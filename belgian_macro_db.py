@@ -1,14 +1,10 @@
 """
 Belgian Macroeconomic Database
 ==============================
-Fetches GDP data from the NBB SDMX dissemination API,
+Fetches GDP data from the NBB SDMX dissemination API and DBnomics,
 stores in SQLite, and exports to CSV/JSON.
 
 Runs daily via GitHub Actions — data committed back to the repo.
-
-Sources:
-  1. Quarterly GDP Growth (Y-Y) — NBB DF_QNA_DISS
-  2. Annual GDP Growth           — NBB DF_QNA_DISS
 """
 
 import sqlite3
@@ -40,6 +36,7 @@ SOURCES = {
         "unit": "percent_yy",
         "source_agency": "NBB",
         "description": "Year-on-year volume change of GDP, quarterly, first estimate",
+        "type": "nbb"
     },
     "GDP_ANNUAL_CY": {
         "name": "Annual GDP Growth (contribution)",
@@ -48,6 +45,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "GDP total contribution to volume change, Y-Y, non-adjusted",
+        "type": "nbb"
     },
     "PRIV_CONSUMPTION_CY": {
         "name": "Private Final Consumption (contribution)",
@@ -56,6 +54,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Private final consumption, contribution to GDP volume change",
+        "type": "nbb"
     },
     "GOV_CONSUMPTION_CY": {
         "name": "Gov. Consumption Expenditure (contribution)",
@@ -64,6 +63,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Final consumption expenditure of general government, contribution to GDP volume change",
+        "type": "nbb"
     },
     "GFCF_ENTERPRISES_CY": {
         "name": "GFCF Enterprises (contribution)",
@@ -72,6 +72,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Gross fixed capital formation by enterprises, contribution to GDP volume change",
+        "type": "nbb"
     },
     "GFCF_DWELLINGS_CY": {
         "name": "GFCF Dwellings (contribution)",
@@ -80,6 +81,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Gross fixed capital formation in dwellings, contribution to GDP volume change",
+        "type": "nbb"
     },
     "GFCF_PUBLIC_CY": {
         "name": "GFCF Public Admin (contribution)",
@@ -88,6 +90,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Gross fixed capital formation by public administrations, contribution to GDP volume change",
+        "type": "nbb"
     },
     "CHG_STOCKS_CY": {
         "name": "Changes in Stocks (contribution)",
@@ -96,6 +99,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Changes in inventories, contribution to GDP volume change",
+        "type": "nbb"
     },
     "NET_EXPORTS_CY": {
         "name": "Net Exports (contribution)",
@@ -104,7 +108,62 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "External balance of goods and services, contribution to GDP volume change",
+        "type": "nbb"
     },
+    "EUROSTAT_GDP_Q_MEUR": {
+        "name": "Eurostat GDP (Chain linked volumes, MEUR)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?start_period=2008-Q1",
+        "frequency": "Q",
+        "unit": "MEUR",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Gross domestic product at market prices, chain linked volumes (2010), seasonally and calendar adjusted",
+        "type": "dbnomics"
+    },
+    "EUROSTAT_GDP_Q_MEUR_ES": {
+        "name": "Eurostat GDP Spain (MEUR)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?start_period=2008-Q1",
+        "frequency": "Q",
+        "unit": "MEUR",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Spain GDP, chain linked volumes, seasonally and calendar adjusted",
+        "type": "dbnomics"
+    },
+    "EUROSTAT_GDP_Q_MEUR_DE": {
+        "name": "Eurostat GDP Germany (MEUR)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?start_period=2008-Q1",
+        "frequency": "Q",
+        "unit": "MEUR",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Germany GDP, chain linked volumes, seasonally and calendar adjusted",
+        "type": "dbnomics"
+    },
+    "EUROSTAT_GDP_Q_MEUR_FR": {
+        "name": "Eurostat GDP France (MEUR)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?start_period=2008-Q1",
+        "frequency": "Q",
+        "unit": "MEUR",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "France GDP, chain linked volumes, seasonally and calendar adjusted",
+        "type": "dbnomics"
+    },
+    "EUROSTAT_GDP_Q_MEUR_NL": {
+        "name": "Eurostat GDP Netherlands (MEUR)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?start_period=2008-Q1",
+        "frequency": "Q",
+        "unit": "MEUR",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Netherlands GDP, chain linked volumes, seasonally and calendar adjusted",
+        "type": "dbnomics"
+    },
+    "EUROSTAT_GDP_Q_MEUR_EA": {
+        "name": "Eurostat GDP Euro Area 20 (MEUR)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?start_period=2008-Q1",
+        "frequency": "Q",
+        "unit": "MEUR",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Euro Area 20 GDP, chain linked volumes, seasonally and calendar adjusted",
+        "type": "dbnomics"
+    }
 }
 
 REQUEST_TIMEOUT = 30
@@ -224,7 +283,7 @@ class MacroDatabase:
         self.conn.close()
 
 
-# ─── NBB Fetcher ──────────────────────────────────────────────────
+# ─── Fetchers ─────────────────────────────────────────────────────
 
 class NBBFetcher:
     @staticmethod
@@ -246,6 +305,39 @@ class NBBFetcher:
             log.info(f"  {len(data)} obs: {data[0]['period']} → {data[-1]['period']}")
         return data
 
+class DBnomicsFetcher:
+    @staticmethod
+    def fetch(url: str) -> list[dict]:
+        log.info(f"GET {url[:90]}...")
+        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        
+        try:
+            data = resp.json()
+            series = data["series"]["docs"][0]
+            periods = series["period"]
+            values = series["value"]
+        except (KeyError, IndexError, ValueError) as e:
+            raise ValueError(f"Unexpected DBnomics JSON structure or decoding failed: {e}")
+
+        results = []
+        for p, v in zip(periods, values):
+            # Client-side fallback filter
+            if str(p) < "2008-Q1":
+                continue
+            if v is None or v == "NA":
+                continue
+            try:
+                val = float(v)
+                # DBnomics doesn't universally provide granular observation status flags in the main array, defaulting to Actual
+                results.append({"period": str(p), "value": val, "obs_status": "A"})
+            except ValueError:
+                continue
+                
+        if results:
+            log.info(f"  {len(results)} obs: {results[0]['period']} → {results[-1]['period']}")
+        return results
+
 
 # ─── Orchestration ────────────────────────────────────────────────
 
@@ -254,7 +346,14 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
     for code, meta in SOURCES.items():
         db.upsert_indicator(code, meta)
         try:
-            rows = NBBFetcher.fetch(meta["url"])
+            src_type = meta.get("type", "nbb")
+            if src_type == "nbb":
+                rows = NBBFetcher.fetch(meta["url"])
+            elif src_type == "dbnomics":
+                rows = DBnomicsFetcher.fetch(meta["url"])
+            else:
+                raise ValueError(f"Unknown source type specified: {src_type}")
+                
             n = db.upsert_observations(code, rows)
             db.log_fetch(code, n, "OK")
             results[code] = n
@@ -277,7 +376,7 @@ def show_latest(db: MacroDatabase):
     for e in latest:
         s = {"A": "Actual", "P": "Provisional"}.get(e["obs_status"], e["obs_status"])
         print(f"  {e['name']}")
-        print(f"    {e['period']}  →  {e['value']}%  ({s})")
+        print(f"    {e['period']}  →  {e['value']}  ({s})")
         print(f"    fetched {e['fetched_at'][:16]}\n")
 
 
@@ -305,7 +404,7 @@ def export_data(db: MacroDatabase, fmt: str) -> Optional[Path]:
 # ─── CLI ──────────────────────────────────────────────────────────
 
 def main():
-    ap = argparse.ArgumentParser(description="Belgian Macro DB — NBB → SQLite → CSV")
+    ap = argparse.ArgumentParser(description="Belgian Macro DB — APIs → SQLite → CSV")
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--latest", action="store_true")
     ap.add_argument("--dump", action="store_true")
@@ -335,7 +434,7 @@ def main():
                 print(f"\n  {s.iloc[0]['name']} ({code})")
                 for _, row in s.iterrows():
                     st = {"A": "Act", "P": "Prov", "B": "Break"}.get(row["obs_status"], row["obs_status"])
-                    print(f"    {row['period']:<10} {row['value']:>7.1f}%  {st}")
+                    print(f"    {row['period']:<10} {row['value']:>12.1f}  {st}")
 
         if args.export:
             for fmt in args.export:
