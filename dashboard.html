@@ -1,1102 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="soft">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Macroeconomic and Financial Review of Belgium</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════
-   Belgian FPS Finance — Institutional dark dashboard
-   Matching the screenshot: navy header, dark table,
-   pill filters, sparkline visuals, mono data cells.
-   ═══════════════════════════════════════════════════════ */
-:root {
-  --navy: #131d33;
-  --navy-mid: #1a2744;
-  --navy-table: #16203a;
-  --navy-row: #1c2a4a;
-  --navy-hover: #223358;
-  --steel: #4a7ab5;
-  --sky: #7db4e0;
-  --gold: #d4a843;
-  --cream: #f0ede6;
-  --white: #ffffff;
-  --text-bright: #e8ecf2;
-  --text-dim: #8899ad;
-  --text-muted: #5a6b80;
-  --green: #34d399;
-  --red: #f87171;
-  --orange: #fbbf24;
-  --border-dark: #253050;
-  --border-light: #d1d5db;
+/* ═══ DAY — clean white ═══ */
+[data-theme="day"] {
+  --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
+  --bg-header-sub:rgba(255,255,255,.55); --bg-header-right:rgba(255,255,255,.6); --gold:#b58a2a;
+  --bg-controls:#fff; --border-controls:#e5e7eb; --text-status:#6b7280;
+  --bg-btn:#fff; --text-btn:#374151; --border-btn:#d1d5db; --bg-btn-hover:#f3f4f6;
+  --bg-btn-primary:#2a5080; --text-btn-primary:#fff;
+  --bg-pill:#fff; --text-pill:#6b7280; --border-pill:#d1d5db; --bg-pill-active:#2a5080; --text-pill-active:#fff;
+  --bg-config:#fffbeb; --border-config:#fde68a; --text-config:#92400e;
+  --text-section:#1e3a5f; --border-section:#1e3a5f;
+  --bg-table:#fff; --bg-thead:#f1f5f9; --text-thead:#64748b; --border-table:#e2e8f0;
+  --bg-row-hover:#f8fafc; --text-cell:#1e293b; --text-cell-muted:#94a3b8; --text-cell-dim:#64748b;
+  --link-color:#2563eb; --src-nbb-bg:rgba(37,99,235,.08); --src-nbb-text:#2563eb;
+  --green:#059669; --red:#dc2626; --orange:#d97706;
+  --green-bg:rgba(5,150,105,.08); --red-bg:rgba(220,38,38,.08); --orange-bg:rgba(217,119,6,.08);
+  --bg-footer:#fff; --border-footer:#e5e7eb; --text-footer:#9ca3af; --text-footer-strong:#6b7280;
+  --bg-tip:#fff; --border-tip:#e2e8f0; --shadow-tip:rgba(0,0,0,.12);
+  --tip-title:#2563eb; --tip-code:#94a3b8; --tip-desc:#64748b;
+  --bg-modal-overlay:rgba(0,0,0,.35); --bg-modal:#fff; --border-modal:#e2e8f0;
+  --text-modal-title:#1e293b; --text-modal-sub:#94a3b8;
+  --bg-stat:#f8fafc; --text-stat-label:#94a3b8; --text-stat-val:#1e293b;
+  --bg-chart:#f8fafc; --chart-grid:rgba(0,0,0,.06); --chart-zero:rgba(0,0,0,.12);
+  --chart-label:#94a3b8; --chart-line:rgba(37,99,235,.45); --chart-dot:#2563eb; --chart-dot-ring:#fff;
+  --chart-bar-pos:5,150,105; --chart-bar-neg:220,38,38;
+  --bg-modal-table:#f8fafc; --modal-table-border:#e2e8f0;
+  --modal-bar-bg:rgba(0,0,0,.04); --modal-bar-zero:rgba(0,0,0,.1);
+}
+/* ═══ SOFT — warm muted ═══ */
+[data-theme="soft"] {
+  --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
+  --bg-header-sub:rgba(245,240,234,.5); --bg-header-right:rgba(245,240,234,.55); --gold:#c49a3c;
+  --bg-controls:#ece6dc; --border-controls:#d9d0c3; --text-status:#7a6f63;
+  --bg-btn:#ece6dc; --text-btn:#4a3f35; --border-btn:#d1c8ba; --bg-btn-hover:#e2dacf;
+  --bg-btn-primary:#5a4a3a; --text-btn-primary:#f5f0ea;
+  --bg-pill:#ece6dc; --text-pill:#7a6f63; --border-pill:#d1c8ba; --bg-pill-active:#5a4a3a; --text-pill-active:#f5f0ea;
+  --bg-config:#fdf6ec; --border-config:#e8d5a8; --text-config:#7a5c20;
+  --text-section:#3b3228; --border-section:#3b3228;
+  --bg-table:#faf6f0; --bg-thead:#ece6dc; --text-thead:#7a6f63; --border-table:#ddd5c8;
+  --bg-row-hover:#f0ebe3; --text-cell:#3b3228; --text-cell-muted:#a39888; --text-cell-dim:#7a6f63;
+  --link-color:#8b6914; --src-nbb-bg:rgba(139,105,20,.1); --src-nbb-text:#8b6914;
+  --green:#2d8659; --red:#b83c3c; --orange:#b87d1a;
+  --green-bg:rgba(45,134,89,.1); --red-bg:rgba(184,60,60,.1); --orange-bg:rgba(184,125,26,.1);
+  --bg-footer:#ece6dc; --border-footer:#d9d0c3; --text-footer:#a39888; --text-footer-strong:#7a6f63;
+  --bg-tip:#faf6f0; --border-tip:#ddd5c8; --shadow-tip:rgba(0,0,0,.1);
+  --tip-title:#8b6914; --tip-code:#a39888; --tip-desc:#7a6f63;
+  --bg-modal-overlay:rgba(30,22,15,.4); --bg-modal:#faf6f0; --border-modal:#ddd5c8;
+  --text-modal-title:#3b3228; --text-modal-sub:#a39888;
+  --bg-stat:#ece6dc; --text-stat-label:#a39888; --text-stat-val:#3b3228;
+  --bg-chart:#ece6dc; --chart-grid:rgba(0,0,0,.05); --chart-zero:rgba(0,0,0,.1);
+  --chart-label:#a39888; --chart-line:rgba(139,105,20,.4); --chart-dot:#8b6914; --chart-dot-ring:#faf6f0;
+  --chart-bar-pos:45,134,89; --chart-bar-neg:184,60,60;
+  --bg-modal-table:#ece6dc; --modal-table-border:#ddd5c8;
+  --modal-bar-bg:rgba(0,0,0,.04); --modal-bar-zero:rgba(0,0,0,.08);
+}
+/* ═══ NIGHT — deep blue ═══ */
+[data-theme="night"] {
+  --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
+  --bg-header-sub:rgba(232,236,242,.45); --bg-header-right:rgba(136,153,173,.8); --gold:#d4a843;
+  --bg-controls:#111927; --border-controls:#1e2d45; --text-status:#5a6b80;
+  --bg-btn:#111927; --text-btn:#8899ad; --border-btn:#1e2d45; --bg-btn-hover:#182438;
+  --bg-btn-primary:#1e3a5f; --text-btn-primary:#e8ecf2;
+  --bg-pill:#111927; --text-pill:#5a6b80; --border-pill:#1e2d45; --bg-pill-active:#1e3a5f; --text-pill-active:#e8ecf2;
+  --bg-config:#1a1500; --border-config:#3d3000; --text-config:#d4a843;
+  --text-section:#7db4e0; --border-section:#1e3a5f;
+  --bg-table:#0f1826; --bg-thead:#131d33; --text-thead:#5a6b80; --border-table:#1a2744;
+  --bg-row-hover:#182a42; --text-cell:#c8d2de; --text-cell-muted:#3d5068; --text-cell-dim:#5a6b80;
+  --link-color:#7db4e0; --src-nbb-bg:rgba(125,180,224,.12); --src-nbb-text:#7db4e0;
+  --green:#34d399; --red:#f87171; --orange:#fbbf24;
+  --green-bg:rgba(52,211,153,.1); --red-bg:rgba(248,113,113,.1); --orange-bg:rgba(251,191,36,.1);
+  --bg-footer:#111927; --border-footer:#1e2d45; --text-footer:#3d5068; --text-footer-strong:#5a6b80;
+  --bg-tip:#0f1826; --border-tip:#1a2744; --shadow-tip:rgba(0,0,0,.5);
+  --tip-title:#7db4e0; --tip-code:#3d5068; --tip-desc:#5a6b80;
+  --bg-modal-overlay:rgba(5,8,15,.8); --bg-modal:#0f1826; --border-modal:#1a2744;
+  --text-modal-title:#e8ecf2; --text-modal-sub:#5a6b80;
+  --bg-stat:#131d33; --text-stat-label:#3d5068; --text-stat-val:#e8ecf2;
+  --bg-chart:#131d33; --chart-grid:rgba(255,255,255,.04); --chart-zero:rgba(255,255,255,.12);
+  --chart-label:#3d5068; --chart-line:rgba(125,180,224,.45); --chart-dot:#7db4e0; --chart-dot-ring:#0f1826;
+  --chart-bar-pos:52,211,153; --chart-bar-neg:248,113,113;
+  --bg-modal-table:#131d33; --modal-table-border:#1a2744;
+  --modal-bar-bg:rgba(255,255,255,.03); --modal-bar-zero:rgba(255,255,255,.1);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'Figtree', sans-serif;
-  background: var(--cream);
-  color: #1e2a3a;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── HEADER ───────────────────────────────── */
-.header {
-  background: linear-gradient(135deg, #101a2e 0%, var(--navy-mid) 100%);
-  color: white;
-  padding: 18px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.header-left { display: flex; align-items: center; gap: 16px; }
-.be-flag {
-  width: 40px; height: 40px; border-radius: 6px; overflow: hidden;
-  display: flex; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
-}
-.be-flag .s { flex: 1; }
-.be-flag .s:nth-child(1) { background: #2d2926; }
-.be-flag .s:nth-child(2) { background: #ffd100; }
-.be-flag .s:nth-child(3) { background: #ef3340; }
-
-.header-text h1 {
-  font-family: 'Figtree', sans-serif;
-  font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em;
-}
-.header-text .sub {
-  font-size: 0.75rem; opacity: 0.55; margin-top: 1px;
-}
-.header-right {
-  text-align: right; font-size: 0.72rem; line-height: 1.5; color: var(--text-dim);
-}
-.header-right .ital { font-style: italic; color: var(--gold); font-weight: 600; font-size: 0.78rem; }
-
-/* ── CONTROLS ─────────────────────────────── */
-.controls {
-  background: white; border-bottom: 1px solid var(--border-light);
-  padding: 10px 32px; display: flex; align-items: center;
-  justify-content: space-between; gap: 12px; flex-wrap: wrap;
-}
-.ctrl-left { display: flex; align-items: center; gap: 10px; }
-
-.status { display: flex; align-items: center; gap: 7px; font-size: 0.76rem; color: #6b7280; }
-.dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
-  box-shadow: 0 0 5px rgba(52,211,153,0.5);
-}
-.dot.loading { background: var(--orange); animation: blink 1s infinite; }
-.dot.err { background: var(--red); }
-@keyframes blink { 50% { opacity: 0.3; } }
-
-.btn {
-  font-family: 'Figtree'; font-size: 0.74rem; font-weight: 600;
-  padding: 6px 14px; border-radius: 6px; cursor: pointer;
-  border: 1px solid var(--border-light); background: white; color: #374151;
-  transition: all 0.12s; display: inline-flex; align-items: center; gap: 5px;
-}
-.btn:hover { background: #f3f4f6; }
-.btn.primary { background: var(--navy-mid); color: white; border-color: var(--navy-mid); }
-.btn.primary:hover { background: #223358; }
-
-.pills { display: flex; gap: 5px; flex-wrap: wrap; }
-.pill {
-  font-size: 0.68rem; font-weight: 600; padding: 5px 12px; border-radius: 20px;
-  border: 1px solid var(--border-light); background: white; color: #6b7280;
-  cursor: pointer; transition: all 0.12s; text-transform: uppercase; letter-spacing: 0.04em;
-}
-.pill:hover, .pill.on { background: var(--navy-mid); color: white; border-color: var(--navy-mid); }
-
-/* ── CONFIG BANNER ────────────────────────── */
-.config-banner {
-  background: #fffbeb; border-bottom: 1px solid #fde68a;
-  padding: 10px 32px; font-size: 0.78rem; color: #92400e;
-  display: none; align-items: center; gap: 10px;
-}
-.config-banner input {
-  font-family: 'Overpass Mono'; font-size: 0.74rem; padding: 4px 10px;
-  border: 1px solid #fde68a; border-radius: 4px; flex: 1; max-width: 500px;
-}
-.config-banner .btn { font-size: 0.7rem; padding: 4px 10px; }
-
-/* ── TABLE AREA ───────────────────────────── */
-.table-wrap { padding: 20px 32px 40px; }
-
-.section-head {
-  font-family: 'Figtree'; font-size: 0.95rem; font-weight: 700;
-  color: var(--navy-mid); padding: 14px 0 6px;
-  border-bottom: 2px solid var(--navy-mid);
-  margin-top: 20px; display: flex; align-items: center; gap: 8px;
-}
-.section-head:first-of-type { margin-top: 0; }
-
-table {
-  width: 100%; border-collapse: collapse; font-size: 0.8rem;
-  background: var(--navy); border-radius: 8px; overflow: hidden;
-  margin-bottom: 4px;
-}
-thead th {
-  background: var(--navy-mid); color: var(--text-dim);
-  font-weight: 600; font-size: 0.68rem; text-transform: uppercase;
-  letter-spacing: 0.06em; padding: 10px 12px; text-align: left;
-  border-bottom: 1px solid var(--border-dark);
-}
-tbody tr {
-  border-bottom: 1px solid var(--border-dark);
-  transition: background 0.1s;
-  cursor: pointer;
-}
-tbody tr:hover { background: var(--navy-hover); }
-tbody td {
-  padding: 12px 12px; color: var(--text-bright);
-  vertical-align: top; line-height: 1.45;
-}
-
-/* Column sizing */
-th:nth-child(1),td:nth-child(1) { width: 3%; text-align: center; color: var(--text-muted); }
-th:nth-child(2),td:nth-child(2) { width: 20%; }
-th:nth-child(3),td:nth-child(3) { width: 6%; text-align: center; }
-th:nth-child(4),td:nth-child(4) { width: 8%; text-align: center; }
-th:nth-child(5),td:nth-child(5) { width: 8%; text-align: center; }
-th:nth-child(6),td:nth-child(6) { width: 5%; text-align: center; }
-th:nth-child(7),td:nth-child(7) { width: 11%; }
-th:nth-child(8),td:nth-child(8) { width: 7%; text-align: center; }
-th:nth-child(9),td:nth-child(9) { width: 32%; }
-
-.src-badge {
-  font-family: 'Overpass Mono'; font-size: 0.66rem; font-weight: 600;
-  padding: 2px 7px; border-radius: 3px; letter-spacing: 0.02em;
-}
-.src-nbb { background: rgba(74,122,181,0.2); color: var(--sky); }
-.src-ec { background: rgba(251,191,36,0.15); color: #fbbf24; }
-.src-statbel { background: rgba(52,211,153,0.15); color: var(--green); }
-.src-fbp { background: rgba(248,113,113,0.15); color: var(--red); }
-.val {
-  font-family: 'Overpass Mono'; font-size: 0.8rem; font-weight: 600;
-  white-space: pre-line;
-}
-.trend { font-size: 1.1rem; font-weight: 700; }
-.trend.up { color: var(--green); }
-.trend.down { color: var(--red); }
-.trend.flat { color: var(--text-muted); }
-
-canvas.spark { display: block; }
-
-.update-dt {
-  font-family: 'Overpass Mono'; font-size: 0.7rem; color: var(--text-muted);
-}
-.comment {
-  font-size: 0.76rem; color: var(--text-dim); line-height: 1.5;
-}
-
-/* ── FOOTER ───────────────────────────────── */
-.footer {
-  background: white; border-top: 1px solid var(--border-light);
-  padding: 14px 32px; font-size: 0.7rem; color: #9ca3af;
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-}
-.footer strong { color: #6b7280; }
-
-/* ── TOOLTIP ──────────────────────────────── */
-.ind-name {
-  color: var(--sky); font-weight: 600;
-  position: relative; cursor: pointer;
-}
-.ind-name .tip {
-  display: none; position: absolute; left: 0; top: calc(100% + 8px);
-  z-index: 50; width: 320px; padding: 12px 14px;
-  background: #0f1729; border: 1px solid var(--border-dark);
-  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  pointer-events: none;
-}
-.ind-name:hover .tip { display: block; animation: tipIn 0.15s ease; }
-@keyframes tipIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-.tip-title {
-  font-family: 'Figtree'; font-size: 0.8rem; font-weight: 700;
-  color: var(--sky); margin-bottom: 4px; line-height: 1.3;
-}
-.tip-code {
-  font-family: 'Overpass Mono'; font-size: 0.64rem;
-  color: var(--text-muted); margin-bottom: 6px;
-}
-.tip-desc {
-  font-family: 'Figtree'; font-size: 0.72rem; font-weight: 400;
-  color: var(--text-dim); line-height: 1.5;
-}
-.tip-meta {
-  margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border-dark);
-  font-family: 'Overpass Mono'; font-size: 0.64rem; color: var(--text-muted);
-  display: flex; gap: 12px;
-}
-
-/* ── MODAL ────────────────────────────────── */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(10,15,28,0.75);
-  z-index: 1000; display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.15s ease;
-}
-.modal-overlay.open { display: flex; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.modal {
-  background: var(--navy); border: 1px solid var(--border-dark);
-  border-radius: 12px; width: 90%; max-width: 860px; max-height: 88vh;
-  display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  animation: slideUp 0.2s ease;
-}
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.modal-head {
-  padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--border-dark); flex-shrink: 0;
-}
-.modal-head h2 {
-  font-family: 'Figtree'; font-size: 1.05rem; font-weight: 700; color: var(--text-bright);
-}
-.modal-head .modal-sub {
-  font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;
-}
-.modal-close {
-  width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-dark);
-  background: transparent; color: var(--text-dim); font-size: 1.1rem;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.12s;
-}
-.modal-close:hover { background: var(--navy-hover); color: var(--text-bright); }
-
-.modal-body {
-  padding: 20px 24px; overflow-y: auto; flex: 1;
-}
-
-/* Chart area */
-.modal-chart {
-  background: var(--navy-mid); border-radius: 8px; padding: 20px;
-  margin-bottom: 20px;
-}
-.modal-chart canvas { display: block; }
-
-/* Stats row */
-.modal-stats {
-  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
-}
-.stat-card {
-  flex: 1; min-width: 120px; background: var(--navy-mid); border-radius: 8px;
-  padding: 12px 16px;
-}
-.stat-card .stat-label {
-  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
-  color: var(--text-muted); margin-bottom: 4px;
-}
-.stat-card .stat-val {
-  font-family: 'Overpass Mono'; font-size: 1.1rem; font-weight: 700; color: var(--text-bright);
-}
-.stat-card .stat-val.pos { color: var(--green); }
-.stat-card .stat-val.neg { color: var(--red); }
-
-/* Data table in modal */
-.modal-table-wrap {
-  border-radius: 8px; overflow: hidden; border: 1px solid var(--border-dark);
-}
-.modal-table {
-  width: 100%; border-collapse: collapse; font-size: 0.78rem;
-}
-.modal-table thead th {
-  background: var(--navy-mid); color: var(--text-dim);
-  font-weight: 600; font-size: 0.66rem; text-transform: uppercase;
-  letter-spacing: 0.06em; padding: 8px 14px; text-align: left;
-  position: sticky; top: 0;
-}
-.modal-table tbody tr { border-bottom: 1px solid var(--border-dark); }
-.modal-table tbody tr:hover { background: var(--navy-hover); }
-.modal-table td {
-  padding: 7px 14px; color: var(--text-bright);
-  font-family: 'Overpass Mono'; font-size: 0.76rem;
-}
-.modal-table td:nth-child(2) { font-weight: 600; }
-.modal-table .pos-val { color: var(--green); }
-.modal-table .neg-val { color: var(--red); }
-.modal-table .status-badge {
-  font-size: 0.62rem; padding: 1px 6px; border-radius: 3px;
-  font-family: 'Figtree'; font-weight: 600;
-}
-.modal-table .st-actual { background: rgba(52,211,153,0.15); color: var(--green); }
-.modal-table .st-prov { background: rgba(251,191,36,0.15); color: var(--orange); }
-.modal-table .st-break { background: rgba(248,113,113,0.15); color: var(--red); }
-
-/* bar in table */
-.bar-cell { position: relative; width: 100px; }
-.bar-bg { height: 6px; border-radius: 3px; position: absolute; top: 50%; transform: translateY(-50%); }
-
-/* ── RESPONSIVE ───────────────────────────── */
-@media (max-width: 1100px) {
-  .header,.controls,.table-wrap,.footer { padding-left: 16px; padding-right: 16px; }
-  table { min-width: 950px; }
-  .table-wrap { overflow-x: auto; }
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Figtree',sans-serif;background:var(--bg-page);color:var(--text-cell);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+.header{background:var(--bg-header);color:var(--bg-header-text);padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:16px}
+.be-flag{width:40px;height:40px;border-radius:6px;overflow:hidden;display:flex;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
+.be-flag .s{flex:1}.be-flag .s:nth-child(1){background:#2d2926}.be-flag .s:nth-child(2){background:#ffd100}.be-flag .s:nth-child(3){background:#ef3340}
+.header-text h1{font-size:1.15rem;font-weight:700;letter-spacing:.01em}
+.header-text .sub{font-size:.75rem;color:var(--bg-header-sub);margin-top:1px}
+.header-right{text-align:right;font-size:.72rem;line-height:1.5;color:var(--bg-header-right)}
+.header-right .ital{font-style:italic;color:var(--gold);font-weight:600;font-size:.78rem}
+.controls{background:var(--bg-controls);border-bottom:1px solid var(--border-controls);padding:10px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;transition:background .3s}
+.ctrl-left{display:flex;align-items:center;gap:10px}
+.status{display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-status)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.dot.loading{background:var(--orange);animation:blink 1s infinite}.dot.err{background:var(--red)}
+@keyframes blink{50%{opacity:.3}}
+.btn{font-family:'Figtree';font-size:.74rem;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--border-btn);background:var(--bg-btn);color:var(--text-btn);transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{background:var(--bg-btn-hover)}
+.btn.primary{background:var(--bg-btn-primary);color:var(--text-btn-primary);border-color:var(--bg-btn-primary)}
+.btn.primary:hover{filter:brightness(1.1)}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{font-size:.68rem;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border-pill);background:var(--bg-pill);color:var(--text-pill);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.04em}
+.pill:hover,.pill.on{background:var(--bg-pill-active);color:var(--text-pill-active);border-color:var(--bg-pill-active)}
+.theme-switcher{display:flex;gap:2px;background:var(--border-controls);border-radius:8px;padding:2px}
+.theme-btn{font-family:'Figtree';font-size:.7rem;font-weight:600;padding:5px 12px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text-status);transition:all .15s}
+.theme-btn.active{background:var(--bg-btn-primary);color:var(--text-btn-primary)}
+.theme-btn:not(.active):hover{background:var(--bg-btn-hover)}
+.config-banner{background:var(--bg-config);border-bottom:1px solid var(--border-config);padding:10px 32px;font-size:.78rem;color:var(--text-config);display:none;align-items:center;gap:10px}
+.config-banner input{font-family:'Overpass Mono';font-size:.74rem;padding:4px 10px;border:1px solid var(--border-config);border-radius:4px;flex:1;max-width:500px;background:var(--bg-page);color:var(--text-cell)}
+.config-banner .btn{font-size:.7rem;padding:4px 10px}
+.table-wrap{padding:20px 32px 40px}
+.section-head{font-size:.95rem;font-weight:700;color:var(--text-section);padding:14px 0 6px;border-bottom:2px solid var(--border-section);margin-top:20px;display:flex;align-items:center;gap:8px}
+.section-head:first-of-type{margin-top:0}
+table{width:100%;border-collapse:collapse;font-size:.8rem;background:var(--bg-table);border-radius:8px;overflow:hidden;margin-bottom:4px;transition:background .3s}
+thead th{background:var(--bg-thead);color:var(--text-thead);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-table)}
+tbody tr{border-bottom:1px solid var(--border-table);transition:background .1s;cursor:pointer}
+tbody tr:hover{background:var(--bg-row-hover)}
+tbody td{padding:12px;color:var(--text-cell);vertical-align:top;line-height:1.45}
+th:nth-child(1),td:nth-child(1){width:3%;text-align:center;color:var(--text-cell-muted)}
+th:nth-child(2),td:nth-child(2){width:20%}th:nth-child(3),td:nth-child(3){width:6%;text-align:center}
+th:nth-child(4),td:nth-child(4){width:8%;text-align:center}th:nth-child(5),td:nth-child(5){width:8%;text-align:center}
+th:nth-child(6),td:nth-child(6){width:5%;text-align:center}th:nth-child(7),td:nth-child(7){width:11%}
+th:nth-child(8),td:nth-child(8){width:7%;text-align:center}th:nth-child(9),td:nth-child(9){width:32%}
+.src-badge{font-family:'Overpass Mono';font-size:.66rem;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.02em}
+.src-nbb{background:var(--src-nbb-bg);color:var(--src-nbb-text)}
+.val{font-family:'Overpass Mono';font-size:.8rem;font-weight:600}
+.trend{font-size:1.1rem;font-weight:700}.trend.up{color:var(--green)}.trend.down{color:var(--red)}.trend.flat{color:var(--text-cell-muted)}
+canvas.spark{display:block}
+.update-dt{font-family:'Overpass Mono';font-size:.7rem;color:var(--text-cell-muted)}
+.comment{font-size:.76rem;color:var(--text-cell-dim);line-height:1.5}
+.footer{background:var(--bg-footer);border-top:1px solid var(--border-footer);padding:14px 32px;font-size:.7rem;color:var(--text-footer);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;transition:background .3s}
+.footer strong{color:var(--text-footer-strong)}
+.ind-name{color:var(--link-color);font-weight:600;position:relative;cursor:pointer}
+.ind-name .tip{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:50;width:320px;padding:12px 14px;background:var(--bg-tip);border:1px solid var(--border-tip);border-radius:8px;box-shadow:0 8px 24px var(--shadow-tip);pointer-events:none}
+.ind-name:hover .tip{display:block;animation:tipIn .15s ease}
+@keyframes tipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.tip-title{font-size:.8rem;font-weight:700;color:var(--tip-title);margin-bottom:4px;line-height:1.3}
+.tip-code{font-family:'Overpass Mono';font-size:.64rem;color:var(--tip-code);margin-bottom:6px}
+.tip-desc{font-size:.72rem;color:var(--tip-desc);line-height:1.5}
+.tip-meta{margin-top:8px;padding-top:6px;border-top:1px solid var(--border-tip);font-family:'Overpass Mono';font-size:.64rem;color:var(--tip-code);display:flex;gap:12px}
+.modal-overlay{position:fixed;inset:0;background:var(--bg-modal-overlay);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg-modal);border:1px solid var(--border-modal);border-radius:12px;width:90%;max-width:860px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-modal);flex-shrink:0}
+.modal-head h2{font-size:1.05rem;font-weight:700;color:var(--text-modal-title)}
+.modal-head .modal-sub{font-size:.75rem;color:var(--text-modal-sub);margin-top:2px}
+.modal-close{width:32px;height:32px;border-radius:6px;border:1px solid var(--border-modal);background:transparent;color:var(--text-modal-sub);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.modal-close:hover{background:var(--bg-row-hover);color:var(--text-cell)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:120px;background:var(--bg-stat);border-radius:8px;padding:12px 16px}
+.stat-card .stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-stat-label);margin-bottom:4px}
+.stat-card .stat-val{font-family:'Overpass Mono';font-size:1.1rem;font-weight:700;color:var(--text-stat-val)}
+.stat-card .stat-val.pos{color:var(--green)}.stat-card .stat-val.neg{color:var(--red)}
+.modal-chart{background:var(--bg-chart);border-radius:8px;padding:20px;margin-bottom:20px}
+.modal-chart canvas{display:block}
+.modal-table-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--modal-table-border)}
+.modal-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.modal-table thead th{background:var(--bg-modal-table);color:var(--text-thead);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 14px;text-align:left;position:sticky;top:0}
+.modal-table tbody tr{border-bottom:1px solid var(--modal-table-border)}
+.modal-table tbody tr:hover{background:var(--bg-row-hover)}
+.modal-table td{padding:7px 14px;color:var(--text-cell);font-family:'Overpass Mono';font-size:.76rem}
+.modal-table td:nth-child(2){font-weight:600}
+.modal-table .pos-val{color:var(--green)}.modal-table .neg-val{color:var(--red)}
+.modal-table .status-badge{font-size:.62rem;padding:1px 6px;border-radius:3px;font-family:'Figtree';font-weight:600}
+.modal-table .st-actual{background:var(--green-bg);color:var(--green)}
+.modal-table .st-prov{background:var(--orange-bg);color:var(--orange)}
+.modal-table .st-break{background:var(--red-bg);color:var(--red)}
+@media(max-width:1100px){.header,.controls,.table-wrap,.footer{padding-left:16px;padding-right:16px}table{min-width:950px}.table-wrap{overflow-x:auto}}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-left">
-    <div class="be-flag"><div class="s"></div><div class="s"></div><div class="s"></div></div>
-    <div class="header-text">
-      <div class="sub">Federal Public Service Finance</div>
-      <h1>Macroeconomic and Financial Review of Belgium</h1>
-      <div class="sub" id="dateLabel"></div>
-    </div>
-  </div>
-  <div class="header-right">
-    <div class="ital">Expertise and Strategic Support</div>
-    Research Department<br>Data and Statistics
-  </div>
-</div>
-
-<div class="controls">
-  <div class="ctrl-left">
-    <div class="status">
-      <div class="dot loading" id="dot"></div>
-      <span id="statusText">Loading data…</span>
-    </div>
-    <button class="btn primary" onclick="fetchData()">↻ Refresh All</button>
-    <button class="btn" onclick="toggleConfig()">⚙ Configure</button>
-  </div>
-  <div class="pills" id="pills"></div>
-</div>
-
-<div class="config-banner" id="configBanner">
-  <span>⚠ Set your GitHub raw CSV URL:</span>
-  <input id="csvUrl" placeholder="https://raw.githubusercontent.com/YOUR_USER/belgian-macro-pipeline/main/data/belgian_macro_export.csv">
-  <button class="btn primary" onclick="saveConfig()">Save & Reload</button>
-</div>
-
+<div class="header"><div class="header-left"><div class="be-flag"><div class="s"></div><div class="s"></div><div class="s"></div></div><div class="header-text"><div class="sub">Federal Public Service Finance</div><h1>Macroeconomic and Financial Review of Belgium</h1><div class="sub" id="dateLabel"></div></div></div><div class="header-right"><div class="ital">Expertise and Strategic Support</div>Research Department<br>Data and Statistics</div></div>
+<div class="controls"><div class="ctrl-left"><div class="status"><div class="dot loading" id="dot"></div><span id="statusText">Loading…</span></div><button class="btn primary" onclick="fetchData()">↻ Refresh All</button><button class="btn" onclick="toggleConfig()">⚙ Configure</button><div class="theme-switcher"><button class="theme-btn" onclick="setTheme('day',this)">☀ Day</button><button class="theme-btn active" onclick="setTheme('soft',this)">◑ Soft</button><button class="theme-btn" onclick="setTheme('night',this)">☾ Night</button></div></div><div class="pills" id="pills"></div></div>
+<div class="config-banner" id="configBanner"><span>⚠ Set GitHub raw CSV URL:</span><input id="csvUrl" placeholder="https://raw.githubusercontent.com/…/belgian_macro_export.csv"><button class="btn primary" onclick="saveConfig()">Save & Reload</button></div>
 <div class="table-wrap" id="tableWrap"></div>
-
-<div class="footer">
-  <div>
-    <strong>Sources:</strong> NBB = National Bank of Belgium · EC = European Commission ·
-    StatBel = Belgian Statistical Office · FBP = Federal Bureau of Planning
-  </div>
-  <div>Data fetched from GitHub repo · Auto-updated daily at 06:00 CET</div>
-</div>
-
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <div>
-        <h2 id="modalTitle">—</h2>
-        <div class="modal-sub" id="modalSub">—</div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-stats" id="modalStats"></div>
-      <div class="modal-chart"><canvas id="modalChart"></canvas></div>
-      <div class="modal-table-wrap">
-        <table class="modal-table">
-          <thead><tr>
-            <th>Period</th><th>Value</th><th>Δ Change</th><th>Status</th><th>Bar</th>
-          </tr></thead>
-          <tbody id="modalTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
+<div class="footer"><div><strong>Sources:</strong> NBB = National Bank of Belgium</div><div>Data from GitHub · Auto-updated daily 06:00 CET</div></div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th>Period</th><th>Value</th><th>Δ Change</th><th>Status</th><th>Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════
-const DEFAULT_CSV_URL = localStorage.getItem('csv_url') || 'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
-
-// Indicator display metadata — maps indicator_code to display settings
-const INDICATOR_META = {
-  GDP_QUARTERLY_YY: {
-    num: 1, section: 'gdp', name: 'Quarterly GDP growth (Y-Y)', order: 1,
-    fullName: 'Gross Domestic Product — Quarterly Year-on-Year Volume Change',
-    desc: 'Measures the percentage change in real GDP compared to the same quarter of the previous year. Captures the overall pace of economic expansion or contraction on a quarterly basis.',
-    sdmx: 'B1GM', freq: 'Q', prices: 'LY',
-  },
-  GDP_ANNUAL_YY: {
-    num: 2, section: 'gdp', name: 'Annual GDP growth', order: 2,
-    fullName: 'Gross Domestic Product — Annual Year-on-Year Volume Change',
-    desc: 'The annual percentage change in the total value of goods and services produced by the Belgian economy, adjusted for inflation. The headline measure of economic performance.',
-    sdmx: 'B1GM', freq: 'A', prices: 'LY',
-  },
-  PRIV_CONSUMPTION_YY: {
-    num: 3, section: 'gdp', name: 'Private final consumption', order: 3,
-    fullName: 'Private Final Consumption Expenditure (P31_S14_S15)',
-    desc: 'Spending by households and non-profit institutions on goods and services — food, housing, transport, recreation, etc. Typically the largest component of GDP (~50%).',
-    sdmx: 'P31_S14_S15', freq: 'A', prices: 'LY',
-  },
-  GOV_CONSUMPTION_YY: {
-    num: 4, section: 'gdp', name: 'Gov. consumption expenditure', order: 4,
-    fullName: 'Final Consumption Expenditure of General Government (P3_S13)',
-    desc: 'Government spending on public services — healthcare, education, defence, public administration. Includes compensation of government employees and purchases of goods and services.',
-    sdmx: 'P3_S13', freq: 'A', prices: 'LY',
-  },
-  GFCF_ENTERPRISES_YY: {
-    num: 5, section: 'gdp', name: 'GFCF — Enterprises', order: 5,
-    fullName: 'Gross Fixed Capital Formation by Enterprises & Self-Employed (P51_ENT)',
-    desc: 'Business investment in machinery, equipment, IT, intellectual property, and non-residential buildings. A leading indicator of private-sector confidence and future productive capacity.',
-    sdmx: 'P51_ENT', freq: 'A', prices: 'LY',
-  },
-  GFCF_DWELLINGS_YY: {
-    num: 6, section: 'gdp', name: 'GFCF — Dwellings', order: 6,
-    fullName: 'Gross Fixed Capital Formation in Dwellings (P51_DWE)',
-    desc: 'Investment in residential construction — new builds, major renovations, and conversions. Sensitive to mortgage rates, housing policy, and demographic trends.',
-    sdmx: 'P51_DWE', freq: 'A', prices: 'LY',
-  },
-  GFCF_PUBLIC_YY: {
-    num: 7, section: 'gdp', name: 'GFCF — Public admin.', order: 7,
-    fullName: 'Gross Fixed Capital Formation by Public Administrations (P51_PAD)',
-    desc: 'Government investment in infrastructure — roads, rail, schools, hospitals, public buildings. Tends to follow political investment cycles and EU co-financing programmes.',
-    sdmx: 'P51_PAD', freq: 'A', prices: 'LY',
-  },
-  CHG_STOCKS_YY: {
-    num: 8, section: 'gdp', name: 'Changes in stocks', order: 8,
-    fullName: 'Changes in Inventories + Acquisitions Less Disposals of Valuables (P52)',
-    desc: 'The change in raw materials, work-in-progress, and finished goods held by firms. Highly volatile and often a swing factor in quarterly GDP. Positive = inventory build-up.',
-    sdmx: 'P52', freq: 'A', prices: 'LY',
-  },
-  NET_EXPORTS_YY: {
-    num: 9, section: 'gdp', name: 'Net exports', order: 9,
-    fullName: 'External Balance of Goods and Services (B11 = Exports − Imports)',
-    desc: 'The difference between exports and imports. Belgium is a highly open economy (trade ~160% of GDP), so net exports are a significant growth driver. Positive = trade surplus contributing to GDP.',
-    sdmx: 'B11', freq: 'A', prices: 'LY',
-  },
-};
-
-const SECTIONS = {
-  gdp: { label: 'Gross Domestic Product', icon: '📊' },
-  confidence: { label: 'Confidence & Sentiment', icon: '📈' },
-  prices: { label: 'Production & Prices', icon: '🏭' },
-  labour: { label: 'Labour Costs', icon: '💼' },
-  employment: { label: 'Employment', icon: '👥' },
-  unemployment: { label: 'Unemployment', icon: '📉' },
-  business: { label: 'Business Environment', icon: '🏢' },
-  fiscal: { label: 'Government Finances', icon: '🏛' },
-};
-
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let DATA = {}; // indicator_code → [{period, value, obs_status, ...}]
-let activeFilter = null;
-
-// ═══════════════════════════════════════════════════════
-// CSV PARSER
-// ═══════════════════════════════════════════════════════
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',');
-  return lines.slice(1).map(line => {
-    const vals = line.split(',');
-    const obj = {};
-    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
-    return obj;
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// FETCH DATA
-// ═══════════════════════════════════════════════════════
-async function fetchData() {
-  const url = localStorage.getItem('csv_url') || DEFAULT_CSV_URL;
-  const dot = document.getElementById('dot');
-  const statusText = document.getElementById('statusText');
-
-  if (!url) {
-    dot.className = 'dot err';
-    statusText.textContent = 'No CSV URL configured — click ⚙ Configure';
-    document.getElementById('configBanner').style.display = 'flex';
-    return;
-  }
-
-  dot.className = 'dot loading';
-  statusText.textContent = 'Fetching from GitHub…';
-
-  try {
-    const resp = await fetch(url + '?t=' + Date.now()); // cache-bust
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const text = await resp.text();
-    const rows = parseCSV(text);
-
-    // Group by indicator_code
-    DATA = {};
-    rows.forEach(row => {
-      const code = row.indicator_code;
-      if (!DATA[code]) DATA[code] = [];
-      DATA[code].push({
-        period: row.period,
-        value: parseFloat(row.value),
-        obs_status: row.obs_status,
-        unit: row.unit,
-        source: row.source_agency,
-        name: row.name,
-        fetched_at: row.fetched_at,
-      });
-    });
-
-    // Sort each series by period
-    Object.values(DATA).forEach(series => series.sort((a, b) => a.period.localeCompare(b.period)));
-
-    const totalRows = rows.length;
-    const indicators = Object.keys(DATA).length;
-    dot.className = 'dot';
-    statusText.textContent = `${indicators} indicators · ${totalRows} observations loaded`;
-
-    render();
-  } catch (err) {
-    dot.className = 'dot err';
-    statusText.textContent = `Error: ${err.message}`;
-    console.error(err);
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// SPARKLINE
-// ═══════════════════════════════════════════════════════
-function drawSpark(canvas, values, color) {
-  if (!canvas || values.length < 2) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width = 100;
-  const H = canvas.height = 32;
-  const pad = 3;
-  const vs = values.slice(-20);
-  const min = Math.min(...vs);
-  const max = Math.max(...vs);
-  const range = max - min || 1;
-
-  ctx.clearRect(0, 0, W, H);
-
-  // Area fill
-  ctx.beginPath();
-  vs.forEach((v, i) => {
-    const x = pad + (i / (vs.length - 1)) * (W - 2 * pad);
-    const y = H - pad - ((v - min) / range) * (H - 2 * pad);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  const lx = pad + (W - 2 * pad);
-  ctx.lineTo(lx, H); ctx.lineTo(pad, H); ctx.closePath();
-  ctx.fillStyle = color + '20';
-  ctx.fill();
-
-  // Line
-  ctx.beginPath();
-  vs.forEach((v, i) => {
-    const x = pad + (i / (vs.length - 1)) * (W - 2 * pad);
-    const y = H - pad - ((v - min) / range) * (H - 2 * pad);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.8;
-  ctx.stroke();
-
-  // End dot
-  const lastV = vs[vs.length - 1];
-  const lastY = H - pad - ((lastV - min) / range) * (H - 2 * pad);
-  ctx.beginPath();
-  ctx.arc(lx, lastY, 2.5, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.fill();
-}
-
-// ═══════════════════════════════════════════════════════
-// TREND LOGIC
-// ═══════════════════════════════════════════════════════
-function getTrend(series) {
-  if (series.length < 2) return 'flat';
-  const last = series[series.length - 1].value;
-  const prev = series[series.length - 2].value;
-  if (last > prev + 0.05) return 'up';
-  if (last < prev - 0.05) return 'down';
-  return 'flat';
-}
-
-function trendArrow(t) {
-  if (t === 'up') return '<span class="trend up">↗</span>';
-  if (t === 'down') return '<span class="trend down">↘</span>';
-  return '<span class="trend flat">→</span>';
-}
-
-function trendColor(t) {
-  if (t === 'up') return '#34d399';
-  if (t === 'down') return '#f87171';
-  return '#8899ad';
-}
-
-// ═══════════════════════════════════════════════════════
-// FORMAT
-// ═══════════════════════════════════════════════════════
-function fmtValue(val, unit) {
-  const v = val.toFixed(1).replace('.', ',');
-  if (unit === 'percent_yy') return v + '%';
-  if (unit === 'pp_contribution') return v + ' pp';
-  return v;
-}
-
-function fmtDate(isoStr) {
-  if (!isoStr) return '—';
-  return isoStr.substring(0, 10).replace(/-/g, '-');
-}
-
-function srcClass(s) {
-  const l = (s || '').toLowerCase();
-  if (l === 'nbb') return 'src-nbb';
-  if (l === 'ec') return 'src-ec';
-  if (l === 'statbel') return 'src-statbel';
-  return 'src-fbp';
-}
-
-// ═══════════════════════════════════════════════════════
-// AUTO-COMMENT
-// ═══════════════════════════════════════════════════════
-function generateComment(code, series) {
-  if (series.length < 2) return '';
-  const last = series[series.length - 1];
-  const prev = series[series.length - 2];
-  const meta = INDICATOR_META[code] || {};
-  const name = meta.name || last.name || code;
-  const diff = (last.value - prev.value).toFixed(1).replace('.', ',');
-  const sign = last.value > prev.value ? '+' : '';
-  const status = last.obs_status === 'P' ? ' (provisional)' : '';
-  const val = fmtValue(last.value, last.unit);
-
-  return `${name} reached ${val} in ${last.period}${status}. ` +
-         `Change vs ${prev.period}: ${sign}${diff} ${last.unit === 'pp_contribution' ? 'pp' : 'p.p.'}.`;
-}
-
-// ═══════════════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════════════
-function render() {
-  const wrap = document.getElementById('tableWrap');
-  let html = '';
-
-  // Group indicators by section
-  const bySec = {};
-  for (const [code, series] of Object.entries(DATA)) {
-    const meta = INDICATOR_META[code];
-    const sec = meta ? meta.section : 'other';
-    if (!bySec[sec]) bySec[sec] = [];
-    bySec[sec].push({ code, series, meta });
-  }
-
-  // Add 'other' section for unknown indicators
-  if (bySec.other && !SECTIONS.other) {
-    SECTIONS.other = { label: 'Other Indicators', icon: '📋' };
-  }
-
-  for (const [secId, secMeta] of Object.entries(SECTIONS)) {
-    const items = bySec[secId];
-    if (!items || items.length === 0) continue;
-    if (activeFilter && activeFilter !== secId) continue;
-
-    items.sort((a, b) => (a.meta?.order || 99) - (b.meta?.order || 99));
-
-    html += `<div class="section-head">${secMeta.icon} ${secMeta.label}</div>`;
-    html += `<table><thead><tr>
-      <th>#</th><th>Indicator</th><th>Source</th><th>Last data</th>
-      <th>Value</th><th>Trend</th><th>Visual</th><th>Update</th><th>Comments</th>
-    </tr></thead><tbody>`;
-
-    items.forEach(({ code, series, meta }) => {
-      const last = series[series.length - 1];
-      const trend = getTrend(series);
-      const num = meta?.num || '—';
-      const displayName = meta?.name || last.name || code;
-      const sparkId = `spark_${code}`;
-
-      // Tooltip content
-      const tipFull = meta?.fullName || displayName;
-      const tipDesc = meta?.desc || '';
-      const tipSdmx = meta?.sdmx || '';
-      const tipFreq = meta?.freq === 'Q' ? 'Quarterly' : meta?.freq === 'M' ? 'Monthly' : 'Annual';
-      const tipHtml = `<div class="tip">
-        <div class="tip-title">${tipFull}</div>
-        <div class="tip-code">${code}${tipSdmx ? ' · SDMX: ' + tipSdmx : ''}</div>
-        ${tipDesc ? '<div class="tip-desc">' + tipDesc + '</div>' : ''}
-        <div class="tip-meta">
-          <span>⏱ ${tipFreq}</span>
-          <span>📡 ${last.source}</span>
-          <span>📊 ${series.length} obs</span>
-        </div>
-      </div>`;
-
-      html += `<tr onclick="openModal('${code}')">
-        <td style="font-family:'Overpass Mono';font-size:0.7rem;">${num}</td>
-        <td><span class="ind-name">${displayName}${tipHtml}</span></td>
-        <td><span class="src-badge ${srcClass(last.source)}">${last.source}</span></td>
-        <td style="font-family:'Overpass Mono';font-size:0.72rem;">${last.period}</td>
-        <td class="val">${fmtValue(last.value, last.unit)}</td>
-        <td>${trendArrow(trend)}</td>
-        <td><canvas id="${sparkId}" class="spark" width="100" height="32"></canvas></td>
-        <td><span class="update-dt">${fmtDate(last.fetched_at)}</span></td>
-        <td class="comment">${generateComment(code, series)}</td>
-      </tr>`;
-    });
-
-    html += '</tbody></table>';
-  }
-
-  wrap.innerHTML = html;
-
-  // Draw sparklines
-  requestAnimationFrame(() => {
-    for (const [code, series] of Object.entries(DATA)) {
-      const canvas = document.getElementById(`spark_${code}`);
-      const trend = getTrend(series);
-      drawSpark(canvas, series.map(d => d.value), trendColor(trend));
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// PILLS
-// ═══════════════════════════════════════════════════════
-function renderPills() {
-  const el = document.getElementById('pills');
-  let html = `<span class="pill on" onclick="setFilter(null,this)">ALL</span>`;
-  for (const [id, s] of Object.entries(SECTIONS)) {
-    html += `<span class="pill" onclick="setFilter('${id}',this)">${s.icon} ${s.label.toUpperCase()}</span>`;
-  }
-  el.innerHTML = html;
-}
-
-function setFilter(id, el) {
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
-  el.classList.add('on');
-  activeFilter = id;
-  render();
-}
-
-// ═══════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════
-function toggleConfig() {
-  const b = document.getElementById('configBanner');
-  b.style.display = b.style.display === 'flex' ? 'none' : 'flex';
-  document.getElementById('csvUrl').value = localStorage.getItem('csv_url') || '';
-}
-
-function saveConfig() {
-  const url = document.getElementById('csvUrl').value.trim();
-  if (url) {
-    localStorage.setItem('csv_url', url);
-    document.getElementById('configBanner').style.display = 'none';
-    fetchData();
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// MODAL — Detail view with chart + datatable
-// ═══════════════════════════════════════════════════════
-let modalChartCtx = null;
-
-function openModal(code) {
-  const series = DATA[code];
-  if (!series || series.length === 0) return;
-
-  const meta = INDICATOR_META[code] || {};
-  const name = meta.name || series[0].name || code;
-  const unit = series[0].unit;
-
-  // Filter to last ~10 years of data
-  const now = new Date();
-  const cutoffYear = now.getFullYear() - 10;
-  const filtered = series.filter(d => {
-    const year = parseInt(d.period.substring(0, 4));
-    return year >= cutoffYear;
-  });
-  const displayData = filtered.length > 0 ? filtered : series.slice(-10);
-
-  // Header
-  document.getElementById('modalTitle').textContent = name;
-  document.getElementById('modalSub').textContent =
-    `${code} · Source: ${series[0].source} · ${displayData.length} observations · Last 10 years`;
-
-  // Stats
-  const last = displayData[displayData.length - 1];
-  const prev = displayData.length >= 2 ? displayData[displayData.length - 2] : null;
-  const values = displayData.map(d => d.value);
-  const avg = values.reduce((a, b) => a + b, 0) / values.length;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const change = prev ? last.value - prev.value : 0;
-
-  const statsHtml = `
-    <div class="stat-card">
-      <div class="stat-label">Latest (${last.period})</div>
-      <div class="stat-val ${last.value >= 0 ? 'pos' : 'neg'}">${fmtValue(last.value, unit)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Change</div>
-      <div class="stat-val ${change >= 0 ? 'pos' : 'neg'}">${change >= 0 ? '+' : ''}${change.toFixed(1).replace('.', ',')} ${unit === 'pp_contribution' ? 'pp' : 'p.p.'}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">10Y Average</div>
-      <div class="stat-val">${avg.toFixed(1).replace('.', ',')}${unit === 'percent_yy' ? '%' : ' pp'}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">10Y Min</div>
-      <div class="stat-val neg">${fmtValue(min, unit)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">10Y Max</div>
-      <div class="stat-val pos">${fmtValue(max, unit)}</div>
-    </div>
-  `;
-  document.getElementById('modalStats').innerHTML = statsHtml;
-
-  // Chart
-  drawModalChart(displayData, unit);
-
-  // Datatable — reversed (newest first)
-  const absMax = Math.max(Math.abs(min), Math.abs(max)) || 1;
-  let tableHtml = '';
-  for (let i = displayData.length - 1; i >= 0; i--) {
-    const d = displayData[i];
-    const prevVal = i > 0 ? displayData[i - 1].value : null;
-    const delta = prevVal !== null ? d.value - prevVal : null;
-    const valClass = d.value >= 0 ? 'pos-val' : 'neg-val';
-    const deltaStr = delta !== null
-      ? `<span class="${delta >= 0 ? 'pos-val' : 'neg-val'}">${delta >= 0 ? '+' : ''}${delta.toFixed(1).replace('.', ',')}</span>`
-      : '—';
-
-    let statusBadge = '';
-    if (d.obs_status === 'A') statusBadge = '<span class="status-badge st-actual">Actual</span>';
-    else if (d.obs_status === 'P') statusBadge = '<span class="status-badge st-prov">Provisional</span>';
-    else if (d.obs_status === 'B') statusBadge = '<span class="status-badge st-break">Break</span>';
-    else statusBadge = `<span class="status-badge">${d.obs_status || '—'}</span>`;
-
-    // Mini bar
-    const barPct = Math.abs(d.value) / absMax * 100;
-    const barColor = d.value >= 0 ? 'var(--green)' : 'var(--red)';
-    const barLeft = d.value >= 0 ? '50%' : `${50 - barPct / 2}%`;
-    const barWidth = barPct / 2;
-
-    tableHtml += `<tr>
-      <td>${d.period}</td>
-      <td class="${valClass}">${fmtValue(d.value, unit)}</td>
-      <td>${deltaStr}</td>
-      <td>${statusBadge}</td>
-      <td class="bar-cell">
-        <div style="position:relative;width:100px;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;">
-          <div style="position:absolute;height:100%;border-radius:3px;background:${barColor};opacity:0.6;
-            left:${d.value >= 0 ? '50%' : (50 - barWidth) + '%'};
-            width:${barWidth}%;"></div>
-          <div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:rgba(255,255,255,0.15);"></div>
-        </div>
-      </td>
-    </tr>`;
-  }
-  document.getElementById('modalTableBody').innerHTML = tableHtml;
-
-  // Show
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-// ESC key closes modal
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-function drawModalChart(data, unit) {
-  // Delay to let modal render and get real dimensions
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      _renderChart(data, unit);
-    });
-  });
-}
-
-function _renderChart(data, unit) {
-  const canvas = document.getElementById('modalChart');
-  const container = canvas.parentElement;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-
-  // Get actual container width after layout
-  const W = container.clientWidth - 40; // minus padding
-  const H = 260;
-
-  // Set canvas pixel buffer and CSS display size
-  canvas.width = Math.round(W * dpr);
-  canvas.height = Math.round(H * dpr);
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  // Clear
-  ctx.clearRect(0, 0, W, H);
-
-  const values = data.map(d => d.value);
-  const n = data.length;
-  const vMin = Math.min(...values, 0);
-  const vMax = Math.max(...values, 0);
-  const vRange = vMax - vMin || 1;
-
-  // Layout
-  const pL = 58, pR = 18, pT = 18, pB = 48;
-  const cW = W - pL - pR;
-  const cH = H - pT - pB;
-  const slotW = cW / n;
-  const barW = Math.max(8, Math.min(36, slotW * 0.55));
-
-  // Helpers
-  const yOf = v => pT + ((vMax - v) / vRange) * cH;
-  const zeroY = yOf(0);
-
-  // ── Y-axis grid ──
-  const gridSteps = getNiceSteps(vMin, vMax, 5);
-  gridSteps.forEach(v => {
-    const y = Math.round(yOf(v)) + 0.5;
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
-
-    ctx.font = '10px Overpass Mono, monospace';
-    ctx.fillStyle = '#5f7089';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    const lbl = v.toFixed(1).replace('.', ',') + (unit === 'percent_yy' ? '%' : 'pp');
-    ctx.fillText(lbl, pL - 10, y);
-  });
-
-  // ── Zero line ──
-  const zy = Math.round(zeroY) + 0.5;
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(pL, zy); ctx.lineTo(W - pR, zy); ctx.stroke();
-
-  // ── Bars ──
-  data.forEach((d, i) => {
-    const cx = pL + slotW * i + slotW / 2;
-    const valY = yOf(d.value);
-    const isPos = d.value >= 0;
-    const barTop = isPos ? valY : zeroY;
-    const barH = Math.max(1, Math.abs(valY - zeroY));
-    const rgb = isPos ? '52,211,153' : '248,113,113';
-
-    // Solid bar
-    ctx.fillStyle = `rgba(${rgb}, 0.6)`;
-    ctx.beginPath();
-    roundRect(ctx, Math.round(cx - barW / 2), barTop, barW, barH, 3);
-    ctx.fill();
-
-    // Dashed border for provisional
-    if (d.obs_status === 'P') {
-      ctx.strokeStyle = `rgba(${rgb}, 0.35)`;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 3]);
-      ctx.beginPath();
-      roundRect(ctx, Math.round(cx - barW / 2), barTop, barW, barH, 3);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    // Value label on top of bar
-    ctx.font = '9px Overpass Mono, monospace';
-    ctx.fillStyle = isPos ? 'rgba(52,211,153,0.8)' : 'rgba(248,113,113,0.8)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = isPos ? 'bottom' : 'top';
-    const valLabel = d.value.toFixed(1).replace('.', ',');
-    ctx.fillText(valLabel, cx, isPos ? barTop - 4 : barTop + barH + 4);
-
-    // X-axis labels
-    ctx.font = '9px Overpass Mono, monospace';
-    ctx.fillStyle = '#5f7089';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillText(d.period, cx, H - pB + 8);
-  });
-
-  // ── Trend line ──
-  ctx.beginPath();
-  data.forEach((d, i) => {
-    const cx = pL + slotW * i + slotW / 2;
-    const y = yOf(d.value);
-    i === 0 ? ctx.moveTo(cx, y) : ctx.lineTo(cx, y);
-  });
-  ctx.strokeStyle = 'rgba(125,180,224,0.55)';
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.stroke();
-
-  // ── Dots on trend line ──
-  data.forEach((d, i) => {
-    const cx = pL + slotW * i + slotW / 2;
-    const y = yOf(d.value);
-    const isLast = i === n - 1;
-    ctx.beginPath();
-    ctx.arc(cx, y, isLast ? 4.5 : 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = isLast ? '#7db4e0' : 'rgba(125,180,224,0.4)';
-    ctx.fill();
-    if (isLast) {
-      ctx.strokeStyle = '#1a2744';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-  });
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  if (h === 0) return;
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-function getNiceSteps(min, max, targetSteps) {
-  const range = max - min || 1;
-  const rough = range / targetSteps;
-  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
-  const residual = rough / mag;
-  let nice;
-  if (residual <= 1.5) nice = 1 * mag;
-  else if (residual <= 3) nice = 2 * mag;
-  else if (residual <= 7) nice = 5 * mag;
-  else nice = 10 * mag;
-
-  const steps = [];
-  let v = Math.ceil(min / nice) * nice;
-  while (v <= max) {
-    steps.push(parseFloat(v.toFixed(4)));
-    v += nice;
-  }
-  return steps;
-}
-
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-function init() {
-  const now = new Date();
-  document.getElementById('dateLabel').textContent =
-    now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  renderPills();
-  fetchData();
-}
-
-document.addEventListener('DOMContentLoaded', init);
+const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
+const M={GDP_QUARTERLY_YY:{n:1,s:'gdp',name:'Quarterly GDP growth (Y-Y)',o:1,full:'Gross Domestic Product — Quarterly Y-Y Volume Change',desc:'Percentage change in real GDP vs same quarter previous year.',sdmx:'B1GM',freq:'Q'},GDP_ANNUAL_YY:{n:2,s:'gdp',name:'Annual GDP growth',o:2,full:'Gross Domestic Product — Annual Y-Y Volume Change',desc:'Annual percentage change in total output, adjusted for inflation.',sdmx:'B1GM',freq:'A'},PRIV_CONSUMPTION_YY:{n:3,s:'gdp',name:'Private final consumption',o:3,full:'Private Final Consumption Expenditure (P31_S14_S15)',desc:'Household spending on goods and services — typically ~50% of GDP.',sdmx:'P31_S14_S15',freq:'A'},GOV_CONSUMPTION_YY:{n:4,s:'gdp',name:'Gov. consumption expenditure',o:4,full:'Final Consumption Expenditure of General Government (P3_S13)',desc:'Government spending on public services — healthcare, education, defence.',sdmx:'P3_S13',freq:'A'},GFCF_ENTERPRISES_YY:{n:5,s:'gdp',name:'GFCF — Enterprises',o:5,full:'Gross Fixed Capital Formation by Enterprises (P51_ENT)',desc:'Business investment in machinery, equipment, IT. A leading confidence indicator.',sdmx:'P51_ENT',freq:'A'},GFCF_DWELLINGS_YY:{n:6,s:'gdp',name:'GFCF — Dwellings',o:6,full:'Gross Fixed Capital Formation in Dwellings (P51_DWE)',desc:'Residential construction — new builds and major renovations. Sensitive to mortgage rates.',sdmx:'P51_DWE',freq:'A'},GFCF_PUBLIC_YY:{n:7,s:'gdp',name:'GFCF — Public admin.',o:7,full:'Gross Fixed Capital Formation by Public Administrations (P51_PAD)',desc:'Government infrastructure — roads, rail, schools. Follows political investment cycles.',sdmx:'P51_PAD',freq:'A'},CHG_STOCKS_YY:{n:8,s:'gdp',name:'Changes in stocks',o:8,full:'Changes in Inventories (P52)',desc:'Change in raw materials and finished goods held by firms. Highly volatile swing factor.',sdmx:'P52',freq:'A'},NET_EXPORTS_YY:{n:9,s:'gdp',name:'Net exports',o:9,full:'External Balance of Goods and Services (B11)',desc:'Exports minus imports. Belgium is highly open (trade ~160% of GDP).',sdmx:'B11',freq:'A'}};
+const SECTIONS={gdp:{label:'Gross Domestic Product',icon:'📊'},confidence:{label:'Confidence & Sentiment',icon:'📈'},prices:{label:'Production & Prices',icon:'🏭'},labour:{label:'Labour Costs',icon:'💼'},employment:{label:'Employment',icon:'👥'},unemployment:{label:'Unemployment',icon:'📉'},business:{label:'Business Environment',icon:'🏢'},fiscal:{label:'Government Finances',icon:'🏛'}};
+let DATA={},activeFilter=null;
+
+function setTheme(t,btn){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('theme',t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');if(Object.keys(DATA).length)render();}
+function loadTheme(){const t=localStorage.getItem('theme')||'soft';document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn').forEach(b=>{const l=b.textContent.toLowerCase();b.classList.toggle('active',l.includes(t))});}
+function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function parseCSV(t){const l=t.trim().split('\n'),h=l[0].split(',');return l.slice(1).map(r=>{const v=r.split(','),o={};h.forEach((k,i)=>o[k.trim()]=(v[i]||'').trim());return o});}
+function fmtV(v,u){const s=v.toFixed(1).replace('.',',');return u==='pp_contribution'?s+' pp':s+'%';}
+function fmtD(s){return s?s.substring(0,10):'—';}
+function trend(s){if(s.length<2)return'flat';const d=s[s.length-1].value-s[s.length-2].value;return d>.05?'up':d<-.05?'down':'flat';}
+function tArr(t){return t==='up'?'<span class="trend up">↗</span>':t==='down'?'<span class="trend down">↘</span>':'<span class="trend flat">→</span>';}
+function comment(c,s){if(s.length<2)return'';const l=s[s.length-1],p=s[s.length-2],m=M[c]||{},d=(l.value-p.value).toFixed(1).replace('.',','),sg=l.value>p.value?'+':'',st=l.obs_status==='P'?' (provisional)':'';return`${m.name||c} reached ${fmtV(l.value,l.unit)} in ${l.period}${st}. Change vs ${p.period}: ${sg}${d} p.p.`;}
+
+async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CSV_URL;const dot=document.getElementById('dot'),st=document.getElementById('statusText');if(!url){dot.className='dot err';st.textContent='No CSV URL — click ⚙';document.getElementById('configBanner').style.display='flex';return;}dot.className='dot loading';st.textContent='Fetching…';try{const r=await fetch(url+'?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);const rows=parseCSV(await r.text());DATA={};rows.forEach(r=>{const c=r.indicator_code;if(!DATA[c])DATA[c]=[];DATA[c].push({period:r.period,value:parseFloat(r.value),obs_status:r.obs_status,unit:r.unit,source:r.source_agency,name:r.name,fetched_at:r.fetched_at});});Object.values(DATA).forEach(s=>s.sort((a,b)=>a.period.localeCompare(b.period)));dot.className='dot';st.textContent=`${Object.keys(DATA).length} indicators · ${rows.length} obs`;render();}catch(e){dot.className='dot err';st.textContent='Error: '+e.message;}}
+
+function drawSpark(cv,vals,tr){if(!cv||vals.length<2)return;const g=gc('--green'),r=gc('--red'),mu=gc('--text-cell-muted'),col=tr==='up'?g:tr==='down'?r:mu;const ctx=cv.getContext('2d'),W=cv.width=100,H=cv.height=32,p=3,vs=vals.slice(-20),mn=Math.min(...vs),mx=Math.max(...vs),rg=mx-mn||1;ctx.clearRect(0,0,W,H);ctx.beginPath();vs.forEach((v,i)=>{const x=p+(i/(vs.length-1))*(W-2*p),y=H-p-((v-mn)/rg)*(H-2*p);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.lineTo(p+(W-2*p),H);ctx.lineTo(p,H);ctx.closePath();ctx.fillStyle=col+'18';ctx.fill();ctx.beginPath();vs.forEach((v,i)=>{const x=p+(i/(vs.length-1))*(W-2*p),y=H-p-((v-mn)/rg)*(H-2*p);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.stroke();const lv=vs[vs.length-1],ly=H-p-((lv-mn)/rg)*(H-2*p);ctx.beginPath();ctx.arc(p+(W-2*p),ly,2.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();}
+
+function render(){const w=document.getElementById('tableWrap');let h='';const by={};for(const[c,s]of Object.entries(DATA)){const sec=(M[c]||{}).s||'other';if(!by[sec])by[sec]=[];by[sec].push({c,s,m:M[c]});}if(by.other&&!SECTIONS.other)SECTIONS.other={label:'Other',icon:'📋'};for(const[sid,sm]of Object.entries(SECTIONS)){const it=by[sid];if(!it||!it.length)continue;if(activeFilter&&activeFilter!==sid)continue;it.sort((a,b)=>(a.m?.o||99)-(b.m?.o||99));h+=`<div class="section-head">${sm.icon} ${sm.label}</div><table><thead><tr><th>#</th><th>Indicator</th><th>Source</th><th>Last data</th><th>Value</th><th>Trend</th><th>Visual</th><th>Update</th><th>Comments</th></tr></thead><tbody>`;it.forEach(({c,s,m})=>{const l=s[s.length-1],tr=trend(s),nm=m?.name||l.name||c,tf=m?.full||nm,td=m?.desc||'',ts=m?.sdmx||'',fr=m?.freq==='Q'?'Quarterly':'Annual';h+=`<tr onclick="openModal('${c}')"><td style="font-family:'Overpass Mono';font-size:.7rem">${m?.n||'—'}</td><td><span class="ind-name">${nm}<div class="tip"><div class="tip-title">${tf}</div><div class="tip-code">${c}${ts?' · SDMX: '+ts:''}</div>${td?'<div class="tip-desc">'+td+'</div>':''}<div class="tip-meta"><span>⏱ ${fr}</span><span>📡 ${l.source}</span><span>📊 ${s.length} obs</span></div></div></span></td><td><span class="src-badge src-nbb">${l.source}</span></td><td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td><td class="val">${fmtV(l.value,l.unit)}</td><td>${tArr(tr)}</td><td><canvas id="sp_${c}" class="spark" width="100" height="32"></canvas></td><td><span class="update-dt">${fmtD(l.fetched_at)}</span></td><td class="comment">${comment(c,s)}</td></tr>`;});h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA))drawSpark(document.getElementById('sp_'+c),s.map(d=>d.value),trend(s));});}
+
+function renderPills(){const e=document.getElementById('pills');let h='<span class="pill on" onclick="setFilter(null,this)">ALL</span>';for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill" onclick="setFilter('${id}',this)">${s.icon} ${s.label.toUpperCase()}</span>`;e.innerHTML=h;}
+function setFilter(id,el){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');activeFilter=id;render();}
+function toggleConfig(){const b=document.getElementById('configBanner');b.style.display=b.style.display==='flex'?'none':'flex';document.getElementById('csvUrl').value=localStorage.getItem('csv_url')||'';}
+function saveConfig(){const u=document.getElementById('csvUrl').value.trim();if(u){localStorage.setItem('csv_url',u);document.getElementById('configBanner').style.display='none';fetchData();}}
+
+function openModal(code){const series=DATA[code];if(!series||!series.length)return;const meta=M[code]||{},name=meta.name||series[0].name||code,unit=series[0].unit;const cutoff=new Date().getFullYear()-10;const filtered=series.filter(d=>parseInt(d.period)>=cutoff);const dd=filtered.length>0?filtered:series.slice(-10);document.getElementById('modalTitle').textContent=name;document.getElementById('modalSub').textContent=`${code} · Source: ${series[0].source} · ${dd.length} observations · Last 10 years`;const last=dd[dd.length-1],prev=dd.length>=2?dd[dd.length-2]:null,vals=dd.map(d=>d.value),avg=vals.reduce((a,b)=>a+b,0)/vals.length,chg=prev?last.value-prev.value:0;document.getElementById('modalStats').innerHTML=`<div class="stat-card"><div class="stat-label">Latest (${last.period})</div><div class="stat-val ${last.value>=0?'pos':'neg'}">${fmtV(last.value,unit)}</div></div><div class="stat-card"><div class="stat-label">Change</div><div class="stat-val ${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(1).replace('.',',')} p.p.</div></div><div class="stat-card"><div class="stat-label">10Y Average</div><div class="stat-val">${avg.toFixed(1).replace('.',',')}%</div></div><div class="stat-card"><div class="stat-label">10Y Min</div><div class="stat-val neg">${fmtV(Math.min(...vals),unit)}</div></div><div class="stat-card"><div class="stat-label">10Y Max</div><div class="stat-val pos">${fmtV(Math.max(...vals),unit)}</div></div>`;drawModalChart(dd,unit);const am=Math.max(Math.abs(Math.min(...vals)),Math.abs(Math.max(...vals)))||1;let tb='';for(let i=dd.length-1;i>=0;i--){const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class="${delta>=0?'pos-val':'neg-val'}">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';let sb='—';if(d.obs_status==='A')sb='<span class="status-badge st-actual">Actual</span>';else if(d.obs_status==='P')sb='<span class="status-badge st-prov">Provisional</span>';else if(d.obs_status==='B')sb='<span class="status-badge st-break">Break</span>';const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';tb+=`<tr><td>${d.period}</td><td class="${vc}">${fmtV(d.value,unit)}</td><td>${dc}</td><td>${sb}</td><td><div style="position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px"><div style="position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)"></div></div></td></tr>`;}document.getElementById('modalTableBody').innerHTML=tb;document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function drawModalChart(data,unit){requestAnimationFrame(()=>{requestAnimationFrame(()=>{_rc(data,unit);});});}
+function _rc(data,unit){const cv=document.getElementById('modalChart'),ct=cv.parentElement,ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=ct.clientWidth-40,H=260;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const vals=data.map(d=>d.value),n=data.length,vMin=Math.min(...vals,0),vMax=Math.max(...vals,0),vR=vMax-vMin||1;const pL=58,pR=18,pT=18,pB=48,cW=W-pL-pR,slW=cW/n,bW=Math.max(8,Math.min(36,slW*.55));const yOf=v=>pT+((vMax-v)/vR)*(H-pT-pB),zY=yOf(0);const gC=gc('--chart-grid'),zC=gc('--chart-zero'),lC=gc('--chart-label'),liC=gc('--chart-line'),dC=gc('--chart-dot'),dR=gc('--chart-dot-ring'),bP=gc('--chart-bar-pos'),bN=gc('--chart-bar-neg');niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+('%'),pL-10,y);});const zy=Math.round(zY)+.5;ctx.strokeStyle=zC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,zy);ctx.lineTo(W-pR,zy);ctx.stroke();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,vY=yOf(d.value),isP=d.value>=0,bT=isP?vY:zY,bH=Math.max(1,Math.abs(vY-zY)),rgb=isP?bP:bN;ctx.fillStyle=`rgba(${rgb},.55)`;ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.fill();if(d.obs_status==='P'){ctx.strokeStyle=`rgba(${rgb},.3)`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.stroke();ctx.setLineDash([]);}ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=`rgba(${rgb},.85)`;ctx.textAlign='center';ctx.textBaseline=isP?'bottom':'top';ctx.fillText(d.value.toFixed(1).replace('.',','),cx,isP?bT-4:bT+bH+4);ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(d.period,cx,H-pB+8);});ctx.beginPath();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2;i===0?ctx.moveTo(cx,yOf(d.value)):ctx.lineTo(cx,yOf(d.value));});ctx.strokeStyle=liC;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,y=yOf(d.value),isL=i===n-1;ctx.beginPath();ctx.arc(cx,y,isL?4.5:2.5,0,Math.PI*2);ctx.fillStyle=isL?dC:liC;ctx.fill();if(isL){ctx.strokeStyle=dR;ctx.lineWidth=2;ctx.stroke();}});}
+function rr(c,x,y,w,h,r){if(h===0)return;c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+function niceSteps(mn,mx,n){const rg=mx-mn||1,ro=rg/n,mg=Math.pow(10,Math.floor(Math.log10(ro))),rs=ro/mg,ni=rs<=1.5?mg:rs<=3?2*mg:rs<=7?5*mg:10*mg;const st=[];let v=Math.ceil(mn/ni)*ni;while(v<=mx){st.push(parseFloat(v.toFixed(4)));v+=ni;}return st;}
+
+function init(){document.getElementById('dateLabel').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});loadTheme();renderPills();fetchData();}
+document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
