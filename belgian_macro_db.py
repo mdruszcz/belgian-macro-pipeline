@@ -13,7 +13,6 @@ import io
 import json
 import logging
 import argparse
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -111,55 +110,55 @@ SOURCES = {
         "type": "nbb"
     },
     "EUROSTAT_GDP_Q_MEUR": {
-        "name": "Eurostat GDP (Chain linked volumes, MEUR)",
+        "name": "Eurostat GDP (Index 2010=100)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?start_period=2008-Q1",
         "frequency": "Q",
-        "unit": "MEUR",
+        "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Gross domestic product at market prices, chain linked volumes (2010), seasonally and calendar adjusted",
         "type": "dbnomics"
     },
     "EUROSTAT_GDP_Q_MEUR_ES": {
-        "name": "Eurostat GDP Spain (MEUR)",
+        "name": "Eurostat GDP Spain (Index 2010=100)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?start_period=2008-Q1",
         "frequency": "Q",
-        "unit": "MEUR",
+        "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Spain GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
     },
     "EUROSTAT_GDP_Q_MEUR_DE": {
-        "name": "Eurostat GDP Germany (MEUR)",
+        "name": "Eurostat GDP Germany (Index 2010=100)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?start_period=2008-Q1",
         "frequency": "Q",
-        "unit": "MEUR",
+        "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Germany GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
     },
     "EUROSTAT_GDP_Q_MEUR_FR": {
-        "name": "Eurostat GDP France (MEUR)",
+        "name": "Eurostat GDP France (Index 2010=100)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?start_period=2008-Q1",
         "frequency": "Q",
-        "unit": "MEUR",
+        "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "France GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
     },
     "EUROSTAT_GDP_Q_MEUR_NL": {
-        "name": "Eurostat GDP Netherlands (MEUR)",
+        "name": "Eurostat GDP Netherlands (Index 2010=100)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?start_period=2008-Q1",
         "frequency": "Q",
-        "unit": "MEUR",
+        "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Netherlands GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
     },
     "EUROSTAT_GDP_Q_MEUR_EA": {
-        "name": "Eurostat GDP Euro Area 20 (MEUR)",
+        "name": "Eurostat GDP Euro Area 20 (Index 2010=100)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?start_period=2008-Q1",
         "frequency": "Q",
-        "unit": "MEUR",
+        "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Euro Area 20 GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
@@ -322,7 +321,7 @@ class DBnomicsFetcher:
 
         results = []
         for p, v in zip(periods, values):
-            # Client-side fallback filter
+            # Client-side fallback filter to ensure no data before 2008-Q1
             if str(p) < "2008-Q1":
                 continue
             if v is None or v == "NA":
@@ -335,6 +334,13 @@ class DBnomicsFetcher:
                 continue
                 
         if results:
+            # Normalize to average of 4 quarters of 2010 = 100
+            q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
+            if q2010:
+                avg_2010 = sum(q2010) / len(q2010)
+                for r in results:
+                    r["value"] = round((r["value"] / avg_2010) * 100, 2)
+                    
             log.info(f"  {len(results)} obs: {results[0]['period']} → {results[-1]['period']}")
         return results
 
