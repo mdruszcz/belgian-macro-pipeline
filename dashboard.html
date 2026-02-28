@@ -145,6 +145,7 @@ thead th {
 tbody tr {
   border-bottom: 1px solid var(--border-dark);
   transition: background 0.1s;
+  cursor: pointer;
 }
 tbody tr:hover { background: var(--navy-hover); }
 tbody td {
@@ -198,6 +199,106 @@ canvas.spark { display: block; }
 }
 .footer strong { color: #6b7280; }
 
+/* ── MODAL ────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(10,15,28,0.75);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease;
+}
+.modal-overlay.open { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--navy); border: 1px solid var(--border-dark);
+  border-radius: 12px; width: 90%; max-width: 860px; max-height: 88vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-head {
+  padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border-dark); flex-shrink: 0;
+}
+.modal-head h2 {
+  font-family: 'Figtree'; font-size: 1.05rem; font-weight: 700; color: var(--text-bright);
+}
+.modal-head .modal-sub {
+  font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;
+}
+.modal-close {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-dark);
+  background: transparent; color: var(--text-dim); font-size: 1.1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.modal-close:hover { background: var(--navy-hover); color: var(--text-bright); }
+
+.modal-body {
+  padding: 20px 24px; overflow-y: auto; flex: 1;
+}
+
+/* Chart area */
+.modal-chart {
+  background: var(--navy-mid); border-radius: 8px; padding: 16px;
+  margin-bottom: 20px; position: relative;
+}
+.modal-chart canvas { width: 100% !important; height: 280px !important; }
+
+/* Stats row */
+.modal-stats {
+  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.stat-card {
+  flex: 1; min-width: 120px; background: var(--navy-mid); border-radius: 8px;
+  padding: 12px 16px;
+}
+.stat-card .stat-label {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-muted); margin-bottom: 4px;
+}
+.stat-card .stat-val {
+  font-family: 'Overpass Mono'; font-size: 1.1rem; font-weight: 700; color: var(--text-bright);
+}
+.stat-card .stat-val.pos { color: var(--green); }
+.stat-card .stat-val.neg { color: var(--red); }
+
+/* Data table in modal */
+.modal-table-wrap {
+  border-radius: 8px; overflow: hidden; border: 1px solid var(--border-dark);
+}
+.modal-table {
+  width: 100%; border-collapse: collapse; font-size: 0.78rem;
+}
+.modal-table thead th {
+  background: var(--navy-mid); color: var(--text-dim);
+  font-weight: 600; font-size: 0.66rem; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 8px 14px; text-align: left;
+  position: sticky; top: 0;
+}
+.modal-table tbody tr { border-bottom: 1px solid var(--border-dark); }
+.modal-table tbody tr:hover { background: var(--navy-hover); }
+.modal-table td {
+  padding: 7px 14px; color: var(--text-bright);
+  font-family: 'Overpass Mono'; font-size: 0.76rem;
+}
+.modal-table td:nth-child(2) { font-weight: 600; }
+.modal-table .pos-val { color: var(--green); }
+.modal-table .neg-val { color: var(--red); }
+.modal-table .status-badge {
+  font-size: 0.62rem; padding: 1px 6px; border-radius: 3px;
+  font-family: 'Figtree'; font-weight: 600;
+}
+.modal-table .st-actual { background: rgba(52,211,153,0.15); color: var(--green); }
+.modal-table .st-prov { background: rgba(251,191,36,0.15); color: var(--orange); }
+.modal-table .st-break { background: rgba(248,113,113,0.15); color: var(--red); }
+
+/* bar in table */
+.bar-cell { position: relative; width: 100px; }
+.bar-bg { height: 6px; border-radius: 3px; position: absolute; top: 50%; transform: translateY(-50%); }
+
 /* ── RESPONSIVE ───────────────────────────── */
 @media (max-width: 1100px) {
   .header,.controls,.table-wrap,.footer { padding-left: 16px; padding-right: 16px; }
@@ -249,6 +350,30 @@ canvas.spark { display: block; }
     StatBel = Belgian Statistical Office · FBP = Federal Bureau of Planning
   </div>
   <div>Data fetched from GitHub repo · Auto-updated daily at 06:00 CET</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle">—</h2>
+        <div class="modal-sub" id="modalSub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stats" id="modalStats"></div>
+      <div class="modal-chart"><canvas id="modalChart"></canvas></div>
+      <div class="modal-table-wrap">
+        <table class="modal-table">
+          <thead><tr>
+            <th>Period</th><th>Value</th><th>Δ Change</th><th>Status</th><th>Bar</th>
+          </tr></thead>
+          <tbody id="modalTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -511,7 +636,7 @@ function render() {
       const displayName = meta?.name || last.name || code;
       const sparkId = `spark_${code}`;
 
-      html += `<tr>
+      html += `<tr onclick="openModal('${code}')">
         <td style="font-family:'Overpass Mono';font-size:0.7rem;">${num}</td>
         <td><span class="ind-name">${displayName}</span></td>
         <td><span class="src-badge ${srcClass(last.source)}">${last.source}</span></td>
@@ -574,6 +699,280 @@ function saveConfig() {
     document.getElementById('configBanner').style.display = 'none';
     fetchData();
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL — Detail view with chart + datatable
+// ═══════════════════════════════════════════════════════
+let modalChartCtx = null;
+
+function openModal(code) {
+  const series = DATA[code];
+  if (!series || series.length === 0) return;
+
+  const meta = INDICATOR_META[code] || {};
+  const name = meta.name || series[0].name || code;
+  const unit = series[0].unit;
+
+  // Filter to last ~10 years of data
+  const now = new Date();
+  const cutoffYear = now.getFullYear() - 10;
+  const filtered = series.filter(d => {
+    const year = parseInt(d.period.substring(0, 4));
+    return year >= cutoffYear;
+  });
+  const displayData = filtered.length > 0 ? filtered : series.slice(-10);
+
+  // Header
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalSub').textContent =
+    `${code} · Source: ${series[0].source} · ${displayData.length} observations · Last 10 years`;
+
+  // Stats
+  const last = displayData[displayData.length - 1];
+  const prev = displayData.length >= 2 ? displayData[displayData.length - 2] : null;
+  const values = displayData.map(d => d.value);
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const change = prev ? last.value - prev.value : 0;
+
+  const statsHtml = `
+    <div class="stat-card">
+      <div class="stat-label">Latest (${last.period})</div>
+      <div class="stat-val ${last.value >= 0 ? 'pos' : 'neg'}">${fmtValue(last.value, unit)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Change</div>
+      <div class="stat-val ${change >= 0 ? 'pos' : 'neg'}">${change >= 0 ? '+' : ''}${change.toFixed(1).replace('.', ',')} ${unit === 'pp_contribution' ? 'pp' : 'p.p.'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">10Y Average</div>
+      <div class="stat-val">${avg.toFixed(1).replace('.', ',')}${unit === 'percent_yy' ? '%' : ' pp'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">10Y Min</div>
+      <div class="stat-val neg">${fmtValue(min, unit)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">10Y Max</div>
+      <div class="stat-val pos">${fmtValue(max, unit)}</div>
+    </div>
+  `;
+  document.getElementById('modalStats').innerHTML = statsHtml;
+
+  // Chart
+  drawModalChart(displayData, unit);
+
+  // Datatable — reversed (newest first)
+  const absMax = Math.max(Math.abs(min), Math.abs(max)) || 1;
+  let tableHtml = '';
+  for (let i = displayData.length - 1; i >= 0; i--) {
+    const d = displayData[i];
+    const prevVal = i > 0 ? displayData[i - 1].value : null;
+    const delta = prevVal !== null ? d.value - prevVal : null;
+    const valClass = d.value >= 0 ? 'pos-val' : 'neg-val';
+    const deltaStr = delta !== null
+      ? `<span class="${delta >= 0 ? 'pos-val' : 'neg-val'}">${delta >= 0 ? '+' : ''}${delta.toFixed(1).replace('.', ',')}</span>`
+      : '—';
+
+    let statusBadge = '';
+    if (d.obs_status === 'A') statusBadge = '<span class="status-badge st-actual">Actual</span>';
+    else if (d.obs_status === 'P') statusBadge = '<span class="status-badge st-prov">Provisional</span>';
+    else if (d.obs_status === 'B') statusBadge = '<span class="status-badge st-break">Break</span>';
+    else statusBadge = `<span class="status-badge">${d.obs_status || '—'}</span>`;
+
+    // Mini bar
+    const barPct = Math.abs(d.value) / absMax * 100;
+    const barColor = d.value >= 0 ? 'var(--green)' : 'var(--red)';
+    const barLeft = d.value >= 0 ? '50%' : `${50 - barPct / 2}%`;
+    const barWidth = barPct / 2;
+
+    tableHtml += `<tr>
+      <td>${d.period}</td>
+      <td class="${valClass}">${fmtValue(d.value, unit)}</td>
+      <td>${deltaStr}</td>
+      <td>${statusBadge}</td>
+      <td class="bar-cell">
+        <div style="position:relative;width:100px;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;">
+          <div style="position:absolute;height:100%;border-radius:3px;background:${barColor};opacity:0.6;
+            left:${d.value >= 0 ? '50%' : (50 - barWidth) + '%'};
+            width:${barWidth}%;"></div>
+          <div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:rgba(255,255,255,0.15);"></div>
+        </div>
+      </td>
+    </tr>`;
+  }
+  document.getElementById('modalTableBody').innerHTML = tableHtml;
+
+  // Show
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ESC key closes modal
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function drawModalChart(data, unit) {
+  const canvas = document.getElementById('modalChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width - 32;
+  const H = 280;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  const values = data.map(d => d.value);
+  const labels = data.map(d => d.period);
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 0);
+  const range = max - min || 1;
+
+  const padL = 50, padR = 20, padT = 20, padB = 40;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Zero line Y position
+  const zeroY = padT + ((max - 0) / range) * chartH;
+
+  // Grid lines
+  const niceSteps = getNiceSteps(min, max, 6);
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  ctx.font = '11px "Overpass Mono"';
+  niceSteps.forEach(v => {
+    const y = padT + ((max - v) / range) * chartH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillStyle = '#5a6b80';
+    const label = unit === 'percent_yy' ? v.toFixed(1) + '%' : v.toFixed(1) + 'pp';
+    ctx.fillText(label, padL - 8, y);
+  });
+
+  // Zero line (thicker)
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(padL, zeroY); ctx.lineTo(W - padR, zeroY); ctx.stroke();
+
+  // Bars
+  const barW = Math.max(4, Math.min(28, (chartW / data.length) * 0.6));
+  const gap = chartW / data.length;
+
+  data.forEach((d, i) => {
+    const x = padL + gap * i + gap / 2;
+    const valY = padT + ((max - d.value) / range) * chartH;
+    const barH = Math.abs(valY - zeroY);
+
+    // Gradient bar
+    const isPos = d.value >= 0;
+    const barTop = isPos ? valY : zeroY;
+    const grad = ctx.createLinearGradient(0, barTop, 0, barTop + barH);
+    if (isPos) {
+      grad.addColorStop(0, 'rgba(52,211,153,0.85)');
+      grad.addColorStop(1, 'rgba(52,211,153,0.3)');
+    } else {
+      grad.addColorStop(0, 'rgba(248,113,113,0.3)');
+      grad.addColorStop(1, 'rgba(248,113,113,0.85)');
+    }
+
+    ctx.fillStyle = grad;
+    roundRect(ctx, x - barW / 2, barTop, barW, barH, 2);
+    ctx.fill();
+
+    // Provisional bars get a dashed outline
+    if (d.obs_status === 'P') {
+      ctx.strokeStyle = isPos ? 'rgba(52,211,153,0.5)' : 'rgba(248,113,113,0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      roundRect(ctx, x - barW / 2, barTop, barW, barH, 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // X-axis labels
+    const showLabel = data.length <= 15 || i % Math.ceil(data.length / 12) === 0 || i === data.length - 1;
+    if (showLabel) {
+      ctx.save();
+      ctx.translate(x, H - padB + 14);
+      ctx.rotate(-0.5);
+      ctx.fillStyle = '#5a6b80';
+      ctx.font = '10px "Overpass Mono"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(d.period, 0, 0);
+      ctx.restore();
+    }
+  });
+
+  // Trend line on top
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = padL + gap * i + gap / 2;
+    const y = padT + ((max - d.value) / range) * chartH;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = 'rgba(125,180,224,0.7)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // End dot
+  const lastX = padL + gap * (data.length - 1) + gap / 2;
+  const lastY = padT + ((max - values[values.length - 1]) / range) * chartH;
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = 'var(--sky)';
+  ctx.fill();
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (h === 0) return;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function getNiceSteps(min, max, targetSteps) {
+  const range = max - min || 1;
+  const rough = range / targetSteps;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const residual = rough / mag;
+  let nice;
+  if (residual <= 1.5) nice = 1 * mag;
+  else if (residual <= 3) nice = 2 * mag;
+  else if (residual <= 7) nice = 5 * mag;
+  else nice = 10 * mag;
+
+  const steps = [];
+  let v = Math.ceil(min / nice) * nice;
+  while (v <= max) {
+    steps.push(parseFloat(v.toFixed(4)));
+    v += nice;
+  }
+  return steps;
 }
 
 // ═══════════════════════════════════════════════════════
