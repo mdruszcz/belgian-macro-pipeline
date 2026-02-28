@@ -3,7 +3,7 @@
 Automated pipeline that fetches Belgian GDP data from the **National Bank of Belgium (NBB)** SDMX API, stores it in SQLite, and exports CSV — running daily on GitHub Actions for free.
 
 ```
-NBB SDMX API  →  SQLite DB  →  CSV + JSON
+NBB SDMX API  →  SQLite DB  →  CSV + JSON + HTML
                   (all committed to this repo daily)
 ```
 
@@ -14,6 +14,7 @@ NBB SDMX API  →  SQLite DB  →  CSV + JSON
 | [`data/belgian_macro_export.csv`](data/belgian_macro_export.csv) | Full time series, viewable in GitHub |
 | [`data/belgian_macro_export.json`](data/belgian_macro_export.json) | Same data as JSON |
 | [`data/belgian_macro.db`](data/belgian_macro.db) | SQLite database |
+| [`data/belgian_macro.html`](data/belgian_macro.html) | Generated HTML table of indicators |
 
 ## Indicators
 
@@ -21,8 +22,25 @@ NBB SDMX API  →  SQLite DB  →  CSV + JSON
 |------|------|-----------|-----|--------|
 | `GDP_QUARTERLY_YY` | Quarterly GDP Growth (Y-Y) | Quarterly | 104 | NBB |
 | `GDP_ANNUAL_YY` | Annual GDP Growth | Annual | 26 | NBB |
+| `PRIV_CONSUMPTION_YY` | Private Final Consumption | Annual | 26 | NBB |
+| `GOV_CONSUMPTION_YY` | Gov. Consumption Expenditure | Annual | 26 | NBB |
+| `GFCF_DWELLINGS_YY` | Gross Fixed Capital Formation — Dwellings | Annual | 26 | NBB |
+| `CHG_STOCKS_YY` | Changes in Stocks | Annual | 26 | NBB |
+| `NET_EXPORTS_YY` | Net Exports | Annual | 26 | NBB |
+| `GFCF_ENTERPRISES_YY` | Gross Fixed Capital Formation — Enterprises | Annual | 26 | NBB |
+| `GFCF_PUBLIC_YY` | Gross Fixed Capital Formation — Public Admin | Annual | 26 | NBB |
 
 Updated daily at 06:00 CET via GitHub Actions.
+
+## HTML Generation
+
+To generate an HTML table with a summarized view of the data, run:
+
+```bash
+python generate_html.py
+```
+
+This will read `data/belgian_macro.db` and output `data/belgian_macro.html` displaying an organized view of various indicators.
 
 ## Adding more indicators
 
