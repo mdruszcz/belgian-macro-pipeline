@@ -1,5 +1,205 @@
 [
   {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2006",
+    "value": 0.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2007",
+    "value": 0.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2008",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2009",
+    "value": -0.7,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2010",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2011",
+    "value": 0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2012",
+    "value": -0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2013",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2014",
+    "value": -0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2015",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2016",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2017",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2018",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2019",
+    "value": -1.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2020",
+    "value": -0.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2021",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2022",
+    "value": 1.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2023",
+    "value": -0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2024",
+    "value": -0.5,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
+    "indicator_code": "CHG_STOCKS_CY",
+    "name": "Changes in Stocks (contribution)",
+    "period": "2025",
+    "value": -0.1,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:43.406127+00:00"
+  },
+  {
     "indicator_code": "CHG_STOCKS_YY",
     "name": "Changes in Stocks",
     "period": "2000",
@@ -258,6 +458,206 @@
     "unit": "percent_yy",
     "source_agency": "NBB",
     "fetched_at": "2026-02-28T17:20:02.690572+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2006",
+    "value": 2.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2007",
+    "value": 3.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2008",
+    "value": 0.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2009",
+    "value": -1.9,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2010",
+    "value": 2.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2011",
+    "value": 1.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2012",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2013",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2014",
+    "value": 1.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2015",
+    "value": 1.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2016",
+    "value": 1.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2017",
+    "value": 1.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2018",
+    "value": 1.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2019",
+    "value": 2.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2020",
+    "value": -4.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2021",
+    "value": 6.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2022",
+    "value": 4.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2023",
+    "value": 1.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2024",
+    "value": 1.1,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
+  },
+  {
+    "indicator_code": "GDP_ANNUAL_CY",
+    "name": "Annual GDP Growth (contribution)",
+    "period": "2025",
+    "value": 1.0,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:37.827739+00:00"
   },
   {
     "indicator_code": "GDP_ANNUAL_YY",
@@ -527,7 +927,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -537,7 +937,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -547,7 +947,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -557,7 +957,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -567,7 +967,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -577,7 +977,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -587,7 +987,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -597,7 +997,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -607,7 +1007,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -617,7 +1017,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -627,7 +1027,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -637,7 +1037,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -647,7 +1047,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -657,7 +1057,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -667,7 +1067,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -677,7 +1077,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -687,7 +1087,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -697,7 +1097,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -707,7 +1107,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -717,7 +1117,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -727,7 +1127,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -737,7 +1137,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -747,7 +1147,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -757,7 +1157,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -767,7 +1167,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -777,7 +1177,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -787,7 +1187,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -797,7 +1197,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -807,7 +1207,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -817,7 +1217,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -827,7 +1227,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -837,7 +1237,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -847,7 +1247,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -857,7 +1257,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -867,7 +1267,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -877,7 +1277,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -887,7 +1287,7 @@
     "obs_status": "B",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -897,7 +1297,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -907,7 +1307,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -917,7 +1317,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -927,7 +1327,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -937,7 +1337,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -947,7 +1347,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -957,7 +1357,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -967,7 +1367,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -977,7 +1377,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -987,7 +1387,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -997,7 +1397,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1007,7 +1407,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1017,7 +1417,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1027,7 +1427,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1037,7 +1437,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1047,7 +1447,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1057,7 +1457,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1067,7 +1467,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1077,7 +1477,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1087,7 +1487,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1097,7 +1497,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1107,7 +1507,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1117,7 +1517,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1127,7 +1527,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1137,7 +1537,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1147,7 +1547,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1157,7 +1557,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1167,7 +1567,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1177,7 +1577,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1187,7 +1587,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1197,7 +1597,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1207,7 +1607,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1217,7 +1617,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1227,7 +1627,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1237,7 +1637,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1247,7 +1647,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1257,7 +1657,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1267,7 +1667,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1277,7 +1677,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1287,7 +1687,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1297,7 +1697,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1307,7 +1707,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1317,7 +1717,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1327,7 +1727,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1337,7 +1737,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1347,7 +1747,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1357,7 +1757,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1367,7 +1767,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1377,7 +1777,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1387,7 +1787,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1397,7 +1797,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1407,7 +1807,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1417,7 +1817,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1427,7 +1827,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1437,7 +1837,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1447,7 +1847,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1457,7 +1857,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1467,7 +1867,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1477,7 +1877,7 @@
     "obs_status": "A",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1487,7 +1887,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1497,7 +1897,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1507,7 +1907,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1517,7 +1917,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1527,7 +1927,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1537,7 +1937,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1547,7 +1947,7 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
   },
   {
     "indicator_code": "GDP_QUARTERLY_YY",
@@ -1557,7 +1957,207 @@
     "obs_status": "P",
     "unit": "percent_yy",
     "source_agency": "NBB",
-    "fetched_at": "2026-02-28T17:20:00.457067+00:00"
+    "fetched_at": "2026-02-28T22:58:36.985626+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2006",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2007",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2008",
+    "value": -0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2009",
+    "value": -0.5,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2010",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2011",
+    "value": -0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2012",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2013",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2014",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2015",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2016",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2017",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2018",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2019",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2020",
+    "value": -0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2021",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2022",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2023",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2024",
+    "value": -0.3,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
+  },
+  {
+    "indicator_code": "GFCF_DWELLINGS_CY",
+    "name": "GFCF Dwellings (contribution)",
+    "period": "2025",
+    "value": -0.4,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:41.557767+00:00"
   },
   {
     "indicator_code": "GFCF_DWELLINGS_YY",
@@ -1820,6 +2420,206 @@
     "fetched_at": "2026-02-28T17:20:02.160829+00:00"
   },
   {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2006",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2007",
+    "value": 1.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2008",
+    "value": 0.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2009",
+    "value": -1.4,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2010",
+    "value": -0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2011",
+    "value": 1.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2012",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2013",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2014",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2015",
+    "value": 0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2016",
+    "value": 0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2017",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2018",
+    "value": 0.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2019",
+    "value": 0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2020",
+    "value": -0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2021",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2022",
+    "value": 0.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2023",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2024",
+    "value": 0.5,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
+    "indicator_code": "GFCF_ENTERPRISES_CY",
+    "name": "GFCF Enterprises (contribution)",
+    "period": "2025",
+    "value": 0.5,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:40.735423+00:00"
+  },
+  {
     "indicator_code": "GFCF_ENTERPRISES_YY",
     "name": "Gross Fixed Capital Formation \u2014 Enterprises",
     "period": "2000",
@@ -2078,6 +2878,206 @@
     "unit": "percent_yy",
     "source_agency": "NBB",
     "fetched_at": "2026-02-28T17:20:03.573758+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2006",
+    "value": -0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2007",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2008",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2009",
+    "value": 0.2,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2010",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2011",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2012",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2013",
+    "value": -0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2014",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2015",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2016",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2017",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2018",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2019",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2020",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2021",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2022",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2023",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2024",
+    "value": 0.3,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
+  },
+  {
+    "indicator_code": "GFCF_PUBLIC_CY",
+    "name": "GFCF Public Admin (contribution)",
+    "period": "2025",
+    "value": -0.1,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:42.497803+00:00"
   },
   {
     "indicator_code": "GFCF_PUBLIC_YY",
@@ -2340,6 +3340,206 @@
     "fetched_at": "2026-02-28T17:20:03.915735+00:00"
   },
   {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2006",
+    "value": 0.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2007",
+    "value": 0.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2008",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2009",
+    "value": 0.4,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2010",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2011",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2012",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2013",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2014",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2015",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2016",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2017",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2018",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2019",
+    "value": 0.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2020",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2021",
+    "value": 1.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2022",
+    "value": 0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2023",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2024",
+    "value": 0.4,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
+    "indicator_code": "GOV_CONSUMPTION_CY",
+    "name": "Gov. Consumption Expenditure (contribution)",
+    "period": "2025",
+    "value": 0.6,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:39.706185+00:00"
+  },
+  {
     "indicator_code": "GOV_CONSUMPTION_YY",
     "name": "Gov. Consumption Expenditure",
     "period": "2000",
@@ -2600,6 +3800,206 @@
     "fetched_at": "2026-02-28T17:20:01.693772+00:00"
   },
   {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2006",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2007",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2008",
+    "value": -1.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2009",
+    "value": -0.6,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2010",
+    "value": 0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2011",
+    "value": -0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2012",
+    "value": 0.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2013",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2014",
+    "value": -0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2015",
+    "value": -0.4,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2016",
+    "value": -1.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2017",
+    "value": 0.1,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2018",
+    "value": -0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2019",
+    "value": 1.2,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2020",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2021",
+    "value": 1.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2022",
+    "value": -0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2023",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2024",
+    "value": -0.3,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
+    "indicator_code": "NET_EXPORTS_CY",
+    "name": "Net Exports (contribution)",
+    "period": "2025",
+    "value": -0.3,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:44.461188+00:00"
+  },
+  {
     "indicator_code": "NET_EXPORTS_YY",
     "name": "Net Exports",
     "period": "2000",
@@ -2858,6 +4258,206 @@
     "unit": "percent_yy",
     "source_agency": "NBB",
     "fetched_at": "2026-02-28T17:20:03.046938+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2006",
+    "value": 0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2007",
+    "value": 1.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2008",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2009",
+    "value": 0.8,
+    "obs_status": "B",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2010",
+    "value": 2.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2011",
+    "value": 0.3,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2012",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2013",
+    "value": 0.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2014",
+    "value": 0.5,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2015",
+    "value": 0.9,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2016",
+    "value": 0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2017",
+    "value": 1.0,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2018",
+    "value": 0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2019",
+    "value": 0.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2020",
+    "value": -3.7,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2021",
+    "value": 2.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2022",
+    "value": 1.8,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2023",
+    "value": 0.6,
+    "obs_status": "A",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2024",
+    "value": 1.1,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
+  },
+  {
+    "indicator_code": "PRIV_CONSUMPTION_CY",
+    "name": "Private Final Consumption (contribution)",
+    "period": "2025",
+    "value": 0.9,
+    "obs_status": "P",
+    "unit": "pp_contribution",
+    "source_agency": "NBB",
+    "fetched_at": "2026-02-28T22:58:38.857867+00:00"
   },
   {
     "indicator_code": "PRIV_CONSUMPTION_YY",
