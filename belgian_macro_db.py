@@ -111,7 +111,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR": {
         "name": "Eurostat GDP (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -120,7 +120,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_ES": {
         "name": "Eurostat GDP Spain (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -129,7 +129,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_DE": {
         "name": "Eurostat GDP Germany (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -138,7 +138,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_FR": {
         "name": "Eurostat GDP France (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -147,7 +147,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_NL": {
         "name": "Eurostat GDP Netherlands (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -156,7 +156,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_EA": {
         "name": "Eurostat GDP Euro Area 20 (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -281,6 +281,20 @@ class MacroDatabase:
     def close(self):
         self.conn.close()
 
+    def cleanup_orphans(self, valid_codes: list[str]):
+        """Remove indicators and observations not in the current SOURCES config."""
+        placeholders = ','.join('?' * len(valid_codes))
+        cur = self.conn.execute(
+            f"SELECT code FROM indicators WHERE code NOT IN ({placeholders})", valid_codes)
+        orphans = [r[0] for r in cur]
+        if orphans:
+            for code in orphans:
+                self.conn.execute("DELETE FROM observations WHERE indicator_code = ?", (code,))
+                self.conn.execute("DELETE FROM indicators WHERE code = ?", (code,))
+                log.info(f"  Cleaned up orphan indicator: {code}")
+            self.conn.commit()
+        return orphans
+
 
 # ─── Fetchers ─────────────────────────────────────────────────────
 
@@ -348,6 +362,11 @@ class DBnomicsFetcher:
 # ─── Orchestration ────────────────────────────────────────────────
 
 def fetch_all(db: MacroDatabase) -> dict[str, int]:
+    # Clean up indicators from previous script versions (e.g. _YY variants)
+    orphans = db.cleanup_orphans(list(SOURCES.keys()))
+    if orphans:
+        log.info(f"Removed {len(orphans)} orphaned indicators: {', '.join(orphans)}")
+
     results = {}
     for code, meta in SOURCES.items():
         db.upsert_indicator(code, meta)
