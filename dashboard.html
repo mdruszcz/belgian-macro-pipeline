@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macroeconomic and Financial Review of Belgium</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   Belgian FPS Finance — Institutional dark dashboard
+   Matching the screenshot: navy header, dark table,
+   pill filters, sparkline visuals, mono data cells.
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --navy: #131d33;
+  --navy-mid: #1a2744;
+  --navy-table: #16203a;
+  --navy-row: #1c2a4a;
+  --navy-hover: #223358;
+  --steel: #4a7ab5;
+  --sky: #7db4e0;
+  --gold: #d4a843;
+  --cream: #f0ede6;
+  --white: #ffffff;
+  --text-bright: #e8ecf2;
+  --text-dim: #8899ad;
+  --text-muted: #5a6b80;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fbbf24;
+  --border-dark: #253050;
+  --border-light: #d1d5db;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Figtree', sans-serif;
+  background: var(--cream);
+  color: #1e2a3a;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ───────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #101a2e 0%, var(--navy-mid) 100%);
+  color: white;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.be-flag {
+  width: 40px; height: 40px; border-radius: 6px; overflow: hidden;
+  display: flex; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+}
+.be-flag .s { flex: 1; }
+.be-flag .s:nth-child(1) { background: #2d2926; }
+.be-flag .s:nth-child(2) { background: #ffd100; }
+.be-flag .s:nth-child(3) { background: #ef3340; }
+
+.header-text h1 {
+  font-family: 'Figtree', sans-serif;
+  font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em;
+}
+.header-text .sub {
+  font-size: 0.75rem; opacity: 0.55; margin-top: 1px;
+}
+.header-right {
+  text-align: right; font-size: 0.72rem; line-height: 1.5; color: var(--text-dim);
+}
+.header-right .ital { font-style: italic; color: var(--gold); font-weight: 600; font-size: 0.78rem; }
+
+/* ── CONTROLS ─────────────────────────────── */
+.controls {
+  background: white; border-bottom: 1px solid var(--border-light);
+  padding: 10px 32px; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.ctrl-left { display: flex; align-items: center; gap: 10px; }
+
+.status { display: flex; align-items: center; gap: 7px; font-size: 0.76rem; color: #6b7280; }
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 5px rgba(52,211,153,0.5);
+}
+.dot.loading { background: var(--orange); animation: blink 1s infinite; }
+.dot.err { background: var(--red); }
+@keyframes blink { 50% { opacity: 0.3; } }
+
+.btn {
+  font-family: 'Figtree'; font-size: 0.74rem; font-weight: 600;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border-light); background: white; color: #374151;
+  transition: all 0.12s; display: inline-flex; align-items: center; gap: 5px;
+}
+.btn:hover { background: #f3f4f6; }
+.btn.primary { background: var(--navy-mid); color: white; border-color: var(--navy-mid); }
+.btn.primary:hover { background: #223358; }
+
+.pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.pill {
+  font-size: 0.68rem; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border-light); background: white; color: #6b7280;
+  cursor: pointer; transition: all 0.12s; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.pill:hover, .pill.on { background: var(--navy-mid); color: white; border-color: var(--navy-mid); }
+
+/* ── CONFIG BANNER ────────────────────────── */
+.config-banner {
+  background: #fffbeb; border-bottom: 1px solid #fde68a;
+  padding: 10px 32px; font-size: 0.78rem; color: #92400e;
+  display: none; align-items: center; gap: 10px;
+}
+.config-banner input {
+  font-family: 'Overpass Mono'; font-size: 0.74rem; padding: 4px 10px;
+  border: 1px solid #fde68a; border-radius: 4px; flex: 1; max-width: 500px;
+}
+.config-banner .btn { font-size: 0.7rem; padding: 4px 10px; }
+
+/* ── TABLE AREA ───────────────────────────── */
+.table-wrap { padding: 20px 32px 40px; }
+
+.section-head {
+  font-family: 'Figtree'; font-size: 0.95rem; font-weight: 700;
+  color: var(--navy-mid); padding: 14px 0 6px;
+  border-bottom: 2px solid var(--navy-mid);
+  margin-top: 20px; display: flex; align-items: center; gap: 8px;
+}
+.section-head:first-of-type { margin-top: 0; }
+
+table {
+  width: 100%; border-collapse: collapse; font-size: 0.8rem;
+  background: var(--navy); border-radius: 8px; overflow: hidden;
+  margin-bottom: 4px;
+}
+thead th {
+  background: var(--navy-mid); color: var(--text-dim);
+  font-weight: 600; font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 10px 12px; text-align: left;
+  border-bottom: 1px solid var(--border-dark);
+}
+tbody tr {
+  border-bottom: 1px solid var(--border-dark);
+  transition: background 0.1s;
+}
+tbody tr:hover { background: var(--navy-hover); }
+tbody td {
+  padding: 12px 12px; color: var(--text-bright);
+  vertical-align: top; line-height: 1.45;
+}
+
+/* Column sizing */
+th:nth-child(1),td:nth-child(1) { width: 3%; text-align: center; color: var(--text-muted); }
+th:nth-child(2),td:nth-child(2) { width: 20%; }
+th:nth-child(3),td:nth-child(3) { width: 6%; text-align: center; }
+th:nth-child(4),td:nth-child(4) { width: 8%; text-align: center; }
+th:nth-child(5),td:nth-child(5) { width: 8%; text-align: center; }
+th:nth-child(6),td:nth-child(6) { width: 5%; text-align: center; }
+th:nth-child(7),td:nth-child(7) { width: 11%; }
+th:nth-child(8),td:nth-child(8) { width: 7%; text-align: center; }
+th:nth-child(9),td:nth-child(9) { width: 32%; }
+
+.ind-name { color: var(--sky); font-weight: 600; }
+.src-badge {
+  font-family: 'Overpass Mono'; font-size: 0.66rem; font-weight: 600;
+  padding: 2px 7px; border-radius: 3px; letter-spacing: 0.02em;
+}
+.src-nbb { background: rgba(74,122,181,0.2); color: var(--sky); }
+.src-ec { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.src-statbel { background: rgba(52,211,153,0.15); color: var(--green); }
+.src-fbp { background: rgba(248,113,113,0.15); color: var(--red); }
+.val {
+  font-family: 'Overpass Mono'; font-size: 0.8rem; font-weight: 600;
+  white-space: pre-line;
+}
+.trend { font-size: 1.1rem; font-weight: 700; }
+.trend.up { color: var(--green); }
+.trend.down { color: var(--red); }
+.trend.flat { color: var(--text-muted); }
+
+canvas.spark { display: block; }
+
+.update-dt {
+  font-family: 'Overpass Mono'; font-size: 0.7rem; color: var(--text-muted);
+}
+.comment {
+  font-size: 0.76rem; color: var(--text-dim); line-height: 1.5;
+}
+
+/* ── FOOTER ───────────────────────────────── */
+.footer {
+  background: white; border-top: 1px solid var(--border-light);
+  padding: 14px 32px; font-size: 0.7rem; color: #9ca3af;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.footer strong { color: #6b7280; }
+
+/* ── RESPONSIVE ───────────────────────────── */
+@media (max-width: 1100px) {
+  .header,.controls,.table-wrap,.footer { padding-left: 16px; padding-right: 16px; }
+  table { min-width: 950px; }
+  .table-wrap { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="be-flag"><div class="s"></div><div class="s"></div><div class="s"></div></div>
+    <div class="header-text">
+      <div class="sub">Federal Public Service Finance</div>
+      <h1>Macroeconomic and Financial Review of Belgium</h1>
+      <div class="sub" id="dateLabel"></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="ital">Expertise and Strategic Support</div>
+    Research Department<br>Data and Statistics
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-left">
+    <div class="status">
+      <div class="dot loading" id="dot"></div>
+      <span id="statusText">Loading data…</span>
+    </div>
+    <button class="btn primary" onclick="fetchData()">↻ Refresh All</button>
+    <button class="btn" onclick="toggleConfig()">⚙ Configure</button>
+  </div>
+  <div class="pills" id="pills"></div>
+</div>
+
+<div class="config-banner" id="configBanner">
+  <span>⚠ Set your GitHub raw CSV URL:</span>
+  <input id="csvUrl" placeholder="https://raw.githubusercontent.com/YOUR_USER/belgian-macro-pipeline/main/data/belgian_macro_export.csv">
+  <button class="btn primary" onclick="saveConfig()">Save & Reload</button>
+</div>
+
+<div class="table-wrap" id="tableWrap"></div>
+
+<div class="footer">
+  <div>
+    <strong>Sources:</strong> NBB = National Bank of Belgium · EC = European Commission ·
+    StatBel = Belgian Statistical Office · FBP = Federal Bureau of Planning
+  </div>
+  <div>Data fetched from GitHub repo · Auto-updated daily at 06:00 CET</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const DEFAULT_CSV_URL = localStorage.getItem('csv_url') || 'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
+
+// Indicator display metadata — maps indicator_code to display settings
+const INDICATOR_META = {
+  GDP_QUARTERLY_YY:    { num: 1,  section: 'gdp', name: 'Quarterly GDP growth (Y-Y)', order: 1 },
+  GDP_ANNUAL_YY:       { num: 2,  section: 'gdp', name: 'Annual GDP growth', order: 2 },
+  PRIV_CONSUMPTION_YY: { num: 3,  section: 'gdp', name: 'Private final consumption', order: 3 },
+  GOV_CONSUMPTION_YY:  { num: 4,  section: 'gdp', name: 'Gov. consumption expenditure', order: 4 },
+  GFCF_ENTERPRISES_YY: { num: 5,  section: 'gdp', name: 'GFCF — Enterprises', order: 5 },
+  GFCF_DWELLINGS_YY:   { num: 6,  section: 'gdp', name: 'GFCF — Dwellings', order: 6 },
+  GFCF_PUBLIC_YY:      { num: 7,  section: 'gdp', name: 'GFCF — Public admin.', order: 7 },
+  CHG_STOCKS_YY:       { num: 8,  section: 'gdp', name: 'Changes in stocks', order: 8 },
+  NET_EXPORTS_YY:      { num: 9,  section: 'gdp', name: 'Net exports', order: 9 },
+};
+
+const SECTIONS = {
+  gdp: { label: 'Gross Domestic Product', icon: '📊' },
+  confidence: { label: 'Confidence & Sentiment', icon: '📈' },
+  prices: { label: 'Production & Prices', icon: '🏭' },
+  labour: { label: 'Labour Costs', icon: '💼' },
+  employment: { label: 'Employment', icon: '👥' },
+  unemployment: { label: 'Unemployment', icon: '📉' },
+  business: { label: 'Business Environment', icon: '🏢' },
+  fiscal: { label: 'Government Finances', icon: '🏛' },
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let DATA = {}; // indicator_code → [{period, value, obs_status, ...}]
+let activeFilter = null;
+
+// ═══════════════════════════════════════════════════════
+// CSV PARSER
+// ═══════════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// FETCH DATA
+// ═══════════════════════════════════════════════════════
+async function fetchData() {
+  const url = localStorage.getItem('csv_url') || DEFAULT_CSV_URL;
+  const dot = document.getElementById('dot');
+  const statusText = document.getElementById('statusText');
+
+  if (!url) {
+    dot.className = 'dot err';
+    statusText.textContent = 'No CSV URL configured — click ⚙ Configure';
+    document.getElementById('configBanner').style.display = 'flex';
+    return;
+  }
+
+  dot.className = 'dot loading';
+  statusText.textContent = 'Fetching from GitHub…';
+
+  try {
+    const resp = await fetch(url + '?t=' + Date.now()); // cache-bust
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+
+    // Group by indicator_code
+    DATA = {};
+    rows.forEach(row => {
+      const code = row.indicator_code;
+      if (!DATA[code]) DATA[code] = [];
+      DATA[code].push({
+        period: row.period,
+        value: parseFloat(row.value),
+        obs_status: row.obs_status,
+        unit: row.unit,
+        source: row.source_agency,
+        name: row.name,
+        fetched_at: row.fetched_at,
+      });
+    });
+
+    // Sort each series by period
+    Object.values(DATA).forEach(series => series.sort((a, b) => a.period.localeCompare(b.period)));
+
+    const totalRows = rows.length;
+    const indicators = Object.keys(DATA).length;
+    dot.className = 'dot';
+    statusText.textContent = `${indicators} indicators · ${totalRows} observations loaded`;
+
+    render();
+  } catch (err) {
+    dot.className = 'dot err';
+    statusText.textContent = `Error: ${err.message}`;
+    console.error(err);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SPARKLINE
+// ═══════════════════════════════════════════════════════
+function drawSpark(canvas, values, color) {
+  if (!canvas || values.length < 2) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = 100;
+  const H = canvas.height = 32;
+  const pad = 3;
+  const vs = values.slice(-20);
+  const min = Math.min(...vs);
+  const max = Math.max(...vs);
+  const range = max - min || 1;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Area fill
+  ctx.beginPath();
+  vs.forEach((v, i) => {
+    const x = pad + (i / (vs.length - 1)) * (W - 2 * pad);
+    const y = H - pad - ((v - min) / range) * (H - 2 * pad);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  const lx = pad + (W - 2 * pad);
+  ctx.lineTo(lx, H); ctx.lineTo(pad, H); ctx.closePath();
+  ctx.fillStyle = color + '20';
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  vs.forEach((v, i) => {
+    const x = pad + (i / (vs.length - 1)) * (W - 2 * pad);
+    const y = H - pad - ((v - min) / range) * (H - 2 * pad);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+
+  // End dot
+  const lastV = vs[vs.length - 1];
+  const lastY = H - pad - ((lastV - min) / range) * (H - 2 * pad);
+  ctx.beginPath();
+  ctx.arc(lx, lastY, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+// ═══════════════════════════════════════════════════════
+// TREND LOGIC
+// ═══════════════════════════════════════════════════════
+function getTrend(series) {
+  if (series.length < 2) return 'flat';
+  const last = series[series.length - 1].value;
+  const prev = series[series.length - 2].value;
+  if (last > prev + 0.05) return 'up';
+  if (last < prev - 0.05) return 'down';
+  return 'flat';
+}
+
+function trendArrow(t) {
+  if (t === 'up') return '<span class="trend up">↗</span>';
+  if (t === 'down') return '<span class="trend down">↘</span>';
+  return '<span class="trend flat">→</span>';
+}
+
+function trendColor(t) {
+  if (t === 'up') return '#34d399';
+  if (t === 'down') return '#f87171';
+  return '#8899ad';
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════════════════════
+function fmtValue(val, unit) {
+  const v = val.toFixed(1).replace('.', ',');
+  if (unit === 'percent_yy') return v + '%';
+  if (unit === 'pp_contribution') return v + ' pp';
+  return v;
+}
+
+function fmtDate(isoStr) {
+  if (!isoStr) return '—';
+  return isoStr.substring(0, 10).replace(/-/g, '-');
+}
+
+function srcClass(s) {
+  const l = (s || '').toLowerCase();
+  if (l === 'nbb') return 'src-nbb';
+  if (l === 'ec') return 'src-ec';
+  if (l === 'statbel') return 'src-statbel';
+  return 'src-fbp';
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTO-COMMENT
+// ═══════════════════════════════════════════════════════
+function generateComment(code, series) {
+  if (series.length < 2) return '';
+  const last = series[series.length - 1];
+  const prev = series[series.length - 2];
+  const meta = INDICATOR_META[code] || {};
+  const name = meta.name || last.name || code;
+  const diff = (last.value - prev.value).toFixed(1).replace('.', ',');
+  const sign = last.value > prev.value ? '+' : '';
+  const status = last.obs_status === 'P' ? ' (provisional)' : '';
+  const val = fmtValue(last.value, last.unit);
+
+  return `${name} reached ${val} in ${last.period}${status}. ` +
+         `Change vs ${prev.period}: ${sign}${diff} ${last.unit === 'pp_contribution' ? 'pp' : 'p.p.'}.`;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  const wrap = document.getElementById('tableWrap');
+  let html = '';
+
+  // Group indicators by section
+  const bySec = {};
+  for (const [code, series] of Object.entries(DATA)) {
+    const meta = INDICATOR_META[code];
+    const sec = meta ? meta.section : 'other';
+    if (!bySec[sec]) bySec[sec] = [];
+    bySec[sec].push({ code, series, meta });
+  }
+
+  // Add 'other' section for unknown indicators
+  if (bySec.other && !SECTIONS.other) {
+    SECTIONS.other = { label: 'Other Indicators', icon: '📋' };
+  }
+
+  for (const [secId, secMeta] of Object.entries(SECTIONS)) {
+    const items = bySec[secId];
+    if (!items || items.length === 0) continue;
+    if (activeFilter && activeFilter !== secId) continue;
+
+    items.sort((a, b) => (a.meta?.order || 99) - (b.meta?.order || 99));
+
+    html += `<div class="section-head">${secMeta.icon} ${secMeta.label}</div>`;
+    html += `<table><thead><tr>
+      <th>#</th><th>Indicator</th><th>Source</th><th>Last data</th>
+      <th>Value</th><th>Trend</th><th>Visual</th><th>Update</th><th>Comments</th>
+    </tr></thead><tbody>`;
+
+    items.forEach(({ code, series, meta }) => {
+      const last = series[series.length - 1];
+      const trend = getTrend(series);
+      const num = meta?.num || '—';
+      const displayName = meta?.name || last.name || code;
+      const sparkId = `spark_${code}`;
+
+      html += `<tr>
+        <td style="font-family:'Overpass Mono';font-size:0.7rem;">${num}</td>
+        <td><span class="ind-name">${displayName}</span></td>
+        <td><span class="src-badge ${srcClass(last.source)}">${last.source}</span></td>
+        <td style="font-family:'Overpass Mono';font-size:0.72rem;">${last.period}</td>
+        <td class="val">${fmtValue(last.value, last.unit)}</td>
+        <td>${trendArrow(trend)}</td>
+        <td><canvas id="${sparkId}" class="spark" width="100" height="32"></canvas></td>
+        <td><span class="update-dt">${fmtDate(last.fetched_at)}</span></td>
+        <td class="comment">${generateComment(code, series)}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+  }
+
+  wrap.innerHTML = html;
+
+  // Draw sparklines
+  requestAnimationFrame(() => {
+    for (const [code, series] of Object.entries(DATA)) {
+      const canvas = document.getElementById(`spark_${code}`);
+      const trend = getTrend(series);
+      drawSpark(canvas, series.map(d => d.value), trendColor(trend));
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// PILLS
+// ═══════════════════════════════════════════════════════
+function renderPills() {
+  const el = document.getElementById('pills');
+  let html = `<span class="pill on" onclick="setFilter(null,this)">ALL</span>`;
+  for (const [id, s] of Object.entries(SECTIONS)) {
+    html += `<span class="pill" onclick="setFilter('${id}',this)">${s.icon} ${s.label.toUpperCase()}</span>`;
+  }
+  el.innerHTML = html;
+}
+
+function setFilter(id, el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  activeFilter = id;
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+function toggleConfig() {
+  const b = document.getElementById('configBanner');
+  b.style.display = b.style.display === 'flex' ? 'none' : 'flex';
+  document.getElementById('csvUrl').value = localStorage.getItem('csv_url') || '';
+}
+
+function saveConfig() {
+  const url = document.getElementById('csvUrl').value.trim();
+  if (url) {
+    localStorage.setItem('csv_url', url);
+    document.getElementById('configBanner').style.display = 'none';
+    fetchData();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  const now = new Date();
+  document.getElementById('dateLabel').textContent =
+    now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  renderPills();
+  fetchData();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
