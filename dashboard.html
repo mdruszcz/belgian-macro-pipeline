@@ -178,13 +178,29 @@ tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
 .modal-table .st-actual{background:var(--green-bg);color:var(--green)}
 .modal-table .st-prov{background:var(--orange-bg);color:var(--orange)}
 .modal-table .st-break{background:var(--red-bg);color:var(--red)}
-@media(max-width:1100px){.header,.controls,.table-wrap,.footer{padding-left:16px;padding-right:16px}table{min-width:950px}.table-wrap{overflow-x:auto}}
+.contrib-wrap{padding:0 32px 30px}
+.contrib-card{background:var(--bg-table);border-radius:10px;padding:24px 28px 18px;border:1px solid var(--border-table)}
+.contrib-title{font-size:.95rem;font-weight:700;color:var(--text-cell);margin-bottom:2px}
+.contrib-sub{font-size:.7rem;color:var(--text-cell-muted);margin-bottom:16px}
+.contrib-card canvas{display:block;width:100%}
+.contrib-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-table)}
+.contrib-legend .leg{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text-cell-dim)}
+.contrib-legend .leg .swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+@media(max-width:1100px){.contrib-wrap{padding-left:16px;padding-right:16px}}
 </style>
 </head>
 <body>
 <div class="header"><div class="header-left"><div class="be-flag"><div class="s"></div><div class="s"></div><div class="s"></div></div><div class="header-text"><h1 id="mainTitle">Macroeconomic and Financial Review of Belgium</h1><div class="sub" id="dateLabel"></div></div></div><div class="header-right"><div class="dd-wrap theme"><div class="theme-switcher"><button class="theme-btn" id="t-day" onclick="setTheme('day',this)">☀</button><button class="theme-btn active" id="t-soft" onclick="setTheme('soft',this)">◑</button><button class="theme-btn" id="t-night" onclick="setTheme('night',this)">☾</button></div></div><div class="dd-wrap lang"><div class="lang-switch"><button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button><button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button><button class="lang-btn" id="btn-nl" onclick="setLang('nl')">NL</button></div></div></div></div>
 <div class="controls"><div class="ctrl-left"><div class="status"><div class="dot loading" id="dot"></div><span id="statusText">Loading…</span></div></div><div class="pills" id="pills"></div></div>
 <div class="table-wrap" id="tableWrap"></div>
+<div class="contrib-wrap" id="contribWrap" style="display:none">
+  <div class="contrib-card">
+    <div class="contrib-title" id="contribTitle">Annual real GDP growth and contributions</div>
+    <div class="contrib-sub">in percentage points · Source: NBB</div>
+    <canvas id="contribCanvas"></canvas>
+    <div class="contrib-legend" id="contribLegend"></div>
+  </div>
+</div>
 <div class="footer"><div id="ftSrc"><strong>Sources:</strong> NBB = National Bank of Belgium</div><div id="ftGit">Data from GitHub · Auto-updated daily 06:00 CET</div></div>
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
@@ -270,7 +286,7 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
     }
     let srcBadge = l.source === 'EC' ? `<span class="src-badge" style="background:var(--bg-btn-primary);color:var(--text-btn-primary)">${l.source}</span>` : `<span class="src-badge src-nbb">${l.source}</span>`;
     h+=`<tr onclick="openModal('${c}')"><td style="font-family:'Overpass Mono';font-size:.7rem">${m?.n||'—'}</td><td><span class="ind-name">${nm}<div class="tip"><div class="tip-title">${tf}</div><div class="tip-code">${c}${ts?' · SDMX: '+ts:''}</div>${td?'<div class="tip-desc">'+td+'</div>':''}<div class="tip-meta"><span>⏱ ${fr}</span><span>📡 ${l.source}</span><span>📊 ${s.length} ${t('m_obs')}</span></div></div></span></td><td>${srcBadge}</td>${periodCell}${valCell}<td>${tArr(tr)}</td><td><canvas id="sp_${c}" class="spark" width="100" height="32"></canvas></td><td><span class="update-dt">${fmtD(l.fetched_at)}</span></td><td class="comment">${comment(c,s)}</td></tr>`;
-});h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA))drawSpark(document.getElementById('sp_'+c),s.map(d=>d.value),trend(s));});}
+});h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA))drawSpark(document.getElementById('sp_'+c),s.map(d=>d.value),trend(s));});renderContribChart();}
 
 function renderPills(){const e=document.getElementById('pills');let h=`<span class="pill ${activeFilter===null?'on':''}" onclick="setFilter(null,this)">${t('all')}</span>`;for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill ${activeFilter===id?'on':''}" onclick=\"setFilter('${id}',this)\">${(s.label[LANG]||s.label.en).toUpperCase()}</span>`;e.innerHTML=h;}
 function setFilter(id,el){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');activeFilter=id;render();}
@@ -283,6 +299,196 @@ function drawModalChart(data,unit){requestAnimationFrame(()=>{requestAnimationFr
 function _rc(data,unit){const cv=document.getElementById('modalChart'),ct=cv.parentElement,ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=ct.clientWidth-40,H=260;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const vals=data.map(d=>d.value),n=data.length,vMin=Math.min(...vals,0),vMax=Math.max(...vals,0),vR=vMax-vMin||1;const pL=58,pR=18,pT=18,pB=48,cW=W-pL-pR,slW=cW/n,bW=Math.max(8,Math.min(36,slW*.55));const yOf=v=>pT+((vMax-v)/vR)*(H-pT-pB),zY=yOf(0);const gC=gc('--chart-grid'),zC=gc('--chart-zero'),lC=gc('--chart-label'),liC=gc('--chart-line'),dC=gc('--chart-dot'),dR=gc('--chart-dot-ring'),bP=gc('--chart-bar-pos'),bN=gc('--chart-bar-neg');niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+('%'),pL-10,y);});const zy=Math.round(zY)+.5;ctx.strokeStyle=zC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,zy);ctx.lineTo(W-pR,zy);ctx.stroke();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,vY=yOf(d.value),isP=d.value>=0,bT=isP?vY:zY,bH=Math.max(1,Math.abs(vY-zY)),rgb=isP?bP:bN;ctx.fillStyle=`rgba(${rgb},.55)`;ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.fill();if(d.obs_status==='P'){ctx.strokeStyle=`rgba(${rgb},.3)`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.stroke();ctx.setLineDash([]);}ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=`rgba(${rgb},.85)`;ctx.textAlign='center';ctx.textBaseline=isP?'bottom':'top';ctx.fillText(d.value.toFixed(1).replace('.',','),cx,isP?bT-4:bT+bH+4);ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(d.period,cx,H-pB+8);});ctx.beginPath();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2;i===0?ctx.moveTo(cx,yOf(d.value)):ctx.lineTo(cx,yOf(d.value));});ctx.strokeStyle=liC;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,y=yOf(d.value),isL=i===n-1;ctx.beginPath();ctx.arc(cx,y,isL?4.5:2.5,0,Math.PI*2);ctx.fillStyle=isL?dC:liC;ctx.fill();if(isL){ctx.strokeStyle=dR;ctx.lineWidth=2;ctx.stroke();}});}
 function rr(c,x,y,w,h,r){if(h===0)return;c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
 function niceSteps(mn,mx,n){const rg=mx-mn||1,ro=rg/n,mg=Math.pow(10,Math.floor(Math.log10(ro))),rs=ro/mg,ni=rs<=1.5?mg:rs<=3?2*mg:rs<=7?5*mg:10*mg;const st=[];let v=Math.ceil(mn/ni)*ni;while(v<=mx){st.push(parseFloat(v.toFixed(4)));v+=ni;}return st;}
+
+// ═══════════════════════════════════════════════════════
+// STACKED BAR CHART — GDP contributions
+// ═══════════════════════════════════════════════════════
+const CONTRIB_SERIES = [
+  {code:'PRIV_CONSUMPTION_CY', label:{en:'Private consumption',fr:'Consommation privée',nl:'Particuliere consumptie'}, color:'#4292c6'},
+  {code:'GOV_CONSUMPTION_CY', label:{en:'Public consumption',fr:'Consommation publique',nl:'Overheidsconsumptie'}, color:'#d6604d'},
+  {code:'_PRIV_INVEST', label:{en:'Private investment (business + residential)',fr:'Investissement privé (entreprises + logements)',nl:'Particuliere investeringen (bedrijven + woningen)'}, color:'#e8c96a', composite:['GFCF_ENTERPRISES_CY','GFCF_DWELLINGS_CY']},
+  {code:'GFCF_PUBLIC_CY', label:{en:'Public investment',fr:'Investissement public',nl:'Overheidsinvesteringen'}, color:'#8c6d31'},
+  {code:'CHG_STOCKS_CY', label:{en:'Change in inventories',fr:'Variation des stocks',nl:'Voorraadwijzigingen'}, color:'#bdbdbd'},
+  {code:'NET_EXPORTS_CY', label:{en:'Net exports',fr:'Exportations nettes',nl:'Netto-export'}, color:'#74a9cf'},
+];
+
+function renderContribChart() {
+  const wrap = document.getElementById('contribWrap');
+  // Check if we have the data
+  const gdp = DATA['GDP_ANNUAL_CY'];
+  const hasContrib = CONTRIB_SERIES.every(s => {
+    if (s.composite) return s.composite.every(c => DATA[c] && DATA[c].length > 0);
+    return DATA[s.code] && DATA[s.code].length > 0;
+  });
+  if (!gdp || !hasContrib) { wrap.style.display = 'none'; return; }
+  // Only show when GDP section is visible
+  if (activeFilter && activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'block';
+  const titles = {en:'Annual real GDP growth and contributions', fr:'Croissance annuelle réelle du PIB et contributions', nl:'Jaarlijkse reële BBP-groei en bijdragen'};
+  document.getElementById('contribTitle').textContent = titles[LANG] || titles.en;
+
+  // Build year-aligned data (last 14 years)
+  const cutoff = new Date().getFullYear() - 14;
+  const years = gdp.filter(d => parseInt(d.period) >= cutoff).map(d => d.period);
+
+  // For each year, get contribution values
+  const yearData = years.map(yr => {
+    const obj = { year: yr, gdp: gdp.find(d => d.period === yr)?.value || 0 };
+    CONTRIB_SERIES.forEach(s => {
+      if (s.composite) {
+        obj[s.code] = s.composite.reduce((sum, c) => {
+          const match = (DATA[c] || []).find(d => d.period === yr);
+          return sum + (match ? match.value : 0);
+        }, 0);
+      } else {
+        const match = (DATA[s.code] || []).find(d => d.period === yr);
+        obj[s.code] = match ? match.value : 0;
+      }
+    });
+    return obj;
+  });
+
+  // Legend
+  const legEl = document.getElementById('contribLegend');
+  legEl.innerHTML = CONTRIB_SERIES.map(s =>
+    `<div class="leg"><div class="swatch" style="background:${s.color}"></div>${s.label[LANG]||s.label.en}</div>`
+  ).join('') + `<div class="leg"><div class="swatch" style="background:var(--text-cell);border-radius:0;height:2px;margin-top:5px"></div>GDP (growth in %)</div>`;
+
+  // Draw on canvas
+  requestAnimationFrame(() => { requestAnimationFrame(() => { _drawContrib(yearData); }); });
+}
+
+function _drawContrib(yearData) {
+  const cv = document.getElementById('contribCanvas');
+  const ct = cv.parentElement;
+  const ctx = cv.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = ct.clientWidth - 56;
+  const H = 340;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const n = yearData.length;
+  const pL = 48, pR = 12, pT = 22, pB = 42;
+  const cW = W - pL - pR, cH = H - pT - pB;
+  const slW = cW / n;
+  const barW = Math.max(10, Math.min(42, slW * 0.6));
+
+  // Compute stacked ranges to find min/max
+  let stackMin = 0, stackMax = 0;
+  yearData.forEach(yd => {
+    let posSum = 0, negSum = 0;
+    CONTRIB_SERIES.forEach(s => {
+      const v = yd[s.code];
+      if (v >= 0) posSum += v; else negSum += v;
+    });
+    stackMax = Math.max(stackMax, posSum, yd.gdp);
+    stackMin = Math.min(stackMin, negSum, yd.gdp);
+  });
+  // Add padding
+  const vMin = Math.floor(stackMin - 1);
+  const vMax = Math.ceil(stackMax + 1);
+  const vR = vMax - vMin || 1;
+  const yOf = v => pT + ((vMax - v) / vR) * cH;
+  const zeroY = yOf(0);
+
+  // Colors from theme
+  const gridC = gc('--chart-grid') || 'rgba(0,0,0,.06)';
+  const zeroC = gc('--chart-zero') || 'rgba(0,0,0,.12)';
+  const labelC = gc('--chart-label') || '#94a3b8';
+  const textC = gc('--text-cell') || '#1e293b';
+
+  // Grid
+  const steps = niceSteps(vMin, vMax, 6);
+  steps.forEach(v => {
+    const y = Math.round(yOf(v)) + 0.5;
+    ctx.strokeStyle = gridC; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
+    ctx.font = '10px Overpass Mono, monospace'; ctx.fillStyle = labelC;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(v.toFixed(0), pL - 8, y);
+  });
+
+  // Zero line
+  const zy = Math.round(zeroY) + 0.5;
+  ctx.strokeStyle = zeroC; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pL, zy); ctx.lineTo(W - pR, zy); ctx.stroke();
+
+  // Y-axis label
+  ctx.save(); ctx.translate(12, pT + cH / 2); ctx.rotate(-Math.PI / 2);
+  ctx.font = '10px Figtree, sans-serif'; ctx.fillStyle = labelC;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('in %', 0, 0); ctx.restore();
+
+  // Stacked bars
+  yearData.forEach((yd, i) => {
+    const cx = pL + slW * i + slW / 2;
+    let posY = zeroY; // grows upward
+    let negY = zeroY; // grows downward
+
+    CONTRIB_SERIES.forEach(s => {
+      const v = yd[s.code];
+      if (Math.abs(v) < 0.001) return;
+      const h = Math.abs(v / vR) * cH;
+
+      if (v >= 0) {
+        const top = posY - h;
+        ctx.fillStyle = s.color;
+        ctx.fillRect(Math.round(cx - barW / 2), top, barW, h);
+        // Subtle border
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 0.5;
+        ctx.strokeRect(Math.round(cx - barW / 2), top, barW, h);
+        posY = top;
+      } else {
+        const top = negY;
+        ctx.fillStyle = s.color;
+        ctx.fillRect(Math.round(cx - barW / 2), top, barW, h);
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 0.5;
+        ctx.strokeRect(Math.round(cx - barW / 2), top, barW, h);
+        negY = top + h;
+      }
+    });
+
+    // X label
+    ctx.font = '10px Overpass Mono, monospace'; ctx.fillStyle = labelC;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(yd.year, cx, H - pB + 8);
+  });
+
+  // GDP line on top
+  ctx.beginPath();
+  yearData.forEach((yd, i) => {
+    const cx = pL + slW * i + slW / 2;
+    const y = yOf(yd.gdp);
+    i === 0 ? ctx.moveTo(cx, y) : ctx.lineTo(cx, y);
+  });
+  ctx.strokeStyle = textC; ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+
+  // GDP dots + labels
+  yearData.forEach((yd, i) => {
+    const cx = pL + slW * i + slW / 2;
+    const y = yOf(yd.gdp);
+    // Dot
+    ctx.beginPath(); ctx.arc(cx, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = gc('--bg-table') || '#fff'; ctx.fill();
+    ctx.strokeStyle = textC; ctx.lineWidth = 2; ctx.stroke();
+    // Value label above/below
+    ctx.font = 'bold 10px Figtree, sans-serif'; ctx.fillStyle = textC;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = yd.gdp >= 0 ? 'bottom' : 'top';
+    const offset = yd.gdp >= 0 ? -10 : 10;
+    ctx.fillText(yd.gdp.toFixed(1).replace('.', ','), cx, y + offset);
+  });
+
+  // Source label
+  ctx.font = '9px Figtree, sans-serif'; ctx.fillStyle = labelC;
+  ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Source: NBB', W - pR, H - 2);
+}
 
 function init(){updateStaticUI();document.getElementById('btn-'+LANG).classList.add('active');loadTheme();renderPills();fetchData();}
 document.addEventListener('DOMContentLoaded',init);
