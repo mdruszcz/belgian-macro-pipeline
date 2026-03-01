@@ -169,7 +169,7 @@ SOURCES = {
         "frequency": "A",
         "unit": "percent",
         "source_agency": "BFP",
-        "description": "Prévisions économiques du Bureau fédéral du Plan",
+        "description": "Prévisions de croissance du PIB du Bureau fédéral du Plan",
         "type": "excel_bfp"
     }
 }
@@ -313,6 +313,7 @@ class NBBFetcher:
             log.info(f"  {len(data)} obs: {data[0]['period']} → {data[-1]['period']}")
         return data
 
+
 class DBnomicsFetcher:
     @staticmethod
     def fetch(url: str) -> list[dict]:
@@ -330,20 +331,17 @@ class DBnomicsFetcher:
 
         results = []
         for p, v in zip(periods, values):
-            # Client-side fallback filter to ensure no data before 2008-Q1
             if str(p) < "2008-Q1":
                 continue
             if v is None or v == "NA":
                 continue
             try:
                 val = float(v)
-                # DBnomics doesn't universally provide granular observation status flags in the main array, defaulting to Actual
                 results.append({"period": str(p), "value": val, "obs_status": "A"})
             except ValueError:
                 continue
                 
         if results:
-            # Normalize to average of 4 quarters of 2010 = 100
             q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
             if q2010:
                 avg_2010 = sum(q2010) / len(q2010)
@@ -353,6 +351,7 @@ class DBnomicsFetcher:
             log.info(f"  {len(results)} obs: {results[0]['period']} → {results[-1]['period']}")
         return results
 
+
 class ExcelBFPFetcher:
     @staticmethod
     def fetch(url: str) -> list[dict]:
@@ -360,34 +359,62 @@ class ExcelBFPFetcher:
         resp = requests.get(url, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         
-        # ATTENTION MARC: Tu dois adapter le sheet_name et le skiprows en fonction de la gueule du fichier Excel.
-        # L'administration produit des fichiers pour les imprimantes, pas pour des pipelines de données.
         try:
-            # Requis: pip install openpyxl
-            df = pd.read_excel(io.BytesIO(resp.content), sheet_name=0, skiprows=0)
+            # header=None permet d'importer toute la grille brute sans casser sur les colonnes fusionnées
+            df = pd.read_excel(io.BytesIO(resp.content), header=None)
         except Exception as e:
-            raise ValueError(f"Impossible de parser le fichier Excel du BFP. As-tu bien installé openpyxl ? Erreur: {e}")
+            raise ValueError(f"Impossible de parser le fichier Excel du BFP. Erreur: {e}")
 
         results = []
+        bfp_idx = -1
+        year_idx = -1
         
-        # --- BLOC À MODIFIER SELON LE CONTENU RÉEL DU FICHIER ---
-        # Remplace 'Annee' et 'PIB_Volume' par les vrais noms de colonnes de ton fichier
-        """
-        for index, row in df.iterrows():
-            period = str(row.get('Annee', '')).strip()
-            val = row.get('PIB_Volume', None)
+        # 1. On cherche la ligne contenant "Bureau fédéral du Plan" dans la première colonne
+        for i, row in df.iterrows():
+            if "Bureau fédéral du Plan" in str(row[0]).strip():
+                bfp_idx = i
+                break
+                
+        if bfp_idx == -1:
+            log.warning("Impossible de trouver 'Bureau fédéral du Plan' dans l'Excel.")
+            return results
+
+        # 2. On remonte à partir de bfp_idx pour trouver la ligne contenant les années (ex: 2025, 2026)
+        for i in range(bfp_idx - 1, -1, -1):
+            col1_val = str(df.iloc[i, 1]).strip().replace('.0', '')
+            if col1_val.isdigit() and len(col1_val) == 4:
+                year_idx = i
+                break
+
+        if year_idx == -1:
+            log.warning("Impossible de trouver la ligne des années dans l'Excel.")
+            return results
+
+        year_row = df.iloc[year_idx]
+        bfp_row = df.iloc[bfp_idx]
+
+        # 3. Selon le format, les années pour le "PIB en volume" sont dans les colonnes 1 et 2
+        for col in [1, 2]:
+            year = str(year_row[col]).strip().replace('.0', '')
+            val = bfp_row[col]
             
-            # Vérification simple: est-ce une année valide (ex: 2024) et une valeur non-nulle ?
-            if period.isdigit() and len(period) == 4 and pd.notna(val):
+            if str(val).strip() in ["", "-.-", "nan"]:
+                continue
+                
+            if year.isdigit() and len(year) == 4:
                 try:
-                    results.append({"period": period, "value": float(val), "obs_status": "F"}) # F pour Forecast
+                    results.append({
+                        "period": year,
+                        "value": float(val),
+                        "obs_status": "F" # F pour Forecast
+                    })
                 except ValueError:
                     continue
-        """
-        # --------------------------------------------------------
 
-        if not results:
-            log.warning("Aucune donnée extraite. Va lire le code de ExcelBFPFetcher et ajuste la logique de parsing Pandas aux vraies colonnes du BFP.")
+        if results:
+            log.info(f"  {len(results)} obs BFP: {results[0]['period']} → {results[-1]['period']}")
+        else:
+            log.warning("Aucune donnée valide extraite du fichier BFP.")
             
         return results
 
@@ -429,7 +456,7 @@ def show_latest(db: MacroDatabase):
     print("  BELGIAN MACRO DATABASE — Latest")
     print("=" * 70 + "\n")
     for e in latest:
-        s = {"A": "Actual", "P": "Provisional", "F": "Forecast"}.get(e["obs_status"], e["obs_status"])
+        s = {"A": "Actual", "P": "Provisional", "F": "Forecast", "B": "Break"}.get(e["obs_status"], e["obs_status"])
         print(f"  {e['name']}")
         print(f"    {e['period']}  →  {e['value']}  ({s})")
         print(f"    fetched {e['fetched_at'][:16]}\n")
