@@ -1,9 +1,9 @@
 # 🇧🇪 Belgian Macroeconomic Database
 
-Automated pipeline that fetches Belgian economic data from the **National Bank of Belgium (NBB)** SDMX API, stores it in SQLite, exports CSV, and powers a live dashboard — running daily on GitHub Actions for free.
+Automated pipeline that fetches Belgian economic data from the **National Bank of Belgium (NBB)** SDMX API, **Eurostat (via DBnomics)**, and **Federal Planning Bureau (FPB)**, stores it in SQLite, exports CSV/JSON, and powers a live dashboard — running daily on GitHub Actions for free.
 
 ```
-NBB SDMX API  →  SQLite DB  →  CSV + JSON  →  Live Dashboard
+NBB + Eurostat + FPB  →  SQLite DB  →  CSV + JSON  →  Live Dashboard
                   (all committed to this repo daily)
 ```
 
@@ -11,23 +11,36 @@ NBB SDMX API  →  SQLite DB  →  CSV + JSON  →  Live Dashboard
 
 **[→ Open Dashboard](https://mdruszcz.github.io/belgian-macro-pipeline/dashboard.html)**
 
-The dashboard fetches data directly from this repo's CSV and displays all indicators with sparklines, trend arrows, and auto-generated commentary.
+The dashboard fetches data directly from this repo's CSV files and displays all indicators with sparklines, trend arrows, and auto-generated commentary.
 
 ## Indicators
 
-| # | Code | Name | Latest | Source |
-|---|------|------|--------|--------|
-| 1 | `GDP_QUARTERLY_YY` | Quarterly GDP Growth (Y-Y) | 2025-Q4 | NBB |
-| 2 | `GDP_ANNUAL_YY` | Annual GDP Growth | 2025 | NBB |
-| 3 | `PRIV_CONSUMPTION_YY` | Private Final Consumption | 2025 | NBB |
-| 4 | `GOV_CONSUMPTION_YY` | Gov. Consumption Expenditure | 2025 | NBB |
-| 5 | `GFCF_ENTERPRISES_YY` | GFCF — Enterprises | 2025 | NBB |
-| 6 | `GFCF_DWELLINGS_YY` | GFCF — Dwellings | 2025 | NBB |
-| 7 | `GFCF_PUBLIC_YY` | GFCF — Public Admin | 2025 | NBB |
-| 8 | `CHG_STOCKS_YY` | Changes in Stocks | 2025 | NBB |
-| 9 | `NET_EXPORTS_YY` | Net Exports | 2025 | NBB |
+| # | Code | Name | Source |
+|---|------|------|--------|
+| 1 | `GDP_QUARTERLY_YY` | Quarterly GDP Growth (Y-Y) | NBB |
+| 2 | `GDP_ANNUAL_CY` | Annual GDP Growth (contribution) | NBB |
+| 3 | `PRIV_CONSUMPTION_CY` | Private Final Consumption (contribution) | NBB |
+| 4 | `GOV_CONSUMPTION_CY` | Gov. Consumption Expenditure (contribution) | NBB |
+| 5 | `GFCF_ENTERPRISES_CY` | GFCF Enterprises (contribution) | NBB |
+| 6 | `GFCF_DWELLINGS_CY` | GFCF Dwellings (contribution) | NBB |
+| 7 | `GFCF_PUBLIC_CY` | GFCF Public Admin (contribution) | NBB |
+| 8 | `CHG_STOCKS_CY` | Changes in Stocks (contribution) | NBB |
+| 9 | `NET_EXPORTS_CY` | Net Exports (contribution) | NBB |
+| 10 | `EUROSTAT_GDP_Q_MEUR` | Eurostat GDP (Index 2010=100) | Eurostat/DBnomics |
+| 11 | `EUROSTAT_GDP_Q_MEUR_ES` | Eurostat GDP Spain (Index 2010=100) | Eurostat/DBnomics |
+| 12 | `EUROSTAT_GDP_Q_MEUR_DE` | Eurostat GDP Germany (Index 2010=100) | Eurostat/DBnomics |
+| 13 | `EUROSTAT_GDP_Q_MEUR_FR` | Eurostat GDP France (Index 2010=100) | Eurostat/DBnomics |
+| 14 | `EUROSTAT_GDP_Q_MEUR_NL` | Eurostat GDP Netherlands (Index 2010=100) | Eurostat/DBnomics |
+| 15 | `EUROSTAT_GDP_Q_MEUR_EA` | Eurostat GDP Euro Area 20 (Index 2010=100) | Eurostat/DBnomics |
+| 16 | `BE_CONSUMER_CONFIDENCE` | Consumer Confidence (BE) | Eurostat/DBnomics |
+| 17 | `EU_CONSUMER_CONFIDENCE` | Consumer Confidence (EU27) | Eurostat/DBnomics |
 
-All data sourced from the [NBB SDMX Dissemination API](https://nsidisseminate-stat.nbb.be/) — dataflow `DF_QNA_DISS` (Quarterly National Accounts).
+*Note: FPB Forecasts are also fetched and stored.*
+
+Data sources:
+- [NBB SDMX Dissemination API](https://nsidisseminate-stat.nbb.be/) — dataflow `DF_QNA_DISS` (Quarterly National Accounts).
+- [DBnomics](https://db.nomics.world/) for Eurostat indicators.
+- [Federal Planning Bureau (FPB)](https://www.plan.be/) for economic forecasts.
 
 Updated daily at 06:00 CET via GitHub Actions.
 
@@ -36,21 +49,23 @@ Updated daily at 06:00 CET via GitHub Actions.
 | File | Description |
 |------|-------------|
 | [`data/belgian_macro_export.csv`](data/belgian_macro_export.csv) | Full time series — viewable directly in GitHub |
+| [`data/belgian_macro_export.json`](data/belgian_macro_export.json) | Full time series in JSON format |
+| [`data/belgian_forecasts.csv`](data/belgian_forecasts.csv) | Multi-institution economic forecasts |
 | [`data/belgian_macro.db`](data/belgian_macro.db) | SQLite database with observations + fetch log |
 | [`dashboard.html`](dashboard.html) | Self-contained dashboard (also hosted via GitHub Pages) |
 
 ## How It Works
 
 1. **GitHub Actions** triggers daily at 06:00 CET (`.github/workflows/daily_fetch.yml`)
-2. **Python script** fetches SDMX CSV data from NBB for each indicator
+2. **Python script** fetches SDMX CSV data from NBB, JSON from DBnomics, and XLSX from FPB
 3. **SQLite** upserts observations (idempotent — safe to re-run)
 4. **CSV + JSON** exported to `data/`
 5. **Git commit** pushes updated files back to this repo
-6. **Dashboard** reads the CSV via raw GitHub URL — always up to date
+6. **Dashboard** reads the data via raw GitHub URL — always up to date
 
 ## Adding More Indicators
 
-Edit the `SOURCES` dict in `belgian_macro_db.py`:
+Edit the `SOURCES` dict in `belgian_macro_db.py` to add NBB or DBnomics sources. For NBB:
 
 ```python
 "YOUR_INDICATOR": {
@@ -60,27 +75,13 @@ Edit the `SOURCES` dict in `belgian_macro_db.py`:
     "unit": "percent_yy",
     "source_agency": "NBB",
     "description": "What this measures",
+    "type": "nbb"
 },
 ```
 
-Then add a matching entry in `dashboard.html`'s `INDICATOR_META` object to control display order and section grouping.
+For DBnomics sources, change `type` to `"dbnomics"` and provide the API URL.
 
-Available NBB SDMX indicator codes for `DF_QNA_DISS` (Account=2, expenditure breakdown):
-
-| Code | Component |
-|------|-----------|
-| `B1GM` | GDP total |
-| `P31_S14_S15` | Private final consumption |
-| `P3_S13` | Government consumption |
-| `P51_ENT` | GFCF enterprises |
-| `P51_DWE` | GFCF dwellings |
-| `P51_PAD` | GFCF public admin |
-| `P52` | Changes in stocks |
-| `B11` | Net exports |
-| `P6` | Exports |
-| `P7` | Imports |
-
-Price types: `LY` = Y-Y volume change (%), `CY` = Contribution to volume change (pp), `V` = Current prices, `L` = Chained volumes.
+Then add a matching entry in `dashboard.html`'s `INDICATOR_META` object (if you want to display it on the dashboard) to control display order and section grouping.
 
 ## Local Usage
 
@@ -90,6 +91,7 @@ pip install -r requirements.txt
 python belgian_macro_db.py                # fetch + show latest
 python belgian_macro_db.py --dump         # full database dump
 python belgian_macro_db.py --export csv   # export CSV
+python belgian_macro_db.py --export json  # export JSON
 python belgian_macro_db.py --history      # fetch log
 ```
 
@@ -100,7 +102,9 @@ python belgian_macro_db.py --history      # fetch log
 │   └── daily_fetch.yml          ← GitHub Actions daily schedule
 ├── data/
 │   ├── belgian_macro.db         ← SQLite database (auto-updated)
-│   └── belgian_macro_export.csv ← CSV export (auto-updated)
+│   ├── belgian_macro_export.csv ← CSV export (auto-updated)
+│   ├── belgian_macro_export.json← JSON export (auto-updated)
+│   └── belgian_forecasts.csv    ← Forecasts CSV export (auto-updated)
 ├── belgian_macro_db.py          ← Python ETL script
 ├── dashboard.html               ← Live dashboard (GitHub Pages)
 ├── requirements.txt
