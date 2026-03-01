@@ -152,6 +152,15 @@ SOURCES = {
         "source_agency": "Eurostat/DBnomics",
         "description": "EU27 Consumer Confidence Indicator",
         "type": "dbnomics"
+    },
+    "BUSINESS_CONFIDENCE": {
+        "name": "Business Confidence (NBB)",
+        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_BUSSURVM,1.0/M.SYNC.BE.A999.X?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
+        "frequency": "M",
+        "unit": "balance",
+        "source_agency": "NBB",
+        "description": "Overall synthetic curve (Business Barometer) from the National Bank of Belgium",
+        "type": "nbb"
     }
 }
 
