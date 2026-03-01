@@ -175,22 +175,22 @@ SOURCES = {
         "description": "Euro Area 20 GDP index",
         "type": "dbnomics"
     },
-    "BE_CONSUMER_CONFIDENCE": {
-        "name": "Consumer Confidence (BE - Eurostat)",
+    "EC_CONS_CONF_BE": {
+        "name": "Consumer Confidence BE (EC)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true&start_period=2010-01",
         "frequency": "M",
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
-        "description": "Consumer confidence indicator, seasonally adjusted (Belgium)",
+        "description": "European Commission survey: BE Consumer Confidence",
         "type": "dbnomics"
     },
-    "EU_CONSUMER_CONFIDENCE": {
-        "name": "Consumer Confidence (EU27 - Eurostat)",
+    "EC_CONS_CONF_EU": {
+        "name": "Consumer Confidence EU (EC)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true&start_period=2010-01",
         "frequency": "M",
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
-        "description": "Consumer confidence indicator, seasonally adjusted (EU 27 countries)",
+        "description": "European Commission survey: EU27 Consumer Confidence",
         "type": "dbnomics"
     }
 }
@@ -390,7 +390,6 @@ class DBnomicsFetcher:
             except ValueError:
                 continue
                 
-        # Normalisation UNIQUEMENT si l'unité est index_2010
         if results and unit == "index_2010":
             q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
             if q2010:
@@ -471,6 +470,20 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
         
     return results
 
+def show_latest(db: MacroDatabase):
+    latest = db.get_all_latest()
+    if not latest:
+        log.warning("Empty DB. Run --fetch first.")
+        return
+    print("\n" + "=" * 70)
+    print("  BELGIAN MACRO DATABASE — Latest Observations")
+    print("=" * 70 + "\n")
+    for e in latest:
+        s = {"A": "Actual", "P": "Provisional"}.get(e["obs_status"], e["obs_status"])
+        print(f"  {e['name']} ({e['indicator_code']})")
+        print(f"    {e['period']}  →  {e['value']} {e['unit']} ({s})")
+        print(f"    fetched {e['fetched_at'][:16]}\n")
+
 def export_data(db: MacroDatabase, fmt: str):
     df = db.get_all_observations()
     if df.empty: return
@@ -484,15 +497,45 @@ def export_data(db: MacroDatabase, fmt: str):
         fc.to_csv(out / "belgian_forecasts.csv", index=False)
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--fetch", action="store_true")
-    ap.add_argument("--export", action="append", choices=["csv", "json"])
+    ap = argparse.ArgumentParser(description="Belgian Macro DB Pipeline CLI")
+    ap.add_argument("--fetch", action="store_true", help="Fetch new data from APIs")
+    ap.add_argument("--latest", action="store_true", help="Show latest data in DB")
+    ap.add_argument("--dump", action="store_true", help="Print all observations")
+    ap.add_argument("--export", action="append", choices=["csv", "json"], help="Export DB to files")
+    ap.add_argument("--history", action="store_true", help="Show fetch logs")
+    ap.add_argument("--db", default=str(DB_PATH), help="Path to SQLite DB file")
     args = ap.parse_args()
-    db = MacroDatabase(DB_PATH)
-    if args.fetch: fetch_all(db)
-    if args.export:
-        for f in args.export: export_data(db, f)
-    db.close()
+
+    db = MacroDatabase(Path(args.db))
+
+    if not any([args.fetch, args.latest, args.dump, args.export, args.history]):
+        args.fetch = args.latest = True
+
+    try:
+        if args.fetch:
+            log.info(f"DB: {db.db_path}")
+            fetch_all(db)
+
+        if args.latest:
+            show_latest(db)
+
+        if args.dump:
+            df = db.get_all_observations()
+            for code in df["indicator_code"].unique():
+                s = df[df["indicator_code"] == code]
+                print(f"\n  {s.iloc[0]['name']} ({code})")
+                for _, row in s.iterrows():
+                    print(f"    {row['period']:<10} {row['value']:>12.1f}  {row['obs_status']}")
+
+        if args.export:
+            for f in args.export: 
+                export_data(db, f)
+
+        if args.history:
+            for e in db.get_fetch_history():
+                print(f"  {e['code']:<22} {e['at'][:19]}  {e['rows']:>4} rows  {e['status']}")
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     main()
