@@ -139,12 +139,9 @@ canvas.spark{display:block}
 .footer{background:var(--bg-footer);border-top:1px solid var(--border-footer);padding:14px 32px;font-size:.7rem;color:var(--text-footer);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;transition:background .3s}
 .footer strong{color:var(--text-footer-strong)}
 .ind-name{color:var(--link-color);font-weight:600;position:relative;cursor:pointer}
-.ind-name .tip{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:50;width:320px;padding:12px 14px;background:var(--bg-tip);border:1px solid var(--border-tip);border-radius:8px;box-shadow:0 8px 24px var(--shadow-tip);pointer-events:none}
+.ind-name .tip{display:none;position:fixed;z-index:9999;width:320px;padding:12px 14px;background:var(--bg-tip);border:1px solid var(--border-tip);border-radius:8px;box-shadow:0 8px 24px var(--shadow-tip);pointer-events:none}
 .ind-name:hover .tip{display:block;animation:tipIn .15s ease}
 @keyframes tipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-tr:nth-last-child(-n+3) .ind-name .tip{top:auto;bottom:calc(100% + 8px)}
-tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
-@keyframes tipUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .tip-title{font-size:.8rem;font-weight:700;color:var(--tip-title);margin-bottom:4px;line-height:1.3}
 .tip-code{font-family:'Overpass Mono';font-size:.64rem;color:var(--tip-code);margin-bottom:6px}
 .tip-desc{font-size:.72rem;color:var(--tip-desc);line-height:1.5}
@@ -195,14 +192,20 @@ tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
 <div class="table-wrap" id="tableWrap"></div>
 <div class="contrib-wrap" id="contribWrap" style="display:none">
   <div class="contrib-card">
-    <div class="contrib-title" id="contribTitle">Annual real GDP growth and contributions</div>
-    <div class="contrib-sub">in percentage points · Source: NBB</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><div class="contrib-title" id="contribTitle">Annual real GDP growth and contributions</div>
+      <div class="contrib-sub">in percentage points · Source: NBB</div></div>
+      <button class="btn" onclick="exportChartPNG('contribCanvas','gdp_contributions.png')" style="font-size:.6rem;padding:3px 8px;flex-shrink:0">⬇ PNG</button>
+    </div>
     <canvas id="contribCanvas"></canvas>
     <div class="contrib-legend" id="contribLegend"></div>
   </div>
   <div class="contrib-card" id="intlCard" style="display:none">
-    <div class="contrib-title" id="intlTitle">Quarterly real GDP growth</div>
-    <div class="contrib-sub">(2010 = 100) · Source: Eurostat</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><div class="contrib-title" id="intlTitle">Quarterly real GDP growth</div>
+      <div class="contrib-sub">(2010 = 100) · Source: Eurostat</div></div>
+      <button class="btn" onclick="exportChartPNG('intlCanvas','gdp_international.png')" style="font-size:.6rem;padding:3px 8px;flex-shrink:0">⬇ PNG</button>
+    </div>
     <canvas id="intlCanvas"></canvas>
     <div class="contrib-legend" id="intlLegend"></div>
   </div>
@@ -231,7 +234,8 @@ FC_GDP_VOL:{n:11,s:'gdp',name:{en:'⟶ GDP forecast (consensus)',fr:'⟶ Prévis
 FC_CPI:{n:1,s:'prices',name:{en:'⟶ CPI forecast (consensus)',fr:'⟶ Prévision IPC (consensus)',nl:'⟶ CPI-prognose (consensus)'},o:0.5,full:{en:'Consumer Price Index — Multi-Institution Forecast',fr:'Indice des prix à la consommation — Prévisions multi-institutions',nl:'Consumentenprijsindex — Meervoudige prognose'},desc:{en:'Average CPI growth forecast from 13 institutions. Source: plan.be.',fr:'Prévision moyenne IPC de 13 institutions. Source : plan.be.',nl:'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'CPI'},
 FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'⟶ Fiscal balance forecast (consensus)',fr:'⟶ Prévision solde budgétaire (consensus)',nl:'⟶ Begrotingssaldo prognose (consensus)'},o:0.5,full:{en:'Government Fiscal Balance — Multi-Institution Forecast',fr:'Solde de financement des APU — Prévisions multi-institutions',nl:'Begrotingssaldo overheid — Meervoudige prognose'},desc:{en:'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.',fr:'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source : plan.be.',nl:'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'FISCAL_BAL'},
 CONSUMER_CONFIDENCE:{n:5,s:'confidence',name:{en:'Consumer confidence (NBB)',fr:'Confiance des consommateurs (BNB)',nl:'Consumentenvertrouwen (NBB)'},o:5,full:{en:'Consumer Confidence Indicator — NBB Survey',fr:'Indicateur de confiance des consommateurs — Enquête BNB',nl:'Consumentenvertrouwenindicator — NBB-enquête'},desc:{en:'Monthly survey of household sentiment. Negative = pessimism, positive = optimism.',fr:'Enquête mensuelle du sentiment des ménages. Négatif = pessimisme, positif = optimisme.',nl:'Maandelijkse peiling van huishoudelijk sentiment. Negatief = pessimisme, positief = optimisme.'},sdmx:'',freq:'M'},
-EC_CONS_CONF:{n:6,s:'confidence',name:{en:'Consumer\'s confidence index',fr:'Indice de confiance des consommateurs',nl:'Consumentenvertrouwensindex'},o:6,full:{en:'Consumer Confidence — Eurostat (BE & EA)',fr:'Confiance des consommateurs — Eurostat (BE & ZE)',nl:'Consumentenvertrouwen — Eurostat (BE & EA)'},desc:{en:'EC harmonised consumer confidence for Belgium and Euro Area. Balance metric from Eurostat/DG ECFIN surveys.',fr:'Confiance des consommateurs harmonisée CE pour la Belgique et la zone euro. Source : Eurostat/DG ECFIN.',nl:'EC geharmoniseerd consumentenvertrouwen voor België en eurozone. Bron: Eurostat/DG ECFIN.'},sdmx:'',freq:'M',combined:true,be_code:'EC_CONS_CONF_BE',eu_code:'EC_CONS_CONF_EU'}
+EC_CONS_CONF:{n:6,s:'confidence',name:{en:'Consumer\'s confidence index',fr:'Indice de confiance des consommateurs',nl:'Consumentenvertrouwensindex'},o:6,full:{en:'Consumer Confidence — Eurostat (BE & EA)',fr:'Confiance des consommateurs — Eurostat (BE & ZE)',nl:'Consumentenvertrouwen — Eurostat (BE & EA)'},desc:{en:'EC harmonised consumer confidence for Belgium and Euro Area. Balance metric from Eurostat/DG ECFIN surveys.',fr:'Confiance des consommateurs harmonisée CE pour la Belgique et la zone euro. Source : Eurostat/DG ECFIN.',nl:'EC geharmoniseerd consumentenvertrouwen voor België en eurozone. Bron: Eurostat/DG ECFIN.'},sdmx:'',freq:'M',combined:true,be_code:'EC_CONS_CONF_BE',eu_code:'EC_CONS_CONF_EU'},
+BUSINESS_CONFIDENCE:{n:7,s:'confidence',name:{en:'Business confidence (NBB)',fr:'Confiance des entreprises (BNB)',nl:'Ondernemersvertrouwen (NBB)'},o:7,full:{en:'Business Confidence — NBB Synthetic Barometer',fr:'Confiance des entreprises — Baromètre synthétique BNB',nl:'Ondernemersvertrouwen — NBB Synthetische barometer'},desc:{en:'Overall synthetic curve from the NBB Business Survey. Positive = expansion, negative = contraction.',fr:'Courbe synthétique globale de l\'enquête conjoncturelle BNB. Positif = expansion, négatif = contraction.',nl:'Globale synthetische curve van de NBB-conjunctuurenquête. Positief = expansie, negatief = krimp.'},sdmx:'',freq:'M'}
 };
 const SECTIONS={gdp:{label:{en:'Gross Domestic Product',fr:'Produit Intérieur Brut',nl:'Bruto Binnenlands Product'}},confidence:{label:{en:'Confidence & Sentiment',fr:'Confiance et Sentiment',nl:'Vertrouwen & Sentiment'}},prices:{label:{en:'Production & Prices',fr:'Production et Prix',nl:'Productie & Prijzen'}},labour:{label:{en:'Labour Costs',fr:'Coûts de la Main-d\'œuvre',nl:'Arbeidskosten'}},employment:{label:{en:'Employment',fr:'Emploi',nl:'Werkgelegenheid'}},unemployment:{label:{en:'Unemployment',fr:'Chômage',nl:'Werkloosheid'}},business:{label:{en:'Business Environment',fr:'Environnement des Affaires',nl:'Bedrijfsklimaat'}},fiscal:{label:{en:'Government Finances',fr:'Finances Publiques',nl:'Overheidsfinanciën'}}};
 let DATA={},activeFilter='gdp';
@@ -660,6 +664,7 @@ function renderContribChart() {
   ).join('') + `<div class="leg"><div class="swatch" style="background:var(--text-cell);border-radius:0;height:2px;margin-top:5px"></div>GDP (growth in %)</div>`;
 
   // Draw on canvas
+  _contribYearData = yearData;
   requestAnimationFrame(() => { requestAnimationFrame(() => { _drawContrib(yearData); }); });
   } else {
     contribCard.style.display = 'none';
@@ -837,7 +842,8 @@ function renderIntlChart() {
     return `<div class="leg"><div class="swatch" style="background:${col};height:${s.width>2?3:2}px;border-radius:0;margin-top:5px"></div>${s.label}</div>`;
   }).join('');
 
-  requestAnimationFrame(()=>{requestAnimationFrame(()=>{_drawIntl();});});
+  _intlPeriods = be.map(d=>d.period);
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{_drawIntl(); initChartInteractivity();});});
 }
 
 function _drawIntl() {
@@ -939,6 +945,115 @@ function _drawIntl() {
   ctx.font='9px Figtree,sans-serif'; ctx.fillStyle=labelC;
   ctx.textAlign='right'; ctx.textBaseline='bottom';
   ctx.fillText('Source: Eurostat', W-pR, H-2);
+}
+
+// ═══════════════════════════════════════════════════════
+// TOOLTIP POSITIONING — prevent clipping on top/bottom
+// ═══════════════════════════════════════════════════════
+document.addEventListener('mouseover', function(e){
+  const indName = e.target.closest('.ind-name');
+  if(!indName) return;
+  const tip = indName.querySelector('.tip');
+  if(!tip) return;
+  requestAnimationFrame(()=>{
+    const rect = indName.getBoundingClientRect();
+    const tipH = tip.offsetHeight;
+    const vH = window.innerHeight;
+    // Default: below the row
+    let top = rect.bottom + 6;
+    // If it goes below viewport, show above
+    if(top + tipH > vH - 10) top = rect.top - tipH - 6;
+    // If still above viewport, clamp to top
+    if(top < 10) top = 10;
+    tip.style.left = rect.left + 'px';
+    tip.style.top = top + 'px';
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// PNG EXPORT — save chart canvases as PNG
+// ═══════════════════════════════════════════════════════
+function exportChartPNG(canvasId, filename){
+  const cv = document.getElementById(canvasId);
+  if(!cv) return;
+  // Create a temp canvas with white background
+  const tmp = document.createElement('canvas');
+  tmp.width = cv.width; tmp.height = cv.height;
+  const ctx = tmp.getContext('2d');
+  ctx.fillStyle = gc('--bg-table') || '#fff';
+  ctx.fillRect(0, 0, tmp.width, tmp.height);
+  ctx.drawImage(cv, 0, 0);
+  const a = document.createElement('a');
+  a.href = tmp.toDataURL('image/png');
+  a.download = filename || 'chart.png';
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// CHART CROSSHAIR + TOOLTIP — contrib & intl charts
+// ═══════════════════════════════════════════════════════
+let _contribYearData = [], _intlPeriods = [];
+
+function setupChartHover(canvasId, getDataFn){
+  const cv = document.getElementById(canvasId);
+  if(!cv) return;
+  const tipEl = document.createElement('div');
+  tipEl.style.cssText = 'display:none;position:fixed;z-index:9999;padding:8px 12px;background:var(--bg-tip,#fff);border:1px solid var(--border-tip,#e2e8f0);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:.7rem;font-family:Figtree,sans-serif;color:var(--text-cell,#333);pointer-events:none;max-width:260px;line-height:1.5';
+  document.body.appendChild(tipEl);
+
+  cv.addEventListener('mousemove', function(e){
+    const rect = cv.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const data = getDataFn(x, rect.width);
+    if(!data){ tipEl.style.display='none'; cv.style.cursor='default'; return; }
+    cv.style.cursor='crosshair';
+    tipEl.innerHTML = data.html;
+    tipEl.style.display = 'block';
+    // Position near cursor
+    let tipX = e.clientX + 14, tipY = e.clientY - 10;
+    const tipW = tipEl.offsetWidth, tipH = tipEl.offsetHeight;
+    if(tipX + tipW > window.innerWidth - 10) tipX = e.clientX - tipW - 14;
+    if(tipY + tipH > window.innerHeight - 10) tipY = e.clientY - tipH - 10;
+    if(tipY < 10) tipY = 10;
+    tipEl.style.left = tipX + 'px'; tipEl.style.top = tipY + 'px';
+  });
+  cv.addEventListener('mouseleave', function(){ tipEl.style.display='none'; cv.style.cursor='default'; });
+}
+
+function initChartInteractivity(){
+  // Contrib chart hover
+  setupChartHover('contribCanvas', function(x, W){
+    const data = _contribYearData;
+    if(!data.length) return null;
+    const effW = W - 60; // pL=48 + pR=12
+    const idx = Math.round((x - 48) / effW * (data.length - 1));
+    if(idx < 0 || idx >= data.length) return null;
+    const d = data[idx];
+    let html = `<b>${d.year}</b> — GDP: <b>${d.gdp.toFixed(1).replace('.',',')}%</b><br>`;
+    CONTRIB_SERIES.forEach(s => {
+      const v = d[s.code];
+      if(v !== undefined) html += `<span style="color:${s.color}">■</span> ${s.label[LANG]||s.label.en}: ${v>=0?'+':''}${v.toFixed(1).replace('.',',')}<br>`;
+    });
+    return {html};
+  });
+
+  // Intl chart hover
+  setupChartHover('intlCanvas', function(x, W){
+    const periods = _intlPeriods;
+    if(!periods.length) return null;
+    const effW = W - 64; // pL=50 + pR=14
+    const idx = Math.round((x - 50) / effW * (periods.length - 1));
+    if(idx < 0 || idx >= periods.length) return null;
+    const p = periods[idx];
+    let html = `<b>${p}</b><br>`;
+    INTL_SERIES.forEach(s => {
+      const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
+      const d = src ? src.find(r=>r.period===p) : null;
+      if(d) html += `<span style="color:${s.color==='_theme_'?gc('--text-cell'):s.color}">━</span> ${s.label}: <b>${d.value.toFixed(1).replace('.',',')}</b><br>`;
+    });
+    return {html};
+  });
 }
 
 function init(){updateStaticUI();document.getElementById('btn-'+LANG).classList.add('active');loadTheme();renderPills();fetchData();}
