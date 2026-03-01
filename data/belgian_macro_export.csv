@@ -1,24 +1,24 @@
 indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at
-CHG_STOCKS_CY,Changes in Stocks (contribution),2006,0.5,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2007,0.5,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2008,0.1,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2009,-0.7,B,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2010,0.0,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2011,0.9,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2012,-0.9,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2013,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2014,-0.3,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2015,0.2,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2016,0.6,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2017,0.0,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2018,0.7,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2019,-1.0,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2020,-0.4,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2021,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2022,1.1,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2023,-0.8,A,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2024,-0.5,P,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
-CHG_STOCKS_CY,Changes in Stocks (contribution),2025,-0.1,P,pp_contribution,NBB,2026-02-28T23:57:15.354640+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2006,0.5,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2007,0.5,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2008,0.1,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2009,-0.7,B,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2010,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2011,0.9,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2012,-0.9,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2013,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2014,-0.3,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2015,0.2,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2016,0.6,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2017,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2018,0.7,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2019,-1.0,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2020,-0.4,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2021,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2022,1.1,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2023,-0.8,A,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2024,-0.5,P,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
+CHG_STOCKS_CY,Changes in Stocks (contribution),2025,-0.1,P,pp_contribution,NBB,2026-03-01T00:44:26.796834+00:00
 EUROSTAT_GDP_Q_MEUR,Eurostat GDP (Index 2010=100),2008-Q1,100.03,A,index_2010,Eurostat/DBnomics,2026-02-28T23:57:17.106245+00:00
 EUROSTAT_GDP_Q_MEUR,Eurostat GDP (Index 2010=100),2008-Q2,100.08,A,index_2010,Eurostat/DBnomics,2026-02-28T23:57:17.106245+00:00
 EUROSTAT_GDP_Q_MEUR,Eurostat GDP (Index 2010=100),2008-Q3,99.53,A,index_2010,Eurostat/DBnomics,2026-02-28T23:57:17.106245+00:00
@@ -445,247 +445,247 @@ EUROSTAT_GDP_Q_MEUR_NL,Eurostat GDP Netherlands (Index 2010=100),2024-Q4,125.22,
 EUROSTAT_GDP_Q_MEUR_NL,Eurostat GDP Netherlands (Index 2010=100),2025-Q1,125.63,A,index_2010,Eurostat/DBnomics,2026-02-28T23:57:19.661037+00:00
 EUROSTAT_GDP_Q_MEUR_NL,Eurostat GDP Netherlands (Index 2010=100),2025-Q2,126.03,A,index_2010,Eurostat/DBnomics,2026-02-28T23:57:19.661037+00:00
 EUROSTAT_GDP_Q_MEUR_NL,Eurostat GDP Netherlands (Index 2010=100),2025-Q3,126.66,A,index_2010,Eurostat/DBnomics,2026-02-28T23:57:19.661037+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2006,2.6,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2007,3.7,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2008,0.4,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2009,-1.9,B,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2010,2.7,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2011,1.9,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2012,0.2,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2013,0.3,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2014,1.8,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2015,1.5,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2016,1.2,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2017,1.5,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2018,1.9,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2019,2.4,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2020,-4.8,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2021,6.3,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2022,4.0,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2023,1.7,A,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2024,1.1,P,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_ANNUAL_CY,Annual GDP Growth (contribution),2025,1.0,P,pp_contribution,NBB,2026-02-28T23:57:09.217334+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q1,4.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q2,4.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q3,3.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q4,3.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q1,2.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q2,1.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q3,0.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q4,-0.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q1,0.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q2,1.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q3,2.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q4,2.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q1,1.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q2,0.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q3,0.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q4,1.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q1,2.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q2,3.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q3,4.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q4,3.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q1,2.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q2,2.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q3,1.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q4,2.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q1,2.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q2,2.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q3,2.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q4,3.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q1,3.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q2,4.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q3,3.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q4,3.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q1,1.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q2,1.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q3,0.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q4,-2.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q1,-5.7,B,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q2,-3.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q3,-3.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q4,5.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q1,2.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q2,3.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q3,2.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q4,2.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q1,2.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q2,2.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q3,1.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q4,1.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q1,0.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q2,0.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q3,0.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q4,-0.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q1,-0.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q2,0.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q3,0.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q4,0.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q1,2.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q2,1.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q3,1.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q4,1.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q1,1.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q2,1.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q3,1.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q4,1.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q1,1.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q2,1.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q3,1.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q4,1.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q1,1.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q2,1.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q3,1.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q4,1.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q1,1.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q2,1.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q3,2.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q4,2.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q1,2.2,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q2,2.4,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q3,2.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q4,2.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q1,-0.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q2,-12.0,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q3,-2.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q4,-3.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q1,0.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q2,14.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q3,4.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q4,6.5,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q1,4.9,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q2,4.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q3,3.6,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q4,2.7,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q1,2.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q2,1.8,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q3,1.3,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q4,1.1,A,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q1,1.3,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q2,1.0,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q3,1.1,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q4,0.9,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q1,0.9,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q2,1.0,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q3,1.0,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q4,1.0,P,percent_yy,NBB,2026-02-28T23:57:08.276792+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2006,0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2007,0.3,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2008,-0.1,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2009,-0.5,B,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2010,0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2011,-0.1,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2012,0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2013,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2014,0.3,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2015,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2016,0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2017,0.0,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2018,0.1,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2019,0.1,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2020,-0.3,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2021,0.2,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2022,0.1,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2023,0.0,A,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2024,-0.3,P,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2025,-0.4,P,pp_contribution,NBB,2026-02-28T23:57:13.302451+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2006,0.3,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2007,1.2,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2008,0.5,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2009,-1.4,B,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2010,-0.3,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2011,1.2,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2012,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2013,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2014,0.7,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2015,0.9,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2016,0.8,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2017,0.2,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2018,0.4,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2019,0.9,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2020,-0.9,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2021,0.7,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2022,0.5,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2023,0.6,A,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2024,0.5,P,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2025,0.5,P,pp_contribution,NBB,2026-02-28T23:57:12.233786+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2006,-0.2,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2007,0.1,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2008,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2009,0.2,B,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2010,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2011,0.1,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2012,0.1,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2013,-0.1,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2014,0.3,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2015,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2016,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2017,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2018,0.2,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2019,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2020,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2021,0.1,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2022,0.0,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2023,0.2,A,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2024,0.3,P,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2025,-0.1,P,pp_contribution,NBB,2026-02-28T23:57:14.343589+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2006,0.2,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2007,0.4,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2008,0.7,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2009,0.4,B,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2010,0.1,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2011,0.1,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2012,0.3,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2013,0.1,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2014,0.3,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2015,0.1,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2016,0.0,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2017,0.1,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2018,0.3,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2019,0.5,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2020,0.0,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2021,1.0,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2022,0.8,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2023,0.6,A,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2024,0.4,P,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2025,0.6,P,pp_contribution,NBB,2026-02-28T23:57:11.327176+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2006,0.6,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2007,0.1,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2008,-1.4,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2009,-0.6,B,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2010,0.8,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2011,-0.6,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2012,0.0,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2013,0.3,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2014,-0.1,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2015,-0.4,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2016,-1.2,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2017,0.1,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2018,-0.7,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2019,1.2,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2020,0.6,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2021,1.6,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2022,-0.3,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2023,0.6,A,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2024,-0.3,P,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-NET_EXPORTS_CY,Net Exports (contribution),2025,-0.3,P,pp_contribution,NBB,2026-02-28T23:57:16.318679+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2006,0.9,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2007,1.0,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2008,0.7,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2009,0.8,B,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2010,2.0,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2011,0.3,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2012,0.7,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2013,0.7,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2014,0.5,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2015,0.9,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2016,0.8,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2017,1.0,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2018,0.8,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2019,0.8,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2020,-3.7,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2021,2.8,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2022,1.8,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2023,0.6,A,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2024,1.1,P,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
-PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2025,0.9,P,pp_contribution,NBB,2026-02-28T23:57:10.265210+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2006,2.6,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2007,3.7,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2008,0.4,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2009,-1.9,B,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2010,2.7,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2011,1.9,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2012,0.2,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2013,0.3,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2014,1.8,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2015,1.5,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2016,1.2,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2017,1.5,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2018,1.9,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2019,2.4,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2020,-4.8,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2021,6.3,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2022,4.0,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2023,1.7,A,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2024,1.1,P,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_ANNUAL_CY,Annual GDP Growth (contribution),2025,1.0,P,pp_contribution,NBB,2026-03-01T00:44:22.411870+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q1,4.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q2,4.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q3,3.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2000-Q4,3.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q1,2.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q2,1.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q3,0.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2001-Q4,-0.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q1,0.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q2,1.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q3,2.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2002-Q4,2.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q1,1.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q2,0.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q3,0.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2003-Q4,1.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q1,2.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q2,3.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q3,4.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2004-Q4,3.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q1,2.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q2,2.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q3,1.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2005-Q4,2.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q1,2.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q2,2.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q3,2.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2006-Q4,3.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q1,3.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q2,4.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q3,3.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2007-Q4,3.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q1,1.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q2,1.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q3,0.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2008-Q4,-2.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q1,-5.7,B,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q2,-3.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q3,-3.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2009-Q4,5.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q1,2.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q2,3.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q3,2.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2010-Q4,2.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q1,2.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q2,2.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q3,1.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2011-Q4,1.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q1,0.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q2,0.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q3,0.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2012-Q4,-0.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q1,-0.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q2,0.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q3,0.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2013-Q4,0.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q1,2.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q2,1.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q3,1.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2014-Q4,1.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q1,1.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q2,1.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q3,1.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2015-Q4,1.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q1,1.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q2,1.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q3,1.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2016-Q4,1.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q1,1.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q2,1.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q3,1.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2017-Q4,1.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q1,1.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q2,1.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q3,2.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2018-Q4,2.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q1,2.2,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q2,2.4,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q3,2.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2019-Q4,2.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q1,-0.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q2,-12.0,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q3,-2.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2020-Q4,-3.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q1,0.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q2,14.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q3,4.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2021-Q4,6.5,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q1,4.9,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q2,4.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q3,3.6,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2022-Q4,2.7,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q1,2.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q2,1.8,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q3,1.3,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2023-Q4,1.1,A,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q1,1.3,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q2,1.0,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q3,1.1,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2024-Q4,0.9,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q1,0.9,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q2,1.0,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q3,1.0,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GDP_QUARTERLY_YY,Quarterly GDP Growth (Y-Y),2025-Q4,1.0,P,percent_yy,NBB,2026-03-01T00:44:21.587734+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2006,0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2007,0.3,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2008,-0.1,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2009,-0.5,B,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2010,0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2011,-0.1,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2012,0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2013,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2014,0.3,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2015,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2016,0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2017,0.0,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2018,0.1,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2019,0.1,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2020,-0.3,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2021,0.2,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2022,0.1,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2023,0.0,A,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2024,-0.3,P,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_DWELLINGS_CY,GFCF Dwellings (contribution),2025,-0.4,P,pp_contribution,NBB,2026-03-01T00:44:25.401427+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2006,0.3,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2007,1.2,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2008,0.5,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2009,-1.4,B,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2010,-0.3,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2011,1.2,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2012,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2013,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2014,0.7,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2015,0.9,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2016,0.8,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2017,0.2,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2018,0.4,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2019,0.9,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2020,-0.9,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2021,0.7,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2022,0.5,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2023,0.6,A,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2024,0.5,P,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_ENTERPRISES_CY,GFCF Enterprises (contribution),2025,0.5,P,pp_contribution,NBB,2026-03-01T00:44:24.677337+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2006,-0.2,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2007,0.1,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2008,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2009,0.2,B,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2010,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2011,0.1,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2012,0.1,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2013,-0.1,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2014,0.3,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2015,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2016,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2017,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2018,0.2,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2019,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2020,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2021,0.1,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2022,0.0,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2023,0.2,A,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2024,0.3,P,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GFCF_PUBLIC_CY,GFCF Public Admin (contribution),2025,-0.1,P,pp_contribution,NBB,2026-03-01T00:44:26.098390+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2006,0.2,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2007,0.4,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2008,0.7,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2009,0.4,B,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2010,0.1,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2011,0.1,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2012,0.3,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2013,0.1,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2014,0.3,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2015,0.1,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2016,0.0,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2017,0.1,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2018,0.3,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2019,0.5,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2020,0.0,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2021,1.0,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2022,0.8,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2023,0.6,A,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2024,0.4,P,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+GOV_CONSUMPTION_CY,Gov. Consumption Expenditure (contribution),2025,0.6,P,pp_contribution,NBB,2026-03-01T00:44:23.957311+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2006,0.6,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2007,0.1,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2008,-1.4,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2009,-0.6,B,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2010,0.8,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2011,-0.6,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2012,0.0,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2013,0.3,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2014,-0.1,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2015,-0.4,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2016,-1.2,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2017,0.1,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2018,-0.7,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2019,1.2,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2020,0.6,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2021,1.6,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2022,-0.3,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2023,0.6,A,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2024,-0.3,P,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+NET_EXPORTS_CY,Net Exports (contribution),2025,-0.3,P,pp_contribution,NBB,2026-03-01T00:44:27.488631+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2006,0.9,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2007,1.0,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2008,0.7,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2009,0.8,B,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2010,2.0,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2011,0.3,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2012,0.7,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2013,0.7,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2014,0.5,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2015,0.9,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2016,0.8,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2017,1.0,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2018,0.8,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2019,0.8,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2020,-3.7,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2021,2.8,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2022,1.8,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2023,0.6,A,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2024,1.1,P,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
+PRIV_CONSUMPTION_CY,Private Final Consumption (contribution),2025,0.9,P,pp_contribution,NBB,2026-03-01T00:44:23.231312+00:00
