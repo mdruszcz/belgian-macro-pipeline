@@ -202,7 +202,7 @@ tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
   </div>
 </div>
 <div class="footer"><div id="ftSrc"><strong>Sources:</strong> NBB = National Bank of Belgium</div><div id="ftGit">Data from GitHub · Auto-updated daily 06:00 CET</div></div>
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="exportModalCSV()" style="font-size:.68rem;padding:5px 10px">⬇ Export CSV</button><button class="modal-close" onclick="closeModal()">✕</button></div></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
 const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
 let LANG=localStorage.getItem('lang')||'en';
@@ -221,7 +221,7 @@ CHG_STOCKS_CY:{n:9,s:'gdp',name:{en:'Changes in stocks',fr:'Variation des stocks
 NET_EXPORTS_CY:{n:10,s:'gdp',name:{en:'Net exports',fr:'Exportations nettes',nl:'Netto-export'},o:10,full:{en:'External Balance of Goods and Services',fr:'Solde extérieur des biens et services',nl:'Extern saldo van goederen en diensten'},desc:{en:'Exports minus imports. Belgium is highly open (trade ~160% of GDP).',fr:'Exportations moins importations. La Belgique est très ouverte (commerce ~160% du PIB).',nl:'Export minus import. België is zeer open (handel ~160% van het BBP).'},sdmx:'B11',freq:'A'}
 };
 const SECTIONS={gdp:{label:{en:'Gross Domestic Product',fr:'Produit Intérieur Brut',nl:'Bruto Binnenlands Product'}},confidence:{label:{en:'Confidence & Sentiment',fr:'Confiance et Sentiment',nl:'Vertrouwen & Sentiment'}},prices:{label:{en:'Production & Prices',fr:'Production et Prix',nl:'Productie & Prijzen'}},labour:{label:{en:'Labour Costs',fr:'Coûts de la Main-d\'œuvre',nl:'Arbeidskosten'}},employment:{label:{en:'Employment',fr:'Emploi',nl:'Werkgelegenheid'}},unemployment:{label:{en:'Unemployment',fr:'Chômage',nl:'Werkloosheid'}},business:{label:{en:'Business Environment',fr:'Environnement des Affaires',nl:'Bedrijfsklimaat'}},fiscal:{label:{en:'Government Finances',fr:'Finances Publiques',nl:'Overheidsfinanciën'}}};
-let DATA={},activeFilter=null;
+let DATA={},activeFilter='gdp';
 
 function setLang(l){LANG=l;localStorage.setItem('lang',l);document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.getElementById('btn-'+l).classList.add('active');updateStaticUI();if(Object.keys(DATA).length)render();renderPills();}
 function updateStaticUI(){document.getElementById('mainTitle').textContent=t('title');document.getElementById('ftSrc').innerHTML=t('ft_src');document.getElementById('ftGit').textContent=t('ft_git');document.getElementById('mThPer').textContent=t('m_th_per');document.getElementById('mThVal').textContent=t('m_th_val');document.getElementById('mThChg').textContent=t('m_th_chg');document.getElementById('mThStat').textContent=t('m_th_stat');document.getElementById('mThBar').textContent=t('m_th_bar');const dL=document.getElementById('dateLabel');dL.textContent=new Date().toLocaleDateString(LANG==='nl'?'nl-BE':LANG==='fr'?'fr-BE':'en-GB',{day:'numeric',month:'long',year:'numeric'});if(document.getElementById('dot').classList.contains('err'))document.getElementById('statusText').textContent=t('no_csv');}
@@ -288,15 +288,71 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
     h+=`<tr onclick="openModal('${c}')"><td style="font-family:'Overpass Mono';font-size:.7rem">${m?.n||'—'}</td><td><span class="ind-name">${nm}<div class="tip"><div class="tip-title">${tf}</div><div class="tip-code">${c}${ts?' · SDMX: '+ts:''}</div>${td?'<div class="tip-desc">'+td+'</div>':''}<div class="tip-meta"><span>⏱ ${fr}</span><span>📡 ${l.source}</span><span>📊 ${s.length} ${t('m_obs')}</span></div></div></span></td><td>${srcBadge}</td>${periodCell}${valCell}<td>${tArr(tr)}</td><td><canvas id="sp_${c}" class="spark" width="100" height="32"></canvas></td><td><span class="update-dt">${fmtD(l.fetched_at)}</span></td><td class="comment">${comment(c,s)}</td></tr>`;
 });h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA))drawSpark(document.getElementById('sp_'+c),s.map(d=>d.value),trend(s));});renderContribChart();}
 
-function renderPills(){const e=document.getElementById('pills');let h=`<span class="pill ${activeFilter===null?'on':''}" onclick="setFilter(null,this)">${t('all')}</span>`;for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill ${activeFilter===id?'on':''}" onclick=\"setFilter('${id}',this)\">${(s.label[LANG]||s.label.en).toUpperCase()}</span>`;e.innerHTML=h;}
+function renderPills(){const e=document.getElementById('pills');let h='';for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill ${activeFilter===id?'on':''}" onclick="setFilter('${id}',this)">${(s.label[LANG]||s.label.en).toUpperCase()}</span>`;e.innerHTML=h;}
 function setFilter(id,el){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');activeFilter=id;render();}
 
-function openModal(code){const series=DATA[code];if(!series||!series.length)return;const meta=M[code]||{},name=meta.name?.[LANG]||series[0].name||code,unit=series[0].unit;const cutoff=new Date().getFullYear()-10;const filtered=series.filter(d=>parseInt(d.period)>=cutoff);const dd=filtered.length>0?filtered:series.slice(-10);document.getElementById('modalTitle').textContent=name;document.getElementById('modalSub').textContent=`${code} · Source: ${series[0].source} · ${dd.length} ${t('m_obs')} · ${t('m_last10')}`;const last=dd[dd.length-1],prev=dd.length>=2?dd[dd.length-2]:null,vals=dd.map(d=>d.value),avg=vals.reduce((a,b)=>a+b,0)/vals.length,chg=prev?last.value-prev.value:0;document.getElementById('modalStats').innerHTML=`<div class=\"stat-card\"><div class=\"stat-label\">${t('m_latest')} (${last.period})</div><div class=\"stat-val ${last.value>=0?'pos':'neg'}\">${fmtV(last.value,unit)}</div></div><div class=\"stat-card\"><div class=\"stat-label\">${t('m_chg')}</div><div class=\"stat-val ${chg>=0?'pos':'neg'}\">${chg>=0?'+':''}${chg.toFixed(1).replace('.',',')} p.p.</div></div><div class=\"stat-card\"><div class=\"stat-label\">${t('m_avg')}</div><div class=\"stat-val\">${avg.toFixed(1).replace('.',',')}%</div></div><div class=\"stat-card\"><div class=\"stat-label\">${t('m_min')}</div><div class=\"stat-val neg\">${fmtV(Math.min(...vals),unit)}</div></div><div class=\"stat-card\"><div class=\"stat-label\">${t('m_max')}</div><div class=\"stat-val pos\">${fmtV(Math.max(...vals),unit)}</div></div>`;drawModalChart(dd,unit);const am=Math.max(Math.abs(Math.min(...vals)),Math.abs(Math.max(...vals)))||1;let tb='';for(let i=dd.length-1;i>=0;i--){const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class=\"${delta>=0?'pos-val':'neg-val'}\">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';let sb='—';if(d.obs_status==='A')sb=`<span class=\"status-badge st-actual\">${t('st_act')}</span>`;else if(d.obs_status==='P')sb=`<span class=\"status-badge st-prov\">${t('st_prov')}</span>`;else if(d.obs_status==='B')sb=`<span class=\"status-badge st-break\">${t('st_brk')}</span>`;const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';tb+=`<tr><td>${d.period}</td><td class=\"${vc}\">${fmtV(d.value,unit)}</td><td>${dc}</td><td>${sb}</td><td><div style=\"position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px\"><div style=\"position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%\"></div><div style=\"position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)\"></div></div></td></tr>`;}document.getElementById('modalTableBody').innerHTML=tb;document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';}
+let _modalCode='', _modalData=[];
+function openModal(code){
+  _modalCode = code;
+  // For INT_GDP_COMP, show Belgium EUROSTAT data
+  let series, displayCode=code;
+  if(code==='INT_GDP_COMP' && DATA['EUROSTAT_GDP_Q_MEUR']){
+    series = DATA['EUROSTAT_GDP_Q_MEUR'];
+    displayCode = 'EUROSTAT_GDP_Q_MEUR';
+  } else {
+    series = DATA[code];
+  }
+  if(!series||!series.length)return;
+  const meta=M[code]||{},name=meta.name?.[LANG]||series[0].name||code,unit=series[0].unit;
+  const cutoff=new Date().getFullYear()-10;
+  const filtered=series.filter(d=>parseInt(d.period)>=cutoff);
+  const dd=filtered.length>0?filtered:series.slice(-10);
+  _modalData = dd;
+  document.getElementById('modalTitle').textContent=name;
+  const srcLabel = code==='INT_GDP_COMP' ? 'Eurostat/DBnomics (Belgium)' : series[0].source;
+  document.getElementById('modalSub').textContent=`${displayCode} · Source: ${srcLabel} · ${dd.length} ${t('m_obs')} · ${t('m_last10')}`;
+  const last=dd[dd.length-1],prev=dd.length>=2?dd[dd.length-2]:null,vals=dd.map(d=>d.value),avg=vals.reduce((a,b)=>a+b,0)/vals.length,chg=prev?last.value-prev.value:0;
+  document.getElementById('modalStats').innerHTML=`<div class="stat-card"><div class="stat-label">${t('m_latest')} (${last.period})</div><div class="stat-val ${last.value>=0?'pos':'neg'}">${fmtV(last.value,unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_chg')}</div><div class="stat-val ${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(1).replace('.',',')} p.p.</div></div><div class="stat-card"><div class="stat-label">${t('m_avg')}</div><div class="stat-val">${avg.toFixed(1).replace('.',',')}%</div></div><div class="stat-card"><div class="stat-label">${t('m_min')}</div><div class="stat-val neg">${fmtV(Math.min(...vals),unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_max')}</div><div class="stat-val pos">${fmtV(Math.max(...vals),unit)}</div></div>`;
+  drawModalChart(dd,unit);
+  const am=Math.max(Math.abs(Math.min(...vals)),Math.abs(Math.max(...vals)))||1;
+  let tb='';for(let i=dd.length-1;i>=0;i--){const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class="${delta>=0?'pos-val':'neg-val'}">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';let sb='—';if(d.obs_status==='A')sb=`<span class="status-badge st-actual">${t('st_act')}</span>`;else if(d.obs_status==='P')sb=`<span class="status-badge st-prov">${t('st_prov')}</span>`;else if(d.obs_status==='B')sb=`<span class="status-badge st-break">${t('st_brk')}</span>`;const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';tb+=`<tr><td>${d.period}</td><td class="${vc}">${fmtV(d.value,unit)}</td><td>${dc}</td><td>${sb}</td><td><div style="position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px"><div style="position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)"></div></div></td></tr>`;}
+  document.getElementById('modalTableBody').innerHTML=tb;
+  document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
+}
+function exportModalCSV(){
+  if(!_modalData.length)return;
+  const meta=M[_modalCode]||{};
+  const name=meta.name?.[LANG]||_modalCode;
+  let csv='Period,Value,Status\n';
+  _modalData.forEach(d=>{csv+=`${d.period},${d.value},${d.obs_status||''}\n`;});
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${_modalCode}_data.csv`;
+  a.click();URL.revokeObjectURL(a.href);
+}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function drawModalChart(data,unit){requestAnimationFrame(()=>{requestAnimationFrame(()=>{_rc(data,unit);});});}
-function _rc(data,unit){const cv=document.getElementById('modalChart'),ct=cv.parentElement,ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=ct.clientWidth-40,H=260;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const vals=data.map(d=>d.value),n=data.length,vMin=Math.min(...vals,0),vMax=Math.max(...vals,0),vR=vMax-vMin||1;const pL=58,pR=18,pT=18,pB=48,cW=W-pL-pR,slW=cW/n,bW=Math.max(8,Math.min(36,slW*.55));const yOf=v=>pT+((vMax-v)/vR)*(H-pT-pB),zY=yOf(0);const gC=gc('--chart-grid'),zC=gc('--chart-zero'),lC=gc('--chart-label'),liC=gc('--chart-line'),dC=gc('--chart-dot'),dR=gc('--chart-dot-ring'),bP=gc('--chart-bar-pos'),bN=gc('--chart-bar-neg');niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+('%'),pL-10,y);});const zy=Math.round(zY)+.5;ctx.strokeStyle=zC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,zy);ctx.lineTo(W-pR,zy);ctx.stroke();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,vY=yOf(d.value),isP=d.value>=0,bT=isP?vY:zY,bH=Math.max(1,Math.abs(vY-zY)),rgb=isP?bP:bN;ctx.fillStyle=`rgba(${rgb},.55)`;ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.fill();if(d.obs_status==='P'){ctx.strokeStyle=`rgba(${rgb},.3)`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.stroke();ctx.setLineDash([]);}ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=`rgba(${rgb},.85)`;ctx.textAlign='center';ctx.textBaseline=isP?'bottom':'top';ctx.fillText(d.value.toFixed(1).replace('.',','),cx,isP?bT-4:bT+bH+4);ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(d.period,cx,H-pB+8);});ctx.beginPath();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2;i===0?ctx.moveTo(cx,yOf(d.value)):ctx.lineTo(cx,yOf(d.value));});ctx.strokeStyle=liC;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,y=yOf(d.value),isL=i===n-1;ctx.beginPath();ctx.arc(cx,y,isL?4.5:2.5,0,Math.PI*2);ctx.fillStyle=isL?dC:liC;ctx.fill();if(isL){ctx.strokeStyle=dR;ctx.lineWidth=2;ctx.stroke();}});}
+function _rc(data,unit){const cv=document.getElementById('modalChart'),ct=cv.parentElement,ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=ct.clientWidth-40,H=260;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const vals=data.map(d=>d.value),n=data.length,vMin=Math.min(...vals,0),vMax=Math.max(...vals,0),vR=vMax-vMin||1;const pL=58,pR=18,pT=18,pB=48,cW=W-pL-pR,slW=cW/n,bW=Math.max(8,Math.min(36,slW*.55));const yOf=v=>pT+((vMax-v)/vR)*(H-pT-pB),zY=yOf(0);const gC=gc('--chart-grid'),zC=gc('--chart-zero'),lC=gc('--chart-label'),liC=gc('--chart-line'),dC=gc('--chart-dot'),dR=gc('--chart-dot-ring'),bP=gc('--chart-bar-pos'),bN=gc('--chart-bar-neg');
+// Y grid
+niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+('%'),pL-10,y);});
+// Zero line
+const zy=Math.round(zY)+.5;ctx.strokeStyle=zC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,zy);ctx.lineTo(W-pR,zy);ctx.stroke();
+// X-axis label skip: measure label width and compute optimal interval
+const maxLabelW=Math.max(...data.map(d=>{ctx.font='9px Overpass Mono,monospace';return ctx.measureText(d.period).width;}));
+const xSkip=Math.max(1,Math.ceil((maxLabelW+12)/slW));
+// Bars
+data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,vY=yOf(d.value),isP=d.value>=0,bT=isP?vY:zY,bH=Math.max(1,Math.abs(vY-zY)),rgb=isP?bP:bN;ctx.fillStyle=`rgba(${rgb},.55)`;ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.fill();if(d.obs_status==='P'){ctx.strokeStyle=`rgba(${rgb},.3)`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.stroke();ctx.setLineDash([]);}
+// Value labels — only show if bars wide enough
+if(slW>18){ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=`rgba(${rgb},.85)`;ctx.textAlign='center';ctx.textBaseline=isP?'bottom':'top';ctx.fillText(d.value.toFixed(1).replace('.',','),cx,isP?bT-4:bT+bH+4);}
+// X labels — skip to avoid overlap
+if(i%xSkip===0||i===n-1){ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(d.period,cx,H-pB+8);}});
+// Trend line
+ctx.beginPath();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2;i===0?ctx.moveTo(cx,yOf(d.value)):ctx.lineTo(cx,yOf(d.value));});ctx.strokeStyle=liC;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+// Dots
+data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,y=yOf(d.value),isL=i===n-1;ctx.beginPath();ctx.arc(cx,y,isL?4.5:2.5,0,Math.PI*2);ctx.fillStyle=isL?dC:liC;ctx.fill();if(isL){ctx.strokeStyle=dR;ctx.lineWidth=2;ctx.stroke();}});}
 function rr(c,x,y,w,h,r){if(h===0)return;c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
 function niceSteps(mn,mx,n){const rg=mx-mn||1,ro=rg/n,mg=Math.pow(10,Math.floor(Math.log10(ro))),rs=ro/mg,ni=rs<=1.5?mg:rs<=3?2*mg:rs<=7?5*mg:10*mg;const st=[];let v=Math.ceil(mn/ni)*ni;while(v<=mx){st.push(parseFloat(v.toFixed(4)));v+=ni;}return st;}
 
@@ -321,8 +377,7 @@ function renderContribChart() {
     return DATA[s.code] && DATA[s.code].length > 0;
   });
   if (!gdp || !hasContrib) { wrap.style.display = 'none'; return; }
-  // Only show when GDP section is visible
-  if (activeFilter && activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
+  if (activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
 
   wrap.style.display = 'block';
   const titles = {en:'Annual real GDP growth and contributions', fr:'Croissance annuelle réelle du PIB et contributions', nl:'Jaarlijkse reële BBP-groei en bijdragen'};
