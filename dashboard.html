@@ -261,7 +261,7 @@ NET_EXPORTS_CY:{n:10,s:'gdp',name:{en:'Net exports',fr:'Exportations nettes',nl:
 FC_GDP_VOL:{n:11,s:'gdp',name:{en:'⟶ GDP forecast (consensus)',fr:'⟶ Prévision PIB (consensus)',nl:'⟶ BBP-prognose (consensus)'},o:11,full:{en:'GDP Volume Growth — Multi-Institution Forecast',fr:'Croissance du PIB en volume — Prévisions multi-institutions',nl:'BBP-volumegroei — Meervoudige prognose'},desc:{en:'Average GDP growth forecast from 13 institutions (FPB, NBB, EC, IMF, OECD, banks). Source: plan.be.',fr:'Prévision moyenne de croissance du PIB de 13 institutions. Source : plan.be.',nl:'Gemiddelde BBP-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'GDP_VOL'},
 FC_CPI:{n:1,s:'prices',name:{en:'⟶ CPI forecast (consensus)',fr:'⟶ Prévision IPC (consensus)',nl:'⟶ CPI-prognose (consensus)'},o:0.5,full:{en:'Consumer Price Index — Multi-Institution Forecast',fr:'Indice des prix à la consommation — Prévisions multi-institutions',nl:'Consumentenprijsindex — Meervoudige prognose'},desc:{en:'Average CPI growth forecast from 13 institutions. Source: plan.be.',fr:'Prévision moyenne IPC de 13 institutions. Source : plan.be.',nl:'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'CPI'},
 FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'⟶ Fiscal balance forecast (consensus)',fr:'⟶ Prévision solde budgétaire (consensus)',nl:'⟶ Begrotingssaldo prognose (consensus)'},o:0.5,full:{en:'Government Fiscal Balance — Multi-Institution Forecast',fr:'Solde de financement des APU — Prévisions multi-institutions',nl:'Begrotingssaldo overheid — Meervoudige prognose'},desc:{en:'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.',fr:'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source : plan.be.',nl:'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'FISCAL_BAL'},
-CONSUMER_CONFIDENCE:{n:1,s:'confidence',name:{en:'Consumer confidence',fr:'Confiance des consommateurs',nl:'Consumentenvertrouwen'},o:1,full:{en:'Consumer Confidence Indicator',fr:'Indicateur de confiance des consommateurs',nl:'Indicator van het consumentenvertrouwen'},desc:{en:'Monthly consumer confidence balance. Reflects household sentiment on the economic situation.',fr:'Solde mensuel de confiance des consommateurs. Reflète le sentiment des ménages sur la situation économique.',nl:'Maandelijks saldo consumentenvertrouwen. Weerspiegelt het sentiment van huishoudens over de economische situation.'},sdmx:'DF_CONSN',freq:'M'}
+CONSUMER_CONFIDENCE_COMP:{n:1,s:'confidence',name:{en:"Consumer's confidence index",fr:'Indice de confiance des consommateurs',nl:'Consumentenvertrouwensindex'},o:1,full:{en:'Consumer Confidence Indicator — BE vs EU27',fr:'Indicateur de confiance des consommateurs — BE vs UE27',nl:'Indicator van het consumentenvertrouwen — BE vs EU27'},desc:{en:'Monthly consumer confidence balance, seasonally adjusted. European Commission survey.',fr:'Solde mensuel de confiance des consommateurs, désaisonnalisé. Enquête de la Commission Européenne.',nl:'Maandelijks saldo consumentenvertrouwen, seizoensgezuiverd. Enquête Europese Commissie.'},sdmx:'ei_bssi_m_r2',freq:'M'}
 };
 const SECTIONS={gdp:{label:{en:'Gross Domestic Product',fr:'Produit Intérieur Brut',nl:'Bruto Binnenlands Product'}},confidence:{label:{en:'Confidence & Sentiment',fr:'Confiance et Sentiment',nl:'Vertrouwen & Sentiment'}},prices:{label:{en:'Production & Prices',fr:'Production et Prix',nl:'Productie & Prijzen'}},labour:{label:{en:'Labour Costs',fr:'Coûts de la Main-d\'œuvre',nl:'Arbeidskosten'}},employment:{label:{en:'Employment',fr:'Emploi',nl:'Werkgelegenheid'}},unemployment:{label:{en:'Unemployment',fr:'Chômage',nl:'Werkloosheid'}},business:{label:{en:'Business Environment',fr:'Environnement des Affaires',nl:'Bedrijfsklimaat'}},fiscal:{label:{en:'Government Finances',fr:'Finances Publiques',nl:'Overheidsfinanciën'}}};
 let DATA={},activeFilter='gdp';
@@ -288,6 +288,30 @@ function comment(c,s){
         const frStr=`L'économie belge a atteint un niveau de ${bv} depuis 2008, tandis que l'indice combiné de l'Allemagne(50%), la France(40%) et les Pays-Bas(10%) a atteint ${cv}.`;
         const nlStr=`De Belgische economie is gegroeid naar een niveau van ${bv} sinds 2008, terwijl de gecombineerde index (DE 50%, FR 40%, NL 10%) naar ${cv} is gegroeid.`;
         return LANG==='fr'?frStr:LANG==='nl'?nlStr:enStr;
+    }
+    if(c==='CONSUMER_CONFIDENCE_COMP'){
+        const bv = l.value.toFixed(1).replace('.',',');
+        const euv = l.eu_value.toFixed(1).replace('.',',');
+        
+        // Find Year-over-Year comparison
+        const yr = parseInt(l.period.substring(0,4));
+        const mth = l.period.substring(4); // e.g. "-11" or "-M11"
+        const pyRow = s.find(x => x.period === String(yr - 1) + mth);
+        
+        if (pyRow) {
+            const diff = (l.value - pyRow.value);
+            const diffStr = Math.abs(diff).toFixed(1).replace('.',',');
+            const dirEN = diff >= 0 ? 'higher' : 'lower';
+            const dirFR = diff >= 0 ? 'supérieur' : 'inférieur';
+            const dirNL = diff >= 0 ? 'hoger' : 'lager';
+            
+            const enStr = `The EC's consumers confidence index is ${bv} for ${l.period}. Compared to the same month last year, it is ${dirEN} by ${diffStr} point${diffStr==='1,0'?'':'s'}.`;
+            const frStr = `L'indice de confiance des consommateurs de la CE est de ${bv} pour ${l.period}. Par rapport au même mois l'an dernier, il est ${dirFR} de ${diffStr} point${diffStr==='1,0'?'':'s'}.`;
+            const nlStr = `De consumentenvertrouwensindex van de EC is ${bv} voor ${l.period}. Vergeleken met dezelfde maand vorig jaar is deze ${diffStr} punt${diffStr==='1,0'?'':'en'} ${dirNL}.`;
+            return LANG==='fr'?frStr:LANG==='nl'?nlStr:enStr;
+        } else {
+            return LANG==='fr'?`BE: ${bv} (UE: ${euv})`:LANG==='nl'?`BE: ${bv} (EU: ${euv})`:`BE: ${bv} (EU: ${euv})`;
+        }
     }
     const m=M[c]||{},d=(l.value-p.value).toFixed(1).replace('.',','),sg=l.value>p.value?'+':'',st=l.obs_status==='P'?' '+t('c_prov'):'';return`${m.name?.[LANG]||c} ${t('c_reached')} ${fmtV(l.value,l.unit)} ${t('c_in')} ${l.period}${st}. ${t('c_vs')} ${p.period}: ${sg}${d} ${m.unit==='balance'?'pts':'p.p.'}`;
 }
@@ -316,6 +340,27 @@ async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CS
         });
         if(comp.length > 0) DATA['INT_GDP_COMP'] = comp;
     }
+    
+    if(DATA['BE_CONSUMER_CONFIDENCE'] && DATA['EU_CONSUMER_CONFIDENCE']) {
+        let comp_cc = [];
+        DATA['BE_CONSUMER_CONFIDENCE'].forEach(b => {
+            let eu = DATA['EU_CONSUMER_CONFIDENCE'].find(x => x.period === b.period);
+            if(eu) {
+                comp_cc.push({
+                    period: b.period,
+                    value: b.value,
+                    eu_value: eu.value,
+                    obs_status: b.obs_status,
+                    unit: 'balance',
+                    source: 'EC',
+                    name: "Consumer's confidence index",
+                    fetched_at: b.fetched_at
+                });
+            }
+        });
+        if(comp_cc.length > 0) DATA['CONSUMER_CONFIDENCE_COMP'] = comp_cc;
+    }
+
     // ── Load forecasts ──
     try {
         const fr=await fetch(FORECAST_CSV_URL+'?t='+Date.now());
@@ -330,8 +375,6 @@ async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CS
     dot.className='dot';st.textContent=`${Object.keys(DATA).length} indicators · ${rows.length} ${t('m_obs')}`;render();}catch(e){dot.className='dot err';st.textContent=t('error')+e.message;}}
 
 function buildForecastData(){
-    // For each FC_ meta entry, build a synthetic DATA entry with avg values per year
-    // Only include institutions updated in the last 6 months
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - 6);
     const cutStr = cutoff.toISOString().substring(0,10);
@@ -342,7 +385,6 @@ function buildForecastData(){
         const relevant = FORECASTS_RAW.filter(r =>
             r.indicator === ind && r.value !== null && r.updated_at >= cutStr
         );
-        // Group by year
         const byYear = {};
         relevant.forEach(r => {
             if(!byYear[r.year]) byYear[r.year] = [];
@@ -376,7 +418,7 @@ function drawSparkBar(cv, series){
   const mn=Math.min(...vals,0), mx=Math.max(...vals,0), rg=mx-mn||1;
   const n=vals.length, barW=Math.min(28, (W-pad*2)/n - 4), gap=((W-pad*2)-barW*n)/(n+1);
   const zY=H-pad-((0-mn)/rg)*(H-2*pad);
-  const green=gc('--green'), red=gc('--red'), orange=gc('--orange')||'#d97706';
+  const green=gc('--green'), red=gc('--red');
   vals.forEach((v,i)=>{
     const x=pad+gap+(barW+gap)*i;
     const yV=H-pad-((v-mn)/rg)*(H-2*pad);
@@ -390,11 +432,9 @@ function drawSparkBar(cv, series){
     ctx.lineTo(x+r,top+h);ctx.quadraticCurveTo(x,top+h,x,top+h-r);
     ctx.lineTo(x,top+r);ctx.quadraticCurveTo(x,top,x+r,top);ctx.fill();
     ctx.globalAlpha=1;
-    // year label below
     ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=gc('--text-cell-dim');
     ctx.textAlign='center';ctx.textBaseline='bottom';
     ctx.fillText(series[i].period.slice(-2), x+barW/2, H);
-    // value above bar
     ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=v>=0?green:red;
     ctx.textBaseline=v>=0?'bottom':'top';
     ctx.fillText(v.toFixed(1).replace('.',','), x+barW/2, v>=0?top-1:top+h+1);
@@ -412,8 +452,10 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
     if(c === 'INT_GDP_COMP') {
         valCell = `<td class="val" style="font-size:0.7rem;line-height:1.2;white-space:nowrap">BE: ${l.be_value.toFixed(1).replace('.',',')}<br><span style="color:var(--text-cell-muted);font-size:0.65rem">DE/FR/NL: ${l.value.toFixed(1).replace('.',',')}</span></td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}<br><span style="font-size:0.6rem;color:var(--text-cell-muted)">2010=100</span></td>`;
+    } else if (c === 'CONSUMER_CONFIDENCE_COMP') {
+        valCell = `<td class="val" style="font-size:0.7rem;line-height:1.2;white-space:nowrap">BE: ${l.value.toFixed(1).replace('.',',')}<br><span style="color:var(--text-cell-muted);font-size:0.65rem">EA: ${l.eu_value.toFixed(1).replace('.',',')}</span></td>`;
+        periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td>`;
     } else if(isFc) {
-        // Show values for each forecast year side by side
         const parts = s.map(d => `${d.period}: <b>${d.value>=0?'':' '}${d.value.toFixed(1).replace('.',',')}</b>`).join(' · ');
         valCell = `<td class="val" style="font-size:0.68rem;white-space:nowrap">${parts}</td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${s.map(d=>d.period).join(', ')}<br><span style="font-size:0.58rem;color:var(--text-cell-muted)">${l._count||'?'} inst.</span></td>`;
@@ -425,7 +467,6 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
     if(isFc) srcBadge=`<span class="src-badge" style="background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange)">FPB</span>`;
     else if(l.source==='EC') srcBadge=`<span class="src-badge" style="background:var(--bg-btn-primary);color:var(--text-btn-primary)">${l.source}</span>`;
     else srcBadge=`<span class="src-badge src-nbb">${l.source}</span>`;
-    // Comment for forecast rows
     let cmnt;
     if(isFc){
         const avgAll = s.map(d=>d.value.toFixed(1).replace('.',',')).join(' / ');
@@ -440,6 +481,7 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
 });h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA)){
   const cv=document.getElementById('sp_'+c);
   if(M[c]?.forecast) drawSparkBar(cv, s);
+  else if (c === 'CONSUMER_CONFIDENCE_COMP') drawSparkBar(cv, s);
   else drawSpark(cv, s.map(d=>d.value), trend(s));
 }});renderContribChart();}
 
@@ -451,7 +493,6 @@ function openModal(code){
   _modalCode = code;
   const meta = M[code] || {};
 
-  // ── Forecast modal: table only, per-institution ──
   if(meta.forecast && meta.fc_indicator){
     const ind = meta.fc_indicator;
     const name = meta.name?.[LANG] || code;
@@ -459,7 +500,6 @@ function openModal(code){
     const cutStr = cutoff.toISOString().substring(0,10);
     const relevant = FORECASTS_RAW.filter(r => r.indicator===ind && r.updated_at>=cutStr);
     const years = [...new Set(relevant.map(r=>r.year))].sort();
-    // Group by institution
     const instMap = {};
     relevant.forEach(r => {
       if(!instMap[r.institution]) instMap[r.institution]={institution:r.institution, updated_at:r.updated_at};
@@ -467,7 +507,6 @@ function openModal(code){
       if(r.updated_at > (instMap[r.institution].updated_at||'')) instMap[r.institution].updated_at=r.updated_at;
     });
     const insts = Object.values(instMap).sort((a,b)=>a.institution.localeCompare(b.institution));
-    // Stats
     const avgByYear = years.map(yr => {
       const vals = relevant.filter(r=>r.year===yr && r.value!==null).map(r=>r.value);
       return {year:yr, avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0, count:vals.length,
@@ -481,9 +520,7 @@ function openModal(code){
       `<div class="stat-card"><div class="stat-label">Avg ${a.year} (${a.count} inst.)</div><div class="stat-val">${a.avg.toFixed(2).replace('.',',')}%</div></div>`+
       `<div class="stat-card"><div class="stat-label">Range ${a.year}</div><div class="stat-val" style="font-size:.75rem">${a.min.toFixed(1).replace('.',',')} — ${a.max.toFixed(1).replace('.',',')}%</div></div>`
     ).join('');
-    // Hide chart
     document.getElementById('modalChart').style.display='none';
-    // Build table
     let tb=`<tr style="background:var(--bg-thead)"><td style="font-weight:600">Institution</td>${years.map(y=>`<td style="font-weight:600;text-align:center">${y}</td>`).join('')}<td style="font-weight:600">Updated</td></tr>`;
     insts.forEach(inst => {
       tb += `<tr><td style="font-size:.72rem">${inst.institution}</td>`;
@@ -497,26 +534,22 @@ function openModal(code){
       });
       tb+=`<td style="font-size:.65rem;color:var(--text-cell-muted)">${inst.updated_at||'—'}</td></tr>`;
     });
-    // Averages row
     tb+=`<tr style="background:var(--bg-thead);font-weight:600"><td>Consensus avg</td>`;
     avgByYear.forEach(a=>{
       tb+=`<td style="text-align:center;font-family:'Overpass Mono';font-size:.72rem">${a.avg.toFixed(2).replace('.',',')}</td>`;
     });
     tb+=`<td></td></tr>`;
     document.getElementById('modalTableBody').innerHTML=tb;
-    // Update table headers for forecast view
     document.getElementById('mThPer').textContent='Institution';
     document.getElementById('mThVal').textContent=years[0]||'';
     document.getElementById('mThChg').textContent=years[1]||'';
     document.getElementById('mThStat').textContent='Updated';
     document.getElementById('mThBar').textContent='';
-    // Hide default header row, use custom row
     document.querySelector('.modal-table thead').style.display='none';
     document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
     return;
   }
 
-  // ── Standard modal ──
   let series, displayCode=code;
   if(code==='INT_GDP_COMP' && DATA['EUROSTAT_GDP_Q_MEUR']){
     series = DATA['EUROSTAT_GDP_Q_MEUR'];
@@ -527,10 +560,10 @@ function openModal(code){
   if(!series||!series.length)return;
   const name=meta.name?.[LANG]||series[0].name||code,unit=series[0].unit;
   const cutoff=new Date().getFullYear()-10;
-  const filtered=series.filter(d=>parseInt(d.period)>=cutoff);
+  const filtered=series.filter(d=>parseInt(d.period.substring(0,4))>=cutoff);
   const dd=filtered.length>0?filtered:series.slice(-10);
   _modalData = dd;
-  // Show chart again
+  
   document.getElementById('modalChart').style.display='';
   document.querySelector('.modal-table thead').style.display='';
   document.getElementById('modalTitle').textContent=name;
@@ -540,14 +573,24 @@ function openModal(code){
   document.getElementById('modalStats').innerHTML=`<div class="stat-card"><div class="stat-label">${t('m_latest')} (${last.period})</div><div class="stat-val ${last.value>=0?'pos':'neg'}">${fmtV(last.value,unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_chg')}</div><div class="stat-val ${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(1).replace('.',',')} ${unit==='balance'?'pts':'p.p.'}</div></div><div class="stat-card"><div class="stat-label">${t('m_avg')}</div><div class="stat-val">${avg.toFixed(1).replace('.',',')}${unit==='balance'?'':'%'}</div></div><div class="stat-card"><div class="stat-label">${t('m_min')}</div><div class="stat-val neg">${fmtV(Math.min(...vals),unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_max')}</div><div class="stat-val pos">${fmtV(Math.max(...vals),unit)}</div></div>`;
   drawModalChart(dd,unit);
   const am=Math.max(Math.abs(Math.min(...vals)),Math.abs(Math.max(...vals)))||1;
-  let tb='';for(let i=dd.length-1;i>=0;i--){const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class="${delta>=0?'pos-val':'neg-val'}">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';let sb='—';if(d.obs_status==='A')sb=`<span class="status-badge st-actual">${t('st_act')}</span>`;else if(d.obs_status==='P')sb=`<span class="status-badge st-prov">${t('st_prov')}</span>`;else if(d.obs_status==='B')sb=`<span class="status-badge st-break">${t('st_brk')}</span>`;const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';tb+=`<tr><td>${d.period}</td><td class="${vc}">${fmtV(d.value,unit)}</td><td>${dc}</td><td>${sb}</td><td><div style="position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px"><div style="position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)"></div></div></td></tr>`;}
+  let tb='';for(let i=dd.length-1;i>=0;i--){
+      const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class="${delta>=0?'pos-val':'neg-val'}">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';
+      let sb='—';if(d.obs_status==='A')sb=`<span class="status-badge st-actual">${t('st_act')}</span>`;else if(d.obs_status==='P')sb=`<span class="status-badge st-prov">${t('st_prov')}</span>`;else if(d.obs_status==='B')sb=`<span class="status-badge st-break">${t('st_brk')}</span>`;
+      const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';
+      
+      let displayVal = `<span class="${vc}">${fmtV(d.value,unit)}</span>`;
+      if(code === 'CONSUMER_CONFIDENCE_COMP' && d.eu_value !== undefined) {
+          displayVal = `<div style="line-height:1.2; padding-top:2px; padding-bottom:2px;"><span class="${vc}">BE: ${d.value.toFixed(1).replace('.',',')}</span><br><span style="font-size:0.65rem;color:var(--text-cell-muted)">EU: ${d.eu_value.toFixed(1).replace('.',',')}</span></div>`;
+      }
+      
+      tb+=`<tr><td>${d.period}</td><td>${displayVal}</td><td>${dc}</td><td>${sb}</td><td><div style="position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px"><div style="position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)"></div></div></td></tr>`;
+  }
   document.getElementById('modalTableBody').innerHTML=tb;
   document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
 }
 function exportModalCSV(){
   const meta=M[_modalCode]||{};
   if(meta.forecast && meta.fc_indicator){
-    // Export all institution-level forecast data
     const ind=meta.fc_indicator;
     const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
     const cutStr=cutoff.toISOString().substring(0,10);
@@ -571,22 +614,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function drawModalChart(data,unit){requestAnimationFrame(()=>{requestAnimationFrame(()=>{_rc(data,unit);});});}
 function _rc(data,unit){const cv=document.getElementById('modalChart'),ct=cv.parentElement,ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=ct.clientWidth-40,H=260;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const vals=data.map(d=>d.value),n=data.length,vMin=Math.min(...vals,0),vMax=Math.max(...vals,0),vR=vMax-vMin||1;const pL=58,pR=18,pT=18,pB=48,cW=W-pL-pR,slW=cW/n,bW=Math.max(8,Math.min(36,slW*.55));const yOf=v=>pT+((vMax-v)/vR)*(H-pT-pB),zY=yOf(0);const gC=gc('--chart-grid'),zC=gc('--chart-zero'),lC=gc('--chart-label'),liC=gc('--chart-line'),dC=gc('--chart-dot'),dR=gc('--chart-dot-ring'),bP=gc('--chart-bar-pos'),bN=gc('--chart-bar-neg');
-// Y grid
 niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+(unit==='balance'?'':'%'),pL-10,y);});
-// Zero line
 const zy=Math.round(zY)+.5;ctx.strokeStyle=zC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,zy);ctx.lineTo(W-pR,zy);ctx.stroke();
-// X-axis label skip: measure label width and compute optimal interval
 const maxLabelW=Math.max(...data.map(d=>{ctx.font='9px Overpass Mono,monospace';return ctx.measureText(d.period).width;}));
 const xSkip=Math.max(1,Math.ceil((maxLabelW+12)/slW));
-// Bars
 data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,vY=yOf(d.value),isP=d.value>=0,bT=isP?vY:zY,bH=Math.max(1,Math.abs(vY-zY)),rgb=isP?bP:bN;ctx.fillStyle=`rgba(${rgb},.55)`;ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.fill();if(d.obs_status==='P'){ctx.strokeStyle=`rgba(${rgb},.3)`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.stroke();ctx.setLineDash([]);}
-// Value labels — only show if bars wide enough
 if(slW>18){ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=`rgba(${rgb},.85)`;ctx.textAlign='center';ctx.textBaseline=isP?'bottom':'top';ctx.fillText(d.value.toFixed(1).replace('.',','),cx,isP?bT-4:bT+bH+4);}
-// X labels — skip to avoid overlap
 if(i%xSkip===0||i===n-1){ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(d.period,cx,H-pB+8);}});
-// Trend line
 ctx.beginPath();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2;i===0?ctx.moveTo(cx,yOf(d.value)):ctx.lineTo(cx,yOf(d.value));});ctx.strokeStyle=liC;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
-// Dots
 data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,y=yOf(d.value),isL=i===n-1;ctx.beginPath();ctx.arc(cx,y,isL?4.5:2.5,0,Math.PI*2);ctx.fillStyle=isL?dC:liC;ctx.fill();if(isL){ctx.strokeStyle=dR;ctx.lineWidth=2;ctx.stroke();}});}
 function rr(c,x,y,w,h,r){if(h===0)return;c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
 function niceSteps(mn,mx,n){const rg=mx-mn||1,ro=rg/n,mg=Math.pow(10,Math.floor(Math.log10(ro))),rs=ro/mg,ni=rs<=1.5?mg:rs<=3?2*mg:rs<=7?5*mg:10*mg;const st=[];let v=Math.ceil(mn/ni)*ni;while(v<=mx){st.push(parseFloat(v.toFixed(4)));v+=ni;}return st;}
@@ -623,7 +658,6 @@ function downloadChart(canvasId, name) {
   const temp = document.createElement('canvas');
   const ctx = temp.getContext('2d');
   
-  // Analyse de la légende pour calculer la hauteur totale
   ctx.font = `${legFontSz}px Figtree, sans-serif`;
   let legRows = 1;
   let currentX = padX;
@@ -647,7 +681,6 @@ function downloadChart(canvasId, name) {
     const textW = ctx.measureText(text).width;
     const itemW = swW + swatchTextGap + textW;
     
-    // Retour à la ligne si on dépasse la bordure droite
     if (currentX + itemW > cardW - padX && currentX > padX) {
       legRows++;
       currentX = padX;
@@ -667,7 +700,6 @@ function downloadChart(canvasId, name) {
   temp.width = cardW;
   temp.height = sepY + legendTotalH + padYBot;
   
-  // Fond et bordures
   ctx.fillStyle = gc('--bg-table');
   ctx.fillRect(0, 0, temp.width, temp.height);
   
@@ -675,27 +707,22 @@ function downloadChart(canvasId, name) {
   ctx.lineWidth = 1 * dpr;
   ctx.strokeRect(0, 0, temp.width, temp.height);
   
-  // Titre
   ctx.fillStyle = gc('--text-cell');
   ctx.font = `bold ${titleFontSz}px Figtree, sans-serif`;
   ctx.textBaseline = 'top';
   ctx.fillText(title, padX, padYTop);
   
-  // Sous-titre
   ctx.fillStyle = gc('--text-cell-muted');
   ctx.font = `${subFontSz}px Figtree, sans-serif`;
   ctx.fillText(sub, padX, padYTop + titleH + titleMb);
   
-  // Graphique (Canevas d'origine)
   ctx.drawImage(cv, padX, cvY, cv.width, cv.height);
   
-  // Ligne de séparation
   ctx.beginPath();
   ctx.moveTo(padX, sepY);
   ctx.lineTo(cardW - padX, sepY);
   ctx.stroke();
   
-  // Légende
   ctx.font = `${legFontSz}px Figtree, sans-serif`;
   legItems.forEach(item => {
     const y = sepY + legPt + (item.row - 1) * (legLineH + legGapY);
@@ -711,7 +738,6 @@ function downloadChart(canvasId, name) {
     ctx.fillText(item.text, item.x + item.swW + swatchTextGap, y + legLineH / 2);
   });
   
-  // Extraction
   const a = document.createElement('a');
   a.download = name + '.png';
   a.href = temp.toDataURL('image/png');
@@ -734,7 +760,6 @@ function renderContribChart() {
   const wrap = document.getElementById('contribWrap');
   if (activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
 
-  // Check contrib data
   const gdp = DATA['GDP_ANNUAL_CY'];
   const hasContrib = CONTRIB_SERIES.every(s => {
     if (s.composite) return s.composite.every(c => DATA[c] && DATA[c].length > 0);
@@ -745,18 +770,15 @@ function renderContribChart() {
   if (!gdp && !hasContrib && !hasIntl) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'flex';
 
-  // Contrib card
   const contribCard = wrap.querySelector('.contrib-card:first-child');
   if (gdp && hasContrib) {
     contribCard.style.display = '';
     const titles = {en:'Annual real GDP growth and contributions', fr:'Croissance annuelle réelle du PIB et contributions', nl:'Jaarlijkse reële BBP-groei en bijdragen'};
     document.getElementById('contribTitle').textContent = titles[LANG] || titles.en;
 
-    // Build year-aligned data (last 14 years)
     const cutoff = new Date().getFullYear() - 14;
     const years = gdp.filter(d => parseInt(d.period) >= cutoff).map(d => d.period);
 
-    // For each year, get contribution values
     const yearData = years.map(yr => {
       const obj = { year: yr, gdp: gdp.find(d => d.period === yr)?.value || 0 };
       CONTRIB_SERIES.forEach(s => {
@@ -773,13 +795,11 @@ function renderContribChart() {
       return obj;
     });
 
-    // Legend
     const legEl = document.getElementById('contribLegend');
     legEl.innerHTML = CONTRIB_SERIES.map(s =>
       `<div class="leg"><div class="swatch" style="background:${s.color}"></div>${s.label[LANG]||s.label.en}</div>`
     ).join('') + `<div class="leg"><div class="swatch" style="background:var(--text-cell);border-radius:0;height:2px;margin-top:5px"></div>GDP (growth in %)</div>`;
 
-    // Draw on canvas
     requestAnimationFrame(() => { requestAnimationFrame(() => { _drawContrib(yearData); }); });
   } else {
     contribCard.style.display = 'none';
@@ -805,7 +825,6 @@ function _drawContrib(yearData) {
   const slW = cW / n;
   const barW = Math.max(10, Math.min(42, slW * 0.6));
 
-  // Compute stacked ranges to find min/max
   let stackMin = 0, stackMax = 0;
   yearData.forEach(yd => {
     let posSum = 0, negSum = 0;
@@ -816,20 +835,17 @@ function _drawContrib(yearData) {
     stackMax = Math.max(stackMax, posSum, yd.gdp);
     stackMin = Math.min(stackMin, negSum, yd.gdp);
   });
-  // Add padding
   const vMin = Math.floor(stackMin - 1);
   const vMax = Math.ceil(stackMax + 1);
   const vR = vMax - vMin || 1;
   const yOf = v => pT + ((vMax - v) / vR) * cH;
   const zeroY = yOf(0);
 
-  // Colors from theme
   const gridC = gc('--chart-grid') || 'rgba(0,0,0,.06)';
   const zeroC = gc('--chart-zero') || 'rgba(0,0,0,.12)';
   const labelC = gc('--chart-label') || '#94a3b8';
   const textC = gc('--text-cell') || '#1e293b';
 
-  // Grid
   const steps = niceSteps(vMin, vMax, 6);
   steps.forEach(v => {
     const y = Math.round(yOf(v)) + 0.5;
@@ -840,22 +856,19 @@ function _drawContrib(yearData) {
     ctx.fillText(v.toFixed(0), pL - 8, y);
   });
 
-  // Zero line
   const zy = Math.round(zeroY) + 0.5;
   ctx.strokeStyle = zeroC; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(pL, zy); ctx.lineTo(W - pR, zy); ctx.stroke();
 
-  // Y-axis label
   ctx.save(); ctx.translate(12, pT + cH / 2); ctx.rotate(-Math.PI / 2);
   ctx.font = '10px Figtree, sans-serif'; ctx.fillStyle = labelC;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText('in %', 0, 0); ctx.restore();
 
-  // Stacked bars
   yearData.forEach((yd, i) => {
     const cx = pL + slW * i + slW / 2;
-    let posY = zeroY; // grows upward
-    let negY = zeroY; // grows downward
+    let posY = zeroY;
+    let negY = zeroY;
 
     CONTRIB_SERIES.forEach(s => {
       const v = yd[s.code];
@@ -866,7 +879,6 @@ function _drawContrib(yearData) {
         const top = posY - h;
         ctx.fillStyle = s.color;
         ctx.fillRect(Math.round(cx - barW / 2), top, barW, h);
-        // Subtle border
         ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 0.5;
         ctx.strokeRect(Math.round(cx - barW / 2), top, barW, h);
         posY = top;
@@ -880,13 +892,11 @@ function _drawContrib(yearData) {
       }
     });
 
-    // X label
     ctx.font = '10px Overpass Mono, monospace'; ctx.fillStyle = labelC;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     ctx.fillText(yd.year, cx, H - pB + 8);
   });
 
-  // GDP line on top
   ctx.beginPath();
   yearData.forEach((yd, i) => {
     const cx = pL + slW * i + slW / 2;
@@ -896,15 +906,12 @@ function _drawContrib(yearData) {
   ctx.strokeStyle = textC; ctx.lineWidth = 2.5;
   ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
 
-  // GDP dots + labels
   yearData.forEach((yd, i) => {
     const cx = pL + slW * i + slW / 2;
     const y = yOf(yd.gdp);
-    // Dot
     ctx.beginPath(); ctx.arc(cx, y, 3.5, 0, Math.PI * 2);
     ctx.fillStyle = gc('--bg-table') || '#fff'; ctx.fill();
     ctx.strokeStyle = textC; ctx.lineWidth = 2; ctx.stroke();
-    // Value label above/below
     ctx.font = 'bold 10px Figtree, sans-serif'; ctx.fillStyle = textC;
     ctx.textAlign = 'center';
     ctx.textBaseline = yd.gdp >= 0 ? 'bottom' : 'top';
@@ -912,12 +919,10 @@ function _drawContrib(yearData) {
     ctx.fillText(yd.gdp.toFixed(1).replace('.', ','), cx, y + offset);
   });
 
-  // Source label
   ctx.font = '9px Figtree, sans-serif'; ctx.fillStyle = labelC;
   ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
   ctx.fillText('Source: NBB', W - pR, H - 2);
 
-  // Interaction Hover
   cv.onmousemove = e => {
     const rect = cv.getBoundingClientRect();
     const cw = rect.width - pL - pR;
@@ -970,7 +975,6 @@ function renderIntlChart() {
   const titles = {en:'Quarterly real GDP growth',fr:'Croissance trimestrielle du PIB réel',nl:'Kwartaal reëel BBP-groei'};
   document.getElementById('intlTitle').textContent = titles[LANG]||titles.en;
 
-  // Build composite DE/FR/NL series
   const compData = [];
   be.forEach(b => {
     const d=de.find(x=>x.period===b.period), f=fr.find(x=>x.period===b.period), n=nl.find(x=>x.period===b.period);
@@ -978,7 +982,6 @@ function renderIntlChart() {
   });
   DATA['_COMPOSITE_DEFRNL'] = compData;
 
-  // Legend
   const legEl = document.getElementById('intlLegend');
   legEl.innerHTML = INTL_SERIES.map(s => {
     const col = s.color === '_theme_' ? 'var(--text-cell)' : s.color;
@@ -1000,13 +1003,11 @@ function _drawIntl() {
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
 
-  // Gather all periods from BE (reference)
   const be = DATA['EUROSTAT_GDP_Q_MEUR'];
   if(!be || !be.length) return;
   const periods = be.map(d=>d.period);
   const n = periods.length;
 
-  // Collect all values to find Y range
   let allVals = [];
   INTL_SERIES.forEach(s => {
     const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
@@ -1017,7 +1018,6 @@ function _drawIntl() {
   const pL=50, pR=14, pT=16, pB=52;
   const cW=W-pL-pR, cH=H-pT-pB;
 
-  // Nice Y range
   const rawMin=Math.min(...allVals), rawMax=Math.max(...allVals);
   const vMin=Math.floor(rawMin/5)*5, vMax=Math.ceil(rawMax/5)*5;
   const vR=vMax-vMin||1;
@@ -1026,7 +1026,6 @@ function _drawIntl() {
   const gridC=gc('--chart-grid')||'rgba(0,0,0,.06)';
   const labelC=gc('--chart-label')||'#94a3b8';
 
-  // Y grid
   const yStep = vMax-vMin > 30 ? 5 : (vMax-vMin > 15 ? 5 : 2);
   for(let v=vMin; v<=vMax; v+=yStep){
     const y=Math.round(yOf(v))+0.5;
@@ -1038,16 +1037,13 @@ function _drawIntl() {
     ctx.fillText(v.toString(), pL-8, y);
   }
 
-  // Y-axis label
   ctx.save(); ctx.translate(11, pT+cH/2); ctx.rotate(-Math.PI/2);
   ctx.font='10px Figtree,sans-serif'; ctx.fillStyle=labelC;
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('2010 = 100', 0, 0); ctx.restore();
 
-  // X-axis labels — smart skip
-  const maxLblW = 52; // approx width of "2020-Q1"
+  const maxLblW = 52;
   const xStep = Math.max(1, Math.ceil((maxLblW+8) / (cW/n)));
-  // Prefer Q1 labels
   periods.forEach((p,i) => {
     if(i % xStep !== 0 && i !== n-1) return;
     const x = pL + (i/(n-1))*cW;
@@ -1060,8 +1056,7 @@ function _drawIntl() {
     ctx.restore();
   });
 
-  // Draw lines — order matters (thicker BE on top)
-  const drawOrder = [3, 4, 2, 0, 1]; // ES, composite, DE, EA, BE
+  const drawOrder = [3, 4, 2, 0, 1];
   drawOrder.forEach(si => {
     const s = INTL_SERIES[si];
     const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
@@ -1083,12 +1078,10 @@ function _drawIntl() {
     ctx.stroke();
   });
 
-  // Source
   ctx.font='9px Figtree,sans-serif'; ctx.fillStyle=labelC;
   ctx.textAlign='right'; ctx.textBaseline='bottom';
   ctx.fillText('Source: Eurostat', W-pR, H-2);
 
-  // Interaction Hover
   cv.onmousemove = e => {
     const rect = cv.getBoundingClientRect();
     const cw = rect.width - pL - pR;
