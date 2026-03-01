@@ -119,16 +119,11 @@ body{font-family:'Figtree',sans-serif;background:var(--bg-page);color:var(--text
 .table-wrap{padding:20px 32px 40px}
 .section-head{font-size:.95rem;font-weight:700;color:var(--text-section);padding:14px 0 6px;border-bottom:2px solid var(--border-section);margin-top:20px;display:flex;align-items:center;gap:8px}
 .section-head:first-of-type{margin-top:0}
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.8rem;background:var(--bg-table);border-radius:8px;margin-bottom:4px;transition:background .3s}
+table{width:100%;border-collapse:collapse;font-size:.8rem;background:var(--bg-table);border-radius:8px;overflow:hidden;margin-bottom:4px;transition:background .3s}
 thead th{background:var(--bg-thead);color:var(--text-thead);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-table)}
-table thead th:first-child{border-top-left-radius:8px}
-table thead th:last-child{border-top-right-radius:8px}
-tbody tr{transition:background .1s;cursor:pointer}
+tbody tr{border-bottom:1px solid var(--border-table);transition:background .1s;cursor:pointer}
 tbody tr:hover{background:var(--bg-row-hover)}
-tbody td{padding:12px;color:var(--text-cell);vertical-align:top;line-height:1.45;border-bottom:1px solid var(--border-table)}
-table tbody tr:last-child td{border-bottom:none}
-table tbody tr:last-child td:first-child{border-bottom-left-radius:8px}
-table tbody tr:last-child td:last-child{border-bottom-right-radius:8px}
+tbody td{padding:12px;color:var(--text-cell);vertical-align:top;line-height:1.45}
 th:nth-child(1),td:nth-child(1){width:3%;text-align:center;color:var(--text-cell-muted)}
 th:nth-child(2),td:nth-child(2){width:20%}th:nth-child(3),td:nth-child(3){width:6%;text-align:center}
 th:nth-child(4),td:nth-child(4){width:8%;text-align:center}th:nth-child(5),td:nth-child(5){width:8%;text-align:center}
@@ -147,8 +142,8 @@ canvas.spark{display:block}
 .ind-name .tip{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:50;width:320px;padding:12px 14px;background:var(--bg-tip);border:1px solid var(--border-tip);border-radius:8px;box-shadow:0 8px 24px var(--shadow-tip);pointer-events:none}
 .ind-name:hover .tip{display:block;animation:tipIn .15s ease}
 @keyframes tipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-tr:nth-last-child(-n+3):nth-child(n+4) .ind-name .tip{top:auto;bottom:calc(100% + 8px)}
-tr:nth-last-child(-n+3):nth-child(n+4) .ind-name:hover .tip{animation:tipUp .15s ease}
+tr:nth-last-child(-n+3) .ind-name .tip{top:auto;bottom:calc(100% + 8px)}
+tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
 @keyframes tipUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .tip-title{font-size:.8rem;font-weight:700;color:var(--tip-title);margin-bottom:4px;line-height:1.3}
 .tip-code{font-family:'Overpass Mono';font-size:.64rem;color:var(--tip-code);margin-bottom:6px}
@@ -173,10 +168,10 @@ tr:nth-last-child(-n+3):nth-child(n+4) .ind-name:hover .tip{animation:tipUp .15s
 .modal-chart canvas{display:block}
 .modal-table-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--modal-table-border)}
 .modal-table{width:100%;border-collapse:collapse;font-size:.78rem}
-.modal-table thead th{background:var(--bg-modal-table);color:var(--text-thead);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 14px;text-align:left;position:sticky;top:0;border-radius:0}
+.modal-table thead th{background:var(--bg-modal-table);color:var(--text-thead);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 14px;text-align:left;position:sticky;top:0}
 .modal-table tbody tr{border-bottom:1px solid var(--modal-table-border)}
 .modal-table tbody tr:hover{background:var(--bg-row-hover)}
-.modal-table td{padding:7px 14px;color:var(--text-cell);font-family:'Overpass Mono';font-size:.76rem;border-bottom:none;border-radius:0}
+.modal-table td{padding:7px 14px;color:var(--text-cell);font-family:'Overpass Mono';font-size:.76rem}
 .modal-table td:nth-child(2){font-weight:600}
 .modal-table .pos-val{color:var(--green)}.modal-table .neg-val{color:var(--red)}
 .modal-table .status-badge{font-size:.62rem;padding:1px 6px;border-radius:3px;font-family:'Figtree';font-weight:600}
@@ -184,7 +179,7 @@ tr:nth-last-child(-n+3):nth-child(n+4) .ind-name:hover .tip{animation:tipUp .15s
 .modal-table .st-prov{background:var(--orange-bg);color:var(--orange)}
 .modal-table .st-break{background:var(--red-bg);color:var(--red)}
 .contrib-wrap{padding:0 32px 30px;display:flex;gap:20px}
-.contrib-card{background:var(--bg-table);border-radius:10px;padding:24px 28px 18px;border:1px solid var(--border-table);flex:1;min-width:0;position:relative}
+.contrib-card{background:var(--bg-table);border-radius:10px;padding:24px 28px 18px;border:1px solid var(--border-table);flex:1;min-width:0}
 .contrib-title{font-size:.95rem;font-weight:700;color:var(--text-cell);margin-bottom:2px}
 .contrib-sub{font-size:.7rem;color:var(--text-cell-muted);margin-bottom:16px}
 .contrib-card canvas{display:block;width:100%}
@@ -192,25 +187,6 @@ tr:nth-last-child(-n+3):nth-child(n+4) .ind-name:hover .tip{animation:tipUp .15s
 .contrib-legend .leg{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text-cell-dim)}
 .contrib-legend .leg .swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
 @media(max-width:1100px){.contrib-wrap{padding-left:16px;padding-right:16px;flex-direction:column}}
-
-.dl-btn {
-  position: absolute; right: 20px; top: 20px;
-  background: transparent; border: none; cursor: pointer;
-  color: var(--text-cell-muted); padding: 4px; border-radius: 4px; transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center;
-}
-.dl-btn:hover { background: var(--bg-row-hover); color: var(--text-cell); }
-
-.chart-tooltip {
-  position: fixed; pointer-events: none; opacity: 0; z-index: 9999;
-  background: var(--bg-tip); border: 1px solid var(--border-tip);
-  border-radius: 6px; padding: 12px; font-size: 0.75rem; color: var(--text-cell);
-  box-shadow: 0 8px 24px var(--shadow-tip); transition: opacity 0.15s;
-  white-space: nowrap; font-family: 'Figtree', sans-serif;
-}
-.chart-tooltip .tt-title { font-weight: 700; margin-bottom: 8px; font-family: 'Overpass Mono', monospace; color: var(--tip-title); }
-.chart-tooltip .tt-row { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 4px; }
-.chart-tooltip .tt-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: -1px; margin-right: 6px;}
 </style>
 </head>
 <body>
@@ -219,18 +195,12 @@ tr:nth-last-child(-n+3):nth-child(n+4) .ind-name:hover .tip{animation:tipUp .15s
 <div class="table-wrap" id="tableWrap"></div>
 <div class="contrib-wrap" id="contribWrap" style="display:none">
   <div class="contrib-card">
-    <button class="dl-btn" onclick="downloadChart('contribCanvas', 'gdp_contributions')" title="Télécharger (.png)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-    </button>
     <div class="contrib-title" id="contribTitle">Annual real GDP growth and contributions</div>
     <div class="contrib-sub">in percentage points · Source: NBB</div>
     <canvas id="contribCanvas"></canvas>
     <div class="contrib-legend" id="contribLegend"></div>
   </div>
   <div class="contrib-card" id="intlCard" style="display:none">
-    <button class="dl-btn" onclick="downloadChart('intlCanvas', 'gdp_comparison')" title="Télécharger (.png)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-    </button>
     <div class="contrib-title" id="intlTitle">Quarterly real GDP growth</div>
     <div class="contrib-sub">(2010 = 100) · Source: Eurostat</div>
     <canvas id="intlCanvas"></canvas>
@@ -238,7 +208,6 @@ tr:nth-last-child(-n+3):nth-child(n+4) .ind-name:hover .tip{animation:tipUp .15s
   </div>
 </div>
 <div class="footer"><div id="ftSrc"><strong>Sources:</strong> NBB = National Bank of Belgium</div><div id="ftGit">Data from GitHub · Auto-updated daily 06:00 CET</div></div>
-<div id="chartTooltip" class="chart-tooltip"></div>
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="exportModalCSV()" style="font-size:.68rem;padding:5px 10px">⬇ Export CSV</button><button class="modal-close" onclick="closeModal()">✕</button></div></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
 const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
@@ -261,8 +230,8 @@ NET_EXPORTS_CY:{n:10,s:'gdp',name:{en:'Net exports',fr:'Exportations nettes',nl:
 FC_GDP_VOL:{n:11,s:'gdp',name:{en:'⟶ GDP forecast (consensus)',fr:'⟶ Prévision PIB (consensus)',nl:'⟶ BBP-prognose (consensus)'},o:11,full:{en:'GDP Volume Growth — Multi-Institution Forecast',fr:'Croissance du PIB en volume — Prévisions multi-institutions',nl:'BBP-volumegroei — Meervoudige prognose'},desc:{en:'Average GDP growth forecast from 13 institutions (FPB, NBB, EC, IMF, OECD, banks). Source: plan.be.',fr:'Prévision moyenne de croissance du PIB de 13 institutions. Source : plan.be.',nl:'Gemiddelde BBP-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'GDP_VOL'},
 FC_CPI:{n:1,s:'prices',name:{en:'⟶ CPI forecast (consensus)',fr:'⟶ Prévision IPC (consensus)',nl:'⟶ CPI-prognose (consensus)'},o:0.5,full:{en:'Consumer Price Index — Multi-Institution Forecast',fr:'Indice des prix à la consommation — Prévisions multi-institutions',nl:'Consumentenprijsindex — Meervoudige prognose'},desc:{en:'Average CPI growth forecast from 13 institutions. Source: plan.be.',fr:'Prévision moyenne IPC de 13 institutions. Source : plan.be.',nl:'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'CPI'},
 FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'⟶ Fiscal balance forecast (consensus)',fr:'⟶ Prévision solde budgétaire (consensus)',nl:'⟶ Begrotingssaldo prognose (consensus)'},o:0.5,full:{en:'Government Fiscal Balance — Multi-Institution Forecast',fr:'Solde de financement des APU — Prévisions multi-institutions',nl:'Begrotingssaldo overheid — Meervoudige prognose'},desc:{en:'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.',fr:'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source : plan.be.',nl:'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'FISCAL_BAL'},
-CONSUMER_CONFIDENCE:{n:1,s:'confidence',name:{en:'Consumer confidence (NBB)',fr:'Confiance des consommateurs (BNB)',nl:'Consumentenvertrouwen (NBB)'},o:1,full:{en:'Consumer Confidence Indicator — NBB',fr:'Indicateur de confiance des consommateurs — BNB',nl:'Indicator van het consumentenvertrouwen — NBB'},desc:{en:'Monthly consumer confidence balance from the National Bank of Belgium.',fr:'Solde mensuel de confiance des consommateurs de la Banque Nationale de Belgique.',nl:'Maandelijks saldo consumentenvertrouwen van de Nationale Bank van België.'},sdmx:'DF_CONSN',freq:'M'},
-CONSUMER_CONFIDENCE_COMP:{n:2,s:'confidence',name:{en:"Consumer's confidence index (EC)",fr:'Indice de confiance des consommateurs (CE)',nl:'Consumentenvertrouwensindex (EC)'},o:2,full:{en:'Consumer Confidence Indicator — BE vs EU27',fr:'Indicateur de confiance des consommateurs — BE vs UE27',nl:'Indicator van het consumentenvertrouwen — BE vs EU27'},desc:{en:'Monthly consumer confidence balance, seasonally adjusted. European Commission survey.',fr:'Solde mensuel de confiance des consommateurs, désaisonnalisé. Enquête de la Commission Européenne.',nl:'Maandelijks saldo consumentenvertrouwen, seizoensgezuiverd. Enquête Europese Commissie.'},sdmx:'ei_bssi_m_r2',freq:'M'}
+CONSUMER_CONFIDENCE:{n:5,s:'confidence',name:{en:'Consumer confidence (NBB)',fr:'Confiance des consommateurs (BNB)',nl:'Consumentenvertrouwen (NBB)'},o:5,full:{en:'Consumer Confidence Indicator — NBB Survey',fr:'Indicateur de confiance des consommateurs — Enquête BNB',nl:'Consumentenvertrouwenindicator — NBB-enquête'},desc:{en:'Monthly survey of household sentiment. Negative = pessimism, positive = optimism.',fr:'Enquête mensuelle du sentiment des ménages. Négatif = pessimisme, positif = optimisme.',nl:'Maandelijkse peiling van huishoudelijk sentiment. Negatief = pessimisme, positief = optimisme.'},sdmx:'',freq:'M'},
+EC_CONS_CONF:{n:6,s:'confidence',name:{en:'Consumer\'s confidence index',fr:'Indice de confiance des consommateurs',nl:'Consumentenvertrouwensindex'},o:6,full:{en:'Consumer Confidence — Eurostat (BE & EA)',fr:'Confiance des consommateurs — Eurostat (BE & ZE)',nl:'Consumentenvertrouwen — Eurostat (BE & EA)'},desc:{en:'EC harmonised consumer confidence for Belgium and Euro Area. Balance metric from Eurostat/DG ECFIN surveys.',fr:'Confiance des consommateurs harmonisée CE pour la Belgique et la zone euro. Source : Eurostat/DG ECFIN.',nl:'EC geharmoniseerd consumentenvertrouwen voor België en eurozone. Bron: Eurostat/DG ECFIN.'},sdmx:'',freq:'M',combined:true,be_code:'EC_CONS_CONF_BE',eu_code:'EC_CONS_CONF_EU'}
 };
 const SECTIONS={gdp:{label:{en:'Gross Domestic Product',fr:'Produit Intérieur Brut',nl:'Bruto Binnenlands Product'}},confidence:{label:{en:'Confidence & Sentiment',fr:'Confiance et Sentiment',nl:'Vertrouwen & Sentiment'}},prices:{label:{en:'Production & Prices',fr:'Production et Prix',nl:'Productie & Prijzen'}},labour:{label:{en:'Labour Costs',fr:'Coûts de la Main-d\'œuvre',nl:'Arbeidskosten'}},employment:{label:{en:'Employment',fr:'Emploi',nl:'Werkgelegenheid'}},unemployment:{label:{en:'Unemployment',fr:'Chômage',nl:'Werkloosheid'}},business:{label:{en:'Business Environment',fr:'Environnement des Affaires',nl:'Bedrijfsklimaat'}},fiscal:{label:{en:'Government Finances',fr:'Finances Publiques',nl:'Overheidsfinanciën'}}};
 let DATA={},activeFilter='gdp';
@@ -274,7 +243,7 @@ function setTheme(t,btn){document.documentElement.setAttribute('data-theme',t);l
 function loadTheme(){const t=localStorage.getItem('theme')||'soft';document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('t-'+t);if(btn)btn.classList.add('active');}
 function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function parseCSV(t){const l=t.trim().split('\n'),h=l[0].split(',');return l.slice(1).map(r=>{const v=r.split(','),o={};h.forEach((k,i)=>o[k.trim()]=(v[i]||'').trim());return o});}
-function fmtV(v,u){const s=v.toFixed(1).replace('.',',');return u==='pp_contribution'?s+' pp':u==='pct_gdp'?s+'% GDP':(u==='index_2010'||u==='comp_index'||u==='balance')?s:s+'%';}
+function fmtV(v,u){const s=v.toFixed(1).replace('.',',');return u==='pp_contribution'?s+' pp':u==='pct_gdp'?s+'% GDP':u==='balance'?s:(u==='index_2010'||u==='comp_index')?s:s+'%';}
 function fmtD(s){return s?s.substring(0,10):'—';}
 function trend(s){if(s.length<2)return'flat';const d=s[s.length-1].value-s[s.length-2].value;return d>.05?'up':d<-.05?'down':'flat';}
 function tArr(t){return t==='up'?'<span class="trend up">↗</span>':t==='down'?'<span class="trend down">↘</span>':'<span class="trend flat">→</span>';}
@@ -290,31 +259,18 @@ function comment(c,s){
         const nlStr=`De Belgische economie is gegroeid naar een niveau van ${bv} sinds 2008, terwijl de gecombineerde index (DE 50%, FR 40%, NL 10%) naar ${cv} is gegroeid.`;
         return LANG==='fr'?frStr:LANG==='nl'?nlStr:enStr;
     }
-    if(c==='CONSUMER_CONFIDENCE_COMP'){
-        const bv = l.value.toFixed(1).replace('.',',');
-        const euv = l.eu_value.toFixed(1).replace('.',',');
-        
-        // Find Year-over-Year comparison
-        const yr = parseInt(l.period.substring(0,4));
-        const mth = l.period.substring(4); // e.g. "-11" or "-M11"
-        const pyRow = s.find(x => x.period === String(yr - 1) + mth);
-        
-        if (pyRow) {
-            const diff = (l.value - pyRow.value);
-            const diffStr = Math.abs(diff).toFixed(1).replace('.',',');
-            const dirEN = diff >= 0 ? 'higher' : 'lower';
-            const dirFR = diff >= 0 ? 'supérieur' : 'inférieur';
-            const dirNL = diff >= 0 ? 'hoger' : 'lager';
-            
-            const enStr = `The EC's consumers confidence index is ${bv} for ${l.period}. Compared to the same month last year, it is ${dirEN} by ${diffStr} point${diffStr==='1,0'?'':'s'}.`;
-            const frStr = `L'indice de confiance des consommateurs de la CE est de ${bv} pour ${l.period}. Par rapport au même mois l'an dernier, il est ${dirFR} de ${diffStr} point${diffStr==='1,0'?'':'s'}.`;
-            const nlStr = `De consumentenvertrouwensindex van de EC is ${bv} voor ${l.period}. Vergeleken met dezelfde maand vorig jaar is deze ${diffStr} punt${diffStr==='1,0'?'':'en'} ${dirNL}.`;
-            return LANG==='fr'?frStr:LANG==='nl'?nlStr:enStr;
-        } else {
-            return LANG==='fr'?`BE: ${bv} (UE: ${euv})`:LANG==='nl'?`BE: ${bv} (EU: ${euv})`:`BE: ${bv} (EU: ${euv})`;
-        }
+    if(c==='EC_CONS_CONF'){
+        const bv=l.value.toFixed(1).replace('.',','), ev=l.eu_value.toFixed(1).replace('.',',');
+        // Compare to same month last year
+        const ly=s.find(d=>d.period===l.period.replace(/\d{4}/,String(parseInt(l.period)-1)));
+        const diff=ly?(l.value-ly.value).toFixed(1).replace('.',','):'—';
+        const sg=ly&&l.value>ly.value?'+':'';
+        const enStr=`The EC's consumers confidence index is ${bv} for ${l.period}. Compared to the same month last year, it is ${ly?'lower':'—'} by ${sg}${diff} point.`;
+        const frStr=`L'indice de confiance des consommateurs CE est de ${bv} pour ${l.period}. Par rapport au même mois l'an dernier : ${sg}${diff} point.`;
+        const nlStr=`De EC-consumentenvertrouwensindex is ${bv} voor ${l.period}. Ten opzichte van dezelfde maand vorig jaar: ${sg}${diff} punt.`;
+        return LANG==='fr'?frStr:LANG==='nl'?nlStr:enStr;
     }
-    const m=M[c]||{},d=(l.value-p.value).toFixed(1).replace('.',','),sg=l.value>p.value?'+':'',st=l.obs_status==='P'?' '+t('c_prov'):'';return`${m.name?.[LANG]||c} ${t('c_reached')} ${fmtV(l.value,l.unit)} ${t('c_in')} ${l.period}${st}. ${t('c_vs')} ${p.period}: ${sg}${d} ${m.unit==='balance'?'pts':'p.p.'}`;
+    const m=M[c]||{},d=(l.value-p.value).toFixed(1).replace('.',','),sg=l.value>p.value?'+':'',st=l.obs_status==='P'?' '+t('c_prov'):'';return`${m.name?.[LANG]||c} ${t('c_reached')} ${fmtV(l.value,l.unit)} ${t('c_in')} ${l.period}${st}. ${t('c_vs')} ${p.period}: ${sg}${d} p.p.`;
 }
 
 async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CSV_URL;const dot=document.getElementById('dot'),st=document.getElementById('statusText');if(!url){dot.className='dot err';st.textContent=t('no_csv');return;}dot.className='dot loading';st.textContent=t('fetching');try{const r=await fetch(url+'?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);const rows=parseCSV(await r.text());DATA={};rows.forEach(r=>{const c=r.indicator_code;if(!DATA[c])DATA[c]=[];DATA[c].push({period:r.period,value:parseFloat(r.value),obs_status:r.obs_status,unit:r.unit,source:r.source_agency,name:r.name,fetched_at:r.fetched_at});});Object.values(DATA).forEach(s=>s.sort((a,b)=>a.period.localeCompare(b.period)));
@@ -341,27 +297,26 @@ async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CS
         });
         if(comp.length > 0) DATA['INT_GDP_COMP'] = comp;
     }
-    
-    if(DATA['BE_CONSUMER_CONFIDENCE'] && DATA['EU_CONSUMER_CONFIDENCE']) {
-        let comp_cc = [];
-        DATA['BE_CONSUMER_CONFIDENCE'].forEach(b => {
-            let eu = DATA['EU_CONSUMER_CONFIDENCE'].find(x => x.period === b.period);
+    // ── Build combined EC Consumer Confidence (BE + EU) ──
+    if(DATA['EC_CONS_CONF_BE'] && DATA['EC_CONS_CONF_EU']) {
+        const combined = [];
+        DATA['EC_CONS_CONF_BE'].forEach(b => {
+            const eu = DATA['EC_CONS_CONF_EU'].find(x => x.period === b.period);
             if(eu) {
-                comp_cc.push({
+                combined.push({
                     period: b.period,
                     value: b.value,
                     eu_value: eu.value,
                     obs_status: b.obs_status,
                     unit: 'balance',
                     source: 'EC',
-                    name: "Consumer's confidence index",
+                    name: 'Consumer confidence index',
                     fetched_at: b.fetched_at
                 });
             }
         });
-        if(comp_cc.length > 0) DATA['CONSUMER_CONFIDENCE_COMP'] = comp_cc;
+        if(combined.length > 0) DATA['EC_CONS_CONF'] = combined;
     }
-
     // ── Load forecasts ──
     try {
         const fr=await fetch(FORECAST_CSV_URL+'?t='+Date.now());
@@ -376,6 +331,8 @@ async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CS
     dot.className='dot';st.textContent=`${Object.keys(DATA).length} indicators · ${rows.length} ${t('m_obs')}`;render();}catch(e){dot.className='dot err';st.textContent=t('error')+e.message;}}
 
 function buildForecastData(){
+    // For each FC_ meta entry, build a synthetic DATA entry with avg values per year
+    // Only include institutions updated in the last 6 months
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - 6);
     const cutStr = cutoff.toISOString().substring(0,10);
@@ -386,6 +343,7 @@ function buildForecastData(){
         const relevant = FORECASTS_RAW.filter(r =>
             r.indicator === ind && r.value !== null && r.updated_at >= cutStr
         );
+        // Group by year
         const byYear = {};
         relevant.forEach(r => {
             if(!byYear[r.year]) byYear[r.year] = [];
@@ -419,7 +377,7 @@ function drawSparkBar(cv, series){
   const mn=Math.min(...vals,0), mx=Math.max(...vals,0), rg=mx-mn||1;
   const n=vals.length, barW=Math.min(28, (W-pad*2)/n - 4), gap=((W-pad*2)-barW*n)/(n+1);
   const zY=H-pad-((0-mn)/rg)*(H-2*pad);
-  const green=gc('--green'), red=gc('--red');
+  const green=gc('--green'), red=gc('--red'), orange=gc('--orange')||'#d97706';
   vals.forEach((v,i)=>{
     const x=pad+gap+(barW+gap)*i;
     const yV=H-pad-((v-mn)/rg)*(H-2*pad);
@@ -433,9 +391,11 @@ function drawSparkBar(cv, series){
     ctx.lineTo(x+r,top+h);ctx.quadraticCurveTo(x,top+h,x,top+h-r);
     ctx.lineTo(x,top+r);ctx.quadraticCurveTo(x,top,x+r,top);ctx.fill();
     ctx.globalAlpha=1;
+    // year label below
     ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=gc('--text-cell-dim');
     ctx.textAlign='center';ctx.textBaseline='bottom';
     ctx.fillText(series[i].period.slice(-2), x+barW/2, H);
+    // value above bar
     ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=v>=0?green:red;
     ctx.textBaseline=v>=0?'bottom':'top';
     ctx.fillText(v.toFixed(1).replace('.',','), x+barW/2, v>=0?top-1:top+h+1);
@@ -453,10 +413,11 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
     if(c === 'INT_GDP_COMP') {
         valCell = `<td class="val" style="font-size:0.7rem;line-height:1.2;white-space:nowrap">BE: ${l.be_value.toFixed(1).replace('.',',')}<br><span style="color:var(--text-cell-muted);font-size:0.65rem">DE/FR/NL: ${l.value.toFixed(1).replace('.',',')}</span></td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}<br><span style="font-size:0.6rem;color:var(--text-cell-muted)">2010=100</span></td>`;
-    } else if (c === 'CONSUMER_CONFIDENCE_COMP') {
+    } else if(c === 'EC_CONS_CONF') {
         valCell = `<td class="val" style="font-size:0.7rem;line-height:1.2;white-space:nowrap">BE: ${l.value.toFixed(1).replace('.',',')}<br><span style="color:var(--text-cell-muted);font-size:0.65rem">EA: ${l.eu_value.toFixed(1).replace('.',',')}</span></td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td>`;
     } else if(isFc) {
+        // Show values for each forecast year side by side
         const parts = s.map(d => `${d.period}: <b>${d.value>=0?'':' '}${d.value.toFixed(1).replace('.',',')}</b>`).join(' · ');
         valCell = `<td class="val" style="font-size:0.68rem;white-space:nowrap">${parts}</td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${s.map(d=>d.period).join(', ')}<br><span style="font-size:0.58rem;color:var(--text-cell-muted)">${l._count||'?'} inst.</span></td>`;
@@ -468,6 +429,7 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
     if(isFc) srcBadge=`<span class="src-badge" style="background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange)">FPB</span>`;
     else if(l.source==='EC') srcBadge=`<span class="src-badge" style="background:var(--bg-btn-primary);color:var(--text-btn-primary)">${l.source}</span>`;
     else srcBadge=`<span class="src-badge src-nbb">${l.source}</span>`;
+    // Comment for forecast rows
     let cmnt;
     if(isFc){
         const avgAll = s.map(d=>d.value.toFixed(1).replace('.',',')).join(' / ');
@@ -482,7 +444,6 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
 });h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA)){
   const cv=document.getElementById('sp_'+c);
   if(M[c]?.forecast) drawSparkBar(cv, s);
-  else if (c === 'CONSUMER_CONFIDENCE_COMP') drawSparkBar(cv, s);
   else drawSpark(cv, s.map(d=>d.value), trend(s));
 }});renderContribChart();}
 
@@ -494,6 +455,7 @@ function openModal(code){
   _modalCode = code;
   const meta = M[code] || {};
 
+  // ── Forecast modal: table only, per-institution ──
   if(meta.forecast && meta.fc_indicator){
     const ind = meta.fc_indicator;
     const name = meta.name?.[LANG] || code;
@@ -501,6 +463,7 @@ function openModal(code){
     const cutStr = cutoff.toISOString().substring(0,10);
     const relevant = FORECASTS_RAW.filter(r => r.indicator===ind && r.updated_at>=cutStr);
     const years = [...new Set(relevant.map(r=>r.year))].sort();
+    // Group by institution
     const instMap = {};
     relevant.forEach(r => {
       if(!instMap[r.institution]) instMap[r.institution]={institution:r.institution, updated_at:r.updated_at};
@@ -508,6 +471,7 @@ function openModal(code){
       if(r.updated_at > (instMap[r.institution].updated_at||'')) instMap[r.institution].updated_at=r.updated_at;
     });
     const insts = Object.values(instMap).sort((a,b)=>a.institution.localeCompare(b.institution));
+    // Stats
     const avgByYear = years.map(yr => {
       const vals = relevant.filter(r=>r.year===yr && r.value!==null).map(r=>r.value);
       return {year:yr, avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0, count:vals.length,
@@ -521,7 +485,9 @@ function openModal(code){
       `<div class="stat-card"><div class="stat-label">Avg ${a.year} (${a.count} inst.)</div><div class="stat-val">${a.avg.toFixed(2).replace('.',',')}%</div></div>`+
       `<div class="stat-card"><div class="stat-label">Range ${a.year}</div><div class="stat-val" style="font-size:.75rem">${a.min.toFixed(1).replace('.',',')} — ${a.max.toFixed(1).replace('.',',')}%</div></div>`
     ).join('');
+    // Hide chart
     document.getElementById('modalChart').style.display='none';
+    // Build table
     let tb=`<tr style="background:var(--bg-thead)"><td style="font-weight:600">Institution</td>${years.map(y=>`<td style="font-weight:600;text-align:center">${y}</td>`).join('')}<td style="font-weight:600">Updated</td></tr>`;
     insts.forEach(inst => {
       tb += `<tr><td style="font-size:.72rem">${inst.institution}</td>`;
@@ -535,63 +501,60 @@ function openModal(code){
       });
       tb+=`<td style="font-size:.65rem;color:var(--text-cell-muted)">${inst.updated_at||'—'}</td></tr>`;
     });
+    // Averages row
     tb+=`<tr style="background:var(--bg-thead);font-weight:600"><td>Consensus avg</td>`;
     avgByYear.forEach(a=>{
       tb+=`<td style="text-align:center;font-family:'Overpass Mono';font-size:.72rem">${a.avg.toFixed(2).replace('.',',')}</td>`;
     });
     tb+=`<td></td></tr>`;
     document.getElementById('modalTableBody').innerHTML=tb;
+    // Update table headers for forecast view
     document.getElementById('mThPer').textContent='Institution';
     document.getElementById('mThVal').textContent=years[0]||'';
     document.getElementById('mThChg').textContent=years[1]||'';
     document.getElementById('mThStat').textContent='Updated';
     document.getElementById('mThBar').textContent='';
+    // Hide default header row, use custom row
     document.querySelector('.modal-table thead').style.display='none';
     document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
     return;
   }
 
+  // ── Standard modal ──
   let series, displayCode=code;
   if(code==='INT_GDP_COMP' && DATA['EUROSTAT_GDP_Q_MEUR']){
     series = DATA['EUROSTAT_GDP_Q_MEUR'];
     displayCode = 'EUROSTAT_GDP_Q_MEUR';
+  } else if(code==='EC_CONS_CONF' && DATA['EC_CONS_CONF_BE']){
+    series = DATA['EC_CONS_CONF_BE'];
+    displayCode = 'EC_CONS_CONF_BE';
   } else {
     series = DATA[code];
   }
   if(!series||!series.length)return;
   const name=meta.name?.[LANG]||series[0].name||code,unit=series[0].unit;
   const cutoff=new Date().getFullYear()-10;
-  const filtered=series.filter(d=>parseInt(d.period.substring(0,4))>=cutoff);
+  const filtered=series.filter(d=>parseInt(d.period)>=cutoff);
   const dd=filtered.length>0?filtered:series.slice(-10);
   _modalData = dd;
-  
+  // Show chart again
   document.getElementById('modalChart').style.display='';
   document.querySelector('.modal-table thead').style.display='';
   document.getElementById('modalTitle').textContent=name;
-  const srcLabel = code==='INT_GDP_COMP' ? 'Eurostat/DBnomics (Belgium)' : series[0].source;
+  const srcLabel = code==='INT_GDP_COMP' ? 'Eurostat/DBnomics (Belgium)' : code==='EC_CONS_CONF' ? 'Eurostat/DG ECFIN (Belgium)' : series[0].source;
   document.getElementById('modalSub').textContent=`${displayCode} · Source: ${srcLabel} · ${dd.length} ${t('m_obs')} · ${t('m_last10')}`;
   const last=dd[dd.length-1],prev=dd.length>=2?dd[dd.length-2]:null,vals=dd.map(d=>d.value),avg=vals.reduce((a,b)=>a+b,0)/vals.length,chg=prev?last.value-prev.value:0;
-  document.getElementById('modalStats').innerHTML=`<div class="stat-card"><div class="stat-label">${t('m_latest')} (${last.period})</div><div class="stat-val ${last.value>=0?'pos':'neg'}">${fmtV(last.value,unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_chg')}</div><div class="stat-val ${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(1).replace('.',',')} ${unit==='balance'?'pts':'p.p.'}</div></div><div class="stat-card"><div class="stat-label">${t('m_avg')}</div><div class="stat-val">${avg.toFixed(1).replace('.',',')}${unit==='balance'?'':'%'}</div></div><div class="stat-card"><div class="stat-label">${t('m_min')}</div><div class="stat-val neg">${fmtV(Math.min(...vals),unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_max')}</div><div class="stat-val pos">${fmtV(Math.max(...vals),unit)}</div></div>`;
+  document.getElementById('modalStats').innerHTML=`<div class="stat-card"><div class="stat-label">${t('m_latest')} (${last.period})</div><div class="stat-val ${last.value>=0?'pos':'neg'}">${fmtV(last.value,unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_chg')}</div><div class="stat-val ${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(1).replace('.',',')} p.p.</div></div><div class="stat-card"><div class="stat-label">${t('m_avg')}</div><div class="stat-val">${avg.toFixed(1).replace('.',',')}%</div></div><div class="stat-card"><div class="stat-label">${t('m_min')}</div><div class="stat-val neg">${fmtV(Math.min(...vals),unit)}</div></div><div class="stat-card"><div class="stat-label">${t('m_max')}</div><div class="stat-val pos">${fmtV(Math.max(...vals),unit)}</div></div>`;
   drawModalChart(dd,unit);
   const am=Math.max(Math.abs(Math.min(...vals)),Math.abs(Math.max(...vals)))||1;
-  let tb='';for(let i=dd.length-1;i>=0;i--){
-      const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class="${delta>=0?'pos-val':'neg-val'}">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';
-      let sb='—';if(d.obs_status==='A')sb=`<span class="status-badge st-actual">${t('st_act')}</span>`;else if(d.obs_status==='P')sb=`<span class="status-badge st-prov">${t('st_prov')}</span>`;else if(d.obs_status==='B')sb=`<span class="status-badge st-break">${t('st_brk')}</span>`;
-      const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';
-      
-      let displayVal = `<span class="${vc}">${fmtV(d.value,unit)}</span>`;
-      if(code === 'CONSUMER_CONFIDENCE_COMP' && d.eu_value !== undefined) {
-          displayVal = `<div style="line-height:1.2; padding-top:2px; padding-bottom:2px;"><span class="${vc}">BE: ${d.value.toFixed(1).replace('.',',')}</span><br><span style="font-size:0.65rem;color:var(--text-cell-muted)">EU: ${d.eu_value.toFixed(1).replace('.',',')}</span></div>`;
-      }
-      
-      tb+=`<tr><td>${d.period}</td><td>${displayVal}</td><td>${dc}</td><td>${sb}</td><td><div style="position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px"><div style="position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)"></div></div></td></tr>`;
-  }
+  let tb='';for(let i=dd.length-1;i>=0;i--){const d=dd[i],pv=i>0?dd[i-1].value:null,delta=pv!==null?d.value-pv:null,vc=d.value>=0?'pos-val':'neg-val',dc=delta!==null?`<span class="${delta>=0?'pos-val':'neg-val'}">${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')}</span>`:'—';let sb='—';if(d.obs_status==='A')sb=`<span class="status-badge st-actual">${t('st_act')}</span>`;else if(d.obs_status==='P')sb=`<span class="status-badge st-prov">${t('st_prov')}</span>`;else if(d.obs_status==='B')sb=`<span class="status-badge st-break">${t('st_brk')}</span>`;const bw=Math.abs(d.value)/am*50,bc=d.value>=0?'var(--green)':'var(--red)',bl=d.value>=0?'50%':(50-bw)+'%';tb+=`<tr><td>${d.period}</td><td class="${vc}">${fmtV(d.value,unit)}</td><td>${dc}</td><td>${sb}</td><td><div style="position:relative;width:100px;height:6px;background:var(--modal-bar-bg);border-radius:3px"><div style="position:absolute;height:100%;border-radius:3px;background:${bc};opacity:.5;left:${bl};width:${bw}%"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:10px;background:var(--modal-bar-zero)"></div></div></td></tr>`;}
   document.getElementById('modalTableBody').innerHTML=tb;
   document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
 }
 function exportModalCSV(){
   const meta=M[_modalCode]||{};
   if(meta.forecast && meta.fc_indicator){
+    // Export all institution-level forecast data
     const ind=meta.fc_indicator;
     const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
     const cutStr=cutoff.toISOString().substring(0,10);
@@ -615,135 +578,25 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function drawModalChart(data,unit){requestAnimationFrame(()=>{requestAnimationFrame(()=>{_rc(data,unit);});});}
 function _rc(data,unit){const cv=document.getElementById('modalChart'),ct=cv.parentElement,ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=ct.clientWidth-40,H=260;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const vals=data.map(d=>d.value),n=data.length,vMin=Math.min(...vals,0),vMax=Math.max(...vals,0),vR=vMax-vMin||1;const pL=58,pR=18,pT=18,pB=48,cW=W-pL-pR,slW=cW/n,bW=Math.max(8,Math.min(36,slW*.55));const yOf=v=>pT+((vMax-v)/vR)*(H-pT-pB),zY=yOf(0);const gC=gc('--chart-grid'),zC=gc('--chart-zero'),lC=gc('--chart-label'),liC=gc('--chart-line'),dC=gc('--chart-dot'),dR=gc('--chart-dot-ring'),bP=gc('--chart-bar-pos'),bN=gc('--chart-bar-neg');
-niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+(unit==='balance'?'':'%'),pL-10,y);});
+// Y grid
+niceSteps(vMin,vMax,5).forEach(v=>{const y=Math.round(yOf(v))+.5;ctx.strokeStyle=gC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.font='10px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v.toFixed(1).replace('.',',')+('%'),pL-10,y);});
+// Zero line
 const zy=Math.round(zY)+.5;ctx.strokeStyle=zC;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,zy);ctx.lineTo(W-pR,zy);ctx.stroke();
+// X-axis label skip: measure label width and compute optimal interval
 const maxLabelW=Math.max(...data.map(d=>{ctx.font='9px Overpass Mono,monospace';return ctx.measureText(d.period).width;}));
 const xSkip=Math.max(1,Math.ceil((maxLabelW+12)/slW));
+// Bars
 data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,vY=yOf(d.value),isP=d.value>=0,bT=isP?vY:zY,bH=Math.max(1,Math.abs(vY-zY)),rgb=isP?bP:bN;ctx.fillStyle=`rgba(${rgb},.55)`;ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.fill();if(d.obs_status==='P'){ctx.strokeStyle=`rgba(${rgb},.3)`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();rr(ctx,Math.round(cx-bW/2),bT,bW,bH,3);ctx.stroke();ctx.setLineDash([]);}
+// Value labels — only show if bars wide enough
 if(slW>18){ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=`rgba(${rgb},.85)`;ctx.textAlign='center';ctx.textBaseline=isP?'bottom':'top';ctx.fillText(d.value.toFixed(1).replace('.',','),cx,isP?bT-4:bT+bH+4);}
+// X labels — skip to avoid overlap
 if(i%xSkip===0||i===n-1){ctx.font='9px Overpass Mono,monospace';ctx.fillStyle=lC;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(d.period,cx,H-pB+8);}});
+// Trend line
 ctx.beginPath();data.forEach((d,i)=>{const cx=pL+slW*i+slW/2;i===0?ctx.moveTo(cx,yOf(d.value)):ctx.lineTo(cx,yOf(d.value));});ctx.strokeStyle=liC;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+// Dots
 data.forEach((d,i)=>{const cx=pL+slW*i+slW/2,y=yOf(d.value),isL=i===n-1;ctx.beginPath();ctx.arc(cx,y,isL?4.5:2.5,0,Math.PI*2);ctx.fillStyle=isL?dC:liC;ctx.fill();if(isL){ctx.strokeStyle=dR;ctx.lineWidth=2;ctx.stroke();}});}
 function rr(c,x,y,w,h,r){if(h===0)return;c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
 function niceSteps(mn,mx,n){const rg=mx-mn||1,ro=rg/n,mg=Math.pow(10,Math.floor(Math.log10(ro))),rs=ro/mg,ni=rs<=1.5?mg:rs<=3?2*mg:rs<=7?5*mg:10*mg;const st=[];let v=Math.ceil(mn/ni)*ni;while(v<=mx){st.push(parseFloat(v.toFixed(4)));v+=ni;}return st;}
-
-function downloadChart(canvasId, name) {
-  const cv = document.getElementById(canvasId);
-  if (!cv) return;
-  
-  const card = cv.parentElement;
-  const title = card.querySelector('.contrib-title').textContent;
-  const sub = card.querySelector('.contrib-sub').textContent;
-  const legs = card.querySelectorAll('.contrib-legend .leg');
-  
-  const dpr = window.devicePixelRatio || 1;
-  const padX = 28 * dpr;
-  const padYTop = 24 * dpr;
-  const padYBot = 18 * dpr;
-  
-  const titleFontSz = 15.2 * dpr;
-  const subFontSz = 11.2 * dpr;
-  const legFontSz = 10.88 * dpr;
-  
-  const titleMb = 2 * dpr;
-  const subMb = 16 * dpr;
-  
-  const legMt = 14 * dpr;
-  const legPt = 12 * dpr;
-  const legGapX = 16 * dpr;
-  const legGapY = 6 * dpr;
-  const swatchTextGap = 5 * dpr;
-  
-  const cardW = card.clientWidth * dpr;
-  
-  const temp = document.createElement('canvas');
-  const ctx = temp.getContext('2d');
-  
-  ctx.font = `${legFontSz}px Figtree, sans-serif`;
-  let legRows = 1;
-  let currentX = padX;
-  const legItems = [];
-  
-  legs.forEach(leg => {
-    const text = leg.textContent.trim();
-    const swatch = leg.querySelector('.swatch');
-    const comp = swatch ? getComputedStyle(swatch) : null;
-    const color = comp ? comp.backgroundColor : '#000';
-    
-    const swW = comp ? parseFloat(comp.width) * dpr : 12 * dpr;
-    const swH = comp ? parseFloat(comp.height) * dpr : 12 * dpr;
-    let swR = 0;
-    if (comp && comp.borderRadius && comp.borderRadius !== '0px') {
-        swR = parseFloat(comp.borderRadius) * dpr;
-    } else if (!comp) {
-        swR = 2 * dpr;
-    }
-    
-    const textW = ctx.measureText(text).width;
-    const itemW = swW + swatchTextGap + textW;
-    
-    if (currentX + itemW > cardW - padX && currentX > padX) {
-      legRows++;
-      currentX = padX;
-    }
-    legItems.push({ text, color, x: currentX, row: legRows, swW, swH, swR });
-    currentX += itemW + legGapX;
-  });
-  
-  const titleH = titleFontSz * 1.2;
-  const subH = subFontSz * 1.2;
-  const legLineH = Math.max(12 * dpr, legFontSz * 1.2);
-  
-  const cvY = padYTop + titleH + titleMb + subH + subMb;
-  const sepY = cvY + cv.height + legMt;
-  const legendTotalH = legPt + (legRows * legLineH) + ((legRows - 1) * legGapY);
-  
-  temp.width = cardW;
-  temp.height = sepY + legendTotalH + padYBot;
-  
-  ctx.fillStyle = gc('--bg-table');
-  ctx.fillRect(0, 0, temp.width, temp.height);
-  
-  ctx.strokeStyle = gc('--border-table');
-  ctx.lineWidth = 1 * dpr;
-  ctx.strokeRect(0, 0, temp.width, temp.height);
-  
-  ctx.fillStyle = gc('--text-cell');
-  ctx.font = `bold ${titleFontSz}px Figtree, sans-serif`;
-  ctx.textBaseline = 'top';
-  ctx.fillText(title, padX, padYTop);
-  
-  ctx.fillStyle = gc('--text-cell-muted');
-  ctx.font = `${subFontSz}px Figtree, sans-serif`;
-  ctx.fillText(sub, padX, padYTop + titleH + titleMb);
-  
-  ctx.drawImage(cv, padX, cvY, cv.width, cv.height);
-  
-  ctx.beginPath();
-  ctx.moveTo(padX, sepY);
-  ctx.lineTo(cardW - padX, sepY);
-  ctx.stroke();
-  
-  ctx.font = `${legFontSz}px Figtree, sans-serif`;
-  legItems.forEach(item => {
-    const y = sepY + legPt + (item.row - 1) * (legLineH + legGapY);
-    
-    ctx.fillStyle = item.color;
-    ctx.beginPath();
-    const radius = Math.min(item.swR, item.swW / 2, item.swH / 2);
-    rr(ctx, item.x, y + (legLineH - item.swH) / 2, item.swW, item.swH, radius);
-    ctx.fill();
-    
-    ctx.fillStyle = gc('--text-cell-dim');
-    ctx.textBaseline = 'middle';
-    ctx.fillText(item.text, item.x + item.swW + swatchTextGap, y + legLineH / 2);
-  });
-  
-  const a = document.createElement('a');
-  a.download = name + '.png';
-  a.href = temp.toDataURL('image/png');
-  a.click();
-}
 
 // ═══════════════════════════════════════════════════════
 // STACKED BAR CHART — GDP contributions
@@ -761,6 +614,7 @@ function renderContribChart() {
   const wrap = document.getElementById('contribWrap');
   if (activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
 
+  // Check contrib data
   const gdp = DATA['GDP_ANNUAL_CY'];
   const hasContrib = CONTRIB_SERIES.every(s => {
     if (s.composite) return s.composite.every(c => DATA[c] && DATA[c].length > 0);
@@ -771,37 +625,42 @@ function renderContribChart() {
   if (!gdp && !hasContrib && !hasIntl) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'flex';
 
+  // Contrib card
   const contribCard = wrap.querySelector('.contrib-card:first-child');
   if (gdp && hasContrib) {
     contribCard.style.display = '';
-    const titles = {en:'Annual real GDP growth and contributions', fr:'Croissance annuelle réelle du PIB et contributions', nl:'Jaarlijkse reële BBP-groei en bijdragen'};
-    document.getElementById('contribTitle').textContent = titles[LANG] || titles.en;
+  const titles = {en:'Annual real GDP growth and contributions', fr:'Croissance annuelle réelle du PIB et contributions', nl:'Jaarlijkse reële BBP-groei en bijdragen'};
+  document.getElementById('contribTitle').textContent = titles[LANG] || titles.en;
 
-    const cutoff = new Date().getFullYear() - 14;
-    const years = gdp.filter(d => parseInt(d.period) >= cutoff).map(d => d.period);
+  // Build year-aligned data (last 14 years)
+  const cutoff = new Date().getFullYear() - 14;
+  const years = gdp.filter(d => parseInt(d.period) >= cutoff).map(d => d.period);
 
-    const yearData = years.map(yr => {
-      const obj = { year: yr, gdp: gdp.find(d => d.period === yr)?.value || 0 };
-      CONTRIB_SERIES.forEach(s => {
-        if (s.composite) {
-          obj[s.code] = s.composite.reduce((sum, c) => {
-            const match = (DATA[c] || []).find(d => d.period === yr);
-            return sum + (match ? match.value : 0);
-          }, 0);
-        } else {
-          const match = (DATA[s.code] || []).find(d => d.period === yr);
-          obj[s.code] = match ? match.value : 0;
-        }
-      });
-      return obj;
+  // For each year, get contribution values
+  const yearData = years.map(yr => {
+    const obj = { year: yr, gdp: gdp.find(d => d.period === yr)?.value || 0 };
+    CONTRIB_SERIES.forEach(s => {
+      if (s.composite) {
+        obj[s.code] = s.composite.reduce((sum, c) => {
+          const match = (DATA[c] || []).find(d => d.period === yr);
+          return sum + (match ? match.value : 0);
+        }, 0);
+      } else {
+        const match = (DATA[s.code] || []).find(d => d.period === yr);
+        obj[s.code] = match ? match.value : 0;
+      }
     });
+    return obj;
+  });
 
-    const legEl = document.getElementById('contribLegend');
-    legEl.innerHTML = CONTRIB_SERIES.map(s =>
-      `<div class="leg"><div class="swatch" style="background:${s.color}"></div>${s.label[LANG]||s.label.en}</div>`
-    ).join('') + `<div class="leg"><div class="swatch" style="background:var(--text-cell);border-radius:0;height:2px;margin-top:5px"></div>GDP (growth in %)</div>`;
+  // Legend
+  const legEl = document.getElementById('contribLegend');
+  legEl.innerHTML = CONTRIB_SERIES.map(s =>
+    `<div class="leg"><div class="swatch" style="background:${s.color}"></div>${s.label[LANG]||s.label.en}</div>`
+  ).join('') + `<div class="leg"><div class="swatch" style="background:var(--text-cell);border-radius:0;height:2px;margin-top:5px"></div>GDP (growth in %)</div>`;
 
-    requestAnimationFrame(() => { requestAnimationFrame(() => { _drawContrib(yearData); }); });
+  // Draw on canvas
+  requestAnimationFrame(() => { requestAnimationFrame(() => { _drawContrib(yearData); }); });
   } else {
     contribCard.style.display = 'none';
   }
@@ -826,6 +685,7 @@ function _drawContrib(yearData) {
   const slW = cW / n;
   const barW = Math.max(10, Math.min(42, slW * 0.6));
 
+  // Compute stacked ranges to find min/max
   let stackMin = 0, stackMax = 0;
   yearData.forEach(yd => {
     let posSum = 0, negSum = 0;
@@ -836,17 +696,20 @@ function _drawContrib(yearData) {
     stackMax = Math.max(stackMax, posSum, yd.gdp);
     stackMin = Math.min(stackMin, negSum, yd.gdp);
   });
+  // Add padding
   const vMin = Math.floor(stackMin - 1);
   const vMax = Math.ceil(stackMax + 1);
   const vR = vMax - vMin || 1;
   const yOf = v => pT + ((vMax - v) / vR) * cH;
   const zeroY = yOf(0);
 
+  // Colors from theme
   const gridC = gc('--chart-grid') || 'rgba(0,0,0,.06)';
   const zeroC = gc('--chart-zero') || 'rgba(0,0,0,.12)';
   const labelC = gc('--chart-label') || '#94a3b8';
   const textC = gc('--text-cell') || '#1e293b';
 
+  // Grid
   const steps = niceSteps(vMin, vMax, 6);
   steps.forEach(v => {
     const y = Math.round(yOf(v)) + 0.5;
@@ -857,19 +720,22 @@ function _drawContrib(yearData) {
     ctx.fillText(v.toFixed(0), pL - 8, y);
   });
 
+  // Zero line
   const zy = Math.round(zeroY) + 0.5;
   ctx.strokeStyle = zeroC; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(pL, zy); ctx.lineTo(W - pR, zy); ctx.stroke();
 
+  // Y-axis label
   ctx.save(); ctx.translate(12, pT + cH / 2); ctx.rotate(-Math.PI / 2);
   ctx.font = '10px Figtree, sans-serif'; ctx.fillStyle = labelC;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText('in %', 0, 0); ctx.restore();
 
+  // Stacked bars
   yearData.forEach((yd, i) => {
     const cx = pL + slW * i + slW / 2;
-    let posY = zeroY;
-    let negY = zeroY;
+    let posY = zeroY; // grows upward
+    let negY = zeroY; // grows downward
 
     CONTRIB_SERIES.forEach(s => {
       const v = yd[s.code];
@@ -880,6 +746,7 @@ function _drawContrib(yearData) {
         const top = posY - h;
         ctx.fillStyle = s.color;
         ctx.fillRect(Math.round(cx - barW / 2), top, barW, h);
+        // Subtle border
         ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 0.5;
         ctx.strokeRect(Math.round(cx - barW / 2), top, barW, h);
         posY = top;
@@ -893,11 +760,13 @@ function _drawContrib(yearData) {
       }
     });
 
+    // X label
     ctx.font = '10px Overpass Mono, monospace'; ctx.fillStyle = labelC;
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     ctx.fillText(yd.year, cx, H - pB + 8);
   });
 
+  // GDP line on top
   ctx.beginPath();
   yearData.forEach((yd, i) => {
     const cx = pL + slW * i + slW / 2;
@@ -907,12 +776,15 @@ function _drawContrib(yearData) {
   ctx.strokeStyle = textC; ctx.lineWidth = 2.5;
   ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
 
+  // GDP dots + labels
   yearData.forEach((yd, i) => {
     const cx = pL + slW * i + slW / 2;
     const y = yOf(yd.gdp);
+    // Dot
     ctx.beginPath(); ctx.arc(cx, y, 3.5, 0, Math.PI * 2);
     ctx.fillStyle = gc('--bg-table') || '#fff'; ctx.fill();
     ctx.strokeStyle = textC; ctx.lineWidth = 2; ctx.stroke();
+    // Value label above/below
     ctx.font = 'bold 10px Figtree, sans-serif'; ctx.fillStyle = textC;
     ctx.textAlign = 'center';
     ctx.textBaseline = yd.gdp >= 0 ? 'bottom' : 'top';
@@ -920,36 +792,10 @@ function _drawContrib(yearData) {
     ctx.fillText(yd.gdp.toFixed(1).replace('.', ','), cx, y + offset);
   });
 
+  // Source label
   ctx.font = '9px Figtree, sans-serif'; ctx.fillStyle = labelC;
   ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
   ctx.fillText('Source: NBB', W - pR, H - 2);
-
-  cv.onmousemove = e => {
-    const rect = cv.getBoundingClientRect();
-    const cw = rect.width - pL - pR;
-    let i = Math.floor((e.clientX - rect.left - pL) / (cw / n));
-    if (i < 0) i = 0; if (i >= n) i = n - 1;
-    const yd = yearData[i];
-    const tt = document.getElementById('chartTooltip');
-    
-    let h = `<div class="tt-title">${yd.year}</div>`;
-    CONTRIB_SERIES.forEach(s => {
-      const v = yd[s.code];
-      if (Math.abs(v) > 0.001) h += `<div class="tt-row"><span><span class="tt-swatch" style="background:${s.color}"></span>${s.label[LANG]||s.label.en}</span><strong>${v.toFixed(2).replace('.',',')} p.p.</strong></div>`;
-    });
-    h += `<hr style="border:none;border-top:1px solid var(--border-tip);margin:8px 0">`;
-    h += `<div class="tt-row"><span>${LANG==='fr'?'Croissance PIB':LANG==='nl'?'BBP Groei':'GDP Growth'}</span><strong style="font-family:'Overpass Mono'">${yd.gdp.toFixed(1).replace('.',',')}%</strong></div>`;
-    
-    tt.innerHTML = h;
-    tt.style.opacity = 1;
-    
-    let tx = e.clientX + 15, ty = e.clientY + 15;
-    tt.style.left = tx + 'px'; tt.style.top = ty + 'px';
-    const tr = tt.getBoundingClientRect();
-    if(tr.right > window.innerWidth) tt.style.left = (e.clientX - tr.width - 15) + 'px';
-    if(tr.bottom > window.innerHeight) tt.style.top = (e.clientY - tr.height - 15) + 'px';
-  };
-  cv.onmouseout = () => { document.getElementById('chartTooltip').style.opacity = 0; };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -976,6 +822,7 @@ function renderIntlChart() {
   const titles = {en:'Quarterly real GDP growth',fr:'Croissance trimestrielle du PIB réel',nl:'Kwartaal reëel BBP-groei'};
   document.getElementById('intlTitle').textContent = titles[LANG]||titles.en;
 
+  // Build composite DE/FR/NL series
   const compData = [];
   be.forEach(b => {
     const d=de.find(x=>x.period===b.period), f=fr.find(x=>x.period===b.period), n=nl.find(x=>x.period===b.period);
@@ -983,6 +830,7 @@ function renderIntlChart() {
   });
   DATA['_COMPOSITE_DEFRNL'] = compData;
 
+  // Legend
   const legEl = document.getElementById('intlLegend');
   legEl.innerHTML = INTL_SERIES.map(s => {
     const col = s.color === '_theme_' ? 'var(--text-cell)' : s.color;
@@ -1004,11 +852,13 @@ function _drawIntl() {
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
 
+  // Gather all periods from BE (reference)
   const be = DATA['EUROSTAT_GDP_Q_MEUR'];
   if(!be || !be.length) return;
   const periods = be.map(d=>d.period);
   const n = periods.length;
 
+  // Collect all values to find Y range
   let allVals = [];
   INTL_SERIES.forEach(s => {
     const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
@@ -1019,6 +869,7 @@ function _drawIntl() {
   const pL=50, pR=14, pT=16, pB=52;
   const cW=W-pL-pR, cH=H-pT-pB;
 
+  // Nice Y range
   const rawMin=Math.min(...allVals), rawMax=Math.max(...allVals);
   const vMin=Math.floor(rawMin/5)*5, vMax=Math.ceil(rawMax/5)*5;
   const vR=vMax-vMin||1;
@@ -1027,6 +878,7 @@ function _drawIntl() {
   const gridC=gc('--chart-grid')||'rgba(0,0,0,.06)';
   const labelC=gc('--chart-label')||'#94a3b8';
 
+  // Y grid
   const yStep = vMax-vMin > 30 ? 5 : (vMax-vMin > 15 ? 5 : 2);
   for(let v=vMin; v<=vMax; v+=yStep){
     const y=Math.round(yOf(v))+0.5;
@@ -1038,13 +890,16 @@ function _drawIntl() {
     ctx.fillText(v.toString(), pL-8, y);
   }
 
+  // Y-axis label
   ctx.save(); ctx.translate(11, pT+cH/2); ctx.rotate(-Math.PI/2);
   ctx.font='10px Figtree,sans-serif'; ctx.fillStyle=labelC;
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('2010 = 100', 0, 0); ctx.restore();
 
-  const maxLblW = 52;
+  // X-axis labels — smart skip
+  const maxLblW = 52; // approx width of "2020-Q1"
   const xStep = Math.max(1, Math.ceil((maxLblW+8) / (cW/n)));
+  // Prefer Q1 labels
   periods.forEach((p,i) => {
     if(i % xStep !== 0 && i !== n-1) return;
     const x = pL + (i/(n-1))*cW;
@@ -1057,7 +912,8 @@ function _drawIntl() {
     ctx.restore();
   });
 
-  const drawOrder = [3, 4, 2, 0, 1];
+  // Draw lines — order matters (thicker BE on top)
+  const drawOrder = [3, 4, 2, 0, 1]; // ES, composite, DE, EA, BE
   drawOrder.forEach(si => {
     const s = INTL_SERIES[si];
     const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
@@ -1079,40 +935,10 @@ function _drawIntl() {
     ctx.stroke();
   });
 
+  // Source
   ctx.font='9px Figtree,sans-serif'; ctx.fillStyle=labelC;
   ctx.textAlign='right'; ctx.textBaseline='bottom';
   ctx.fillText('Source: Eurostat', W-pR, H-2);
-
-  cv.onmousemove = e => {
-    const rect = cv.getBoundingClientRect();
-    const cw = rect.width - pL - pR;
-    let i = Math.round((e.clientX - rect.left - pL) / (cw / (n - 1)));
-    if (i < 0) i = 0; if (i >= n) i = n - 1;
-    const p = periods[i];
-    const tt = document.getElementById('chartTooltip');
-    
-    let h = `<div class="tt-title">${p}</div>`;
-    INTL_SERIES.forEach(si => {
-      const src = si.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[si.code];
-      if(src) {
-        const d = src.find(x => x.period === p);
-        if(d) {
-          const col = si.color === '_theme_' ? gc('--text-cell') : si.color;
-          h += `<div class="tt-row"><span><span class="tt-swatch" style="background:${col}"></span>${si.label}</span><strong style="font-family:'Overpass Mono'">${d.value.toFixed(1).replace('.',',')}</strong></div>`;
-        }
-      }
-    });
-    
-    tt.innerHTML = h;
-    tt.style.opacity = 1;
-    
-    let tx = e.clientX + 15, ty = e.clientY + 15;
-    tt.style.left = tx + 'px'; tt.style.top = ty + 'px';
-    const tr = tt.getBoundingClientRect();
-    if(tr.right > window.innerWidth) tt.style.left = (e.clientX - tr.width - 15) + 'px';
-    if(tr.bottom > window.innerHeight) tt.style.top = (e.clientY - tr.height - 15) + 'px';
-  };
-  cv.onmouseout = () => { document.getElementById('chartTooltip').style.opacity = 0; };
 }
 
 function init(){updateStaticUI();document.getElementById('btn-'+LANG).classList.add('active');loadTheme();renderPills();fetchData();}
