@@ -166,14 +166,23 @@ SOURCES = {
         "description": "Euro Area 20 GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
     },
-    "CONSUMER_CONFIDENCE": {
-        "name": "Consumer Confidence Indicator",
-        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_CONSN,1.0/M..BE?startPeriod=2010-02&dimensionAtObservation=AllDimensions",
+    "BE_CONSUMER_CONFIDENCE": {
+        "name": "Consumer Confidence (BE)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true&start_period=2010-01",
         "frequency": "M",
         "unit": "balance",
-        "source_agency": "NBB",
-        "description": "Consumer confidence indicator, monthly",
-        "type": "nbb"
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Consumer confidence indicator, seasonally adjusted (Belgium)",
+        "type": "dbnomics"
+    },
+    "EU_CONSUMER_CONFIDENCE": {
+        "name": "Consumer Confidence (EU27)",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true&start_period=2010-01",
+        "frequency": "M",
+        "unit": "balance",
+        "source_agency": "Eurostat/DBnomics",
+        "description": "Consumer confidence indicator, seasonally adjusted (EU 27)",
+        "type": "dbnomics"
     }
 }
 
@@ -351,7 +360,7 @@ class NBBFetcher:
 
 class DBnomicsFetcher:
     @staticmethod
-    def fetch(url: str) -> list[dict]:
+    def fetch(url: str, unit: str = "") -> list[dict]:
         log.info(f"GET {url[:90]}...")
         resp = requests.get(url, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
@@ -366,8 +375,8 @@ class DBnomicsFetcher:
 
         results = []
         for p, v in zip(periods, values):
-            # Client-side fallback filter to ensure no data before 2008-Q1
-            if str(p) < "2008-Q1":
+            # Client-side fallback filter to ensure no data before 2008-01 / 2008-Q1
+            if str(p) < "2008":
                 continue
             if v is None or v == "NA":
                 continue
@@ -378,14 +387,16 @@ class DBnomicsFetcher:
             except ValueError:
                 continue
                 
-        if results:
-            # Normalize to average of 4 quarters of 2010 = 100
+        # ONLY apply indexing normalization to indicators meant to be an index base 2010
+        if results and unit == "index_2010":
             q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
             if q2010:
                 avg_2010 = sum(q2010) / len(q2010)
-                for r in results:
-                    r["value"] = round((r["value"] / avg_2010) * 100, 2)
-                    
+                if avg_2010 != 0:
+                    for r in results:
+                        r["value"] = round((r["value"] / avg_2010) * 100, 2)
+                        
+        if results:
             log.info(f"  {len(results)} obs: {results[0]['period']} → {results[-1]['period']}")
         return results
 
@@ -479,7 +490,8 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
             if src_type == "nbb":
                 rows = NBBFetcher.fetch(meta["url"])
             elif src_type == "dbnomics":
-                rows = DBnomicsFetcher.fetch(meta["url"])
+                # Safely pass the unit to ensure we don't index non-index data
+                rows = DBnomicsFetcher.fetch(meta["url"], meta.get("unit", ""))
             else:
                 raise ValueError(f"Unknown source type specified: {src_type}")
                 
