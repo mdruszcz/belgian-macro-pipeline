@@ -127,61 +127,21 @@ SOURCES = {
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
-        "description": "Gross domestic product at market prices, chain linked volumes (2010), seasonally and calendar adjusted",
+        "description": "Gross domestic product, seasonally adjusted",
         "type": "dbnomics"
     },
-    "EUROSTAT_GDP_Q_MEUR_ES": {
-        "name": "Eurostat GDP Spain (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "Spain GDP index",
-        "type": "dbnomics"
-    },
-    "EUROSTAT_GDP_Q_MEUR_DE": {
-        "name": "Eurostat GDP Germany (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "Germany GDP index",
-        "type": "dbnomics"
-    },
-    "EUROSTAT_GDP_Q_MEUR_FR": {
-        "name": "Eurostat GDP France (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "France GDP index",
-        "type": "dbnomics"
-    },
-    "EUROSTAT_GDP_Q_MEUR_NL": {
-        "name": "Eurostat GDP Netherlands (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "Netherlands GDP index",
-        "type": "dbnomics"
-    },
-    "EUROSTAT_GDP_Q_MEUR_EA": {
-        "name": "Eurostat GDP Euro Area 20 (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "Euro Area 20 GDP index",
-        "type": "dbnomics"
-    },
+    "EUROSTAT_GDP_Q_MEUR_ES": { "name": "GDP ES", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
+    "EUROSTAT_GDP_Q_MEUR_DE": { "name": "GDP DE", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
+    "EUROSTAT_GDP_Q_MEUR_FR": { "name": "GDP FR", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
+    "EUROSTAT_GDP_Q_MEUR_NL": { "name": "GDP NL", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
+    "EUROSTAT_GDP_Q_MEUR_EA": { "name": "GDP EA", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
     "EC_CONS_CONF_BE": {
         "name": "Consumer Confidence BE (EC)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true&start_period=2010-01",
         "frequency": "M",
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
-        "description": "European Commission survey: BE Consumer Confidence",
+        "description": "BE Consumer Confidence Indicator",
         "type": "dbnomics"
     },
     "EC_CONS_CONF_EU": {
@@ -190,7 +150,7 @@ SOURCES = {
         "frequency": "M",
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
-        "description": "European Commission survey: EU27 Consumer Confidence",
+        "description": "EU27 Consumer Confidence Indicator",
         "type": "dbnomics"
     }
 }
@@ -359,8 +319,6 @@ class NBBFetcher:
             except ValueError: continue
             seen[period] = {"period": period, "value": val, "obs_status": status}
         data = sorted(seen.values(), key=lambda x: x["period"])
-        if data:
-            log.info(f"  {len(data)} obs: {data[0]['period']} → {data[-1]['period']}")
         return data
 
 class DBnomicsFetcher:
@@ -376,19 +334,16 @@ class DBnomicsFetcher:
             periods = series["period"]
             values = series["value"]
         except (KeyError, IndexError, ValueError) as e:
-            raise ValueError(f"Unexpected DBnomics JSON structure or decoding failed: {e}")
+            raise ValueError(f"Unexpected DBnomics JSON structure: {e}")
 
         results = []
         for p, v in zip(periods, values):
-            if str(p) < "2008": # Fallback minimum
-                continue
-            if v is None or v == "NA":
-                continue
+            if str(p) < "2008": continue
+            if v is None or v == "NA": continue
             try:
                 val = float(v)
                 results.append({"period": str(p), "value": val, "obs_status": "A"})
-            except ValueError:
-                continue
+            except ValueError: continue
                 
         if results and unit == "index_2010":
             q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
@@ -397,11 +352,7 @@ class DBnomicsFetcher:
                 if avg_2010 != 0:
                     for r in results:
                         r["value"] = round((r["value"] / avg_2010) * 100, 2)
-                        
-        if results:
-            log.info(f"  {len(results)} obs: {results[0]['period']} → {results[-1]['period']}")
         return results
-
 
 class FPBFetcher:
     INDICATORS = { 1: "GDP_VOL", 3: "CPI", 5: "FISCAL_BAL" }
@@ -444,8 +395,7 @@ class FPBFetcher:
 
 # ─── Orchestration ────────────────────────────────────────────────
 
-def fetch_all(db: MacroDatabase) -> dict[str, int]:
-    results = {}
+def fetch_all(db: MacroDatabase):
     for code, meta in SOURCES.items():
         db.upsert_indicator(code, meta)
         try:
@@ -455,34 +405,25 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
                 rows = DBnomicsFetcher.fetch(meta["url"], meta.get("unit", ""))
             n = db.upsert_observations(code, rows)
             db.log_fetch(code, n, "OK")
-            results[code] = n
             log.info(f"  OK {code}: {n} rows")
         except Exception as e:
             log.error(f"  FAIL {code}: {e}")
             db.log_fetch(code, 0, "ERROR", str(e))
-    
     try:
         fc_rows = FPBFetcher.fetch()
         n = db.upsert_forecasts(fc_rows)
         db.log_fetch("FPB_FORECASTS", n, "OK")
     except Exception as e:
         log.error(f"  FAIL FPB_FORECASTS: {e}")
-        
-    return results
 
 def show_latest(db: MacroDatabase):
     latest = db.get_all_latest()
-    if not latest:
-        log.warning("Empty DB. Run --fetch first.")
-        return
-    print("\n" + "=" * 70)
-    print("  BELGIAN MACRO DATABASE — Latest Observations")
-    print("=" * 70 + "\n")
+    if not latest: return
+    print("\n" + "=" * 60)
+    print("  BELGIAN MACRO DATABASE — Latest")
+    print("=" * 60 + "\n")
     for e in latest:
-        s = {"A": "Actual", "P": "Provisional"}.get(e["obs_status"], e["obs_status"])
-        print(f"  {e['name']} ({e['indicator_code']})")
-        print(f"    {e['period']}  →  {e['value']} {e['unit']} ({s})")
-        print(f"    fetched {e['fetched_at'][:16]}\n")
+        print(f"  {e['name']:<40} | {e['period']:<10} | {e['value']:>8.1f} {e['unit']}")
 
 def export_data(db: MacroDatabase, fmt: str):
     df = db.get_all_observations()
@@ -491,23 +432,21 @@ def export_data(db: MacroDatabase, fmt: str):
     out.mkdir(parents=True, exist_ok=True)
     if fmt == "csv":
         df.to_csv(out / "belgian_macro_export.csv", index=False)
-    
     fc = db.get_all_forecasts()
     if not fc.empty:
         fc.to_csv(out / "belgian_forecasts.csv", index=False)
 
 def main():
     ap = argparse.ArgumentParser(description="Belgian Macro DB Pipeline CLI")
-    ap.add_argument("--fetch", action="store_true", help="Fetch new data from APIs")
-    ap.add_argument("--latest", action="store_true", help="Show latest data in DB")
-    ap.add_argument("--dump", action="store_true", help="Print all observations")
-    ap.add_argument("--export", action="append", choices=["csv", "json"], help="Export DB to files")
+    ap.add_argument("--fetch", action="store_true", help="Fetch data from APIs")
+    ap.add_argument("--latest", action="store_true", help="Show latest data")
+    ap.add_argument("--dump", action="store_true", help="Print all data")
+    ap.add_argument("--export", action="append", choices=["csv", "json"], help="Export files")
     ap.add_argument("--history", action="store_true", help="Show fetch logs")
-    ap.add_argument("--db", default=str(DB_PATH), help="Path to SQLite DB file")
+    ap.add_argument("--db", default=str(DB_PATH), help="DB path")
     args = ap.parse_args()
 
     db = MacroDatabase(Path(args.db))
-
     if not any([args.fetch, args.latest, args.dump, args.export, args.history]):
         args.fetch = args.latest = True
 
@@ -515,25 +454,19 @@ def main():
         if args.fetch:
             log.info(f"DB: {db.db_path}")
             fetch_all(db)
-
-        if args.latest:
-            show_latest(db)
-
+        if args.latest: show_latest(db)
         if args.dump:
             df = db.get_all_observations()
             for code in df["indicator_code"].unique():
                 s = df[df["indicator_code"] == code]
-                print(f"\n  {s.iloc[0]['name']} ({code})")
+                print(f"\n{s.iloc[0]['name']} ({code})")
                 for _, row in s.iterrows():
-                    print(f"    {row['period']:<10} {row['value']:>12.1f}  {row['obs_status']}")
-
+                    print(f"  {row['period']:<10} {row['value']:>8.1f}")
         if args.export:
-            for f in args.export: 
-                export_data(db, f)
-
+            for f in args.export: export_data(db, f)
         if args.history:
             for e in db.get_fetch_history():
-                print(f"  {e['code']:<22} {e['at'][:19]}  {e['rows']:>4} rows  {e['status']}")
+                print(f"{e['code']:<22} | {e['at'][:19]} | {e['rows']:>4} rows | {e['status']}")
     finally:
         db.close()
 
