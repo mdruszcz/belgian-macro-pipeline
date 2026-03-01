@@ -1,7 +1,7 @@
 """
 Belgian Macroeconomic Database
 ==============================
-Fetches GDP data from the NBB SDMX dissemination API, DBnomics, and BFP Excel,
+Fetches GDP data from the NBB SDMX dissemination API and DBnomics,
 stores in SQLite, and exports to CSV/JSON.
 
 Runs daily via GitHub Actions — data committed back to the repo.
@@ -19,6 +19,7 @@ from typing import Optional
 
 import pandas as pd
 import requests
+from openpyxl import load_workbook
 
 # ─── Configuration ────────────────────────────────────────────────
 
@@ -26,6 +27,8 @@ DB_PATH = Path(__file__).parent / "data" / "belgian_macro.db"
 
 NBB_BASE = "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_QNA_DISS,1.0"
 NBB_CSV_HEADER = {"Accept": "application/vnd.sdmx.data+csv;version=2.0.0"}
+
+FPB_XLSX_URL = "https://www.plan.be/sites/default/files/documents/FOR_BE_FR.xlsx"
 
 SOURCES = {
     "GDP_QUARTERLY_YY": {
@@ -111,7 +114,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR": {
         "name": "Eurostat GDP (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -120,7 +123,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_ES": {
         "name": "Eurostat GDP Spain (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -129,7 +132,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_DE": {
         "name": "Eurostat GDP Germany (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -138,7 +141,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_FR": {
         "name": "Eurostat GDP France (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -147,7 +150,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_NL": {
         "name": "Eurostat GDP Netherlands (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -156,21 +159,12 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_EA": {
         "name": "Eurostat GDP Euro Area 20 (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?start_period=2008-Q1",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Euro Area 20 GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
-    },
-    "BFP_GDP_FORECAST": {
-        "name": "Bureau du Plan - Prévisions PIB",
-        "url": "https://www.plan.be/sites/default/files/documents/FOR_BE_FR.xlsx",
-        "frequency": "A",
-        "unit": "percent",
-        "source_agency": "BFP",
-        "description": "Prévisions de croissance du PIB du Bureau fédéral du Plan",
-        "type": "excel_bfp"
     }
 }
 
@@ -224,6 +218,17 @@ class MacroDatabase:
             );
             CREATE INDEX IF NOT EXISTS idx_obs_period
                 ON observations(indicator_code, period DESC);
+            CREATE TABLE IF NOT EXISTS forecasts (
+                institution    TEXT NOT NULL,
+                indicator      TEXT NOT NULL,
+                year           TEXT NOT NULL,
+                value          REAL,
+                updated_at     TEXT,
+                fetched_at     TEXT NOT NULL,
+                PRIMARY KEY (institution, indicator, year)
+            );
+            CREATE INDEX IF NOT EXISTS idx_fc_indicator
+                ON forecasts(indicator, year);
         """)
         self.conn.commit()
 
@@ -290,6 +295,28 @@ class MacroDatabase:
     def close(self):
         self.conn.close()
 
+    # ── Forecasts ──
+
+    def upsert_forecasts(self, rows: list[dict]) -> int:
+        now = datetime.now(timezone.utc).isoformat()
+        for r in rows:
+            self.conn.execute("""
+                INSERT INTO forecasts (institution, indicator, year, value, updated_at, fetched_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(institution, indicator, year) DO UPDATE SET
+                    value=excluded.value, updated_at=excluded.updated_at,
+                    fetched_at=excluded.fetched_at
+            """, (r["institution"], r["indicator"], r["year"],
+                  r.get("value"), r.get("updated_at", ""), now))
+        self.conn.commit()
+        return len(rows)
+
+    def get_all_forecasts(self) -> pd.DataFrame:
+        return pd.read_sql_query("""
+            SELECT institution, indicator, year, value, updated_at, fetched_at
+            FROM forecasts ORDER BY indicator, year, institution
+        """, self.conn)
+
 
 # ─── Fetchers ─────────────────────────────────────────────────────
 
@@ -313,7 +340,6 @@ class NBBFetcher:
             log.info(f"  {len(data)} obs: {data[0]['period']} → {data[-1]['period']}")
         return data
 
-
 class DBnomicsFetcher:
     @staticmethod
     def fetch(url: str) -> list[dict]:
@@ -331,17 +357,20 @@ class DBnomicsFetcher:
 
         results = []
         for p, v in zip(periods, values):
+            # Client-side fallback filter to ensure no data before 2008-Q1
             if str(p) < "2008-Q1":
                 continue
             if v is None or v == "NA":
                 continue
             try:
                 val = float(v)
+                # DBnomics doesn't universally provide granular observation status flags in the main array, defaulting to Actual
                 results.append({"period": str(p), "value": val, "obs_status": "A"})
             except ValueError:
                 continue
                 
         if results:
+            # Normalize to average of 4 quarters of 2010 = 100
             q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
             if q2010:
                 avg_2010 = sum(q2010) / len(q2010)
@@ -352,71 +381,82 @@ class DBnomicsFetcher:
         return results
 
 
-class ExcelBFPFetcher:
+class FPBFetcher:
+    """Fetches the Federal Planning Bureau multi-institution forecast Excel."""
+
+    INDICATORS = {
+        1: "GDP_VOL",       # PIB en volume — taux de croissance en %
+        3: "CPI",           # Indice des prix à la consommation — taux de croissance en %
+        5: "FISCAL_BAL",    # Solde de financement des administrations publiques — % du PIB
+    }
+
     @staticmethod
-    def fetch(url: str) -> list[dict]:
-        log.info(f"GET {url[:90]}...")
+    def fetch(url: str = FPB_XLSX_URL) -> list[dict]:
+        import tempfile
+        log.info(f"GET {url[:80]}...")
         resp = requests.get(url, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
-        
-        try:
-            # header=None permet d'importer toute la grille brute sans casser sur les colonnes fusionnées
-            df = pd.read_excel(io.BytesIO(resp.content), header=None)
-        except Exception as e:
-            raise ValueError(f"Impossible de parser le fichier Excel du BFP. Erreur: {e}")
 
-        results = []
-        bfp_idx = -1
-        year_idx = -1
-        
-        # 1. On cherche la ligne contenant "Bureau fédéral du Plan" dans la première colonne
-        for i, row in df.iterrows():
-            if "Bureau fédéral du Plan" in str(row[0]).strip():
-                bfp_idx = i
-                break
-                
-        if bfp_idx == -1:
-            log.warning("Impossible de trouver 'Bureau fédéral du Plan' dans l'Excel.")
-            return results
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+            tmp.write(resp.content)
+            tmp_path = tmp.name
 
-        # 2. On remonte à partir de bfp_idx pour trouver la ligne contenant les années (ex: 2025, 2026)
-        for i in range(bfp_idx - 1, -1, -1):
-            col1_val = str(df.iloc[i, 1]).strip().replace('.0', '')
-            if col1_val.isdigit() and len(col1_val) == 4:
-                year_idx = i
-                break
+        wb = load_workbook(tmp_path, data_only=True)
+        ws = wb[wb.sheetnames[0]]
 
-        if year_idx == -1:
-            log.warning("Impossible de trouver la ligne des années dans l'Excel.")
-            return results
+        # Row 4 has the year headers: cols B,C for GDP; D,E for CPI; F,G for fiscal
+        year_cols = {}
+        for col_offset, ind_code in FPBFetcher.INDICATORS.items():
+            y1 = ws.cell(4, col_offset + 1).value  # e.g. 2026
+            y2 = ws.cell(4, col_offset + 2).value  # e.g. 2027
+            year_cols[ind_code] = [(col_offset + 1, str(int(y1))), (col_offset + 2, str(int(y2)))]
 
-        year_row = df.iloc[year_idx]
-        bfp_row = df.iloc[bfp_idx]
-
-        # 3. Selon le format, les années pour le "PIB en volume" sont dans les colonnes 1 et 2
-        for col in [1, 2]:
-            year = str(year_row[col]).strip().replace('.0', '')
-            val = bfp_row[col]
-            
-            if str(val).strip() in ["", "-.-", "nan"]:
+        rows = []
+        for r in range(5, ws.max_row + 1):
+            institution = ws.cell(r, 1).value
+            if not institution or not str(institution).strip():
                 continue
-                
-            if year.isdigit() and len(year) == 4:
-                try:
-                    results.append({
-                        "period": year,
-                        "value": float(val),
-                        "obs_status": "F" # F pour Forecast
-                    })
-                except ValueError:
-                    continue
+            institution = str(institution).strip()
 
-        if results:
-            log.info(f"  {len(results)} obs BFP: {results[0]['period']} → {results[-1]['period']}")
-        else:
-            log.warning("Aucune donnée valide extraite du fichier BFP.")
-            
-        return results
+            updated_raw = ws.cell(r, 8).value  # Column H = update date
+            updated_at = ""
+            if updated_raw:
+                try:
+                    updated_at = str(updated_raw)[:10]
+                except Exception:
+                    updated_at = str(updated_raw)
+
+            for ind_code, cols in year_cols.items():
+                for col_idx, year in cols:
+                    raw = ws.cell(r, col_idx).value
+                    val = FPBFetcher._parse_value(raw)
+                    rows.append({
+                        "institution": institution,
+                        "indicator": ind_code,
+                        "year": year,
+                        "value": val,
+                        "updated_at": updated_at,
+                    })
+
+        wb.close()
+        Path(tmp_path).unlink(missing_ok=True)
+        valid = [r for r in rows if r["value"] is not None]
+        log.info(f"  FPB forecasts: {len(valid)} values from {len(set(r['institution'] for r in rows))} institutions")
+        return rows
+
+    @staticmethod
+    def _parse_value(raw) -> Optional[float]:
+        if raw is None:
+            return None
+        if isinstance(raw, (int, float)):
+            return round(float(raw), 2)
+        s = str(raw).strip().replace(",", ".")
+        if s in ("-.-", "—", "-", "...", ""):
+            return None
+        try:
+            return round(float(s), 2)
+        except ValueError:
+            return None
 
 
 # ─── Orchestration ────────────────────────────────────────────────
@@ -431,8 +471,6 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
                 rows = NBBFetcher.fetch(meta["url"])
             elif src_type == "dbnomics":
                 rows = DBnomicsFetcher.fetch(meta["url"])
-            elif src_type == "excel_bfp":
-                rows = ExcelBFPFetcher.fetch(meta["url"])
             else:
                 raise ValueError(f"Unknown source type specified: {src_type}")
                 
@@ -444,6 +482,19 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
             log.error(f"  FAIL {code}: {e}")
             db.log_fetch(code, 0, "ERROR", str(e))
             results[code] = 0
+
+    # ── Forecasts (FPB multi-institution table) ──
+    try:
+        fc_rows = FPBFetcher.fetch()
+        n = db.upsert_forecasts(fc_rows)
+        db.log_fetch("FPB_FORECASTS", n, "OK")
+        results["FPB_FORECASTS"] = n
+        log.info(f"  OK FPB_FORECASTS: {n} rows")
+    except Exception as e:
+        log.error(f"  FAIL FPB_FORECASTS: {e}")
+        db.log_fetch("FPB_FORECASTS", 0, "ERROR", str(e))
+        results["FPB_FORECASTS"] = 0
+
     return results
 
 
@@ -456,7 +507,7 @@ def show_latest(db: MacroDatabase):
     print("  BELGIAN MACRO DATABASE — Latest")
     print("=" * 70 + "\n")
     for e in latest:
-        s = {"A": "Actual", "P": "Provisional", "F": "Forecast", "B": "Break"}.get(e["obs_status"], e["obs_status"])
+        s = {"A": "Actual", "P": "Provisional"}.get(e["obs_status"], e["obs_status"])
         print(f"  {e['name']}")
         print(f"    {e['period']}  →  {e['value']}  ({s})")
         print(f"    fetched {e['fetched_at'][:16]}\n")
@@ -480,6 +531,14 @@ def export_data(db: MacroDatabase, fmt: str) -> Optional[Path]:
     else:
         return None
     log.info(f"Exported {len(df)} rows → {p.name}")
+
+    # Export forecasts
+    fc = db.get_all_forecasts()
+    if not fc.empty:
+        fp = out / "belgian_forecasts.csv"
+        fc.to_csv(fp, index=False)
+        log.info(f"Exported {len(fc)} forecast rows → {fp.name}")
+
     return p
 
 
@@ -515,7 +574,7 @@ def main():
                 s = df[df["indicator_code"] == code]
                 print(f"\n  {s.iloc[0]['name']} ({code})")
                 for _, row in s.iterrows():
-                    st = {"A": "Act", "P": "Prov", "B": "Break", "F": "Fore"}.get(row["obs_status"], row["obs_status"])
+                    st = {"A": "Act", "P": "Prov", "B": "Break"}.get(row["obs_status"], row["obs_status"])
                     print(f"    {row['period']:<10} {row['value']:>12.1f}  {st}")
 
         if args.export:
