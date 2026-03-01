@@ -4,7 +4,7 @@ on:
   schedule:
     # 06:00 CET = 05:00 UTC
     - cron: '0 5 * * *'
-  workflow_dispatch:  # Manual trigger button
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,23 +13,24 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
-steps:
+    steps:
       - uses: actions/checkout@v4
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          
       - name: Install dependencies
         run: pip install pandas requests openpyxl
+        
       - name: Run pipeline
         run: python belgian_macro_db.py --fetch --latest --export csv
         
-
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/
-          git diff --staged --quiet || git commit -m "📊 Daily update $(date -u +%Y-%m-%d)"
-          git push
+          git diff --staged --quiet || (git commit -m "📊 Daily update $(date -u +%Y-%m-%d)" && git push)
+```
