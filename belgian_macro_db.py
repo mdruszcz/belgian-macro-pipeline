@@ -137,7 +137,7 @@ SOURCES = {
     "EUROSTAT_GDP_Q_MEUR_EA": { "name": "GDP EA", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
     "EC_CONS_CONF_BE": {
         "name": "Consumer Confidence BE (EC)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true&start_period=2010-01",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true",
         "frequency": "M",
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
@@ -146,7 +146,7 @@ SOURCES = {
     },
     "EC_CONS_CONF_EU": {
         "name": "Consumer Confidence EU (EC)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true&start_period=2010-01",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true",
         "frequency": "M",
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
