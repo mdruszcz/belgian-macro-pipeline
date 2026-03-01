@@ -1,7 +1,7 @@
 """
 Belgian Macroeconomic Database
 ==============================
-Fetches GDP data from the NBB SDMX dissemination API and DBnomics,
+Fetches GDP data from the NBB SDMX dissemination API, DBnomics, and BFP Excel,
 stores in SQLite, and exports to CSV/JSON.
 
 Runs daily via GitHub Actions — data committed back to the repo.
@@ -111,7 +111,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR": {
         "name": "Eurostat GDP (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?observations=true",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?start_period=2008-Q1",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -120,7 +120,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_ES": {
         "name": "Eurostat GDP Spain (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?start_period=2008-Q1",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -129,7 +129,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_DE": {
         "name": "Eurostat GDP Germany (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?start_period=2008-Q1",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -138,7 +138,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_FR": {
         "name": "Eurostat GDP France (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?start_period=2008-Q1",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -147,7 +147,7 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_NL": {
         "name": "Eurostat GDP Netherlands (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?start_period=2008-Q1",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
@@ -156,12 +156,21 @@ SOURCES = {
     },
     "EUROSTAT_GDP_Q_MEUR_EA": {
         "name": "Eurostat GDP Euro Area 20 (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?start_period=2008-Q1",
         "frequency": "Q",
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Euro Area 20 GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
+    },
+    "BFP_GDP_FORECAST": {
+        "name": "Bureau du Plan - Prévisions PIB",
+        "url": "https://www.plan.be/sites/default/files/documents/FOR_BE_FR.xlsx",
+        "frequency": "A",
+        "unit": "percent",
+        "source_agency": "BFP",
+        "description": "Prévisions économiques du Bureau fédéral du Plan",
+        "type": "excel_bfp"
     }
 }
 
@@ -281,20 +290,6 @@ class MacroDatabase:
     def close(self):
         self.conn.close()
 
-    def cleanup_orphans(self, valid_codes: list[str]):
-        """Remove indicators and observations not in the current SOURCES config."""
-        placeholders = ','.join('?' * len(valid_codes))
-        cur = self.conn.execute(
-            f"SELECT code FROM indicators WHERE code NOT IN ({placeholders})", valid_codes)
-        orphans = [r[0] for r in cur]
-        if orphans:
-            for code in orphans:
-                self.conn.execute("DELETE FROM observations WHERE indicator_code = ?", (code,))
-                self.conn.execute("DELETE FROM indicators WHERE code = ?", (code,))
-                log.info(f"  Cleaned up orphan indicator: {code}")
-            self.conn.commit()
-        return orphans
-
 
 # ─── Fetchers ─────────────────────────────────────────────────────
 
@@ -358,15 +353,48 @@ class DBnomicsFetcher:
             log.info(f"  {len(results)} obs: {results[0]['period']} → {results[-1]['period']}")
         return results
 
+class ExcelBFPFetcher:
+    @staticmethod
+    def fetch(url: str) -> list[dict]:
+        log.info(f"GET {url[:90]}...")
+        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        
+        # ATTENTION MARC: Tu dois adapter le sheet_name et le skiprows en fonction de la gueule du fichier Excel.
+        # L'administration produit des fichiers pour les imprimantes, pas pour des pipelines de données.
+        try:
+            # Requis: pip install openpyxl
+            df = pd.read_excel(io.BytesIO(resp.content), sheet_name=0, skiprows=0)
+        except Exception as e:
+            raise ValueError(f"Impossible de parser le fichier Excel du BFP. As-tu bien installé openpyxl ? Erreur: {e}")
+
+        results = []
+        
+        # --- BLOC À MODIFIER SELON LE CONTENU RÉEL DU FICHIER ---
+        # Remplace 'Annee' et 'PIB_Volume' par les vrais noms de colonnes de ton fichier
+        """
+        for index, row in df.iterrows():
+            period = str(row.get('Annee', '')).strip()
+            val = row.get('PIB_Volume', None)
+            
+            # Vérification simple: est-ce une année valide (ex: 2024) et une valeur non-nulle ?
+            if period.isdigit() and len(period) == 4 and pd.notna(val):
+                try:
+                    results.append({"period": period, "value": float(val), "obs_status": "F"}) # F pour Forecast
+                except ValueError:
+                    continue
+        """
+        # --------------------------------------------------------
+
+        if not results:
+            log.warning("Aucune donnée extraite. Va lire le code de ExcelBFPFetcher et ajuste la logique de parsing Pandas aux vraies colonnes du BFP.")
+            
+        return results
+
 
 # ─── Orchestration ────────────────────────────────────────────────
 
 def fetch_all(db: MacroDatabase) -> dict[str, int]:
-    # Clean up indicators from previous script versions (e.g. _YY variants)
-    orphans = db.cleanup_orphans(list(SOURCES.keys()))
-    if orphans:
-        log.info(f"Removed {len(orphans)} orphaned indicators: {', '.join(orphans)}")
-
     results = {}
     for code, meta in SOURCES.items():
         db.upsert_indicator(code, meta)
@@ -376,6 +404,8 @@ def fetch_all(db: MacroDatabase) -> dict[str, int]:
                 rows = NBBFetcher.fetch(meta["url"])
             elif src_type == "dbnomics":
                 rows = DBnomicsFetcher.fetch(meta["url"])
+            elif src_type == "excel_bfp":
+                rows = ExcelBFPFetcher.fetch(meta["url"])
             else:
                 raise ValueError(f"Unknown source type specified: {src_type}")
                 
@@ -399,7 +429,7 @@ def show_latest(db: MacroDatabase):
     print("  BELGIAN MACRO DATABASE — Latest")
     print("=" * 70 + "\n")
     for e in latest:
-        s = {"A": "Actual", "P": "Provisional"}.get(e["obs_status"], e["obs_status"])
+        s = {"A": "Actual", "P": "Provisional", "F": "Forecast"}.get(e["obs_status"], e["obs_status"])
         print(f"  {e['name']}")
         print(f"    {e['period']}  →  {e['value']}  ({s})")
         print(f"    fetched {e['fetched_at'][:16]}\n")
@@ -458,7 +488,7 @@ def main():
                 s = df[df["indicator_code"] == code]
                 print(f"\n  {s.iloc[0]['name']} ({code})")
                 for _, row in s.iterrows():
-                    st = {"A": "Act", "P": "Prov", "B": "Break"}.get(row["obs_status"], row["obs_status"])
+                    st = {"A": "Act", "P": "Prov", "B": "Break", "F": "Fore"}.get(row["obs_status"], row["obs_status"])
                     print(f"    {row['period']:<10} {row['value']:>12.1f}  {st}")
 
         if args.export:
