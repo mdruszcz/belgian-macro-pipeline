@@ -14,22 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+   steps:
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
-
+          python-version: '3.10'
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Fetch from NBB + export
-        run: |
-          python belgian_macro_db.py --fetch --export csv --export json
+        run: pip install pandas requests openpyxl
+      - name: Run pipeline
+        run: python belgian_macro_db.py --fetch --latest --export csv
+        
 
       - name: Commit updated data
         run: |
