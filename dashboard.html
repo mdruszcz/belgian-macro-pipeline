@@ -178,15 +178,15 @@ tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
 .modal-table .st-actual{background:var(--green-bg);color:var(--green)}
 .modal-table .st-prov{background:var(--orange-bg);color:var(--orange)}
 .modal-table .st-break{background:var(--red-bg);color:var(--red)}
-.contrib-wrap{padding:0 32px 30px}
-.contrib-card{background:var(--bg-table);border-radius:10px;padding:24px 28px 18px;border:1px solid var(--border-table)}
+.contrib-wrap{padding:0 32px 30px;display:flex;gap:20px}
+.contrib-card{background:var(--bg-table);border-radius:10px;padding:24px 28px 18px;border:1px solid var(--border-table);flex:1;min-width:0}
 .contrib-title{font-size:.95rem;font-weight:700;color:var(--text-cell);margin-bottom:2px}
 .contrib-sub{font-size:.7rem;color:var(--text-cell-muted);margin-bottom:16px}
 .contrib-card canvas{display:block;width:100%}
 .contrib-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-table)}
 .contrib-legend .leg{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text-cell-dim)}
 .contrib-legend .leg .swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
-@media(max-width:1100px){.contrib-wrap{padding-left:16px;padding-right:16px}}
+@media(max-width:1100px){.contrib-wrap{padding-left:16px;padding-right:16px;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -199,6 +199,12 @@ tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
     <div class="contrib-sub">in percentage points · Source: NBB</div>
     <canvas id="contribCanvas"></canvas>
     <div class="contrib-legend" id="contribLegend"></div>
+  </div>
+  <div class="contrib-card" id="intlCard" style="display:none">
+    <div class="contrib-title" id="intlTitle">Quarterly real GDP growth</div>
+    <div class="contrib-sub">(2010 = 100) · Source: Eurostat</div>
+    <canvas id="intlCanvas"></canvas>
+    <div class="contrib-legend" id="intlLegend"></div>
   </div>
 </div>
 <div class="footer"><div id="ftSrc"><strong>Sources:</strong> NBB = National Bank of Belgium</div><div id="ftGit">Data from GitHub · Auto-updated daily 06:00 CET</div></div>
@@ -566,16 +572,23 @@ const CONTRIB_SERIES = [
 
 function renderContribChart() {
   const wrap = document.getElementById('contribWrap');
-  // Check if we have the data
+  if (activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
+
+  // Check contrib data
   const gdp = DATA['GDP_ANNUAL_CY'];
   const hasContrib = CONTRIB_SERIES.every(s => {
     if (s.composite) return s.composite.every(c => DATA[c] && DATA[c].length > 0);
     return DATA[s.code] && DATA[s.code].length > 0;
   });
-  if (!gdp || !hasContrib) { wrap.style.display = 'none'; return; }
-  if (activeFilter !== 'gdp') { wrap.style.display = 'none'; return; }
+  const hasIntl = DATA['EUROSTAT_GDP_Q_MEUR'] && DATA['EUROSTAT_GDP_Q_MEUR_DE'] && DATA['EUROSTAT_GDP_Q_MEUR_FR'] && DATA['EUROSTAT_GDP_Q_MEUR_NL'];
 
-  wrap.style.display = 'block';
+  if (!gdp && !hasContrib && !hasIntl) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+
+  // Contrib card
+  const contribCard = wrap.querySelector('.contrib-card:first-child');
+  if (gdp && hasContrib) {
+    contribCard.style.display = '';
   const titles = {en:'Annual real GDP growth and contributions', fr:'Croissance annuelle réelle du PIB et contributions', nl:'Jaarlijkse reële BBP-groei en bijdragen'};
   document.getElementById('contribTitle').textContent = titles[LANG] || titles.en;
 
@@ -608,6 +621,10 @@ function renderContribChart() {
 
   // Draw on canvas
   requestAnimationFrame(() => { requestAnimationFrame(() => { _drawContrib(yearData); }); });
+  } else {
+    contribCard.style.display = 'none';
+  }
+  renderIntlChart();
 }
 
 function _drawContrib(yearData) {
@@ -739,6 +756,149 @@ function _drawContrib(yearData) {
   ctx.font = '9px Figtree, sans-serif'; ctx.fillStyle = labelC;
   ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
   ctx.fillText('Source: NBB', W - pR, H - 2);
+}
+
+// ═══════════════════════════════════════════════════════
+// MULTI-LINE CHART — International GDP comparison
+// ═══════════════════════════════════════════════════════
+
+const INTL_SERIES = [
+  {code:'EUROSTAT_GDP_Q_MEUR_EA', label:'Euro Area', color:'#dc2626', width:2.5},
+  {code:'EUROSTAT_GDP_Q_MEUR',    label:'BE',        color:'_theme_', width:3},
+  {code:'EUROSTAT_GDP_Q_MEUR_DE', label:'DE',        color:'#84cc16', width:2},
+  {code:'EUROSTAT_GDP_Q_MEUR_ES', label:'ES',        color:'#3b82f6', width:2},
+  {code:'_COMPOSITE_DEFRNL',      label:'DE/FR/NL',  color:'#f59e0b', width:2, composite:true},
+];
+
+function renderIntlChart() {
+  const card = document.getElementById('intlCard');
+  const be = DATA['EUROSTAT_GDP_Q_MEUR'];
+  const de = DATA['EUROSTAT_GDP_Q_MEUR_DE'];
+  const fr = DATA['EUROSTAT_GDP_Q_MEUR_FR'];
+  const nl = DATA['EUROSTAT_GDP_Q_MEUR_NL'];
+  if(!be || !de || !fr || !nl) { card.style.display='none'; return; }
+  card.style.display='';
+
+  const titles = {en:'Quarterly real GDP growth',fr:'Croissance trimestrielle du PIB réel',nl:'Kwartaal reëel BBP-groei'};
+  document.getElementById('intlTitle').textContent = titles[LANG]||titles.en;
+
+  // Build composite DE/FR/NL series
+  const compData = [];
+  be.forEach(b => {
+    const d=de.find(x=>x.period===b.period), f=fr.find(x=>x.period===b.period), n=nl.find(x=>x.period===b.period);
+    if(d&&f&&n) compData.push({period:b.period, value: d.value*0.5 + f.value*0.4 + n.value*0.1});
+  });
+  DATA['_COMPOSITE_DEFRNL'] = compData;
+
+  // Legend
+  const legEl = document.getElementById('intlLegend');
+  legEl.innerHTML = INTL_SERIES.map(s => {
+    const col = s.color === '_theme_' ? 'var(--text-cell)' : s.color;
+    return `<div class="leg"><div class="swatch" style="background:${col};height:${s.width>2?3:2}px;border-radius:0;margin-top:5px"></div>${s.label}</div>`;
+  }).join('');
+
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{_drawIntl();});});
+}
+
+function _drawIntl() {
+  const cv = document.getElementById('intlCanvas');
+  const ct = cv.parentElement;
+  const ctx = cv.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = ct.clientWidth - 56;
+  const H = 340;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+  cv.style.width = W+'px'; cv.style.height = H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  // Gather all periods from BE (reference)
+  const be = DATA['EUROSTAT_GDP_Q_MEUR'];
+  if(!be || !be.length) return;
+  const periods = be.map(d=>d.period);
+  const n = periods.length;
+
+  // Collect all values to find Y range
+  let allVals = [];
+  INTL_SERIES.forEach(s => {
+    const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
+    if(src) src.forEach(d => { if(typeof d.value==='number') allVals.push(d.value); });
+  });
+  if(!allVals.length) return;
+
+  const pL=50, pR=14, pT=16, pB=52;
+  const cW=W-pL-pR, cH=H-pT-pB;
+
+  // Nice Y range
+  const rawMin=Math.min(...allVals), rawMax=Math.max(...allVals);
+  const vMin=Math.floor(rawMin/5)*5, vMax=Math.ceil(rawMax/5)*5;
+  const vR=vMax-vMin||1;
+  const yOf=v=>pT+((vMax-v)/vR)*cH;
+
+  const gridC=gc('--chart-grid')||'rgba(0,0,0,.06)';
+  const labelC=gc('--chart-label')||'#94a3b8';
+
+  // Y grid
+  const yStep = vMax-vMin > 30 ? 5 : (vMax-vMin > 15 ? 5 : 2);
+  for(let v=vMin; v<=vMax; v+=yStep){
+    const y=Math.round(yOf(v))+0.5;
+    ctx.strokeStyle=gridC; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(pL,y); ctx.lineTo(W-pR,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font='10px Overpass Mono,monospace'; ctx.fillStyle=labelC;
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(v.toString(), pL-8, y);
+  }
+
+  // Y-axis label
+  ctx.save(); ctx.translate(11, pT+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.font='10px Figtree,sans-serif'; ctx.fillStyle=labelC;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('2010 = 100', 0, 0); ctx.restore();
+
+  // X-axis labels — smart skip
+  const maxLblW = 52; // approx width of "2020-Q1"
+  const xStep = Math.max(1, Math.ceil((maxLblW+8) / (cW/n)));
+  // Prefer Q1 labels
+  periods.forEach((p,i) => {
+    if(i % xStep !== 0 && i !== n-1) return;
+    const x = pL + (i/(n-1))*cW;
+    ctx.save();
+    ctx.translate(x, H-pB+10);
+    ctx.rotate(-Math.PI/4);
+    ctx.font='8.5px Overpass Mono,monospace'; ctx.fillStyle=labelC;
+    ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText(p, 0, 0);
+    ctx.restore();
+  });
+
+  // Draw lines — order matters (thicker BE on top)
+  const drawOrder = [3, 4, 2, 0, 1]; // ES, composite, DE, EA, BE
+  drawOrder.forEach(si => {
+    const s = INTL_SERIES[si];
+    const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];
+    if(!src || !src.length) return;
+
+    ctx.beginPath();
+    let started = false;
+    periods.forEach((p,i) => {
+      const d = src.find(x=>x.period===p);
+      if(!d) return;
+      const x = pL + (i/(n-1))*cW;
+      const y = yOf(d.value);
+      if(!started){ ctx.moveTo(x,y); started=true; }
+      else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle = s.color === '_theme_' ? (gc('--text-cell')||'#1e293b') : s.color;
+    ctx.lineWidth = s.width;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.stroke();
+  });
+
+  // Source
+  ctx.font='9px Figtree,sans-serif'; ctx.fillStyle=labelC;
+  ctx.textAlign='right'; ctx.textBaseline='bottom';
+  ctx.fillText('Source: Eurostat', W-pR, H-2);
 }
 
 function init(){updateStaticUI();document.getElementById('btn-'+LANG).classList.add('active');loadTheme();renderPills();fetchData();}
