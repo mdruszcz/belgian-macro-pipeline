@@ -205,6 +205,8 @@ tr:nth-last-child(-n+3) .ind-name:hover .tip{animation:tipUp .15s ease}
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="exportModalCSV()" style="font-size:.68rem;padding:5px 10px">⬇ Export CSV</button><button class="modal-close" onclick="closeModal()">✕</button></div></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
 const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
+const FORECAST_CSV_URL='https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_forecasts.csv';
+let FORECASTS_RAW=[];
 let LANG=localStorage.getItem('lang')||'en';
 const T={title:{en:'Macroeconomic and Financial Review of Belgium',fr:'Revue macroéconomique et financière de la Belgique',nl:'Macro-economisch en financieel overzicht van België'},loading:{en:'Loading…',fr:'Chargement…',nl:'Laden…'},fetching:{en:'Fetching…',fr:'Récupération…',nl:'Ophalen…'},error:{en:'Error: ',fr:'Erreur : ',nl:'Fout: '},no_csv:{en:'No CSV URL available in configuration.',fr:'Aucune URL CSV disponible.',nl:'Geen CSV URL beschikbaar.'},all:{en:'ALL',fr:'TOUS',nl:'ALLE'},th_ind:{en:'Indicator',fr:'Indicateur',nl:'Indicator'},th_src:{en:'Source',fr:'Source',nl:'Bron'},th_last:{en:'Last data',fr:'Dernières données',nl:'Laatste data'},th_val:{en:'Value',fr:'Valeur',nl:'Waarde'},th_trend:{en:'Trend',fr:'Tendance',nl:'Trend'},th_vis:{en:'Visuel',fr:'Visuel',nl:'Visueel'},th_upd:{en:'Update',fr:'Mise à jour',nl:'Update'},th_com:{en:'Comments',fr:'Commentaires',nl:'Opmerkingen'},ft_src:{en:'<strong>Sources:</strong> NBB = National Bank of Belgium',fr:'<strong>Sources:</strong> BNB = Banque Nationale de Belgique',nl:'<strong>Bronnen:</strong> NBB = Nationale Bank van België'},ft_git:{en:'Data from GitHub · Auto-updated daily 06:00 CET',fr:'Données GitHub · Mise à jour auto. 06:00 CET',nl:'Data via GitHub · Auto-update 06:00 CET'},m_obs:{en:'observations',fr:'observations',nl:'waarnemingen'},m_last10:{en:'Last 10 years',fr:'10 dernières années',nl:'Laatste 10 jaar'},m_latest:{en:'Latest',fr:'Dernier',nl:'Laatste'},m_chg:{en:'Change',fr:'Changement',nl:'Verschil'},m_avg:{en:'10Y Average',fr:'Moyenne 10A',nl:'10J Gemid.'},m_min:{en:'10Y Min',fr:'Min 10A',nl:'10J Min'},m_max:{en:'10Y Max',fr:'Max 10A',nl:'10J Max'},m_th_per:{en:'Period',fr:'Période',nl:'Periode'},m_th_val:{en:'Value',fr:'Valeur',nl:'Waarde'},m_th_chg:{en:'Δ Change',fr:'Δ Changement',nl:'Δ Verschil'},m_th_stat:{en:'Status',fr:'Statut',nl:'Status'},m_th_bar:{en:'Bar',fr:'Barre',nl:'Balk'},st_act:{en:'Actual',fr:'Réel',nl:'Actueel'},st_prov:{en:'Provisional',fr:'Provisoire',nl:'Voorlopig'},st_brk:{en:'Break',fr:'Rupture',nl:'Breuk'},c_reached:{en:'reached',fr:'a atteint',nl:'bereikte'},c_in:{en:'in',fr:'en',nl:'in'},c_prov:{en:'(provisional)',fr:'(provisoire)',nl:'(voorlopig)'},c_vs:{en:'Change vs',fr:'Changement vs',nl:'Verschil met'}};
 function t(k){return T[k]?.[LANG]||k;}
@@ -218,7 +220,10 @@ GFCF_ENTERPRISES_CY:{n:6,s:'gdp',name:{en:'GFCF — Enterprises',fr:'FBCF — En
 GFCF_DWELLINGS_CY:{n:7,s:'gdp',name:{en:'GFCF — Dwellings',fr:'FBCF — Logements',nl:'BIK — Woningen'},o:7,full:{en:'Gross Fixed Capital Formation in Dwellings',fr:'Formation brute de capital fixe en logements',nl:'Bruto-investeringen in vaste activa in woningen'},desc:{en:'Residential construction — new builds and major renovations. Sensitive to mortgage rates.',fr:'Construction résidentielle — logements neufs et rénovations. Sensible aux taux hypothécaires.',nl:'Woningbouw — nieuwbouw en grote renovaties. Gevoelig voor hypotheekrente.'},sdmx:'P51_DWE',freq:'A'},
 GFCF_PUBLIC_CY:{n:8,s:'gdp',name:{en:'GFCF — Public admin.',fr:'FBCF — Administrations publiques',nl:'BIK — Overheid'},o:8,full:{en:'Gross Fixed Capital Formation by Public Administrations',fr:'Formation brute de capital fixe par les APU',nl:'Bruto-investeringen in vaste activa door de overheid'},desc:{en:'Government infrastructure — roads, rail, schools. Follows political investment cycles.',fr:'Infrastructures gouvernementales — routes, rails, écoles. Suit les cycles politiques.',nl:'Overheidsinfrastructuur — wegen, spoor, scholen. Volgt politieke cycli.'},sdmx:'P51_PAD',freq:'A'},
 CHG_STOCKS_CY:{n:9,s:'gdp',name:{en:'Changes in stocks',fr:'Variation des stocks',nl:'Voorraadverandering'},o:9,full:{en:'Changes in Inventories',fr:'Variation des stocks',nl:'Veranderingen in voorraden'},desc:{en:'Change in raw materials and finished goods held by firms. Highly volatile swing factor.',fr:'Variation des matières premières et produits finis. Facteur d\'ajustement très volatil.',nl:'Verandering in grondstoffen en eindproducten bij bedrijven. Zeer volatiele zwaaifactor.'},sdmx:'P52',freq:'A'},
-NET_EXPORTS_CY:{n:10,s:'gdp',name:{en:'Net exports',fr:'Exportations nettes',nl:'Netto-export'},o:10,full:{en:'External Balance of Goods and Services',fr:'Solde extérieur des biens et services',nl:'Extern saldo van goederen en diensten'},desc:{en:'Exports minus imports. Belgium is highly open (trade ~160% of GDP).',fr:'Exportations moins importations. La Belgique est très ouverte (commerce ~160% du PIB).',nl:'Export minus import. België is zeer open (handel ~160% van het BBP).'},sdmx:'B11',freq:'A'}
+NET_EXPORTS_CY:{n:10,s:'gdp',name:{en:'Net exports',fr:'Exportations nettes',nl:'Netto-export'},o:10,full:{en:'External Balance of Goods and Services',fr:'Solde extérieur des biens et services',nl:'Extern saldo van goederen en diensten'},desc:{en:'Exports minus imports. Belgium is highly open (trade ~160% of GDP).',fr:'Exportations moins importations. La Belgique est très ouverte (commerce ~160% du PIB).',nl:'Export minus import. België is zeer open (handel ~160% van het BBP).'},sdmx:'B11',freq:'A'},
+FC_GDP_VOL:{n:11,s:'gdp',name:{en:'⟶ GDP forecast (consensus)',fr:'⟶ Prévision PIB (consensus)',nl:'⟶ BBP-prognose (consensus)'},o:11,full:{en:'GDP Volume Growth — Multi-Institution Forecast',fr:'Croissance du PIB en volume — Prévisions multi-institutions',nl:'BBP-volumegroei — Meervoudige prognose'},desc:{en:'Average GDP growth forecast from 13 institutions (FPB, NBB, EC, IMF, OECD, banks). Source: plan.be.',fr:'Prévision moyenne de croissance du PIB de 13 institutions. Source : plan.be.',nl:'Gemiddelde BBP-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'GDP_VOL'},
+FC_CPI:{n:1,s:'prices',name:{en:'⟶ CPI forecast (consensus)',fr:'⟶ Prévision IPC (consensus)',nl:'⟶ CPI-prognose (consensus)'},o:0.5,full:{en:'Consumer Price Index — Multi-Institution Forecast',fr:'Indice des prix à la consommation — Prévisions multi-institutions',nl:'Consumentenprijsindex — Meervoudige prognose'},desc:{en:'Average CPI growth forecast from 13 institutions. Source: plan.be.',fr:'Prévision moyenne IPC de 13 institutions. Source : plan.be.',nl:'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'CPI'},
+FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'⟶ Fiscal balance forecast (consensus)',fr:'⟶ Prévision solde budgétaire (consensus)',nl:'⟶ Begrotingssaldo prognose (consensus)'},o:0.5,full:{en:'Government Fiscal Balance — Multi-Institution Forecast',fr:'Solde de financement des APU — Prévisions multi-institutions',nl:'Begrotingssaldo overheid — Meervoudige prognose'},desc:{en:'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.',fr:'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source : plan.be.',nl:'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'FISCAL_BAL'}
 };
 const SECTIONS={gdp:{label:{en:'Gross Domestic Product',fr:'Produit Intérieur Brut',nl:'Bruto Binnenlands Product'}},confidence:{label:{en:'Confidence & Sentiment',fr:'Confiance et Sentiment',nl:'Vertrouwen & Sentiment'}},prices:{label:{en:'Production & Prices',fr:'Production et Prix',nl:'Productie & Prijzen'}},labour:{label:{en:'Labour Costs',fr:'Coûts de la Main-d\'œuvre',nl:'Arbeidskosten'}},employment:{label:{en:'Employment',fr:'Emploi',nl:'Werkgelegenheid'}},unemployment:{label:{en:'Unemployment',fr:'Chômage',nl:'Werkloosheid'}},business:{label:{en:'Business Environment',fr:'Environnement des Affaires',nl:'Bedrijfsklimaat'}},fiscal:{label:{en:'Government Finances',fr:'Finances Publiques',nl:'Overheidsfinanciën'}}};
 let DATA={},activeFilter='gdp';
@@ -230,7 +235,7 @@ function setTheme(t,btn){document.documentElement.setAttribute('data-theme',t);l
 function loadTheme(){const t=localStorage.getItem('theme')||'soft';document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('t-'+t);if(btn)btn.classList.add('active');}
 function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function parseCSV(t){const l=t.trim().split('\n'),h=l[0].split(',');return l.slice(1).map(r=>{const v=r.split(','),o={};h.forEach((k,i)=>o[k.trim()]=(v[i]||'').trim());return o});}
-function fmtV(v,u){const s=v.toFixed(1).replace('.',',');return u==='pp_contribution'?s+' pp':(u==='index_2010'||u==='comp_index')?s:s+'%';}
+function fmtV(v,u){const s=v.toFixed(1).replace('.',',');return u==='pp_contribution'?s+' pp':u==='pct_gdp'?s+'% GDP':(u==='index_2010'||u==='comp_index')?s:s+'%';}
 function fmtD(s){return s?s.substring(0,10):'—';}
 function trend(s){if(s.length<2)return'flat';const d=s[s.length-1].value-s[s.length-2].value;return d>.05?'up':d<-.05?'down':'flat';}
 function tArr(t){return t==='up'?'<span class="trend up">↗</span>':t==='down'?'<span class="trend down">↘</span>':'<span class="trend flat">→</span>';}
@@ -273,20 +278,131 @@ async function fetchData(){const url=localStorage.getItem('csv_url')||DEFAULT_CS
         });
         if(comp.length > 0) DATA['INT_GDP_COMP'] = comp;
     }
+    // ── Load forecasts ──
+    try {
+        const fr=await fetch(FORECAST_CSV_URL+'?t='+Date.now());
+        if(fr.ok){
+            FORECASTS_RAW=parseCSV(await fr.text()).map(r=>({
+                institution:r.institution, indicator:r.indicator, year:r.year,
+                value:r.value?parseFloat(r.value):null, updated_at:r.updated_at||''
+            }));
+            buildForecastData();
+        }
+    } catch(e){ log && console.warn('Forecasts not loaded:', e); }
     dot.className='dot';st.textContent=`${Object.keys(DATA).length} indicators · ${rows.length} ${t('m_obs')}`;render();}catch(e){dot.className='dot err';st.textContent=t('error')+e.message;}}
+
+function buildForecastData(){
+    // For each FC_ meta entry, build a synthetic DATA entry with avg values per year
+    // Only include institutions updated in the last 6 months
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 6);
+    const cutStr = cutoff.toISOString().substring(0,10);
+
+    for(const [code, meta] of Object.entries(M)){
+        if(!meta.forecast || !meta.fc_indicator) continue;
+        const ind = meta.fc_indicator;
+        const relevant = FORECASTS_RAW.filter(r =>
+            r.indicator === ind && r.value !== null && r.updated_at >= cutStr
+        );
+        // Group by year
+        const byYear = {};
+        relevant.forEach(r => {
+            if(!byYear[r.year]) byYear[r.year] = [];
+            byYear[r.year].push(r);
+        });
+        const series = [];
+        for(const [year, entries] of Object.entries(byYear).sort((a,b)=>a[0].localeCompare(b[0]))){
+            const avg = entries.reduce((s,e)=>s+e.value,0) / entries.length;
+            series.push({
+                period: year,
+                value: Math.round(avg * 100) / 100,
+                obs_status: 'F',
+                unit: ind === 'FISCAL_BAL' ? 'pct_gdp' : 'percent_yy',
+                source: 'FPB',
+                name: meta.name?.en || code,
+                fetched_at: entries[0].updated_at || '',
+                _count: entries.length
+            });
+        }
+        if(series.length > 0) DATA[code] = series;
+    }
+}
 
 function drawSpark(cv,vals,tr){if(!cv||vals.length<2)return;const g=gc('--green'),r=gc('--red'),mu=gc('--text-cell-muted'),col=tr==='up'?g:tr==='down'?r:mu;const ctx=cv.getContext('2d'),W=cv.width=100,H=cv.height=32,p=3,vs=vals.slice(-20),mn=Math.min(...vs),mx=Math.max(...vs),rg=mx-mn||1;ctx.clearRect(0,0,W,H);ctx.beginPath();vs.forEach((v,i)=>{const x=p+(i/(vs.length-1))*(W-2*p),y=H-p-((v-mn)/rg)*(H-2*p);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.lineTo(p+(W-2*p),H);ctx.lineTo(p,H);ctx.closePath();ctx.fillStyle=col+'18';ctx.fill();ctx.beginPath();vs.forEach((v,i)=>{const x=p+(i/(vs.length-1))*(W-2*p),y=H-p-((v-mn)/rg)*(H-2*p);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.stroke();const lv=vs[vs.length-1],ly=H-p-((lv-mn)/rg)*(H-2*p);ctx.beginPath();ctx.arc(p+(W-2*p),ly,2.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();}
 
-function render(){const w=document.getElementById('tableWrap');let h='';const by={};for(const[c,s]of Object.entries(DATA)){const sec=(M[c]||{}).s||'other';if(!by[sec])by[sec]=[];by[sec].push({c,s,m:M[c]});}if(by.other&&!SECTIONS.other)SECTIONS.other={label:{en:'Other',fr:'Autre',nl:'Andere'}};for(const[sid,sm]of Object.entries(SECTIONS)){const it=by[sid];if(!it||!it.length)continue;if(activeFilter&&activeFilter!==sid)continue;it.sort((a,b)=>(a.m?.o||99)-(b.m?.o||99));h+=`<div class="section-head">${sm.label[LANG]||sm.label.en}</div><table><thead><tr><th>#</th><th>${t('th_ind')}</th><th>${t('th_src')}</th><th>${t('th_last')}</th><th>${t('th_val')}</th><th>${t('th_trend')}</th><th>${t('th_vis')}</th><th>${t('th_upd')}</th><th>${t('th_com')}</th></tr></thead><tbody>`;it.forEach(({c,s,m})=>{const l=s[s.length-1],tr=trend(s),nm=m?.name?.[LANG]||l.name||c,tf=m?.full?.[LANG]||nm,td=m?.desc?.[LANG]||'',ts=m?.sdmx||'',fr=m?.freq==='Q'?(LANG==='fr'?'Trimestriel':LANG==='nl'?'Kwartaal':'Quarterly'):(LANG==='fr'?'Annuel':LANG==='nl'?'Jaarlijks':'Annual');
-    let valCell = `<td class="val">${fmtV(l.value,l.unit)}</td>`;
-    let periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td>`;
+function drawSparkBar(cv, series){
+  if(!cv || !series || series.length < 1) return;
+  const ctx=cv.getContext('2d'), W=cv.width=100, H=cv.height=32, pad=3;
+  ctx.clearRect(0,0,W,H);
+  const vals=series.map(d=>d.value);
+  const mn=Math.min(...vals,0), mx=Math.max(...vals,0), rg=mx-mn||1;
+  const n=vals.length, barW=Math.min(28, (W-pad*2)/n - 4), gap=((W-pad*2)-barW*n)/(n+1);
+  const zY=H-pad-((0-mn)/rg)*(H-2*pad);
+  const green=gc('--green'), red=gc('--red'), orange=gc('--orange')||'#d97706';
+  vals.forEach((v,i)=>{
+    const x=pad+gap+(barW+gap)*i;
+    const yV=H-pad-((v-mn)/rg)*(H-2*pad);
+    const top=v>=0?yV:zY, h=Math.max(1,Math.abs(yV-zY));
+    ctx.fillStyle=v>=0?green:red;
+    ctx.globalAlpha=0.6;
+    ctx.beginPath();
+    const r=Math.min(2, h/2);
+    ctx.moveTo(x+r,top);ctx.lineTo(x+barW-r,top);ctx.quadraticCurveTo(x+barW,top,x+barW,top+r);
+    ctx.lineTo(x+barW,top+h-r);ctx.quadraticCurveTo(x+barW,top+h,x+barW-r,top+h);
+    ctx.lineTo(x+r,top+h);ctx.quadraticCurveTo(x,top+h,x,top+h-r);
+    ctx.lineTo(x,top+r);ctx.quadraticCurveTo(x,top,x+r,top);ctx.fill();
+    ctx.globalAlpha=1;
+    // year label below
+    ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=gc('--text-cell-dim');
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(series[i].period.slice(-2), x+barW/2, H);
+    // value above bar
+    ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=v>=0?green:red;
+    ctx.textBaseline=v>=0?'bottom':'top';
+    ctx.fillText(v.toFixed(1).replace('.',','), x+barW/2, v>=0?top-1:top+h+1);
+  });
+}
+
+function render(){const w=document.getElementById('tableWrap');let h='';const by={};for(const[c,s]of Object.entries(DATA)){const sec=(M[c]||{}).s||'other';if(!by[sec])by[sec]=[];by[sec].push({c,s,m:M[c]});}if(by.other&&!SECTIONS.other)SECTIONS.other={label:{en:'Other',fr:'Autre',nl:'Andere'}};for(const[sid,sm]of Object.entries(SECTIONS)){const it=by[sid];if(!it||!it.length)continue;if(activeFilter&&activeFilter!==sid)continue;it.sort((a,b)=>(a.m?.o||99)-(b.m?.o||99));h+=`<div class="section-head">${sm.label[LANG]||sm.label.en}</div><table><thead><tr><th>#</th><th>${t('th_ind')}</th><th>${t('th_src')}</th><th>${t('th_last')}</th><th>${t('th_val')}</th><th>${t('th_trend')}</th><th>${t('th_vis')}</th><th>${t('th_upd')}</th><th>${t('th_com')}</th></tr></thead><tbody>`;it.forEach(({c,s,m})=>{const l=s[s.length-1],tr=trend(s),nm=m?.name?.[LANG]||l.name||c,tf=m?.full?.[LANG]||nm,td=m?.desc?.[LANG]||'',ts=m?.sdmx||'';
+    const isFc = m?.forecast;
+    let fr;
+    if(isFc) fr=LANG==='fr'?'Prévision':LANG==='nl'?'Prognose':'Forecast';
+    else if(m?.freq==='Q') fr=LANG==='fr'?'Trimestriel':LANG==='nl'?'Kwartaal':'Quarterly';
+    else fr=LANG==='fr'?'Annuel':LANG==='nl'?'Jaarlijks':'Annual';
+    let valCell, periodCell;
     if(c === 'INT_GDP_COMP') {
         valCell = `<td class="val" style="font-size:0.7rem;line-height:1.2;white-space:nowrap">BE: ${l.be_value.toFixed(1).replace('.',',')}<br><span style="color:var(--text-cell-muted);font-size:0.65rem">DE/FR/NL: ${l.value.toFixed(1).replace('.',',')}</span></td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}<br><span style="font-size:0.6rem;color:var(--text-cell-muted)">2010=100</span></td>`;
+    } else if(isFc) {
+        // Show values for each forecast year side by side
+        const parts = s.map(d => `${d.period}: <b>${d.value>=0?'':' '}${d.value.toFixed(1).replace('.',',')}</b>`).join(' · ');
+        valCell = `<td class="val" style="font-size:0.68rem;white-space:nowrap">${parts}</td>`;
+        periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${s.map(d=>d.period).join(', ')}<br><span style="font-size:0.58rem;color:var(--text-cell-muted)">${l._count||'?'} inst.</span></td>`;
+    } else {
+        valCell = `<td class="val">${fmtV(l.value,l.unit)}</td>`;
+        periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td>`;
     }
-    let srcBadge = l.source === 'EC' ? `<span class="src-badge" style="background:var(--bg-btn-primary);color:var(--text-btn-primary)">${l.source}</span>` : `<span class="src-badge src-nbb">${l.source}</span>`;
-    h+=`<tr onclick="openModal('${c}')"><td style="font-family:'Overpass Mono';font-size:.7rem">${m?.n||'—'}</td><td><span class="ind-name">${nm}<div class="tip"><div class="tip-title">${tf}</div><div class="tip-code">${c}${ts?' · SDMX: '+ts:''}</div>${td?'<div class="tip-desc">'+td+'</div>':''}<div class="tip-meta"><span>⏱ ${fr}</span><span>📡 ${l.source}</span><span>📊 ${s.length} ${t('m_obs')}</span></div></div></span></td><td>${srcBadge}</td>${periodCell}${valCell}<td>${tArr(tr)}</td><td><canvas id="sp_${c}" class="spark" width="100" height="32"></canvas></td><td><span class="update-dt">${fmtD(l.fetched_at)}</span></td><td class="comment">${comment(c,s)}</td></tr>`;
-});h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA))drawSpark(document.getElementById('sp_'+c),s.map(d=>d.value),trend(s));});renderContribChart();}
+    let srcBadge;
+    if(isFc) srcBadge=`<span class="src-badge" style="background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange)">FPB</span>`;
+    else if(l.source==='EC') srcBadge=`<span class="src-badge" style="background:var(--bg-btn-primary);color:var(--text-btn-primary)">${l.source}</span>`;
+    else srcBadge=`<span class="src-badge src-nbb">${l.source}</span>`;
+    // Comment for forecast rows
+    let cmnt;
+    if(isFc){
+        const avgAll = s.map(d=>d.value.toFixed(1).replace('.',',')).join(' / ');
+        const yrLabels = s.map(d=>d.period).join('/');
+        cmnt = {en:`Consensus avg ${yrLabels}: ${avgAll}% (${l._count||'?'} institutions, last 6mo)`,
+                fr:`Moy. consensus ${yrLabels}: ${avgAll}% (${l._count||'?'} inst., 6 derniers mois)`,
+                nl:`Consensusgemiddelde ${yrLabels}: ${avgAll}% (${l._count||'?'} inst., laatste 6 mnd)`}[LANG];
+    } else {
+        cmnt = comment(c,s);
+    }
+    h+=`<tr onclick="openModal('${c}')" ${isFc?'style="background:var(--bg-page);opacity:0.92"':''}><td style="font-family:'Overpass Mono';font-size:.7rem">${m?.n||'—'}</td><td><span class="ind-name">${nm}<div class="tip"><div class="tip-title">${tf}</div><div class="tip-code">${c}${ts?' · SDMX: '+ts:''}</div>${td?'<div class="tip-desc">'+td+'</div>':''}<div class="tip-meta"><span>⏱ ${fr}</span><span>📡 ${isFc?'FPB/plan.be':l.source}</span><span>📊 ${s.length} ${t('m_obs')}</span></div></div></span></td><td>${srcBadge}</td>${periodCell}${valCell}<td>${isFc?'<span class="trend flat" style="font-size:.65rem">forecast</span>':tArr(tr)}</td><td><canvas id="sp_${c}" class="spark" width="100" height="32"></canvas></td><td><span class="update-dt">${fmtD(l.fetched_at)}</span></td><td class="comment">${cmnt}</td></tr>`;
+});h+='</tbody></table>';}w.innerHTML=h;requestAnimationFrame(()=>{for(const[c,s]of Object.entries(DATA)){
+  const cv=document.getElementById('sp_'+c);
+  if(M[c]?.forecast) drawSparkBar(cv, s);
+  else drawSpark(cv, s.map(d=>d.value), trend(s));
+}});renderContribChart();}
 
 function renderPills(){const e=document.getElementById('pills');let h='';for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill ${activeFilter===id?'on':''}" onclick="setFilter('${id}',this)">${(s.label[LANG]||s.label.en).toUpperCase()}</span>`;e.innerHTML=h;}
 function setFilter(id,el){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');activeFilter=id;render();}
@@ -294,7 +410,74 @@ function setFilter(id,el){document.querySelectorAll('.pill').forEach(p=>p.classL
 let _modalCode='', _modalData=[];
 function openModal(code){
   _modalCode = code;
-  // For INT_GDP_COMP, show Belgium EUROSTAT data
+  const meta = M[code] || {};
+
+  // ── Forecast modal: table only, per-institution ──
+  if(meta.forecast && meta.fc_indicator){
+    const ind = meta.fc_indicator;
+    const name = meta.name?.[LANG] || code;
+    const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth()-6);
+    const cutStr = cutoff.toISOString().substring(0,10);
+    const relevant = FORECASTS_RAW.filter(r => r.indicator===ind && r.updated_at>=cutStr);
+    const years = [...new Set(relevant.map(r=>r.year))].sort();
+    // Group by institution
+    const instMap = {};
+    relevant.forEach(r => {
+      if(!instMap[r.institution]) instMap[r.institution]={institution:r.institution, updated_at:r.updated_at};
+      instMap[r.institution]['y_'+r.year] = r.value;
+      if(r.updated_at > (instMap[r.institution].updated_at||'')) instMap[r.institution].updated_at=r.updated_at;
+    });
+    const insts = Object.values(instMap).sort((a,b)=>a.institution.localeCompare(b.institution));
+    // Stats
+    const avgByYear = years.map(yr => {
+      const vals = relevant.filter(r=>r.year===yr && r.value!==null).map(r=>r.value);
+      return {year:yr, avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0, count:vals.length,
+              min:vals.length?Math.min(...vals):0, max:vals.length?Math.max(...vals):0};
+    });
+    _modalData = relevant.map(r=>({period:r.year,value:r.value||0,obs_status:'F',unit:'percent_yy'}));
+
+    document.getElementById('modalTitle').textContent=name;
+    document.getElementById('modalSub').textContent=`${code} · Source: plan.be (FPB) · ${insts.length} institutions · last 6 months`;
+    document.getElementById('modalStats').innerHTML=avgByYear.map(a=>
+      `<div class="stat-card"><div class="stat-label">Avg ${a.year} (${a.count} inst.)</div><div class="stat-val">${a.avg.toFixed(2).replace('.',',')}%</div></div>`+
+      `<div class="stat-card"><div class="stat-label">Range ${a.year}</div><div class="stat-val" style="font-size:.75rem">${a.min.toFixed(1).replace('.',',')} — ${a.max.toFixed(1).replace('.',',')}%</div></div>`
+    ).join('');
+    // Hide chart
+    document.getElementById('modalChart').style.display='none';
+    // Build table
+    let tb=`<tr style="background:var(--bg-thead)"><td style="font-weight:600">Institution</td>${years.map(y=>`<td style="font-weight:600;text-align:center">${y}</td>`).join('')}<td style="font-weight:600">Updated</td></tr>`;
+    insts.forEach(inst => {
+      tb += `<tr><td style="font-size:.72rem">${inst.institution}</td>`;
+      years.forEach(yr => {
+        const v = inst['y_'+yr];
+        if(v===null || v===undefined) tb+=`<td style="text-align:center;color:var(--text-cell-muted)">—</td>`;
+        else {
+          const vc = v>=0?'pos-val':'neg-val';
+          tb+=`<td class="${vc}" style="text-align:center;font-family:'Overpass Mono';font-size:.72rem">${v.toFixed(1).replace('.',',')}</td>`;
+        }
+      });
+      tb+=`<td style="font-size:.65rem;color:var(--text-cell-muted)">${inst.updated_at||'—'}</td></tr>`;
+    });
+    // Averages row
+    tb+=`<tr style="background:var(--bg-thead);font-weight:600"><td>Consensus avg</td>`;
+    avgByYear.forEach(a=>{
+      tb+=`<td style="text-align:center;font-family:'Overpass Mono';font-size:.72rem">${a.avg.toFixed(2).replace('.',',')}</td>`;
+    });
+    tb+=`<td></td></tr>`;
+    document.getElementById('modalTableBody').innerHTML=tb;
+    // Update table headers for forecast view
+    document.getElementById('mThPer').textContent='Institution';
+    document.getElementById('mThVal').textContent=years[0]||'';
+    document.getElementById('mThChg').textContent=years[1]||'';
+    document.getElementById('mThStat').textContent='Updated';
+    document.getElementById('mThBar').textContent='';
+    // Hide default header row, use custom row
+    document.querySelector('.modal-table thead').style.display='none';
+    document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
+    return;
+  }
+
+  // ── Standard modal ──
   let series, displayCode=code;
   if(code==='INT_GDP_COMP' && DATA['EUROSTAT_GDP_Q_MEUR']){
     series = DATA['EUROSTAT_GDP_Q_MEUR'];
@@ -303,11 +486,14 @@ function openModal(code){
     series = DATA[code];
   }
   if(!series||!series.length)return;
-  const meta=M[code]||{},name=meta.name?.[LANG]||series[0].name||code,unit=series[0].unit;
+  const name=meta.name?.[LANG]||series[0].name||code,unit=series[0].unit;
   const cutoff=new Date().getFullYear()-10;
   const filtered=series.filter(d=>parseInt(d.period)>=cutoff);
   const dd=filtered.length>0?filtered:series.slice(-10);
   _modalData = dd;
+  // Show chart again
+  document.getElementById('modalChart').style.display='';
+  document.querySelector('.modal-table thead').style.display='';
   document.getElementById('modalTitle').textContent=name;
   const srcLabel = code==='INT_GDP_COMP' ? 'Eurostat/DBnomics (Belgium)' : series[0].source;
   document.getElementById('modalSub').textContent=`${displayCode} · Source: ${srcLabel} · ${dd.length} ${t('m_obs')} · ${t('m_last10')}`;
@@ -320,16 +506,26 @@ function openModal(code){
   document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
 }
 function exportModalCSV(){
-  if(!_modalData.length)return;
   const meta=M[_modalCode]||{};
-  const name=meta.name?.[LANG]||_modalCode;
+  if(meta.forecast && meta.fc_indicator){
+    // Export all institution-level forecast data
+    const ind=meta.fc_indicator;
+    const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
+    const cutStr=cutoff.toISOString().substring(0,10);
+    const relevant=FORECASTS_RAW.filter(r=>r.indicator===ind && r.updated_at>=cutStr);
+    let csv='Institution,Year,Value,Updated\n';
+    relevant.forEach(r=>{csv+=`"${r.institution}",${r.year},${r.value!==null?r.value:''},${r.updated_at}\n`;});
+    const blob=new Blob([csv],{type:'text/csv'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=`${_modalCode}_forecasts.csv`;a.click();URL.revokeObjectURL(a.href);
+    return;
+  }
+  if(!_modalData.length)return;
   let csv='Period,Value,Status\n';
   _modalData.forEach(d=>{csv+=`${d.period},${d.value},${d.obs_status||''}\n`;});
   const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`${_modalCode}_data.csv`;
-  a.click();URL.revokeObjectURL(a.href);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${_modalCode}_data.csv`;a.click();URL.revokeObjectURL(a.href);
 }
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
