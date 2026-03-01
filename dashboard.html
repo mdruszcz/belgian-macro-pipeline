@@ -241,9 +241,72 @@ FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'Fiscal balance forecast (consensus)',fr:
 CONSUMER_CONFIDENCE:{n:5,s:'confidence',name:{en:'Consumer confidence (NBB)',fr:'Confiance des consommateurs (BNB)',nl:'Consumentenvertrouwen (NBB)'},o:5,full:{en:'Consumer Confidence Indicator — NBB Survey',fr:'Indicateur de confiance des consommateurs — Enquête BNB',nl:'Consumentenvertrouwenindicator — NBB-enquête'},desc:{en:'Monthly survey of household sentiment. Negative = pessimism, positive = optimism.',fr:'Enquête mensuelle du sentiment des ménages. Négatif = pessimisme, positif = optimisme.',nl:'Maandelijkse peiling van huishoudelijk sentiment. Negatief = pessimisme, positief = optimisme.'},freq:'M'},
 EC_CONS_CONF:{n:6,s:'confidence',name:{en:'',fr:'',nl:''},o:6,full:{en:'Consumer Confidence — Eurostat (BE & EA)',fr:'Confiance des consommateurs — Eurostat (BE & ZE)',nl:'Consumentenvertrouwen — Eurostat (BE & EA)'},desc:{en:'EC harmonised consumer confidence for Belgium and Euro Area. Balance metric from Eurostat/DG ECFIN surveys.',fr:'Confiance des consommateurs harmonisée CE pour la Belgique et la zone euro. Source : Eurostat/DG ECFIN.',nl:'EC geharmoniseerd consumentenvertrouwen voor België en eurozone. Bron: Eurostat/DG ECFIN.'},freq:'M',combined:true},
 BUSINESS_CONFIDENCE:{n:7,s:'confidence',name:{en:'Business confidence (NBB)',fr:'Confiance des entreprises (BNB)',nl:'Ondernemersvertrouwen (NBB)'},o:7,full:{en:'Business Confidence — NBB Synthetic Barometer',fr:'Confiance des entreprises — Baromètre synthétique BNB',nl:'Ondernemersvertrouwen — NBB Synthetische barometer'},freq:'M'},
-LABOUR_COST_BE:{n:1,s:'labour',name:{en:'',fr:'',nl:''},o:1,freq:'A'},
-INDUSTRIAL_PROD:{n:1,s:'prices',name:{en:'',fr:'',nl:''},o:1,freq:'A'},
-HICP:{n:1,s:'prices',name:{en:'',fr:'',nl:''},o:1,freq:'A'}
+LABOUR_COST_BE: {
+    n: 1, 
+    s: 'labour', 
+    name: {
+        en: 'Labour cost index', 
+        fr: 'Indice du coût de la main-d\'œuvre', 
+        nl: 'Loonkostenindex'
+    }, 
+    o: 1, 
+    full: {
+        en: 'Labour Cost Index (LCI) — Nominal hourly costs', 
+        fr: 'Indice du coût de la main-d\'œuvre (ICM) — Coûts horaires nominaux', 
+        nl: 'Loonkostenindex (LKI) — Nominale uurkosten'
+    },
+    desc: {
+        en: 'Total hourly labour costs (wages + social contributions). Key for Belgian competitiveness monitoring.',
+        fr: 'Coûts salariaux horaires totaux (salaires + cotisations). Crucial pour le suivi de la compétitivité belge.',
+        nl: 'Totale uurloonkosten (lonen + sociale bijdragen). Cruciaal voor het monitoren van het Belgische concurrentievermogen.'
+    },
+    sdmx: 'LCI_INDEX', 
+    freq: 'A'
+},
+INDUSTRIAL_PROD: {
+    n: 2, 
+    s: 'prices', // Change to 'industry' if you want accuracy
+    name: {
+        en: 'Industrial production', 
+        fr: 'Production industrielle', 
+        nl: 'Industriële productie'
+    }, 
+    o: 2, 
+    full: {
+        en: 'Industrial Production Index (IPI) — Total Industry', 
+        fr: 'Indice de la production industrielle (IPI) — Total industrie', 
+        nl: 'Index van de industriële productie (IPI) — Totaal industrie'
+    },
+    desc: {
+        en: 'Volume of output for mining, manufacturing, and energy. Adjusted for working days.',
+        fr: 'Volume de production pour les mines, l\'industrie manufacturière et l\'énergie. Ajusté selon les jours ouvrables.',
+        nl: 'Productievolume voor mijnbouw, industrie en energie. Aangepast voor werkdagen.'
+    },
+    sdmx: 'IPI_STS', 
+    freq: 'A'
+},
+HICP: {
+    n: 3, 
+    s: 'prices', 
+    name: {
+        en: 'HICP (Harmonised Inflation)', 
+        fr: 'IPCH (Inflation harmonisée)', 
+        nl: 'GICP (Geharmoniseerde inflatie)'
+    }, 
+    o: 3, 
+    full: {
+        en: 'Harmonised Index of Consumer Prices', 
+        fr: 'Indice des prix à la consommation harmonisé', 
+        nl: 'Geharmoniseerde index van de consumentenprijzen'
+    },
+    desc: {
+        en: 'Standardised inflation measure for ECB comparison. Includes tourist spending, unlike national CPI.',
+        fr: 'Mesure d\'inflation harmonisée pour comparaison BCE. Inclut les dépenses des touristes, contrairement à l\'IPC national.',
+        nl: 'Geharmoniseerde inflatiemaatstaf voor ECB-vergelijking. Inclusief toeristische uitgaven, in tegenstelling tot de nationale CPI.'
+    },
+    sdmx: 'HICP_INDEX', 
+    freq: 'A'
+}
 };
 const SECTIONS={gdp:{label:{en:'Gross Domestic Product',fr:'Produit Intérieur Brut',nl:'Bruto Binnenlands Product'}},confidence:{label:{en:'Confidence & Sentiment',fr:'Confiance et Sentiment',nl:'Vertrouwen & Sentiment'}},prices:{label:{en:'Production & Prices',fr:'Production et Prix',nl:'Productie & Prijzen'}},labour:{label:{en:'Labour Costs',fr:'Coûts de la Main-d\'œuvre',nl:'Arbeidskosten'}},employment:{label:{en:'Employment',fr:'Emploi',nl:'Werkgelegenheid'}},unemployment:{label:{en:'Unemployment',fr:'Chômage',nl:'Werkloosheid'}},business:{label:{en:'Business Environment',fr:'Environnement des Affaires',nl:'Bedrijfsklimaat'}},fiscal:{label:{en:'Government Finances',fr:'Finances Publiques',nl:'Overheidsfinanciën'}}};
 let DATA={},activeFilter='gdp';
