@@ -161,6 +161,69 @@ SOURCES = {
         "source_agency": "NBB",
         "description": "Overall synthetic curve (Business Barometer) from the National Bank of Belgium",
         "type": "nbb"
+    },
+    "LABOUR_COST_BE": {
+        "name": "Labour Cost Belgium",
+        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/BEL.3.1.99.0.PLCD?observations=true",
+        "frequency": "A",
+        "unit": "index_2010",
+        "source_agency": "AMECO/EC",
+        "description": "Nominal compensation per employee, total economy (2010=100)",
+        "type": "dbnomics"
+    },
+    "LABOUR_COST_DE": {
+        "name": "Labour Cost Germany",
+        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/DEU.3.1.99.0.PLCD?observations=true",
+        "frequency": "A",
+        "unit": "index_2010",
+        "source_agency": "AMECO/EC",
+        "description": "Nominal compensation per employee, total economy (2010=100) - Germany",
+        "type": "dbnomics"
+    },
+    "LABOUR_COST_FR": {
+        "name": "Labour Cost France",
+        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/FRA.3.1.99.0.PLCD?observations=true",
+        "frequency": "A",
+        "unit": "index_2010",
+        "source_agency": "AMECO/EC",
+        "description": "Nominal compensation per employee, total economy (2010=100) - France",
+        "type": "dbnomics"
+    },
+    "LABOUR_COST_NL": {
+        "name": "Labour Cost Netherlands",
+        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/NLD.3.1.99.0.PLCD?observations=true",
+        "frequency": "A",
+        "unit": "index_2010",
+        "source_agency": "AMECO/EC",
+        "description": "Nominal compensation per employee, total economy (2010=100) - Netherlands",
+        "type": "dbnomics"
+    },
+    "LABOUR_COST_EA": {
+        "name": "Labour Cost Euro Area",
+        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/EA20.3.1.99.0.PLCD?observations=true",
+        "frequency": "A",
+        "unit": "index_2010",
+        "source_agency": "AMECO/EC",
+        "description": "Nominal compensation per employee, total economy (2010=100) - Euro Area",
+        "type": "dbnomics"
+    },
+    "INDUSTRIAL_PROD": {
+        "name": "Industrial Production (Total)",
+        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_INDPROD,1.0/M.2021..S.B_C_D.BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
+        "frequency": "M",
+        "unit": "index_2021",
+        "source_agency": "NBB",
+        "description": "Industrial production index (mining, manufacturing, energy), 2021=100, seasonally adjusted",
+        "type": "nbb"
+    },
+    "HICP": {
+        "name": "HICP (Y-Y Growth Rate)",
+        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_HICP,1.0/M.BE.000000.2015.HCP.GROWTH_RATE?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
+        "frequency": "M",
+        "unit": "percent_yy",
+        "source_agency": "NBB",
+        "description": "Harmonised Index of Consumer Prices, all items, year-on-year growth rate",
+        "type": "nbb"
     }
 }
 
