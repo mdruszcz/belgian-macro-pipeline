@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belgian Macro Dashboard — Admin Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0c0f14; --bg-card:#151921; --bg-input:#1a1f2a; --bg-hover:#1e2533;
+  --border:#2a3142; --border-focus:#4a6cf7; --border-subtle:#222838;
+  --text:#e2e8f0; --text-dim:#64748b; --text-muted:#475569; --text-accent:#4a6cf7;
+  --green:#22c55e; --red:#ef4444; --orange:#f59e0b; --blue:#3b82f6; --purple:#a78bfa;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+html{font-size:14px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+code,pre,.mono{font-family:'JetBrains Mono',monospace}
+
+/* Layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 24px}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 24px;border-bottom:1px solid var(--border)}
+.top-bar h1{font-size:1.15rem;font-weight:700;letter-spacing:-.02em}
+.top-bar h1 span{color:var(--text-accent);font-weight:600}
+.top-bar .sub{font-size:.7rem;color:var(--text-dim);margin-top:2px}
+.top-actions{display:flex;gap:8px}
+
+/* Buttons */
+.btn{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{background:var(--bg-hover);border-color:var(--text-dim)}
+.btn-primary{background:var(--text-accent);border-color:var(--text-accent);color:#fff}
+.btn-primary:hover{opacity:.9;box-shadow:0 2px 12px rgba(74,108,247,.3)}
+.btn-danger{background:#7f1d1d;border-color:#991b1b;color:#fca5a5}
+.btn-danger:hover{background:#991b1b}
+.btn-success{background:#14532d;border-color:#166534;color:#86efac}
+.btn-success:hover{background:#166534}
+.btn-sm{font-size:.65rem;padding:4px 10px}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin:24px 0 20px;border-bottom:2px solid var(--border)}
+.tab{padding:10px 20px;font-size:.75rem;font-weight:600;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text-accent);border-bottom-color:var(--text-accent)}
+
+/* Cards & Table */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-subtle)}
+.card-head h3{font-size:.8rem;font-weight:600}
+.card-head .count{font-size:.65rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+
+table{width:100%;border-collapse:collapse}
+thead th{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);padding:10px 14px;text-align:left;background:var(--bg-input);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+tbody td{padding:9px 14px;font-size:.72rem;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--bg-hover)}
+.code-cell{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--purple);font-weight:500}
+.type-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.type-nbb{background:rgba(34,197,94,.12);color:var(--green)}
+.type-dbnomics{background:rgba(59,130,246,.12);color:var(--blue)}
+.type-forecast{background:rgba(245,158,11,.12);color:var(--orange)}
+.section-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.58rem;font-weight:500;background:rgba(74,108,247,.1);color:var(--text-accent)}
+.freq-badge{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text-dim)}
+.action-btns{display:flex;gap:4px}
+.url-cell{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.6rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+
+/* Forms */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px}
+.form-full{grid-column:1/-1}
+.form-group label{display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;transition:border .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(74,108,247,.12)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-group select{cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.form-actions{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border-subtle)}
+.form-hint{font-size:.6rem;color:var(--text-muted);margin-top:3px}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;width:92%;max-width:720px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.modal-head h2{font-size:.9rem;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.modal-close:hover{background:var(--bg-hover);color:var(--text)}
+
+/* Output panel */
+.output-panel{margin-top:20px}
+.output-panel pre{background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:.68rem;line-height:1.6;overflow-x:auto;max-height:400px;overflow-y:auto;white-space:pre;tab-size:4}
+.output-tabs{display:flex;gap:0;margin-bottom:0}
+.output-tab{padding:8px 16px;font-size:.65rem;font-weight:600;color:var(--text-dim);cursor:pointer;background:var(--bg-input);border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;margin-right:-1px;transition:all .12s}
+.output-tab.active{background:var(--bg-card);color:var(--text-accent);border-bottom:1px solid var(--bg-card);position:relative;z-index:1}
+.output-pre{border-top-left-radius:0}
+
+/* Status bar */
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;justify-content:space-between;font-size:.65rem;z-index:50}
+.status-bar .left{display:flex;align-items:center;gap:12px;color:var(--text-dim)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-dim)}
+
+/* Responsive */
+@media(max-width:768px){.form-grid{grid-template-columns:1fr} .shell{padding:12px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div>
+      <h1>🇧🇪 Dashboard <span>Admin</span></h1>
+      <div class="sub">Indicator configuration manager for belgian-macro-pipeline</div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" onclick="importFromGitHub()">↓ Import from GitHub</button>
+      <button class="btn btn-primary" onclick="generateOutput()">⚡ Generate Code</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('indicators',this)">Indicators</div>
+    <div class="tab" onclick="switchTab('dashboard-meta',this)">Dashboard Meta</div>
+    <div class="tab" onclick="switchTab('output',this)">Output</div>
+  </div>
+
+  <!-- TAB 1: Indicators (Python SOURCES) -->
+  <div id="tab-indicators">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h3>Data Sources (belgian_macro_db.py)</h3>
+          <span class="count" id="indicatorCount">0 indicators</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddIndicator()">+ Add Indicator</button>
+      </div>
+      <div style="overflow-x:auto;max-height:60vh;overflow-y:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Section</th>
+              <th>Freq</th>
+              <th>Unit</th>
+              <th>URL</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="indicatorTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Dashboard Meta (HTML M dict) -->
+  <div id="tab-dashboard-meta" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h3>Dashboard Display Config (M dict in dashboard.html)</h3>
+          <span class="count" id="metaCount">0 entries</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddMeta()">+ Add Meta</button>
+      </div>
+      <div style="overflow-x:auto;max-height:60vh;overflow-y:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Code</th>
+              <th>Name (EN)</th>
+              <th>Section</th>
+              <th>Order</th>
+              <th>Freq</th>
+              <th>Special</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="metaTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Output -->
+  <div id="tab-output" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="generateOutput()">⚡ Generate All</button>
+      <button class="btn" onclick="copyOutput('python')">📋 Copy Python</button>
+      <button class="btn" onclick="copyOutput('js')">📋 Copy JS Meta</button>
+      <button class="btn btn-success" onclick="downloadOutputs()">⬇ Download Files</button>
+    </div>
+    <div class="output-panel">
+      <div class="output-tabs">
+        <div class="output-tab active" onclick="switchOutputTab('python',this)">SOURCES (Python)</div>
+        <div class="output-tab" onclick="switchOutputTab('js',this)">M dict (JS)</div>
+      </div>
+      <pre id="outputPython" class="output-pre" style="display:block"></pre>
+      <pre id="outputJs" class="output-pre" style="display:none"></pre>
+    </div>
+  </div>
+
+  <div style="height:50px"></div>
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <div class="left">
+    <span class="status-dot"></span>
+    <span id="statusText">Ready</span>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;color:var(--text-muted);font-size:.6rem">
+    <span id="statsText"></span>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Indicator -->
+<div class="modal-overlay" id="indicatorModal" onclick="if(event.target===this)closeIndicatorModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="indicatorModalTitle">Add Indicator</h2>
+      <button class="modal-close" onclick="closeIndicatorModal()">✕</button>
+    </div>
+    <div class="form-grid" id="indicatorForm">
+      <div class="form-group">
+        <label>Indicator Code</label>
+        <input type="text" id="ind_code" placeholder="e.g. LABOUR_COST_BE" style="text-transform:uppercase">
+        <div class="form-hint">Unique key. Use UPPERCASE_SNAKE_CASE.</div>
+      </div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="ind_name" placeholder="e.g. Labour Cost Belgium">
+      </div>
+      <div class="form-group form-full">
+        <label>API URL</label>
+        <input type="text" id="ind_url" placeholder="https://api.db.nomics.world/v22/series/...">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="ind_type">
+          <option value="dbnomics">DBnomics</option>
+          <option value="nbb">NBB SDMX</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Frequency</label>
+        <select id="ind_freq">
+          <option value="M">Monthly</option>
+          <option value="Q">Quarterly</option>
+          <option value="A">Annual</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Unit</label>
+        <select id="ind_unit">
+          <option value="percent_yy">Percent Y/Y</option>
+          <option value="pp_contribution">PP Contribution</option>
+          <option value="index_2010">Index 2010=100</option>
+          <option value="index_2021">Index 2021=100</option>
+          <option value="balance">Balance</option>
+          <option value="pct_gdp">% of GDP</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Source Agency</label>
+        <input type="text" id="ind_source" placeholder="e.g. NBB, AMECO/EC, Eurostat/DBnomics">
+      </div>
+      <div class="form-group form-full">
+        <label>Description</label>
+        <textarea id="ind_desc" placeholder="What this indicator measures..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeIndicatorModal()">Cancel</button>
+        <button class="btn" onclick="testIndicatorURL()" id="btnTest">🔍 Test URL</button>
+        <button class="btn btn-primary" onclick="saveIndicator()" id="btnSaveInd">Save</button>
+      </div>
+    </div>
+    <div id="testResult" style="display:none;padding:0 20px 16px">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:.65rem;line-height:1.5;max-height:150px;overflow-y:auto" id="testResultContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Dashboard Meta -->
+<div class="modal-overlay" id="metaModal" onclick="if(event.target===this)closeMetaModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="metaModalTitle">Add Dashboard Meta</h2>
+      <button class="modal-close" onclick="closeMetaModal()">✕</button>
+    </div>
+    <div class="form-grid" id="metaForm">
+      <div class="form-group">
+        <label>Code</label>
+        <select id="meta_code"><option value="">— Select indicator —</option></select>
+        <div class="form-hint">Must match an indicator code from SOURCES (or a composite like INT_GDP_COMP)</div>
+      </div>
+      <div class="form-group">
+        <label>Section</label>
+        <select id="meta_section">
+          <option value="gdp">GDP</option>
+          <option value="confidence">Confidence & Sentiment</option>
+          <option value="prices">Production & Prices</option>
+          <option value="labour">Labour Costs</option>
+          <option value="employment">Employment</option>
+          <option value="unemployment">Unemployment</option>
+          <option value="business">Business Environment</option>
+          <option value="fiscal">Government Finances</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Row Number (#)</label>
+        <input type="number" id="meta_n" value="1" min="1" max="99">
+      </div>
+      <div class="form-group">
+        <label>Sort Order</label>
+        <input type="number" id="meta_o" value="1" min="0" max="99" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>Name (EN)</label>
+        <input type="text" id="meta_name_en" placeholder="GDP growth (Y-Y)">
+      </div>
+      <div class="form-group">
+        <label>Name (FR)</label>
+        <input type="text" id="meta_name_fr" placeholder="Croissance du PIB (A-A)">
+      </div>
+      <div class="form-group">
+        <label>Name (NL)</label>
+        <input type="text" id="meta_name_nl" placeholder="BBP-groei (J-J)">
+      </div>
+      <div class="form-group">
+        <label>Frequency</label>
+        <select id="meta_freq">
+          <option value="A">Annual</option>
+          <option value="Q">Quarterly</option>
+          <option value="M">Monthly</option>
+          <option value="F">Forecast</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>Full Name (EN)</label>
+        <input type="text" id="meta_full_en" placeholder="Gross Domestic Product — Quarterly Y-Y Volume Growth">
+      </div>
+      <div class="form-group form-full">
+        <label>Description (EN)</label>
+        <textarea id="meta_desc_en" placeholder="Year-over-year real GDP growth rate..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>SDMX Code (optional)</label>
+        <input type="text" id="meta_sdmx" placeholder="B1GQ">
+      </div>
+      <div class="form-group">
+        <label>Special flags (optional)</label>
+        <input type="text" id="meta_flags" placeholder="e.g. forecast:true,fc_indicator:GDP_VOL">
+        <div class="form-hint">Comma-separated key:value pairs</div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeMetaModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMeta()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let indicators = {};  // Python SOURCES dict
+let dashMeta = {};    // Dashboard M dict
+let editingCode = null;
+let editingMeta = null;
+
+const SECTIONS = {
+  gdp:'GDP', confidence:'Confidence', prices:'Prices', labour:'Labour',
+  employment:'Employment', unemployment:'Unemployment', business:'Business', fiscal:'Fiscal'
+};
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function switchTab(id, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['indicators','dashboard-meta','output'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===id ? '' : 'none';
+  });
+}
+function switchOutputTab(id, el){
+  document.querySelectorAll('.output-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('outputPython').style.display = id==='python'?'block':'none';
+  document.getElementById('outputJs').style.display = id==='js'?'block':'none';
+}
+
+// ═══════════════════════════════════════════
+// IMPORT FROM GITHUB
+// ═══════════════════════════════════════════
+async function importFromGitHub(){
+  setStatus('Fetching from GitHub...');
+  try {
+    // Fetch Python file
+    const pyR = await fetch('https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/belgian_macro_db.py?t='+Date.now());
+    if(!pyR.ok) throw new Error('Python file: HTTP '+pyR.status);
+    const pyText = await pyR.text();
+    parsePythonSources(pyText);
+
+    // Fetch Dashboard HTML
+    const htmlR = await fetch('https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/dashboard.html?t='+Date.now());
+    if(htmlR.ok){
+      const htmlText = await htmlR.text();
+      parseDashboardMeta(htmlText);
+    }
+
+    renderIndicators();
+    renderMeta();
+    updateStats();
+    setStatus(`Imported ${Object.keys(indicators).length} indicators + ${Object.keys(dashMeta).length} meta entries`);
+  } catch(e){
+    setStatus('Error: ' + e.message);
+  }
+}
+
+function parsePythonSources(text){
+  indicators = {};
+  // Match each "CODE": { ... } block
+  const re = /"([A-Z_]+)":\s*\{([^}]+)\}/g;
+  let m;
+  while((m = re.exec(text)) !== null){
+    const code = m[1];
+    const block = m[2];
+    const get = (key) => {
+      const r = new RegExp('"'+key+'":\\s*"([^"]*)"');
+      const mm = block.match(r);
+      return mm ? mm[1] : '';
+    };
+    indicators[code] = {
+      name: get('name'),
+      url: get('url'),
+      frequency: get('frequency'),
+      unit: get('unit'),
+      source_agency: get('source_agency'),
+      description: get('description'),
+      type: get('type')
+    };
+  }
+}
+
+function parseDashboardMeta(text){
+  dashMeta = {};
+  // Match M dict entries: CODE:{...}
+  const mBlock = text.match(/const M=\{([\s\S]*?)\n\};/);
+  if(!mBlock) return;
+  const content = mBlock[1];
+  // Parse each entry
+  const re = /^([A-Z_]+):\{(.*)\}/gm;
+  let m;
+  while((m = re.exec(content)) !== null){
+    const code = m[1];
+    const raw = m[2];
+    const getStr = (key) => {
+      const r = new RegExp(key+":'([^']*)'");
+      const mm = raw.match(r);
+      return mm ? mm[1] : '';
+    };
+    const getNum = (key) => {
+      const r = new RegExp(key+":(\\d+\\.?\\d*)");
+      const mm = raw.match(r);
+      return mm ? parseFloat(mm[1]) : 0;
+    };
+    const getNameField = (field) => {
+      const r = new RegExp(field+":\\{en:'([^']*)',fr:'([^']*)',nl:'([^']*)'\\}");
+      const mm = raw.match(r);
+      return mm ? {en:mm[1],fr:mm[2],nl:mm[3]} : {en:'',fr:'',nl:''};
+    };
+    dashMeta[code] = {
+      n: getNum('n'),
+      s: getStr('s'),
+      name: getNameField('name'),
+      o: getNum('o'),
+      full: getNameField('full'),
+      desc: getNameField('desc'),
+      sdmx: getStr('sdmx'),
+      freq: getStr('freq'),
+      _raw: raw  // keep raw for flags we don't parse
+    };
+    // Detect special flags
+    if(raw.includes('forecast:true')) dashMeta[code].forecast = true;
+    if(raw.includes('combined:true')) dashMeta[code].combined = true;
+  }
+}
+
+// ═══════════════════════════════════════════
+// RENDER TABLES
+// ═══════════════════════════════════════════
+function renderIndicators(){
+  const tb = document.getElementById('indicatorTableBody');
+  // Find section from dashMeta if exists
+  const getSec = (code) => dashMeta[code]?.s || '—';
+  let html = '';
+  for(const [code, ind] of Object.entries(indicators)){
+    const typeClass = ind.type==='nbb'?'type-nbb':'type-dbnomics';
+    html += `<tr>
+      <td class="code-cell">${code}</td>
+      <td>${ind.name}</td>
+      <td><span class="type-badge ${typeClass}">${ind.type}</span></td>
+      <td><span class="section-badge">${getSec(code)}</span></td>
+      <td class="freq-badge">${ind.frequency}</td>
+      <td style="font-size:.6rem;color:var(--text-dim)">${ind.unit}</td>
+      <td class="url-cell" title="${ind.url}">${ind.url.substring(0,50)}…</td>
+      <td class="action-btns">
+        <button class="btn btn-sm" onclick="editIndicator('${code}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteIndicator('${code}')">✕</button>
+      </td>
+    </tr>`;
+  }
+  tb.innerHTML = html;
+  document.getElementById('indicatorCount').textContent = Object.keys(indicators).length + ' indicators';
+}
+
+function renderMeta(){
+  const tb = document.getElementById('metaTableBody');
+  let html = '';
+  // Sort by section then order
+  const sorted = Object.entries(dashMeta).sort((a,b) => {
+    if(a[1].s !== b[1].s) return (a[1].s||'').localeCompare(b[1].s||'');
+    return (a[1].o||0) - (b[1].o||0);
+  });
+  for(const [code, meta] of sorted){
+    const flags = [];
+    if(meta.forecast) flags.push('forecast');
+    if(meta.combined) flags.push('combined');
+    html += `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.65rem">${meta.n}</td>
+      <td class="code-cell">${code}</td>
+      <td>${meta.name?.en||'—'}</td>
+      <td><span class="section-badge">${meta.s||'—'}</span></td>
+      <td class="freq-badge">${meta.o}</td>
+      <td class="freq-badge">${meta.freq||'A'}</td>
+      <td style="font-size:.6rem;color:var(--orange)">${flags.join(', ')||'—'}</td>
+      <td class="action-btns">
+        <button class="btn btn-sm" onclick="editMeta('${code}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteMeta('${code}')">✕</button>
+      </td>
+    </tr>`;
+  }
+  tb.innerHTML = html;
+  document.getElementById('metaCount').textContent = Object.keys(dashMeta).length + ' entries';
+  // Update meta code dropdown
+  updateMetaCodeDropdown();
+}
+
+function updateMetaCodeDropdown(){
+  const sel = document.getElementById('meta_code');
+  // Keep first option
+  const opts = ['<option value="">— Select indicator or type custom —</option>'];
+  // All indicator codes + any existing meta codes
+  const allCodes = new Set([...Object.keys(indicators), ...Object.keys(dashMeta)]);
+  for(const c of [...allCodes].sort()){
+    const inMeta = dashMeta[c] ? ' ✓' : '';
+    opts.push(`<option value="${c}">${c}${inMeta}</option>`);
+  }
+  opts.push('<option value="__custom__">Custom code...</option>');
+  sel.innerHTML = opts.join('');
+}
+
+// ═══════════════════════════════════════════
+// INDICATOR CRUD
+// ═══════════════════════════════════════════
+function openAddIndicator(){
+  editingCode = null;
+  document.getElementById('indicatorModalTitle').textContent = 'Add Indicator';
+  document.getElementById('ind_code').value = '';
+  document.getElementById('ind_code').removeAttribute('readonly');
+  document.getElementById('ind_name').value = '';
+  document.getElementById('ind_url').value = '';
+  document.getElementById('ind_type').value = 'dbnomics';
+  document.getElementById('ind_freq').value = 'M';
+  document.getElementById('ind_unit').value = 'percent_yy';
+  document.getElementById('ind_source').value = '';
+  document.getElementById('ind_desc').value = '';
+  document.getElementById('testResult').style.display = 'none';
+  document.getElementById('indicatorModal').classList.add('open');
+}
+
+function editIndicator(code){
+  editingCode = code;
+  const ind = indicators[code];
+  document.getElementById('indicatorModalTitle').textContent = 'Edit ' + code;
+  document.getElementById('ind_code').value = code;
+  document.getElementById('ind_code').setAttribute('readonly','');
+  document.getElementById('ind_name').value = ind.name;
+  document.getElementById('ind_url').value = ind.url;
+  document.getElementById('ind_type').value = ind.type;
+  document.getElementById('ind_freq').value = ind.frequency;
+  document.getElementById('ind_unit').value = ind.unit;
+  document.getElementById('ind_source').value = ind.source_agency;
+  document.getElementById('ind_desc').value = ind.description;
+  document.getElementById('testResult').style.display = 'none';
+  document.getElementById('indicatorModal').classList.add('open');
+}
+
+function saveIndicator(){
+  const code = document.getElementById('ind_code').value.trim().toUpperCase();
+  if(!code){ alert('Code is required'); return; }
+  indicators[code] = {
+    name: document.getElementById('ind_name').value.trim(),
+    url: document.getElementById('ind_url').value.trim(),
+    frequency: document.getElementById('ind_freq').value,
+    unit: document.getElementById('ind_unit').value,
+    source_agency: document.getElementById('ind_source').value.trim(),
+    description: document.getElementById('ind_desc').value.trim(),
+    type: document.getElementById('ind_type').value
+  };
+  closeIndicatorModal();
+  renderIndicators();
+  renderMeta();
+  updateStats();
+  setStatus(`Saved indicator: ${code}`);
+}
+
+function deleteIndicator(code){
+  if(!confirm(`Delete ${code}?`)) return;
+  delete indicators[code];
+  renderIndicators();
+  updateStats();
+  setStatus(`Deleted indicator: ${code}`);
+}
+
+function closeIndicatorModal(){ document.getElementById('indicatorModal').classList.remove('open'); }
+
+// ═══════════════════════════════════════════
+// TEST URL
+// ═══════════════════════════════════════════
+async function testIndicatorURL(){
+  const url = document.getElementById('ind_url').value.trim();
+  const type = document.getElementById('ind_type').value;
+  const resultEl = document.getElementById('testResult');
+  const contentEl = document.getElementById('testResultContent');
+  resultEl.style.display = 'block';
+  contentEl.innerHTML = '<span style="color:var(--orange)">Testing...</span>';
+
+  try {
+    let testUrl = url;
+    if(type === 'dbnomics'){
+      // Ensure ?observations=true
+      if(!testUrl.includes('observations=true')){
+        testUrl += (testUrl.includes('?') ? '&' : '?') + 'observations=true';
+      }
+      const r = await fetch(testUrl);
+      const d = await r.json();
+      if(d.message) throw new Error(d.message);
+      const s = d.series.docs[0];
+      const n = s.period.length;
+      contentEl.innerHTML = `<span style="color:var(--green)">✓ OK</span> — ${n} observations<br>` +
+        `First: ${s.period[0]} = ${s.value[0]}<br>` +
+        `Last: ${s.period[n-1]} = ${s.value[n-1]}`;
+    } else {
+      // NBB SDMX — use CSV format
+      const r = await fetch(testUrl, {headers:{'Accept':'application/vnd.sdmx.data+csv;version=2.0.0'}});
+      const text = await r.text();
+      if(text.startsWith('NoResults') || text.includes('Not enough')){
+        throw new Error('No results returned. Check URL dimensions.');
+      }
+      const lines = text.trim().split('\n');
+      contentEl.innerHTML = `<span style="color:var(--green)">✓ OK</span> — ${lines.length-1} rows<br>` +
+        `Header: ${lines[0].substring(0,100)}...<br>` +
+        `First: ${lines[1].substring(0,120)}...<br>` +
+        `Last: ${lines[lines.length-1].substring(0,120)}...`;
+    }
+  } catch(e){
+    contentEl.innerHTML = `<span style="color:var(--red)">✕ FAILED</span> — ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD META CRUD
+// ═══════════════════════════════════════════
+function openAddMeta(){
+  editingMeta = null;
+  document.getElementById('metaModalTitle').textContent = 'Add Dashboard Meta';
+  document.getElementById('meta_code').value = '';
+  document.getElementById('meta_section').value = 'gdp';
+  document.getElementById('meta_n').value = '1';
+  document.getElementById('meta_o').value = '1';
+  document.getElementById('meta_name_en').value = '';
+  document.getElementById('meta_name_fr').value = '';
+  document.getElementById('meta_name_nl').value = '';
+  document.getElementById('meta_freq').value = 'A';
+  document.getElementById('meta_full_en').value = '';
+  document.getElementById('meta_desc_en').value = '';
+  document.getElementById('meta_sdmx').value = '';
+  document.getElementById('meta_flags').value = '';
+  updateMetaCodeDropdown();
+  document.getElementById('metaModal').classList.add('open');
+}
+
+function editMeta(code){
+  editingMeta = code;
+  const meta = dashMeta[code];
+  document.getElementById('metaModalTitle').textContent = 'Edit ' + code;
+  updateMetaCodeDropdown();
+  document.getElementById('meta_code').value = code;
+  document.getElementById('meta_section').value = meta.s || 'gdp';
+  document.getElementById('meta_n').value = meta.n || 1;
+  document.getElementById('meta_o').value = meta.o || 1;
+  document.getElementById('meta_name_en').value = meta.name?.en || '';
+  document.getElementById('meta_name_fr').value = meta.name?.fr || '';
+  document.getElementById('meta_name_nl').value = meta.name?.nl || '';
+  document.getElementById('meta_freq').value = meta.freq || 'A';
+  document.getElementById('meta_full_en').value = meta.full?.en || '';
+  document.getElementById('meta_desc_en').value = meta.desc?.en || '';
+  document.getElementById('meta_sdmx').value = meta.sdmx || '';
+  // Build flags string
+  const flags = [];
+  if(meta.forecast) flags.push('forecast:true');
+  if(meta.combined) flags.push('combined:true');
+  if(meta._raw?.match(/fc_indicator:'([^']+)'/)){
+    flags.push('fc_indicator:'+meta._raw.match(/fc_indicator:'([^']+)'/)[1]);
+  }
+  document.getElementById('meta_flags').value = flags.join(',');
+  document.getElementById('metaModal').classList.add('open');
+}
+
+function saveMeta(){
+  let code = document.getElementById('meta_code').value.trim().toUpperCase();
+  if(!code || code==='__CUSTOM__'){
+    code = prompt('Enter custom code:');
+    if(!code) return;
+    code = code.trim().toUpperCase();
+  }
+  const flagStr = document.getElementById('meta_flags').value.trim();
+  const flags = {};
+  if(flagStr){
+    flagStr.split(',').forEach(f => {
+      const [k,v] = f.split(':').map(s=>s.trim());
+      if(k && v) flags[k] = v==='true'?true:v;
+    });
+  }
+
+  dashMeta[code] = {
+    n: parseInt(document.getElementById('meta_n').value) || 1,
+    s: document.getElementById('meta_section').value,
+    name: {
+      en: document.getElementById('meta_name_en').value.trim(),
+      fr: document.getElementById('meta_name_fr').value.trim(),
+      nl: document.getElementById('meta_name_nl').value.trim()
+    },
+    o: parseFloat(document.getElementById('meta_o').value) || 1,
+    full: { en: document.getElementById('meta_full_en').value.trim(), fr:'', nl:'' },
+    desc: { en: document.getElementById('meta_desc_en').value.trim(), fr:'', nl:'' },
+    sdmx: document.getElementById('meta_sdmx').value.trim(),
+    freq: document.getElementById('meta_freq').value,
+    ...flags
+  };
+
+  closeMetaModal();
+  renderMeta();
+  updateStats();
+  setStatus(`Saved meta: ${code}`);
+}
+
+function deleteMeta(code){
+  if(!confirm(`Delete meta for ${code}?`)) return;
+  delete dashMeta[code];
+  renderMeta();
+  updateStats();
+  setStatus(`Deleted meta: ${code}`);
+}
+
+function closeMetaModal(){ document.getElementById('metaModal').classList.remove('open'); }
+
+// ═══════════════════════════════════════════
+// CODE GENERATION
+// ═══════════════════════════════════════════
+function generateOutput(){
+  // Python SOURCES dict
+  let py = 'SOURCES = {\n';
+  const entries = Object.entries(indicators);
+  entries.forEach(([code, ind], i) => {
+    py += `    "${code}": {\n`;
+    py += `        "name": "${ind.name}",\n`;
+    py += `        "url": "${ind.url}",\n`;
+    py += `        "frequency": "${ind.frequency}",\n`;
+    py += `        "unit": "${ind.unit}",\n`;
+    py += `        "source_agency": "${ind.source_agency}",\n`;
+    py += `        "description": "${ind.description}",\n`;
+    py += `        "type": "${ind.type}"\n`;
+    py += `    }${i < entries.length-1 ? ',' : ''}\n`;
+  });
+  py += '}';
+  document.getElementById('outputPython').textContent = py;
+
+  // JS M dict
+  let js = 'const M={\n';
+  const mEntries = Object.entries(dashMeta);
+  mEntries.forEach(([code, m], i) => {
+    const esc = (s) => (s||'').replace(/'/g, "\\'");
+    let line = `${code}:{n:${m.n},s:'${m.s}'`;
+    line += `,name:{en:'${esc(m.name?.en)}',fr:'${esc(m.name?.fr)}',nl:'${esc(m.name?.nl)}'}`;
+    line += `,o:${m.o}`;
+    if(m.full?.en) line += `,full:{en:'${esc(m.full.en)}',fr:'${esc(m.full?.fr)}',nl:'${esc(m.full?.nl)}'}`;
+    if(m.desc?.en) line += `,desc:{en:'${esc(m.desc.en)}',fr:'${esc(m.desc?.fr)}',nl:'${esc(m.desc?.nl)}'}`;
+    if(m.sdmx) line += `,sdmx:'${m.sdmx}'`;
+    line += `,freq:'${m.freq||'A'}'`;
+    if(m.forecast) line += `,forecast:true,fc_indicator:'${m.fc_indicator||''}'`;
+    if(m.combined) line += `,combined:true`;
+    if(m.be_code) line += `,be_code:'${m.be_code}'`;
+    if(m.eu_code) line += `,eu_code:'${m.eu_code}'`;
+    line += `}${i < mEntries.length-1 ? ',' : ''}`;
+    js += line + '\n';
+  });
+  js += '};';
+  document.getElementById('outputJs').textContent = js;
+
+  setStatus('Code generated');
+  // Switch to output tab
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab')[2].classList.add('active');
+  ['indicators','dashboard-meta','output'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t==='output' ? '' : 'none';
+  });
+}
+
+function copyOutput(type){
+  const el = type==='python' ? document.getElementById('outputPython') : document.getElementById('outputJs');
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    setStatus(`Copied ${type==='python'?'Python SOURCES':'JS M dict'} to clipboard`);
+  });
+}
+
+function downloadOutputs(){
+  generateOutput();
+  // Download Python snippet
+  const pyBlob = new Blob([document.getElementById('outputPython').textContent], {type:'text/plain'});
+  const pyA = document.createElement('a');
+  pyA.href = URL.createObjectURL(pyBlob); pyA.download = 'SOURCES_config.py'; pyA.click();
+  // Download JS snippet
+  const jsBlob = new Blob([document.getElementById('outputJs').textContent], {type:'text/plain'});
+  const jsA = document.createElement('a');
+  jsA.href = URL.createObjectURL(jsBlob); jsA.download = 'M_dict_config.js'; jsA.click();
+  setStatus('Downloaded both config files');
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function setStatus(msg){
+  document.getElementById('statusText').textContent = msg;
+}
+function updateStats(){
+  const nInd = Object.keys(indicators).length;
+  const nMeta = Object.keys(dashMeta).length;
+  const nbb = Object.values(indicators).filter(i=>i.type==='nbb').length;
+  const dbn = Object.values(indicators).filter(i=>i.type==='dbnomics').length;
+  document.getElementById('statsText').textContent = `${nInd} indicators (${nbb} NBB, ${dbn} DBnomics) · ${nMeta} meta entries`;
+}
+
+// Auto-import on load
+document.addEventListener('DOMContentLoaded', ()=>{
+  importFromGitHub();
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    closeIndicatorModal();
+    closeMetaModal();
+  }
+});
+</script>
+</body>
+</html>
