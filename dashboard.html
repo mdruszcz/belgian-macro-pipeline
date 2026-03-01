@@ -105,6 +105,11 @@ body{font-family:'Figtree',sans-serif;background:var(--bg-page);color:var(--text
 @keyframes blink{50%{opacity:.3}}
 .pill{font-size:.68rem;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border-pill);background:var(--bg-pill);color:var(--text-pill);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.04em}
 .pill:hover,.pill.on{background:var(--bg-pill-active);color:var(--text-pill-active);border-color:var(--bg-pill-active)}
+.btn{font-family:Figtree,sans-serif;font-size:.65rem;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid var(--border-btn);background:var(--bg-btn);color:var(--text-btn);cursor:pointer;transition:all .15s;letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{background:var(--bg-btn-hover);border-color:var(--text-btn);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.btn-sm{font-size:.58rem;padding:3px 9px;border-radius:5px}
+.btn-primary{background:var(--bg-btn-primary);color:var(--text-btn-primary);border-color:var(--bg-btn-primary)}
+.btn-primary:hover{opacity:.9;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .dd-wrap{position:relative;height:28px}
 .dd-wrap.theme,.dd-wrap.lang{width:42px}
 .theme-switcher,.lang-switch{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.1);border-radius:8px;padding:3px;position:absolute;top:0;left:0;right:0;z-index:100;transition:background .2s,box-shadow .2s}
@@ -195,7 +200,7 @@ canvas.spark{display:block}
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div><div class="contrib-title" id="contribTitle">Annual real GDP growth and contributions</div>
       <div class="contrib-sub">in percentage points · Source: NBB</div></div>
-      <button class="btn" onclick="exportChartPNG('contribCanvas','gdp_contributions.png')" style="font-size:.6rem;padding:3px 8px;flex-shrink:0">⬇ PNG</button>
+      <button class="btn btn-sm" onclick="exportChartPNG('contribCanvas','gdp_contributions.png')">⬇ PNG</button>
     </div>
     <canvas id="contribCanvas"></canvas>
     <div class="contrib-legend" id="contribLegend"></div>
@@ -204,14 +209,14 @@ canvas.spark{display:block}
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div><div class="contrib-title" id="intlTitle">Quarterly real GDP growth</div>
       <div class="contrib-sub">(2010 = 100) · Source: Eurostat</div></div>
-      <button class="btn" onclick="exportChartPNG('intlCanvas','gdp_international.png')" style="font-size:.6rem;padding:3px 8px;flex-shrink:0">⬇ PNG</button>
+      <button class="btn btn-sm" onclick="exportChartPNG('intlCanvas','gdp_international.png')">⬇ PNG</button>
     </div>
     <canvas id="intlCanvas"></canvas>
     <div class="contrib-legend" id="intlLegend"></div>
   </div>
 </div>
 <div class="footer"><div id="ftSrc"><strong>Sources:</strong> NBB = National Bank of Belgium</div><div id="ftGit">Data from GitHub · Auto-updated daily 06:00 CET</div></div>
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="exportModalCSV()" style="font-size:.68rem;padding:5px 10px">⬇ Export CSV</button><button class="modal-close" onclick="closeModal()">✕</button></div></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="exportModalCSV()">⬇ Export CSV</button><button class="modal-close" onclick="closeModal()">✕</button></div></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
 const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
 const FORECAST_CSV_URL='https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_forecasts.csv';
@@ -230,9 +235,9 @@ GFCF_DWELLINGS_CY:{n:7,s:'gdp',name:{en:'GFCF — Dwellings',fr:'FBCF — Logeme
 GFCF_PUBLIC_CY:{n:8,s:'gdp',name:{en:'GFCF — Public admin.',fr:'FBCF — Administrations publiques',nl:'BIK — Overheid'},o:8,full:{en:'Gross Fixed Capital Formation by Public Administrations',fr:'Formation brute de capital fixe par les APU',nl:'Bruto-investeringen in vaste activa door de overheid'},desc:{en:'Government infrastructure — roads, rail, schools. Follows political investment cycles.',fr:'Infrastructures gouvernementales — routes, rails, écoles. Suit les cycles politiques.',nl:'Overheidsinfrastructuur — wegen, spoor, scholen. Volgt politieke cycli.'},sdmx:'P51_PAD',freq:'A'},
 CHG_STOCKS_CY:{n:9,s:'gdp',name:{en:'Changes in stocks',fr:'Variation des stocks',nl:'Voorraadverandering'},o:9,full:{en:'Changes in Inventories',fr:'Variation des stocks',nl:'Veranderingen in voorraden'},desc:{en:'Change in raw materials and finished goods held by firms. Highly volatile swing factor.',fr:'Variation des matières premières et produits finis. Facteur d\'ajustement très volatil.',nl:'Verandering in grondstoffen en eindproducten bij bedrijven. Zeer volatiele zwaaifactor.'},sdmx:'P52',freq:'A'},
 NET_EXPORTS_CY:{n:10,s:'gdp',name:{en:'Net exports',fr:'Exportations nettes',nl:'Netto-export'},o:10,full:{en:'External Balance of Goods and Services',fr:'Solde extérieur des biens et services',nl:'Extern saldo van goederen en diensten'},desc:{en:'Exports minus imports. Belgium is highly open (trade ~160% of GDP).',fr:'Exportations moins importations. La Belgique est très ouverte (commerce ~160% du PIB).',nl:'Export minus import. België is zeer open (handel ~160% van het BBP).'},sdmx:'B11',freq:'A'},
-FC_GDP_VOL:{n:11,s:'gdp',name:{en:'⟶ GDP forecast (consensus)',fr:'⟶ Prévision PIB (consensus)',nl:'⟶ BBP-prognose (consensus)'},o:11,full:{en:'GDP Volume Growth — Multi-Institution Forecast',fr:'Croissance du PIB en volume — Prévisions multi-institutions',nl:'BBP-volumegroei — Meervoudige prognose'},desc:{en:'Average GDP growth forecast from 13 institutions (FPB, NBB, EC, IMF, OECD, banks). Source: plan.be.',fr:'Prévision moyenne de croissance du PIB de 13 institutions. Source : plan.be.',nl:'Gemiddelde BBP-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'GDP_VOL'},
-FC_CPI:{n:1,s:'prices',name:{en:'⟶ CPI forecast (consensus)',fr:'⟶ Prévision IPC (consensus)',nl:'⟶ CPI-prognose (consensus)'},o:0.5,full:{en:'Consumer Price Index — Multi-Institution Forecast',fr:'Indice des prix à la consommation — Prévisions multi-institutions',nl:'Consumentenprijsindex — Meervoudige prognose'},desc:{en:'Average CPI growth forecast from 13 institutions. Source: plan.be.',fr:'Prévision moyenne IPC de 13 institutions. Source : plan.be.',nl:'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'CPI'},
-FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'⟶ Fiscal balance forecast (consensus)',fr:'⟶ Prévision solde budgétaire (consensus)',nl:'⟶ Begrotingssaldo prognose (consensus)'},o:0.5,full:{en:'Government Fiscal Balance — Multi-Institution Forecast',fr:'Solde de financement des APU — Prévisions multi-institutions',nl:'Begrotingssaldo overheid — Meervoudige prognose'},desc:{en:'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.',fr:'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source : plan.be.',nl:'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'FISCAL_BAL'},
+FC_GDP_VOL:{n:11,s:'gdp',name:{en:'GDP forecast (consensus)',fr:'Prévision PIB (consensus)',nl:'BBP-prognose (consensus)'},o:11,full:{en:'GDP Volume Growth — Multi-Institution Forecast',fr:'Croissance du PIB en volume — Prévisions multi-institutions',nl:'BBP-volumegroei — Meervoudige prognose'},desc:{en:'Average GDP growth forecast from 13 institutions (FPB, NBB, EC, IMF, OECD, banks). Source: plan.be.',fr:'Prévision moyenne de croissance du PIB de 13 institutions. Source : plan.be.',nl:'Gemiddelde BBP-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'GDP_VOL'},
+FC_CPI:{n:1,s:'prices',name:{en:'CPI forecast (consensus)',fr:'Prévision IPC (consensus)',nl:'CPI-prognose (consensus)'},o:0.5,full:{en:'Consumer Price Index — Multi-Institution Forecast',fr:'Indice des prix à la consommation — Prévisions multi-institutions',nl:'Consumentenprijsindex — Meervoudige prognose'},desc:{en:'Average CPI growth forecast from 13 institutions. Source: plan.be.',fr:'Prévision moyenne IPC de 13 institutions. Source : plan.be.',nl:'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'CPI'},
+FC_FISCAL_BAL:{n:1,s:'fiscal',name:{en:'Fiscal balance forecast (consensus)',fr:'Prévision solde budgétaire (consensus)',nl:'Begrotingssaldo prognose (consensus)'},o:0.5,full:{en:'Government Fiscal Balance — Multi-Institution Forecast',fr:'Solde de financement des APU — Prévisions multi-institutions',nl:'Begrotingssaldo overheid — Meervoudige prognose'},desc:{en:'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.',fr:'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source : plan.be.',nl:'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron: plan.be.'},sdmx:'',freq:'F',forecast:true,fc_indicator:'FISCAL_BAL'},
 CONSUMER_CONFIDENCE:{n:5,s:'confidence',name:{en:'Consumer confidence (NBB)',fr:'Confiance des consommateurs (BNB)',nl:'Consumentenvertrouwen (NBB)'},o:5,full:{en:'Consumer Confidence Indicator — NBB Survey',fr:'Indicateur de confiance des consommateurs — Enquête BNB',nl:'Consumentenvertrouwenindicator — NBB-enquête'},desc:{en:'Monthly survey of household sentiment. Negative = pessimism, positive = optimism.',fr:'Enquête mensuelle du sentiment des ménages. Négatif = pessimisme, positif = optimisme.',nl:'Maandelijkse peiling van huishoudelijk sentiment. Negatief = pessimisme, positief = optimisme.'},sdmx:'',freq:'M'},
 EC_CONS_CONF:{n:6,s:'confidence',name:{en:'Consumer\'s confidence index',fr:'Indice de confiance des consommateurs',nl:'Consumentenvertrouwensindex'},o:6,full:{en:'Consumer Confidence — Eurostat (BE & EA)',fr:'Confiance des consommateurs — Eurostat (BE & ZE)',nl:'Consumentenvertrouwen — Eurostat (BE & EA)'},desc:{en:'EC harmonised consumer confidence for Belgium and Euro Area. Balance metric from Eurostat/DG ECFIN surveys.',fr:'Confiance des consommateurs harmonisée CE pour la Belgique et la zone euro. Source : Eurostat/DG ECFIN.',nl:'EC geharmoniseerd consumentenvertrouwen voor België en eurozone. Bron: Eurostat/DG ECFIN.'},sdmx:'',freq:'M',combined:true,be_code:'EC_CONS_CONF_BE',eu_code:'EC_CONS_CONF_EU'},
 BUSINESS_CONFIDENCE:{n:7,s:'confidence',name:{en:'Business confidence (NBB)',fr:'Confiance des entreprises (BNB)',nl:'Ondernemersvertrouwen (NBB)'},o:7,full:{en:'Business Confidence — NBB Synthetic Barometer',fr:'Confiance des entreprises — Baromètre synthétique BNB',nl:'Ondernemersvertrouwen — NBB Synthetische barometer'},desc:{en:'Overall synthetic curve from the NBB Business Survey. Positive = expansion, negative = contraction.',fr:'Courbe synthétique globale de l\'enquête conjoncturelle BNB. Positif = expansion, négatif = contraction.',nl:'Globale synthetische curve van de NBB-conjunctuurenquête. Positief = expansie, negatief = krimp.'},sdmx:'',freq:'M'}
@@ -375,34 +380,42 @@ function drawSpark(cv,vals,tr){if(!cv||vals.length<2)return;const g=gc('--green'
 
 function drawSparkBar(cv, series){
   if(!cv || !series || series.length < 1) return;
-  const ctx=cv.getContext('2d'), W=cv.width=100, H=cv.height=32, pad=3;
+  const ctx=cv.getContext('2d'), W=cv.width=100, H=cv.height=36, pad=2;
   ctx.clearRect(0,0,W,H);
   const vals=series.map(d=>d.value);
-  const mn=Math.min(...vals,0), mx=Math.max(...vals,0), rg=mx-mn||1;
-  const n=vals.length, barW=Math.min(28, (W-pad*2)/n - 4), gap=((W-pad*2)-barW*n)/(n+1);
-  const zY=H-pad-((0-mn)/rg)*(H-2*pad);
-  const green=gc('--green'), red=gc('--red'), orange=gc('--orange')||'#d97706';
+  const absMax=Math.max(...vals.map(Math.abs), 0.1);
+  const n=vals.length;
+  const totalBarSpace = W - pad*2 - 4;
+  const barW = Math.min(32, Math.floor(totalBarSpace / n) - 6);
+  const totalUsed = n * barW + (n-1)*6;
+  const startX = pad + (totalBarSpace - totalUsed) / 2;
+  const midY = 11;  // top area for values, bars from midY down
+  const barArea = H - midY - 10; // 10px for year label at bottom
+  const green=gc('--green')||'#059669', red=gc('--red')||'#dc2626';
   vals.forEach((v,i)=>{
-    const x=pad+gap+(barW+gap)*i;
-    const yV=H-pad-((v-mn)/rg)*(H-2*pad);
-    const top=v>=0?yV:zY, h=Math.max(1,Math.abs(yV-zY));
-    ctx.fillStyle=v>=0?green:red;
-    ctx.globalAlpha=0.6;
+    const x = startX + i * (barW + 6);
+    const barH = Math.max(2, (Math.abs(v) / absMax) * barArea);
+    const col = v>=0 ? green : red;
+    // Bar
+    ctx.fillStyle = col;
+    ctx.globalAlpha = 0.7;
+    const barTop = midY + (barArea - barH);
     ctx.beginPath();
-    const r=Math.min(2, h/2);
-    ctx.moveTo(x+r,top);ctx.lineTo(x+barW-r,top);ctx.quadraticCurveTo(x+barW,top,x+barW,top+r);
-    ctx.lineTo(x+barW,top+h-r);ctx.quadraticCurveTo(x+barW,top+h,x+barW-r,top+h);
-    ctx.lineTo(x+r,top+h);ctx.quadraticCurveTo(x,top+h,x,top+h-r);
-    ctx.lineTo(x,top+r);ctx.quadraticCurveTo(x,top,x+r,top);ctx.fill();
-    ctx.globalAlpha=1;
-    // year label below
-    ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=gc('--text-cell-dim');
-    ctx.textAlign='center';ctx.textBaseline='bottom';
-    ctx.fillText(series[i].period.slice(-2), x+barW/2, H);
-    // value above bar
-    ctx.font='bold 7px Overpass Mono,monospace';ctx.fillStyle=v>=0?green:red;
-    ctx.textBaseline=v>=0?'bottom':'top';
-    ctx.fillText(v.toFixed(1).replace('.',','), x+barW/2, v>=0?top-1:top+h+1);
+    const r = Math.min(3, barW/2, barH/2);
+    ctx.moveTo(x+r,barTop);ctx.lineTo(x+barW-r,barTop);ctx.quadraticCurveTo(x+barW,barTop,x+barW,barTop+r);
+    ctx.lineTo(x+barW,barTop+barH);ctx.lineTo(x,barTop+barH);
+    ctx.lineTo(x,barTop+r);ctx.quadraticCurveTo(x,barTop,x+r,barTop);ctx.fill();
+    ctx.globalAlpha = 1;
+    // Value above bar
+    ctx.font = 'bold 8px Overpass Mono,monospace';
+    ctx.fillStyle = col;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(v.toFixed(1).replace('.',','), x+barW/2, barTop - 1);
+    // Year below bar
+    ctx.font = '7px Overpass Mono,monospace';
+    ctx.fillStyle = gc('--text-cell-dim') || '#64748b';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(series[i].period, x+barW/2, H - 9);
   });
 }
 
@@ -421,10 +434,10 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
         valCell = `<td class="val" style="font-size:0.7rem;line-height:1.2;white-space:nowrap">BE: ${l.value.toFixed(1).replace('.',',')}<br><span style="color:var(--text-cell-muted);font-size:0.65rem">EA: ${l.eu_value.toFixed(1).replace('.',',')}</span></td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td>`;
     } else if(isFc) {
-        // Show values for each forecast year side by side
-        const parts = s.map(d => `${d.period}: <b>${d.value>=0?'':' '}${d.value.toFixed(1).replace('.',',')}</b>`).join(' · ');
-        valCell = `<td class="val" style="font-size:0.68rem;white-space:nowrap">${parts}</td>`;
-        periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${s.map(d=>d.period).join(', ')}<br><span style="font-size:0.58rem;color:var(--text-cell-muted)">${l._count||'?'} inst.</span></td>`;
+        // Show values stacked vertically per year
+        const parts = s.map(d => `<div style="white-space:nowrap">${d.period}: <b>${d.value.toFixed(1).replace('.',',')}</b>%</div>`).join('');
+        valCell = `<td class="val" style="font-size:0.7rem;line-height:1.35">${parts}</td>`;
+        periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${s.map(d=>d.period).join('<br>')}<br><span style="font-size:0.58rem;color:var(--text-cell-muted)">${l._count||'?'} inst.</span></td>`;
     } else {
         valCell = `<td class="val">${fmtV(l.value,l.unit)}</td>`;
         periodCell = `<td style="font-family:'Overpass Mono';font-size:.72rem">${l.period}</td>`;
