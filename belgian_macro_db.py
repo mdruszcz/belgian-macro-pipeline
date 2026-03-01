@@ -165,6 +165,15 @@ SOURCES = {
         "source_agency": "Eurostat/DBnomics",
         "description": "Euro Area 20 GDP, chain linked volumes, seasonally and calendar adjusted",
         "type": "dbnomics"
+    },
+    "CONSUMER_CONFIDENCE": {
+        "name": "Consumer Confidence Indicator",
+        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_CONSN,1.0/M..BE?startPeriod=2010-02&dimensionAtObservation=AllDimensions",
+        "frequency": "M",
+        "unit": "balance",
+        "source_agency": "NBB",
+        "description": "Consumer confidence indicator, monthly",
+        "type": "nbb"
     }
 }
 
