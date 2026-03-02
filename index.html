@@ -581,8 +581,8 @@
 
             container.innerHTML = content;
             
-            // Speed control: total passing time
-            const duration = Math.max(40, Math.floor(keys.length * 4));
+            // Speed control: total passing time (increased by 30% for slower scroll)
+            const duration = Math.max(60, Math.floor(keys.length * 6));
             container.style.animationDuration = `${duration}s`;
         }
 
