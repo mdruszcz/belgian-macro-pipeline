@@ -5,25 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BelPulse (Beta) — Belgium Economic Intelligence</title>
     
-    <script>
-      (function() {
-        "use strict";
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem("currentThemeState");
-        html.dataset.theme = savedTheme |
-
-| "dark"; // Defaulting to dark to match your Tailwind aesthetic
-        const savedLang = localStorage.getItem("currentLangState");
-        if (savedLang) html.lang = savedLang;
-      })();
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap');
-        
-        body { font-family: 'Inter', system_ui, sans-serif; }
-       .header-font { font-family: 'Space Grotesk', sans-serif; }
+        /* ═══ DAY — clean white ═══ */
+        [data-theme="day"] {
+          --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
+          --bg-header-sub:rgba(255,255,255,.55); --bg-header-right:rgba(255,255,255,.6); --gold:#b58a2a;
+          --bg-controls:#fff; --border-controls:#e5e7eb; --text-status:#6b7280;
+          --bg-btn:#fff; --text-btn:#374151; --border-btn:#d1d5db; --bg-btn-hover:#f3f4f6;
+          --bg-btn-primary:#2a5080; --text-btn-primary:#fff;
+          --bg-pill:#fff; --text-pill:#6b7280; --border-pill:#d1d5db; --bg-pill-active:#2a5080; --text-pill-active:#fff;
+          --text-section:#1e3a5f; --border-section:#1e3a5f;
+          --text-cell:#1e293b; --text-cell-muted:#94a3b8; --text-cell-dim:#64748b;
+        }
+        /* ═══ SOFT — warm muted ═══ */
+        [data-theme="soft"] {
+          --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
+          --bg-header-sub:rgba(245,240,234,.5); --bg-header-right:rgba(245,240,234,.55); --gold:#c49a3c;
+          --bg-controls:#ece6dc; --border-controls:#d9d0c3; --text-status:#7a6f63;
+          --bg-btn:#ece6dc; --text-btn:#4a3f35; --border-btn:#d1c8ba; --bg-btn-hover:#e2dacf;
+          --bg-btn-primary:#5a4a3a; --text-btn-primary:#f5f0ea;
+          --bg-pill:#ece6dc; --text-pill:#7a6f63; --border-pill:#d1c8ba; --bg-pill-active:#5a4a3a; --text-pill-active:#f5f0ea;
+          --text-section:#3b3228; --border-section:#3b3228;
+          --text-cell:#3b3228; --text-cell-muted:#a39888; --text-cell-dim:#7a6f63;
+        }
+        /* ═══ NIGHT — deep blue ═══ */
+        [data-theme="night"] {
+          --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
+          --bg-header-sub:rgba(232,236,242,.45); --bg-header-right:rgba(136,153,173,.8); --gold:#d4a843;
+          --bg-controls:#111927; --border-controls:#1e2d45; --text-status:#5a6b80;
+          --bg-btn:#111927; --text-btn:#8899ad; --border-btn:#1e2d45; --bg-btn-hover:#182438;
+          --bg-btn-primary:#1e3a5f; --text-btn-primary:#e8ecf2;
+          --bg-pill:#111927; --text-pill:#5a6b80; --border-pill:#1e2d45; --bg-pill-active:#1e3a5f; --text-pill-active:#e8ecf2;
+          --text-section:#7db4e0; --border-section:#1e3a5f;
+          --text-cell:#c8d2de; --text-cell-muted:#3d5068; --text-cell-dim:#5a6b80;
+        }
+
+        body { font-family: 'Figtree', sans-serif; background: var(--bg-page); color: var(--text-cell); transition: background 0.3s, color 0.3s; }
+       .header-font { font-family: 'Figtree', sans-serif; }
         
        .iframe-container {
             height: calc(100vh - 140px);
@@ -38,11 +59,11 @@
             box-shadow: 0 10px 30px -15px rgb(0 0 0 / 0.2);
         }
         
-       .nav-button { transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+       .nav-button { transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border: 1px solid var(--border-btn); background: var(--bg-btn); color: var(--text-btn); }
        .nav-button.active {
-            background-color: #000000;
-            color: white;
-            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.3);
+            background: var(--bg-btn-primary);
+            color: var(--text-btn-primary);
+            border-color: var(--bg-btn-primary);
         }
         
        .belgian-flag {
@@ -50,22 +71,22 @@
         }
 
         /* NEWS TICKER */
-       .ticker { overflow: hidden; white-space: nowrap; background: linear-gradient(90deg, #18181b, #27272a); }
+       .ticker { overflow: hidden; white-space: nowrap; background: var(--bg-controls); border-bottom: 1px solid var(--border-controls); color: var(--text-cell); }
        .ticker-content { display: inline-flex; animation: ticker-slide 35s linear infinite; }
         @keyframes ticker-slide {
             from { transform: translateX(0); }
             to { transform: translateX(-50%); }
         }
-       .ticker-item:hover { color: #eab308; }
+       .ticker-item:hover { color: var(--gold); }
 
         /* AI CHAT */
-       .chat-sidebar { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
+       .chat-sidebar { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); background: var(--bg-page); border-left: 1px solid var(--border-controls); }
        .chat-sidebar.open { transform: translateX(0); }
        .message-bubble { max-width: 80%; padding: 12px 16px; border-radius: 18px; position: relative; }
-       .user-bubble { background: #eab308; color: black; border-bottom-right-radius: 4px; }
-       .ai-bubble { background: #27272a; border-bottom-left-radius: 4px; }
+       .user-bubble { background: var(--gold); color: white; border-bottom-right-radius: 4px; }
+       .ai-bubble { background: var(--bg-controls); border-bottom-left-radius: 4px; color: var(--text-cell); border: 1px solid var(--border-controls); }
        .typing { display: flex; gap: 4px; }
-       .typing-dot { width: 6px; height: 6px; background: #71717a; border-radius: 50%; animation: typingBounce 1.2s infinite; }
+       .typing-dot { width: 6px; height: 6px; background: var(--text-cell-muted); border-radius: 50%; animation: typingBounce 1.2s infinite; }
        .typing-dot:nth-child(2) { animation-delay: 150ms; }
        .typing-dot:nth-child(3) { animation-delay: 300ms; }
         @keyframes typingBounce {
@@ -74,21 +95,30 @@
         }
 
         /* BETA BADGE */
-       .beta-badge { font-size: 10px; letter-spacing: 1px; background: #eab308; color: black; padding: 1px 6px; border-radius: 9999px; font-weight: 700; }
+       .beta-badge { font-size: 10px; letter-spacing: 1px; background: var(--gold); color: white; padding: 1px 6px; border-radius: 9999px; font-weight: 700; }
 
-        /* ============================================ */
-        /* PAGE-SPECIFIC CONTEXTUAL RULE                */
-        /* ============================================ */
-        /* Hides the dashboard nav exclusively on index.html */
+        /* DROPDOWNS MATCHING DASHBOARD */
+       .dd-wrap{position:relative;height:28px}
+       .dd-wrap.theme,.dd-wrap.lang{width:42px}
+       .theme-switcher,.lang-switch{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.1);border-radius:8px;padding:3px;position:absolute;top:0;left:0;right:0;z-index:100;transition:background .2s,box-shadow .2s}
+       .dd-wrap:hover .theme-switcher,.dd-wrap:hover .lang-switch{background:var(--bg-page);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+       .theme-btn,.lang-btn{font-family:'Figtree';border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--bg-header-text);transition:all .15s;text-align:center;display:none;order:2;padding:4px 0;width:100%;height:28px;line-height:20px}
+       .theme-btn{font-size:.85rem}
+       .lang-btn{font-size:.7rem;font-weight:700}
+       .theme-btn.active,.lang-btn.active{display:block;order:1;opacity:1;background:var(--bg-page);color:var(--text-section);box-shadow:0 2px 4px rgba(0,0,0,.1)}
+       .dd-wrap:hover .theme-btn,.dd-wrap:hover .lang-btn{display:block;color:var(--text-section);opacity:.7}
+       .dd-wrap:hover .theme-btn.active,.dd-wrap:hover .lang-btn.active{box-shadow:none;background:transparent;opacity:1}
+       .dd-wrap:hover .theme-btn:hover,.dd-wrap:hover .lang-btn:hover{background:rgba(128,128,128,.15);opacity:1}
+
         body.page-index #dashboard-first-header {
             display: none!important;
         }
     </style>
 </head>
 
-<body class="page-index bg-zinc-950 text-white overflow-hidden">
+<body class="page-index overflow-hidden">
 
-    <header class="bg-black border-b border-zinc-800 sticky top-0 z-50">
+    <header class="sticky top-0 z-50 border-b" style="background: var(--bg-header); border-color: var(--border-controls);">
         <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-x-4" aria-label="Belpulse Beta">
                 <div class="w-10 h-10 rounded-2xl belgian-flag flex items-center justify-center text-3xl shadow-inner">
@@ -96,44 +126,48 @@
                 </div>
                 <div>
                     <div class="flex items-baseline gap-x-3">
-                        <h1 class="header-font text-4xl font-semibold tracking-tighter text-white">BelPulse</h1>
+                        <h1 class="header-font text-4xl font-semibold tracking-tighter" style="color: var(--bg-header-text)">BelPulse</h1>
                         <span class="beta-badge">BETA</span>
                     </div>
-                    <p id="subtitle" class="text-[10px] text-amber-400 tracking-[2px] -mt-1">BELGIUM'S ECONOMIC PULSE</p>
+                    <p id="subtitle" class="text-[10px] tracking-[2px] -mt-1" style="color: var(--gold)">BELGIUM'S ECONOMIC PULSE</p>
                 </div>
             </div>
 
             <div id="dashboard-first-header" class="flex items-center gap-x-3">
                 <button onclick="loadDashboard(0)" id="btn-0"
-                        class="nav-button active flex items-center gap-x-3 px-8 py-4 rounded-3xl bg-zinc-900 hover:bg-zinc-800 text-sm font-medium">
+                        class="nav-button active flex items-center gap-x-3 px-8 py-4 rounded-3xl text-sm font-medium">
                     <span class="text-lg">📈</span>
                     <span id="macro-btn-text">MACRO PIPELINE</span>
                 </button>
                 
                 <button onclick="loadDashboard(1)" id="btn-1"
-                        class="nav-button flex items-center gap-x-3 px-8 py-4 rounded-3xl bg-zinc-900 hover:bg-zinc-800 text-sm font-medium">
+                        class="nav-button flex items-center gap-x-3 px-8 py-4 rounded-3xl text-sm font-medium">
                     <span class="text-lg">⏱️</span>
                     <span id="fiscal-btn-text">FISCAL CLOCK DASHBOARD</span>
                 </button>
             </div>
 
             <div class="flex items-center gap-x-3">
-                <select id="lang-sync-selector" aria-label="Select interface language" 
-                        class="bg-zinc-900 text-white border border-zinc-700 rounded-3xl px-4 py-3 text-xs font-medium focus:outline-none focus:border-amber-400 appearance-none cursor-pointer">
-                    <option value="en" selected>EN</option>
-                    <option value="fr">FR</option>
-                    <option value="nl">NL</option>
-                </select>
+                <!-- CUSTOM DROPDOWNS FROM DASHBOARD -->
+                <div class="dd-wrap theme">
+                    <div class="theme-switcher">
+                        <button class="theme-btn" id="t-day" onclick="setTheme('day')">☀</button>
+                        <button class="theme-btn" id="t-soft" onclick="setTheme('soft')">◑</button>
+                        <button class="theme-btn" id="t-night" onclick="setTheme('night')">☾</button>
+                    </div>
+                </div>
 
-                <select id="theme-sync-selector" aria-label="Select reading mode / theme" 
-                        class="bg-zinc-900 text-white border border-zinc-700 rounded-3xl px-4 py-3 text-xs font-medium focus:outline-none focus:border-amber-400 appearance-none cursor-pointer">
-                    <option value="light">Light</option>
-                    <option value="dark" selected>Dark</option>
-                    <option value="high-contrast">High Contrast</option>
-                </select>
+                <div class="dd-wrap lang">
+                    <div class="lang-switch">
+                        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+                        <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+                        <button class="lang-btn" id="btn-nl" onclick="setLang('nl')">NL</button>
+                    </div>
+                </div>
 
                 <button onclick="toggleChat()" id="ai-trigger-btn"
-                        class="flex items-center gap-x-3 bg-amber-400 hover:bg-amber-300 text-black px-6 py-3 rounded-3xl font-semibold text-sm transition-all active:scale-95">
+                        class="flex items-center gap-x-3 px-6 py-3 rounded-3xl font-semibold text-sm transition-all active:scale-95"
+                        style="background: var(--gold); color: white;">
                     <span class="text-xl">🤖</span>
                     <span id="ai-btn-text">ASK BELPULSE AI</span>
                 </button>
@@ -141,21 +175,21 @@
         </div>
     </header>
 
-    <div class="ticker border-b border-zinc-800 py-3 text-sm font-medium">
-        <div class="ticker-content flex items-center gap-x-12 text-amber-300" id="ticker-content">
-            </div>
+    <div class="ticker py-3 text-sm font-medium">
+        <div class="ticker-content flex items-center gap-x-12" id="ticker-content" style="color: var(--gold)">
+        </div>
     </div>
 
     <div class="max-w-screen-2xl mx-auto px-8 py-6">
-        <div class="iframe-container bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800">
+        <div class="iframe-container rounded-3xl overflow-hidden border" style="background: var(--bg-controls); border-color: var(--border-controls);">
             <iframe id="dashboard-frame" 
                     src="https://mdruszcz.github.io/belgian-macro-pipeline/dashboard.html"
                     allowfullscreen></iframe>
         </div>
     </div>
 
-    <div id="chat-sidebar" class="chat-sidebar fixed top-0 right-0 h-screen w-96 bg-zinc-900 border-l border-zinc-700 shadow-2xl z- flex flex-col">
-        <div class="bg-black px-6 py-5 flex items-center justify-between border-b border-zinc-800">
+    <div id="chat-sidebar" class="chat-sidebar fixed top-0 right-0 h-screen w-96 shadow-2xl z-50 flex flex-col">
+        <div class="px-6 py-5 flex items-center justify-between border-b" style="background: var(--bg-header); border-color: var(--border-controls); color: var(--bg-header-text);">
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 rounded-2xl belgian-flag flex items-center justify-center text-2xl">🇧🇪</div>
                 <div>
@@ -169,26 +203,75 @@
             <button onclick="toggleChat()" class="text-zinc-400 hover:text-white text-2xl leading-none">×</button>
         </div>
 
-        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6 bg-zinc-950">
-            </div>
+        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6">
+        </div>
 
-        <div class="p-6 border-t border-zinc-800 bg-zinc-900">
+        <div class="p-6 border-t" style="background: var(--bg-controls); border-color: var(--border-controls);">
             <div class="flex gap-x-3">
                 <input id="chat-input" 
                        type="text" 
                        placeholder="Ask about debt, growth, HERMES scenarios..." 
-                       class="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4 text-sm focus:outline-none focus:border-amber-400 transition-colors"
+                       class="flex-1 rounded-3xl px-6 py-4 text-sm focus:outline-none transition-colors"
+                       style="background: var(--bg-page); color: var(--text-cell); border: 1px solid var(--border-controls);"
                        onkeypress="if(event.key === 'Enter') sendMessage()">
                 <button onclick="sendMessage()" 
-                        class="bg-amber-400 hover:bg-amber-300 text-black w-12 h-12 rounded-3xl flex items-center justify-center text-xl transition-all active:scale-95">
+                        class="w-12 h-12 rounded-3xl flex items-center justify-center text-xl transition-all active:scale-95"
+                        style="background: var(--gold); color: white;">
                     ↑
                 </button>
             </div>
-            <div class="text-[10px] text-zinc-500 mt-3 text-center">Demo AI • Real version connects to your HERMES model</div>
+            <div class="text-[10px] mt-3 text-center" style="color: var(--text-cell-muted)">Demo AI • Real version connects to your HERMES model</div>
         </div>
     </div>
 
     <script>
+        // === SYNC SYSTEM ===
+        function syncDashboard() {
+            const frame = document.getElementById('dashboard-frame');
+            if (frame && frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'setTheme', value: document.documentElement.getAttribute('data-theme') }, '*');
+                frame.contentWindow.postMessage({ type: 'setLang', value: currentLang }, '*');
+            }
+        }
+
+        function setTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('theme', t);
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('t-' + t);
+            if (btn) btn.classList.add('active');
+            syncDashboard();
+        }
+
+        function setLang(l) {
+            if (currentLang === l && document.getElementById('btn-' + l).classList.contains('active')) return;
+            currentLang = l;
+            localStorage.setItem('lang', l);
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('btn-' + l);
+            if (btn) btn.classList.add('active');
+            
+            // Update UI translations
+            document.getElementById('subtitle').textContent = translations[l].subtitle;
+            document.getElementById('macro-btn-text').textContent = translations[l].macroBtn;
+            document.getElementById('fiscal-btn-text').textContent = translations[l].fiscalBtn;
+            document.getElementById('ai-btn-text').textContent = translations[l].aiBtn;
+            document.getElementById('chat-title').textContent = translations[l].chatTitle;
+            document.getElementById('chat-sub').innerHTML = `
+                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                ${translations[l].chatSub}
+            `;
+            document.getElementById('chat-input').placeholder = translations[l].chatPlaceholder;
+
+            initTicker();
+            syncDashboard();
+
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages.children.length === 0 && chatOpen) {
+                addMessage(translations[l].welcome, false);
+            }
+        }
+
         // === LANGUAGE SYSTEM ===
         let currentLang = 'en';
 
@@ -226,14 +309,14 @@
         };
 
         const newsData = {
-            en:,
-            fr:,
-            nl:
+            en: ["GDP growth stable at 1.1%", "Public debt trajectory under review", "Consumer confidence slightly up in February", "Inflation falls to 2.8%"],
+            fr: ["Croissance du PIB stable à 1,1%", "Trajectoire de la dette publique en cours d'examen", "Confiance des consommateurs en légère hausse en février", "L'inflation tombe à 2,8%"],
+            nl: ["BBP-groei stabiel op 1,1%", "Traject van de overheidsschuld wordt herzien", "Consumentenvertrouwen licht gestegen in februari", "Inflatie daalt naar 2,8%"]
         };
 
         const sampleResponses = {
             en: {
-                default:,
+                default: "I'm BelPulse AI. I can help you with Belgian macroeconomic data.",
                 debt: "Public debt-to-GDP stands at 107.4%. Without consolidation, it will keep rising.",
                 deficit: "The 2026 deficit is projected at 5.6% of GDP — highest in the eurozone.",
                 growth: "NBB now expects only 1.1% real GDP growth in 2026.",
@@ -241,7 +324,7 @@
                 unemployment: "National unemployment 5.9%. Flanders 4.1%, Wallonia 7.9%, Brussels 11.2%."
             },
             fr: {
-                default:,
+                default: "Je suis BelPulse AI. Je peux vous aider avec les données macroéconomiques belges.",
                 debt: "La dette publique atteint 107,4 % du PIB. Sans consolidation, elle continuera d’augmenter.",
                 deficit: "Le déficit 2026 est projeté à 5,6 % du PIB — le plus élevé de la zone euro.",
                 growth: "La BNB prévoit désormais seulement 1,1 % de croissance réelle du PIB en 2026.",
@@ -249,7 +332,7 @@
                 unemployment: "Chômage national 5,9 %. Flandre 4,1 %, Wallonie 7,9 %, Bruxelles 11,2 %."
             },
             nl: {
-                default:,
+                default: "Ik ben BelPulse AI. Ik kan u helpen met Belgische macro-economische gegevens.",
                 debt: "Overheidsschuld staat op 107,4% van het BBP. Zonder maatregelen blijft ze stijgen.",
                 deficit: "Het tekort 2026 wordt geraamd op 5,6% van het BBP — hoogste in de eurozone.",
                 growth: "NBB verwacht nu slechts 1,1% reële BBP-groei in 2026.",
@@ -257,34 +340,6 @@
                 unemployment: "Nationale werkloosheid 5,9%. Vlaanderen 4,1%, Wallonië 7,9%, Brussel 11,2%."
             }
         };
-
-        function switchLanguage(lang) {
-            if (currentLang === lang) return;
-            currentLang = lang;
-
-            document.getElementById('subtitle').textContent = translations[lang].subtitle;
-            document.getElementById('macro-btn-text').textContent = translations[lang].macroBtn;
-            document.getElementById('fiscal-btn-text').textContent = translations[lang].fiscalBtn;
-            document.getElementById('ai-btn-text').textContent = translations[lang].aiBtn;
-            document.getElementById('chat-title').textContent = translations[lang].chatTitle;
-            document.getElementById('chat-sub').innerHTML = `
-                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                ${translations[lang].chatSub}
-            `;
-            document.getElementById('chat-input').placeholder = translations[lang].chatPlaceholder;
-
-            initTicker();
-
-            const chatMessages = document.getElementById('chat-messages');
-            if (chatMessages.children.length === 0 && document.getElementById('chat-sidebar').classList.contains('open')) {
-                addMessage(translations[lang].welcome, false);
-            }
-        }
-
-        // Binds the new dropdown to your existing translation logic
-        document.getElementById('lang-sync-selector').addEventListener('change', function(e) {
-            switchLanguage(e.target.value);
-        });
 
         // === DASHBOARD SWITCHING ===
         const dashboards = [
@@ -299,6 +354,8 @@
             setTimeout(() => {
                 frame.src = dashboards[index];
                 frame.style.opacity = 1;
+                // Give it a moment to load then sync
+                setTimeout(syncDashboard, 500);
             }, 300);
             buttons.forEach((btn, i) => {
                 i === index? btn.classList.add('active') : btn.classList.remove('active');
@@ -361,26 +418,11 @@
         function getAIResponse(message) {
             const lower = message.toLowerCase();
             const langResponses = sampleResponses[currentLang];
-            if (lower.includes('debt') |
-
-| lower.includes('dette') |
-| lower.includes('schuld')) return langResponses.debt;
-            if (lower.includes('deficit') |
-
-| lower.includes('déficit') |
-| lower.includes('tekort')) return langResponses.deficit;
-            if (lower.includes('growth') |
-
-| lower.includes('croissance') |
-| lower.includes('groei')) return langResponses.growth;
-            if (lower.includes('hermes') |
-
-| lower.includes('simulation') |
-| lower.includes('simulatie')) return langResponses.heremes;
-            if (lower.includes('unemployment') |
-
-| lower.includes('chômage') |
-| lower.includes('werkloosheid')) return langResponses.unemployment;
+            if (lower.includes('debt') || lower.includes('dette') || lower.includes('schuld')) return langResponses.debt;
+            if (lower.includes('deficit') || lower.includes('déficit') || lower.includes('tekort')) return langResponses.deficit;
+            if (lower.includes('growth') || lower.includes('croissance') || lower.includes('groei')) return langResponses.growth;
+            if (lower.includes('hermes') || lower.includes('simulation') || lower.includes('simulatie')) return langResponses.heremes;
+            if (lower.includes('unemployment') || lower.includes('chômage') || lower.includes('werkloosheid')) return langResponses.unemployment;
             return langResponses.default;
         }
 
@@ -403,7 +445,7 @@
 
         function toggleChat() {
             const sidebar = document.getElementById('chat-sidebar');
-            chatOpen =!chatOpen;
+            chatOpen = !chatOpen;
             sidebar.classList.toggle('open', chatOpen);
             
             if (chatOpen && chatMessages.children.length === 0) {
@@ -417,7 +459,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === "1") loadDashboard(0);
             if (e.key === "2") loadDashboard(1);
-            if (e.key === "/" && document.getElementById('chat-input')!== document.activeElement) {
+            if (e.key === "/" && document.getElementById('chat-input') !== document.activeElement) {
                 e.preventDefault();
                 toggleChat();
                 setTimeout(() => document.getElementById('chat-input').focus(), 500);
@@ -426,21 +468,42 @@
 
         // Init everything
         window.onload = function() {
-            // Check localStorage on load to initialize correct language text
-            const savedLang = localStorage.getItem("currentLangState");
-            if (savedLang) {
-                document.getElementById('lang-sync-selector').value = savedLang;
-                switchLanguage(savedLang);
-            } else {
-                initTicker();
-            }
+            const savedLang = localStorage.getItem("lang") || 'en';
+            const savedTheme = localStorage.getItem("theme") || 'soft';
+            
+            // Set initial state without triggering sync yet
+            currentLang = savedLang;
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Update active buttons
+            const themeBtn = document.getElementById('t-' + savedTheme);
+            if (themeBtn) themeBtn.classList.add('active');
+            const langBtn = document.getElementById('btn-' + savedLang);
+            if (langBtn) langBtn.classList.add('active');
 
-            console.log('%c🚀 BelPulse (Beta) ready — Multilingual AI + News Ticker live! Press / to open chat, 1 or 2 to switch dashboards', 
-                        'color:#eab308; font-family:monospace; font-size:11px');
+            // Apply translations
+            document.getElementById('subtitle').textContent = translations[savedLang].subtitle;
+            document.getElementById('macro-btn-text').textContent = translations[savedLang].macroBtn;
+            document.getElementById('fiscal-btn-text').textContent = translations[savedLang].fiscalBtn;
+            document.getElementById('ai-btn-text').textContent = translations[savedLang].aiBtn;
+            document.getElementById('chat-title').textContent = translations[savedLang].chatTitle;
+            document.getElementById('chat-input').placeholder = translations[savedLang].chatPlaceholder;
+            
+            initTicker();
+            
+            // Sync with iframe after a short delay
+            setTimeout(syncDashboard, 1000);
+
+            console.log('%c🚀 BelPulse (Beta) ready — Shared Dashboard Styles & Sync live!', 
+                        'color:#c49a3c; font-family:monospace; font-size:11px');
         };
+
+        // Listen for iframe ready message if any
+        window.addEventListener('message', function(e) {
+            if (e.data === 'dashboard-ready') {
+                syncDashboard();
+            }
+        });
     </script>
-
-    <script defer src="sync-engine.js"></script>
-
 </body>
 </html>

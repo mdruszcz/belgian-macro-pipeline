@@ -1135,7 +1135,30 @@ function initChartInteractivity(){
   });
 }
 
-function init(){updateStaticUI();document.getElementById('btn-'+LANG).classList.add('active');loadTheme();renderPills();fetchData();}
+function init(){
+  updateStaticUI();
+  document.getElementById('btn-'+LANG).classList.add('active');
+  loadTheme();
+  renderPills();
+  fetchData();
+  
+  // Hide controls if in iframe and notify parent
+  if (window.self !== window.top) {
+    const hr = document.querySelector('.header-right');
+    if (hr) hr.style.display = 'none';
+    window.parent.postMessage('dashboard-ready', '*');
+  }
+}
+
+// Listen for sync messages from parent
+window.addEventListener('message', function(e) {
+  if (e.data.type === 'setTheme') {
+    setTheme(e.data.value, null);
+  } else if (e.data.type === 'setLang') {
+    setLang(e.data.value);
+  }
+});
+
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
