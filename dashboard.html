@@ -1144,8 +1144,8 @@ function init(){
   
   // Hide controls if in iframe and notify parent
   if (window.self !== window.top) {
-    const hr = document.querySelector('.header-right');
-    if (hr) hr.style.display = 'none';
+    const header = document.querySelector('.header');
+    if (header) header.style.display = 'none';
     window.parent.postMessage('dashboard-ready', '*');
   }
 }
