@@ -130,6 +130,65 @@
     </style>
 </head>
 <body class="bg-zinc-950 text-white overflow-hidden">
+    <!-- ============================================= -->
+<!-- DASHBOARD-SPECIFIC HEADER WRAPPER             -->
+<!-- (hidden automatically on index.html via CSS)  -->
+<!-- ============================================= -->
+<div id="dashboard-first-header">
+  <!-- Dummy navigational content (illustrates dashboard context) -->
+  <nav class="dashboard-top-nav" aria-label="Dashboard primary navigation">
+    <a href="#">Overview</a>
+    <a href="#">Macro Data</a>
+    <a href="#">Forecasts</a>
+    <a href="#">Exports</a>
+    <a href="#">Settings</a>
+  </nav>
+</div>
+
+<!-- ============================================= -->
+<!-- SYNCHRONIZED SHARED HEADER COMPONENT          -->
+<!-- (identical markup used in BOTH index.html     -->
+<!--  and dashboard.html — fully theme-synchronized) -->
+<!-- ============================================= -->
+<header class="main-header">
+  <div class="header-content">
+
+    <!-- 
+      BRANDING
+      • Uses .brand-title class exactly as defined in shared-styles.css
+      • The entire branding string is wrapped in a container with aria-label
+        so screen readers announce "Belpulse Beta" cleanly (ignores the <sup>)
+    -->
+    <div aria-label="Belpulse Beta">
+      <h1 class="brand-title">Belpulse<sup>BETA</sup></h1>
+    </div>
+
+    <!-- 
+      UI CONTROLS SECTION
+      • Houses the two required <select> elements
+      • IDs are exactly as requested for future vanilla JS targeting
+    -->
+    <div class="header-controls">
+
+      <!-- Language Selector -->
+      <select id="lang-sync-selector" aria-label="Select interface language">
+        <option value="en" selected>EN</option>
+        <option value="fr">FR</option>
+        <option value="nl">NL</option>
+      </select>
+
+      <!-- Theme / Reading Mode Selector -->
+      <!-- Option values match the three data-theme states from shared-styles.css -->
+      <select id="theme-sync-selector" aria-label="Select reading mode / theme">
+        <option value="light" selected>Light</option>
+        <option value="dark">Dark</option>
+        <option value="high-contrast">High Contrast</option>
+      </select>
+
+    </div>
+
+  </div>
+</header>
     <!-- HEADER -->
     <header class="bg-black border-b border-zinc-800 sticky top-0 z-50">
         <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
@@ -510,3 +569,4 @@
     </script>
 </body>
 </html>
+
