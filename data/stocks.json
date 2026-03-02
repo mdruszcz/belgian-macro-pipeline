@@ -1,1 +1,156 @@
-{}
+{
+    "BEL20": {
+        "name": "BEL20 Index",
+        "ticker": "BEL20",
+        "price": 5366.22,
+        "change": -4.670865050673714,
+        "currency": "EUR"
+    },
+    "EURUSD": {
+        "name": "Euro / US Dollar",
+        "ticker": "EURUSD",
+        "price": 1.1695,
+        "change": -0.8394098694251331,
+        "currency": "USD"
+    },
+    "ABI": {
+        "name": "AB InBev",
+        "ticker": "ABI",
+        "price": 67.28,
+        "change": -1.4934114202049722,
+        "currency": "EUR"
+    },
+    "ACKB": {
+        "name": "Ackermans & van Haaren",
+        "ticker": "ACKB",
+        "price": 283.2,
+        "change": -3.2125768967874344,
+        "currency": "EUR"
+    },
+    "AED": {
+        "name": "Aedifica",
+        "ticker": "AED",
+        "price": 78.35,
+        "change": 0.2559181062059995,
+        "currency": "EUR"
+    },
+    "AGS": {
+        "name": "Ageas",
+        "ticker": "AGS",
+        "price": 62.15,
+        "change": -1.3492063492063515,
+        "currency": "EUR"
+    },
+    "ARGX": {
+        "name": "Argenx",
+        "ticker": "ARGX",
+        "price": 649.4,
+        "change": -8.432036097010725,
+        "currency": "EUR"
+    },
+    "AZE": {
+        "name": "Azelis Group",
+        "ticker": "AZE",
+        "price": 8.075,
+        "change": -6.701328711727326,
+        "currency": "EUR"
+    },
+    "COFB": {
+        "name": "Cofinimmo",
+        "ticker": "COFB",
+        "price": 91.75,
+        "change": -0.8643976229065339,
+        "currency": "EUR"
+    },
+    "DIE": {
+        "name": "D'Ieteren Group",
+        "ticker": "DIE",
+        "price": 181.6,
+        "change": -0.6564551422319568,
+        "currency": "EUR"
+    },
+    "ELI": {
+        "name": "Elia Group",
+        "ticker": "ELI",
+        "price": 134.3,
+        "change": -1.2499999999999916,
+        "currency": "EUR"
+    },
+    "GLPG": {
+        "name": "Galapagos",
+        "ticker": "GLPG",
+        "price": 15.99,
+        "change": 0.0,
+        "currency": "EUR"
+    },
+    "GBLB": {
+        "name": "Groupe Bruxelles Lambert",
+        "ticker": "GBLB",
+        "price": 83.85,
+        "change": -0.237953599048189,
+        "currency": "EUR"
+    },
+    "KBC": {
+        "name": "KBC Group",
+        "ticker": "KBC",
+        "price": 113.25,
+        "change": -0.35195776506819676,
+        "currency": "EUR"
+    },
+    "LOTB": {
+        "name": "Lotus Bakeries",
+        "ticker": "LOTB",
+        "price": 10280.0,
+        "change": -2.6515151515151514,
+        "currency": "EUR"
+    },
+    "MELE": {
+        "name": "Melexis",
+        "ticker": "MELE",
+        "price": 56.2,
+        "change": -3.7671232876712257,
+        "currency": "EUR"
+    },
+    "SOF": {
+        "name": "Sofina",
+        "ticker": "SOF",
+        "price": 244.6,
+        "change": -1.3709677419354862,
+        "currency": "EUR"
+    },
+    "SOLB": {
+        "name": "Solvay",
+        "ticker": "SOLB",
+        "price": 26.8,
+        "change": -3.873744619799133,
+        "currency": "EUR"
+    },
+    "SYENS": {
+        "name": "Syensqo",
+        "ticker": "SYENS",
+        "price": 49.0,
+        "change": -37.4361593462717,
+        "currency": "EUR"
+    },
+    "UCB": {
+        "name": "UCB",
+        "ticker": "UCB",
+        "price": 249.6,
+        "change": -7.862679955703205,
+        "currency": "EUR"
+    },
+    "UMI": {
+        "name": "Umicore",
+        "ticker": "UMI",
+        "price": 18.04,
+        "change": -2.0097772949484027,
+        "currency": "EUR"
+    },
+    "WDP": {
+        "name": "WDP",
+        "ticker": "WDP",
+        "price": 25.5,
+        "change": -0.6235385814497277,
+        "currency": "EUR"
+    }
+}

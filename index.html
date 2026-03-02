@@ -547,116 +547,42 @@
         };
 
         // === STOCK DATA FETCHING ===
-        const stockList = [
-            { id: 'BEL20', ticker: '^BFX', label: 'BEL20' },
-            { id: 'EURUSD', ticker: 'EURUSD=X', label: 'EUR/USD' },
-            { id: 'ABI', ticker: 'ABI.BR', label: 'ABI' },
-            { id: 'ACKB', ticker: 'ACKB.BR', label: 'ACKB' },
-            { id: 'AED', ticker: 'AED.BR', label: 'AED' },
-            { id: 'AGS', ticker: 'AGS.BR', label: 'AGS' },
-            { id: 'ARGX', ticker: 'ARGX.BR', label: 'ARGX' },
-            { id: 'AZE', ticker: 'AZE.BR', label: 'AZE' },
-            { id: 'COFB', ticker: 'COFB.BR', label: 'COFB' },
-            { id: 'DIE', ticker: 'DIE.BR', label: 'DIE' },
-            { id: 'ELI', ticker: 'ELI.BR', label: 'ELI' },
-            { id: 'GLPG', ticker: 'GLPG.BR', label: 'GLPG' },
-            { id: 'GBLB', ticker: 'GBLB.BR', label: 'GBLB' },
-            { id: 'KBC', ticker: 'KBC.BR', label: 'KBC' },
-            { id: 'LOTB', ticker: 'LOTB.BR', label: 'LOTB' },
-            { id: 'MELE', ticker: 'MELE.BR', label: 'MELE' },
-            { id: 'SOF', ticker: 'SOF.BR', label: 'SOF' },
-            { id: 'SOLB', ticker: 'SOLB.BR', label: 'SOLB' },
-            { id: 'SYENS', ticker: 'SYENS.BR', label: 'SYENS' },
-            { id: 'UCB', ticker: 'UCB.BR', label: 'UCB' },
-            { id: 'UMI', ticker: 'UMI.BR', label: 'UMI' },
-            { id: 'WDP', ticker: 'WDP.BR', label: 'WDP' }
-        ];
-
         let stockResults = {};
 
         async function fetchStockData() {
-            const now = Date.now();
-            const cacheTime = 300000; // 5 minutes cache
-
-            const cached = sessionStorage.getItem('stockData');
-            if (cached) {
-                const { timestamp, data } = JSON.parse(cached);
-                if (now - timestamp < cacheTime) {
-                    stockResults = data;
-                    updateStockTicker();
-                    // If we have cached data, only return if it's really fresh
-                    if (now - timestamp < 60000) return;
-                }
-            }
-
             try {
-                // Batch all symbols into one request to avoid rate limits
-                const symbols = stockList.map(s => s.ticker).join(',');
-                const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`;
-                
-                // Use AllOrigins proxy to bypass CORS
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
-                
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Network error');
-                
-                const wrapper = await response.json();
-                const json = JSON.parse(wrapper.contents);
-                
-                if (json.quoteResponse && json.quoteResponse.result) {
-                    json.quoteResponse.result.forEach(quote => {
-                        const symObj = stockList.find(s => s.ticker === quote.symbol);
-                        if (symObj) {
-                            const price = quote.regularMarketPrice;
-                            const change = quote.regularMarketChangePercent;
-                            const currency = quote.currency;
-                            const formattedPrice = currency === 'USD' ? `$${price.toFixed(4)}` : `${price.toFixed(2)}€`;
-                            const sign = change >= 0 ? '▲' : '▼';
-                            const colorClass = change >= 0 ? 'stock-up' : 'stock-down';
-                            
-                            stockResults[symObj.id] = `<span class="${colorClass}">${sign} ${formattedPrice} (${change.toFixed(2)}%)</span>`;
-                        }
-                    });
-                    
-                    sessionStorage.setItem('stockData', JSON.stringify({
-                        timestamp: Date.now(),
-                        data: stockResults
-                    }));
-                }
+                const response = await fetch('data/stocks.json');
+                if (!response.ok) throw new Error('Could not load stock data');
+                stockResults = await response.json();
+                updateStockTicker();
             } catch (e) {
-                console.error("Batch fetch error:", e);
-                // Fallback to N/A for missing items if all failed
-                stockList.forEach(s => {
-                    if (!stockResults[s.id]) stockResults[s.id] = 'N/A';
-                });
+                console.error("Error loading stocks.json:", e);
             }
-
-            updateStockTicker();
         }
 
         function updateStockTicker() {
             const container = document.getElementById('stock-ticker-content');
-            if (!container) return;
+            if (!container || !stockResults) return;
 
-            const items = stockList.map(s => ({
-                label: s.label,
-                value: stockResults[s.id] || '...'
-            }));
-
-            // No duplicates needed with the new 100vw to -100% animation
-            const content = items.map(item => `
-                <div class="stock-item">
-                    <span class="stock-label">${item.label}</span>
-                    <span class="stock-value">${item.value}</span>
-                </div>
-            `).join('');
+            const keys = Object.keys(stockResults);
+            const content = keys.map(key => {
+                const s = stockResults[key];
+                const sign = s.change >= 0 ? '▲' : '▼';
+                const colorClass = s.change >= 0 ? 'stock-up' : 'stock-down';
+                const formattedPrice = s.currency === 'USD' ? `$${s.price.toFixed(4)}` : `${s.price.toFixed(2)}€`;
+                
+                return `
+                    <div class="stock-item">
+                        <span class="stock-label">${s.name} (${s.ticker})</span>
+                        <span class="stock-value ${colorClass}">${formattedPrice} ${sign} (${s.change.toFixed(2)}%)</span>
+                    </div>
+                `;
+            }).join('');
 
             container.innerHTML = content;
             
-            // Speed control: pixels per second
-            // Total distance = 100vw + container width
-            // We want it to take about 30-60 seconds for a full pass
-            const duration = Math.max(30, Math.floor(items.length * 3));
+            // Speed control: total passing time
+            const duration = Math.max(40, Math.floor(keys.length * 4));
             container.style.animationDuration = `${duration}s`;
         }
 
