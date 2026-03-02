@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloomgium — Belgium Economic Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        .header-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .iframe-container {
+            height: calc(100vh - 140px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -15px rgb(0 0 0 / 0.2);
+        }
+        
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .nav-button.active {
+            background-color: #000000;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.3);
+        }
+        
+        .belgian-flag {
+            background: linear-gradient(
+                to right,
+                #000000 33.33%,
+                #FFCC00 33.33%,
+                #FFCC00 66.66%,
+                #C8102E 66.66%
+            );
+        }
+
+        /* NEWS TICKER */
+        .ticker {
+            overflow: hidden;
+            white-space: nowrap;
+            background: linear-gradient(90deg, #18181b, #27272a);
+        }
+        .ticker-content {
+            display: inline-flex;
+            animation: ticker-slide 35s linear infinite;
+        }
+        @keyframes ticker-slide {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .ticker-item:hover {
+            color: #eab308;
+        }
+
+        /* AI CHAT */
+        .chat-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .chat-sidebar.open {
+            transform: translateX(0);
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+        .user-bubble {
+            background: #eab308;
+            color: black;
+            border-bottom-right-radius: 4px;
+        }
+        .ai-bubble {
+            background: #27272a;
+            border-bottom-left-radius: 4px;
+        }
+        .typing {
+            display: flex;
+            gap: 4px;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #71717a;
+            border-radius: 50%;
+            animation: typingBounce 1.2s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 150ms; }
+        .typing-dot:nth-child(3) { animation-delay: 300ms; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+        }
+
+        /* LANGUAGE TOGGLE */
+        .lang-btn {
+            transition: all 0.3s ease;
+        }
+        .lang-btn.active {
+            background-color: #000000;
+            color: white;
+            box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white overflow-hidden">
+    <!-- HEADER -->
+    <header class="bg-black border-b border-zinc-800 sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <!-- Logo + Name -->
+            <div class="flex items-center gap-x-4">
+                <div class="w-10 h-10 rounded-2xl belgian-flag flex items-center justify-center text-3xl shadow-inner">
+                    🇧🇪
+                </div>
+                <div>
+                    <h1 class="header-font text-4xl font-semibold tracking-tighter text-white">Bloomgium</h1>
+                    <p id="subtitle" class="text-[10px] text-amber-400 tracking-[2px] -mt-1">BELGIAN ECONOMIC INTELLIGENCE</p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex items-center gap-x-3">
+                <button onclick="loadDashboard(0)" id="btn-0"
+                        class="nav-button active flex items-center gap-x-3 px-8 py-4 rounded-3xl bg-zinc-900 hover:bg-zinc-800 text-sm font-medium">
+                    <span class="text-lg">📈</span>
+                    <span id="macro-btn-text">MACRO PIPELINE</span>
+                </button>
+                
+                <button onclick="loadDashboard(1)" id="btn-1"
+                        class="nav-button flex items-center gap-x-3 px-8 py-4 rounded-3xl bg-zinc-900 hover:bg-zinc-800 text-sm font-medium">
+                    <span class="text-lg">⏱️</span>
+                    <span id="fiscal-btn-text">FISCAL CLOCK DASHBOARD</span>
+                </button>
+            </div>
+
+            <!-- Language Toggle -->
+            <div class="flex bg-zinc-900 rounded-3xl p-1 text-xs font-medium border border-zinc-700">
+                <button onclick="switchLanguage('en')" id="lang-en"
+                        class="lang-btn active px-5 py-2.5 rounded-3xl">EN</button>
+                <button onclick="switchLanguage('fr')" id="lang-fr"
+                        class="lang-btn px-5 py-2.5 rounded-3xl">FR</button>
+                <button onclick="switchLanguage('nl')" id="lang-nl"
+                        class="lang-btn px-5 py-2.5 rounded-3xl">NL</button>
+            </div>
+
+            <!-- AI Chat Trigger -->
+            <button onclick="toggleChat()" id="ai-trigger-btn"
+                    class="flex items-center gap-x-3 bg-amber-400 hover:bg-amber-300 text-black px-6 py-3 rounded-3xl font-semibold text-sm transition-all active:scale-95">
+                <span class="text-xl">🤖</span>
+                <span id="ai-btn-text">ASK BLOOMGIUM AI</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- NEWS TICKER -->
+    <div class="ticker border-b border-zinc-800 py-3 text-sm font-medium">
+        <div class="ticker-content flex items-center gap-x-12 text-amber-300" id="ticker-content">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="max-w-screen-2xl mx-auto px-8 py-6">
+        <div class="iframe-container bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800">
+            <iframe id="dashboard-frame" 
+                    src="https://mdruszcz.github.io/belgian-macro-pipeline/dashboard.html"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- AI CHAT SIDEBAR -->
+    <div id="chat-sidebar" class="chat-sidebar fixed top-0 right-0 h-screen w-96 bg-zinc-900 border-l border-zinc-700 shadow-2xl z-[100] flex flex-col">
+        <!-- Chat Header -->
+        <div class="bg-black px-6 py-5 flex items-center justify-between border-b border-zinc-800">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 rounded-2xl belgian-flag flex items-center justify-center text-2xl">🇧🇪</div>
+                <div>
+                    <div class="font-semibold text-lg" id="chat-title">Bloomgium AI</div>
+                    <div id="chat-sub" class="text-emerald-400 text-xs font-mono flex items-center gap-x-1">
+                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        ONLINE • Powered by real Belgian macro data
+                    </div>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="text-zinc-400 hover:text-white text-2xl leading-none">×</button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6 bg-zinc-950">
+            <!-- Welcome added by JS -->
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-6 border-t border-zinc-800 bg-zinc-900">
+            <div class="flex gap-x-3">
+                <input id="chat-input" 
+                       type="text" 
+                       placeholder="Ask about debt, growth, HERMES scenarios..." 
+                       class="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4 text-sm focus:outline-none focus:border-amber-400 transition-colors"
+                       onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" 
+                        class="bg-amber-400 hover:bg-amber-300 text-black w-12 h-12 rounded-3xl flex items-center justify-center text-xl transition-all active:scale-95">
+                    ↑
+                </button>
+            </div>
+            <div class="text-[10px] text-zinc-500 mt-3 text-center">Demo AI • Real version connects to your HERMES model</div>
+        </div>
+    </div>
+
+    <script>
+        // === LANGUAGE SYSTEM ===
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                subtitle: "BELGIAN ECONOMIC INTELLIGENCE",
+                macroBtn: "MACRO PIPELINE",
+                fiscalBtn: "FISCAL CLOCK DASHBOARD",
+                aiBtn: "ASK BLOOMGIUM AI",
+                chatTitle: "Bloomgium AI",
+                chatSub: "ONLINE • Powered by real Belgian macro data",
+                chatPlaceholder: "Ask about debt, growth, HERMES scenarios...",
+                welcome: "👋 Hi! I’m Bloomgium AI — your personal Belgian macro analyst. Ask me anything about the dashboards, fiscal policy, debt trajectory, or run quick HERMES-style scenarios!"
+            },
+            fr: {
+                subtitle: "INTELLIGENCE ÉCONOMIQUE BELGE",
+                macroBtn: "PIPELINE MACRO",
+                fiscalBtn: "HORLOGE FISCALE",
+                aiBtn: "INTERROGER BLOOMGIUM AI",
+                chatTitle: "Bloomgium AI",
+                chatSub: "EN LIGNE • Alimenté par des données macro belges réelles",
+                chatPlaceholder: "Posez des questions sur la dette, la croissance, les scénarios HERMES...",
+                welcome: "👋 Salut ! Je suis Bloomgium AI — votre analyste macro belge personnel. Demandez-moi tout sur les tableaux de bord, la politique fiscale, la trajectoire de la dette ou lancez des scénarios HERMES rapides !"
+            },
+            nl: {
+                subtitle: "BELGISCHE ECONOMISCHE INTELLIGENTIE",
+                macroBtn: "MACRO-PIPELINE",
+                fiscalBtn: "FISCAAL KLOK DASHBOARD",
+                aiBtn: "VRAAG AAN BLOOMGIUM AI",
+                chatTitle: "Bloomgium AI",
+                chatSub: "ONLINE • Aangedreven door echte Belgische macrodata",
+                chatPlaceholder: "Vraag naar schuld, groei, HERMES-scenario's...",
+                welcome: "👋 Hoi! Ik ben Bloomgium AI — jouw persoonlijke Belgische macro-analist. Vraag me alles over de dashboards, fiscaal beleid, schuldenpad of voer snelle HERMES-scenario’s uit!"
+            }
+        };
+
+        const newsData = {
+            en: [
+                "🇧🇪 Belgium's public debt hits 107.4% of GDP – highest in Eurozone",
+                "Deficit projected at 5.6% for 2026 – FPB warns of sustainability risks",
+                "Wallonia unemployment at 7.9% while Flanders hits record employment",
+                "NBB cuts 2026 growth forecast to 1.1% amid German slowdown",
+                "Energy transition: €4.2B extra spending approved for nuclear extension",
+                "Corporate tax reform: New 20% rate for SMEs effective Jan 2026",
+                "HERMES simulation: 2% VAT hike would cost 18,000 jobs",
+                "Inflation steady at 2.3% – ECB rate path critical for Belgian mortgages",
+                "Pension reform delayed: Additional €1.8B annual pressure",
+                "Live: Belgium Fiscal Clock ticking at +€1,247 per second"
+            ],
+            fr: [
+                "🇧🇪 La dette publique belge atteint 107,4 % du PIB – la plus élevée de la zone euro",
+                "Déficit prévu à 5,6 % pour 2026 – le FPB met en garde contre les risques",
+                "Chômage en Wallonie à 7,9 % tandis que la Flandre bat des records d'emploi",
+                "La BNB abaisse sa prévision de croissance 2026 à 1,1 %",
+                "Transition énergétique : 4,2 Md€ supplémentaires pour le nucléaire",
+                "Réforme de l'impôt des sociétés : taux de 20 % pour PME dès janv. 2026",
+                "Simulation HERMES : hausse TVA de 2 % = 18 000 emplois perdus",
+                "Inflation stable à 2,3 % – trajectoire BCE critique pour les hypothèques",
+                "Réforme des pensions retardée : +1,8 Md€ de pression annuelle",
+                "En direct : Horloge fiscale belge à +1 247 €/seconde"
+            ],
+            nl: [
+                "🇧🇪 Belgische overheidsschuld bereikt 107,4% van het BBP – hoogste in eurozone",
+                "Tekort geprojecteerd op 5,6% voor 2026 – FPB waarschuwt voor risico's",
+                "Werkloosheid Wallonië 7,9% terwijl Vlaanderen recordwerkgelegenheid haalt",
+                "NBB verlaagt groeivoorspelling 2026 naar 1,1%",
+                "Energietransitie: €4,2 mld extra voor kernenergie-uitbreiding",
+                "Vennootschapsbelasting: nieuw 20% tarief voor KMO's vanaf jan 2026",
+                "HERMES-simulatie: 2% BTW-verhoging kost 18.000 banen",
+                "Inflatie stabiel op 2,3% – ECB-rente kritiek voor Belgische hypotheken",
+                "Pensioenreform uitgesteld: +€1,8 mld extra druk per jaar",
+                "Live: Belgische Fiscale Klok tikt +€1.247 per seconde"
+            ]
+        };
+
+        const sampleResponses = {
+            en: {
+                default: [
+                    "According to latest NBB data, Belgium’s structural deficit is one of the largest in the euro area.",
+                    "Wallonia’s unemployment gap with Flanders remains 2.8 pp.",
+                    "A 1 pp interest rate shock would add €2.1B to annual interest payments."
+                ],
+                debt: "Public debt-to-GDP stands at 107.4%. Without consolidation, it will keep rising.",
+                deficit: "The 2026 deficit is projected at 5.6% of GDP — highest in the eurozone.",
+                growth: "NBB now expects only 1.1% real GDP growth in 2026.",
+                heremes: "The HERMES model shows a 2 pp corporate tax cut would boost GDP by 0.4% but widen the deficit.",
+                unemployment: "National unemployment 5.9%. Flanders 4.1%, Wallonia 7.9%, Brussels 11.2%."
+            },
+            fr: {
+                default: [
+                    "Selon les dernières données de la BNB, le déficit structurel belge est l’un des plus élevés de la zone euro.",
+                    "L’écart de chômage Wallonie-Flandre reste de 2,8 points.",
+                    "Un choc de +1 pp sur les taux ajouterait 2,1 Md€ aux intérêts annuels."
+                ],
+                debt: "La dette publique atteint 107,4 % du PIB. Sans consolidation, elle continuera d’augmenter.",
+                deficit: "Le déficit 2026 est projeté à 5,6 % du PIB — le plus élevé de la zone euro.",
+                growth: "La BNB prévoit désormais seulement 1,1 % de croissance réelle du PIB en 2026.",
+                heremes: "Le modèle HERMES montre qu’une baisse de 2 pp de l’impôt des sociétés boosterait le PIB de 0,4 % mais creuserait le déficit.",
+                unemployment: "Chômage national 5,9 %. Flandre 4,1 %, Wallonie 7,9 %, Bruxelles 11,2 %."
+            },
+            nl: {
+                default: [
+                    "Volgens de laatste NBB-gegevens is het structurele tekort van België een van de hoogste in de eurozone.",
+                    "Het werkloosheidsverschil Wallonië-Vlaanderen blijft 2,8 pp.",
+                    "Een rentestijging van 1 pp zou €2,1 mld extra rente kosten."
+                ],
+                debt: "Overheidsschuld staat op 107,4% van het BBP. Zonder maatregelen blijft ze stijgen.",
+                deficit: "Het tekort 2026 wordt geraamd op 5,6% van het BBP — hoogste in de eurozone.",
+                growth: "NBB verwacht nu slechts 1,1% reële BBP-groei in 2026.",
+                heremes: "Het HERMES-model toont dat een verlaging van 2 pp vennootschapsbelasting het BBP met 0,4% zou boosten maar het tekort zou vergroten.",
+                unemployment: "Nationale werkloosheid 5,9%. Vlaanderen 4,1%, Wallonië 7,9%, Brussel 11,2%."
+            }
+        };
+
+        function switchLanguage(lang) {
+            if (currentLang === lang) return;
+            currentLang = lang;
+
+            // Update static texts
+            document.getElementById('subtitle').textContent = translations[lang].subtitle;
+            document.getElementById('macro-btn-text').textContent = translations[lang].macroBtn;
+            document.getElementById('fiscal-btn-text').textContent = translations[lang].fiscalBtn;
+            document.getElementById('ai-btn-text').textContent = translations[lang].aiBtn;
+            document.getElementById('chat-title').textContent = translations[lang].chatTitle;
+            document.getElementById('chat-sub').innerHTML = `
+                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                ${translations[lang].chatSub}
+            `;
+            document.getElementById('chat-input').placeholder = translations[lang].chatPlaceholder;
+
+            // Re-init ticker with new language
+            initTicker();
+
+            // Update active lang button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.id === `lang-${lang}`);
+            });
+
+            // Re-show welcome if chat is open and empty
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages.children.length === 0 && document.getElementById('chat-sidebar').classList.contains('open')) {
+                addMessage(translations[lang].welcome, false);
+            }
+        }
+
+        // === DASHBOARD SWITCHING ===
+        const dashboards = [
+            "https://mdruszcz.github.io/belgian-macro-pipeline/dashboard.html",
+            "https://mdruszcz.github.io/belgium-dashboard/"
+        ];
+
+        function loadDashboard(index) {
+            const frame = document.getElementById('dashboard-frame');
+            const buttons = document.querySelectorAll('.nav-button');
+            frame.style.opacity = 0;
+            setTimeout(() => {
+                frame.src = dashboards[index];
+                frame.style.opacity = 1;
+            }, 300);
+            buttons.forEach((btn, i) => {
+                i === index ? btn.classList.add('active') : btn.classList.remove('active');
+            });
+        }
+
+        // === NEWS TICKER ===
+        function initTicker() {
+            const container = document.getElementById('ticker-content');
+            container.innerHTML = '';
+            const items = newsData[currentLang];
+            [...items, ...items].forEach(text => {
+                const div = document.createElement('div');
+                div.className = 'ticker-item flex-shrink-0 px-8 cursor-pointer hover:underline';
+                div.textContent = text;
+                div.onclick = () => alert("🔴 Full news aggregator & AI summary coming in v3 – this is live demo data");
+                container.appendChild(div);
+            });
+        }
+
+        // === AI CHAT ===
+        let chatOpen = false;
+        const chatMessages = document.getElementById('chat-messages');
+
+        function addMessage(text, isUser) {
+            const msg = document.createElement('div');
+            msg.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+            msg.innerHTML = `
+                <div class="message-bubble ${isUser ? 'user-bubble' : 'ai-bubble'}">
+                    ${text}
+                </div>
+            `;
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            const typing = document.createElement('div');
+            typing.id = 'typing-indicator';
+            typing.className = 'flex justify-start';
+            typing.innerHTML = `
+                <div class="ai-bubble px-4 py-3">
+                    <div class="typing">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typing);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typing;
+        }
+
+        function removeTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        function getAIResponse(message) {
+            const lower = message.toLowerCase();
+            const langResponses = sampleResponses[currentLang];
+            if (lower.includes('debt') || lower.includes('dette') || lower.includes('schuld')) return langResponses.debt;
+            if (lower.includes('deficit') || lower.includes('déficit') || lower.includes('tekort')) return langResponses.deficit;
+            if (lower.includes('growth') || lower.includes('croissance') || lower.includes('groei')) return langResponses.growth;
+            if (lower.includes('hermes') || lower.includes('simulation') || lower.includes('simulatie')) return langResponses.heremes;
+            if (lower.includes('unemployment') || lower.includes('chômage') || lower.includes('werkloosheid')) return langResponses.unemployment;
+            return langResponses.default[Math.floor(Math.random() * langResponses.default.length)];
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            input.value = '';
+
+            const typingEl = showTyping();
+
+            setTimeout(() => {
+                removeTyping();
+                const response = getAIResponse(text);
+                addMessage(response, false);
+            }, 950);
+        }
+
+        function toggleChat() {
+            const sidebar = document.getElementById('chat-sidebar');
+            chatOpen = !chatOpen;
+            sidebar.classList.toggle('open', chatOpen);
+            
+            if (chatOpen && chatMessages.children.length === 0) {
+                setTimeout(() => {
+                    addMessage(translations[currentLang].welcome, false);
+                }, 600);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "1") loadDashboard(0);
+            if (e.key === "2") loadDashboard(1);
+            if (e.key === "/" && document.getElementById('chat-input') !== document.activeElement) {
+                e.preventDefault();
+                toggleChat();
+                setTimeout(() => document.getElementById('chat-input').focus(), 500);
+            }
+        });
+
+        // Init everything
+        window.onload = function() {
+            initTicker();
+            console.log('%c🚀 Bloomgium v3 ready — Multilingual (EN/FR/NL) + AI Chat + News Ticker live! Press / to open chat, 1 or 2 to switch dashboards', 
+                        'color:#eab308; font-family:monospace; font-size:11px');
+        };
+    </script>
+</body>
+</html>
