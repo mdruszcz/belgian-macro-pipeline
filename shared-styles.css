@@ -1,0 +1,139 @@
+/* ============================================ */
+/* shared-styles.css                            */
+/* Vanilla CSS Custom Properties Theming System */
+/* ============================================ */
+
+/* 
+ * THEMING ARCHITECTURE
+ * --------------------
+ * All theme variables are defined directly on :root (the <html> element).
+ * They cascade automatically to EVERY descendant element in the document tree.
+ * 
+ * To activate a theme, simply add the data-theme attribute to the <html> tag
+ * (e.g. <html data-theme="dark">). No JavaScript required.
+ * 
+ * When the attribute changes:
+ *   1. The more specific :root[data-theme="xxx"] rule overrides the base :root values.
+ *   2. All elements using var(--xxx) instantly update due to CSS inheritance + cascade.
+ *   3. Performance is maximal — pure native CSS, zero reflow cost beyond normal variable resolution.
+ * 
+ * Focused variables (exactly as requested):
+ *   • background colors
+ *   • primary text colors
+ *   • header background colors
+ *   • border rendering
+ */
+
+:root {
+  /* === Background Colors === */
+  --background-color: #f8fafc;     /* Main page background (light theme default) */
+  --surface-color: #ffffff;        /* Cards, panels, modals */
+
+  /* === Primary Text Colors === */
+  --text-primary: #0f172a;         /* Main body / heading text */
+  --text-secondary: #475569;       /* Subtle supporting text */
+
+  /* === Header Background Colors === */
+  --header-bg: #ffffff;            /* Top navigation / dashboard header */
+
+  /* === Border Rendering === */
+  --border-color: #e2e8f0;         /* All borders, dividers, outlines */
+  --border-width: 1px;
+  --border-style: solid;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+
+  /* Accent (used by brand title) */
+  --accent-color: #0ea5e9;
+}
+
+/* Dark Mode Override */
+:root[data-theme="dark"] {
+  /* Dark backgrounds */
+  --background-color: #0f172a;
+  --surface-color: #1e2937;
+
+  /* Inverted text for perfect contrast */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+
+  /* Slightly darker header */
+  --header-bg: #1e2937;
+
+  /* Subtle dark borders */
+  --border-color: #334155;
+}
+
+/* High-Contrast Mode Override (WCAG AA/AAA friendly) */
+:root[data-theme="high-contrast"] {
+  /* Stark black/white */
+  --background-color: #000000;
+  --surface-color: #111111;
+
+  --text-primary: #ffffff;
+  --text-secondary: #dddddd;
+
+  /* Solid black header */
+  --header-bg: #000000;
+
+  /* Bright yellow borders for maximum visibility */
+  --border-color: #ffff00;
+  --accent-color: #00ffaa;
+}
+
+/* ============================================ */
+/* BRAND TITLE STYLING                          */
+/* ============================================ */
+
+/*
+ * .brand-title is intentionally specific and self-contained.
+ * Recommended HTML usage (anywhere in index.html or dashboard.html):
+ *   <h1 class="brand-title">Belpulse<sup>BETA</sup></h1>
+ * 
+ * The <sup> element:
+ *   • Completely bypasses user-agent defaults (vertical-align: super, etc.)
+ *   • Uses exact 0.55em relative sizing
+ *   • Uses position: relative + top for pixel-perfect cap-height alignment
+ *   • Uses line-height: 0 to guarantee ZERO impact on the parent's line-height calculation
+ *   • Inherits colors from the active theme via var(--accent-color)
+ */
+
+.brand-title {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 800;
+  font-size: 2.5rem;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* BETA superscript — fully decoupled from user-agent */
+.brand-title sup {
+  font-size: 0.55em;
+  font-weight: 700;
+  position: relative;
+  top: -0.38em;               /* Precisely tuned to sit at cap-height of "Belpulse" */
+  vertical-align: baseline;   /* Explicitly overrides UA super alignment */
+  line-height: 0;             /* Critical: prevents any line-height inflation of parent */
+  color: var(--accent-color);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ============================================ */
+/* PAGE-SPECIFIC CONTEXTUAL RULE                */
+/* ============================================ */
+
+/*
+ * When the index page is active (body class="page-index" added in index.html),
+ * this rule hides the dashboard's top header (#dashboard-first-header)
+ * with !important to guarantee override regardless of dashboard.html styles.
+ * 
+ * The two HTML files remain completely decoupled — this is pure CSS context.
+ */
+
+body.page-index #dashboard-first-header {
+  display: none !important;
+}
+
+/* End of shared-styles.css — link this file in both index.html and dashboard.html */
