@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="soft">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis — Belgium Economic Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ═══ DAY — clean white ═══ */
+        [data-theme="day"] {
+          --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
+          --text-cell:#1e293b; --text-muted:#94a3b8; --gold:#b58a2a;
+          --bg-card:#fff; --border-card:#e5e7eb;
+        }
+        /* ═══ SOFT — warm muted ═══ */
+        [data-theme="soft"] {
+          --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
+          --text-cell:#3b3228; --text-muted:#a39888; --gold:#c49a3c;
+          --bg-card:#faf6f0; --border-card:#ddd5c8;
+        }
+        /* ═══ NIGHT — deep blue ═══ */
+        [data-theme="night"] {
+          --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
+          --text-cell:#c8d2de; --text-muted:#3d5068; --gold:#d4a843;
+          --bg-card:#0f1826; --border-card:#1a2744;
+        }
+
+        body { font-family: 'Figtree', sans-serif; background: var(--bg-page); color: var(--text-cell); margin: 0; padding: 40px; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; color: var(--gold); }
+        .subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .analysis-item { margin-bottom: 30px; }
+        .analysis-item:last-child { margin-bottom: 0; }
+        .analysis-title { font-weight: 700; font-size: 1.4rem; margin-bottom: 10px; }
+        .analysis-text { font-size: 1rem; line-height: 1.6; opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="page-title">Expert Analysis</h1>
+        <p class="subtitle" id="page-subtitle">In-depth insights into Belgian macroeconomic trends</p>
+        
+        <div class="card">
+            <div id="analysis-content">
+                <div class="analysis-item">
+                    <div class="analysis-title">The HERMES Model and 2026 Fiscal Outlook</div>
+                    <div class="analysis-text">An examination of how the current deficit levels interact with long-term debt sustainability using the Federal Planning Bureau's flagship model.</div>
+                </div>
+                <div class="analysis-item">
+                    <div class="analysis-title">Labour Market Tightness in Flanders vs. Wallonia</div>
+                    <div class="analysis-text">Regional disparities in employment rates continue to pose structural challenges for the Belgian federal budget and social security system.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                title: "Expert Analysis",
+                subtitle: "In-depth insights into Belgian macroeconomic trends",
+                items: [
+                    { t: "The HERMES Model and 2026 Fiscal Outlook", d: "An examination of how the current deficit levels interact with long-term debt sustainability using the Federal Planning Bureau's flagship model." },
+                    { t: "Labour Market Tightness in Flanders vs. Wallonia", d: "Regional disparities in employment rates continue to pose structural challenges for the Belgian federal budget and social security system." }
+                ]
+            },
+            fr: {
+                title: "Analyses d'Experts",
+                subtitle: "Aperçus approfondis des tendances macroéconomiques belges",
+                items: [
+                    { t: "Le modèle HERMES et les perspectives budgétaires 2026", d: "Un examen de la manière dont les niveaux de déficit actuels interagissent avec la viabilité de la dette à long terme à l'aide du modèle phare du Bureau du Plan." },
+                    { t: "Tension sur le marché du travail en Flandre vs Wallonie", d: "Les disparités régionales dans les taux d'emploi continuent de poser des défis structurels pour le budget fédéral belge et le système de sécurité sociale." }
+                ]
+            },
+            nl: {
+                title: "Expertanalyse",
+                subtitle: "Diepgaande inzichten in Belgische macro-economische trends",
+                items: [
+                    { t: "Het HERMES-model en de begrotingsvooruitzichten voor 2026", d: "Een onderzoek naar hoe de huidige tekortniveaus interageren met de schuldhoudbaarheid op lange termijn met behulp van het vlaggenschipmodel van het Federaal Planbureau." },
+                    { t: "Krapte op de arbeidsmarkt in Vlaanderen vs. Wallonië", d: "Regionale verschillen in de werkgelegenheidsgraad blijven structurele uitdagingen vormen voor de Belgische federale begroting en het socialezekerheidsstelsel." }
+                ]
+            }
+        };
+
+        function setTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+        }
+
+        function setLang(l) {
+            const t = translations[l] || translations.en;
+            document.getElementById('page-title').textContent = t.title;
+            document.getElementById('page-subtitle').textContent = t.subtitle;
+            
+            const titles = document.querySelectorAll('.analysis-title');
+            const texts = document.querySelectorAll('.analysis-text');
+            titles.forEach((el, idx) => { if (t.items[idx]) el.textContent = t.items[idx].t; });
+            texts.forEach((el, idx) => { if (t.items[idx]) el.textContent = t.items[idx].d; });
+        }
+
+        window.addEventListener('message', function(e) {
+            if (e.data.type === 'setTheme') {
+                setTheme(e.data.value);
+            } else if (e.data.type === 'setLang') {
+                setLang(e.data.value);
+            }
+        });
+
+        // Notify parent we are ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.self !== window.top) {
+                window.parent.postMessage('dashboard-ready', '*');
+            }
+        });
+    </script>
+</body>
+</html>

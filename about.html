@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="soft">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us — Belgium Economic Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ═══ DAY — clean white ═══ */
+        [data-theme="day"] {
+          --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
+          --text-cell:#1e293b; --text-muted:#94a3b8; --gold:#b58a2a;
+          --bg-card:#fff; --border-card:#e5e7eb;
+        }
+        /* ═══ SOFT — warm muted ═══ */
+        [data-theme="soft"] {
+          --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
+          --text-cell:#3b3228; --text-muted:#a39888; --gold:#c49a3c;
+          --bg-card:#faf6f0; --border-card:#ddd5c8;
+        }
+        /* ═══ NIGHT — deep blue ═══ */
+        [data-theme="night"] {
+          --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
+          --text-cell:#c8d2de; --text-muted:#3d5068; --gold:#d4a843;
+          --bg-card:#0f1826; --border-card:#1a2744;
+        }
+
+        body { font-family: 'Figtree', sans-serif; background: var(--bg-page); color: var(--text-cell); margin: 0; padding: 40px; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; color: var(--gold); }
+        .subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        p { font-size: 1.1rem; line-height: 1.7; margin-bottom: 20px; }
+        .feature-list { list-style: none; padding: 0; margin-top: 30px; }
+        .feature-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; font-weight: 500; }
+        .feature-icon { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="page-title">About BelPulse</h1>
+        <p class="subtitle" id="page-subtitle">Your window into the Belgian macroeconomic pulse</p>
+        
+        <div class="card">
+            <p id="about-text-1">BelPulse is an independent intelligence platform dedicated to providing real-time transparency into Belgium's economic and financial health. Our mission is to democratize access to complex macroeconomic data through intuitive visualizations and expert commentary.</p>
+            <p id="about-text-2">We aggregate data from the National Bank of Belgium (NBB), Statbel, the Federal Planning Bureau, and international institutions to offer a comprehensive view of the national landscape.</p>
+            
+            <ul class="feature-list">
+                <li class="feature-item"><span class="feature-icon">📊</span> <span id="feat-1">Real-time data synchronization</span></li>
+                <li class="feature-item"><span class="feature-icon">🔍</span> <span id="feat-2">Deep-dive structural analysis</span></li>
+                <li class="feature-item"><span class="feature-icon">🌍</span> <span id="feat-3">Multi-institution forecast consensus</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                title: "About BelPulse",
+                subtitle: "Your window into the Belgian macroeconomic pulse",
+                text1: "BelPulse is an independent intelligence platform dedicated to providing real-time transparency into Belgium's economic and financial health. Our mission is to democratize access to complex macroeconomic data through intuitive visualizations and expert commentary.",
+                text2: "We aggregate data from the National Bank of Belgium (NBB), Statbel, the Federal Planning Bureau, and international institutions to offer a comprehensive view of the national landscape.",
+                features: [
+                    "Real-time data synchronization",
+                    "Deep-dive structural analysis",
+                    "Multi-institution forecast consensus"
+                ]
+            },
+            fr: {
+                title: "À Propos de BelPulse",
+                subtitle: "Votre fenêtre sur le pouls macroéconomique belge",
+                text1: "BelPulse est une plateforme de veille indépendante dédiée à la transparence en temps réel de la santé économique et financière de la Belgique. Notre mission est de démocratiser l'accès aux données macroéconomiques complexes grâce à des visualisations intuitives et des commentaires d'experts.",
+                text2: "Nous agrégons les données de la Banque Nationale de Belgique (BNB), de Statbel, du Bureau fédéral du Plan et des institutions internationales pour offrir une vue d'ensemble du paysage national.",
+                features: [
+                    "Synchronisation des données en temps réel",
+                    "Analyse structurelle approfondie",
+                    "Consensus de prévisions multi-institutions"
+                ]
+            },
+            nl: {
+                title: "Over BelPulse",
+                subtitle: "Uw venster op de Belgische macro-economische polslag",
+                text1: "BelPulse is een onafhankelijk platform dat zich toelegt op het bieden van real-time transparantie in de economische en financiële gezondheid van België. Onze missie is om de toegang tot complexe macro-economische gegevens te democratiseren via intuïtieve visualisaties en deskundig commentaar.",
+                text2: "We verzamelen gegevens van de Nationale Bank van België (NBB), Statbel, het Federaal Planbureau en internationale instellingen om een uitgebreid beeld van het nationale landschap te bieden.",
+                features: [
+                    "Real-time gegevenssynchronisatie",
+                    "Diepgaande structurele analyse",
+                    "Consensus tussen prognoses van meerdere instellingen"
+                ]
+            }
+        };
+
+        function setTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+        }
+
+        function setLang(l) {
+            const t = translations[l] || translations.en;
+            document.getElementById('page-title').textContent = t.title;
+            document.getElementById('page-subtitle').textContent = t.subtitle;
+            document.getElementById('about-text-1').textContent = t.text1;
+            document.getElementById('about-text-2').textContent = t.text2;
+            
+            document.getElementById('feat-1').textContent = t.features[0];
+            document.getElementById('feat-2').textContent = t.features[1];
+            document.getElementById('feat-3').textContent = t.features[2];
+        }
+
+        window.addEventListener('message', function(e) {
+            if (e.data.type === 'setTheme') {
+                setTheme(e.data.value);
+            } else if (e.data.type === 'setLang') {
+                setLang(e.data.value);
+            }
+        });
+
+        // Notify parent we are ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.self !== window.top) {
+                window.parent.postMessage('dashboard-ready', '*');
+            }
+        });
+    </script>
+</body>
+</html>

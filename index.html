@@ -215,20 +215,38 @@
 
             <div class="w-px h-6 bg-gray-500/20 mx-2"></div>
 
-            <button onclick="alert('News coming soon')" id="btn-news"
-                    class="px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2 text-gray-500 hover:text-gold">
+            <button onclick="loadDashboard(2)" id="btn-2"
+                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
                 <span>📰</span> <span id="menu-news">NEWS</span>
             </button>
 
-            <button onclick="alert('Analysis coming soon')" id="btn-analysis"
-                    class="px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2 text-gray-500 hover:text-gold">
+            <button onclick="loadDashboard(3)" id="btn-3"
+                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
                 <span>🔬</span> <span id="menu-analysis">ANALYSIS</span>
             </button>
 
-            <button onclick="alert('About Us coming soon')" id="btn-about"
-                    class="px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2 text-gray-500 hover:text-gold">
+            <button onclick="loadDashboard(4)" id="btn-4"
+                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
                 <span>🤝</span> <span id="menu-about">ABOUT US</span>
             </button>
+>>>>>>>------- SEARCH
+        // === DASHBOARD SWITCHING ===
+        const dashboards = [
+            "dashboard.html",
+            "clock.html"
+        ];
+
+        function loadDashboard(index) {
+        // === DASHBOARD SWITCHING ===
+        const dashboards = [
+            "dashboard.html",
+            "clock.html",
+            "news.html",
+            "analysis.html",
+            "about.html"
+        ];
+
+        function loadDashboard(index) {
         </div>
     </nav>
 
