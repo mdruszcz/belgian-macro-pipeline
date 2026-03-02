@@ -191,65 +191,7 @@ canvas.spark{display:block}
 @media(max-width:1100px){.contrib-wrap{padding-left:16px;padding-right:16px;flex-direction:column}}
 </style>
 </head>
-<body><!-- ============================================= -->
-<!-- DASHBOARD-SPECIFIC HEADER WRAPPER             -->
-<!-- (hidden automatically on index.html via CSS)  -->
-<!-- ============================================= -->
-<div id="dashboard-first-header">
-  <!-- Dummy navigational content (illustrates dashboard context) -->
-  <nav class="dashboard-top-nav" aria-label="Dashboard primary navigation">
-    <a href="#">Overview</a>
-    <a href="#">Macro Data</a>
-    <a href="#">Forecasts</a>
-    <a href="#">Exports</a>
-    <a href="#">Settings</a>
-  </nav>
-</div>
-
-<!-- ============================================= -->
-<!-- SYNCHRONIZED SHARED HEADER COMPONENT          -->
-<!-- (identical markup used in BOTH index.html     -->
-<!--  and dashboard.html — fully theme-synchronized) -->
-<!-- ============================================= -->
-<header class="main-header">
-  <div class="header-content">
-
-    <!-- 
-      BRANDING
-      • Uses .brand-title class exactly as defined in shared-styles.css
-      • The entire branding string is wrapped in a container with aria-label
-        so screen readers announce "Belpulse Beta" cleanly (ignores the <sup>)
-    -->
-    <div aria-label="Belpulse Beta">
-      <h1 class="brand-title">Belpulse<sup>BETA</sup></h1>
-    </div>
-
-    <!-- 
-      UI CONTROLS SECTION
-      • Houses the two required <select> elements
-      • IDs are exactly as requested for future vanilla JS targeting
-    -->
-    <div class="header-controls">
-
-      <!-- Language Selector -->
-      <select id="lang-sync-selector" aria-label="Select interface language">
-        <option value="en" selected>EN</option>
-        <option value="fr">FR</option>
-        <option value="nl">NL</option>
-      </select>
-
-      <!-- Theme / Reading Mode Selector -->
-      <!-- Option values match the three data-theme states from shared-styles.css -->
-      <select id="theme-sync-selector" aria-label="Select reading mode / theme">
-        <option value="light" selected>Light</option>
-        <option value="dark">Dark</option>
-        <option value="high-contrast">High Contrast</option>
-      </select>
-
-    </div>
-
-  </div>
-</header>
+<body>
 <div class="header"><div class="header-left"><div class="be-flag"><div class="s"></div><div class="s"></div><div class="s"></div></div><div class="header-text"><h1 id="mainTitle">Macroeconomic and Financial Review of Belgium</h1><div class="sub" id="dateLabel"></div></div></div><div class="header-right"><div class="dd-wrap theme"><div class="theme-switcher"><button class="theme-btn" id="t-day" onclick="setTheme('day',this)">☀</button><button class="theme-btn active" id="t-soft" onclick="setTheme('soft',this)">◑</button><button class="theme-btn" id="t-night" onclick="setTheme('night',this)">☾</button></div></div><div class="dd-wrap lang"><div class="lang-switch"><button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button><button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button><button class="lang-btn" id="btn-nl" onclick="setLang('nl')">NL</button></div></div></div></div>
 <div class="controls"><div class="ctrl-left"><div class="status"><div class="dot loading" id="dot"></div><span id="statusText">Loading…</span></div></div><div class="pills" id="pills"></div></div>
 <div class="table-wrap" id="tableWrap"></div>
