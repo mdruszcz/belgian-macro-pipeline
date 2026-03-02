@@ -25,7 +25,9 @@ jobs:
         run: pip install pandas requests openpyxl
         
       - name: Run pipeline
-        run: python belgian_macro_db.py --fetch --latest --export csv
+        run: |
+          python belgian_macro_db.py --fetch --latest --export csv
+          python fetch_stocks.py
         
       - name: Commit updated data
         run: |
