@@ -129,8 +129,8 @@
             animation: stock-ticker-slide 20s linear infinite;
         }
         @keyframes stock-ticker-slide {
-            from { transform: translateX(0); }
-            to { transform: translateX(-33.33%); }
+            from { transform: translateX(100vw); }
+            to { transform: translateX(-100%); }
         }
        .stock-item {
             display: flex;
@@ -548,28 +548,28 @@
 
         // === STOCK DATA FETCHING ===
         const stockList = [
-            { id: 'BEL20', url: 'https://www.google.com/finance/quote/BEL20:INDEXEBR', label: 'BEL20' },
-            { id: 'EURUSD', url: 'https://www.google.com/finance/quote/EUR-USD', label: 'EUR/USD' },
-            { id: 'ABI', url: 'https://www.google.com/finance/quote/ABI:EBR', label: 'ABI' },
-            { id: 'ACKB', url: 'https://www.google.com/finance/quote/ACKB:EBR', label: 'ACKB' },
-            { id: 'AED', url: 'https://www.google.com/finance/quote/AED:EBR', label: 'AED' },
-            { id: 'AGS', url: 'https://www.google.com/finance/quote/AGS:EBR', label: 'AGS' },
-            { id: 'ARGX', url: 'https://www.google.com/finance/quote/ARGX:EBR', label: 'ARGX' },
-            { id: 'AZE', url: 'https://www.google.com/finance/quote/AZE:EBR', label: 'AZE' },
-            { id: 'COFB', url: 'https://www.google.com/finance/quote/COFB:EBR', label: 'COFB' },
-            { id: 'DIE', url: 'https://www.google.com/finance/quote/DIE:EBR', label: 'DIE' },
-            { id: 'ELI', url: 'https://www.google.com/finance/quote/ELI:EBR', label: 'ELI' },
-            { id: 'GLPG', url: 'https://www.google.com/finance/quote/GLPG:EBR', label: 'GLPG' },
-            { id: 'GBLB', url: 'https://www.google.com/finance/quote/GBLB:EBR', label: 'GBLB' },
-            { id: 'KBC', url: 'https://www.google.com/finance/quote/KBC:EBR', label: 'KBC' },
-            { id: 'LOTB', url: 'https://www.google.com/finance/quote/LOTB:EBR', label: 'LOTB' },
-            { id: 'MELE', url: 'https://www.google.com/finance/quote/MELE:EBR', label: 'MELE' },
-            { id: 'SOF', url: 'https://www.google.com/finance/quote/SOF:EBR', label: 'SOF' },
-            { id: 'SOLB', url: 'https://www.google.com/finance/quote/SOLB:EBR', label: 'SOLB' },
-            { id: 'SYENS', url: 'https://www.google.com/finance/quote/SYENS:EBR', label: 'SYENS' },
-            { id: 'UCB', url: 'https://www.google.com/finance/quote/UCB:EBR', label: 'UCB' },
-            { id: 'UMI', url: 'https://www.google.com/finance/quote/UMI:EBR', label: 'UMI' },
-            { id: 'WDP', url: 'https://www.google.com/finance/quote/WDP:EBR', label: 'WDP' }
+            { id: 'BEL20', ticker: '^BFX', label: 'BEL20' },
+            { id: 'EURUSD', ticker: 'EURUSD=X', label: 'EUR/USD' },
+            { id: 'ABI', ticker: 'ABI.BR', label: 'ABI' },
+            { id: 'ACKB', ticker: 'ACKB.BR', label: 'ACKB' },
+            { id: 'AED', ticker: 'AED.BR', label: 'AED' },
+            { id: 'AGS', ticker: 'AGS.BR', label: 'AGS' },
+            { id: 'ARGX', ticker: 'ARGX.BR', label: 'ARGX' },
+            { id: 'AZE', ticker: 'AZE.BR', label: 'AZE' },
+            { id: 'COFB', ticker: 'COFB.BR', label: 'COFB' },
+            { id: 'DIE', ticker: 'DIE.BR', label: 'DIE' },
+            { id: 'ELI', ticker: 'ELI.BR', label: 'ELI' },
+            { id: 'GLPG', ticker: 'GLPG.BR', label: 'GLPG' },
+            { id: 'GBLB', ticker: 'GBLB.BR', label: 'GBLB' },
+            { id: 'KBC', ticker: 'KBC.BR', label: 'KBC' },
+            { id: 'LOTB', ticker: 'LOTB.BR', label: 'LOTB' },
+            { id: 'MELE', ticker: 'MELE.BR', label: 'MELE' },
+            { id: 'SOF', ticker: 'SOF.BR', label: 'SOF' },
+            { id: 'SOLB', ticker: 'SOLB.BR', label: 'SOLB' },
+            { id: 'SYENS', ticker: 'SYENS.BR', label: 'SYENS' },
+            { id: 'UCB', ticker: 'UCB.BR', label: 'UCB' },
+            { id: 'UMI', ticker: 'UMI.BR', label: 'UMI' },
+            { id: 'WDP', ticker: 'WDP.BR', label: 'WDP' }
         ];
 
         let stockResults = {};
@@ -578,7 +578,6 @@
             const now = Date.now();
             const cacheTime = 300000; // 5 minutes cache
 
-            // Load from session storage if available
             const cached = sessionStorage.getItem('stockData');
             if (cached) {
                 const { timestamp, data } = JSON.parse(cached);
@@ -588,45 +587,29 @@
                 }
             }
 
-            // Staggered fetching to avoid rate limits
-            for (let i = 0; i < stockList.length; i++) {
-                const sym = stockList[i];
-                
-                // Skip if we have a fresh cached value
-                if (stockResults[sym.id] && stockResults[sym.id] !== 'N/A') {
-                    const cachedObj = JSON.parse(sessionStorage.getItem('stockData') || '{}');
-                    if (cachedObj.timestamp && (now - cachedObj.timestamp < cacheTime)) continue;
-                }
-
-                try {
-                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(sym.url)}`;
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error('Proxy error');
-                    const html = await response.text();
-                    
-                    const priceRegex = /class="YMlKec fxKbKc">([^<]+)<\/div>/;
-                    const match = html.match(priceRegex);
-                    
-                    if (match && match[1]) {
-                        stockResults[sym.id] = match[1];
-                    } else {
-                        const altRegex = /data-last-price="([^"]+)"/;
-                        const altMatch = html.match(altRegex);
-                        stockResults[sym.id] = altMatch ? altMatch[1] : 'N/A';
+            // Fetch in chunks of 5 to avoid browser request limits
+            for (let i = 0; i < stockList.length; i += 5) {
+                const chunk = stockList.slice(i, i + 5);
+                await Promise.all(chunk.map(async (sym) => {
+                    try {
+                        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym.ticker}?interval=1m&range=1d`;
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('API error');
+                        const json = await response.json();
+                        const price = json.chart.result[0].meta.regularMarketPrice;
+                        const currency = json.chart.result[0].meta.currency;
+                        
+                        stockResults[sym.id] = currency === 'USD' ? `$${price.toFixed(4)}` : `${price.toFixed(2)}€`;
+                    } catch (e) {
+                        console.error(`Error fetching ${sym.id}:`, e);
+                        if (!stockResults[sym.id]) stockResults[sym.id] = 'N/A';
                     }
-                } catch (e) {
-                    console.error(`Error fetching ${sym.id}:`, e);
-                    if (!stockResults[sym.id]) stockResults[sym.id] = 'N/A';
-                }
-
-                // Update UI incrementally
-                updateStockTicker();
+                }));
                 
-                // Small delay between requests to be polite to the proxy
-                if (i < stockList.length - 1) await new Promise(r => setTimeout(r, 800));
+                updateStockTicker();
+                if (i + 5 < stockList.length) await new Promise(r => setTimeout(r, 500));
             }
 
-            // Save to session storage
             sessionStorage.setItem('stockData', JSON.stringify({
                 timestamp: Date.now(),
                 data: stockResults
@@ -642,8 +625,8 @@
                 value: stockResults[s.id] || '...'
             }));
 
-            // Create duplicates for smooth loop, adjust duration based on items
-            const content = [...items, ...items].map(item => `
+            // No duplicates needed with the new 100vw to -100% animation
+            const content = items.map(item => `
                 <div class="stock-item">
                     <span class="stock-label">${item.label}</span>
                     <span class="stock-value">${item.value}</span>
@@ -652,8 +635,10 @@
 
             container.innerHTML = content;
             
-            // Adjust speed based on number of items (approx 5s per 4 items)
-            const duration = Math.max(20, Math.floor(items.length * 2.5));
+            // Speed control: pixels per second
+            // Total distance = 100vw + container width
+            // We want it to take about 30-60 seconds for a full pass
+            const duration = Math.max(30, Math.floor(items.length * 3));
             container.style.animationDuration = `${duration}s`;
         }
 
