@@ -67,17 +67,25 @@ def fetch_data():
                 with urllib.request.urlopen(req) as response:
                     data = json.loads(response.read().decode())
                     meta = data["chart"]["result"][0]["meta"]
-                    price = meta["regularMarketPrice"]
-                    prev_close = meta["previousClose"]
-                    change = ((price - prev_close) / prev_close) * 100
+                    price = meta.get("regularMarketPrice")
+                    # Fallback for previous close
+                    prev_close = meta.get("chartPreviousClose") or meta.get("previousClose")
                     
-                    results[stock["id"]] = {
-                        "name": stock["name"],
-                        "ticker": stock["id"],
-                        "price": price,
-                        "change": change,
-                        "currency": meta["currency"]
-                    }
+                    if price is None and "indicators" in data["chart"]["result"][0]:
+                        adjclose = data["chart"]["result"][0]["indicators"]["adjclose"][0]["adjclose"]
+                        price = adjclose[-1]
+                        if prev_close is None and len(adjclose) > 1:
+                            prev_close = adjclose[-2]
+
+                    if price is not None and prev_close:
+                        change = ((price - prev_close) / prev_close) * 100
+                        results[stock["id"]] = {
+                            "name": stock["name"],
+                            "ticker": stock["id"],
+                            "price": price,
+                            "change": change,
+                            "currency": meta.get("currency", "EUR")
+                        }
                 time.sleep(0.5) # Be polite
             except Exception as e:
                 print(f"Error fetching {stock['id']}: {e}")
