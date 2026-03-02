@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BelPulse (Beta) — Belgium Economic Intelligence</title>
     
+    <script>
+      (function() {
+        const t = localStorage.getItem("theme") || "soft";
+        document.documentElement.setAttribute('data-theme', t);
+        const l = localStorage.getItem("lang") || "en";
+        document.documentElement.lang = l;
+      })();
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
