@@ -56,7 +56,7 @@
        .header-font { font-family: 'Space Grotesk', sans-serif; }
         
        .iframe-container {
-            height: calc(100vh - 190px);
+            height: calc(100vh - 200px); /* Adjusted for 10px gap above 40px footer */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
@@ -547,54 +547,103 @@
         };
 
         // === STOCK DATA FETCHING ===
+        const stockList = [
+            { id: 'BEL20', url: 'https://www.google.com/finance/quote/BEL20:INDEXEBR', label: 'BEL20' },
+            { id: 'EURUSD', url: 'https://www.google.com/finance/quote/EUR-USD', label: 'EUR/USD' },
+            { id: 'ABI', url: 'https://www.google.com/finance/quote/ABI:EBR', label: 'ABI' },
+            { id: 'ACKB', url: 'https://www.google.com/finance/quote/ACKB:EBR', label: 'ACKB' },
+            { id: 'AED', url: 'https://www.google.com/finance/quote/AED:EBR', label: 'AED' },
+            { id: 'AGS', url: 'https://www.google.com/finance/quote/AGS:EBR', label: 'AGS' },
+            { id: 'ARGX', url: 'https://www.google.com/finance/quote/ARGX:EBR', label: 'ARGX' },
+            { id: 'AZE', url: 'https://www.google.com/finance/quote/AZE:EBR', label: 'AZE' },
+            { id: 'COFB', url: 'https://www.google.com/finance/quote/COFB:EBR', label: 'COFB' },
+            { id: 'DIE', url: 'https://www.google.com/finance/quote/DIE:EBR', label: 'DIE' },
+            { id: 'ELI', url: 'https://www.google.com/finance/quote/ELI:EBR', label: 'ELI' },
+            { id: 'GLPG', url: 'https://www.google.com/finance/quote/GLPG:EBR', label: 'GLPG' },
+            { id: 'GBLB', url: 'https://www.google.com/finance/quote/GBLB:EBR', label: 'GBLB' },
+            { id: 'KBC', url: 'https://www.google.com/finance/quote/KBC:EBR', label: 'KBC' },
+            { id: 'LOTB', url: 'https://www.google.com/finance/quote/LOTB:EBR', label: 'LOTB' },
+            { id: 'MELE', url: 'https://www.google.com/finance/quote/MELE:EBR', label: 'MELE' },
+            { id: 'SOF', url: 'https://www.google.com/finance/quote/SOF:EBR', label: 'SOF' },
+            { id: 'SOLB', url: 'https://www.google.com/finance/quote/SOLB:EBR', label: 'SOLB' },
+            { id: 'SYENS', url: 'https://www.google.com/finance/quote/SYENS:EBR', label: 'SYENS' },
+            { id: 'UCB', url: 'https://www.google.com/finance/quote/UCB:EBR', label: 'UCB' },
+            { id: 'UMI', url: 'https://www.google.com/finance/quote/UMI:EBR', label: 'UMI' },
+            { id: 'WDP', url: 'https://www.google.com/finance/quote/WDP:EBR', label: 'WDP' }
+        ];
+
+        let stockResults = {};
+
         async function fetchStockData() {
-            const symbols = [
-                { id: 'BEL20', url: 'https://www.google.com/finance/quote/BEL20:INDEXEBR', label: 'BEL20' },
-                { id: 'EURUSD', url: 'https://www.google.com/finance/quote/EUR-USD', label: 'EUR/USD' }
-            ];
+            const now = Date.now();
+            const cacheTime = 300000; // 5 minutes cache
 
-            const results = {};
+            // Load from session storage if available
+            const cached = sessionStorage.getItem('stockData');
+            if (cached) {
+                const { timestamp, data } = JSON.parse(cached);
+                if (now - timestamp < cacheTime) {
+                    stockResults = data;
+                    updateStockTicker();
+                }
+            }
 
-            for (const sym of symbols) {
+            // Staggered fetching to avoid rate limits
+            for (let i = 0; i < stockList.length; i++) {
+                const sym = stockList[i];
+                
+                // Skip if we have a fresh cached value
+                if (stockResults[sym.id] && stockResults[sym.id] !== 'N/A') {
+                    const cachedObj = JSON.parse(sessionStorage.getItem('stockData') || '{}');
+                    if (cachedObj.timestamp && (now - cachedObj.timestamp < cacheTime)) continue;
+                }
+
                 try {
-                    // Using corsproxy.io to bypass CORS
                     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(sym.url)}`;
                     const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error('Proxy error');
                     const html = await response.text();
                     
-                    // The price is typically in a div with class "YMlKec fxKbKc"
-                    // Or in a meta tag/data attribute. We'll use a regex to find the most likely price.
                     const priceRegex = /class="YMlKec fxKbKc">([^<]+)<\/div>/;
                     const match = html.match(priceRegex);
                     
                     if (match && match[1]) {
-                        results[sym.id] = match[1];
+                        stockResults[sym.id] = match[1];
                     } else {
-                        // Fallback: search for data-last-price
                         const altRegex = /data-last-price="([^"]+)"/;
                         const altMatch = html.match(altRegex);
-                        results[sym.id] = altMatch ? altMatch[1] : 'N/A';
+                        stockResults[sym.id] = altMatch ? altMatch[1] : 'N/A';
                     }
                 } catch (e) {
                     console.error(`Error fetching ${sym.id}:`, e);
-                    results[sym.id] = 'N/A';
+                    if (!stockResults[sym.id]) stockResults[sym.id] = 'N/A';
                 }
+
+                // Update UI incrementally
+                updateStockTicker();
+                
+                // Small delay between requests to be polite to the proxy
+                if (i < stockList.length - 1) await new Promise(r => setTimeout(r, 800));
             }
 
-            updateStockTicker(results);
+            // Save to session storage
+            sessionStorage.setItem('stockData', JSON.stringify({
+                timestamp: Date.now(),
+                data: stockResults
+            }));
         }
 
-        function updateStockTicker(data) {
+        function updateStockTicker() {
             const container = document.getElementById('stock-ticker-content');
             if (!container) return;
 
-            const items = [
-                { label: 'BEL20', value: data.BEL20 || 'N/A' },
-                { label: 'EUR/USD', value: data.EURUSD || 'N/A' }
-            ];
+            const items = stockList.map(s => ({
+                label: s.label,
+                value: stockResults[s.id] || '...'
+            }));
 
-            // Create 3 sets for continuous loop
-            const content = [...items, ...items, ...items].map(item => `
+            // Create duplicates for smooth loop, adjust duration based on items
+            const content = [...items, ...items].map(item => `
                 <div class="stock-item">
                     <span class="stock-label">${item.label}</span>
                     <span class="stock-value">${item.value}</span>
@@ -602,6 +651,10 @@
             `).join('');
 
             container.innerHTML = content;
+            
+            // Adjust speed based on number of items (approx 5s per 4 items)
+            const duration = Math.max(20, Math.floor(items.length * 2.5));
+            container.style.animationDuration = `${duration}s`;
         }
 
         // Listen for iframe ready message if any
