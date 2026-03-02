@@ -584,36 +584,54 @@
                 if (now - timestamp < cacheTime) {
                     stockResults = data;
                     updateStockTicker();
+                    // If we have cached data, only return if it's really fresh
+                    if (now - timestamp < 60000) return;
                 }
             }
 
-            // Fetch in chunks of 5 to avoid browser request limits
-            for (let i = 0; i < stockList.length; i += 5) {
-                const chunk = stockList.slice(i, i + 5);
-                await Promise.all(chunk.map(async (sym) => {
-                    try {
-                        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym.ticker}?interval=1m&range=1d`;
-                        const response = await fetch(url);
-                        if (!response.ok) throw new Error('API error');
-                        const json = await response.json();
-                        const price = json.chart.result[0].meta.regularMarketPrice;
-                        const currency = json.chart.result[0].meta.currency;
-                        
-                        stockResults[sym.id] = currency === 'USD' ? `$${price.toFixed(4)}` : `${price.toFixed(2)}€`;
-                    } catch (e) {
-                        console.error(`Error fetching ${sym.id}:`, e);
-                        if (!stockResults[sym.id]) stockResults[sym.id] = 'N/A';
-                    }
-                }));
+            try {
+                // Batch all symbols into one request to avoid rate limits
+                const symbols = stockList.map(s => s.ticker).join(',');
+                const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`;
                 
-                updateStockTicker();
-                if (i + 5 < stockList.length) await new Promise(r => setTimeout(r, 500));
+                // Use AllOrigins proxy to bypass CORS
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
+                
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Network error');
+                
+                const wrapper = await response.json();
+                const json = JSON.parse(wrapper.contents);
+                
+                if (json.quoteResponse && json.quoteResponse.result) {
+                    json.quoteResponse.result.forEach(quote => {
+                        const symObj = stockList.find(s => s.ticker === quote.symbol);
+                        if (symObj) {
+                            const price = quote.regularMarketPrice;
+                            const change = quote.regularMarketChangePercent;
+                            const currency = quote.currency;
+                            const formattedPrice = currency === 'USD' ? `$${price.toFixed(4)}` : `${price.toFixed(2)}€`;
+                            const sign = change >= 0 ? '▲' : '▼';
+                            const colorClass = change >= 0 ? 'stock-up' : 'stock-down';
+                            
+                            stockResults[symObj.id] = `<span class="${colorClass}">${sign} ${formattedPrice} (${change.toFixed(2)}%)</span>`;
+                        }
+                    });
+                    
+                    sessionStorage.setItem('stockData', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: stockResults
+                    }));
+                }
+            } catch (e) {
+                console.error("Batch fetch error:", e);
+                // Fallback to N/A for missing items if all failed
+                stockList.forEach(s => {
+                    if (!stockResults[s.id]) stockResults[s.id] = 'N/A';
+                });
             }
 
-            sessionStorage.setItem('stockData', JSON.stringify({
-                timestamp: Date.now(),
-                data: stockResults
-            }));
+            updateStockTicker();
         }
 
         function updateStockTicker() {
