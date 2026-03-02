@@ -120,20 +120,4 @@
   text-transform: uppercase;
 }
 
-/* ============================================ */
-/* PAGE-SPECIFIC CONTEXTUAL RULE                */
-/* ============================================ */
-
-/*
- * When the index page is active (body class="page-index" added in index.html),
- * this rule hides the dashboard's top header (#dashboard-first-header)
- * with !important to guarantee override regardless of dashboard.html styles.
- * 
- * The two HTML files remain completely decoupled — this is pure CSS context.
- */
-
-body.page-index #dashboard-first-header {
-  display: none !important;
-}
-
 /* End of shared-styles.css — link this file in both index.html and dashboard.html */

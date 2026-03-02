@@ -117,11 +117,7 @@
        .theme-btn.active,.lang-btn.active{display:block;order:1;opacity:1;background:var(--bg-page);color:var(--text-section);box-shadow:0 2px 4px rgba(0,0,0,.1)}
        .dd-wrap:hover .theme-btn,.dd-wrap:hover .lang-btn{display:block;color:var(--text-section);opacity:.7}
        .dd-wrap:hover .theme-btn.active,.dd-wrap:hover .lang-btn.active{box-shadow:none;background:transparent;opacity:1}
-       .dd-wrap:hover .theme-btn:hover,.dd-wrap:hover .lang-btn:hover{background:rgba(128,128,128,.15);opacity:1}
-
-        body.page-index #dashboard-first-header {
-            display: none!important;
-        }
+        .dd-wrap:hover .theme-btn:hover,.dd-wrap:hover .lang-btn:hover{background:rgba(128,128,128,.15);opacity:1}
     </style>
 </head>
 
@@ -142,7 +138,7 @@
                 </div>
             </div>
 
-            <div id="dashboard-first-header" class="flex items-center gap-x-3">
+            <div id="main-nav-buttons" class="flex items-center gap-x-3">
                 <button onclick="loadDashboard(0)" id="btn-0"
                         class="nav-button active flex items-center gap-x-3 px-8 py-4 rounded-3xl text-sm font-medium">
                     <span class="text-lg">📈</span>
