@@ -56,7 +56,7 @@
        .header-font { font-family: 'Space Grotesk', sans-serif; }
         
        .iframe-container {
-            height: calc(100vh - 140px);
+            height: calc(100vh - 190px);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
@@ -105,6 +105,43 @@
 
         /* BETA BADGE */
        .beta-badge { font-size: 10px; letter-spacing: 1px; background: var(--gold); color: white; padding: 1px 6px; border-radius: 9999px; font-weight: 700; }
+
+        /* STOCK TICKER FOOTER */
+       .stock-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--bg-controls);
+            border-top: 1px solid var(--border-controls);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Overpass Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-cell);
+        }
+       .stock-ticker-wrapper {
+            white-space: nowrap;
+            display: flex;
+            animation: stock-ticker-slide 20s linear infinite;
+        }
+        @keyframes stock-ticker-slide {
+            from { transform: translateX(0); }
+            to { transform: translateX(-33.33%); }
+        }
+       .stock-item {
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            gap: 10px;
+        }
+       .stock-label { font-weight: 600; color: var(--text-cell-dim); }
+       .stock-value { font-weight: 700; }
+       .stock-up { color: #10b981; }
+       .stock-down { color: #ef4444; }
 
         /* DROPDOWNS MATCHING DASHBOARD */
        .dd-wrap{position:relative;height:28px}
@@ -192,6 +229,12 @@
                     allowfullscreen></iframe>
         </div>
     </div>
+
+    <footer class="stock-footer">
+        <div class="stock-ticker-wrapper" id="stock-ticker-content">
+            <!-- Items will be populated by JS -->
+        </div>
+    </footer>
 
     <div id="chat-sidebar" class="chat-sidebar fixed top-0 right-0 h-screen w-96 shadow-2xl z-50 flex flex-col">
         <div class="px-6 py-5 flex items-center justify-between border-b" style="background: var(--bg-header); border-color: var(--border-controls); color: var(--bg-header-text);">
@@ -503,12 +546,75 @@
                         'color:#c49a3c; font-family:monospace; font-size:11px');
         };
 
+        // === STOCK DATA FETCHING ===
+        async function fetchStockData() {
+            const symbols = [
+                { id: 'BEL20', url: 'https://www.google.com/finance/quote/BEL20:INDEXEBR', label: 'BEL20' },
+                { id: 'EURUSD', url: 'https://www.google.com/finance/quote/EUR-USD', label: 'EUR/USD' }
+            ];
+
+            const results = {};
+
+            for (const sym of symbols) {
+                try {
+                    // Using corsproxy.io to bypass CORS
+                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(sym.url)}`;
+                    const response = await fetch(proxyUrl);
+                    const html = await response.text();
+                    
+                    // The price is typically in a div with class "YMlKec fxKbKc"
+                    // Or in a meta tag/data attribute. We'll use a regex to find the most likely price.
+                    const priceRegex = /class="YMlKec fxKbKc">([^<]+)<\/div>/;
+                    const match = html.match(priceRegex);
+                    
+                    if (match && match[1]) {
+                        results[sym.id] = match[1];
+                    } else {
+                        // Fallback: search for data-last-price
+                        const altRegex = /data-last-price="([^"]+)"/;
+                        const altMatch = html.match(altRegex);
+                        results[sym.id] = altMatch ? altMatch[1] : 'N/A';
+                    }
+                } catch (e) {
+                    console.error(`Error fetching ${sym.id}:`, e);
+                    results[sym.id] = 'N/A';
+                }
+            }
+
+            updateStockTicker(results);
+        }
+
+        function updateStockTicker(data) {
+            const container = document.getElementById('stock-ticker-content');
+            if (!container) return;
+
+            const items = [
+                { label: 'BEL20', value: data.BEL20 || 'N/A' },
+                { label: 'EUR/USD', value: data.EURUSD || 'N/A' }
+            ];
+
+            // Create 3 sets for continuous loop
+            const content = [...items, ...items, ...items].map(item => `
+                <div class="stock-item">
+                    <span class="stock-label">${item.label}</span>
+                    <span class="stock-value">${item.value}</span>
+                </div>
+            `).join('');
+
+            container.innerHTML = content;
+        }
+
         // Listen for iframe ready message if any
         window.addEventListener('message', function(e) {
             if (e.data === 'dashboard-ready') {
                 syncDashboard();
             }
         });
+
+        // Initialize stock data fetching
+        fetchStockData();
+        // Refresh every 5 minutes
+        setInterval(fetchStockData, 300000);
     </script>
 </body>
 </html>
