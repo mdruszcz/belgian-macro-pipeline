@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bloomgium — Belgium Economic Intelligence</title>
+    <title>BelPulse (Beta) — Belgium Economic Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
@@ -116,6 +116,17 @@
             color: white;
             box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.4);
         }
+
+        /* BETA BADGE */
+        .beta-badge {
+            font-size: 10px;
+            letter-spacing: 1px;
+            background: #eab308;
+            color: black;
+            padding: 1px 6px;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-white overflow-hidden">
@@ -128,8 +139,11 @@
                     🇧🇪
                 </div>
                 <div>
-                    <h1 class="header-font text-4xl font-semibold tracking-tighter text-white">Bloomgium</h1>
-                    <p id="subtitle" class="text-[10px] text-amber-400 tracking-[2px] -mt-1">BELGIAN ECONOMIC INTELLIGENCE</p>
+                    <div class="flex items-baseline gap-x-3">
+                        <h1 class="header-font text-4xl font-semibold tracking-tighter text-white">BelPulse</h1>
+                        <span class="beta-badge">BETA</span>
+                    </div>
+                    <p id="subtitle" class="text-[10px] text-amber-400 tracking-[2px] -mt-1">BELGIUM'S ECONOMIC PULSE</p>
                 </div>
             </div>
 
@@ -162,7 +176,7 @@
             <button onclick="toggleChat()" id="ai-trigger-btn"
                     class="flex items-center gap-x-3 bg-amber-400 hover:bg-amber-300 text-black px-6 py-3 rounded-3xl font-semibold text-sm transition-all active:scale-95">
                 <span class="text-xl">🤖</span>
-                <span id="ai-btn-text">ASK BLOOMGIUM AI</span>
+                <span id="ai-btn-text">ASK BELPULSE AI</span>
             </button>
         </div>
     </header>
@@ -190,7 +204,7 @@
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 rounded-2xl belgian-flag flex items-center justify-center text-2xl">🇧🇪</div>
                 <div>
-                    <div class="font-semibold text-lg" id="chat-title">Bloomgium AI</div>
+                    <div class="font-semibold text-lg" id="chat-title">BelPulse AI</div>
                     <div id="chat-sub" class="text-emerald-400 text-xs font-mono flex items-center gap-x-1">
                         <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                         ONLINE • Powered by real Belgian macro data
@@ -228,34 +242,34 @@
 
         const translations = {
             en: {
-                subtitle: "BELGIAN ECONOMIC INTELLIGENCE",
+                subtitle: "BELGIUM'S ECONOMIC PULSE",
                 macroBtn: "MACRO PIPELINE",
                 fiscalBtn: "FISCAL CLOCK DASHBOARD",
-                aiBtn: "ASK BLOOMGIUM AI",
-                chatTitle: "Bloomgium AI",
+                aiBtn: "ASK BELPULSE AI",
+                chatTitle: "BelPulse AI",
                 chatSub: "ONLINE • Powered by real Belgian macro data",
                 chatPlaceholder: "Ask about debt, growth, HERMES scenarios...",
-                welcome: "👋 Hi! I’m Bloomgium AI — your personal Belgian macro analyst. Ask me anything about the dashboards, fiscal policy, debt trajectory, or run quick HERMES-style scenarios!"
+                welcome: "👋 Hi! I’m BelPulse AI — your personal Belgian macro analyst. Ask me anything about the dashboards, fiscal policy, debt trajectory, or run quick HERMES-style scenarios!"
             },
             fr: {
-                subtitle: "INTELLIGENCE ÉCONOMIQUE BELGE",
+                subtitle: "LE POULS ÉCONOMIQUE DE LA BELGIQUE",
                 macroBtn: "PIPELINE MACRO",
                 fiscalBtn: "HORLOGE FISCALE",
-                aiBtn: "INTERROGER BLOOMGIUM AI",
-                chatTitle: "Bloomgium AI",
+                aiBtn: "INTERROGER BELPULSE AI",
+                chatTitle: "BelPulse AI",
                 chatSub: "EN LIGNE • Alimenté par des données macro belges réelles",
                 chatPlaceholder: "Posez des questions sur la dette, la croissance, les scénarios HERMES...",
-                welcome: "👋 Salut ! Je suis Bloomgium AI — votre analyste macro belge personnel. Demandez-moi tout sur les tableaux de bord, la politique fiscale, la trajectoire de la dette ou lancez des scénarios HERMES rapides !"
+                welcome: "👋 Salut ! Je suis BelPulse AI — votre analyste macro belge personnel. Demandez-moi tout sur les tableaux de bord, la politique fiscale, la trajectoire de la dette ou lancez des scénarios HERMES rapides !"
             },
             nl: {
-                subtitle: "BELGISCHE ECONOMISCHE INTELLIGENTIE",
+                subtitle: "BELGIË'S ECONOMISCHE PULS",
                 macroBtn: "MACRO-PIPELINE",
                 fiscalBtn: "FISCAAL KLOK DASHBOARD",
-                aiBtn: "VRAAG AAN BLOOMGIUM AI",
-                chatTitle: "Bloomgium AI",
+                aiBtn: "VRAAG AAN BELPULSE AI",
+                chatTitle: "BelPulse AI",
                 chatSub: "ONLINE • Aangedreven door echte Belgische macrodata",
                 chatPlaceholder: "Vraag naar schuld, groei, HERMES-scenario's...",
-                welcome: "👋 Hoi! Ik ben Bloomgium AI — jouw persoonlijke Belgische macro-analist. Vraag me alles over de dashboards, fiscaal beleid, schuldenpad of voer snelle HERMES-scenario’s uit!"
+                welcome: "👋 Hoi! Ik ben BelPulse AI — jouw persoonlijke Belgische macro-analist. Vraag me alles over de dashboards, fiscaal beleid, schuldenpad of voer snelle HERMES-scenario’s uit!"
             }
         };
 
@@ -341,7 +355,6 @@
             if (currentLang === lang) return;
             currentLang = lang;
 
-            // Update static texts
             document.getElementById('subtitle').textContent = translations[lang].subtitle;
             document.getElementById('macro-btn-text').textContent = translations[lang].macroBtn;
             document.getElementById('fiscal-btn-text').textContent = translations[lang].fiscalBtn;
@@ -353,15 +366,12 @@
             `;
             document.getElementById('chat-input').placeholder = translations[lang].chatPlaceholder;
 
-            // Re-init ticker with new language
             initTicker();
 
-            // Update active lang button
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.id === `lang-${lang}`);
             });
 
-            // Re-show welcome if chat is open and empty
             const chatMessages = document.getElementById('chat-messages');
             if (chatMessages.children.length === 0 && document.getElementById('chat-sidebar').classList.contains('open')) {
                 addMessage(translations[lang].welcome, false);
@@ -494,7 +504,7 @@
         // Init everything
         window.onload = function() {
             initTicker();
-            console.log('%c🚀 Bloomgium v3 ready — Multilingual (EN/FR/NL) + AI Chat + News Ticker live! Press / to open chat, 1 or 2 to switch dashboards', 
+            console.log('%c🚀 BelPulse (Beta) ready — Multilingual AI + News Ticker live! Press / to open chat, 1 or 2 to switch dashboards', 
                         'color:#eab308; font-family:monospace; font-size:11px');
         };
     </script>
