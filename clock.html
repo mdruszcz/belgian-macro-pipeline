@@ -465,16 +465,16 @@
 <body>
     <header class="header">
         <h1>
-            <div class="flag-icon">
+            <div class="flag-icon" id="flag-icon">
                 <span class="flag-black"></span>
                 <span class="flag-yellow"></span>
                 <span class="flag-red"></span>
             </div>
-            BELGIQUE — ÉCONOMIE EN DIRECT
+            <span id="title-text">BELGIQUE — ÉCONOMIE EN DIRECT</span>
         </h1>
         <div class="header-right">
             <div class="live-clock" id="liveClock">--:--:--</div>
-            <div class="live-badge">
+            <div class="live-badge" id="live-badge">
                 <div class="live-dot"></div>
                 <span>LIVE DATA</span>
             </div>
@@ -482,6 +482,66 @@
     </header>
 
     <div class="dashboard">
+>>>>>>>------- SEARCH
+        // Initialize
+        function init() {
+            // Set static rate displays
+            document.getElementById('debtRate').textContent = formatNumber(DEBT_PER_SECOND);
+            document.getElementById('expPerSec').textContent = formatNumber(EXP_PER_SECOND);
+            document.getElementById('revPerSec').textContent = formatNumber(REV_PER_SECOND);
+            
+            // Initial update
+            updateDisplay();
+            updateClock();
+            
+            // Update every second
+            setInterval(updateDisplay, 1000);
+            setInterval(updateClock, 1000);
+
+            // Listen for sync messages from parent
+            window.addEventListener('message', function(e) {
+                if (e.data.type === 'setTheme') {
+                    setTheme(e.data.value);
+                }
+            });
+
+            // Notify parent we are ready
+            if (window.self !== window.top) {
+                const header = document.querySelector('.header');
+                if (header) header.style.display = 'none';
+                window.parent.postMessage('dashboard-ready', '*');
+            }
+        }
+        // Initialize
+        function init() {
+            // Set static rate displays
+            document.getElementById('debtRate').textContent = formatNumber(DEBT_PER_SECOND);
+            document.getElementById('expPerSec').textContent = formatNumber(EXP_PER_SECOND);
+            document.getElementById('revPerSec').textContent = formatNumber(REV_PER_SECOND);
+            
+            // Initial update
+            updateDisplay();
+            updateClock();
+            
+            // Update every second
+            setInterval(updateDisplay, 1000);
+            setInterval(updateClock, 1000);
+
+            // Listen for sync messages from parent
+            window.addEventListener('message', function(e) {
+                if (e.data.type === 'setTheme') {
+                    setTheme(e.data.value);
+                }
+            });
+
+            // Notify parent we are ready
+            if (window.self !== window.top) {
+                document.getElementById('flag-icon').style.display = 'none';
+                document.getElementById('title-text').style.display = 'none';
+                document.getElementById('live-badge').style.display = 'none';
+                window.parent.postMessage('dashboard-ready', '*');
+            }
+        }
         <!-- COLUMN 1: BLACK - Demographics & Spending -->
         <div class="column column-black">
             <div class="top-stats">
