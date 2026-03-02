@@ -56,7 +56,7 @@
        .header-font { font-family: 'Space Grotesk', sans-serif; }
         
        .iframe-container {
-            height: calc(100vh - 200px); /* Adjusted for 10px gap above 40px footer */
+            height: calc(100vh - 210px); /* Adjusted for menu and 10px gap above footer */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
@@ -79,14 +79,8 @@
             background: linear-gradient(to right, #000000 33.33%, #FFCC00 33.33%, #FFCC00 66.66%, #C8102E 66.66%);
         }
 
-        /* NEWS TICKER */
-       .ticker { overflow: hidden; white-space: nowrap; background: var(--bg-controls); border-bottom: 1px solid var(--border-controls); color: var(--text-cell); }
-       .ticker-content { display: inline-flex; animation: ticker-slide 35s linear infinite; }
-        @keyframes ticker-slide {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-       .ticker-item:hover { color: var(--gold); }
+        /* SUB-MENU */
+       .sub-menu { background: var(--bg-controls); border-bottom: 1px solid var(--border-controls); color: var(--text-cell); }
 
         /* AI CHAT */
        .chat-sidebar { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); background: var(--bg-page); border-left: 1px solid var(--border-controls); }
@@ -175,18 +169,8 @@
                 </div>
             </div>
 
-            <div id="main-nav-buttons" class="flex items-center gap-x-3">
-                <button onclick="loadDashboard(0)" id="btn-0"
-                        class="nav-button active flex items-center gap-x-3 px-8 py-4 rounded-3xl text-sm font-medium">
-                    <span class="text-lg">📈</span>
-                    <span id="macro-btn-text">STATISTICS</span>
-                </button>
-                
-                <button onclick="loadDashboard(1)" id="btn-1"
-                        class="nav-button flex items-center gap-x-3 px-8 py-4 rounded-3xl text-sm font-medium">
-                    <span class="text-lg">⏱️</span>
-                    <span id="fiscal-btn-text">CLOCK</span>
-                </button>
+            <div id="main-nav-buttons" class="hidden md:flex items-center gap-x-3">
+                <!-- Buttons moved to sub-menu -->
             </div>
 
             <div class="flex items-center gap-x-3">
@@ -217,10 +201,36 @@
         </div>
     </header>
 
-    <div class="ticker py-3 text-sm font-medium">
-        <div class="ticker-content flex items-center gap-x-12" id="ticker-content" style="color: var(--gold)">
+    <nav class="sub-menu py-1 text-sm font-medium sticky top-[81px] z-40">
+        <div class="max-w-screen-2xl mx-auto px-8 flex items-center gap-x-1">
+            <button onclick="loadDashboard(0)" id="btn-0"
+                    class="nav-button active px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
+                <span>📈</span> <span id="menu-stats">STATISTICS</span>
+            </button>
+            
+            <button onclick="loadDashboard(1)" id="btn-1"
+                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
+                <span>⏱️</span> <span id="menu-clock">CLOCK</span>
+            </button>
+
+            <div class="w-px h-6 bg-gray-500/20 mx-2"></div>
+
+            <button onclick="alert('News coming soon')" id="btn-news"
+                    class="px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2 text-gray-500 hover:text-gold">
+                <span>📰</span> <span id="menu-news">NEWS</span>
+            </button>
+
+            <button onclick="alert('Analysis coming soon')" id="btn-analysis"
+                    class="px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2 text-gray-500 hover:text-gold">
+                <span>🔬</span> <span id="menu-analysis">ANALYSIS</span>
+            </button>
+
+            <button onclick="alert('About Us coming soon')" id="btn-about"
+                    class="px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2 text-gray-500 hover:text-gold">
+                <span>🤝</span> <span id="menu-about">ABOUT US</span>
+            </button>
         </div>
-    </div>
+    </nav>
 
     <div class="max-w-screen-2xl mx-auto px-8 py-6">
         <div class="iframe-container rounded-3xl overflow-hidden border" style="background: var(--bg-controls); border-color: var(--border-controls);">
