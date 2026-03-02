@@ -311,8 +311,6 @@
             
             // Update UI translations
             document.getElementById('subtitle').textContent = translations[l].subtitle;
-            document.getElementById('macro-btn-text').textContent = translations[l].macroBtn;
-            document.getElementById('fiscal-btn-text').textContent = translations[l].fiscalBtn;
             document.getElementById('ai-btn-text').textContent = translations[l].aiBtn;
             document.getElementById('chat-title').textContent = translations[l].chatTitle;
             document.getElementById('chat-sub').innerHTML = `
@@ -321,7 +319,13 @@
             `;
             document.getElementById('chat-input').placeholder = translations[l].chatPlaceholder;
 
-            initTicker();
+            // Update Menu
+            document.getElementById('menu-stats').textContent = translations[l].menuStats;
+            document.getElementById('menu-clock').textContent = translations[l].menuClock;
+            document.getElementById('menu-news').textContent = translations[l].menuNews;
+            document.getElementById('menu-analysis').textContent = translations[l].menuAnalysis;
+            document.getElementById('menu-about').textContent = translations[l].menuAbout;
+
             syncDashboard();
 
             const chatMessages = document.getElementById('chat-messages');
@@ -336,40 +340,43 @@
         const translations = {
             en: {
                 subtitle: "BELGIUM'S ECONOMIC PULSE",
-                macroBtn: "STATISTICS",
-                fiscalBtn: "CLOCK",
                 aiBtn: "ASK BELPULSE AI",
                 chatTitle: "BelPulse AI",
                 chatSub: "ONLINE • Powered by real Belgian macro data",
                 chatPlaceholder: "Ask about debt, growth, HERMES scenarios...",
-                welcome: "👋 Hi! I’m BelPulse AI — your personal Belgian macro analyst. Ask me anything about the dashboards, fiscal policy, debt trajectory, or run quick HERMES-style scenarios!"
+                welcome: "👋 Hi! I’m BelPulse AI — your personal Belgian macro analyst. Ask me anything about the dashboards, fiscal policy, debt trajectory, or run quick HERMES-style scenarios!",
+                menuStats: "STATISTICS",
+                menuClock: "CLOCK",
+                menuNews: "NEWS",
+                menuAnalysis: "ANALYSIS",
+                menuAbout: "ABOUT US"
             },
             fr: {
                 subtitle: "LE POULS ÉCONOMIQUE DE LA BELGIQUE",
-                macroBtn: "STATISTIQUES",
-                fiscalBtn: "HORLOGE",
                 aiBtn: "INTERROGER BELPULSE AI",
                 chatTitle: "BelPulse AI",
                 chatSub: "EN LIGNE • Alimenté par des données macro belges réelles",
                 chatPlaceholder: "Posez des questions sur la dette, la croissance, les scénarios HERMES...",
-                welcome: "👋 Salut! Je suis BelPulse AI — votre analyste macro belge personnel. Demandez-moi tout sur les tableaux de bord, la politique fiscale, la trajectoire de la dette ou lancez des scénarios HERMES rapides!"
+                welcome: "👋 Salut! Je suis BelPulse AI — votre analyste macro belge personnel. Demandez-moi tout sur les tableaux de bord, la politique fiscale, la trajectoire de la dette ou lancez des scénarios HERMES rapides!",
+                menuStats: "STATISTIQUES",
+                menuClock: "HORLOGE",
+                menuNews: "NOUVELLES",
+                menuAnalysis: "ANALYSE",
+                menuAbout: "À PROPOS"
             },
             nl: {
                 subtitle: "BELGIË'S ECONOMISCHE PULS",
-                macroBtn: "STATISTIEKEN",
-                fiscalBtn: "KLOK",
                 aiBtn: "VRAAG AAN BELPULSE AI",
                 chatTitle: "BelPulse AI",
                 chatSub: "ONLINE • Aangedreven door echte Belgische macrodata",
                 chatPlaceholder: "Vraag naar schuld, groei, HERMES-scenario's...",
-                welcome: "👋 Hoi! Ik ben BelPulse AI — jouw persoonlijke Belgische macro-analist. Vraag me alles over de dashboards, fiscaal beleid, schuldenpad of voer snelle HERMES-scenario’s uit!"
+                welcome: "👋 Hoi! Ik ben BelPulse AI — jouw persoonlijke Belgische macro-analist. Vraag me alles over de dashboards, fiscaal beleid, schuldenpad of voer snelle HERMES-scenario’s uit!",
+                menuStats: "STATISTIEKEN",
+                menuClock: "KLOK",
+                menuNews: "NIEUWS",
+                menuAnalysis: "ANALYSE",
+                menuAbout: "OVER ONS"
             }
-        };
-
-        const newsData = {
-            en: ["GDP growth stable at 1.1%", "Public debt trajectory under review", "Consumer confidence slightly up in February", "Inflation falls to 2.8%"],
-            fr: ["Croissance du PIB stable à 1,1%", "Trajectoire de la dette publique en cours d'examen", "Confiance des consommateurs en légère hausse en février", "L'inflation tombe à 2,8%"],
-            nl: ["BBP-groei stabiel op 1,1%", "Traject van de overheidsschuld wordt herzien", "Consumentenvertrouwen licht gestegen in februari", "Inflatie daalt naar 2,8%"]
         };
 
         const sampleResponses = {
@@ -420,19 +427,6 @@
             });
         }
 
-        // === NEWS TICKER ===
-        function initTicker() {
-            const container = document.getElementById('ticker-content');
-            container.innerHTML = '';
-            const items = newsData[currentLang];
-            [...items,...items].forEach(text => {
-                const div = document.createElement('div');
-                div.className = 'ticker-item flex-shrink-0 px-8 cursor-pointer hover:underline';
-                div.textContent = text;
-                div.onclick = () => alert("🔴 Full news aggregator & AI summary coming in v3 – this is live demo data");
-                container.appendChild(div);
-            });
-        }
 
         // === AI CHAT ===
         let chatOpen = false;
@@ -541,13 +535,15 @@
 
             // Apply translations
             document.getElementById('subtitle').textContent = translations[savedLang].subtitle;
-            document.getElementById('macro-btn-text').textContent = translations[savedLang].macroBtn;
-            document.getElementById('fiscal-btn-text').textContent = translations[savedLang].fiscalBtn;
             document.getElementById('ai-btn-text').textContent = translations[savedLang].aiBtn;
             document.getElementById('chat-title').textContent = translations[savedLang].chatTitle;
             document.getElementById('chat-input').placeholder = translations[savedLang].chatPlaceholder;
             
-            initTicker();
+            document.getElementById('menu-stats').textContent = translations[savedLang].menuStats;
+            document.getElementById('menu-clock').textContent = translations[savedLang].menuClock;
+            document.getElementById('menu-news').textContent = translations[savedLang].menuNews;
+            document.getElementById('menu-analysis').textContent = translations[savedLang].menuAnalysis;
+            document.getElementById('menu-about').textContent = translations[savedLang].menuAbout;
             
             // Sync with iframe after a short delay
             setTimeout(syncDashboard, 1000);
