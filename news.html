@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="soft">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <style>
         :root {
+            /* DEFAULT (SOFT) THEME - Print Heritage look */
             --bg-primary: #fdf4ef;
             --text-main: #111827;
             --text-body: #4b5563;
@@ -19,6 +20,7 @@
             --badge-bg: #1f2937;
             --badge-text: #ffffff;
             --border-color: rgba(0, 0, 0, 0.15);
+            --chart-grid: rgba(0,0,0,0.05);
             
             --font-serif: "Playfair Display", serif;
             --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -26,6 +28,28 @@
             --spacing-sm: 0.5rem;
             --spacing-md: 1rem;
             --spacing-lg: 2rem;
+        }
+
+        [data-theme="day"] {
+            --bg-primary: #ffffff;
+            --text-main: #000000;
+            --text-body: #374151;
+            --taxonomy-color: #991b1b;
+            --link-color: #2563eb;
+            --border-color: #e5e7eb;
+            --chart-grid: #f3f4f6;
+        }
+
+        [data-theme="night"] {
+            --bg-primary: #0f172a;
+            --text-main: #f8fafc;
+            --text-body: #94a3b8;
+            --taxonomy-color: #f87171;
+            --link-color: #60a5fa;
+            --badge-bg: #1e293b;
+            --badge-text: #f8fafc;
+            --border-color: #334155;
+            --chart-grid: rgba(255,255,255,0.05);
         }
 
         * {
@@ -40,6 +64,7 @@
             color: var(--text-body);
             line-height: 1.6;
             padding: var(--spacing-lg);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         main {
@@ -166,9 +191,9 @@
 <main>
     <!-- MAIN ARTICLE -->
     <article class="main-article">
-        <span class="taxonomy">Macroeconomic Analysis</span>
-        <h2>The Fiscal Contagion: AI Agency and the Collapse of Labor Revenues</h2>
-        <p class="summary">As AI task horizons grow logarithmically, Belgium faces a structural collapse of its wage-dependent tax base — and a narrow window to engineer a post-labor equilibrium</p>
+        <span class="taxonomy" id="main-taxonomy">Macroeconomic Analysis</span>
+        <h2 id="main-title">The Fiscal Contagion: AI Agency and the Collapse of Labor Revenues</h2>
+        <p class="summary" id="main-summary">As AI task horizons grow logarithmically, Belgium faces a structural collapse of its wage-dependent tax base — and a narrow window to engineer a post-labor equilibrium</p>
         
         <figure>
             <div class="charts-row">
@@ -178,14 +203,14 @@
             </div>
         </figure>
 
-        <div class="article-content">
+        <div class="article-content" id="main-content">
             <p>The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the "Task Horizon"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate.</p>
             
             <p>This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle "1-Month Tasks," effectively approaching AGI and operating as fully autonomous synthetic employees.</p>
 
             <div class="quote-box">
-                <blockquote>"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks."</blockquote>
-                <div class="attribution">— Dr. Anya Sharma & Prof. David Chen</div>
+                <blockquote id="main-quote">"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks."</blockquote>
+                <div class="attribution" id="main-attribution">— Dr. Anya Sharma & Prof. David Chen</div>
             </div>
 
             <p>The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.</p>
@@ -196,175 +221,245 @@
 
             <p>To survive this valley of death, policymakers must engineer an "Elegant Equilibrium." This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat.</p>
             
-            <p>By <a href="#" class="author">Robert Armstrong</a> and <a href="#" class="author">Ludovic Hunter-Tilney</a></p>
+            <p><span id="byline-by">By</span> <a href="#" class="author">Robert Armstrong</a> <span id="byline-and">and</span> <a href="#" class="author">Ludovic Hunter-Tilney</a></p>
         </div>
     </article>
 
     <!-- SIDEBAR ARTICLES -->
     <aside>
         <article>
-            <span class="taxonomy">Utilities <span class="premium-badge" style="margin-left: 0.5rem;">Premium</span></span>
-            <h2>Grid Stability in the Age of High-Performance Compute</h2>
-            <p class="summary">European energy grids face unprecedented strain as data center demand triples.</p>
+            <span class="taxonomy"><span id="sidebar-1-tax">Utilities</span> <span class="premium-badge" style="margin-left: 0.5rem;" id="badge-1">Premium</span></span>
+            <h2 id="sidebar-1-title">Grid Stability in the Age of High-Performance Compute</h2>
+            <p class="summary" id="sidebar-1-summary">European energy grids face unprecedented strain as data center demand triples.</p>
         </article>
 
         <article>
-            <span class="taxonomy">Technology sector</span>
-            <h2>The Silicon Shield: Defense tech's new frontier</h2>
-            <p class="summary">How sovereign AI is reshaping the geopolitical landscape of the Low Countries.</p>
+            <span class="taxonomy" id="sidebar-2-tax">Technology sector</span>
+            <h2 id="sidebar-2-title">The Silicon Shield: Defense tech's new frontier</h2>
+            <p class="summary" id="sidebar-2-summary">How sovereign AI is reshaping the geopolitical landscape of the Low Countries.</p>
         </article>
 
         <article>
-            <span class="taxonomy">FT Swamp Notes <span class="premium-badge" style="margin-left: 0.5rem;">Premium</span></span>
-            <h2>Lobbying the LLMs</h2>
-            <p class="summary">The subtle art of prompt engineering for legislative influence.</p>
+            <span class="taxonomy"><span id="sidebar-3-tax">FT Swamp Notes</span> <span class="premium-badge" style="margin-left: 0.5rem;" id="badge-3">Premium</span></span>
+            <h2 id="sidebar-3-title">Lobbying the LLMs</h2>
+            <p class="summary" id="sidebar-3-summary">The subtle art of prompt engineering for legislative influence.</p>
         </article>
     </aside>
 </main>
 
 <script>
+const translations = {
+    en: {
+        mainTax: "Macroeconomic Analysis",
+        mainTitle: "The Fiscal Contagion: AI Agency and the Collapse of Labor Revenues",
+        mainSummary: "As AI task horizons grow logarithmically, Belgium faces a structural collapse of its wage-dependent tax base — and a narrow window to engineer a post-labor equilibrium",
+        mainContent: [
+            "The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the \"Task Horizon\"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate.",
+            "This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle \"1-Month Tasks,\" effectively approaching AGI and operating as fully autonomous synthetic employees.",
+            "The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.",
+            "This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse.",
+            "Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.",
+            "To survive this valley of death, policymakers must engineer an \"Elegant Equilibrium.\" This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat."
+        ],
+        mainQuote: "\"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks.\"",
+        mainAttribution: "— Dr. Anya Sharma & Prof. David Chen",
+        by: "By",
+        and: "and",
+        sidebar: [
+            { tax: "Utilities", title: "Grid Stability in the Age of High-Performance Compute", summary: "European energy grids face unprecedented strain as data center demand triples." },
+            { tax: "Technology sector", title: "The Silicon Shield: Defense tech's new frontier", summary: "How sovereign AI is reshaping the geopolitical landscape of the Low Countries." },
+            { tax: "FT Swamp Notes", title: "Lobbying the LLMs", summary: "The subtle art of prompt engineering for legislative influence." }
+        ],
+        badges: "Premium",
+        chartTitles: {
+            horizon: "AI Task Horizon (METR)",
+            unemployment: "Unemployment Rate (%)",
+            tax: "Tax-to-GDP Ratio (%)"
+        }
+    },
+    fr: {
+        mainTax: "Analyse Macroéconomique",
+        mainTitle: "La contagion fiscale : l'agence de l'IA et l'effondrement des revenus du travail",
+        mainSummary: "À mesure que les horizons de tâches de l'IA croissent de manière logarithmique, la Belgique est confrontée à un effondrement structurel de sa base fiscale dépendante des salaires — et dispose d'une fenêtre étroite pour concevoir un équilibre post-travail.",
+        mainContent: [
+            "La trajectoire exponentielle de l'intelligence artificielle a franchi un seuil économique critique. En exploitant les données de l'organisation Model Evaluation and Threat Research (METR), nous observons que les capacités de l'IA ne sont plus mesurées par des repères statiques, mais par l'\"horizon de tâches\" — la durée pendant laquelle une IA peut planifier et exécuter de manière autonome des tâches complexes avec un taux de réussite de 50 %.",
+            "Cette mesure croît de manière logarithmique. Alors que des modèles comme ChatGPT géraient des micro-tâches, d'ici 2030, les modèles géreront de manière fluide des \"tâches d'un mois\", s'approchant ainsi de l'IA générale (AGI) et fonctionnant comme des employés synthétiques totalement autonomes.",
+            "Les implications pour le marché du travail belge sont profondes et profondément déstabilisantes. L'économie belge repose lourdement sur le travail cognitif des cols blancs. Lorsque l'IA franchira le seuil des tâches d'un jour en 2027, le chômage structurel se découplera violemment de son niveau de référence de 5 %, dépassant le déclencheur de la garantie d'emploi de 15 % pour culminer à un niveau apocalyptique de 35 % vers 2032.",
+            "Ce choc de l'emploi déclenche une contagion fiscale immédiate. Actuellement, l'État belge s'appuie massivement sur l'impôt sur le revenu des personnes physiques (IPP) et les cotisations sociales (ONSS). À mesure que le travail humain est systématiquement substitué par une inférence d'IA au coût marginal quasi nul, cette base fiscale du travail s'effondrera structurellement.",
+            "Le ratio total impôt/PIB devrait chuter d'un solide 43 % à un niveau d'insolvabilité fiscale de 28 % au point de crise de 2032, provoquant un piège mortel revenus-dette alors que les obligations nominales restent fixes tandis que la base fiscale s'évapore.",
+            "Pour survivre à cette vallée de la mort, les décideurs politiques doivent concevoir un \"équilibre élégant\". Ce scénario idéal embrasse la nature déflationniste agressive de l'IA pour financer un revenu de base universel localisé, contrebalançant l'inflation fiduciaire nécessaire pour maintenir à flot la population au chômage."
+        ],
+        mainQuote: "\"La nature exponentielle de ce progrès signifie que l'avenir arrive bien plus vite que ne le suggère l'intuition linéaire. Nous approchons rapidement d'un point où l'IA peut surpasser la planification et l'exécution d'équipes humaines sur des tâches économiques importantes.\"",
+        mainAttribution: "— Dr. Anya Sharma & Prof. David Chen",
+        by: "Par",
+        and: "et",
+        sidebar: [
+            { tax: "Services Publics", title: "Stabilité du réseau à l'ère du calcul haute performance", summary: "Les réseaux énergétiques européens font face à une tension sans précédent alors que la demande des centres de données triple." },
+            { tax: "Secteur technologique", title: "Le bouclier de silicium : la nouvelle frontière de la tech de défense", summary: "Comment l'IA souveraine redessine le paysage géopolitique des Plats Pays." },
+            { tax: "Notes du Marais", title: "Lobbying auprès des LLM", summary: "L'art subtil de l'ingénierie de prompt pour l'influence législative." }
+        ],
+        badges: "Premium",
+        chartTitles: {
+            horizon: "Horizon de tâches de l'IA (METR)",
+            unemployment: "Taux de chômage (%)",
+            tax: "Ratio Impôt-sur-PIB (%)"
+        }
+    },
+    nl: {
+        mainTax: "Macro-economische Analyse",
+        mainTitle: "De fiscale besmetting: AI-agentschap en de ineenstorting van arbeidsinkomsten",
+        mainSummary: "Naarmate de taakhorizons van AI logaritmisch groeien, wordt België geconfronteerd met een structurele ineenstorting van zijn loonafhankelijke belastinggrondslag — en een smal venster om een post-arbeidsevenwicht te ontwerpen.",
+        mainContent: [
+            "Het exponentiële traject van kunstmatige intelligentie heeft een kritieke economische drempel overschreden. Gebruikmakend van gegevens van de Model Evaluation and Threat Research (METR) organisatie, zien we dat AI-mogelijkheden niet langer worden gemeten door statische benchmarks, maar door de \"Taakhorizon\" — de duur waarvoor een AI autonoom complexe taken kan plannen en uitvoeren met een succespercentage van 50%.",
+            "Deze maatstaf groeit logaritmisch. Waar modellen zoals ChatGPT micro-taken afhandelden, zullen modellen tegen 2030 naadloos \"taken van 1 maand\" afhandelen, waardoor ze effectief AGI benaderen en opereren als volledig autonome synthetische werknemers.",
+            "De implicaties voor de Belgische arbeidsmarkt zijn diepgaand en zeer destabiliserend. De Belgische economie leunt zwaar op cognitieve arbeid van bedienden. Wanneer AI in 2027 de drempel van 1 dag taakduur overschrijdt, zal de structurele werkloosheid zich gewelddadig loskoppelen van de basislijn van 5%, de 15% jobgarantie-trigger passeren en een apocalyptisch hoogtepunt bereiken van 35% rond 2032.",
+            "Deze banenshock veroorzaakt een onmiddellijke fiscale besmetting. Momenteel leunt de Belgische staat massaal op de personenbelasting (IPP) en sociale bijdragen (RSZ). Naarmate menselijke arbeid systematisch wordt vervangen door AI-inferentie tegen bijna nul marginale kosten, zal deze belastinggrondslag voor arbeid structureel instorten.",
+            "De totale belastingdruk ten opzichte van het bbp zal naar verwachting kelderen van een robuuste 43% naar een fiscaal insolvente 28% op het crisispunt van 2032, wat een dodelijke inkomsten-schuldenval veroorzaakt terwijl de nominale verplichtingen vast blijven staan terwijl de belastinggrondslag verdampt.",
+            "Om deze vallei des doods te overleven, moeten beleidsmakers een \"Elegant Evenwicht\" ontwerpen. Dit perfecte scenario omarmt het agressieve deflationaire karakter van AI om een gelokaliseerd universeel basisinkomen te financieren, als tegenwicht voor de fiat-inflatie die nodig is om de werkloze bevolking overeind te houden."
+        ],
+        mainQuote: "\"De exponentiële aard van deze vooruitgang betekent dat de toekomst veel sneller arriveert dan lineaire intuïtie suggereert. We naderen snel een punt waarop AI menselijke teams kan overtreffen in het plannen en uitvoeren van belangrijke economische taken.\"",
+        mainAttribution: "— Dr. Anya Sharma & Prof. David Chen",
+        by: "Door",
+        and: "en",
+        sidebar: [
+            { tax: "Nutsbedrijven", title: "Netstabiliteit in het tijdperk van high-performance computing", summary: "Europese energienetten staan onder ongekende druk nu de vraag van datacenters verdrievoudigt." },
+            { tax: "Technologiesector", title: "Het Siliconen Schild: de nieuwe grens van defensie-technologie", summary: "Hoe soevereine AI het geopolitieke landschap van de Lage Landen hertekent." },
+            { tax: "Moerasnotities", title: "Lobbyen bij de LLM's", summary: "De subtiele kunst van prompt engineering voor wetgevende invloed." }
+        ],
+        badges: "Premium",
+        chartTitles: {
+            horizon: "AI Taakhorizon (METR)",
+            unemployment: "Werkloosheidsgraad (%)",
+            tax: "Belasting-tot-bbp Ratio (%)"
+        }
+    }
+};
+
+let currentCharts = {};
+
+function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    // Update chart colors
+    const isNight = t === 'night';
+    const textColor = isNight ? '#94a3b8' : '#4b5563';
+    const gridColor = isNight ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+    Object.values(currentCharts).forEach(chart => {
+        chart.options.scales.x.ticks.color = textColor;
+        chart.options.scales.y.ticks.color = textColor;
+        chart.options.scales.y.grid.color = gridColor;
+        chart.options.plugins.title.color = isNight ? '#f8fafc' : '#111827';
+        chart.update();
+    });
+}
+
+function setLang(l) {
+    const t = translations[l] || translations.en;
+    document.getElementById('main-taxonomy').textContent = t.mainTax;
+    document.getElementById('main-title').textContent = t.mainTitle;
+    document.getElementById('main-summary').textContent = t.mainSummary;
+    document.getElementById('main-quote').textContent = t.mainQuote;
+    document.getElementById('main-attribution').textContent = t.mainAttribution;
+    document.getElementById('byline-by').textContent = t.by;
+    document.getElementById('byline-and').textContent = t.and;
+
+    const contentDiv = document.getElementById('main-content');
+    const paras = contentDiv.querySelectorAll('p:not(:last-child)');
+    t.mainContent.forEach((text, idx) => {
+        if (paras[idx]) paras[idx].textContent = text;
+    });
+
+    // Sidebars
+    t.sidebar.forEach((item, idx) => {
+        document.getElementById(`sidebar-${idx+1}-tax`).textContent = item.tax;
+        document.getElementById(`sidebar-${idx+1}-title`).textContent = item.title;
+        document.getElementById(`sidebar-${idx+1}-summary`).textContent = item.summary;
+    });
+
+    const badges = document.querySelectorAll('.premium-badge');
+    badges.forEach(b => b.textContent = t.badges);
+
+    // Chart titles
+    if (currentCharts.horizon) currentCharts.horizon.options.plugins.title.text = t.chartTitles.horizon;
+    if (currentCharts.unemployment) currentCharts.unemployment.options.plugins.title.text = t.chartTitles.unemployment;
+    if (currentCharts.tax) currentCharts.tax.options.plugins.title.text = t.chartTitles.tax;
+    Object.values(currentCharts).forEach(c => c.update());
+}
+
 (function() {
-    const FT_SLATE   = '#111827';
-    const FT_MUTED   = '#4b5563';
     const FT_BLUE    = '#1d4ed8';
     const FT_CLARET  = '#800020';
     const FT_TEAL    = '#0D7680';
     const FT_GOLD    = '#B5832A';
-    const GRID_COLOR = 'rgba(0,0,0,0.05)';
 
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size = 11;
-    Chart.defaults.color = FT_MUTED;
 
     const sharedXConfig = {
         type: 'linear',
         min: 2020,
         max: 2035,
-        ticks: {
-            stepSize: 5,
-            callback: v => Math.round(v)
-        },
+        ticks: { stepSize: 5, callback: v => Math.round(v) },
         grid: { display: false }
     };
 
-    // AI Task Horizon
-    new Chart(document.getElementById('chartTaskHorizon'), {
+    currentCharts.horizon = new Chart(document.getElementById('chartTaskHorizon'), {
         type: 'line',
         data: {
             datasets: [{
-                label: 'Task Horizon (mins)',
-                data: [
-                    { x: 2020, y: 1 },
-                    { x: 2023, y: 5 },
-                    { x: 2027, y: 480 },
-                    { x: 2030, y: 10000 },
-                    { x: 2035, y: 100000 }
-                ],
-                borderColor: FT_BLUE,
-                backgroundColor: FT_BLUE,
-                tension: 0.3
+                data: [{x:2020,y:1},{x:2023,y:5},{x:2027,y:480},{x:2030,y:10000},{x:2035,y:100000}],
+                borderColor: FT_BLUE, backgroundColor: FT_BLUE, tension: 0.3
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: sharedXConfig,
-                y: {
-                    type: 'logarithmic',
-                    title: { display: true, text: 'Duration (mins, log)' }
-                }
-            },
+            responsive: true, maintainAspectRatio: false,
+            scales: { x: sharedXConfig, y: { type: 'logarithmic' } },
+            plugins: { legend: { display: false }, title: { display: true, text: translations.en.chartTitles.horizon, font: { family: 'Playfair Display', size: 14 } } }
+        }
+    });
+
+    currentCharts.unemployment = new Chart(document.getElementById('chartUnemployment'), {
+        type: 'line',
+        data: {
+            datasets: [{
+                data: [{x:2020,y:5},{x:2025,y:5},{x:2028,y:10},{x:2030,y:18},{x:2032,y:35},{x:2035,y:33}],
+                borderColor: FT_CLARET, backgroundColor: FT_CLARET, tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { x: sharedXConfig, y: { min: 0, max: 40 } },
             plugins: {
                 legend: { display: false },
-                title: { display: true, text: 'AI Task Horizon (METR)', font: { family: 'Playfair Display', size: 14 } }
+                title: { display: true, text: translations.en.chartTitles.unemployment, font: { family: 'Playfair Display', size: 14 } },
+                annotation: { annotations: { line1: { type:'line', yMin:15, yMax:15, borderColor: FT_GOLD, borderDash:[5,5], label:{content:'UBI Trigger', display:true} } } }
             }
         }
     });
 
-    // Unemployment
-    new Chart(document.getElementById('chartUnemployment'), {
+    currentCharts.tax = new Chart(document.getElementById('chartTaxGDP'), {
         type: 'line',
         data: {
             datasets: [{
-                label: 'Unemployment %',
-                data: [
-                    { x: 2020, y: 5 },
-                    { x: 2025, y: 5 },
-                    { x: 2028, y: 10 },
-                    { x: 2030, y: 18 },
-                    { x: 2032, y: 35 },
-                    { x: 2035, y: 33 }
-                ],
-                borderColor: FT_CLARET,
-                backgroundColor: FT_CLARET,
-                tension: 0.3
+                data: [{x:2020,y:43},{x:2025,y:43},{x:2029,y:44},{x:2030,y:38},{x:2032,y:28},{x:2035,y:30}],
+                borderColor: FT_TEAL, backgroundColor: FT_TEAL, tension: 0.3
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: sharedXConfig,
-                y: {
-                    min: 0,
-                    max: 40,
-                    title: { display: true, text: 'Rate (%)' }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                title: { display: true, text: 'Unemployment Rate (%)', font: { family: 'Playfair Display', size: 14 } },
-                annotation: {
-                    annotations: {
-                        line1: {
-                            type: 'line',
-                            yMin: 15,
-                            yMax: 15,
-                            borderColor: FT_GOLD,
-                            borderDash: [5, 5],
-                            label: { content: 'UBI Trigger', display: true }
-                        }
-                    }
-                }
-            }
+            responsive: true, maintainAspectRatio: false,
+            scales: { x: sharedXConfig, y: { min: 20, max: 50 } },
+            plugins: { legend: { display: false }, title: { display: true, text: translations.en.chartTitles.tax, font: { family: 'Playfair Display', size: 14 } } }
         }
     });
 
-    // Tax-to-GDP
-    new Chart(document.getElementById('chartTaxGDP'), {
-        type: 'line',
-        data: {
-            datasets: [{
-                label: 'Tax/GDP %',
-                data: [
-                    { x: 2020, y: 43 },
-                    { x: 2025, y: 43 },
-                    { x: 2029, y: 44 },
-                    { x: 2030, y: 38 },
-                    { x: 2032, y: 28 },
-                    { x: 2035, y: 30 }
-                ],
-                borderColor: FT_TEAL,
-                backgroundColor: FT_TEAL,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: sharedXConfig,
-                y: {
-                    min: 20,
-                    max: 50,
-                    title: { display: true, text: 'Ratio (%)' }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                title: { display: true, text: 'Tax-to-GDP Ratio (%)', font: { family: 'Playfair Display', size: 14 } }
-            }
+    window.addEventListener('message', function(e) {
+        if (e.data.type === 'setTheme') setTheme(e.data.value);
+        else if (e.data.type === 'setLang') setLang(e.data.value);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.self !== window.top) {
+            window.parent.postMessage('dashboard-ready', '*');
         }
     });
 })();
