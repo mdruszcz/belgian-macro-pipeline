@@ -146,13 +146,13 @@
             margin-bottom: var(--spacing-sm);
         }
 
-        .author {
+        .author-link {
             color: var(--link-color);
             font-weight: 600;
             text-decoration: none;
         }
 
-        .author:hover {
+        .author-link:hover {
             text-decoration: underline;
         }
 
@@ -177,6 +177,15 @@
             font-weight: 600;
             text-transform: uppercase;
             color: var(--text-body);
+        }
+
+        .sources-footer {
+            font-size: 0.8rem;
+            color: var(--text-body);
+            border-top: 1px solid var(--border-color);
+            padding-top: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+            font-style: italic;
         }
 
         @media (min-width: 1024px) {
@@ -204,24 +213,25 @@
         </figure>
 
         <div class="article-content" id="main-content">
-            <p>The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the "Task Horizon"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate.</p>
+            <!-- 4 Body Paragraphs -->
+            <p id="p1">The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the "Task Horizon"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate. This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle "1-Month Tasks," effectively approaching AGI and operating as fully autonomous synthetic employees.</p>
             
-            <p>This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle "1-Month Tasks," effectively approaching AGI and operating as fully autonomous synthetic employees.</p>
+            <p id="p2">The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.</p>
+
+            <p id="p3">This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse. Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.</p>
+
+            <p id="p4">To survive this valley of death, policymakers must engineer an "Elegant Equilibrium." This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat. More critically, the state must transition from a wage-based economy to a property-based macroeconomy. By utilizing aggressive government matching funds and a 0.5% wealth circulation tax on ultra-high accounts, displaced laborers can be transitioned into sovereign owners of the very capital replacing them. Finally, the implementation of a sweeping "Compute Tax" in 2035 will restabilize the fiscal state at a 30% GDP ratio, ushering in an era of post-labor hyperabundance.</p>
 
             <div class="quote-box">
                 <blockquote id="main-quote">"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks."</blockquote>
                 <div class="attribution" id="main-attribution">— Dr. Anya Sharma & Prof. David Chen</div>
             </div>
 
-            <p>The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.</p>
-
-            <p>This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse.</p>
-
-            <p>Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.</p>
-
-            <p>To survive this valley of death, policymakers must engineer an "Elegant Equilibrium." This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat.</p>
-            
-            <p><span id="byline-by">By</span> <a href="#" class="author">Robert Armstrong</a> <span id="byline-and">and</span> <a href="#" class="author">Ludovic Hunter-Tilney</a></p>
+            <p class="sources-footer">
+                <span id="sources-text">Sources: METR (2025), NBB, Eurostat, OECD Revenue Statistics. Projections are illustrative scenario modelling.</span>
+                <br>
+                <span id="author-label">Author</span> : <a href="#" class="author-link">Marc Druszcz</a>
+            </p>
         </div>
     </article>
 
@@ -253,18 +263,14 @@ const translations = {
         mainTax: "Macroeconomic Analysis",
         mainTitle: "The Fiscal Contagion: AI Agency and the Collapse of Labor Revenues",
         mainSummary: "As AI task horizons grow logarithmically, Belgium faces a structural collapse of its wage-dependent tax base — and a narrow window to engineer a post-labor equilibrium",
-        mainContent: [
-            "The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the \"Task Horizon\"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate.",
-            "This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle \"1-Month Tasks,\" effectively approaching AGI and operating as fully autonomous synthetic employees.",
-            "The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.",
-            "This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse.",
-            "Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.",
-            "To survive this valley of death, policymakers must engineer an \"Elegant Equilibrium.\" This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat."
-        ],
+        p1: "The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the \"Task Horizon\"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate. This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle \"1-Month Tasks,\" effectively approaching AGI and operating as fully autonomous synthetic employees.",
+        p2: "The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.",
+        p3: "This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse. Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.",
+        p4: "To survive this valley of death, policymakers must engineer an \"Elegant Equilibrium.\" This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat. More critically, the state must transition from a wage-based economy to a property-based macroeconomy. By utilizing aggressive government matching funds and a 0.5% wealth circulation tax on ultra-high accounts, displaced laborers can be transitioned into sovereign owners of the very capital replacing them. Finally, the implementation of a sweeping \"Compute Tax\" in 2035 will restabilize the fiscal state at a 30% GDP ratio, ushering in an era of post-labor hyperabundance.",
         mainQuote: "\"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks.\"",
         mainAttribution: "— Dr. Anya Sharma & Prof. David Chen",
-        by: "By",
-        and: "and",
+        sources: "Sources: METR (2025), NBB, Eurostat, OECD Revenue Statistics. Projections are illustrative scenario modelling.",
+        authorLabel: "Author",
         sidebar: [
             { tax: "Utilities", title: "Grid Stability in the Age of High-Performance Compute", summary: "European energy grids face unprecedented strain as data center demand triples." },
             { tax: "Technology sector", title: "The Silicon Shield: Defense tech's new frontier", summary: "How sovereign AI is reshaping the geopolitical landscape of the Low Countries." },
@@ -281,18 +287,14 @@ const translations = {
         mainTax: "Analyse Macroéconomique",
         mainTitle: "La contagion fiscale : l'agence de l'IA et l'effondrement des revenus du travail",
         mainSummary: "À mesure que les horizons de tâches de l'IA croissent de manière logarithmique, la Belgique est confrontée à un effondrement structurel de sa base fiscale dépendante des salaires — et dispose d'une fenêtre étroite pour concevoir un équilibre post-travail.",
-        mainContent: [
-            "La trajectoire exponentielle de l'intelligence artificielle a franchi un seuil économique critique. En exploitant les données de l'organisation Model Evaluation and Threat Research (METR), nous observons que les capacités de l'IA ne sont plus mesurées par des repères statiques, mais par l'\"horizon de tâches\" — la durée pendant laquelle une IA peut planifier et exécuter de manière autonome des tâches complexes avec un taux de réussite de 50 %.",
-            "Cette mesure croît de manière logarithmique. Alors que des modèles comme ChatGPT géraient des micro-tâches, d'ici 2030, les modèles géreront de manière fluide des \"tâches d'un mois\", s'approchant ainsi de l'IA générale (AGI) et fonctionnant comme des employés synthétiques totalement autonomes.",
-            "Les implications pour le marché du travail belge sont profondes et profondément déstabilisantes. L'économie belge repose lourdement sur le travail cognitif des cols blancs. Lorsque l'IA franchira le seuil des tâches d'un jour en 2027, le chômage structurel se découplera violemment de son niveau de référence de 5 %, dépassant le déclencheur de la garantie d'emploi de 15 % pour culminer à un niveau apocalyptique de 35 % vers 2032.",
-            "Ce choc de l'emploi déclenche une contagion fiscale immédiate. Actuellement, l'État belge s'appuie massivement sur l'impôt sur le revenu des personnes physiques (IPP) et les cotisations sociales (ONSS). À mesure que le travail humain est systématiquement substitué par une inférence d'IA au coût marginal quasi nul, cette base fiscale du travail s'effondrera structurellement.",
-            "Le ratio total impôt/PIB devrait chuter d'un solide 43 % à un niveau d'insolvabilité fiscale de 28 % au point de crise de 2032, provoquant un piège mortel revenus-dette alors que les obligations nominales restent fixes tandis que la base fiscale s'évapore.",
-            "Pour survivre à cette vallée de la mort, les décideurs politiques doivent concevoir un \"équilibre élégant\". Ce scénario idéal embrasse la nature déflationniste agressive de l'IA pour financer un revenu de base universel localisé, contrebalançant l'inflation fiduciaire nécessaire pour maintenir à flot la population au chômage."
-        ],
-        mainQuote: "\"La nature exponentielle de ce progrès signifie que l'avenir arrive bien plus vite que ne le suggère l'intuition linéaire. Nous approchons rapidement d'un point où l'IA peut surpasser la planification et l'exécution d'équipes humaines sur des tâches économiques importantes.\"",
+        p1: "La trajectoire exponentielle de l'intelligence artificielle a franchi un seuil économique critique. En s'appuyant sur les données de l'organisation Model Evaluation and Threat Research (METR), nous observons que les capacités de l'IA ne sont plus mesurées par des critères statiques, mais par l'« horizon de tâches » — la durée pendant laquelle une IA peut planifier et exécuter de manière autonome des tâches complexes avec un taux de réussite de 50 %. Cette métrique croît de manière logarithmique. Alors que des modèles comme ChatGPT géraient des micro-tâches, d'ici 2030, les modèles traiteront de manière fluide des « tâches d'un mois », s'approchant ainsi de l'AGI et fonctionnant comme des employés synthétiques totalement autonomes.",
+        p2: "Les implications pour le marché du travail belge sont profondes et profondément déstabilisantes. L'économie belge repose lourdement sur le travail cognitif des cols blancs. Lorsque l'IA franchira le seuil des tâches d'un jour en 2027, le chômage structurel se découplera violemment de son niveau de référence de 5 %, dépassant le déclencheur de la garantie d'emploi de 15 % et atteignant un niveau apocalyptique de 35 % vers 2032.",
+        p3: "Ce choc de l'emploi déclenche une contagion fiscale immédiate. Actuellement, l'État belge s'appuie massivement sur l'impôt sur le revenu des personnes physiques (IPP) et les cotisations sociales (ONSS). À mesure que le travail humain est systématiquement substitué par une inférence d'IA au coût marginal quasi nul, cette base fiscale du travail s'effondrera structurellement. Le ratio impôt/PIB total devrait chuter d'un solide 43 % à un niveau d'insolvabilité fiscale de 28 % lors du point de crise de 2032, provoquant un piège mortel revenu-dette alors que les obligations nominales restent fixes tandis que la base fiscale s'évapore.",
+        p4: "Pour survivre à cette vallée de la mort, les décideurs politiques doivent concevoir un « équilibre élégant ». Ce scénario idéal exploite la nature déflationniste agressive de l'IA pour financer un revenu de base universel localisé, contrebalançant l'inflation fiduciaire nécessaire pour maintenir à flot la population au chômage. Plus important encore, l'État doit passer d'une économie basée sur le salaire à une macroéconomie basée sur la propriété. En utilisant des fonds de contrepartie gouvernementaux agressifs et une taxe de circulation des richesses de 0,5 % sur les comptes ultra-élevés, les travailleurs déplacés peuvent être transformés en propriétaires souverains du capital même qui les remplace. Enfin, la mise en œuvre d'une vaste « taxe sur le calcul » en 2035 restabilisera l'État fiscal à un ratio de 30 % du PIB, inaugurant une ère d'hyperabondance post-travail.",
+        mainQuote: "« La nature exponentielle de ce progrès signifie que l'avenir arrive bien plus vite que ne le suggère l'intuition linéaire. Nous approchons rapidement d'un point où l'IA peut surpasser la planification et l'exécution d'équipes humaines sur des tâches économiques importantes. »",
         mainAttribution: "— Dr. Anya Sharma & Prof. David Chen",
-        by: "Par",
-        and: "et",
+        sources: "Sources : METR (2025), BNB, Eurostat, OCDE Statistiques des recettes publiques. Les projections sont des modélisations de scénarios illustratifs.",
+        authorLabel: "Auteur",
         sidebar: [
             { tax: "Services Publics", title: "Stabilité du réseau à l'ère du calcul haute performance", summary: "Les réseaux énergétiques européens font face à une tension sans précédent alors que la demande des centres de données triple." },
             { tax: "Secteur technologique", title: "Le bouclier de silicium : la nouvelle frontière de la tech de défense", summary: "Comment l'IA souveraine redessine le paysage géopolitique des Plats Pays." },
@@ -309,18 +311,14 @@ const translations = {
         mainTax: "Macro-economische Analyse",
         mainTitle: "De fiscale besmetting: AI-agentschap en de ineenstorting van arbeidsinkomsten",
         mainSummary: "Naarmate de taakhorizons van AI logaritmisch groeien, wordt België geconfronteerd met een structurele ineenstorting van zijn loonafhankelijke belastinggrondslag — en een smal venster om een post-arbeidsevenwicht te ontwerpen.",
-        mainContent: [
-            "Het exponentiële traject van kunstmatige intelligentie heeft een kritieke economische drempel overschreden. Gebruikmakend van gegevens van de Model Evaluation and Threat Research (METR) organisatie, zien we dat AI-mogelijkheden niet langer worden gemeten door statische benchmarks, maar door de \"Taakhorizon\" — de duur waarvoor een AI autonoom complexe taken kan plannen en uitvoeren met een succespercentage van 50%.",
-            "Deze maatstaf groeit logaritmisch. Waar modellen zoals ChatGPT micro-taken afhandelden, zullen modellen tegen 2030 naadloos \"taken van 1 maand\" afhandelen, waardoor ze effectief AGI benaderen en opereren als volledig autonome synthetische werknemers.",
-            "De implicaties voor de Belgische arbeidsmarkt zijn diepgaand en zeer destabiliserend. De Belgische economie leunt zwaar op cognitieve arbeid van bedienden. Wanneer AI in 2027 de drempel van 1 dag taakduur overschrijdt, zal de structurele werkloosheid zich gewelddadig loskoppelen van de basislijn van 5%, de 15% jobgarantie-trigger passeren en een apocalyptisch hoogtepunt bereiken van 35% rond 2032.",
-            "Deze banenshock veroorzaakt een onmiddellijke fiscale besmetting. Momenteel leunt de Belgische staat massaal op de personenbelasting (IPP) en sociale bijdragen (RSZ). Naarmate menselijke arbeid systematisch wordt vervangen door AI-inferentie tegen bijna nul marginale kosten, zal deze belastinggrondslag voor arbeid structureel instorten.",
-            "De totale belastingdruk ten opzichte van het bbp zal naar verwachting kelderen van een robuuste 43% naar een fiscaal insolvente 28% op het crisispunt van 2032, wat een dodelijke inkomsten-schuldenval veroorzaakt terwijl de nominale verplichtingen vast blijven staan terwijl de belastinggrondslag verdampt.",
-            "Om deze vallei des doods te overleven, moeten beleidsmakers een \"Elegant Evenwicht\" ontwerpen. Dit perfecte scenario omarmt het agressieve deflationaire karakter van AI om een gelokaliseerd universeel basisinkomen te financieren, als tegenwicht voor de fiat-inflatie die nodig is om de werkloze bevolking overeind te houden."
-        ],
+        p1: "Het exponentiële traject van kunstmatige intelligentie heeft een kritieke economische drempel overschreden. Gebruikmakend van gegevens van de Model Evaluation and Threat Research (METR)-organisatie, zien we dat AI-mogelijkheden niet langer worden gemeten aan de hand van statische benchmarks, maar door de \"Taakhorizon\" — de duur waarvoor een AI autonoom complexe taken kan plannen en uitvoeren met een succespercentage van 50%. Deze maatstaf groeit logaritmisch. Terwijl modellen zoals ChatGPT microtaken afhandelden, zullen modellen tegen 2030 naadloos \"taken van 1 maand\" afhandelen, waardoor ze effectief AGI benaderen en opereren als volledig autonome synthetische werknemers.",
+        p2: "De implicaties voor de Belgische arbeidsmarkt zijn diepgaand en zeer destabiliserend. De Belgische economie leunt zwaar op cognitieve arbeid van bedienden. Wanneer AI in 2027 de drempel van de 1-dagstaak overschrijdt, zal de structurele werkloosheid zich gewelddadig loskoppelen van de basislijn van 5%, de drempel van de 15% jobgarantie passeren en een apocalyptisch hoogtepunt bereiken van 35% rond 2032.",
+        p3: "Deze banenshock veroorzaakt een onmiddellijke fiscale besmetting. Momenteel leunt de Belgische staat massaal op de personenbelasting (IPP) en sociale bijdragen (RSZ). Naarmate menselijke arbeid systematisch wordt vervangen door AI-inferentie tegen bijna nul marginale kosten, zal deze belastinggrondslag voor arbeid structureel instorten. De totale belastingdruk ten opzichte van het bbp zal naar verwachting kelderen van een robuuste 43% naar een fiscaal insolvente 28% op het crisispunt van 2032, wat een dodelijke inkomsten-schuldenval veroorzaakt terwijl de nominale verplichtingen vast blijven staan terwijl de belastinggrondslag verdampt.",
+        p4: "Om deze vallei des doods te overleven, moeten beleidsmakers een \"Elegant Evenwicht\" ontwerpen. Dit perfecte scenario omarmt het agressieve deflationaire karakter van AI om een gelokaliseerd universeel basisinkomen te financieren, als tegenwicht voor de fiat-inflatie die nodig is om de werkloze bevolking overeind te houden. Meer cruciaal nog moet de staat overgaan van een op loon gebaseerde economie naar een op eigendom gebaseerde macro-economie. Door gebruik te maken van agressieve overheidsbijdragen en een vermogenscirculatiebelasting van 0,5% op ultrahoge rekeningen, kunnen ontslagen arbeiders worden getransformeerd in soevereine eigenaren van het kapitaal dat hen vervangt. Ten slotte zal de implementatie van een ingrijpende \"Compute Tax\" in 2035 de fiscale staat herstabiliseren op een bbp-ratio van 30%, wat een tijdperk van post-arbeid hyperovervloed inluidt.",
         mainQuote: "\"De exponentiële aard van deze vooruitgang betekent dat de toekomst veel sneller arriveert dan lineaire intuïtie suggereert. We naderen snel een punt waarop AI menselijke teams kan overtreffen in het plannen en uitvoeren van belangrijke economische taken.\"",
         mainAttribution: "— Dr. Anya Sharma & Prof. David Chen",
-        by: "Door",
-        and: "en",
+        sources: "Bronnen: METR (2025), NBB, Eurostat, OECD Revenue Statistics. Projecties zijn illustratieve scenariomodellering.",
+        authorLabel: "Auteur",
         sidebar: [
             { tax: "Nutsbedrijven", title: "Netstabiliteit in het tijdperk van high-performance computing", summary: "Europese energienetten staan onder ongekende druk nu de vraag van datacenters verdrievoudigt." },
             { tax: "Technologiesector", title: "Het Siliconen Schild: de nieuwe grens van defensie-technologie", summary: "Hoe soevereine AI het geopolitieke landschap van de Lage Landen hertekent." },
@@ -339,7 +337,6 @@ let currentCharts = {};
 
 function setTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
-    // Update chart colors
     const isNight = t === 'night';
     const textColor = isNight ? '#94a3b8' : '#4b5563';
     const gridColor = isNight ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
@@ -360,16 +357,13 @@ function setLang(l) {
     document.getElementById('main-summary').textContent = t.mainSummary;
     document.getElementById('main-quote').textContent = t.mainQuote;
     document.getElementById('main-attribution').textContent = t.mainAttribution;
-    document.getElementById('byline-by').textContent = t.by;
-    document.getElementById('byline-and').textContent = t.and;
+    document.getElementById('p1').textContent = t.p1;
+    document.getElementById('p2').textContent = t.p2;
+    document.getElementById('p3').textContent = t.p3;
+    document.getElementById('p4').textContent = t.p4;
+    document.getElementById('sources-text').textContent = t.sources;
+    document.getElementById('author-label').textContent = t.authorLabel;
 
-    const contentDiv = document.getElementById('main-content');
-    const paras = contentDiv.querySelectorAll('p:not(:last-child)');
-    t.mainContent.forEach((text, idx) => {
-        if (paras[idx]) paras[idx].textContent = text;
-    });
-
-    // Sidebars
     t.sidebar.forEach((item, idx) => {
         document.getElementById(`sidebar-${idx+1}-tax`).textContent = item.tax;
         document.getElementById(`sidebar-${idx+1}-title`).textContent = item.title;
@@ -379,7 +373,6 @@ function setLang(l) {
     const badges = document.querySelectorAll('.premium-badge');
     badges.forEach(b => b.textContent = t.badges);
 
-    // Chart titles
     if (currentCharts.horizon) currentCharts.horizon.options.plugins.title.text = t.chartTitles.horizon;
     if (currentCharts.unemployment) currentCharts.unemployment.options.plugins.title.text = t.chartTitles.unemployment;
     if (currentCharts.tax) currentCharts.tax.options.plugins.title.text = t.chartTitles.tax;
