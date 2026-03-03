@@ -1,124 +1,375 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="soft">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News — Belgium Economic Intelligence</title>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>The Fiscal Contagion — Belgium Economic Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <style>
-        /* ═══ DAY — clean white ═══ */
-        [data-theme="day"] {
-          --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
-          --text-cell:#1e293b; --text-muted:#94a3b8; --gold:#b58a2a;
-          --bg-card:#fff; --border-card:#e5e7eb;
-        }
-        /* ═══ SOFT — warm muted ═══ */
-        [data-theme="soft"] {
-          --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
-          --text-cell:#3b3228; --text-muted:#a39888; --gold:#c49a3c;
-          --bg-card:#faf6f0; --border-card:#ddd5c8;
-        }
-        /* ═══ NIGHT — deep blue ═══ */
-        [data-theme="night"] {
-          --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
-          --text-cell:#c8d2de; --text-muted:#3d5068; --gold:#d4a843;
-          --bg-card:#0f1826; --border-card:#1a2744;
+        :root {
+            --bg-primary: #fdf4ef;
+            --text-main: #111827;
+            --text-body: #4b5563;
+            --taxonomy-color: #800020;
+            --link-color: #1d4ed8;
+            --badge-bg: #1f2937;
+            --badge-text: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.15);
+            
+            --font-serif: "Playfair Display", serif;
+            --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+            
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 2rem;
         }
 
-        body { font-family: 'Figtree', sans-serif; background: var(--bg-page); color: var(--text-cell); margin: 0; padding: 40px; transition: background 0.3s, color 0.3s; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; color: var(--gold); }
-        .subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px; }
-        .news-card { background: var(--bg-card); border: 1px solid var(--border-card); padding: 30px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .news-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-card); }
-        .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .news-title { font-weight: 600; font-size: 1.2rem; margin-bottom: 5px; }
-        .news-date { font-size: 0.8rem; color: var(--text-muted); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            font-family: var(--font-sans);
+            color: var(--text-body);
+            line-height: 1.6;
+            padding: var(--spacing-lg);
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+            gap: var(--spacing-lg);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        article {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .taxonomy {
+            display: block;
+            color: var(--taxonomy-color);
+            font-weight: bold;
+            font-family: var(--font-sans);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        h2 {
+            font-family: var(--font-serif);
+            color: var(--text-main);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            line-height: 1.1;
+            margin-bottom: var(--spacing-md);
+            font-weight: 700;
+        }
+
+        .summary {
+            font-family: var(--font-sans);
+            color: var(--text-body);
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-md);
+            max-width: 65ch;
+        }
+
+        .article-content {
+            max-width: 65ch;
+        }
+
+        .article-content p {
+            margin-bottom: var(--spacing-md);
+            font-family: var(--font-sans);
+        }
+
+        figure {
+            margin: var(--spacing-md) 0;
+            width: 100%;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .chart-container {
+            background: rgba(0,0,0,0.02);
+            padding: 10px;
+            border-radius: 4px;
+            height: 250px;
+        }
+
+        .premium-badge {
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .author {
+            color: var(--link-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .author:hover {
+            text-decoration: underline;
+        }
+
+        .quote-box {
+            background: rgba(128, 0, 32, 0.05);
+            border-left: 4px solid var(--taxonomy-color);
+            padding: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+            font-style: italic;
+        }
+
+        blockquote {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            color: var(--text-main);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .attribution {
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-body);
+        }
+
+        @media (min-width: 1024px) {
+            .main-article {
+                grid-column: span 2;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 id="page-title">Economic News</h1>
-        <p class="subtitle" id="page-subtitle">Latest updates from the Belgian economy</p>
+
+<main>
+    <!-- MAIN ARTICLE -->
+    <article class="main-article">
+        <span class="taxonomy">Macroeconomic Analysis</span>
+        <h2>The Fiscal Contagion: AI Agency and the Collapse of Labor Revenues</h2>
+        <p class="summary">As AI task horizons grow logarithmically, Belgium faces a structural collapse of its wage-dependent tax base — and a narrow window to engineer a post-labor equilibrium</p>
         
-        <div class="news-card">
-            <div id="news-content">
-                <div class="news-item">
-                    <div class="news-title">NBB releases Autumn macroeconomic projections</div>
-                    <div class="news-date">March 2, 2026</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Belgium's public debt trajectory remains under focus</div>
-                    <div class="news-date">February 28, 2026</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Consumer confidence shows slight improvement in early Q1</div>
-                    <div class="news-date">February 25, 2026</div>
-                </div>
+        <figure>
+            <div class="charts-row">
+                <div class="chart-container"><canvas id="chartTaskHorizon"></canvas></div>
+                <div class="chart-container"><canvas id="chartUnemployment"></canvas></div>
+                <div class="chart-container"><canvas id="chartTaxGDP"></canvas></div>
             </div>
-        </div>
-    </div>
+        </figure>
 
-    <script>
-        const translations = {
-            en: {
-                title: "Economic News",
-                subtitle: "Latest updates from the Belgian economy",
-                items: [
-                    "NBB releases Autumn macroeconomic projections",
-                    "Belgium's public debt trajectory remains under focus",
-                    "Consumer confidence shows slight improvement in early Q1"
-                ]
-            },
-            fr: {
-                title: "Actualités Économiques",
-                subtitle: "Dernières mises à jour de l'économie belge",
-                items: [
-                    "La BNB publie ses projections macroéconomiques d'automne",
-                    "La trajectoire de la dette publique belge reste sous surveillance",
-                    "La confiance des consommateurs s'améliore légèrement début T1"
-                ]
-            },
-            nl: {
-                title: "Economisch Nieuws",
-                subtitle: "Laatste updates van de Belgische economie",
-                items: [
-                    "NBB publiceert herfst-macro-economische prognoses",
-                    "Belgiës staatsschuldtraject blijft onder de aandacht",
-                    "Consumentenvertrouwen toont lichte verbetering in begin Q1"
-                ]
-            }
-        };
-
-        function setTheme(t) {
-            document.documentElement.setAttribute('data-theme', t);
-        }
-
-        function setLang(l) {
-            const t = translations[l] || translations.en;
-            document.getElementById('page-title').textContent = t.title;
-            document.getElementById('page-subtitle').textContent = t.subtitle;
+        <div class="article-content">
+            <p>The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the "Task Horizon"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate.</p>
             
-            const newsItems = document.querySelectorAll('.news-item .news-title');
-            newsItems.forEach((item, idx) => {
-                if (t.items[idx]) item.textContent = t.items[idx];
-            });
+            <p>This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle "1-Month Tasks," effectively approaching AGI and operating as fully autonomous synthetic employees.</p>
+
+            <div class="quote-box">
+                <blockquote>"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks."</blockquote>
+                <div class="attribution">— Dr. Anya Sharma & Prof. David Chen</div>
+            </div>
+
+            <p>The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.</p>
+
+            <p>This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse.</p>
+
+            <p>Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.</p>
+
+            <p>To survive this valley of death, policymakers must engineer an "Elegant Equilibrium." This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat.</p>
+            
+            <p>By <a href="#" class="author">Robert Armstrong</a> and <a href="#" class="author">Ludovic Hunter-Tilney</a></p>
+        </div>
+    </article>
+
+    <!-- SIDEBAR ARTICLES -->
+    <aside>
+        <article>
+            <span class="premium-badge">Premium</span>
+            <span class="taxonomy">Utilities</span>
+            <h2>Grid Stability in the Age of High-Performance Compute</h2>
+            <p class="summary">European energy grids face unprecedented strain as data center demand triples.</p>
+        </article>
+
+        <article>
+            <span class="taxonomy">Technology sector</span>
+            <h2>The Silicon Shield: Defense tech's new frontier</h2>
+            <p class="summary">How sovereign AI is reshaping the geopolitical landscape of the Low Countries.</p>
+        </article>
+
+        <article>
+            <span class="premium-badge">Premium</span>
+            <span class="taxonomy">FT Swamp Notes</span>
+            <h2>Lobbying the LLMs</h2>
+            <p class="summary">The subtle art of prompt engineering for legislative influence.</p>
+        </article>
+    </aside>
+</main>
+
+<script>
+(function() {
+    const FT_SLATE   = '#111827';
+    const FT_MUTED   = '#4b5563';
+    const FT_BLUE    = '#1d4ed8';
+    const FT_CLARET  = '#800020';
+    const FT_TEAL    = '#0D7680';
+    const FT_GOLD    = '#B5832A';
+    const GRID_COLOR = 'rgba(0,0,0,0.05)';
+
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = FT_MUTED;
+
+    const sharedXConfig = {
+        type: 'linear',
+        min: 2020,
+        max: 2035,
+        ticks: {
+            stepSize: 5,
+            callback: v => Math.round(v)
+        },
+        grid: { display: false }
+    };
+
+    // AI Task Horizon
+    new Chart(document.getElementById('chartTaskHorizon'), {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Task Horizon (mins)',
+                data: [
+                    { x: 2020, y: 1 },
+                    { x: 2023, y: 5 },
+                    { x: 2027, y: 480 },
+                    { x: 2030, y: 10000 },
+                    { x: 2035, y: 100000 }
+                ],
+                borderColor: FT_BLUE,
+                backgroundColor: FT_BLUE,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: sharedXConfig,
+                y: {
+                    type: 'logarithmic',
+                    title: { display: true, text: 'Duration (mins, log)' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'AI Task Horizon (METR)', font: { family: 'Playfair Display', size: 14 } }
+            }
         }
+    });
 
-        window.addEventListener('message', function(e) {
-            if (e.data.type === 'setTheme') {
-                setTheme(e.data.value);
-            } else if (e.data.type === 'setLang') {
-                setLang(e.data.value);
+    // Unemployment
+    new Chart(document.getElementById('chartUnemployment'), {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Unemployment %',
+                data: [
+                    { x: 2020, y: 5 },
+                    { x: 2025, y: 5 },
+                    { x: 2028, y: 10 },
+                    { x: 2030, y: 18 },
+                    { x: 2032, y: 35 },
+                    { x: 2035, y: 33 }
+                ],
+                borderColor: FT_CLARET,
+                backgroundColor: FT_CLARET,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: sharedXConfig,
+                y: {
+                    min: 0,
+                    max: 40,
+                    title: { display: true, text: 'Rate (%)' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Unemployment Rate (%)', font: { family: 'Playfair Display', size: 14 } },
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            yMin: 15,
+                            yMax: 15,
+                            borderColor: FT_GOLD,
+                            borderDash: [5, 5],
+                            label: { content: 'UBI Trigger', display: true }
+                        }
+                    }
+                }
             }
-        });
+        }
+    });
 
-        // Notify parent we are ready
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.self !== window.top) {
-                window.parent.postMessage('dashboard-ready', '*');
+    // Tax-to-GDP
+    new Chart(document.getElementById('chartTaxGDP'), {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Tax/GDP %',
+                data: [
+                    { x: 2020, y: 43 },
+                    { x: 2025, y: 43 },
+                    { x: 2029, y: 44 },
+                    { x: 2030, y: 38 },
+                    { x: 2032, y: 28 },
+                    { x: 2035, y: 30 }
+                ],
+                borderColor: FT_TEAL,
+                backgroundColor: FT_TEAL,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: sharedXConfig,
+                y: {
+                    min: 20,
+                    max: 50,
+                    title: { display: true, text: 'Ratio (%)' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Tax-to-GDP Ratio (%)', font: { family: 'Playfair Display', size: 14 } }
             }
-        });
-    </script>
+        }
+    });
+})();
+</script>
 </body>
 </html>
