@@ -408,7 +408,10 @@
                 const s = stockResults[key];
                 const sign = s.change >= 0 ? '▲' : '▼';
                 const colorClass = s.change >= 0 ? 'stock-up' : 'stock-down';
-                const formattedPrice = s.currency === 'USD' ? `$${s.price.toFixed(4)}` : `${s.price.toFixed(2)}€`;
+                let formattedPrice;
+                if(s.currency === 'USD') formattedPrice = `$${s.price.toFixed(4)}`;
+                else if(s.currency === '%') formattedPrice = `${s.price.toFixed(2)}%`;
+                else formattedPrice = `${s.price.toFixed(2)}€`;
                 
                 return `
                     <div class="stock-item">
