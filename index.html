@@ -68,11 +68,15 @@
             border: none;
         }
         
-       .nav-button { transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border: 1px solid var(--border-btn); background: var(--bg-btn); color: var(--text-btn); }
+       .nav-button { transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border: none; background: transparent; color: var(--text-cell-muted); font-weight: 500; }
+       .nav-button:hover { color: var(--text-cell); }
        .nav-button.active {
-            background: var(--bg-btn-primary);
-            color: var(--text-btn-primary);
-            border-color: var(--bg-btn-primary);
+            background: transparent;
+            color: var(--text-cell);
+            border: none;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 4px;
         }
         
        .belgian-flag {
@@ -197,32 +201,32 @@
     </header>
 
     <nav class="sub-menu py-1 text-sm font-medium sticky top-[81px] z-40">
-        <div class="w-full px-8 flex items-center gap-x-1">
+        <div class="w-full px-8 flex items-center gap-x-4">
             <button onclick="loadDashboard(2)" id="btn-2"
-                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>📰</span> <span id="menu-news">NEWS</span>
+                    class="nav-button px-2 py-1 transition-all flex items-center">
+                <span id="menu-news">NEWS</span>
             </button>
 
             <button onclick="loadDashboard(3)" id="btn-3"
-                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>🔬</span> <span id="menu-analysis">ANALYSIS</span>
+                    class="nav-button px-2 py-1 transition-all flex items-center">
+                <span id="menu-analysis">ANALYSIS</span>
             </button>
 
-            <div class="w-px h-6 bg-gray-500/20 mx-2"></div>
+            <div class="w-px h-4 bg-gray-500/20 mx-1"></div>
 
             <button onclick="loadDashboard(0)" id="btn-0"
-                    class="nav-button active px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>📈</span> <span id="menu-stats">STATISTICS</span>
+                    class="nav-button active px-2 py-1 transition-all flex items-center">
+                <span id="menu-stats">STATISTICS</span>
             </button>
             
             <button onclick="loadDashboard(1)" id="btn-1"
-                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>⏱️</span> <span id="menu-clock">CLOCK</span>
+                    class="nav-button px-2 py-1 transition-all flex items-center">
+                <span id="menu-clock">CLOCK</span>
             </button>
 
             <button onclick="loadDashboard(4)" id="btn-4"
-                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>🤝</span> <span id="menu-about">ABOUT US</span>
+                    class="nav-button px-2 py-1 transition-all flex items-center">
+                <span id="menu-about">ABOUT US</span>
             </button>
         </div>
     </nav>
