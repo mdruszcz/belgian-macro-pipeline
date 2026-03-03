@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fiscal Contagion — Financial Times</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #FFF1E0;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 16mm 15mm 12mm 15mm;
+    font-family: 'Financier Text', 'Georgia', serif;
+    color: #262A33;
+    font-size: 11pt;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ══════════════ TOP RULE & MASTHEAD ══════════════ */
+  .top-rule {
+    border-top: 4px solid #9E2F50;
+    padding-top: 7px;
+    margin-bottom: 4px;
+  }
+
+  .masthead {
+    font-family: 'Metric', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8pt;
+    color: #66605C;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .masthead .section-tag {
+    color: #9E2F50;
+    font-weight: 700;
+  }
+
+  /* ══════════════ HEADLINES ══════════════ */
+  h1.article-title {
+    font-family: 'Financier Display', 'Perpetua', 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: 21pt;
+    line-height: 1.15;
+    color: #262A33;
+    margin-bottom: 5px;
+    letter-spacing: -0.02em;
+  }
+
+  .article-subtitle {
+    font-family: 'Metric', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9.5pt;
+    color: #66605C;
+    line-height: 1.35;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #9E2F50;
+    padding-bottom: 10px;
+  }
+
+  /* ══════════════ CHARTS GRID ══════════════ */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .chart-module {
+    background: #F2DFCE;
+    border-radius: 3px;
+    padding: 10px 10px 6px 10px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .chart-module h2 {
+    font-family: 'Metric', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #262A33;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(38,42,51,0.12);
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 170px;
+  }
+
+  /* ══════════════ BOTTOM GRID ══════════════ */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1.55fr 0.85fr;
+    gap: 18px;
+    margin-top: 2px;
+  }
+
+  .article-body p {
+    font-family: 'Financier Text', 'Georgia', 'Times New Roman', serif;
+    font-size: 9.2pt;
+    line-height: 1.52;
+    color: #262A33;
+    margin-bottom: 7px;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .article-body p:first-child::first-letter {
+    font-family: 'Financier Display', 'Perpetua', 'Times New Roman', serif;
+    font-size: 32pt;
+    float: left;
+    line-height: 0.78;
+    margin-right: 4px;
+    margin-top: 5px;
+    color: #9E2F50;
+  }
+
+  /* ══════════════ QUOTE BOX ══════════════ */
+  .quote-box {
+    background: #F2DFCE;
+    border-left: 3px solid #9E2F50;
+    border-radius: 2px;
+    padding: 14px 14px 14px 16px;
+    align-self: start;
+  }
+
+  .quote-box blockquote {
+    font-family: 'Financier Display', 'Perpetua', 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: 11pt;
+    line-height: 1.42;
+    color: #262A33;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+
+  .quote-box .attribution {
+    font-family: 'Metric', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #66605C;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ══════════════ CALLOUT STATS ══════════════ */
+  .callout-stat {
+    background: #F2DFCE;
+    border-radius: 2px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .callout-stat .big-number {
+    font-family: 'Financier Display', 'Perpetua', 'Times New Roman', serif;
+    font-size: 26pt;
+    font-weight: 400;
+    color: #0D7680;
+    line-height: 1.1;
+  }
+
+  .callout-stat .stat-label {
+    font-family: 'Metric', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #66605C;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  /* ══════════════ FOOTER ══════════════ */
+  .footer-rule {
+    border-top: 1px solid #9E2F50;
+    margin-top: 10px;
+    padding-top: 5px;
+    font-family: 'Metric', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 6.5pt;
+    color: #998F86;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media print {
+    body { padding: 12mm 13mm 10mm 13mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ MASTHEAD ═══════ -->
+<div class="top-rule">
+  <div class="masthead">
+    <span><span class="section-tag">Special Report</span> &nbsp;·&nbsp; Macroeconomic Analysis &nbsp;·&nbsp; AI &amp; The Future of Work</span>
+    <span>Financial Times &nbsp;·&nbsp; February 2026</span>
+  </div>
+</div>
+
+<!-- ═══════ HEADLINE ═══════ -->
+<h1 class="article-title">The Fiscal Contagion: AI Agency and the Collapse of Labor Revenues</h1>
+<div class="article-subtitle">As AI task horizons grow logarithmically, Belgium faces a structural collapse of its wage-dependent tax base — and a narrow window to engineer a post-labor equilibrium</div>
+
+<!-- ═══════ THREE CHARTS ═══════ -->
+<div class="charts-row">
+  <div class="chart-module">
+    <h2>AI Task Horizon (METR)</h2>
+    <div class="chart-container"><canvas id="chartTaskHorizon"></canvas></div>
+  </div>
+  <div class="chart-module">
+    <h2>Unemployment Rate (%)</h2>
+    <div class="chart-container"><canvas id="chartUnemployment"></canvas></div>
+  </div>
+  <div class="chart-module">
+    <h2>Total Tax-to-GDP Ratio (%)</h2>
+    <div class="chart-container"><canvas id="chartTaxGDP"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════ BOTTOM: ARTICLE + QUOTE ═══════ -->
+<div class="bottom-grid">
+
+  <!-- LEFT: ARTICLE -->
+  <div class="article-body">
+    <p>The exponential trajectory of artificial intelligence has breached a critical economic threshold. Leveraging data from the Model Evaluation and Threat Research (METR) organization, we observe that AI capabilities are no longer measured by static benchmarks, but by the "Task Horizon"—the duration for which an AI can autonomously plan and execute complex tasks with a 50% success rate. This metric is growing logarithmically. While models like ChatGPT handled micro-tasks, by 2030, models will seamlessly handle "1-Month Tasks," effectively approaching AGI and operating as fully autonomous synthetic employees.</p>
+
+    <p>The implications for the Belgian labor market are profound and deeply destabilizing. Belgium's economy relies heavily on white-collar cognitive labor. As AI crosses the 1-Day task threshold in 2027, structural unemployment will violently decouple from its 5% baseline, rocketing past the 15% Job Guarantee trigger and peaking at an apocalyptic 35% around 2032.</p>
+
+    <p>This job shock triggers an immediate fiscal contagion. Currently, the Belgian state relies massively on the Personal Income Tax (IPP) and social contributions (ONSS). As human labor is systematically substituted by near-zero marginal cost AI inference, this labor-tax base will structurally collapse. Total Tax-to-GDP is projected to plummet from a robust 43% down to a fiscally insolvent 28% at the 2032 crisis point, sparking a lethal Revenue-Debt Trap as nominal obligations remain fixed while the tax base evaporates.</p>
+
+    <p>To survive this valley of death, policymakers must engineer an "Elegant Equilibrium." This perfect scenario embraces the aggressive deflationary nature of AI to fund a localized Universal Basic Income, counterbalancing the fiat inflation required to keep the unemployed populace afloat. More critically, the state must transition from a wage-based economy to a property-based macroeconomy. By utilizing aggressive government matching funds and a 0.5% wealth circulation tax on ultra-high accounts, displaced laborers can be transitioned into sovereign owners of the very capital replacing them. Finally, the implementation of a sweeping "Compute Tax" in 2035 will restabilize the fiscal state at a 30% GDP ratio, ushering in an era of post-labor hyperabundance.</p>
+  </div>
+
+  <!-- RIGHT: QUOTE + CALLOUTS -->
+  <div>
+    <div class="quote-box">
+      <blockquote>"The exponential nature of this progress means the future arrives much faster than linear intuition suggests. We are rapidly approaching a point where AI can out-plan and out-execute human teams on significant economic tasks."</blockquote>
+      <div class="attribution">— Dr. Anya Sharma &amp; Prof. David Chen</div>
+    </div>
+    <div class="callout-stat">
+      <div class="big-number">35%</div>
+      <div class="stat-label">Peak unemployment forecast — Belgium, 2032</div>
+    </div>
+    <div class="callout-stat" style="margin-top:8px;">
+      <div class="big-number">−15pp</div>
+      <div class="stat-label">Projected Tax-to-GDP collapse from 43% to 28%</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="footer-rule">
+  <span>Sources: METR (2025), NBB, Eurostat, OECD Revenue Statistics. Projections are illustrative scenario modelling.</span>
+  <span>© Financial Times Ltd 2026</span>
+</div>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- ════════════ CHART.JS RENDERING ════════════════ -->
+<!-- ════════════════════════════════════════════════ -->
+<script>
+(function() {
+
+  /* ── FT Colour Palette ── */
+  const FT_SLATE   = '#262A33';
+  const FT_MUTED   = '#998F86';
+  const FT_BLUE    = '#2E6E9E';
+  const FT_CLARET  = '#9E2F50';
+  const FT_TEAL    = '#0D7680';
+  const FT_GOLD    = '#B5832A';
+  const GRID_COLOR = 'rgba(102,96,92,0.18)';
+
+  Chart.defaults.font.family = "'Metric', 'Helvetica Neue', Arial, sans-serif";
+  Chart.defaults.font.size = 9;
+  Chart.defaults.color = FT_MUTED;
+
+  /* ── Shared X-Axis (synchronized 2020-2035) ── */
+  const sharedXConfig = {
+    type: 'linear',
+    min: 2020,
+    max: 2035,
+    ticks: {
+      stepSize: 5,
+      color: FT_MUTED,
+      font: { size: 8 },
+      callback: function(v) { return String(Math.round(v)); }
+    },
+    grid: { display: false },
+    border: { color: FT_SLATE }
+  };
+
+  const sharedPlugins = {
+    legend: { display: false },
+    tooltip: { enabled: false }
+  };
+
+  /* ════════════════════════════════════════════════════ */
+  /*  CUSTOM PLUGIN: Smart Point Labels                  */
+  /*  Draws labels near data points with edge-aware      */
+  /*  alignment so text never clips outside the canvas   */
+  /* ════════════════════════════════════════════════════ */
+  const pointLabelPlugin = {
+    id: 'smartPointLabels',
+    afterDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      const area = chart.chartArea;
+
+      chart.data.datasets.forEach(function(ds, dsIndex) {
+        if (!ds.pointLabels) return;
+        var meta = chart.getDatasetMeta(dsIndex);
+
+        ctx.save();
+        ctx.font = "bold 7.5px 'Metric', 'Helvetica Neue', Arial, sans-serif";
+        ctx.fillStyle = ds.labelColor || FT_SLATE;
+
+        meta.data.forEach(function(point, i) {
+          var label = ds.pointLabels[i];
+          if (!label) return;
+
+          var offsetY = (ds.pointLabelOffsets && ds.pointLabelOffsets[i] !== undefined)
+            ? ds.pointLabelOffsets[i] : -12;
+          var px = point.x;
+          var py = point.y + offsetY;
+          var tw = ctx.measureText(label).width;
+
+          /* Edge-aware alignment */
+          if (px + tw / 2 > area.right - 4) {
+            ctx.textAlign = 'right';
+            ctx.fillText(label, area.right, py);
+          } else if (px - tw / 2 < area.left + 4) {
+            ctx.textAlign = 'left';
+            ctx.fillText(label, area.left, py);
+          } else {
+            ctx.textAlign = 'center';
+            ctx.fillText(label, px, py);
+          }
+        });
+
+        ctx.restore();
+      });
+    }
+  };
+
+
+  /* ═══════════════════════════════════════════════ */
+  /*  GRAPH 1: AI Task Horizon (Log Scale)          */
+  /* ═══════════════════════════════════════════════ */
+  new Chart(document.getElementById('chartTaskHorizon'), {
+    type: 'line',
+    data: {
+      datasets: [{
+        data: [
+          { x: 2020, y: 1 },
+          { x: 2023, y: 5 },
+          { x: 2027, y: 480 },
+          { x: 2030, y: 10000 },
+          { x: 2035, y: 100000 }
+        ],
+        borderColor: FT_BLUE,
+        backgroundColor: FT_BLUE,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: FT_BLUE,
+        pointBorderColor: '#F2DFCE',
+        pointBorderWidth: 2,
+        tension: 0.35,
+        fill: false,
+        clip: false,
+        pointLabels:      ['ChatGPT', 'GPT-4', '1-Day Tasks', '1-Month Tasks', 'Superhuman'],
+        pointLabelOffsets: [-14,       -14,     -14,           -14,             -14],
+        labelColor: FT_BLUE
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 22, right: 16, bottom: 4, left: 8 } },
+      scales: {
+        x: { ...sharedXConfig },
+        y: {
+          type: 'logarithmic',
+          min: 1,
+          max: 100000,
+          ticks: {
+            color: FT_MUTED,
+            font: { size: 7.5 },
+            callback: function(value) {
+              var map = { 1:'1 min', 10:'10 min', 100:'100 min', 1000:'1K min', 10000:'10K', 100000:'100K' };
+              return map[value] || '';
+            },
+            maxTicksLimit: 6
+          },
+          grid: { color: GRID_COLOR, drawTicks: false },
+          border: { color: FT_SLATE },
+          title: {
+            display: true,
+            text: 'Task Duration (mins, log scale)',
+            font: { size: 7, weight: '600' },
+            color: FT_MUTED
+          }
+        }
+      },
+      plugins: sharedPlugins
+    },
+    plugins: [pointLabelPlugin]
+  });
+
+
+  /* ═══════════════════════════════════════════════ */
+  /*  GRAPH 2: Unemployment Rate                    */
+  /* ═══════════════════════════════════════════════ */
+  new Chart(document.getElementById('chartUnemployment'), {
+    type: 'line',
+    data: {
+      datasets: [{
+        data: [
+          { x: 2020, y: 5 },
+          { x: 2025, y: 5 },
+          { x: 2028, y: 10 },
+          { x: 2030, y: 18 },
+          { x: 2032, y: 35 },
+          { x: 2035, y: 33 }
+        ],
+        borderColor: FT_CLARET,
+        backgroundColor: FT_CLARET,
+        borderWidth: 2.5,
+        pointRadius: 3.5,
+        pointBackgroundColor: FT_CLARET,
+        pointBorderColor: '#F2DFCE',
+        pointBorderWidth: 2,
+        tension: 0.3,
+        fill: false,
+        clip: false,
+        pointLabels:      ['5%', '', '10%', '18%', '35%', '33%'],
+        pointLabelOffsets: [-14,  0,  -14,   -14,  -14,    13],
+        labelColor: FT_CLARET
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 22, right: 16, bottom: 4, left: 8 } },
+      scales: {
+        x: { ...sharedXConfig },
+        y: {
+          type: 'linear',
+          min: 0,
+          max: 42,
+          ticks: {
+            stepSize: 10,
+            color: FT_MUTED,
+            font: { size: 7.5 },
+            callback: function(v) { return v + '%'; }
+          },
+          grid: { color: GRID_COLOR, drawTicks: false },
+          border: { color: FT_SLATE },
+          title: {
+            display: true,
+            text: 'Unemployment Rate (%)',
+            font: { size: 7, weight: '600' },
+            color: FT_MUTED
+          }
+        }
+      },
+      plugins: {
+        ...sharedPlugins,
+        annotation: {
+          annotations: {
+            ubiLine: {
+              type: 'line',
+              yMin: 15,
+              yMax: 15,
+              borderColor: FT_GOLD,
+              borderWidth: 1.5,
+              borderDash: [5, 3],
+              label: {
+                display: true,
+                content: 'UBI Trigger — 15%',
+                position: 'center',
+                backgroundColor: '#F2DFCE',
+                color: FT_GOLD,
+                font: { size: 7, weight: 'bold', family: "'Metric', 'Helvetica Neue', sans-serif" },
+                padding: { top: 1, bottom: 1, left: 4, right: 4 },
+                yAdjust: -10
+              }
+            }
+          }
+        }
+      }
+    },
+    plugins: [pointLabelPlugin]
+  });
+
+
+  /* ═══════════════════════════════════════════════ */
+  /*  GRAPH 3: Tax-to-GDP Ratio                     */
+  /* ═══════════════════════════════════════════════ */
+  new Chart(document.getElementById('chartTaxGDP'), {
+    type: 'line',
+    data: {
+      datasets: [{
+        data: [
+          { x: 2020, y: 43 },
+          { x: 2025, y: 43 },
+          { x: 2029, y: 44 },
+          { x: 2030, y: 38 },
+          { x: 2032, y: 28 },
+          { x: 2035, y: 30 }
+        ],
+        borderColor: FT_TEAL,
+        backgroundColor: FT_TEAL,
+        borderWidth: 2.5,
+        pointRadius: 3.5,
+        pointBackgroundColor: FT_TEAL,
+        pointBorderColor: '#F2DFCE',
+        pointBorderWidth: 2,
+        tension: 0.3,
+        fill: false,
+        clip: false,
+        pointLabels:      ['43%', '', '44%', '38%', '28%', '30%'],
+        pointLabelOffsets: [-14,   0,  -14,   13,    13,    -14],
+        labelColor: FT_TEAL
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 22, right: 50, bottom: 4, left: 8 } },
+      scales: {
+        x: { ...sharedXConfig },
+        y: {
+          type: 'linear',
+          min: 20,
+          max: 50,
+          ticks: {
+            stepSize: 5,
+            color: FT_MUTED,
+            font: { size: 7.5 },
+            callback: function(v) { return v + '%'; }
+          },
+          grid: { color: GRID_COLOR, drawTicks: false },
+          border: { color: FT_SLATE },
+          title: {
+            display: true,
+            text: 'Tax-to-GDP Ratio (%)',
+            font: { size: 7, weight: '600' },
+            color: FT_MUTED
+          }
+        }
+      },
+      plugins: {
+        ...sharedPlugins,
+        annotation: {
+          annotations: {
+            crisisRing: {
+              type: 'point',
+              xValue: 2032,
+              yValue: 28,
+              radius: 8,
+              backgroundColor: 'rgba(158,47,80,0.10)',
+              borderColor: FT_CLARET,
+              borderWidth: 1.5
+            },
+            crisisLabel: {
+              type: 'label',
+              xValue: 2032,
+              yValue: 24,
+              content: ['CRISIS POINT'],
+              backgroundColor: 'transparent',
+              color: FT_CLARET,
+              font: { size: 6.5, weight: 'bold', family: "'Metric', 'Helvetica Neue', sans-serif" },
+              padding: 0
+            },
+            computeTax: {
+              type: 'label',
+              xValue: 2033.5,
+              yValue: 36,
+              content: ['Compute Tax', 'Implemented'],
+              backgroundColor: 'rgba(13,118,128,0.08)',
+              borderColor: FT_TEAL,
+              borderWidth: 1,
+              borderRadius: 3,
+              color: FT_TEAL,
+              font: { size: 6.5, weight: 'bold', family: "'Metric', 'Helvetica Neue', sans-serif" },
+              padding: { top: 3, bottom: 3, left: 5, right: 5 }
+            },
+            computeArrow: {
+              type: 'line',
+              xMin: 2034.2,
+              xMax: 2034.8,
+              yMin: 34.5,
+              yMax: 31,
+              borderColor: FT_TEAL,
+              borderWidth: 1,
+              borderDash: [3, 2]
+            }
+          }
+        }
+      }
+    },
+    plugins: [pointLabelPlugin]
+  });
+
+})();
+</script>
+
+</body>
+</html>
