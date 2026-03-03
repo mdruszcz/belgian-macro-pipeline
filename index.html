@@ -182,18 +182,6 @@
 
     <nav class="sub-menu py-1 text-sm font-medium sticky top-[81px] z-40">
         <div class="w-full px-8 flex items-center gap-x-1">
-            <button onclick="loadDashboard(0)" id="btn-0"
-                    class="nav-button active px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>📈</span> <span id="menu-stats">STATISTICS</span>
-            </button>
-            
-            <button onclick="loadDashboard(1)" id="btn-1"
-                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
-                <span>⏱️</span> <span id="menu-clock">CLOCK</span>
-            </button>
-
-            <div class="w-px h-6 bg-gray-500/20 mx-2"></div>
-
             <button onclick="loadDashboard(2)" id="btn-2"
                     class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
                 <span>📰</span> <span id="menu-news">NEWS</span>
@@ -202,6 +190,18 @@
             <button onclick="loadDashboard(3)" id="btn-3"
                     class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
                 <span>🔬</span> <span id="menu-analysis">ANALYSIS</span>
+            </button>
+
+            <div class="w-px h-6 bg-gray-500/20 mx-2"></div>
+
+            <button onclick="loadDashboard(0)" id="btn-0"
+                    class="nav-button active px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
+                <span>📈</span> <span id="menu-stats">STATISTICS</span>
+            </button>
+            
+            <button onclick="loadDashboard(1)" id="btn-1"
+                    class="nav-button px-6 py-2 rounded-xl transition-all hover:bg-gray-500/10 flex items-center gap-x-2">
+                <span>⏱️</span> <span id="menu-clock">CLOCK</span>
             </button>
 
             <button onclick="loadDashboard(4)" id="btn-4"
@@ -322,12 +322,17 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            if (e.key === "1") loadDashboard(0);
-            if (e.key === "2") loadDashboard(1);
+            if (e.key === "1") loadDashboard(2); // News
+            if (e.key === "2") loadDashboard(3); // Analysis
+            if (e.key === "3") loadDashboard(0); // Stats
+            if (e.key === "4") loadDashboard(1); // Clock
+            if (e.key === "5") loadDashboard(4); // About
         });
 
         // Init everything
         window.onload = function() {
+            // Default to News (index 2)
+            loadDashboard(2);
             const savedLang = localStorage.getItem("lang") || 'en';
             const savedTheme = localStorage.getItem("theme") || 'soft';
             
