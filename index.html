@@ -14,46 +14,48 @@
       })();
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Overpass+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* ═══ DAY — clean white ═══ */
+        /* ═══ DAY ═══ */
         [data-theme="day"] {
-          --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
-          --bg-header-sub:rgba(255,255,255,.55); --bg-header-right:rgba(255,255,255,.6); --gold:#b58a2a;
-          --bg-controls:#fff; --border-controls:#e5e7eb; --text-status:#6b7280;
-          --bg-btn:#fff; --text-btn:#374151; --border-btn:#d1d5db; --bg-btn-hover:#f3f4f6;
-          --bg-btn-primary:#2a5080; --text-btn-primary:#fff;
-          --bg-pill:#fff; --text-pill:#6b7280; --border-pill:#d1d5db; --bg-pill-active:#2a5080; --text-pill-active:#fff;
-          --text-section:#1e3a5f; --border-section:#1e3a5f;
-          --text-cell:#1e293b; --text-cell-muted:#94a3b8; --text-cell-dim:#64748b;
+          --bg-page:#ffffff; --bg-header:#ffffff; --bg-header-text:#000000;
+          --bg-header-sub:rgba(0,0,0,.55); --bg-header-right:rgba(0,0,0,.6); --gold:#991b1b;
+          --bg-controls:#f3f4f6; --border-controls:#e5e7eb; --text-status:#374151;
+          --bg-btn:#ffffff; --text-btn:#000000; --border-btn:#e5e7eb; --bg-btn-hover:#f9fafb;
+          --bg-btn-primary:#000000; --text-btn-primary:#ffffff;
+          --bg-pill:#ffffff; --text-pill:#374151; --border-pill:#e5e7eb; --bg-pill-active:#000000; --text-pill-active:#ffffff;
+          --text-section:#000000; --border-section:#000000;
+          --text-cell:#000000; --text-cell-muted:#374151; --text-cell-dim:#4b5563;
         }
-        /* ═══ SOFT — warm muted ═══ */
+        /* ═══ SOFT ═══ */
         [data-theme="soft"] {
-          --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
-          --bg-header-sub:rgba(245,240,234,.5); --bg-header-right:rgba(245,240,234,.55); --gold:#c49a3c;
-          --bg-controls:#ece6dc; --border-controls:#d9d0c3; --text-status:#7a6f63;
-          --bg-btn:#ece6dc; --text-btn:#4a3f35; --border-btn:#d1c8ba; --bg-btn-hover:#e2dacf;
-          --bg-btn-primary:#5a4a3a; --text-btn-primary:#f5f0ea;
-          --bg-pill:#ece6dc; --text-pill:#7a6f63; --border-pill:#d1c8ba; --bg-pill-active:#5a4a3a; --text-pill-active:#f5f0ea;
-          --text-section:#3b3228; --border-section:#3b3228;
-          --text-cell:#3b3228; --text-cell-muted:#a39888; --text-cell-dim:#7a6f63;
+          --bg-page:#fdf4ef; --bg-header:#fdf4ef; --bg-header-text:#111827;
+          --bg-header-sub:rgba(17,24,39,.5); --bg-header-right:rgba(17,24,39,.55); --gold:#800020;
+          --bg-controls:#f5e9e2; --border-controls:rgba(0, 0, 0, 0.15); --text-status:#4b5563;
+          --bg-btn:#f5e9e2; --text-btn:#111827; --border-btn:rgba(0, 0, 0, 0.1); --bg-btn-hover:#efe3db;
+          --bg-btn-primary:#1f2937; --text-btn-primary:#ffffff;
+          --bg-pill:#f5e9e2; --text-pill:#4b5563; --border-pill:rgba(0, 0, 0, 0.1); --bg-pill-active:#1f2937; --text-pill-active:#ffffff;
+          --text-section:#111827; --border-section:#111827;
+          --text-cell:#111827; --text-cell-muted:#4b5563; --text-cell-dim:#6b7280;
         }
-        /* ═══ NIGHT — deep blue ═══ */
+        /* ═══ NIGHT ═══ */
         [data-theme="night"] {
-          --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
-          --bg-header-sub:rgba(232,236,242,.45); --bg-header-right:rgba(136,153,173,.8); --gold:#d4a843;
-          --bg-controls:#111927; --border-controls:#1e2d45; --text-status:#5a6b80;
-          --bg-btn:#111927; --text-btn:#8899ad; --border-btn:#1e2d45; --bg-btn-hover:#182438;
-          --bg-btn-primary:#1e3a5f; --text-btn-primary:#e8ecf2;
-          --bg-pill:#111927; --text-pill:#5a6b80; --border-pill:#1e2d45; --bg-pill-active:#1e3a5f; --text-pill-active:#e8ecf2;
-          --text-section:#7db4e0; --border-section:#1e3a5f;
-          --text-cell:#c8d2de; --text-cell-muted:#3d5068; --text-cell-dim:#5a6b80;
+          --bg-page:#0f172a; --bg-header:#0f172a; --bg-header-text:#f8fafc;
+          --bg-header-sub:rgba(248,250,252,.45); --bg-header-right:rgba(148,163,184,.8); --gold:#f87171;
+          --bg-controls:#1e293b; --border-controls:#334155; --text-status:#94a3b8;
+          --bg-btn:#1e293b; --text-btn:#f8fafc; --border-btn:#334155; --bg-btn-hover:#2d3748;
+          --bg-btn-primary:#334155; --text-btn-primary:#f8fafc;
+          --bg-pill:#1e293b; --text-pill:#94a3b8; --border-pill:#334155; --bg-pill-active:#334155; --text-pill-active:#f8fafc;
+          --text-section:#f8fafc; --border-section:#334155;
+          --text-cell:#f8fafc; --text-cell-muted:#94a3b8; --text-cell-dim:#64748b;
         }
 
-        body { font-family: 'Figtree', sans-serif; background: var(--bg-page); color: var(--text-cell); transition: background 0.3s, color 0.3s; }
-       .header-font { font-family: 'Space Grotesk', sans-serif; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-page); color: var(--text-cell); transition: background 0.3s, color 0.3s; }
+       .header-font { font-family: 'Playfair Display', serif; font-weight: 700; }
         
        .iframe-container {
             height: calc(100vh - 166px); /* Exact height between menu and footer */
@@ -80,20 +82,6 @@
         /* SUB-MENU */
        .sub-menu { background: var(--bg-controls); border-bottom: 1px solid var(--border-controls); color: var(--text-cell); }
 
-        /* AI CHAT */
-       .chat-sidebar { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); background: var(--bg-page); border-left: 1px solid var(--border-controls); }
-       .chat-sidebar.open { transform: translateX(0); }
-       .message-bubble { max-width: 80%; padding: 12px 16px; border-radius: 18px; position: relative; }
-       .user-bubble { background: var(--gold); color: white; border-bottom-right-radius: 4px; }
-       .ai-bubble { background: var(--bg-controls); border-bottom-left-radius: 4px; color: var(--text-cell); border: 1px solid var(--border-controls); }
-       .typing { display: flex; gap: 4px; }
-       .typing-dot { width: 6px; height: 6px; background: var(--text-cell-muted); border-radius: 50%; animation: typingBounce 1.2s infinite; }
-       .typing-dot:nth-child(2) { animation-delay: 150ms; }
-       .typing-dot:nth-child(3) { animation-delay: 300ms; }
-        @keyframes typingBounce {
-            0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-5px); }
-        }
 
         /* BETA BADGE */
        .beta-badge { font-size: 10px; letter-spacing: 1px; background: var(--gold); color: white; padding: 1px 6px; border-radius: 9999px; font-weight: 700; }
@@ -140,7 +128,7 @@
        .dd-wrap.theme,.dd-wrap.lang{width:42px}
        .theme-switcher,.lang-switch{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.1);border-radius:8px;padding:3px;position:absolute;top:0;left:0;right:0;z-index:100;transition:background .2s,box-shadow .2s}
        .dd-wrap:hover .theme-switcher,.dd-wrap:hover .lang-switch{background:var(--bg-page);box-shadow:0 4px 12px rgba(0,0,0,.25)}
-       .theme-btn,.lang-btn{font-family:'Figtree';border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--bg-header-text);transition:all .15s;text-align:center;display:none;order:2;padding:4px 0;width:100%;height:28px;line-height:20px}
+       .theme-btn,.lang-btn{font-family:'Inter';border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--bg-header-text);transition:all .15s;text-align:center;display:none;order:2;padding:4px 0;width:100%;height:28px;line-height:20px}
        .theme-btn{font-size:.85rem}
        .lang-btn{font-size:.7rem;font-weight:700}
        .theme-btn.active,.lang-btn.active{display:block;order:1;opacity:1;background:var(--bg-page);color:var(--text-section);box-shadow:0 2px 4px rgba(0,0,0,.1)}
@@ -152,7 +140,7 @@
 
 <body class="page-index overflow-hidden">
 
-    <header class="sticky top-0 z-50 border-b" style="background: var(--bg-header); border-color: var(--border-controls);">
+    <header class="sticky top-0 z-50 border-b" style="background: var(--bg-page); border-color: var(--border-controls);">
         <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-x-4" aria-label="Belpulse Beta">
                 <div class="w-10 h-10 rounded-2xl belgian-flag flex items-center justify-center text-3xl shadow-inner">
@@ -171,7 +159,7 @@
                 <!-- Buttons moved to sub-menu -->
             </div>
 
-            <div class="flex items-center gap-x-3">
+            <div class="flex items-center gap-x-6">
                 <!-- CUSTOM DROPDOWNS FROM DASHBOARD -->
                 <div class="dd-wrap theme">
                     <div class="theme-switcher">
@@ -188,13 +176,6 @@
                         <button class="lang-btn" id="btn-nl" onclick="setLang('nl')">NL</button>
                     </div>
                 </div>
-
-                <button onclick="toggleChat()" id="ai-trigger-btn"
-                        class="flex items-center gap-x-3 px-6 py-3 rounded-3xl font-semibold text-sm transition-all active:scale-95"
-                        style="background: var(--gold); color: white;">
-                    <span class="text-xl">🤖</span>
-                    <span id="ai-btn-text">ASK BELPULSE AI</span>
-                </button>
             </div>
         </div>
     </header>
@@ -244,42 +225,6 @@
         </div>
     </footer>
 
-    <div id="chat-sidebar" class="chat-sidebar fixed top-0 right-0 h-screen w-96 shadow-2xl z-50 flex flex-col">
-        <div class="px-6 py-5 flex items-center justify-between border-b" style="background: var(--bg-header); border-color: var(--border-controls); color: var(--bg-header-text);">
-            <div class="flex items-center gap-x-3">
-                <div class="w-9 h-9 rounded-2xl belgian-flag flex items-center justify-center text-2xl">🇧🇪</div>
-                <div>
-                    <div class="font-semibold text-lg" id="chat-title">BelPulse AI</div>
-                    <div id="chat-sub" class="text-emerald-400 text-xs font-mono flex items-center gap-x-1">
-                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                        ONLINE • Powered by real Belgian macro data
-                    </div>
-                </div>
-            </div>
-            <button onclick="toggleChat()" class="text-zinc-400 hover:text-white text-2xl leading-none">×</button>
-        </div>
-
-        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6">
-        </div>
-
-        <div class="p-6 border-t" style="background: var(--bg-controls); border-color: var(--border-controls);">
-            <div class="flex gap-x-3">
-                <input id="chat-input" 
-                       type="text" 
-                       placeholder="Ask about debt, growth, HERMES scenarios..." 
-                       class="flex-1 rounded-3xl px-6 py-4 text-sm focus:outline-none transition-colors"
-                       style="background: var(--bg-page); color: var(--text-cell); border: 1px solid var(--border-controls);"
-                       onkeypress="if(event.key === 'Enter') sendMessage()">
-                <button onclick="sendMessage()" 
-                        class="w-12 h-12 rounded-3xl flex items-center justify-center text-xl transition-all active:scale-95"
-                        style="background: var(--gold); color: white;">
-                    ↑
-                </button>
-            </div>
-            <div class="text-[10px] mt-3 text-center" style="color: var(--text-cell-muted)">Demo AI • Real version connects to your HERMES model</div>
-        </div>
-    </div>
-
     <script>
         // === SYNC SYSTEM ===
         function syncDashboard() {
@@ -309,13 +254,6 @@
             
             // Update UI translations
             document.getElementById('subtitle').textContent = translations[l].subtitle;
-            document.getElementById('ai-btn-text').textContent = translations[l].aiBtn;
-            document.getElementById('chat-title').textContent = translations[l].chatTitle;
-            document.getElementById('chat-sub').innerHTML = `
-                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                ${translations[l].chatSub}
-            `;
-            document.getElementById('chat-input').placeholder = translations[l].chatPlaceholder;
 
             // Update Menu
             document.getElementById('menu-stats').textContent = translations[l].menuStats;
@@ -325,11 +263,6 @@
             document.getElementById('menu-about').textContent = translations[l].menuAbout;
 
             syncDashboard();
-
-            const chatMessages = document.getElementById('chat-messages');
-            if (chatMessages.children.length === 0 && chatOpen) {
-                addMessage(translations[l].welcome, false);
-            }
         }
 
         // === LANGUAGE SYSTEM ===
@@ -338,11 +271,6 @@
         const translations = {
             en: {
                 subtitle: "BELGIUM'S ECONOMIC PULSE",
-                aiBtn: "ASK BELPULSE AI",
-                chatTitle: "BelPulse AI",
-                chatSub: "ONLINE • Powered by real Belgian macro data",
-                chatPlaceholder: "Ask about debt, growth, HERMES scenarios...",
-                welcome: "👋 Hi! I’m BelPulse AI — your personal Belgian macro analyst. Ask me anything about the dashboards, fiscal policy, debt trajectory, or run quick HERMES-style scenarios!",
                 menuStats: "STATISTICS",
                 menuClock: "CLOCK",
                 menuNews: "NEWS",
@@ -351,11 +279,6 @@
             },
             fr: {
                 subtitle: "LE POULS ÉCONOMIQUE DE LA BELGIQUE",
-                aiBtn: "INTERROGER BELPULSE AI",
-                chatTitle: "BelPulse AI",
-                chatSub: "EN LIGNE • Alimenté par des données macro belges réelles",
-                chatPlaceholder: "Posez des questions sur la dette, la croissance, les scénarios HERMES...",
-                welcome: "👋 Salut! Je suis BelPulse AI — votre analyste macro belge personnel. Demandez-moi tout sur les tableaux de bord, la politique fiscale, la trajectoire de la dette ou lancez des scénarios HERMES rapides!",
                 menuStats: "STATISTIQUES",
                 menuClock: "HORLOGE",
                 menuNews: "NOUVELLES",
@@ -364,43 +287,11 @@
             },
             nl: {
                 subtitle: "BELGIË'S ECONOMISCHE PULS",
-                aiBtn: "VRAAG AAN BELPULSE AI",
-                chatTitle: "BelPulse AI",
-                chatSub: "ONLINE • Aangedreven door echte Belgische macrodata",
-                chatPlaceholder: "Vraag naar schuld, groei, HERMES-scenario's...",
-                welcome: "👋 Hoi! Ik ben BelPulse AI — jouw persoonlijke Belgische macro-analist. Vraag me alles over de dashboards, fiscaal beleid, schuldenpad of voer snelle HERMES-scenario’s uit!",
                 menuStats: "STATISTIEKEN",
                 menuClock: "KLOK",
                 menuNews: "NIEUWS",
                 menuAnalysis: "ANALYSE",
                 menuAbout: "OVER ONS"
-            }
-        };
-
-        const sampleResponses = {
-            en: {
-                default: "I'm BelPulse AI. I can help you with Belgian macroeconomic data.",
-                debt: "Public debt-to-GDP stands at 107.4%. Without consolidation, it will keep rising.",
-                deficit: "The 2026 deficit is projected at 5.6% of GDP — highest in the eurozone.",
-                growth: "NBB now expects only 1.1% real GDP growth in 2026.",
-                heremes: "The HERMES model shows a 2 pp corporate tax cut would boost GDP by 0.4% but widen the deficit.",
-                unemployment: "National unemployment 5.9%. Flanders 4.1%, Wallonia 7.9%, Brussels 11.2%."
-            },
-            fr: {
-                default: "Je suis BelPulse AI. Je peux vous aider avec les données macroéconomiques belges.",
-                debt: "La dette publique atteint 107,4 % du PIB. Sans consolidation, elle continuera d’augmenter.",
-                deficit: "Le déficit 2026 est projeté à 5,6 % du PIB — le plus élevé de la zone euro.",
-                growth: "La BNB prévoit désormais seulement 1,1 % de croissance réelle du PIB en 2026.",
-                heremes: "Le modèle HERMES montre qu’une baisse de 2 pp de l’impôt des sociétés boosterait le PIB de 0,4 % mais creuserait le déficit.",
-                unemployment: "Chômage national 5,9 %. Flandre 4,1 %, Wallonie 7,9 %, Bruxelles 11,2 %."
-            },
-            nl: {
-                default: "Ik ben BelPulse AI. Ik kan u helpen met Belgische macro-economische gegevens.",
-                debt: "Overheidsschuld staat op 107,4% van het BBP. Zonder maatregelen blijft ze stijgen.",
-                deficit: "Het tekort 2026 wordt geraamd op 5,6% van het BBP — hoogste in de eurozone.",
-                growth: "NBB verwacht nu slechts 1,1% reële BBP-groei in 2026.",
-                heremes: "Het HERMES-model toont dat een verlaging van 2 pp vennootschapsbelasting het BBP met 0,4% zou boosten maar het tekort zou vergroten.",
-                unemployment: "Nationale werkloosheid 5,9%. Vlaanderen 4,1%, Wallonië 7,9%, Brussel 11,2%."
             }
         };
 
@@ -429,94 +320,10 @@
         }
 
 
-        // === AI CHAT ===
-        let chatOpen = false;
-        const chatMessages = document.getElementById('chat-messages');
-
-        function addMessage(text, isUser) {
-            const msg = document.createElement('div');
-            msg.className = `flex ${isUser? 'justify-end' : 'justify-start'}`;
-            msg.innerHTML = `
-                <div class="message-bubble ${isUser? 'user-bubble' : 'ai-bubble'}">
-                    ${text}
-                </div>
-            `;
-            chatMessages.appendChild(msg);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function showTyping() {
-            const typing = document.createElement('div');
-            typing.id = 'typing-indicator';
-            typing.className = 'flex justify-start';
-            typing.innerHTML = `
-                <div class="ai-bubble px-4 py-3">
-                    <div class="typing">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
-            `;
-            chatMessages.appendChild(typing);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            return typing;
-        }
-
-        function removeTyping() {
-            const typing = document.getElementById('typing-indicator');
-            if (typing) typing.remove();
-        }
-
-        function getAIResponse(message) {
-            const lower = message.toLowerCase();
-            const langResponses = sampleResponses[currentLang];
-            if (lower.includes('debt') || lower.includes('dette') || lower.includes('schuld')) return langResponses.debt;
-            if (lower.includes('deficit') || lower.includes('déficit') || lower.includes('tekort')) return langResponses.deficit;
-            if (lower.includes('growth') || lower.includes('croissance') || lower.includes('groei')) return langResponses.growth;
-            if (lower.includes('hermes') || lower.includes('simulation') || lower.includes('simulatie')) return langResponses.heremes;
-            if (lower.includes('unemployment') || lower.includes('chômage') || lower.includes('werkloosheid')) return langResponses.unemployment;
-            return langResponses.default;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-
-            addMessage(text, true);
-            input.value = '';
-
-            const typingEl = showTyping();
-
-            setTimeout(() => {
-                removeTyping();
-                const response = getAIResponse(text);
-                addMessage(response, false);
-            }, 950);
-        }
-
-        function toggleChat() {
-            const sidebar = document.getElementById('chat-sidebar');
-            chatOpen = !chatOpen;
-            sidebar.classList.toggle('open', chatOpen);
-            
-            if (chatOpen && chatMessages.children.length === 0) {
-                setTimeout(() => {
-                    addMessage(translations[currentLang].welcome, false);
-                }, 600);
-            }
-        }
-
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (e.key === "1") loadDashboard(0);
             if (e.key === "2") loadDashboard(1);
-            if (e.key === "/" && document.getElementById('chat-input') !== document.activeElement) {
-                e.preventDefault();
-                toggleChat();
-                setTimeout(() => document.getElementById('chat-input').focus(), 500);
-            }
         });
 
         // Init everything
@@ -536,9 +343,6 @@
 
             // Apply translations
             document.getElementById('subtitle').textContent = translations[savedLang].subtitle;
-            document.getElementById('ai-btn-text').textContent = translations[savedLang].aiBtn;
-            document.getElementById('chat-title').textContent = translations[savedLang].chatTitle;
-            document.getElementById('chat-input').placeholder = translations[savedLang].chatPlaceholder;
             
             document.getElementById('menu-stats').textContent = translations[savedLang].menuStats;
             document.getElementById('menu-clock').textContent = translations[savedLang].menuClock;

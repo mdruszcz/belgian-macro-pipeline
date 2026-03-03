@@ -4,37 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🇧🇪 Belgique - Dashboard Économique LIVE 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <style>
-        /* ═══ DAY — clean white ═══ */
+        /* ═══ DAY ═══ */
         [data-theme="day"] {
-          --bg-page:#f7f7f5; --bg-header:linear-gradient(135deg,#1e3a5f,#2a5080); --bg-header-text:#fff;
-          --bg-controls:#fff; --border-controls:#e5e7eb; --text-cell:#1e293b;
-          --bg-card: #fff; --border-card: #e2e8f0;
-          --text-muted: #6b7280; --text-dim: #94a3b8;
+          --bg-page:#ffffff; --bg-header:#ffffff; --bg-header-text:#000000;
+          --bg-controls:#f3f4f6; --border-controls:#e5e7eb; --text-cell:#000000;
+          --bg-card: #ffffff; --border-card: #e5e7eb;
+          --text-muted: #374151; --text-dim: #4b5563;
           --col-black: #000; --col-yellow: #fdda24; --col-red: #c8102e;
-          --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
-          --header-bg-solid: #1e3a5f;
+          --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          --header-bg-solid: #ffffff;
         }
-        /* ═══ SOFT — warm muted ═══ */
+        /* ═══ SOFT ═══ */
         [data-theme="soft"] {
-          --bg-page:#f5f0ea; --bg-header:linear-gradient(135deg,#3b3228,#5a4a3a); --bg-header-text:#f5f0ea;
-          --bg-controls:#ece6dc; --border-controls:#d9d0c3; --text-cell:#3b3228;
-          --bg-card: #faf6f0; --border-card: #ddd5c8;
-          --text-muted: #7a6f63; --text-dim: #a39888;
+          --bg-page:#fdf4ef; --bg-header:#fdf4ef; --bg-header-text:#111827;
+          --bg-controls:#f5e9e2; --border-controls:rgba(0,0,0,0.15); --text-cell:#111827;
+          --bg-card: #fdf4ef; --border-card: rgba(0,0,0,0.1);
+          --text-muted: #4b5563; --text-dim: #6b7280;
           --col-black: #2d2926; --col-yellow: #ffd100; --col-red: #ef3340;
-          --card-shadow: 0 4px 12px rgba(0,0,0,0.04);
-          --header-bg-solid: #3b3228;
+          --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          --header-bg-solid: #fdf4ef;
         }
-        /* ═══ NIGHT — deep blue ═══ */
+        /* ═══ NIGHT ═══ */
         [data-theme="night"] {
-          --bg-page:#0c1220; --bg-header:linear-gradient(135deg,#0a0f1c,#131d33); --bg-header-text:#e8ecf2;
-          --bg-controls:#111927; --border-controls:#1e2d45; --text-cell:#c8d2de;
-          --bg-card: #0f1826; --border-card: #1a2744;
-          --text-muted: #5a6b80; --text-dim: #3d5068;
+          --bg-page:#0f172a; --bg-header:#0f172a; --bg-header-text:#f8fafc;
+          --bg-controls:#1e293b; --border-controls:#334155; --text-cell:#f8fafc;
+          --bg-card: #1e293b; --border-card: #334155;
+          --text-muted: #94a3b8; --text-dim: #64748b;
           --col-black: #000; --col-yellow: #fdda24; --col-red: #c8102e;
-          --card-shadow: 0 10px 40px rgba(0,0,0,0.4);
-          --header-bg-solid: #0a0f1c;
+          --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          --header-bg-solid: #0f172a;
         }
 
         :root {
@@ -51,7 +53,7 @@
         }
 
         body {
-            font-family: 'Source Sans Pro', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: var(--bg-page);
             min-height: 100vh;
             overflow-x: hidden;
@@ -65,22 +67,22 @@
             top: 0;
             left: 0;
             right: 0;
-            background: var(--header-bg-solid);
+            background: var(--bg-page);
             backdrop-filter: blur(20px);
             z-index: 1000;
             padding: 12px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 4px solid;
-            border-image: linear-gradient(90deg, #000 33%, var(--yellow) 33%, var(--yellow) 66%, var(--red) 66%) 1;
+            border-bottom: 1px solid var(--border-controls);
             color: var(--bg-header-text);
         }
 
         .header h1 {
-            font-family: 'Bebas Neue', sans-serif;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
             font-size: 1.8rem;
-            letter-spacing: 4px;
+            letter-spacing: 1px;
             display: flex;
             align-items: center;
             gap: 15px;
@@ -109,7 +111,8 @@
         }
 
         .live-clock {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
             font-size: 1.1rem;
             color: var(--yellow);
             background: rgba(253, 218, 36, 0.1);
@@ -143,7 +146,7 @@
         }
 
         .live-badge span {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
             font-size: 0.85rem;
             color: var(--green);
             font-weight: 700;
@@ -234,16 +237,18 @@
         }
 
         .card-title {
-            font-family: 'Bebas Neue', sans-serif;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
             font-size: 1.1rem;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             opacity: 0.85;
             color: var(--text-cell);
         }
 
         .live-value {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
             font-size: 2rem;
             font-weight: 700;
             letter-spacing: -1px;
@@ -272,7 +277,8 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
             font-size: 0.8rem;
             padding: 5px 12px;
             border-radius: 20px;
@@ -293,9 +299,10 @@
 
         /* Section Headers */
         .section-title {
-            font-family: 'Bebas Neue', sans-serif;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
             font-size: 1.2rem;
-            letter-spacing: 3px;
+            letter-spacing: 1px;
             padding: 12px 0;
             margin: 20px 0 15px;
             border-bottom: 2px solid var(--border-card);
@@ -333,7 +340,8 @@
         }
 
         .info-value {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
             font-weight: 700;
             color: var(--text-cell);
         }
@@ -364,7 +372,8 @@
         }
 
         .top-stat-value {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
             font-size: 1.1rem;
             font-weight: 700;
             color: var(--text-cell);
@@ -394,13 +403,13 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--header-bg-solid);
+            background: var(--bg-page);
             padding: 10px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 0.75rem;
-            color: var(--bg-header-text);
+            color: var(--text-muted);
             opacity: 0.8;
             border-top: 1px solid var(--border-card);
             z-index: 1000;
@@ -409,7 +418,8 @@
         .footer-stats {
             display: flex;
             gap: 25px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
         }
 
         .footer-stat {
