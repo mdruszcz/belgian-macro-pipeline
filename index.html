@@ -78,6 +78,20 @@
        .belgian-flag {
             background: linear-gradient(to right, #000000 33.33%, #FFCC00 33.33%, #FFCC00 66.66%, #C8102E 66.66%);
         }
+        
+        .ecg-line {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: dash 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+        }
+        
+        @keyframes dash {
+            0% { stroke-dashoffset: 100; opacity: 0; }
+            10% { opacity: 1; }
+            80% { stroke-dashoffset: 0; opacity: 1; }
+            100% { stroke-dashoffset: 0; opacity: 0; }
+        }
 
         /* SUB-MENU */
        .sub-menu { background: var(--bg-controls); border-bottom: 1px solid var(--border-controls); color: var(--text-cell); }
@@ -143,8 +157,10 @@
     <header class="sticky top-0 z-50 border-b" style="background: var(--bg-page); border-color: var(--border-controls);">
         <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-x-4" aria-label="Belpulse Beta">
-                <div class="w-10 h-10 rounded-2xl belgian-flag flex items-center justify-center text-3xl shadow-inner">
-                    🇧🇪
+                <div class="w-10 h-10 rounded-2xl belgian-flag flex items-center justify-center shadow-inner overflow-hidden">
+                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path class="ecg-line" d="M2 12h3l2.5-6 5 12 2.5-6h3" />
+                    </svg>
                 </div>
                 <div>
                     <div class="flex items-baseline gap-x-3">
