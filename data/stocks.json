@@ -9,8 +9,8 @@
     "EURUSD": {
         "name": "Euro / US Dollar",
         "ticker": "EURUSD",
-        "price": 1.1695,
-        "change": -0.8394098694251331,
+        "price": 1.1701,
+        "change": -0.6284501061571188,
         "currency": "USD"
     },
     "ABI": {
