@@ -105,6 +105,7 @@ body{font-family:'Figtree',sans-serif;background:var(--bg-page);color:var(--text
 @keyframes blink{50%{opacity:.3}}
 .pill{font-size:.68rem;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border-pill);background:var(--bg-pill);color:var(--text-pill);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.04em}
 .pill:hover{background:var(--bg-btn-hover);color:var(--text-btn);border-color:var(--border-btn)}
+.pill.on{background:var(--bg-pill-active);color:var(--text-pill-active);border-color:var(--bg-pill-active)}
 .btn{font-family:Figtree,sans-serif;font-size:.65rem;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid var(--border-btn);background:var(--bg-btn);color:var(--text-btn);cursor:pointer;transition:all .15s;letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px}
 .btn:hover{background:var(--bg-btn-hover);border-color:var(--text-btn);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .btn-sm{font-size:.58rem;padding:3px 9px;border-radius:5px}
@@ -530,8 +531,8 @@ function render(){const w=document.getElementById('tableWrap');let h='';const by
   else drawSpark(cv, s.map(d=>d.value), trend(s));
 }});renderContribChart();}
 
-function renderPills(){const e=document.getElementById('pills');let h='';for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill" onclick="setFilter('${id}',this)">${(s.label[LANG]||s.label.en).toUpperCase()}</span>`;e.innerHTML=h;}
-function setFilter(id,el){activeFilter=id;render();}
+function renderPills(){const e=document.getElementById('pills');let h='';for(const[id,s]of Object.entries(SECTIONS))h+=`<span class="pill ${activeFilter===id?'on':''}" onclick="setFilter('${id}',this)">${(s.label[LANG]||s.label.en).toUpperCase()}</span>`;e.innerHTML=h;}
+function setFilter(id,el){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');activeFilter=id;render();}
 
 let _modalCode='', _modalData=[];
 function openModal(code){
