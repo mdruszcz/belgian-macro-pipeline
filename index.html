@@ -326,7 +326,6 @@
 
         function loadDashboard(index) {
             const frame = document.getElementById('dashboard-frame');
-            const buttons = document.querySelectorAll('.nav-button');
             frame.style.opacity = 0;
             setTimeout(() => {
                 frame.src = dashboards[index];
@@ -334,9 +333,13 @@
                 // Give it a moment to load then sync
                 setTimeout(syncDashboard, 500);
             }, 300);
-            buttons.forEach((btn, i) => {
-                i === index? btn.classList.add('active') : btn.classList.remove('active');
-            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to the correct button based on ID
+            const activeBtn = document.getElementById('btn-' + index);
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
 

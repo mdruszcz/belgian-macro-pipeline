@@ -103,9 +103,9 @@ body{font-family:'Figtree',sans-serif;background:var(--bg-page);color:var(--text
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
 .dot.loading{background:var(--orange);animation:blink 1s infinite}.dot.err{background:var(--red)}
 @keyframes blink{50%{opacity:.3}}
-.pill{font-size:.68rem;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border-pill);background:var(--bg-pill);color:var(--text-pill);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.04em}
-.pill:hover{background:var(--bg-btn-hover);color:var(--text-btn);border-color:var(--border-btn)}
-.pill.on{background:var(--bg-pill-active);color:var(--text-pill-active);border-color:var(--bg-pill-active)}
+.pill{font-size:.68rem;font-weight:600;padding:2px 8px;border:none;background:transparent;color:var(--text-cell-muted);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.04em}
+.pill:hover{background:transparent;color:var(--text-cell);text-decoration:underline}
+.pill.on{background:transparent;color:var(--text-cell);border:none;font-weight:700;text-decoration:underline;text-underline-offset:4px}
 .btn{font-family:Figtree,sans-serif;font-size:.65rem;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid var(--border-btn);background:var(--bg-btn);color:var(--text-btn);cursor:pointer;transition:all .15s;letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px}
 .btn:hover{background:var(--bg-btn-hover);border-color:var(--text-btn);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .btn-sm{font-size:.58rem;padding:3px 9px;border-radius:5px}
