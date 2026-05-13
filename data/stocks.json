@@ -2,23 +2,16 @@
     "BEL20": {
         "name": "BEL 20",
         "ticker": "^BFX",
-        "price": 5435.82,
-        "change": -2.148096811067207,
+        "price": 5504.66,
+        "change": 0.6382375794140474,
         "currency": "EUR"
     },
     "EURUSD": {
         "name": "EUR/USD",
         "ticker": "EURUSD=X",
-        "price": 1.1751,
-        "change": 0.298736770228752,
+        "price": 1.1716,
+        "change": -0.2638971652336854,
         "currency": "USD"
-    },
-    "BE_10Y": {
-        "name": "BE OLO 10Y",
-        "ticker": "BE10Y",
-        "price": 3.08,
-        "change": 0.0,
-        "currency": "%"
     },
     "DE_10Y": {
         "name": "DE Bund 10Y",
@@ -32,13 +25,6 @@
         "ticker": "MRO",
         "price": 3.15,
         "change": 0.0,
-        "currency": "%"
-    },
-    "SPREAD": {
-        "name": "BE-DE Spread",
-        "ticker": "SPREAD",
-        "price": 0.5500000000000003,
-        "change": 0,
         "currency": "%"
     }
 }
