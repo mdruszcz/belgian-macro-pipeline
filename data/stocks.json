@@ -2,15 +2,15 @@
     "BEL20": {
         "name": "BEL 20",
         "ticker": "^BFX",
-        "price": 5583.39,
-        "change": -1.1619694000562826,
+        "price": 5586.83,
+        "change": -0.30265231209592147,
         "currency": "EUR"
     },
     "EURUSD": {
         "name": "EUR/USD",
         "ticker": "EURUSD=X",
-        "price": 1.1659,
-        "change": 0.14602302009964224,
+        "price": 1.1652,
+        "change": 0.12889920082495976,
         "currency": "USD"
     },
     "BE_10Y": {
