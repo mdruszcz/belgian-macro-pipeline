@@ -13,32 +13,11 @@
         "change": 0.4742666432460785,
         "currency": "USD"
     },
-    "BE_10Y": {
-        "name": "BE OLO 10Y",
-        "ticker": "BE10Y",
-        "price": 3.08,
-        "change": 0.0,
-        "currency": "%"
-    },
-    "DE_10Y": {
-        "name": "DE Bund 10Y",
-        "ticker": "DE10Y",
-        "price": 2.53,
-        "change": 0.7968127490039849,
-        "currency": "%"
-    },
     "ECB_RATE": {
         "name": "ECB Rate",
         "ticker": "MRO",
         "price": 2.4,
         "change": 0.0,
-        "currency": "%"
-    },
-    "SPREAD": {
-        "name": "BE-DE Spread",
-        "ticker": "SPREAD",
-        "price": 0.5500000000000003,
-        "change": 0,
         "currency": "%"
     }
 }
