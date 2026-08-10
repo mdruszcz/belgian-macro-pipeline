@@ -9,8 +9,8 @@
     "EURUSD": {
         "name": "EUR/USD",
         "ticker": "EURUSD=X",
-        "price": 1.1562,
-        "change": 0.15592515592513873,
+        "price": 1.1557,
+        "change": 0.43451811940556995,
         "currency": "USD"
     },
     "BE_10Y": {
