@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// Embedders may request a deterministic first paint. URL values take
+// precedence over the visitor's saved dashboard preferences.
+const DASHBOARD_OPTIONS = new URLSearchParams(window.location.search);
+const REQUESTED_THEME = ['day','soft','night'].includes(DASHBOARD_OPTIONS.get('theme')) ? DASHBOARD_OPTIONS.get('theme') : null;
+const REQUESTED_LANG = ['fr','nl','en'].includes(DASHBOARD_OPTIONS.get('lang')) ? DASHBOARD_OPTIONS.get('lang') : null;
+if (REQUESTED_THEME) document.documentElement.setAttribute('data-theme', REQUESTED_THEME);
+</script>
 <title>Macroeconomic and Financial Review of Belgium</title>
 <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -222,7 +230,7 @@ canvas.spark{display:block}
 const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
 const FORECAST_CSV_URL='https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_forecasts.csv';
 let FORECASTS_RAW=[];
-let LANG=localStorage.getItem('lang')||'en';
+let LANG=REQUESTED_LANG||localStorage.getItem('lang')||'en';
 const T={title:{en:'Macroeconomic and Financial Review of Belgium',fr:'Revue macroéconomique et financière de la Belgique',nl:'Macro-economisch en financieel overzicht van België'},loading:{en:'Loading…',fr:'Chargement…',nl:'Laden…'},fetching:{en:'Fetching…',fr:'Récupération…',nl:'Ophalen…'},error:{en:'Error: ',fr:'Erreur : ',nl:'Fout: '},no_csv:{en:'No CSV URL available in configuration.',fr:'Aucune URL CSV disponible.',nl:'Geen CSV URL beschikbaar.'},all:{en:'ALL',fr:'TOUS',nl:'ALLE'},th_ind:{en:'Indicator',fr:'Indicateur',nl:'Indicator'},th_src:{en:'Source',fr:'Source',nl:'Bron'},th_last:{en:'Last data',fr:'Dernières données',nl:'Laatste data'},th_val:{en:'Value',fr:'Valeur',nl:'Waarde'},th_trend:{en:'Trend',fr:'Tendance',nl:'Trend'},th_vis:{en:'Visuel',fr:'Visuel',nl:'Visueel'},th_upd:{en:'Update',fr:'Mise à jour',nl:'Update'},th_com:{en:'Comments',fr:'Commentaires',nl:'Opmerkingen'},ft_src:{en:'<strong>Sources:</strong> NBB = National Bank of Belgium',fr:'<strong>Sources:</strong> BNB = Banque Nationale de Belgique',nl:'<strong>Bronnen:</strong> NBB = Nationale Bank van België'},ft_git:{en:'Data from GitHub · Auto-updated daily 06:00 CET',fr:'Données GitHub · Mise à jour auto. 06:00 CET',nl:'Data via GitHub · Auto-update 06:00 CET'},m_obs:{en:'observations',fr:'observations',nl:'waarnemingen'},m_last10:{en:'Last 10 years',fr:'10 dernières années',nl:'Laatste 10 jaar'},m_latest:{en:'Latest',fr:'Dernier',nl:'Laatste'},m_chg:{en:'Change',fr:'Changement',nl:'Verschil'},m_avg:{en:'10Y Average',fr:'Moyenne 10A',nl:'10J Gemid.'},m_min:{en:'10Y Min',fr:'Min 10A',nl:'10J Min'},m_max:{en:'10Y Max',fr:'Max 10A',nl:'10J Max'},m_th_per:{en:'Period',fr:'Période',nl:'Periode'},m_th_val:{en:'Value',fr:'Valeur',nl:'Waarde'},m_th_chg:{en:'Δ Change',fr:'Δ Changement',nl:'Δ Verschil'},m_th_stat:{en:'Status',fr:'Statut',nl:'Status'},m_th_bar:{en:'Bar',fr:'Barre',nl:'Balk'},st_act:{en:'Actual',fr:'Réel',nl:'Actueel'},st_prov:{en:'Provisional',fr:'Provisoire',nl:'Voorlopig'},st_brk:{en:'Break',fr:'Rupture',nl:'Breuk'},c_reached:{en:'reached',fr:'a atteint',nl:'bereikte'},c_in:{en:'in',fr:'en',nl:'in'},c_prov:{en:'(provisional)',fr:'(provisoire)',nl:'(voorlopig)'},c_vs:{en:'Change vs',fr:'Changement vs',nl:'Verschil met'}};
 function t(k){return T[k]?.[LANG]||k;}
 const M={
@@ -316,7 +324,7 @@ function setLang(l){LANG=l;localStorage.setItem('lang',l);document.querySelector
 function updateStaticUI(){document.getElementById('mainTitle').textContent=t('title');document.getElementById('ftSrc').innerHTML=t('ft_src');document.getElementById('ftGit').textContent=t('ft_git');document.getElementById('mThPer').textContent=t('m_th_per');document.getElementById('mThVal').textContent=t('m_th_val');document.getElementById('mThChg').textContent=t('m_th_chg');document.getElementById('mThStat').textContent=t('m_th_stat');document.getElementById('mThBar').textContent=t('m_th_bar');const dL=document.getElementById('dateLabel');dL.textContent=new Date().toLocaleDateString(LANG==='nl'?'nl-BE':LANG==='fr'?'fr-BE':'en-GB',{day:'numeric',month:'long',year:'numeric'});if(document.getElementById('dot').classList.contains('err'))document.getElementById('statusText').textContent=t('no_csv');}
 
 function setTheme(t,btn){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('theme',t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');if(Object.keys(DATA).length)render();}
-function loadTheme(){const t=localStorage.getItem('theme')||'soft';document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('t-'+t);if(btn)btn.classList.add('active');}
+function loadTheme(){const t=REQUESTED_THEME||localStorage.getItem('theme')||'soft';document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('t-'+t);if(btn)btn.classList.add('active');}
 function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function parseCSV(t){const l=t.trim().split('\n'),h=l[0].split(',');return l.slice(1).map(r=>{const v=r.split(','),o={};h.forEach((k,i)=>o[k.trim()]=(v[i]||'').trim());return o});}
 function fmtV(v,u){const s=v.toFixed(1).replace('.',',');return u==='pp_contribution'?s+' pp':u==='pct_gdp'?s+'% GDP':u==='balance'?s:(u==='index_2010'||u==='comp_index')?s:s+'%';}
