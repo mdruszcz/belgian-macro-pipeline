@@ -1,3 +1,13 @@
+STATUS MARKERS
+ ✅            Done. Evidence in the note, the PR, or both.
+ 🛑 [BLOCKED]  Cannot proceed. An external dependency is missing; the note says which.
+ 🚫 [DEFERRED] Deliberately not doing this. A decision was taken; the note says why.
+ (PENDING)     Work is done but unconfirmed — waiting on a run, a check, or an observation.
+ (NOT DONE)    Not done, not blocked. Still owed.
+ (unmarked)    Not started.
+A step is only ✅ when its own How: column was actually carried out. "Mostly done" is not ✅ —
+it is PENDING or NOT DONE with a note, so the gap stays visible instead of dissolving.
+
 PHASE I — 30% → 50%
 Block A — Canonical data model
  ✅ [SPEC] Write /docs/features/data_model.md with all five tables, columns, types, keys, indexes
@@ -91,7 +101,7 @@ Why: Belgian geography has more edge cases than the data itself. Getting them in
  ✅ [H] Download the official Statbel geography and statistical-sector files (2026-09-05: REFNIS DEFINITIEF/2019/2025 + NIS9 2026 + postal-code file, in data/raw/statbel/)
 How: Statbel open-data portal; keep the SQLite or GeoJSON version and record the download date.
 Why: Official reference files are the only defensible source of NIS codes. Anything scraped or LLM-generated will contain wrong codes you cannot detect.
- ✅ [H] Record licence terms in docs/data_catalog.md (CC BY 4.0, commercial reuse permitted; attribution + 'changes were made' notice required on published output — obligations recorded, not yet implemented on the site)
+ ✅ [H] Record licence terms in docs/data_catalog.md (CC BY 4.0, commercial reuse permitted; attribution + 'changes were made' notice required on published output — obligations recorded, not yet implemented on the site. EXTENDED 2026-09-06: a SECOND Statbel licence document surfaced, the Licentie open data of 22 October 2015, now at docs/licences/statbel_open_data_licence_2015-10-22.pdf. It never mentions CC BY 4.0, declares itself compatible with OGL / CC-BY 2.0 / ODC-BY, and requires THE DATE OF LAST UPDATE in the attribution -- which CC BY 4.0 does not. Both grant commercial reuse. We satisfy the union of both obligation sets until Statbel confirms which governs; that makes the Block X freshness badge a licence condition, not a nicety)
 How: Copy the licence name, URL and reuse conditions into the catalogue row.
 Why: You intend to sell this. "I think it was open data" is not a position you want to hold in a procurement conversation.
  ✅ [BUILD] Load Belgium, regions, provinces, arrondissements, communes (statistical sectors deliberately deferred — no consumer before Phase II, see geography.md Q2)
@@ -122,7 +132,7 @@ Why: Mismapped geography produces plausible numbers attached to the wrong place,
  ✅ [H] Total commune count matches the current official figure (2026-09-06: 565, independently corroborated -- public sources confirm 565 communes as of 2025-01-01, citing the same Bastogne+Bertogne 2024-12-02 date this pipeline independently derived and verified in PR #32. Not circular: this check used a general web search, not our own REFNIS file)
 How: Compare your SELECT COUNT(*) to Statbel's published count.
 Why: An off-by-a-few count means the crosswalk or the source file vintage is wrong.
- [H] Five merged communes stitch correctly across the merger (BLOCKED -- needs population-by-commune data to plot; population is one of the 3 Statbel datasets Block F documented as blocked, no commune-level Bestat view exists and statbel.fgov.be is unreachable. Cannot do until that unblocks)
+ 🛑 [BLOCKED] Five merged communes stitch correctly across the merger (BLOCKED -- needs population-by-commune data to plot; statbel.fgov.be is unreachable. Cannot pass this control until data is sourced. 2026-09-06 re-verified, not assumed: all 182 Bestat datasources searched for population x commune -- exactly one match, IM_SOC_CENSUS2011_HC56, which is Census 2011 only, a single year, not a 2010-2025 series. statbel.fgov.be and data.gov.be both time out at the network level from CI. The parser and plot script are written and waiting in scripts/plot_population_continuity.py; only the source files are missing)
 How: Plot population 2010–2025 for each and look for the discontinuity.
 Why: A visible step change in a population series is the signature of a crosswalk failure, and it is instantly obvious on a chart.
 Block D — Generic source-adapter system
@@ -147,7 +157,7 @@ Why: When the dashboard shows a stale number, this table tells you whether the f
  ✅ [BUILD] Contract test applied to all adapters (NBB + Eurostat; FPB deliberately excluded, keeps its own shape -- see source_adapter.md Non-goals)
 How: Parametrized pytest asserting identical output columns and dtypes from every source.
 Why: It makes source-agnostic downstream code true by construction rather than by hope.
- [H] Confirm the daily Action still produces identical data to macro-v1 (verified locally via a live --fetch run on both branches, byte-identical export except fetched_at -- the daily GH Action itself is still the maintainer's own step to watch on the next scheduled run)
+ [H] Confirm the daily Action still produces identical data to macro-v1 (PENDING -- verified locally via a live --fetch run on both branches, byte-identical export except fetched_at, but the scheduled daily GH Action must still run and pass in CI. Local agreement is not the same as the workflow agreeing)
 How: Run the workflow manually on the branch and diff the export.
 Why: A refactor that changes public numbers is a bug, even if the new numbers are better. Fix that separately and deliberately.
 🚦 CONTROL D
@@ -167,7 +177,7 @@ Why: Decision value depends on what a directeur financier will pay for, which is
  ✅ [H] Select exactly 10 datasets; mark everything else DEFERRED (2026-09-06: exactly 10 selected, confirmed by count; 6 deferred groups + datastore.brussels left unresolved -- never formally offered as a candidate)
 How: Sort by priority, cut at 10, write DEFERRED in the row rather than deleting it.
 Why: Deferred-not-deleted stops you re-researching the same rejected dataset three months later.
- [H] Verify commercial-reuse permission for each of the 10 (2026-09-06: only 3 of 10 confirmed -- WalStat, both IBSA datasets. The other 7 carry an assumed, corroborated-but-unopened, or entirely unknown licence. NOT done; see docs/data_catalog.md "Selected 10" table)
+ [H] Verify commercial-reuse permission for each of the 10 (NOT DONE -- 7 of 10 confirmed as of 2026-09-06. Do not build adapters for data you cannot resell. Confirmed: WalStat, both IBSA datasets, and all 4 Statbel datasets -- the last cleared by the maintainer supplying Statbel's own licence PDF, now committed at docs/licences/statbel_open_data_licence_2015-10-22.pdf, which grants commercial reuse in as many words. NOTE: Statbel has TWO licence documents that conflict -- the Conditions generales d'utilisation (CC BY 4.0, confirmed 2026-09-05) and this 2015 PDF, which never mentions CC BY 4.0, declares itself compatible with OGL / CC-BY 2.0 / ODC-BY, and additionally requires the date of last update in the attribution. Both grant commercial reuse, so the resale question is settled; we satisfy the union of their obligations until Statbel says which governs. Still unverified: Gemeente-Stadsmonitor, and ODWB + opendata.brussels.be, which are portals rather than datasets and cannot be licence-cleared as a unit -- see docs/data_catalog.md "Selected 10")
 How: Read the actual licence page for each publisher and record the URL and date.
 Why: A dataset you cannot resell is worse than useless once it is embedded in a paid report.
  ✅ [H] Add the anti-scope-creep rule to CLAUDE.md (already rule 8, added before this block existed -- "NEVER add a new data source without a row in docs/data_catalog.md approved by the maintainer", word for word)
@@ -184,19 +194,19 @@ Why: Column-level mapping written in advance is what stops an agent guessing whi
  ✅ [BUILD] Implement StatbelSource on the base interface (one dataset wired -- LOCAL_UNITS_BY_COMMUNE; a new MunicipalTimeSeriesSource contract added to src/fetchers/base.py since this is the first source returning many geographies per fetch)
 How: One class, dataset-specific parsing driven by config.
 Why: Ten datasets in one adapter beats ten adapters, because the fetch, cache, retry and load logic is shared.
- [BUILD] Demography: population, growth, age structure, dependency ratios, household composition (BLOCKED -- population-by-commune has no commune-level Bestat view; statbel.fgov.be unreachable this session. See statbel_adapter.md Non-goals)
+ 🛑 [BLOCKED] Demography: population, growth, age structure, dependency ratios, household composition (BLOCKED -- population-by-commune has no commune-level Bestat view; statbel.fgov.be unreachable. See statbel_adapter.md Non-goals. Licence is NOT the blocker here -- Statbel's own licence is now confirmed and permits commercial reuse; this is purely a data-access block)
 How: Load raw counts only; ratios come from the derived engine.
 Why: Storing ratios as source data means you cannot recompute them when the denominator is revised.
- [BUILD] Income: mean taxable income, median where available, per inhabitant (BLOCKED -- same reason as Demography above; fiscal income by commune and by statistical sector both affected)
+ 🛑 [BLOCKED] Income: mean taxable income, median where available, per inhabitant (BLOCKED -- same reason as Demography above; fiscal income by commune and by statistical sector both affected. Licence confirmed, data access blocked)
 How: Keep the fiscal-year reference explicit in the period field.
 Why: Taxable income is published with a lag and refers to an earlier income year. Mislabelling it makes every income comparison off by a year or two.
  ✅ [BUILD] Business: active enterprises... (2026-09-06: LOCAL_UNITS_BY_COMMUNE live -- 565 communes, real counts, verified against a copy of the real DB. Births/deaths/sectoral structure not in this dataset -- only a point-in-time establishment count was selected in Block E)
 How: Store the sector dimension as separate indicator ids rather than a new table column.
 Why: Keeps the universal indicator × geography × period × value grammar intact instead of special-casing the schema.
- [BUILD] Housing: stock, building permits, transactions and prices where available (no dataset selected in Block E -- real estate sales, cadastral stock and building permits were all DEFERRED)
+ 🚫 [DEFERRED] Housing: stock, building permits, transactions and prices where available (DEFERRED -- no dataset selected in Block E; real estate sales, cadastral stock and building permits were all deferred there. Nothing to build against until Block E selects one)
 How: Flag suppressed small-commune values as suppressed, never as zero.
 Why: Housing transaction counts are small in small communes and get suppressed. Zeros would make quiet communes look like collapsed markets.
- [BUILD] Mobility: vehicle stock, road accidents (no dataset selected in Block E)
+ 🚫 [DEFERRED] Mobility: vehicle stock, road accidents (DEFERRED -- no dataset selected in Block E)
 How: Low priority, load last.
 Why: Nice to have, rarely decision-relevant. Its position in the order is the point.
  ✅ [BUILD] Fixture tests per dataset using saved sample files (tests/fixtures/statbel_local_units_sample.json -- a real, trimmed 5-row sample including the Sint-Niklaas/Saint-Nicolas edge case and the unattributed row, not synthetic data)
