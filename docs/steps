@@ -155,10 +155,10 @@ Why: A refactor that changes public numbers is a bug, even if the new numbers ar
 How: diff on the CSV, or a pandas compare script.
 Why: "Probably rounding" is how wrong numbers enter a product. Each difference needs a named cause.
 Block E — Data catalogue before downloading anything
- [H] Write the catalogue header: scoring formula, licence column, refusal criteria
+ [H] Write the catalogue header: scoring formula, licence column, refusal criteria (2026-09-06: formula + column definitions drafted in docs/data_catalog.md; refusal criteria deliberately left blank -- needs the maintainer's own judgment, not drafted here)
 How: Encode priority = decision_value × comparability × coverage × depth ÷ maintenance_cost at the top of data_catalog.md.
 Why: A written formula makes "no" defensible against your own enthusiasm at 11pm on a Saturday.
- [SPEC] Draft the candidate dataset table
+ ✅ [SPEC] Draft the candidate dataset table (2026-09-06: 16 candidates across Statbel/WalStat/IBSA/ABB/Statistiek Vlaanderen/ODWB/data.gov.be in docs/data_catalog.md, no scores, confidence level stated honestly per row -- several are search-snippet-only since statbel.fgov.be and data.gov.be refused direct fetches this session)
 How: Ask the architect for candidates with geography, history depth, update frequency, licence and URL. No scores.
 Why: Agents are good at enumeration and bad at judging commercial value. Split the task along that line.
  [H] Score every candidate yourself
@@ -170,7 +170,7 @@ Why: Deferred-not-deleted stops you re-researching the same rejected dataset thr
  [H] Verify commercial-reuse permission for each of the 10
 How: Read the actual licence page for each publisher and record the URL and date.
 Why: A dataset you cannot resell is worse than useless once it is embedded in a paid report.
- [H] Add the anti-scope-creep rule to CLAUDE.md
+ ✅ [H] Add the anti-scope-creep rule to CLAUDE.md (already rule 8, added before this block existed -- "NEVER add a new data source without a row in docs/data_catalog.md approved by the maintainer", word for word)
 How: "No new source enters the pipeline without a catalogue row approved by the maintainer."
 Why: Agents will helpfully offer to add three more sources in every PR. The rule lets you decline in one word.
 🚦 CONTROL E
