@@ -40,13 +40,13 @@ def small_sources(monkeypatch):
 
 
 def test_fetch_all_returns_false_when_a_source_fails(db, monkeypatch):
-    def fake_fetch(url):
+    def fake_fetch(self, url, *, cache_key, conn=None, **kwargs):
         if "fail" in url:
             raise ValueError("simulated source failure")
         return [{"period": "2020", "value": 1.0, "obs_status": "A"}]
 
-    monkeypatch.setattr(bmdb.NBBFetcher, "fetch", staticmethod(fake_fetch))
-    monkeypatch.setattr(bmdb.FPBFetcher, "fetch", staticmethod(lambda: []))
+    monkeypatch.setattr(bmdb.NBBSource, "fetch", fake_fetch)
+    monkeypatch.setattr(bmdb.FPBSource, "fetch", lambda self, url, *, cache_key, conn=None: [])
 
     assert bmdb.fetch_all(db) is False
     history = {e["code"]: e["status"] for e in db.get_fetch_history()}
@@ -56,26 +56,30 @@ def test_fetch_all_returns_false_when_a_source_fails(db, monkeypatch):
 
 def test_fetch_all_returns_true_when_everything_succeeds(db, monkeypatch):
     monkeypatch.setattr(
-        bmdb.NBBFetcher,
+        bmdb.NBBSource,
         "fetch",
-        staticmethod(lambda url: [{"period": "2020", "value": 1.0, "obs_status": "A"}]),
+        lambda self, url, *, cache_key, conn=None: [
+            {"period": "2020", "value": 1.0, "obs_status": "A"}
+        ],
     )
-    monkeypatch.setattr(bmdb.FPBFetcher, "fetch", staticmethod(lambda: []))
+    monkeypatch.setattr(bmdb.FPBSource, "fetch", lambda self, url, *, cache_key, conn=None: [])
 
     assert bmdb.fetch_all(db) is True
 
 
 def test_fetch_all_returns_false_when_forecasts_fail(db, monkeypatch):
     monkeypatch.setattr(
-        bmdb.NBBFetcher,
+        bmdb.NBBSource,
         "fetch",
-        staticmethod(lambda url: [{"period": "2020", "value": 1.0, "obs_status": "A"}]),
+        lambda self, url, *, cache_key, conn=None: [
+            {"period": "2020", "value": 1.0, "obs_status": "A"}
+        ],
     )
 
-    def fake_fpb_fetch():
+    def fake_fpb_fetch(self, url, *, cache_key, conn=None):
         raise ValueError("simulated FPB failure")
 
-    monkeypatch.setattr(bmdb.FPBFetcher, "fetch", staticmethod(fake_fpb_fetch))
+    monkeypatch.setattr(bmdb.FPBSource, "fetch", fake_fpb_fetch)
 
     assert bmdb.fetch_all(db) is False
     history = {e["code"]: e["status"] for e in db.get_fetch_history()}

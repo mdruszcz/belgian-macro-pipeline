@@ -138,9 +138,11 @@ def test_port_skips_non_belgium_indicators(monkeypatch, tmp_path, migrated_db):
     monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
     monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
-        port_mod.NBBFetcher,
+        port_mod.NBBSource,
         "fetch",
-        staticmethod(lambda url: [{"period": "2024-Q1", "value": 1.5, "obs_status": "A"}]),
+        lambda self, url, *, cache_key, conn=None: [
+            {"period": "2024-Q1", "value": 1.5, "obs_status": "A"}
+        ],
     )
 
     port_mod.port(migrated_db, run_date="2026-09-05")
@@ -172,11 +174,11 @@ def test_dbnomics_rows_mapped_to_final(monkeypatch, tmp_path, migrated_db):
     monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
     monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
-        port_mod.DBnomicsFetcher,
+        port_mod.EurostatSource,
         "fetch",
-        staticmethod(
-            lambda url, unit="": [{"period": "2024-Q1", "value": 100.0, "obs_status": "A"}]
-        ),
+        lambda self, url, *, cache_key, conn=None, unit="": [
+            {"period": "2024-Q1", "value": 100.0, "obs_status": "A"}
+        ],
     )
 
     port_mod.port(migrated_db, run_date="2026-09-05")
@@ -206,9 +208,11 @@ def test_port_idempotent_same_day(monkeypatch, tmp_path, migrated_db):
     monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
     monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
-        port_mod.NBBFetcher,
+        port_mod.NBBSource,
         "fetch",
-        staticmethod(lambda url: [{"period": "2024-Q1", "value": 1.5, "obs_status": "A"}]),
+        lambda self, url, *, cache_key, conn=None: [
+            {"period": "2024-Q1", "value": 1.5, "obs_status": "A"}
+        ],
     )
 
     port_mod.port(migrated_db, run_date="2026-09-05")
