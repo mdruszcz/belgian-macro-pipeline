@@ -1,0 +1,23 @@
+id: POPULATION_AGE_15_64
+name:
+  en: Population aged 15 to 64
+  fr: Population âgée de 15 à 64 ans
+  nl: Bevolking 15 tot 64 jaar
+unit: count
+frequency: A
+source_id: statbel
+geo_levels:
+- municipal
+preferred_direction: contextual
+description:
+  en: >
+    Population per commune in the working-age population (15-64) age band, as of 1 January each year.
+    Source: Statbel's TF_SOC_POP_STRUCT bulk file, where CD_AGE is single
+    years 0-100 (100 is top-coded "100 and over"); this band is the sum over
+    those single years. A raw count, deliberately not a ratio -- the
+    dependency ratio is computed from these three bands by the Block G
+    derived engine, so a denominator revision recomputes it rather than
+    leaving a stale stored figure. Summing the three bands reproduces
+    POPULATION_BY_COMMUNE exactly; scripts/sync_population.py asserts that
+    rather than assuming it.
+display: null

@@ -36,9 +36,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from plot_population_continuity import (  # noqa: E402
+    AGE_BANDS,
     DEFAULT_POP_DIR,
     MissingPopulationData,
-    read_population_by_year,
+    read_population_by_age_band,
 )
 from port_existing_indicators import derive_period_bounds  # noqa: E402
 
@@ -48,8 +49,14 @@ from src.validation.config_schema import load_and_validate_all  # noqa: E402
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
 INDICATOR_ID = "POPULATION_BY_COMMUNE"
 
+# The three age bands load as ordinary raw counts, one indicator each. The
+# dependency ratio itself is NOT stored -- it is computed from these by the
+# Block G derived engine, so a revision to any band recomputes it instead of
+# leaving a stale figure behind (CLAUDE.md rule 6).
+BAND_INDICATOR_IDS = {band: f"POPULATION_AGE_{band}" for band, _, _ in AGE_BANDS}
 
-def _ensure_reference_rows(conn: sqlite3.Connection, ind: dict) -> None:
+
+def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) -> None:
     """INSERT OR IGNORE the sources/indicators rows this script depends on --
     same pattern as sync_statbel.py's _ensure_reference_rows. The statbel
     source row may already exist (sync_statbel.py creates it too); INSERT OR
@@ -67,28 +74,91 @@ def _ensure_reference_rows(conn: sqlite3.Connection, ind: dict) -> None:
             "confirmed to grant commercial reuse",
         ),
     )
-    conn.execute(
+    for indicator_id in [INDICATOR_ID, *BAND_INDICATOR_IDS.values()]:
+        ind = indicator_configs[indicator_id]
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO indicators
+                (indicator_id, source_id, name_nl, name_fr, name_en,
+                 description_nl, description_fr, description_en,
+                 frequency, unit, preferred_direction, aggregation_method,
+                 is_additive, decimals, config_path, is_active)
+            VALUES (?, 'statbel', ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'sum', 1, 0, ?, 1)
+            """,
+            (
+                indicator_id,
+                ind["name"]["nl"],
+                ind["name"]["fr"],
+                ind["name"]["en"],
+                ind.get("description", {}).get("en", ""),
+                ind["frequency"],
+                ind["unit"],
+                ind["preferred_direction"],
+                f"config/indicators/{indicator_id}.yaml",
+            ),
+        )
+    conn.commit()
+
+
+def _upsert_observation(
+    conn: sqlite3.Connection,
+    *,
+    indicator_id: str,
+    geo_id: str,
+    period: str,
+    period_start: str,
+    period_end: str,
+    value: int,
+    vintage: str,
+    fetch_run_id: int,
+) -> int:
+    """Insert-only-on-change. Returns 1 if a new vintage was written, else 0.
+
+    Extracted so the four indicators this script now writes (the total plus
+    three age bands) share one implementation of the vintage/is_latest rule
+    rather than four copies of it.
+    """
+    current = conn.execute(
+        """SELECT value FROM observations
+           WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
+        (indicator_id, geo_id, period),
+    ).fetchone()
+    if current is not None and current[0] == value:
+        return 0  # unchanged -- no new vintage
+
+    if current is not None:
+        conn.execute(
+            """UPDATE observations SET is_latest = 0
+               WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
+            (indicator_id, geo_id, period),
+        )
+
+    cur = conn.execute(
         """
-        INSERT OR IGNORE INTO indicators
-            (indicator_id, source_id, name_nl, name_fr, name_en,
-             description_nl, description_fr, description_en,
-             frequency, unit, preferred_direction, aggregation_method,
-             is_additive, decimals, config_path, is_active)
-        VALUES (?, 'statbel', ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'sum', 1, 0, ?, 1)
+        INSERT OR IGNORE INTO observations
+            (indicator_id, geo_id, period, vintage, value, status,
+             period_start, period_end, is_latest, fetch_run_id, created_at)
+        VALUES (?, ?, ?, ?, ?, 'final', ?, ?, 1, ?, ?)
         """,
         (
-            INDICATOR_ID,
-            ind["name"]["nl"],
-            ind["name"]["fr"],
-            ind["name"]["en"],
-            ind.get("description", {}).get("en", ""),
-            ind["frequency"],
-            ind["unit"],
-            ind["preferred_direction"],
-            f"config/indicators/{INDICATOR_ID}.yaml",
+            indicator_id,
+            geo_id,
+            period,
+            vintage,
+            value,
+            period_start,
+            period_end,
+            fetch_run_id,
+            vintage,
         ),
     )
-    conn.commit()
+    if cur.rowcount != 1:
+        raise RuntimeError(
+            f"Vintage collision writing {indicator_id}/{geo_id}/{period}/{vintage}: "
+            "a row with this exact key already exists. Refusing to silently drop "
+            "the new value (CLAUDE.md rule 13)."
+        )
+    return 1
 
 
 def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
@@ -104,13 +174,12 @@ def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
     swallowed.
     """
     indicator_configs, _ = load_and_validate_all(CONFIG_DIR / "indicators", CONFIG_DIR / "sources")
-    ind = indicator_configs[INDICATOR_ID]
 
     conn = sqlite3.connect(str(db_path))
     conn.execute("PRAGMA foreign_keys=ON")
-    _ensure_reference_rows(conn, ind)
+    _ensure_reference_rows(conn, indicator_configs)
 
-    by_year = read_population_by_year(pop_dir)
+    by_year = read_population_by_age_band(pop_dir)
 
     now = datetime.now(timezone.utc).isoformat()
     conn.execute(
@@ -123,11 +192,11 @@ def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
     rows_written = 0
     unresolved: list[tuple[str, str]] = []
 
-    for year, totals in sorted(by_year.items()):
+    for year, communes in sorted(by_year.items()):
         period = str(year)
         period_start, period_end = derive_period_bounds(period, "A")
 
-        for nis, population in totals.items():
+        for nis, bands in communes.items():
             rows_read += 1
             try:
                 geo_id = resolve_geo(conn, nis, period)
@@ -135,47 +204,26 @@ def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
                 unresolved.append((nis, period))
                 continue
 
-            current = conn.execute(
-                """SELECT value FROM observations
-                   WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-                (INDICATOR_ID, geo_id, period),
-            ).fetchone()
-            if current is not None and current[0] == population:
-                continue  # unchanged -- no new vintage
+            # The total is the sum of the bands rather than a second pass over
+            # a 100 MB file. Every row falls in exactly one band, so this must
+            # equal what a total-only read produces -- verified against the
+            # real 2026 file for all 565 communes before this landed.
+            values = {INDICATOR_ID: sum(bands.values())}
+            for band, indicator_id in BAND_INDICATOR_IDS.items():
+                values[indicator_id] = bands.get(band, 0)
 
-            if current is not None:
-                conn.execute(
-                    """UPDATE observations SET is_latest = 0
-                       WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-                    (INDICATOR_ID, geo_id, period),
+            for indicator_id, value in values.items():
+                rows_written += _upsert_observation(
+                    conn,
+                    indicator_id=indicator_id,
+                    geo_id=geo_id,
+                    period=period,
+                    period_start=period_start,
+                    period_end=period_end,
+                    value=value,
+                    vintage=now,
+                    fetch_run_id=fetch_run_id,
                 )
-
-            cur = conn.execute(
-                """
-                INSERT OR IGNORE INTO observations
-                    (indicator_id, geo_id, period, vintage, value, status,
-                     period_start, period_end, is_latest, fetch_run_id, created_at)
-                VALUES (?, ?, ?, ?, ?, 'final', ?, ?, 1, ?, ?)
-                """,
-                (
-                    INDICATOR_ID,
-                    geo_id,
-                    period,
-                    now,
-                    population,
-                    period_start,
-                    period_end,
-                    fetch_run_id,
-                    now,
-                ),
-            )
-            if cur.rowcount != 1:
-                raise RuntimeError(
-                    f"Vintage collision writing {INDICATOR_ID}/{geo_id}/{period}/{now}: "
-                    "a row with this exact key already exists. Refusing to silently drop "
-                    "the new value (CLAUDE.md rule 13)."
-                )
-            rows_written += 1
 
     if unresolved:
         print(
