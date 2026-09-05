@@ -1,17 +1,18 @@
 id: PRIV_CONSUMPTION_CY
+name:
+  en: Private final consumption
+  fr: Consommation finale privée
+  nl: Particuliere consumptie
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.P31_S14_S15.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: Private final consumption
-  fr: Consommation finale privée
-  nl: Particuliere consumptie
+preferred_direction: higher_is_better
 description:
   en: Private final consumption, contribution to GDP volume change
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P31_S14_S15.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

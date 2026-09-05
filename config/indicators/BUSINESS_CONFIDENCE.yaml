@@ -1,17 +1,18 @@
 id: BUSINESS_CONFIDENCE
+name:
+  en: Business confidence (NBB)
+  fr: Confiance des entreprises (BNB)
+  nl: Ondernemersvertrouwen (NBB)
 unit: balance
 frequency: M
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_BUSSURVM,1.0/M.SYNC.BE.A999.X?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
-name:
-  en: Business confidence (NBB)
-  fr: Confiance des entreprises (BNB)
-  nl: Ondernemersvertrouwen (NBB)
+preferred_direction: higher_is_better
 description:
   en: Overall synthetic curve (Business Barometer) from the National Bank of Belgium
+fetch:
+  query: ',DF_BUSSURVM,1.0/M.SYNC.BE.A999.X?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
 display:
   category: confidence
   title:

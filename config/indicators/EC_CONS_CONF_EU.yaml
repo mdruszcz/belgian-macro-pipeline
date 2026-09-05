@@ -1,15 +1,17 @@
 id: EC_CONS_CONF_EU
+name:
+  en: EC_CONS_CONF_EU
+  fr: EC_CONS_CONF_EU
+  nl: EC_CONS_CONF_EU
+country: EU
 unit: balance
 frequency: M
 source_id: dbnomics_eurostat
 geo_levels:
 - national
-fetch:
-  query: /ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true
-name:
-  en: EC_CONS_CONF_EU
-  fr: EC_CONS_CONF_EU
-  nl: EC_CONS_CONF_EU
+preferred_direction: neutral
 description:
   en: EU27 Consumer Confidence Indicator
+fetch:
+  query: /ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true
 display: null

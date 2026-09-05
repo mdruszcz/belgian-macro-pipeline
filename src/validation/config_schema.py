@@ -72,3 +72,15 @@ def load_and_validate_all(indicators_dir: Path, sources_dir: Path) -> tuple[dict
         raise ConfigValidationError("\n".join(errors))
 
     return indicators, sources
+
+
+def is_canonical_eligible(indicator: dict, sources: dict) -> bool:
+    """Whether this indicator belongs in the canonical schema/dashboard
+    pipeline. Deliberately NOT "does it have a display block" -- e.g.
+    EC_CONS_CONF_BE is Belgian data with no dashboard row of its own and is
+    still eligible; EUROSTAT_GDP_Q_MEUR_DE has the same shape but is German
+    data and is not. The real criterion is country + a fetchable adapter."""
+    if indicator.get("country", "BE") != "BE":
+        return False
+    source = sources[indicator["source_id"]]
+    return source["adapter"] in ("nbb", "dbnomics")

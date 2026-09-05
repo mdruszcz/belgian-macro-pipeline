@@ -6,7 +6,9 @@ name:
 unit: percent
 frequency: M
 source_id: nbb
-geo_levels: [national]
+geo_levels:
+- national
+preferred_direction: lower_is_better
 description:
   en: Harmonised unemployment rate, Belgium, monthly.
 fetch:

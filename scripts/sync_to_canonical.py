@@ -14,8 +14,9 @@ No network calls: reads what the fetchers already wrote to
 legacy_observations/legacy_indicators this run (see
 scripts/rename_legacy_tables.py, belgian_macro_db.py's _init_schema).
 
-Scope: the same 16 Belgium-only indicators as port_existing_indicators.py.
-The other 10 (non-Belgium) stay on the legacy tables only.
+Scope: same criterion as port_existing_indicators.py -- config `country` is
+"BE" (or absent) and the source's adapter is fetchable (nbb/dbnomics).
+Non-Belgium indicators stay on the legacy tables only.
 """
 
 import argparse
@@ -25,17 +26,18 @@ from pathlib import Path
 
 from port_existing_indicators import (
     BE_COUNTRY_GEO,
-    INCLUDED,
-    PREFERRED_DIRECTION,
     derive_period_bounds,
     map_obs_status,
     source_id_for,
 )
 
-from belgian_macro_db import SOURCES
+from belgian_macro_db import CONFIG_DIR, SOURCES
+from src.validation.config_schema import is_canonical_eligible, load_and_validate_all
 
 
-def _ensure_reference_rows(conn: sqlite3.Connection) -> None:
+def _ensure_reference_rows(
+    conn: sqlite3.Connection, indicator_configs: dict, source_configs: dict
+) -> None:
     conn.execute(
         """
         INSERT OR IGNORE INTO geographies
@@ -46,7 +48,7 @@ def _ensure_reference_rows(conn: sqlite3.Connection) -> None:
         tuple(BE_COUNTRY_GEO.values()),
     )
     for code, meta in SOURCES.items():
-        if code not in INCLUDED:
+        if not is_canonical_eligible(indicator_configs[code], source_configs):
             continue
         agency = meta["source_agency"]
         source_id = source_id_for(agency)
@@ -85,7 +87,7 @@ def _ensure_reference_rows(conn: sqlite3.Connection) -> None:
                 meta.get("description", ""),
                 meta["frequency"],
                 meta["unit"],
-                PREFERRED_DIRECTION[code],
+                indicator_configs[code]["preferred_direction"],
                 f"scripts/port_existing_indicators.py::{code}",
             ),
         )
@@ -106,14 +108,18 @@ def sync(db_path: Path, vintage: str | None = None) -> tuple[int, int]:
     now = datetime.now(timezone.utc).isoformat()
     vintage = vintage or now
 
+    indicator_configs, source_configs = load_and_validate_all(
+        CONFIG_DIR / "indicators", CONFIG_DIR / "sources"
+    )
+
     conn = sqlite3.connect(str(db_path))
     conn.execute("PRAGMA foreign_keys=ON")
-    _ensure_reference_rows(conn)
+    _ensure_reference_rows(conn, indicator_configs, source_configs)
 
     checked = 0
     changed = 0
     for code, meta in SOURCES.items():
-        if code not in INCLUDED:
+        if not is_canonical_eligible(indicator_configs[code], source_configs):
             continue
 
         source_id = source_id_for(meta["source_agency"])

@@ -56,14 +56,31 @@ display block`) and the current `M` object's fields don't use the same names. Ev
 | — | `forecast:true` + `fc_indicator` | `display.forecast_of` (single field replaces both booleans) |
 | — | (absent for 12 codes) | `display: null` — explicit "fetched/stored, no dashboard row" |
 | — | (only in `SOURCES`, as an f-string URL) | `fetch.query` — see below |
+| — | (didn't exist anywhere) | `preferred_direction` — see below |
+| — | (didn't exist anywhere) | `country` (optional) — see below |
 
 **New field not in any prior list: `fetch.query`.** `SOURCES`'s URLs are built from an f-string
 (`f"{NBB_BASE}/Q.1.B1GM.VZ.LY.N?startPeriod=..."`), which a YAML file cannot express. Each
-indicator config instead stores the part of the URL after its source's `base_url`, and the
-loader concatenates `source.base_url + "/" + indicator.fetch.query` at load time. `fetch` is
-omitted only for indicators with no live fetch (there are none today — every `SOURCES` entry has
-a URL — but the field is optional in the schema for forward-compatibility with a hypothetical
-manually-entered indicator).
+indicator config instead stores the part of the URL *after* its source's `base_url` — the
+loader does a **plain concatenation** (`source.base_url + indicator.fetch.query`, no separator
+added or stripped), because NBB URLs continue with a comma (`BE2,DF_QNA_DISS,1.0/...`) while
+DBnomics URLs continue with a slash (`Eurostat/namq_10_gdp/...`) — the stored `fetch.query`
+value already carries whichever one is correct, so the loader must never insert its own.
+
+**`preferred_direction` (required) and `country` (optional, default `BE`).** Both were missing
+from the first version of this schema and had to be added after a real bug: `belgian_macro_db.py`
+still gated the canonical-schema sync through a hardcoded `INCLUDED` set and `PREFERRED_DIRECTION`
+dict written back in Block A, before this config system existed — an indicator added purely via
+YAML (`UNEMPLOYMENT_RATE`, the acceptance-test indicator) was silently invisible to the
+dashboard no matter how many pipeline runs happened, because it wasn't in either hardcoded
+structure. Fixed by making both config-driven: `preferred_direction` is now read directly from
+each indicator's YAML (`src/validation/config_schema.py`'s `is_canonical_eligible()` no longer
+needs a separate table), and eligibility is `country in (None, "BE")` plus a fetchable adapter —
+**not** "does this indicator have a `display` block". That distinction matters: `EC_CONS_CONF_BE`
+is Belgian data with no dashboard row of its own (it feeds the `EC_CONS_CONF` composite) and is
+still canonical-eligible; `EUROSTAT_GDP_Q_MEUR_DE` has the identical `display: null` shape but is
+German data and is not eligible. `country` is what actually encodes that distinction; `display`
+does not.
 
 ### `config/sources/*.yaml` mirrors the canonical DB schema
 

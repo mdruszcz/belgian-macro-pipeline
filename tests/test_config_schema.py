@@ -28,6 +28,7 @@ VALID_INDICATOR = {
     "frequency": "A",
     "source_id": "test_source",
     "geo_levels": ["national"],
+    "preferred_direction": "higher_is_better",
     "display": {
         "category": "gdp",
         "title": {"en": "Test title", "fr": "Titre", "nl": "Titel"},

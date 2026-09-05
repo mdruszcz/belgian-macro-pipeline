@@ -1,17 +1,18 @@
 id: GDP_ANNUAL_CY
+name:
+  en: Annual GDP growth
+  fr: Croissance annuelle du PIB
+  nl: Jaarlijkse BBP-groei
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.B1GM.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: Annual GDP growth
-  fr: Croissance annuelle du PIB
-  nl: Jaarlijkse BBP-groei
+preferred_direction: higher_is_better
 description:
   en: GDP total contribution to volume change, Y-Y, non-adjusted
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.B1GM.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

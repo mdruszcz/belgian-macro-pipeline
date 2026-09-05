@@ -1,18 +1,19 @@
 id: GFCF_PUBLIC_CY
+name:
+  en: GFCF — Public admin.
+  fr: FBCF — Administrations publiques
+  nl: BIK — Overheid
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.P51_PAD.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: GFCF — Public admin.
-  fr: FBCF — Administrations publiques
-  nl: BIK — Overheid
+preferred_direction: contextual
 description:
   en: Gross fixed capital formation by public administrations, contribution to GDP
     volume change
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P51_PAD.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

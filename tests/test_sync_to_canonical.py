@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
@@ -12,6 +13,18 @@ import belgian_macro_db as bmdb  # noqa: E402
 from src.db import migrate  # noqa: E402
 
 REAL_MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
+
+VALID_SOURCE_NBB = {
+    "source_id": "nbb",
+    "name": "NBB",
+    "agency": "NBB",
+    "adapter": "nbb",
+    "base_url": "https://example.test/nbb",
+    "licence": None,
+    "catalog_ref": None,
+    "cadence": "daily",
+    "is_active": True,
+}
 
 
 @pytest.fixture
@@ -37,10 +50,30 @@ def db_with_legacy(tmp_path, monkeypatch):
             "type": "nbb",
         }
     }
+    config_dir = tmp_path / "config"
+    indicators_dir = config_dir / "indicators"
+    sources_dir = config_dir / "sources"
+    indicators_dir.mkdir(parents=True)
+    sources_dir.mkdir(parents=True)
+    (sources_dir / "nbb.yaml").write_text(yaml.dump(VALID_SOURCE_NBB))
+    (indicators_dir / "GDP_QUARTERLY_YY.yaml").write_text(
+        yaml.dump(
+            {
+                "id": "GDP_QUARTERLY_YY",
+                "name": {"en": "GDP", "fr": "GDP", "nl": "GDP"},
+                "unit": "percent_yy",
+                "frequency": "Q",
+                "source_id": "nbb",
+                "geo_levels": ["national"],
+                "preferred_direction": "higher_is_better",
+                "display": None,
+            }
+        )
+    )
+
     monkeypatch.setattr(bmdb, "SOURCES", fake_sources)
     monkeypatch.setattr(sync_mod, "SOURCES", fake_sources)
-    monkeypatch.setattr(sync_mod, "INCLUDED", {"GDP_QUARTERLY_YY"})
-    monkeypatch.setattr(sync_mod, "PREFERRED_DIRECTION", {"GDP_QUARTERLY_YY": "higher_is_better"})
+    monkeypatch.setattr(sync_mod, "CONFIG_DIR", config_dir)
     return db_path
 
 

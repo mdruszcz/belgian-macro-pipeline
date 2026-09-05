@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
@@ -12,6 +13,58 @@ import belgian_macro_db as bmdb  # noqa: E402
 from src.db import migrate  # noqa: E402
 
 REAL_MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
+
+VALID_SOURCE_NBB = {
+    "source_id": "nbb",
+    "name": "NBB",
+    "agency": "NBB",
+    "adapter": "nbb",
+    "base_url": "https://example.test/nbb",
+    "licence": None,
+    "catalog_ref": None,
+    "cadence": "daily",
+    "is_active": True,
+}
+
+VALID_SOURCE_DBNOMICS = {
+    "source_id": "dbnomics_eurostat",
+    "name": "Eurostat",
+    "agency": "Eurostat",
+    "adapter": "dbnomics",
+    "base_url": "https://example.test/dbnomics",
+    "licence": None,
+    "catalog_ref": None,
+    "cadence": "daily",
+    "is_active": True,
+}
+
+
+def _write_config(tmp_path, indicators: dict, sources: list[dict]):
+    indicators_dir = tmp_path / "indicators"
+    sources_dir = tmp_path / "sources"
+    indicators_dir.mkdir(parents=True)
+    sources_dir.mkdir(parents=True)
+    for source in sources:
+        (sources_dir / f"{source['source_id']}.yaml").write_text(yaml.dump(source))
+    for code, ind in indicators.items():
+        (indicators_dir / f"{code}.yaml").write_text(yaml.dump(ind))
+    return indicators_dir, sources_dir
+
+
+def _indicator(code, source_id="nbb", country=None, direction="higher_is_better"):
+    doc = {
+        "id": code,
+        "name": {"en": code, "fr": code, "nl": code},
+        "unit": "percent_yy",
+        "frequency": "Q",
+        "source_id": source_id,
+        "geo_levels": ["national"],
+        "preferred_direction": direction,
+        "display": None,
+    }
+    if country:
+        doc["country"] = country
+    return doc
 
 
 def test_map_obs_status_known_codes():
@@ -50,8 +103,8 @@ def migrated_db(tmp_path: Path) -> Path:
     return db_path
 
 
-def _fake_sources():
-    return {
+def test_port_skips_non_belgium_indicators(monkeypatch, tmp_path, migrated_db):
+    fake_sources = {
         "GDP_QUARTERLY_YY": {
             "name": "GDP",
             "url": "https://example.test/nbb",
@@ -69,18 +122,21 @@ def _fake_sources():
             "type": "dbnomics",
         },
     }
+    config_dir = tmp_path / "config"
+    _write_config(
+        config_dir,
+        {
+            "GDP_QUARTERLY_YY": _indicator("GDP_QUARTERLY_YY"),
+            "EUROSTAT_GDP_Q_MEUR_DE": _indicator(
+                "EUROSTAT_GDP_Q_MEUR_DE", source_id="dbnomics_eurostat", country="DE"
+            ),
+        },
+        [VALID_SOURCE_NBB, VALID_SOURCE_DBNOMICS],
+    )
 
-
-def test_port_skips_non_belgium_indicators(monkeypatch, migrated_db):
-    fake_sources = _fake_sources()
     monkeypatch.setattr(bmdb, "SOURCES", fake_sources)
     monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
-    monkeypatch.setattr(port_mod, "INCLUDED", {"GDP_QUARTERLY_YY"})
-    monkeypatch.setattr(
-        port_mod,
-        "PREFERRED_DIRECTION",
-        {"GDP_QUARTERLY_YY": "higher_is_better"},
-    )
+    monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
         port_mod.NBBFetcher,
         "fetch",
@@ -95,7 +151,7 @@ def test_port_skips_non_belgium_indicators(monkeypatch, migrated_db):
     conn.close()
 
 
-def test_dbnomics_rows_mapped_to_final(monkeypatch, migrated_db):
+def test_dbnomics_rows_mapped_to_final(monkeypatch, tmp_path, migrated_db):
     fake_sources = {
         "EUROSTAT_GDP_Q_MEUR": {
             "name": "GDP",
@@ -106,11 +162,15 @@ def test_dbnomics_rows_mapped_to_final(monkeypatch, migrated_db):
             "type": "dbnomics",
         }
     }
-    monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
-    monkeypatch.setattr(port_mod, "INCLUDED", {"EUROSTAT_GDP_Q_MEUR"})
-    monkeypatch.setattr(
-        port_mod, "PREFERRED_DIRECTION", {"EUROSTAT_GDP_Q_MEUR": "higher_is_better"}
+    config_dir = tmp_path / "config"
+    _write_config(
+        config_dir,
+        {"EUROSTAT_GDP_Q_MEUR": _indicator("EUROSTAT_GDP_Q_MEUR", source_id="dbnomics_eurostat")},
+        [VALID_SOURCE_DBNOMICS],
     )
+
+    monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
+    monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
         port_mod.DBnomicsFetcher,
         "fetch",
@@ -127,7 +187,7 @@ def test_dbnomics_rows_mapped_to_final(monkeypatch, migrated_db):
     conn.close()
 
 
-def test_port_idempotent_same_day(monkeypatch, migrated_db):
+def test_port_idempotent_same_day(monkeypatch, tmp_path, migrated_db):
     fake_sources = {
         "GDP_QUARTERLY_YY": {
             "name": "GDP",
@@ -138,9 +198,13 @@ def test_port_idempotent_same_day(monkeypatch, migrated_db):
             "type": "nbb",
         }
     }
+    config_dir = tmp_path / "config"
+    _write_config(
+        config_dir, {"GDP_QUARTERLY_YY": _indicator("GDP_QUARTERLY_YY")}, [VALID_SOURCE_NBB]
+    )
+
     monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
-    monkeypatch.setattr(port_mod, "INCLUDED", {"GDP_QUARTERLY_YY"})
-    monkeypatch.setattr(port_mod, "PREFERRED_DIRECTION", {"GDP_QUARTERLY_YY": "higher_is_better"})
+    monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
         port_mod.NBBFetcher,
         "fetch",

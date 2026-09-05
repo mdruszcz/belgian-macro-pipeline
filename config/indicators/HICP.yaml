@@ -1,17 +1,18 @@
 id: HICP
+name:
+  en: HICP (Harmonised Inflation)
+  fr: IPCH (Inflation harmonisée)
+  nl: GICP (Geharmoniseerde inflatie)
 unit: percent_yy
 frequency: M
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_HICP,1.0/M.BE.000000.2015.HCP.GROWTH_RATE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
-name:
-  en: HICP (Harmonised Inflation)
-  fr: IPCH (Inflation harmonisée)
-  nl: GICP (Geharmoniseerde inflatie)
+preferred_direction: contextual
 description:
   en: Harmonised Index of Consumer Prices, all items, year-on-year growth rate
+fetch:
+  query: ',DF_HICP,1.0/M.BE.000000.2015.HCP.GROWTH_RATE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
 display:
   category: prices
   title:
