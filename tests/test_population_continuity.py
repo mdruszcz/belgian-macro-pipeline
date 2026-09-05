@@ -56,6 +56,22 @@ def groups():
     return P.read_merger_groups(P.CROSSWALK)
 
 
+def test_falls_back_to_cp1252_when_utf8_fails(tmp_path):
+    """The maintainer's real 2022 vintage of TF_SOC_POP_STRUCT encodes its
+    apostrophes as a raw cp1252 0x92 byte ('Arrondissement d\x92Anvers') while
+    every other year (2016-2021, 2023-2025) is proper UTF-8 -- confirmed by
+    inspecting the actual bytes, not assumed. A reader that only tries UTF-8
+    would crash on this one real file rather than the ones invented for a
+    test."""
+    pop = tmp_path / "pop"
+    pop.mkdir()
+    raw = b"CD_REFNIS|TX_DESCR_FR|MS_POPULATION\r\n11002|Arrondissement d\x92Anvers|500\r\n"
+    (pop / "TF_SOC_POP_STRUCT_2022.txt").write_bytes(raw)
+
+    by_year = P.read_population_by_year(pop)
+    assert by_year == {2022: {"11002": 500}}
+
+
 def test_reads_the_real_statbel_zip_format(tmp_path):
     """Statbel ships TF_SOC_POP_STRUCT_<year>.zip, one .txt inside, pipe-
     delimited with a BOM -- the exact shape the maintainer confirmed
