@@ -130,13 +130,16 @@ specific, plausibly-real titles and URLs consistently across multiple queries.
 
 | # | Dataset | Publisher | Geography | History | Update freq. | Licence | Format | Confidence | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | [Fiscal statistics on income](https://statbel.fgov.be/en/open-data/fiscal-statistics-income) | Statbel | Commune | 2005–2023 | Annual | CC BY 4.0 | XLSX | Corroborated (search + independent search agreed on years, geography, licence) | |
+| 1 | [Fiscal statistics on income](https://statbel.fgov.be/en/open-data/fiscal-statistics-income) | Statbel | Commune (confirmed as a real dimension in the Bestat datasource — see below — but every standard/pre-built view found stops at province level) | 2005–2023 (open-data page); 2017–2019 confirmed directly via Bestat standard view (`850933c9`, province-level) | Annual | CC BY 4.0 | XLSX (open-data page); JSON via Bestat API (see below) | Corroborated + Bestat datasource verified directly | |
+| 1b | Same dataset via Bestat API — datasource `IM_SOC_PSNL_INC_TAX_MUNTY` | Statbel (Bestat) | **Commune is a real dimension of this datasource** (name: "par commune de résidence") but no standard view exposing it was found — see "Statbel Bestat API" note below | Datasource "last data update" timestamp confirms it is live-maintained (Nov 2026) | Unconfirmed at commune level; region-level standard view covers 2017–2019 only | Not stated per-datasource; presumed CC BY 4.0 (Statbel's general policy) | JSON, CSV, XML, XLS, HTML, PDF via `https://bestat.statbel.fgov.be/bestat/api/views/{id}/result/{FORMAT}` | Verified directly (datasource id `b394aa82-5045-4483-9e79-cd5344651791`, fetched and read) | |
 | 2 | [Fiscal statistics on income by statistical sector](https://statbel.fgov.be/en/open-data/fiscal-statistics-income-statistical-sector) | Statbel | Statistical sector (sub-commune) | 2005–2023 | Annual | CC BY 4.0 | XLSX | Snippet-only | |
 | 3 | [Population by place of residence, nationality, marital status, age and sex](https://statbel.fgov.be/en/open-data/population-place-residence-nationality-marital-status-age-and-sex-12) | Statbel | Commune (aggregable to arrondissement/province/region) | Annual snapshot (1 Jan); exact earliest year not confirmed | Annual | CC BY 4.0 (site default, not independently confirmed on this page) | CSV | Snippet-only | |
+| 3b | Census 2011+2021 population/household/housing indicators via Bestat — datasource `IM_SOC_GEO_IND_CENSUS_2021` | Statbel (Bestat) | Standard views confirmed at **province level only** (e.g. "Total population" view returns 28 rows: region × province × 2 census years) despite dozens of commune-sounding indicator names | 2011 and 2021 census years, confirmed directly | Static (census-based, not continuously updated) | Unconfirmed; presumed CC BY 4.0 | JSON etc. (Bestat API) | Verified directly (datasource id `e957ac31-44a2-4718-8469-10470d3c41d9`, one standard view fetched and read) | |
 | 4 | [Sales of real estate according to nature of property](https://statbel.fgov.be/en/open-data/sales-real-estate-belgium-according-nature-property-land-register) | Statbel | **Unconfirmed at commune level** — Statbel's public bulletins for this series are region/province aggregates; whether the open-data file itself goes to commune level was not verified | Unconfirmed | Quarterly (per Statbel's general release cadence) | Presumed CC BY 4.0 | Unconfirmed | Snippet-only | |
 | 5 | [Cadastral statistics of the building stock](https://statbel.fgov.be/en/open-data/cadastral-statistics-building-stock) | Statbel | Commune (stated: buildings in Belgium as of 1 Jan of the reference year) | At least one reference year confirmed to exist (2024) | Annual | Unconfirmed on page | Unconfirmed (likely CSV) | Snippet-only | |
 | 6 | Building permits statistics | Statbel | Region/province confirmed via press releases; commune-level open-data availability **not verified** | Monthly figures referenced in recent press bulletins | Monthly | Unconfirmed | Unconfirmed | Snippet-only, no confirmed open-data page found (only a thematic page) | |
 | 7 | Statistics on establishment units (business/enterprise) | Statbel | Commune, but counts are **banded/masked for confidentiality**, not exact — worth weighing against `comparability` in the formula above | Unconfirmed | Annual (VAT-registered units) | Unconfirmed | Unconfirmed | Snippet-only | |
+| 7b | Local units (établissements) by commune via Bestat — datasource `IM_EAF_LCL_UNIT_POP` | Statbel (Bestat) | **True commune-level confirmed by directly fetching the data**: 566 rows, one per commune, exact (not banded) counts, e.g. Aartselaar 2232, Antwerp 66,381 | Datasource covers "since 2015 per quarter" but the commune-level standard view returns only the latest quarter (Q4 2023); a separate region-level standard view (`e21e18c6`) has full 2015–present quarterly depth. **Getting both commune granularity and full depth needs a custom cross-tab, not a standard view** — see note below | Quarterly (per datasource description) | Unconfirmed; presumed CC BY 4.0 | JSON (confirmed), + CSV/XML/XLS/HTML/PDF per the API structure | **Verified directly** — fetched real data, real commune names matching this repo's own `geographies.csv`, real counts | |
 | 8 | [WalStat portal](https://walstat.iweps.be/walstat-accueil.php) — 19 themes incl. "Pouvoirs locaux" (local governance) | IWEPS (Wallonia) | Quartier / commune / arrondissement / province / bassin | Not stated on the pages opened; needs a catalogue-level query | Not stated | **CC0 for the data, CC BY-SA for maps** — a genuine two-licence split confirmed independently, not a page error | CSV, JSON | Verified (portal opened directly) + corroborated (licence split confirmed by a second, independent search) | |
 | 9 | [WalStat open-data catalogue (DCAT-AP)](https://opendata.iweps.be/statdcat-ap/walstat) | IWEPS (Wallonia) | Same as above | Not stated; catalogue updated twice yearly (end of June, end of December) per iweps.be | Semi-annual catalogue refresh | CC0 (data) | RDF/XML catalogue → CSV/JSON | Verified (catalogue page opened directly) | |
 | 10 | [IBSA — List of Belgian Municipalities in Urban Regions](https://ibsa.brussels/opendata) | IBSA (Brussels) | Belgium-wide | 2021–2025 | Last updated 25 June 2026 (per page) | CC BY 4.0 | XLSX, CSV (+ codebook) | Verified (page opened directly) | |
@@ -146,6 +149,45 @@ specific, plausibly-real titles and URLs consistently across multiple queries.
 | 14 | ["Jouw gemeente in cijfers" / Gemeente-Stadsmonitor](https://gemeentemonitor.vlaanderen.be/) | Statistiek Vlaanderen | Municipality (~200 indicators, ~70 from a resident survey per search snippets) | Unconfirmed | Unconfirmed | Unconfirmed | Page did not return usable content this session; needs a direct visit | Snippet-only | |
 | 15 | [ODWB — Open Data Wallonie-Bruxelles](https://www.odwb.be/pages/home/) | Agence du Numérique (Walloon Region + French Community) | Confirmed to include a "Données locales" / commune-level section, exact datasets not enumerated | Unconfirmed | Unconfirmed | Not stated on the homepage; needs a dataset-level check | Unconfirmed | Verified portal exists and structure (homepage opened directly); individual dataset details not checked | |
 | 16 | [data.gov.be](https://data.gov.be/en/documentation/licenses) (federal aggregator, ~10,000 datasets across 14 categories per search snippets) | Federal Belgian government | Aggregates federal + some regional/local; explicitly *not* a one-stop shop — its own docs point out to regional portals | N/A (aggregator) | N/A | Default **CC0**, "comply or explain" — a department may instead choose CC BY 4.0 / CC BY-SA 4.0 / CC BY-NC 4.0 / CC BY-ND 4.0 (per search snippet only, could not open the licence page directly to confirm) | Varies by dataset | Snippet-only, page unreachable | |
+
+### Statbel Bestat API — real, verified, directly queryable
+
+The maintainer supplied the structure of Statbel's actual data API (`bestat.statbel.fgov.be`,
+distinct from `statbel.fgov.be` — a different subdomain that did **not** refuse fetches the way
+the main site did this session). It works exactly as described, verified by directly fetching
+real data, not just reading documentation:
+
+- `GET /bestat/api/datasources/` — lists every datasource (182 found). Each has a stable UUID,
+  bilingual/trilingual description, and a last-update timestamp.
+- `GET /bestat/api/views/` — lists 1,341 pre-built ("standard") views, each tied to one
+  `dataSourceId`, with a human name in one locale.
+- `GET /bestat/api/views/{id}/result/{FORMAT}` (`FORMAT` = JSON/CSV/XML/XLS/HTML/PDF) — the
+  actual export. This is the same shape as NBB's SDMX-CSV and DBnomics' JSON endpoints already
+  integrated in `src/fetchers/` — a `StatbelSource(TimeSeriesSource)` adapter (Block D's
+  interface) is a plausible, concrete fit once Block E selects specific datasets.
+
+**The important, non-obvious finding**: a datasource's description naming "commune" as a
+dimension does not mean a *standard* view exposes it at that granularity. Confirmed by directly
+comparing two standard views built from the same `IM_EAF_LCL_UNIT_POP` datasource:
+
+- One standard view returns true commune-level data (566 rows, exact counts) — but only the
+  **single latest quarter**.
+- Another standard view has the **full 2015–present quarterly time series** — but only at
+  **region level** (3 rows per quarter).
+
+The same pattern held for fiscal income and census population: the underlying datasource
+supports a commune dimension, but every standard view actually found stops at province level.
+**Getting both commune granularity and multi-year depth from Bestat requires building a custom
+cross-tabulation** via the Bestat web UI (`https://bestat.statbel.fgov.be`) and capturing that
+view's own ID from the resulting URL — precisely what the maintainer's own note described for
+"customised views." This is a concrete, bounded, one-time manual step per dataset (the same shape
+as Block C's manual Statbel geography download), not a blocker, but it means the `maintenance_cost`
+term in the scoring formula above should account for it: someone has to actually build and record
+each needed view before `StatbelSource` can fetch from it.
+
+Not checked this session: whether Bestat's API has its own licence/terms page distinct from
+Statbel's general CC BY 4.0 statement (no licence field appears on a view or datasource's own
+JSON metadata) — worth a direct check before relying on it for the 10 selected sources.
 
 Not investigated this session, and not implied to be worse candidates for it — simply outside the
 7 categories the research pass covered: **datastore.brussels** (the Brussels-region aggregator
