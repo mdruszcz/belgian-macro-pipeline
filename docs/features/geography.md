@@ -288,9 +288,16 @@ Checked against Statbel's official merger table (maintainer-supplied, 2026-09-05
   pair the NIS6 prefix rule could not derive and the name-matching fallback recovered. Both are
   now signed off with their source recorded.
 - **One date correction**, Bastogne/Bertogne, described above.
-- The **2019 wave is not covered by that table** and its 26 rows remain evidenced only by the
-  vintage diff. They are unflagged because their lineage is unambiguous from code prefixes, but
-  they have not been checked against a published list.
+
+Checked against Statbel's official 2019 merger table (maintainer-supplied, 2026-09-05):
+
+- **All 7 Flemish mergers match exactly** — 15 predecessor communes, 7 successor codes, all
+  dated 1 January 2019, no discrepancy. Together with the 11 Hainaut arrondissement recodes
+  (expected to be absent from a "communes qui fusionnent" list — nothing merged, only the code
+  changed), this accounts for every row in the 2019 wave.
+
+Every row in both waves is now checked against a published Statbel list. The only correction
+either table produced was the Bastogne date.
 
 `valid_from` for a predecessor is the first vintage containing it; `valid_to` is the wave that
 ended it. They must differ — `geographies` enforces `CHECK (valid_to > valid_from)`.
@@ -434,9 +441,13 @@ it rather than by a general assertion:
 - **~~Q5 — Historical predecessors have no parent.~~ Fixed.** Each old vintage's hierarchy *is*
   recoverable from REFNIS's document order; see "Historical parents" above. Zero orphans at any
   era, asserted by `test_historical_communes_are_not_orphaned_from_the_hierarchy`.
-- **Q8 — 2019 wave dates are unverified.** The maintainer's merger table covers the 2025 cycle
-  only. If any 2019 merger took effect on a date other than 1 January 2019, it carries the same
-  error the Bastogne row did, and nothing here would detect it.
+- **~~Q8 — 2019 wave dates were unverified.~~ Resolved.** The maintainer supplied Statbel's
+  official 2019 merger table ("Codes INS des communes valables à partir du 01/01/2019"): 15
+  Flemish communes merging into 7 new ones, all effective 1 January 2019. All 7 successors match
+  the derived crosswalk exactly — predecessors, successor code, and the date, with no
+  Bastogne-style surprise. Together with the 11 Hainaut arrondissement recodes (renumbered, not
+  merged, so absent from a "communes qui fusionnent" page by construction), that accounts for all
+  26 rows in the 2019 wave. See "Verification status" below.
 - **Q7 — Canonicalization blurs merged entities.** Comparing territory through the crosswalk
   means two communes that merged become one identity, so an arrondissement that *gained* a merged
   commune's land may not register as changed (arrondissement `71000` gaining Kortessem's territory

@@ -103,7 +103,7 @@ Why: One orphaned commune means it silently vanishes from regional aggregates, w
  ✅ [BUILD] Build municipality_crosswalk.csv (55 rows; 7 flagged for the [H] verification below)
 How: Columns old_nis, new_nis, valid_from, valid_to, relationship (merged/renamed/split).
 Why: Without it, a merged commune's history starts in the merger year, and your "5-year growth" for that commune is undefined or absurd.
- ✅ [H] Verify the crosswalk against the 2019 and 2025 Flemish merger waves (2026-09-05: all 14 successors of the 2025 cycle confirmed against Statbel's official merger table; found and fixed one date error — Bastogne+Bertogne merged 2024-12-02, not 2025-01-01. The 2019 wave is NOT covered by that table — see geography.md Q8)
+ ✅ [H] Verify the crosswalk against the 2019 and 2025 Flemish merger waves (2026-09-05: all 14 successors of the 2025 cycle AND all 7 of the 2019 cycle confirmed against Statbel's two official merger tables; found and fixed one date error — Bastogne+Bertogne merged 2024-12-02, not 2025-01-01. Every row in both waves now checked against a published list)
 How: Check a handful of known merged communes against official merger lists.
 Why: This is the highest-risk table for hallucinated content, and it is small enough to check by hand. Do it once, properly.
  ✅ [BUILD] Implement resolve_geo(nis, period) used by every adapter
