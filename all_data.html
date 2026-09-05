@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Observations</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
+    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
+    --accent:#a8722f; --accent-soft:#f0e2cf; --accent-ink:#5c3d18;
+    --good:#3f7d5c; --good-soft:#e2efe7;
+    --warn:#b9762a; --warn-soft:#f6e9d6;
+    --row-alt: #fbfaf6;
+    --focus-ring: #a8722f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+      --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+      --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+      --good:#6fbf94; --good-soft:#1f2f26;
+      --warn:#e0a355; --warn-soft:#332818;
+      --row-alt:#1f1d18;
+      --focus-ring:#d6994f;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+    --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+    --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+    --good:#6fbf94; --good-soft:#1f2f26;
+    --warn:#e0a355; --warn-soft:#332818;
+    --row-alt:#1f1d18;
+    --focus-ring:#d6994f;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+  ::selection{background:var(--accent-soft)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+
+  header{margin-bottom:28px}
+  h1{
+    font-family:"Spectral",Georgia,serif; font-weight:600;
+    font-size:2rem; margin:0 0 6px; color:var(--text);
+    text-wrap:balance; letter-spacing:-.01em;
+  }
+  .subtitle{color:var(--text-muted); font-size:.95rem; max-width:62ch}
+  .subtitle code{
+    font-family:"IBM Plex Mono",monospace; font-size:.85em;
+    background:var(--accent-soft); color:var(--accent-ink);
+    padding:1px 5px; border-radius:3px;
+  }
+
+  .stats{
+    display:flex; gap:1px; margin:22px 0 24px;
+    background:var(--border); border:1px solid var(--border);
+    border-radius:8px; overflow:hidden;
+  }
+  .stat{
+    flex:1; background:var(--surface); padding:14px 18px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .stat .n{
+    font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+    font-size:1.5rem; font-weight:500; color:var(--text);
+  }
+  .stat .l{
+    font-size:.72rem; text-transform:uppercase; letter-spacing:.07em;
+    color:var(--text-faint);
+  }
+
+  .toolbar{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  #search{
+    flex:1; min-width:220px;
+    font-family:"IBM Plex Sans",sans-serif; font-size:.9rem;
+    padding:9px 12px; border-radius:7px;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+  }
+  #search:focus{outline:2px solid var(--focus-ring); outline-offset:1px}
+  #search::placeholder{color:var(--text-faint)}
+  #status{
+    font-size:.82rem; color:var(--text-muted); white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  #status.err{color:#c0392b}
+
+  .table-scroll{
+    overflow-x:auto; border:1px solid var(--border); border-radius:8px;
+    background:var(--surface);
+  }
+  table{border-collapse:collapse; width:100%; min-width:820px}
+  thead th{
+    position:sticky; top:0; background:var(--surface);
+    border-bottom:1px solid var(--border-strong);
+    text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-muted); padding:10px 14px; cursor:pointer; user-select:none;
+    white-space:nowrap;
+  }
+  thead th:hover{color:var(--text)}
+  thead th .arrow{opacity:0; margin-left:4px; color:var(--accent)}
+  thead th.sorted .arrow{opacity:1}
+  tbody td{
+    padding:8px 14px; border-bottom:1px solid var(--border);
+    font-family:"IBM Plex Mono",monospace; font-size:.83rem; white-space:nowrap;
+  }
+  tbody td.name{
+    font-family:"IBM Plex Sans",sans-serif; font-size:.85rem; white-space:normal;
+    max-width:260px; color:var(--text);
+  }
+  tbody td.val{text-align:right; font-variant-numeric:tabular-nums}
+  tbody tr:nth-child(even){background:var(--row-alt)}
+  tbody tr:hover{background:var(--accent-soft)}
+  tbody td.code{color:var(--text-muted)}
+
+  .pill{
+    display:inline-block; padding:1px 8px; border-radius:99px;
+    font-family:"IBM Plex Sans",sans-serif; font-size:.72rem; font-weight:500;
+  }
+  .pill.final{background:var(--good-soft); color:var(--good)}
+  .pill.prov{background:var(--warn-soft); color:var(--warn)}
+  .pill.other{background:var(--border); color:var(--text-muted)}
+
+  footer{margin-top:22px; color:var(--text-faint); font-size:.78rem}
+  footer a{color:var(--text-muted)}
+
+  @media (max-width:640px){
+    .wrap{padding:24px 16px 60px}
+    h1{font-size:1.5rem}
+    .stats{flex-wrap:wrap}
+    .stat{min-width:45%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>All Observations</h1>
+    <p class="subtitle">Every row currently in <code>data/belgian_macro_export.csv</code> — unfiltered, no category grouping. For the presented view see <a href="dashboard.html">dashboard.html</a>.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><span class="n" id="statIndicators">—</span><span class="l">Indicators</span></div>
+    <div class="stat"><span class="n" id="statRows">—</span><span class="l">Observations</span></div>
+    <div class="stat"><span class="n" id="statUpdated">—</span><span class="l">Last fetched</span></div>
+  </div>
+
+  <div class="toolbar">
+    <input id="search" type="text" placeholder="Filter by indicator code or name…" autocomplete="off">
+    <span id="status">Loading…</span>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-key="indicator_code">Code<span class="arrow">↓</span></th>
+          <th data-key="name">Name<span class="arrow">↓</span></th>
+          <th data-key="period">Period<span class="arrow">↓</span></th>
+          <th data-key="value">Value<span class="arrow">↓</span></th>
+          <th data-key="obs_status">Status<span class="arrow">↓</span></th>
+          <th data-key="unit">Unit<span class="arrow">↓</span></th>
+          <th data-key="source_agency">Source<span class="arrow">↓</span></th>
+          <th data-key="fetched_at">Fetched<span class="arrow">↓</span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied.</footer>
+</div>
+
+<script>
+let ROWS = [];
+let sortKey = 'indicator_code', sortDir = 1;
+
+function parseCSV(text){
+  // Quote-aware parser (RFC 4180): the dashboard's own parser is a naive
+  // comma-split and only stays safe because no current field contains a
+  // literal comma. This page does it properly instead of inheriting that.
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c === '\r'){ /* skip */ }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const header = rows[0];
+  return rows.slice(1).filter(r => r.length === header.length).map(r => {
+    const o = {};
+    header.forEach((h,i) => o[h] = r[i]);
+    return o;
+  });
+}
+
+function statusPill(s){
+  if(s === 'A') return '<span class="pill final">Final</span>';
+  if(s === 'P') return '<span class="pill prov">Provisional</span>';
+  if(!s) return '';
+  return `<span class="pill other">${s}</span>`;
+}
+
+function render(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  let rows = q
+    ? ROWS.filter(r => r.indicator_code.toLowerCase().includes(q) || (r.name||'').toLowerCase().includes(q))
+    : ROWS;
+
+  rows = rows.slice().sort((a,b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if(sortKey === 'value'){ av = parseFloat(av); bv = parseFloat(bv); }
+    if(av < bv) return -1 * sortDir;
+    if(av > bv) return 1 * sortDir;
+    return a.indicator_code < b.indicator_code ? -1 : a.indicator_code > b.indicator_code ? 1 : 0;
+  });
+
+  document.getElementById('tbody').innerHTML = rows.map(r => `<tr>
+    <td class="code">${r.indicator_code}</td>
+    <td class="name">${r.name || ''}</td>
+    <td>${r.period}</td>
+    <td class="val">${r.value}</td>
+    <td>${statusPill(r.obs_status)}</td>
+    <td>${r.unit || ''}</td>
+    <td>${r.source_agency || ''}</td>
+    <td>${(r.fetched_at || '').slice(0,19).replace('T',' ')}</td>
+  </tr>`).join('');
+
+  document.getElementById('status').textContent =
+    q ? `${rows.length} of ${ROWS.length} rows` : `${rows.length} rows`;
+
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.toggle('sorted', th.dataset.key === sortKey);
+    const arrow = th.querySelector('.arrow');
+    if(th.dataset.key === sortKey) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+  });
+}
+
+document.querySelectorAll('thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    if(sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+    render();
+  });
+});
+document.getElementById('search').addEventListener('input', render);
+
+async function load(){
+  const statusEl = document.getElementById('status');
+  try{
+    const res = await fetch('data/belgian_macro_export.csv?t=' + Date.now());
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    ROWS = parseCSV(await res.text());
+
+    const codes = new Set(ROWS.map(r => r.indicator_code));
+    document.getElementById('statIndicators').textContent = codes.size;
+    document.getElementById('statRows').textContent = ROWS.length.toLocaleString();
+    const latest = ROWS.reduce((m,r) => r.fetched_at > m ? r.fetched_at : m, '');
+    document.getElementById('statUpdated').textContent = latest ? latest.slice(0,10) : '—';
+
+    render();
+  } catch(e){
+    statusEl.textContent = 'Error: ' + e.message;
+    statusEl.classList.add('err');
+  }
+}
+load();
+</script>
+</body>
+</html>
