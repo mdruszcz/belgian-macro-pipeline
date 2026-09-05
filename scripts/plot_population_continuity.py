@@ -113,13 +113,27 @@ def _pick_column(fieldnames: list[str], candidates: tuple[str, ...], path: Path,
     )
 
 
+def _decode_text(raw: bytes, display_name: str) -> str:
+    """Statbel's own encoding is not consistent across vintages of the same
+    file: 2016-2021, 2023-2025 are UTF-8, but the 2022 vintage encodes its
+    apostrophes ('Arrondissement d'Anvers') as a raw cp1252 0x92 byte, which
+    is invalid UTF-8. Confirmed by inspecting the actual bytes, not assumed --
+    the same kind of single-vintage disagreement Block C already found
+    between the Bestat API and the static NIS9 file for Sint-Niklaas."""
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252")
+
+
 def _open_text_member(path: Path):
     """Return (display_name, text_stream) for a .csv/.txt file, or for the
     single data member inside a .zip -- Statbel ships TF_SOC_POP_STRUCT as one
     ~99 MB .txt per year, zipped. Refuses to guess if a zip holds more than
     one plausible member rather than silently picking one (CLAUDE.md rule 13)."""
     if path.suffix.lower() != ".zip":
-        return path.name, path.open(encoding="utf-8-sig", newline="")
+        text = _decode_text(path.read_bytes(), path.name)
+        return path.name, io.StringIO(text)
 
     zf = zipfile.ZipFile(path)
     candidates = [n for n in zf.namelist() if n.lower().endswith((".txt", ".csv"))]
@@ -128,10 +142,9 @@ def _open_text_member(path: Path):
             f"{path.name}: expected exactly one .txt/.csv inside the zip, found "
             f"{len(candidates)}: {candidates or zf.namelist()}"
         )
-    raw = zf.read(candidates[0])
-    return f"{path.name}:{candidates[0]}", io.TextIOWrapper(
-        io.BytesIO(raw), encoding="utf-8-sig", newline=""
-    )
+    display_name = f"{path.name}:{candidates[0]}"
+    text = _decode_text(zf.read(candidates[0]), display_name)
+    return display_name, io.StringIO(text)
 
 
 def _sum_communes(fh, display_name: str) -> dict[str, int]:
