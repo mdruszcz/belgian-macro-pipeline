@@ -18,17 +18,26 @@ percentage of the commune's population -- and the chart is optional. A picture
 nobody can re-derive is not evidence.
 
 WHAT IT NEEDS (not committed -- data/raw is gitignored):
-    data/raw/statbel/population/*.csv|*.xlsx, one file per year, 2010-2025,
-    each carrying a commune NIS code column and a population count column.
+    data/raw/statbel/population/*.zip|*.csv|*.txt, one file per year -- direct
+    download URL, maintainer-supplied 2026-09-06 (year is the only variable):
 
-    Statbel open data, "Population by place of residence, nationality,
-    marital status, age and sex":
-      https://statbel.fgov.be/en/open-data/population-place-residence-nationality-marital-status-age-and-sex-12
+      https://statbel.fgov.be/sites/default/files/files/opendata/bevolking%20naar%20woonplaats%2C%20nationaliteit%20burgelijke%20staat%20%2C%20leeftijd%20en%20geslacht/TF_SOC_POP_STRUCT_<YEAR>.zip
 
-    This must be downloaded by hand. statbel.fgov.be and data.gov.be are both
-    unreachable from CI (connection timeout, not a 403), and the reachable
-    Bestat API carries only Census 2011 at commune level -- a single year, not
-    a series. See docs/features/statbel_adapter.md, Non-goals.
+    Each zip is reported at ~99 MB (a per-sector breakdown by nationality,
+    civil status, age and sex -- this script sums it down to one total per
+    commune per year). Only TWO merger-boundary years exist across the six
+    groups this control checks (2019 and 2025 -- see select_groups/ALWAYS_
+    INCLUDE below), so only SIX files are actually needed, not the full
+    2010-2025 span: 2018, 2019, 2020, 2024, 2025, 2026.
+
+    This must be downloaded by hand. statbel.fgov.be is unreachable from this
+    pipeline's own network context -- confirmed three separate ways on
+    2026-09-06 (curl IPv4, curl IPv6, and an independent WebFetch path all
+    fail on this exact URL; DNS resolves fine, so it is a connection-level
+    block, not a DNS or 403 issue). bestat.statbel.fgov.be, a different host,
+    is reachable, but its Census 2011 view is the only commune-level
+    population data it carries -- a single year, not a series. See
+    docs/features/statbel_adapter.md, Non-goals.
 
 HOW TO READ THE OUTPUT:
     For each merger group, two series are compared over the merger boundary:
@@ -46,8 +55,10 @@ HOW TO READ THE OUTPUT:
 
 import argparse
 import csv
+import io
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -102,6 +113,62 @@ def _pick_column(fieldnames: list[str], candidates: tuple[str, ...], path: Path,
     )
 
 
+def _open_text_member(path: Path):
+    """Return (display_name, text_stream) for a .csv/.txt file, or for the
+    single data member inside a .zip -- Statbel ships TF_SOC_POP_STRUCT as one
+    ~99 MB .txt per year, zipped. Refuses to guess if a zip holds more than
+    one plausible member rather than silently picking one (CLAUDE.md rule 13)."""
+    if path.suffix.lower() != ".zip":
+        return path.name, path.open(encoding="utf-8-sig", newline="")
+
+    zf = zipfile.ZipFile(path)
+    candidates = [n for n in zf.namelist() if n.lower().endswith((".txt", ".csv"))]
+    if len(candidates) != 1:
+        raise MissingPopulationData(
+            f"{path.name}: expected exactly one .txt/.csv inside the zip, found "
+            f"{len(candidates)}: {candidates or zf.namelist()}"
+        )
+    raw = zf.read(candidates[0])
+    return f"{path.name}:{candidates[0]}", io.TextIOWrapper(
+        io.BytesIO(raw), encoding="utf-8-sig", newline=""
+    )
+
+
+def _sum_communes(fh, display_name: str) -> dict[str, int]:
+    """Sniff the delimiter (Statbel varies pipe/semicolon/comma across
+    vintages, always with a BOM -- the same trap the REFNIS parsers hit in
+    Block C) and sum population to one total per commune."""
+    sample = fh.read(8192)
+    fh.seek(0)
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters="|;,\t")
+    except csv.Error:
+        dialect = csv.excel
+    reader = csv.DictReader(fh, dialect=dialect)
+    if not reader.fieldnames:
+        raise MissingPopulationData(f"{display_name} is empty or has no header row.")
+    nis_col = _pick_column(list(reader.fieldnames), NIS_COLUMNS, Path(display_name), "nis")
+    pop_col = _pick_column(list(reader.fieldnames), POP_COLUMNS, Path(display_name), "pop")
+
+    totals: dict[str, int] = {}
+    for row in reader:
+        nis = (row.get(nis_col) or "").strip()
+        raw = (row.get(pop_col) or "").strip().replace(" ", "").replace(",", "")
+        if not nis or not raw:
+            continue
+        try:
+            totals[nis] = totals.get(nis, 0) + int(float(raw))
+        except ValueError:
+            continue
+
+    if not totals:
+        raise MissingPopulationData(
+            f"{display_name}: parsed 0 communes. Columns picked were "
+            f"{nis_col!r}/{pop_col!r} -- one of them is probably not what it looks like."
+        )
+    return totals
+
+
 def read_population_by_year(pop_dir: Path) -> dict[int, dict[str, int]]:
     """-> {year: {nis5: total_population}}.
 
@@ -114,10 +181,10 @@ def read_population_by_year(pop_dir: Path) -> dict[int, dict[str, int]]:
             f"{__doc__.split('WHAT IT NEEDS')[1].split('HOW TO READ')[0].strip()}"
         )
 
-    files = sorted(p for p in pop_dir.iterdir() if p.suffix.lower() in {".csv", ".txt"})
+    files = sorted(p for p in pop_dir.iterdir() if p.suffix.lower() in {".csv", ".txt", ".zip"})
     if not files:
         raise MissingPopulationData(
-            f"{pop_dir} exists but holds no .csv/.txt files.\n"
+            f"{pop_dir} exists but holds no .csv/.txt/.zip files.\n"
             f"Found instead: {[p.name for p in pop_dir.iterdir()] or 'nothing'}\n"
             f"If the download was .xlsx, export each sheet to CSV first -- this script "
             f"deliberately does not parse Excel, to keep a throwaway check dependency-free."
@@ -130,40 +197,12 @@ def read_population_by_year(pop_dir: Path) -> dict[int, dict[str, int]]:
             print(f"  skipping {path.name}: no year in the filename", file=sys.stderr)
             continue
 
-        # Statbel ships these pipe- or semicolon-delimited depending on vintage,
-        # and with a BOM. Sniff rather than assume -- the same trap the REFNIS
-        # parsers hit in Block C.
-        with path.open(encoding="utf-8-sig", newline="") as fh:
-            sample = fh.read(8192)
-            fh.seek(0)
-            try:
-                dialect = csv.Sniffer().sniff(sample, delimiters="|;,\t")
-            except csv.Error:
-                dialect = csv.excel
-            reader = csv.DictReader(fh, dialect=dialect)
-            if not reader.fieldnames:
-                raise MissingPopulationData(f"{path.name} is empty or has no header row.")
-            nis_col = _pick_column(list(reader.fieldnames), NIS_COLUMNS, path, "nis")
-            pop_col = _pick_column(list(reader.fieldnames), POP_COLUMNS, path, "pop")
-
-            totals: dict[str, int] = {}
-            for row in reader:
-                nis = (row.get(nis_col) or "").strip()
-                raw = (row.get(pop_col) or "").strip().replace(" ", "").replace(",", "")
-                if not nis or not raw:
-                    continue
-                try:
-                    totals[nis] = totals.get(nis, 0) + int(float(raw))
-                except ValueError:
-                    continue
-
-        if not totals:
-            raise MissingPopulationData(
-                f"{path.name}: parsed 0 communes. Columns picked were "
-                f"{nis_col!r}/{pop_col!r} -- one of them is probably not what it looks like."
-            )
-        by_year[year] = totals
-        print(f"  {path.name}: year {year}, {len(totals)} communes")
+        display_name, fh = _open_text_member(path)
+        try:
+            by_year[year] = _sum_communes(fh, display_name)
+        finally:
+            fh.close()
+        print(f"  {path.name}: year {year}, {len(by_year[year])} communes")
 
     return by_year
 
