@@ -8,34 +8,99 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Fail if a previous daily-fetch PR is still open
+        run: |
+          OPEN=$(gh pr list --repo "${{ github.repository }}" --state open \
+            --json headRefName,url,createdAt \
+            --jq '[.[] | select(.headRefName | startswith("bot/daily-fetch-"))]')
+          if [ "$(echo "$OPEN" | jq 'length')" -gt 0 ]; then
+            echo "::error::Unmerged daily-fetch PR(s) from a previous run. Resolve before this runs again:"
+            echo "$OPEN" | jq -r '.[] | "  \(.url) (opened \(.createdAt))"'
+            exit 1
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Install dependencies
-        run: pip install pandas requests openpyxl
-        
-      - name: Run pipeline
+        run: pip install -r requirements.txt
+
+      - name: Fetch macro indicators
+        id: fetch_macro
+        continue-on-error: true
+        run: python belgian_macro_db.py --fetch --latest --export csv
+
+      - name: Fetch market data
+        id: fetch_stocks
+        continue-on-error: true
+        run: python fetch_stocks.py
+
+      - name: Guard against oversized data files
         run: |
-          python belgian_macro_db.py --fetch --latest --export csv
-          python fetch_stocks.py
-        
-      - name: Commit updated data
+          OVERSIZED=$(find data/ -type f -size +25000k)
+          if [ -n "$OVERSIZED" ]; then
+            echo "::error::File(s) under data/ exceed 25 MB; refusing to commit:"
+            echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done
+            exit 1
+          fi
+
+      - name: Stage data changes
+        id: stage
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/
-          if ! git diff --staged --quiet; then
-            git commit -m "📊 Daily update $(date -u +%Y-%m-%d)"
-            git pull --rebase origin main
-            git push
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No data changes today."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Open PR with updated data
+        id: pr
+        if: steps.stage.outputs.has_changes == 'true'
+        run: |
+          BRANCH="bot/daily-fetch-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git commit -m "📊 Daily update $(date -u +%Y-%m-%d)"
+          git push origin "$BRANCH"
+          PR_URL=$(gh pr create \
+            --repo "${{ github.repository }}" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "📊 Daily data update $(date -u +%Y-%m-%d)" \
+            --body "Automated daily fetch of Belgian macro indicators and market data.
+
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, market=${{ steps.fetch_stocks.outcome }}")
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "Opened $PR_URL"
+
+      - name: Enable auto-merge
+        if: steps.stage.outputs.has_changes == 'true'
+        run: |
+          if ! gh pr merge --auto --squash --delete-branch "${{ steps.pr.outputs.pr_url }}"; then
+            echo "::error::Could not enable auto-merge on ${{ steps.pr.outputs.pr_url }} — it will NOT merge itself. Check the required 'report-build-status' check and merge manually."
+            exit 1
+          fi
+
+      - name: Fail run if any source failed
+        if: steps.fetch_macro.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        run: |
+          echo "::error::A data source failed to fetch (macro=${{ steps.fetch_macro.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and the fetch_log table."
+          exit 1

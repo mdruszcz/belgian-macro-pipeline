@@ -95,6 +95,19 @@ python belgian_macro_db.py --export json  # export JSON
 python belgian_macro_db.py --history      # fetch log
 ```
 
+Exit code is non-zero if any source failed to fetch — check `--history` for details.
+
+## Development
+
+```bash
+pip install -e ".[dev]"   # installs ruff, black, pytest on top of the runtime deps
+pre-commit install        # run ruff/black/large-file checks on every commit
+
+pytest                    # run the test suite
+ruff check .
+black --check .
+```
+
 ## File Structure
 
 ```

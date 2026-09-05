@@ -7,15 +7,13 @@ stores in SQLite, and exports to CSV/JSON.
 Runs daily via GitHub Actions.
 """
 
-import sqlite3
+import argparse
 import csv
 import io
-import json
 import logging
-import argparse
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 import requests
@@ -38,7 +36,7 @@ SOURCES = {
         "unit": "percent_yy",
         "source_agency": "NBB",
         "description": "Year-on-year volume change of GDP, quarterly, first estimate",
-        "type": "nbb"
+        "type": "nbb",
     },
     "GDP_ANNUAL_CY": {
         "name": "Annual GDP Growth (contribution)",
@@ -47,7 +45,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "GDP total contribution to volume change, Y-Y, non-adjusted",
-        "type": "nbb"
+        "type": "nbb",
     },
     "PRIV_CONSUMPTION_CY": {
         "name": "Private Final Consumption (contribution)",
@@ -56,7 +54,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Private final consumption, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "GOV_CONSUMPTION_CY": {
         "name": "Gov. Consumption Expenditure (contribution)",
@@ -65,7 +63,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Final consumption expenditure of general government, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "GFCF_ENTERPRISES_CY": {
         "name": "GFCF Enterprises (contribution)",
@@ -74,7 +72,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Gross fixed capital formation by enterprises, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "GFCF_DWELLINGS_CY": {
         "name": "GFCF Dwellings (contribution)",
@@ -83,7 +81,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Gross fixed capital formation in dwellings, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "GFCF_PUBLIC_CY": {
         "name": "GFCF Public Admin (contribution)",
@@ -92,7 +90,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Gross fixed capital formation by public administrations, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "CHG_STOCKS_CY": {
         "name": "Changes in Stocks (contribution)",
@@ -101,7 +99,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "Changes in inventories, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "NET_EXPORTS_CY": {
         "name": "Net Exports (contribution)",
@@ -110,7 +108,7 @@ SOURCES = {
         "unit": "pp_contribution",
         "source_agency": "NBB",
         "description": "External balance of goods and services, contribution to GDP volume change",
-        "type": "nbb"
+        "type": "nbb",
     },
     "CONSUMER_CONFIDENCE": {
         "name": "Consumer Confidence Indicator (NBB)",
@@ -119,7 +117,7 @@ SOURCES = {
         "unit": "balance",
         "source_agency": "NBB",
         "description": "Consumer confidence indicator from the National Bank of Belgium",
-        "type": "nbb"
+        "type": "nbb",
     },
     "EUROSTAT_GDP_Q_MEUR": {
         "name": "Eurostat GDP (Index 2010=100)",
@@ -128,13 +126,48 @@ SOURCES = {
         "unit": "index_2010",
         "source_agency": "Eurostat/DBnomics",
         "description": "Gross domestic product, seasonally adjusted",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
-    "EUROSTAT_GDP_Q_MEUR_ES": { "name": "GDP ES", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
-    "EUROSTAT_GDP_Q_MEUR_DE": { "name": "GDP DE", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
-    "EUROSTAT_GDP_Q_MEUR_FR": { "name": "GDP FR", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
-    "EUROSTAT_GDP_Q_MEUR_NL": { "name": "GDP NL", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
-    "EUROSTAT_GDP_Q_MEUR_EA": { "name": "GDP EA", "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true", "frequency": "Q", "unit": "index_2010", "source_agency": "Eurostat", "type": "dbnomics" },
+    "EUROSTAT_GDP_Q_MEUR_ES": {
+        "name": "GDP ES",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true",
+        "frequency": "Q",
+        "unit": "index_2010",
+        "source_agency": "Eurostat",
+        "type": "dbnomics",
+    },
+    "EUROSTAT_GDP_Q_MEUR_DE": {
+        "name": "GDP DE",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true",
+        "frequency": "Q",
+        "unit": "index_2010",
+        "source_agency": "Eurostat",
+        "type": "dbnomics",
+    },
+    "EUROSTAT_GDP_Q_MEUR_FR": {
+        "name": "GDP FR",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true",
+        "frequency": "Q",
+        "unit": "index_2010",
+        "source_agency": "Eurostat",
+        "type": "dbnomics",
+    },
+    "EUROSTAT_GDP_Q_MEUR_NL": {
+        "name": "GDP NL",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true",
+        "frequency": "Q",
+        "unit": "index_2010",
+        "source_agency": "Eurostat",
+        "type": "dbnomics",
+    },
+    "EUROSTAT_GDP_Q_MEUR_EA": {
+        "name": "GDP EA",
+        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true",
+        "frequency": "Q",
+        "unit": "index_2010",
+        "source_agency": "Eurostat",
+        "type": "dbnomics",
+    },
     "EC_CONS_CONF_BE": {
         "name": "Consumer Confidence BE (EC)",
         "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true",
@@ -142,7 +175,7 @@ SOURCES = {
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
         "description": "BE Consumer Confidence Indicator",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "EC_CONS_CONF_EU": {
         "name": "Consumer Confidence EU (EC)",
@@ -151,7 +184,7 @@ SOURCES = {
         "unit": "balance",
         "source_agency": "Eurostat/DBnomics",
         "description": "EU27 Consumer Confidence Indicator",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "BUSINESS_CONFIDENCE": {
         "name": "Business Confidence (NBB)",
@@ -160,7 +193,7 @@ SOURCES = {
         "unit": "balance",
         "source_agency": "NBB",
         "description": "Overall synthetic curve (Business Barometer) from the National Bank of Belgium",
-        "type": "nbb"
+        "type": "nbb",
     },
     "LABOUR_COST_BE": {
         "name": "Labour Cost Belgium",
@@ -169,7 +202,7 @@ SOURCES = {
         "unit": "index_2010",
         "source_agency": "AMECO/EC",
         "description": "Nominal compensation per employee, total economy (2010=100)",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "LABOUR_COST_DE": {
         "name": "Labour Cost Germany",
@@ -178,7 +211,7 @@ SOURCES = {
         "unit": "index_2010",
         "source_agency": "AMECO/EC",
         "description": "Nominal compensation per employee, total economy (2010=100) - Germany",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "LABOUR_COST_FR": {
         "name": "Labour Cost France",
@@ -187,7 +220,7 @@ SOURCES = {
         "unit": "index_2010",
         "source_agency": "AMECO/EC",
         "description": "Nominal compensation per employee, total economy (2010=100) - France",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "LABOUR_COST_NL": {
         "name": "Labour Cost Netherlands",
@@ -196,7 +229,7 @@ SOURCES = {
         "unit": "index_2010",
         "source_agency": "AMECO/EC",
         "description": "Nominal compensation per employee, total economy (2010=100) - Netherlands",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "LABOUR_COST_EA": {
         "name": "Labour Cost Euro Area",
@@ -205,7 +238,7 @@ SOURCES = {
         "unit": "index_2010",
         "source_agency": "AMECO/EC",
         "description": "Nominal compensation per employee, total economy (2010=100) - Euro Area",
-        "type": "dbnomics"
+        "type": "dbnomics",
     },
     "INDUSTRIAL_PROD": {
         "name": "Industrial Production (Total)",
@@ -214,7 +247,7 @@ SOURCES = {
         "unit": "index_2021",
         "source_agency": "NBB",
         "description": "Industrial production index (mining, manufacturing, energy), 2021=100, seasonally adjusted",
-        "type": "nbb"
+        "type": "nbb",
     },
     "HICP": {
         "name": "HICP (Y-Y Growth Rate)",
@@ -223,8 +256,8 @@ SOURCES = {
         "unit": "percent_yy",
         "source_agency": "NBB",
         "description": "Harmonised Index of Consumer Prices, all items, year-on-year growth rate",
-        "type": "nbb"
-    }
+        "type": "nbb",
+    },
 }
 
 REQUEST_TIMEOUT = 30
@@ -238,6 +271,7 @@ log = logging.getLogger("belgian_macro")
 
 
 # ─── Database ─────────────────────────────────────────────────────
+
 
 class MacroDatabase:
     def __init__(self, db_path: Path = DB_PATH):
@@ -290,27 +324,40 @@ class MacroDatabase:
         self.conn.commit()
 
     def upsert_indicator(self, code: str, meta: dict):
-        self.conn.execute("""
+        self.conn.execute(
+            """
             INSERT INTO indicators (code, name, frequency, unit, source_agency, description, api_url)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(code) DO UPDATE SET
                 name=excluded.name, frequency=excluded.frequency,
                 unit=excluded.unit, source_agency=excluded.source_agency,
                 description=excluded.description, api_url=excluded.api_url
-        """, (code, meta["name"], meta["frequency"], meta["unit"],
-              meta["source_agency"], meta.get("description", ""), meta.get("url", "")))
+        """,
+            (
+                code,
+                meta["name"],
+                meta["frequency"],
+                meta["unit"],
+                meta["source_agency"],
+                meta.get("description", ""),
+                meta.get("url", ""),
+            ),
+        )
         self.conn.commit()
 
     def upsert_observations(self, indicator_code: str, rows: list[dict]) -> int:
         now = datetime.now(timezone.utc).isoformat()
         for row in rows:
-            self.conn.execute("""
+            self.conn.execute(
+                """
                 INSERT INTO observations (indicator_code, period, value, obs_status, fetched_at)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(indicator_code, period) DO UPDATE SET
                     value=excluded.value, obs_status=excluded.obs_status,
                     fetched_at=excluded.fetched_at
-            """, (indicator_code, row["period"], row["value"], row.get("obs_status", ""), now))
+            """,
+                (indicator_code, row["period"], row["value"], row.get("obs_status", ""), now),
+            )
         self.conn.commit()
         return len(rows)
 
@@ -318,35 +365,52 @@ class MacroDatabase:
         now = datetime.now(timezone.utc).isoformat()
         self.conn.execute(
             "INSERT INTO fetch_log (indicator_code, fetched_at, rows_upserted, status, message) VALUES (?,?,?,?,?)",
-            (code, now, count, status, msg))
+            (code, now, count, status, msg),
+        )
         self.conn.commit()
 
-    def get_latest(self, code: str) -> Optional[dict]:
-        cur = self.conn.execute("""
+    def get_latest(self, code: str) -> dict | None:
+        cur = self.conn.execute(
+            """
             SELECT o.period, o.value, o.obs_status, o.fetched_at, i.name, i.unit
             FROM observations o JOIN indicators i ON o.indicator_code = i.code
             WHERE o.indicator_code = ? ORDER BY o.period DESC LIMIT 1
-        """, (code,))
+        """,
+            (code,),
+        )
         r = cur.fetchone()
-        if not r: return None
-        return {"indicator_code": code, "period": r[0], "value": r[1],
-                "obs_status": r[2], "fetched_at": r[3], "name": r[4], "unit": r[5]}
+        if not r:
+            return None
+        return {
+            "indicator_code": code,
+            "period": r[0],
+            "value": r[1],
+            "obs_status": r[2],
+            "fetched_at": r[3],
+            "name": r[4],
+            "unit": r[5],
+        }
 
     def get_all_latest(self) -> list[dict]:
         codes = [r[0] for r in self.conn.execute("SELECT code FROM indicators ORDER BY code")]
-        return [l for c in codes if (l := self.get_latest(c))]
+        return [latest for c in codes if (latest := self.get_latest(c))]
 
     def get_all_observations(self) -> pd.DataFrame:
-        return pd.read_sql_query("""
+        return pd.read_sql_query(
+            """
             SELECT o.indicator_code, i.name, o.period, o.value,
                    o.obs_status, i.unit, i.source_agency, o.fetched_at
             FROM observations o JOIN indicators i ON o.indicator_code = i.code
             ORDER BY o.indicator_code, o.period
-        """, self.conn)
+        """,
+            self.conn,
+        )
 
     def get_fetch_history(self, n: int = 20) -> list[dict]:
         cur = self.conn.execute(
-            "SELECT indicator_code, fetched_at, rows_upserted, status, message FROM fetch_log ORDER BY id DESC LIMIT ?", (n,))
+            "SELECT indicator_code, fetched_at, rows_upserted, status, message FROM fetch_log ORDER BY id DESC LIMIT ?",
+            (n,),
+        )
         return [{"code": r[0], "at": r[1], "rows": r[2], "status": r[3], "msg": r[4]} for r in cur]
 
     def close(self):
@@ -355,25 +419,38 @@ class MacroDatabase:
     def upsert_forecasts(self, rows: list[dict]) -> int:
         now = datetime.now(timezone.utc).isoformat()
         for r in rows:
-            self.conn.execute("""
+            self.conn.execute(
+                """
                 INSERT INTO forecasts (institution, indicator, year, value, updated_at, fetched_at)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(institution, indicator, year) DO UPDATE SET
                     value=excluded.value, updated_at=excluded.updated_at,
                     fetched_at=excluded.fetched_at
-            """, (r["institution"], r["indicator"], r["year"],
-                  r.get("value"), r.get("updated_at", ""), now))
+            """,
+                (
+                    r["institution"],
+                    r["indicator"],
+                    r["year"],
+                    r.get("value"),
+                    r.get("updated_at", ""),
+                    now,
+                ),
+            )
         self.conn.commit()
         return len(rows)
 
     def get_all_forecasts(self) -> pd.DataFrame:
-        return pd.read_sql_query("""
+        return pd.read_sql_query(
+            """
             SELECT institution, indicator, year, value, updated_at, fetched_at
             FROM forecasts ORDER BY indicator, year, institution
-        """, self.conn)
+        """,
+            self.conn,
+        )
 
 
 # ─── Fetchers ─────────────────────────────────────────────────────
+
 
 class NBBFetcher:
     @staticmethod
@@ -386,12 +463,16 @@ class NBBFetcher:
             period = row.get("TIME_PERIOD", "").strip()
             raw = row.get("OBS_VALUE", "").strip()
             status = row.get("OBS_STATUS", "").strip()
-            if not period or not raw: continue
-            try: val = float(raw)
-            except ValueError: continue
+            if not period or not raw:
+                continue
+            try:
+                val = float(raw)
+            except ValueError:
+                continue
             seen[period] = {"period": period, "value": val, "obs_status": status}
         data = sorted(seen.values(), key=lambda x: x["period"])
         return data
+
 
 class DBnomicsFetcher:
     @staticmethod
@@ -399,38 +480,50 @@ class DBnomicsFetcher:
         log.info(f"GET {url[:90]}...")
         resp = requests.get(url, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
-        
+
         try:
             data = resp.json()
             series = data["series"]["docs"][0]
             periods = series["period"]
             values = series["value"]
         except (KeyError, IndexError, ValueError) as e:
-            raise ValueError(f"Unexpected DBnomics JSON structure: {e}")
+            raise ValueError(f"Unexpected DBnomics JSON structure: {e}") from e
 
         results = []
-        for p, v in zip(periods, values):
-            if str(p) < "2008": continue
-            if v is None or v == "NA": continue
+        for p, v in zip(periods, values, strict=False):
+            if str(p) < "2008":
+                continue
+            if v is None or v == "NA":
+                continue
             try:
                 val = float(v)
                 results.append({"period": str(p), "value": val, "obs_status": "A"})
-            except ValueError: continue
-                
-        if results and unit == "index_2010":
-            q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
-            if q2010:
-                avg_2010 = sum(q2010) / len(q2010)
-                if avg_2010 != 0:
-                    for r in results:
-                        r["value"] = round((r["value"] / avg_2010) * 100, 2)
+            except ValueError:
+                continue
+
+        if unit == "index_2010":
+            results = DBnomicsFetcher._rebase_to_2010(results)
         return results
 
+    @staticmethod
+    def _rebase_to_2010(results: list[dict]) -> list[dict]:
+        """Rescale values so the 2010 average equals 100 (index_2010 unit)."""
+        q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
+        if not q2010:
+            return results
+        avg_2010 = sum(q2010) / len(q2010)
+        if avg_2010 == 0:
+            return results
+        return [{**r, "value": round((r["value"] / avg_2010) * 100, 2)} for r in results]
+
+
 class FPBFetcher:
-    INDICATORS = { 1: "GDP_VOL", 3: "CPI", 5: "FISCAL_BAL" }
+    INDICATORS = {1: "GDP_VOL", 3: "CPI", 5: "FISCAL_BAL"}
+
     @staticmethod
     def fetch(url: str = FPB_XLSX_URL) -> list[dict]:
         import tempfile
+
         log.info(f"GET {url[:80]}...")
         resp = requests.get(url, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
@@ -447,27 +540,46 @@ class FPBFetcher:
         rows = []
         for r in range(5, ws.max_row + 1):
             inst = ws.cell(r, 1).value
-            if not inst or not str(inst).strip(): continue
+            if not inst or not str(inst).strip():
+                continue
             upd = str(ws.cell(r, 8).value)[:10] if ws.cell(r, 8).value else ""
             for ind_code, cols in year_cols.items():
                 for col_idx, year in cols:
                     val = FPBFetcher._parse_value(ws.cell(r, col_idx).value)
-                    rows.append({"institution": str(inst).strip(), "indicator": ind_code, "year": year, "value": val, "updated_at": upd})
+                    rows.append(
+                        {
+                            "institution": str(inst).strip(),
+                            "indicator": ind_code,
+                            "year": year,
+                            "value": val,
+                            "updated_at": upd,
+                        }
+                    )
         wb.close()
         Path(tmp_path).unlink(missing_ok=True)
         return rows
+
     @staticmethod
-    def _parse_value(raw) -> Optional[float]:
-        if raw is None: return None
-        if isinstance(raw, (int, float)): return round(float(raw), 2)
+    def _parse_value(raw) -> float | None:
+        if raw is None:
+            return None
+        if isinstance(raw, (int, float)):
+            return round(float(raw), 2)
         s = str(raw).strip().replace(",", ".")
-        if s in ("-.-", "—", "-", "...", ""): return None
-        try: return round(float(s), 2)
-        except: return None
+        if s in ("-.-", "—", "-", "...", ""):
+            return None
+        try:
+            return round(float(s), 2)
+        except ValueError:
+            return None
+
 
 # ─── Orchestration ────────────────────────────────────────────────
 
-def fetch_all(db: MacroDatabase):
+
+def fetch_all(db: MacroDatabase) -> bool:
+    """Fetch every configured source. Returns False if any source failed."""
+    all_ok = True
     for code, meta in SOURCES.items():
         db.upsert_indicator(code, meta)
         try:
@@ -481,32 +593,46 @@ def fetch_all(db: MacroDatabase):
         except Exception as e:
             log.error(f"  FAIL {code}: {e}")
             db.log_fetch(code, 0, "ERROR", str(e))
+            all_ok = False
     try:
         fc_rows = FPBFetcher.fetch()
         n = db.upsert_forecasts(fc_rows)
         db.log_fetch("FPB_FORECASTS", n, "OK")
     except Exception as e:
         log.error(f"  FAIL FPB_FORECASTS: {e}")
+        db.log_fetch("FPB_FORECASTS", 0, "ERROR", str(e))
+        all_ok = False
+    return all_ok
+
 
 def show_latest(db: MacroDatabase):
     latest = db.get_all_latest()
-    if not latest: return
+    if not latest:
+        return
     print("\n" + "=" * 60)
     print("  BELGIAN MACRO DATABASE — Latest")
     print("=" * 60 + "\n")
     for e in latest:
         print(f"  {e['name']:<40} | {e['period']:<10} | {e['value']:>8.1f} {e['unit']}")
 
+
 def export_data(db: MacroDatabase, fmt: str):
     df = db.get_all_observations()
-    if df.empty: return
+    if df.empty:
+        return
     out = Path(__file__).parent / "data"
     out.mkdir(parents=True, exist_ok=True)
     if fmt == "csv":
         df.to_csv(out / "belgian_macro_export.csv", index=False)
+    elif fmt == "json":
+        df.to_json(out / "belgian_macro_export.json", orient="records", indent=2)
     fc = db.get_all_forecasts()
     if not fc.empty:
-        fc.to_csv(out / "belgian_forecasts.csv", index=False)
+        if fmt == "csv":
+            fc.to_csv(out / "belgian_forecasts.csv", index=False)
+        elif fmt == "json":
+            fc.to_json(out / "belgian_forecasts.json", orient="records", indent=2)
+
 
 def main():
     ap = argparse.ArgumentParser(description="Belgian Macro DB Pipeline CLI")
@@ -522,11 +648,15 @@ def main():
     if not any([args.fetch, args.latest, args.dump, args.export, args.history]):
         args.fetch = args.latest = True
 
+    fetch_ok = True
     try:
         if args.fetch:
             log.info(f"DB: {db.db_path}")
-            fetch_all(db)
-        if args.latest: show_latest(db)
+            fetch_ok = fetch_all(db)
+            if not fetch_ok:
+                log.error("One or more sources failed to fetch — see fetch_log / --history")
+        if args.latest:
+            show_latest(db)
         if args.dump:
             df = db.get_all_observations()
             for code in df["indicator_code"].unique():
@@ -535,12 +665,17 @@ def main():
                 for _, row in s.iterrows():
                     print(f"  {row['period']:<10} {row['value']:>8.1f}")
         if args.export:
-            for f in args.export: export_data(db, f)
+            for f in args.export:
+                export_data(db, f)
         if args.history:
             for e in db.get_fetch_history():
                 print(f"{e['code']:<22} | {e['at'][:19]} | {e['rows']:>4} rows | {e['status']}")
     finally:
         db.close()
+
+    if not fetch_ok:
+        raise SystemExit(1)
+
 
 if __name__ == "__main__":
     main()

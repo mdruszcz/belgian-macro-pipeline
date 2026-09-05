@@ -1,17 +1,25 @@
-import urllib.request
 import json
+import logging
 import time
+import urllib.request
+
 import requests
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s")
+log = logging.getLogger("fetch_stocks")
 
 stock_list = [
     {"id": "BEL20", "ticker": "^BFX", "name": "BEL 20"},
     {"id": "EURUSD", "ticker": "EURUSD=X", "name": "EUR/USD"},
 ]
 
-def fetch_data():
+
+def fetch_data() -> bool:
+    """Fetch all series and write data/stocks.json. Returns False if any source failed."""
     results = {}
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    
+    errors = 0
+    headers = {"User-Agent": "Mozilla/5.0"}
+
     # 1. Fetch Yahoo Data (Stocks/Forex)
     for stock in stock_list:
         try:
@@ -23,7 +31,7 @@ def fetch_data():
                 meta = data["chart"]["result"][0]["meta"]
                 price = meta.get("regularMarketPrice")
                 prev_close = meta.get("chartPreviousClose") or meta.get("previousClose")
-                
+
                 # Fallback to indicators if meta price is missing
                 if price is None and "indicators" in data["chart"]["result"][0]:
                     adjclose = data["chart"]["result"][0]["indicators"]["adjclose"][0]["adjclose"]
@@ -37,36 +45,50 @@ def fetch_data():
                     change = 0
                     if prev_close:
                         change = ((price - prev_close) / prev_close) * 100
-                    
+
                     currency = meta.get("currency", "EUR")
-                    if stock["id"] == "EURUSD": currency = "USD" # Fix for display
+                    if stock["id"] == "EURUSD":
+                        currency = "USD"  # Fix for display
 
                     results[stock["id"]] = {
                         "name": stock["name"],
-                        "ticker": stock["ticker"], # Use symbol as ticker text
+                        "ticker": stock["ticker"],  # Use symbol as ticker text
                         "price": price,
                         "change": change,
-                        "currency": currency
+                        "currency": currency,
                     }
             time.sleep(0.5)
         except Exception as e:
-            print(f"Error fetching {stock['id']}: {e}")
+            log.error(f"Error fetching {stock['id']}: {e}")
+            errors += 1
 
     # 2. Fetch DBnomics Data (Bonds & Rates)
     # Using Eurostat for Bonds and ECB for rates
     # BE 10Y: Eurostat/irt_lt_mcby_d/D.MCBY.BE (Daily Maastricht criterion bond yields)
     # DE 10Y: Eurostat/irt_lt_mcby_d/D.MCBY.DE
     # ECB MRO: ECB/FM/D.U2.EUR.4F.KR.MRR_FR.LEV (Main Refinancing Rate)
-    
+
     db_series = {
-        "BE_10Y": {"url": "https://api.db.nomics.world/v22/series/Eurostat/irt_lt_mcby_d/D.MCBY.BE?observations=true", "name": "BE OLO 10Y", "ticker": "BE10Y"},
-        "DE_10Y": {"url": "https://api.db.nomics.world/v22/series/Eurostat/irt_lt_mcby_d/D.MCBY.DE?observations=true", "name": "DE Bund 10Y", "ticker": "DE10Y"},
-        "ECB_RATE": {"url": "https://api.db.nomics.world/v22/series/ECB/FM/D.U2.EUR.4F.KR.MRR_FR.LEV?observations=true", "name": "ECB Rate", "ticker": "MRO"},
+        "BE_10Y": {
+            "url": "https://api.db.nomics.world/v22/series/Eurostat/irt_lt_mcby_d/D.MCBY.BE?observations=true",
+            "name": "BE OLO 10Y",
+            "ticker": "BE10Y",
+        },
+        "DE_10Y": {
+            "url": "https://api.db.nomics.world/v22/series/Eurostat/irt_lt_mcby_d/D.MCBY.DE?observations=true",
+            "name": "DE Bund 10Y",
+            "ticker": "DE10Y",
+        },
+        "ECB_RATE": {
+            "url": "https://api.db.nomics.world/v22/series/ECB/FM/D.U2.EUR.4F.KR.MRR_FR.LEV?observations=true",
+            "name": "ECB Rate",
+            "ticker": "MRO",
+        },
     }
-    
+
     be_val = None
     de_val = None
-    
+
     for key, info in db_series.items():
         try:
             r = requests.get(info["url"], timeout=10)
@@ -81,23 +103,26 @@ def fetch_data():
                     # Calculate change from previous value
                     prev = valid_vals[-2] if len(valid_vals) > 1 else curr
                     change = ((curr - prev) / prev) * 100 if prev != 0 else 0
-                    
+
                     results[key] = {
                         "name": info["name"],
                         "ticker": info["ticker"],
                         "price": curr,
-                        "change": change, # Percent change of the yield itself
-                        "currency": "%"
+                        "change": change,  # Percent change of the yield itself
+                        "currency": "%",
                     }
-                    
-                    if key == "BE_10Y": be_val = curr
-                    if key == "DE_10Y": de_val = curr
+
+                    if key == "BE_10Y":
+                        be_val = curr
+                    if key == "DE_10Y":
+                        de_val = curr
         except Exception as e:
-            print(f"Error fetching {key}: {e}")
+            log.error(f"Error fetching {key}: {e}")
+            errors += 1
 
     # 3. Calculate Spread
     if be_val is not None and de_val is not None:
-        spread = (be_val - de_val)
+        spread = be_val - de_val
         # Spread change? Hard to calculate exact change without history, assume 0 or calc from yield changes?
         # Let's just calculate spread value. Change can be 0 for now or derived if I kept history.
         # Simple: Spread value.
@@ -105,14 +130,25 @@ def fetch_data():
             "name": "BE-DE Spread",
             "ticker": "SPREAD",
             "price": spread,
-            "change": 0, # Placeholder
-            "currency": "%"
+            "change": 0,  # Placeholder
+            "currency": "%",
         }
+
+    if not results:
+        log.error("All sources failed — keeping last known-good data/stocks.json")
+        return False
 
     # Save
     with open("data/stocks.json", "w") as f:
         json.dump(results, f, indent=4)
-    print("Successfully updated data/stocks.json")
+
+    if errors:
+        log.warning(f"Wrote partial update to data/stocks.json ({errors} source(s) failed)")
+    else:
+        log.info("Successfully updated data/stocks.json")
+    return errors == 0
+
 
 if __name__ == "__main__":
-    fetch_data()
+    if not fetch_data():
+        raise SystemExit(1)
