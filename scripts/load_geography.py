@@ -22,9 +22,9 @@ drops them from every historical province and region aggregate.
 references it by foreign key.
 
 The loader refuses to run while any crosswalk row still awaits the maintainer's
-sign-off (`verified` in municipality_crosswalk.csv). The derivation flags rows
-whose successor was guessed by name matching, or that involve a partial
-boundary transfer; writing them regardless would make the flagging decorative.
+sign-off (`verified` in municipality_crosswalk.csv) -- rows whose successor was
+guessed rather than derived from code lineage. Writing them regardless would
+make the flagging decorative.
 
 Usage:
     python scripts/load_geography.py --db data/belgian_macro.db
@@ -39,6 +39,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.geography.crosswalk import unresolved  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_DIR = REPO_ROOT / "config" / "geography"
@@ -104,20 +106,18 @@ def _require_date(value: str, field: str, context: str) -> str:
 def _check_crosswalk_reviewed(crosswalk: list[dict], allow_unverified: bool) -> None:
     """Enforce the [H] review gate that the derivation's flags exist for.
 
-    derive_crosswalk() carefully marks rows whose successor was guessed by name
-    matching, or which involve a partial boundary transfer that is not a 1:1
-    lineage at all. Loading those without a human sign-off would make the
-    flagging decorative -- the loader would write exactly the confident
-    successor links the flags exist to question.
+    derive_crosswalk() marks rows whose successor was guessed by name matching,
+    split across several successors, or not derivable at all. Loading those
+    without a human sign-off would make the flagging decorative -- the loader
+    would write exactly the confident successor links the flags exist to
+    question.
     """
     if allow_unverified:
         return
-    pending = [
-        row
-        for row in crosswalk
-        if (row.get("note") or row.get("has_partial_transfer") == "true")
-        and row.get("verified") != "true"
-    ]
+    # Uses crosswalk.unresolved() rather than restating the predicate: two
+    # copies of "which rows need review" is how the gate and the derivation
+    # drift apart, and this one had already started to.
+    pending = [row for row in unresolved(crosswalk) if row.get("verified") != "true"]
     if pending:
         listed = ", ".join(f"{r['old_nis']} ({r['old_name_nl']})" for r in pending)
         raise UnverifiedCrosswalkError(

@@ -100,7 +100,6 @@ def test_partial_transfer_is_a_flag_not_a_relationship():
     assert len(rows) == 1
     assert rows[0]["relationship"] == "recoded"
     assert rows[0]["has_partial_transfer"] == "true"
-    assert unresolved(rows) == rows
 
 
 def test_committed_crosswalk_covers_both_waves():
@@ -110,20 +109,20 @@ def test_committed_crosswalk_covers_both_waves():
     waves: dict[str, int] = {}
     for row in rows:
         waves[row["valid_to"]] = waves.get(row["valid_to"], 0) + 1
-    assert waves == {"2019-01-01": 26, "2025-01-01": 29}
+    # Bastogne and Bertogne merged on 2024-12-02, a month before the REFNIS
+    # snapshot that first shows it -- see config/geography/merger_effective_dates.csv.
+    assert waves == {"2019-01-01": 26, "2024-12-02": 2, "2025-01-01": 27}
     # Every row must have a validity window the schema will accept.
     assert all(r["valid_to"] > r["valid_from"] for r in rows)
-    # Nothing is silently marked verified.
-    assert {r["verified"] for r in rows} == {"false"}
 
 
-def test_committed_crosswalk_flags_the_known_ambiguous_rows():
+def test_committed_crosswalk_flags_only_the_genuinely_ambiguous_rows():
     with CROSSWALK_CSV.open(encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     flagged = {r["old_nis"] for r in unresolved(rows)}
-    # The two name-matched successors plus the five partial transfers.
-    assert {"73009", "73083"} <= flagged
-    assert len(flagged) == 7
+    # Only the two whose successor came from name matching rather than code
+    # lineage. The five 1977-era partial-transfer markers no longer gate.
+    assert flagged == {"73009", "73083"}
 
 
 def test_name_comparison_ignores_apostrophe_style():
@@ -197,3 +196,97 @@ def test_internal_merger_does_not_split_the_parent_window():
     windows = derive_entity_windows([("REFNIS_2019.csv", old), ("REFNIS_2025.csv", new)], canonical)
     assert len(windows["46000"]) == 1
     assert windows["46000"][0]["valid_to"] is None
+
+
+def test_partial_marker_does_not_gate_the_review():
+    """The `*` / `PARTIE DE` markers annotate the 1977 merger, not the waves this
+    crosswalk records, and roughly 200 of them exist nationwide. Gating on them
+    flagged five lineages that were never in doubt; a review gate that cries
+    wolf gets ignored."""
+    vintages = [
+        _vintage("REFNIS_DEFINITIEF.csv", {"82003": "Bastenaken", "82005": "Bertogne"}),
+        _vintage("REFNIS_2019.csv", {"82039": "Bastenaken"}),
+    ]
+    nis9 = [
+        _nis6("82003A", "82039", name="BASTOGNE + PARTIE DE LONGCHAMPS ET SIBRET"),
+        _nis6("82005B", "82039", name="LONGCHAMPS*"),
+    ]
+    rows = derive_crosswalk(vintages, nis9, {"82039": "Bastenaken"})
+    # Recorded as context...
+    assert {r["has_partial_transfer"] for r in rows} == {"true"}
+    # ...but the lineage is unambiguous, so nothing is asked of the maintainer.
+    assert unresolved(rows) == []
+
+
+def test_territory_leaving_for_another_commune_is_still_caught():
+    """The case the partial flag was meant to cover is already covered: land
+    that went elsewhere shows up as a second successor."""
+    vintages = [
+        _vintage("REFNIS_DEFINITIEF.csv", {"52063": "Seneffe"}),
+        _vintage("REFNIS_2019.csv", {"55085": "Seneffe", "58001": "La Louvière"}),
+    ]
+    nis9 = [
+        _nis6("52063A", "55085", name="SENEFFE"),
+        _nis6("52063E", "58001", name="FAMILLEUREUX*"),
+    ]
+    rows = derive_crosswalk(vintages, nis9, {"55085": "Seneffe", "58001": "La Louvière"})
+    assert rows[0]["new_nis"] == "55085;58001"
+    assert unresolved(rows) == rows
+
+
+def test_signoff_survives_regeneration_but_only_for_the_same_claim():
+    """Regeneration must not silently discard the maintainer's [H] verification
+    -- but a sign-off attaches to the claim that was checked, so a changed
+    successor or wave correctly asks for another look."""
+    vintages = [
+        _vintage("REFNIS_DEFINITIEF.csv", {"46013": "Kruibeke"}),
+        _vintage("REFNIS_2019.csv", {"46030": "Beveren-Kruibeke"}),
+    ]
+    nis9 = [_nis6("46013A", "46030")]
+    names = {"46030": "Beveren-Kruibeke"}
+
+    kept = derive_crosswalk(
+        vintages,
+        nis9,
+        names,
+        previously_verified={("46013", "46030", "2019-01-01"): "official merger table"},
+    )
+    assert kept[0]["verified"] == "true"
+    assert kept[0]["verified_source"] == "official merger table"
+
+    # Same predecessor, but the sign-off was recorded against a different
+    # successor -- it must not carry over.
+    reset = derive_crosswalk(
+        vintages,
+        nis9,
+        names,
+        previously_verified={("46013", "99999", "2019-01-01"): "official merger table"},
+    )
+    assert reset[0]["verified"] == "false"
+    assert reset[0]["verified_source"] == ""
+
+
+def test_every_verified_row_cites_its_evidence():
+    """A sign-off is a claim that someone checked something against a source.
+    A `verified=true` with no note saying against what is indistinguishable
+    from one set by accident."""
+    with CROSSWALK_CSV.open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    signed = [r for r in rows if r["verified"] == "true"]
+    # The two whose successor came from name matching, confirmed against
+    # Statbel's published merger table.
+    assert {r["old_nis"] for r in signed} == {"73009", "73083"}
+    for row in signed:
+        # verified_source, not note: `note` is regenerated on every derivation,
+        # so evidence recorded there would be silently overwritten.
+        assert "Statbel" in row["verified_source"], row["old_nis"]
+
+
+def test_bastogne_carries_its_official_effective_date():
+    """The one 2025-cycle merger that did not happen on 1 January. A vintage
+    diff cannot see it, so every December 2024 lookup would resolve to the
+    pre-merger communes."""
+    with CROSSWALK_CSV.open(encoding="utf-8") as handle:
+        rows = {r["old_nis"]: r for r in csv.DictReader(handle)}
+    assert rows["82003"]["valid_to"] == "2024-12-02"
+    assert rows["82005"]["valid_to"] == "2024-12-02"

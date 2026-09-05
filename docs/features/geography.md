@@ -201,11 +201,21 @@ derived from official data rather than authored by hand, but still reviewed by a
 | `absorbed` | Sole predecessor, different name — taken into an existing commune. | `11007` Borsbeek → `11002` Antwerpen |
 | `recoded` | Sole predecessor, same name — the entity survived, only its code changed (the 2019 Hainaut arrondissement reform). | `55022` La Louvière → `58001` La Louvière |
 
-`has_partial_transfer` is a **separate boolean**, not a fourth relationship value. A boundary
-transfer (Statbel marks these `PARTIE DE …`, `MODIFICATION DE LIMITE`, or a trailing `*`) is
-orthogonal to what happened to the commune itself: La Louvière was *recoded* and separately
-received part of Familleureux. Folding that into `relationship` would overwrite the useful fact
-with the incidental one.
+`has_partial_transfer` is a **separate, informational boolean** — not a fourth relationship
+value and not a review gate. Statbel marks these with `PARTIE DE …`, `MODIFICATION DE LIMITE`, or
+a trailing `*`, and they are orthogonal to what happened to the commune: La Louvière was
+*recoded* and separately received part of Familleureux.
+
+It does not gate the review, and the reason is worth recording. Roughly **200 of these markers
+exist nationwide** — they annotate the **1977** merger that created the modern communes, not the
+2019 or 2025 waves. Gating on them flagged five rows (Seneffe, La Louvière, Silly, Bastogne,
+Bertogne) purely because their codes happen to appear in this crosswalk, asking the maintainer to
+verify lineages that were never in doubt. A gate that cries wolf gets ignored.
+
+The obvious narrowing — flag only when the marked land ended up somewhere other than the row's
+successor — turns out to be *unable to fire*: the prefix rule derives successors from exactly
+those NIS6 rows, so territory that went elsewhere is already in the successor set and the row is
+already flagged as split. The marker carries no signal the multi-successor check does not.
 
 #### Two methods, and why one is not enough
 
@@ -226,13 +236,68 @@ silently orphaned both communes' entire pre-2025 history — precisely the failu
 step below exists to find. `tests/test_geography_crosswalk.py` carries this as a regression test.
 
 Where the two methods disagree, or where the successor comes from the weaker name-matching
-fallback, the row is **flagged in the `note` column and `verified` stays `false`**. Seven rows
-are currently flagged (the two above, plus five partial transfers), and **the loader refuses to
-run while any remain unsigned** — `scripts/load_geography.py` raises `UnverifiedCrosswalkError`
+fallback, the row is **flagged in the `note` column and `verified` stays `false`**. Two rows
+are currently flagged — Borgloon and Tongeren, whose successor came from name matching — and
+**the loader refuses to run while any remain unsigned** — `scripts/load_geography.py` raises `UnverifiedCrosswalkError`
 unless `verified` is `true` on every flagged row, or `--allow-unverified` is passed explicitly.
 The audit found this gate missing: the loader read none of the flag columns and wrote exactly the
 confident successor links the flags exist to question. CONTROL C must not be claimed while any
 remain unresolved.
+
+### Effective dates are not always the vintage boundary
+
+A vintage diff can only date a change to the snapshot that first shows it, and every REFNIS file
+is cut on 1 January. Belgian mergers usually take effect then — **but not always**.
+
+Checking the derived crosswalk against Statbel's published merger table found exactly one
+exception: **Bastogne + Bertogne merged on 2 December 2024**, a month before `REFNIS_2025.csv`
+was cut. The diff therefore dated it 2025-01-01, and every lookup in that December window
+resolved to the pre-merger communes.
+
+`config/geography/merger_effective_dates.csv` records official dates where they differ from the
+vintage boundary, cited to their source, and the derivation applies them over both the crosswalk
+and the hierarchy windows. It is small, hand-checked and committed, in the same spirit as
+`name_en_exonyms.csv`. The override is applied *after* sign-offs are matched, so correcting a
+date does not read as a changed claim and reset the maintainer's verification.
+
+All 14 lineages of the 2025 cycle were confirmed against that table — see "Verification status".
+
+**A note on mid-period boundaries.** `resolve_geo` resolves a period as of its **first day**, so
+December 2024 — which begins one day before the Bastogne merger — resolves to the predecessors.
+Monthly data for that month straddles the change. The convention is deliberate and documented
+rather than silently averaged; anything finer would require knowing how a source apportioned a
+part-month, which no source states.
+
+**A sign-off survives regeneration.** `derive_geography_csv.py` reads the committed crosswalk
+before overwriting it and carries `verified=true` forward, keyed on the claim that was actually
+checked — `(old_nis, new_nis, valid_to)`. A refresh that changes the successor or the wave resets
+it, because that is a different claim from the one that was verified. Without this, every refresh
+silently discarded the maintainer's work, which is the same failure as not having the gate.
+
+The evidence travels in its own `verified_source` column, **not** in `note`: `note` is
+regenerated on every derivation, so evidence recorded there would be silently overwritten. A
+`verified=true` with no stated source is indistinguishable from one set by accident, and
+`test_every_verified_row_cites_its_evidence` enforces that.
+
+### Verification status
+
+Checked against Statbel's official merger table (maintainer-supplied, 2026-09-05):
+
+- **All 14 successors of the 2025 cycle match exactly** — same predecessors, same successor
+  codes, no extras on either side. This includes `73111 ← 73009 Borgloon + 73083 Tongeren`, the
+  pair the NIS6 prefix rule could not derive and the name-matching fallback recovered. Both are
+  now signed off with their source recorded.
+- **One date correction**, Bastogne/Bertogne, described above.
+
+Checked against Statbel's official 2019 merger table (maintainer-supplied, 2026-09-05):
+
+- **All 7 Flemish mergers match exactly** — 15 predecessor communes, 7 successor codes, all
+  dated 1 January 2019, no discrepancy. Together with the 11 Hainaut arrondissement recodes
+  (expected to be absent from a "communes qui fusionnent" list — nothing merged, only the code
+  changed), this accounts for every row in the 2019 wave.
+
+Every row in both waves is now checked against a published Statbel list. The only correction
+either table produced was the Bastogne date.
 
 `valid_from` for a predecessor is the first vintage containing it; `valid_to` is the wave that
 ended it. They must differ — `geographies` enforces `CHECK (valid_to > valid_from)`.
@@ -376,15 +441,22 @@ it rather than by a general assertion:
 - **~~Q5 — Historical predecessors have no parent.~~ Fixed.** Each old vintage's hierarchy *is*
   recoverable from REFNIS's document order; see "Historical parents" above. Zero orphans at any
   era, asserted by `test_historical_communes_are_not_orphaned_from_the_hierarchy`.
+- **~~Q8 — 2019 wave dates were unverified.~~ Resolved.** The maintainer supplied Statbel's
+  official 2019 merger table ("Codes INS des communes valables à partir du 01/01/2019"): 15
+  Flemish communes merging into 7 new ones, all effective 1 January 2019. All 7 successors match
+  the derived crosswalk exactly — predecessors, successor code, and the date, with no
+  Bastogne-style surprise. Together with the 11 Hainaut arrondissement recodes (renumbered, not
+  merged, so absent from a "communes qui fusionnent" page by construction), that accounts for all
+  26 rows in the 2019 wave. See "Verification status" below.
 - **Q7 — Canonicalization blurs merged entities.** Comparing territory through the crosswalk
   means two communes that merged become one identity, so an arrondissement that *gained* a merged
   commune's land may not register as changed (arrondissement `71000` gaining Kortessem's territory
   in 2025 is absorbed into Hasselt's canonical identity). The alternative — comparing raw commune
   codes — produced false splits everywhere. Observations attach to communes, not arrondissements,
   so this is a limitation of aggregate-level history rather than of the data itself.
-- **Q6 — Partial boundary transfers.** Five rows carry `has_partial_transfer = true`. A partial
-  transfer cannot be expressed as a 1:1 lineage, so the affected cells' history is a judgement
-  call the maintainer must make rather than the loader assuming one.
+- **~~Q6 — Partial boundary transfers.~~ Resolved.** The markers describe the 1977 merger, and
+  any territory that actually left is already caught as a multi-successor row. The column is
+  informational; it no longer gates the review. Five rows carry it.
 
 ## Rollout / risks
 

@@ -233,11 +233,62 @@ def test_arrondissement_that_changed_territory_has_separate_windows(loaded_db):
 
 def test_loader_refuses_unverified_crosswalk_rows(tmp_path):
     """Audit S3. The derivation flags rows whose successor was guessed; the
-    loader used to write them anyway, making the flags decorative."""
+    loader used to write them anyway, making the flags decorative.
+
+    The committed crosswalk is now fully signed off, so this drives the gate
+    with a row whose sign-off has been withdrawn.
+    """
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    for name in ("geographies.csv", "municipality_crosswalk.csv", "merger_effective_dates.csv"):
+        (config_dir / name).write_text((REAL_CONFIG_DIR / name).read_text(encoding="utf-8"))
+    path = config_dir / "municipality_crosswalk.csv"
+    path.write_text(path.read_text(encoding="utf-8").replace(",true,", ",false,"), encoding="utf-8")
+
     db_path = tmp_path / "gate.db"
     migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
-    with pytest.raises(load_mod.UnverifiedCrosswalkError, match="need maintainer verification"):
-        load_mod.load(db_path, REAL_CONFIG_DIR)
+    with pytest.raises(load_mod.UnverifiedCrosswalkError) as excinfo:
+        load_mod.load(db_path, config_dir)
+    message = str(excinfo.value)
+    # Exactly the two whose successor was guessed -- the gate must name them,
+    # and must not have drifted back to flagging the 1977 partial-transfer rows.
+    assert "73009" in message and "73083" in message
+    assert "52063" not in message
+
+
+def test_committed_crosswalk_now_loads_without_an_override(tmp_path):
+    """The gate is satisfied by real sign-offs, not by --allow-unverified."""
+    db_path = tmp_path / "signed.db"
+    migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
+    rows, links = load_mod.load(db_path, REAL_CONFIG_DIR)
+    assert (rows, links) == (688, 55)
+
+
+def test_bastogne_merger_resolves_on_its_official_date(tmp_path):
+    """Bastogne and Bertogne merged on 2024-12-02, a month before the REFNIS
+    snapshot that first shows it. Without the official date the whole of
+    December 2024 would resolve to the merged commune.
+
+    Note the mid-month boundary: a period resolves as of its *first day*, so
+    December 2024 -- which begins one day before the merger -- resolves to the
+    predecessors. That is the documented convention, not an accident; see
+    docs/features/geography.md.
+    """
+    db_path = tmp_path / "bastogne.db"
+    migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
+    load_mod.load(db_path, REAL_CONFIG_DIR)
+    conn = sqlite3.connect(str(db_path))
+
+    assert resolve_geo(conn, "82003", "2024-11") == "be:mun:82003"
+    assert resolve_geo(conn, "82003", "2024-12") == "be:mun:82003"
+    # From 2 December the old code refers to nothing -- it is not silently
+    # forwarded to the successor, which has its own code.
+    assert resolve_geo(conn, "82039", "2024-12-15") == "be:mun:82039"
+    with pytest.raises(UnknownGeographyError):
+        resolve_geo(conn, "82003", "2024-12-15")
+    assert resolve_geo(conn, "82039", "2025-01") == "be:mun:82039"
+    with pytest.raises(UnknownGeographyError):
+        resolve_geo(conn, "82003", "2025-01")
 
 
 def test_loader_rejects_a_blank_valid_from(tmp_path):

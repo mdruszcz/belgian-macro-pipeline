@@ -82,6 +82,7 @@ CROSSWALK_COLUMNS = [
     "valid_to",
     "evidence",
     "verified",
+    "verified_source",
     "note",
 ]
 
@@ -96,6 +97,73 @@ log = logging.getLogger("derive_geography_csv")
 def load_exonyms(path: Path) -> dict[str, str]:
     with path.open(encoding="utf-8") as handle:
         return {row["nis_code"]: row["name_en"] for row in csv.DictReader(handle)}
+
+
+def read_effective_dates(path: Path) -> dict[str, str]:
+    """Official effective dates, where they differ from the vintage boundary.
+
+    A vintage diff can only date a change to the snapshot that first shows it,
+    which is 1 January for every REFNIS file. Belgian mergers usually take
+    effect then -- but not always: Bastogne and Bertogne merged on 2 December
+    2024, a month before REFNIS_2025.csv was cut, so the diff attributes it to
+    1 January 2025 and every lookup in that December window resolves to the
+    wrong entity.
+
+    This file records dates read off Statbel's published merger table, which is
+    the only source that carries them. It is small, hand-checked and cited, in
+    the same spirit as name_en_exonyms.csv.
+    """
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as handle:
+        return {row["new_nis"]: row["effective_date"] for row in csv.DictReader(handle)}
+
+
+def apply_effective_dates(
+    crosswalk: list[dict], hierarchy: list[dict], effective: dict[str, str]
+) -> int:
+    """Rewrite vintage-derived dates with the official ones. Returns rows changed."""
+    changed = 0
+    ended: dict[str, str] = {}
+    for row in crosswalk:
+        official = effective.get(row["new_nis"])
+        if official and row["valid_to"] != official:
+            ended[row["old_nis"]] = official
+            row["valid_to"] = official
+            row["evidence"] = f"{row['evidence']}; effective date per official merger table"
+            changed += 1
+
+    for row in hierarchy:
+        code = row["nis_code"]
+        if row["level"] != "municipality":
+            continue
+        # The predecessor's window closes on the official date...
+        if code in ended and row["valid_to"]:
+            row["valid_to"] = ended[code]
+        # ...and the successor's opens on it.
+        elif code in effective and not row["valid_to"]:
+            row["valid_from"] = effective[code]
+    return changed
+
+
+def read_existing_signoffs(path: Path) -> dict[tuple[str, str, str], str]:
+    """Sign-offs already recorded in the committed crosswalk.
+
+    Regeneration must not silently discard the maintainer's [H] verification --
+    that work is the whole point of the review gate, and quietly resetting it on
+    every refresh would train everyone to ignore the flags. A sign-off is keyed
+    on the claim that was actually checked (predecessor, successor, wave), so a
+    refresh that changes any of those correctly asks for it to be looked at
+    again.
+    """
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as handle:
+        return {
+            (row["old_nis"], row["new_nis"], row["valid_to"]): row.get("verified_source", "")
+            for row in csv.DictReader(handle)
+            if row.get("verified") == "true"
+        }
 
 
 def _require(path: Path) -> Path:
@@ -151,7 +219,10 @@ def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
     for filename, communes in vintages:
         for code in communes:
             first_seen.setdefault(code, VINTAGE_DATES[filename])
-    crosswalk = derive_crosswalk(vintages, nis9_rows, names_by_code, first_seen)
+    signoffs = read_existing_signoffs(config_dir / "municipality_crosswalk.csv")
+    crosswalk = derive_crosswalk(
+        vintages, nis9_rows, names_by_code, first_seen, previously_verified=signoffs
+    )
 
     # Validity windows for every entity at every level, evidenced by the
     # vintage diff -- this is what stops an arrondissement created in 2019
@@ -164,11 +235,20 @@ def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
     regime_by_code = {r["nis_code"]: r["language_regime"] for r in latest_refnis}
     hierarchy = build_windowed_rows(windows, current_by_geo_id, exonyms, regime_by_code)
 
+    effective = read_effective_dates(config_dir / "merger_effective_dates.csv")
+    # Applied after sign-offs are matched, so a corrected date does not read as
+    # a changed claim and reset the maintainer's verification.
+    corrected = apply_effective_dates(crosswalk, hierarchy, effective)
+    if corrected:
+        log.info("Applied %d official effective date(s) over the vintage boundary", corrected)
+
     config_dir.mkdir(parents=True, exist_ok=True)
     _write_csv(config_dir / "geographies.csv", GEOGRAPHIES_COLUMNS, hierarchy)
     _write_csv(config_dir / "municipality_crosswalk.csv", CROSSWALK_COLUMNS, crosswalk)
 
-    needs_review = unresolved(crosswalk)
+    needs_review = [row for row in unresolved(crosswalk) if row["verified"] != "true"]
+    if signoffs:
+        log.info("Carried forward %d existing sign-off(s)", len(signoffs))
     return len(hierarchy), len(crosswalk), len(needs_review)
 
 
