@@ -1,17 +1,18 @@
 id: GDP_QUARTERLY_YY
+name:
+  en: Quarterly GDP growth (Y-Y)
+  fr: Croissance trimestrielle du PIB (A-A)
+  nl: Kwartaalgroei BBP (J-J)
 unit: percent_yy
 frequency: Q
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/Q.1.B1GM.VZ.LY.N?startPeriod=2000-Q1&dimensionAtObservation=AllDimensions'
-name:
-  en: Quarterly GDP growth (Y-Y)
-  fr: Croissance trimestrielle du PIB (A-A)
-  nl: Kwartaalgroei BBP (J-J)
+preferred_direction: higher_is_better
 description:
   en: Year-on-year volume change of GDP, quarterly, first estimate
+fetch:
+  query: ',DF_QNA_DISS,1.0/Q.1.B1GM.VZ.LY.N?startPeriod=2000-Q1&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

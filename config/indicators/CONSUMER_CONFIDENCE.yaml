@@ -1,17 +1,18 @@
 id: CONSUMER_CONFIDENCE
+name:
+  en: Consumer confidence (NBB)
+  fr: Confiance des consommateurs (BNB)
+  nl: Consumentenvertrouwen (NBB)
 unit: balance
 frequency: M
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_CONSN,1.0/M..BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
-name:
-  en: Consumer confidence (NBB)
-  fr: Confiance des consommateurs (BNB)
-  nl: Consumentenvertrouwen (NBB)
+preferred_direction: higher_is_better
 description:
   en: Consumer confidence indicator from the National Bank of Belgium
+fetch:
+  query: ',DF_CONSN,1.0/M..BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
 display:
   category: confidence
   title:

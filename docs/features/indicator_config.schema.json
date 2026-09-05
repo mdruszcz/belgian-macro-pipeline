@@ -3,7 +3,7 @@
   "$id": "https://belgian-macro-pipeline/indicator_config.schema.json",
   "title": "Indicator configuration",
   "type": "object",
-  "required": ["id", "name", "unit", "frequency", "source_id", "geo_levels", "display"],
+  "required": ["id", "name", "unit", "frequency", "source_id", "geo_levels", "preferred_direction", "display"],
   "additionalProperties": false,
   "properties": {
     "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
@@ -33,6 +33,14 @@
       "type": "array",
       "minItems": 1,
       "items": { "type": "string", "enum": ["national", "regional", "provincial", "municipal"] }
+    },
+    "preferred_direction": {
+      "type": "string",
+      "enum": ["lower_is_better", "higher_is_better", "neutral", "contextual"]
+    },
+    "country": {
+      "type": "string",
+      "description": "Country/aggregate this series describes (informational, not a strict ISO code -- 'EA' etc. are allowed). Omit for Belgium; the loader defaults to 'BE'. This is what determines canonical-schema/dashboard eligibility, not whether `display` is null -- e.g. EC_CONS_CONF_BE is Belgian data with no dashboard row of its own, and is still eligible."
     },
     "fetch": {
       "type": "object",

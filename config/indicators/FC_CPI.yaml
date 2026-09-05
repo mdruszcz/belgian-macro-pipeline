@@ -8,6 +8,7 @@ frequency: F
 source_id: fpb
 geo_levels:
 - national
+preferred_direction: contextual
 display:
   category: prices
   title:

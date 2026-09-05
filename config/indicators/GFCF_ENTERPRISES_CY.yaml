@@ -1,17 +1,18 @@
 id: GFCF_ENTERPRISES_CY
+name:
+  en: GFCF — Enterprises
+  fr: FBCF — Entreprises
+  nl: BIK — Bedrijven
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.P51_ENT.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: GFCF — Enterprises
-  fr: FBCF — Entreprises
-  nl: BIK — Bedrijven
+preferred_direction: higher_is_better
 description:
   en: Gross fixed capital formation by enterprises, contribution to GDP volume change
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P51_ENT.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

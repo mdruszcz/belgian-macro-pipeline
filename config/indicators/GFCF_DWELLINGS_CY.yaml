@@ -1,17 +1,18 @@
 id: GFCF_DWELLINGS_CY
+name:
+  en: GFCF — Dwellings
+  fr: FBCF — Logements
+  nl: BIK — Woningen
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.P51_DWE.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: GFCF — Dwellings
-  fr: FBCF — Logements
-  nl: BIK — Woningen
+preferred_direction: contextual
 description:
   en: Gross fixed capital formation in dwellings, contribution to GDP volume change
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P51_DWE.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

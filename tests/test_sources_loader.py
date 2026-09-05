@@ -33,6 +33,7 @@ def test_loader_reconstructs_gdp_quarterly_yy(tmp_path, monkeypatch):
                 "frequency": "Q",
                 "source_id": "nbb",
                 "geo_levels": ["national"],
+                "preferred_direction": "higher_is_better",
                 "fetch": {"query": ",DF_QNA_DISS,1.0/Q.1.B1GM.VZ.LY.N?startPeriod=2000-Q1"},
                 "display": {
                     "category": "gdp",

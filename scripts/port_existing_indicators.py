@@ -9,11 +9,12 @@ get real per-row status information, rather than trusting the old DB's
 mostly non-informative obs_status column. This is a deliberate, accepted
 cost of a one-off script -- the daily pipeline does not do this.
 
-SCOPE: SOURCES has 26 entries. 10 of them are not Belgium (Germany, France,
-Netherlands, Spain, and EU/EA-aggregate series) and the canonical model's
-geo_id convention has no codes for those yet. This script ports only the
-16 Belgium-only indicators; the other 10 are skipped with a logged reason.
-Their geo_id convention is separate follow-up work, not resolved here.
+SCOPE: eligibility (which indicators are Belgium-only, canonical-eligible)
+and preferred_direction both come from config/indicators/*.yaml
+(src.validation.config_schema.is_canonical_eligible), not a hardcoded list.
+A non-Belgium indicator (config `country` != "BE", e.g. the DE/FR/NL/ES/EA
+feeder series) is skipped with a logged reason; the canonical model's
+geo_id convention has no codes for those yet.
 
 The OBS_STATUS mapping below is a plausible reading of the SDMX
 CL_OBS_STATUS codelist as commonly used by NBB's SDMX 2.1 API. It has NOT
@@ -32,7 +33,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from belgian_macro_db import SOURCES, DBnomicsFetcher, NBBFetcher  # noqa: E402
+from belgian_macro_db import CONFIG_DIR, SOURCES, DBnomicsFetcher, NBBFetcher  # noqa: E402
+from src.validation.config_schema import is_canonical_eligible, load_and_validate_all  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s", datefmt="%H:%M:%S"
@@ -75,33 +77,6 @@ def map_obs_status(raw: str) -> str:
             "Add it to OBS_STATUS_MAP after confirming its meaning."
         )
     return OBS_STATUS_MAP[raw]
-
-
-# New judgment call introduced by this port -- SOURCES has no such field
-# today. Listed in full here for review, not derived automatically.
-PREFERRED_DIRECTION = {
-    "GDP_QUARTERLY_YY": "higher_is_better",
-    "GDP_ANNUAL_CY": "higher_is_better",
-    "PRIV_CONSUMPTION_CY": "higher_is_better",
-    "GOV_CONSUMPTION_CY": "contextual",
-    "GFCF_ENTERPRISES_CY": "higher_is_better",
-    "GFCF_DWELLINGS_CY": "contextual",
-    "GFCF_PUBLIC_CY": "contextual",
-    "CHG_STOCKS_CY": "contextual",
-    "NET_EXPORTS_CY": "higher_is_better",
-    "CONSUMER_CONFIDENCE": "higher_is_better",
-    "EUROSTAT_GDP_Q_MEUR": "higher_is_better",
-    "EC_CONS_CONF_BE": "higher_is_better",
-    "BUSINESS_CONFIDENCE": "higher_is_better",
-    "LABOUR_COST_BE": "contextual",
-    "INDUSTRIAL_PROD": "higher_is_better",
-    # Inflation growth rate: neither direction is unconditionally "good"
-    # without a target-band framing the model doesn't have -- contextual,
-    # not neutral, so the phrasing layer doesn't editorialize.
-    "HICP": "contextual",
-}
-
-INCLUDED = set(PREFERRED_DIRECTION.keys())
 
 
 def derive_period_bounds(period: str, frequency: str) -> tuple[str, str]:
@@ -147,11 +122,17 @@ def port(db_path: Path, run_date: str | None = None) -> None:
         tuple(BE_COUNTRY_GEO.values()),
     )
 
+    indicator_configs, source_configs = load_and_validate_all(
+        CONFIG_DIR / "indicators", CONFIG_DIR / "sources"
+    )
+
     ported = 0
     for code, meta in SOURCES.items():
-        if code not in INCLUDED:
+        ind_config = indicator_configs[code]
+        if not is_canonical_eligible(ind_config, source_configs):
             log.warning(f"SKIP {code}: non-Belgium series, out of scope this port (see docstring)")
             continue
+        preferred_direction = ind_config["preferred_direction"]
 
         agency = meta["source_agency"]
         source_id = source_id_for(agency)
@@ -197,7 +178,7 @@ def port(db_path: Path, run_date: str | None = None) -> None:
                 meta.get("description", ""),
                 meta["frequency"],
                 meta["unit"],
-                PREFERRED_DIRECTION[code],
+                preferred_direction,
                 f"scripts/port_existing_indicators.py::{code}",
             ),
         )

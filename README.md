@@ -76,6 +76,7 @@ unit: percent_yy
 frequency: A          # A=Annual, Q=Quarterly, M=Monthly, F=Forecast
 source_id: nbb        # must match a source_id in config/sources/*.yaml
 geo_levels: [national]
+preferred_direction: higher_is_better   # lower_is_better | higher_is_better | neutral | contextual
 fetch:
   query: A.2.INDICATOR_CODE.VZ.LY.N?startPeriod=2000&dimensionAtObservation=AllDimensions
 display:
@@ -87,6 +88,10 @@ display:
 `python scripts/validate_config.py` checks the file before you run anything else. Set
 `display: null` instead of a `display` block if the indicator should be fetched and stored but
 never shown as its own dashboard row.
+
+If this series describes a country other than Belgium (a comparison/feeder series), add
+`country: DE` (or `FR`/`NL`/`ES`/`EA`/etc.) — this, not `display`, is what determines whether the
+indicator reaches the canonical schema and dashboard. Omit it for Belgian data.
 
 ## Local Usage
 

@@ -1,15 +1,16 @@
 id: EUROSTAT_GDP_Q_MEUR
+name:
+  en: EUROSTAT_GDP_Q_MEUR
+  fr: EUROSTAT_GDP_Q_MEUR
+  nl: EUROSTAT_GDP_Q_MEUR
 unit: index_2010
 frequency: Q
 source_id: dbnomics_eurostat
 geo_levels:
 - national
-fetch:
-  query: /namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?observations=true
-name:
-  en: EUROSTAT_GDP_Q_MEUR
-  fr: EUROSTAT_GDP_Q_MEUR
-  nl: EUROSTAT_GDP_Q_MEUR
+preferred_direction: higher_is_better
 description:
   en: Gross domestic product, seasonally adjusted
+fetch:
+  query: /namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?observations=true
 display: null

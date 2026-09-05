@@ -1,18 +1,19 @@
 id: GOV_CONSUMPTION_CY
+name:
+  en: Gov. consumption expenditure
+  fr: Dépenses de consommation des APU
+  nl: Overheidsconsumptie
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.P3_S13.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: Gov. consumption expenditure
-  fr: Dépenses de consommation des APU
-  nl: Overheidsconsumptie
+preferred_direction: contextual
 description:
   en: Final consumption expenditure of general government, contribution to GDP volume
     change
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P3_S13.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

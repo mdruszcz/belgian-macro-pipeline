@@ -1,18 +1,19 @@
 id: INDUSTRIAL_PROD
+name:
+  en: Industrial production
+  fr: Production industrielle
+  nl: Industriële productie
 unit: index_2021
 frequency: M
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_INDPROD,1.0/M.2021..S.B_C_D.BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
-name:
-  en: Industrial production
-  fr: Production industrielle
-  nl: Industriële productie
+preferred_direction: higher_is_better
 description:
   en: Industrial production index (mining, manufacturing, energy), 2021=100, seasonally
     adjusted
+fetch:
+  query: ',DF_INDPROD,1.0/M.2021..S.B_C_D.BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
 display:
   category: prices
   title:

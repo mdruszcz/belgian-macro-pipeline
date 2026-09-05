@@ -1,17 +1,18 @@
 id: NET_EXPORTS_CY
+name:
+  en: Net exports
+  fr: Exportations nettes
+  nl: Netto-export
 unit: pp_contribution
 frequency: A
 source_id: nbb
 geo_levels:
 - national
-fetch:
-  query: ',DF_QNA_DISS,1.0/A.2.B11.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
-name:
-  en: Net exports
-  fr: Exportations nettes
-  nl: Netto-export
+preferred_direction: higher_is_better
 description:
   en: External balance of goods and services, contribution to GDP volume change
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.B11.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
 display:
   category: gdp
   title:

@@ -33,6 +33,7 @@ def test_dummy_indicator_reaches_exported_metadata(tmp_path):
                 "frequency": "A",
                 "source_id": "test_source",
                 "geo_levels": ["national"],
+                "preferred_direction": "higher_is_better",
                 "display": {
                     "category": "gdp",
                     "title": {
@@ -72,6 +73,7 @@ def test_hidden_indicator_has_null_display(tmp_path):
                 "frequency": "Q",
                 "source_id": "test_source",
                 "geo_levels": ["national"],
+                "preferred_direction": "neutral",
                 "display": None,
             }
         )
