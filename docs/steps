@@ -1,0 +1,816 @@
+PHASE I — 30% → 50%
+Block A — Canonical data model
+ [SPEC] Write /docs/features/data_model.md with all five tables, columns, types, keys, indexes
+How: Give the architect the current SQLite schema plus the target from the roadmap; require explicit types and constraints.
+Why: Everything downstream speaks indicator × geography × period × value. Getting it wrong now means rewriting every adapter later.
+ [SPEC] Define the observations primary key as (indicator_id, geo_id, period, vintage)
+How: State it in the spec and in the migration as a real constraint, not a convention.
+Why: Without vintage in the key, a revised government figure overwrites history and your revision analysis becomes impossible. Without the constraint, duplicate rows silently double your averages.
+ [SPEC] Define period formats and their sorting rules
+How: One period string column plus frequency; document that 2024-Q3 sorts lexically and 2024-7 is invalid.
+Why: Mixed annual, quarterly and monthly data in one table is where date bugs live. Zero-padding decided late means re-writing millions of rows.
+ [SPEC] Define the status enum
+How: final | provisional | estimate | revised | suppressed | na, documented with which source uses which.
+Why: Statbel suppresses small-cell values. If suppression looks like zero, you will publish "median income €0" for a small commune.
+ [SPEC] Define preferred_direction
+How: Enum on the indicator config: lower_is_better | higher_is_better | neutral | contextual.
+Why: Every later feature (arrows, percentiles, scores, commentary) needs to know whether high is good. Encoding it once prevents the classic "unemployment is in the 95th percentile 🎉" bug.
+ [REVIEW] Review the model against mergers, sector data, source conflicts, revisions
+How: Give the reviewer the spec and ask specifically: what breaks when two sources publish different values for the same cell?
+Why: These four scenarios are the ones that force schema changes. Better to discover them in a text file than in a migration on 2 million rows.
+ [H] Approve and freeze; later changes need an ADR
+How: Comment "approved" on the issue; add docs/decisions/0001-data-model.md.
+Why: Frozen means agents stop proposing improvements to it every session, which is otherwise a permanent tax on your attention.
+ [BUILD] Create the target folder structure
+How: src/{fetchers,transforms,validation,analytics,exporters}, config/{indicators,sources,geography}, data/{raw,processed,exports}, tests/.
+Why: Structure is instruction. Given a fetchers/ folder, an agent puts a fetcher there; given a flat repo, it appends 300 lines to belgian_macro_db.py.
+ [BUILD] Add a migration system
+How: Numbered .sql files plus a tiny runner tracking applied versions in a schema_migrations table. No ORM.
+Why: You need to reproduce any past schema to reproduce any past report. An ORM adds a large dependency and hides exactly the SQL you need to review.
+ [BUILD] Implement 001_core_schema.sql
+How: Straight translation of the approved spec, with FKs enabled (PRAGMA foreign_keys=ON).
+Why: SQLite silently ignores foreign keys unless you turn them on, which means integrity constraints you believe exist do not.
+ [BUILD] Implement 002_indexes.sql
+How: At minimum observations(geo_id, indicator_id) and observations(indicator_id, period).
+Why: At 581 communes × 200 indicators × 20 years you are near 2.5 million rows. Unindexed, the export step goes from seconds to many minutes inside a GitHub Actions time budget.
+ [BUILD] Port the 17 existing macro indicators into the new model with geo_id = BE
+How: A one-off script reading the old table, mapping to new ids, writing with vintage set to the migration date.
+Why: Proves the new model can hold the old data. If national data does not fit, municipal data certainly will not.
+ [BUILD] Tests: round-trip, PK collision, FK violation, migration idempotency
+How: pytest with a temp SQLite file per test.
+Why: Idempotency in particular: the daily workflow re-runs migrations every day. A non-idempotent migration breaks production once and then every day after.
+ [RED] Independent audit of schema and migration
+How: Hand over only the SQL and the spec, not the discussion.
+Why: Schema errors are cheap now and catastrophic after 200 indicators depend on them.
+ [H] Run the migration on a copy and eyeball 20 rows against the old CSV
+How: Copy the DB, run, then compare specific GDP_QUARTERLY_YY values by hand.
+Why: Automated tests confirm the code does what it says. Only your eyes confirm it does what you meant.
+🚦 CONTROL A
+ [H] Old dashboard still renders from the new schema
+How: Load the Pages URL from the branch build.
+Why: The refactor must be invisible to the public site. If it is not, you have a migration bug, not a frontend bug.
+ [H] Row count before = row count after, documented in the PR
+How: Two SELECT COUNT(*) results pasted into the PR body.
+Why: This is the cheapest possible detector of silent data loss during migration.
+Block B — Metadata out of the HTML
+ [SPEC] Write /docs/features/indicator_config.md with a JSON Schema
+How: Define required and optional fields; generate the JSON Schema alongside the prose.
+Why: Machine-checkable config is the only way 500 YAML files stay consistent. Prose alone drifts by file 40.
+ [BUILD] Create config/indicators/*.yaml, one per indicator
+How: One file per indicator with id, name.{en,fr,nl}, category, unit, frequency, source, geo_levels, display block.
+Why: One file per indicator means two agents adding indicators in parallel never conflict. One big file means constant merge conflicts.
+ [BUILD] Validator that fails CI on malformed config
+How: jsonschema check over the config directory, wired into ci.yml.
+Why: A typo'd unit or missing Dutch label should fail at PR time, not appear as a blank label on a public page.
+ [BUILD] src/exporters/metadata.py → public/data/metadata/indicators.json
+How: Read all YAML, validate, emit one compact JSON.
+Why: The browser should fetch one small metadata file, not parse YAML or embed metadata in HTML.
+ [BUILD] Refactor dashboard.html to read it; delete INDICATOR_META
+How: Fetch metadata first, then render from it; remove the hardcoded object entirely.
+Why: INDICATOR_META is the specific thing that makes indicator #742 a five-file edit. Deleting it is the point of the block.
+ [BUILD] Move the SOURCES dict out of belgian_macro_db.py into config/sources/*.yaml
+How: Adapter reads config at startup; no source URLs remain in Python.
+Why: Source definitions and display metadata living in two languages in two files is the duplication the whole block exists to kill.
+ [BUILD] Test: a dummy indicator added via config alone appears in the dashboard
+How: Add a fixture indicator in a test config dir and assert it reaches the exported metadata.
+Why: Turns "metadata-driven" from an aspiration into a regression test.
+ [REVIEW] Check multilingual, unit and display metadata completeness
+How: Ask for a table of missing fields across all configs.
+Why: Missing FR/NL labels are invisible in an English test pass and fatal in a Belgian sales meeting.
+ [H] Add one new indicator yourself using only YAML
+How: Pick any NBB series, write the config, run the pipeline, look at the dashboard.
+Why: You are the acceptance test. If you have to open an HTML file, the block failed regardless of what the agent reported.
+🚦 CONTROL B
+ [H] Grep the frontend for hardcoded indicator names; expect zero
+How: grep -rEi "GDP_|UNEMPLOY|POPULATION" site/ *.html
+Why: Agents love leaving "just one" special case. One special case becomes the precedent for fifty.
+Block C — Belgian geography master
+ [SPEC] Write /docs/features/geography.md
+How: Levels, NIS semantics, merger handling, valid_from/valid_to intervals, resolution rules.
+Why: Belgian geography has more edge cases than the data itself. Getting them into text first means the agent implements decisions rather than inventing them.
+ [H] Download the official Statbel geography and statistical-sector files
+How: Statbel open-data portal; keep the SQLite or GeoJSON version and record the download date.
+Why: Official reference files are the only defensible source of NIS codes. Anything scraped or LLM-generated will contain wrong codes you cannot detect.
+ [H] Record licence terms in docs/data_catalog.md
+How: Copy the licence name, URL and reuse conditions into the catalogue row.
+Why: You intend to sell this. "I think it was open data" is not a position you want to hold in a procurement conversation.
+ [BUILD] Load Belgium, regions, provinces, arrondissements, communes, statistical sectors
+How: One loader per level, writing into geographies with geo_level set.
+Why: Every aggregate, comparison and percentile in the product depends on this hierarchy being complete and correct.
+ [BUILD] Populate parent_geo_id and test every commune resolves to BELGIUM
+How: Recursive CTE walking parents; assert no orphans and no cycles.
+Why: One orphaned commune means it silently vanishes from regional aggregates, which understates a region without any error appearing.
+ [BUILD] Build municipality_crosswalk.csv
+How: Columns old_nis, new_nis, valid_from, valid_to, relationship (merged/renamed/split).
+Why: Without it, a merged commune's history starts in the merger year, and your "5-year growth" for that commune is undefined or absurd.
+ [H] Verify the crosswalk against the 2019 and 2025 Flemish merger waves
+How: Check a handful of known merged communes against official merger lists.
+Why: This is the highest-risk table for hallucinated content, and it is small enough to check by hand. Do it once, properly.
+ [BUILD] Implement resolve_geo(nis, period) used by every adapter
+How: Single function applying the crosswalk for the observation's period; raise on unknown codes.
+Why: Centralizing it means a crosswalk fix propagates everywhere. Per-adapter handling means eight subtly different behaviours.
+ [BUILD] Store geometry separately from observations
+How: Separate table or static GeoJSON files keyed by geometry_id.
+Why: Municipal boundaries are megabytes. Inlining them into exports makes every payload enormous and the git repo unmanageable.
+ [BUILD] Tests: commune count per region, orphans, crosswalk cycles, unknown NIS rejection
+How: Assert exact counts as constants, updated deliberately when Belgium changes.
+Why: A hardcoded expected count is the fastest way to detect a loader that silently dropped a province.
+ [RED] "Find every way a NIS code could be silently mismapped"
+How: Provide the loader, crosswalk and resolve function only.
+Why: Mismapped geography produces plausible numbers attached to the wrong place, which is the single most damaging failure this product can have.
+🚦 CONTROL C
+ [H] Total commune count matches the current official figure
+How: Compare your SELECT COUNT(*) to Statbel's published count.
+Why: An off-by-a-few count means the crosswalk or the source file vintage is wrong.
+ [H] Five merged communes stitch correctly across the merger
+How: Plot population 2010–2025 for each and look for the discontinuity.
+Why: A visible step change in a population series is the signature of a crosswalk failure, and it is instantly obvious on a chart.
+Block D — Generic source-adapter system
+ [SPEC] Write /docs/features/source_adapter.md
+How: Define the fetch → parse → normalize → validate → load interface, the normalized dataframe columns and dtypes, retry/caching/rate-limit rules.
+Why: This interface is the leverage point of the whole project. Every future source costs a day instead of a week if the contract is right.
+ [BUILD] Implement src/fetchers/base.py with raw caching to data/raw/{source}/{date}/
+How: Abstract base class; cache the raw response before parsing anything.
+Why: When a parse breaks six months from now, you need the exact bytes the source returned that day. You cannot get them back later.
+ [BUILD] Refactor NBB into NBBSource
+How: Move existing logic, no behaviour change, tests asserting identical output.
+Why: Refactoring a known-good adapter first proves the interface works before you use it on unfamiliar data.
+ [BUILD] Refactor DBnomics/Eurostat into EurostatSource
+How: Same, driven by config/sources/*.yaml.
+Why: Eurostat's shape differs from NBB's, so it stress-tests whether the interface is genuinely generic or just NBB-shaped.
+ [BUILD] Refactor FPB into FPBSource
+How: Same, handling the XLSX path.
+Why: A third format (spreadsheet rather than API) is the real test of the abstraction.
+ [BUILD] Implement fetch_runs logging for every adapter
+How: Write run start, end, status, rows received, rows written and errors on every execution.
+Why: When the dashboard shows a stale number, this table tells you whether the fetch failed, the parse dropped rows, or nothing was published.
+ [BUILD] Contract test applied to all adapters
+How: Parametrized pytest asserting identical output columns and dtypes from every source.
+Why: It makes source-agnostic downstream code true by construction rather than by hope.
+ [H] Confirm the daily Action still produces identical data to macro-v1
+How: Run the workflow manually on the branch and diff the export.
+Why: A refactor that changes public numbers is a bug, even if the new numbers are better. Fix that separately and deliberately.
+🚦 CONTROL D
+ [H] Diff today's export against macro-v1; explain every difference in the PR
+How: diff on the CSV, or a pandas compare script.
+Why: "Probably rounding" is how wrong numbers enter a product. Each difference needs a named cause.
+Block E — Data catalogue before downloading anything
+ [H] Write the catalogue header: scoring formula, licence column, refusal criteria
+How: Encode priority = decision_value × comparability × coverage × depth ÷ maintenance_cost at the top of data_catalog.md.
+Why: A written formula makes "no" defensible against your own enthusiasm at 11pm on a Saturday.
+ [SPEC] Draft the candidate dataset table
+How: Ask the architect for candidates with geography, history depth, update frequency, licence and URL. No scores.
+Why: Agents are good at enumeration and bad at judging commercial value. Split the task along that line.
+ [H] Score every candidate yourself
+How: Fill decision_value and difficulty columns by hand.
+Why: Decision value depends on what a directeur financier will pay for, which is knowledge only you have and only from the conversations in Block Z.
+ [H] Select exactly 10 datasets; mark everything else DEFERRED
+How: Sort by priority, cut at 10, write DEFERRED in the row rather than deleting it.
+Why: Deferred-not-deleted stops you re-researching the same rejected dataset three months later.
+ [H] Verify commercial-reuse permission for each of the 10
+How: Read the actual licence page for each publisher and record the URL and date.
+Why: A dataset you cannot resell is worse than useless once it is embedded in a paid report.
+ [H] Add the anti-scope-creep rule to CLAUDE.md
+How: "No new source enters the pipeline without a catalogue row approved by the maintainer."
+Why: Agents will helpfully offer to add three more sources in every PR. The rule lets you decline in one word.
+🚦 CONTROL E
+ [H] The list has 10 items, not 11
+How: Count them.
+Why: This is a literal test of the discipline the whole plan depends on. If it fails here, it will fail everywhere.
+Block F — Statbel adapter
+ [SPEC] Write /docs/features/statbel_adapter.md, one section per dataset
+How: URL, format, key columns, geo column, period column, unit, indicator id mapping.
+Why: Column-level mapping written in advance is what stops an agent guessing which column is "income" when three columns plausibly are.
+ [BUILD] Implement StatbelSource on the base interface
+How: One class, dataset-specific parsing driven by config.
+Why: Ten datasets in one adapter beats ten adapters, because the fetch, cache, retry and load logic is shared.
+ [BUILD] Demography: population, growth, age structure, dependency ratios, household composition
+How: Load raw counts only; ratios come from the derived engine.
+Why: Storing ratios as source data means you cannot recompute them when the denominator is revised.
+ [BUILD] Income: mean taxable income, median where available, per inhabitant
+How: Keep the fiscal-year reference explicit in the period field.
+Why: Taxable income is published with a lag and refers to an earlier income year. Mislabelling it makes every income comparison off by a year or two.
+ [BUILD] Business: active enterprises, births, deaths, sectoral structure
+How: Store the sector dimension as separate indicator ids rather than a new table column.
+Why: Keeps the universal indicator × geography × period × value grammar intact instead of special-casing the schema.
+ [BUILD] Housing: stock, building permits, transactions and prices where available
+How: Flag suppressed small-commune values as suppressed, never as zero.
+Why: Housing transaction counts are small in small communes and get suppressed. Zeros would make quiet communes look like collapsed markets.
+ [BUILD] Mobility: vehicle stock, road accidents
+How: Low priority, load last.
+Why: Nice to have, rarely decision-relevant. Its position in the order is the point.
+ [BUILD] Fixture tests per dataset using saved sample files
+How: Commit a small trimmed sample per dataset; tests parse the fixture, never the network.
+Why: CI must not fail because Statbel is down for maintenance, and it must fail when Statbel renames a column.
+ [REVIEW] Check unit consistency, definitional breaks and label honesty
+How: Ask specifically whether the field you call "median income" is a median and of what population.
+Why: The subtle-but-wrong number is your main product risk. Labels are where it enters.
+ [H] Spot-check three communes you know against the Statbel website
+How: Open the source page and compare three values on screen.
+Why: Five minutes here catches an entire mis-parsed column, which no unit test on your own fixture can catch.
+🚦 CONTROL F
+ [H] All communes present for population, no silent nulls
+How: Query for communes missing a population value in the latest year.
+Why: Coverage gaps break percentiles and peer models everywhere downstream, invisibly.
+ [H] At least five years of history per core dataset
+How: MIN(period) per indicator.
+Why: Below five years, growth rates, trend breaks and the peer model are all statistically meaningless.
+Block G — Derived-indicator engine
+ [SPEC] Write /docs/features/derived_indicators.md
+How: Function catalogue, YAML formula grammar, null propagation, rounding policy.
+Why: Null handling decided per function by different agents produces silently inconsistent results across the site.
+ [BUILD] Implement the function library
+How: growth_rate, cagr, per_capita, share_of_total, five_year_change, z_score, percentile, index_base_100, dependency_ratio, regional_share in src/analytics/derived.py.
+Why: 150 raw indicators become roughly 400 analytical ones with no additional data collection. Best value-per-hour in the project.
+ [BUILD] Declarative derived configs
+How: config/indicators/derived/*.yaml with formula: pct_change(POPULATION, periods=5).
+Why: Same reason as Block B: adding analysis should be config, not code.
+ [BUILD] Dependency resolver with cycle detection
+How: Topological sort over formula references; error on cycles.
+Why: Derived-of-derived is inevitable. Without ordering you get nulls that depend on execution order, which is maddening to debug.
+ [BUILD] Unit tests with hand-computed expected values
+How: Small fixtures where you know the answer, asserted to a fixed tolerance.
+Why: Testing a formula against its own implementation proves nothing. Only an independently computed number is a test.
+ [REVIEW] Verify CAGR, percentile method and per-capita denominators
+How: Ask which percentile definition is used and require it to be documented.
+Why: Rank-based and interpolated percentiles differ by several points for 581 items. A commune arguing about its rank will notice.
+ [H] Recompute three derived values in a spreadsheet
+How: Excel or Sheets, from the raw values on the page.
+Why: It is your independent check of the check, and it takes ten minutes.
+🚦 CONTROL G
+ [H] Confirm derived values are never stored as source observations
+How: Query observations for any derived indicator id.
+Why: Once derived values are stored as source data, a formula fix no longer propagates and your database contains two contradicting truths.
+Block H — Validation layer
+ [SPEC] Write /docs/features/validation.md
+How: Rule catalogue with severity fail or warn and thresholds per rule.
+Why: If every rule fails the build, you will disable validation within a week. Severity levels keep it survivable.
+ [BUILD] Range rules
+How: population >= 0, 0 <= unemployment <= 100, percentages bounded, currency non-negative.
+Why: Catches unit errors (a rate stored as 0.052 vs 5.2) which are otherwise invisible until a chart looks flat.
+ [BUILD] Referential rules
+How: Assert every geo_id, indicator_id and source_id exists.
+Why: This is the automated version of the NIS-mismapping risk from Block C.
+ [BUILD] Structural rules
+How: No duplicate keys, period matches declared frequency, unit unchanged versus metadata.
+Why: A source silently switching from thousands to units is a real event and completely undetectable by eye.
+ [BUILD] Volume rules
+How: Fail on null share > 90%, row-count drop > 10%, or latest period older than expected.
+Why: This is the rule that catches "17,000 rows yesterday, 436 today" before it reaches the public dashboard.
+ [BUILD] Persist previous count, new count and delta per run
+How: Columns on fetch_runs.
+Why: Gives you a history to set sensible thresholds instead of guessing them.
+ [BUILD] Wire validation so failure blocks commit and deploy
+How: Validation step between transform and export in the workflow; non-zero exit stops the job.
+Why: Validation that only logs is decoration. The value is entirely in the blocking.
+ [H] Corrupt a fixture deliberately and confirm the Action fails
+How: Push a branch with a truncated fixture and watch the run.
+Why: Verifies the wiring, not just the rules. Most validation failures in practice are wiring failures.
+🚦 CONTROL H
+ [H] Prove the row-collapse scenario breaks the build
+How: Simulate a 95% row drop in a test run.
+Why: It is the specific failure mode most likely to publish garbage to a paying client's page.
+Block I — Vintages
+ [SPEC] Write /docs/features/vintages.md
+How: Define what creates a new vintage, and that queries default to latest.
+Why: If every daily run creates a vintage, the table grows 365× faster than needed. The rule must be "only on value change".
+ [BUILD] Add vintage and retrieved_at; insert rather than overwrite on change
+How: Compare incoming value to stored latest; insert a new row only if it differs.
+Why: Preserves revision history at almost no storage cost, because most values never change.
+ [BUILD] Implement get_observations(as_of=...)
+How: Filter to the latest vintage at or before the given date.
+Why: This is what lets you regenerate a client's March report identically in December. Professionally essential.
+ [BUILD] Revision-detection report
+How: List values changed since the previous run, with old and new.
+Why: Revisions are themselves analytically interesting and are also your early warning that a source changed methodology.
+ [BUILD] Tests for revision insertion and as-of queries
+How: Fixture with a known revision, asserted from both time perspectives.
+Why: As-of logic is easy to get subtly wrong and impossible to notice without a test.
+ [REVIEW] Confirm storage growth and dedup rule are sensible
+How: Ask for a projected row count at 200 indicators and 20 years.
+Why: The DB is committed to git daily. Growth here compounds into repo size permanently.
+Block J — Payload exports
+ [SPEC] Write /docs/features/site_payloads.md
+How: Define the file layout, a size budget under roughly 150 KB per commune, and compression.
+Why: Without a budget, payloads grow until the mobile experience is unusable and nobody notices which addition did it.
+ [BUILD] Emit national.json, communes/{nis}.json, indicators/{id}.json, metadata/*.json
+How: Exporter module writing to public/data/.
+Why: The browser downloads one commune instead of the entire national dataset. This is what makes /local fast at any scale.
+ [BUILD] Keep bulk CSV/JSON downloads as-is
+How: Leave the existing export path untouched.
+Why: Bulk downloads are a credibility feature for researchers and journalists, and they cost nothing to keep.
+ [BUILD] Emit a build manifest
+How: build_id, git_commit, build_date, row counts per dataset.
+Why: Lets you answer "which build produced this number?" without archaeology. Early version of Step 48.
+ [H] Check the largest commune payload against the budget
+How: ls -lS public/data/communes | head.
+Why: Antwerp and Brussels communes have the most data. If they fit, everything fits.
+Block K — /local interface
+ [SPEC] Write /docs/features/local_ui.md
+How: Routes, sections, empty and missing-data states, mobile behaviour.
+Why: Missing-data states are where amateur dashboards look broken, and they are always designed last unless specified first.
+ [BUILD] Search page with FR/NL/DE autocomplete and region browse
+How: Client-side search over the geographies metadata file.
+Why: A Belgian user will type "Sint-Lambrechts-Woluwe" or "Woluwe-Saint-Lambert". Both must work or the product feels foreign.
+ [BUILD] Municipality header with the six headline figures
+How: Population, 5Y growth, median income, unemployment, businesses, housing price.
+Why: The header is what someone screenshots and forwards. It has to be right and legible on its own.
+ [BUILD] Sections: Overview, Demography, Income, Employment, Business, Housing, Mobility, Finances
+How: Render Finances as "coming soon" until Phase II.
+Why: Fixed structure across all communes makes the product feel systematic rather than assembled from whatever data existed.
+ [BUILD] Reuse existing chart and modal components
+How: Extend shared-styles.css and the current chart code.
+Why: A framework rewrite here costs weeks and delivers zero commercial value. It is explicitly banned until 50%.
+ [BUILD] Explicit "no data available" component
+How: One component, one style, used everywhere data is absent.
+Why: A blank chart reads as a bug. A clear "not published at municipal level" reads as rigour.
+ [H] Open ten communes on your phone and list every ugly thing
+How: Real device, real network, notes app.
+Why: Municipal staff will open your link on a phone in a meeting. That is the first impression you actually get.
+Block L — Comparison, percentiles, URLs
+ [SPEC] Write /docs/features/comparison.md
+How: Define the comparison set, aggregation method (weighted or not) and missing-data handling.
+Why: These three choices determine every number in the comparison column. Deciding them in code means deciding them inconsistently.
+ [BUILD] Show commune / province / region / Belgium for every metric
+How: Precompute aggregates in the analytics step, ship them in the commune payload.
+Why: Context is what turns a number into information. "€31,842" means nothing alone.
+ [BUILD] Free comparison picker for up to four communes
+How: Lazy-load the other communes' payloads on selection.
+Why: Comparing to neighbours is the first thing every municipal user does. It is also the cheapest feature here.
+ [BUILD] National and regional percentiles per comparable indicator
+How: Computed in derived.py, stored per commune.
+Why: Percentiles communicate position instantly to non-analysts, which is your actual audience.
+ [BUILD] Percentile component showing reference year and peer-set size
+How: Small caption under the figure.
+Why: A percentile without a stated universe is unfalsifiable, and the first sceptical directeur financier will ask.
+ [REVIEW] Resolve unweighted commune average versus population-weighted national figure
+How: Have the reviewer state which is correct per indicator type and why.
+Why: The two differ substantially for income and unemployment. Publishing the wrong one is a credibility-ending error, and it is easy to make.
+ [BUILD] Permanent URLs /local/{nis} and /local/{nis}/{indicator}, statically generated
+How: Generate one HTML file per route at build time.
+Why: Static pages are indexable, shareable and free to serve. This is the entire basis of the SEO moat in Step 49.
+ [BUILD] Per-page title, meta description, canonical URL, JSON-LD Dataset
+How: Templated from the indicator and geography metadata.
+Why: Structured markup is how Google understands that these thousands of pages are data, not thin content.
+ [H] Verify a URL survives a rebuild and is indexable
+How: Rebuild, reload the same URL, check the rendered <title> and robots directives.
+Why: Journalists and civil servants bookmark links. A URL that breaks on rebuild destroys the trust the whole public side is built on.
+🚦 GATE 50%
+ [H] Any commune returns ≥ 50 standardized indicators
+How: Pick five at random and count.
+Why: This is the threshold where the product stops being a demo and starts being usable by a stranger.
+ [H] Each indicator has history, comparison, percentile, source and update date
+How: Inspect one full section closely.
+Why: These five attributes are precisely what separates a credible product from a chart dump.
+ [H] Per-commune data is downloadable
+How: Click the download button on a commune page.
+Why: Costs nothing, builds enormous trust with analysts, and is the reason people cite you.
+ [H] clone → install → pipeline → tests → build runs with one command
+How: A make all or a single script, executed from a fresh clone.
+Why: If you cannot rebuild from scratch, you have a machine, not a product.
+ [H] Zero indicator-specific frontend logic
+How: Repeat the Control B grep across the whole site directory.
+Why: This is the property that makes indicators 50 through 500 cheap. Losing it silently is the main regression risk.
+ [RED] "Assume the statistics are subtly wrong. Find where."
+How: Full repo, no prior context, explicit adversarial framing.
+Why: You are about to build paid analysis on top of these numbers. This is the last cheap moment to find a systematic error.
+ [REVIEW] Methodology review of every aggregate and percentile
+How: Reviewer works from methodology.md and the code together.
+Why: Documentation drift starts here. Catching it now keeps the methodology pages honest later.
+ [H] Watch two non-technical people use it without instructions
+How: Hand them a phone, say nothing, take notes.
+Why: Every confusion you observe is one a bourgmestre will also have, and they will not tell you about it.
+ [H] Tag belpulse-v0.5, write release notes, update the roadmap
+How: Tag, Release, tick Phase I in roadmap.md.
+Why: Marks the frozen reference point for Phase II, and gives you a visible win at the moment motivation usually dips.
+PHASE II — 50% → 80%
+Block M — Peer model
+ [SPEC] Write /docs/features/peer_model.md
+How: Variable list, standardization, distance metric, k, exclusions, version number.
+Why: This becomes a versioned commercial asset. It has to be a document before it is an algorithm.
+ [H] Approve the variable list personally
+How: Cross out anything you cannot justify to a directeur financier in one sentence.
+Why: The variable list is the proprietary value. Delegating it means selling someone else's judgement.
+ [BUILD] Build the feature matrix
+How: Population, density, income, age structure, employment, urbanization, housing, enterprise density, social indicators, tax base; impute or exclude missing explicitly.
+Why: Structural similarity is the basis of every "versus comparable communes" claim in the product.
+ [BUILD] StandardScaler + Euclidean distance as v1
+How: Plain scikit-learn, deterministic, seeded.
+Why: You must be able to explain it in a meeting. Interpretability beats accuracy when the buyer is a public administration.
+ [BUILD] Optional PCA variant behind a flag
+How: Same interface, off by default.
+Why: Lets you measure whether sophistication actually changes the peer sets, rather than assuming it does.
+ [BUILD] Output ten nearest peers per commune with distances
+How: Store as a table with the model version stamped on each row.
+Why: Versioned output is what lets you reproduce an old report after you improve the model.
+ [BUILD] Peer median, peer percentile and deviation for every indicator
+How: Derived layer, computed from the peer table.
+Why: "€1,800 vs peer median €1,210, +49%" is the sentence that makes this sellable. Everything else supports it.
+ [BUILD] Stability test across two data vintages
+How: Assert peer-set overlap stays above a threshold between runs.
+Why: If a commune's peers change wholesale after a routine data update, clients lose faith immediately.
+ [REVIEW] Check circularity, scaling artefacts and small-commune distortion
+How: Ask explicitly whether any benchmarked metric is also a peer-selection variable.
+Why: Benchmarking debt against peers selected partly on debt is circular and will be spotted by exactly the person you are selling to.
+ [H] Read the peer lists for fifteen communes you know
+How: Eyeball them and note absurdities.
+Why: Local knowledge is the only available ground truth. There is no labelled dataset of "correct peers".
+ [RED] "Break this peer model. Find where it produces nonsense."
+How: Give the model and outputs, not the design discussion.
+Why: Edge communes (tiny, extreme, atypical) break distance models, and those are often exactly who is curious enough to try your product.
+ [BUILD] Freeze as Peer Model v1.0 and stamp the version on every output
+How: Constant in code, written into outputs and reports.
+Why: Without versioning, a client's numbers change between two reports with no explanation available.
+Block N — Methodology pages
+ [BUILD] Build a /methodology route rendering from docs
+How: Convert docs/methodology.md fragments to HTML at build time.
+Why: One source of truth for methodology, published and internal, so they cannot diverge.
+ [SPEC] One page per model: data, transformation, period, weighting, limitations, failure modes
+How: Fixed template per model.
+Why: Public-sector buyers ask "how did you calculate this" as a matter of course. Having the answer already published converts scepticism into confidence.
+ [H] Rewrite every methodology page in your own words
+How: Read the agent draft, then write it again yourself.
+Why: You will have to defend these sentences verbally. If you cannot write them, you cannot defend them, and "the AI wrote it" ends the sale.
+ [BUILD] Link every model output to its methodology page
+How: Small "methodology" link next to every score and benchmark.
+Why: Traceability at the point of doubt is worth more than a well-written page nobody finds.
+Block O — Walloon municipal finance
+ [H] Confirm WalStat open-data access terms
+How: Read the open-data page, register if required, record terms in the catalogue.
+Why: Municipal finance is your paid product's core. Its licensing must be airtight before you build on it.
+ [SPEC] Write /docs/features/walstat_adapter.md
+How: Endpoints, indicator mapping, coverage from 2013, known gaps.
+Why: M2M access means the mapping is the whole job. Getting it wrong produces confident, wrong finance numbers.
+ [BUILD] Implement WalStatSource
+How: Standard adapter interface, fixtures for tests.
+Why: Reuses everything from Block D, which is the payoff for building the interface properly.
+ [BUILD] Load ordinary/extraordinary revenue and expenditure, debt, debt per head, investment, balance
+How: Raw series only.
+Why: These eight series generate all the ratios. Load them once, correctly.
+ [BUILD] Compute the seven ratios
+How: Debt/revenue, debt/inhabitant, personnel/expenditure, investment/expenditure, revenue growth, expenditure growth, structural balance, in the derived engine.
+Why: Ratios are what a directeur financier reads; absolute figures are what they already have.
+ [REVIEW] Validate every ratio definition against real Walloon budget documents
+How: Reviewer compares your definition to the official budget structure line by line.
+Why: Belgian municipal accounting (ordinary vs extraordinary service) does not map onto intuitive corporate finance. Wrong definitions here are instantly recognisable to your buyer.
+ [H] Cross-check three communes against their published budgets
+How: Download the commune's budget PDF and compare totals.
+Why: The only real validation available, and the one that gives you confidence to charge money.
+ [BUILD] Enable the Finances section in /local
+How: Fill the placeholder built in Block K, Wallonia only for now, clearly labelled.
+Why: Regional coverage differences must be explicit, or Flemish visitors will conclude the product is broken.
+ [H] Decide and document the plan for Brussels (IBSA) and Flanders (ABB)
+How: Write it into the roadmap with an estimate, do not build it yet.
+Why: Prevents an agent or your own enthusiasm from spending two weeks on Flanders before Wallonia has produced a single euro.
+Block P — Financial health scoring
+ [SPEC] Write /docs/features/fiscal_score.md
+How: Five components, normalization to 0–100, thresholds, weights, and an explicit "what this score is not" section.
+Why: A score is an opinion in numeric clothing. The limitations section is what keeps it defensible.
+ [BUILD] Implement the five component scores
+How: Debt burden, budget balance, revenue dynamism, expenditure growth, investment capacity.
+Why: Components are diagnosable and arguable. A single opaque number is neither, and public buyers reject it.
+ [BUILD] Every component drills down to inputs and formula
+How: Click-through panel showing the raw values used.
+Why: The first question about any score is "why is mine 43?". You need an answer on screen.
+ [BUILD] Composite score, labelled as composite, versioned Fiscal Score v1.0
+How: Weighted combination, weights published.
+Why: A composite is useful for ranking and headlines, but only if the buyer can see it is derived, not measured.
+ [REVIEW] Sanity-check the score distribution
+How: Histogram all Walloon communes.
+Why: If 90% land between 60 and 70, the score discriminates nothing and adds no value over the raw ratios.
+ [H] Rank all Walloon communes and inspect the top and bottom ten
+How: Read the list against what you know and what has been in the press.
+Why: Known financially distressed communes must appear near the bottom. If they do not, the model is wrong, whatever the distribution looks like.
+Block Q — Signals: trend breaks and anomalies
+ [SPEC] Write /docs/features/signals.md
+How: Detection rules, thresholds, minimum series length, multiple-testing policy.
+Why: Testing thousands of series at |z|>2 generates false positives by construction. The policy has to be designed, not discovered.
+ [BUILD] Trend-break detection
+How: Large YoY move, departure from 5Y trend, peer divergence, regional divergence, historical extreme.
+Why: This is what an analyst does manually and what you are selling as automated. No LLM required.
+ [BUILD] Anomaly detection via z-score, peer z-score, historical z-score
+How: Flag at |z| > 2, store the z value alongside the flag.
+Why: Interpretable statistics beat opaque models when the buyer must justify the finding to a council.
+ [BUILD] Suppress signals on short series or after definitional breaks
+How: Minimum period count, plus a break flag on the indicator config.
+Why: A methodology change in a source looks exactly like a dramatic real-world event. Publishing that as a finding is embarrassing.
+ [BUILD] Rank signals by severity
+How: Combine z magnitude, indicator decision-value and recency.
+Why: Feeds the "5 things to know" selection. Without ranking you show five random true facts instead of five important ones.
+ [REVIEW] Review the suppression strategy against false-positive volume
+How: Count total flags across all communes and indicators before tuning.
+Why: If a commune page shows forty alerts, the user learns to ignore all of them, including the real one.
+ [H] Read every signal for five communes and count the noise
+How: Tally useful versus trivial.
+Why: Signal quality is a judgement call only you can calibrate, and it determines whether the product feels smart or noisy.
+Block R — Forecasting
+ [SPEC] Write /docs/features/forecasting.md
+How: Forecastable domains, methods, horizon, uncertainty presentation, and an explicit non-forecastable list.
+Why: The non-forecastable list protects you more than the models do. Overreach here is how forecasting products lose credibility.
+ [BUILD] Demographic projection
+How: Cohort-component or a documented simplified trend.
+Why: Demography is genuinely projectable at municipal scale and is what school, housing and care planning depend on. Best first forecast.
+ [BUILD] Revenue base, scenario-driven
+How: Driven by explicit assumptions, not fitted to a trend.
+Why: Municipal revenue depends on policy and tax base decisions. Extrapolation would be false precision.
+ [BUILD] Expenditure, scenario-driven
+How: Same, with personnel cost and indexation as levers.
+Why: Indexation shocks dominate Belgian municipal expenditure. A trend model would miss them entirely.
+ [BUILD] Debt via accounting identity
+How: Opening debt + borrowing − repayment, derived from the other projections.
+Why: Debt is not forecast, it is computed. Treating it as a statistical forecast would be simply wrong.
+ [BUILD] Three named scenarios with visible assumptions
+How: Baseline, optimistic, stress, each with an assumptions table on screen.
+Why: Public-sector readers trust visible assumptions and distrust point forecasts. Ranges also protect you from being wrong.
+ [BUILD] Backtest harness
+How: Run the model on 2015 data, compare with actuals, publish the error.
+Why: Publishing your own error is a strong differentiator and forces you to know whether the model works.
+ [REVIEW] Verify nothing unsuitable is being forecast
+How: Reviewer checks each series against the forecastability criteria.
+Why: Agents will happily extrapolate anything numeric. The constraint has to be enforced by a person or a process.
+ [H] Approve and publish the "we do not forecast X" list
+How: A short section on the methodology page.
+Why: Stated limits read as expertise. Silent limits read as an oversight when someone finds them.
+Block S — Scenario engine
+ [SPEC] Write /docs/features/scenario_engine.md
+How: Levers, propagation logic, horizon, constraints on inputs.
+Why: This is the feature that competes with paid Excel consultancy. Its logic must be written down before it is coded.
+ [BUILD] Implement the seven levers
+How: Population growth, inflation, personnel cost, interest rates, IPP base, property-tax revenue, investment expenditure.
+Why: These are the variables a finance director actually argues about in budget meetings.
+ [BUILD] Six-year financial trajectory output
+How: Recompute revenue, expenditure, balance and debt for 2027–2032.
+Why: Matches the Belgian municipal planning horizon, so the output slots into work they already do.
+ [BUILD] Scenario save and share via URL parameters
+How: Encode lever values in the query string.
+Why: A shareable scenario link circulates inside the administration, which is free distribution to the exact buying committee.
+ [BUILD] Guard rails on implausible inputs
+How: Clamp ranges and warn on extremes.
+Why: Someone will type 50% inflation, get an absurd chart, screenshot it, and that screenshot is now your product.
+ [REVIEW] Check propagation logic against real municipal budget behaviour
+How: Reviewer traces one lever end to end.
+Why: If inflation does not flow into personnel cost the way it does in reality, the tool is wrong in the exact way an expert will notice first.
+ [H] Rebuild one scenario in Excel and compare
+How: Manual model, same inputs, compare outputs line by line.
+Why: You are replacing a consultant's spreadsheet. You need to know yours matches before you charge for it.
+Block T — Fact generator and the LLM boundary
+ [SPEC] Write /docs/features/fact_generator.md
+How: Fact JSON schema plus the hard rule that the LLM never computes.
+Why: This architecture decision is what makes the product trustworthy at all. It must be explicit and enforced.
+ [BUILD] Implement src/analytics/facts.py
+How: Produce a verified fact object per commune from the database and analytics only.
+Why: The LLM receives verified numbers and only chooses words. Hallucinated statistics become structurally impossible.
+ [BUILD] Every fact carries value, period, source, method and confidence
+How: Required fields in the schema.
+Why: Enables sentence-level traceability and stops the commentary from asserting things with unwarranted certainty.
+ [BUILD] Commentary generator consuming only the fact object
+How: No database handle in the generation module.
+Why: Removing the capability is more reliable than instructing against using it.
+ [BUILD] Traceability: each sentence carries an evidence array of fact ids
+How: Structured generation output, not free text.
+Why: Lets a civil servant verify a claim in one click, which is exactly the behaviour that builds institutional trust.
+ [BUILD] UI revealing sources and calculation on click
+How: Expandable panel under each generated sentence.
+Why: Turns generated text from a liability into a demonstration of rigour.
+ [BUILD] Guard test asserting no raw tables reach the prompt
+How: Test inspects the constructed prompt.
+Why: This boundary will erode in a refactor unless a test defends it.
+ [RED] "Make this commentary state something the data does not support"
+How: Adversarial session against the generation layer.
+Why: One overstated sentence in a paid report can cost the client relationship entirely.
+Block U — Golden tests for interpretation
+ [SPEC] Design roughly 100 analytical scenarios with expected verdicts
+How: Input fact patterns plus allowed and forbidden statements.
+Why: Statistical text generation fails in predictable ways. Enumerating them is what stops the failures shipping.
+ [BUILD] Test framework asserting forbidden statements
+How: Growth 2% versus peer 5% must never yield "outperforming"; pattern-match the output.
+Why: This exact inversion is the classic AI-written-analysis embarrassment, and it is trivially preventable.
+ [BUILD] Directional consistency tests across all preferred_direction values
+How: Parametrized over every indicator.
+Why: Catches "unemployment improved to 12%" phrasing across the whole catalogue in one test.
+ [BUILD] Run golden tests on every PR
+How: Add to ci.yml as a required check.
+Why: Interpretation regressions arrive through prompt tweaks, which look harmless in a diff.
+ [H] Write twenty scenarios yourself from real cases
+How: Take actual commune data that confused you and encode it.
+Why: Your real cases contain the ambiguity that synthetic scenarios lack.
+ [REVIEW] Add adversarial scenarios
+How: Flat series, missing years, sign flips, tiny denominators, single-observation series.
+Why: Tiny denominators in small communes produce enormous percentage changes, which is the most common source of ridiculous automated claims.
+Block V — "5 things to know"
+ [SPEC] Design the materiality ranking
+How: Combine signal severity, indicator decision-value, peer divergence and recency.
+Why: Which five facts appear is the actual product. The rendering is trivial by comparison.
+ [BUILD] Selection engine plus card UI at the top of the page
+How: Precomputed per commune, shipped in the payload.
+Why: This is likely more useful to a mayor than the other 195 indicators combined.
+ [H] Read the five facts for thirty communes
+How: Note every trivial or duplicate item.
+Why: If any of the five is filler, fix the ranking rather than the wording. The wording is a symptom.
+Block W — Reports
+ [SPEC] Write /docs/features/executive_report.md with the 14-section outline
+How: Diagnosis, key figures, structure, population, labour, income, housing, business, finances, peers, risks, outlook, methodology, sources.
+Why: A fixed outline is what makes the report reproducible across 581 communes and recognisable as a product.
+ [BUILD] HTML report generator
+How: Template consuming the fact object and charts.
+Why: HTML iterates in seconds; PDF layout iterates in hours. Get the content right in the cheap medium.
+ [BUILD] Print stylesheet, then HTML → PDF
+How: Headless browser print with a dedicated print CSS.
+Why: One rendering system. Maintaining separate HTML and PDF generators guarantees they diverge.
+ [BUILD] Print model versions and dataset vintage on the cover
+How: Pull from the manifest at generation time.
+Why: Makes any delivered report reproducible and auditable months later, which matters when a client disputes a figure.
+ [H] Read one full report aloud
+How: Out loud, start to finish, pen in hand.
+Why: Reading aloud exposes repetition, hedging and nonsense that silent reading skims past.
+ [BUILD] PowerPoint export, only after the HTML report is good
+How: Roughly twelve slides from the same fact object.
+Why: Municipal management presents in PowerPoint, so this is commercially valuable, but building it on a weak report just multiplies the weakness.
+Block X — Maps, languages, freshness, quality
+ [BUILD] Choropleth maps for income, growth, ageing, debt, employment, housing
+How: Official boundary files, simplified geometry, one shared map component.
+Why: Maps drive exploration and sharing. They are navigation, not analysis, so they get built after the analysis works.
+ [BUILD] Full FR/NL/EN interface from stored metadata
+How: Language files generated from indicator configs; no runtime translation calls.
+Why: Runtime LLM translation is slow, expensive, inconsistent between page loads and impossible to proofread.
+ [BUILD] Cache commentary per language
+How: Generate once per commune per language at build time.
+Why: Same reasons, plus it makes the generated text reviewable before publication.
+ [H] Get native FR and NL proofreading
+How: Pay someone or trade favours; review the top 200 strings.
+Why: Mediocre French or Dutch signals a foreign product to a Belgian public administration, which is fatal in this market.
+ [BUILD] Freshness badge on every metric
+How: Source name, reference year and retrieval date from the observation row.
+Why: Official data is often two years old. Showing that honestly increases trust; hiding it destroys it when discovered.
+ [BUILD] Quality grade A/B/C/D per value
+How: Official / transformed / derived / forecast, computed from the lineage.
+Why: An analyst instantly knows what they are looking at, and you avoid a forecast being quoted as a measurement.
+ [BUILD] Stale-data alerting in the daily workflow
+How: Warn when a source has not updated within its expected window.
+Why: Sources go quiet without announcing it. You want to know before a client does.
+🚦 GATE 80%
+ [H] All communes live with 100–200 core indicators
+How: Query coverage per commune and inspect the worst-covered ones.
+Why: Averages hide gaps. The weakest commune page is what a sceptical prospect will happen to open.
+ [H] Peer model, benchmarks, finance, anomalies, trend breaks, forecasts, scenarios, commentary, reports, methodology and traceability all work
+How: Tick each against the Phase II blocks.
+Why: This is the feature set that a municipality cannot reproduce internally, which is the whole basis of charging for it.
+ [REVIEW] Full methodology audit of every published model
+How: Reviewer works from published pages and code together.
+Why: Last check before real money and real reputations are attached to these numbers.
+ [RED] Full independent audit with no prior context
+How: Fresh session, whole repo, adversarial framing.
+Why: Two phases of accumulated shared assumptions need an outsider to break.
+ [H] Explain three communes from the product alone, in one paragraph each
+How: No code, no database, just the site.
+Why: If you cannot, a client certainly cannot, and the analysis layer has failed regardless of how much of it exists.
+ [H] Tag belpulse-v0.8
+How: Tag and Release with notes.
+Why: Fixed reference point for the pilot you are about to sell.
+PHASE III — 80% → 100%
+Block Y — Reality testing
+ [H] Select ten deliberately diverse test communes
+How: Small, large, rich, poor, urban, semi-rural, high debt, low debt, growing, shrinking.
+Why: Random selection would give you ten average communes and hide every edge-case failure the product has.
+ [H] Generate complete reports for all ten
+How: One command, all ten, saved to a folder.
+Why: Batch generation also tests that the pipeline scales to on-demand report production.
+ [H] Read every page and log each error as a report-QA issue
+How: One issue per error, however small.
+Why: Reading the full output is the fastest way to catch analytical stupidity, and it is a task nobody else can do for you.
+ [BUILD] Fix everything logged, with a regression test per fix
+How: One PR per issue, test first.
+Why: Without a test, the same class of error returns the next time the fact generator is touched.
+Block Z — Customer discovery
+ [H] Build a list of 25 target contacts
+How: Directeurs généraux, directeurs financiers, échevins des finances, bourgmestres, cabinet staff; names, emails, commune.
+Why: Ten meetings requires roughly 25 approaches. Building the list is what makes the outreach happen at all.
+ [H] Book ten meetings
+How: Short email offering a free profile of their commune, with the live URL.
+Why: The product is the pitch. A working link about their own commune converts far better than a description.
+ [H] Ask only the three real questions
+How: What would you actually use? Which analysis saves your staff time? What do you currently pay a consultant to produce?
+Why: "Do you like it?" produces polite lies. Spending questions produce information you can price against.
+ [H] Write up each conversation the same day
+How: /docs/customer_notes/YYYY-MM-DD-commune.md.
+Why: Memory of a meeting decays within days and your later strategy depends on the details, not the impression.
+ [H] Identify the one recurring €5k–€20k deliverable you can automate
+How: Look for the task named in more than half the meetings.
+Why: An expensive recurring task with a known price is a validated market. A dashboard is not.
+ [H] Write a one-page PMF hypothesis and commit it
+How: Who buys, what for, what it replaces, what they pay today.
+Why: Forces the vagueness out and gives every subsequent build decision a test to pass.
+ [SPEC] Turn that deliverable into a product spec
+How: Standard feature spec plus a sample of the current manual output.
+Why: Matching an existing deliverable's format is what makes it an easy purchase rather than a change-management project.
+ [BUILD] Build it as the flagship feature
+How: Full spec-review-red-team loop.
+Why: This is the first feature built against a confirmed willingness to pay, which makes it the most valuable code in the repo.
+Block AA — Commercial packaging
+ [H] Define BelPulse Public (free)
+How: Data, charts, basic comparison, profiles, CSV.
+Why: Free tier drives SEO, credibility and inbound. It is your distribution, not a lost sale.
+ [H] Define BelPulse Intelligence (paid)
+How: Peer benchmarking, anomalies, forecasting, scenarios, advanced finance, reports, alerts, exports.
+Why: The line has to fall where the work is proprietary and expensive to reproduce, which is analysis, not data.
+ [H] Define BelPulse Strategic (paid plus your time)
+How: Quarterly review, bespoke analysis, custom scenarios.
+Why: Your time is the highest-margin, lowest-scale product, and it is what generates the insight that improves the software tiers.
+ [H] Write the pricing page in FR and NL
+How: Proofread by the same native speakers as Block X.
+Why: Pricing is the most-read and least-forgiving page. Errors there read as amateurism at the decision moment.
+ [H] Price test at €2,500 / €5,000 / €10,000 / €15,000
+How: Quote different figures to different prospects and record the reaction verbatim.
+Why: You are hunting for the highest number that still gets an easy yes, not for what you think it is worth.
+ [H] Do not build authentication yet
+How: "Want the full report? Contact us." Deliver PDFs by hand.
+Why: Auth, billing, password reset and OAuth is three weekends of work that produces zero learning while you have zero customers.
+ [H] Draft a pilot contract template
+How: Scope, deliverables, timeline, data handling, term, price.
+Why: Having it ready means a verbal yes becomes a signature the same week rather than a month later.
+ [H] Check invoicing entity, VAT and procurement thresholds
+How: One conversation with an accountant familiar with public-sector clients.
+Why: Belgian communes have purchasing rules with thresholds. Knowing the direct-purchase limit tells you what to price under.
+🚦 GATE 90% — first paid pilot
+ [H] One signed pilot with money received
+How: Contract signed, invoice paid.
+Why: This is the real milestone. Everything before it is a hypothesis.
+ [H] Deliver it manually, end to end
+How: Do the work by hand where the software falls short.
+Why: Manual delivery shows you precisely which automation is worth building, which is impossible to guess.
+ [H] Record which features the client actually used
+How: Ask directly at the end of the pilot.
+Why: Usage, not enthusiasm, tells you where the next quarter of engineering goes.
+Block AB — Only now: platform
+ [SPEC] Split static public site from app.belpulse.be
+How: Architecture doc covering both deployment targets.
+Why: Keeps the free tier cheap and fast while the paid side gets a real backend.
+ [BUILD] Postgres migration path, identical schema
+How: Port the migrations, keep the same table and column names.
+Why: An identical schema means analytics code moves unchanged; a redesign during migration would double the risk.
+ [BUILD] API layer over the analytics
+How: Read-only endpoints mirroring the payload structure.
+Why: Serves the app, future integrations and eventually client systems from one surface.
+ [BUILD] Authentication, organizations, roles
+How: Managed provider, not a bespoke implementation.
+Why: Auth is a solved, high-risk problem. Custom auth is how small products get breached.
+ [BUILD] Subscription and billing
+How: Stripe or equivalent, invoices suitable for public-sector accounting.
+Why: Communes pay on invoice with purchase orders, not credit cards. Billing must match that reality.
+ [H] Keep the public GitHub Pages side alive
+How: Do not migrate it into the app.
+Why: It costs nothing, carries the SEO moat, and is the top of the funnel for everything paid.
+Block AC — Private municipal data
+ [SPEC] Define upload formats and mapping
+How: Budget, accounts, HR, procurement, investments, departmental expenditure; a template per type.
+Why: Templates convert an open-ended integration project into a repeatable onboarding step.
+ [BUILD] Security first
+How: Access control, encryption in transit and at rest, audit logs, backups, tenant separation, retention policy.
+Why: This must exist before the first byte of confidential municipal data arrives, not after.
+ [H] Write the GDPR documentation
+How: DPA template, records of processing, DPIA if needed, incident procedure.
+Why: Public bodies cannot legally contract with you without it, so it is a sales blocker as much as a compliance one.
+ [H] Have a lawyer review the DPA before any upload
+How: One review of the template, reused thereafter.
+Why: One-time cost, unlimited reuse, and it prevents a category of problem you cannot fix retrospectively.
+ [BUILD] Ingestion plus internal-versus-benchmark comparison
+How: Map uploaded data onto the canonical indicator model.
+Why: Comparing a commune's internal detail to external peers is knowledge nobody else has, which is why switching costs jump.
+ [H] Get an external security review before the second private-data client
+How: Paid pentest or a security consultant's review.
+Why: One breach involving municipal data ends the company. The cost is trivial against that.
+Block AD — Professional infrastructure
+ [BUILD] Version every methodology on every output
+How: Peer Model v1.3, Fiscal Score v1.1, Dataset vintage 2027-03-04 on reports and pages.
+Why: When numbers change between two reports, versioning is the difference between a professional explanation and an apology.
+ [BUILD] Report reproducibility
+How: Regenerate any past report from its stored build id, model versions and vintage.
+Why: Clients cite your reports in council documents. You must be able to reproduce exactly what they cited.
+ [BUILD] Full pipeline monitoring with a hard deploy gate
+How: fetch → schema validation → quality validation → transforms → analytics → exports → frontend tests → deploy → health check; any failure stops the deploy.
+Why: Prevents publishing corrupted government data because a source renamed a column overnight.
+ [BUILD] Alerting on failure
+How: Email or Telegram from the workflow.
+Why: A silent failure on a Friday means a stale product all weekend while a prospect is browsing.
+ [BUILD] Emit the BelPulse Data Manifest per build
+How: build_id, commit, date, datasets, versions, row counts, validation status.
+Why: Makes every deployed version auditable and reproducible, which is a genuine differentiator with institutional buyers.
+ [BUILD] SEO at scale
+How: Static pages per commune and per indicator, each with real data, a chart, an explanation, methodology, source and comparisons.
+Why: Thousands of genuinely useful pages compound into the position where anyone googling Belgian municipal statistics finds you first.
+ [H] Ban thin pages
+How: Build-time rule: no data, no page.
+Why: Mass-generated empty pages get the whole domain demoted, which would destroy the moat you are building.
+ [H] Submit sitemaps and track which pages get traffic
+How: Search Console, sitemap per section, monthly review.
+Why: Traffic per commune tells you where demand is, which tells you who to call next.
+🚦 GATE 100% v1
+ [H] Five paying institutional clients
+How: Five signed contracts, five invoices paid.
+Why: Proves data + analytics + software + AI + domain expertise converts to money repeatably, not once.
+ [H] Renewal conversation held with the pilot client
+How: Ask directly whether they will renew and why or why not.
+Why: Renewal is the real validation. First sales can be enthusiasm; second sales are value.
+ [H] Tag belpulse-v1.0
+How: Tag, Release, update the roadmap.
+Why: Marks the transition from building a project to scaling a company.
