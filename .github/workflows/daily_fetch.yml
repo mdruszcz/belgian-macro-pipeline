@@ -77,6 +77,11 @@ jobs:
         # stay on the legacy table, out of scope per docs/decisions/0001.
         run: python scripts/export_canonical_csv.py --db data/belgian_macro.db --out data/belgian_macro_export.csv
 
+      - name: Export commune CSV for communes.html
+        # Municipal-level sibling of the export above -- communes.html reads
+        # this, the same way all_data.html reads belgian_macro_export.csv.
+        run: python scripts/export_communes_csv.py --db data/belgian_macro.db --out data/communes_export.csv
+
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
 
