@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commune Data</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
+    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
+    --accent:#a8722f; --accent-soft:#f0e2cf; --accent-ink:#5c3d18;
+    --good:#3f7d5c; --good-soft:#e2efe7;
+    --warn:#b9762a; --warn-soft:#f6e9d6;
+    --row-alt: #fbfaf6;
+    --focus-ring: #a8722f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+      --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+      --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+      --good:#6fbf94; --good-soft:#1f2f26;
+      --warn:#e0a355; --warn-soft:#332818;
+      --row-alt:#1f1d18;
+      --focus-ring:#d6994f;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+    --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+    --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+    --good:#6fbf94; --good-soft:#1f2f26;
+    --warn:#e0a355; --warn-soft:#332818;
+    --row-alt:#1f1d18;
+    --focus-ring:#d6994f;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+  ::selection{background:var(--accent-soft)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+
+  header{margin-bottom:28px}
+  h1{
+    font-family:"Spectral",Georgia,serif; font-weight:600;
+    font-size:2rem; margin:0 0 6px; color:var(--text);
+    text-wrap:balance; letter-spacing:-.01em;
+  }
+  .subtitle{color:var(--text-muted); font-size:.95rem; max-width:62ch}
+  .subtitle code{
+    font-family:"IBM Plex Mono",monospace; font-size:.85em;
+    background:var(--accent-soft); color:var(--accent-ink);
+    padding:1px 5px; border-radius:3px;
+  }
+
+  .stats{
+    display:flex; gap:1px; margin:22px 0 24px;
+    background:var(--border); border:1px solid var(--border);
+    border-radius:8px; overflow:hidden;
+  }
+  .stat{
+    flex:1; background:var(--surface); padding:14px 18px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .stat .n{
+    font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+    font-size:1.5rem; font-weight:500; color:var(--text);
+  }
+  .stat .l{
+    font-size:.72rem; text-transform:uppercase; letter-spacing:.07em;
+    color:var(--text-faint);
+  }
+
+  .toolbar{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  #search{
+    flex:1; min-width:220px;
+    font-family:"IBM Plex Sans",sans-serif; font-size:.9rem;
+    padding:9px 12px; border-radius:7px;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+  }
+  #search:focus, #regionFilter:focus{outline:2px solid var(--focus-ring); outline-offset:1px}
+  #search::placeholder{color:var(--text-faint)}
+  #regionFilter{
+    font-family:"IBM Plex Sans",sans-serif; font-size:.9rem;
+    padding:9px 12px; border-radius:7px;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+  }
+  #status{
+    font-size:.82rem; color:var(--text-muted); white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  #status.err{color:#c0392b}
+
+  .table-scroll{
+    overflow-x:auto; border:1px solid var(--border); border-radius:8px;
+    background:var(--surface);
+  }
+  table{border-collapse:collapse; width:100%; min-width:820px}
+  thead th{
+    position:sticky; top:0; background:var(--surface);
+    border-bottom:1px solid var(--border-strong);
+    text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-muted); padding:10px 14px; cursor:pointer; user-select:none;
+    white-space:nowrap;
+  }
+  thead th:hover{color:var(--text)}
+  thead th .arrow{opacity:0; margin-left:4px; color:var(--accent)}
+  thead th.sorted .arrow{opacity:1}
+  tbody td{
+    padding:8px 14px; border-bottom:1px solid var(--border);
+    font-family:"IBM Plex Mono",monospace; font-size:.83rem; white-space:nowrap;
+  }
+  tbody td.name{
+    font-family:"IBM Plex Sans",sans-serif; font-size:.85rem; white-space:normal;
+    max-width:220px; color:var(--text);
+  }
+  tbody td.val{text-align:right; font-variant-numeric:tabular-nums}
+  tbody tr:nth-child(even){background:var(--row-alt)}
+  tbody tr:hover{background:var(--accent-soft)}
+  tbody td.code{color:var(--text-muted)}
+  tbody td.region{color:var(--text-muted); font-family:"IBM Plex Sans",sans-serif; font-size:.8rem}
+
+  .pill{
+    display:inline-block; padding:1px 8px; border-radius:99px;
+    font-family:"IBM Plex Sans",sans-serif; font-size:.72rem; font-weight:500;
+  }
+  .pill.final{background:var(--good-soft); color:var(--good)}
+  .pill.prov{background:var(--warn-soft); color:var(--warn)}
+  .pill.other{background:var(--border); color:var(--text-muted)}
+  .pill.na{background:var(--border); color:var(--text-faint); font-style:italic}
+
+  footer{margin-top:22px; color:var(--text-faint); font-size:.78rem}
+  footer a{color:var(--text-muted)}
+
+  @media (max-width:640px){
+    .wrap{padding:24px 16px 60px}
+    h1{font-size:1.5rem}
+    .stats{flex-wrap:wrap}
+    .stat{min-width:45%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Commune Data</h1>
+    <p class="subtitle">Every municipal-level observation currently in <code>data/communes_export.csv</code>, one row per commune. See <a href="all_data.html">all_data.html</a> for national-level data, or <a href="dashboard.html">dashboard.html</a> for the presented view.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><span class="n" id="statCommunes">—</span><span class="l">Communes</span></div>
+    <div class="stat"><span class="n" id="statIndicators">—</span><span class="l">Indicators</span></div>
+    <div class="stat"><span class="n" id="statUpdated">—</span><span class="l">Last fetched</span></div>
+  </div>
+
+  <div class="toolbar">
+    <input id="search" type="text" placeholder="Filter by commune name (EN/FR/NL) or NIS code…" autocomplete="off">
+    <select id="regionFilter"><option value="">All regions</option></select>
+    <span id="status">Loading…</span>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr id="headRow">
+          <th data-key="nis_code">NIS<span class="arrow">↓</span></th>
+          <th data-key="name_en">Commune<span class="arrow">↓</span></th>
+          <th data-key="region">Region<span class="arrow">↓</span></th>
+          <th data-key="province">Province<span class="arrow">↓</span></th>
+          <th data-key="arrondissement">Arrondissement<span class="arrow">↓</span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>.</footer>
+</div>
+
+<script>
+let RAW = [];         // long-format rows straight from the CSV
+let COMMUNES = [];    // one object per commune, indicator values pivoted onto it
+let INDICATOR_CODES = []; // discovered from the data, in first-seen order
+let sortKey = 'name_en', sortDir = 1;
+
+function parseCSV(text){
+  // Quote-aware (RFC 4180) -- see all_data.html for why this isn't a naive split.
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c === '\r'){ /* skip */ }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const header = rows[0];
+  return rows.slice(1).filter(r => r.length === header.length).map(r => {
+    const o = {};
+    header.forEach((h,i) => o[h] = r[i]);
+    return o;
+  });
+}
+
+function statusPill(s){
+  if(s === 'A') return '<span class="pill final">Final</span>';
+  if(s === 'P') return '<span class="pill prov">Provisional</span>';
+  if(!s) return '';
+  return `<span class="pill other">${s}</span>`;
+}
+
+// Long rows (one per commune x indicator) -> one row per commune, with each
+// indicator's {value, unit, period, status} attached under its own code.
+// This is what lets a second municipal indicator show up as a new column
+// with no change to this page.
+function pivot(rows){
+  const byGeo = new Map();
+  const codesSeen = [];
+  for(const r of rows){
+    if(!byGeo.has(r.geo_id)){
+      byGeo.set(r.geo_id, {
+        geo_id: r.geo_id, nis_code: r.nis_code,
+        name_en: r.name_en, name_fr: r.name_fr, name_nl: r.name_nl,
+        region: r.region, province: r.province, arrondissement: r.arrondissement,
+        indicators: {},
+      });
+    }
+    const c = byGeo.get(r.geo_id);
+    if(!(r.indicator_code in c.indicators) && !codesSeen.includes(r.indicator_code)){
+      codesSeen.push(r.indicator_code);
+    }
+    c.indicators[r.indicator_code] = {
+      value: r.value, unit: r.unit, period: r.period, status: r.status,
+      name: r.indicator_name,
+    };
+  }
+  return { communes: Array.from(byGeo.values()), codes: codesSeen };
+}
+
+function buildHeader(){
+  const headRow = document.getElementById('headRow');
+  // Drop any previously-added indicator columns before rebuilding, so this
+  // is safe to call again if the data reloads with a different code set.
+  headRow.querySelectorAll('th[data-indicator]').forEach(th => th.remove());
+  for(const code of INDICATOR_CODES){
+    const label = (COMMUNES.find(c => c.indicators[code])?.indicators[code].name) || code;
+    const th = document.createElement('th');
+    th.dataset.key = 'ind:' + code;
+    th.dataset.indicator = '1';
+    th.innerHTML = `${label}<span class="arrow">↓</span>`;
+    th.addEventListener('click', () => sortBy(th.dataset.key));
+    headRow.appendChild(th);
+  }
+}
+
+function sortBy(key){
+  if(sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+  render();
+}
+
+function populateRegionFilter(){
+  const sel = document.getElementById('regionFilter');
+  const regions = Array.from(new Set(COMMUNES.map(c => c.region).filter(Boolean))).sort();
+  for(const r of regions){
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    sel.appendChild(opt);
+  }
+}
+
+function render(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const region = document.getElementById('regionFilter').value;
+
+  let rows = COMMUNES.filter(c => {
+    if(region && c.region !== region) return false;
+    if(!q) return true;
+    return c.nis_code.includes(q)
+      || c.name_en.toLowerCase().includes(q)
+      || c.name_fr.toLowerCase().includes(q)
+      || c.name_nl.toLowerCase().includes(q);
+  });
+
+  rows = rows.slice().sort((a,b) => {
+    let av, bv;
+    if(sortKey.startsWith('ind:')){
+      const code = sortKey.slice(4);
+      av = parseFloat(a.indicators[code]?.value); bv = parseFloat(b.indicators[code]?.value);
+      if(isNaN(av)) av = -Infinity; if(isNaN(bv)) bv = -Infinity;
+    } else {
+      av = a[sortKey]; bv = b[sortKey];
+    }
+    if(av < bv) return -1 * sortDir;
+    if(av > bv) return 1 * sortDir;
+    return a.name_en < b.name_en ? -1 : a.name_en > b.name_en ? 1 : 0;
+  });
+
+  document.getElementById('tbody').innerHTML = rows.map(c => {
+    const indCells = INDICATOR_CODES.map(code => {
+      const ind = c.indicators[code];
+      if(!ind) return `<td class="val"><span class="pill na">n/a</span></td>`;
+      const num = parseFloat(ind.value);
+      const display = isNaN(num) ? ind.value : num.toLocaleString();
+      return `<td class="val" title="${ind.period} · ${ind.unit}">${display} ${statusPill(ind.status)}</td>`;
+    }).join('');
+    return `<tr>
+      <td class="code">${c.nis_code}</td>
+      <td class="name">${c.name_en}${c.name_fr !== c.name_en ? ' <span style="color:var(--text-faint)">/ ' + c.name_fr + '</span>' : ''}</td>
+      <td class="region">${c.region || ''}</td>
+      <td class="region">${c.province || '—'}</td>
+      <td class="region">${c.arrondissement || ''}</td>
+      ${indCells}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('status').textContent =
+    (q || region) ? `${rows.length} of ${COMMUNES.length} communes` : `${rows.length} communes`;
+
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.toggle('sorted', th.dataset.key === sortKey);
+    const arrow = th.querySelector('.arrow');
+    if(th.dataset.key === sortKey) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+  });
+}
+
+document.querySelectorAll('#headRow th').forEach(th => {
+  th.addEventListener('click', () => sortBy(th.dataset.key));
+});
+document.getElementById('search').addEventListener('input', render);
+document.getElementById('regionFilter').addEventListener('change', render);
+
+async function load(){
+  const statusEl = document.getElementById('status');
+  try{
+    const res = await fetch('data/communes_export.csv?t=' + Date.now());
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    RAW = parseCSV(await res.text());
+
+    const pivoted = pivot(RAW);
+    COMMUNES = pivoted.communes;
+    INDICATOR_CODES = pivoted.codes;
+
+    buildHeader();
+    populateRegionFilter();
+
+    document.getElementById('statCommunes').textContent = COMMUNES.length.toLocaleString();
+    document.getElementById('statIndicators').textContent = INDICATOR_CODES.length;
+    const latest = RAW.reduce((m,r) => r.fetched_at > m ? r.fetched_at : m, '');
+    document.getElementById('statUpdated').textContent = latest ? latest.slice(0,10) : '—';
+
+    render();
+  } catch(e){
+    statusEl.textContent = 'Error: ' + e.message;
+    statusEl.classList.add('err');
+  }
+}
+load();
+</script>
+</body>
+</html>
