@@ -115,14 +115,14 @@ Why: Municipal boundaries are megabytes. Inlining them into exports makes every 
  ✅ [BUILD] Tests: commune count per region, orphans, crosswalk cycles, unknown NIS rejection
 How: Assert exact counts as constants, updated deliberately when Belgium changes.
 Why: A hardcoded expected count is the fastest way to detect a loader that silently dropped a province.
- [RED] "Find every way a NIS code could be silently mismapped"
+ ✅ [RED] "Find every way a NIS code could be silently mismapped" (2026-09-05: dispatched as an independent agent given only the loader/crosswalk/resolver, no design context, per the How column. Found 10 issues (S1-S10); the two live silent-mismapping bugs -- historical communes orphaned from every pre-2025 aggregate, and arrondissements/provinces resolving before they existed -- were fixed in PR #31 with named regression tests. S4 (reload reconciliation) and S6 (schema cannot forbid overlapping validity windows) documented as known gaps, not fixed -- see PR #31 and geography.md)
 How: Provide the loader, crosswalk and resolve function only.
 Why: Mismapped geography produces plausible numbers attached to the wrong place, which is the single most damaging failure this product can have.
 🚦 CONTROL C
- [H] Total commune count matches the current official figure
+ ✅ [H] Total commune count matches the current official figure (2026-09-06: 565, independently corroborated -- public sources confirm 565 communes as of 2025-01-01, citing the same Bastogne+Bertogne 2024-12-02 date this pipeline independently derived and verified in PR #32. Not circular: this check used a general web search, not our own REFNIS file)
 How: Compare your SELECT COUNT(*) to Statbel's published count.
 Why: An off-by-a-few count means the crosswalk or the source file vintage is wrong.
- [H] Five merged communes stitch correctly across the merger
+ [H] Five merged communes stitch correctly across the merger (BLOCKED -- needs population-by-commune data to plot; population is one of the 3 Statbel datasets Block F documented as blocked, no commune-level Bestat view exists and statbel.fgov.be is unreachable. Cannot do until that unblocks)
 How: Plot population 2010–2025 for each and look for the discontinuity.
 Why: A visible step change in a population series is the signature of a crosswalk failure, and it is instantly obvious on a chart.
 Block D — Generic source-adapter system
