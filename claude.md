@@ -32,6 +32,10 @@ than a missing feature.
 14. Every new adapter must implement the DataSource interface and pass the
     shared contract test.
 15. Statistical claims in generated text must pass tests/golden/.
+16. ALWAYS read docs/steps before starting work — it is the current plan of
+    record (checked-off steps are marked ✅). ALWAYS update docs/steps to
+    check off a step (✅) the moment it is genuinely done; never batch this
+    for later, and never check off a step you have not personally verified.
 
 ## Definitions you must respect
 - period: YYYY, YYYY-Qn, YYYY-MM, or YYYY-MM-DD, matching the indicator's
@@ -50,6 +54,10 @@ than a missing feature.
 4. Open a PR stating: files changed, tests added, tests run and their output,
    assumptions made, unresolved issues.
 5. Do not merge. The maintainer merges.
+6. After finishing a big step (a Block, a CONTROL/GATE, or any multi-PR unit
+   of work in docs/steps), update docs/steps' checkmarks first, then run
+   /clear before starting the next big step. Keeps context focused on the
+   step at hand instead of dragging the whole history forward.
 
 ## Prohibited until the 50% milestone
 - AI chatbot interfaces
