@@ -11,7 +11,10 @@ permissions:
   pull-requests: write
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # A PAT, not the default GITHUB_TOKEN: PRs/pushes made with GITHUB_TOKEN don't trigger this
+  # repo's own pull_request-triggered workflows (GitHub's recursive-run guard), so ci.yml's
+  # required "test" check would never appear on the bot's PR and it would sit BLOCKED forever.
+  GH_TOKEN: ${{ secrets.BOT_PAT }}
 
 jobs:
   fetch:
@@ -19,6 +22,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_PAT }}
 
       - name: Fail if a previous daily-fetch PR is still open
         run: |
@@ -95,7 +100,7 @@ jobs:
         if: steps.stage.outputs.has_changes == 'true'
         run: |
           if ! gh pr merge --auto --squash --delete-branch "${{ steps.pr.outputs.pr_url }}"; then
-            echo "::error::Could not enable auto-merge on ${{ steps.pr.outputs.pr_url }} — it will NOT merge itself. Check the required 'report-build-status' check and merge manually."
+            echo "::error::Could not enable auto-merge on ${{ steps.pr.outputs.pr_url }} — it will NOT merge itself. Check the required 'test' check and merge manually."
             exit 1
           fi
 
