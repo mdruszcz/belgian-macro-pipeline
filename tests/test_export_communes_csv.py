@@ -150,3 +150,69 @@ def test_only_is_latest_rows_are_exported(tmp_path):
     out_path = tmp_path / "communes_export.csv"
     n = export_communes_csv(db_path, out_path)
     assert n == 0
+
+
+def test_historical_predecessor_geo_id_is_excluded(tmp_path):
+    """A pre-merger year's population resolves to the historical
+    predecessor's own geo_id (resolve_geo is period-aware) -- that entity no
+    longer exists today and must not surface as a phantom extra commune."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    conn.executescript("""
+        INSERT INTO geographies (geo_id, level, name_nl, name_fr, name_en, valid_from)
+          VALUES ('be:country', 'country', 'België', 'Belgique', 'Belgium', '1830-01-01');
+        INSERT INTO geographies
+            (geo_id, nis_code, level, name_nl, name_fr, name_en, valid_from, valid_to)
+          VALUES ('be:mun:12030', '12030', 'municipality', 'Puurs', 'Puurs', 'Puurs',
+                  '1977-01-01', '2019-01-01');
+        """)
+    conn.execute("""INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('POPULATION_BY_COMMUNE', 'be:mun:12030', '2018', 'v1', 17000.0, 'final',
+                   '2018-01-01', '2018-12-31', 1, 1, '2026-09-06T00:00:00+00:00')""")
+    conn.commit()
+    conn.close()
+
+    out_path = tmp_path / "communes_export.csv"
+    n = export_communes_csv(db_path, out_path)
+    assert n == 0
+
+
+def test_only_the_most_recent_period_is_exported_per_indicator(tmp_path):
+    """is_latest marks 'not superseded by a revision', not 'the newest
+    period' -- an indicator with real multi-year history has many
+    is_latest=1 rows simultaneously. Only the latest period shows here."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    conn.executescript("""
+        INSERT INTO geographies (geo_id, level, name_nl, name_fr, name_en, valid_from)
+          VALUES ('be:country', 'country', 'België', 'Belgique', 'Belgium', '1830-01-01');
+        INSERT INTO geographies (geo_id, nis_code, level, name_nl, name_fr, name_en, valid_from)
+          VALUES ('be:mun:11002', '11002', 'municipality', 'Antwerpen', 'Anvers', 'Antwerp',
+                  '1830-01-01');
+        """)
+    conn.execute("""INSERT INTO indicators
+           (indicator_id, source_id, name_nl, name_fr, name_en, frequency, unit,
+            preferred_direction, is_additive, config_path)
+           VALUES ('POPULATION_BY_COMMUNE', 'statbel', 'Bevolking', 'Population', 'Population',
+                   'A', 'count', 'contextual', 1, 'x')""")
+    for period, value in [("2016", 517042.0), ("2025", 562002.0), ("2026", 565615.0)]:
+        conn.execute(
+            """INSERT INTO observations
+               (indicator_id, geo_id, period, vintage, value, status,
+                period_start, period_end, is_latest, fetch_run_id, created_at)
+               VALUES ('POPULATION_BY_COMMUNE', 'be:mun:11002', ?, 'v1', ?, 'final',
+                       ? || '-01-01', ? || '-12-31', 1, 1, '2026-09-06T00:00:00+00:00')""",
+            (period, value, period, period),
+        )
+    conn.commit()
+    conn.close()
+
+    out_path = tmp_path / "communes_export.csv"
+    n = export_communes_csv(db_path, out_path)
+    assert n == 1
+
+    fields = out_path.read_text(encoding="utf-8").splitlines()[1].split(",")
+    assert fields[11] == "2026"
+    assert fields[12] == "565615.0"

@@ -56,12 +56,32 @@ def export_communes_csv(db_path: Path, out_path: Path) -> int:
     ).fetchall()
     ancestors = {geo_id: _ancestor_names(conn, geo_id) for geo_id, *_ in communes}
 
+    # Two filters that matter now that a municipal indicator can have real
+    # multi-year history (POPULATION_BY_COMMUNE, 11 periods) rather than a
+    # single point (LOCAL_UNITS_BY_COMMUNE):
+    #   1. Only CURRENT communes -- a pre-merger year's population resolves
+    #      to the historical predecessor's own geo_id (resolve_geo is
+    #      period-aware, see sync_population.py), which is correct for the
+    #      canonical model but must not surface here as a phantom extra
+    #      "commune" that no longer exists.
+    #   2. Only the MOST RECENT period per (geo_id, indicator) -- is_latest
+    #      marks "not superseded by a revision", not "the newest period", so
+    #      an indicator with real history has many is_latest=1 rows at once.
+    #      This page shows current commune data, one row per commune; a
+    #      time-series view is a different, future feature.
     obs = conn.execute("""
         SELECT o.geo_id, o.indicator_id, i.name_en, i.unit, o.period, o.value,
                o.status, o.created_at
         FROM observations o
         JOIN indicators i ON o.indicator_id = i.indicator_id
-        WHERE o.geo_id LIKE 'be:mun:%' AND o.is_latest = 1
+        JOIN geographies g ON g.geo_id = o.geo_id
+            AND g.level = 'municipality' AND g.valid_to IS NULL
+        WHERE o.is_latest = 1
+          AND o.period = (
+              SELECT MAX(o2.period) FROM observations o2
+              WHERE o2.indicator_id = o.indicator_id
+                AND o2.geo_id = o.geo_id AND o2.is_latest = 1
+          )
         ORDER BY o.geo_id, o.indicator_id
         """).fetchall()
     conn.close()

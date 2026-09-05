@@ -1,0 +1,26 @@
+id: POPULATION_BY_COMMUNE
+name:
+  en: Population
+  fr: Population
+  nl: Bevolking
+unit: count
+frequency: A
+source_id: statbel
+geo_levels:
+- municipal
+preferred_direction: contextual
+description:
+  en: >
+    Total population per commune, as of 1 January each year. Source:
+    Statbel's TF_SOC_POP_STRUCT bulk file (population by place of residence,
+    nationality, marital status, age and sex), summed down to one total per
+    commune per year -- the per-sector breakdown is not retained. Loaded
+    from files the maintainer downloaded by hand (statbel.fgov.be is
+    unreachable from this pipeline's automated context) via
+    scripts/sync_population.py; see docs/features/statbel_adapter.md for why
+    this is a manual, non-automated load rather than a daily fetch. Raw
+    counts only -- growth rates and other derived figures belong in the
+    Block G analytics layer, not here, so they can be recomputed when a
+    denominator is revised. preferred_direction is 'contextual': a larger or
+    smaller population is neither better nor worse on its own.
+display: null
