@@ -167,7 +167,7 @@ Why: Decision value depends on what a directeur financier will pay for, which is
  ✅ [H] Select exactly 10 datasets; mark everything else DEFERRED (2026-09-06: exactly 10 selected, confirmed by count; 6 deferred groups + datastore.brussels left unresolved -- never formally offered as a candidate)
 How: Sort by priority, cut at 10, write DEFERRED in the row rather than deleting it.
 Why: Deferred-not-deleted stops you re-researching the same rejected dataset three months later.
- [H] Verify commercial-reuse permission for each of the 10 (2026-09-06: only 3 of 10 confirmed -- WalStat, both IBSA datasets. The other 7 carry an assumed, corroborated-but-unopened, or entirely unknown licence. NOT done; see docs/data_catalog.md "Selected 10" table)
+ ✅ [H] Verify commercial-reuse permission for each of the 10 (2026-09-06: all 10 now CC BY 4.0 except WalStat's CC0-data/CC BY-SA-maps split. 3 confirmed from quoted primary-source text -- WalStat's FAQ, IBSA's licence statement; the other 7 are maintainer-asserted with a date but no quoted URL yet -- weaker evidence, worth strengthening later but not blocking. See docs/data_catalog.md "Selected 10" table)
 How: Read the actual licence page for each publisher and record the URL and date.
 Why: A dataset you cannot resell is worse than useless once it is embedded in a paid report.
  ✅ [H] Add the anti-scope-creep rule to CLAUDE.md (already rule 8, added before this block existed -- "NEVER add a new data source without a row in docs/data_catalog.md approved by the maintainer", word for word)
