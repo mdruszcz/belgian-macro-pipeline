@@ -49,6 +49,18 @@ jobs:
         continue-on-error: true
         run: python belgian_macro_db.py --fetch --latest --export csv
 
+      - name: Sync to canonical schema
+        id: sync_canonical
+        continue-on-error: true
+        run: python scripts/sync_to_canonical.py --db data/belgian_macro.db
+
+      - name: Export canonical CSV for the dashboard
+        # Overwrites belgian_macro_export.csv (written above from the legacy
+        # schema) with the canonical-schema version the dashboard now reads.
+        # belgian_forecasts.csv, written above too, is untouched -- forecasts
+        # stay on the legacy table, out of scope per docs/decisions/0001.
+        run: python scripts/export_canonical_csv.py --db data/belgian_macro.db --out data/belgian_macro_export.csv
+
       - name: Fetch market data
         id: fetch_stocks
         continue-on-error: true
@@ -92,7 +104,7 @@ jobs:
             --body "Automated daily fetch of Belgian macro indicators and market data.
 
           Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, market=${{ steps.fetch_stocks.outcome }}")
+          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, market=${{ steps.fetch_stocks.outcome }}")
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           echo "Opened $PR_URL"
 
@@ -105,7 +117,7 @@ jobs:
           fi
 
       - name: Fail run if any source failed
-        if: steps.fetch_macro.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
         run: |
-          echo "::error::A data source failed to fetch (macro=${{ steps.fetch_macro.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and the fetch_log table."
+          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
           exit 1
