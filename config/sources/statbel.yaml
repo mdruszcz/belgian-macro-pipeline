@@ -3,7 +3,14 @@ name: Statbel Bestat API
 agency: Statbel
 adapter: statbel
 base_url: https://bestat.statbel.fgov.be/bestat/api
-licence: CC BY 4.0 -- maintainer-asserted 2026-09-06, see docs/data_catalog.md "Selected 10"
+licence: >-
+  Commercial reuse verified 2026-09-06 from Statbel's own documents. Two exist and conflict:
+  the Conditions generales d'utilisation (CC BY 4.0, confirmed 2026-09-05) and the Licentie
+  open data of 22 October 2015, committed at
+  docs/licences/statbel_open_data_licence_2015-10-22.pdf, which never mentions CC BY 4.0 and
+  additionally requires the date of last update in the attribution. Both grant commercial
+  reuse; both terminate automatically on non-compliance. Satisfy the union of their
+  obligations until Statbel confirms which governs. See docs/data_catalog.md "Statbel licence".
 catalog_ref: docs/data_catalog.md rows 7, 7b
 cadence: quarterly
 is_active: true

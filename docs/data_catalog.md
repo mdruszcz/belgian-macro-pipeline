@@ -45,26 +45,25 @@ met either way. **CONTROL E check: exactly 10.** ✅
 
 | # | Dataset | Full row | Licence status |
 |---|---|---|---|
-| 1 | Fiscal income by commune | rows 1, 1b | Corroborated (CC BY 4.0) — not independently re-verified |
-| 2 | Fiscal income by statistical sector | row 2 | Snippet-only (CC BY 4.0 assumed) — **not verified** |
-| 3 | Population by commune | rows 3, 3b | Snippet-only (site default assumed) — **not verified** |
-| 4 | Business/enterprise units by commune | rows 7, 7b | Unconfirmed at the open-data page; no licence field found via Bestat — **not verified** |
+| 1 | Fiscal income by commune | rows 1, 1b | ✅ **Verified 2026-09-06 from Statbel's own licence document** — commercial reuse granted. Not CC BY 4.0; see "Statbel licence" below |
+| 2 | Fiscal income by statistical sector | row 2 | ✅ **Verified** — same Statbel licence, see below |
+| 3 | Population by commune | rows 3, 3b | ✅ **Verified** — same Statbel licence, see below |
+| 4 | Business/enterprise units by commune | rows 7, 7b | ✅ **Verified** — same Statbel licence, see below. This is the one dataset already ingested (`StatbelSource`, PR #39) |
 | 5 | WalStat (IWEPS) | rows 8, 9 | **Verified from IWEPS' own FAQ, maintainer-supplied 2026-09-06** — CC0 (data) / CC BY-SA (maps). See below for the exact text and a liability nuance worth knowing before this ships. |
 | 6 | IBSA — municipalities in urban regions | row 10 | **Verified from IBSA's own licence statement, maintainer-supplied 2026-09-06** — CC BY 4.0, attribution required. See below for the exact text. |
 | 7 | IBSA — Brussels demographic projections | row 11 | **Verified from IBSA's own licence statement, maintainer-supplied 2026-09-06** — CC BY 4.0, attribution required. Same source as row 6. |
-| 8 | Gemeente-Stadsmonitor | row 14 | Completely unconfirmed — **not verified** |
-| 9 | ODWB (Wallonie-Bruxelles) | row 15 | Not stated on the homepage — **not verified** |
-| 10 | opendata.brussels.be | row 17 (new) | Per-dataset, not checked at catalogue level — **not verified** |
+| 8 | Gemeente-Stadsmonitor | row 14 | **Not verified.** Site reachable 2026-09-06 but its FAQ page yielded no licence text. Flemish default is *Modellicentie Gratis Hergebruik v1.0* — a default, not this platform's stated terms |
+| 9 | ODWB (Wallonie-Bruxelles) | row 15 | ⚠️ **UNRESOLVED — category error.** This is a portal, not a dataset: 1289 datasets under 22 different licences, incl. non-commercial ones. Cannot be cleared as a unit. See "Portals cannot be licence-cleared" below |
+| 10 | opendata.brussels.be | row 17 (new) | ⚠️ **UNRESOLVED — category error.** Same: a portal, 208 datasets under 7 licences, incl. NC and ND. See below |
 
-**`[H] Verify commercial-reuse permission for each of the 10` is NOT done** — only 3 of the 10
-(WalStat, both IBSA datasets) have a licence the maintainer can point to as actually confirmed,
-and all 3 are now confirmed from the publisher's own stated licence text, maintainer-supplied
-2026-09-06 (WalStat's FAQ, IBSA's licence statement — both quoted in full below), not merely a
-page someone opened and skimmed. The other 7 carry a licence that is assumed, corroborated-but-
-unopened, or entirely unknown. Per `CLAUDE.md` rule 8's own spirit, none of these 7 should be
-built into `StatbelSource`/an adapter for production use until their licence page is actually
-read and recorded here with a URL and date — the same standard `statbel_geography`'s licence
-was held to in Block C.
+**`[H] Verify commercial-reuse permission for each of the 10` is NOT done — 7 of 10 confirmed.**
+All 7 are confirmed from the publisher's own stated licence text, maintainer-supplied, not from a
+search snippet or a page someone skimmed: WalStat's FAQ, IBSA's licence statement (both quoted in
+full below), and Statbel's own licence PDF, now committed at
+[`docs/licences/statbel_open_data_licence_2015-10-22.pdf`](licences/statbel_open_data_licence_2015-10-22.pdf)
+and quoted below. **The maintainer's rule stands: do not build adapters for data you cannot
+resell.** The remaining 3 are Gemeente-Stadsmonitor (genuinely unverified) and the two portal
+rows, which are a different problem entirely — see below.
 
 **Deferred, not deleted:** rows 4 (real estate sales), 5 (cadastral building stock), 6 (building
 permits), 12–13 (ABB municipal finance — both the interactive tool and the PDF report), and 16
@@ -103,7 +102,17 @@ Files, downloaded by the maintainer on 2026-09-05 and held under `data/raw/statb
 | `REFNIS_2025.csv` | Administrative entities, post-2025 wave (565 communes) |
 | `Conversion Postal code_Refnis code_va01012025.xlsx` | Postal code → commune; retained, not yet used |
 
-### Licence — CC BY 4.0
+### Licence — CC BY 4.0 (see also the 2015 open-data licence below — two documents, both from Statbel)
+
+> ⚠️ **Two Statbel licence documents exist and they do not say the same thing.** This section
+> records the *Conditions générales d'utilisation* (CC BY 4.0), confirmed by the maintainer
+> 2026-09-05. A second document — the *Licentie open data* of 22 October 2015, committed at
+> [`licences/statbel_open_data_licence_2015-10-22.pdf`](licences/statbel_open_data_licence_2015-10-22.pdf)
+> — is a bespoke federal licence that never mentions CC BY 4.0 and carries a **different
+> attribution obligation**. See "Statbel licence — the second document" below. **Both grant
+> commercial reuse**, so the commercial question is settled either way; the difference is in what
+> we must print. Until Statbel is asked which supersedes, satisfy the **union** of both
+> obligation sets — that is compliant under either reading.
 
 Confirmed by the maintainer from Statbel's *Conditions générales d'utilisation* on 2026-09-05.
 Statbel publishes data it owns under **Creative Commons Attribution 4.0**.
@@ -148,6 +157,104 @@ exported payload that carries municipal geography needs the attribution string, 
 and the "modified" notice. Nothing municipal is published yet, so this is not currently in
 breach — but it must land before the first commune-level page goes live. Tracked as a
 Block K/J item.
+
+### Statbel licence — the second document (2015), maintainer-supplied 2026-09-06
+
+Verified from the publisher's own document, committed at
+[`licences/statbel_open_data_licence_2015-10-22.pdf`](licences/statbel_open_data_licence_2015-10-22.pdf):
+*"Licentie open data — Algemene Directie Statistiek - Statistics Belgium"*, 22 October 2015.
+This is the licence that clears **rows 1–4 of the Selected 10** (all four Statbel datasets).
+
+**Commercial reuse is granted in as many words** — it is listed as one of the freedoms, not
+merely tolerated:
+
+> de "informatie" commercieel benutten, bijvoorbeeld door ze met andere "gegevens" te combineren,
+> of door ze in je eigen product of applicatie te gebruiken.
+
+*(use the information commercially, for example by combining it with other data, or by using it
+in your own product or application.)*
+
+The grant is **personal, non-exclusive, free of charge, worldwide, and of unlimited duration**,
+and expressly covers reproducing, publishing, redistributing, adapting, extracting, transforming
+and **deriving data** (`gegevens af te leiden`). The reuser **retains all intellectual property
+rights in the product they build** on it — directly relevant to selling analysis built on this.
+
+#### Where it differs from CC BY 4.0
+
+1. **It never claims to be CC BY 4.0.** It declares itself designed to be compatible with any
+   licence requiring attribution, naming **OGL (UK)**, **CC-BY 2.0**, and **ODC-BY**.
+2. **Attribution must carry the date of last update** — `de bron (ten minste de naam van de
+   "producent") en de datum van de laatste bijwerking`. CC BY 4.0 requires no such date. A
+   hyperlink to the information may satisfy this, provided it genuinely evidences authorship.
+3. **No "changes were made" notice is required** by this document — that obligation comes from
+   the CC BY 4.0 text, not this one.
+4. **No implied endorsement** — the attribution must not lend the reuse any official character,
+   nor imply recognition by the producer or any other public body. (Same as CC BY 4.0 §5.2.)
+5. **Must not mislead** third parties as to the content of the information, its source, or its
+   update date. This binds Block F's open `[REVIEW] label honesty` step: a mislabelled indicator
+   is a licence breach here, not only a product-quality problem.
+6. **No warranty** — no guarantee the information is free of defects or continuously available,
+   and no producer liability for loss or damage to third parties from the reuse.
+7. **Terminates automatically on non-compliance**, and is governed by Belgian law, with recourse
+   to the *Commissie voor de toegang tot en het hergebruik van bestuursdocumenten*.
+
+#### What this obliges us to build
+
+Point 2 is the one with teeth. **Every published Statbel-derived figure must show the date that
+figure was last updated** — and the licence ends automatically if it does not. That converts
+Block X's *"Freshness badge on every metric — source name, reference year and retrieval date"*
+from a trust-building nicety into a **licence condition**. The `observations` table already
+stores `vintage` and `retrieved_at` per row, so the data needed is present; only the display is
+missing. Nothing municipal is published yet, so this is **not currently in breach**, but it must
+land before the first commune-level page goes live.
+
+#### Open question for the maintainer
+
+Which document governs — the 2015 licence, or the CC BY 4.0 in the *Conditions générales
+d'utilisation*? Statbel may have moved to CC BY 4.0 since 2015 without withdrawing the PDF, or
+may apply the PDF to bulk open-data files and CC BY 4.0 to the website. Worth one email to
+`statbel.opendata@economie.fgov.be` (the address on the PDF) before anything is sold. Until then
+we satisfy both.
+
+### Portals cannot be licence-cleared — rows 9 and 10 are a category error
+
+Established 2026-09-06 by querying both portals' own catalogue APIs directly (both reachable
+from CI; `statbel.fgov.be` and `data.gov.be` are not).
+
+**ODWB (`www.odwb.be`) — 1289 datasets, 22 distinct licences:**
+
+| Count | Licence |
+|---|---|
+| 653 | CC BY |
+| 270 | Creative Commons — CC0 |
+| 102 | CC-BY |
+| 93 | Open licentie CC0 — Universeel |
+| **19** | **CC BY-NC 4.0** — non-commercial, unusable for us |
+| 17 + 1 | *Licence non spécifiée* / *License Not Specified* |
+| 8 | Belgian NGI — ngi-standard-open |
+| 6 + 1 + 1 + 1 | Service public de Wallonie — custom terms (4 variants) |
+| 5 | CC-by 4.0 |
+| 3 | Licence Personnalisée (see reference link) |
+| **3** | **other-closed** |
+| 2 | CC 0 · CC BY-SA · CC-0 · Open Government Licence v3.0 · other-open |
+| 1 | CC BY-SA 4.0 · **CC-BY-NC-ND** |
+
+**opendata.brussels.be — 208 datasets, 7 licences:** CC0 1.0 (107), CC BY 4.0 (85),
+"Statbel Open Data" (11), **CC BY-NC 4.0 (3)**, **CC BY-ND 4.0 (1)**, Custom (1).
+
+Neither portal has a portal-wide licence, and **both contain non-commercial and no-derivatives
+datasets**. A row that names the portal can therefore never be marked "commercial reuse
+permitted" — the answer depends entirely on which dataset is pulled. These two rows were selected
+in Block E as if they were datasets; they are aggregators.
+
+Marked **UNRESOLVED** rather than re-scoped, deferred, or quietly deleted: Block E selection is
+the maintainer's call (`CLAUDE.md` rule 8), and the options — narrow each row to named datasets,
+replace them, or drop to 8 and break CONTROL E's "10 items, not 11" — are commercial judgments,
+not technical ones. **No adapter may be built against either until this resolves.**
+
+Side finding worth keeping: `opendata.brussels.be` labels 11 of its datasets `"Statbel Open
+Data"`, independently corroborating that Statbel's open-data licence is a distinct named licence
+rather than a plain CC BY 4.0 grant.
 
 ## Candidate municipal-level datasets (Block E `[SPEC]`)
 
