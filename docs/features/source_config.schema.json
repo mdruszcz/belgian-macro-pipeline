@@ -9,7 +9,7 @@
     "source_id": { "type": "string", "minLength": 1 },
     "name": { "type": "string", "minLength": 1 },
     "agency": { "type": "string", "minLength": 1 },
-    "adapter": { "type": "string", "enum": ["nbb", "dbnomics", "fpb"] },
+    "adapter": { "type": "string", "enum": ["nbb", "dbnomics", "fpb", "statbel"] },
     "base_url": { "type": ["string", "null"] },
     "licence": { "type": ["string", "null"] },
     "catalog_ref": { "type": ["string", "null"] },

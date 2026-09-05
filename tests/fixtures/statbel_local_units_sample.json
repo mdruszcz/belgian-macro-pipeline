@@ -1,0 +1,44 @@
+{
+  "facts": [
+    {
+      "Région": "Région flamande",
+      "Province": "Province d’Anvers",
+      "Arrondissement": "Arrondissement d’Anvers",
+      "Commune": "Aartselaar",
+      "Trimestre": "4ème trimestre 2023",
+      "Nombre d’établissements": 2232.0
+    },
+    {
+      "Région": "Région flamande",
+      "Province": "Province d’Anvers",
+      "Arrondissement": "Arrondissement d’Anvers",
+      "Commune": "Anvers",
+      "Trimestre": "4ème trimestre 2023",
+      "Nombre d’établissements": 66381.0
+    },
+    {
+      "Région": "Région flamande",
+      "Province": "Province de Flandre orientale",
+      "Arrondissement": "Arrondissement de Saint-Nicolas",
+      "Commune": "Sint-Niklaas",
+      "Trimestre": "4ème trimestre 2023",
+      "Nombre d’établissements": 8596.0
+    },
+    {
+      "Région": "Région wallonne",
+      "Province": "Province de Liège",
+      "Arrondissement": "Arrondissement de Liège",
+      "Commune": "Saint-Nicolas",
+      "Trimestre": "4ème trimestre 2023",
+      "Nombre d’établissements": 1068.0
+    },
+    {
+      "Région": "Localisation indéterminée",
+      "Province": null,
+      "Arrondissement": null,
+      "Commune": null,
+      "Trimestre": "4ème trimestre 2023",
+      "Nombre d’établissements": 9233.0
+    }
+  ]
+}
