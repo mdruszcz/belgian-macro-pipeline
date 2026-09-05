@@ -12,6 +12,7 @@ tiny synthetic Statbel-shaped file set against the REAL committed crosswalk.
 
 import csv
 import sys
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -53,6 +54,31 @@ def _write_population(out_dir: Path, groups: dict, chosen: list[str], drop_from:
 @pytest.fixture
 def groups():
     return P.read_merger_groups(P.CROSSWALK)
+
+
+def test_reads_the_real_statbel_zip_format(tmp_path):
+    """Statbel ships TF_SOC_POP_STRUCT_<year>.zip, one .txt inside, pipe-
+    delimited with a BOM -- the exact shape the maintainer confirmed
+    2026-09-06. A .csv/.txt-only reader would silently find zero files."""
+    pop = tmp_path / "pop"
+    pop.mkdir()
+    txt = "CD_REFNIS|CD_SEX|MS_POPULATION\n11002|1|500\n11002|2|520\n".encode("utf-8-sig")
+    with zipfile.ZipFile(pop / "TF_SOC_POP_STRUCT_2024.zip", "w") as zf:
+        zf.writestr("TF_SOC_POP_STRUCT_2024.txt", txt)
+
+    by_year = P.read_population_by_year(pop)
+    assert by_year == {2024: {"11002": 1020}}
+
+
+def test_zip_with_ambiguous_contents_raises_rather_than_guessing(tmp_path):
+    pop = tmp_path / "pop"
+    pop.mkdir()
+    with zipfile.ZipFile(pop / "TF_SOC_POP_STRUCT_2024.zip", "w") as zf:
+        zf.writestr("a.txt", "CD_REFNIS|MS_POPULATION\n11002|500\n")
+        zf.writestr("b.txt", "CD_REFNIS|MS_POPULATION\n11002|500\n")
+
+    with pytest.raises(P.MissingPopulationData, match="found 2"):
+        P.read_population_by_year(pop)
 
 
 def test_missing_data_raises_rather_than_reporting_a_false_pass(tmp_path):
