@@ -1,0 +1,23 @@
+id: LOCAL_UNITS_BY_COMMUNE
+name:
+  en: Local business units
+  fr: Unités d'établissements
+  nl: Vestigingseenheden
+unit: count
+frequency: Q
+source_id: statbel
+geo_levels:
+- municipal
+preferred_direction: higher_is_better
+description:
+  en: >
+    Number of registered local business establishment units per commune,
+    per quarter. Verified via Statbel's Bestat API (datasource
+    IM_EAF_LCL_UNIT_POP); only the latest quarter is available through a
+    standard view -- see docs/features/statbel_adapter.md for why. A row
+    where Statbel itself could not attribute the establishment to any
+    commune ("Localisation indéterminée") is excluded from ingestion, not
+    assigned to a geography that would misrepresent it.
+fetch:
+  query: /views/04f3d23b-9422-4d08-a856-ab547ccf7b38/result/JSON
+display: null

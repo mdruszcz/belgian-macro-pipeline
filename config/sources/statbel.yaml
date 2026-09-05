@@ -1,0 +1,9 @@
+source_id: statbel
+name: Statbel Bestat API
+agency: Statbel
+adapter: statbel
+base_url: https://bestat.statbel.fgov.be/bestat/api
+licence: CC BY 4.0 -- maintainer-asserted 2026-09-06, see docs/data_catalog.md "Selected 10"
+catalog_ref: docs/data_catalog.md rows 7, 7b
+cadence: quarterly
+is_active: true

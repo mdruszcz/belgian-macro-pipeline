@@ -54,6 +54,22 @@ jobs:
         continue-on-error: true
         run: python scripts/sync_to_canonical.py --db data/belgian_macro.db
 
+      - name: Load Belgian geography
+        id: load_geography
+        continue-on-error: true
+        # Reads only the committed config/geography/*.csv (no network) -- see
+        # docs/features/geography.md. Idempotent, so safe to run every day;
+        # this is what makes observations.geo_id resolvable for any
+        # municipal-level source (Block F) instead of only 'be:country'.
+        run: python scripts/load_geography.py --db data/belgian_macro.db
+
+      - name: Sync Statbel municipal indicators
+        id: sync_statbel
+        continue-on-error: true
+        # Block F -- docs/features/statbel_adapter.md. Depends on the
+        # geography load above for observations.geo_id to resolve.
+        run: python scripts/sync_statbel.py --db data/belgian_macro.db
+
       - name: Export canonical CSV for the dashboard
         # Overwrites belgian_macro_export.csv (written above from the legacy
         # schema) with the canonical-schema version the dashboard now reads.
@@ -120,7 +136,7 @@ jobs:
           fi
 
       - name: Fail run if any source failed
-        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
         run: |
-          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
+          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
           exit 1

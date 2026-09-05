@@ -178,28 +178,28 @@ Why: Agents will helpfully offer to add three more sources in every PR. The rule
 How: Count them.
 Why: This is a literal test of the discipline the whole plan depends on. If it fails here, it will fail everywhere.
 Block F — Statbel adapter
- [SPEC] Write /docs/features/statbel_adapter.md, one section per dataset
+ ✅ [SPEC] Write /docs/features/statbel_adapter.md, one section per dataset (2026-09-06: business units by commune fully specified; fiscal income x2 + population documented as blocked -- no commune-level Bestat view exists and statbel.fgov.be refused every fetch attempt)
 How: URL, format, key columns, geo column, period column, unit, indicator id mapping.
 Why: Column-level mapping written in advance is what stops an agent guessing which column is "income" when three columns plausibly are.
- [BUILD] Implement StatbelSource on the base interface
+ ✅ [BUILD] Implement StatbelSource on the base interface (one dataset wired -- LOCAL_UNITS_BY_COMMUNE; a new MunicipalTimeSeriesSource contract added to src/fetchers/base.py since this is the first source returning many geographies per fetch)
 How: One class, dataset-specific parsing driven by config.
 Why: Ten datasets in one adapter beats ten adapters, because the fetch, cache, retry and load logic is shared.
- [BUILD] Demography: population, growth, age structure, dependency ratios, household composition
+ [BUILD] Demography: population, growth, age structure, dependency ratios, household composition (BLOCKED -- population-by-commune has no commune-level Bestat view; statbel.fgov.be unreachable this session. See statbel_adapter.md Non-goals)
 How: Load raw counts only; ratios come from the derived engine.
 Why: Storing ratios as source data means you cannot recompute them when the denominator is revised.
- [BUILD] Income: mean taxable income, median where available, per inhabitant
+ [BUILD] Income: mean taxable income, median where available, per inhabitant (BLOCKED -- same reason as Demography above; fiscal income by commune and by statistical sector both affected)
 How: Keep the fiscal-year reference explicit in the period field.
 Why: Taxable income is published with a lag and refers to an earlier income year. Mislabelling it makes every income comparison off by a year or two.
- [BUILD] Business: active enterprises, births, deaths, sectoral structure
+ ✅ [BUILD] Business: active enterprises... (2026-09-06: LOCAL_UNITS_BY_COMMUNE live -- 565 communes, real counts, verified against a copy of the real DB. Births/deaths/sectoral structure not in this dataset -- only a point-in-time establishment count was selected in Block E)
 How: Store the sector dimension as separate indicator ids rather than a new table column.
 Why: Keeps the universal indicator × geography × period × value grammar intact instead of special-casing the schema.
- [BUILD] Housing: stock, building permits, transactions and prices where available
+ [BUILD] Housing: stock, building permits, transactions and prices where available (no dataset selected in Block E -- real estate sales, cadastral stock and building permits were all DEFERRED)
 How: Flag suppressed small-commune values as suppressed, never as zero.
 Why: Housing transaction counts are small in small communes and get suppressed. Zeros would make quiet communes look like collapsed markets.
- [BUILD] Mobility: vehicle stock, road accidents
+ [BUILD] Mobility: vehicle stock, road accidents (no dataset selected in Block E)
 How: Low priority, load last.
 Why: Nice to have, rarely decision-relevant. Its position in the order is the point.
- [BUILD] Fixture tests per dataset using saved sample files
+ ✅ [BUILD] Fixture tests per dataset using saved sample files (tests/fixtures/statbel_local_units_sample.json -- a real, trimmed 5-row sample including the Sint-Niklaas/Saint-Nicolas edge case and the unattributed row, not synthetic data)
 How: Commit a small trimmed sample per dataset; tests parse the fixture, never the network.
 Why: CI must not fail because Statbel is down for maintenance, and it must fail when Statbel renames a column.
  [REVIEW] Check unit consistency, definitional breaks and label honesty

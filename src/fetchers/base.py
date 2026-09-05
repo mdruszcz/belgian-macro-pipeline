@@ -229,3 +229,19 @@ class ForecastSource(DataSource):
     docs/features/source_adapter.md, Non-goals, for why forcing one shape
     across both would be a real behaviour change to the forecasts table.
     """
+
+
+class MunicipalTimeSeriesSource(DataSource):
+    """Contract: `_parse` returns list[dict] of exactly
+    {"geo_id": str, "period": str, "value": float, "status": str}.
+    StatbelSource implements this (Block F).
+
+    A third shape, not TimeSeriesSource's: one fetch here returns *many*
+    geographies at once (one row per commune), where TimeSeriesSource's single
+    fetch is always for one already-known geography. `status` uses the
+    canonical enum (final/provisional/estimate/revised/suppressed/na, per
+    docs/features/data_model.md), not SDMX's obs_status -- this feeds
+    `observations` directly (scripts/sync_statbel.py), never the legacy
+    tables TimeSeriesSource still targets. See
+    docs/features/statbel_adapter.md for the full reasoning.
+    """
