@@ -1,0 +1,21 @@
+nis_code,name_en,note
+01000,Belgium,country
+02000,Flanders,region — English uses the region name without "Region"
+03000,Wallonia,region
+04000,Brussels-Capital Region,region
+10000,Antwerp,province
+20001,Flemish Brabant,province
+20002,Walloon Brabant,province
+30000,West Flanders,province
+40000,East Flanders,province
+50000,Hainaut,province — English keeps the French form
+60000,Liège,province — English keeps the French form
+70000,Limburg,province
+80000,Luxembourg,province — the Belgian province, not the country
+90000,Namur,province — English keeps the French form
+11002,Antwerp,commune
+21004,Brussels,commune — the City of Brussels
+31005,Bruges,commune
+33011,Ypres,commune
+35013,Ostend,commune
+44021,Ghent,commune

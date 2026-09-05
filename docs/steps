@@ -88,31 +88,31 @@ Block C — Belgian geography master
  ✅ [SPEC] Write /docs/features/geography.md
 How: Levels, NIS semantics, merger handling, valid_from/valid_to intervals, resolution rules.
 Why: Belgian geography has more edge cases than the data itself. Getting them into text first means the agent implements decisions rather than inventing them.
- [H] Download the official Statbel geography and statistical-sector files
+ ✅ [H] Download the official Statbel geography and statistical-sector files (2026-09-05: REFNIS DEFINITIEF/2019/2025 + NIS9 2026 + postal-code file, in data/raw/statbel/)
 How: Statbel open-data portal; keep the SQLite or GeoJSON version and record the download date.
 Why: Official reference files are the only defensible source of NIS codes. Anything scraped or LLM-generated will contain wrong codes you cannot detect.
  [H] Record licence terms in docs/data_catalog.md
 How: Copy the licence name, URL and reuse conditions into the catalogue row.
 Why: You intend to sell this. "I think it was open data" is not a position you want to hold in a procurement conversation.
- [BUILD] Load Belgium, regions, provinces, arrondissements, communes, statistical sectors
+ ✅ [BUILD] Load Belgium, regions, provinces, arrondissements, communes (statistical sectors deliberately deferred — no consumer before Phase II, see geography.md Q2)
 How: One loader per level, writing into geographies with geo_level set.
 Why: Every aggregate, comparison and percentile in the product depends on this hierarchy being complete and correct.
- [BUILD] Populate parent_geo_id and test every commune resolves to BELGIUM
+ ✅ [BUILD] Populate parent_geo_id and test every commune resolves to BELGIUM
 How: Recursive CTE walking parents; assert no orphans and no cycles.
 Why: One orphaned commune means it silently vanishes from regional aggregates, which understates a region without any error appearing.
- [BUILD] Build municipality_crosswalk.csv
+ ✅ [BUILD] Build municipality_crosswalk.csv (55 rows; 7 flagged for the [H] verification below)
 How: Columns old_nis, new_nis, valid_from, valid_to, relationship (merged/renamed/split).
 Why: Without it, a merged commune's history starts in the merger year, and your "5-year growth" for that commune is undefined or absurd.
  [H] Verify the crosswalk against the 2019 and 2025 Flemish merger waves
 How: Check a handful of known merged communes against official merger lists.
 Why: This is the highest-risk table for hallucinated content, and it is small enough to check by hand. Do it once, properly.
- [BUILD] Implement resolve_geo(nis, period) used by every adapter
+ ✅ [BUILD] Implement resolve_geo(nis, period) used by every adapter
 How: Single function applying the crosswalk for the observation's period; raise on unknown codes.
 Why: Centralizing it means a crosswalk fix propagates everywhere. Per-adapter handling means eight subtly different behaviours.
- [BUILD] Store geometry separately from observations
+ ✅ [BUILD] Store geometry separately from observations (decision recorded in geography.md; nothing to build until Block X needs boundaries)
 How: Separate table or static GeoJSON files keyed by geometry_id.
 Why: Municipal boundaries are megabytes. Inlining them into exports makes every payload enormous and the git repo unmanageable.
- [BUILD] Tests: commune count per region, orphans, crosswalk cycles, unknown NIS rejection
+ ✅ [BUILD] Tests: commune count per region, orphans, crosswalk cycles, unknown NIS rejection
 How: Assert exact counts as constants, updated deliberately when Belgium changes.
 Why: A hardcoded expected count is the fastest way to detect a loader that silently dropped a province.
  [RED] "Find every way a NIS code could be silently mismapped"

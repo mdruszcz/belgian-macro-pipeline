@@ -1,0 +1,248 @@
+"""
+Derivation of the municipal merger crosswalk from official Statbel files.
+
+Belgium's communes are not stable. Two recent waves (1 January 2019 and
+1 January 2025) merged 55 communes out of existence, and the 2019 Hainaut
+arrondissement reform renumbered a further eleven without merging them. Without
+a crosswalk, a 2015 source file about Kruibeke resolves to nothing, and a merged
+commune's history silently starts at the merger year -- which is exactly the
+"plausible numbers attached to the wrong place" failure that docs/steps' Block C
+[RED] step exists to catch.
+
+Two independent methods are combined here, deliberately:
+
+1. **Vintage diff (authoritative for *whether* and *when*).** A commune present
+   in REFNIS vintage N and absent in vintage N+1 disappeared at that boundary.
+   This is direct documentary evidence from the publisher, and it is the reason
+   the maintainer downloaded three vintages rather than one.
+
+2. **NIS6 prefix rule (corroborating, and supplies *where to*).** In the NIS9
+   workbook, a sub-municipality code whose first five digits differ from its
+   commune code preserves the *former* commune's NIS5. That names the successor,
+   which a diff alone cannot do -- a diff only reports what vanished and what
+   appeared, not which maps to which.
+
+The prefix rule alone is NOT sufficient, and this is not hypothetical: it finds
+53 of the 55 predecessors. It misses `73009` (Borgloon) and `73083` (Tongeren),
+whose sub-municipality codes were renumbered under the new commune `73111`
+(Tongeren-Borgloon) instead of preserving the old codes. Had the crosswalk been
+built on the prefix rule alone, both communes' entire pre-2025 history would
+have been silently orphaned. Hence: the diff decides membership, the prefix rule
+decorates it, and anything the two do not agree on is flagged for human review
+rather than guessed.
+"""
+
+# Effective dates of the REFNIS vintages the maintainer downloaded. The wave
+# dates are Belgian municipal reorganizations, which always take effect on
+# 1 January; the diff between two vintages is attributed to the later date.
+VINTAGE_DATES = {
+    "REFNIS_DEFINITIEF.csv": "1977-01-01",
+    "REFNIS_2019.csv": "2019-01-01",
+    "REFNIS_2025.csv": "2025-01-01",
+}
+
+# Statbel marks partial transfers in NIS6 names. A commune boundary change that
+# moved only *part* of a former entity cannot be expressed as a 1:1 crosswalk
+# row, so these are surfaced rather than folded in silently.
+PARTIAL_MARKERS = ("PARTIE DE", "MODIFICATION DE LIMITE", "*")
+
+# `partial` is deliberately NOT one of these. A boundary transfer is orthogonal
+# to what happened to the commune itself: 55022 La Louviere was *recoded* by the
+# 2019 Hainaut arrondissement reform and separately received part of
+# Familleureux. Folding that into the relationship would overwrite the useful
+# fact with the incidental one, so it travels as its own column.
+RELATIONSHIPS = ("merged", "absorbed", "recoded")
+
+
+def successor_candidates_from_nis6(nis9_rows: list[dict]) -> dict[str, set[str]]:
+    """old NIS5 -> {successor commune codes}, via the NIS6 prefix rule.
+
+    Returns a set per old code because the rule is applied per sub-municipality
+    row; a genuine 1:1 lineage yields a single-element set, and anything larger
+    means the former commune was split across successors, which must not be
+    collapsed silently.
+    """
+    candidates: dict[str, set[str]] = {}
+    for row in nis9_rows:
+        nis6 = row.get("nis6")
+        commune = row.get("commune_code")
+        if not nis6 or not commune or len(nis6) < 5:
+            continue
+        old_code = nis6[:5]
+        if old_code != commune:
+            candidates.setdefault(old_code, set()).add(commune)
+    return candidates
+
+
+def _is_partial(name: str | None) -> bool:
+    if not name:
+        return False
+    upper = name.upper()
+    return any(marker in upper for marker in PARTIAL_MARKERS)
+
+
+def classify(
+    old_name: str,
+    successors: set[str],
+    names_by_code: dict,
+    predecessor_count: int,
+) -> str:
+    """merged | absorbed | recoded, per docs/features/geography.md.
+
+    `predecessor_count` is how many communes disappeared into this same
+    successor in this wave -- which is what distinguishes a merger from an
+    absorption, and it cannot be seen from a single crosswalk row. Puurs and
+    Sint-Amands each map 1:1 to Puurs-Sint-Amands, but the pair of them formed
+    a new entity, so both rows are `merged`, not `absorbed`.
+
+    - merged: the successor took in more than one predecessor.
+    - recoded: sole predecessor, same name -- the entity survived and only its
+      code changed (the 2019 Hainaut reform: 55022 La Louviere -> 58001).
+    - absorbed: sole predecessor, different name -- taken into an existing
+      commune (11007 Borsbeek -> 11002 Antwerpen).
+    """
+    if len(successors) != 1:
+        return "merged"
+    if predecessor_count > 1:
+        return "merged"
+    successor = next(iter(successors))
+    new_name = names_by_code.get(successor, "")
+    if _normalize(old_name) == _normalize(new_name):
+        return "recoded"
+    return "absorbed"
+
+
+def _match_successor_by_name(old_name: str, appeared: set[str], names_by_code: dict) -> set[str]:
+    """Fallback when the NIS6 prefix rule yields no successor.
+
+    Belgian merged communes are conventionally named after their constituents
+    ("Tongeren-Borgloon"), so a predecessor's name appearing inside a newly
+    created commune's name is a strong signal. It is still only a signal: rows
+    resolved this way stay flagged for the maintainer's [H] verification.
+    """
+    needle = _normalize(old_name)
+    if not needle:
+        return set()
+    return {code for code in appeared if needle in _normalize(names_by_code.get(code, ""))}
+
+
+def _normalize(name: str | None) -> str:
+    return (name or "").strip().casefold()
+
+
+def derive_crosswalk(
+    vintages: list[tuple[str, dict[str, str]]],
+    nis9_rows: list[dict],
+    names_by_code: dict[str, str],
+    valid_from_by_code: dict[str, str] | None = None,
+) -> list[dict]:
+    """Build the crosswalk from vintage diffs, decorated by the prefix rule.
+
+    `vintages` is an ordered list of (filename, {nis_code: {"name_fr", "name_nl"}})
+    for the commune rows of each REFNIS vintage, oldest first. Both languages are
+    carried because a disappeared commune's row is the only surviving record of
+    its name, and dropping one language here would put a Dutch name in a Walloon
+    commune's French label (CLAUDE.md rule 7).
+
+    Every returned row carries `verified: False` and, where the two methods
+    could not agree, a `note` naming the disagreement. Those rows are the
+    maintainer's [H] verification list -- CONTROL C must not be claimed while
+    any remain unresolved.
+    """
+    prefix_candidates = successor_candidates_from_nis6(nis9_rows)
+    valid_from_by_code = valid_from_by_code or {}
+    partial_old_codes = {
+        row["nis6"][:5]
+        for row in nis9_rows
+        if row.get("nis6") and len(row["nis6"]) >= 5 and _is_partial(row.get("nis6_name"))
+    }
+
+    rows: list[dict] = []
+    for (_, older), (newer_file, newer) in zip(vintages, vintages[1:], strict=False):
+        wave_date = VINTAGE_DATES.get(newer_file)
+        if wave_date is None:
+            raise ValueError(
+                f"No effective date known for REFNIS vintage {newer_file!r}. "
+                "Add it to VINTAGE_DATES rather than guessing a merger date."
+            )
+        appeared = set(newer) - set(older)
+        disappeared = sorted(set(older) - set(newer))
+
+        # Resolve every predecessor's successor first, so that the number of
+        # predecessors per successor is known before anything is classified.
+        newer_names = {code: entry["name_nl"] for code, entry in newer.items()}
+        resolved: dict[str, tuple[set[str], str]] = {}
+        for old_code in disappeared:
+            successors = prefix_candidates.get(old_code, set())
+            note = ""
+            if not successors:
+                successors = _match_successor_by_name(
+                    older[old_code]["name_nl"], appeared, newer_names
+                )
+                if successors:
+                    note = (
+                        "successor not derivable from NIS6 codes; matched by name against "
+                        f"commune(s) created on {wave_date} -- verify before relying on it"
+                    )
+                else:
+                    note = (
+                        "successor could not be derived from NIS6 codes or by name; "
+                        f"{len(appeared)} commune(s) were created on {wave_date}"
+                    )
+            elif len(successors) > 1:
+                note = "former commune split across multiple successors"
+            resolved[old_code] = (successors, note)
+
+        predecessors_per_successor: dict[str, int] = {}
+        for successors, _ in resolved.values():
+            if len(successors) == 1:
+                successor = next(iter(successors))
+                predecessors_per_successor[successor] = (
+                    predecessors_per_successor.get(successor, 0) + 1
+                )
+
+        for old_code in disappeared:
+            successors, note = resolved[old_code]
+            count = (
+                predecessors_per_successor.get(next(iter(successors)), 1)
+                if len(successors) == 1
+                else 1
+            )
+            rows.append(
+                {
+                    "old_nis": old_code,
+                    "old_name_nl": older[old_code]["name_nl"],
+                    "old_name_fr": older[old_code]["name_fr"],
+                    "new_nis": ";".join(sorted(successors)) if successors else "",
+                    "relationship": classify(
+                        older[old_code]["name_nl"], successors, names_by_code, count
+                    ),
+                    "has_partial_transfer": ("true" if old_code in partial_old_codes else "false"),
+                    # valid_from is when the predecessor first appears in a
+                    # vintage; valid_to is the wave that ended it. They must
+                    # differ -- `geographies` enforces valid_to > valid_from.
+                    "valid_from": valid_from_by_code.get(old_code, VINTAGE_DATES[vintages[0][0]]),
+                    "valid_to": wave_date,
+                    "evidence": f"absent from {newer_file}",
+                    "verified": "false",
+                    "note": note,
+                }
+            )
+    return rows
+
+
+def unresolved(rows: list[dict]) -> list[dict]:
+    """Crosswalk rows that need the maintainer's eye before CONTROL C.
+
+    Partial transfers are included: they cannot be represented as a clean 1:1
+    lineage, so a human has to decide what the history of the affected cell
+    should be rather than the loader assuming one.
+    """
+    return [
+        r
+        for r in rows
+        if r["note"]
+        or ";" in r["new_nis"]
+        or not r["new_nis"]
+        or r["has_partial_transfer"] == "true"
+    ]
