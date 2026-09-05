@@ -161,20 +161,20 @@ Why: A written formula makes "no" defensible against your own enthusiasm at 11pm
  ✅ [SPEC] Draft the candidate dataset table (2026-09-06: 16 candidates across Statbel/WalStat/IBSA/ABB/Statistiek Vlaanderen/ODWB/data.gov.be in docs/data_catalog.md, no scores, confidence level stated honestly per row -- several are search-snippet-only since statbel.fgov.be and data.gov.be refused direct fetches this session)
 How: Ask the architect for candidates with geography, history depth, update frequency, licence and URL. No scores.
 Why: Agents are good at enumeration and bad at judging commercial value. Split the task along that line.
- [H] Score every candidate yourself
+ ✅ [H] Score every candidate yourself (2026-09-06: done as a multi-round selection interview rather than numeric decision_value/difficulty columns -- facts presented per candidate, maintainer chose; see docs/data_catalog.md "Selected 10")
 How: Fill decision_value and difficulty columns by hand.
 Why: Decision value depends on what a directeur financier will pay for, which is knowledge only you have and only from the conversations in Block Z.
- [H] Select exactly 10 datasets; mark everything else DEFERRED
+ ✅ [H] Select exactly 10 datasets; mark everything else DEFERRED (2026-09-06: exactly 10 selected, confirmed by count; 6 deferred groups + datastore.brussels left unresolved -- never formally offered as a candidate)
 How: Sort by priority, cut at 10, write DEFERRED in the row rather than deleting it.
 Why: Deferred-not-deleted stops you re-researching the same rejected dataset three months later.
- [H] Verify commercial-reuse permission for each of the 10
+ [H] Verify commercial-reuse permission for each of the 10 (2026-09-06: only 3 of 10 confirmed -- WalStat, both IBSA datasets. The other 7 carry an assumed, corroborated-but-unopened, or entirely unknown licence. NOT done; see docs/data_catalog.md "Selected 10" table)
 How: Read the actual licence page for each publisher and record the URL and date.
 Why: A dataset you cannot resell is worse than useless once it is embedded in a paid report.
  ✅ [H] Add the anti-scope-creep rule to CLAUDE.md (already rule 8, added before this block existed -- "NEVER add a new data source without a row in docs/data_catalog.md approved by the maintainer", word for word)
 How: "No new source enters the pipeline without a catalogue row approved by the maintainer."
 Why: Agents will helpfully offer to add three more sources in every PR. The rule lets you decline in one word.
 🚦 CONTROL E
- [H] The list has 10 items, not 11
+ ✅ [H] The list has 10 items, not 11 (2026-09-06: counted -- 10 unique datasets across 14 table rows, some sharing a row-pair for an alternate access method to the same source)
 How: Count them.
 Why: This is a literal test of the discipline the whole plan depends on. If it fails here, it will fail everywhere.
 Block F — Statbel adapter
