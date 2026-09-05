@@ -4,6 +4,7 @@ __pycache__/
 .DS_Store
 *.db-journal
 /data/raw/**
+!/data/raw/.gitkeep
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
