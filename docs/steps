@@ -157,7 +157,7 @@ Why: When the dashboard shows a stale number, this table tells you whether the f
  ✅ [BUILD] Contract test applied to all adapters (NBB + Eurostat; FPB deliberately excluded, keeps its own shape -- see source_adapter.md Non-goals)
 How: Parametrized pytest asserting identical output columns and dtypes from every source.
 Why: It makes source-agnostic downstream code true by construction rather than by hope.
- [H] Confirm the daily Action still produces identical data to macro-v1 (PENDING -- verified locally via a live --fetch run on both branches, byte-identical export except fetched_at, but the scheduled daily GH Action must still run and pass in CI. Local agreement is not the same as the workflow agreeing)
+ ✅ [H] Confirm the daily Action still produces identical data to macro-v1 (2026-09-05: confirmed for real, not just locally. The Load Belgian geography and Sync Statbel municipal indicators steps (added PR #39) had never once executed -- PR #39 merged 20:06, the prior run was 13:16 the same day. Rehearsed first against a throwaway copy of the real DB (FK-clean, national data byte-identical, 565 communes, fetch_runs showed 566 read/565 written -- the excluded unattributed row visible, not hidden), then ran the real workflow: run 33985724227, PR #42, merged. observations now genuinely has 565 municipal rows (LOCAL_UNITS_BY_COMMUNE) alongside the unchanged 1,374 national rows; the exported dashboard CSV differs only in fetched_at. This is the specific thing the roadmap's 50% milestone requires -- "at least one real indicator with genuine municipality-level granularity" -- and it is now true of the committed database, not just of a copy)
 How: Run the workflow manually on the branch and diff the export.
 Why: A refactor that changes public numbers is a bug, even if the new numbers are better. Fix that separately and deliberately.
 🚦 CONTROL D
@@ -219,10 +219,10 @@ Why: The subtle-but-wrong number is your main product risk. Labels are where it 
 How: Open the source page and compare three values on screen.
 Why: Five minutes here catches an entire mis-parsed column, which no unit test on your own fixture can catch.
 🚦 CONTROL F
- [H] All communes present for population, no silent nulls
+ 🛑 [BLOCKED] All communes present for population, no silent nulls (2026-09-05: observations now genuinely has municipal rows for the first time -- 565 communes, LOCAL_UNITS_BY_COMMUNE, PR #42 -- but this control asks specifically about POPULATION, which remains unavailable. Business-unit coverage does not satisfy it)
 How: Query for communes missing a population value in the latest year.
 Why: Coverage gaps break percentiles and peer models everywhere downstream, invisibly.
- [H] At least five years of history per core dataset
+ 🛑 [BLOCKED] At least five years of history per core dataset (the commune-level Bestat view carries only the latest quarter -- see statbel_adapter.md, "Only the latest quarter is available")
 How: MIN(period) per indicator.
 Why: Below five years, growth rates, trend breaks and the peer model are all statistically meaningless.
 Block G — Derived-indicator engine
