@@ -124,3 +124,76 @@ def test_committed_crosswalk_flags_the_known_ambiguous_rows():
     # The two name-matched successors plus the five partial transfers.
     assert {"73009", "73083"} <= flagged
     assert len(flagged) == 7
+
+
+def test_name_comparison_ignores_apostrophe_style():
+    """Statbel writes "Arrondissement d'Anvers" with a straight quote in one
+    vintage and a typographic one in another. Comparing raw strings would split
+    the entity's validity window on punctuation alone."""
+    from src.geography.crosswalk import _normalize
+
+    assert _normalize("Arrondissement d'Anvers") == _normalize("Arrondissement d’Anvers")
+
+
+def test_entity_windows_cover_aggregates_not_just_communes():
+    """Audit S2: only commune rows were diffed, so every aggregate silently
+    inherited the structural epoch and resolved for periods before it existed."""
+    from src.geography.crosswalk import derive_entity_windows
+
+    def entity(level, parent, name, children=()):
+        return {
+            "level": level,
+            "parent_nis": parent,
+            "name_fr": name,
+            "name_nl": name,
+            "children": tuple(children),
+        }
+
+    old = {
+        "01000": entity("country", None, "ROYAUME", ["54000"]),
+        "54000": entity("arrondissement", "01000", "Mouscron", ["54007"]),
+        "54007": entity("municipality", "54000", "Mouscron"),
+    }
+    new = {
+        "01000": entity("country", None, "ROYAUME", ["58000"]),
+        "58000": entity("arrondissement", "01000", "La Louvière", ["58001"]),
+        "58001": entity("municipality", "58000", "La Louvière"),
+    }
+    windows = derive_entity_windows([("REFNIS_DEFINITIEF.csv", old), ("REFNIS_2019.csv", new)])
+    assert windows["54000"][0]["valid_to"] == "2019-01-01"
+    assert windows["58000"][0]["valid_from"] == "2019-01-01"
+    assert windows["58000"][0]["valid_to"] is None
+
+
+def test_internal_merger_does_not_split_the_parent_window():
+    """Communes merging *inside* an arrondissement leave its territory
+    unchanged, so it must not be treated as a new entity."""
+    from src.geography.crosswalk import canonical_code_map, derive_entity_windows
+
+    def entity(level, parent, name, children=()):
+        return {
+            "level": level,
+            "parent_nis": parent,
+            "name_fr": name,
+            "name_nl": name,
+            "children": tuple(children),
+        }
+
+    old = {
+        "46000": entity("arrondissement", None, "Saint-Nicolas", ["46003", "46013"]),
+        "46003": entity("municipality", "46000", "Beveren"),
+        "46013": entity("municipality", "46000", "Kruibeke"),
+    }
+    new = {
+        "46000": entity("arrondissement", None, "Saint-Nicolas", ["46030"]),
+        "46030": entity("municipality", "46000", "Beveren-Kruibeke"),
+    }
+    canonical = canonical_code_map(
+        [
+            {"old_nis": "46003", "new_nis": "46030"},
+            {"old_nis": "46013", "new_nis": "46030"},
+        ]
+    )
+    windows = derive_entity_windows([("REFNIS_2019.csv", old), ("REFNIS_2025.csv", new)], canonical)
+    assert len(windows["46000"]) == 1
+    assert windows["46000"][0]["valid_to"] is None

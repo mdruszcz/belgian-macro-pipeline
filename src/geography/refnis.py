@@ -92,6 +92,74 @@ def parse_refnis_csv(path: Path) -> list[dict]:
     return out
 
 
+# Level markers as they appear in REFNIS's own FR and NL name columns. Both
+# languages are checked, so a row is classified even if one column is odd.
+_COUNTRY_MARKERS = ("ROYAUME", "HET RIJK")
+_REGION_MARKERS = ("RÉGION", "REGION", "GEWEST")
+_PROVINCE_MARKERS = ("PROVINC",)
+_ARRONDISSEMENT_MARKERS = ("ARRONDISSEMENT",)
+
+
+def parse_refnis_hierarchy(path: Path) -> dict[str, dict]:
+    """Reconstruct one REFNIS vintage's full hierarchy from its document order.
+
+    REFNIS has no parent column; it is a nested outline -- the kingdom, then a
+    region, then that region's provinces, each followed by its arrondissements
+    and their communes. Reading it as a state machine recovers the parent of
+    every entity *as it was in that vintage*, which the NIS9 workbook cannot
+    give because it only describes the present.
+
+    That is what makes two things possible that would otherwise be guesses:
+    a historical commune's real arrondissement (Kortessem sat in `73000` before
+    the 2025 merger moved it into Hasselt's `71000`), and detecting an
+    arrondissement whose *composition* changed while keeping its code (`57000`
+    was Tournai with 10 communes, and Tournai-Mouscron with 12 from 2019).
+
+    Validated against the NIS9-derived hierarchy for the 2025 vintage: 622
+    entities, zero level or parent mismatches.
+
+    Returns {nis_code: {level, parent_nis, name_fr, name_nl, children}}.
+    """
+    region = province = arrondissement = None
+    out: dict[str, dict] = {}
+
+    for row in parse_refnis_csv(path):
+        code = row["nis_code"]
+        haystack = f"{row['name_fr']} {row['name_nl']}".upper()
+
+        if row["language_regime"]:
+            # The language-regime column is populated only for communes.
+            level, parent = "municipality", arrondissement or region
+        elif any(m in haystack for m in _COUNTRY_MARKERS):
+            level, parent = "country", None
+            region = province = arrondissement = None
+        elif any(m in haystack for m in _REGION_MARKERS):
+            level, parent = "region", "01000"
+            region, province, arrondissement = code, None, None
+        elif any(m in haystack for m in _PROVINCE_MARKERS):
+            level, parent = "province", region
+            province, arrondissement = code, None
+        elif any(m in haystack for m in _ARRONDISSEMENT_MARKERS):
+            level, parent = "arrondissement", province or region
+            arrondissement = code
+        else:
+            raise ValueError(
+                f"{path.name}: cannot classify row {code} ({row['name_fr']!r}). "
+                "Refusing to guess its level (CLAUDE.md rule 13)."
+            )
+
+        out[code] = {
+            "level": level,
+            "parent_nis": parent,
+            "name_fr": row["name_fr"],
+            "name_nl": row["name_nl"],
+        }
+
+    for code, entity in out.items():
+        entity["children"] = tuple(sorted(c for c, e in out.items() if e["parent_nis"] == code))
+    return out
+
+
 def parse_nis9_xlsx(path: Path) -> list[dict]:
     """One dict per statistical-sector row of the NIS9 reference workbook.
 
@@ -208,6 +276,95 @@ def geo_id_for(level: str, nis_code: str | None) -> str:
     return f"{prefixes[level]}{nis_code}"
 
 
+def historical_geo_id(level: str, nis_code: str, valid_from: str, needs_suffix: bool) -> str:
+    """geo_id for one validity window of an entity.
+
+    `geo_id` is the primary key, so an entity whose code outlived a change of
+    substance needs one id per window: arrondissement `57000` was Tournai until
+    2019 and Tournai-Mouscron after, and collapsing them would let a 2015 lookup
+    silently return the larger territory.
+
+    The suffix is added only where a code actually has several windows. A
+    commune that simply ceased to exist has exactly one, so Kruibeke stays
+    `be:mun:46013` -- the id any stored observation about it would carry, and
+    not something to churn just because the entity is no longer current.
+    """
+    base = geo_id_for(level, nis_code)
+    return f"{base}@{valid_from}" if needs_suffix else base
+
+
+def build_windowed_rows(
+    windows: dict[str, list[dict]],
+    current_by_geo_id: dict[str, dict],
+    exonyms: dict[str, str],
+    regime_by_code: dict[str, str],
+) -> list[dict]:
+    """One row per (entity, validity window), for every level.
+
+    Rows for the current window are enriched from `current_by_geo_id` (the
+    NIS9-derived hierarchy, which carries NUTS codes and better names);
+    superseded windows are described from the REFNIS vintage that recorded
+    them, which is the only surviving record of what they were.
+    """
+    rows: list[dict] = []
+    for nis_code, entity_windows in sorted(windows.items()):
+        for index, window in enumerate(entity_windows):
+            is_latest = index == len(entity_windows) - 1 and window["valid_to"] is None
+            needs_suffix = len(entity_windows) > 1 and not is_latest
+            level = window["level"]
+            geo_id = historical_geo_id(level, nis_code, window["valid_from"], needs_suffix)
+
+            current = current_by_geo_id.get(geo_id) if is_latest else None
+            if current is not None:
+                # The vintage diff can only say when an entity was first
+                # *observed*, which for the country is just the oldest REFNIS
+                # file. Belgium predates it, and `be:country` is already
+                # referenced by every stored observation, so its own date wins.
+                valid_from = current["valid_from"] if level == "country" else window["valid_from"]
+                rows.append({**current, "valid_from": valid_from, "valid_to": None})
+                continue
+
+            names = {"name_nl": window["name_nl"], "name_fr": window["name_fr"]}
+            parent_nis = window["parent_nis"]
+            parent_geo_id = None
+            if parent_nis:
+                parent_geo_id = _parent_geo_id_at(
+                    windows.get(parent_nis, []), parent_nis, window["valid_from"]
+                )
+            rows.append(
+                {
+                    "geo_id": geo_id,
+                    "nis_code": nis_code,
+                    "level": level,
+                    "name_nl": names["name_nl"],
+                    "name_fr": names["name_fr"],
+                    "name_en": _pick_name_en(
+                        names, regime_by_code.get(nis_code), exonyms, nis_code, "name_nl"
+                    ),
+                    "parent_geo_id": parent_geo_id,
+                    "valid_from": window["valid_from"],
+                    "valid_to": window["valid_to"],
+                    "successor_geo_id": None,
+                    "nuts": None,
+                }
+            )
+    return rows
+
+
+def _parent_geo_id_at(parent_windows: list[dict], parent_nis: str, as_of: str) -> str | None:
+    """The parent's geo_id for the window that contained `as_of`."""
+    for index, window in enumerate(parent_windows):
+        starts_before = window["valid_from"] <= as_of
+        ends_after = window["valid_to"] is None or window["valid_to"] > as_of
+        if starts_before and ends_after:
+            is_latest = index == len(parent_windows) - 1 and window["valid_to"] is None
+            needs_suffix = len(parent_windows) > 1 and not is_latest
+            return historical_geo_id(
+                window["level"], parent_nis, window["valid_from"], needs_suffix
+            )
+    return None
+
+
 def _pick_name_en(
     names: dict, regime: str | None, exonyms: dict, nis_code: str | None, default_field: str
 ) -> str:
@@ -322,7 +479,15 @@ def build_hierarchy(
         add(
             "municipality",
             row["commune_code"],
-            {"name_nl": row["commune_nl"], "name_fr": row["commune_fr"]},
+            {
+                "name_nl": row["commune_nl"],
+                "name_fr": row["commune_fr"],
+                # Threaded through only so that the nine German-regime communes
+                # (Eupen, Sankt Vith, ...) get their own name as name_en rather
+                # than silently falling back to Dutch. `geographies` has no
+                # name_de column.
+                "name_de": row["commune_de"],
+            },
             arrondissement_id,
             nuts=row["nuts3"],
         )

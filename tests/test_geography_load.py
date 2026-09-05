@@ -29,7 +29,10 @@ def loaded_db(tmp_path):
     """
     db_path = tmp_path / "test.db"
     migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
-    load_mod.load(db_path, REAL_CONFIG_DIR)
+    # The committed crosswalk still has rows awaiting the maintainer's [H]
+    # sign-off, which the loader refuses by design; tests opt past that gate
+    # deliberately rather than by weakening it.
+    load_mod.load(db_path, REAL_CONFIG_DIR, allow_unverified=True)
     return db_path
 
 
@@ -38,10 +41,24 @@ def test_load_writes_expected_row_counts(loaded_db):
     counts = dict(conn.execute("SELECT level, COUNT(*) FROM geographies GROUP BY level"))
     assert counts["country"] == 1
     assert counts["region"] == 3
-    assert counts["province"] == 10
-    assert counts["arrondissement"] == 43
+    # More than one row per code where an entity's territory changed while it
+    # kept its code -- arrondissement 57000 was Tournai, then Tournai-Mouscron.
+    assert counts["province"] == 11
+    assert counts["arrondissement"] == 53
     # 565 current communes plus the 55 ended by the 2019 and 2025 waves.
     assert counts["municipality"] == 620
+    current = dict(
+        conn.execute(
+            "SELECT level, COUNT(*) FROM geographies WHERE valid_to IS NULL GROUP BY level"
+        )
+    )
+    assert current == {
+        "country": 1,
+        "region": 3,
+        "province": 10,
+        "arrondissement": 43,
+        "municipality": 565,
+    }
 
 
 def test_every_current_commune_resolves_to_belgium(loaded_db):
@@ -68,7 +85,7 @@ def test_every_current_commune_resolves_to_belgium(loaded_db):
 def test_load_is_idempotent(loaded_db):
     """The loader may be re-run; a second pass must not duplicate or drop rows."""
     before = sqlite3.connect(str(loaded_db)).execute("SELECT COUNT(*) FROM geographies").fetchone()
-    load_mod.load(loaded_db, REAL_CONFIG_DIR)
+    load_mod.load(loaded_db, REAL_CONFIG_DIR, allow_unverified=True)
     after = sqlite3.connect(str(loaded_db)).execute("SELECT COUNT(*) FROM geographies").fetchone()
     assert before == after
 
@@ -151,3 +168,113 @@ def test_period_to_date(period, expected):
 def test_period_to_date_rejects_unknown_shapes():
     with pytest.raises(ValueError, match="Unrecognized period format"):
         period_to_date("2024-7")
+
+
+# --- Regression tests for the Block C adversarial audit findings ---------------
+
+
+def test_historical_communes_are_not_orphaned_from_the_hierarchy(loaded_db):
+    """Audit S1. Historical predecessors were first loaded with a NULL parent,
+    so any aggregate rolling up through parent_geo_id silently dropped 55
+    communes for pre-2025 periods -- a 2015 Limburg total was missing Hasselt,
+    with no error anywhere."""
+    conn = sqlite3.connect(str(loaded_db))
+    for as_of, expected in [("2015-01-01", 589), ("2020-01-01", 581), ("2026-01-01", 565)]:
+        valid, orphaned = conn.execute(
+            """
+            SELECT COUNT(*),
+                   COUNT(*) FILTER (WHERE parent_geo_id IS NULL)
+            FROM geographies
+            WHERE level = 'municipality'
+              AND valid_from <= ? AND (valid_to IS NULL OR valid_to > ?)
+            """,
+            (as_of, as_of),
+        ).fetchone()
+        assert (valid, orphaned) == (expected, 0), f"at {as_of}"
+
+
+def test_historical_commune_keeps_the_arrondissement_it_actually_had(loaded_db):
+    """Kortessem sat in arrondissement 73000 and was merged into Hasselt, which
+    is in 71000 -- so its historical parent must be 73000, not its successor's."""
+    conn = sqlite3.connect(str(loaded_db))
+    parent = conn.execute(
+        "SELECT parent_geo_id FROM geographies WHERE nis_code = '73040'"
+    ).fetchone()[0]
+    assert parent.startswith("be:arr:73000")
+
+
+def test_aggregates_do_not_resolve_before_they_existed(loaded_db):
+    """Audit S2. Every arrondissement, province and region was dated to the
+    structural epoch because the vintage diff only looked at commune rows."""
+    conn = sqlite3.connect(str(loaded_db))
+    # Arrondissement La Louviere was created by the 2019 Hainaut reform.
+    with pytest.raises(UnknownGeographyError):
+        resolve_geo(conn, "58000", "2015")
+    assert resolve_geo(conn, "58000", "2020") == "be:arr:58000"
+    # Arrondissement Mouscron ceased to exist in the same reform.
+    with pytest.raises(UnknownGeographyError):
+        resolve_geo(conn, "54000", "2020")
+
+
+def test_arrondissement_that_changed_territory_has_separate_windows(loaded_db):
+    """Audit S2, the subtle half: 57000 kept its code but went from Tournai
+    (10 communes) to Tournai-Mouscron (12) in 2019. One row for both would
+    attach 2015 Tournai figures to the larger territory."""
+    conn = sqlite3.connect(str(loaded_db))
+    early = resolve_geo(conn, "57000", "2010")
+    late = resolve_geo(conn, "57000", "2020")
+    assert early != late
+    names = dict(
+        conn.execute("SELECT geo_id, name_fr FROM geographies WHERE nis_code = '57000'").fetchall()
+    )
+    assert "Mouscron" not in names[early]
+    assert "Mouscron" in names[late]
+
+
+def test_loader_refuses_unverified_crosswalk_rows(tmp_path):
+    """Audit S3. The derivation flags rows whose successor was guessed; the
+    loader used to write them anyway, making the flags decorative."""
+    db_path = tmp_path / "gate.db"
+    migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
+    with pytest.raises(load_mod.UnverifiedCrosswalkError, match="need maintainer verification"):
+        load_mod.load(db_path, REAL_CONFIG_DIR)
+
+
+def test_loader_rejects_a_blank_valid_from(tmp_path):
+    """Audit S8. An empty string satisfies NOT NULL and sorts before every
+    date, making the entity valid for all of recorded history."""
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    for name in ("geographies.csv", "municipality_crosswalk.csv", "name_en_exonyms.csv"):
+        (config_dir / name).write_text((REAL_CONFIG_DIR / name).read_text(encoding="utf-8"))
+    rows = (config_dir / "geographies.csv").read_text(encoding="utf-8").splitlines()
+    header, first = rows[0], rows[1].split(",")
+    first[header.split(",").index("valid_from")] = ""
+    (config_dir / "geographies.csv").write_text(
+        "\n".join([header, ",".join(first)] + rows[2:]), encoding="utf-8"
+    )
+
+    db_path = tmp_path / "blank.db"
+    migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
+    with pytest.raises(ValueError, match="not a YYYY-MM-DD date"):
+        load_mod.load(db_path, config_dir, allow_unverified=True)
+
+
+def test_resolve_to_current_refuses_a_dead_end(loaded_db):
+    """Audit S7. A commune that ended with no recorded successor reported
+    itself as current, because only successor_geo_id was checked."""
+    conn = sqlite3.connect(str(loaded_db))
+    conn.execute("UPDATE geographies SET successor_geo_id = NULL WHERE nis_code = '46013'")
+    with pytest.raises(UnknownGeographyError, match="ceased to exist"):
+        resolve_to_current(conn, "be:mun:46013")
+
+
+def test_german_speaking_communes_keep_their_own_name(loaded_db):
+    """Audit S10. name_en fell back to Dutch for the nine German-regime
+    communes because name_de was never threaded through."""
+    conn = sqlite3.connect(str(loaded_db))
+    name_en, name_fr = conn.execute(
+        "SELECT name_en, name_fr FROM geographies WHERE nis_code = '63040'"
+    ).fetchone()
+    assert name_en == "Kelmis"
+    assert name_fr == "La Calamine"
