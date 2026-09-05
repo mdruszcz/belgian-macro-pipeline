@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://belgian-macro-pipeline/indicator_config.schema.json",
+  "title": "Indicator configuration",
+  "type": "object",
+  "required": ["id", "name", "unit", "frequency", "source_id", "geo_levels", "display"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+    "name": {
+      "type": "object",
+      "required": ["en", "fr", "nl"],
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string" },
+        "fr": { "type": "string" },
+        "nl": { "type": "string" }
+      }
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string" },
+        "fr": { "type": "string" },
+        "nl": { "type": "string" }
+      }
+    },
+    "unit": { "type": "string", "minLength": 1 },
+    "frequency": { "type": "string", "enum": ["A", "Q", "M", "F"] },
+    "source_id": { "type": "string", "minLength": 1 },
+    "geo_levels": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["national", "regional", "provincial", "municipal"] }
+    },
+    "fetch": {
+      "type": "object",
+      "required": ["query"],
+      "additionalProperties": false,
+      "properties": {
+        "query": { "type": "string", "minLength": 1 }
+      }
+    },
+    "display": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["category", "title", "sort_order"],
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "type": "string",
+              "enum": ["gdp", "confidence", "prices", "labour", "employment",
+                       "unemployment", "business", "fiscal"]
+            },
+            "title": {
+              "type": "object",
+              "required": ["en", "fr", "nl"],
+              "additionalProperties": false,
+              "properties": {
+                "en": { "type": "string" },
+                "fr": { "type": "string" },
+                "nl": { "type": "string" }
+              }
+            },
+            "description": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "en": { "type": "string" },
+                "fr": { "type": "string" },
+                "nl": { "type": "string" }
+              }
+            },
+            "sort_order": { "type": "number" },
+            "sdmx_code": { "type": "string" },
+            "combined": { "type": "boolean" },
+            "forecast_of": { "type": "string", "enum": ["GDP_VOL", "CPI", "FISCAL_BAL"] }
+          }
+        }
+      ]
+    }
+  }
+}

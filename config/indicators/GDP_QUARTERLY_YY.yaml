@@ -1,0 +1,22 @@
+id: GDP_QUARTERLY_YY
+unit: percent_yy
+frequency: Q
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/Q.1.B1GM.VZ.LY.N?startPeriod=2000-Q1&dimensionAtObservation=AllDimensions'
+name:
+  en: Quarterly GDP growth (Y-Y)
+  fr: Croissance trimestrielle du PIB (A-A)
+  nl: Kwartaalgroei BBP (J-J)
+description:
+  en: Year-on-year volume change of GDP, quarterly, first estimate
+display:
+  category: gdp
+  title:
+    en: Gross Domestic Product — Quarterly Y-Y Volume Change
+    fr: Produit Intérieur Brut — Variation trimestrielle (A-A)
+    nl: Bruto Binnenlands Product — Kwartaal J-J volumeverschil
+  sort_order: 1
+  sdmx_code: B1GM

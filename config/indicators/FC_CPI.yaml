@@ -1,0 +1,22 @@
+id: FC_CPI
+name:
+  en: CPI forecast (consensus)
+  fr: Prévision IPC (consensus)
+  nl: CPI-prognose (consensus)
+unit: percent
+frequency: F
+source_id: fpb
+geo_levels:
+- national
+display:
+  category: prices
+  title:
+    en: Consumer Price Index — Multi-Institution Forecast
+    fr: Indice des prix à la consommation — Prévisions multi-institutions
+    nl: Consumentenprijsindex — Meervoudige prognose
+  description:
+    en: 'Average CPI growth forecast from 13 institutions. Source: plan.be.'
+    fr: 'Prévision moyenne IPC de 13 institutions. Source : plan.be.'
+    nl: 'Gemiddelde CPI-groeiverwachting van 13 instellingen. Bron: plan.be.'
+  sort_order: 0.5
+  forecast_of: CPI

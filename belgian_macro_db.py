@@ -25,247 +25,45 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 from rename_legacy_tables import rename_legacy_tables  # noqa: E402
 
 from src.db.migrate import run as run_migrations  # noqa: E402
+from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
 # ─── Configuration ────────────────────────────────────────────────
 
 DB_PATH = Path(__file__).parent / "data" / "belgian_macro.db"
 
-NBB_BASE = "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_QNA_DISS,1.0"
 NBB_CSV_HEADER = {"Accept": "application/vnd.sdmx.data+csv;version=2.0.0"}
 
 FPB_XLSX_URL = "https://www.plan.be/sites/default/files/documents/FOR_BE_FR.xlsx"
 
-SOURCES = {
-    "GDP_QUARTERLY_YY": {
-        "name": "Quarterly GDP Growth (Y-Y)",
-        "url": f"{NBB_BASE}/Q.1.B1GM.VZ.LY.N?startPeriod=2000-Q1&dimensionAtObservation=AllDimensions",
-        "frequency": "Q",
-        "unit": "percent_yy",
-        "source_agency": "NBB",
-        "description": "Year-on-year volume change of GDP, quarterly, first estimate",
-        "type": "nbb",
-    },
-    "GDP_ANNUAL_CY": {
-        "name": "Annual GDP Growth (contribution)",
-        "url": f"{NBB_BASE}/A.2.B1GM.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "GDP total contribution to volume change, Y-Y, non-adjusted",
-        "type": "nbb",
-    },
-    "PRIV_CONSUMPTION_CY": {
-        "name": "Private Final Consumption (contribution)",
-        "url": f"{NBB_BASE}/A.2.P31_S14_S15.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "Private final consumption, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "GOV_CONSUMPTION_CY": {
-        "name": "Gov. Consumption Expenditure (contribution)",
-        "url": f"{NBB_BASE}/A.2.P3_S13.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "Final consumption expenditure of general government, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "GFCF_ENTERPRISES_CY": {
-        "name": "GFCF Enterprises (contribution)",
-        "url": f"{NBB_BASE}/A.2.P51_ENT.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "Gross fixed capital formation by enterprises, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "GFCF_DWELLINGS_CY": {
-        "name": "GFCF Dwellings (contribution)",
-        "url": f"{NBB_BASE}/A.2.P51_DWE.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "Gross fixed capital formation in dwellings, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "GFCF_PUBLIC_CY": {
-        "name": "GFCF Public Admin (contribution)",
-        "url": f"{NBB_BASE}/A.2.P51_PAD.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "Gross fixed capital formation by public administrations, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "CHG_STOCKS_CY": {
-        "name": "Changes in Stocks (contribution)",
-        "url": f"{NBB_BASE}/A.2.P52.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "Changes in inventories, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "NET_EXPORTS_CY": {
-        "name": "Net Exports (contribution)",
-        "url": f"{NBB_BASE}/A.2.B11.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions",
-        "frequency": "A",
-        "unit": "pp_contribution",
-        "source_agency": "NBB",
-        "description": "External balance of goods and services, contribution to GDP volume change",
-        "type": "nbb",
-    },
-    "CONSUMER_CONFIDENCE": {
-        "name": "Consumer Confidence Indicator (NBB)",
-        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_CONSN,1.0/M..BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
-        "frequency": "M",
-        "unit": "balance",
-        "source_agency": "NBB",
-        "description": "Consumer confidence indicator from the National Bank of Belgium",
-        "type": "nbb",
-    },
-    "EUROSTAT_GDP_Q_MEUR": {
-        "name": "Eurostat GDP (Index 2010=100)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.BE?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "Gross domestic product, seasonally adjusted",
-        "type": "dbnomics",
-    },
-    "EUROSTAT_GDP_Q_MEUR_ES": {
-        "name": "GDP ES",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.ES?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat",
-        "type": "dbnomics",
-    },
-    "EUROSTAT_GDP_Q_MEUR_DE": {
-        "name": "GDP DE",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.DE?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat",
-        "type": "dbnomics",
-    },
-    "EUROSTAT_GDP_Q_MEUR_FR": {
-        "name": "GDP FR",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat",
-        "type": "dbnomics",
-    },
-    "EUROSTAT_GDP_Q_MEUR_NL": {
-        "name": "GDP NL",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.NL?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat",
-        "type": "dbnomics",
-    },
-    "EUROSTAT_GDP_Q_MEUR_EA": {
-        "name": "GDP EA",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true",
-        "frequency": "Q",
-        "unit": "index_2010",
-        "source_agency": "Eurostat",
-        "type": "dbnomics",
-    },
-    "EC_CONS_CONF_BE": {
-        "name": "Consumer Confidence BE (EC)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true",
-        "frequency": "M",
-        "unit": "balance",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "BE Consumer Confidence Indicator",
-        "type": "dbnomics",
-    },
-    "EC_CONS_CONF_EU": {
-        "name": "Consumer Confidence EU (EC)",
-        "url": "https://api.db.nomics.world/v22/series/Eurostat/ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.EU27_2020?observations=true",
-        "frequency": "M",
-        "unit": "balance",
-        "source_agency": "Eurostat/DBnomics",
-        "description": "EU27 Consumer Confidence Indicator",
-        "type": "dbnomics",
-    },
-    "BUSINESS_CONFIDENCE": {
-        "name": "Business Confidence (NBB)",
-        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_BUSSURVM,1.0/M.SYNC.BE.A999.X?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
-        "frequency": "M",
-        "unit": "balance",
-        "source_agency": "NBB",
-        "description": "Overall synthetic curve (Business Barometer) from the National Bank of Belgium",
-        "type": "nbb",
-    },
-    "LABOUR_COST_BE": {
-        "name": "Labour Cost Belgium",
-        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/BEL.3.1.99.0.PLCD?observations=true",
-        "frequency": "A",
-        "unit": "index_2010",
-        "source_agency": "AMECO/EC",
-        "description": "Nominal compensation per employee, total economy (2010=100)",
-        "type": "dbnomics",
-    },
-    "LABOUR_COST_DE": {
-        "name": "Labour Cost Germany",
-        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/DEU.3.1.99.0.PLCD?observations=true",
-        "frequency": "A",
-        "unit": "index_2010",
-        "source_agency": "AMECO/EC",
-        "description": "Nominal compensation per employee, total economy (2010=100) - Germany",
-        "type": "dbnomics",
-    },
-    "LABOUR_COST_FR": {
-        "name": "Labour Cost France",
-        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/FRA.3.1.99.0.PLCD?observations=true",
-        "frequency": "A",
-        "unit": "index_2010",
-        "source_agency": "AMECO/EC",
-        "description": "Nominal compensation per employee, total economy (2010=100) - France",
-        "type": "dbnomics",
-    },
-    "LABOUR_COST_NL": {
-        "name": "Labour Cost Netherlands",
-        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/NLD.3.1.99.0.PLCD?observations=true",
-        "frequency": "A",
-        "unit": "index_2010",
-        "source_agency": "AMECO/EC",
-        "description": "Nominal compensation per employee, total economy (2010=100) - Netherlands",
-        "type": "dbnomics",
-    },
-    "LABOUR_COST_EA": {
-        "name": "Labour Cost Euro Area",
-        "url": "https://api.db.nomics.world/v22/series/AMECO/PLCD/EA20.3.1.99.0.PLCD?observations=true",
-        "frequency": "A",
-        "unit": "index_2010",
-        "source_agency": "AMECO/EC",
-        "description": "Nominal compensation per employee, total economy (2010=100) - Euro Area",
-        "type": "dbnomics",
-    },
-    "INDUSTRIAL_PROD": {
-        "name": "Industrial Production (Total)",
-        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_INDPROD,1.0/M.2021..S.B_C_D.BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
-        "frequency": "M",
-        "unit": "index_2021",
-        "source_agency": "NBB",
-        "description": "Industrial production index (mining, manufacturing, energy), 2021=100, seasonally adjusted",
-        "type": "nbb",
-    },
-    "HICP": {
-        "name": "HICP (Y-Y Growth Rate)",
-        "url": "https://nsidisseminate-stat.nbb.be/rest/data/BE2,DF_HICP,1.0/M.BE.000000.2015.HCP.GROWTH_RATE?startPeriod=2010-01&dimensionAtObservation=AllDimensions",
-        "frequency": "M",
-        "unit": "percent_yy",
-        "source_agency": "NBB",
-        "description": "Harmonised Index of Consumer Prices, all items, year-on-year growth rate",
-        "type": "nbb",
-    },
-}
+CONFIG_DIR = Path(__file__).parent / "config"
+
+
+def _load_sources() -> dict:
+    """Rebuild the SOURCES-dict shape fetch_all()/upsert_indicator() expect,
+    from config/indicators/*.yaml + config/sources/*.yaml, per
+    docs/features/indicator_config.md. Indicators whose source's adapter is
+    not "nbb"/"dbnomics" (i.e. adapter "fpb", the forecast pseudo-indicators)
+    are excluded -- forecasts are fetched by FPBFetcher directly, exactly as
+    before, and never belonged in this dict."""
+    indicators, sources = load_and_validate_all(CONFIG_DIR / "indicators", CONFIG_DIR / "sources")
+    out = {}
+    for code, ind in indicators.items():
+        source = sources[ind["source_id"]]
+        if source["adapter"] not in ("nbb", "dbnomics"):
+            continue
+        out[code] = {
+            "name": ind["name"]["en"],
+            "url": source["base_url"] + ind["fetch"]["query"],
+            "frequency": ind["frequency"],
+            "unit": ind["unit"],
+            "source_agency": source["agency"],
+            "description": ind.get("description", {}).get("en", ""),
+            "type": source["adapter"],
+        }
+    return out
+
+
+SOURCES = _load_sources()
 
 REQUEST_TIMEOUT = 30
 

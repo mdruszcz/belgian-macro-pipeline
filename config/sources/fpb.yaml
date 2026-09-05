@@ -1,0 +1,9 @@
+source_id: fpb
+name: Federal Planning Bureau forecasts
+agency: FPB
+adapter: fpb
+base_url: null
+licence: null  # TODO: confirm licence terms (CLAUDE.md rule 8) -- already in production use
+catalog_ref: null
+cadence: quarterly
+is_active: true

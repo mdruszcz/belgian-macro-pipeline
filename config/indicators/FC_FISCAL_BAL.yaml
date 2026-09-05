@@ -1,0 +1,24 @@
+id: FC_FISCAL_BAL
+name:
+  en: Fiscal balance forecast (consensus)
+  fr: Prévision solde budgétaire (consensus)
+  nl: Begrotingssaldo prognose (consensus)
+unit: percent_gdp
+frequency: F
+source_id: fpb
+geo_levels:
+- national
+display:
+  category: fiscal
+  title:
+    en: Government Fiscal Balance — Multi-Institution Forecast
+    fr: Solde de financement des APU — Prévisions multi-institutions
+    nl: Begrotingssaldo overheid — Meervoudige prognose
+  description:
+    en: 'Average fiscal balance forecast (% GDP) from 13 institutions. Source: plan.be.'
+    fr: 'Prévision moyenne du solde budgétaire (% PIB) de 13 institutions. Source
+      : plan.be.'
+    nl: 'Gemiddelde begrotingssaldoverwachting (% BBP) van 13 instellingen. Bron:
+      plan.be.'
+  sort_order: 0.5
+  forecast_of: FISCAL_BAL

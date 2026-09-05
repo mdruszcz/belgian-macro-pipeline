@@ -1,0 +1,13 @@
+id: EUROSTAT_GDP_Q_MEUR_EA
+unit: index_2010
+frequency: Q
+source_id: dbnomics_eurostat
+geo_levels:
+- national
+fetch:
+  query: /namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.EA20?observations=true
+name:
+  en: EUROSTAT_GDP_Q_MEUR_EA
+  fr: EUROSTAT_GDP_Q_MEUR_EA
+  nl: EUROSTAT_GDP_Q_MEUR_EA
+display: null

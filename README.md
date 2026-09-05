@@ -65,23 +65,28 @@ Updated daily at 06:00 CET via GitHub Actions.
 
 ## Adding More Indicators
 
-Edit the `SOURCES` dict in `belgian_macro_db.py` to add NBB or DBnomics sources. For NBB:
+Indicator and source metadata live in `config/indicators/*.yaml` and `config/sources/*.yaml`,
+not in Python or HTML — see `docs/features/indicator_config.md` for the full field reference.
+Add one indicator by creating `config/indicators/YOUR_INDICATOR.yaml`:
 
-```python
-"YOUR_INDICATOR": {
-    "name": "Display Name",
-    "url": f"{NBB_BASE}/A.2.INDICATOR_CODE.VZ.LY.N?startPeriod=2000&dimensionAtObservation=AllDimensions",
-    "frequency": "A",          # A=Annual, Q=Quarterly, M=Monthly
-    "unit": "percent_yy",
-    "source_agency": "NBB",
-    "description": "What this measures",
-    "type": "nbb"
-},
+```yaml
+id: YOUR_INDICATOR
+name: {en: Display Name, fr: Nom affiché, nl: Weergavenaam}
+unit: percent_yy
+frequency: A          # A=Annual, Q=Quarterly, M=Monthly, F=Forecast
+source_id: nbb        # must match a source_id in config/sources/*.yaml
+geo_levels: [national]
+fetch:
+  query: A.2.INDICATOR_CODE.VZ.LY.N?startPeriod=2000&dimensionAtObservation=AllDimensions
+display:
+  category: gdp       # must be one of the categories in src/exporters/metadata.py
+  title: {en: Full title, fr: Titre complet, nl: Volledige titel}
+  sort_order: 20
 ```
 
-For DBnomics sources, change `type` to `"dbnomics"` and provide the API URL.
-
-Then add a matching entry in `dashboard.html`'s `INDICATOR_META` object (if you want to display it on the dashboard) to control display order and section grouping.
+`python scripts/validate_config.py` checks the file before you run anything else. Set
+`display: null` instead of a `display` block if the indicator should be fetched and stored but
+never shown as its own dashboard row.
 
 ## Local Usage
 

@@ -1,0 +1,15 @@
+id: LABOUR_COST_EA
+unit: index_2010
+frequency: A
+source_id: dbnomics_ameco
+geo_levels:
+- national
+fetch:
+  query: /PLCD/EA20.3.1.99.0.PLCD?observations=true
+name:
+  en: LABOUR_COST_EA
+  fr: LABOUR_COST_EA
+  nl: LABOUR_COST_EA
+description:
+  en: Nominal compensation per employee, total economy (2010=100) - Euro Area
+display: null

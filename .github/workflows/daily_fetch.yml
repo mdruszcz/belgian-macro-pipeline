@@ -61,6 +61,9 @@ jobs:
         # stay on the legacy table, out of scope per docs/decisions/0001.
         run: python scripts/export_canonical_csv.py --db data/belgian_macro.db --out data/belgian_macro_export.csv
 
+      - name: Export indicator metadata for the dashboard
+        run: python -m src.exporters.metadata --out data/metadata/indicators.json
+
       - name: Fetch market data
         id: fetch_stocks
         continue-on-error: true

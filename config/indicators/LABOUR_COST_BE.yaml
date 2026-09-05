@@ -1,0 +1,29 @@
+id: LABOUR_COST_BE
+unit: index_2010
+frequency: A
+source_id: dbnomics_ameco
+geo_levels:
+- national
+fetch:
+  query: /PLCD/BEL.3.1.99.0.PLCD?observations=true
+name:
+  en: Labour cost index
+  fr: Indice du coût de la main-d'œuvre
+  nl: Loonkostenindex
+description:
+  en: Nominal compensation per employee, total economy (2010=100)
+display:
+  category: labour
+  title:
+    en: Labour Cost Index (LCI) — Nominal hourly costs
+    fr: Indice du coût de la main-d'œuvre (ICM) — Coûts horaires nominaux
+    nl: Loonkostenindex (LKI) — Nominale uurkosten
+  sort_order: 1
+  description:
+    en: Total hourly labour costs (wages + social contributions). Key for Belgian
+      competitiveness monitoring.
+    fr: Coûts salariaux horaires totaux (salaires + cotisations). Crucial pour le
+      suivi de la compétitivité belge.
+    nl: Totale uurloonkosten (lonen + sociale bijdragen). Cruciaal voor het monitoren
+      van het Belgische concurrentievermogen.
+  sdmx_code: LCI_INDEX

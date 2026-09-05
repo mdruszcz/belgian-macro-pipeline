@@ -1,0 +1,15 @@
+id: LABOUR_COST_DE
+unit: index_2010
+frequency: A
+source_id: dbnomics_ameco
+geo_levels:
+- national
+fetch:
+  query: /PLCD/DEU.3.1.99.0.PLCD?observations=true
+name:
+  en: LABOUR_COST_DE
+  fr: LABOUR_COST_DE
+  nl: LABOUR_COST_DE
+description:
+  en: Nominal compensation per employee, total economy (2010=100) - Germany
+display: null

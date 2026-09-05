@@ -1,0 +1,28 @@
+id: GFCF_DWELLINGS_CY
+unit: pp_contribution
+frequency: A
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P51_DWE.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
+name:
+  en: GFCF — Dwellings
+  fr: FBCF — Logements
+  nl: BIK — Woningen
+description:
+  en: Gross fixed capital formation in dwellings, contribution to GDP volume change
+display:
+  category: gdp
+  title:
+    en: Gross Fixed Capital Formation in Dwellings
+    fr: Formation brute de capital fixe en logements
+    nl: Bruto-investeringen in vaste activa in woningen
+  sort_order: 7
+  description:
+    en: Residential construction — new builds and major renovations. Sensitive to
+      mortgage rates.
+    fr: Construction résidentielle — logements neufs et rénovations. Sensible aux
+      taux hypothécaires.
+    nl: Woningbouw — nieuwbouw en grote renovaties. Gevoelig voor hypotheekrente.
+  sdmx_code: P51_DWE

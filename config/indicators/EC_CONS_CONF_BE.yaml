@@ -1,0 +1,15 @@
+id: EC_CONS_CONF_BE
+unit: balance
+frequency: M
+source_id: dbnomics_eurostat
+geo_levels:
+- national
+fetch:
+  query: /ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true
+name:
+  en: EC_CONS_CONF_BE
+  fr: EC_CONS_CONF_BE
+  nl: EC_CONS_CONF_BE
+description:
+  en: BE Consumer Confidence Indicator
+display: null
