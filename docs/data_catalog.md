@@ -189,8 +189,31 @@ Not checked this session: whether Bestat's API has its own licence/terms page di
 Statbel's general CC BY 4.0 statement (no licence field appears on a view or datasource's own
 JSON metadata) — worth a direct check before relying on it for the 10 selected sources.
 
-Not investigated this session, and not implied to be worse candidates for it — simply outside the
-7 categories the research pass covered: **datastore.brussels** (the Brussels-region aggregator
-IBSA's own page points to for more datasets) and **opendata.brussels.be** (City of Brussels'
-own portal, distinct from the regional one). Worth a follow-up pass if the maintainer wants
-Brussels coverage beyond IBSA's two current datasets.
+**Confirmed (follow-up pass): the `/result/{FORMAT}` export does not accept query parameters to
+reshape a standard view's dimensions** — appending `?dimension=Commune` to the region-level local
+units view returned the identical region-level shape, unchanged. This closes the question left
+open above: there is no API shortcut around building a custom cross-tabulation through the
+Bestat web UI when a standard view doesn't already have the geography/depth combination needed.
+
+### Brussels aggregator portals (follow-up pass)
+
+Previously flagged as not investigated; both are now confirmed real and queryable, closing that
+gap:
+
+- **[opendata.brussels.be](https://opendata.brussels.be/)** (City of Brussels) — a real,
+  standard **OpenDataSoft** portal, confirmed via its Explore API v2.1
+  (`/api/explore/v2.1/catalog/datasets`): **208 datasets**, searchable
+  (`?q=commune` returns real results). Same API family as many other Belgian open-data portals,
+  so the same fetch pattern could serve multiple sources if this is selected. Licence and
+  update frequency are per-dataset, not checked at the catalogue level this pass.
+- **[datastore.brussels](https://datastore.brussels/)** (Brussels-Capital Region aggregator,
+  the one IBSA's own page points to) — confirmed to be a **single-page application**; every path
+  tried under `/web/...` returns the same client-rendered HTML shell rather than JSON, including
+  a guessed CKAN-style `/web/api/action/package_search` endpoint. The real data API exists
+  somewhere behind this frontend but its path was not found this pass — needs either browser
+  dev-tools inspection of a real page load, or the maintainer already knowing the endpoint.
+
+Both are now "verified to exist and be worth a real look," upgraded from "not investigated" —
+neither has been evaluated as a candidate dataset itself yet, since that requires picking a
+specific dataset within each, which is exactly the enumeration Block E's `[H]` scoring step
+still needs from the maintainer.
