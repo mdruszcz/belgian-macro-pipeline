@@ -8,8 +8,6 @@ Runs daily via GitHub Actions.
 """
 
 import argparse
-import csv
-import io
 import logging
 import sqlite3
 import sys
@@ -17,25 +15,31 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-import requests
-from openpyxl import load_workbook
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
 from rename_legacy_tables import rename_legacy_tables  # noqa: E402
 
 from src.db.migrate import run as run_migrations  # noqa: E402
+from src.fetchers.eurostat import EurostatSource  # noqa: E402
+from src.fetchers.fpb import FPB_XLSX_URL, FPBSource  # noqa: E402
+from src.fetchers.nbb import NBBSource  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
 # ─── Configuration ────────────────────────────────────────────────
 
 DB_PATH = Path(__file__).parent / "data" / "belgian_macro.db"
 
-NBB_CSV_HEADER = {"Accept": "application/vnd.sdmx.data+csv;version=2.0.0"}
-
-FPB_XLSX_URL = "https://www.plan.be/sites/default/files/documents/FOR_BE_FR.xlsx"
-
 CONFIG_DIR = Path(__file__).parent / "config"
+
+
+def source_id_for(agency: str) -> str:
+    """Duplicated from scripts/port_existing_indicators.py rather than
+    imported: that script imports NBBSource/EurostatSource/FPBSource-adjacent
+    names from *this* module, so importing the other way would be circular.
+    Both copies must stay identical -- it is one line, and belgian_macro_db.py
+    is what this repo already treats as upstream of scripts/."""
+    return agency.lower().replace("/", "_").replace(" ", "_")
 
 
 def _load_sources() -> dict:
@@ -43,7 +47,7 @@ def _load_sources() -> dict:
     from config/indicators/*.yaml + config/sources/*.yaml, per
     docs/features/indicator_config.md. Indicators whose source's adapter is
     not "nbb"/"dbnomics" (i.e. adapter "fpb", the forecast pseudo-indicators)
-    are excluded -- forecasts are fetched by FPBFetcher directly, exactly as
+    are excluded -- forecasts are fetched by FPBSource directly, exactly as
     before, and never belonged in this dict."""
     indicators, sources = load_and_validate_all(CONFIG_DIR / "indicators", CONFIG_DIR / "sources")
     out = {}
@@ -64,8 +68,6 @@ def _load_sources() -> dict:
 
 
 SOURCES = _load_sources()
-
-REQUEST_TIMEOUT = 30
 
 logging.basicConfig(
     level=logging.INFO,
@@ -263,143 +265,48 @@ class MacroDatabase:
 
 
 # ─── Fetchers ─────────────────────────────────────────────────────
-
-
-class NBBFetcher:
-    @staticmethod
-    def fetch(url: str) -> list[dict]:
-        log.info(f"GET {url[:90]}...")
-        resp = requests.get(url, headers=NBB_CSV_HEADER, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        seen: dict[str, dict] = {}
-        for row in csv.DictReader(io.StringIO(resp.text)):
-            period = row.get("TIME_PERIOD", "").strip()
-            raw = row.get("OBS_VALUE", "").strip()
-            status = row.get("OBS_STATUS", "").strip()
-            if not period or not raw:
-                continue
-            try:
-                val = float(raw)
-            except ValueError:
-                continue
-            seen[period] = {"period": period, "value": val, "obs_status": status}
-        data = sorted(seen.values(), key=lambda x: x["period"])
-        return data
-
-
-class DBnomicsFetcher:
-    @staticmethod
-    def fetch(url: str, unit: str = "") -> list[dict]:
-        log.info(f"GET {url[:90]}...")
-        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-
-        try:
-            data = resp.json()
-            series = data["series"]["docs"][0]
-            periods = series["period"]
-            values = series["value"]
-        except (KeyError, IndexError, ValueError) as e:
-            raise ValueError(f"Unexpected DBnomics JSON structure: {e}") from e
-
-        results = []
-        for p, v in zip(periods, values, strict=False):
-            if str(p) < "2008":
-                continue
-            if v is None or v == "NA":
-                continue
-            try:
-                val = float(v)
-                results.append({"period": str(p), "value": val, "obs_status": "A"})
-            except ValueError:
-                continue
-
-        if unit == "index_2010":
-            results = DBnomicsFetcher._rebase_to_2010(results)
-        return results
-
-    @staticmethod
-    def _rebase_to_2010(results: list[dict]) -> list[dict]:
-        """Rescale values so the 2010 average equals 100 (index_2010 unit)."""
-        q2010 = [r["value"] for r in results if str(r["period"]).startswith("2010")]
-        if not q2010:
-            return results
-        avg_2010 = sum(q2010) / len(q2010)
-        if avg_2010 == 0:
-            return results
-        return [{**r, "value": round((r["value"] / avg_2010) * 100, 2)} for r in results]
-
-
-class FPBFetcher:
-    INDICATORS = {1: "GDP_VOL", 3: "CPI", 5: "FISCAL_BAL"}
-
-    @staticmethod
-    def fetch(url: str = FPB_XLSX_URL) -> list[dict]:
-        import tempfile
-
-        log.info(f"GET {url[:80]}...")
-        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
-            tmp.write(resp.content)
-            tmp_path = tmp.name
-        wb = load_workbook(tmp_path, data_only=True)
-        ws = wb[wb.sheetnames[0]]
-        year_cols = {}
-        for col_offset, ind_code in FPBFetcher.INDICATORS.items():
-            y1 = ws.cell(4, col_offset + 1).value
-            y2 = ws.cell(4, col_offset + 2).value
-            year_cols[ind_code] = [(col_offset + 1, str(int(y1))), (col_offset + 2, str(int(y2)))]
-        rows = []
-        for r in range(5, ws.max_row + 1):
-            inst = ws.cell(r, 1).value
-            if not inst or not str(inst).strip():
-                continue
-            upd = str(ws.cell(r, 8).value)[:10] if ws.cell(r, 8).value else ""
-            for ind_code, cols in year_cols.items():
-                for col_idx, year in cols:
-                    val = FPBFetcher._parse_value(ws.cell(r, col_idx).value)
-                    rows.append(
-                        {
-                            "institution": str(inst).strip(),
-                            "indicator": ind_code,
-                            "year": year,
-                            "value": val,
-                            "updated_at": upd,
-                        }
-                    )
-        wb.close()
-        Path(tmp_path).unlink(missing_ok=True)
-        return rows
-
-    @staticmethod
-    def _parse_value(raw) -> float | None:
-        if raw is None:
-            return None
-        if isinstance(raw, (int, float)):
-            return round(float(raw), 2)
-        s = str(raw).strip().replace(",", ".")
-        if s in ("-.-", "—", "-", "...", ""):
-            return None
-        try:
-            return round(float(s), 2)
-        except ValueError:
-            return None
+#
+# NBBSource, EurostatSource, FPBSource (src/fetchers/) replace the bare
+# NBBFetcher/DBnomicsFetcher/FPBFetcher staticmethods that used to live here.
+# See docs/features/source_adapter.md (Block D) -- the parsing logic in each
+# is unchanged; what moved into the shared DataSource base class is the HTTP
+# GET-with-retry, raw-response caching to data/raw/{source_id}/{date}/, and
+# fetch_runs logging, none of which existed before this refactor.
 
 
 # ─── Orchestration ────────────────────────────────────────────────
 
 
 def fetch_all(db: MacroDatabase) -> bool:
-    """Fetch every configured source. Returns False if any source failed."""
+    """Fetch every configured source. Returns False if any source failed.
+
+    Each call passes db.conn as `conn` so every adapter logs a fetch_runs row
+    in the same connection the legacy tables already use (Block D). The
+    all_ok / db.log_fetch("OK"|"ERROR") contract below is unchanged from
+    before that block -- fetch_runs is new observability alongside it, not a
+    replacement (tests/test_fetch_all.py pins this down).
+
+    source_id for fetch_runs is derived via source_id_for(agency), matching
+    what scripts/sync_to_canonical.py already put in the canonical `sources`
+    table ("eurostat", "ameco_ec") -- NOT the source_id used in
+    config/sources/*.yaml ("dbnomics_eurostat", "dbnomics_ameco"). Those two
+    registries disagree; this uses whichever one is actually populated today,
+    rather than silently reconciling a pre-existing inconsistency that is out
+    of scope for this refactor. See docs/features/source_adapter.md.
+    """
     all_ok = True
     for code, meta in SOURCES.items():
         db.upsert_indicator(code, meta)
+        source_id = source_id_for(meta["source_agency"])
         try:
             if meta.get("type") == "nbb":
-                rows = NBBFetcher.fetch(meta["url"])
+                source = NBBSource()
+                rows = source.fetch(meta["url"], cache_key=code, conn=db.conn)
             else:
-                rows = DBnomicsFetcher.fetch(meta["url"], meta.get("unit", ""))
+                source = EurostatSource(source_id=source_id)
+                rows = source.fetch(
+                    meta["url"], cache_key=code, conn=db.conn, unit=meta.get("unit", "")
+                )
             n = db.upsert_observations(code, rows)
             db.log_fetch(code, n, "OK")
             log.info(f"  OK {code}: {n} rows")
@@ -408,7 +315,7 @@ def fetch_all(db: MacroDatabase) -> bool:
             db.log_fetch(code, 0, "ERROR", str(e))
             all_ok = False
     try:
-        fc_rows = FPBFetcher.fetch()
+        fc_rows = FPBSource().fetch(FPB_XLSX_URL, cache_key="FPB_FORECASTS", conn=db.conn)
         n = db.upsert_forecasts(fc_rows)
         db.log_fetch("FPB_FORECASTS", n, "OK")
     except Exception as e:

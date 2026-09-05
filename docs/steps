@@ -126,32 +126,32 @@ Why: An off-by-a-few count means the crosswalk or the source file vintage is wro
 How: Plot population 2010–2025 for each and look for the discontinuity.
 Why: A visible step change in a population series is the signature of a crosswalk failure, and it is instantly obvious on a chart.
 Block D — Generic source-adapter system
- [SPEC] Write /docs/features/source_adapter.md
+ ✅ [SPEC] Write /docs/features/source_adapter.md
 How: Define the fetch → parse → normalize → validate → load interface, the normalized dataframe columns and dtypes, retry/caching/rate-limit rules.
 Why: This interface is the leverage point of the whole project. Every future source costs a day instead of a week if the contract is right.
- [BUILD] Implement src/fetchers/base.py with raw caching to data/raw/{source}/{date}/
+ ✅ [BUILD] Implement src/fetchers/base.py with raw caching to data/raw/{source}/{date}/
 How: Abstract base class; cache the raw response before parsing anything.
 Why: When a parse breaks six months from now, you need the exact bytes the source returned that day. You cannot get them back later.
- [BUILD] Refactor NBB into NBBSource
+ ✅ [BUILD] Refactor NBB into NBBSource
 How: Move existing logic, no behaviour change, tests asserting identical output.
 Why: Refactoring a known-good adapter first proves the interface works before you use it on unfamiliar data.
- [BUILD] Refactor DBnomics/Eurostat into EurostatSource
+ ✅ [BUILD] Refactor DBnomics/Eurostat into EurostatSource
 How: Same, driven by config/sources/*.yaml.
 Why: Eurostat's shape differs from NBB's, so it stress-tests whether the interface is genuinely generic or just NBB-shaped.
- [BUILD] Refactor FPB into FPBSource
+ ✅ [BUILD] Refactor FPB into FPBSource
 How: Same, handling the XLSX path.
 Why: A third format (spreadsheet rather than API) is the real test of the abstraction.
- [BUILD] Implement fetch_runs logging for every adapter
+ ✅ [BUILD] Implement fetch_runs logging for every adapter
 How: Write run start, end, status, rows received, rows written and errors on every execution.
 Why: When the dashboard shows a stale number, this table tells you whether the fetch failed, the parse dropped rows, or nothing was published.
- [BUILD] Contract test applied to all adapters
+ ✅ [BUILD] Contract test applied to all adapters (NBB + Eurostat; FPB deliberately excluded, keeps its own shape -- see source_adapter.md Non-goals)
 How: Parametrized pytest asserting identical output columns and dtypes from every source.
 Why: It makes source-agnostic downstream code true by construction rather than by hope.
- [H] Confirm the daily Action still produces identical data to macro-v1
+ [H] Confirm the daily Action still produces identical data to macro-v1 (verified locally via a live --fetch run on both branches, byte-identical export except fetched_at -- the daily GH Action itself is still the maintainer's own step to watch on the next scheduled run)
 How: Run the workflow manually on the branch and diff the export.
 Why: A refactor that changes public numbers is a bug, even if the new numbers are better. Fix that separately and deliberately.
 🚦 CONTROL D
- [H] Diff today's export against macro-v1; explain every difference in the PR
+ ✅ [H] Diff today's export against macro-v1; explain every difference in the PR (2026-09-05: 2027 rows, identical apart from fetched_at; FPB fails identically on both branches with 403 Forbidden from plan.be, a pre-existing block, not a regression)
 How: diff on the CSV, or a pandas compare script.
 Why: "Probably rounding" is how wrong numbers enter a product. Each difference needs a named cause.
 Block E — Data catalogue before downloading anything

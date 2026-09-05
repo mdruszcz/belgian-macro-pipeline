@@ -4,10 +4,16 @@ canonical five-table model (docs/features/data_model.md, frozen by
 docs/decisions/0001-data-model.md).
 
 Requires live network access: re-fetches every ported indicator via the
-existing NBBFetcher/DBnomicsFetcher classes (reused, not reimplemented) to
-get real per-row status information, rather than trusting the old DB's
-mostly non-informative obs_status column. This is a deliberate, accepted
-cost of a one-off script -- the daily pipeline does not do this.
+NBBSource/EurostatSource adapters (Block D, src/fetchers/) to get real
+per-row status information, rather than trusting the old DB's mostly
+non-informative obs_status column. This is a deliberate, accepted cost of a
+one-off script -- the daily pipeline does not do this.
+
+Deliberately does not pass `conn` to the adapters' own fetch_runs logging:
+this script already opens and closes its own fetch_runs row per indicator
+(below), with its own accounting of rows_read/rows_written for the port. A
+second, adapter-level row would describe the same network call from a
+different angle and is not needed for a one-off migration script.
 
 SCOPE: eligibility (which indicators are Belgium-only, canonical-eligible)
 and preferred_direction both come from config/indicators/*.yaml
@@ -33,7 +39,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from belgian_macro_db import CONFIG_DIR, SOURCES, DBnomicsFetcher, NBBFetcher  # noqa: E402
+from belgian_macro_db import CONFIG_DIR, SOURCES  # noqa: E402
+from src.fetchers.eurostat import EurostatSource  # noqa: E402
+from src.fetchers.nbb import NBBSource  # noqa: E402
 from src.validation.config_schema import is_canonical_eligible, load_and_validate_all  # noqa: E402
 
 logging.basicConfig(
@@ -185,11 +193,13 @@ def port(db_path: Path, run_date: str | None = None) -> None:
 
         log.info(f"Fetching {code} ({meta['type']})...")
         if meta["type"] == "nbb":
-            rows = NBBFetcher.fetch(meta["url"])
+            rows = NBBSource().fetch(meta["url"], cache_key=code)
             mapped = [(r["period"], r["value"], map_obs_status(r["obs_status"])) for r in rows]
         else:
-            rows = DBnomicsFetcher.fetch(meta["url"], meta.get("unit", ""))
-            # DBnomicsFetcher hardcodes obs_status="A" for every row -- there
+            rows = EurostatSource(source_id=source_id_for(meta["source_agency"])).fetch(
+                meta["url"], cache_key=code, unit=meta.get("unit", "")
+            )
+            # EurostatSource hardcodes obs_status="A" for every row -- there
             # is no real per-row status from this source today. Carried
             # forward as 'final': an inherited simplification, not a new
             # claim asserted by this migration.
