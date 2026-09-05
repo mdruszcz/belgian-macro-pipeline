@@ -6,23 +6,25 @@ spreadsheets, which are gitignored -- so this runs on a fresh clone with no
 downloads. Regenerating those CSVs from raw is a separate manual step
 (scripts/derive_geography_csv.py).
 
-Two kinds of row are written:
+Every row is one *validity window* of one entity: 622 windows open today (the
+country, 3 regions, 10 provinces, 43 arrondissements, 565 communes) and 66
+closed ones -- the 55 communes ended by the 2019 and 2025 merger waves, plus
+the aggregates whose territory changed while keeping their code.
 
-1. **Current entities** (622): the country, 3 regions, 10 provinces, 43
-   arrondissements and 565 communes valid today, with `parent_geo_id` chains
-   terminating at `be:country` and `valid_to` NULL.
-
-2. **Historical predecessors** (55): communes that the 2019 and 2025 merger
-   waves ended. They carry `valid_to` and `successor_geo_id`, which is what
-   lets resolve_geo() return the entity that actually reported a 2015 figure
-   rather than the commune that exists today. Their `parent_geo_id` is left
-   NULL -- the arrondissement they belonged to at the time is not recoverable
-   from these files, and inventing one would attach historical numbers to a
-   possibly-wrong province (the Hasselt/Kortessem merger crossed an
-   arrondissement boundary). See docs/features/geography.md.
+Historical rows carry the parent they actually had at the time, taken from the
+REFNIS vintage that recorded them. That matters: Kortessem sat in
+arrondissement 73000 and was merged into Hasselt, which is in 71000, so
+borrowing its successor's parent would file its history under the wrong
+arrondissement. Loading them without a parent is equally wrong -- it silently
+drops them from every historical province and region aggregate.
 
 `be:country` is upserted, never deleted: every observation in the database
 references it by foreign key.
+
+The loader refuses to run while any crosswalk row still awaits the maintainer's
+sign-off (`verified` in municipality_crosswalk.csv). The derivation flags rows
+whose successor was guessed by name matching, or that involve a partial
+boundary transfer; writing them regardless would make the flagging decorative.
 
 Usage:
     python scripts/load_geography.py --db data/belgian_macro.db
@@ -31,13 +33,12 @@ Usage:
 import argparse
 import csv
 import logging
+import re
 import sqlite3
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from src.geography.refnis import geo_id_for  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_DIR = REPO_ROOT / "config" / "geography"
@@ -81,10 +82,79 @@ def _none_if_blank(value: str | None) -> str | None:
     return value if value else None
 
 
-def load(db_path: Path, config_dir: Path = CONFIG_DIR) -> tuple[int, int]:
-    """Returns (current entities written, historical predecessors written)."""
+class UnverifiedCrosswalkError(Exception):
+    """The crosswalk still contains rows the maintainer has not signed off."""
+
+
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _require_date(value: str, field: str, context: str) -> str:
+    """`valid_from` is NOT NULL in the schema, but an empty string satisfies
+    that and sorts before every real date -- which would make the entity valid
+    for all of recorded history and resolve for any period asked."""
+    if not _DATE_RE.match(value or ""):
+        raise ValueError(
+            f"{context}: {field}={value!r} is not a YYYY-MM-DD date. "
+            "Refusing to load a validity window that would match every period."
+        )
+    return value
+
+
+def _check_crosswalk_reviewed(crosswalk: list[dict], allow_unverified: bool) -> None:
+    """Enforce the [H] review gate that the derivation's flags exist for.
+
+    derive_crosswalk() carefully marks rows whose successor was guessed by name
+    matching, or which involve a partial boundary transfer that is not a 1:1
+    lineage at all. Loading those without a human sign-off would make the
+    flagging decorative -- the loader would write exactly the confident
+    successor links the flags exist to question.
+    """
+    if allow_unverified:
+        return
+    pending = [
+        row
+        for row in crosswalk
+        if (row.get("note") or row.get("has_partial_transfer") == "true")
+        and row.get("verified") != "true"
+    ]
+    if pending:
+        listed = ", ".join(f"{r['old_nis']} ({r['old_name_nl']})" for r in pending)
+        raise UnverifiedCrosswalkError(
+            f"{len(pending)} crosswalk row(s) need maintainer verification before they may be "
+            f"loaded: {listed}. Check each against official merger lists, then set "
+            "verified=true in config/geography/municipality_crosswalk.csv. "
+            "Pass --allow-unverified to load anyway (development only)."
+        )
+
+
+def _check_no_geo_id_collisions(hierarchy: list[dict]) -> None:
+    """`geo_id` is the primary key and an upsert silently overwrites on
+    conflict, so a duplicate would replace a live commune with another entity
+    rather than failing."""
+    seen: dict[str, str] = {}
+    for row in hierarchy:
+        previous = seen.get(row["geo_id"])
+        if previous is not None:
+            raise ValueError(
+                f"Duplicate geo_id {row['geo_id']!r} in geographies.csv "
+                f"({previous} and {row['nis_code']}). An upsert would silently overwrite."
+            )
+        seen[row["geo_id"]] = row["nis_code"]
+
+
+def load(
+    db_path: Path, config_dir: Path = CONFIG_DIR, allow_unverified: bool = False
+) -> tuple[int, int]:
+    """Returns (geography rows written, lineage links written).
+
+    Raises UnverifiedCrosswalkError unless every crosswalk row the derivation
+    flagged has been signed off, or `allow_unverified` is set explicitly.
+    """
     hierarchy = _read_csv(config_dir / "geographies.csv")
     crosswalk = _read_csv(config_dir / "municipality_crosswalk.csv")
+    _check_crosswalk_reviewed(crosswalk, allow_unverified)
+    _check_no_geo_id_collisions(hierarchy)
 
     conn = sqlite3.connect(str(db_path))
     conn.execute("PRAGMA foreign_keys=ON")
@@ -112,54 +182,67 @@ def load(db_path: Path, config_dir: Path = CONFIG_DIR) -> tuple[int, int]:
                 row["name_fr"],
                 row["name_en"],
                 _none_if_blank(row["parent_geo_id"]),
-                row["valid_from"],
+                _require_date(row["valid_from"], "valid_from", row["geo_id"]),
                 _none_if_blank(row["valid_to"]),
                 _none_if_blank(row["successor_geo_id"]),
             ),
         )
 
-    historical = 0
+    # Historical communes are already in geographies.csv, with the real parent
+    # they had in the vintage that recorded them. The crosswalk's only job here
+    # is lineage: pointing each predecessor at its successor.
+    by_nis = {row["nis_code"]: row["geo_id"] for row in hierarchy if not row["valid_to"]}
+    links = 0
     for row in crosswalk:
         successors = [s for s in row["new_nis"].split(";") if s]
-        # A predecessor split across several successors has no single lineage
-        # target; it is flagged for review in the CSV and left without a
-        # successor here rather than being pointed at an arbitrary one.
-        successor_geo_id = (
-            geo_id_for("municipality", successors[0]) if len(successors) == 1 else None
+        # A predecessor split across several successors, or one whose successor
+        # could not be derived, has no single lineage target and is left without
+        # one rather than pointed at an arbitrary commune.
+        if len(successors) != 1:
+            continue
+        successor_geo_id = by_nis.get(successors[0])
+        if successor_geo_id is None:
+            raise ValueError(
+                f"Crosswalk row {row['old_nis']} -> {successors[0]} names a successor that is "
+                "not a currently-valid commune in geographies.csv. Refusing to write a dangling "
+                "lineage link (CLAUDE.md rule 13)."
+            )
+        predecessor_geo_id = by_nis.get(row["old_nis"])
+        if predecessor_geo_id is not None:
+            raise ValueError(
+                f"Crosswalk row {row['old_nis']} is also a currently-valid commune "
+                f"({predecessor_geo_id}). Loading it would mark a live commune as ended."
+            )
+        updated = conn.execute(
+            "UPDATE geographies SET successor_geo_id = ? WHERE nis_code = ? AND valid_to = ?",
+            (successor_geo_id, row["old_nis"], row["valid_to"]),
         )
-        conn.execute(
-            UPSERT_SQL,
-            (
-                geo_id_for("municipality", row["old_nis"]),
-                row["old_nis"],
-                "municipality",
-                row["old_name_nl"],
-                row["old_name_fr"],
-                # No exonym list applies to communes that no longer exist, and
-                # the vintage files carry no English. The Dutch name is the
-                # honest placeholder rather than a fabricated translation.
-                row["old_name_nl"],
-                None,
-                row["valid_from"],
-                row["valid_to"],
-                successor_geo_id,
-            ),
-        )
-        historical += 1
+        if updated.rowcount != 1:
+            raise ValueError(
+                f"Crosswalk row {row['old_nis']} (ended {row['valid_to']}) matched "
+                f"{updated.rowcount} geography rows, expected exactly 1. The crosswalk and "
+                "the hierarchy disagree; refusing to guess."
+            )
+        links += 1
 
     conn.commit()
     conn.close()
-    return len(ordered), historical
+    return len(ordered), links
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Load Belgian geography into the canonical schema")
     parser.add_argument("--db", required=True, help="Path to the SQLite DB file")
     parser.add_argument("--config-dir", default=str(CONFIG_DIR), help="Geography CSV directory")
+    parser.add_argument(
+        "--allow-unverified",
+        action="store_true",
+        help="Load crosswalk rows the maintainer has not signed off (development only)",
+    )
     args = parser.parse_args()
 
-    current, historical = load(Path(args.db), Path(args.config_dir))
-    print(f"Loaded {current} current geography rows and {historical} historical predecessors.")
+    rows, links = load(Path(args.db), Path(args.config_dir), args.allow_unverified)
+    print(f"Loaded {rows} geography rows and {links} lineage links.")
 
 
 if __name__ == "__main__":

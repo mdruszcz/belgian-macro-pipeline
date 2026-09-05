@@ -266,10 +266,17 @@ def test_committed_geographies_csv_matches_expected_counts():
     counts: dict[str, int] = {}
     for row in rows:
         counts[row["level"]] = counts.get(row["level"], 0) + 1
-    assert counts == {
+    current = {}
+    for row in rows:
+        if not row["valid_to"]:
+            current[row["level"]] = current.get(row["level"], 0) + 1
+    assert current == {
         "country": 1,
         "region": 3,
         "province": 10,
         "arrondissement": 43,
         "municipality": 565,
     }
+    # Historical windows: the 55 merged communes plus the aggregates whose
+    # territory changed in 2019 or 2025.
+    assert sum(1 for r in rows if r["valid_to"]) == 66

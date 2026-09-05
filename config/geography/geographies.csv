@@ -1,52 +1,17 @@
 geo_id,nis_code,level,name_nl,name_fr,name_en,parent_geo_id,valid_from,valid_to,successor_geo_id,nuts
-be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,be:prov:10000,1977-01-01,,,BE211
-be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,be:prov:10000,1977-01-01,,,BE212
-be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,be:prov:10000,1977-01-01,,,BE213
-be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,be:reg:04000,1977-01-01,,,BE100
-be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,be:prov:20001,1977-01-01,,,BE241
-be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,be:prov:20001,1977-01-01,,,BE242
-be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,be:prov:20002,1977-01-01,,,BE310
-be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,be:prov:30000,1977-01-01,,,BE251
-be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,be:prov:30000,1977-01-01,,,BE252
-be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,be:prov:30000,1977-01-01,,,BE253
-be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,be:prov:30000,1977-01-01,,,BE254
-be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,be:prov:30000,1977-01-01,,,BE255
-be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,be:prov:30000,1977-01-01,,,BE256
-be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,be:prov:30000,1977-01-01,,,BE257
-be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,be:prov:30000,1977-01-01,,,BE258
-be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,be:prov:40000,1977-01-01,,,BE231
-be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,be:prov:40000,1977-01-01,,,BE232
-be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,be:prov:40000,1977-01-01,,,BE233
-be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,be:prov:40000,1977-01-01,,,BE234
-be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,be:prov:40000,1977-01-01,,,BE235
-be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,be:prov:40000,1977-01-01,,,BE236
-be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,be:prov:50000,1977-01-01,,,BE32A
-be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,be:prov:50000,1977-01-01,,,BE32B
-be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,be:prov:50000,1977-01-01,,,BE323
-be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,be:prov:50000,1977-01-01,,,BE32C
-be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,be:prov:50000,1977-01-01,,,BE32D
-be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,be:prov:50000,1977-01-01,,,BE328
-be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,be:prov:50000,1977-01-01,,,BE329
-be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,be:prov:60000,1977-01-01,,,BE331
-be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,be:prov:60000,1977-01-01,,,BE332
-be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,be:prov:60000,1977-01-01,,,BE336
-be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,be:prov:60000,1977-01-01,,,BE334
-be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,be:prov:70000,1977-01-01,,,BE224
-be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,be:prov:70000,1977-01-01,,,BE225
-be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,be:prov:70000,1977-01-01,,,BE223
-be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,be:prov:80000,1977-01-01,,,BE341
-be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,be:prov:80000,1977-01-01,,,BE342
-be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,be:prov:80000,1977-01-01,,,BE343
-be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,be:prov:80000,1977-01-01,,,BE344
-be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,be:prov:80000,1977-01-01,,,BE345
-be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,be:prov:90000,1977-01-01,,,BE351
-be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,be:prov:90000,1977-01-01,,,BE352
-be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,be:prov:90000,1977-01-01,,,BE353
 be:country,01000,country,HET RIJK,ROYAUME,Belgium,,1830-01-01,,,BE
+be:reg:02000,02000,region,Vlaams Gewest,Région flamande,Flanders,be:country,1977-01-01,,,BE2
+be:reg:03000,03000,region,Waals Gewest,Région wallonne,Wallonia,be:country,1977-01-01,,,BE3
+be:reg:04000,04000,region,Brussels Hoofdstedelijk Gewest,Région de Bruxelles-Capitale,Brussels-Capital Region,be:country,1977-01-01,,,BE1
+be:prov:10000@1977-01-01,10000,province,Provincie Antwerpen,Province d'Anvers,Antwerp,be:reg:02000,1977-01-01,2025-01-01,,
+be:prov:10000,10000,province,Provincie Antwerpen,Province d’Anvers,Antwerp,be:reg:02000,2025-01-01,,,BE21
+be:arr:11000@1977-01-01,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d'Anvers,Arrondissement Antwerpen,be:prov:10000@1977-01-01,1977-01-01,2025-01-01,,
+be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,be:prov:10000,2025-01-01,,,BE211
 be:mun:11001,11001,municipality,Aartselaar,Aartselaar,Aartselaar,be:arr:11000,1977-01-01,,,BE211
 be:mun:11002,11002,municipality,Antwerpen,Anvers,Antwerp,be:arr:11000,1977-01-01,,,BE211
 be:mun:11004,11004,municipality,Boechout,Boechout,Boechout,be:arr:11000,1977-01-01,,,BE211
 be:mun:11005,11005,municipality,Boom,Boom,Boom,be:arr:11000,1977-01-01,,,BE211
+be:mun:11007,11007,municipality,Borsbeek,Borsbeek,Borsbeek,be:arr:11000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:11008,11008,municipality,Brasschaat,Brasschaat,Brasschaat,be:arr:11000,1977-01-01,,,BE211
 be:mun:11009,11009,municipality,Brecht,Brecht,Brecht,be:arr:11000,1977-01-01,,,BE211
 be:mun:11013,11013,municipality,Edegem,Edegem,Edegem,be:arr:11000,1977-01-01,,,BE211
@@ -70,7 +35,9 @@ be:mun:11052,11052,municipality,Wommelgem,Wommelgem,Wommelgem,be:arr:11000,1977-
 be:mun:11053,11053,municipality,Wuustwezel,Wuustwezel,Wuustwezel,be:arr:11000,1977-01-01,,,BE211
 be:mun:11054,11054,municipality,Zandhoven,Zandhoven,Zandhoven,be:arr:11000,1977-01-01,,,BE211
 be:mun:11055,11055,municipality,Zoersel,Zoersel,Zoersel,be:arr:11000,1977-01-01,,,BE211
+be:mun:11056,11056,municipality,Zwijndrecht,Zwijndrecht,Zwijndrecht,be:arr:11000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:11057,11057,municipality,Malle,Malle,Malle,be:arr:11000,1977-01-01,,,BE211
+be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,be:prov:10000,1977-01-01,,,BE212
 be:mun:12002,12002,municipality,Berlaar,Berlaar,Berlaar,be:arr:12000,1977-01-01,,,BE212
 be:mun:12005,12005,municipality,Bonheiden,Bonheiden,Bonheiden,be:arr:12000,1977-01-01,,,BE212
 be:mun:12007,12007,municipality,Bornem,Bornem,Bornem,be:arr:12000,1977-01-01,,,BE212
@@ -80,9 +47,12 @@ be:mun:12021,12021,municipality,Lier,Lierre,Lier,be:arr:12000,1977-01-01,,,BE212
 be:mun:12025,12025,municipality,Mechelen,Malines,Mechelen,be:arr:12000,1977-01-01,,,BE212
 be:mun:12026,12026,municipality,Nijlen,Nijlen,Nijlen,be:arr:12000,1977-01-01,,,BE212
 be:mun:12029,12029,municipality,Putte,Putte,Putte,be:arr:12000,1977-01-01,,,BE212
+be:mun:12030,12030,municipality,Puurs,Puurs,Puurs,be:arr:12000,1977-01-01,2019-01-01,,
+be:mun:12034,12034,municipality,Sint-Amands,Sint-Amands,Sint-Amands,be:arr:12000,1977-01-01,2019-01-01,,
 be:mun:12035,12035,municipality,Sint-Katelijne-Waver,Sint-Katelijne-Waver,Sint-Katelijne-Waver,be:arr:12000,1977-01-01,,,BE212
 be:mun:12040,12040,municipality,Willebroek,Willebroek,Willebroek,be:arr:12000,1977-01-01,,,BE212
 be:mun:12041,12041,municipality,Puurs-Sint-Amands,Puurs-Sint-Amands,Puurs-Sint-Amands,be:arr:12000,2019-01-01,,,BE212
+be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,be:prov:10000,1977-01-01,,,BE213
 be:mun:13001,13001,municipality,Arendonk,Arendonk,Arendonk,be:arr:13000,1977-01-01,,,BE213
 be:mun:13002,13002,municipality,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,be:arr:13000,1977-01-01,,,BE213
 be:mun:13003,13003,municipality,Balen,Balen,Balen,be:arr:13000,1977-01-01,,,BE213
@@ -110,6 +80,9 @@ be:mun:13044,13044,municipality,Vorselaar,Vorselaar,Vorselaar,be:arr:13000,1977-
 be:mun:13046,13046,municipality,Vosselaar,Vosselaar,Vosselaar,be:arr:13000,1977-01-01,,,BE213
 be:mun:13049,13049,municipality,Westerlo,Westerlo,Westerlo,be:arr:13000,1977-01-01,,,BE213
 be:mun:13053,13053,municipality,Laakdal,Laakdal,Laakdal,be:arr:13000,1977-01-01,,,BE213
+be:prov:20001,20001,province,Provincie Vlaams-Brabant,Province du Brabant flamand,Flemish Brabant,be:reg:02000,1977-01-01,,,BE24
+be:prov:20002,20002,province,Provincie Waals-Brabant,Province du Brabant wallon,Walloon Brabant,be:reg:03000,1977-01-01,,,BE31
+be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,be:reg:04000,1977-01-01,,,BE100
 be:mun:21001,21001,municipality,Anderlecht,Anderlecht,Anderlecht,be:arr:21000,1977-01-01,,,BE100
 be:mun:21002,21002,municipality,Oudergem,Auderghem,Auderghem,be:arr:21000,1977-01-01,,,BE100
 be:mun:21003,21003,municipality,Sint-Agatha-Berchem,Berchem-Sainte-Agathe,Berchem-Sainte-Agathe,be:arr:21000,1977-01-01,,,BE100
@@ -129,12 +102,16 @@ be:mun:21016,21016,municipality,Ukkel,Uccle,Uccle,be:arr:21000,1977-01-01,,,BE10
 be:mun:21017,21017,municipality,Watermaal-Bosvoorde,Watermael-Boitsfort,Watermael-Boitsfort,be:arr:21000,1977-01-01,,,BE100
 be:mun:21018,21018,municipality,Sint-Lambrechts-Woluwe,Woluwe-Saint-Lambert,Woluwe-Saint-Lambert,be:arr:21000,1977-01-01,,,BE100
 be:mun:21019,21019,municipality,Sint-Pieters-Woluwe,Woluwe-Saint-Pierre,Woluwe-Saint-Pierre,be:arr:21000,1977-01-01,,,BE100
+be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,be:prov:20001,1977-01-01,,,BE241
 be:mun:23002,23002,municipality,Asse,Asse,Asse,be:arr:23000,1977-01-01,,,BE241
 be:mun:23003,23003,municipality,Beersel,Beersel,Beersel,be:arr:23000,1977-01-01,,,BE241
 be:mun:23009,23009,municipality,Bever,Biévène,Bever,be:arr:23000,1977-01-01,,,BE241
 be:mun:23016,23016,municipality,Dilbeek,Dilbeek,Dilbeek,be:arr:23000,1977-01-01,,,BE241
+be:mun:23023,23023,municipality,Galmaarden,Gammerages,Galmaarden,be:arr:23000,1977-01-01,2025-01-01,,
+be:mun:23024,23024,municipality,Gooik,Gooik,Gooik,be:arr:23000,1977-01-01,2025-01-01,,
 be:mun:23025,23025,municipality,Grimbergen,Grimbergen,Grimbergen,be:arr:23000,1977-01-01,,,BE241
 be:mun:23027,23027,municipality,Halle,Hal,Halle,be:arr:23000,1977-01-01,,,BE241
+be:mun:23032,23032,municipality,Herne,Herne,Herne,be:arr:23000,1977-01-01,2025-01-01,,
 be:mun:23033,23033,municipality,Hoeilaart,Hoeilaart,Hoeilaart,be:arr:23000,1977-01-01,,,BE241
 be:mun:23038,23038,municipality,Kampenhout,Kampenhout,Kampenhout,be:arr:23000,1977-01-01,,,BE241
 be:mun:23039,23039,municipality,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,be:arr:23000,1977-01-01,,,BE241
@@ -162,6 +139,7 @@ be:mun:23103,23103,municipality,Wezembeek-Oppem,Wezembeek-Oppem,Wezembeek-Oppem,
 be:mun:23104,23104,municipality,Lennik,Lennik,Lennik,be:arr:23000,1977-01-01,,,BE241
 be:mun:23105,23105,municipality,Affligem,Affligem,Affligem,be:arr:23000,1977-01-01,,,BE241
 be:mun:23106,23106,municipality,Pajottegem,Pajottegem,Pajottegem,be:arr:23000,2025-01-01,,,BE241
+be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,be:prov:20001,1977-01-01,,,BE242
 be:mun:24001,24001,municipality,Aarschot,Aarschot,Aarschot,be:arr:24000,1977-01-01,,,BE242
 be:mun:24007,24007,municipality,Begijnendijk,Begijnendijk,Begijnendijk,be:arr:24000,1977-01-01,,,BE242
 be:mun:24008,24008,municipality,Bekkevoort,Bekkevoort,Bekkevoort,be:arr:24000,1977-01-01,,,BE242
@@ -192,6 +170,7 @@ be:mun:24133,24133,municipality,Linter,Linter,Linter,be:arr:24000,1977-01-01,,,B
 be:mun:24134,24134,municipality,Scherpenheuvel-Zichem,Montaigu-Zichem,Scherpenheuvel-Zichem,be:arr:24000,1977-01-01,,,BE242
 be:mun:24135,24135,municipality,Tielt-Winge,Tielt-Winge,Tielt-Winge,be:arr:24000,1977-01-01,,,BE242
 be:mun:24137,24137,municipality,Glabbeek,Glabbeek,Glabbeek,be:arr:24000,1977-01-01,,,BE242
+be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,be:prov:20002,1977-01-01,,,BE310
 be:mun:25005,25005,municipality,Bevekom,Beauvechain,Beauvechain,be:arr:25000,1977-01-01,,,BE310
 be:mun:25014,25014,municipality,Eigenbrakel,Braine-l’Alleud,Braine-l’Alleud,be:arr:25000,1977-01-01,,,BE310
 be:mun:25015,25015,municipality,Kasteelbrakel,Braine-le-Château,Braine-le-Château,be:arr:25000,1977-01-01,,,BE310
@@ -219,6 +198,8 @@ be:mun:25121,25121,municipality,Ottignies-Louvain-la-Neuve,Ottignies-Louvain-la-
 be:mun:25122,25122,municipality,Ramillies,Ramillies,Ramillies,be:arr:25000,1977-01-01,,,BE310
 be:mun:25123,25123,municipality,Rebecq,Rebecq,Rebecq,be:arr:25000,1977-01-01,,,BE310
 be:mun:25124,25124,municipality,Walhain,Walhain,Walhain,be:arr:25000,1977-01-01,,,BE310
+be:prov:30000,30000,province,Provincie West-Vlaanderen,Province de Flandre occidentale,West Flanders,be:reg:02000,1977-01-01,,,BE25
+be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,be:prov:30000,1977-01-01,,,BE251
 be:mun:31003,31003,municipality,Beernem,Beernem,Beernem,be:arr:31000,1977-01-01,,,BE251
 be:mun:31004,31004,municipality,Blankenberge,Blankenberge,Blankenberge,be:arr:31000,1977-01-01,,,BE251
 be:mun:31005,31005,municipality,Brugge,Bruges,Bruges,be:arr:31000,1977-01-01,,,BE251
@@ -229,11 +210,13 @@ be:mun:31033,31033,municipality,Torhout,Torhout,Torhout,be:arr:31000,1977-01-01,
 be:mun:31040,31040,municipality,Zedelgem,Zedelgem,Zedelgem,be:arr:31000,1977-01-01,,,BE251
 be:mun:31042,31042,municipality,Zuienkerke,Zuienkerke,Zuienkerke,be:arr:31000,1977-01-01,,,BE251
 be:mun:31043,31043,municipality,Knokke-Heist,Knokke-Heist,Knokke-Heist,be:arr:31000,1977-01-01,,,BE251
+be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,be:prov:30000,1977-01-01,,,BE252
 be:mun:32003,32003,municipality,Diksmuide,Dixmude,Diksmuide,be:arr:32000,1977-01-01,,,BE252
 be:mun:32006,32006,municipality,Houthulst,Houthulst,Houthulst,be:arr:32000,1977-01-01,,,BE252
 be:mun:32010,32010,municipality,Koekelare,Koekelare,Koekelare,be:arr:32000,1977-01-01,,,BE252
 be:mun:32011,32011,municipality,Kortemark,Kortemark,Kortemark,be:arr:32000,1977-01-01,,,BE252
 be:mun:32030,32030,municipality,Lo-Reninge,Lo-Reninge,Lo-Reninge,be:arr:32000,1977-01-01,,,BE252
+be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,be:prov:30000,1977-01-01,,,BE253
 be:mun:33011,33011,municipality,Ieper,Ypres,Ypres,be:arr:33000,1977-01-01,,,BE253
 be:mun:33016,33016,municipality,Mesen,Messines,Mesen,be:arr:33000,1977-01-01,,,BE253
 be:mun:33021,33021,municipality,Poperinge,Poperinge,Poperinge,be:arr:33000,1977-01-01,,,BE253
@@ -242,6 +225,7 @@ be:mun:33037,33037,municipality,Zonnebeke,Zonnebeke,Zonnebeke,be:arr:33000,1977-
 be:mun:33039,33039,municipality,Heuvelland,Heuvelland,Heuvelland,be:arr:33000,1977-01-01,,,BE253
 be:mun:33040,33040,municipality,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,be:arr:33000,1977-01-01,,,BE253
 be:mun:33041,33041,municipality,Vleteren,Vleteren,Vleteren,be:arr:33000,1977-01-01,,,BE253
+be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,be:prov:30000,1977-01-01,,,BE254
 be:mun:34002,34002,municipality,Anzegem,Anzegem,Anzegem,be:arr:34000,1977-01-01,,,BE254
 be:mun:34003,34003,municipality,Avelgem,Avelgem,Avelgem,be:arr:34000,1977-01-01,,,BE254
 be:mun:34009,34009,municipality,Deerlijk,Deerlijk,Deerlijk,be:arr:34000,1977-01-01,,,BE254
@@ -254,6 +238,7 @@ be:mun:34040,34040,municipality,Waregem,Waregem,Waregem,be:arr:34000,1977-01-01,
 be:mun:34041,34041,municipality,Wevelgem,Wevelgem,Wevelgem,be:arr:34000,1977-01-01,,,BE254
 be:mun:34042,34042,municipality,Zwevegem,Zwevegem,Zwevegem,be:arr:34000,1977-01-01,,,BE254
 be:mun:34043,34043,municipality,Spiere-Helkijn,Espierres-Helchin,Spiere-Helkijn,be:arr:34000,1977-01-01,,,BE254
+be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,be:prov:30000,1977-01-01,,,BE255
 be:mun:35002,35002,municipality,Bredene,Bredene,Bredene,be:arr:35000,1977-01-01,,,BE255
 be:mun:35005,35005,municipality,Gistel,Gistel,Gistel,be:arr:35000,1977-01-01,,,BE255
 be:mun:35006,35006,municipality,Ichtegem,Ichtegem,Ichtegem,be:arr:35000,1977-01-01,,,BE255
@@ -261,6 +246,7 @@ be:mun:35011,35011,municipality,Middelkerke,Middelkerke,Middelkerke,be:arr:35000
 be:mun:35013,35013,municipality,Oostende,Ostende,Ostend,be:arr:35000,1977-01-01,,,BE255
 be:mun:35014,35014,municipality,Oudenburg,Oudenburg,Oudenburg,be:arr:35000,1977-01-01,,,BE255
 be:mun:35029,35029,municipality,De Haan,De Haan,De Haan,be:arr:35000,1977-01-01,,,BE255
+be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,be:prov:30000,1977-01-01,,,BE256
 be:mun:36006,36006,municipality,Hooglede,Hooglede,Hooglede,be:arr:36000,1977-01-01,,,BE256
 be:mun:36007,36007,municipality,Ingelmunster,Ingelmunster,Ingelmunster,be:arr:36000,1977-01-01,,,BE256
 be:mun:36008,36008,municipality,Izegem,Izegem,Izegem,be:arr:36000,1977-01-01,,,BE256
@@ -269,18 +255,26 @@ be:mun:36011,36011,municipality,Lichtervelde,Lichtervelde,Lichtervelde,be:arr:36
 be:mun:36012,36012,municipality,Moorslede,Moorslede,Moorslede,be:arr:36000,1977-01-01,,,BE256
 be:mun:36015,36015,municipality,Roeselare,Roulers,Roeselare,be:arr:36000,1977-01-01,,,BE256
 be:mun:36019,36019,municipality,Staden,Staden,Staden,be:arr:36000,1977-01-01,,,BE256
+be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,be:prov:30000,1977-01-01,,,BE257
 be:mun:37002,37002,municipality,Dentergem,Dentergem,Dentergem,be:arr:37000,1977-01-01,,,BE257
+be:mun:37007,37007,municipality,Meulebeke,Meulebeke,Meulebeke,be:arr:37000,1977-01-01,2025-01-01,,
 be:mun:37010,37010,municipality,Oostrozebeke,Oostrozebeke,Oostrozebeke,be:arr:37000,1977-01-01,,,BE257
 be:mun:37011,37011,municipality,Pittem,Pittem,Pittem,be:arr:37000,1977-01-01,,,BE257
+be:mun:37012,37012,municipality,Ruiselede,Ruiselede,Ruiselede,be:arr:37000,1977-01-01,2025-01-01,,
+be:mun:37015,37015,municipality,Tielt,Tielt,Tielt,be:arr:37000,1977-01-01,2025-01-01,,
 be:mun:37017,37017,municipality,Wielsbeke,Wielsbeke,Wielsbeke,be:arr:37000,1977-01-01,,,BE257
+be:mun:37018,37018,municipality,Wingene,Wingene,Wingene,be:arr:37000,1977-01-01,2025-01-01,,
 be:mun:37020,37020,municipality,Ardooie,Ardooie,Ardooie,be:arr:37000,1977-01-01,,,BE257
 be:mun:37021,37021,municipality,Wingene,Wingene,Wingene,be:arr:37000,2025-01-01,,,BE257
 be:mun:37022,37022,municipality,Tielt,Tielt,Tielt,be:arr:37000,2025-01-01,,,BE257
+be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,be:prov:30000,1977-01-01,,,BE258
 be:mun:38002,38002,municipality,Alveringem,Alveringem,Alveringem,be:arr:38000,1977-01-01,,,BE258
 be:mun:38008,38008,municipality,De Panne,La Panne,De Panne,be:arr:38000,1977-01-01,,,BE258
 be:mun:38014,38014,municipality,Koksijde,Koksijde,Koksijde,be:arr:38000,1977-01-01,,,BE258
 be:mun:38016,38016,municipality,Nieuwpoort,Nieuport,Nieuwpoort,be:arr:38000,1977-01-01,,,BE258
 be:mun:38025,38025,municipality,Veurne,Furnes,Veurne,be:arr:38000,1977-01-01,,,BE258
+be:prov:40000,40000,province,Provincie Oost-Vlaanderen,Province de Flandre orientale,East Flanders,be:reg:02000,1977-01-01,,,BE23
+be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,be:prov:40000,1977-01-01,,,BE231
 be:mun:41002,41002,municipality,Aalst,Alost,Aalst,be:arr:41000,1977-01-01,,,BE231
 be:mun:41011,41011,municipality,Denderleeuw,Denderleeuw,Denderleeuw,be:arr:41000,1977-01-01,,,BE231
 be:mun:41018,41018,municipality,Geraardsbergen,Grammont,Geraardsbergen,be:arr:41000,1977-01-01,,,BE231
@@ -291,6 +285,7 @@ be:mun:41048,41048,municipality,Ninove,Ninove,Ninove,be:arr:41000,1977-01-01,,,B
 be:mun:41063,41063,municipality,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,be:arr:41000,1977-01-01,,,BE231
 be:mun:41081,41081,municipality,Zottegem,Zottegem,Zottegem,be:arr:41000,1977-01-01,,,BE231
 be:mun:41082,41082,municipality,Erpe-Mere,Erpe-Mere,Erpe-Mere,be:arr:41000,1977-01-01,,,BE231
+be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,be:prov:40000,1977-01-01,,,BE232
 be:mun:42003,42003,municipality,Berlare,Berlare,Berlare,be:arr:42000,1977-01-01,,,BE232
 be:mun:42004,42004,municipality,Buggenhout,Buggenhout,Buggenhout,be:arr:42000,1977-01-01,,,BE232
 be:mun:42006,42006,municipality,Dendermonde,Termonde,Dendermonde,be:arr:42000,1977-01-01,,,BE232
@@ -301,18 +296,35 @@ be:mun:42023,42023,municipality,Waasmunster,Waasmunster,Waasmunster,be:arr:42000
 be:mun:42025,42025,municipality,Wetteren,Wetteren,Wetteren,be:arr:42000,1977-01-01,,,BE232
 be:mun:42026,42026,municipality,Wichelen,Wichelen,Wichelen,be:arr:42000,1977-01-01,,,BE232
 be:mun:42028,42028,municipality,Zele,Zele,Zele,be:arr:42000,1977-01-01,,,BE232
+be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,be:prov:40000,1977-01-01,,,BE233
 be:mun:43002,43002,municipality,Assenede,Assenede,Assenede,be:arr:43000,1977-01-01,,,BE233
 be:mun:43005,43005,municipality,Eeklo,Eeklo,Eeklo,be:arr:43000,1977-01-01,,,BE233
 be:mun:43007,43007,municipality,Kaprijke,Kaprijke,Kaprijke,be:arr:43000,1977-01-01,,,BE233
 be:mun:43010,43010,municipality,Maldegem,Maldegem,Maldegem,be:arr:43000,1977-01-01,,,BE233
 be:mun:43014,43014,municipality,Sint-Laureins,Sint-Laureins,Sint-Laureins,be:arr:43000,1977-01-01,,,BE233
 be:mun:43018,43018,municipality,Zelzate,Zelzate,Zelzate,be:arr:43000,1977-01-01,,,BE233
+be:arr:44000@1977-01-01,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,be:prov:40000,1977-01-01,2025-01-01,,
+be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,be:prov:40000,2025-01-01,,,BE234
+be:mun:44001,44001,municipality,Aalter,Aalter,Aalter,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:44011,44011,municipality,Deinze,Deinze,Deinze,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:44012,44012,municipality,De Pinte,De Pinte,De Pinte,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:44013,44013,municipality,Destelbergen,Destelbergen,Destelbergen,be:arr:44000,1977-01-01,,,BE234
 be:mun:44019,44019,municipality,Evergem,Evergem,Evergem,be:arr:44000,1977-01-01,,,BE234
 be:mun:44020,44020,municipality,Gavere,Gavere,Gavere,be:arr:44000,1977-01-01,,,BE234
 be:mun:44021,44021,municipality,Gent,Gand,Ghent,be:arr:44000,1977-01-01,,,BE234
+be:mun:44029,44029,municipality,Knesselare,Knesselare,Knesselare,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:44034,44034,municipality,Lochristi,Lochristi,Lochristi,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:44036,44036,municipality,Lovendegem,Lovendegem,Lovendegem,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:44040,44040,municipality,Melle,Melle,Melle,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:44043,44043,municipality,Merelbeke,Merelbeke,Merelbeke,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:44045,44045,municipality,Moerbeke,Moerbeke,Moerbeke,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:44048,44048,municipality,Nazareth,Nazareth,Nazareth,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:44049,44049,municipality,Nevele,Nevele,Nevele,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:44052,44052,municipality,Oosterzele,Oosterzele,Oosterzele,be:arr:44000,1977-01-01,,,BE234
 be:mun:44064,44064,municipality,Sint-Martens-Latem,Sint-Martens-Latem,Sint-Martens-Latem,be:arr:44000,1977-01-01,,,BE234
+be:mun:44072,44072,municipality,Waarschoot,Waarschoot,Waarschoot,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:44073,44073,municipality,Wachtebeke,Wachtebeke,Wachtebeke,be:arr:44000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:44080,44080,municipality,Zomergem,Zomergem,Zomergem,be:arr:44000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:44081,44081,municipality,Zulte,Zulte,Zulte,be:arr:44000,1977-01-01,,,BE234
 be:mun:44083,44083,municipality,Deinze,Deinze,Deinze,be:arr:44000,2019-01-01,,,BE234
 be:mun:44084,44084,municipality,Aalter,Aalter,Aalter,be:arr:44000,2019-01-01,,,BE234
@@ -320,8 +332,11 @@ be:mun:44085,44085,municipality,Lievegem,Lievegem,Lievegem,be:arr:44000,2019-01-
 be:mun:44086,44086,municipality,Nazareth-De Pinte,Nazareth-De Pinte,Nazareth-De Pinte,be:arr:44000,2025-01-01,,,BE234
 be:mun:44087,44087,municipality,Lochristi,Lochristi,Lochristi,be:arr:44000,2025-01-01,,,BE234
 be:mun:44088,44088,municipality,Merelbeke-Melle,Merelbeke-Melle,Merelbeke-Melle,be:arr:44000,2025-01-01,,,BE234
+be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,be:prov:40000,1977-01-01,,,BE235
+be:mun:45017,45017,municipality,Kruishoutem,Kruishoutem,Kruishoutem,be:arr:45000,1977-01-01,2019-01-01,,
 be:mun:45035,45035,municipality,Oudenaarde,Audenarde,Oudenaarde,be:arr:45000,1977-01-01,,,BE235
 be:mun:45041,45041,municipality,Ronse,Renaix,Ronse,be:arr:45000,1977-01-01,,,BE235
+be:mun:45057,45057,municipality,Zingem,Zingem,Zingem,be:arr:45000,1977-01-01,2019-01-01,,
 be:mun:45059,45059,municipality,Brakel,Brakel,Brakel,be:arr:45000,1977-01-01,,,BE235
 be:mun:45060,45060,municipality,Kluisbergen,Kluisbergen,Kluisbergen,be:arr:45000,1977-01-01,,,BE235
 be:mun:45061,45061,municipality,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,be:arr:45000,1977-01-01,,,BE235
@@ -330,12 +345,19 @@ be:mun:45063,45063,municipality,Lierde,Lierde,Lierde,be:arr:45000,1977-01-01,,,B
 be:mun:45064,45064,municipality,Maarkedal,Maarkedal,Maarkedal,be:arr:45000,1977-01-01,,,BE235
 be:mun:45065,45065,municipality,Zwalm,Zwalin,Zwalm,be:arr:45000,1977-01-01,,,BE235
 be:mun:45068,45068,municipality,Kruisem,Kruisem,Kruisem,be:arr:45000,2019-01-01,,,BE235
+be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,be:prov:40000,1977-01-01,,,BE236
+be:mun:46003,46003,municipality,Beveren,Beveren,Beveren,be:arr:46000,1977-01-01,2025-01-01,,
+be:mun:46013,46013,municipality,Kruibeke,Kruibeke,Kruibeke,be:arr:46000,1977-01-01,2025-01-01,,
+be:mun:46014,46014,municipality,Lokeren,Lokeren,Lokeren,be:arr:46000,1977-01-01,2025-01-01,,
 be:mun:46020,46020,municipality,Sint-Gillis-Waas,Sint-Gillis-Waas,Sint-Gillis-Waas,be:arr:46000,1977-01-01,,,BE236
 be:mun:46021,46021,municipality,Sint-Niklaas,Saint-Nicolas,Sint-Niklaas,be:arr:46000,1977-01-01,,,BE236
 be:mun:46024,46024,municipality,Stekene,Stekene,Stekene,be:arr:46000,1977-01-01,,,BE236
 be:mun:46025,46025,municipality,Temse,Tamise,Temse,be:arr:46000,1977-01-01,,,BE236
 be:mun:46029,46029,municipality,Lokeren,Lokeren,Lokeren,be:arr:46000,2025-01-01,,,BE236
 be:mun:46030,46030,municipality,Beveren-Kruibeke-Zwijndrecht,Beveren-Kruibeke-Zwijndrecht,Beveren-Kruibeke-Zwijndrecht,be:arr:46000,2025-01-01,,,BE236
+be:prov:50000,50000,province,Provincie Henegouwen,Province du Hainaut,Hainaut,be:reg:03000,1977-01-01,,,BE32
+be:arr:51000@1977-01-01,51000,arrondissement,Arrondissement Aat,Arrondissement d'Ath,Arrondissement Aat,be:prov:50000,1977-01-01,2019-01-01,,
+be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,be:prov:50000,2019-01-01,,,BE32A
 be:mun:51004,51004,municipality,Aat,Ath,Ath,be:arr:51000,1977-01-01,,,BE32A
 be:mun:51008,51008,municipality,Beloeil,Beloeil,Beloeil,be:arr:51000,1977-01-01,,,BE32A
 be:mun:51009,51009,municipality,Bernissart,Bernissart,Bernissart,be:arr:51000,1977-01-01,,,BE32A
@@ -347,6 +369,8 @@ be:mun:51065,51065,municipality,Frasnes-lez-Anvaing,Frasnes-lez-Anvaing,Frasnes-
 be:mun:51067,51067,municipality,Edingen,Enghien,Enghien,be:arr:51000,2019-01-01,,,BE32A
 be:mun:51068,51068,municipality,Opzullik,Silly,Silly,be:arr:51000,2019-01-01,,,BE32A
 be:mun:51069,51069,municipality,Lessen,Lessines,Lessines,be:arr:51000,2019-01-01,,,BE32A
+be:arr:52000@1977-01-01,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,be:prov:50000,1977-01-01,2019-01-01,,
+be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,be:prov:50000,2019-01-01,,,BE32B
 be:mun:52010,52010,municipality,Chapelle-lez-Herlaimont,Chapelle-lez-Herlaimont,Chapelle-lez-Herlaimont,be:arr:52000,1977-01-01,,,BE32B
 be:mun:52011,52011,municipality,Charleroi,Charleroi,Charleroi,be:arr:52000,1977-01-01,,,BE32B
 be:mun:52012,52012,municipality,Châtelet,Châtelet,Châtelet,be:arr:52000,1977-01-01,,,BE32B
@@ -355,10 +379,13 @@ be:mun:52018,52018,municipality,Farciennes,Farciennes,Farciennes,be:arr:52000,19
 be:mun:52021,52021,municipality,Fleurus,Fleurus,Fleurus,be:arr:52000,1977-01-01,,,BE32B
 be:mun:52022,52022,municipality,Fontaine-l’Evêque,Fontaine-l’Evêque,Fontaine-l’Evêque,be:arr:52000,1977-01-01,,,BE32B
 be:mun:52025,52025,municipality,Gerpinnes,Gerpinnes,Gerpinnes,be:arr:52000,1977-01-01,,,BE32B
+be:mun:52043,52043,municipality,Manage,Manage,Manage,be:arr:52000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:52048,52048,municipality,Montigny-le-Tilleul,Montigny-le-Tilleul,Montigny-le-Tilleul,be:arr:52000,1977-01-01,,,BE32B
 be:mun:52055,52055,municipality,Pont-à-Celles,Pont-à-Celles,Pont-à-Celles,be:arr:52000,1977-01-01,,,BE32B
+be:mun:52063,52063,municipality,Seneffe,Seneffe,Seneffe,be:arr:52000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:52074,52074,municipality,Aiseau-Presles,Aiseau-Presles,Aiseau-Presles,be:arr:52000,1977-01-01,,,BE32B
 be:mun:52075,52075,municipality,Les Bons Villers,Les Bons Villers,Les Bons Villers,be:arr:52000,1977-01-01,,,BE32B
+be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,be:prov:50000,1977-01-01,,,BE323
 be:mun:53014,53014,municipality,Boussu,Boussu,Boussu,be:arr:53000,1977-01-01,,,BE323
 be:mun:53020,53020,municipality,Dour,Dour,Dour,be:arr:53000,1977-01-01,,,BE323
 be:mun:53028,53028,municipality,Frameries,Frameries,Frameries,be:arr:53000,1977-01-01,,,BE323
@@ -372,14 +399,26 @@ be:mun:53070,53070,municipality,Saint-Ghislain,Saint-Ghislain,Saint-Ghislain,be:
 be:mun:53082,53082,municipality,Colfontaine,Colfontaine,Colfontaine,be:arr:53000,1977-01-01,,,BE323
 be:mun:53083,53083,municipality,Honnelles,Honnelles,Honnelles,be:arr:53000,1977-01-01,,,BE323
 be:mun:53084,53084,municipality,Quévy,Quévy,Quévy,be:arr:53000,1977-01-01,,,BE323
+be:arr:54000,54000,arrondissement,Arrondissement Moeskroen,Arrondissement de Mouscron,Arrondissement Moeskroen,be:prov:50000,1977-01-01,2019-01-01,,
+be:mun:54007,54007,municipality,Moeskroen,Mouscron,Moeskroen,be:arr:54000,1977-01-01,2019-01-01,,
+be:mun:54010,54010,municipality,Komen-Waasten,Comines-Warneton,Komen-Waasten,be:arr:54000,1977-01-01,2019-01-01,,
+be:arr:55000@1977-01-01,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,be:prov:50000,1977-01-01,2019-01-01,,
+be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,be:prov:50000,2019-01-01,,,BE32C
 be:mun:55004,55004,municipality,’s Gravenbrakel,Braine-le-Comte,Braine-le-Comte,be:arr:55000,1977-01-01,,,BE32C
+be:mun:55010,55010,municipality,Edingen,Enghien,Edingen,be:arr:55000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:55022,55022,municipality,La Louvière,La Louvière,La Louvière,be:arr:55000@1977-01-01,1977-01-01,2019-01-01,,
+be:mun:55023,55023,municipality,Lessen,Lessines,Lessen,be:arr:55000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:55035,55035,municipality,Le Roeulx,Le Roeulx,Le Roeulx,be:arr:55000,1977-01-01,,,BE32C
+be:mun:55039,55039,municipality,Opzullik,Silly,Opzullik,be:arr:55000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:55040,55040,municipality,Zinnik,Soignies,Soignies,be:arr:55000,1977-01-01,,,BE32C
 be:mun:55050,55050,municipality,Ecaussinnes,Ecaussinnes,Ecaussinnes,be:arr:55000,1977-01-01,,,BE32C
 be:mun:55085,55085,municipality,Seneffe,Seneffe,Seneffe,be:arr:55000,2019-01-01,,,BE32C
 be:mun:55086,55086,municipality,Manage,Manage,Manage,be:arr:55000,2019-01-01,,,BE32C
+be:arr:56000@1977-01-01,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,be:prov:50000,1977-01-01,2019-01-01,,
+be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,be:prov:50000,2019-01-01,,,BE32D
 be:mun:56001,56001,municipality,Anderlues,Anderlues,Anderlues,be:arr:56000,1977-01-01,,,BE32D
 be:mun:56005,56005,municipality,Beaumont,Beaumont,Beaumont,be:arr:56000,1977-01-01,,,BE32D
+be:mun:56011,56011,municipality,Binche,Binche,Binche,be:arr:56000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:56016,56016,municipality,Chimay,Chimay,Chimay,be:arr:56000,1977-01-01,,,BE32D
 be:mun:56022,56022,municipality,Erquelinnes,Erquelinnes,Erquelinnes,be:arr:56000,1977-01-01,,,BE32D
 be:mun:56029,56029,municipality,Froidchapelle,Froidchapelle,Froidchapelle,be:arr:56000,1977-01-01,,,BE32D
@@ -387,8 +426,12 @@ be:mun:56044,56044,municipality,Lobbes,Lobbes,Lobbes,be:arr:56000,1977-01-01,,,B
 be:mun:56049,56049,municipality,Merbes-le-Château,Merbes-le-Château,Merbes-le-Château,be:arr:56000,1977-01-01,,,BE32D
 be:mun:56051,56051,municipality,Momignies,Momignies,Momignies,be:arr:56000,1977-01-01,,,BE32D
 be:mun:56078,56078,municipality,Thuin,Thuin,Thuin,be:arr:56000,1977-01-01,,,BE32D
+be:mun:56085,56085,municipality,Estinnes,Estinnes,Estinnes,be:arr:56000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:56086,56086,municipality,Ham-sur-Heure-Nalinnes,Ham-sur-Heure-Nalinnes,Ham-sur-Heure-Nalinnes,be:arr:56000,1977-01-01,,,BE32D
+be:mun:56087,56087,municipality,Morlanwelz,Morlanwelz,Morlanwelz,be:arr:56000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:56088,56088,municipality,Sivry-Rance,Sivry-Rance,Sivry-Rance,be:arr:56000,1977-01-01,,,BE32D
+be:arr:57000@1977-01-01,57000,arrondissement,Arrondissement Doornik,Arrondissement de Tournai,Arrondissement Doornik,be:prov:50000,1977-01-01,2019-01-01,,
+be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,be:prov:50000,2019-01-01,,,BE328
 be:mun:57003,57003,municipality,Antoing,Antoing,Antoing,be:arr:57000,1977-01-01,,,BE328
 be:mun:57018,57018,municipality,Celles,Celles,Celles,be:arr:57000,1977-01-01,,,BE328
 be:mun:57027,57027,municipality,Estaimpuis,Estaimpuis,Estaimpuis,be:arr:57000,1977-01-01,,,BE328
@@ -401,10 +444,13 @@ be:mun:57094,57094,municipality,Leuze-en-Hainaut,Leuze-en-Hainaut,Leuze-en-Haina
 be:mun:57095,57095,municipality,Mont-de-l’Enclus,Mont-de-l’Enclus,Mont-de-l’Enclus,be:arr:57000,1977-01-01,,,BE328
 be:mun:57096,57096,municipality,Moeskroen,Mouscron,Mouscron,be:arr:57000,2019-01-01,,,BE328
 be:mun:57097,57097,municipality,Komen-Waasten,Comines-Warneton,Comines-Warneton,be:arr:57000,2019-01-01,,,BE328
+be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,be:prov:50000,2019-01-01,,,BE329
 be:mun:58001,58001,municipality,La Louvière,La Louvière,La Louvière,be:arr:58000,2019-01-01,,,BE329
 be:mun:58002,58002,municipality,Binche,Binche,Binche,be:arr:58000,2019-01-01,,,BE329
 be:mun:58003,58003,municipality,Estinnes,Estinnes,Estinnes,be:arr:58000,2019-01-01,,,BE329
 be:mun:58004,58004,municipality,Morlanwelz,Morlanwelz,Morlanwelz,be:arr:58000,2019-01-01,,,BE329
+be:prov:60000,60000,province,Provincie Luik,Province de Liège,Liège,be:reg:03000,1977-01-01,,,BE33
+be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,be:prov:60000,1977-01-01,,,BE331
 be:mun:61003,61003,municipality,Amay,Amay,Amay,be:arr:61000,1977-01-01,,,BE331
 be:mun:61010,61010,municipality,Burdinne,Burdinne,Burdinne,be:arr:61000,1977-01-01,,,BE331
 be:mun:61012,61012,municipality,Clavier,Clavier,Clavier,be:arr:61000,1977-01-01,,,BE331
@@ -422,6 +468,7 @@ be:mun:61072,61072,municipality,Wanze,Wanze,Wanze,be:arr:61000,1977-01-01,,,BE33
 be:mun:61079,61079,municipality,Anthisnes,Anthisnes,Anthisnes,be:arr:61000,1977-01-01,,,BE331
 be:mun:61080,61080,municipality,Engis,Engis,Engis,be:arr:61000,1977-01-01,,,BE331
 be:mun:61081,61081,municipality,Tinlot,Tinlot,Tinlot,be:arr:61000,1977-01-01,,,BE331
+be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,be:prov:60000,1977-01-01,,,BE332
 be:mun:62003,62003,municipality,Ans,Ans,Ans,be:arr:62000,1977-01-01,,,BE332
 be:mun:62006,62006,municipality,Awans,Awans,Awans,be:arr:62000,1977-01-01,,,BE332
 be:mun:62009,62009,municipality,Aywaille,Aywaille,Aywaille,be:arr:62000,1977-01-01,,,BE332
@@ -446,6 +493,7 @@ be:mun:62119,62119,municipality,Blegny,Blegny,Blegny,be:arr:62000,1977-01-01,,,B
 be:mun:62120,62120,municipality,Flémalle,Flémalle,Flémalle,be:arr:62000,1977-01-01,,,BE332
 be:mun:62121,62121,municipality,Neupré,Neupré,Neupré,be:arr:62000,1977-01-01,,,BE332
 be:mun:62122,62122,municipality,Trooz,Trooz,Trooz,be:arr:62000,1977-01-01,,,BE332
+be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,be:prov:60000,1977-01-01,,,BE336
 be:mun:63001,63001,municipality,Amel,Amblève,Amel,be:arr:63000,1977-01-01,,,BE336
 be:mun:63003,63003,municipality,Aubel,Aubel,Aubel,be:arr:63000,1977-01-01,,,BE336
 be:mun:63004,63004,municipality,Baelen,Baelen,Baelen,be:arr:63000,1977-01-01,,,BE336
@@ -475,6 +523,7 @@ be:mun:63086,63086,municipality,Trois-Ponts,Trois-Ponts,Trois-Ponts,be:arr:63000
 be:mun:63087,63087,municipality,Burg-Reuland,Burg-Reuland,Burg-Reuland,be:arr:63000,1977-01-01,,,BE336
 be:mun:63088,63088,municipality,Plombières,Plombières,Plombières,be:arr:63000,1977-01-01,,,BE336
 be:mun:63089,63089,municipality,Thimister-Clermont,Thimister-Clermont,Thimister-Clermont,be:arr:63000,1977-01-01,,,BE336
+be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,be:prov:60000,1977-01-01,,,BE334
 be:mun:64008,64008,municipality,Berloz,Berloz,Berloz,be:arr:64000,1977-01-01,,,BE334
 be:mun:64015,64015,municipality,Braives,Braives,Braives,be:arr:64000,1977-01-01,,,BE334
 be:mun:64021,64021,municipality,Crisnée,Crisnée,Crisnée,be:arr:64000,1977-01-01,,,BE334
@@ -489,49 +538,72 @@ be:mun:64065,64065,municipality,Saint-Georges-sur-Meuse,Saint-Georges-sur-Meuse,
 be:mun:64074,64074,municipality,Borgworm,Waremme,Waremme,be:arr:64000,1977-01-01,,,BE334
 be:mun:64075,64075,municipality,Wasseiges,Wasseiges,Wasseiges,be:arr:64000,1977-01-01,,,BE334
 be:mun:64076,64076,municipality,Faimes,Faimes,Faimes,be:arr:64000,1977-01-01,,,BE334
+be:prov:70000,70000,province,Provincie Limburg,Province du Limbourg,Limburg,be:reg:02000,1977-01-01,,,BE22
+be:arr:71000@1977-01-01,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,be:prov:70000,1977-01-01,2019-01-01,,
+be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,be:prov:70000,2019-01-01,,,BE224
 be:mun:71002,71002,municipality,As,As,As,be:arr:71000,1977-01-01,,,BE224
 be:mun:71004,71004,municipality,Beringen,Beringen,Beringen,be:arr:71000,1977-01-01,,,BE224
 be:mun:71011,71011,municipality,Diepenbeek,Diepenbeek,Diepenbeek,be:arr:71000,1977-01-01,,,BE224
 be:mun:71016,71016,municipality,Genk,Genk,Genk,be:arr:71000,1977-01-01,,,BE224
 be:mun:71017,71017,municipality,Gingelom,Gingelom,Gingelom,be:arr:71000,1977-01-01,,,BE224
 be:mun:71020,71020,municipality,Halen,Halen,Halen,be:arr:71000,1977-01-01,,,BE224
+be:mun:71022,71022,municipality,Hasselt,Hasselt,Hasselt,be:arr:71000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:71024,71024,municipality,Herk-de-Stad,Herck-la-Ville,Herk-de-Stad,be:arr:71000,1977-01-01,,,BE224
 be:mun:71034,71034,municipality,Leopoldsburg,Bourg-Léopold,Leopoldsburg,be:arr:71000,1977-01-01,,,BE224
 be:mun:71037,71037,municipality,Lummen,Lummen,Lummen,be:arr:71000,1977-01-01,,,BE224
 be:mun:71045,71045,municipality,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,be:arr:71000,1977-01-01,,,BE224
+be:mun:71047,71047,municipality,Opglabbeek,Opglabbeek,Opglabbeek,be:arr:71000@1977-01-01,1977-01-01,2019-01-01,,
 be:mun:71053,71053,municipality,Sint-Truiden,Saint-Trond,Sint-Truiden,be:arr:71000,1977-01-01,,,BE224
+be:mun:71057,71057,municipality,Tessenderlo,Tessenderlo,Tessenderlo,be:arr:71000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:71066,71066,municipality,Zonhoven,Zonhoven,Zonhoven,be:arr:71000,1977-01-01,,,BE224
 be:mun:71067,71067,municipality,Zutendaal,Zutendaal,Zutendaal,be:arr:71000,1977-01-01,,,BE224
+be:mun:71069,71069,municipality,Ham,Ham,Ham,be:arr:71000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:71070,71070,municipality,Heusden-Zolder,Heusden-Zolder,Heusden-Zolder,be:arr:71000,1977-01-01,,,BE224
 be:mun:71071,71071,municipality,Tessenderlo-Ham,Tessenderlo-Ham,Tessenderlo-Ham,be:arr:71000,2025-01-01,,,BE224
 be:mun:71072,71072,municipality,Hasselt,Hasselt,Hasselt,be:arr:71000,2025-01-01,,,BE224
+be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,be:prov:70000,1977-01-01,,,BE225
 be:mun:72003,72003,municipality,Bocholt,Bocholt,Bocholt,be:arr:72000,1977-01-01,,,BE225
 be:mun:72004,72004,municipality,Bree,Bree,Bree,be:arr:72000,1977-01-01,,,BE225
 be:mun:72018,72018,municipality,Kinrooi,Kinrooi,Kinrooi,be:arr:72000,1977-01-01,,,BE225
 be:mun:72020,72020,municipality,Lommel,Lommel,Lommel,be:arr:72000,1977-01-01,,,BE225
 be:mun:72021,72021,municipality,Maaseik,Maaseik,Maaseik,be:arr:72000,1977-01-01,,,BE225
+be:mun:72025,72025,municipality,Neerpelt,Neerpelt,Neerpelt,be:arr:72000,1977-01-01,2019-01-01,,
+be:mun:72029,72029,municipality,Overpelt,Overpelt,Overpelt,be:arr:72000,1977-01-01,2019-01-01,,
 be:mun:72030,72030,municipality,Peer,Peer,Peer,be:arr:72000,1977-01-01,,,BE225
 be:mun:72037,72037,municipality,Hamont-Achel,Hamont-Achel,Hamont-Achel,be:arr:72000,1977-01-01,,,BE225
 be:mun:72038,72038,municipality,Hechtel-Eksel,Hechtel-Eksel,Hechtel-Eksel,be:arr:72000,1977-01-01,,,BE225
 be:mun:72039,72039,municipality,Houthalen-Helchteren,Houthalen-Helchteren,Houthalen-Helchteren,be:arr:72000,1977-01-01,,,BE225
+be:mun:72040,72040,municipality,Meeuwen-Gruitrode,Meeuwen-Gruitrode,Meeuwen-Gruitrode,be:arr:72000,1977-01-01,2019-01-01,,
 be:mun:72041,72041,municipality,Dilsen-Stokkem,Dilsen-Stokkem,Dilsen-Stokkem,be:arr:72000,1977-01-01,,,BE225
 be:mun:72042,72042,municipality,Oudsbergen,Oudsbergen,Oudsbergen,be:arr:72000,2019-01-01,,,BE225
 be:mun:72043,72043,municipality,Pelt,Pelt,Pelt,be:arr:72000,2019-01-01,,,BE225
+be:arr:73000@1977-01-01,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,be:prov:70000,1977-01-01,2025-01-01,,
+be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,be:prov:70000,2025-01-01,,,BE223
 be:mun:73001,73001,municipality,Alken,Alken,Alken,be:arr:73000,1977-01-01,,,BE223
+be:mun:73006,73006,municipality,Bilzen,Bilzen,Bilzen,be:arr:73000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:73009,73009,municipality,Borgloon,Looz,Borgloon,be:arr:73000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:73022,73022,municipality,Heers,Heers,Heers,be:arr:73000,1977-01-01,,,BE223
 be:mun:73028,73028,municipality,Herstappe,Herstappe,Herstappe,be:arr:73000,1977-01-01,,,BE223
+be:mun:73032,73032,municipality,Hoeselt,Hoeselt,Hoeselt,be:arr:73000@1977-01-01,1977-01-01,2025-01-01,,
+be:mun:73040,73040,municipality,Kortessem,Kortessem,Kortessem,be:arr:73000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:73042,73042,municipality,Lanaken,Lanaken,Lanaken,be:arr:73000,1977-01-01,,,BE223
 be:mun:73066,73066,municipality,Riemst,Riemst,Riemst,be:arr:73000,1977-01-01,,,BE223
+be:mun:73083,73083,municipality,Tongeren,Tongres,Tongeren,be:arr:73000@1977-01-01,1977-01-01,2025-01-01,,
 be:mun:73098,73098,municipality,Wellen,Wellen,Wellen,be:arr:73000,1977-01-01,,,BE223
 be:mun:73107,73107,municipality,Maasmechelen,Maasmechelen,Maasmechelen,be:arr:73000,1977-01-01,,,BE223
 be:mun:73109,73109,municipality,Voeren,Fourons,Voeren,be:arr:73000,1977-01-01,,,BE223
 be:mun:73110,73110,municipality,Bilzen-Hoeselt,Bilzen-Hoeselt,Bilzen-Hoeselt,be:arr:73000,2025-01-01,,,BE223
 be:mun:73111,73111,municipality,Tongeren-Borgloon,Tongres-Looz,Tongeren-Borgloon,be:arr:73000,2025-01-01,,,BE223
+be:prov:80000,80000,province,Provincie Luxemburg,Province du Luxembourg,Luxembourg,be:reg:03000,1977-01-01,,,BE34
+be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,be:prov:80000,1977-01-01,,,BE341
 be:mun:81001,81001,municipality,Aarlen,Arlon,Arlon,be:arr:81000,1977-01-01,,,BE341
 be:mun:81003,81003,municipality,Attert,Attert,Attert,be:arr:81000,1977-01-01,,,BE341
 be:mun:81004,81004,municipality,Aubange,Aubange,Aubange,be:arr:81000,1977-01-01,,,BE341
 be:mun:81013,81013,municipality,Martelange,Martelange,Martelange,be:arr:81000,1977-01-01,,,BE341
 be:mun:81015,81015,municipality,Messancy,Messancy,Messancy,be:arr:81000,1977-01-01,,,BE341
+be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,be:prov:80000,1977-01-01,,,BE342
+be:mun:82003,82003,municipality,Bastenaken,Bastogne,Bastenaken,be:arr:82000,1977-01-01,2025-01-01,,
+be:mun:82005,82005,municipality,Bertogne,Bertogne,Bertogne,be:arr:82000,1977-01-01,2025-01-01,,
 be:mun:82009,82009,municipality,Fauvillers,Fauvillers,Fauvillers,be:arr:82000,1977-01-01,,,BE342
 be:mun:82014,82014,municipality,Houffalize,Houffalize,Houffalize,be:arr:82000,1977-01-01,,,BE342
 be:mun:82032,82032,municipality,Vielsalm,Vielsalm,Vielsalm,be:arr:82000,1977-01-01,,,BE342
@@ -539,6 +611,7 @@ be:mun:82036,82036,municipality,Vaux-sur-Sûre,Vaux-sur-Sûre,Vaux-sur-Sûre,be:
 be:mun:82037,82037,municipality,Gouvy,Gouvy,Gouvy,be:arr:82000,1977-01-01,,,BE342
 be:mun:82038,82038,municipality,Sainte-Ode,Sainte-Ode,Sainte-Ode,be:arr:82000,1977-01-01,,,BE342
 be:mun:82039,82039,municipality,Bastenaken,Bastogne,Bastogne,be:arr:82000,2025-01-01,,,BE342
+be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,be:prov:80000,1977-01-01,,,BE343
 be:mun:83012,83012,municipality,Durbuy,Durbuy,Durbuy,be:arr:83000,1977-01-01,,,BE343
 be:mun:83013,83013,municipality,Erezée,Erezée,Erezée,be:arr:83000,1977-01-01,,,BE343
 be:mun:83028,83028,municipality,Hotton,Hotton,Hotton,be:arr:83000,1977-01-01,,,BE343
@@ -548,6 +621,7 @@ be:mun:83040,83040,municipality,Nassogne,Nassogne,Nassogne,be:arr:83000,1977-01-
 be:mun:83044,83044,municipality,Rendeux,Rendeux,Rendeux,be:arr:83000,1977-01-01,,,BE343
 be:mun:83049,83049,municipality,Tenneville,Tenneville,Tenneville,be:arr:83000,1977-01-01,,,BE343
 be:mun:83055,83055,municipality,Manhay,Manhay,Manhay,be:arr:83000,1977-01-01,,,BE343
+be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,be:prov:80000,1977-01-01,,,BE344
 be:mun:84009,84009,municipality,Bertrix,Bertrix,Bertrix,be:arr:84000,1977-01-01,,,BE344
 be:mun:84010,84010,municipality,Bouillon,Bouillon,Bouillon,be:arr:84000,1977-01-01,,,BE344
 be:mun:84016,84016,municipality,Daverdisse,Daverdisse,Daverdisse,be:arr:84000,1977-01-01,,,BE344
@@ -560,6 +634,7 @@ be:mun:84059,84059,municipality,Saint-Hubert,Saint-Hubert,Saint-Hubert,be:arr:84
 be:mun:84068,84068,municipality,Tellin,Tellin,Tellin,be:arr:84000,1977-01-01,,,BE344
 be:mun:84075,84075,municipality,Wellin,Wellin,Wellin,be:arr:84000,1977-01-01,,,BE344
 be:mun:84077,84077,municipality,Libramont-Chevigny,Libramont-Chevigny,Libramont-Chevigny,be:arr:84000,1977-01-01,,,BE344
+be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,be:prov:80000,1977-01-01,,,BE345
 be:mun:85007,85007,municipality,Chiny,Chiny,Chiny,be:arr:85000,1977-01-01,,,BE345
 be:mun:85009,85009,municipality,Etalle,Etalle,Etalle,be:arr:85000,1977-01-01,,,BE345
 be:mun:85011,85011,municipality,Florenville,Florenville,Florenville,be:arr:85000,1977-01-01,,,BE345
@@ -570,6 +645,8 @@ be:mun:85039,85039,municipality,Tintigny,Tintigny,Tintigny,be:arr:85000,1977-01-
 be:mun:85045,85045,municipality,Virton,Virton,Virton,be:arr:85000,1977-01-01,,,BE345
 be:mun:85046,85046,municipality,Habay,Habay,Habay,be:arr:85000,1977-01-01,,,BE345
 be:mun:85047,85047,municipality,Rouvroy,Rouvroy,Rouvroy,be:arr:85000,1977-01-01,,,BE345
+be:prov:90000,90000,province,Provincie Namen,Province de Namur,Namur,be:reg:03000,1977-01-01,,,BE35
+be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,be:prov:90000,1977-01-01,,,BE351
 be:mun:91005,91005,municipality,Anhée,Anhée,Anhée,be:arr:91000,1977-01-01,,,BE351
 be:mun:91013,91013,municipality,Beauraing,Beauraing,Beauraing,be:arr:91000,1977-01-01,,,BE351
 be:mun:91015,91015,municipality,Bièvre,Bièvre,Bièvre,be:arr:91000,1977-01-01,,,BE351
@@ -585,6 +662,7 @@ be:mun:91120,91120,municipality,Somme-Leuze,Somme-Leuze,Somme-Leuze,be:arr:91000
 be:mun:91141,91141,municipality,Yvoir,Yvoir,Yvoir,be:arr:91000,1977-01-01,,,BE351
 be:mun:91142,91142,municipality,Hastière,Hastière,Hastière,be:arr:91000,1977-01-01,,,BE351
 be:mun:91143,91143,municipality,Vresse-sur-Semois,Vresse-sur-Semois,Vresse-sur-Semois,be:arr:91000,1977-01-01,,,BE351
+be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,be:prov:90000,1977-01-01,,,BE352
 be:mun:92003,92003,municipality,Andenne,Andenne,Andenne,be:arr:92000,1977-01-01,,,BE352
 be:mun:92006,92006,municipality,Assesse,Assesse,Assesse,be:arr:92000,1977-01-01,,,BE352
 be:mun:92035,92035,municipality,Eghezée,Eghezée,Eghezée,be:arr:92000,1977-01-01,,,BE352
@@ -601,6 +679,7 @@ be:mun:92138,92138,municipality,Fernelmont,Fernelmont,Fernelmont,be:arr:92000,19
 be:mun:92140,92140,municipality,Jemeppe-sur-Sambre,Jemeppe-sur-Sambre,Jemeppe-sur-Sambre,be:arr:92000,1977-01-01,,,BE352
 be:mun:92141,92141,municipality,La Bruyère,La Bruyère,La Bruyère,be:arr:92000,1977-01-01,,,BE352
 be:mun:92142,92142,municipality,Gembloux,Gembloux,Gembloux,be:arr:92000,1977-01-01,,,BE352
+be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,be:prov:90000,1977-01-01,,,BE353
 be:mun:93010,93010,municipality,Cerfontaine,Cerfontaine,Cerfontaine,be:arr:93000,1977-01-01,,,BE353
 be:mun:93014,93014,municipality,Couvin,Couvin,Couvin,be:arr:93000,1977-01-01,,,BE353
 be:mun:93018,93018,municipality,Doische,Doische,Doische,be:arr:93000,1977-01-01,,,BE353
@@ -608,16 +687,3 @@ be:mun:93022,93022,municipality,Florennes,Florennes,Florennes,be:arr:93000,1977-
 be:mun:93056,93056,municipality,Philippeville,Philippeville,Philippeville,be:arr:93000,1977-01-01,,,BE353
 be:mun:93088,93088,municipality,Walcourt,Walcourt,Walcourt,be:arr:93000,1977-01-01,,,BE353
 be:mun:93090,93090,municipality,Viroinval,Viroinval,Viroinval,be:arr:93000,1977-01-01,,,BE353
-be:prov:10000,10000,province,Provincie Antwerpen,Province d’Anvers,Antwerp,be:reg:02000,1977-01-01,,,BE21
-be:prov:20001,20001,province,Provincie Vlaams-Brabant,Province du Brabant flamand,Flemish Brabant,be:reg:02000,1977-01-01,,,BE24
-be:prov:20002,20002,province,Provincie Waals-Brabant,Province du Brabant wallon,Walloon Brabant,be:reg:03000,1977-01-01,,,BE31
-be:prov:30000,30000,province,Provincie West-Vlaanderen,Province de Flandre occidentale,West Flanders,be:reg:02000,1977-01-01,,,BE25
-be:prov:40000,40000,province,Provincie Oost-Vlaanderen,Province de Flandre orientale,East Flanders,be:reg:02000,1977-01-01,,,BE23
-be:prov:50000,50000,province,Provincie Henegouwen,Province du Hainaut,Hainaut,be:reg:03000,1977-01-01,,,BE32
-be:prov:60000,60000,province,Provincie Luik,Province de Liège,Liège,be:reg:03000,1977-01-01,,,BE33
-be:prov:70000,70000,province,Provincie Limburg,Province du Limbourg,Limburg,be:reg:02000,1977-01-01,,,BE22
-be:prov:80000,80000,province,Provincie Luxemburg,Province du Luxembourg,Luxembourg,be:reg:03000,1977-01-01,,,BE34
-be:prov:90000,90000,province,Provincie Namen,Province de Namur,Namur,be:reg:03000,1977-01-01,,,BE35
-be:reg:02000,02000,region,Vlaams Gewest,Région flamande,Flanders,be:country,1977-01-01,,,BE2
-be:reg:03000,03000,region,Waals Gewest,Région wallonne,Wallonia,be:country,1977-01-01,,,BE3
-be:reg:04000,04000,region,Brussels Hoofdstedelijk Gewest,Région de Bruxelles-Capitale,Brussels-Capital Region,be:country,1977-01-01,,,BE1

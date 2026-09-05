@@ -37,10 +37,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.geography.crosswalk import (  # noqa: E402
     VINTAGE_DATES,
+    canonical_code_map,
     derive_crosswalk,
+    derive_entity_windows,
     unresolved,
 )
-from src.geography.refnis import build_hierarchy, parse_nis9_xlsx, parse_refnis_csv  # noqa: E402
+from src.geography.refnis import (  # noqa: E402
+    build_hierarchy,
+    build_windowed_rows,
+    parse_nis9_xlsx,
+    parse_refnis_csv,
+    parse_refnis_hierarchy,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "statbel"
@@ -99,14 +107,15 @@ def _require(path: Path) -> Path:
     return path
 
 
-def _first_appearance(vintages: list[tuple[str, dict[str, str]]]) -> dict[str, str]:
-    """nis_code -> valid_from, evidenced by the first vintage containing it."""
-    valid_from: dict[str, str] = {}
-    for filename, communes in vintages:
-        wave_date = VINTAGE_DATES[filename]
-        for code in communes:
-            valid_from.setdefault(code, wave_date)
-    return valid_from
+def _first_appearance(windows: dict[str, list[dict]]) -> dict[str, str]:
+    """nis_code -> valid_from of its earliest window.
+
+    Taken from the full entity windows, not just commune rows: an earlier
+    version of this script diffed communes only, so every arrondissement,
+    province and region silently fell back to the structural epoch and
+    resolved for periods before it existed.
+    """
+    return {code: entity_windows[0]["valid_from"] for code, entity_windows in windows.items()}
 
 
 def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
@@ -115,28 +124,45 @@ def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
     log.info("Parsed %d statistical-sector rows from %s", len(nis9_rows), NIS9_FILE)
 
     vintages = []
+    hierarchies = []
     for filename in REFNIS_VINTAGES:
-        rows = parse_refnis_csv(_require(raw_dir / filename))
+        path = _require(raw_dir / filename)
+        rows = parse_refnis_csv(path)
         communes = {
             r["nis_code"]: {"name_nl": r["name_nl"], "name_fr": r["name_fr"]}
             for r in rows
             if r["level_hint"] == "commune"
         }
         vintages.append((filename, communes))
-        log.info("Parsed %s: %d communes", filename, len(communes))
+        hierarchies.append((filename, parse_refnis_hierarchy(path)))
+        log.info(
+            "Parsed %s: %d communes, %d entities", filename, len(communes), len(hierarchies[-1][1])
+        )
 
     latest_refnis = parse_refnis_csv(raw_dir / REFNIS_VINTAGES[-1])
     exonyms = load_exonyms(config_dir / "name_en_exonyms.csv")
-    valid_from_by_code = _first_appearance(vintages)
 
-    hierarchy = build_hierarchy(
-        nis9_rows,
-        latest_refnis,
-        exonyms,
-        valid_from_by_code=valid_from_by_code,
-    )
-    names_by_code = {e["nis_code"]: e["name_nl"] for e in hierarchy if e["nis_code"]}
-    crosswalk = derive_crosswalk(vintages, nis9_rows, names_by_code, valid_from_by_code)
+    # The crosswalk comes first: the window logic needs it to tell a commune
+    # merging *inside* an arrondissement (territory unchanged) from an
+    # arrondissement actually gaining territory.
+    provisional = build_hierarchy(nis9_rows, latest_refnis, exonyms)
+    names_by_code = {e["nis_code"]: e["name_nl"] for e in provisional if e["nis_code"]}
+    first_seen = {}
+    for filename, communes in vintages:
+        for code in communes:
+            first_seen.setdefault(code, VINTAGE_DATES[filename])
+    crosswalk = derive_crosswalk(vintages, nis9_rows, names_by_code, first_seen)
+
+    # Validity windows for every entity at every level, evidenced by the
+    # vintage diff -- this is what stops an arrondissement created in 2019
+    # resolving for 2015.
+    windows = derive_entity_windows(hierarchies, canonical_code_map(crosswalk))
+    valid_from_by_code = _first_appearance(windows)
+
+    current = build_hierarchy(nis9_rows, latest_refnis, exonyms, valid_from_by_code)
+    current_by_geo_id = {row["geo_id"]: row for row in current}
+    regime_by_code = {r["nis_code"]: r["language_regime"] for r in latest_refnis}
+    hierarchy = build_windowed_rows(windows, current_by_geo_id, exonyms, regime_by_code)
 
     config_dir.mkdir(parents=True, exist_ok=True)
     _write_csv(config_dir / "geographies.csv", GEOGRAPHIES_COLUMNS, hierarchy)

@@ -112,7 +112,8 @@ Two stages, deliberately separated:
 
 1. **`scripts/derive_geography_csv.py`** — a *manual refresh* step, not part of the daily
    workflow. Reads the raw files above and writes small, diffable, committed CSVs:
-   `config/geography/geographies.csv` (622 rows) and `municipality_crosswalk.csv` (55 rows).
+   `config/geography/geographies.csv` (688 rows — 622 open windows plus 66 closed) and
+   `municipality_crosswalk.csv` (55 rows).
    A reviewer can then see in a PR diff exactly which communes changed, instead of "a 2.7 MB
    binary changed".
 2. **`scripts/load_geography.py --db …`** — reads only those CSVs, so a fresh clone runs the
@@ -121,16 +122,65 @@ Two stages, deliberately separated:
    parent does not yet exist. `be:country` is **upserted, never replaced** — every existing
    observation references it.
 
-`parent_geo_id` comes from the NIS9 file's explicit parent columns, never from slicing digits off
-a code. Brussels' communes have an empty province column in the source, so their arrondissement
+`parent_geo_id` for current entities comes from the NIS9 file's explicit parent columns, and for
+historical ones from the REFNIS vintage that recorded them — never from slicing digits off a
+code. Brussels' communes have an empty province column in the source, so their arrondissement
 (`21000`) parents straight to the region (`04000`) — handled explicitly rather than by a
 null-coalescing accident that would silently reparent 19 communes.
 
-Historical predecessor communes are loaded with `valid_to` and `successor_geo_id` set but
-**`parent_geo_id` NULL**: the arrondissement they belonged to at the time is not recoverable from
-these files, and inventing one would attach historical figures to a possibly-wrong province —
-the Hasselt/Kortessem merger crossed an arrondissement boundary, so this is not hypothetical.
-Hierarchy assertions are therefore scoped to currently-valid communes.
+### Validity windows, at every level
+
+Each row is one *validity window* of one entity, not one entity. 622 windows are open today; 66
+are closed — the 55 communes ended by the merger waves, plus the aggregates whose territory
+changed.
+
+**Communes are not the only things that change**, and an earlier version of this design assumed
+they were. It diffed only commune rows, so every arrondissement, province and region fell back to
+the structural epoch. Two silent mismappings followed, both caught by the Block C `[RED]` audit:
+
+- `resolve_geo('58000', '2015')` returned Arrondissement La Louvière, **created by the 2019
+  Hainaut reform**. It now raises.
+- `resolve_geo('57000', '2010')` returned "Tournai-Mouscron". Code `57000` meant *Tournai alone*
+  (10 communes) before 2019 and Tournai-Mouscron (12) after — the same code, a larger territory.
+  2015 Tournai figures were being attributed to an area two communes bigger. It now returns the
+  Tournai-only window.
+
+A window closes and a new one opens when an entity disappears, is renamed, or changes territory.
+"Territory" is compared as the entity's **transitive set of communes, each mapped through the
+merger crosswalk** — not its direct children. Both refinements were needed:
+
+- Rolling down to communes stops Province Hainaut splitting in 2019, when its *arrondissements*
+  were renumbered but it covered exactly the same ground.
+- Canonicalizing through the crosswalk stops Arrondissement Sint-Niklaas splitting in 2025, when
+  Beveren and Kruibeke merged *inside* it.
+
+Name comparison normalizes apostrophes: Statbel writes `Arrondissement d'Anvers` with a straight
+quote in one vintage and a typographic one in another, which would otherwise split a window on
+punctuation.
+
+`geo_id` is the primary key, so a code with several windows needs one id per window: the current
+window keeps the plain id (`be:arr:57000`) and superseded ones are suffixed with the date they
+began (`be:arr:57000@1977-01-01`). The suffix appears **only** where a code genuinely has more
+than one window — a commune that simply ceased to exist keeps its plain id, since that is what
+any stored observation about it would carry.
+
+### Historical parents
+
+Historical communes carry the parent they actually had, recovered by
+`parse_refnis_hierarchy()` from the vintage that recorded them. REFNIS has no parent column, but
+it is a nested outline, so reading it as a state machine reconstructs the hierarchy of any
+vintage. Validated against the independently-derived NIS9 hierarchy for 2025: **622 entities,
+zero level or parent mismatches.**
+
+This replaced an earlier decision to leave `parent_geo_id` NULL, which was wrong in a way worth
+recording: it silently removed 55 communes from every pre-2025 province and region aggregate —
+a 2015 "Province of Limburg" total was missing Hasselt, with no error raised anywhere. Nothing
+distinguished "root" from "unknown parent", which is exactly the shape of failure this feature is
+supposed to prevent.
+
+It also matters *which* parent: Kortessem sat in arrondissement `73000` and was merged into
+Hasselt, which is in `71000`. Borrowing the successor's parent would file Kortessem's history
+under the wrong arrondissement — plausible, and wrong.
 
 ### Merger handling
 
@@ -177,8 +227,12 @@ step below exists to find. `tests/test_geography_crosswalk.py` carries this as a
 
 Where the two methods disagree, or where the successor comes from the weaker name-matching
 fallback, the row is **flagged in the `note` column and `verified` stays `false`**. Seven rows
-are currently flagged (the two above, plus five partial transfers). CONTROL C must not be claimed
-while any remain unresolved.
+are currently flagged (the two above, plus five partial transfers), and **the loader refuses to
+run while any remain unsigned** — `scripts/load_geography.py` raises `UnverifiedCrosswalkError`
+unless `verified` is `true` on every flagged row, or `--allow-unverified` is passed explicitly.
+The audit found this gate missing: the loader read none of the flag columns and wrote exactly the
+confident successor links the flags exist to question. CONTROL C must not be claimed while any
+remain unresolved.
 
 `valid_from` for a predecessor is the first vintage containing it; `valid_to` is the wave that
 ended it. They must differ — `geographies` enforces `CHECK (valid_to > valid_from)`.
@@ -279,15 +333,29 @@ discharge (per `CLAUDE.md` rule 8 and this document's own Non-goals).
 
 ## Tests
 
-- `resolve_geo`: known current commune resolves correctly; known pre-merger commune resolves to
-  the historical entity for a pre-merger period and to the successor for a post-merger period;
-  unknown NIS code raises `UnknownGeographyError`.
-- Every municipality's `parent_geo_id` chain terminates at `be:country` — recursive-CTE walk,
-  asserting zero orphans and zero cycles.
-- Exact row counts per level, asserted as constants (per docs/steps' own rationale: a hardcoded
-  expected count is what catches a loader silently dropping a province).
-- Crosswalk: no `old_nis`/`new_nis` cycles; every `old_nis` has a `valid_to` matching the
-  corresponding `geographies.valid_to`.
+`tests/test_geography_{parse,crosswalk,load}.py`, 42 tests.
+
+- `resolve_geo`: current commune resolves; a pre-merger commune resolves to the historical entity
+  for a pre-merger period; unknown code and out-of-window both raise `UnknownGeographyError`.
+- Exact row counts per level, asserted as constants (per docs/steps' rationale: a hardcoded count
+  is what catches a loader silently dropping a province).
+- Every current commune's `parent_geo_id` chain terminates at `be:country` — recursive CTE, zero
+  orphans, zero cycles — and zero orphans at 2015, 2020 and 2026.
+- Parsers run against a synthetic `.xlsx` the test writes itself, since the real 2.7 MB workbook
+  is gitignored and CI cannot depend on it.
+
+Every audit finding has a named regression test, so each is pinned by the scenario that produced
+it rather than by a general assertion:
+`test_historical_communes_are_not_orphaned_from_the_hierarchy`,
+`test_aggregates_do_not_resolve_before_they_existed`,
+`test_arrondissement_that_changed_territory_has_separate_windows`,
+`test_loader_refuses_unverified_crosswalk_rows`,
+`test_resolve_to_current_refuses_a_dead_end`,
+`test_loader_rejects_a_blank_valid_from`,
+`test_german_speaking_communes_keep_their_own_name`,
+`test_vintage_diff_is_authoritative_where_the_prefix_rule_is_blind`,
+`test_internal_merger_does_not_split_the_parent_window`,
+`test_name_comparison_ignores_apostrophe_style`.
 
 ## Assumptions and open questions
 
@@ -305,9 +373,15 @@ discharge (per `CLAUDE.md` rule 8 and this document's own Non-goals).
   municipalities) is used as the structural epoch. It is right for the large majority but will be
   wrong for any commune altered between 1977 and the DEFINITIEF vintage. It matters only if
   pre-2019 municipal data is ever loaded, which nothing currently does.
-- **Q5 — Historical predecessors have no parent.** Consequence: they cannot be aggregated to
-  province or region for pre-merger periods. Fixing it properly needs each old vintage's
-  hierarchy, which REFNIS encodes only as document order. Deferred until a consumer exists.
+- **~~Q5 — Historical predecessors have no parent.~~ Fixed.** Each old vintage's hierarchy *is*
+  recoverable from REFNIS's document order; see "Historical parents" above. Zero orphans at any
+  era, asserted by `test_historical_communes_are_not_orphaned_from_the_hierarchy`.
+- **Q7 — Canonicalization blurs merged entities.** Comparing territory through the crosswalk
+  means two communes that merged become one identity, so an arrondissement that *gained* a merged
+  commune's land may not register as changed (arrondissement `71000` gaining Kortessem's territory
+  in 2025 is absorbed into Hasselt's canonical identity). The alternative — comparing raw commune
+  codes — produced false splits everywhere. Observations attach to communes, not arrondissements,
+  so this is a limitation of aggregate-level history rather than of the data itself.
 - **Q6 — Partial boundary transfers.** Five rows carry `has_partial_transfer = true`. A partial
   transfer cannot be expressed as a 1:1 lineage, so the affected cells' history is a judgement
   call the maintainer must make rather than the loader assuming one.

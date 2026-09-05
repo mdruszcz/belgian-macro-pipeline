@@ -127,7 +127,127 @@ def _match_successor_by_name(old_name: str, appeared: set[str], names_by_code: d
 
 
 def _normalize(name: str | None) -> str:
-    return (name or "").strip().casefold()
+    """Case- and punctuation-insensitive form for comparing names across vintages.
+
+    Statbel is not consistent about apostrophes: `REFNIS_DEFINITIEF.csv` writes
+    "Arrondissement d'Anvers" with a straight quote and `REFNIS_2025.csv` writes
+    it with a typographic one. Comparing raw strings would read that as the
+    entity changing identity and split its validity window on punctuation.
+    """
+    text = (name or "").strip().casefold()
+    for curly, straight in (("’", "'"), ("‘", "'"), ("´", "'")):
+        text = text.replace(curly, straight)
+    return " ".join(text.split())
+
+
+def canonical_code_map(crosswalk_rows: list[dict]) -> dict[str, str]:
+    """old NIS -> the code its territory ended up under, following chains.
+
+    Used to compare an arrondissement's territory across vintages without being
+    fooled by mergers *inside* it: when Beveren and Kruibeke become
+    Beveren-Kruibeke-Zwijndrecht, arrondissement `46000`'s commune list changes
+    but its territory does not, and it must not be treated as a new entity.
+    """
+    direct = {
+        row["old_nis"]: row["new_nis"]
+        for row in crosswalk_rows
+        if row["new_nis"] and ";" not in row["new_nis"]
+    }
+    resolved: dict[str, str] = {}
+    for code in direct:
+        seen = {code}
+        current = code
+        while current in direct and direct[current] not in seen:
+            current = direct[current]
+            seen.add(current)
+        resolved[code] = current
+    return resolved
+
+
+def derive_entity_windows(
+    hierarchies: list[tuple[str, dict[str, dict]]],
+    canonical: dict[str, str] | None = None,
+) -> dict[str, list[dict]]:
+    """Validity windows for *every* entity, aggregates included.
+
+    `hierarchies` is an ordered list of (filename, parse_refnis_hierarchy(...))
+    output, oldest first.
+
+    Communes are not the only things that change. Arrondissement `54000`
+    (Mouscron) ceased to exist in 2019 and `58000` (La Louvière) was created;
+    more subtly, `57000` kept its code but went from "Tournai" with 10 communes
+    to "Tournai-Mouscron" with 12. Dating every aggregate to the structural
+    epoch -- as an earlier version of this module did, by only ever diffing
+    commune rows -- makes `resolve_geo('58000', '2015')` return an entity that
+    did not exist, and `resolve_geo('57000', '2010')` return a territory
+    two communes larger than the one the source meant. Both are silent
+    mismappings of exactly the kind Block C's audit step exists to find.
+
+    A window is closed and a new one opened when an entity disappears, or when
+    its name or its set of children changes. Returns
+    {nis_code: [{valid_from, valid_to, level, parent_nis, name_fr, name_nl}]},
+    oldest window first.
+    """
+    windows: dict[str, list[dict]] = {}
+    canonical = canonical or {}
+
+    def territory_map(hierarchy: dict[str, dict]) -> dict[str, frozenset]:
+        """Each entity's transitive set of canonical communes.
+
+        Compared at the leaf level rather than by direct children, because an
+        aggregate's children can be renumbered without its territory moving:
+        the 2019 reform replaced Hainaut's arrondissement `54000` with `58000`,
+        so the province's child list changed while it covered exactly the same
+        communes. Rolling down to communes -- and mapping each through the
+        merger crosswalk -- compares what the entity actually contains.
+        """
+        leaves: dict[str, set] = {code: set() for code in hierarchy}
+        for code, entity in hierarchy.items():
+            if entity["level"] != "municipality":
+                continue
+            canonical_code = canonical.get(code, code)
+            current = code
+            while current is not None:
+                leaves[current].add(canonical_code)
+                current = hierarchy[current]["parent_nis"] if current in hierarchy else None
+        return {code: frozenset(found) for code, found in leaves.items()}
+
+    for filename, hierarchy in hierarchies:
+        territories = territory_map(hierarchy)
+        for code, entity in hierarchy.items():
+            entity["territory"] = territories[code]
+        as_of = VINTAGE_DATES.get(filename)
+        if as_of is None:
+            raise ValueError(
+                f"No effective date known for REFNIS vintage {filename!r}. "
+                "Add it to VINTAGE_DATES rather than guessing."
+            )
+        for code, entity in hierarchy.items():
+            existing = windows.setdefault(code, [])
+            open_window = existing[-1] if existing and existing[-1]["valid_to"] is None else None
+            if open_window is None:
+                existing.append({**entity, "valid_from": as_of, "valid_to": None})
+                continue
+            # Same code, but a different entity in substance: close and reopen.
+            # Compared on canonical territory rather than the raw child list, so
+            # communes merging *within* an arrondissement do not masquerade as
+            # the arrondissement itself changing.
+            if (
+                _normalize(open_window["name_nl"]) != _normalize(entity["name_nl"])
+                or open_window["parent_nis"] != entity["parent_nis"]
+                or open_window["territory"] != entity["territory"]
+            ):
+                open_window["valid_to"] = as_of
+                existing.append({**entity, "valid_from": as_of, "valid_to": None})
+
+        # Anything absent from this vintage ended at its date.
+        for code, existing in windows.items():
+            if code in hierarchy or not existing:
+                continue
+            if existing[-1]["valid_to"] is None:
+                existing[-1]["valid_to"] = as_of
+
+    return windows
 
 
 def derive_crosswalk(

@@ -107,12 +107,23 @@ def resolve_to_current(conn: sqlite3.Connection, geo_id: str) -> str:
     current = geo_id
     while True:
         row = conn.execute(
-            "SELECT successor_geo_id FROM geographies WHERE geo_id = ?", (current,)
+            "SELECT successor_geo_id, valid_to FROM geographies WHERE geo_id = ?", (current,)
         ).fetchone()
         if row is None:
             raise UnknownGeographyError(f"geo_id {current!r} is not present in `geographies`.")
-        successor = row[0]
+        successor, valid_to = row
         if successor is None:
+            if valid_to is not None:
+                # Dead end: the entity ended but no successor was recorded --
+                # the case for predecessors split across several successors, or
+                # whose lineage could not be derived. Returning it would claim
+                # a defunct commune is the current one.
+                raise UnknownGeographyError(
+                    f"{current!r} ceased to exist on {valid_to} and has no recorded successor, "
+                    "so it cannot be mapped to a current entity. This is expected for communes "
+                    "split across several successors -- see "
+                    "config/geography/municipality_crosswalk.csv."
+                )
             return current
         if successor in seen:
             raise UnknownGeographyError(
