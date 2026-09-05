@@ -244,11 +244,53 @@ The audit found this gate missing: the loader read none of the flag columns and 
 confident successor links the flags exist to question. CONTROL C must not be claimed while any
 remain unresolved.
 
+### Effective dates are not always the vintage boundary
+
+A vintage diff can only date a change to the snapshot that first shows it, and every REFNIS file
+is cut on 1 January. Belgian mergers usually take effect then — **but not always**.
+
+Checking the derived crosswalk against Statbel's published merger table found exactly one
+exception: **Bastogne + Bertogne merged on 2 December 2024**, a month before `REFNIS_2025.csv`
+was cut. The diff therefore dated it 2025-01-01, and every lookup in that December window
+resolved to the pre-merger communes.
+
+`config/geography/merger_effective_dates.csv` records official dates where they differ from the
+vintage boundary, cited to their source, and the derivation applies them over both the crosswalk
+and the hierarchy windows. It is small, hand-checked and committed, in the same spirit as
+`name_en_exonyms.csv`. The override is applied *after* sign-offs are matched, so correcting a
+date does not read as a changed claim and reset the maintainer's verification.
+
+All 14 lineages of the 2025 cycle were confirmed against that table — see "Verification status".
+
+**A note on mid-period boundaries.** `resolve_geo` resolves a period as of its **first day**, so
+December 2024 — which begins one day before the Bastogne merger — resolves to the predecessors.
+Monthly data for that month straddles the change. The convention is deliberate and documented
+rather than silently averaged; anything finer would require knowing how a source apportioned a
+part-month, which no source states.
+
 **A sign-off survives regeneration.** `derive_geography_csv.py` reads the committed crosswalk
 before overwriting it and carries `verified=true` forward, keyed on the claim that was actually
 checked — `(old_nis, new_nis, valid_to)`. A refresh that changes the successor or the wave resets
 it, because that is a different claim from the one that was verified. Without this, every refresh
 silently discarded the maintainer's work, which is the same failure as not having the gate.
+
+The evidence travels in its own `verified_source` column, **not** in `note`: `note` is
+regenerated on every derivation, so evidence recorded there would be silently overwritten. A
+`verified=true` with no stated source is indistinguishable from one set by accident, and
+`test_every_verified_row_cites_its_evidence` enforces that.
+
+### Verification status
+
+Checked against Statbel's official merger table (maintainer-supplied, 2026-09-05):
+
+- **All 14 successors of the 2025 cycle match exactly** — same predecessors, same successor
+  codes, no extras on either side. This includes `73111 ← 73009 Borgloon + 73083 Tongeren`, the
+  pair the NIS6 prefix rule could not derive and the name-matching fallback recovered. Both are
+  now signed off with their source recorded.
+- **One date correction**, Bastogne/Bertogne, described above.
+- The **2019 wave is not covered by that table** and its 26 rows remain evidenced only by the
+  vintage diff. They are unflagged because their lineage is unambiguous from code prefixes, but
+  they have not been checked against a published list.
 
 `valid_from` for a predecessor is the first vintage containing it; `valid_to` is the wave that
 ended it. They must differ — `geographies` enforces `CHECK (valid_to > valid_from)`.
@@ -392,6 +434,9 @@ it rather than by a general assertion:
 - **~~Q5 — Historical predecessors have no parent.~~ Fixed.** Each old vintage's hierarchy *is*
   recoverable from REFNIS's document order; see "Historical parents" above. Zero orphans at any
   era, asserted by `test_historical_communes_are_not_orphaned_from_the_hierarchy`.
+- **Q8 — 2019 wave dates are unverified.** The maintainer's merger table covers the 2025 cycle
+  only. If any 2019 merger took effect on a date other than 1 January 2019, it carries the same
+  error the Bastogne row did, and nothing here would detect it.
 - **Q7 — Canonicalization blurs merged entities.** Comparing territory through the crosswalk
   means two communes that merged become one identity, so an arrondissement that *gained* a merged
   commune's land may not register as changed (arrondissement `71000` gaining Kortessem's territory

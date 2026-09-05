@@ -109,11 +109,11 @@ def test_committed_crosswalk_covers_both_waves():
     waves: dict[str, int] = {}
     for row in rows:
         waves[row["valid_to"]] = waves.get(row["valid_to"], 0) + 1
-    assert waves == {"2019-01-01": 26, "2025-01-01": 29}
+    # Bastogne and Bertogne merged on 2024-12-02, a month before the REFNIS
+    # snapshot that first shows it -- see config/geography/merger_effective_dates.csv.
+    assert waves == {"2019-01-01": 26, "2024-12-02": 2, "2025-01-01": 27}
     # Every row must have a validity window the schema will accept.
     assert all(r["valid_to"] > r["valid_from"] for r in rows)
-    # Nothing is silently marked verified.
-    assert {r["verified"] for r in rows} == {"false"}
 
 
 def test_committed_crosswalk_flags_only_the_genuinely_ambiguous_rows():
@@ -246,21 +246,47 @@ def test_signoff_survives_regeneration_but_only_for_the_same_claim():
     names = {"46030": "Beveren-Kruibeke"}
 
     kept = derive_crosswalk(
-        vintages, nis9, names, previously_verified={("46013", "46030", "2019-01-01")}
+        vintages,
+        nis9,
+        names,
+        previously_verified={("46013", "46030", "2019-01-01"): "official merger table"},
     )
     assert kept[0]["verified"] == "true"
+    assert kept[0]["verified_source"] == "official merger table"
 
     # Same predecessor, but the sign-off was recorded against a different
     # successor -- it must not carry over.
     reset = derive_crosswalk(
-        vintages, nis9, names, previously_verified={("46013", "99999", "2019-01-01")}
+        vintages,
+        nis9,
+        names,
+        previously_verified={("46013", "99999", "2019-01-01"): "official merger table"},
     )
     assert reset[0]["verified"] == "false"
+    assert reset[0]["verified_source"] == ""
 
 
-def test_committed_crosswalk_is_not_silently_pre_verified():
-    """Nothing in the repo may claim a verification that was not performed."""
+def test_every_verified_row_cites_its_evidence():
+    """A sign-off is a claim that someone checked something against a source.
+    A `verified=true` with no note saying against what is indistinguishable
+    from one set by accident."""
     with CROSSWALK_CSV.open(encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
-    assert {r["verified"] for r in rows} == {"false"}
-    assert {r["old_nis"] for r in unresolved(rows)} == {"73009", "73083"}
+    signed = [r for r in rows if r["verified"] == "true"]
+    # The two whose successor came from name matching, confirmed against
+    # Statbel's published merger table.
+    assert {r["old_nis"] for r in signed} == {"73009", "73083"}
+    for row in signed:
+        # verified_source, not note: `note` is regenerated on every derivation,
+        # so evidence recorded there would be silently overwritten.
+        assert "Statbel" in row["verified_source"], row["old_nis"]
+
+
+def test_bastogne_carries_its_official_effective_date():
+    """The one 2025-cycle merger that did not happen on 1 January. A vintage
+    diff cannot see it, so every December 2024 lookup would resolve to the
+    pre-merger communes."""
+    with CROSSWALK_CSV.open(encoding="utf-8") as handle:
+        rows = {r["old_nis"]: r for r in csv.DictReader(handle)}
+    assert rows["82003"]["valid_to"] == "2024-12-02"
+    assert rows["82005"]["valid_to"] == "2024-12-02"

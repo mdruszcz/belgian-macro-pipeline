@@ -602,15 +602,15 @@ be:mun:81004,81004,municipality,Aubange,Aubange,Aubange,be:arr:81000,1977-01-01,
 be:mun:81013,81013,municipality,Martelange,Martelange,Martelange,be:arr:81000,1977-01-01,,,BE341
 be:mun:81015,81015,municipality,Messancy,Messancy,Messancy,be:arr:81000,1977-01-01,,,BE341
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,be:prov:80000,1977-01-01,,,BE342
-be:mun:82003,82003,municipality,Bastenaken,Bastogne,Bastenaken,be:arr:82000,1977-01-01,2025-01-01,,
-be:mun:82005,82005,municipality,Bertogne,Bertogne,Bertogne,be:arr:82000,1977-01-01,2025-01-01,,
+be:mun:82003,82003,municipality,Bastenaken,Bastogne,Bastenaken,be:arr:82000,1977-01-01,2024-12-02,,
+be:mun:82005,82005,municipality,Bertogne,Bertogne,Bertogne,be:arr:82000,1977-01-01,2024-12-02,,
 be:mun:82009,82009,municipality,Fauvillers,Fauvillers,Fauvillers,be:arr:82000,1977-01-01,,,BE342
 be:mun:82014,82014,municipality,Houffalize,Houffalize,Houffalize,be:arr:82000,1977-01-01,,,BE342
 be:mun:82032,82032,municipality,Vielsalm,Vielsalm,Vielsalm,be:arr:82000,1977-01-01,,,BE342
 be:mun:82036,82036,municipality,Vaux-sur-Sûre,Vaux-sur-Sûre,Vaux-sur-Sûre,be:arr:82000,1977-01-01,,,BE342
 be:mun:82037,82037,municipality,Gouvy,Gouvy,Gouvy,be:arr:82000,1977-01-01,,,BE342
 be:mun:82038,82038,municipality,Sainte-Ode,Sainte-Ode,Sainte-Ode,be:arr:82000,1977-01-01,,,BE342
-be:mun:82039,82039,municipality,Bastenaken,Bastogne,Bastogne,be:arr:82000,2025-01-01,,,BE342
+be:mun:82039,82039,municipality,Bastenaken,Bastogne,Bastogne,be:arr:82000,2024-12-02,,,BE342
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,be:prov:80000,1977-01-01,,,BE343
 be:mun:83012,83012,municipality,Durbuy,Durbuy,Durbuy,be:arr:83000,1977-01-01,,,BE343
 be:mun:83013,83013,municipality,Erezée,Erezée,Erezée,be:arr:83000,1977-01-01,,,BE343

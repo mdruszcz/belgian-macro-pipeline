@@ -1,0 +1,2 @@
+new_nis,effective_date,source,note
+82039,2024-12-02,"Statbel, Fusions de communes (official table, supplied by maintainer 2026-09-05)","Bastogne + Bertogne. The only 2025-cycle merger that did not take effect on 1 January; the REFNIS vintage diff cannot see it, because REFNIS_2025.csv is a 1 January snapshot in which the merger has already happened."

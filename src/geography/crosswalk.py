@@ -303,7 +303,7 @@ def derive_crosswalk(
     nis9_rows: list[dict],
     names_by_code: dict[str, str],
     valid_from_by_code: dict[str, str] | None = None,
-    previously_verified: set[tuple[str, str, str]] | None = None,
+    previously_verified: dict[tuple[str, str, str], str] | None = None,
 ) -> list[dict]:
     """Build the crosswalk from vintage diffs, decorated by the prefix rule.
 
@@ -321,7 +321,7 @@ def derive_crosswalk(
     prefix_candidates = successor_candidates_from_nis6(nis9_rows)
     valid_from_by_code = valid_from_by_code or {}
     partial_destinations = partial_transfer_destinations(nis9_rows)
-    previously_verified = previously_verified or set()
+    previously_verified = previously_verified or {}
 
     rows: list[dict] = []
     for (_, older), (newer_file, newer) in zip(vintages, vintages[1:], strict=False):
@@ -374,6 +374,7 @@ def derive_crosswalk(
                 if len(successors) == 1
                 else 1
             )
+            signoff_key = (old_code, ";".join(sorted(successors)), wave_date)
             rows.append(
                 {
                     "old_nis": old_code,
@@ -398,12 +399,11 @@ def derive_crosswalk(
                     # was given still says the same thing; any change to the
                     # successor or the wave resets it, because that is a
                     # different claim from the one that was checked.
-                    "verified": (
-                        "true"
-                        if (old_code, ";".join(sorted(successors)), wave_date)
-                        in previously_verified
-                        else "false"
-                    ),
+                    "verified": ("true" if signoff_key in previously_verified else "false"),
+                    # The source a sign-off was checked against, carried forward
+                    # with it. `note` is regenerated on every run, so evidence
+                    # recorded there would be silently overwritten.
+                    "verified_source": previously_verified.get(signoff_key, ""),
                     "note": note,
                 }
             )

@@ -91,7 +91,7 @@ Why: Belgian geography has more edge cases than the data itself. Getting them in
  ✅ [H] Download the official Statbel geography and statistical-sector files (2026-09-05: REFNIS DEFINITIEF/2019/2025 + NIS9 2026 + postal-code file, in data/raw/statbel/)
 How: Statbel open-data portal; keep the SQLite or GeoJSON version and record the download date.
 Why: Official reference files are the only defensible source of NIS codes. Anything scraped or LLM-generated will contain wrong codes you cannot detect.
- [H] Record licence terms in docs/data_catalog.md
+ ✅ [H] Record licence terms in docs/data_catalog.md (CC BY 4.0, commercial reuse permitted; attribution + 'changes were made' notice required on published output — obligations recorded, not yet implemented on the site)
 How: Copy the licence name, URL and reuse conditions into the catalogue row.
 Why: You intend to sell this. "I think it was open data" is not a position you want to hold in a procurement conversation.
  ✅ [BUILD] Load Belgium, regions, provinces, arrondissements, communes (statistical sectors deliberately deferred — no consumer before Phase II, see geography.md Q2)
@@ -103,7 +103,7 @@ Why: One orphaned commune means it silently vanishes from regional aggregates, w
  ✅ [BUILD] Build municipality_crosswalk.csv (55 rows; 7 flagged for the [H] verification below)
 How: Columns old_nis, new_nis, valid_from, valid_to, relationship (merged/renamed/split).
 Why: Without it, a merged commune's history starts in the merger year, and your "5-year growth" for that commune is undefined or absurd.
- [H] Verify the crosswalk against the 2019 and 2025 Flemish merger waves
+ ✅ [H] Verify the crosswalk against the 2019 and 2025 Flemish merger waves (2026-09-05: all 14 successors of the 2025 cycle confirmed against Statbel's official merger table; found and fixed one date error — Bastogne+Bertogne merged 2024-12-02, not 2025-01-01. The 2019 wave is NOT covered by that table — see geography.md Q8)
 How: Check a handful of known merged communes against official merger lists.
 Why: This is the highest-risk table for hallucinated content, and it is small enough to check by hand. Do it once, properly.
  ✅ [BUILD] Implement resolve_geo(nis, period) used by every adapter
