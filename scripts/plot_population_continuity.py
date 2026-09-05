@@ -83,6 +83,17 @@ ALWAYS_INCLUDE = {"73111"}
 # and between the FR/NL editions of the same file, so match rather than assume.
 NIS_COLUMNS = ("cd_refnis", "cd_munty_refnis", "nis", "nis_code", "refnis")
 POP_COLUMNS = ("ms_population", "population", "ms_pop", "aantal", "nombre", "ms_num_pop")
+AGE_COLUMNS = ("cd_age", "age", "leeftijd")
+
+# Standard demographic dependency bands. CD_AGE in this file is single years
+# 0..100 (verified against the real 2026 file: 101 distinct values, all
+# numeric), where 100 is top-coded "100 and over" -- which lands in 65_PLUS
+# either way, so the top-coding does not affect banding.
+AGE_BANDS: tuple[tuple[str, int, int], ...] = (
+    ("0_14", 0, 14),
+    ("15_64", 15, 64),
+    ("65_PLUS", 65, 10**6),
+)
 
 
 class MissingPopulationData(Exception):
@@ -182,18 +193,14 @@ def _sum_communes(fh, display_name: str) -> dict[str, int]:
     return totals
 
 
-def read_population_by_year(pop_dir: Path) -> dict[int, dict[str, int]]:
-    """-> {year: {nis5: total_population}}.
-
-    Statbel publishes these broken down by nationality, sex, age and marital
-    status, so a commune appears on many rows; they are summed to one total.
-    """
+def _population_files(pop_dir: Path) -> list[Path]:
+    """Discovery shared by both readers, so a missing-data message is
+    identical whichever one the caller reached for."""
     if not pop_dir.is_dir():
         raise MissingPopulationData(
             f"No population data at {pop_dir}.\n\n"
             f"{__doc__.split('WHAT IT NEEDS')[1].split('HOW TO READ')[0].strip()}"
         )
-
     files = sorted(p for p in pop_dir.iterdir() if p.suffix.lower() in {".csv", ".txt", ".zip"})
     if not files:
         raise MissingPopulationData(
@@ -202,7 +209,101 @@ def read_population_by_year(pop_dir: Path) -> dict[int, dict[str, int]]:
             f"If the download was .xlsx, export each sheet to CSV first -- this script "
             f"deliberately does not parse Excel, to keep a throwaway check dependency-free."
         )
+    return files
 
+
+def _band_for_age(age: int) -> str | None:
+    for name, low, high in AGE_BANDS:
+        if low <= age <= high:
+            return name
+    return None
+
+
+def _sum_communes_by_age_band(fh, display_name: str) -> dict[str, dict[str, int]]:
+    """-> {nis5: {band: population}}. Same file, same sniffing, but keeping
+    the CD_AGE dimension banded instead of summing it away.
+
+    Every row lands in exactly one band, so summing the bands back up must
+    reproduce _sum_communes' total for the same file -- an invariant
+    sync_population.py asserts rather than assumes."""
+    sample = fh.read(8192)
+    fh.seek(0)
+    try:
+        dialect = csv.Sniffer().sniff(sample, delimiters="|;,\t")
+    except csv.Error:
+        dialect = csv.excel
+    reader = csv.DictReader(fh, dialect=dialect)
+    if not reader.fieldnames:
+        raise MissingPopulationData(f"{display_name} is empty or has no header row.")
+    fields = list(reader.fieldnames)
+    nis_col = _pick_column(fields, NIS_COLUMNS, Path(display_name), "nis")
+    pop_col = _pick_column(fields, POP_COLUMNS, Path(display_name), "pop")
+    age_col = _pick_column(fields, AGE_COLUMNS, Path(display_name), "age")
+
+    banded: dict[str, dict[str, int]] = {}
+    unbanded = 0
+    for row in reader:
+        nis = (row.get(nis_col) or "").strip()
+        raw = (row.get(pop_col) or "").strip().replace(" ", "").replace(",", "")
+        age_raw = (row.get(age_col) or "").strip()
+        if not nis or not raw or not age_raw:
+            continue
+        try:
+            value = int(float(raw))
+            band = _band_for_age(int(float(age_raw)))
+        except ValueError:
+            continue
+        if band is None:
+            # An age outside every band would silently vanish from the totals.
+            # Count it and fail below rather than under-report a commune.
+            unbanded += value
+            continue
+        banded.setdefault(nis, {})[band] = banded.setdefault(nis, {}).get(band, 0) + value
+
+    if not banded:
+        raise MissingPopulationData(
+            f"{display_name}: parsed 0 communes by age band. Columns picked were "
+            f"{nis_col!r}/{pop_col!r}/{age_col!r} -- one is probably not what it looks like."
+        )
+    if unbanded:
+        raise MissingPopulationData(
+            f"{display_name}: {unbanded} people fell outside every age band in "
+            f"{[b[0] for b in AGE_BANDS]}. Refusing to under-report (CLAUDE.md rule 13)."
+        )
+    return banded
+
+
+def read_population_by_age_band(pop_dir: Path) -> dict[int, dict[str, dict[str, int]]]:
+    """-> {year: {nis5: {band: population}}}.
+
+    Sibling of read_population_by_year, sharing its file discovery, zip
+    handling and encoding fallback. Kept as a separate function rather than a
+    flag on that one so its return shape is fixed, and so the existing
+    function's behaviour (and its tests) are untouched.
+    """
+    files = _population_files(pop_dir)
+    by_year: dict[int, dict[str, dict[str, int]]] = {}
+    for path in files:
+        year = _year_from_filename(path)
+        if year is None:
+            print(f"  skipping {path.name}: no year in the filename", file=sys.stderr)
+            continue
+        display_name, fh = _open_text_member(path)
+        try:
+            by_year[year] = _sum_communes_by_age_band(fh, display_name)
+        finally:
+            fh.close()
+        print(f"  {path.name}: year {year}, {len(by_year[year])} communes by age band")
+    return by_year
+
+
+def read_population_by_year(pop_dir: Path) -> dict[int, dict[str, int]]:
+    """-> {year: {nis5: total_population}}.
+
+    Statbel publishes these broken down by nationality, sex, age and marital
+    status, so a commune appears on many rows; they are summed to one total.
+    """
+    files = _population_files(pop_dir)
     by_year: dict[int, dict[str, int]] = {}
     for path in files:
         year = _year_from_filename(path)
