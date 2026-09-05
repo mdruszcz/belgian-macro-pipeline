@@ -50,20 +50,21 @@ met either way. **CONTROL E check: exactly 10.** ✅
 | 3 | Population by commune | rows 3, 3b | Snippet-only (site default assumed) — **not verified** |
 | 4 | Business/enterprise units by commune | rows 7, 7b | Unconfirmed at the open-data page; no licence field found via Bestat — **not verified** |
 | 5 | WalStat (IWEPS) | rows 8, 9 | **Verified from IWEPS' own FAQ, maintainer-supplied 2026-09-06** — CC0 (data) / CC BY-SA (maps). See below for the exact text and a liability nuance worth knowing before this ships. |
-| 6 | IBSA — municipalities in urban regions | row 10 | **Verified** — CC BY 4.0, page opened directly |
-| 7 | IBSA — Brussels demographic projections | row 11 | **Verified** — CC BY 4.0, page opened directly |
+| 6 | IBSA — municipalities in urban regions | row 10 | **Verified from IBSA's own licence statement, maintainer-supplied 2026-09-06** — CC BY 4.0, attribution required. See below for the exact text. |
+| 7 | IBSA — Brussels demographic projections | row 11 | **Verified from IBSA's own licence statement, maintainer-supplied 2026-09-06** — CC BY 4.0, attribution required. Same source as row 6. |
 | 8 | Gemeente-Stadsmonitor | row 14 | Completely unconfirmed — **not verified** |
 | 9 | ODWB (Wallonie-Bruxelles) | row 15 | Not stated on the homepage — **not verified** |
 | 10 | opendata.brussels.be | row 17 (new) | Per-dataset, not checked at catalogue level — **not verified** |
 
 **`[H] Verify commercial-reuse permission for each of the 10` is NOT done** — only 3 of the 10
-(WalStat, both IBSA datasets) have a licence the maintainer can point to as actually confirmed.
-WalStat's is now confirmed from IWEPS' own FAQ text (maintainer-supplied, 2026-09-06 — see below),
-the strongest evidence of the three; both IBSA datasets were confirmed by directly opening their
-page. The other 7 carry a licence that is assumed, corroborated-but-unopened, or entirely unknown.
-Per `CLAUDE.md` rule 8's own spirit, none of these 7 should be built into `StatbelSource`/an
-adapter for production use until their licence page is actually read and recorded here with a
-URL and date — the same standard `statbel_geography`'s licence was held to in Block C.
+(WalStat, both IBSA datasets) have a licence the maintainer can point to as actually confirmed,
+and all 3 are now confirmed from the publisher's own stated licence text, maintainer-supplied
+2026-09-06 (WalStat's FAQ, IBSA's licence statement — both quoted in full below), not merely a
+page someone opened and skimmed. The other 7 carry a licence that is assumed, corroborated-but-
+unopened, or entirely unknown. Per `CLAUDE.md` rule 8's own spirit, none of these 7 should be
+built into `StatbelSource`/an adapter for production use until their licence page is actually
+read and recorded here with a URL and date — the same standard `statbel_geography`'s licence
+was held to in Block C.
 
 **Deferred, not deleted:** rows 4 (real estate sales), 5 (cadastral building stock), 6 (building
 permits), 12–13 (ABB municipal finance — both the interactive tool and the PDF report), and 16
@@ -176,14 +177,30 @@ specific, plausibly-real titles and URLs consistently across multiple queries.
 | 7b | Local units (établissements) by commune via Bestat — datasource `IM_EAF_LCL_UNIT_POP` | Statbel (Bestat) | **True commune-level confirmed by directly fetching the data**: 566 rows, one per commune, exact (not banded) counts, e.g. Aartselaar 2232, Antwerp 66,381 | Datasource covers "since 2015 per quarter" but the commune-level standard view returns only the latest quarter (Q4 2023); a separate region-level standard view (`e21e18c6`) has full 2015–present quarterly depth. **Getting both commune granularity and full depth needs a custom cross-tab, not a standard view** — see note below | Quarterly (per datasource description) | Unconfirmed; presumed CC BY 4.0 | JSON (confirmed), + CSV/XML/XLS/HTML/PDF per the API structure | **Verified directly** — fetched real data, real commune names matching this repo's own `geographies.csv`, real counts | SELECTED |
 | 8 | [WalStat portal](https://walstat.iweps.be/walstat-accueil.php) — 19 themes incl. "Pouvoirs locaux" (local governance) | IWEPS (Wallonia) | Quartier / commune / arrondissement / province / bassin | Not stated on the pages opened; needs a catalogue-level query | Not stated | **CC0 for the data, CC BY-SA for maps** — confirmed from IWEPS' own FAQ text, maintainer-supplied 2026-09-06 (see the "WalStat licence" note below) | CSV, JSON | **Verified from the primary source** — this is IWEPS' own stated policy, not a search corroboration | SELECTED |
 | 9 | [WalStat open-data catalogue (DCAT-AP)](https://opendata.iweps.be/statdcat-ap/walstat) | IWEPS (Wallonia) | Same as above | Not stated; catalogue updated twice yearly (end of June, end of December) per iweps.be | Semi-annual catalogue refresh | CC0 (data) | RDF/XML catalogue → CSV/JSON | Verified (catalogue page opened directly) | SELECTED |
-| 10 | [IBSA — List of Belgian Municipalities in Urban Regions](https://ibsa.brussels/opendata) | IBSA (Brussels) | Belgium-wide | 2021–2025 | Last updated 25 June 2026 (per page) | CC BY 4.0 | XLSX, CSV (+ codebook) | Verified (page opened directly) | SELECTED |
-| 11 | [IBSA — Brussels Municipal Demographic Projections](https://ibsa.brussels/opendata) | IBSA (Brussels) | Brussels-Capital Region, municipal | Projections 2026–2035 | Last updated 26 March 2026 (per page) | CC BY 4.0 | XLSX, CSV (+ codebook) | Verified (page opened directly) | SELECTED |
+| 10 | [IBSA — List of Belgian Municipalities in Urban Regions](https://ibsa.brussels/opendata) | IBSA (Brussels) | Belgium-wide | 2021–2025 | Last updated 25 June 2026 (per page) | CC BY 4.0 | XLSX, CSV (+ codebook) | **Verified from IBSA's own licence statement**, maintainer-supplied 2026-09-06 (see "IBSA licence" note below) | SELECTED |
+| 11 | [IBSA — Brussels Municipal Demographic Projections](https://ibsa.brussels/opendata) | IBSA (Brussels) | Brussels-Capital Region, municipal | Projections 2026–2035 | Last updated 26 March 2026 (per page) | CC BY 4.0 | XLSX, CSV (+ codebook) | **Verified from IBSA's own licence statement**, maintainer-supplied 2026-09-06 (same source as row 10) | SELECTED |
 | 12 | ABB / "Financieel profiel van het lokaal bestuur" (BBC financial reporting) | ABB / Flemish government (`vlaanderen.be/lokaal-bestuur`) | Municipality + OCMW + the 10 Antwerp districts | Not confirmed — the actual dataset download page was not reached (redirects led to a general landing page) | Quarterly submissions feed the underlying BBC system, per its own description | Unconfirmed | Interactive tool; underlying data format unconfirmed | Snippet-only, page not reached | DEFERRED |
 | 13 | ["De financiële toestand van de Vlaamse gemeenten"](https://publicaties.vlaanderen.be/view-file/78642) (annual analysis of Flemish municipal accounts) | ABB / Flemish government | Municipality | 2024 annual accounts (latest edition found) | Annual | Unconfirmed | **PDF report, not structured data** — a real cost against `maintenance_cost` in the formula above | Snippet-only | DEFERRED |
 | 14 | ["Jouw gemeente in cijfers" / Gemeente-Stadsmonitor](https://gemeentemonitor.vlaanderen.be/) | Statistiek Vlaanderen | Municipality (~200 indicators, ~70 from a resident survey per search snippets) | Unconfirmed | Unconfirmed | Unconfirmed | Page did not return usable content this session; needs a direct visit | Snippet-only | SELECTED |
 | 15 | [ODWB — Open Data Wallonie-Bruxelles](https://www.odwb.be/pages/home/) | Agence du Numérique (Walloon Region + French Community) | Confirmed to include a "Données locales" / commune-level section, exact datasets not enumerated | Unconfirmed | Unconfirmed | Not stated on the homepage; needs a dataset-level check | Unconfirmed | Verified portal exists and structure (homepage opened directly); individual dataset details not checked | SELECTED |
 | 16 | [data.gov.be](https://data.gov.be/en/documentation/licenses) (federal aggregator, ~10,000 datasets across 14 categories per search snippets) | Federal Belgian government | Aggregates federal + some regional/local; explicitly *not* a one-stop shop — its own docs point out to regional portals | N/A (aggregator) | N/A | Default **CC0**, "comply or explain" — a department may instead choose CC BY 4.0 / CC BY-SA 4.0 / CC BY-NC 4.0 / CC BY-ND 4.0 (per search snippet only, could not open the licence page directly to confirm) | Varies by dataset | Snippet-only, page unreachable | DEFERRED |
 | 17 | [opendata.brussels.be](https://opendata.brussels.be/) — a portal, not yet a chosen dataset within it | City of Brussels | 208 datasets, spans whatever geography levels its individual datasets use — not enumerated | Unconfirmed at dataset level | Unconfirmed at dataset level | Not stated at portal level; per-dataset | Standard OpenDataSoft Explore API v2.1, JSON/CSV | Verified (portal + working search API confirmed directly) | SELECTED — **a specific dataset within it still needs to be picked** before this can feed an adapter |
+
+### IBSA licence — confirmed from IBSA's own statement
+
+The maintainer supplied IBSA's own licence text directly. Quoted in full:
+
+> *"Les Open Data publiées par l'IBSA sont soumises à la licence Creative Commons Attribution 4.0
+> (CC BY 4.0). Les données peuvent être utilisées gratuitement moyennant mention de la source."*
+
+Straightforward and matches what was already found by opening `ibsa.brussels/opendata` directly:
+**CC BY 4.0, free use with attribution required** — no share-alike clause, no non-commercial
+restriction, no ambiguity between a data licence and a separate map licence (unlike WalStat,
+below). Applies to both selected IBSA datasets (rows 10 and 11), since they're published under
+the same portal-wide policy. The only obligation is attribution — "mention de la source" — which
+should follow the same pattern already established for `statbel_geography`'s CC BY 4.0 terms
+above: credit IBSA, and if the data is reshaped before publishing (as it will be, going through
+the canonical schema), say so.
 
 ### WalStat licence — confirmed from IWEPS' own FAQ
 
