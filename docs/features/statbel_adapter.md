@@ -25,24 +25,52 @@ internal consistency checks.
 
 ## Non-goals (this pass) — and why
 
-**Fiscal income by commune, fiscal income by statistical sector, and population by commune are
-not built this pass.** Verified directly, not assumed:
+**Fiscal income by commune and fiscal income by statistical sector are not built this pass.**
+Verified directly, not assumed:
 
-- Every standard Bestat view for both fiscal-income datasources and the population datasource
-  stops at province level (3 views total for fiscal income, checked exhaustively; 156 views for
-  population, none named "commune"/"municipal").
+- Every standard Bestat view for both fiscal-income datasources stops at province level (3 views
+  total, checked exhaustively).
 - `statbel.fgov.be` — the open-data portal whose XLSX pages claim commune-level files for these
-  three — refused every direct fetch attempt this session (timeouts), the same as during Block E.
+  two — refused every direct fetch attempt this session (timeouts), the same as during Block E.
 
 Building an adapter for data whose actual column layout has never been seen would mean guessing
 at exactly the thing this document's own `[SPEC]` step exists to prevent ("column-level mapping
-written in advance is what stops an agent guessing which column is 'income'"). These three stay
+written in advance is what stops an agent guessing which column is 'income'"). These two stay
 blocked until either the site becomes reachable, or the maintainer supplies the file directly —
-the same pattern already used for the geography files in Block C.
+the same pattern used for the geography files in Block C, and later for population below.
 
-**Demography (beyond this one dataset), Housing, Mobility** — no dataset was selected for these
-categories in Block E (real estate, cadastral stock and building permits were all `DEFERRED`).
-Nothing to build against.
+**Housing, Mobility** — no dataset was selected for these categories in Block E (real estate,
+cadastral stock and building permits were all `DEFERRED`). Nothing to build against.
+
+## Population by commune — built later, once the file was supplied
+
+Unlike the three datasets above, population **was** unblocked: the maintainer downloaded
+`TF_SOC_POP_STRUCT_<year>.zip` (Statbel's population-by-place-of-residence bulk file) by hand for
+2016 through 2026 and supplied them directly — `statbel.fgov.be` itself never became reachable
+from this pipeline's automated context.
+
+This dataset differs from business/enterprise units in a way that made it *easier*, not harder,
+to load correctly:
+
+- **It carries a real NIS code** (`CD_REFNIS`), not a name. `resolve_geo(nis, period)` (Block C)
+  applies directly — no name-matching, no `Sint-Niklaas`/`Saint-Nicolas`-style ambiguity to
+  resolve. This is the first Statbel dataset to exercise `resolve_geo`'s period-awareness for
+  real: a pre-2019 file's NIS code for a since-merged commune correctly resolves to that
+  commune's own historical `geo_id`, not to the merger successor that did not yet exist.
+- **It genuinely has multi-year history** — 11 annual periods (2016–2026), each a real Statbel
+  publication, not backfilled or interpolated. This is unlike `LOCAL_UNITS_BY_COMMUNE`, which
+  only has the latest quarter.
+- **One real vintage inconsistency, found and handled, not assumed away**: the 2022 file encodes
+  its apostrophes as a raw cp1252 byte where every other year is UTF-8. Confirmed byte-for-byte
+  (see `scripts/plot_population_continuity.py`'s docstring); the reader falls back to cp1252 on a
+  UTF-8 decode failure rather than crash or silently mis-decode.
+
+**Not automated.** `scripts/sync_population.py` is a manual script, run by hand whenever the
+maintainer downloads a fresh year — it is deliberately **not** added to `daily_fetch.yml`, because
+the daily workflow cannot itself re-fetch these files (the source is unreachable from that
+context, unlike the live Bestat API `sync_statbel.py` calls every day). Config:
+`config/indicators/POPULATION_BY_COMMUNE.yaml`. `preferred_direction: contextual` — a larger or
+smaller population is not inherently better or worse.
 
 ## Data source
 

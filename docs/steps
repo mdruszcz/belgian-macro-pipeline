@@ -194,7 +194,7 @@ Why: Column-level mapping written in advance is what stops an agent guessing whi
  ✅ [BUILD] Implement StatbelSource on the base interface (one dataset wired -- LOCAL_UNITS_BY_COMMUNE; a new MunicipalTimeSeriesSource contract added to src/fetchers/base.py since this is the first source returning many geographies per fetch)
 How: One class, dataset-specific parsing driven by config.
 Why: Ten datasets in one adapter beats ten adapters, because the fetch, cache, retry and load logic is shared.
- 🛑 [BLOCKED] Demography: population, growth, age structure, dependency ratios, household composition (BLOCKED -- population-by-commune has no commune-level Bestat view; statbel.fgov.be unreachable. See statbel_adapter.md Non-goals. Licence is NOT the blocker here -- Statbel's own licence is now confirmed and permits commercial reuse; this is purely a data-access block)
+ ✅ [BUILD] Demography: population (2026-09-06: raw population counts only -- POPULATION_BY_COMMUNE, 11 real annual periods 2016-2026, all 565 current communes present in the latest year, loaded via scripts/sync_population.py from maintainer-supplied TF_SOC_POP_STRUCT files, resolved through resolve_geo -- the first Statbel dataset to use it directly, since this one carries a real NIS code rather than a name. Growth is deliberately NOT stored here -- it is Block G's job, computed from these raw counts, not a second source of truth. Age structure, dependency ratios and household composition are NOT covered -- the per-age/sex/nationality/civil-status breakdown was summed away on load; loading it would need a wider schema than one total per commune per year and is separate future work, not done here)
 How: Load raw counts only; ratios come from the derived engine.
 Why: Storing ratios as source data means you cannot recompute them when the denominator is revised.
  🛑 [BLOCKED] Income: mean taxable income, median where available, per inhabitant (BLOCKED -- same reason as Demography above; fiscal income by commune and by statistical sector both affected. Licence confirmed, data access blocked)
@@ -219,10 +219,10 @@ Why: The subtle-but-wrong number is your main product risk. Labels are where it 
 How: Open the source page and compare three values on screen.
 Why: Five minutes here catches an entire mis-parsed column, which no unit test on your own fixture can catch.
 🚦 CONTROL F
- 🛑 [BLOCKED] All communes present for population, no silent nulls (2026-09-05: observations now genuinely has municipal rows for the first time -- 565 communes, LOCAL_UNITS_BY_COMMUNE, PR #42 -- but this control asks specifically about POPULATION, which remains unavailable. Business-unit coverage does not satisfy it)
+ ✅ [H] All communes present for population, no silent nulls (2026-09-06: checked directly -- all 565 current communes have a POPULATION_BY_COMMUNE value for 2026, the latest year. Zero silent nulls: every NIS code in every one of the 11 loaded years resolved via resolve_geo -- 0 unresolved across 6,383 (commune, year) rows)
 How: Query for communes missing a population value in the latest year.
 Why: Coverage gaps break percentiles and peer models everywhere downstream, invisibly.
- 🛑 [BLOCKED] At least five years of history per core dataset (the commune-level Bestat view carries only the latest quarter -- see statbel_adapter.md, "Only the latest quarter is available")
+ 🛑 [BLOCKED] At least five years of history per core dataset (2026-09-06: PARTIAL, left unchecked because "per core dataset" means all of them -- POPULATION_BY_COMMUNE now has 11 real annual periods (2016-2026), well past five years, but LOCAL_UNITS_BY_COMMUNE still carries only the latest quarter; see statbel_adapter.md, "Only the latest quarter is available". Marking this control done would overstate the weaker of the two datasets)
 How: MIN(period) per indicator.
 Why: Below five years, growth rates, trend breaks and the peer model are all statistically meaningless.
 Block G — Derived-indicator engine
