@@ -1,0 +1,48 @@
+[project]
+name = "belgian-macro-pipeline"
+version = "0.1.0"
+description = "Fetches Belgian macroeconomic and market data, stores in SQLite, exports to CSV/JSON."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0",
+    "requests>=2.31",
+    "openpyxl",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=26.0",
+    "ruff>=0.16",
+    "pytest>=8.0",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "C4",  # flake8-comprehensions
+]
+ignore = [
+    "E501",  # line length handled by black; long data URLs stay on one line
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
