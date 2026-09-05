@@ -1,0 +1,20 @@
+id: UNEMPLOYMENT_RATE
+name:
+  en: Unemployment rate
+  fr: Taux de chômage
+  nl: Werkloosheidsgraad
+unit: percent
+frequency: M
+source_id: nbb
+geo_levels: [national]
+description:
+  en: Harmonised unemployment rate, Belgium, monthly.
+fetch:
+  query: ',DF_UNEMPLOY_RATE,1.0/M..Z0000....?startPeriod=2022-07&lastNObservations=13'
+display:
+  category: unemployment
+  title:
+    en: Unemployment Rate — Belgium
+    fr: Taux de chômage — Belgique
+    nl: Werkloosheidsgraad — België
+  sort_order: 1
