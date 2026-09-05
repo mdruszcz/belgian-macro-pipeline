@@ -98,6 +98,26 @@ def load_exonyms(path: Path) -> dict[str, str]:
         return {row["nis_code"]: row["name_en"] for row in csv.DictReader(handle)}
 
 
+def read_existing_signoffs(path: Path) -> set[tuple[str, str, str]]:
+    """Sign-offs already recorded in the committed crosswalk.
+
+    Regeneration must not silently discard the maintainer's [H] verification --
+    that work is the whole point of the review gate, and quietly resetting it on
+    every refresh would train everyone to ignore the flags. A sign-off is keyed
+    on the claim that was actually checked (predecessor, successor, wave), so a
+    refresh that changes any of those correctly asks for it to be looked at
+    again.
+    """
+    if not path.exists():
+        return set()
+    with path.open(encoding="utf-8") as handle:
+        return {
+            (row["old_nis"], row["new_nis"], row["valid_to"])
+            for row in csv.DictReader(handle)
+            if row.get("verified") == "true"
+        }
+
+
 def _require(path: Path) -> Path:
     if not path.exists():
         raise FileNotFoundError(
@@ -151,7 +171,10 @@ def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
     for filename, communes in vintages:
         for code in communes:
             first_seen.setdefault(code, VINTAGE_DATES[filename])
-    crosswalk = derive_crosswalk(vintages, nis9_rows, names_by_code, first_seen)
+    signoffs = read_existing_signoffs(config_dir / "municipality_crosswalk.csv")
+    crosswalk = derive_crosswalk(
+        vintages, nis9_rows, names_by_code, first_seen, previously_verified=signoffs
+    )
 
     # Validity windows for every entity at every level, evidenced by the
     # vintage diff -- this is what stops an arrondissement created in 2019
@@ -168,7 +191,9 @@ def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
     _write_csv(config_dir / "geographies.csv", GEOGRAPHIES_COLUMNS, hierarchy)
     _write_csv(config_dir / "municipality_crosswalk.csv", CROSSWALK_COLUMNS, crosswalk)
 
-    needs_review = unresolved(crosswalk)
+    needs_review = [row for row in unresolved(crosswalk) if row["verified"] != "true"]
+    if signoffs:
+        log.info("Carried forward %d existing sign-off(s)", len(signoffs))
     return len(hierarchy), len(crosswalk), len(needs_review)
 
 

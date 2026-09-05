@@ -201,11 +201,21 @@ derived from official data rather than authored by hand, but still reviewed by a
 | `absorbed` | Sole predecessor, different name — taken into an existing commune. | `11007` Borsbeek → `11002` Antwerpen |
 | `recoded` | Sole predecessor, same name — the entity survived, only its code changed (the 2019 Hainaut arrondissement reform). | `55022` La Louvière → `58001` La Louvière |
 
-`has_partial_transfer` is a **separate boolean**, not a fourth relationship value. A boundary
-transfer (Statbel marks these `PARTIE DE …`, `MODIFICATION DE LIMITE`, or a trailing `*`) is
-orthogonal to what happened to the commune itself: La Louvière was *recoded* and separately
-received part of Familleureux. Folding that into `relationship` would overwrite the useful fact
-with the incidental one.
+`has_partial_transfer` is a **separate, informational boolean** — not a fourth relationship
+value and not a review gate. Statbel marks these with `PARTIE DE …`, `MODIFICATION DE LIMITE`, or
+a trailing `*`, and they are orthogonal to what happened to the commune: La Louvière was
+*recoded* and separately received part of Familleureux.
+
+It does not gate the review, and the reason is worth recording. Roughly **200 of these markers
+exist nationwide** — they annotate the **1977** merger that created the modern communes, not the
+2019 or 2025 waves. Gating on them flagged five rows (Seneffe, La Louvière, Silly, Bastogne,
+Bertogne) purely because their codes happen to appear in this crosswalk, asking the maintainer to
+verify lineages that were never in doubt. A gate that cries wolf gets ignored.
+
+The obvious narrowing — flag only when the marked land ended up somewhere other than the row's
+successor — turns out to be *unable to fire*: the prefix rule derives successors from exactly
+those NIS6 rows, so territory that went elsewhere is already in the successor set and the row is
+already flagged as split. The marker carries no signal the multi-successor check does not.
 
 #### Two methods, and why one is not enough
 
@@ -226,13 +236,19 @@ silently orphaned both communes' entire pre-2025 history — precisely the failu
 step below exists to find. `tests/test_geography_crosswalk.py` carries this as a regression test.
 
 Where the two methods disagree, or where the successor comes from the weaker name-matching
-fallback, the row is **flagged in the `note` column and `verified` stays `false`**. Seven rows
-are currently flagged (the two above, plus five partial transfers), and **the loader refuses to
-run while any remain unsigned** — `scripts/load_geography.py` raises `UnverifiedCrosswalkError`
+fallback, the row is **flagged in the `note` column and `verified` stays `false`**. Two rows
+are currently flagged — Borgloon and Tongeren, whose successor came from name matching — and
+**the loader refuses to run while any remain unsigned** — `scripts/load_geography.py` raises `UnverifiedCrosswalkError`
 unless `verified` is `true` on every flagged row, or `--allow-unverified` is passed explicitly.
 The audit found this gate missing: the loader read none of the flag columns and wrote exactly the
 confident successor links the flags exist to question. CONTROL C must not be claimed while any
 remain unresolved.
+
+**A sign-off survives regeneration.** `derive_geography_csv.py` reads the committed crosswalk
+before overwriting it and carries `verified=true` forward, keyed on the claim that was actually
+checked — `(old_nis, new_nis, valid_to)`. A refresh that changes the successor or the wave resets
+it, because that is a different claim from the one that was verified. Without this, every refresh
+silently discarded the maintainer's work, which is the same failure as not having the gate.
 
 `valid_from` for a predecessor is the first vintage containing it; `valid_to` is the wave that
 ended it. They must differ — `geographies` enforces `CHECK (valid_to > valid_from)`.
@@ -382,9 +398,9 @@ it rather than by a general assertion:
   in 2025 is absorbed into Hasselt's canonical identity). The alternative — comparing raw commune
   codes — produced false splits everywhere. Observations attach to communes, not arrondissements,
   so this is a limitation of aggregate-level history rather than of the data itself.
-- **Q6 — Partial boundary transfers.** Five rows carry `has_partial_transfer = true`. A partial
-  transfer cannot be expressed as a 1:1 lineage, so the affected cells' history is a judgement
-  call the maintainer must make rather than the loader assuming one.
+- **~~Q6 — Partial boundary transfers.~~ Resolved.** The markers describe the 1977 merger, and
+  any territory that actually left is already caught as a multi-successor row. The column is
+  informational; it no longer gates the review. Five rows carry it.
 
 ## Rollout / risks
 

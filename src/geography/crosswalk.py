@@ -41,10 +41,21 @@ VINTAGE_DATES = {
     "REFNIS_2025.csv": "2025-01-01",
 }
 
-# Statbel marks partial transfers in NIS6 names. A commune boundary change that
-# moved only *part* of a former entity cannot be expressed as a 1:1 crosswalk
-# row, so these are surfaced rather than folded in silently.
-PARTIAL_MARKERS = ("PARTIE DE", "MODIFICATION DE LIMITE", "*")
+# Statbel marks partial territory transfers in NIS6 sub-municipality names.
+#
+# These annotate the **1977** merger of Belgian municipalities, when the modern
+# communes were formed -- roughly 200 of them appear across the country, on
+# sub-municipalities of communes that have been stable ever since. They say
+# nothing about the 2019 and 2025 waves this crosswalk records.
+#
+# An earlier version flagged a crosswalk row whenever any of its former
+# commune's NIS6 entries carried a marker, which caught five rows by pure
+# coincidence of code overlap (52063 Seneffe, 55022 La Louviere, 55039 Silly,
+# 82003 Bastogne, 82005 Bertogne) and asked the maintainer to verify lineages
+# that were never in doubt. A review gate that cries wolf gets ignored, so the
+# column is now informational and no longer gates the review at all -- see
+# _carries_partial_marker for why it turned out to carry no signal of its own.
+PARTIAL_MARKERS = ("PARTIE DE", "PARTIES DE", "MODIFICATION DE LIMITE", "*")
 
 # `partial` is deliberately NOT one of these. A boundary transfer is orthogonal
 # to what happened to the commune itself: 55022 La Louviere was *recoded* by the
@@ -79,6 +90,43 @@ def _is_partial(name: str | None) -> bool:
         return False
     upper = name.upper()
     return any(marker in upper for marker in PARTIAL_MARKERS)
+
+
+def partial_transfer_destinations(nis9_rows: list[dict]) -> dict[str, set[str]]:
+    """old NIS5 -> the communes that its partially-transferred territory sits in today.
+
+    Each marker-bearing NIS6 row states, by its own commune assignment, where
+    that piece of land actually ended up. That is what makes "is this partial
+    transfer relevant?" computable rather than a judgement call.
+    """
+    destinations: dict[str, set[str]] = {}
+    for row in nis9_rows:
+        nis6 = row.get("nis6")
+        commune = row.get("commune_code")
+        if not nis6 or not commune or len(nis6) < 5:
+            continue
+        if _is_partial(row.get("nis6_name")):
+            destinations.setdefault(nis6[:5], set()).add(commune)
+    return destinations
+
+
+def _carries_partial_marker(old_code: str, destinations: dict[str, set[str]]) -> bool:
+    """Whether any of this former commune's territory is marked as a partial
+    transfer. **Informational only** -- it does not gate the review.
+
+    It took a wrong turn to see why. The gate originally stopped on any marker,
+    which flagged five lineages that were never in doubt. The obvious fix --
+    flag only when the marked land ended up somewhere other than this row's
+    successor -- turns out to be unable to fire: the prefix rule derives
+    successors from exactly those NIS6 rows, so any territory that went
+    elsewhere is *already* in the successor set, and the row is already flagged
+    as split across multiple successors.
+
+    So the marker carries no signal the multi-successor check does not. It stays
+    as a column because it is true and occasionally useful context, and it is
+    out of `unresolved()` because a gate that stops on it stops on nothing real.
+    """
+    return bool(destinations.get(old_code))
 
 
 def classify(
@@ -255,6 +303,7 @@ def derive_crosswalk(
     nis9_rows: list[dict],
     names_by_code: dict[str, str],
     valid_from_by_code: dict[str, str] | None = None,
+    previously_verified: set[tuple[str, str, str]] | None = None,
 ) -> list[dict]:
     """Build the crosswalk from vintage diffs, decorated by the prefix rule.
 
@@ -271,11 +320,8 @@ def derive_crosswalk(
     """
     prefix_candidates = successor_candidates_from_nis6(nis9_rows)
     valid_from_by_code = valid_from_by_code or {}
-    partial_old_codes = {
-        row["nis6"][:5]
-        for row in nis9_rows
-        if row.get("nis6") and len(row["nis6"]) >= 5 and _is_partial(row.get("nis6_name"))
-    }
+    partial_destinations = partial_transfer_destinations(nis9_rows)
+    previously_verified = previously_verified or set()
 
     rows: list[dict] = []
     for (_, older), (newer_file, newer) in zip(vintages, vintages[1:], strict=False):
@@ -337,14 +383,27 @@ def derive_crosswalk(
                     "relationship": classify(
                         older[old_code]["name_nl"], successors, names_by_code, count
                     ),
-                    "has_partial_transfer": ("true" if old_code in partial_old_codes else "false"),
+                    "has_partial_transfer": (
+                        "true"
+                        if _carries_partial_marker(old_code, partial_destinations)
+                        else "false"
+                    ),
                     # valid_from is when the predecessor first appears in a
                     # vintage; valid_to is the wave that ended it. They must
                     # differ -- `geographies` enforces valid_to > valid_from.
                     "valid_from": valid_from_by_code.get(old_code, VINTAGE_DATES[vintages[0][0]]),
                     "valid_to": wave_date,
                     "evidence": f"absent from {newer_file}",
-                    "verified": "false",
+                    # A sign-off survives regeneration as long as the lineage it
+                    # was given still says the same thing; any change to the
+                    # successor or the wave resets it, because that is a
+                    # different claim from the one that was checked.
+                    "verified": (
+                        "true"
+                        if (old_code, ";".join(sorted(successors)), wave_date)
+                        in previously_verified
+                        else "false"
+                    ),
                     "note": note,
                 }
             )
@@ -354,15 +413,9 @@ def derive_crosswalk(
 def unresolved(rows: list[dict]) -> list[dict]:
     """Crosswalk rows that need the maintainer's eye before CONTROL C.
 
-    Partial transfers are included: they cannot be represented as a clean 1:1
-    lineage, so a human has to decide what the history of the affected cell
-    should be rather than the loader assuming one.
+    A row qualifies when its successor was guessed (a `note`), when it is split
+    across several successors, or when no successor could be derived at all.
+    `has_partial_transfer` deliberately does not qualify -- see
+    _carries_partial_marker for why it carries no signal of its own.
     """
-    return [
-        r
-        for r in rows
-        if r["note"]
-        or ";" in r["new_nis"]
-        or not r["new_nis"]
-        or r["has_partial_transfer"] == "true"
-    ]
+    return [r for r in rows if r["note"] or ";" in r["new_nis"] or not r["new_nis"]]

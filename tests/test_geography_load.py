@@ -236,8 +236,14 @@ def test_loader_refuses_unverified_crosswalk_rows(tmp_path):
     loader used to write them anyway, making the flags decorative."""
     db_path = tmp_path / "gate.db"
     migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
-    with pytest.raises(load_mod.UnverifiedCrosswalkError, match="need maintainer verification"):
+    with pytest.raises(load_mod.UnverifiedCrosswalkError) as excinfo:
         load_mod.load(db_path, REAL_CONFIG_DIR)
+    message = str(excinfo.value)
+    # Exactly the two whose successor was guessed -- the gate must name them,
+    # and must not have drifted back to flagging the 1977 partial-transfer rows.
+    assert "2 crosswalk row(s)" in message
+    assert "73009" in message and "73083" in message
+    assert "52063" not in message
 
 
 def test_loader_rejects_a_blank_valid_from(tmp_path):
