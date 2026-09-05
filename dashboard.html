@@ -227,8 +227,8 @@ canvas.spark{display:block}
 <div class="footer"><div id="ftSrc"><strong>Sources:</strong> NBB = National Bank of Belgium</div><div id="ftGit">Data from GitHub · Auto-updated daily 06:00 CET</div></div>
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub">—</div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn" onclick="exportModalCSV()">⬇ Export CSV</button><button class="modal-close" onclick="closeModal()">✕</button></div></div><div class="modal-body"><div class="modal-stats" id="modalStats"></div><div class="modal-chart"><canvas id="modalChart"></canvas></div><div class="modal-table-wrap"><table class="modal-table"><thead><tr><th id="mThPer">Period</th><th id="mThVal">Value</th><th id="mThChg">Δ Change</th><th id="mThStat">Status</th><th id="mThBar">Bar</th></tr></thead><tbody id="modalTableBody"></tbody></table></div></div></div></div>
 <script>
-const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_macro_export.csv';
-const FORECAST_CSV_URL='https://raw.githubusercontent.com/mdruszcz/belgian-macro-pipeline/main/data/belgian_forecasts.csv';
+const DEFAULT_CSV_URL=localStorage.getItem('csv_url')||'data/belgian_macro_export.csv';
+const FORECAST_CSV_URL='data/belgian_forecasts.csv';
 let FORECASTS_RAW=[];
 let LANG=REQUESTED_LANG||localStorage.getItem('lang')||'en';
 const T={title:{en:'Macroeconomic and Financial Review of Belgium',fr:'Revue macroéconomique et financière de la Belgique',nl:'Macro-economisch en financieel overzicht van België'},loading:{en:'Loading…',fr:'Chargement…',nl:'Laden…'},fetching:{en:'Fetching…',fr:'Récupération…',nl:'Ophalen…'},error:{en:'Error: ',fr:'Erreur : ',nl:'Fout: '},no_csv:{en:'No CSV URL available in configuration.',fr:'Aucune URL CSV disponible.',nl:'Geen CSV URL beschikbaar.'},all:{en:'ALL',fr:'TOUS',nl:'ALLE'},th_ind:{en:'Indicator',fr:'Indicateur',nl:'Indicator'},th_src:{en:'Source',fr:'Source',nl:'Bron'},th_last:{en:'Last data',fr:'Dernières données',nl:'Laatste data'},th_val:{en:'Value',fr:'Valeur',nl:'Waarde'},th_trend:{en:'Trend',fr:'Tendance',nl:'Trend'},th_vis:{en:'Visuel',fr:'Visuel',nl:'Visueel'},th_upd:{en:'Update',fr:'Mise à jour',nl:'Update'},th_com:{en:'Comments',fr:'Commentaires',nl:'Opmerkingen'},ft_src:{en:'<strong>Sources:</strong> NBB = National Bank of Belgium',fr:'<strong>Sources:</strong> BNB = Banque Nationale de Belgique',nl:'<strong>Bronnen:</strong> NBB = Nationale Bank van België'},ft_git:{en:'Data from GitHub · Auto-updated daily 06:00 CET',fr:'Données GitHub · Mise à jour auto. 06:00 CET',nl:'Data via GitHub · Auto-update 06:00 CET'},m_obs:{en:'observations',fr:'observations',nl:'waarnemingen'},m_last10:{en:'Last 10 years',fr:'10 dernières années',nl:'Laatste 10 jaar'},m_latest:{en:'Latest',fr:'Dernier',nl:'Laatste'},m_chg:{en:'Change',fr:'Changement',nl:'Verschil'},m_avg:{en:'10Y Average',fr:'Moyenne 10A',nl:'10J Gemid.'},m_min:{en:'10Y Min',fr:'Min 10A',nl:'10J Min'},m_max:{en:'10Y Max',fr:'Max 10A',nl:'10J Max'},m_th_per:{en:'Period',fr:'Période',nl:'Periode'},m_th_val:{en:'Value',fr:'Valeur',nl:'Waarde'},m_th_chg:{en:'Δ Change',fr:'Δ Changement',nl:'Δ Verschil'},m_th_stat:{en:'Status',fr:'Statut',nl:'Status'},m_th_bar:{en:'Bar',fr:'Barre',nl:'Balk'},st_act:{en:'Actual',fr:'Réel',nl:'Actueel'},st_prov:{en:'Provisional',fr:'Provisoire',nl:'Voorlopig'},st_brk:{en:'Break',fr:'Rupture',nl:'Breuk'},c_reached:{en:'reached',fr:'a atteint',nl:'bereikte'},c_in:{en:'in',fr:'en',nl:'in'},c_prov:{en:'(provisional)',fr:'(provisoire)',nl:'(voorlopig)'},c_vs:{en:'Change vs',fr:'Changement vs',nl:'Verschil met'}};
@@ -251,17 +251,17 @@ CONSUMER_CONFIDENCE:{n:5,s:'confidence',name:{en:'Consumer confidence (NBB)',fr:
 EC_CONS_CONF:{n:6,s:'confidence',name:{en:'',fr:'',nl:''},o:6,full:{en:'Consumer Confidence — Eurostat (BE & EA)',fr:'Confiance des consommateurs — Eurostat (BE & ZE)',nl:'Consumentenvertrouwen — Eurostat (BE & EA)'},desc:{en:'EC harmonised consumer confidence for Belgium and Euro Area. Balance metric from Eurostat/DG ECFIN surveys.',fr:'Confiance des consommateurs harmonisée CE pour la Belgique et la zone euro. Source : Eurostat/DG ECFIN.',nl:'EC geharmoniseerd consumentenvertrouwen voor België en eurozone. Bron: Eurostat/DG ECFIN.'},freq:'M',combined:true},
 BUSINESS_CONFIDENCE:{n:7,s:'confidence',name:{en:'Business confidence (NBB)',fr:'Confiance des entreprises (BNB)',nl:'Ondernemersvertrouwen (NBB)'},o:7,full:{en:'Business Confidence — NBB Synthetic Barometer',fr:'Confiance des entreprises — Baromètre synthétique BNB',nl:'Ondernemersvertrouwen — NBB Synthetische barometer'},freq:'M'},
 LABOUR_COST_BE: {
-    n: 1, 
-    s: 'labour', 
+    n: 1,
+    s: 'labour',
     name: {
-        en: 'Labour cost index', 
-        fr: 'Indice du coût de la main-d\'œuvre', 
+        en: 'Labour cost index',
+        fr: 'Indice du coût de la main-d\'œuvre',
         nl: 'Loonkostenindex'
-    }, 
-    o: 1, 
+    },
+    o: 1,
     full: {
-        en: 'Labour Cost Index (LCI) — Nominal hourly costs', 
-        fr: 'Indice du coût de la main-d\'œuvre (ICM) — Coûts horaires nominaux', 
+        en: 'Labour Cost Index (LCI) — Nominal hourly costs',
+        fr: 'Indice du coût de la main-d\'œuvre (ICM) — Coûts horaires nominaux',
         nl: 'Loonkostenindex (LKI) — Nominale uurkosten'
     },
     desc: {
@@ -269,21 +269,21 @@ LABOUR_COST_BE: {
         fr: 'Coûts salariaux horaires totaux (salaires + cotisations). Crucial pour le suivi de la compétitivité belge.',
         nl: 'Totale uurloonkosten (lonen + sociale bijdragen). Cruciaal voor het monitoren van het Belgische concurrentievermogen.'
     },
-    sdmx: 'LCI_INDEX', 
+    sdmx: 'LCI_INDEX',
     freq: 'A'
 },
 INDUSTRIAL_PROD: {
-    n: 2, 
+    n: 2,
     s: 'prices', // Change to 'industry' if you want accuracy
     name: {
-        en: 'Industrial production', 
-        fr: 'Production industrielle', 
+        en: 'Industrial production',
+        fr: 'Production industrielle',
         nl: 'Industriële productie'
-    }, 
-    o: 2, 
+    },
+    o: 2,
     full: {
-        en: 'Industrial Production Index (IPI) — Total Industry', 
-        fr: 'Indice de la production industrielle (IPI) — Total industrie', 
+        en: 'Industrial Production Index (IPI) — Total Industry',
+        fr: 'Indice de la production industrielle (IPI) — Total industrie',
         nl: 'Index van de industriële productie (IPI) — Totaal industrie'
     },
     desc: {
@@ -291,21 +291,21 @@ INDUSTRIAL_PROD: {
         fr: 'Volume de production pour les mines, l\'industrie manufacturière et l\'énergie. Ajusté selon les jours ouvrables.',
         nl: 'Productievolume voor mijnbouw, industrie en energie. Aangepast voor werkdagen.'
     },
-    sdmx: 'IPI_STS', 
+    sdmx: 'IPI_STS',
     freq: 'A'
 },
 HICP: {
-    n: 3, 
-    s: 'prices', 
+    n: 3,
+    s: 'prices',
     name: {
-        en: 'HICP (Harmonised Inflation)', 
-        fr: 'IPCH (Inflation harmonisée)', 
+        en: 'HICP (Harmonised Inflation)',
+        fr: 'IPCH (Inflation harmonisée)',
         nl: 'GICP (Geharmoniseerde inflatie)'
-    }, 
-    o: 3, 
+    },
+    o: 3,
     full: {
-        en: 'Harmonised Index of Consumer Prices', 
-        fr: 'Indice des prix à la consommation harmonisé', 
+        en: 'Harmonised Index of Consumer Prices',
+        fr: 'Indice des prix à la consommation harmonisé',
         nl: 'Geharmoniseerde index van de consumentenprijzen'
     },
     desc: {
@@ -313,7 +313,7 @@ HICP: {
         fr: 'Mesure d\'inflation harmonisée pour comparaison BCE. Inclut les dépenses des touristes, contrairement à l\'IPC national.',
         nl: 'Geharmoniseerde inflatiemaatstaf voor ECB-vergelijking. Inclusief toeristische uitgaven, in tegenstelling tot de nationale CPI.'
     },
-    sdmx: 'HICP_INDEX', 
+    sdmx: 'HICP_INDEX',
     freq: 'A'
 }
 };
@@ -1150,7 +1150,7 @@ function init(){
   loadTheme();
   renderPills();
   fetchData();
-  
+
   // Hide controls if in iframe and notify parent
   if (window.self !== window.top) {
     const header = document.querySelector('.header');

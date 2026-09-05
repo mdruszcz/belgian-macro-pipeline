@@ -12,12 +12,19 @@ import csv
 import io
 import logging
 import sqlite3
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import requests
 from openpyxl import load_workbook
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
+
+from rename_legacy_tables import rename_legacy_tables  # noqa: E402
+
+from src.db.migrate import run as run_migrations  # noqa: E402
 
 # ─── Configuration ────────────────────────────────────────────────
 
@@ -282,8 +289,14 @@ class MacroDatabase:
         self._init_schema()
 
     def _init_schema(self):
+        # Order matters: rename any legacy-shaped tables out of the way first,
+        # then apply canonical migrations, then create the (now non-colliding,
+        # renamed) legacy tables if they don't exist yet. See
+        # scripts/rename_legacy_tables.py and docs/decisions/0001-data-model.md.
+        rename_legacy_tables(self.conn)
+        run_migrations(self.db_path)
         self.conn.executescript("""
-            CREATE TABLE IF NOT EXISTS indicators (
+            CREATE TABLE IF NOT EXISTS legacy_indicators (
                 code          TEXT PRIMARY KEY,
                 name          TEXT NOT NULL,
                 frequency     TEXT NOT NULL,
@@ -292,16 +305,16 @@ class MacroDatabase:
                 description   TEXT,
                 api_url       TEXT
             );
-            CREATE TABLE IF NOT EXISTS observations (
+            CREATE TABLE IF NOT EXISTS legacy_observations (
                 indicator_code TEXT NOT NULL,
                 period         TEXT NOT NULL,
                 value          REAL NOT NULL,
                 obs_status     TEXT,
                 fetched_at     TEXT NOT NULL,
                 PRIMARY KEY (indicator_code, period),
-                FOREIGN KEY (indicator_code) REFERENCES indicators(code)
+                FOREIGN KEY (indicator_code) REFERENCES legacy_indicators(code)
             );
-            CREATE TABLE IF NOT EXISTS fetch_log (
+            CREATE TABLE IF NOT EXISTS legacy_fetch_log (
                 id             INTEGER PRIMARY KEY AUTOINCREMENT,
                 indicator_code TEXT NOT NULL,
                 fetched_at     TEXT NOT NULL,
@@ -310,7 +323,7 @@ class MacroDatabase:
                 message        TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_obs_period
-                ON observations(indicator_code, period DESC);
+                ON legacy_observations(indicator_code, period DESC);
             CREATE TABLE IF NOT EXISTS forecasts (
                 institution    TEXT NOT NULL,
                 indicator      TEXT NOT NULL,
@@ -326,7 +339,7 @@ class MacroDatabase:
     def upsert_indicator(self, code: str, meta: dict):
         self.conn.execute(
             """
-            INSERT INTO indicators (code, name, frequency, unit, source_agency, description, api_url)
+            INSERT INTO legacy_indicators (code, name, frequency, unit, source_agency, description, api_url)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(code) DO UPDATE SET
                 name=excluded.name, frequency=excluded.frequency,
@@ -350,7 +363,7 @@ class MacroDatabase:
         for row in rows:
             self.conn.execute(
                 """
-                INSERT INTO observations (indicator_code, period, value, obs_status, fetched_at)
+                INSERT INTO legacy_observations (indicator_code, period, value, obs_status, fetched_at)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(indicator_code, period) DO UPDATE SET
                     value=excluded.value, obs_status=excluded.obs_status,
@@ -364,7 +377,7 @@ class MacroDatabase:
     def log_fetch(self, code: str, count: int, status: str, msg: str = ""):
         now = datetime.now(timezone.utc).isoformat()
         self.conn.execute(
-            "INSERT INTO fetch_log (indicator_code, fetched_at, rows_upserted, status, message) VALUES (?,?,?,?,?)",
+            "INSERT INTO legacy_fetch_log (indicator_code, fetched_at, rows_upserted, status, message) VALUES (?,?,?,?,?)",
             (code, now, count, status, msg),
         )
         self.conn.commit()
@@ -373,7 +386,7 @@ class MacroDatabase:
         cur = self.conn.execute(
             """
             SELECT o.period, o.value, o.obs_status, o.fetched_at, i.name, i.unit
-            FROM observations o JOIN indicators i ON o.indicator_code = i.code
+            FROM legacy_observations o JOIN legacy_indicators i ON o.indicator_code = i.code
             WHERE o.indicator_code = ? ORDER BY o.period DESC LIMIT 1
         """,
             (code,),
@@ -392,7 +405,9 @@ class MacroDatabase:
         }
 
     def get_all_latest(self) -> list[dict]:
-        codes = [r[0] for r in self.conn.execute("SELECT code FROM indicators ORDER BY code")]
+        codes = [
+            r[0] for r in self.conn.execute("SELECT code FROM legacy_indicators ORDER BY code")
+        ]
         return [latest for c in codes if (latest := self.get_latest(c))]
 
     def get_all_observations(self) -> pd.DataFrame:
@@ -400,7 +415,7 @@ class MacroDatabase:
             """
             SELECT o.indicator_code, i.name, o.period, o.value,
                    o.obs_status, i.unit, i.source_agency, o.fetched_at
-            FROM observations o JOIN indicators i ON o.indicator_code = i.code
+            FROM legacy_observations o JOIN legacy_indicators i ON o.indicator_code = i.code
             ORDER BY o.indicator_code, o.period
         """,
             self.conn,
@@ -408,7 +423,7 @@ class MacroDatabase:
 
     def get_fetch_history(self, n: int = 20) -> list[dict]:
         cur = self.conn.execute(
-            "SELECT indicator_code, fetched_at, rows_upserted, status, message FROM fetch_log ORDER BY id DESC LIMIT ?",
+            "SELECT indicator_code, fetched_at, rows_upserted, status, message FROM legacy_fetch_log ORDER BY id DESC LIMIT ?",
             (n,),
         )
         return [{"code": r[0], "at": r[1], "rows": r[2], "status": r[3], "msg": r[4]} for r in cur]
