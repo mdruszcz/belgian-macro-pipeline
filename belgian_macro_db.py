@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
@@ -277,6 +278,60 @@ class MacroDatabase:
 # ─── Orchestration ────────────────────────────────────────────────
 
 
+def _ensure_fpb_source_row(conn: sqlite3.Connection) -> None:
+    """FPBSource logs every fetch attempt to fetch_runs (Block D, "every
+    adapter"), keyed source_id='fpb' -- but 'fpb' is deliberately excluded
+    from SOURCES/_load_sources (adapter not in "nbb"/"dbnomics"), so it has
+    never had a row in the canonical `sources` table. fetch_runs.source_id
+    carries a real FK to sources.source_id.
+
+    This was invisible for a long time because MacroDatabase's connection
+    never runs PRAGMA foreign_keys=ON, so the orphaning insert has always
+    silently succeeded rather than raising -- exactly the trap Block A's own
+    spec warned about ("SQLite silently ignores foreign keys unless you turn
+    them on, which means integrity constraints you believe exist do not").
+    It surfaced for real on 2026-09-05 as a genuine `pragma foreign_key_check`
+    violation on the committed database once fetch_runs actually had an
+    'fpb' row at the same moment someone finally checked.
+
+    Read live from config/sources/fpb.yaml rather than hardcoding a second
+    copy -- scripts/sync_statbel.py's own equivalent reference-row insert
+    hardcodes 'statbel', and that copy has already drifted from
+    config/sources/statbel.yaml's corrected licence text (see docs/data_catalog.md).
+
+    catalog_ref is NOT NULL on `sources` (migrations/001_core_schema.sql), but
+    fpb.yaml's own catalog_ref is null -- true of every macro source's YAML
+    except statbel's. scripts/sync_to_canonical.py's _ensure_reference_rows
+    already hits this and falls back to a literal placeholder rather than
+    trusting the YAML field; this does the same, for the same reason (an
+    INSERT OR IGNORE against a NOT NULL violation is silently dropped, not
+    raised -- the first version of this function did exactly that and the
+    row never landed).
+
+    INSERT OR IGNORE: safe and idempotent on every run.
+    """
+    cfg = yaml.safe_load((CONFIG_DIR / "sources" / "fpb.yaml").read_text())
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO sources
+            (source_id, name, agency, adapter, base_url, licence, catalog_ref, cadence, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            cfg["source_id"],
+            cfg["name"],
+            cfg["agency"],
+            cfg["adapter"],
+            cfg.get("base_url"),
+            cfg.get("licence"),
+            cfg.get("catalog_ref") or "docs/data_catalog.md (pending)",
+            cfg.get("cadence"),
+            1 if cfg.get("is_active", True) else 0,
+        ),
+    )
+    conn.commit()
+
+
 def fetch_all(db: MacroDatabase) -> bool:
     """Fetch every configured source. Returns False if any source failed.
 
@@ -314,6 +369,7 @@ def fetch_all(db: MacroDatabase) -> bool:
             log.error(f"  FAIL {code}: {e}")
             db.log_fetch(code, 0, "ERROR", str(e))
             all_ok = False
+    _ensure_fpb_source_row(db.conn)
     try:
         fc_rows = FPBSource().fetch(FPB_XLSX_URL, cache_key="FPB_FORECASTS", conn=db.conn)
         n = db.upsert_forecasts(fc_rows)
