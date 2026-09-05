@@ -1,0 +1,27 @@
+id: CONSUMER_CONFIDENCE
+unit: balance
+frequency: M
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_CONSN,1.0/M..BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
+name:
+  en: Consumer confidence (NBB)
+  fr: Confiance des consommateurs (BNB)
+  nl: Consumentenvertrouwen (NBB)
+description:
+  en: Consumer confidence indicator from the National Bank of Belgium
+display:
+  category: confidence
+  title:
+    en: Consumer Confidence Indicator — NBB Survey
+    fr: Indicateur de confiance des consommateurs — Enquête BNB
+    nl: Consumentenvertrouwenindicator — NBB-enquête
+  sort_order: 5
+  description:
+    en: Monthly survey of household sentiment. Negative = pessimism, positive = optimism.
+    fr: Enquête mensuelle du sentiment des ménages. Négatif = pessimisme, positif
+      = optimisme.
+    nl: Maandelijkse peiling van huishoudelijk sentiment. Negatief = pessimisme, positief
+      = optimisme.

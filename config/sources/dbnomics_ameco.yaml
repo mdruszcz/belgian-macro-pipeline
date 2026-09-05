@@ -1,0 +1,9 @@
+source_id: dbnomics_ameco
+name: AMECO series via DBnomics
+agency: AMECO/EC
+adapter: dbnomics
+base_url: https://api.db.nomics.world/v22/series/AMECO
+licence: null  # TODO: confirm licence terms (CLAUDE.md rule 8) -- already in production use
+catalog_ref: null
+cadence: daily
+is_active: true

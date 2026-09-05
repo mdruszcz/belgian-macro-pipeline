@@ -1,0 +1,15 @@
+id: LABOUR_COST_FR
+unit: index_2010
+frequency: A
+source_id: dbnomics_ameco
+geo_levels:
+- national
+fetch:
+  query: /PLCD/FRA.3.1.99.0.PLCD?observations=true
+name:
+  en: LABOUR_COST_FR
+  fr: LABOUR_COST_FR
+  nl: LABOUR_COST_FR
+description:
+  en: Nominal compensation per employee, total economy (2010=100) - France
+display: null

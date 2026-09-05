@@ -1,0 +1,27 @@
+id: NET_EXPORTS_CY
+unit: pp_contribution
+frequency: A
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.B11.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
+name:
+  en: Net exports
+  fr: Exportations nettes
+  nl: Netto-export
+description:
+  en: External balance of goods and services, contribution to GDP volume change
+display:
+  category: gdp
+  title:
+    en: External Balance of Goods and Services
+    fr: Solde extérieur des biens et services
+    nl: Extern saldo van goederen en diensten
+  sort_order: 10
+  description:
+    en: Exports minus imports. Belgium is highly open (trade ~160% of GDP).
+    fr: Exportations moins importations. La Belgique est très ouverte (commerce ~160%
+      du PIB).
+    nl: Export minus import. België is zeer open (handel ~160% van het BBP).
+  sdmx_code: B11

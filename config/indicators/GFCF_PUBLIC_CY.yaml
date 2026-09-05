@@ -1,0 +1,29 @@
+id: GFCF_PUBLIC_CY
+unit: pp_contribution
+frequency: A
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P51_PAD.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
+name:
+  en: GFCF — Public admin.
+  fr: FBCF — Administrations publiques
+  nl: BIK — Overheid
+description:
+  en: Gross fixed capital formation by public administrations, contribution to GDP
+    volume change
+display:
+  category: gdp
+  title:
+    en: Gross Fixed Capital Formation by Public Administrations
+    fr: Formation brute de capital fixe par les APU
+    nl: Bruto-investeringen in vaste activa door de overheid
+  sort_order: 8
+  description:
+    en: Government infrastructure — roads, rail, schools. Follows political investment
+      cycles.
+    fr: Infrastructures gouvernementales — routes, rails, écoles. Suit les cycles
+      politiques.
+    nl: Overheidsinfrastructuur — wegen, spoor, scholen. Volgt politieke cycli.
+  sdmx_code: P51_PAD

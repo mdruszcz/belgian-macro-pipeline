@@ -1,0 +1,29 @@
+id: INDUSTRIAL_PROD
+unit: index_2021
+frequency: M
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_INDPROD,1.0/M.2021..S.B_C_D.BE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
+name:
+  en: Industrial production
+  fr: Production industrielle
+  nl: Industriële productie
+description:
+  en: Industrial production index (mining, manufacturing, energy), 2021=100, seasonally
+    adjusted
+display:
+  category: prices
+  title:
+    en: Industrial Production Index (IPI) — Total Industry
+    fr: Indice de la production industrielle (IPI) — Total industrie
+    nl: Index van de industriële productie (IPI) — Totaal industrie
+  sort_order: 2
+  description:
+    en: Volume of output for mining, manufacturing, and energy. Adjusted for working
+      days.
+    fr: Volume de production pour les mines, l'industrie manufacturière et l'énergie.
+      Ajusté selon les jours ouvrables.
+    nl: Productievolume voor mijnbouw, industrie en energie. Aangepast voor werkdagen.
+  sdmx_code: IPI_STS

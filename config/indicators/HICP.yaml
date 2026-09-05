@@ -1,0 +1,29 @@
+id: HICP
+unit: percent_yy
+frequency: M
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_HICP,1.0/M.BE.000000.2015.HCP.GROWTH_RATE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
+name:
+  en: HICP (Harmonised Inflation)
+  fr: IPCH (Inflation harmonisée)
+  nl: GICP (Geharmoniseerde inflatie)
+description:
+  en: Harmonised Index of Consumer Prices, all items, year-on-year growth rate
+display:
+  category: prices
+  title:
+    en: Harmonised Index of Consumer Prices
+    fr: Indice des prix à la consommation harmonisé
+    nl: Geharmoniseerde index van de consumentenprijzen
+  sort_order: 3
+  description:
+    en: Standardised inflation measure for ECB comparison. Includes tourist spending,
+      unlike national CPI.
+    fr: Mesure d'inflation harmonisée pour comparaison BCE. Inclut les dépenses des
+      touristes, contrairement à l'IPC national.
+    nl: Geharmoniseerde inflatiemaatstaf voor ECB-vergelijking. Inclusief toeristische
+      uitgaven, in tegenstelling tot de nationale CPI.
+  sdmx_code: HICP_INDEX

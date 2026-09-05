@@ -1,0 +1,9 @@
+source_id: nbb
+name: National Bank of Belgium SDMX API
+agency: NBB
+adapter: nbb
+base_url: https://nsidisseminate-stat.nbb.be/rest/data/BE2
+licence: null  # TODO: confirm licence terms (CLAUDE.md rule 8) -- already in production use
+catalog_ref: null
+cadence: daily
+is_active: true

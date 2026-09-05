@@ -1,0 +1,27 @@
+id: GOV_CONSUMPTION_CY
+unit: pp_contribution
+frequency: A
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P3_S13.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
+name:
+  en: Gov. consumption expenditure
+  fr: Dépenses de consommation des APU
+  nl: Overheidsconsumptie
+description:
+  en: Final consumption expenditure of general government, contribution to GDP volume
+    change
+display:
+  category: gdp
+  title:
+    en: Final Consumption Expenditure of General Government
+    fr: Dépenses de consommation finale des administrations publiques
+    nl: Finale consumptieve bestedingen van de overheid
+  sort_order: 5
+  description:
+    en: Government spending on public services — healthcare, education, defence.
+    fr: Dépenses publiques en services — santé, éducation, défense.
+    nl: Overheidsuitgaven aan publieke diensten — zorg, onderwijs, defensie.
+  sdmx_code: P3_S13

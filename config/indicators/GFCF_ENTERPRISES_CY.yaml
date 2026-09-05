@@ -1,0 +1,26 @@
+id: GFCF_ENTERPRISES_CY
+unit: pp_contribution
+frequency: A
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P51_ENT.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
+name:
+  en: GFCF — Enterprises
+  fr: FBCF — Entreprises
+  nl: BIK — Bedrijven
+description:
+  en: Gross fixed capital formation by enterprises, contribution to GDP volume change
+display:
+  category: gdp
+  title:
+    en: Gross Fixed Capital Formation by Enterprises
+    fr: Formation brute de capital fixe par les entreprises
+    nl: Bruto-investeringen in vaste activa door bedrijven
+  sort_order: 6
+  description:
+    en: Business investment in machinery, equipment, IT. A leading confidence indicator.
+    fr: Investissements des entreprises en machines, IT. Un indicateur avancé de confiance.
+    nl: Bedrijfsinvesteringen in machines, uitrusting, IT. Een voorlopende vertrouwensindicator.
+  sdmx_code: P51_ENT

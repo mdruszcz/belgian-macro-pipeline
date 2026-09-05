@@ -1,0 +1,26 @@
+id: PRIV_CONSUMPTION_CY
+unit: pp_contribution
+frequency: A
+source_id: nbb
+geo_levels:
+- national
+fetch:
+  query: ',DF_QNA_DISS,1.0/A.2.P31_S14_S15.VZ.CY.N?startPeriod=2006&dimensionAtObservation=AllDimensions'
+name:
+  en: Private final consumption
+  fr: Consommation finale privée
+  nl: Particuliere consumptie
+description:
+  en: Private final consumption, contribution to GDP volume change
+display:
+  category: gdp
+  title:
+    en: Private Final Consumption Expenditure
+    fr: Dépenses de consommation finale privée
+    nl: Particuliere consumptieve bestedingen
+  sort_order: 4
+  description:
+    en: Household spending on goods and services — typically ~50% of GDP.
+    fr: Dépenses des ménages en biens et services — généralement ~50% du PIB.
+    nl: Gezinsuitgaven aan goederen en diensten — typisch ~50% van het BBP.
+  sdmx_code: P31_S14_S15

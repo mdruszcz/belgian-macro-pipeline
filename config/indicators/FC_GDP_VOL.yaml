@@ -1,0 +1,23 @@
+id: FC_GDP_VOL
+name:
+  en: GDP forecast (consensus)
+  fr: Prévision PIB (consensus)
+  nl: BBP-prognose (consensus)
+unit: percent
+frequency: F
+source_id: fpb
+geo_levels:
+- national
+display:
+  category: gdp
+  title:
+    en: GDP Volume Growth — Multi-Institution Forecast
+    fr: Croissance du PIB en volume — Prévisions multi-institutions
+    nl: BBP-volumegroei — Meervoudige prognose
+  description:
+    en: 'Average GDP growth forecast from 13 institutions (FPB, NBB, EC, IMF, OECD,
+      banks). Source: plan.be.'
+    fr: 'Prévision moyenne de croissance du PIB de 13 institutions. Source : plan.be.'
+    nl: 'Gemiddelde BBP-groeiverwachting van 13 instellingen. Bron: plan.be.'
+  sort_order: 11
+  forecast_of: GDP_VOL

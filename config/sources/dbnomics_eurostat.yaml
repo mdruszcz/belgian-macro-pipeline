@@ -1,0 +1,9 @@
+source_id: dbnomics_eurostat
+name: Eurostat series via DBnomics
+agency: Eurostat
+adapter: dbnomics
+base_url: https://api.db.nomics.world/v22/series/Eurostat
+licence: null  # TODO: confirm licence terms (CLAUDE.md rule 8) -- already in production use
+catalog_ref: null
+cadence: daily
+is_active: true
