@@ -80,7 +80,14 @@ jobs:
       - name: Export commune CSV for communes.html
         # Municipal-level sibling of the export above -- communes.html reads
         # this, the same way all_data.html reads belgian_macro_export.csv.
-        run: python scripts/export_communes_csv.py --db data/belgian_macro.db --out data/communes_export.csv
+        # --extra-observations merges the manual-only store, which is a committed
+        # CSV rather than rows in the database -- statbel.fgov.be is unreachable
+        # from CI so population can never be fetched here.
+        # See docs/decisions/0002-split-committed-stores.md.
+        run: |
+          python scripts/export_communes_csv.py --db data/belgian_macro.db \
+            --out data/communes_export.csv \
+            --extra-observations data/population_observations.csv
 
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json

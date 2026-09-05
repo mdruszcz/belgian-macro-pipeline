@@ -1,0 +1,94 @@
+name: Regenerate exports from manual sources
+
+# Manual trigger only, deliberately. This workflow CANNOT fetch the data it
+# concerns: statbel.fgov.be is unreachable from GitHub's runners, which is the
+# whole reason population lives in a committed CSV rather than in the daily
+# database (docs/decisions/0002-split-committed-stores.md).
+#
+# What it does: takes the already-committed data/population_observations.csv,
+# validates it round-trips, and regenerates the published exports from it, so
+# export generation is identical whether the trigger was the daily fetch or a
+# manual population refresh.
+#
+# Loading new raw files is a local procedure -- see docs/features/manual_sources.md.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  GH_TOKEN: ${{ secrets.BOT_PAT }}
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate the manual store rebuilds cleanly
+        # Fails loudly if the committed CSV cannot reconstruct a valid database
+        # -- a corrupted or hand-edited store must not reach the exports.
+        run: |
+          python scripts/load_observations_csv.py \
+            --db "${RUNNER_TEMP}/manual.db" \
+            --csv data/population_observations.csv
+          python - <<'PY'
+          import os, sqlite3
+          conn = sqlite3.connect(os.path.join(os.environ["RUNNER_TEMP"], "manual.db"))
+          violations = conn.execute("PRAGMA foreign_key_check").fetchall()
+          if violations:
+              raise SystemExit(f"::error::Rebuilt manual store has FK violations: {violations}")
+          rows = conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
+          print(f"Manual store rebuilt cleanly: {rows} observations, 0 FK violations.")
+          PY
+
+      - name: Regenerate exports
+        run: |
+          python scripts/export_communes_csv.py --db data/belgian_macro.db \
+            --out data/communes_export.csv \
+            --extra-observations data/population_observations.csv
+          python -m src.exporters.metadata --out data/metadata/indicators.json
+
+      - name: Guard against oversized data files
+        run: |
+          OVERSIZED=$(find data/ -type f -size +25000k)
+          if [ -n "$OVERSIZED" ]; then
+            echo "::error::File(s) under data/ exceed 25 MB; refusing to commit:"
+            echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done
+            exit 1
+          fi
+
+      - name: Open PR if the exports changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "Exports already match the committed manual store; nothing to do."
+            exit 0
+          fi
+          BRANCH="bot/manual-sources-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git commit -m "Regenerate exports from manual sources"
+          git push origin "$BRANCH"
+          gh pr create \
+            --repo "${{ github.repository }}" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "Regenerate exports from manual sources" \
+            --body "Regenerated from the committed data/population_observations.csv.
+
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

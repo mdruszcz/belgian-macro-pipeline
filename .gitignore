@@ -5,6 +5,10 @@ __pycache__/
 *.db-journal
 /data/raw/**
 !/data/raw/.gitkeep
+# Local rebuild of the manual-only store (docs/decisions/0002-split-committed-stores.md).
+# Disposable: rebuilt from data/population_observations.csv. Must stay ignored, or
+# daily_fetch.yml's `git add data/` would commit it.
+/data/local/**
 *.egg-info/
 .pytest_cache/
 .ruff_cache/

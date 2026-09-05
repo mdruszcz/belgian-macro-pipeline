@@ -429,6 +429,12 @@ the stale number it fetched last month.
 - The migration rewrites the fact table's key. It must run on a copy, with row counts and a
   sample of values compared before and after; `data/belgian_macro.db` is committed to git, so a
   bad migration is recoverable but would pollute history.
+- Not every observation lives in `data/belgian_macro.db`. Sources that CI cannot fetch — today
+  population by commune, because `statbel.fgov.be` is unreachable from the runners — are stored
+  as a committed CSV in the same column layout and merged at export time. This model's schema is
+  unchanged either way; only the storage location differs. See
+  [ADR 0002](../decisions/0002-split-committed-stores.md) and
+  [manual_sources.md](manual_sources.md).
 - `is_latest` maintenance is the subtlest piece of logic in the model and the easiest to get
   wrong under concurrency; the pipeline is single-writer today, which should stay true or be
   revisited explicitly.

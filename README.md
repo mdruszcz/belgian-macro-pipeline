@@ -51,7 +51,8 @@ Updated daily at 06:00 CET via GitHub Actions.
 | [`data/belgian_macro_export.csv`](data/belgian_macro_export.csv) | Full time series — viewable directly in GitHub |
 | [`data/belgian_macro_export.json`](data/belgian_macro_export.json) | Full time series in JSON format |
 | [`data/belgian_forecasts.csv`](data/belgian_forecasts.csv) | Multi-institution economic forecasts |
-| [`data/belgian_macro.db`](data/belgian_macro.db) | SQLite database with observations + fetch log |
+| [`data/belgian_macro.db`](data/belgian_macro.db) | SQLite database with observations + fetch log — everything CI can fetch itself |
+| [`data/population_observations.csv`](data/population_observations.csv) | Manual-only store: population by commune. Hand-loaded, see [manual_sources.md](docs/features/manual_sources.md) |
 | [`dashboard.html`](dashboard.html) | Self-contained dashboard (also hosted via GitHub Pages) |
 
 ## How It Works
@@ -125,6 +126,7 @@ black --check .
 │   └── daily_fetch.yml          ← GitHub Actions daily schedule
 ├── data/
 │   ├── belgian_macro.db         ← SQLite database (auto-updated)
+│   ├── population_observations.csv ← manual-only store (hand-refreshed)
 │   ├── belgian_macro_export.csv ← CSV export (auto-updated)
 │   ├── belgian_macro_export.json← JSON export (auto-updated)
 │   └── belgian_forecasts.csv    ← Forecasts CSV export (auto-updated)
