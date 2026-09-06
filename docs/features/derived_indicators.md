@@ -219,6 +219,10 @@ stores. The engine takes an already-assembled observation set rather than openin
 the functions stay pure and testable, and `scripts/export_communes_csv.py`'s existing
 `--extra-observations` merge is reused rather than duplicated.
 
+**Wiring, added later:** `scripts/export_communes_history_csv.py` is what actually calls `compute()`
+against real data — see its module docstring for the peer-set correctness trap that motivated
+building a second exporter rather than extending the snapshot one.
+
 ## Tests
 
 Per the roadmap: "Testing a formula against its own implementation proves nothing. Only an

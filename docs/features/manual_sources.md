@@ -61,14 +61,22 @@ python scripts/export_observations_csv.py --db data/local/manual.db \
   --out data/population_observations.csv \
   --indicators POPULATION_BY_COMMUNE,POPULATION_AGE_0_14,POPULATION_AGE_15_64,POPULATION_AGE_65_PLUS
 
-# 4. Regenerate the published export
+# 4. Regenerate the published exports -- the latest-only snapshot and the
+#    full year-by-year history (communes.html's year selector), which also
+#    computes every configured derived indicator over the whole history
 python scripts/export_communes_csv.py --db data/belgian_macro.db \
   --out data/communes_export.csv \
-  --extra-observations data/population_observations.csv
+  --extra-observations data/population_observations.csv \
+  --extra-observations data/fiscal_income_observations.csv
+python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+  --out data/communes_history.csv \
+  --extra-observations data/population_observations.csv \
+  --extra-observations data/fiscal_income_observations.csv
 ```
 
-Then commit `data/population_observations.csv` and `data/communes_export.csv` and open a PR. The
-diff on the CSV is readable line-by-line — that is the point of storing it as text.
+Then commit `data/population_observations.csv`, `data/communes_export.csv` and
+`data/communes_history.csv`, and open a PR. The diff on each CSV is readable line-by-line — that is
+the point of storing them as text.
 
 Steps 3 and 4 are also available as `.github/workflows/manual_sources.yml`
 (`workflow_dispatch` only), which regenerates the export from the already-committed CSV and opens a

@@ -89,9 +89,17 @@ class ObservationSet:
         """rows: (indicator_id, geo_id, period, value)."""
         self._by_cell: dict[tuple[str, str, str], float | None] = {}
         self._periods: dict[str, set[str]] = {}
+        # (indicator_id, period) -> {geo_id: value}, kept alongside _by_cell
+        # rather than derived from it on demand: peers() is called once per
+        # cross-sectional cell (every commune, every period, for percentile
+        # and z_score), and a full scan of _by_cell per call is O(cells x
+        # rows) -- measured at 28s exporting one real year range with
+        # historical geo_ids folded in. This index makes it O(1) per call.
+        self._by_indicator_period: dict[tuple[str, str], dict[str, float | None]] = {}
         for indicator_id, geo_id, period, value in rows:
             self._by_cell[(indicator_id, geo_id, period)] = value
             self._periods.setdefault(indicator_id, set()).add(period)
+            self._by_indicator_period.setdefault((indicator_id, period), {})[geo_id] = value
 
     def value(self, indicator_id: str, geo_id: str, period: str) -> float | None:
         return self._by_cell.get((indicator_id, geo_id, period))
@@ -111,11 +119,7 @@ class ObservationSet:
         not exist in the period simply has no cell, so it cannot enter the
         denominator.
         """
-        return {
-            geo_id: value
-            for (ind, geo_id, per), value in self._by_cell.items()
-            if ind == indicator_id and per == period
-        }
+        return dict(self._by_indicator_period.get((indicator_id, period), {}))
 
     def cells(self, indicator_id: str) -> list[tuple[str, str]]:
         """(geo_id, period) pairs present for an indicator."""
@@ -124,6 +128,7 @@ class ObservationSet:
     def add(self, indicator_id: str, geo_id: str, period: str, value: float | None) -> None:
         self._by_cell[(indicator_id, geo_id, period)] = value
         self._periods.setdefault(indicator_id, set()).add(period)
+        self._by_indicator_period.setdefault((indicator_id, period), {})[geo_id] = value
 
 
 def resolve_order(configs: Mapping[str, dict], available: Iterable[str] = ()) -> list[str]:

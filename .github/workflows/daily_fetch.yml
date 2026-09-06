@@ -119,6 +119,18 @@ jobs:
             --extra-observations data/population_observations.csv \
             --extra-observations data/fiscal_income_observations.csv
 
+      - name: Export the full commune time series for communes.html
+        # Sibling to the snapshot export above: every period per (commune,
+        # indicator), not just the latest, plus every configured derived
+        # indicator computed over the whole history (Block G engine).
+        # docs/features/statbel_adapter.md's "a time-series view is a
+        # different, future feature" note -- this is that feature.
+        run: |
+          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+            --out data/communes_history.csv \
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv
+
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
 
