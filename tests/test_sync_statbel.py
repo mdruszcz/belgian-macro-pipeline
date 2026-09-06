@@ -84,8 +84,8 @@ def _mock_fetch(monkeypatch, content: bytes = None):
 def test_first_sync_inserts_observations_per_commune(db_with_config, monkeypatch):
     _mock_fetch(monkeypatch)
     fetched, changed = sync_mod.sync(db_with_config)
-    assert fetched == 4  # 5 fixture rows minus the 1 unattributed
-    assert changed == 4
+    assert fetched == 5  # 6 fixture rows minus the 1 unattributed
+    assert changed == 5
 
     conn = sqlite3.connect(str(db_with_config))
     rows = conn.execute(
@@ -95,6 +95,7 @@ def test_first_sync_inserts_observations_per_commune(db_with_config, monkeypatch
     assert rows == [
         ("be:mun:11001", 2232.0, "final", 1),
         ("be:mun:11002", 66381.0, "final", 1),
+        ("be:mun:45065", 1133.0, "final", 1),  # "Zwalin" (really Zwalm), via the override
         ("be:mun:46021", 8596.0, "final", 1),
         ("be:mun:62093", 1068.0, "final", 1),
     ]
@@ -104,14 +105,14 @@ def test_unchanged_resync_creates_no_new_vintage(db_with_config, monkeypatch):
     _mock_fetch(monkeypatch)
     sync_mod.sync(db_with_config)
     fetched, changed = sync_mod.sync(db_with_config)
-    assert fetched == 4
+    assert fetched == 5
     assert changed == 0
 
     conn = sqlite3.connect(str(db_with_config))
     count = conn.execute(
         "SELECT COUNT(*) FROM observations WHERE indicator_id = 'LOCAL_UNITS_BY_COMMUNE'"
     ).fetchone()[0]
-    assert count == 4  # no duplicate vintages
+    assert count == 5  # no duplicate vintages
 
 
 def test_changed_value_flips_is_latest(db_with_config, monkeypatch):
@@ -156,4 +157,4 @@ def test_fetch_runs_row_reflects_the_excluded_row(db_with_config, monkeypatch):
     rows_read, rows_written = conn.execute(
         "SELECT rows_read, rows_written FROM fetch_runs"
     ).fetchone()
-    assert (rows_read, rows_written) == (5, 4)
+    assert (rows_read, rows_written) == (6, 5)
