@@ -150,6 +150,16 @@
   footer{margin-top:22px; color:var(--text-faint); font-size:.78rem}
   footer a{color:var(--text-muted)}
 
+  /* Statbel attribution. A LICENCE CONDITION, not decoration -- clause 6 of
+     Statbel's 2015 open-data licence terminates the grant automatically if
+     it is missing. See docs/data_catalog.md. Never hide or collapse this. */
+  .attribution{
+    margin-top:22px; padding:14px 16px; border:1px solid var(--border); border-radius:8px;
+    background:var(--row-alt); color:var(--text-muted); font-size:.76rem; line-height:1.6;
+  }
+  .attribution strong{color:var(--text)}
+  .attribution a{color:var(--accent-ink)}
+
   @media (max-width:640px){
     .wrap{padding:24px 16px 60px}
     h1{font-size:1.5rem}
@@ -192,6 +202,19 @@
       </thead>
       <tbody id="tbody"></tbody>
     </table>
+  </div>
+
+  <div class="attribution" id="attribution">
+    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), reused under
+    <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
+    and Statbel's <em>Licentie open data</em> of 22 October 2015.
+    <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
+    <strong>Changes were made:</strong> the published files are reshaped into a canonical
+    indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
+    2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
+    endorse this product or how its data is used here. English commune names are unofficial
+    translations, not official Statbel labels.
   </div>
 
   <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>. Columns marked <span class="pill derived" style="vertical-align:1px">Derived</span> are computed on export from stored figures (see <code>docs/features/derived_indicators.md</code>), never a second source of truth; hover any value for its full year-by-year history.</footer>
@@ -456,6 +479,9 @@ async function load(){
       YEARS.length ? (YEARS[0] === YEARS[YEARS.length-1] ? YEARS[0] : `${YEARS[0]}\u2013${YEARS[YEARS.length-1]}`) : '—';
     const latest = RAW.reduce((m,r) => r.fetched_at > m ? r.fetched_at : m, '');
     document.getElementById('statUpdated').textContent = latest ? latest.slice(0,10) : '—';
+    // Same date, in the attribution block -- required there by licence, not
+    // merely informative. See docs/data_catalog.md.
+    document.getElementById('attrUpdated').textContent = latest ? latest.slice(0,10) : 'see source';
 
     render();
   } catch(e){

@@ -241,3 +241,51 @@ def test_manifest_row_counts_match_generated_payload_counts(tmp_path):
     )
     assert manifest["datasets"]["national"]["indicators"] == 1
     assert manifest["validation_status"] == "pass"
+
+
+def test_payload_carries_the_source_retrieval_date_for_licence_attribution(tmp_path):
+    """Statbel's 2015 open-data licence requires the published attribution to
+    carry the date of last update, and terminates automatically without it
+    (docs/data_catalog.md). The pages cannot show a date the payload does not
+    carry, so it is exported per indicator as `updated`.
+
+    A DERIVED indicator must NOT get one: it was computed, not fetched, and
+    the same licence forbids misleading a reader about the update date as
+    squarely as it requires showing one. Its `fetched_at` is empty in the
+    source CSV and the key stays absent, matching the payload format's
+    absent-not-null rule.
+    """
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history_csv = tmp_path / "history.csv"
+    _write(
+        history_csv,
+        HISTORY_HEADER,
+        [
+            # A fetched indicator, two periods retrieved on different days:
+            # the LATER date must win, not the last row read.
+            "be:mun:11001,11001,Aartselaar,Aartselaar,Aartselaar,Flanders,Antwerp,"
+            "Arrondissement Antwerpen,POP,Population,count,2021,110,A,2026-09-05T10:00:00+00:00",
+            "be:mun:11001,11001,Aartselaar,Aartselaar,Aartselaar,Flanders,Antwerp,"
+            "Arrondissement Antwerpen,POP,Population,count,2020,100,A,2026-09-01T10:00:00+00:00",
+            # A derived indicator: no fetched_at at all.
+            "be:mun:11001,11001,Aartselaar,Aartselaar,Aartselaar,Flanders,Antwerp,"
+            "Arrondissement Antwerpen,POP_PCT,Population percentile,percent,2021,50,derived,",
+        ],
+    )
+    latest_csv = tmp_path / "latest.csv"
+    _write(latest_csv, LATEST_HEADER, [])
+    national_csv = tmp_path / "national.csv"
+    national_csv.write_text(
+        "indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at\n",
+        encoding="utf-8",
+    )
+    out_dir = tmp_path / "public"
+    export_site_payloads(db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass")
+
+    import json
+
+    payload = json.loads((out_dir / "communes" / "11001.json").read_text())
+    assert payload["indicators"]["POP"]["updated"] == "2026-09-05"
+    assert "updated" not in payload["indicators"]["POP_PCT"]

@@ -30,6 +30,30 @@ def _status_word(status: str) -> str:
     return STATUS_LETTER_TO_WORD.get(status, status or None)
 
 
+def _note_updated(indicator: dict, fetched_at: str) -> None:
+    """Record the latest retrieval date seen for an indicator, as a date.
+
+    This is a LICENCE CONDITION, not a nicety: Statbel's 2015 open-data
+    licence requires the attribution to carry "de datum van de laatste
+    bijwerking" (the date of last update) and terminates automatically if it
+    does not -- see docs/data_catalog.md, "What this obliges us to build".
+    The pages cannot show a date the payload does not carry.
+
+    A DERIVED indicator has no retrieval date of its own (its `fetched_at`
+    is empty in the source CSV, correctly -- it was computed, not fetched),
+    so the key is simply absent for it rather than carrying an invented or
+    inherited date. Absence is already this format's "no data" signal
+    (docs/features/site_payloads.md); a wrong date here would be a licence
+    breach of its own, since the 2015 licence also forbids misleading a
+    reader about the update date.
+    """
+    if not fetched_at:
+        return
+    day = fetched_at[:10]
+    if day > indicator.get("updated", ""):
+        indicator["updated"] = day
+
+
 def _read_communes_history(csv_path: Path) -> dict[str, dict]:
     """One entry per commune, keyed by nis_code, holding every indicator that
     commune has any value for across every period -- the shape
@@ -60,6 +84,7 @@ def _read_communes_history(csv_path: Path) -> dict[str, dict]:
                 "value": float(row["value"]),
                 "status": _status_word(row["status"]),
             }
+            _note_updated(indicator, row["fetched_at"])
     return communes
 
 
@@ -82,6 +107,7 @@ def _read_communes_latest(csv_path: Path) -> dict[str, dict]:
                 "period": row["period"],
                 "status": _status_word(row["status"]),
             }
+            _note_updated(indicator, row["fetched_at"])
     return indicators
 
 
@@ -102,6 +128,7 @@ def _read_national(csv_path: Path) -> dict[str, dict]:
             )
             if row["value"] == "":
                 continue
+            _note_updated(indicator, row["fetched_at"])
             indicator["periods"][row["period"]] = {
                 "value": float(row["value"]),
                 "status": _status_word(row["obs_status"]),

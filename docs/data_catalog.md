@@ -152,11 +152,21 @@ are breached.
 
 Governed by Belgian law (clause 7); granted for an indefinite term (clause 6).
 
-**Not yet done:** points 1–4 are obligations on *published output*. The dashboard and any
-exported payload that carries municipal geography needs the attribution string, the licence link
-and the "modified" notice. Nothing municipal is published yet, so this is not currently in
-breach — but it must land before the first commune-level page goes live. Tracked as a
-Block K/J item.
+**Done 2026-09-06.** Points 1–5 are obligations on *published output*, and they became live the
+moment commune-level data was published — which had already happened: `communes.html` shipped
+before this was noticed, and `local.html` followed in Block K, both publishing Statbel-derived
+municipal figures with no attribution at all. **The repo was in breach**, briefly, on the reading
+that clause 6 terminates the grant automatically.
+
+Both pages now carry an `.attribution` block with the source credit, the licence link, an
+explicit "changes were made" notice naming what was changed, the date of last update, the
+no-endorsement disclaimer, and the unofficial-English-names statement. `tests/test_statbel_attribution.py`
+asserts each obligation against the published HTML, page by page — verified to fail (7 of 7 for
+that page) when the block is removed, so it is a real guard rather than a note. A new page that
+starts rendering commune data must be added to that test's `MUNICIPAL_PAGES` list.
+
+Point 6 (third-party data) is unaffected: the Eurostat NUTS codes in `geographies.csv` are still
+captured but not published.
 
 ### Statbel licence — the second document (2015), maintainer-supplied 2026-09-06
 
@@ -204,9 +214,27 @@ Point 2 is the one with teeth. **Every published Statbel-derived figure must sho
 figure was last updated** — and the licence ends automatically if it does not. That converts
 Block X's *"Freshness badge on every metric — source name, reference year and retrieval date"*
 from a trust-building nicety into a **licence condition**. The `observations` table already
-stores `vintage` and `retrieved_at` per row, so the data needed is present; only the display is
-missing. Nothing municipal is published yet, so this is **not currently in breach**, but it must
-land before the first commune-level page goes live.
+stores `vintage` and `created_at` per row, so the data needed is present.
+
+**Partly done 2026-09-06.** The date now reaches the published output, per figure, on both
+municipal pages:
+
+- `export_site_payloads.py` carries the source retrieval date per indicator into every payload as
+  `updated` (the *latest* date seen for that indicator, not the last row read — asserted by test).
+- `local.html` prints it on every headline card and every fact tile (`as of 2026 · updated
+  2026-09-05`), and in the attribution block as the newest date across the commune's data.
+- `communes.html` prints it in the attribution block and in its "Last fetched" figure.
+
+**A derived indicator deliberately shows no date and says `derived` instead.** It was computed,
+not fetched, and has no retrieval date of its own; borrowing its inputs' date would mislead a
+reader about the update date, which point 5 of this same licence forbids as squarely as point 2
+requires showing one. Today that affects `AVG_NET_TAXABLE_INCOME`, `DEPENDENCY_RATIO`,
+`POPULATION_CHANGE_5Y`, `POPULATION_CAGR_10Y` and `POPULATION_PERCENTILE`.
+
+**Still open:** whether "derived" is a sufficient disclosure for a derived figure under point 2,
+or whether such a figure must also expose the retrieval dates of its inputs. Block X's freshness
+badge is where that would land. `all_data.html` and `dashboard.html` are unaffected — national
+sources only, no Statbel data.
 
 #### Open question for the maintainer
 
