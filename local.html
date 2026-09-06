@@ -224,11 +224,41 @@
   .cmp td{padding:6px 9px;border-bottom:1px solid var(--border)}
   .cmp tr:last-child td{border-bottom:none}
   .cmp tr.self td{font-weight:600;background:var(--accent-soft)}
+  .cmp tr.peer td{background:var(--surface-2)}
   .cmp td.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
   .cmp td.cov{font-size:.72rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;text-align:right}
   .cmp caption{
     caption-side:bottom;text-align:left;font-size:.72rem;color:var(--text-faint);
     padding-top:8px;line-height:1.5;
+  }
+  .chip-x{
+    appearance:none;border:none;background:none;cursor:pointer;color:var(--text-faint);
+    font-size:.9rem;line-height:1;margin-left:6px;padding:0 2px;vertical-align:middle;
+  }
+  .chip-x:hover{color:var(--accent-ink)}
+
+  /* the free four-commune picker (Block L) */
+  .compare-picker{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .compare-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .compare-chips:empty{margin-bottom:0}
+  .chip{
+    display:inline-flex;align-items:center;gap:2px;background:var(--accent-soft);
+    color:var(--accent-ink);border-radius:99px;padding:4px 6px 4px 12px;font-size:.82rem;
+  }
+  .chip button{
+    appearance:none;border:none;background:none;cursor:pointer;color:inherit;
+    font-size:1rem;line-height:1;padding:2px 6px;
+  }
+  .compare-add{position:relative;max-width:340px}
+  .compare-add input{
+    width:100%;font:inherit;font-size:.85rem;padding:8px 12px;border-radius:8px;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text);
+  }
+  .compare-add input:focus{outline:2px solid var(--focus-ring);outline-offset:1px}
+  #compareResults:not(:empty){
+    position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:5;
+    border:1px solid var(--border);border-radius:8px;background:var(--surface);
+    box-shadow:var(--shadow);overflow:hidden;max-height:220px;overflow-y:auto;
   }
   .pctile{margin-top:12px;display:flex;flex-direction:column;gap:4px}
   .pctile .line{font-size:.85rem}
@@ -293,6 +323,10 @@
       <div class="alt" id="cAlt"></div>
       <div class="path" id="cPath"></div>
       <div class="headline" id="headline"></div>
+      <div class="compare-picker" id="comparePicker">
+        <div class="compare-chips" id="compareChips"></div>
+        <div class="compare-add" id="compareAdd"></div>
+      </div>
     </div>
 
     <div id="sections"></div>
@@ -342,6 +376,9 @@ LocalUI.STRINGS = {
     footer: 'Per-commune data from the published payloads. See {t} for the full commune table.',
     tableLink: 'the commune table',
     loadFail: 'Could not load the commune index',
+    addCompare: 'Compare with another commune…',
+    removeCompare: 'Remove from comparison',
+    peerDiffNote: 'A compared commune shows its own difference from this commune.',
     attribution: '<strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels.',
   },
   fr: {
@@ -372,6 +409,9 @@ LocalUI.STRINGS = {
     footer: 'Données communales issues des fichiers publiés. Voir {t} pour le tableau complet.',
     tableLink: 'le tableau des communes',
     loadFail: 'Impossible de charger l’index des communes',
+    addCompare: 'Comparer avec une autre commune…',
+    removeCompare: 'Retirer de la comparaison',
+    peerDiffNote: 'Une commune comparée affiche son propre écart par rapport à cette commune.',
     attribution: '<strong>Source :</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), réutilisé sous <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> et sous la <em>Licentie open data</em> de Statbel du 22 octobre 2015. <strong>Dernière mise à jour des données :</strong> <span id="attrUpdated">—</span>. <strong>Des modifications ont été apportées :</strong> les fichiers publiés sont restructurés selon un modèle d’indicateurs canonique, ré-indexés sur des identifiants géographiques internes, corrigés pour les fusions de communes de 2019 et 2025, et utilisés pour calculer des indicateurs dérivés. Statbel n’approuve ni ce produit ni l’usage qui est fait de ses données. Les noms de communes en anglais sont des traductions non officielles, et non des libellés officiels de Statbel.',
   },
   nl: {
@@ -402,6 +442,9 @@ LocalUI.STRINGS = {
     footer: 'Gemeentegegevens uit de gepubliceerde bestanden. Zie {t} voor de volledige tabel.',
     tableLink: 'de gemeentetabel',
     loadFail: 'Kon de gemeente-index niet laden',
+    addCompare: 'Vergelijk met een andere gemeente…',
+    removeCompare: 'Uit vergelijking verwijderen',
+    peerDiffNote: 'Een vergeleken gemeente toont haar eigen verschil ten opzichte van deze gemeente.',
     attribution: '<strong>Bron:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Algemene Directie Statistiek — Statistics Belgium), hergebruikt onder <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> en Statbels <em>Licentie open data</em> van 22 oktober 2015. <strong>Gegevens laatst bijgewerkt:</strong> <span id="attrUpdated">—</span>. <strong>Er werden wijzigingen aangebracht:</strong> de gepubliceerde bestanden worden omgezet naar een canoniek indicatormodel, opnieuw gekoppeld aan interne geografische identificatoren, gecorrigeerd voor de gemeentefusies van 2019 en 2025, en gebruikt om afgeleide cijfers te berekenen. Statbel onderschrijft dit product of het gebruik van zijn gegevens niet. Engelse gemeentenamen zijn onofficiële vertalingen, geen officiële Statbel-labels.',
   },
 };
@@ -503,14 +546,46 @@ LocalUI.buildHeadlines = function(commune, lang){
   });
 };
 
-LocalUI.comparisonRows = function(entry, lang){
+// The free four-commune picker (Block L). `opts.peers` is up to three
+// OTHER loaded commune payloads (the primary commune plus these is the
+// roadmap's "up to four"); `opts.indicatorId` is which of their indicators
+// to compare -- required because a peer commune's payload holds all of its
+// indicators, not just this one section's.
+//
+// A peer's relation is a DIFFERENCE from the primary commune's own value,
+// never a share: unlike a province, a peer commune is not a container the
+// primary commune is part of, so "Ghent is 12% higher than this commune"
+// is the meaningful relation regardless of whether the indicator is
+// additive. That is a real behavioural difference from the aggregate rows
+// below, which is exactly why it is computed separately rather than reusing
+// the additive/non-additive branch.
+LocalUI.peerRows = function(entry, own, lang, peers, indicatorId){
+  if(!peers || !peers.length || !indicatorId) return [];
+  const out = [];
+  for(const peer of peers){
+    const peerEntry = peer.indicators && peer.indicators[indicatorId];
+    const latest = LocalUI.latestOf(peerEntry);
+    if(!latest) continue;
+    out.push({
+      scope: 'peer', label: LocalUI.localName(peer.name, lang), nis: peer.nis_code,
+      value: latest.value, period: latest.period,
+      relation: (own === null || own === 0 || latest.value === null)
+        ? null : {kind: 'diff', pct: (latest.value / own - 1) * 100},
+    });
+  }
+  return out;
+};
+
+LocalUI.comparisonRows = function(entry, lang, opts){
   lang = lang || LocalUI.DEFAULT_LANG;
+  opts = opts || {};
   if(!entry) return [];
   const periods = Object.keys(entry.periods || {}).sort();
   if(!periods.length) return [];
   const period = periods[periods.length - 1];
   const own = entry.periods[period].value;
   const rows = [{scope: 'commune', label: LocalUI.t(lang, 'thisCommune'), value: own, period: period}];
+  rows.push(...LocalUI.peerRows(entry, own, lang, opts.peers, opts.indicatorId));
   for(const scope of ['province', 'region', 'country']){
     const agg = (entry.comparison || {})[scope];
     if(!agg) continue;
@@ -594,12 +669,31 @@ LocalUI.percentileShort = function(entry, lang){
     + ' (' + LocalUI.ordinal(p.rank, lang) + '/' + p.peers + ')';
 };
 
+LocalUI.MAX_PEERS = 3;
+
+// Parses the `vs` URL parameter into a list of peer NIS codes: capped at
+// MAX_PEERS, deduplicated, and never containing the primary commune's own
+// code (comparing a commune to itself is not a peer comparison).
+LocalUI.parseVsParam = function(raw, primaryNis){
+  if(!raw) return [];
+  const seen = new Set();
+  const out = [];
+  for(const nis of raw.split(',').map(s => s.trim()).filter(Boolean)){
+    if(nis === primaryNis || seen.has(nis)) continue;
+    seen.add(nis);
+    out.push(nis);
+    if(out.length >= LocalUI.MAX_PEERS) break;
+  }
+  return out;
+};
+
 if(typeof module !== 'undefined') module.exports = LocalUI;
 </script>
 
 <script>
 // ── rendering (browser only) ───────────────────────────────────────────────
 let GEOGRAPHIES = [], SECTIONS = [], COMMUNE = null;
+let VS_NIS = [], VS_COMMUNES = [];  // the free four-commune picker: up to 3 peers alongside COMMUNE
 let LANG = 'en', browseCurrentId = null;
 
 const LOCALES = {en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE'};
@@ -682,12 +776,13 @@ function drawSeries(canvas, points){
 }
 
 // ── components ─────────────────────────────────────────────────────────────
-function comparisonHTML(entry){
-  const rows = LocalUI.comparisonRows(entry, LANG);
+function comparisonHTML(entry, indicatorId){
+  const rows = LocalUI.comparisonRows(entry, LANG, {peers: VS_COMMUNES, indicatorId: indicatorId});
   if(rows.length < 2) return '';
   const additive = !!entry.additive;
+  const hasPeers = rows.some(r => r.scope === 'peer');
   const body = rows.map(r => {
-    const label = r.scope === 'commune' ? r.label : `${r.label} — ${esc(r.name)}`;
+    const label = (r.scope === 'commune' || r.scope === 'peer') ? r.label : `${r.label} — ${esc(r.name)}`;
     let rel = '';
     if(r.relation){
       // A small share must not round to "0.0 %": Herstappe is 0.0086% of
@@ -699,10 +794,18 @@ function comparisonHTML(entry){
       rel = r.relation.kind === 'share' ? `${nStr} %` : `${p >= 0 ? '+' : ''}${nStr} %`;
     }
     const cov = r.coverage ? `${r.coverage.n}/${r.coverage.of}` : '';
-    return `<tr class="${r.scope === 'commune' ? 'self' : ''}"><td>${label}</td>` +
+    const rowClass = r.scope === 'commune' ? 'self' : r.scope === 'peer' ? 'peer' : '';
+    return `<tr class="${rowClass}">` +
+      `<td>${label}${r.scope === 'peer' ? `<button type="button" class="chip-x" data-remove-vs="${r.nis}" title="Remove">&times;</button>` : ''}</td>` +
       `<td class="num">${fmt(r.value, entry.unit)}</td><td class="num">${rel}</td><td class="cov">${cov}</td></tr>`;
   }).join('');
-  const explain = T(additive ? 'shareNote' : 'diffNote', {p: rows[0].period});
+  // Peer rows are always a DIFFERENCE, aggregate rows are a share OR a
+  // difference depending on the indicator (see comparisonRows). One shared
+  // "Diff/Share" column header covers both since they are both percentages;
+  // the caption spells out which is which per row type when peers are
+  // present, so the column is never ambiguous to a reader.
+  const explain = T(additive ? 'shareNote' : 'diffNote', {p: rows[0].period})
+    + (hasPeers ? ' ' + T('peerDiffNote') : '');
   return `<table class="cmp"><caption>${explain} ${T('methodNote')}</caption>
     <thead><tr><th>${T('comparedWith')}</th><th style="text-align:right">${T('value')}</th>
     <th style="text-align:right">${additive ? T('share') : T('diff')}</th><th style="text-align:right">${T('communes')}</th></tr></thead>
@@ -751,7 +854,7 @@ function sectionHTML(section){
       <div class="panel-head">
         <span class="t">${esc(LocalUI.localName(head.names, LANG))}</span>
         <span class="v">${fmt(latest.value, latest.unit)} <span style="font-size:.72rem;color:var(--text-faint);font-weight:400">${T('asOf')} ${latest.period}</span></span>
-      </div>${chart}${comparisonHTML(head)}${percentileHTML(head)}</div>`;
+      </div>${chart}${comparisonHTML(head, section.headline)}${percentileHTML(head)}</div>`;
   }
 
   const facts = (section.indicators || []).map(id => factHTML(COMMUNE.indicators[id])).filter(Boolean).join('');
@@ -786,7 +889,11 @@ function renderCommune(){
       <span class="p">${prov}</span></div>`;
   }).join('');
 
+  renderComparePicker();
+
   document.getElementById('sections').innerHTML = SECTIONS.map(sectionHTML).join('');
+  document.querySelectorAll('[data-remove-vs]').forEach(b =>
+    b.addEventListener('click', () => removePeer(b.dataset.removeVs)));
   requestAnimationFrame(() => {
     document.querySelectorAll('canvas.series').forEach(cv => {
       const section = SECTIONS.find(s => s.id === cv.dataset.section);
@@ -858,8 +965,100 @@ function rerender(){
 function navigateTo(nis){
   const url = new URL(window.location.href);
   url.searchParams.set('nis', nis);
+  url.searchParams.delete('vs');  // a fresh commune starts with no comparison
   window.history.pushState({}, '', url);
+  VS_NIS = []; VS_COMMUNES = [];
   loadCommune(nis);
+}
+
+// ── the free four-commune picker ────────────────────────────────────────
+
+function syncVsUrl(){
+  const url = new URL(window.location.href);
+  if(VS_NIS.length) url.searchParams.set('vs', VS_NIS.join(','));
+  else url.searchParams.delete('vs');
+  window.history.replaceState({}, '', url);  // replace, not push: not a new "page"
+}
+
+async function addPeer(nis){
+  if(VS_NIS.length >= LocalUI.MAX_PEERS || VS_NIS.includes(nis) || nis === COMMUNE.nis_code) return;
+  try{
+    const res = await fetch(`public/data/communes/${nis}.json?t=${Date.now()}`);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const peer = await res.json();
+    VS_NIS.push(nis);
+    VS_COMMUNES.push(peer);
+    syncVsUrl();
+    renderCommune();
+  }catch(e){
+    // A peer that fails to load is dropped silently from the picker rather
+    // than breaking the page the reader came here for -- the comparison is
+    // an enhancement to the commune's own data, not a precondition for it.
+    console.warn('Could not load comparison commune', nis, e);
+  }
+}
+
+function removePeer(nis){
+  const i = VS_NIS.indexOf(nis);
+  if(i === -1) return;
+  VS_NIS.splice(i, 1);
+  VS_COMMUNES.splice(i, 1);
+  syncVsUrl();
+  renderCommune();
+}
+
+async function loadPeersFromUrl(nis){
+  const url = new URL(window.location.href);
+  VS_NIS = LocalUI.parseVsParam(url.searchParams.get('vs'), nis);
+  VS_COMMUNES = [];
+  for(const peerNis of VS_NIS){
+    try{
+      const res = await fetch(`public/data/communes/${peerNis}.json?t=${Date.now()}`);
+      if(res.ok) VS_COMMUNES.push(await res.json());
+    }catch(e){ /* dropped below, once every peer has been attempted */ }
+  }
+  // A peer that failed to load leaves a gap between VS_NIS and VS_COMMUNES;
+  // reconcile VS_NIS to what actually loaded so the URL does not keep
+  // asking for a commune that will not resolve.
+  VS_NIS = VS_COMMUNES.map(c => c.nis_code);
+}
+
+function renderComparePicker(){
+  const el = document.getElementById('comparePicker');
+  if(!SECTIONS.some(s => s.headline)) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  document.getElementById('compareChips').innerHTML = VS_COMMUNES.map(peer =>
+    `<span class="chip">${esc(LocalUI.localName(peer.name, LANG))}
+      <button type="button" data-remove-peer="${peer.nis_code}" title="${esc(T('removeCompare'))}">&times;</button></span>`
+  ).join('');
+  document.querySelectorAll('[data-remove-peer]').forEach(b =>
+    b.addEventListener('click', () => removePeer(b.dataset.removePeer)));
+
+  const addEl = document.getElementById('compareAdd');
+  if(VS_NIS.length >= LocalUI.MAX_PEERS){
+    addEl.innerHTML = '';
+    return;
+  }
+  addEl.innerHTML = `<input type="text" id="compareInput" autocomplete="off" placeholder="${esc(T('addCompare'))}">
+    <div id="compareResults"></div>`;
+  document.getElementById('compareInput').addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    const results = document.getElementById('compareResults');
+    if(!q){ results.innerHTML = ''; return; }
+    const matches = LocalUI.searchCommunes(GEOGRAPHIES, q, 6)
+      .filter(g => g.nis_code !== COMMUNE.nis_code && !VS_NIS.includes(g.nis_code));
+    results.innerHTML = matches.map(g =>
+      `<div class="result-row" data-add-peer="${g.nis_code}">${esc(LocalUI.localName(g.name, LANG))}
+        <span class="rmeta">${g.nis_code}</span></div>`
+    ).join('') || `<div class="result-row">${esc(T('noMatch'))} "${esc(q)}".</div>`;
+    results.querySelectorAll('[data-add-peer]').forEach(r =>
+      r.addEventListener('click', () => {
+        document.getElementById('compareInput').value = '';
+        results.innerHTML = '';
+        addPeer(r.dataset.addPeer);
+      }));
+  });
 }
 
 function showSearchPanel(){
@@ -877,6 +1076,7 @@ async function loadCommune(nis){
     const res = await fetch(`public/data/communes/${nis}.json?t=${Date.now()}`);
     if(!res.ok) throw new Error('HTTP ' + res.status);
     COMMUNE = await res.json();
+    await loadPeersFromUrl(nis);
     renderCommune();
   }catch(e){
     document.getElementById('communePage').style.display = 'block';
