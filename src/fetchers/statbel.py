@@ -38,6 +38,20 @@ GEOGRAPHIES_CSV = Path(__file__).resolve().parents[2] / "config" / "geography" /
 # fuzzy-matching mechanism. See docs/features/statbel_adapter.md.
 NAME_OVERRIDES = {
     ("Sint-Niklaas", "Arrondissement de Saint-Nicolas"): "be:mun:46021",
+    # Bestat's LIVE French-locale export spells Zwalm (be:mun:45065) as
+    # "Zwalin" -- the same typo found and corrected in Statbel's OWN raw
+    # NIS9/NIS6/TF_PSNL_INC_TAX_MUNTY files (see
+    # config/geography/name_fr_corrections.csv), except here it cannot be
+    # corrected at the source: this is Bestat's live API response, not a
+    # downloaded file this pipeline controls. Fixing geographies.csv's own
+    # name_fr to the correct "Zwalm" broke this resolver for real, in
+    # production, on 2026-09-06 -- the daily workflow failed with
+    # UnresolvedCommuneError because Bestat kept sending "Zwalin" and
+    # geographies.csv no longer had a row spelled that way. This override
+    # is the fix, and it must stay even if Statbel ever corrects
+    # geographies.csv's own upstream files, since Bestat's typo is a
+    # separate live system with its own release cycle.
+    ("Zwalin", "Arrondissement d’Audenarde"): "be:mun:45065",
 }
 
 # "4ème trimestre 2023" -> ("4", "2023"). Handles the ordinal-suffix variants

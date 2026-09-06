@@ -18,10 +18,17 @@ class _FakeResponse:
 
 
 def test_parses_fixture_and_resolves_every_commune(tmp_path, monkeypatch):
-    """The fixture deliberately includes the ambiguous name pair -- Bestat's
-    Sint-Niklaas (resolved via the documented override) and the genuinely
-    different Saint-Nicolas in Liège (resolved via the plain name+arrondissement
-    lookup) -- proving the resolver tells them apart rather than colliding."""
+    """The fixture deliberately includes two ambiguous-name pairs, both
+    resolved via NAME_OVERRIDES rather than the plain name+arrondissement
+    lookup: Bestat's Sint-Niklaas (colliding with a genuinely different
+    Saint-Nicolas in Liège, resolved via plain lookup) and Bestat's "Zwalin"
+    for Zwalm -- Statbel's own typo, live in the API, independent of and
+    surviving the correction made to geographies.csv's raw files (see
+    config/geography/name_fr_corrections.csv and NAME_OVERRIDES' own
+    comment). The second pair is the regression for a real production
+    failure: daily_fetch.yml's sync_statbel step raised
+    UnresolvedCommuneError on 2026-09-06 once geographies.csv stopped
+    spelling it "Zwalin", because Bestat kept sending that spelling."""
     monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
     monkeypatch.setattr(
         "src.fetchers.base.requests.get",
@@ -31,9 +38,16 @@ def test_parses_fixture_and_resolves_every_commune(tmp_path, monkeypatch):
     rows = StatbelSource().fetch("https://example.test/bestat", cache_key="LOCAL_UNITS")
 
     by_geo_id = {r["geo_id"]: r for r in rows}
-    assert set(by_geo_id) == {"be:mun:11001", "be:mun:11002", "be:mun:46021", "be:mun:62093"}
+    assert set(by_geo_id) == {
+        "be:mun:11001",
+        "be:mun:11002",
+        "be:mun:46021",
+        "be:mun:62093",
+        "be:mun:45065",
+    }
     assert by_geo_id["be:mun:46021"]["value"] == 8596.0  # Sint-Niklaas, via the override
     assert by_geo_id["be:mun:62093"]["value"] == 1068.0  # Saint-Nicolas (Liège), plain lookup
+    assert by_geo_id["be:mun:45065"]["value"] == 1133.0  # "Zwalin" (really Zwalm), via the override
     assert all(r["period"] == "2023-Q4" for r in rows)
     assert all(r["status"] == "final" for r in rows)
 
@@ -47,7 +61,7 @@ def test_unattributed_row_is_excluded_not_guessed(tmp_path, monkeypatch):
     source = StatbelSource()
     rows = source.fetch("https://example.test/bestat", cache_key="LOCAL_UNITS")
 
-    assert len(rows) == 4  # 5 fixture rows minus the 1 unattributed
+    assert len(rows) == 5  # 6 fixture rows minus the 1 unattributed
     assert source._skipped_unattributed == 1
 
 
@@ -60,7 +74,7 @@ def test_rows_read_hint_includes_the_excluded_row(tmp_path, monkeypatch):
     )
     source = StatbelSource()
     rows = source.fetch("https://example.test/bestat", cache_key="LOCAL_UNITS")
-    assert source._rows_read_hint(rows) == 5
+    assert source._rows_read_hint(rows) == 6
 
 
 def test_unknown_commune_raises_rather_than_guessing(tmp_path, monkeypatch):
