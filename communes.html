@@ -90,11 +90,12 @@
   }
   #search:focus, #regionFilter:focus{outline:2px solid var(--focus-ring); outline-offset:1px}
   #search::placeholder{color:var(--text-faint)}
-  #regionFilter{
+  #regionFilter, #yearFilter{
     font-family:"IBM Plex Sans",sans-serif; font-size:.9rem;
     padding:9px 12px; border-radius:7px;
     border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
   }
+  #yearFilter{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
   #status{
     font-size:.82rem; color:var(--text-muted); white-space:nowrap;
     font-variant-numeric:tabular-nums;
@@ -138,6 +139,13 @@
   .pill.prov{background:var(--warn-soft); color:var(--warn)}
   .pill.other{background:var(--border); color:var(--text-muted)}
   .pill.na{background:var(--border); color:var(--text-faint); font-style:italic}
+  .pill.derived{background:var(--accent-soft); color:var(--accent-ink)}
+  .pill.suppressed{background:var(--border); color:var(--text-faint); font-style:italic}
+  th .coverage{
+    display:block; font-size:.68rem; font-weight:400; text-transform:none;
+    letter-spacing:0; color:var(--text-faint); margin-top:1px;
+  }
+  td.val[title]{cursor:help}
 
   footer{margin-top:22px; color:var(--text-faint); font-size:.78rem}
   footer a{color:var(--text-muted)}
@@ -154,18 +162,20 @@
 <div class="wrap">
   <header>
     <h1>Commune Data</h1>
-    <p class="subtitle">Every municipal-level observation currently in <code>data/communes_export.csv</code>, one row per commune. See <a href="all_data.html">all_data.html</a> for national-level data, or <a href="dashboard.html">dashboard.html</a> for the presented view.</p>
+    <p class="subtitle">Every municipal-level observation in <code>data/communes_history.csv</code> &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. See <a href="all_data.html">all_data.html</a> for national-level data, or <a href="dashboard.html">dashboard.html</a> for the presented view.</p>
   </header>
 
   <div class="stats">
     <div class="stat"><span class="n" id="statCommunes">—</span><span class="l">Communes</span></div>
     <div class="stat"><span class="n" id="statIndicators">—</span><span class="l">Indicators</span></div>
+    <div class="stat"><span class="n" id="statYears">—</span><span class="l">Years covered</span></div>
     <div class="stat"><span class="n" id="statUpdated">—</span><span class="l">Last fetched</span></div>
   </div>
 
   <div class="toolbar">
     <input id="search" type="text" placeholder="Filter by commune name (EN/FR/NL) or NIS code…" autocomplete="off">
     <select id="regionFilter"><option value="">All regions</option></select>
+    <select id="yearFilter" title="Not every indicator covers every year -- a column shows &quot;n/a&quot; for a year outside its own coverage"></select>
     <span id="status">Loading…</span>
   </div>
 
@@ -184,14 +194,32 @@
     </table>
   </div>
 
-  <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>.</footer>
+  <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>. Columns marked <span class="pill derived" style="vertical-align:1px">Derived</span> are computed on export from stored figures (see <code>docs/features/derived_indicators.md</code>), never a second source of truth; hover any value for its full year-by-year history.</footer>
 </div>
 
 <script>
 let RAW = [];         // long-format rows straight from the CSV
 let COMMUNES = [];    // one object per commune, indicator values pivoted onto it
 let INDICATOR_CODES = []; // discovered from the data, in first-seen order
+let INDICATOR_META = {};  // code -> {name, unit, years: sorted list of years the indicator has ANY row for}
+let YEARS = [];       // every distinct year across the whole dataset, sorted ascending
+let selectedYear = null;
 let sortKey = 'name_en', sortDir = 1;
+
+// "2023-Q4" -> "2023", "2026" -> "2026" -- the year a period belongs to,
+// for the single cross-indicator Year selector. Every period in this data
+// starts with its 4-digit year, so a slice is exact, not a guess.
+function yearOf(period){ return period.slice(0,4); }
+
+function formatValue(value, unit){
+  if(value === '' || value === undefined || value === null) return '';
+  const num = parseFloat(value);
+  if(isNaN(num)) return value;
+  const body = num.toLocaleString(undefined, {maximumFractionDigits: 2});
+  if(unit === 'eur') return '\u20ac' + body;
+  if(unit && unit.startsWith('percent')) return body + '%';
+  return body;
+}
 
 function parseCSV(text){
   // Quote-aware (RFC 4180) -- see all_data.html for why this isn't a naive split.
@@ -225,17 +253,23 @@ function parseCSV(text){
 function statusPill(s){
   if(s === 'A') return '<span class="pill final">Final</span>';
   if(s === 'P') return '<span class="pill prov">Provisional</span>';
+  if(s === 'derived') return '<span class="pill derived">Derived</span>';
+  if(s === 'suppressed') return '<span class="pill suppressed">Suppressed</span>';
   if(!s) return '';
   return `<span class="pill other">${s}</span>`;
 }
 
-// Long rows (one per commune x indicator) -> one row per commune, with each
-// indicator's {value, unit, period, status} attached under its own code.
-// This is what lets a second municipal indicator show up as a new column
-// with no change to this page.
+// Long rows (one per commune x indicator x period) -> one row per commune,
+// with each indicator's WHOLE history attached under its own code, keyed by
+// year. This is what lets a second municipal indicator -- or a tenth year of
+// an existing one -- show up with no change to this page: the Year selector
+// and the indicator columns are both built from whatever the CSV contains.
 function pivot(rows){
   const byGeo = new Map();
   const codesSeen = [];
+  const meta = {};   // code -> {name, unit, years: Set}
+  const years = new Set();
+
   for(const r of rows){
     if(!byGeo.has(r.geo_id)){
       byGeo.set(r.geo_id, {
@@ -246,15 +280,31 @@ function pivot(rows){
       });
     }
     const c = byGeo.get(r.geo_id);
-    if(!(r.indicator_code in c.indicators) && !codesSeen.includes(r.indicator_code)){
-      codesSeen.push(r.indicator_code);
-    }
-    c.indicators[r.indicator_code] = {
-      value: r.value, unit: r.unit, period: r.period, status: r.status,
-      name: r.indicator_name,
+    if(!codesSeen.includes(r.indicator_code)) codesSeen.push(r.indicator_code);
+    if(!(r.indicator_code in c.indicators)) c.indicators[r.indicator_code] = { byYear: {} };
+
+    const year = yearOf(r.period);
+    years.add(year);
+    c.indicators[r.indicator_code].byYear[year] = {
+      value: r.value, period: r.period, status: r.status,
     };
+
+    if(!meta[r.indicator_code]) meta[r.indicator_code] = { name: r.indicator_name, unit: r.unit, years: new Set() };
+    meta[r.indicator_code].years.add(year);
   }
-  return { communes: Array.from(byGeo.values()), codes: codesSeen };
+
+  const metaOut = {};
+  for(const code of Object.keys(meta)){
+    const ys = Array.from(meta[code].years).sort();
+    metaOut[code] = { name: meta[code].name, unit: meta[code].unit, minYear: ys[0], maxYear: ys[ys.length-1] };
+  }
+
+  return {
+    communes: Array.from(byGeo.values()),
+    codes: codesSeen,
+    meta: metaOut,
+    years: Array.from(years).sort(),
+  };
 }
 
 function buildHeader(){
@@ -263,14 +313,34 @@ function buildHeader(){
   // is safe to call again if the data reloads with a different code set.
   headRow.querySelectorAll('th[data-indicator]').forEach(th => th.remove());
   for(const code of INDICATOR_CODES){
-    const label = (COMMUNES.find(c => c.indicators[code])?.indicators[code].name) || code;
+    const m = INDICATOR_META[code] || {};
+    const label = m.name || code;
+    const coverage = (m.minYear === m.maxYear) ? m.minYear : `${m.minYear}\u2013${m.maxYear}`;
     const th = document.createElement('th');
     th.dataset.key = 'ind:' + code;
     th.dataset.indicator = '1';
-    th.innerHTML = `${label}<span class="arrow">↓</span>`;
+    th.title = `${label} \u00b7 covers ${coverage}`;
+    th.innerHTML = `${label}<span class="arrow">↓</span><span class="coverage">${coverage}</span>`;
     th.addEventListener('click', () => sortBy(th.dataset.key));
     headRow.appendChild(th);
   }
+}
+
+function populateYearFilter(){
+  const sel = document.getElementById('yearFilter');
+  sel.innerHTML = '';
+  for(const y of YEARS){
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    sel.appendChild(opt);
+  }
+  // Default to the most recent year overall -- indicators that stop earlier
+  // (fiscal income: 2023; LOCAL_UNITS_BY_COMMUNE: one quarter of 2023) show
+  // "n/a" for later years, same as any other missing cell, rather than the
+  // page silently picking an artificial year where everything happens to
+  // overlap.
+  selectedYear = YEARS[YEARS.length - 1];
+  sel.value = selectedYear;
 }
 
 function sortBy(key){
@@ -305,7 +375,8 @@ function render(){
     let av, bv;
     if(sortKey.startsWith('ind:')){
       const code = sortKey.slice(4);
-      av = parseFloat(a.indicators[code]?.value); bv = parseFloat(b.indicators[code]?.value);
+      av = parseFloat(a.indicators[code]?.byYear[selectedYear]?.value);
+      bv = parseFloat(b.indicators[code]?.byYear[selectedYear]?.value);
       if(isNaN(av)) av = -Infinity; if(isNaN(bv)) bv = -Infinity;
     } else {
       av = a[sortKey]; bv = b[sortKey];
@@ -318,10 +389,19 @@ function render(){
   document.getElementById('tbody').innerHTML = rows.map(c => {
     const indCells = INDICATOR_CODES.map(code => {
       const ind = c.indicators[code];
-      if(!ind) return `<td class="val"><span class="pill na">n/a</span></td>`;
-      const num = parseFloat(ind.value);
-      const display = isNaN(num) ? ind.value : num.toLocaleString();
-      return `<td class="val" title="${ind.period} · ${ind.unit}">${display} ${statusPill(ind.status)}</td>`;
+      const unit = INDICATOR_META[code]?.unit;
+      const cell = ind?.byYear[selectedYear];
+      if(!cell || cell.value === ''){
+        return `<td class="val"><span class="pill na">n/a</span></td>`;
+      }
+      const display = formatValue(cell.value, unit);
+      // Full history in the tooltip -- the value on screen is one year,
+      // but every year this indicator has for this commune is one hover
+      // away, so nothing is hidden by picking a single Year.
+      const history = ind ? Object.keys(ind.byYear).sort()
+        .map(y => `${y}: ${formatValue(ind.byYear[y].value, unit)}`).join('\n') : '';
+      const title = `${cell.period} \u00b7 ${unit || ''}\n\n${history}`;
+      return `<td class="val" title="${title}">${display} ${statusPill(cell.status)}</td>`;
     }).join('');
     return `<tr>
       <td class="code">${c.nis_code}</td>
@@ -348,23 +428,32 @@ document.querySelectorAll('#headRow th').forEach(th => {
 });
 document.getElementById('search').addEventListener('input', render);
 document.getElementById('regionFilter').addEventListener('change', render);
+document.getElementById('yearFilter').addEventListener('change', e => {
+  selectedYear = e.target.value;
+  render();
+});
 
 async function load(){
   const statusEl = document.getElementById('status');
   try{
-    const res = await fetch('data/communes_export.csv?t=' + Date.now());
+    const res = await fetch('data/communes_history.csv?t=' + Date.now());
     if(!res.ok) throw new Error('HTTP ' + res.status);
     RAW = parseCSV(await res.text());
 
     const pivoted = pivot(RAW);
     COMMUNES = pivoted.communes;
     INDICATOR_CODES = pivoted.codes;
+    INDICATOR_META = pivoted.meta;
+    YEARS = pivoted.years;
 
     buildHeader();
     populateRegionFilter();
+    populateYearFilter();
 
     document.getElementById('statCommunes').textContent = COMMUNES.length.toLocaleString();
     document.getElementById('statIndicators').textContent = INDICATOR_CODES.length;
+    document.getElementById('statYears').textContent =
+      YEARS.length ? (YEARS[0] === YEARS[YEARS.length-1] ? YEARS[0] : `${YEARS[0]}\u2013${YEARS[YEARS.length-1]}`) : '—';
     const latest = RAW.reduce((m,r) => r.fetched_at > m ? r.fetched_at : m, '');
     document.getElementById('statUpdated').textContent = latest ? latest.slice(0,10) : '—';
 
