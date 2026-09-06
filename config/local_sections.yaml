@@ -18,6 +18,20 @@
 #   reader, because "not collected" and "coming in Phase II" are different
 #   situations and a blank space reads as a bug.
 
+# The hero row at the top of a commune page: the figures a reader sees first,
+# in this order. Here rather than in local.html for the same reason the sections
+# below are -- the 50% gate checks for "zero indicator-specific frontend logic",
+# and this list was the one thing still hardcoded in the page (LocalUI.HEADLINE_SPEC).
+# An indicator named here must exist in the payloads or the export refuses to
+# build, the same check the sections get.
+headlines:
+  - POPULATION_BY_COMMUNE
+  - POPULATION_CHANGE_5Y
+  - AVG_NET_TAXABLE_INCOME
+  - LOCAL_UNITS_BY_COMMUNE
+  - UNEMPLOYMENT_RATE_COM
+  - MEDIAN_HOUSE_PRICE
+
 sections:
   - id: demography
     label: {en: Demography, fr: Démographie, nl: Demografie}

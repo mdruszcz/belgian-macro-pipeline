@@ -140,9 +140,22 @@ COMMUNE_WITH_PARTIAL_DATA = {
 }
 
 
+# The hero row's indicator ids come from config (config/local_sections.yaml ->
+# metadata/sections.json), not from local.html, so a test must supply them the
+# same way load() does. That this is now necessary IS the 50% gate property:
+# the page holds no indicator ids of its own.
+HEADLINES = [
+    "POPULATION_BY_COMMUNE",
+    "AVG_NET_TAXABLE_INCOME",
+    "UNEMPLOYMENT_RATE_COM",
+    "MEDIAN_HOUSE_PRICE",
+]
+
+
 def test_headlines_report_unavailable_honestly_not_as_a_blank_or_zero():
     results = _run_node(f"""
         const commune = {json.dumps(COMMUNE_WITH_PARTIAL_DATA)};
+        LocalUI.setHeadlines({json.dumps(HEADLINES)});
         console.log(JSON.stringify(LocalUI.buildHeadlines(commune)));
     """)
     by_label = {r["label"]: r for r in results}
@@ -559,3 +572,29 @@ def test_comparison_rows_places_peers_between_the_commune_and_the_aggregates():
         ));
     """)
     assert [r["scope"] for r in results] == ["commune", "peer", "peer", "province"]
+
+
+def test_the_page_holds_no_indicator_ids_of_its_own():
+    """The 50% gate's "zero indicator-specific frontend logic" check, as a
+    test rather than a grep someone remembers to run.
+
+    LocalUI.HEADLINE_SPEC used to be a hardcoded array of six indicator ids
+    here -- the one thing that escaped Block B's premise that adding an
+    indicator to a page is config, not a code change. Everything the page
+    renders now comes from metadata/sections.json.
+    """
+    text = LOCAL_HTML.read_text(encoding="utf-8")
+    # Deliberately matches the id SHAPE rather than a list of known ids, so a
+    # newly-invented one is caught too.
+    found = sorted(set(re.findall(r"'([A-Z][A-Z0-9_]{6,})'", text)))
+    assert found == [], f"local.html hardcodes indicator id(s): {found}"
+
+
+def test_headlines_come_from_the_layout_not_a_builtin_default():
+    """An empty layout must yield an empty hero row, not a fallback list --
+    a silent default would reintroduce exactly the coupling this removed."""
+    results = _run_node("""
+        LocalUI.setHeadlines([]);
+        console.log(JSON.stringify(LocalUI.buildHeadlines({indicators: {}})));
+    """)
+    assert results == []

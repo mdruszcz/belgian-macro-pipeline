@@ -370,9 +370,6 @@ LocalUI.STRINGS = {
     noValue: 'No value published for this commune',
     noHistory: 'No history published for this commune.',
     noData: 'No data available.',
-    unemployment: 'Unemployment', housingPrice: 'Housing price',
-    noUnemployment: 'Not collected at municipal level in this pipeline',
-    noHousingPrice: 'Not available at commune level from the source',
     footer: 'Per-commune data from the published payloads. See {t} for the full commune table.',
     tableLink: 'the commune table',
     loadFail: 'Could not load the commune index',
@@ -403,9 +400,6 @@ LocalUI.STRINGS = {
     noValue: 'Aucune valeur publiée pour cette commune',
     noHistory: 'Aucun historique publié pour cette commune.',
     noData: 'Aucune donnée disponible.',
-    unemployment: 'Chômage', housingPrice: 'Prix du logement',
-    noUnemployment: 'Non collecté au niveau communal par ce pipeline',
-    noHousingPrice: 'Non disponible au niveau communal auprès de la source',
     footer: 'Données communales issues des fichiers publiés. Voir {t} pour le tableau complet.',
     tableLink: 'le tableau des communes',
     loadFail: 'Impossible de charger l’index des communes',
@@ -436,9 +430,6 @@ LocalUI.STRINGS = {
     noValue: 'Geen waarde gepubliceerd voor deze gemeente',
     noHistory: 'Geen historiek gepubliceerd voor deze gemeente.',
     noData: 'Geen gegevens beschikbaar.',
-    unemployment: 'Werkloosheid', housingPrice: 'Woningprijs',
-    noUnemployment: 'Niet verzameld op gemeentelijk niveau door deze pijplijn',
-    noHousingPrice: 'Niet beschikbaar op gemeentelijk niveau bij de bron',
     footer: 'Gemeentegegevens uit de gepubliceerde bestanden. Zie {t} voor de volledige tabel.',
     tableLink: 'de gemeentetabel',
     loadFail: 'Kon de gemeente-index niet laden',
@@ -514,27 +505,23 @@ LocalUI.lastUpdated = function(commune){
   return dates.length ? dates[dates.length - 1] : null;
 };
 
-// The headline row. All six of the roadmap's figures are real as of the
-// Census 2021 employment-status and real-estate loads -- unemployment and
-// house price were the two structural gaps until then. Each still renders
-// as an honest gap on a commune with no value for a given year (a `key`
-// with no data falls through to `noValue` below), which is different from
-// the two being absent from the whole pipeline.
-LocalUI.HEADLINE_SPEC = [
-  {key: 'POPULATION_BY_COMMUNE'},
-  {key: 'POPULATION_CHANGE_5Y'},
-  {key: 'AVG_NET_TAXABLE_INCOME'},
-  {key: 'LOCAL_UNITS_BY_COMMUNE'},
-  {key: 'UNEMPLOYMENT_RATE_COM'},
-  {key: 'MEDIAN_HOUSE_PRICE'},
-];
+// The headline row comes from public/data/metadata/sections.json, like the
+// sections do, so this file holds NO indicator ids at all -- the 50% gate's
+// "zero indicator-specific frontend logic" check. It used to be a hardcoded
+// array here, which was the one thing that escaped Block B's whole premise
+// that adding an indicator to a page is config, not a code change.
+// Populated by load(); empty until then, so buildHeadlines() is safe to call
+// with no layout fetched (the tests do exactly that).
+LocalUI.HEADLINE_SPEC = [];
+
+LocalUI.setHeadlines = function(indicatorIds){
+  LocalUI.HEADLINE_SPEC = (indicatorIds || []).map(id => ({key: id}));
+  return LocalUI.HEADLINE_SPEC;
+};
 
 LocalUI.buildHeadlines = function(commune, lang){
   lang = lang || LocalUI.DEFAULT_LANG;
   return LocalUI.HEADLINE_SPEC.map(spec => {
-    if(!spec.key){
-      return {label: LocalUI.t(lang, spec.labelKey), available: false, why: LocalUI.t(lang, spec.whyKey)};
-    }
     const entry = commune.indicators[spec.key];
     const latest = LocalUI.latestOf(entry);
     const label = LocalUI.localName(entry && entry.names, lang, spec.key);
@@ -1147,7 +1134,15 @@ async function init(){
       `scripts/export_site_payloads.py into public/data/ — run that, or wait for the daily workflow.`);
     GEOGRAPHIES = (await geo.json()).geographies;
     if(!GEOGRAPHIES || !GEOGRAPHIES.length) throw new Error('the commune index loaded but is empty.');
-    SECTIONS = sec.ok ? (await sec.json()).sections : [];
+    if(sec.ok){
+      const layout = await sec.json();
+      SECTIONS = layout.sections || [];
+      // The hero row's indicator ids live in config, not in this file --
+      // see LocalUI.setHeadlines and the 50% gate's frontend-logic check.
+      LocalUI.setHeadlines(layout.headlines);
+    } else {
+      SECTIONS = [];
+    }
   }catch(e){
     document.getElementById('searchResults').innerHTML = noDataHTML(T('loadFail') + ': ' + e.message);
     return;

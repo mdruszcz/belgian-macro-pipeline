@@ -267,7 +267,7 @@ def _indicator_names(db_path: Path, derived_dir: Path | None = None) -> dict[str
 SECTIONS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "local_sections.yaml"
 
 
-def _sections(path: Path = SECTIONS_CONFIG) -> list[dict]:
+def _sections(path: Path = SECTIONS_CONFIG) -> dict:
     """The /local page layout, so the page holds no indicator ids.
 
     The 50% gate checks for "zero indicator-specific frontend logic", and
@@ -280,23 +280,35 @@ def _sections(path: Path = SECTIONS_CONFIG) -> list[dict]:
     every other test.
     """
     if not path.is_file():
-        return []
+        return {"headlines": [], "sections": []}
     import yaml
 
-    return yaml.safe_load(path.read_text(encoding="utf-8"))["sections"]
+    layout = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return {
+        "headlines": layout.get("headlines") or [],
+        "sections": layout.get("sections") or [],
+    }
 
 
-def _check_sections(sections: list[dict], known: set[str]) -> None:
+def _check_sections(layout: dict, known: set[str]) -> None:
+    """Every indicator the /local layout names must exist in the payloads.
+
+    Covers the hero row as well as the sections: HEADLINE_SPEC used to be a
+    hardcoded array in local.html and so escaped this check entirely, which
+    is exactly the "zero indicator-specific frontend logic" property the 50%
+    gate tests for.
+    """
     unknown = sorted(
         {
             indicator_id
-            for section in sections
+            for section in layout["sections"]
             for indicator_id in [
                 *([section["headline"]] if section.get("headline") else []),
                 *(section.get("indicators") or []),
             ]
             if indicator_id not in known
         }
+        | {i for i in layout["headlines"] if i not in known}
     )
     if unknown:
         raise ValueError(
@@ -467,13 +479,16 @@ def export_site_payloads(
     # with a fixture-scale set of indicators is not testing the page layout,
     # and the cross-check below would rightly reject every real indicator as
     # missing from a two-row fixture.
-    sections = _sections(sections_config) if sections_config else []
-    if sections:
+    layout = _sections(sections_config) if sections_config else {"headlines": [], "sections": []}
+    if layout["sections"] or layout["headlines"]:
         _check_sections(
-            sections,
+            layout,
             {i for commune in communes.values() for i in commune["indicators"]},
         )
-        _write_json(out_dir / "metadata" / "sections.json", {"sections": sections})
+        _write_json(
+            out_dir / "metadata" / "sections.json",
+            {"headlines": layout["headlines"], "sections": layout["sections"]},
+        )
 
     manifest = {
         "build_id": build_id,
