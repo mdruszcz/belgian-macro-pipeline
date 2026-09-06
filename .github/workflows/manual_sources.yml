@@ -38,6 +38,24 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Apply pending schema migrations
+        # Same idempotent step daily_fetch.yml runs. This workflow regenerates
+        # the same exports from the same database, so it needs the same schema
+        # guarantees; without it, a fresh migration would only ever reach the
+        # committed store on a daily run.
+        run: python -m src.db.migrate --db data/belgian_macro.db
+
+      - name: Ensure manual-source reference rows
+        # THE STEP THIS WORKFLOW WAS MISSING (run 2026-09-06 failed here).
+        # The fiscal observations live in a committed CSV, but their name and
+        # unit are read from the `indicators` table so there is exactly one
+        # metadata path -- and export_communes_csv.py refuses to guess when a
+        # referenced indicator is absent, by design. daily_fetch.yml has had
+        # this step since the fiscal store landed; this workflow did not, so
+        # it crashed on the first run after that store was added. Reads config
+        # only: no network, no workbook, idempotent.
+        run: python scripts/sync_fiscal_income.py --db data/belgian_macro.db --reference-rows-only
+
       - name: Validate the manual store rebuilds cleanly
         # Fails loudly if the committed CSV cannot reconstruct a valid database
         # -- a corrupted or hand-edited store must not reach the exports.
