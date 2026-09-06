@@ -162,7 +162,7 @@ def test_headlines_report_unavailable_honestly_not_as_a_blank_or_zero():
     for indicator_id in (
         "AVG_NET_TAXABLE_INCOME",
         "UNEMPLOYMENT_RATE_COM",
-        "AVG_HOUSE_PRICE",
+        "MEDIAN_HOUSE_PRICE",
     ):
         assert by_label[indicator_id]["available"] is False, indicator_id
         assert "why" in by_label[indicator_id]

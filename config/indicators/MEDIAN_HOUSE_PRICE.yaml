@@ -1,0 +1,34 @@
+id: MEDIAN_HOUSE_PRICE
+name:
+  en: Median house sale price
+  fr: Prix médian de vente des maisons
+  nl: Mediane verkoopprijs woningen
+unit: eur
+frequency: Q
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 200
+description:
+  en: >
+    Quarterly median sale price for houses with 2 or more facades (excl. apartments), as
+    published directly by Statbel -- unlike this pipeline's usual practice of deriving a
+    mean at export time (CLAUDE.md rule 6), a MEDIAN cannot be reconstructed from a total
+    and a count, so it is stored exactly as Statbel computes it, per quarter. Replaces the
+    retired AVG_HOUSE_PRICE (a true mean, recomputed from a total price Statbel's newer
+    file no longer publishes) as this pipeline's housing headline -- median is also the
+    more standard real-estate statistic, since it is not distorted by a handful of very
+    expensive sales the way a mean is.
+
+    NOT AGGREGATABLE to province, region or Belgium (is_additive=false,
+    aggregation_method=not_applicable): a median has no additive components to recompute
+    a wider figure from, and averaging or summing medians across communes would be exactly
+    the error docs/decisions/0003-aggregation-rule.md exists to prevent. Small communes
+    can have very few transactions in a quarter, so this figure is noisier for them than
+    for a city; the transaction count (HOUSE_SALES_TRANSACTIONS, annual) is published
+    alongside it precisely so a reader can judge that, though at a different frequency.
+
+    Every quarter is resolved onto the current (post-2025-merger) commune map regardless
+    of how old the quarter is -- Statbel's own file backcasts it that way, proven by a
+    2019-merger-created commune carrying a real value in the file's 2010 rows.
+display: null

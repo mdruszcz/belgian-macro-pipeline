@@ -1,47 +1,75 @@
 """Load Statbel's commune-level real-estate transaction file -- the housing
-price data docs/data_catalog.md previously said did not exist at commune
-level. It does; it was in the wrong corner of Statbel's site (a hand-supplied
-bulk file, not a Bestat API view), and it was found alongside the Census 2021
-workbooks in the same manual download.
+price data on /local.
 
 MANUAL ONLY, same reason as population and fiscal income: statbel.fgov.be is
 unreachable from this pipeline's network context. The file is
-`immo_by_municipality_2010-2019.xlsx` under data/raw/statbel/census2021/
-(the directory name predates knowing this file belonged there; not moved,
-to avoid invalidating an already-verified download path).
+`FR_immo_statbel_trimestre_par_commune.xlsx` under
+data/raw/statbel/census2021/ (the directory name predates knowing this file
+belonged there; not moved, to avoid invalidating an already-verified
+download path).
 
-SCOPED TO ORDINARY HOUSES ONLY ("gewone woonhuizen"), of the file's four
-property types (houses, apartments, villas, building land). Measured
-coverage per year: houses 588-589 of 589 communes, apartments 527-546,
-villas 577-579, building land 583-587 (2010-2014 only; absent 2015-2017
-entirely). Houses is both the best-covered type and the one a reader means
-by "housing price" without qualification. The other three are real data,
-correctly available, and simply not loaded by this first pass -- extending
-EXTRACTS below to add them is the same shape of change as any other
-indicator here, not a rewrite.
+REPLACES `immo_by_municipality_2010-2019.xlsx`, THE ANNUAL FILE THIS SCRIPT
+USED TO READ. That file gave a TOTAL price (additive, from which a true mean
+was recomputed downstream -- CLAUDE.md rule 6) for "gewone woonhuizen"
+(ordinary houses, i.e. closed + semi-closed only), 2010-2019, annual. This
+one gives QUARTERLY data through the file's own present, 2010-2026 so far,
+for a slightly BROADER category -- "Toutes les maisons avec 2, 3, 4 ou plus
+de façades (excl. appartements)", i.e. every house type except apartments,
+including open/detached houses the old file's "ordinary houses" scope
+excluded -- but only a MEDIAN price and its quartiles, no total. A median
+cannot be reconstructed from parts (see docs/features/fiscal_income.md's
+same point about a different Statbel file), so this is a genuine trade:
+wider category, far more current, but the true recomputable mean this
+pipeline used to publish is no longer possible from what Statbel supplies.
+AVG_HOUSE_PRICE (mean_from_total) and HOUSE_SALES_TOTAL_PRICE are RETIRED
+along with the old file; MEDIAN_HOUSE_PRICE replaces AVG_HOUSE_PRICE as the
+housing headline, stored directly rather than derived, since there is
+nothing to derive it FROM.
 
-ANNUAL PERIOD ONLY (`CD_PERIOD == 'Y'`), not the quarterly/semestral rows the
-file also carries: the rest of this pipeline's municipal indicators are
-annual, and quarterly commune-level transaction counts are small enough that
-most communes would be sparse or suppressed most quarters.
+MEASURED, NOT ASSUMED, THAT THIS IS A DIFFERENT CATEGORY, NOT JUST A REVISION
+OF THE SAME ONE: Aartselaar 2017 read 108 ordinary-house transactions in the
+old file; the new file's closed+semi-closed subset alone reads 113 for the
+same commune-year (a plausible late-registration revision, not investigated
+further), and its broader "all houses" total -- what this script actually
+loads -- reads 146, pulled up by open/detached houses the old scope never
+counted. HOUSE_SALES_TRANSACTIONS' history therefore steps up around 30-40%
+at the 2019/refresh boundary for a reason that has nothing to do with the
+housing market; documented here and in the indicator's own description so a
+reader does not mistake a scope change for a trend.
 
-STORED AS TOTALS, NOT AS THE FILE'S OWN MEAN. MS_TOTAL_TRANSACTIONS and
-MS_TOTAL_PRICE are additive; MS_MEAN_PRICE is not, and averaging Statbel's
-own means across communes would be the exact "average of averages" error
-Block L's aggregation rule exists to prevent (docs/decisions/0003). The mean
-is recomputed downstream by the derived engine (mean_from_total), the same
-pattern AVG_NET_TAXABLE_INCOME already uses.
+EVERY YEAR USES ONE FIXED, CURRENT (POST-2025-MERGER) GEOGRAPHY -- 565
+distinct `refnis` codes, identical across 2010 and 2024 alike. Proven the
+same way ONEM and police.be were: Kruisem (NIS 45068, created by the 2019
+merger) carries a real value in this file's own 2010 rows. So every
+observation here resolves against a SINGLE PINNED PERIOD, "2025" -- deliberately
+the OPPOSITE choice from police.be's "2024" pin, because THIS file's fixed
+code set matches the map AFTER the 2025 mergers (565 codes), not before it
+(police.be's 581).
 
-PERIOD-AWARE GEOGRAPHY, not fixed like sync_fiscal_income.py. The fiscal file
-back-casts one commune vintage across all its years (see that script's own
-docstring); this file's coverage count is stable across 2010-2017 (589,
-588-589 communes per year) with no Belgian merger wave in that window, so
-each year is resolved against its own geography via resolve_geo(nis, year) --
-the same approach sync_population.py uses.
+TWO SEPARATE "MOST RECENT PERIOD IS INCOMPLETE" PROBLEMS, handled
+differently because they are different kinds of incompleteness:
 
-NO EXPLICIT ZEROS anywhere in the annual house rows (verified: 0 of 4,705).
-An absent (commune, year) is a suppressed or genuinely empty cell, and stays
-absent rather than being written as a 0 transaction count.
+  1. HOUSE_SALES_TRANSACTIONS (annual, additive). 2026 has only a Q1 row --
+     summing it and calling the result "2026" would be exactly ONEM's
+     part-year-total mistake (an ~75% undercount presented as a full year).
+     Years with fewer than 4 quarters are SKIPPED entirely for this
+     indicator, not summed partially.
+
+  2. MEDIAN_HOUSE_PRICE (quarterly, not a total). Every quarter through
+     2026-Q1 is loaded, since a quarter's own median is a complete,
+     meaningful figure for that quarter regardless of what comes after it --
+     there is no "partial quarter" analogue to ONEM's partial year here.
+
+STATUS: the single most recent period in EACH indicator's own series is
+'provisional' (2025 for the annual transactions count, 2026-Q1 for the
+quarterly median), every earlier period 'final' -- the same rule ONEM and
+police.be use, applied here because real-estate registrations can lag and
+revise a recent period upward even after it looks complete.
+
+NOT AGGREGATABLE, MEDIAN_HOUSE_PRICE: a median has no additive components to
+recompute a province/region/Belgium figure from, the same reasoning as every
+police.be rate. `is_additive=0`, `aggregation_method='not_applicable'`.
+HOUSE_SALES_TRANSACTIONS remains additive and aggregatable, unchanged.
 """
 
 import argparse
@@ -66,52 +94,105 @@ DEFAULT_SOURCE_FILE = (
     / "raw"
     / "statbel"
     / "census2021"
-    / "immo_by_municipality_2010-2019.xlsx"
+    / "FR_immo_statbel_trimestre_par_commune.xlsx"
 )
+SHEET_NAME = "Par commune"
+CATEGORY_LABEL = "Toutes les maisons avec 2, 3, 4 ou plus de façades (excl. appartements)"
 
-PROPERTY_TYPE = "gewone woonhuizen"  # ordinary houses -- see module docstring
 TRANSACTIONS_INDICATOR = "HOUSE_SALES_TRANSACTIONS"
-TOTAL_PRICE_INDICATOR = "HOUSE_SALES_TOTAL_PRICE"
+MEDIAN_PRICE_INDICATOR = "MEDIAN_HOUSE_PRICE"
+
+# See module docstring: the OPPOSITE pin from police.be's "2024", because
+# this file's 565-code geography matches the map AFTER the 2025 mergers.
+PINNED_PERIOD = "2025"
 
 
-def _read_annual_house_sales(path: Path) -> dict[str, dict[str, tuple[float, float]]]:
-    """{year: {nis: (transactions, total_price)}} for annual house-sale rows."""
+def _read_quarterly_rows(path: Path) -> dict[str, dict[str, tuple[float | None, float | None]]]:
+    """{period ("YYYY-Qn"): {nis: (transactions, median_price)}}.
+
+    Reads the "Toutes les maisons ... (excl. appartements)" block by its own
+    row-1 label, not a fixed column position -- the file repeats the same
+    four column names ("nombre transactions", "prix médian(€)", ...) once
+    per property category, so a position would silently read the wrong
+    category if Statbel ever reordered the blocks.
+    """
     import openpyxl
 
     workbook = openpyxl.load_workbook(path, read_only=True)
-    sheet = workbook[workbook.sheetnames[0]]
-    rows = sheet.iter_rows(values_only=True)
-    header = list(next(rows))
+    if SHEET_NAME not in workbook.sheetnames:
+        raise ValueError(
+            f"{path.name} has no sheet {SHEET_NAME!r}. Its sheets are "
+            f"{workbook.sheetnames}. Refusing to guess a replacement (CLAUDE.md rule 13)."
+        )
+    sheet = workbook[SHEET_NAME]
+    rows = list(sheet.iter_rows(values_only=True))
+    category_row, columns_row = rows[1], rows[2]
 
-    required = (
-        "CD_YEAR",
-        "CD_TYPE_NL",
-        "CD_REFNIS",
-        "CD_PERIOD",
-        "MS_TOTAL_TRANSACTIONS",
-        "MS_TOTAL_PRICE",
-    )
-    missing = [c for c in required if c not in header]
+    try:
+        block_start = category_row.index(CATEGORY_LABEL)
+    except ValueError as exc:
+        raise ValueError(
+            f"{path.name}!{SHEET_NAME} has no {CATEGORY_LABEL!r} category block. Its row-1 "
+            f"labels are {[c for c in category_row if c]}. Refusing to guess a replacement "
+            "(CLAUDE.md rule 13)."
+        ) from exc
+    block = columns_row[block_start : block_start + 4]
+    if block[0] != "nombre transactions" or block[1] != "prix médian(€)":
+        raise ValueError(
+            f"{path.name}!{SHEET_NAME}: the columns under {CATEGORY_LABEL!r} are {block}, not "
+            "the expected ('nombre transactions', 'prix médian(€)', ...). Refusing to guess "
+            "a replacement (CLAUDE.md rule 13)."
+        )
+    transactions_col, median_col = block_start, block_start + 1
+
+    required = ("refnis", "année", "période")
+    missing = [c for c in required if c not in columns_row]
     if missing:
         raise ValueError(
-            f"{path.name} is missing expected column(s) {missing}. Its columns are "
-            f"{header}. Refusing to guess a replacement (CLAUDE.md rule 13)."
+            f"{path.name}!{SHEET_NAME} is missing expected column(s) {missing}. Its columns "
+            f"are {columns_row}. Refusing to guess a replacement (CLAUDE.md rule 13)."
         )
-    idx = {name: header.index(name) for name in required}
+    idx = {name: columns_row.index(name) for name in required}
 
-    out: dict[str, dict[str, tuple[float, float]]] = {}
-    for row in rows:
-        if row[idx["CD_TYPE_NL"]] != PROPERTY_TYPE or row[idx["CD_PERIOD"]] != "Y":
+    out: dict[str, dict[str, tuple[float | None, float | None]]] = {}
+    for row in rows[3:]:
+        nis = row[idx["refnis"]]
+        if nis is None:
             continue
-        year = str(row[idx["CD_YEAR"]])
-        nis = str(row[idx["CD_REFNIS"]])
-        transactions = row[idx["MS_TOTAL_TRANSACTIONS"]]
-        total_price = row[idx["MS_TOTAL_PRICE"]]
-        if transactions is None or total_price is None:
-            continue
-        out.setdefault(year, {})[nis] = (float(transactions), float(total_price))
+        year, quarter = row[idx["année"]], row[idx["période"]]
+        period = f"{year}-{quarter}"
+        transactions = row[transactions_col]
+        median_price = row[median_col]
+        out.setdefault(period, {})[str(nis)] = (
+            float(transactions) if transactions is not None else None,
+            float(median_price) if median_price is not None else None,
+        )
     workbook.close()
     return out
+
+
+def _annual_transaction_totals(
+    by_period: dict[str, dict[str, tuple]],
+) -> dict[str, dict[str, float]]:
+    """Sum quarterly transaction counts into an annual total, but ONLY for a
+    year every one of whose four quarters is present in the file -- see
+    module docstring's ONEM-part-year-total parallel."""
+    quarters_seen: dict[str, set[str]] = {}
+    totals: dict[str, dict[str, float]] = {}
+    for period, by_nis in by_period.items():
+        year, quarter = period.split("-")
+        quarters_seen.setdefault(year, set()).add(quarter)
+        year_totals = totals.setdefault(year, {})
+        for nis, (transactions, _median) in by_nis.items():
+            if transactions is None:
+                continue
+            year_totals[nis] = year_totals.get(nis, 0.0) + transactions
+
+    return {
+        year: values
+        for year, values in totals.items()
+        if quarters_seen[year] == {"Q1", "Q2", "Q3", "Q4"}
+    }
 
 
 def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) -> None:
@@ -121,23 +202,36 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) ->
             (source_id, name, agency, adapter, base_url, licence, catalog_ref, cadence, is_active)
         VALUES ('statbel', 'Statbel Bestat API', 'Statbel', 'statbel',
                 'https://bestat.statbel.fgov.be/bestat/api', ?,
-                'docs/data_catalog.md -- Census indicators', 'annual (manual)', 1)
+                'docs/data_catalog.md -- Census indicators', 'quarterly (manual)', 1)
         """,
         (
             'See docs/data_catalog.md "Statbel licence" -- two Statbel documents, both '
             "confirmed to grant commercial reuse",
         ),
     )
-    for indicator_id in (TRANSACTIONS_INDICATOR, TOTAL_PRICE_INDICATOR):
+    for indicator_id, aggregation_method, is_additive in (
+        (TRANSACTIONS_INDICATOR, "sum", 1),
+        (MEDIAN_PRICE_INDICATOR, "not_applicable", 0),
+    ):
         ind = indicator_configs[indicator_id]
         conn.execute(
             """
-            INSERT OR IGNORE INTO indicators
+            INSERT INTO indicators
                 (indicator_id, source_id, name_nl, name_fr, name_en,
                  description_nl, description_fr, description_en,
                  frequency, unit, preferred_direction, aggregation_method,
                  is_additive, decimals, config_path, is_active)
-            VALUES (?, 'statbel', ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'sum', 1, 0, ?, 1)
+            VALUES (?, 'statbel', ?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, 0, ?, 1)
+            ON CONFLICT(indicator_id) DO UPDATE SET
+                name_nl = excluded.name_nl,
+                name_fr = excluded.name_fr,
+                name_en = excluded.name_en,
+                description_en = excluded.description_en,
+                frequency = excluded.frequency,
+                unit = excluded.unit,
+                preferred_direction = excluded.preferred_direction,
+                aggregation_method = excluded.aggregation_method,
+                is_additive = excluded.is_additive
             """,
             (
                 indicator_id,
@@ -148,6 +242,8 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) ->
                 ind["frequency"],
                 ind["unit"],
                 ind["preferred_direction"],
+                aggregation_method,
+                is_additive,
                 f"config/indicators/{indicator_id}.yaml",
             ),
         )
@@ -172,7 +268,8 @@ def sync(
             f"{source_file} not found. Hand-downloaded from statbel.fgov.be -- see "
             "docs/features/manual_sources.md."
         )
-    by_year = _read_annual_house_sales(source_file)
+    by_period = _read_quarterly_rows(source_file)
+    annual_transactions = _annual_transaction_totals(by_period)
 
     now = datetime.now(timezone.utc).isoformat()
     conn.execute(
@@ -182,33 +279,57 @@ def sync(
     fetch_run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
     rows_read = rows_written = 0
-    unresolved: list[tuple[str, str]] = []
+    unresolved: list[str] = []
 
-    for year in sorted(by_year):
+    latest_year = max(annual_transactions) if annual_transactions else None
+    for year, by_nis in sorted(annual_transactions.items()):
         period_start, period_end = derive_period_bounds(year, "A")
-        for nis, (transactions, total_price) in sorted(by_year[year].items()):
+        status = "provisional" if year == latest_year else "final"
+        for nis, total in sorted(by_nis.items()):
             rows_read += 1
             try:
-                geo_id = resolve_geo(conn, nis, year)
+                geo_id = resolve_geo(conn, nis, PINNED_PERIOD)
             except UnknownGeographyError:
-                unresolved.append((nis, year))
+                unresolved.append(nis)
                 continue
-            for indicator_id, value in (
-                (TRANSACTIONS_INDICATOR, transactions),
-                (TOTAL_PRICE_INDICATOR, total_price),
-            ):
-                rows_written += upsert_observation(
-                    conn,
-                    indicator_id=indicator_id,
-                    geo_id=geo_id,
-                    period=year,
-                    period_start=period_start,
-                    period_end=period_end,
-                    value=value,
-                    status="final",
-                    vintage=now,
-                    fetch_run_id=fetch_run_id,
-                )
+            rows_written += upsert_observation(
+                conn,
+                indicator_id=TRANSACTIONS_INDICATOR,
+                geo_id=geo_id,
+                period=year,
+                period_start=period_start,
+                period_end=period_end,
+                value=total,
+                status=status,
+                vintage=now,
+                fetch_run_id=fetch_run_id,
+            )
+
+    latest_period = max(by_period) if by_period else None
+    for period, by_nis in sorted(by_period.items()):
+        period_start, period_end = derive_period_bounds(period, "Q")
+        status = "provisional" if period == latest_period else "final"
+        for nis, (_transactions, median_price) in sorted(by_nis.items()):
+            if median_price is None:
+                continue
+            rows_read += 1
+            try:
+                geo_id = resolve_geo(conn, nis, PINNED_PERIOD)
+            except UnknownGeographyError:
+                unresolved.append(nis)
+                continue
+            rows_written += upsert_observation(
+                conn,
+                indicator_id=MEDIAN_PRICE_INDICATOR,
+                geo_id=geo_id,
+                period=period,
+                period_start=period_start,
+                period_end=period_end,
+                value=median_price,
+                status=status,
+                vintage=now,
+                fetch_run_id=fetch_run_id,
+            )
 
     conn.execute(
         "UPDATE fetch_runs SET finished_at = ?, rows_read = ?, rows_written = ? "
@@ -220,16 +341,22 @@ def sync(
 
     if unresolved:
         raise SystemExit(
-            f"::error::{len(unresolved)} (NIS, year) pairs did not resolve to a "
-            f"geography, e.g. {unresolved[:5]}. Refusing to load a partial series."
+            f"::error::{len(unresolved)} NIS code(s) did not resolve at the pinned period "
+            f"{PINNED_PERIOD!r}, e.g. {sorted(set(unresolved))[:5]}. Refusing to load a "
+            "partial series."
         )
-    print(f"Read {rows_read} (commune, year) rows across {len(by_year)} years.")
+    print(
+        f"Read {rows_read} rows: {len(annual_transactions)} annual periods for "
+        f"{TRANSACTIONS_INDICATOR}, {len(by_period)} quarterly periods for "
+        f"{MEDIAN_PRICE_INDICATOR}."
+    )
     return rows_read, rows_written
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(
-        description="Load Statbel's commune-level ordinary-house sale prices (manual, not daily)"
+        description="Load Statbel's commune-level house transactions and median price "
+        "(manual, not daily)"
     )
     ap.add_argument("--db", required=True)
     ap.add_argument("--source-file", type=Path, default=DEFAULT_SOURCE_FILE)
@@ -241,7 +368,7 @@ def main() -> None:
     args = ap.parse_args()
     read, written = sync(Path(args.db), args.source_file, args.reference_rows_only)
     if args.reference_rows_only:
-        print(f"Reference rows ensured for: {TRANSACTIONS_INDICATOR}, {TOTAL_PRICE_INDICATOR}")
+        print(f"Reference rows ensured for: {TRANSACTIONS_INDICATOR}, {MEDIAN_PRICE_INDICATOR}")
     else:
         print(f"Wrote {written} new vintage(s).")
 
