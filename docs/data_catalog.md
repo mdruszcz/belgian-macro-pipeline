@@ -70,6 +70,48 @@ permits), 12–13 (ABB municipal finance — both the interactive tool and the P
 (data.gov.be). `datastore.brussels` (Brussels-region aggregator, see below) was never formally
 offered as a candidate and stays unresolved rather than silently deferred.
 
+## Census 2011 geographic indicators — approved 2026-09-06 (11th dataset)
+
+Approved by the maintainer on 2026-09-06, after Block E's "exactly 10" cut. Recorded as an
+addition, not a substitution: CONTROL E's discipline test was about not padding the initial
+selection, and this was found afterwards by measurement rather than by browsing for more sources.
+
+| Field | Value |
+|---|---|
+| Dataset | `IM_SOC_GEO_IND_CENSUS` — *Indicateurs géographiques (basés sur le CENSUS 2011)* |
+| Publisher | Statbel (Directorate-general Statistics) |
+| Access | Bestat API, `bestat.statbel.fgov.be/bestat/api/views/{id}/result/JSON` — **fetchable by CI**, unlike the `statbel.fgov.be` bulk host |
+| Geography | 589 communes (the pre-2019 structure), named in French only, no NIS code in the response |
+| Period | 2011, single snapshot. Stated by the source itself (`IM_SOC_GEO_IND_CENSUS`, "basés sur le CENSUS 2011"), not inferred |
+| Licence | Same Statbel terms already cleared for the other four Statbel datasets — see "Statbel licence" below |
+| Indicators | 38 distinct, across 76 views (each published twice, as a "highest" and a "lowest" ranking of the same full table) |
+
+**Why it was approved.** It is the only identified route to the roadmap's 50-indicator gate: 14 today
+plus 38 is 52. It also supplies **unemployment at commune level**, one of the two headline figures
+`/local` currently reports as unavailable, plus employment and activity rates, population density,
+education, household composition, home ownership, building age and average age.
+
+**How it was found, and the trap in it.** The views are named *"Communes dont le taux de chômage des
+15-64 ans est le plus élevé"* — "communes with the highest unemployment" — which reads like a
+top-ten extract. It is not: the view returns **all 589 communes** with their values, ranked. Measured
+before approval: 590 rows, 589 naming a commune, 589 values present, min 1.76%, median 6.0%, max
+24.06% (Saint-Josse-ten-Noode). Judging these views by their names would have left the single
+largest available body of municipal data unused.
+
+**Known limitations, recorded before any adapter exists:**
+
+- **One period, 2011.** These indicators will have no history and no trend. They fill the indicator
+  count and answer "what is this commune like", not "what is changing".
+- **Values are fractions**, not percentages (0.2406 = 24.06%). A unit decision is owed per indicator.
+- **Pre-2019 geography**, so every value needs `resolve_geo` through the merger crosswalk.
+- **Name-only geography.** Resolution measured at 585/589 by French name plus validity at 2011;
+  the four stragglers are two genuine `Saint-Nicolas` communes needing the view's own parenthetical
+  disambiguator, plus `Blégny`/`Blegny` (an accent) and `Zwalm` (Statbel's own typo, see
+  `config/geography/name_fr_corrections.csv`).
+- **Housing prices are NOT in this dataset** and remain unavailable at commune level: every Bestat
+  price view whose name promises "par commune" returns region-level rows only. The housing headline
+  figure stays unavailable, and real estate sales stays DEFERRED from Block E.
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new
