@@ -1,0 +1,1 @@
+{"build_id":"manual-seed","git_commit":"0e83ba80912a6447250a7a27ab3d46d70751cdff","build_date":"2026-09-06T14:59:49.981600+00:00","datasets":{"national":{"indicators":17},"communes":{"count":565,"indicators":5},"geographies":{"count":622}},"validation_status":"pass"}
