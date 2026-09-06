@@ -1,8 +1,8 @@
 id: EC_CONS_CONF_EU
 name:
-  en: EC_CONS_CONF_EU
-  fr: EC_CONS_CONF_EU
-  nl: EC_CONS_CONF_EU
+  en: Consumer confidence indicator, EU27
+  fr: Indicateur de confiance des consommateurs, UE27
+  nl: Consumentenvertrouwensindicator, EU27
 country: EU
 unit: balance
 frequency: M

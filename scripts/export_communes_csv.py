@@ -155,22 +155,50 @@ def export_communes_csv(
     conn.close()
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # csv.writer, not f-strings -- see export_canonical_csv.py for why. No
+    # commune name contains a comma today, but indicator display names do.
     with open(out_path, "w", newline="", encoding="utf-8") as f:
-        f.write(
-            "geo_id,nis_code,name_en,name_fr,name_nl,region,province,arrondissement,"
-            "indicator_code,indicator_name,unit,period,value,status,fetched_at\n"
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(
+            [
+                "geo_id",
+                "nis_code",
+                "name_en",
+                "name_fr",
+                "name_nl",
+                "region",
+                "province",
+                "arrondissement",
+                "indicator_code",
+                "indicator_name",
+                "unit",
+                "period",
+                "value",
+                "status",
+                "fetched_at",
+            ]
         )
         for geo_id, indicator_id, ind_name, unit, period, value, status, created_at in obs:
             nis, name_en, name_fr, name_nl = commune_by_id[geo_id]
             a = ancestors.get(geo_id, {})
-            region = a.get("region", "")
-            province = a.get("province", "")
-            arrondissement = a.get("arrondissement", "")
-            obs_status = STATUS_TO_LETTER.get(status, status or "")
-            f.write(
-                f"{geo_id},{nis},{name_en},{name_fr},{name_nl},{region},{province},"
-                f"{arrondissement},{indicator_id},{ind_name},{unit},{period},{value},"
-                f"{obs_status},{created_at}\n"
+            writer.writerow(
+                [
+                    geo_id,
+                    nis,
+                    name_en,
+                    name_fr,
+                    name_nl,
+                    a.get("region", ""),
+                    a.get("province", ""),
+                    a.get("arrondissement", ""),
+                    indicator_id,
+                    ind_name,
+                    unit,
+                    period,
+                    value,
+                    STATUS_TO_LETTER.get(status, status or ""),
+                    created_at,
+                ]
             )
     return len(obs)
 

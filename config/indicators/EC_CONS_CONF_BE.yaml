@@ -1,8 +1,8 @@
 id: EC_CONS_CONF_BE
 name:
-  en: EC_CONS_CONF_BE
-  fr: EC_CONS_CONF_BE
-  nl: EC_CONS_CONF_BE
+  en: Consumer confidence indicator, Belgium
+  fr: Indicateur de confiance des consommateurs, Belgique
+  nl: Consumentenvertrouwensindicator, België
 unit: balance
 frequency: M
 source_id: dbnomics_eurostat

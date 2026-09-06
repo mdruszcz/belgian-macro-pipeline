@@ -223,9 +223,12 @@ def _sum_communes_by_age_band(fh, display_name: str) -> dict[str, dict[str, int]
     """-> {nis5: {band: population}}. Same file, same sniffing, but keeping
     the CD_AGE dimension banded instead of summing it away.
 
-    Every row lands in exactly one band, so summing the bands back up must
-    reproduce _sum_communes' total for the same file -- an invariant
-    sync_population.py asserts rather than assumes."""
+    Every row lands in exactly one band, so summing the bands back up
+    reproduces _sum_communes' total for the same file. sync_population.py
+    relies on that by deriving the total AS the band sum, which makes the
+    two agree by construction; the check that matters is therefore the one
+    below -- any population outside every band raises rather than silently
+    vanishing from the totals."""
     sample = fh.read(8192)
     fh.seek(0)
     try:

@@ -1,8 +1,8 @@
 id: LABOUR_COST_DE
 name:
-  en: LABOUR_COST_DE
-  fr: LABOUR_COST_DE
-  nl: LABOUR_COST_DE
+  en: Nominal compensation per employee, Germany (2010=100)
+  fr: Rémunération nominale par salarié, Allemagne (2010=100)
+  nl: Nominale beloning per werknemer, Duitsland (2010=100)
 country: DE
 unit: index_2010
 frequency: A

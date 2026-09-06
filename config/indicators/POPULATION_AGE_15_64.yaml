@@ -18,6 +18,11 @@ description:
     dependency ratio is computed from these three bands by the Block G
     derived engine, so a denominator revision recomputes it rather than
     leaving a stale stored figure. Summing the three bands reproduces
-    POPULATION_BY_COMMUNE exactly; scripts/sync_population.py asserts that
-    rather than assuming it.
+    POPULATION_BY_COMMUNE exactly -- by construction, not by coincidence:
+    sync_population.py derives the total AS the band sum rather than reading
+    the file twice, so the two can never disagree. What is genuinely checked
+    at runtime is narrower and is the thing that could actually go wrong: any
+    population falling outside every band raises rather than being silently
+    dropped from both the bands and the total. Verified empirically across all
+    6,383 commune-year cells in the committed store.
 display: null

@@ -1,8 +1,8 @@
 id: LABOUR_COST_FR
 name:
-  en: LABOUR_COST_FR
-  fr: LABOUR_COST_FR
-  nl: LABOUR_COST_FR
+  en: Nominal compensation per employee, France (2010=100)
+  fr: Rémunération nominale par salarié, France (2010=100)
+  nl: Nominale beloning per werknemer, Frankrijk (2010=100)
 country: FR
 unit: index_2010
 frequency: A

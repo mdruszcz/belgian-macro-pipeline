@@ -1,8 +1,8 @@
 id: EUROSTAT_GDP_Q_MEUR_NL
 name:
-  en: EUROSTAT_GDP_Q_MEUR_NL
-  fr: EUROSTAT_GDP_Q_MEUR_NL
-  nl: EUROSTAT_GDP_Q_MEUR_NL
+  en: GDP volume index, Netherlands (2010=100)
+  fr: Indice de volume du PIB, Pays-Bas (2010=100)
+  nl: Bbp-volume-index, Nederland (2010=100)
 country: NL
 unit: index_2010
 frequency: Q
