@@ -1,0 +1,21 @@
+id: POPULATION_PERCENTILE
+name:
+  en: Population percentile among Belgian communes
+  fr: Percentile de population parmi les communes belges
+  nl: Bevolkingspercentiel onder Belgische gemeenten
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    Percentile rank of the commune's population among all communes that
+    existed in the same year -- 589 in 2016-2018, 581 in 2019-2024, 565 from
+    2025. Ranking against today's 565 for an earlier year would use the wrong
+    denominator. Defined as 100 x (below + 0.5 x equal) / N, so tied communes
+    share a rank; see docs/features/derived_indicators.md for why this rather
+    than an interpolated quantile.
+derived:
+  function: percentile
+  inputs: [POPULATION_BY_COMMUNE]

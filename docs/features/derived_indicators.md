@@ -234,6 +234,20 @@ independently computed number is a test."
 - Cycle detection gets a test asserting the error names the cycle.
 - **CONTROL G gets a test**: no derived `indicator_id` appears in `observations`.
 
+## Gaps found while implementing
+
+**`regional_share` has no denominator yet.** It is in the catalogue and implemented, but nothing
+produces a regional total: geographic aggregation is Block L's own `[BUILD]` step ("Show commune /
+province / region / Belgium for every metric"). A `POPULATION_SHARE_OF_REGION` config was written and
+then removed rather than propped up with a fabricated denominator. The function stays, unused, until
+Block L supplies aggregates.
+
+**`per_capita` cannot currently mix frequencies.** `LOCAL_UNITS_BY_COMMUNE` is quarterly
+(`2023-Q4`); population is annual (`2016`…`2026`). The spec requires the denominator to match on the
+same period, so business-units-per-capita would be null for every row — the periods never coincide.
+Aligning a quarter to its year is a real decision (which year does `2023-Q4` belong to, and does that
+generalise to a fiscal year?), so it is recorded here rather than guessed at.
+
 ## Open questions for the maintainer
 
 - **`preferred_direction` is inconsistent across country variants** in existing config (GDP is

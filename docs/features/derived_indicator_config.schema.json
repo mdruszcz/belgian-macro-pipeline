@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://belgian-macro-pipeline/derived_indicator_config.schema.json",
+  "title": "Derived indicator configuration",
+  "description": "config/indicators/derived/*.yaml -- indicators computed by src/analytics/derived.py rather than fetched. Deliberately a separate schema from indicator_config.schema.json: a derived indicator has no publisher, so requiring source_id would force an invented one, and it must carry a `derived` block, which a fetched indicator must not.",
+  "type": "object",
+  "required": ["id", "name", "unit", "frequency", "geo_levels", "preferred_direction", "derived"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1, "pattern": "^[A-Z0-9_]+$" },
+    "name": {
+      "type": "object",
+      "required": ["en", "fr", "nl"],
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string", "minLength": 1 },
+        "fr": { "type": "string", "minLength": 1 },
+        "nl": { "type": "string", "minLength": 1 }
+      }
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string" },
+        "fr": { "type": "string" },
+        "nl": { "type": "string" }
+      }
+    },
+    "unit": { "type": "string", "minLength": 1 },
+    "frequency": { "type": "string", "enum": ["A", "Q", "M", "F"] },
+    "geo_levels": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["national", "regional", "provincial", "municipal"] }
+    },
+    "preferred_direction": {
+      "type": "string",
+      "enum": ["lower_is_better", "higher_is_better", "neutral", "contextual"]
+    },
+    "decimals": { "type": "integer", "minimum": 0, "maximum": 6 },
+    "derived": {
+      "type": "object",
+      "required": ["function", "inputs"],
+      "additionalProperties": false,
+      "properties": {
+        "function": {
+          "type": "string",
+          "description": "Must name a function in the catalogue in docs/features/derived_indicators.md. Cross-checked against the actual module, not just this list, so the two cannot drift.",
+          "enum": [
+            "growth_rate",
+            "cagr",
+            "five_year_change",
+            "per_capita",
+            "share_of_total",
+            "index_base_100",
+            "dependency_ratio",
+            "z_score",
+            "percentile",
+            "regional_share"
+          ]
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Indicator ids this derivation reads. May name source indicators or other derived ones; the engine topologically sorts them and rejects cycles.",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "args": {
+          "type": "object",
+          "description": "Extra arguments passed to the function, e.g. years for growth_rate/cagr, base_period for index_base_100, scope for percentile/z_score."
+        }
+      }
+    },
+    "display": { "type": ["object", "null"] }
+  }
+}
