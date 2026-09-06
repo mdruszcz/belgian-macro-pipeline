@@ -21,6 +21,7 @@ from src.analytics.aggregate import (
     aggregate_additive,
     ancestors_of,
     methods_from_metadata,
+    per_period_universe,
 )
 from src.analytics.engine import ObservationSet
 
@@ -106,7 +107,7 @@ def test_additive_values_sum_into_each_ancestor():
             ("POP", "be:mun:bru1", "2023", 10.0),
         ]
     )
-    result = aggregate_additive(obs, ["POP"], PARENTS, LEVELS, UNIVERSE)
+    result = aggregate_additive(obs, ["POP"], PARENTS, LEVELS, per_period_universe(UNIVERSE))
 
     assert result.value("POP", "be:prov:a", "2023") == 350.0
     assert result.value("POP", "be:prov:b", "2023") == 40.0
@@ -125,7 +126,9 @@ def test_coverage_counts_the_communes_that_existed_not_the_ones_with_values():
             # a2 exists in 2023 but has no value: province a is 1 of 2.
         ]
     )
-    result = aggregate_additive(obs, ["POP"], PARENTS, LEVELS, UNIVERSE, min_coverage=0.0)
+    result = aggregate_additive(
+        obs, ["POP"], PARENTS, LEVELS, per_period_universe(UNIVERSE), min_coverage=0.0
+    )
     cov = result.coverage("POP", "be:prov:a", "2023")
     assert (cov.contributed, cov.expected) == (1, 2)
     assert cov.pct == 50.0
@@ -136,7 +139,9 @@ def test_coverage_counts_the_communes_that_existed_not_the_ones_with_values():
 
 def test_an_aggregate_below_the_coverage_threshold_is_absent_not_footnoted():
     obs = _obs([("POP", "be:mun:a1", "2023", 100.0)])  # 1 of 2 in province a
-    result = aggregate_additive(obs, ["POP"], PARENTS, LEVELS, UNIVERSE, min_coverage=0.90)
+    result = aggregate_additive(
+        obs, ["POP"], PARENTS, LEVELS, per_period_universe(UNIVERSE), min_coverage=0.90
+    )
     assert result.value("POP", "be:prov:a", "2023") is None
 
 
@@ -157,13 +162,13 @@ def test_the_threshold_boundary_is_inclusive():
     eight = _obs([("POP", g, "2023", 1.0) for g in list(communes)[:8]])
 
     assert (
-        aggregate_additive(nine, ["POP"], parents, levels, universe).value(
+        aggregate_additive(nine, ["POP"], parents, levels, per_period_universe(universe)).value(
             "POP", "be:reg:r", "2023"
         )
         == 9.0
     )
     assert (
-        aggregate_additive(eight, ["POP"], parents, levels, universe).value(
+        aggregate_additive(eight, ["POP"], parents, levels, per_period_universe(universe)).value(
             "POP", "be:reg:r", "2023"
         )
         is None
@@ -207,7 +212,9 @@ def test_a_ratio_is_recomputed_from_the_sums_not_averaged():
         ]
     )
     methods = {"TOTAL_INC": SUM, "RETURNS": SUM, "AVG": RECOMPUTE}
-    result = aggregate(obs, methods, PARENTS, LEVELS, UNIVERSE, MEAN_CONFIG, min_coverage=0.0)
+    result = aggregate(
+        obs, methods, PARENTS, LEVELS, per_period_universe(UNIVERSE), MEAN_CONFIG, min_coverage=0.0
+    )
 
     assert result.value("TOTAL_INC", "be:prov:a", "2023") == 1_200_000.0
     assert result.value("RETURNS", "be:prov:a", "2023") == 50.0
@@ -243,7 +250,9 @@ def test_the_real_belgian_average_income_figure_from_the_spec():
         ]
     )
     methods = {"TOTAL_INC": SUM, "RETURNS": SUM, "AVG": RECOMPUTE}
-    result = aggregate(obs, methods, PARENTS, LEVELS, UNIVERSE, MEAN_CONFIG, min_coverage=0.0)
+    result = aggregate(
+        obs, methods, PARENTS, LEVELS, per_period_universe(UNIVERSE), MEAN_CONFIG, min_coverage=0.0
+    )
 
     assert result.value("AVG", "be:prov:a", "2023") == pytest.approx(34_700.0)
     assert result.value("AVG", "be:prov:a", "2023") != pytest.approx(265_000.0)
@@ -260,7 +269,9 @@ def test_a_recomputed_ratio_inherits_its_weakest_inputs_coverage():
         ]
     )
     methods = {"TOTAL_INC": SUM, "RETURNS": SUM, "AVG": RECOMPUTE}
-    result = aggregate(obs, methods, PARENTS, LEVELS, UNIVERSE, MEAN_CONFIG, min_coverage=0.0)
+    result = aggregate(
+        obs, methods, PARENTS, LEVELS, per_period_universe(UNIVERSE), MEAN_CONFIG, min_coverage=0.0
+    )
 
     assert result.coverage("TOTAL_INC", "be:prov:a", "2023").pct == 100.0
     assert result.coverage("RETURNS", "be:prov:a", "2023").pct == 50.0
@@ -277,7 +288,9 @@ def test_a_ratio_whose_input_was_suppressed_is_itself_absent():
     )
     methods = {"TOTAL_INC": SUM, "RETURNS": SUM, "AVG": RECOMPUTE}
     # At a 90% gate, RETURNS (50%) is suppressed, so AVG cannot be built.
-    result = aggregate(obs, methods, PARENTS, LEVELS, UNIVERSE, MEAN_CONFIG, min_coverage=0.90)
+    result = aggregate(
+        obs, methods, PARENTS, LEVELS, per_period_universe(UNIVERSE), MEAN_CONFIG, min_coverage=0.90
+    )
     assert result.value("RETURNS", "be:prov:a", "2023") is None
     assert result.value("AVG", "be:prov:a", "2023") is None
 
@@ -308,7 +321,7 @@ def test_a_predecessor_commune_contributes_to_its_own_periods_total():
             ("POP", "be:mun:S", "2026", 620.0),
         ]
     )
-    result = aggregate_additive(obs, ["POP"], parents, levels, universe)
+    result = aggregate_additive(obs, ["POP"], parents, levels, per_period_universe(universe))
 
     assert result.value("POP", "be:prov:a", "2023") == 700.0
     assert result.value("POP", "be:prov:a", "2026") == 720.0
@@ -324,13 +337,20 @@ def test_a_predecessor_commune_contributes_to_its_own_periods_total():
 def test_aggregating_a_non_additive_indicator_raises_and_names_it():
     obs = _obs([("IDX", "be:mun:a1", "2023", 112.4)])
     with pytest.raises(NotAggregatableError, match="IDX"):
-        aggregate(obs, {"IDX": REFUSE}, PARENTS, LEVELS, UNIVERSE)
+        aggregate(obs, {"IDX": REFUSE}, PARENTS, LEVELS, per_period_universe(UNIVERSE))
 
 
 def test_a_recompute_without_a_formula_raises_rather_than_guessing():
     obs = _obs([("TOTAL_INC", "be:mun:a1", "2023", 100.0)])
     with pytest.raises(NotAggregatableError, match="AVG"):
-        aggregate(obs, {"TOTAL_INC": SUM, "AVG": RECOMPUTE}, PARENTS, LEVELS, UNIVERSE, {})
+        aggregate(
+            obs,
+            {"TOTAL_INC": SUM, "AVG": RECOMPUTE},
+            PARENTS,
+            LEVELS,
+            per_period_universe(UNIVERSE),
+            {},
+        )
 
 
 # ── method selection from metadata ─────────────────────────────────────────

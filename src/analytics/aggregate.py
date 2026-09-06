@@ -35,7 +35,7 @@ caller assembles observations and the period universe, exactly as it already
 does for ObservationSet.
 """
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 
 from src.analytics.engine import ObservationSet, compute
 
@@ -137,21 +137,47 @@ def ancestors_of(
     return out
 
 
+def per_period_universe(
+    mapping: Mapping[str, set[str]],
+) -> Callable[[str, str], set[str]]:
+    """Adapt a plain period -> communes mapping to the universe callable.
+
+    For the common case where every indicator is expressed in the calendar's
+    own geography for each period.
+    """
+    return lambda _indicator_id, period: mapping.get(period, set())
+
+
 def aggregate_additive(
     obs: ObservationSet,
     indicator_ids: Iterable[str],
     parents: Mapping[str, str | None],
     levels: Mapping[str, str],
-    municipal_universe: Mapping[str, set[str]],
+    universe_of: Callable[[str, str], set[str]],
     min_coverage: float = DEFAULT_MIN_COVERAGE,
 ) -> AggregateSet:
     """Sum additive commune figures into every ancestor geography.
 
-    `municipal_universe` maps period -> the set of municipal geo_ids that
-    EXISTED in that period. It is the coverage denominator and the whole
-    defence against rule 2 above; it must not be "the communes that have a
-    value", which would make coverage 100% by construction and hide exactly
-    the gap it exists to expose.
+    `universe_of(indicator_id, period)` returns the municipal geo_ids that
+    indicator covers in that period. It is the coverage denominator, and it
+    must not be "the communes that have a value" -- that would make coverage
+    100% by construction and hide exactly the gap it exists to expose.
+
+    WHY IT IS PER INDICATOR and not simply per period. Measured: coverage came
+    out above 100% -- more communes contributing than existed -- for 283 cells.
+    Not an arithmetic bug. Statbel's fiscal file expresses EVERY year from 2005
+    to 2023 on the 2019 commune map (Block F documented this: it back-casts a
+    fixed vintage), and LOCAL_UNITS_BY_COMMUNE reports its 2023-Q4 snapshot on
+    today's 565. So for fiscal 2005 the contributors include 18 communes that
+    did not exist until 2019, while the calendar universe for 2005 holds the
+    589 that did. Dividing one map by the other is meaningless in both
+    directions, and it happened to surface as an impossible number only
+    because the mismatch ran that way.
+
+    An indicator's coverage therefore has to be measured against the geography
+    THAT INDICATOR is expressed in. The caller decides; see
+    scripts/export_aggregates_csv.py, which detects a pinned vintage from the
+    data rather than from a hand-maintained list.
     """
     result = AggregateSet()
 
@@ -169,7 +195,9 @@ def aggregate_additive(
                 entry[1] += 1
 
         for (geo_id, period), (total, contributed) in totals.items():
-            expected = _expected_children(geo_id, period, parents, levels, municipal_universe)
+            expected = _expected_children(
+                geo_id, universe_of(indicator_id, period), parents, levels
+            )
             cov = Coverage(contributed, expected)
             # Suppress rather than footnote. See rule 3.
             if not cov.is_sufficient(min_coverage):
@@ -181,17 +209,12 @@ def aggregate_additive(
 
 def _expected_children(
     geo_id: str,
-    period: str,
+    universe: set[str],
     parents: Mapping[str, str | None],
     levels: Mapping[str, str],
-    municipal_universe: Mapping[str, set[str]],
 ) -> int:
-    """How many communes existed under this geography in this period."""
-    return sum(
-        1
-        for commune_id in municipal_universe.get(period, ())
-        if geo_id in ancestors_of(commune_id, parents, levels)
-    )
+    """How many of the indicator's communes sit under this geography."""
+    return sum(1 for commune_id in universe if geo_id in ancestors_of(commune_id, parents, levels))
 
 
 def aggregate(
@@ -199,7 +222,7 @@ def aggregate(
     methods: Mapping[str, str],
     parents: Mapping[str, str | None],
     levels: Mapping[str, str],
-    municipal_universe: Mapping[str, set[str]],
+    universe_of: Callable[[str, str], set[str]],
     derived_configs: Mapping[str, dict] | None = None,
     min_coverage: float = DEFAULT_MIN_COVERAGE,
 ) -> AggregateSet:
@@ -220,7 +243,7 @@ def aggregate(
         )
 
     additive = [i for i, m in methods.items() if m == SUM]
-    result = aggregate_additive(obs, additive, parents, levels, municipal_universe, min_coverage)
+    result = aggregate_additive(obs, additive, parents, levels, universe_of, min_coverage)
 
     recompute = {i for i, m in methods.items() if m == RECOMPUTE}
     if not recompute:

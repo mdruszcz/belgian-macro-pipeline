@@ -85,6 +85,18 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv
           python -m src.exporters.metadata --out data/metadata/indicators.json
 
+      - name: Export province/region/Belgium aggregates
+        # Block L -- docs/features/comparison.md. Feeds the comparison column
+        # on every commune page. Reads the UNRESTRICTED observation set
+        # (including communes merged away since) so a province total is not
+        # short by the communes that no longer exist -- measured at -24.4%
+        # for Limburg 2023 when that is got wrong.
+        run: |
+          python scripts/export_aggregates_csv.py --db data/belgian_macro.db \
+            --out data/aggregates.csv \
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv
+
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. See daily_fetch.yml for
         # the full rationale; this workflow does not run validate_data.py
