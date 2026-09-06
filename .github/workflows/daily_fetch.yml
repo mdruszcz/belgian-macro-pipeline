@@ -142,6 +142,21 @@ jobs:
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
 
+      - name: Export per-entity site payloads for /local
+        # Block J -- docs/features/site_payloads.md. Reshapes the bulk CSVs
+        # written above into public/data/{national,communes/*,indicators/*,
+        # metadata/geographies}.json; writes nothing new, computes nothing
+        # new. Runs after validate_data.py above, which already blocked the
+        # job on failure, so validation-status is always "pass" here.
+        run: |
+          python scripts/export_site_payloads.py --db data/belgian_macro.db \
+            --communes-history data/communes_history.csv \
+            --communes-latest data/communes_export.csv \
+            --national data/belgian_macro_export.csv \
+            --out-dir public/data \
+            --build-id "${{ github.run_id }}" \
+            --validation-status pass
+
       - name: Fetch market data
         id: fetch_stocks
         continue-on-error: true
@@ -149,9 +164,9 @@ jobs:
 
       - name: Guard against oversized data files
         run: |
-          OVERSIZED=$(find data/ -type f -size +25000k)
+          OVERSIZED=$(find data/ public/ -type f -size +25000k)
           if [ -n "$OVERSIZED" ]; then
-            echo "::error::File(s) under data/ exceed 25 MB; refusing to commit:"
+            echo "::error::File(s) under data/ or public/ exceed 25 MB; refusing to commit:"
             echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done
             exit 1
           fi
@@ -161,7 +176,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
+          git add data/ public/
           if git diff --staged --quiet; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No data changes today."

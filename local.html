@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/local — commune profile</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
+    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
+    --accent:#a8722f; --accent-soft:#f0e2cf; --accent-ink:#5c3d18;
+    --good:#3f7d5c; --good-soft:#e2efe7;
+    --warn:#b9762a; --warn-soft:#f6e9d6;
+    --row-alt:#fbfaf6; --focus-ring:#a8722f;
+    --chart-grid:rgba(0,0,0,.08); --chart-label:#948a76; --chart-line:#a8722f; --chart-dot:#5c3d18;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+      --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+      --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+      --good:#6fbf94; --good-soft:#1f2f26;
+      --warn:#e0a355; --warn-soft:#332818;
+      --row-alt:#1f1d18; --focus-ring:#d6994f;
+      --chart-grid:rgba(255,255,255,.08); --chart-label:#a79d89; --chart-line:#d6994f; --chart-dot:#f0d4a8;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.5}
+  ::selection{background:var(--accent-soft)}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 20px 80px}
+  a{color:var(--accent-ink)}
+
+  h1{font-family:"Spectral",Georgia,serif;font-weight:600;font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
+  .subtitle{color:var(--text-muted);font-size:.92rem;max-width:70ch;margin:0 0 20px}
+
+  /* ── search panel ───────────────────────────────────── */
+  #searchInput{
+    width:100%;font-family:"IBM Plex Sans",sans-serif;font-size:1rem;
+    padding:12px 14px;border-radius:8px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);
+  }
+  #searchInput:focus{outline:2px solid var(--focus-ring);outline-offset:1px}
+  #searchResults{margin-top:10px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
+  .result-row{
+    padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  }
+  .result-row:last-child{border-bottom:none}
+  .result-row:hover{background:var(--accent-soft)}
+  .result-row .rname{font-size:.92rem}
+  .result-row .rmeta{font-size:.76rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+
+  .browse-tree{margin-top:18px}
+  .crumb{font-size:.82rem;color:var(--text-muted);margin-bottom:8px}
+  .crumb button{background:none;border:none;color:var(--accent-ink);cursor:pointer;font:inherit;padding:0}
+  .crumb .sep{color:var(--text-faint);margin:0 4px}
+  .tree-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+  .tree-item{
+    padding:9px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);
+    cursor:pointer;font-size:.86rem;
+  }
+  .tree-item:hover{background:var(--accent-soft);border-color:var(--border-strong)}
+
+  /* ── commune page ───────────────────────────────────── */
+  #communePage{display:none}
+  .back-link{display:inline-block;margin-bottom:14px;font-size:.85rem;color:var(--text-muted);text-decoration:none;cursor:pointer}
+  .commune-title{font-family:"Spectral",Georgia,serif;font-weight:600;font-size:1.9rem;margin:0 0 2px}
+  .commune-ancestry{color:var(--text-muted);font-size:.88rem;margin-bottom:20px}
+
+  .headline{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+    background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:28px}
+  .headline .card{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-height:78px}
+  .headline .card .v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:1.35rem;font-weight:500}
+  .headline .card .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint)}
+  .headline .card .p{font-size:.72rem;color:var(--text-faint);margin-top:auto}
+  .headline .card.nodata .v{color:var(--text-faint);font-size:.82rem;font-family:"IBM Plex Sans",sans-serif;font-weight:400;font-style:italic}
+
+  section.block{margin-bottom:30px}
+  section.block h2{font-family:"Spectral",Georgia,serif;font-size:1.2rem;font-weight:600;margin:0 0 4px}
+  section.block .sec-sub{font-size:.78rem;color:var(--text-faint);margin-bottom:14px}
+
+  .no-data{
+    border:1px dashed var(--border-strong);border-radius:8px;padding:18px 20px;
+    color:var(--text-muted);font-size:.88rem;background:var(--row-alt);
+  }
+  .no-data .why{display:block;margin-top:4px;font-size:.78rem;color:var(--text-faint)}
+
+  .chart-card{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:16px}
+  canvas.series{display:block;width:100%}
+
+  .fact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+  .fact{border:1px solid var(--border);border-radius:7px;padding:10px 12px;background:var(--surface)}
+  .fact .fv{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:1.05rem}
+  .fact .fl{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em}
+
+  footer{margin-top:30px;color:var(--text-faint);font-size:.78rem}
+
+  @media (max-width:640px){
+    .wrap{padding:20px 14px 60px}
+    .commune-title{font-size:1.5rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="searchPanel">
+    <h1>Find your commune</h1>
+    <p class="subtitle">Search any of Belgium's 565 communes by name (English, French or Dutch) or NIS code, or browse by region.</p>
+    <input id="searchInput" type="text" placeholder="Type a commune name or NIS code…" autocomplete="off">
+    <div id="searchResults"></div>
+    <div class="browse-tree" id="browseTree"></div>
+  </div>
+
+  <div id="communePage">
+    <a class="back-link" id="backLink">&larr; Back to search</a>
+    <h1 class="commune-title" id="cTitle">—</h1>
+    <div class="commune-ancestry" id="cAncestry"></div>
+
+    <div class="headline" id="headline"></div>
+
+    <section class="block" id="sec-overview">
+      <h2>Overview</h2>
+      <div class="sec-sub">Where this commune sits, and its own reference year for each figure above.</div>
+      <div class="fact-grid" id="overviewFacts"></div>
+    </section>
+
+    <section class="block" id="sec-demography">
+      <h2>Demography</h2>
+      <div class="sec-sub" id="demographySub"></div>
+      <div id="demographyBody"></div>
+    </section>
+
+    <section class="block" id="sec-income">
+      <h2>Income &amp; local finances</h2>
+      <div class="sec-sub" id="incomeSub"></div>
+      <div id="incomeBody"></div>
+    </section>
+
+    <section class="block" id="sec-employment">
+      <h2>Employment</h2>
+      <div id="employmentBody"></div>
+    </section>
+
+    <section class="block" id="sec-business">
+      <h2>Business</h2>
+      <div id="businessBody"></div>
+    </section>
+
+    <section class="block" id="sec-housing">
+      <h2>Housing</h2>
+      <div id="housingBody"></div>
+    </section>
+
+    <section class="block" id="sec-mobility">
+      <h2>Mobility</h2>
+      <div id="mobilityBody"></div>
+    </section>
+
+    <section class="block" id="sec-finances">
+      <h2>Municipal finances</h2>
+      <div id="financesBody"></div>
+    </section>
+
+    <footer>
+      Data from <code>public/data/communes/{nis}.json</code> (Block J). See
+      <a href="communes.html">communes.html</a> for the full commune table, or
+      <a href="docs/features/local_ui.md">docs/features/local_ui.md</a> for what this page does and does not cover.
+    </footer>
+  </div>
+
+</div>
+
+<script>
+// ── shared helpers, importable from Node for logic tests (see
+// tests/test_local_ui_logic.py) without a browser ──────────────────────────
+const LocalUI = {};
+
+LocalUI.matchesQuery = function(geo, q){
+  if(!q) return true;
+  q = q.toLowerCase();
+  return geo.nis_code.includes(q)
+    || geo.name.en.toLowerCase().includes(q)
+    || geo.name.fr.toLowerCase().includes(q)
+    || geo.name.nl.toLowerCase().includes(q);
+};
+
+LocalUI.searchCommunes = function(geographies, q, limit){
+  limit = limit || 25;
+  return geographies
+    .filter(g => g.level === 'municipality' && LocalUI.matchesQuery(g, q))
+    .sort((a,b) => a.name.en.localeCompare(b.name.en))
+    .slice(0, limit);
+};
+
+// children of a geo_id, for the browse tree
+LocalUI.childrenOf = function(geographies, parentId){
+  return geographies.filter(g => g.parent_geo_id === parentId)
+    .sort((a,b) => a.name.en.localeCompare(b.name.en));
+};
+
+LocalUI.ancestorChain = function(geographies, geoId){
+  const byId = new Map(geographies.map(g => [g.geo_id, g]));
+  const chain = [];
+  let current = byId.get(geoId);
+  const seen = new Set();
+  while(current && !seen.has(current.geo_id)){
+    seen.add(current.geo_id);
+    chain.unshift(current);
+    current = current.parent_geo_id ? byId.get(current.parent_geo_id) : null;
+  }
+  return chain;
+};
+
+// The four headline figures the pipeline can honestly produce today, plus
+// the two the roadmap wants but this pipeline does not have (see
+// docs/features/local_ui.md's "grounded in what the pipeline actually
+// publishes" table). Each entry either resolves to {value, period, unit} or
+// is null, in which case the caller renders a .no-data card, never a blank
+// or fabricated one.
+LocalUI.HEADLINE_SPEC = [
+  {key: 'POPULATION_BY_COMMUNE', label: 'Population'},
+  {key: 'POPULATION_CHANGE_5Y', label: '5-year change'},
+  {key: 'AVG_NET_TAXABLE_INCOME', label: 'Avg. net taxable income', caveat: 'mean, not median'},
+  {key: 'LOCAL_UNITS_BY_COMMUNE', label: 'Local business units'},
+  {key: null, label: 'Unemployment', why: 'Not collected at municipal level in this pipeline'},
+  {key: null, label: 'Housing price', why: 'Housing data collection is deferred (Block F)'},
+];
+
+LocalUI.latestOf = function(indicatorEntry){
+  if(!indicatorEntry) return null;
+  const periods = Object.keys(indicatorEntry.periods || {}).sort();
+  if(!periods.length) return null;
+  const p = periods[periods.length - 1];
+  return {value: indicatorEntry.periods[p].value, period: p, unit: indicatorEntry.unit, name: indicatorEntry.name};
+};
+
+LocalUI.buildHeadlines = function(commune){
+  return LocalUI.HEADLINE_SPEC.map(spec => {
+    if(!spec.key) return {label: spec.label, available: false, why: spec.why};
+    const latest = LocalUI.latestOf(commune.indicators[spec.key]);
+    if(!latest) return {label: spec.label, available: false, why: 'No value published for this commune'};
+    return {label: spec.label, available: true, value: latest.value, period: latest.period, unit: latest.unit, caveat: spec.caveat};
+  });
+};
+
+if(typeof module !== 'undefined') module.exports = LocalUI;
+</script>
+
+<script>
+// ── rendering (browser only) ────────────────────────────────────────────
+
+function fmt(value, unit){
+  if(value === null || value === undefined || isNaN(value)) return '—';
+  const body = value.toLocaleString(undefined, {maximumFractionDigits: unit === 'count' ? 0 : 2});
+  if(unit === 'eur') return '€' + body;
+  if(unit && unit.startsWith('percent')) return body + '%';
+  return body;
+}
+
+function noDataHTML(why){
+  return `<div class="no-data">No data available.<span class="why">${why}</span></div>`;
+}
+
+function gc(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+// Adapted from dashboard.html's canvas line-chart renderer (_rc): same
+// technique (devicePixelRatio-aware canvas, CSS-variable-driven theming,
+// "nice" gridline steps), simplified to a single trend line since this page
+// draws a plain history series, not a bar decomposition.
+function niceSteps(mn, mx, n){
+  const rg = mx - mn || 1, ro = rg / n, mg = Math.pow(10, Math.floor(Math.log10(ro)));
+  const rs = ro / mg, ni = rs <= 1.5 ? mg : rs <= 3 ? 2*mg : rs <= 7 ? 5*mg : 10*mg;
+  const steps = [];
+  let v = Math.ceil(mn / ni) * ni;
+  while(v <= mx){ steps.push(parseFloat(v.toFixed(4))); v += ni; }
+  return steps;
+}
+
+function drawSeries(canvas, points){
+  // points: [{period, value}], already sorted ascending. Fewer than two
+  // points means there is nothing to draw a line through -- the caller
+  // should use noDataHTML instead of calling this, per local_ui.md's
+  // ".no-data component" rule.
+  const ctx = canvas.getContext('2d'), dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 32, H = 200;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const vals = points.map(p => p.value);
+  const vMin = Math.min(...vals), vMax = Math.max(...vals);
+  const vR = (vMax - vMin) || 1;
+  const pL = 54, pR = 12, pT = 12, pB = 28, n = points.length;
+  const cW = W - pL - pR, slW = n > 1 ? cW / (n - 1) : 0;
+  const yOf = v => pT + ((vMax - v) / vR) * (H - pT - pB);
+
+  const gridC = gc('--chart-grid'), labelC = gc('--chart-label'), lineC = gc('--chart-line'), dotC = gc('--chart-dot');
+
+  niceSteps(vMin, vMax, 4).forEach(v => {
+    const y = Math.round(yOf(v)) + 0.5;
+    ctx.strokeStyle = gridC; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
+    ctx.font = '10px "IBM Plex Mono",monospace'; ctx.fillStyle = labelC;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(v.toLocaleString(), pL - 8, y);
+  });
+
+  const xSkip = Math.max(1, Math.ceil(28 / Math.max(slW, 1)));
+  points.forEach((p, i) => {
+    const cx = pL + slW * i;
+    if(i % xSkip === 0 || i === n - 1){
+      ctx.font = '9px "IBM Plex Mono",monospace'; ctx.fillStyle = labelC;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(p.period, cx, H - pB + 8);
+    }
+  });
+
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    const cx = pL + slW * i, cy = yOf(p.value);
+    i === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
+  });
+  ctx.strokeStyle = lineC; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+
+  points.forEach((p, i) => {
+    const cx = pL + slW * i, cy = yOf(p.value), isLast = i === n - 1;
+    ctx.beginPath(); ctx.arc(cx, cy, isLast ? 4 : 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = dotC; ctx.fill();
+  });
+}
+
+function seriesOf(commune, code){
+  const ind = commune.indicators[code];
+  if(!ind) return null;
+  const periods = Object.keys(ind.periods).sort();
+  return {
+    name: ind.name, unit: ind.unit,
+    points: periods.map(p => ({period: p, value: ind.periods[p].value})),
+  };
+}
+
+function renderChartOrNoData(container, commune, code, why){
+  const s = seriesOf(commune, code);
+  if(!s || s.points.length < 2){
+    container.innerHTML = noDataHTML(why || 'No history published for this commune.');
+    return;
+  }
+  container.innerHTML = `<div class="chart-card"><canvas class="series"></canvas></div>`;
+  const canvas = container.querySelector('canvas');
+  requestAnimationFrame(() => drawSeries(canvas, s.points));
+}
+
+// ── headline cards ──────────────────────────────────────────────────────
+
+function renderHeadline(commune){
+  const cards = LocalUI.buildHeadlines(commune);
+  document.getElementById('headline').innerHTML = cards.map(c => {
+    if(!c.available){
+      return `<div class="card nodata"><span class="v">Not available</span><span class="l">${c.label}</span><span class="p">${c.why}</span></div>`;
+    }
+    const caveat = c.caveat ? ` <span title="${c.caveat}">*</span>` : '';
+    return `<div class="card"><span class="v">${fmt(c.value, c.unit)}${caveat}</span><span class="l">${c.label}</span><span class="p">as of ${c.period}</span></div>`;
+  }).join('');
+}
+
+// ── sections ────────────────────────────────────────────────────────────
+
+function renderDemography(commune){
+  document.getElementById('demographySub').textContent =
+    'Population history, and the age structure at its most recent year.';
+  const body = document.getElementById('demographyBody');
+  const chartHost = document.createElement('div');
+  body.innerHTML = '';
+  body.appendChild(chartHost);
+  renderChartOrNoData(chartHost, commune, 'POPULATION_BY_COMMUNE');
+
+  const bands = ['POPULATION_AGE_0_14', 'POPULATION_AGE_15_64', 'POPULATION_AGE_65_PLUS'];
+  const bandLabels = {POPULATION_AGE_0_14: '0–14', POPULATION_AGE_15_64: '15–64', POPULATION_AGE_65_PLUS: '65+'};
+  const facts = [];
+  for(const code of bands){
+    const latest = LocalUI.latestOf(commune.indicators[code]);
+    if(latest) facts.push(`<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div><div class="fl">Age ${bandLabels[code]} (${latest.period})</div></div>`);
+  }
+  const dep = LocalUI.latestOf(commune.indicators['DEPENDENCY_RATIO']);
+  if(dep) facts.push(`<div class="fact"><div class="fv">${fmt(dep.value, dep.unit)}</div><div class="fl">Dependency ratio (${dep.period})</div></div>`);
+  if(facts.length){
+    const grid = document.createElement('div');
+    grid.className = 'fact-grid';
+    grid.innerHTML = facts.join('');
+    body.appendChild(grid);
+  }
+}
+
+function renderIncome(commune){
+  document.getElementById('incomeSub').textContent =
+    'Average net taxable income (derived, mean per tax return) and municipal tax totals.';
+  const body = document.getElementById('incomeBody');
+  body.innerHTML = '';
+  const chartHost = document.createElement('div');
+  body.appendChild(chartHost);
+  renderChartOrNoData(chartHost, commune, 'AVG_NET_TAXABLE_INCOME',
+    'Fiscal-income data collection is deferred or absent for this commune (2025-merger successors have no fiscal history yet — see fiscal_income.md).');
+
+  const fiscalCodes = ['FISCAL_TOT_NET_TAXABLE_INC', 'FISCAL_TOT_MUNICIP_TAXES', 'FISCAL_TOT_TAXES', 'FISCAL_NBR_NON_ZERO_INC'];
+  const facts = [];
+  for(const code of fiscalCodes){
+    const latest = LocalUI.latestOf(commune.indicators[code]);
+    if(latest) facts.push(`<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div><div class="fl">${latest.name} (${latest.period})</div></div>`);
+  }
+  if(facts.length){
+    const grid = document.createElement('div');
+    grid.className = 'fact-grid';
+    grid.innerHTML = facts.join('');
+    body.appendChild(grid);
+  }
+}
+
+function renderBusiness(commune){
+  const latest = LocalUI.latestOf(commune.indicators['LOCAL_UNITS_BY_COMMUNE']);
+  const body = document.getElementById('businessBody');
+  if(!latest){
+    body.innerHTML = noDataHTML('No local-unit count published for this commune.');
+    return;
+  }
+  body.innerHTML = `<div class="fact-grid"><div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>
+    <div class="fl">Local business units, ${latest.period}</div></div></div>
+    <p class="sec-sub" style="margin-top:10px">Single snapshot only — Statbel publishes one quarter at a time for this dataset (see <code>docs/features/statbel_adapter.md</code>), so no history chart is shown.</p>`;
+}
+
+function renderOverview(commune){
+  const facts = [];
+  if(commune.region) facts.push(`<div class="fact"><div class="fv">${commune.region}</div><div class="fl">Region</div></div>`);
+  if(commune.province) facts.push(`<div class="fact"><div class="fv">${commune.province}</div><div class="fl">Province</div></div>`);
+  if(commune.arrondissement) facts.push(`<div class="fact"><div class="fv">${commune.arrondissement}</div><div class="fl">Arrondissement</div></div>`);
+  facts.push(`<div class="fact"><div class="fv">${commune.nis_code}</div><div class="fl">NIS code</div></div>`);
+  document.getElementById('overviewFacts').innerHTML = facts.join('');
+}
+
+function renderCommune(commune){
+  document.getElementById('searchPanel').style.display = 'none';
+  document.getElementById('communePage').style.display = 'block';
+  document.getElementById('cTitle').textContent = commune.name.en;
+  const altNames = [commune.name.fr, commune.name.nl].filter(n => n && n !== commune.name.en);
+  document.getElementById('cAncestry').textContent =
+    (altNames.length ? altNames.join(' / ') + ' — ' : '') +
+    [commune.region, commune.province, commune.arrondissement].filter(Boolean).join(' › ');
+
+  renderHeadline(commune);
+  renderOverview(commune);
+  renderDemography(commune);
+  renderIncome(commune);
+  document.getElementById('employmentBody').innerHTML =
+    noDataHTML('Municipal-level employment data is not collected by this pipeline (no dataset selected in Block E).');
+  renderBusiness(commune);
+  document.getElementById('housingBody').innerHTML =
+    noDataHTML('Housing data collection is deferred — no dataset was selected in Block E / Block F.');
+  document.getElementById('mobilityBody').innerHTML =
+    noDataHTML('Mobility data collection is deferred — no dataset was selected in Block E / Block F.');
+  document.getElementById('financesBody').innerHTML =
+    noDataHTML('Coming in Phase II. Municipal finance (Wallonia first) is Block O of the roadmap.');
+}
+
+// ── search panel ────────────────────────────────────────────────────────
+
+let GEOGRAPHIES = [];
+let browseCurrentId = null; // null = country root
+
+function renderSearchResults(){
+  const q = document.getElementById('searchInput').value.trim();
+  const el = document.getElementById('searchResults');
+  if(!q){ el.innerHTML = ''; document.getElementById('browseTree').style.display = ''; return; }
+  document.getElementById('browseTree').style.display = 'none';
+  const results = LocalUI.searchCommunes(GEOGRAPHIES, q);
+  if(!results.length){ el.innerHTML = '<div class="result-row">No commune matches &ldquo;' + q + '&rdquo;.</div>'; return; }
+  el.innerHTML = results.map(g =>
+    `<div class="result-row" data-nis="${g.nis_code}"><span class="rname">${g.name.en}${g.name.fr !== g.name.en ? ' / ' + g.name.fr : ''}</span><span class="rmeta">${g.nis_code}</span></div>`
+  ).join('');
+  el.querySelectorAll('.result-row[data-nis]').forEach(row => {
+    row.addEventListener('click', () => navigateTo(row.dataset.nis));
+  });
+}
+
+function renderBrowseTree(){
+  const root = GEOGRAPHIES.find(g => g.level === 'country');
+  if(!root) return;
+  if(browseCurrentId === null) browseCurrentId = root.geo_id;
+
+  const chain = LocalUI.ancestorChain(GEOGRAPHIES, browseCurrentId);
+  const crumbHTML = chain.map((g, i) =>
+    `<button data-id="${g.geo_id}">${g.name.en}</button>${i < chain.length - 1 ? '<span class="sep">›</span>' : ''}`
+  ).join('');
+
+  const children = LocalUI.childrenOf(GEOGRAPHIES, browseCurrentId);
+  const gridHTML = children.map(c => {
+    if(c.level === 'municipality') return `<div class="tree-item" data-nis="${c.nis_code}">${c.name.en}</div>`;
+    return `<div class="tree-item" data-drill="${c.geo_id}">${c.name.en}</div>`;
+  }).join('');
+
+  const el = document.getElementById('browseTree');
+  el.innerHTML = `<div class="crumb">${crumbHTML}</div><div class="tree-grid">${gridHTML}</div>`;
+  el.querySelectorAll('.crumb button').forEach(b => b.addEventListener('click', () => { browseCurrentId = b.dataset.id; renderBrowseTree(); }));
+  el.querySelectorAll('.tree-item[data-drill]').forEach(b => b.addEventListener('click', () => { browseCurrentId = b.dataset.drill; renderBrowseTree(); }));
+  el.querySelectorAll('.tree-item[data-nis]').forEach(b => b.addEventListener('click', () => navigateTo(b.dataset.nis)));
+}
+
+function navigateTo(nis){
+  const url = new URL(window.location.href);
+  url.searchParams.set('nis', nis);
+  window.history.pushState({}, '', url);
+  loadCommune(nis);
+}
+
+function showSearchPanel(){
+  document.getElementById('searchPanel').style.display = 'block';
+  document.getElementById('communePage').style.display = 'none';
+  const url = new URL(window.location.href);
+  url.searchParams.delete('nis');
+  window.history.pushState({}, '', url);
+}
+
+async function loadCommune(nis){
+  try{
+    const res = await fetch(`public/data/communes/${nis}.json?t=${Date.now()}`);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const commune = await res.json();
+    renderCommune(commune);
+  } catch(e){
+    document.getElementById('communePage').style.display = 'block';
+    document.getElementById('searchPanel').style.display = 'none';
+    document.getElementById('cTitle').textContent = 'Could not load this commune';
+    document.getElementById('cAncestry').innerHTML = noDataHTML('Error: ' + e.message);
+  }
+}
+
+async function init(){
+  document.getElementById('backLink').addEventListener('click', showSearchPanel);
+  document.getElementById('searchInput').addEventListener('input', renderSearchResults);
+
+  try{
+    const res = await fetch('public/data/metadata/geographies.json?t=' + Date.now());
+    GEOGRAPHIES = (await res.json()).geographies;
+  } catch(e){
+    document.getElementById('searchResults').innerHTML = noDataHTML('Could not load the commune index: ' + e.message);
+    return;
+  }
+  renderBrowseTree();
+
+  const nis = new URL(window.location.href).searchParams.get('nis');
+  if(nis) loadCommune(nis);
+}
+init();
+</script>
+</body>
+</html>
