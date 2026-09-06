@@ -282,6 +282,65 @@ artifact, one-off, so a maintainer can open a real file — still nobody has.
    currency; if it is province/national only despite the "Commune" in the filenames, it does not
    reach this pipeline's bar at all. Not yet known.
 
+## police.be — commune-level crime statistics, CANDIDATE 2026-09-06 (13th dataset), licence unverified
+
+Raised by the maintainer 2026-09-06, who supplied a working request captured from their own browser.
+**Not approved yet** — the licence question below is unanswered, and until it is, nothing from this
+source may be stored or exported (CLAUDE.md rule 8). `scripts/fetch_police_raw.py` probes one
+endpoint and caches the raw response; it defines no indicator and writes nothing to the database.
+
+| Field | Value |
+|---|---|
+| Publisher | Police Fédérale / Federale Politie — "stats-pol", the federal police's public crime-statistics tool |
+| Endpoint | `police.be/statistiques/fr/stats-pol/criminality_table/content?nis={nis}&year={years}&month={months}` |
+| Format | JSON (`content-type: application/json`; 11,855 bytes for one commune × 10 years × 12 months) |
+| Geography | Commune, by NIS code — **with an undecoded `_4` suffix**, see below |
+| Period coverage | `year=2016…2025`, monthly — a genuine long time series, unlike Census 2021's single snapshot |
+| Authentication | **None.** Confirmed by the maintainer in a browser: no account, no login. The `TSd87778be027` cookie in the captured request is an F5 firewall session token handed to any ordinary client on page load, not a credential |
+
+**Licence — the open question, and the reason this row says CANDIDATE.** No reuse terms have been
+located for stats-pol. Statbel's CC BY 4.0 and ONEM's own conditions were both found on the
+publisher's site and read before either source was used; nothing equivalent has been found here.
+Public availability is not a licence, and crime data carries reuse sensitivities the other twelve
+sources do not (misattribution of a commune's figures is a reputational harm, not just a data
+error). Needed before approval: a link to the federal police's reuse/open-data conditions, or their
+written confirmation.
+
+**Reachability — the same split question ONEM raised, and unresolved the same way.** This pipeline's
+network context is served an HTTP **403** page titled "Politie - Police - Polizei: Maintenance" on
+*every* police.be request, including the bare front page, with **no cookies set at all** — so no
+session can be started from here and the response body has never been inspected. Retried with a
+full browser User-Agent, `Accept-Language`, `Referer` and `X-Requested-With` headers, and with a
+front-page visit first to pick up the session cookie an ordinary client would get: still 403, still
+no cookie. Note this differs from `statbel.fgov.be` and `onem.be`, which fail at the TCP handshake;
+here the connection succeeds and the *application* refuses it. Whether GitHub Actions' network is
+treated the same way is a separate question, and only a real run answers it — `fetch_police_raw.py`
+is wired into `daily_fetch.yml` as `continue-on-error` with an artifact upload, exactly the pattern
+that answered it for ONEM (run 34054441348).
+
+**Not yet done, recorded so it is not silently skipped:**
+1. The licence, above. Blocking.
+2. What the JSON actually contains. Its keys, its offence categories, and whether the counts are
+   recorded incidents, charges, or something else are all unknown — nobody here has seen the body.
+   No indicator is defined and none should be until one has been read (rule 13).
+3. What the `_4` in `nis=21012_4` means. Police zone? Geography level? A table variant? Belgian
+   police zones do **not** map one-to-one onto communes — many zones cover several communes — so
+   this suffix may be the difference between commune-level data and zone-level data attributed to a
+   commune, which would be a serious misattribution if guessed wrong. `fetch_police_raw.py`
+   deliberately fetches the maintainer's verified request verbatim rather than constructing
+   per-commune URLs from a guess.
+4. Whether it can be fetched at all without a per-request cookie. If the F5 token turns out to
+   require a real browser rather than an ordinary HTTP session, police.be becomes a manual-download
+   source (`docs/features/manual_sources.md`) like Census 2021, not an automated one.
+
+**Explicitly rejected approach.** The maintainer's original script pasted a session cookie copied
+out of a browser (their own note: expires in 1–2 hours) and paced requests with a 2-second sleep
+described as preventing "the federal police WAF from IP-banning you". Neither is built here: a
+hand-pasted expiring cookie is not automation, and pacing chosen to stay under a security control's
+ban threshold is evasion of that control regardless of how public the data is. If police.be is
+reachable by an ordinary client that starts its own session, that is the only route this pipeline
+takes; if it is not, this source is a manual download.
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new

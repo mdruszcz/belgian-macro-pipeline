@@ -236,6 +236,34 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+      - name: Probe police.be crime statistics (reachability test)
+        id: fetch_police
+        continue-on-error: true
+        # NOT wired into any export yet -- see docs/data_catalog.md's
+        # police.be row and scripts/fetch_police_raw.py's docstring. The
+        # maintainer verified in a browser that this endpoint returns 200 and
+        # application/json with no login of any kind, but this pipeline's own
+        # network context is served an HTTP 403 "Maintenance" page on every
+        # request including the bare front page, and is handed no cookies, so
+        # no session can be started and the response shape cannot be read
+        # here. This step asks whether GitHub Actions' network is treated the
+        # same way -- exactly the question fetch_onem_raw.py answered for
+        # onem.be. If it 403s here too, remove this step and treat police.be
+        # as a manual-download source.
+        run: python scripts/fetch_police_raw.py
+
+      - name: Upload the police.be response as a workflow artifact
+        # Same reason as the ONEM artifact above: nobody has read this JSON's
+        # keys, and rule 13 forbids writing a parser against a guessed shape.
+        # Remove this once a real sync_police.py reads it directly.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: police-raw-response
+          path: data/raw/police/
+          retention-days: 14
+          if-no-files-found: warn
+
       - name: Guard against oversized data files
         run: |
           OVERSIZED=$(find data/ public/ -type f -size +25000k)
