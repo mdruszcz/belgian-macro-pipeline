@@ -1,0 +1,23 @@
+id: SHARE_POP_ON_UNEMPLOYMENT_BENEFIT
+name:
+  en: Residents on full unemployment benefit (% of population)
+  fr: Habitants en chômage complet indemnisé (% de la population)
+  nl: Inwoners met volledige werkloosheidsuitkering (% van de bevolking)
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+decimals: 1
+description:
+  en: >
+    UNEMPLOYED_JOBSEEKERS over POPULATION_BY_COMMUNE, both annual and available 2017-2026, so
+    this is current every year rather than frozen at a census date. DELIBERATELY NOT CALLED AN
+    UNEMPLOYMENT RATE: the denominator is the WHOLE POPULATION, including children and
+    pensioners, not the labour force. It is therefore much lower than a published unemployment
+    rate and is not comparable to one -- UNEMPLOYMENT_RATE_COM (Census 2021, over the 15-64
+    labour force) is the comparable figure, and is a single 2021 snapshot. This ratio exists
+    because ONEM publishes no local labour-force denominator, and a claimant count divided by
+    population is the honest thing that can be built from what both sources actually cover.
+derived:
+  function: share_of_total
+  inputs: [UNEMPLOYED_JOBSEEKERS, POPULATION_BY_COMMUNE]

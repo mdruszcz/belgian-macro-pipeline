@@ -231,20 +231,24 @@ by hand.
 
 Housing prices are **not** obtainable at commune level from the API, so the `/local` housing headline
 stays unavailable and real estate sales stays DEFERRED from Block E.
-
-## ONEM/RVA — commune-level unemployment, approved 2026-09-06 (12th dataset)
+## ONEM/RVA — commune-level unemployment, LIVE since 2026-09-06 (12th dataset)
 
 Approved by the maintainer 2026-09-06, who supplied both the direct download URLs and the licence
-text below. A candidate for automated (weekly) fetching, unlike every other municipal source this
-pipeline has, all of which are manual downloads.
+text below. **The pipeline's first and only automated municipal source.** Every other one is a hand
+download because `statbel.fgov.be` is unreachable from GitHub's runners; `onem.be` is not, so these
+observations go into the daily database rather than a committed CSV — `docs/decisions/0002-split-committed-stores.md`
+splits the stores on exactly that question. Loaded by `scripts/sync_onem.py`, wired into
+`daily_fetch.yml`.
 
 | Field | Value |
 |---|---|
 | Publisher | ONEM / RVA (Office National de l'Emploi / Rijksdienst voor Arbeidsvoorziening) — Belgium's federal unemployment office |
-| Files | `CCI_Commune_Statut_UP_FR.xls`, `CCI_Commune_Statut_M_FR.xls`, `CT_Commune_Statut_UP_FR.xls`, `CT_Commune_Statut_M_FR.xls`, `TTP_Commune_Statut_UP_FR.xls`, `EMPL_Commune_Statut_M_FR.xls` |
 | Base URL | `onem.be/sites/default/files/assets/statistiques/113/` |
-| Geography | Commune (per filename; **not yet verified** — no file has been opened) |
-| Cadence | Unknown; ONEM's site structure suggests these are refreshed periodically, not verified |
+| Format | Legacy BIFF `.xls` (Composite Document File V2 — hence `xlrd`, which reads it; `openpyxl` cannot open it at all) |
+| Geography | Commune, named in FRENCH TEXT with no NIS code — resolved by name, not by code |
+| Period coverage | One sheet per year, 2017–2026 |
+| Cadence | Refreshed in place, roughly monthly (the files fetched 2026-09-06 were last saved 2026-08-05 by a named ONEM employee) |
+| Volume | 37,855 observations: 7 indicators × 565 communes × 10 years, less the current year's euro sheets |
 
 **Licence** (maintainer-supplied, ONEM's own reuse conditions page), quoted in full because it
 differs from every other source's terms here — no CC BY 4.0 wrapper, its own attribution
@@ -257,30 +261,136 @@ requirement:
 > source et indiqueront la date des informations utilisées.
 
 **Commercial reuse is explicitly permitted** ("à des fins ... commerciales"). Obligations: credit
-the source, and state the date of the information used — the same "attribution + date" shape as
-Statbel's 2015 licence, so the existing `.attribution` component pattern
-(`docs/data_catalog.md`'s Statbel section, `tests/test_statbel_attribution.py`) extends to this
-source rather than needing a new one. No "changes were made" clause and no explicit no-endorsement
-clause in this text, unlike Statbel's — not assumed present.
+the source, and state the date of the information used. Both are now discharged on the published
+pages and asserted by `tests/test_statbel_attribution.py`, which carries a separate ONEM section —
+separate because ONEM is **not** CC BY 4.0, and the page must say so explicitly rather than let a
+reader assume the neighbouring CC BY notice covers it. There is no "changes were made" clause and no
+no-endorsement clause in this text, unlike Statbel's; neither is asserted for ONEM.
 
-**Answered 2026-09-06:** GitHub Actions' network *can* reach `onem.be` — run 34054441348 fetched
-all six files successfully (0.5–1.4 MB each), even though this pipeline's own development network
-context cannot (confirmed separately with `curl -v`: DNS resolves, then the TCP handshake itself
-times out, the identical signature `statbel.fgov.be` gives — a fact about this development context,
-not about GitHub Actions). `daily_fetch.yml` now also uploads the fetched files as a workflow
-artifact, one-off, so a maintainer can open a real file — still nobody has.
+### What the files actually are
 
-**Not yet done, recorded so it is not silently skipped:**
-1. What the six files' columns mean, now that they can actually be downloaded (via the workflow
-   artifact, or directly — the URLs work in a browser). CCI/CT/TTP/EMPL and UP/M are undecoded
-   abbreviations — reading too much into a Statbel filename abbreviation (`CAS` = "civil status",
-   guessed, wrong) produced a real bug earlier this session, caught only once the actual file was
-   opened. No indicator has been defined from these files and none should be until one has actually
-   been downloaded and read.
-2. Whether this duplicates or complements `UNEMPLOYMENT_RATE_COM` (Census 2021, `CAS` table, single
-   2021 snapshot). If ONEM's data is a genuine time series, it supersedes the census figure for
-   currency; if it is province/national only despite the "Commune" in the filenames, it does not
-   reach this pipeline's bar at all. Not yet known.
+Read off the real files, not inferred. This environment cannot reach `onem.be` at all (DNS resolves,
+then the TCP handshake times out — the identical signature `statbel.fgov.be` gives), so the files
+were obtained the only way available: run `34054441348` proved a GitHub Actions runner reaches
+`onem.be`, and run `34056982618` uploaded all six as a workflow artifact so they could be downloaded
+and opened.
+
+Layout, identical in all six files: row 0 the agency, row 1 the dataset, **row 3 the unit**, row 5
+the column headers, rows 6+ the data — 618 rows, being 565 communes, 42 `arr.*` subtotals, 10
+`prov.*` subtotals and one `Région Bruxelles-Capitale` row. Only commune rows are loaded; the
+subtotals are this pipeline's own job (`src/analytics/aggregate.py`, ADR 0003) and storing them too
+would be a second source of truth for one fact.
+
+**The `UP`/`M` suffixes are now decoded, and not by guessing.** An earlier note in this repo recorded
+them as "likely two report granularities". Row 3 says otherwise:
+
+| Suffix | Row 3 declares | Meaning |
+|---|---|---|
+| `M` | `Montants - Total` | Euros paid, summed over the year |
+| `UP` | `Unités physiques - Moyenne annuelle` | People, averaged over the year's months |
+
+Each dataset in `sync_onem.py` declares the unit string it expects and the loader **refuses a file
+whose row 3 disagrees**. Guessing at an abbreviation is what produced the Census 2021 `CAS` bug, so
+if ONEM ever swaps a suffix's meaning that is a crash, not a silent switch from people to euros.
+
+### Indicators loaded
+
+Seven, all additive, plus one derived. **Only total columns are loaded, and the reason is measured:**
+ONEM masks small counts as the literal string `<10`, and in the `UP` files that masking is pervasive
+in the fine breakdowns — 513 of 618 rows for CCI-NDE voluntary part-timers, 519 for unpaid teaching
+periods — while almost absent from the totals (1 row for CCI-DE). A column masked for four communes
+in five carries no usable commune-level signal. The `M` files are not masked at all: euros are not
+disclosive.
+
+| Indicator | Source column | Unit |
+|---|---|---|
+| `UNEMPLOYED_JOBSEEKERS` | `CCI_..._UP`, column `CCI-DE` | people (annual average) |
+| `UNEMPLOYMENT_BENEFIT_RECIPIENTS` | `CCI_..._UP`, column `Total` | people (annual average) |
+| `TEMP_UNEMPLOYED` | `CT_..._UP`, column `Total` | people (annual average) |
+| `PART_TIME_BENEFIT_RECIPIENTS` | `TTP_..._UP`, column `Total` | people (annual average) |
+| `UNEMPLOYMENT_BENEFIT_PAID` | `CCI_..._M`, column `Total` | EUR |
+| `TEMP_UNEMPLOYMENT_BENEFIT_PAID` | `CT_..._M`, column `Total` | EUR |
+| `ACTIVATION_MEASURES_PAID` | `EMPL_..._M`, column `Total` | EUR |
+| `SHARE_POP_ON_UNEMPLOYMENT_BENEFIT` | derived | percent |
+
+`UNEMPLOYED_JOBSEEKERS` is the headline and the pipeline's most current commune-level labour-market
+series. It **supersedes Census 2021's `UNEMPLOYMENT_RATE_COM` for currency but not for definition**,
+and the two are kept separate rather than merged: ONEM counts *benefit claimants*, so it excludes
+jobseekers without entitlement, while the census figure is the EU Labour Force Survey definition
+measured against the labour force. The derived share is over TOTAL POPULATION, not the labour force,
+because ONEM publishes no local labour-force denominator — so it is deliberately **not** called an
+unemployment rate anywhere in the config or the UI.
+
+### Verified against ONEM's own published subtotals
+
+The strongest check available, and it uses the figures this pipeline deliberately does *not* load:
+summing the loaded commune rows must reproduce the province/region subtotals printed in the same
+sheet. Every year reconciles, and every residual is explained:
+
+| Year | Loaded commune sum | ONEM's own subtotals | Gap |
+|---|---|---|---|
+| 2017 | 373,699.9 | 373,700.9 | −1.00 |
+| 2023 | 284,785.2 | 284,786.1 | −0.92 |
+| 2024 | 284,859.0 | 284,859.2 | −0.17 |
+| 2026 | 279,659.0 | 279,668.5 | −9.50 |
+
+Each gap is **exactly one masked commune** — Herstappe (75 residents) in every year but 2026, where
+it is Horebeke — and each is under the 10-person bound the `<10` marker implies. The national totals
+also match ONEM's published figures directly: 373,701 in 2017 falling to 284,786 in 2023.
+
+### Three decisions that keep a plausible-looking wrong number off the page
+
+1. **A masked cell is not a zero.** `<10` is stored with `status = 'suppressed'` and a NULL value —
+   the one case `migrations/001_core_schema.sql`'s CHECK constraint permits a NULL for. Zero would
+   understate every aggregate built on it; skipping the row would make the commune
+   indistinguishable from one ONEM does not cover. This is the pipeline's first use of that status,
+   which is why `STATUS_TO_LETTER` in `export_communes_csv.py` gained `S` (and `R`/`E`/`N`, which
+   were reachable and falling through unmapped), and why `communes.html`'s status pill now matches
+   the letters the exporter actually writes rather than the word `suppressed`, which never fired.
+   Consequence, visible and correct: `PART_TIME_BENEFIT_RECIPIENTS` is masked for 132 of 618 rows,
+   so its national and regional aggregates fall below the 90% coverage floor and **are withheld
+   entirely** rather than published from four communes in five.
+2. **An explicit `0.0` is a real zero.** ONEM writes both, and they mean different things. There is
+   exactly one in ten years of the CCI-DE column: Herstappe in 2026. The loader keeps that
+   distinction.
+3. **A part-year TOTAL is not an annual total.** The current year is **skipped for the euro files**.
+   Antwerp's full unemployment benefit reads EUR 261.0m for 2025 and EUR 44.3m for 2026 — about two
+   months' worth. Published as the latest figure that is an 83% collapse that never happened, and no
+   status letter repairs a number a reader has already misread. A part-year *average* is a different
+   matter and IS loaded, marked provisional: Antwerp's claimant count moves 17,328 → 18,207 across
+   that boundary rather than falling off a cliff.
+
+### One property worth knowing before comparing ONEM to anything else
+
+**ONEM backcasts today's commune map onto all ten years.** All sheets carry the identical 566 labels,
+so its 2017 rows are expressed on the 2025 geography — Hasselt's 2017 figure covers the merged
+territory, not the Hasselt that existed in 2017. That makes it a pinned-vintage source in exactly
+the sense `scripts/export_aggregates_csv.py` already detects for fiscal income (it picked up all six
+ONEM indicators automatically), and it is why names resolve against *current* municipalities rather
+than period by period.
+
+The visible consequence: `SHARE_POP_ON_UNEMPLOYMENT_BENEFIT` is absent for 31 communes in their
+pre-merger years, because population is recorded on the map that actually existed each year and ONEM
+is not. The derived engine correctly declines to divide across mismatched boundaries rather than
+producing a ratio of two different territories. Any comparison of an ONEM figure against a
+non-pinned source for a pre-2025 year carries the same caveat.
+
+### Ambiguity that had to be resolved rather than papered over
+
+Two current communes carry the French name **Saint-Nicolas** — 46021 in East Flanders and 62093 in
+Liège — and ONEM lists both, using the Dutch `Sint-Niklaas` for the Flemish one. A name index built
+with `setdefault` maps *both* labels onto whichever row came first and never reaches the other. It
+surfaced as a vintage collision on the first real run, but in a single-file load it would instead
+have doubled one commune's figure and dropped the other's silently. `CommuneIndex` therefore
+**detects** ambiguity and resolves it against the arrondissement the file itself states — reading
+ONEM's `arr.*` rows, which *close* each block rather than heading it. Same compound
+(name, arrondissement) match `src/fetchers/statbel.py` needs, for the same pair, for the same reason.
+
+Name folding also has to handle Statbel's typographic apostrophe (U+2019) against ONEM's ASCII
+quote. Separators are replaced **before** the accent fold, not after: folding first deletes a
+non-ASCII apostrophe outright and turns `Braine-l'Alleud` into `braine lalleud`. That ordering left
+exactly three communes unmatched — Braine-l'Alleud, Fontaine-l'Evêque, Mont-de-l'Enclus — and the
+loader refuses a partial load rather than dropping them.
 
 ## police.be — commune-level crime statistics, CANDIDATE 2026-09-06 (13th dataset), licence unverified
 

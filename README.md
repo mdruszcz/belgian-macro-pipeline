@@ -97,6 +97,7 @@ every exporter reads both stores.
 | [`data/belgian_macro_export.csv`](data/belgian_macro_export.csv) · [`.json`](data/belgian_macro_export.json) | national time series, full history |
 | [`data/communes_export.csv`](data/communes_export.csv) | municipal snapshot — latest period per (commune, indicator) |
 | [`data/communes_history.csv`](data/communes_history.csv) | municipal full history, including derived indicators |
+| [`data/communes_table.json`](data/communes_table.json) | same data as `communes_history.csv`, pre-pivoted for `communes.html` -- see `scripts/export_communes_table_json.py` |
 | [`data/belgian_forecasts.csv`](data/belgian_forecasts.csv) | multi-institution economic forecasts (legacy table) |
 | [`data/metadata/indicators.json`](data/metadata/indicators.json) | indicator display metadata, generated from config |
 | `public/data/**` | per-entity payloads: `national.json`, `communes/{nis}.json`, `indicators/{id}.json`, `metadata/geographies.json`, `manifest.json` |

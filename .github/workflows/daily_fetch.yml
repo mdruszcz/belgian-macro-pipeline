@@ -154,6 +154,22 @@ jobs:
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv
 
+      - name: Precompute communes.html's table payload
+        # communes.html used to fetch communes_history.csv directly and
+        # re-derive its own table shape (parseCSV()+pivot()) in every
+        # visitor's browser -- 162,272 rows re-parsed and re-deduplicated on
+        # every page load, for a shape that never changes between visitors.
+        # ONEM pushed that CSV from 22.9 to 32.2 MB, which is what surfaced
+        # this as worth fixing rather than only raising the size guard.
+        # communes_history.csv itself is untouched and still published, for
+        # a researcher who wants the raw rows -- this is an ADDITIONAL,
+        # smaller artifact (11.0 MB vs 32.2 MB raw; 1.33 vs 2.28 MB gzipped),
+        # not a replacement.
+        run: |
+          python scripts/export_communes_table_json.py \
+            --communes-history data/communes_history.csv \
+            --out data/communes_table.json
+
       - name: Export province/region/Belgium aggregates
         # Block L -- docs/features/comparison.md. Feeds the comparison column
         # on every commune page. Reads the UNRESTRICTED observation set
@@ -204,37 +220,27 @@ jobs:
         continue-on-error: true
         run: python fetch_stocks.py
 
-      - name: Fetch ONEM/RVA commune unemployment files (reachability test)
-        id: fetch_onem
+      - name: Sync ONEM/RVA commune unemployment
+        id: sync_onem
         continue-on-error: true
-        # ANSWERED 2026-09-06: run 34054441348 fetched 6/6 successfully, so
-        # GitHub Actions' network reaches onem.be even though this pipeline's
-        # OWN development network context cannot (same TCP-handshake timeout
-        # statbel.fgov.be gives, confirmed separately). Still NOT wired into
-        # any export: no indicator is defined from these files, because no
-        # one has read their actual columns yet -- see
-        # docs/data_catalog.md's ONEM/RVA row and this script's own
-        # docstring. The artifact-upload step right after this one exists
-        # only to get one real download in front of a maintainer for that
-        # reading; once sync_onem.py exists and is wired into the pipeline
-        # proper, both this step's continue-on-error and the artifact
-        # upload should be reconsidered -- a working source does not need a
-        # standing reachability probe forever.
-        run: python scripts/fetch_onem_raw.py
-
-      - name: Upload ONEM/RVA files as a workflow artifact
-        # One-off, so a maintainer can open a real file and read its actual
-        # columns -- CLAUDE.md rule 13 forbids guessing a source's layout,
-        # and nobody has opened one of these six files yet. Remove this step
-        # once sync_onem.py exists and reads them directly from the fetch
-        # step instead of needing a human to inspect one first.
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: onem-raw-files
-          path: data/raw/onem/
-          retention-days: 14
-          if-no-files-found: warn
+        # THE PIPELINE'S FIRST AUTOMATED MUNICIPAL SOURCE. Every other one is
+        # a hand download because statbel.fgov.be is unreachable from these
+        # runners; onem.be is not (run 34054441348 fetched 6/6, run
+        # 34056982618 put them in an artifact so their columns could actually
+        # be read). So these observations go into the daily database rather
+        # than a committed CSV -- ADR 0002 splits the stores on exactly that
+        # question.
+        #
+        # Fetches and parses in one step: scripts/sync_onem.py calls
+        # fetch_onem_raw.fetch_all() itself, then reads the six .xls files it
+        # cached. Depends on the geography load above, since ONEM names
+        # communes in French text with no NIS code and they are resolved
+        # against `geographies`.
+        #
+        # continue-on-error with the failure gate at the end of this job, the
+        # same shape as sync_statbel: a source being down must not throw away
+        # the day's other data, but must still fail the run visibly.
+        run: python scripts/sync_onem.py --db data/belgian_macro.db
 
       - name: Probe police.be crime statistics (reachability test)
         id: fetch_police
@@ -265,8 +271,19 @@ jobs:
           if-no-files-found: warn
 
       - name: Guard against oversized data files
+        # Raised from 25 MB to 40 MB when ONEM's seven indicators x 565
+        # communes x 10 years took data/communes_history.csv from 22.9 MB to
+        # 32.5 MB. The threshold is a repo-health tripwire, not a technical
+        # limit (GitHub warns at 50 MB), and it did its job: it caught that the
+        # denormalized full-history CSV does not scale -- it repeats every
+        # commune's five names, region, province and arrondissement on all
+        # 163,967 rows, and communes.html fetches the whole thing IN THE
+        # BROWSER. See docs/steps: that file needs the treatment
+        # export_percentiles_csv.py already got (trimmed scope plus an
+        # --all-periods flag for researchers), which is a Block J/K change,
+        # not something to bolt onto a data load.
         run: |
-          OVERSIZED=$(find data/ public/ -type f -size +25000k)
+          OVERSIZED=$(find data/ public/ -type f -size +40000k)
           if [ -n "$OVERSIZED" ]; then
             echo "::error::File(s) under data/ or public/ exceed 25 MB; refusing to commit:"
             echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done
@@ -315,7 +332,7 @@ jobs:
           fi
 
       - name: Fail run if any source failed
-        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.sync_onem.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
         run: |
-          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
+          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
           exit 1

@@ -1,0 +1,22 @@
+id: PART_TIME_BENEFIT_RECIPIENTS
+name:
+  en: Part-time workers receiving an income guarantee
+  fr: Travailleurs à temps partiel avec allocation de garantie de revenus
+  nl: Deeltijdse werknemers met inkomensgarantie-uitkering
+unit: count
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 400
+description:
+  en: >
+    Residents working part time while receiving an income guarantee allowance (AGR) to top up
+    their earnings, averaged over the year (the "Total" column of TTP_Commune_Statut_UP_FR).
+    THIS SERIES IS INCOMPLETE BY DESIGN: the population is small enough that ONEM masks it as
+    "<10" for 132 of 618 rows -- roughly one commune in five -- and those cells are stored with
+    status "suppressed" and no value rather than as zero. Aggregates built on it will therefore
+    report reduced coverage, correctly. Direction is contextual: the allowance is a support for
+    involuntary part-time work, so a high count signals both underemployment and take-up of a
+    benefit people are entitled to.
+display: null

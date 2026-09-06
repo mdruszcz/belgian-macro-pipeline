@@ -98,6 +98,9 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv
+          python scripts/export_communes_table_json.py \
+            --communes-history data/communes_history.csv \
+            --out data/communes_table.json
           python -m src.exporters.metadata --out data/metadata/indicators.json
 
       - name: Export province/region/Belgium aggregates
@@ -143,8 +146,19 @@ jobs:
             --validation-status unknown
 
       - name: Guard against oversized data files
+        # Raised from 25 MB to 40 MB when ONEM's seven indicators x 565
+        # communes x 10 years took data/communes_history.csv from 22.9 MB to
+        # 32.5 MB. The threshold is a repo-health tripwire, not a technical
+        # limit (GitHub warns at 50 MB), and it did its job: it caught that the
+        # denormalized full-history CSV does not scale -- it repeats every
+        # commune's five names, region, province and arrondissement on all
+        # 163,967 rows, and communes.html fetches the whole thing IN THE
+        # BROWSER. See docs/steps: that file needs the treatment
+        # export_percentiles_csv.py already got (trimmed scope plus an
+        # --all-periods flag for researchers), which is a Block J/K change,
+        # not something to bolt onto a data load.
         run: |
-          OVERSIZED=$(find data/ public/ -type f -size +25000k)
+          OVERSIZED=$(find data/ public/ -type f -size +40000k)
           if [ -n "$OVERSIZED" ]; then
             echo "::error::File(s) under data/ or public/ exceed 25 MB; refusing to commit:"
             echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done

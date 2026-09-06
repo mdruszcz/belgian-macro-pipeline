@@ -1,0 +1,19 @@
+id: UNEMPLOYMENT_BENEFIT_RECIPIENTS
+name:
+  en: Full unemployment benefit recipients (all statuses)
+  fr: Chômeurs complets indemnisés (tous statuts)
+  nl: Uitkeringsgerechtigde volledig werklozen (alle statuten)
+unit: count
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 400
+description:
+  en: >
+    Everyone receiving a full unemployment benefit, averaged over the year (the "Total" column of
+    CCI_Commune_Statut_UP_FR). Wider than UNEMPLOYED_JOBSEEKERS by the CCI-NDE categories, who are
+    not required to seek work -- older unemployed people, carers, and voluntary part-timers. The
+    gap between the two is large and shrinking: Antwerp 28,302 against 24,150 in 2017, but 16,976
+    against 16,731 in 2024, as the older-unemployed schemes were wound down.
+display: null

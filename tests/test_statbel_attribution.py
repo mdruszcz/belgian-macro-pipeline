@@ -107,3 +107,61 @@ def test_attribution_is_not_hidden(page):
     assert block, f"{page} has no .attribution block"
     assert "display:none" not in block.group(0).replace(" ", "")
     assert "hidden" not in block.group(0)
+
+
+# ── ONEM/RVA ────────────────────────────────────────────────────────────────
+#
+# A SECOND SOURCE WITH DIFFERENT OBLIGATIONS, on the same pages. ONEM's own
+# reuse conditions (quoted in full in docs/data_catalog.md) permit commercial
+# reuse and require two things: name the source, and state the date of the
+# information used. They are NOT CC BY 4.0 -- there is no "changes were made"
+# clause and no no-endorsement clause -- so the tests above must not be
+# reused for it, and the page must not imply CC BY covers it either.
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_credits_onem_as_a_source(page):
+    """ONEM obligation 1: "en mentionneront la source"."""
+    text = _page(page)
+    assert re.search(
+        r"<a[^>]*onem\.be", text
+    ), f"{page} publishes ONEM unemployment data without a source credit"
+    assert "ONEM" in text and "Arbeidsvoorziening" in text
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_states_the_date_of_the_onem_information(page):
+    """ONEM obligation 2: "indiqueront la date des informations utilisées".
+
+    A different obligation from Statbel's date-of-last-update, and satisfied
+    separately -- one date does not stand in for the other, because the two
+    sources are refreshed on entirely different cadences.
+    """
+    text = _page(page)
+    assert re.search(r"[Dd]ate (of the information used|des informations)", text) or (
+        "gebruikte informatie" in text
+    ), f"{page} credits ONEM but never states the date of the data used"
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_does_not_claim_cc_by_covers_onem(page):
+    """The one way this could go quietly wrong: ONEM's data sitting under a
+    CC BY notice it was never released under. The page carries CC BY for
+    Statbel, so the ONEM credit has to say explicitly that it does not apply.
+    """
+    text = _page(page)
+    assert re.search(
+        r"not</em>\s*under\s*CC BY|<em>non</em>\s*sous CC BY|niet</em> onder CC BY", text
+    ), f"{page} shows ONEM data alongside a CC BY notice without excluding it"
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_says_masked_cells_are_not_zero(page):
+    """Not a licence condition -- a truthfulness one, and the reason it is
+    tested here is that it is a claim about published output like the rest.
+    ONEM withholds counts under 10, those cells are stored with a NULL value
+    and status 'suppressed', and a reader must not read a blank as a zero.
+    """
+    text = _page(page)
+    assert "suppressed" in text.lower() or "supprim" in text.lower() or "onderdrukt" in text.lower()
+    assert "never as zero" in text or "jamais comme z" in text or "nooit als nul" in text

@@ -1,0 +1,17 @@
+id: TEMP_UNEMPLOYMENT_BENEFIT_PAID
+name:
+  en: Temporary unemployment benefit paid
+  fr: Montants payés en chômage temporaire
+  nl: Uitbetaalde bedragen tijdelijke werkloosheid
+unit: EUR
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 400
+description:
+  en: >
+    Total euros paid in temporary unemployment and related allowances to residents of the commune
+    over the year (the "Total" column of CT_Commune_Statut_M_FR). Complete for every commune --
+    the euro files carry no privacy masking.
+display: null
