@@ -147,10 +147,17 @@ the right number of lines, and was wrong. Only parsing it catches that.
 |---|---|
 | `counts_non_negative` | `unit = count` implies `value >= 0` |
 | `percent_bounded` | `unit` starting `percent` implies `-100 <= value <= 100` |
-| `no_null_values` | `observations.value` is never null (absence is an absent row) |
+| `suppressed_has_no_value` | a `suppressed`/`na` row carries NULL, never a number |
 
 Catches the classic unit error — a rate stored as `0.052` where its siblings use `5.2` — which is
 otherwise invisible until a chart looks flat.
+
+`suppressed_has_no_value` guards the direction the schema does **not**. `001_core_schema.sql:86`
+already enforces that a null value implies a `suppressed`/`na` status, so a rule hunting stray nulls
+would duplicate a database constraint and could never fire. Nothing guards the reverse — a
+suppressed cell carrying a number — which is the case the data model spec singles out: *"If
+suppression looks like zero, you will publish 'median income €0' for a small commune."* A zero
+there is not a missing number, it is a wrong one.
 
 ### Volume — severity `warn`, except `row_collapse`
 
