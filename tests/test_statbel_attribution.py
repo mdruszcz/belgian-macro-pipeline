@@ -165,3 +165,53 @@ def test_page_says_masked_cells_are_not_zero(page):
     text = _page(page)
     assert "suppressed" in text.lower() or "supprim" in text.lower() or "onderdrukt" in text.lower()
     assert "never as zero" in text or "jamais comme z" in text or "nooit als nul" in text
+
+
+# ── police.be ────────────────────────────────────────────────────────────────
+#
+# A THIRD SOURCE, thinner than either above. police.be's own condition
+# (quoted in full in docs/data_catalog.md) asks only that the source be
+# credited correctly -- it says nothing about permitted uses, unlike
+# Statbel's CC BY 4.0 or ONEM's explicit "commercial reuse permitted"
+# clause. The page must not claim more than that condition actually grants.
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_credits_police_as_a_source(page):
+    """police.be obligation: correctly indicate the source."""
+    text = _page(page)
+    assert re.search(
+        r"<a[^>]*police\.be", text
+    ), f"{page} publishes police.be data without a source credit"
+    assert "Police" in text and ("ICT" in text or "polici" in text.lower())
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_does_not_claim_a_reuse_grant_police_never_made(page):
+    """The one way this could go quietly wrong: implying police.be permits
+    commercial reuse the way ONEM's text explicitly does, or sits under CC
+    BY the way Statbel's does. Its own condition says neither."""
+    text = _page(page)
+    assert re.search(
+        r"not.{0,20}stated grant|<em>non</em> sous CC BY.{0,20}sans octroi|"
+        r"<em>niet</em> onder CC BY.{0,40}zonder uitdrukkelijke",
+        text,
+    ), f"{page} shows police.be data without disclaiming a reuse grant it never got"
+    assert re.search(
+        r"CC BY 4\.0, which does not apply|CC BY 4\.0.{0,10}ne s.applique pas|"
+        r"CC BY 4\.0.{0,10}niet van toepassing",
+        text,
+    ), f"{page} shows police.be data without disclaiming CC BY"
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_flags_the_stale_geography_and_unstated_period(page):
+    """Not a licence condition -- a truthfulness one. The house-burglary
+    figure uses the pre-2025-merger commune map and an unconfirmed reporting
+    window; both are in the module docstring of scripts/sync_police.py and
+    must also reach the reader, not stay a code comment."""
+    text = _page(page)
+    assert "through 2024" in text or "jusqu'en 2024" in text or "tot en met 2024" in text
+    assert (
+        "provisional" in text.lower() or "provisoire" in text.lower() or "voorlopig" in text.lower()
+    )
