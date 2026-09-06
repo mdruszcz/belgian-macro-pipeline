@@ -44,8 +44,25 @@ than a missing feature.
 - status: final | provisional | estimate | revised | suppressed | na.
 - preferred_direction: lower_is_better | higher_is_better | neutral |
   contextual.
-- National aggregates are population-weighted unless the indicator config says
-  otherwise. Document any exception.
+- Aggregates (province, region, Belgium) are built from the ground up, never
+  by averaging communes:
+  - an additive indicator (a count or a total) is SUMMED;
+  - a ratio or average is RECOMPUTED from those sums, using the same formula
+    as at commune level -- e.g. average income = total income / total tax
+    returns, never the mean of 565 commune averages;
+  - anything that is neither (an index, a share) has no defensible aggregate.
+    Refuse, do not invent one.
+  Population-weighting is NOT used and must not be added. It was measured
+  against the correct figure and is wrong for both ratios in the pipeline
+  today, because population is not their denominator -- income is per tax
+  return, the dependency ratio is per working-age person. See
+  docs/features/comparison.md, "Correction 1", for the numbers.
+- Aggregate over the geographies that existed IN THAT PERIOD, not today's.
+  Summing today's 565 communes understates a 2023 province total by up to
+  24%, because communes created in the 2025 mergers have no earlier rows.
+- Every aggregate carries its coverage (how many geographies contributed out
+  of how many existed) and is suppressed below 90%. A total that is 24%
+  short is not a number with a footnote.
 
 ## Workflow you must follow
 1. Read the linked spec in docs/features/. If no spec exists, stop and ask.
