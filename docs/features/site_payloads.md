@@ -1,8 +1,33 @@
 # Feature: site payload exports (Block J)
 
-Status: spec
+Status: built
 Issue: (Block J — Payload exports, docs/steps)
 Branch: spec/block-j-site-payloads
+
+## Implementation (2026-09-06)
+
+`scripts/export_site_payloads.py` implements the layout above by reshaping
+the already-written bulk exports (`communes_history.csv`, `communes_export.csv`,
+`belgian_macro_export.csv`) plus a `geographies` query for
+`metadata/geographies.json` — no new computation, no new database read of
+`observations`. Wired into `daily_fetch.yml` (after `validate_data.py`, so
+`manifest.json`'s `validation_status` is always a real "pass") and
+`manual_sources.yml` (which has no full-DB validation step, so it honestly
+records `"unknown"` there instead of a check that did not happen).
+
+Measured against the real committed data: 565 commune payloads, 5 indicator
+payloads (raw indicators only — `communes_export.csv` is latest-only and does
+not carry derived indicators), 17 national indicators, 622 geographies. The
+largest commune payload (Antwerp, 14 indicators, full 2005–2026 history) is
+9.5 KB compact / 2.3 KB gzip — comfortably inside the ~150 KB budget, and
+close to the pre-build projection above.
+
+Tests in `tests/test_export_site_payloads.py` cover the round-trip (every
+value in a commune payload traces back to a row in the history CSV and vice
+versa), the current-communes-only contract for `indicators/{id}.json`, the
+ancestor-walk resolving to a real region-level entry in
+`metadata/geographies.json`, and manifest row counts matching generated file
+counts.
 
 ## What this is for
 
