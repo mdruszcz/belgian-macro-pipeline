@@ -44,6 +44,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Apply pending schema migrations
+        # Idempotent by design (schema_migrations tracking table), so it is
+        # safe to run every day. This is what brings migration 003's
+        # indicator_volume table into the committed store; the volume rules
+        # no-op quietly until it exists, so ordering it before the fetch
+        # simply means the first run after this lands starts collecting
+        # history immediately.
+        run: python -m src.db.migrate --db data/belgian_macro.db
+
       - name: Fetch macro indicators
         id: fetch_macro
         continue-on-error: true
@@ -75,7 +84,12 @@ jobs:
         # BEFORE anything is written to the published CSVs or committed.
         # Validation that only logs is decoration -- see
         # docs/features/validation.md. Warnings print and do not block.
-        run: python scripts/validate_data.py --db data/belgian_macro.db
+        #
+        # --record-volume writes the is_latest count per indicator ONLY if
+        # this run passed, so tomorrow's row_collapse rule has a baseline.
+        # Recording on a failing run would make the collapsed count the new
+        # normal and silence the alarm on the next run.
+        run: python scripts/validate_data.py --db data/belgian_macro.db --record-volume
 
       - name: Export canonical CSV for the dashboard
         # Overwrites belgian_macro_export.csv (written above from the legacy

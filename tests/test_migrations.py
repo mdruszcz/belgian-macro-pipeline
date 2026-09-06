@@ -29,13 +29,21 @@ def test_fresh_db_applies_all_migrations(migrated_db):
         "indicators",
         "observations",
         "fetch_runs",
+        "indicator_volume",
         "schema_migrations",
     ):
         assert expected in tables
     rows = conn.execute(
         "SELECT version, filename FROM schema_migrations ORDER BY version"
     ).fetchall()
-    assert rows == [(1, "001_core_schema.sql"), (2, "002_indexes.sql")]
+    # Derived from the directory rather than hardcoded, so adding a migration
+    # does not require editing this assertion -- which is how a test that is
+    # meant to guard ordering turns into one people edit reflexively.
+    expected_rows = [
+        (version, path.name) for version, path in migrate.discover_migrations(REAL_MIGRATIONS_DIR)
+    ]
+    assert rows == expected_rows
+    assert [v for v, _ in expected_rows] == sorted(v for v, _ in expected_rows)
     conn.close()
 
 
@@ -238,7 +246,9 @@ def test_migration_idempotency(tmp_path):
     migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)  # second run
 
     conn = sqlite3.connect(str(db_path))
-    assert conn.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0] == 2
+    assert conn.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0] == len(
+        migrate.discover_migrations(REAL_MIGRATIONS_DIR)
+    )
     schema_after = sorted(
         r[0] for r in conn.execute("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL")
     )

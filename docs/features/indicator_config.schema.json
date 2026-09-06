@@ -28,6 +28,11 @@
     },
     "unit": { "type": "string", "minLength": 1 },
     "frequency": { "type": "string", "enum": ["A", "Q", "M", "F"] },
+    "max_age_days": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Staleness allowance for the validation layer (Block H): days past the end of the latest period before the `staleness` rule warns. Omit unless the frequency default is wrong -- set it only to record a known, verified reason the series is frozen, so the warning still means something when that changes."
+    },
     "source_id": { "type": "string", "minLength": 1 },
     "geo_levels": {
       "type": "array",

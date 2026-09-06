@@ -14,16 +14,18 @@ is a `warn`. A rule that would fire today on correct data must not be a
 `fail`; that is not squeamishness, it is the only way this layer is still
 switched on in six months.
 
-Volume rules that need run-to-run history (row_collapse, staleness,
-fetch_error) are deliberately NOT here: they need the count columns that
-migration 003 adds, and live with the runner that persists them.
+The volume rules read the run-to-run history in `indicator_volume`
+(migration 003). Writing that history is deliberately NOT a rule: it is
+`record_volume_snapshot`, called by the runner only after a validation pass
+succeeds, so a collapsed count never becomes the new normal.
 """
 
 import csv
 import re
 import sqlite3
-from collections.abc import Callable, Iterable
-from dataclasses import dataclass
+from collections.abc import Callable, Iterable, Mapping
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 FAIL = "fail"
@@ -40,6 +42,36 @@ _PERIOD_SHAPES = {
 
 # Words in a display name that assert a currency amount.
 _CURRENCY_MARKERS = ("meur", "eur", "euro", "€", "million euro")
+
+# Default staleness allowance per declared frequency, in days: THREE
+# publication intervals, not the two the spec first proposed. Two was
+# measured against the real store and fires on correct data --
+# BUSINESS_CONFIDENCE sits 68 days past the end of 2026-06 on the day this
+# was written, which is a normal publication lag, not a fault. Three leaves
+# exactly the indicators that are genuinely behind (HICP and EC_CONS_CONF_BE
+# stuck on 2025-12, EUROSTAT_GDP_Q_MEUR on 2025-Q3) and nothing else.
+_STALENESS_DEFAULT_DAYS = {"A": 1095, "Q": 270, "M": 93, "D": 7}
+
+# A drop this large in an indicator's is_latest count is treated as a
+# regression rather than a legitimate revision. CONTROL H's scenario
+# ("17,000 rows yesterday, 436 today") is a 97% drop.
+_COLLAPSE_FRACTION = 0.10
+
+# A source or indicator code whose last log entry predates the newest entry in
+# that log by more than this is treated as RETIRED, not failing. Measured
+# case: BE_CONSUMER_CONFIDENCE and EU_CONSUMER_CONFIDENCE were tried three
+# times each on 2026-03-01, failed, and were renamed to EC_CONS_CONF_BE/_EU
+# the same hour. Their final entry is an ERROR that will sit at the top of
+# their history forever. Without this window they red-light every build from
+# now until the log is truncated -- a permanent red light nobody reads is the
+# same as no rule at all.
+_FETCH_LOG_ACTIVE_DAYS = 7
+
+# An indicator whose current rows are this overwhelmingly empty has been
+# fetched into an empty column, not published sparsely. The minimum row count
+# exists because 1-of-1 null is 100% and means nothing.
+_NULL_SHARE_FRACTION = 0.90
+_NULL_SHARE_MIN_ROWS = 10
 
 
 @dataclass(frozen=True)
@@ -62,6 +94,11 @@ class Context:
     conn: sqlite3.Connection
     derived_ids: frozenset[str] = frozenset()
     exports: tuple[Path, ...] = ()
+    # Per-indicator staleness allowances from config (`max_age_days`).
+    # Absent an entry, the frequency default above applies.
+    max_age_days: Mapping[str, int] = field(default_factory=dict)
+    # Injected so staleness is testable without freezing the clock globally.
+    now: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 RULES: dict[str, tuple[str, Callable[[Context], list[Violation]]]] = {}
@@ -347,6 +384,319 @@ def has_trilingual_name(ctx: Context) -> list[Violation]:
                 )
             )
     return violations
+
+
+# ── Volume: fail, except staleness ──────────────────────────────────────────
+# Volume is measured on the STORE, not the run. fetch_runs.rows_written was
+# tried first and is useless for this: nbb writes 0 rows on a normal day
+# (insert-only-on-change working correctly), so a "count dropped" rule fires
+# constantly and a "count is zero" rule fires daily; statbel's figure swings
+# 565 -> 19149 because one number mixes datasets loaded by different scripts.
+# The count of is_latest = 1 rows per indicator is stable by comparison
+# (LOCAL_UNITS_BY_COMMUNE 565, EC_CONS_CONF_BE 216, CONSUMER_CONFIDENCE 200),
+# so a drop in it is genuinely alarming.
+
+
+def _current_counts(ctx: Context) -> dict[str, int]:
+    return dict(
+        ctx.conn.execute(
+            "SELECT indicator_id, COUNT(*) FROM observations WHERE is_latest = 1 GROUP BY 1"
+        )
+    )
+
+
+def _last_snapshot(ctx: Context) -> dict[str, int]:
+    """The most recent recorded count per indicator, or {} before any run."""
+    if not _has_volume_table(ctx.conn):
+        return {}
+    return dict(
+        ctx.conn.execute(
+            "SELECT v.indicator_id, v.new_count FROM indicator_volume v "
+            "WHERE v.snapshot_id = (SELECT MAX(v2.snapshot_id) FROM indicator_volume v2 "
+            "                       WHERE v2.indicator_id = v.indicator_id)"
+        )
+    )
+
+
+def _has_volume_table(conn: sqlite3.Connection) -> bool:
+    return bool(
+        conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='indicator_volume'"
+        ).fetchone()
+    )
+
+
+@rule("row_collapse", FAIL)
+def row_collapse(ctx: Context) -> list[Violation]:
+    """CONTROL H's scenario: yesterday 17,000 rows, today 436.
+
+    A fail rather than a warn even though it is a volume rule, because it is
+    the single failure mode most likely to publish garbage silently -- the
+    site still renders, every remaining number is correct, and most communes
+    have simply vanished.
+
+    Indicators that went to zero are left to `indicator_disappeared` so the
+    same event is not reported twice.
+    """
+    current = _current_counts(ctx)
+    previous = _last_snapshot(ctx)
+    offenders = []
+    for ind, prev in sorted(previous.items()):
+        now = current.get(ind, 0)
+        if prev <= 0 or now == 0:
+            continue
+        if now < prev * (1 - _COLLAPSE_FRACTION):
+            offenders.append(f"{ind}: {prev} -> {now}")
+    if not offenders:
+        return []
+    return [
+        Violation(
+            "row_collapse",
+            FAIL,
+            f"is_latest row count fell more than {int(_COLLAPSE_FRACTION * 100)}%: "
+            + "; ".join(offenders),
+            len(offenders),
+        )
+    ]
+
+
+@rule("indicator_disappeared", FAIL)
+def indicator_disappeared(ctx: Context) -> list[Violation]:
+    """An indicator that had observations now has none.
+
+    Separate from row_collapse because it is qualitatively different: a
+    dashboard row does not shrink, it silently stops existing.
+    """
+    current = _current_counts(ctx)
+    previous = _last_snapshot(ctx)
+    gone = sorted(ind for ind, prev in previous.items() if prev > 0 and current.get(ind, 0) == 0)
+    if not gone:
+        return []
+    return [
+        Violation(
+            "indicator_disappeared",
+            FAIL,
+            f"indicators that had observations and now have none: {gone}",
+            len(gone),
+        )
+    ]
+
+
+@rule("null_share", FAIL)
+def null_share(ctx: Context) -> list[Violation]:
+    """More than 90% of an indicator's current rows carrying no value.
+
+    The signature of a source that answered with the right shape and none of
+    the content -- a renamed value column, a filter that matched nothing.
+    Every row is individually legal (the schema allows NULL where status is
+    suppressed/na), so nothing else here would notice.
+
+    Guarded by a minimum row count: 1 of 1 rows null is 100% and means
+    nothing, and failing the build on it would be exactly the kind of noise
+    that gets this layer switched off. There are zero null values in the
+    store today, so this rule cannot fire on correct data.
+    """
+    rows = ctx.conn.execute(
+        "SELECT indicator_id, COUNT(*), SUM(CASE WHEN value IS NULL THEN 1 ELSE 0 END) "
+        "FROM observations WHERE is_latest = 1 GROUP BY 1"
+    ).fetchall()
+    offenders = [
+        f"{ind}: {nulls}/{total} null"
+        for ind, total, nulls in rows
+        if total >= _NULL_SHARE_MIN_ROWS and nulls > total * _NULL_SHARE_FRACTION
+    ]
+    if not offenders:
+        return []
+    return [
+        Violation(
+            "null_share",
+            FAIL,
+            f"more than {int(_NULL_SHARE_FRACTION * 100)}% of current rows have no value: "
+            + "; ".join(sorted(offenders)),
+            len(offenders),
+        )
+    ]
+
+
+@rule("staleness", WARN)
+def staleness(ctx: Context) -> list[Violation]:
+    """Latest period older than the indicator's allowance.
+
+    A warn, never a fail, and the reason is concrete: LOCAL_UNITS_BY_COMMUNE
+    is 1,010 days old and CORRECT -- Statbel's standard view is pinned to
+    2023-Q4, verified against the live API. A rule that fails the build every
+    day on correct data is the exact thing that gets validation switched off.
+    That indicator carries an explicit `max_age_days` in its config recording
+    why it is frozen, so the warning means something when it changes.
+    """
+    violations = []
+    today = ctx.now.date()
+    rows = ctx.conn.execute(
+        "SELECT o.indicator_id, i.frequency, MAX(o.period) FROM observations o "
+        "JOIN indicators i ON i.indicator_id = o.indicator_id "
+        "WHERE o.is_latest = 1 GROUP BY 1, 2"
+    ).fetchall()
+    for ind, freq, period in rows:
+        ends = _period_end(period, freq)
+        if ends is None:
+            continue
+        age = (today - ends).days
+        allowance = ctx.max_age_days.get(ind, _STALENESS_DEFAULT_DAYS.get(freq))
+        if allowance is None or age <= allowance:
+            continue
+        violations.append(
+            Violation(
+                "staleness",
+                WARN,
+                f"{ind}: latest period {period} ended {age} days ago, "
+                f"allowance is {allowance} days",
+            )
+        )
+    return violations
+
+
+def _period_end(period: str, frequency: str) -> date | None:
+    """Last calendar day of a period string, or None if it is not a shape we
+    recognise. Age is measured from the end of the period, not its start:
+    a monthly series publishing 2026-06 is not 'six months late' on July 1st.
+    """
+    try:
+        if frequency == "A" and _PERIOD_SHAPES["A"].match(period):
+            return date(int(period), 12, 31)
+        if frequency == "Q" and _PERIOD_SHAPES["Q"].match(period):
+            year, quarter = int(period[:4]), int(period[-1])
+            return _month_end(year, quarter * 3)
+        if frequency == "M" and _PERIOD_SHAPES["M"].match(period):
+            return _month_end(int(period[:4]), int(period[5:7]))
+    except ValueError:
+        return None
+    return None
+
+
+def _month_end(year: int, month: int) -> date:
+    return date(year + month // 12, month % 12 + 1, 1) - timedelta(days=1)
+
+
+@rule("fetch_error", FAIL)
+def fetch_error(ctx: Context) -> list[Violation]:
+    """Read BOTH fetch logs, because one of them lies by omission.
+
+    fetch_runs holds 162 rows, every one 'ok'. legacy_fetch_log holds 83
+    ERROR rows over the same history -- DBnomics read timeouts. The canonical
+    table only covers adapters refactored in Block D; belgian_macro_db.py
+    still logs the legacy path to its own table. A validation layer reading
+    only fetch_runs would report all-clear on a day when five indicators
+    failed to fetch. It did: those timeouts are why five country-variant
+    indicators have configs and zero observations.
+
+    Only the MOST RECENT entry per source/indicator counts, and only if that
+    entry is recent in absolute terms too. The 83 historical errors are
+    history; and a code that was tried, failed and abandoned six months ago
+    is retired, not failing. Failing on either forever would make this a
+    permanent red light nobody reads.
+    """
+    violations = []
+    runs = ctx.conn.execute(
+        "SELECT source_id, status, started_at FROM fetch_runs f "
+        "WHERE f.fetch_run_id = (SELECT MAX(f2.fetch_run_id) FROM fetch_runs f2 "
+        "                        WHERE f2.source_id = f.source_id) ORDER BY source_id"
+    ).fetchall()
+    for source_id, status, started_at in _still_active(runs):
+        if status in ("error", "partial", "schema_changed"):
+            violations.append(
+                Violation(
+                    "fetch_error",
+                    FAIL,
+                    f"fetch_runs: latest run for source {source_id!r} is {status!r} "
+                    f"({started_at})",
+                )
+            )
+
+    if _has_legacy_log(ctx.conn):
+        legacy = ctx.conn.execute(
+            "SELECT indicator_code, status, fetched_at FROM legacy_fetch_log l "
+            "WHERE l.id = (SELECT MAX(l2.id) FROM legacy_fetch_log l2 "
+            "              WHERE l2.indicator_code = l.indicator_code) "
+            "ORDER BY indicator_code"
+        ).fetchall()
+        for code, status, fetched_at in _still_active(legacy):
+            if (status or "").upper() != "OK":
+                violations.append(
+                    Violation(
+                        "fetch_error",
+                        FAIL,
+                        f"legacy_fetch_log: latest fetch of {code} is {status!r} ({fetched_at})",
+                    )
+                )
+    return violations
+
+
+def _still_active(rows: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
+    """Drop keys whose last log entry is far older than the newest entry in
+    the same log -- see _FETCH_LOG_ACTIVE_DAYS. Timestamps are compared as
+    parsed datetimes rather than strings, because a log written with mixed
+    offsets would sort wrong lexically."""
+    stamps = {}
+    for key, _status, when in rows:
+        parsed = _parse_ts(when)
+        if parsed is not None:
+            stamps[key] = parsed
+    if not stamps:
+        return list(rows)
+    newest = max(stamps.values())
+    cutoff = newest - timedelta(days=_FETCH_LOG_ACTIVE_DAYS)
+    return [row for row in rows if stamps.get(row[0]) is None or stamps[row[0]] >= cutoff]
+
+
+def _parse_ts(value: str) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def _has_legacy_log(conn: sqlite3.Connection) -> bool:
+    return bool(
+        conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='legacy_fetch_log'"
+        ).fetchone()
+    )
+
+
+def record_volume_snapshot(conn: sqlite3.Connection, now: datetime | None = None) -> int:
+    """Record today's is_latest count per indicator, with the delta against
+    the previous snapshot.
+
+    Deliberately NOT a rule, and deliberately called only after validation
+    passes: recording a collapsed count would make it the baseline, and the
+    alarm would silence itself on the very next run.
+    """
+    if not _has_volume_table(conn):
+        raise RuntimeError(
+            "indicator_volume table missing -- run migrations (003_volume_history.sql) first"
+        )
+    taken_at = (now or datetime.now(timezone.utc)).isoformat()
+    ctx = Context(conn=conn)
+    current = _current_counts(ctx)
+    previous = _last_snapshot(ctx)
+    rows = [
+        (
+            taken_at,
+            ind,
+            previous.get(ind),
+            count,
+            None if previous.get(ind) is None else count - previous[ind],
+        )
+        for ind, count in sorted(current.items())
+    ]
+    conn.executemany(
+        "INSERT INTO indicator_volume "
+        "(taken_at, indicator_id, previous_count, new_count, delta) VALUES (?, ?, ?, ?, ?)",
+        rows,
+    )
+    conn.commit()
+    return len(rows)
 
 
 # ── Runner ──────────────────────────────────────────────────────────────────
