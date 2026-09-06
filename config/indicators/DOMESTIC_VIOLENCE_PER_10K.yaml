@@ -1,0 +1,27 @@
+id: DOMESTIC_VIOLENCE_PER_10K
+name:
+  en: Domestic violence (per 10,000 households)
+  fr: Violence intrafamiliale (par 10 000 ménages)
+  nl: Intrafamiliaal geweld (per 10 000 huishoudens)
+unit: per_10000_households
+frequency: A
+source_id: police
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 400
+description:
+  en: >
+    Recorded domestic-violence incidents (VIF/IFG) per 10,000 households, as published by the
+    federal police's stats-pol tool (police.be), which cites "Ménages privés - SPF Economie"
+    (Statbel's private-household count) as the rate's denominator. A RECORDED-INCIDENT rate, not a
+    prevalence estimate -- it reflects what was reported to and logged by police, which is known to
+    undercount domestic violence substantially and unevenly across communes (reporting rates vary
+    with local policing practice and victim confidence, independent of the true underlying rate);
+    read commune differences with that in mind. Taken as-is from a rate the source itself computes;
+    see HOUSE_BURGLARIES_PER_10K's description for the shared reasoning this pipeline applies to
+    every stats-pol rate: no underlying count to recompute it from (not derived, CLAUDE.md rule 6
+    does not apply), not aggregatable above commune level (is_additive=false,
+    aggregation_method=not_applicable, docs/decisions/0003-aggregation-rule.md), resolved against a
+    single fixed pre-2025-merger geography for every year regardless of that year's own map, and
+    the most recent year loaded as "provisional" with every earlier year "final".
+display: null

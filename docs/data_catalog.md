@@ -391,7 +391,7 @@ quote. Separators are replaced **before** the accent fold, not after: folding fi
 non-ASCII apostrophe outright and turns `Braine-l'Alleud` into `braine lalleud`. That ordering left
 exactly three communes unmatched — Braine-l'Alleud, Fontaine-l'Evêque, Mont-de-l'Enclus — and the
 loader refuses a partial load rather than dropping them.
-## police.be — house-burglary rate, APPROVED 2026-09-06, 14th dataset
+## police.be — four crime-rate indicators, APPROVED 2026-09-06, 14th dataset
 
 Raised by the maintainer 2026-09-06 with a working request captured from their own browser, then
 **approved 2026-09-06** on the licence text below, which the maintainer found and confirmed is
@@ -412,54 +412,91 @@ credit the source correctly, exactly as stated, and nothing else is asserted. `.
 BY or a stated commercial-reuse grant covers it — `tests/test_statbel_attribution.py` has a section
 asserting the disclaimer is present.
 
+**The maintainer separately found that each rate's DENOMINATOR is published by SPF Economie/Statbel
+under CC BY 4.0** (vehicle fleet, private households, building stock — see the per-indicator table
+below). That governs the denominator DATA, not the RATE police.be itself publishes and this pipeline
+actually consumes: the "z" value in each file is police.be's own combination of a police-recorded
+count and that denominator, and reusing police.be's published output is still governed by police.be's
+own condition above, not inherited from whichever government dataset it cites as an input — the same
+way a report citing Eurostat as a source does not put the whole report under Eurostat's licence. Kept
+as attribution-only, pending the maintainer's confirmation of whether this reading matches what they
+found.
+
 **MANUAL ONLY, and for a different reason than Statbel or ONEM.** `onem.be` and `statbel.fgov.be`
 fail at the TCP handshake; `police.be` responds, but with an HTTP 403 "Maintenance" page and no
 session cookie, to every request both this pipeline's own network context AND a real GitHub Actions
-runner send (`scripts/fetch_police_raw.py`, run confirmed). The maintainer fetched the one file used
-here from their own browser, where the same request returns 200 — that gap between "reachable by an
+runner send (`scripts/fetch_police_raw.py`, run confirmed). The maintainer fetched every file used
+here from their own browser, where the same requests return 200 — that gap between "reachable by an
 ordinary browser" and "reachable by anything this pipeline runs" is exactly why this stays a manual
 source rather than an automated one, the same shape as Census 2021 and real-estate.
 
-**The file, and what it actually is.** `data/raw/police/police 2025 cambriolages dans les maisons
-par 10000hab.txt` — a single JSON object, `{"error": false, "data": [{"geo_code": nis, "z": rate},
-...]}`, one row per commune: house burglaries per 10,000 inhabitants. Loaded by `scripts/sync_police.py`
-into `HOUSE_BURGLARIES_PER_10K`, committed at `data/police_observations.csv`. Three other files the
-maintainer supplied alongside it (`police2025.txt`/`a`/`b`) are GeoJSON commune/province boundary
-shapes for drawing a map, not statistics — two are byte-identical duplicates — and are not loaded.
+**Four categories, one directory each under `data/raw/police/`, one file per period named literally
+by its year** (`cambriolage/2024`, `vol de voiture/2025`, …). Loaded by `scripts/sync_police.py`,
+committed at `data/police_observations.csv`. `cambriolage` has a real multi-year history
+(2000, 2017–2025); the other three have one file each (2025 only, as of this writing).
 
-**Six of the file's 587 rows are not real geography** — the negative placeholders `-1`/`-3`/`-4`
-(a residual/unknown bucket in the source's own export) plus three positive codes (`21020`, `23095`,
-`31999`) matching no geography row, current or historical. All six are always paired with `z: 0` and
-are skipped as a GENERAL rule (any code unresolvable under either period, carrying a value of
-exactly 0), not a hardcoded list — a nonzero value on an unresolvable code would still raise.
+| Indicator | Category (fr) | Denominator (source: SPF Economie) |
+|---|---|---|
+| `HOUSE_BURGLARIES_PER_10K` | cambriolage dans habitation | dwellings (Parc de bâtiments) |
+| `CAR_THEFT_PER_10K` | vol de voiture | cars (Parc de véhicules à moteur) |
+| `THEFT_FROM_VEHICLE_PER_10K` | vol dans ou sur un véhicule | vehicles (Parc de véhicules à moteur) |
+| `DOMESTIC_VIOLENCE_PER_10K` | violence intrafamiliale (VIF) | households (Ménages privés) |
 
-**A real geography/period mismatch, found and handled rather than guessed past.** The file labels
-itself "2025" but uses the commune map as it stood through 2024-12-31 — 32 of its codes name
-communes that merged away on 2025-01-01 (Borsbeek, Zwijndrecht, Gooik+Herne+Gammerages who became
-Pajottegem, …), while the 13 communes CREATED by that merger wave are entirely absent from the file.
-Opposite direction from ONEM, which backcasts the CURRENT map onto its past years — here the source
-has simply not caught up to the merger yet. Resolved per commune by trying
-`resolve_geo(nis, "2025")` first and falling back to `resolve_geo(nis, "2024")` for a code only
-valid before the mergers, rather than guessing which successor commune a predecessor's rate should
-attach to — there usually is no clean 1:1 successor, and a RATE cannot be apportioned across a
-merger the way a count could be summed. 581 of 587 rows resolve (6 skipped as above); the 13
-new-in-2025 communes have no value from this source.
+**`HOUSE_BURGLARIES_PER_10K`'s denominator was wrong on first load, and is corrected here.** An
+earlier version of this indicator called it "per 10,000 inhabitants", taken from the maintainer's
+own filename for the first file supplied (`...par 10000hab.txt`). That was the downloader's own
+shorthand, not police.be's methodology — once the real citation surfaced, the unit and every
+description were corrected to per-dwelling. `scripts/sync_police.py`'s reference-row upsert had to
+change too: it originally used `INSERT OR IGNORE`, which would have left the wrong name sitting in
+an already-loaded database forever, since nothing else ever touches that row. Now
+`ON CONFLICT ... DO UPDATE`, matching `scripts/sync_to_canonical.py`'s own pattern (the same latent
+gap still exists in `sync_realestate.py`/`sync_census2021.py`, not fixed here, out of scope for this
+source).
 
-**Loaded as `status = 'provisional'`, not `'final'`.** Nothing in the file or its filename states
-whether "2025" is a completed calendar year, a rolling 12-month window, or a year-to-date snapshot.
-There is no prior year from this source to compare against and notice if that assumption is wrong,
-unlike ONEM's part-year problem — so "provisional" records the genuine uncertainty rather than
-asserting a finality nobody has confirmed. Both this and the stale-geography caveat above are stated
-in the published `.attribution` text, not left as a code comment only.
+**Every file in every category shares one fixed geography — 587 `geo_code`s, identical set across
+every category and every year, including "cambriolage/2000".** Proven, not assumed: Kruisem (NIS
+45068) was FORMED by the 2019 merger wave and did not exist as that code before 2019-01-01, yet it
+carries a real, distinct value in the `cambriolage/2000` file. police.be's own historical tool
+backcasts its current (pre-2025-merger) municipal grid onto every year it shows, the same move ONEM
+makes for its own history. So every row of every file, regardless of the year in its filename, is
+resolved against ONE FIXED PERIOD (`2024`, the last day before the 2025 mergers) — not
+`resolve_geo(nis, that file's own year)`, which raises for merger-created communes in a pre-merger
+year and would be wrong regardless, since the "z" value already reflects police.be's own
+current-grid attribution, not a true historical one. The 13 communes created by the 2025 mergers
+have no value from this source, in any year, in any category.
 
-**`HOUSE_BURGLARIES_PER_10K` is not aggregatable, on purpose.** It is a rate with no underlying count
-in the source to derive it from — CLAUDE.md rule 6 governs deriving a ratio FROM stored additive
-components, and there are none here to derive it from. `is_additive = 0`,
-`aggregation_method = 'not_applicable'`; `export_aggregates_csv.py`'s `methods_from_metadata()`
-refuses it, so it shows at commune level only, with no province/region/Belgium row manufactured by
-averaging a rate across communes (`docs/decisions/0003-aggregation-rule.md`). It still ranks
-correctly (percentile/rank need only a value comparison, not summability) — verified: Aartselaar
-reads 67.7th percentile nationally, 85.2nd regionally within Flanders.
+**Six of the 587 `geo_code`s are not real geography, under any period** — the negative placeholders
+`-1`/`-3`/`-4` (a residual/unknown bucket in the source's own export) plus three positive codes
+(`21020`, `23095`, `31999`) matching no geography row, current or historical. All six are always
+paired with `z: 0` in every file checked, and are skipped as a GENERAL rule (any code unresolvable
+at the pinned period, carrying a value of exactly 0), not a hardcoded list — a nonzero value on an
+unresolvable code would still raise. 581 of every 587-row file resolve.
+
+**Status: every year is `'final'` except the MOST RECENT year in each category's own file set, which
+is `'provisional'`.** For `cambriolage`, this is now measured rather than guessed: national totals
+across the real 2000/2017–2024 series run 35,138–46,000-ish per year with ordinary year-to-year
+variation, and 2025's total (35,138) sits inside that range rather than reading like a
+two-months-only partial total the way ONEM's genuinely partial euro files do (falling to ~17% of a
+full year). That is evidence 2025 may already be a complete period, not proof — nothing in any file
+states whether "2025" means a completed calendar year or a still-open rolling window, so
+`'provisional'` records the remaining uncertainty rather than asserting a finality nobody has
+confirmed. Both this and the fixed-geography caveat above are stated in the published `.attribution`
+text on `communes.html` and `local.html`, not left as a code comment only.
+
+**All four indicators are not aggregatable, on purpose.** Every one is a rate with no underlying
+count in the source to derive it from — CLAUDE.md rule 6 governs deriving a ratio FROM stored
+additive components, and there are none here to derive it from. `is_additive = 0`,
+`aggregation_method = 'not_applicable'` for all four; `export_aggregates_csv.py`'s
+`methods_from_metadata()` refuses them, so they show at commune level only, with no
+province/region/Belgium row manufactured by averaging a rate across communes
+(`docs/decisions/0003-aggregation-rule.md`). They still rank correctly (percentile/rank need only a
+value comparison, not summability) — verified on Kruisem, a 2019-merger commune: all four indicators
+resolve and rank without error.
+
+**`DOMESTIC_VIOLENCE_PER_10K` is a recorded-incident rate, not a prevalence estimate**, flagged in
+its own indicator description: domestic violence is known to be substantially and unevenly
+under-reported, so a commune difference may reflect reporting practice as much as the true
+underlying rate.
 
 **Explicitly rejected approach, unchanged from the earlier note on this source.** The maintainer's
 original script pasted a session cookie copied out of a browser (their own note: expires in 1–2
@@ -470,13 +507,17 @@ evasion of that control regardless of how public the data is.
 
 **Not yet done, recorded so it is not silently skipped:**
 1. Written confirmation from the federal police — the maintainer is emailing separately. If it
-   contradicts the reading above, this row and `HOUSE_BURGLARIES_PER_10K` must be revisited.
-2. The wider `criminality_table` JSON endpoint this row originally investigated (year=2016…2025,
+   contradicts the reading above (including the FPS-Economy-denominator question above), this row
+   and all four indicators must be revisited.
+2. Whether the three single-year categories (car theft, vehicle theft, domestic violence) will gain
+   a historical series the way `cambriolage` has. Adding one is dropping a year-named file into that
+   category's directory — no code change needed.
+3. The wider `criminality_table` JSON endpoint this row originally investigated (year=2016…2025,
    monthly, by NIS with an undecoded `_4` suffix) is UNCHANGED from the earlier note: still
    unreachable from any network this pipeline controls, still undecoded, still not loaded. Only the
-   single burglary-rate snapshot the maintainer fetched by hand is live.
-3. Whether next year's equivalent file will use the current commune map, closing the 13-commune gap,
-   or continue lagging it. Not knowable until a second year's file exists to compare.
+   four rate snapshots the maintainer fetched by hand are live.
+4. Whether next year's equivalent files will use the current commune map, closing the 13-commune
+   gap, or continue lagging it. Not knowable until a second year's file exists to compare.
 
 ## Approved sources
 
