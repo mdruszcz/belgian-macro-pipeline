@@ -1,0 +1,18 @@
+id: CAS_LABOUR_FORCE
+name:
+  en: Labour force (15-64)
+  fr: Population active (15-64 ans)
+  nl: Beroepsactieve bevolking (15-64 jaar)
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents aged 15-64 who are employed or unemployed (Census 2021, table T01_CAS1564,
+    category 1 'Beroepsactieven'). The EU Labour Force Survey's standard working-age population,
+    used here as the denominator for UNEMPLOYMENT_RATE. Excludes retirees, students and other
+    inactive residents, who are INACTIVE_POPULATION.
+display: null

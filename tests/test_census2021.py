@@ -18,7 +18,14 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from sync_census2021 import EXTRACTS, NIS_COLUMN, PERIOD, _read_extract  # noqa: E402
+from sync_census2021 import (  # noqa: E402
+    CAS_TABLE,
+    EXTRACTS,
+    NIS_COLUMN,
+    PERIOD,
+    _read_block_table,
+    _read_extract,
+)
 
 REPO = Path(__file__).resolve().parents[1]
 CENSUS_DIR = REPO / "data" / "raw" / "statbel" / "census2021"
@@ -50,7 +57,12 @@ def test_the_committed_store_covers_every_commune_for_every_indicator():
     for row in rows:
         by_indicator.setdefault(row["indicator_id"], set()).add(row["geo_id"])
 
-    assert set(by_indicator) == set(EXTRACTS), "stored indicators differ from EXTRACTS"
+    # CAS_* indicators come from a second file with a different shape
+    # (_read_block_table, not the hypercube _read_extract), added alongside
+    # EXTRACTS rather than folded into it -- see CAS_TABLE in
+    # sync_census2021.py.
+    expected_ids = {*EXTRACTS, *CAS_TABLE["columns"].values()}
+    assert set(by_indicator) == expected_ids, "stored indicators differ from EXTRACTS + CAS_TABLE"
 
     for indicator_id, geos in sorted(by_indicator.items()):
         # POP_NON_EU_NATIONALS is the one legitimate gap: Herstappe (78
@@ -182,3 +194,72 @@ def test_the_nis_column_carries_real_codes_not_names():
     totals = _read_extract(CENSUS_DIR / "TF_CENSUS_2021_HC03_1.xlsx", "MS_POP", {})
     assert NIS_COLUMN == "CD_REFNIS_LVL_4"
     assert all(code.isdigit() and len(code) == 5 for code in totals)
+
+
+# ── the CAS employment-status block table (a different file shape) ─────────
+
+# The full set of commune NIS codes visible in the CAS table (583 blocks
+# before filtering), used only to prove the geography-table filter actually
+# removes the non-commune ones -- not a claim about which communes exist.
+_CAS_NONCOMMUNE_CODES_SEEN = {"11000", "10000", "01000", "20001", "20002"}
+
+
+@raw_available
+def test_block_table_reconciles_to_belgiums_real_2021_unemployment():
+    """Belgium's 2021 census unemployment rate (ages 15-64) is 8.61%, and the
+    labour force must equal employed plus unemployed exactly -- both
+    reconciliations a mis-read column would break silently."""
+    import sqlite3
+
+    from export_aggregates_csv import _geography  # noqa: PLC0415
+
+    conn = sqlite3.connect(f"file:{REPO / 'data' / 'belgian_macro.db'}?mode=ro", uri=True)
+    try:
+        _parents, _levels, _names, _windows, nis = _geography(conn)
+        commune_codes = {
+            code
+            for code, in conn.execute(
+                "SELECT nis_code FROM geographies WHERE level = 'municipality'"
+            )
+        }
+    finally:
+        conn.close()
+
+    result = _read_block_table(
+        CENSUS_DIR / CAS_TABLE["file"], CAS_TABLE["sheet"], CAS_TABLE["columns"], commune_codes
+    )
+    labour_force = sum(result["CAS_LABOUR_FORCE"].values())
+    employed = sum(result["CAS_EMPLOYED"].values())
+    unemployed = sum(result["CAS_UNEMPLOYED"].values())
+
+    assert labour_force == 5_376_113
+    assert employed + unemployed == labour_force
+    assert round(unemployed / labour_force * 100, 2) == 8.61
+
+
+@raw_available
+def test_block_table_excludes_country_region_and_province_rows():
+    """The regression for the bug this loader actually had: the sheet
+    reports every geography level in one table, and Flemish/Walloon
+    Brabant's split province codes (20001/20002) do not end in '000', so a
+    digit-pattern filter missed them -- 57 non-commune rows landed under a
+    commune-only indicator on the first run."""
+    commune_codes = {f"{n:05d}" for n in range(11001, 11058)}  # a plausible-looking subset
+    result = _read_block_table(
+        CENSUS_DIR / CAS_TABLE["file"], CAS_TABLE["sheet"], CAS_TABLE["columns"], commune_codes
+    )
+    seen = set(result["CAS_LABOUR_FORCE"])
+    assert not (
+        seen & _CAS_NONCOMMUNE_CODES_SEEN
+    ), f"non-commune codes leaked through: {seen & _CAS_NONCOMMUNE_CODES_SEEN}"
+
+
+@raw_available
+def test_block_table_column_rename_fails_loudly():
+    with pytest.raises(ValueError, match="missing expected column"):
+        _read_block_table(
+            CENSUS_DIR / CAS_TABLE["file"],
+            CAS_TABLE["sheet"],
+            {"No such column": "X"},
+            {"11001"},
+        )

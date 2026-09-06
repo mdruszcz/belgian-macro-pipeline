@@ -1,0 +1,19 @@
+id: CAS_UNEMPLOYED
+name:
+  en: Unemployed population (15-64)
+  fr: Population au chômage (15-64 ans)
+  nl: Werkloze bevolking (15-64 jaar)
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents aged 15-64 who are unemployed (Census 2021, table T01_CAS1564, category 1.2
+    'Werklozen'). CAS_LABOUR_FORCE minus CAS_EMPLOYED, verified to reconcile exactly.
+    UNEMPLOYMENT_RATE is this over CAS_LABOUR_FORCE, computed rather than stored so a correction
+    to either count propagates (CLAUDE.md rule 6). Belgium 2021: 8.61% -- the correct order of
+    magnitude for a year still affected by the pandemic.
+display: null

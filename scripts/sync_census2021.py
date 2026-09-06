@@ -135,6 +135,35 @@ EXTRACTS = {
     },
 }
 
+# T01_CAS_AGE_BE_NL.XLSX is a DIFFERENT file shape from the hypercube EXTRACTS
+# above -- a per-table workbook, one NIS block of three rows (Mannen/Vrouwen/
+# Totaal) per geography, rather than one flat row per (geo, category). Despite
+# the "BE" in the filename (Statbel's convention for "national report", not
+# "national-only geography" -- misleading, and worth knowing for the next
+# maintainer download) it drills to commune: 583 NIS-6 codes in the sheet.
+#
+# CAS = "arbeidsmarktsituatie" (labour-market situation), not "civil status"
+# as the maintainer's naming-convention note first guessed -- corrected here
+# from the file's own contents, not from documentation.
+#
+# The 15-64 sheet is used, matching the EU Labour Force Survey's standard
+# working-age population, so the resulting unemployment rate is comparable to
+# published EU/Eurostat figures rather than an unusual age cut. Verified
+# against the file's own Belgium total before trusting any commune row: 8.61%
+# (462,991 unemployed of 5,376,113 in the labour force) -- the correct order
+# of magnitude for 2021, a year still affected by the pandemic.
+CAS_TABLE = {
+    "file": "T01_CAS_AGE_BE_NL.XLSX",
+    "sheet": "CENSUS_T01_2021_BE_CAS1564_2021",
+    # column header (as it appears in the file) -> indicator_id
+    "columns": {
+        "1. Beroepsactieven": "CAS_LABOUR_FORCE",
+        "1.1. Werkzame personen": "CAS_EMPLOYED",
+        "1.2. Werklozen": "CAS_UNEMPLOYED",
+        "2. Inactieven": "CAS_INACTIVE",
+    },
+}
+
 NIS_COLUMN = "CD_REFNIS_LVL_4"
 
 
@@ -172,6 +201,85 @@ def _read_extract(path: Path, measure: str, filters: dict) -> dict[str, float]:
     return totals
 
 
+def _commune_nis_codes(conn: sqlite3.Connection) -> set[str]:
+    """Every NIS code that has ever named a municipality -- current or
+    historical, since Census 2021 uses the 2019-2024 geography and this
+    table's block filter must recognise those codes too."""
+    return {
+        row[0]
+        for row in conn.execute("SELECT nis_code FROM geographies WHERE level = 'municipality'")
+    }
+
+
+def _read_block_table(
+    path: Path, sheet_name: str, columns: dict[str, str], commune_nis_codes: set[str]
+) -> dict[str, dict]:
+    """Parse T01_CAS_AGE_BE_NL.XLSX's block layout: one geography per THREE
+    rows (Mannen, Vrouwen, Totaal), with the NIS code and geography name
+    given only on the first row of each block.
+
+    Returns indicator_id -> {nis: value}, taking only the 'Totaal' row of
+    each block -- the per-sex breakdown is not loaded, matching the rest of
+    this file's raw-counts-only, no-second-source-of-truth approach.
+    """
+    import openpyxl
+
+    workbook = openpyxl.load_workbook(path, read_only=True)
+    if sheet_name not in workbook.sheetnames:
+        raise ValueError(
+            f"{path.name} has no sheet {sheet_name!r}. Its sheets are "
+            f"{workbook.sheetnames}. Refusing to guess a replacement (CLAUDE.md rule 13)."
+        )
+    sheet = workbook[sheet_name]
+    rows = list(sheet.iter_rows(values_only=True))
+
+    # Row 3 (0-indexed) holds the column headers, offset by three leading
+    # blank/label columns (NIS, name, sex) -- verified against this file's
+    # actual layout, not assumed from a generic table shape.
+    header = rows[3]
+    missing = [c for c in columns if c not in header]
+    if missing:
+        raise ValueError(
+            f"{path.name}!{sheet_name} is missing expected column(s) {missing}. Its "
+            f"columns are {header}. Refusing to guess a replacement (CLAUDE.md rule 13) "
+            "-- if Statbel restructured this table, CAS_TABLE must be re-derived."
+        )
+    col_idx = {label: header.index(label) for label in columns}
+
+    out: dict[str, dict[str, float]] = {indicator_id: {} for indicator_id in columns.values()}
+    current_nis: str | None = None
+    for row in rows[4:]:
+        nis, _name, sex = row[0], row[1], row[2]
+        if nis is not None:
+            # This table reports EVERY geography level in one sheet --
+            # country, region, province, arrondissement AND commune -- unlike
+            # the hypercube EXTRACTS files, which are pre-filtered to commune
+            # rows only. Verified: 638 NIS blocks total, only 583 of them
+            # commune-shaped. Without this filter, resolve_geo happily
+            # resolves the higher-level codes too (they are valid NIS codes,
+            # just not communes) and silently writes an arrondissement's
+            # figure into an indicator this pipeline treats as commune-only
+            # everywhere else -- caught by inspecting the loaded rows before
+            # trusting the count, not by a crash: 57 non-commune rows landed
+            # under CAS_LABOUR_FORCE on the first run.
+            #
+            # Filtered against the geographies table's own commune codes,
+            # NOT a "last three digits are zero" heuristic: that heuristic
+            # missed Flemish/Walloon Brabant's split province codes 20001 and
+            # 20002, which do not end in 000 and were caught only by
+            # inspecting the resolved rows' actual geography level.
+            nis_str = str(nis) if isinstance(nis, str) and nis.isdigit() else None
+            current_nis = nis_str if nis_str in commune_nis_codes else None
+        if current_nis is None or sex != "Totaal":
+            continue
+        for label, indicator_id in columns.items():
+            value = row[col_idx[label]]
+            if value is not None:
+                out[indicator_id][current_nis] = float(value)
+    workbook.close()
+    return out
+
+
 def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) -> None:
     conn.execute(
         """
@@ -186,7 +294,7 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) ->
             "confirmed to grant commercial reuse",
         ),
     )
-    for indicator_id in EXTRACTS:
+    for indicator_id in (*EXTRACTS, *CAS_TABLE["columns"].values()):
         ind = indicator_configs[indicator_id]
         conn.execute(
             """
@@ -264,6 +372,40 @@ def sync(db_path: Path, census_dir: Path, reference_rows_only: bool = False) -> 
             )
         print(f"  {indicator_id:36} {len(totals):>4} communes")
 
+    # T01_CAS_AGE_BE_NL.XLSX: a different file, a different parser
+    # (_read_block_table), but the same load/resolve/write path -- one
+    # dataset added to the loop, not a second copy of it.
+    cas_path = census_dir / CAS_TABLE["file"]
+    if not cas_path.is_file():
+        raise FileNotFoundError(
+            f"{cas_path} not found. Census 2021 files are hand-downloaded from "
+            "statbel.fgov.be -- see docs/features/manual_sources.md."
+        )
+    cas_totals = _read_block_table(
+        cas_path, CAS_TABLE["sheet"], CAS_TABLE["columns"], _commune_nis_codes(conn)
+    )
+    for indicator_id, totals in cas_totals.items():
+        rows_read += len(totals)
+        for nis, value in sorted(totals.items()):
+            try:
+                geo_id = resolve_geo(conn, nis, PERIOD)
+            except UnknownGeographyError:
+                unresolved.append((nis, indicator_id))
+                continue
+            rows_written += upsert_observation(
+                conn,
+                indicator_id=indicator_id,
+                geo_id=geo_id,
+                period=PERIOD,
+                period_start=period_start,
+                period_end=period_end,
+                value=value,
+                status="final",
+                vintage=now,
+                fetch_run_id=fetch_run_id,
+            )
+        print(f"  {indicator_id:36} {len(totals):>4} communes")
+
     conn.execute(
         "UPDATE fetch_runs SET finished_at = ?, rows_read = ?, rows_written = ? "
         "WHERE fetch_run_id = ?",
@@ -296,7 +438,8 @@ def main() -> None:
     args = ap.parse_args()
     read, written = sync(args.db and Path(args.db), args.census_dir, args.reference_rows_only)
     if args.reference_rows_only:
-        print(f"Reference rows ensured for: {', '.join(sorted(EXTRACTS))}")
+        all_ids = sorted({*EXTRACTS, *CAS_TABLE["columns"].values()})
+        print(f"Reference rows ensured for: {', '.join(all_ids)}")
     else:
         print(f"Read {read} commune values, wrote {written} new vintage(s).")
 

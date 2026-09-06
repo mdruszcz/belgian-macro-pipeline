@@ -471,16 +471,19 @@ LocalUI.lastUpdated = function(commune){
   return dates.length ? dates[dates.length - 1] : null;
 };
 
-// The headline row. Two entries have no key: the roadmap wants them and this
-// pipeline has no municipal source for either, so they render as explicit
-// gaps rather than being quietly dropped.
+// The headline row. All six of the roadmap's figures are real as of the
+// Census 2021 employment-status and real-estate loads -- unemployment and
+// house price were the two structural gaps until then. Each still renders
+// as an honest gap on a commune with no value for a given year (a `key`
+// with no data falls through to `noValue` below), which is different from
+// the two being absent from the whole pipeline.
 LocalUI.HEADLINE_SPEC = [
   {key: 'POPULATION_BY_COMMUNE'},
   {key: 'POPULATION_CHANGE_5Y'},
   {key: 'AVG_NET_TAXABLE_INCOME'},
   {key: 'LOCAL_UNITS_BY_COMMUNE'},
-  {labelKey: 'unemployment', whyKey: 'noUnemployment'},
-  {labelKey: 'housingPrice', whyKey: 'noHousingPrice'},
+  {key: 'UNEMPLOYMENT_RATE_COM'},
+  {key: 'AVG_HOUSE_PRICE'},
 ];
 
 LocalUI.buildHeadlines = function(commune, lang){

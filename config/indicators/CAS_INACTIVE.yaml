@@ -1,0 +1,16 @@
+id: CAS_INACTIVE
+name:
+  en: Inactive population (15-64)
+  fr: Population inactive (15-64 ans)
+  nl: Inactieve bevolking (15-64 jaar)
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents aged 15-64 who are neither employed nor unemployed -- retirees, students and
+    others outside the labour force (Census 2021, table T01_CAS1564, category 2 'Inactieven').
+display: null
