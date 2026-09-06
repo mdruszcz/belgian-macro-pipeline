@@ -159,6 +159,10 @@
     caption-side:bottom;text-align:left;font-size:.7rem;color:var(--text-faint);
     padding-top:6px;line-height:1.5;
   }
+  .pctile{margin-top:10px;display:flex;flex-direction:column;gap:3px}
+  .pctile .line{font-size:.8rem}
+  .pctile .line b{font-weight:600}
+  .pctile .note{color:var(--text-faint);font-size:.72rem}
   .theme-toggle{position:static; margin:0 0 16px; width:max-content}
   }
 </style>
@@ -408,6 +412,60 @@ LocalUI.comparisonRows = function(entry){
   return rows;
 };
 
+// A percentile is unfalsifiable without its universe, so every line carries
+// the peer count and the reference period. Where the peer set was too small
+// for a percentile to be honest (Brussels-Capital's 19 communes), the
+// exporter withholds `pct` and this states the rank instead -- "4th of 19" is
+// exactly as informative and claims nothing false.
+//
+// `ordinal` is used rather than the bare number because "499th of 581" reads
+// as a position while "499 of 581" reads as a quantity.
+LocalUI.ordinal = function(n){
+  const mod100 = n % 100;
+  if(mod100 >= 11 && mod100 <= 13) return n + 'th';
+  return n + ({1: 'st', 2: 'nd', 3: 'rd'}[n % 10] || 'th');
+};
+
+LocalUI.percentileLines = function(entry){
+  const pos = entry && entry.percentile;
+  if(!pos) return [];
+  const out = [];
+  for(const scope of ['national', 'regional']){
+    const p = pos[scope];
+    if(!p) continue;
+    const where = scope === 'national' ? 'in Belgium' : `in ${p.scope_name}`;
+    if(p.pct === null || p.pct === undefined){
+      out.push({
+        text: `${LocalUI.ordinal(p.rank)} of ${p.peers} ${where}`,
+        note: `too few communes (${p.peers}) for a meaningful percentile`,
+        period: p.period,
+      });
+    } else if(p.rank === 1 || p.rank === p.peers){
+      // The extremes must not be stated as a percentile. Under the rank
+      // definition (100 x (below + 0.5 x equal) / N) the highest of 565
+      // communes scores 99.91 and the lowest 0.09, which round to "100th"
+      // and "0th" -- both impossible, and both a claim the data does not
+      // support. Highest and lowest are unambiguous and need no rounding.
+      out.push({
+        text: `${p.rank === 1 ? 'Highest' : 'Lowest'} of ${p.peers} communes ${where}`,
+        // No ordinal suffix on a decimal: "0.1th" is not English.
+        note: `percentile ${p.pct.toLocaleString(undefined, {maximumFractionDigits: 1})}`,
+        period: p.period,
+      });
+    } else {
+      // Clamped to 1..99 for the same reason: a value of 99.6 must not be
+      // rounded up into a percentile nobody can occupy.
+      const shown = Math.min(99, Math.max(1, Math.round(p.pct)));
+      out.push({
+        text: `${LocalUI.ordinal(shown)} percentile ${where}`,
+        note: `${LocalUI.ordinal(p.rank)} of ${p.peers} communes`,
+        period: p.period,
+      });
+    }
+  }
+  return out;
+};
+
 if(typeof module !== 'undefined') module.exports = LocalUI;
 </script>
 
@@ -548,6 +606,17 @@ function renderAttribution(commune){
 // and says so rather than borrowing one.
 // One comparison table for an indicator, or nothing if there is no
 // reference value to compare against.
+// Percentile lines with their universe -- the roadmap's own requirement that
+// "a percentile without a stated universe is unfalsifiable, and the first
+// sceptical directeur financier will ask".
+function percentileHTML(entry){
+  const lines = LocalUI.percentileLines(entry);
+  if(!lines.length) return '';
+  return `<div class="pctile">` + lines.map(l =>
+    `<div class="line"><b>${l.text}</b> <span class="note">— ${l.note}, ${l.period}</span></div>`
+  ).join('') + `</div>`;
+}
+
 function comparisonHTML(entry, unit){
   const rows = LocalUI.comparisonRows(entry);
   if(rows.length < 2) return '';
@@ -607,7 +676,8 @@ function renderDemography(commune){
   renderChartOrNoData(chartHost, commune, 'POPULATION_BY_COMMUNE');
 
   const popCmp = document.createElement('div');
-  popCmp.innerHTML = comparisonHTML(commune.indicators['POPULATION_BY_COMMUNE'], 'count');
+  popCmp.innerHTML = comparisonHTML(commune.indicators['POPULATION_BY_COMMUNE'], 'count')
+    + percentileHTML(commune.indicators['POPULATION_BY_COMMUNE']);
   body.appendChild(popCmp);
 
   const bands = ['POPULATION_AGE_0_14', 'POPULATION_AGE_15_64', 'POPULATION_AGE_65_PLUS'];
@@ -638,7 +708,8 @@ function renderIncome(commune){
     'Fiscal-income data collection is deferred or absent for this commune (2025-merger successors have no fiscal history yet — see fiscal_income.md).');
 
   const incCmp = document.createElement('div');
-  incCmp.innerHTML = comparisonHTML(commune.indicators['AVG_NET_TAXABLE_INCOME'], 'eur');
+  incCmp.innerHTML = comparisonHTML(commune.indicators['AVG_NET_TAXABLE_INCOME'], 'eur')
+    + percentileHTML(commune.indicators['AVG_NET_TAXABLE_INCOME']);
   body.appendChild(incCmp);
 
   const fiscalCodes = ['FISCAL_TOT_NET_TAXABLE_INC', 'FISCAL_TOT_MUNICIP_TAXES', 'FISCAL_TOT_TAXES', 'FISCAL_NBR_NON_ZERO_INC'];
