@@ -131,6 +131,37 @@ sections:
       - CAS_UNEMPLOYED
       - CAS_INACTIVE
 
+  - id: safety
+    label: {en: Safety, fr: Sécurité, nl: Veiligheid}
+    blurb:
+      en: >
+        Recorded-crime rates from the federal police, each per 10,000 of its own denominator
+        (dwellings, cars, vehicles or households — never population), and each resolved onto a
+        single fixed pre-2025-merger commune map regardless of the year shown, since that is how
+        the source itself publishes its own history. The most recent year of each series is
+        provisional; not comparable across provinces/regions/Belgium since a rate like this cannot
+        be honestly aggregated.
+      fr: >
+        Taux d’infractions enregistrées par la police fédérale, chacun rapporté à son propre
+        dénominateur (logements, voitures, véhicules ou ménages — jamais la population), et chacun
+        calculé sur une carte communale fixe antérieure aux fusions de 2025, quelle que soit
+        l’année affichée, car c’est ainsi que la source publie elle-même son historique. L’année la
+        plus récente de chaque série est provisoire ; non comparable à la province/région/Belgique
+        puisqu’un tel taux ne peut être agrégé honnêtement.
+      nl: >
+        Cijfers over geregistreerde criminaliteit van de federale politie, telkens per 10 000 van
+        hun eigen noemer (woningen, auto’s, voertuigen of huishoudens — nooit bevolking), en telkens
+        berekend op één vaste gemeentekaart van vóór de fusies van 2025, ongeacht het weergegeven
+        jaar, want zo publiceert de bron zelf haar eigen geschiedenis. Het meest recente jaar van
+        elke reeks is voorlopig; niet vergelijkbaar met provincie/gewest/België aangezien zo’n
+        percentage niet eerlijk kan worden opgeteld.
+    headline: HOUSE_BURGLARIES_PER_10K
+    indicators:
+      - HOUSE_BURGLARIES_PER_10K
+      - CAR_THEFT_PER_10K
+      - THEFT_FROM_VEHICLE_PER_10K
+      - DOMESTIC_VIOLENCE_PER_10K
+
   - id: mobility
     label: {en: Mobility, fr: Mobilité, nl: Mobiliteit}
     unavailable:

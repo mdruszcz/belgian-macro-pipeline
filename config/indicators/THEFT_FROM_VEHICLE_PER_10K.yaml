@@ -1,0 +1,25 @@
+id: THEFT_FROM_VEHICLE_PER_10K
+name:
+  en: Theft from a vehicle (per 10,000 vehicles)
+  fr: Vol dans ou sur un véhicule (par 10 000 véhicules)
+  nl: Diefstal uit of aan een voertuig (per 10 000 voertuigen)
+unit: per_10000_vehicles
+frequency: A
+source_id: police
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 400
+description:
+  en: >
+    Thefts from inside or off a vehicle, per 10,000 registered vehicles, as published by the
+    federal police's stats-pol tool (police.be), which cites "Parc de véhicules à moteur -
+    SPF Economie" (Statbel's motor-vehicle fleet) as the rate's denominator -- the broader
+    vehicle fleet, not cars alone, unlike CAR_THEFT_PER_10K. Taken as-is from a rate the source
+    itself computes; see HOUSE_BURGLARIES_PER_10K's description for the shared reasoning this
+    pipeline applies to every stats-pol rate: no underlying count to recompute it from (not
+    derived, CLAUDE.md rule 6 does not apply), not aggregatable above commune level
+    (is_additive=false, aggregation_method=not_applicable, docs/decisions/0003-aggregation-rule.md),
+    resolved against a single fixed pre-2025-merger geography for every year regardless of that
+    year's own map, and the most recent year loaded as "provisional" with every earlier year
+    "final".
+display: null

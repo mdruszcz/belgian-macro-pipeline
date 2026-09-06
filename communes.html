@@ -210,7 +210,7 @@
 </div>
   <header>
     <h1>Commune Data</h1>
-    <p class="subtitle">Every municipal-level observation in <code>data/communes_history.csv</code> &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. See <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
+    <p class="subtitle">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. See <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
   </header>
 
   <div class="stats">
@@ -263,24 +263,30 @@
     permit commercial reuse and require the source and this date &mdash; <em>not</em> under
     CC BY 4.0, which does not apply to this source. Cells ONEM withholds for privacy
     (fewer than 10 people) are shown as suppressed, never as zero.
+    <br><br>
+    <strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police
+    F&eacute;d&eacute;rale / Federale Politie</a> (Direction de l'information polici&egrave;re et
+    des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rate
+    columns. Reused under the federal police's own condition, quoted in full in
+    <code>docs/data_catalog.md</code>: correctly credit the source as stated here. That condition
+    says nothing about permitted uses beyond attribution &mdash; <em>not</em> CC BY 4.0, which does
+    not apply to this source, and not a stated grant of commercial reuse either, unlike Statbel and
+    ONEM above. Every one of these rates is resolved onto the commune boundaries in force through
+    2024, not the current map, for every year shown &mdash; including years long before that map
+    existed, since that is how the source itself publishes its own history. The most recent year of
+    each series is marked provisional; its exact reporting window is not stated by the source.
   </div>
 
   <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>. Columns marked <span class="pill derived" style="vertical-align:1px">Derived</span> are computed on export from stored figures (see <code>docs/features/derived_indicators.md</code>), never a second source of truth; hover any value for its full year-by-year history.</footer>
 </div>
 
 <script>
-let RAW = [];         // long-format rows straight from the CSV
 let COMMUNES = [];    // one object per commune, indicator values pivoted onto it
 let INDICATOR_CODES = []; // discovered from the data, in first-seen order
 let INDICATOR_META = {};  // code -> {name, unit, years: sorted list of years the indicator has ANY row for}
 let YEARS = [];       // every distinct year across the whole dataset, sorted ascending
 let selectedYear = null;
 let sortKey = 'name_en', sortDir = 1;
-
-// "2023-Q4" -> "2023", "2026" -> "2026" -- the year a period belongs to,
-// for the single cross-indicator Year selector. Every period in this data
-// starts with its 4-digit year, so a slice is exact, not a guess.
-function yearOf(period){ return period.slice(0,4); }
 
 function formatValue(value, unit){
   if(value === '' || value === undefined || value === null) return '';
@@ -290,35 +296,6 @@ function formatValue(value, unit){
   if(unit === 'eur') return '\u20ac' + body;
   if(unit && unit.startsWith('percent')) return body + '%';
   return body;
-}
-
-function parseCSV(text){
-  // Quote-aware (RFC 4180) -- see all_data.html for why this isn't a naive split.
-  const rows = [];
-  let row = [], field = '', inQuotes = false;
-  for(let i=0;i<text.length;i++){
-    const c = text[i];
-    if(inQuotes){
-      if(c === '"'){
-        if(text[i+1] === '"'){ field += '"'; i++; }
-        else inQuotes = false;
-      } else field += c;
-    } else {
-      if(c === '"') inQuotes = true;
-      else if(c === ','){ row.push(field); field=''; }
-      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
-      else if(c === '\r'){ /* skip */ }
-      else field += c;
-    }
-  }
-  if(field.length || row.length){ row.push(field); rows.push(row); }
-  if(!rows.length) return [];
-  const header = rows[0];
-  return rows.slice(1).filter(r => r.length === header.length).map(r => {
-    const o = {};
-    header.forEach((h,i) => o[h] = r[i]);
-    return o;
-  });
 }
 
 // The export writes STATUS_TO_LETTER's single letters, not the schema's
@@ -337,54 +314,6 @@ function statusPill(s){
   if(s === 'derived') return '<span class="pill derived">Derived</span>';
   if(!s) return '';
   return `<span class="pill other">${s}</span>`;
-}
-
-// Long rows (one per commune x indicator x period) -> one row per commune,
-// with each indicator's WHOLE history attached under its own code, keyed by
-// year. This is what lets a second municipal indicator -- or a tenth year of
-// an existing one -- show up with no change to this page: the Year selector
-// and the indicator columns are both built from whatever the CSV contains.
-function pivot(rows){
-  const byGeo = new Map();
-  const codesSeen = [];
-  const meta = {};   // code -> {name, unit, years: Set}
-  const years = new Set();
-
-  for(const r of rows){
-    if(!byGeo.has(r.geo_id)){
-      byGeo.set(r.geo_id, {
-        geo_id: r.geo_id, nis_code: r.nis_code,
-        name_en: r.name_en, name_fr: r.name_fr, name_nl: r.name_nl,
-        region: r.region, province: r.province, arrondissement: r.arrondissement,
-        indicators: {},
-      });
-    }
-    const c = byGeo.get(r.geo_id);
-    if(!codesSeen.includes(r.indicator_code)) codesSeen.push(r.indicator_code);
-    if(!(r.indicator_code in c.indicators)) c.indicators[r.indicator_code] = { byYear: {} };
-
-    const year = yearOf(r.period);
-    years.add(year);
-    c.indicators[r.indicator_code].byYear[year] = {
-      value: r.value, period: r.period, status: r.status,
-    };
-
-    if(!meta[r.indicator_code]) meta[r.indicator_code] = { name: r.indicator_name, unit: r.unit, years: new Set() };
-    meta[r.indicator_code].years.add(year);
-  }
-
-  const metaOut = {};
-  for(const code of Object.keys(meta)){
-    const ys = Array.from(meta[code].years).sort();
-    metaOut[code] = { name: meta[code].name, unit: meta[code].unit, minYear: ys[0], maxYear: ys[ys.length-1] };
-  }
-
-  return {
-    communes: Array.from(byGeo.values()),
-    codes: codesSeen,
-    meta: metaOut,
-    years: Array.from(years).sort(),
-  };
 }
 
 function buildHeader(){
@@ -471,8 +400,18 @@ function render(){
       const ind = c.indicators[code];
       const unit = INDICATOR_META[code]?.unit;
       const cell = ind?.byYear[selectedYear];
-      if(!cell || cell.value === ''){
+      if(!cell){
         return `<td class="val"><span class="pill na">n/a</span></td>`;
+      }
+      if(cell.value === ''){
+        // A suppressed cell has an EMPTY value by construction -- ONEM's
+        // '<10' is stored as status 'S' with no value, not a zero (see
+        // docs/data_catalog.md's ONEM/RVA row). Checking value === '' before
+        // status here would show the same generic "n/a" a truly-absent cell
+        // gets, silently erasing the distinction the suppressed status
+        // exists to carry: "we know this is small and are withholding it"
+        // versus "we have no reading at all".
+        return `<td class="val">${statusPill(cell.status) || '<span class="pill na">n/a</span>'}</td>`;
       }
       const display = formatValue(cell.value, unit);
       // Full history in the tooltip -- the value on screen is one year,
@@ -516,11 +455,19 @@ document.getElementById('yearFilter').addEventListener('change', e => {
 async function load(){
   const statusEl = document.getElementById('status');
   try{
-    const res = await fetch('data/communes_history.csv?t=' + Date.now());
+    // scripts/export_communes_table_json.py precomputes exactly what this
+    // page used to build client-side by fetching the raw 32 MB
+    // communes_history.csv and running parseCSV()+pivot() on it in every
+    // visitor's browser -- 162,272 rows re-deduplicated on every page load,
+    // for a shape that never changes between one visitor and the next. This
+    // fetches the already-pivoted result: same shape, same year-collapse
+    // rule (a quarterly indicator's last-in-file quarter still wins per
+    // calendar year), just computed once at export time instead of once
+    // per visitor. communes_history.csv itself is untouched and still
+    // published, for a researcher who wants the raw rows.
+    const res = await fetch('data/communes_table.json?t=' + Date.now());
     if(!res.ok) throw new Error('HTTP ' + res.status);
-    RAW = parseCSV(await res.text());
-
-    const pivoted = pivot(RAW);
+    const pivoted = await res.json();
     COMMUNES = pivoted.communes;
     INDICATOR_CODES = pivoted.codes;
     INDICATOR_META = pivoted.meta;
@@ -534,7 +481,7 @@ async function load(){
     document.getElementById('statIndicators').textContent = INDICATOR_CODES.length;
     document.getElementById('statYears').textContent =
       YEARS.length ? (YEARS[0] === YEARS[YEARS.length-1] ? YEARS[0] : `${YEARS[0]}\u2013${YEARS[YEARS.length-1]}`) : '—';
-    const latest = RAW.reduce((m,r) => r.fetched_at > m ? r.fetched_at : m, '');
+    const latest = pivoted.latest_fetched_at || '';
     document.getElementById('statUpdated').textContent = latest ? latest.slice(0,10) : '—';
     // Same date, in the attribution block -- required there by licence, not
     // merely informative. See docs/data_catalog.md.
