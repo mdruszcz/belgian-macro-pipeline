@@ -29,6 +29,7 @@ from export_aggregates_csv import (  # noqa: E402
     _observations,
     _period_start,
     _universe_resolver,
+    canonical,
     export_aggregates_csv,
 )
 
@@ -196,3 +197,73 @@ def test_the_limburg_figure_the_naive_method_got_wrong(tmp_path):
     # All 42 of its 2023 communes contributed, so this is not a partial total
     # that happens to look right.
     assert limburg[0]["coverage_n"] == limburg[0]["coverage_of"] == "42"
+
+
+@pytest.mark.skipif(not DB.is_file(), reason="committed database not present")
+def test_a_versioned_ancestor_is_the_same_geography_as_its_current_self():
+    """Regression: Antwerp province was short two communes at 100% coverage.
+
+    The geographies table records historical VERSIONS of an arrondissement or
+    province whose boundaries changed -- `be:prov:10000@1977-01-01` beside the
+    current `be:prov:10000`. Borsbeek and Zwijndrecht hang off the versioned
+    Antwerp arrondissement, so aggregating by raw geo_id sent their figures to
+    a separate Antwerp province and left the real one EUR 0.737bn short of
+    2023 taxable income -- while its coverage read a confident 67/67.
+    """
+    assert canonical("be:prov:10000@1977-01-01") == "be:prov:10000"
+    assert canonical("be:prov:10000") == "be:prov:10000"
+    assert canonical(None) is None
+
+    conn = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+    try:
+        versioned = [
+            row[0] for row in conn.execute("SELECT geo_id FROM geographies WHERE geo_id LIKE '%@%'")
+        ]
+        parents, levels, _names, _windows, _nis = _geography(conn)
+    finally:
+        conn.close()
+
+    # The rows exist -- if a future geography reload stops producing them, this
+    # test is no longer guarding anything and should be revisited rather than
+    # silently passing.
+    assert versioned, "no versioned geography rows found; the collapse is untested"
+
+    # After canonicalisation no versioned id survives, and every parent
+    # pointer targets a geography that exists in the same map.
+    assert not [g for g in parents if "@" in g]
+    assert not [p for p in parents.values() if p and "@" in p]
+    for geo_id, parent in parents.items():
+        if parent is not None:
+            assert parent in levels, f"{geo_id} parents to unknown {parent}"
+
+
+@pytest.mark.skipif(
+    not DB.is_file() or not all(s.is_file() for s in STORES),
+    reason="committed stores not present",
+)
+def test_every_province_matches_the_independently_computed_figure(tmp_path):
+    """The whole Correction 2 table from docs/features/comparison.md, whose
+    "correct" column was computed by a separate ad-hoc script that matched
+    provinces by NAME rather than by geo_id. Two independent routes to the
+    same six numbers; the geo_id route was wrong for Antwerp until the
+    versioned-ancestor collapse landed."""
+    out = tmp_path / "aggregates.csv"
+    export_aggregates_csv(DB, out, STORES)
+    with out.open(encoding="utf-8", newline="") as fh:
+        rows = list(csv.DictReader(fh))
+
+    expected_bn = {
+        "be:prov:70000": 21.278,  # Limburg
+        "be:prov:40000": 39.875,  # East Flanders
+        "be:prov:80000": 6.759,  # Luxembourg
+        "be:prov:30000": 29.970,  # West Flanders
+        "be:prov:20001": 32.236,  # Flemish Brabant
+        "be:prov:10000": 46.890,  # Antwerp -- the one that was short
+    }
+    actual = {
+        r["geo_id"]: float(r["value"]) / 1e9
+        for r in rows
+        if r["indicator_code"] == "FISCAL_TOT_NET_TAXABLE_INC" and r["period"] == "2023"
+    }
+    for geo_id, expected in expected_bn.items():
+        assert actual[geo_id] == pytest.approx(expected, abs=0.002), geo_id

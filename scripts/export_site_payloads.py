@@ -161,6 +161,130 @@ def _build_geographies(db_path: Path) -> list[dict]:
     return out
 
 
+def _ancestry(db_path: Path) -> dict[str, list[str]]:
+    """geo_id -> its ancestor geo_ids, nearest first.
+
+    Walked from parent_geo_id over ALL geographies (including historical
+    ones), tolerating a missing level and stopping on a cycle -- the same
+    defence the exporters' own _ancestor_names() applies.
+    """
+    conn = sqlite3.connect(str(db_path))
+    # Canonicalised, matching export_aggregates_csv.py: the geographies table
+    # holds versioned ancestors (be:prov:10000@1977-01-01) whose figures the
+    # aggregate export now folds into the current geography. If the two walks
+    # disagreed, a comparison would silently fail to match and simply not
+    # appear. No CURRENT commune has a versioned parent today -- 34 historical
+    # ones do -- so this is agreement insurance, not a live fix.
+    parents = {
+        geo_id.split("@", 1)[0]: (parent.split("@", 1)[0] if parent else None)
+        for geo_id, parent in conn.execute("SELECT geo_id, parent_geo_id FROM geographies")
+    }
+    conn.close()
+
+    chains: dict[str, list[str]] = {}
+    for geo_id in parents:
+        chain: list[str] = []
+        seen = {geo_id}
+        current = parents.get(geo_id)
+        while current and current not in seen:
+            seen.add(current)
+            chain.append(current)
+            current = parents.get(current)
+        chains[geo_id] = chain
+    return chains
+
+
+def _read_aggregates(csv_path: Path) -> dict[tuple[str, str, str], dict]:
+    """Aggregate values keyed by (geo_id, indicator, period).
+
+    Produced by scripts/export_aggregates_csv.py -- Block L. Read rather than
+    recomputed here, for the same reason every other payload is a reshape of
+    an existing export: one computation, one set of numbers, and no chance of
+    the page disagreeing with the CSV a researcher downloaded.
+    """
+    out: dict[tuple[str, str, str], dict] = {}
+    if not csv_path.is_file():
+        return out
+    with csv_path.open(encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            out[(row["geo_id"], row["indicator_code"], row["period"])] = {
+                "geo_id": row["geo_id"],
+                "level": row["level"],
+                "name": {"en": row["name_en"], "fr": row["name_fr"], "nl": row["name_nl"]},
+                "value": float(row["value"]),
+                "period": row["period"],
+                "coverage": {
+                    "n": int(row["coverage_n"]),
+                    "of": int(row["coverage_of"]),
+                    "pct": float(row["coverage_pct"]),
+                },
+            }
+    return out
+
+
+# Levels shown in the comparison column, nearest first. Arrondissement is
+# computed but deliberately NOT shown -- see docs/features/comparison.md,
+# "The comparison set". A Brussels commune has no province and simply gets
+# two entries instead of three; nothing here assumes a fixed depth.
+COMPARISON_LEVELS = ("province", "region", "country")
+
+
+def _additive_indicators(db_path: Path) -> set[str]:
+    """Indicators that are counts or totals rather than ratios.
+
+    Needed by the page, not just the maths: a commune is PART of its province,
+    so "Antwerp population is -70.7% of Antwerp province" is arithmetically
+    true and useless, while "Antwerp holds 29.3% of its province" is the
+    figure a reader wants. A ratio is the opposite -- it belongs on the same
+    scale as its reference, so the difference is what means something.
+
+    Read from the indicators table rather than inferred from the unit: a
+    total and an average can share the unit `eur`, so the unit cannot carry
+    this. Derived indicators are absent from that table and correctly default
+    to non-additive.
+    """
+    conn = sqlite3.connect(str(db_path))
+    try:
+        return {
+            row[0]
+            for row in conn.execute("SELECT indicator_id FROM indicators WHERE is_additive = 1")
+        }
+    finally:
+        conn.close()
+
+
+def _attach_comparisons(
+    communes: dict[str, dict],
+    aggregates: dict[tuple[str, str, str], dict],
+    ancestry: dict[str, list[str]],
+) -> int:
+    """Attach province/region/Belgium values to each commune's indicators.
+
+    Matched at the commune's OWN latest period for that indicator, never at
+    the aggregate's latest: comparing a commune's 2023 income against
+    Belgium's 2026 would be a different kind of wrong number, and the
+    mismatch would be invisible on screen. If the aggregate does not exist
+    for that exact period, the entry is absent -- the payload format's
+    absent-not-null rule.
+    """
+    attached = 0
+    for commune in communes.values():
+        for indicator_id, entry in commune["indicators"].items():
+            periods = sorted(entry["periods"])
+            if not periods:
+                continue
+            period = periods[-1]
+            comparison = {}
+            for ancestor in ancestry.get(commune["geo_id"], []):
+                agg = aggregates.get((ancestor, indicator_id, period))
+                if agg and agg["level"] in COMPARISON_LEVELS:
+                    comparison[agg["level"]] = agg
+            if comparison:
+                entry["comparison"] = comparison
+                attached += 1
+    return attached
+
+
 def _write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
@@ -183,11 +307,23 @@ def export_site_payloads(
     out_dir: Path,
     build_id: str,
     validation_status: str,
+    aggregates_csv: Path | None = None,
 ) -> dict[str, int]:
     communes = _read_communes_history(communes_history_csv)
     indicators = _read_communes_latest(communes_latest_csv)
     national = _read_national(national_csv)
     geographies = _build_geographies(db_path)
+
+    additive = _additive_indicators(db_path)
+    for commune in communes.values():
+        for indicator_id, entry in commune["indicators"].items():
+            entry["additive"] = indicator_id in additive
+
+    compared = 0
+    if aggregates_csv is not None:
+        compared = _attach_comparisons(
+            communes, _read_aggregates(aggregates_csv), _ancestry(db_path)
+        )
 
     _write_json(out_dir / "national.json", {"geo_id": "be:country", "indicators": national})
 
@@ -208,6 +344,7 @@ def export_site_payloads(
         "build_date": datetime.now(timezone.utc).isoformat(),
         "datasets": {
             "national": {"indicators": len(national)},
+            "comparisons": {"indicator_cells": compared},
             "communes": {"count": len(communes), "indicators": len(indicators)},
             "geographies": {"count": len(geographies)},
         },
@@ -216,6 +353,7 @@ def export_site_payloads(
     _write_json(out_dir / "manifest.json", manifest)
 
     return {
+        "comparisons": compared,
         "national_indicators": len(national),
         "communes": len(communes),
         "indicator_files": len(indicators),
@@ -231,6 +369,11 @@ def main() -> None:
     ap.add_argument("--communes-history", default="data/communes_history.csv")
     ap.add_argument("--communes-latest", default="data/communes_export.csv")
     ap.add_argument("--national", default="data/belgian_macro_export.csv")
+    ap.add_argument(
+        "--aggregates",
+        default="data/aggregates.csv",
+        help="Aggregate CSV from export_aggregates_csv.py; comparisons are omitted if absent",
+    )
     ap.add_argument("--out-dir", default="public/data")
     ap.add_argument("--build-id", default="local")
     ap.add_argument("--validation-status", default="unknown")
@@ -244,10 +387,12 @@ def main() -> None:
         Path(args.out_dir),
         args.build_id,
         args.validation_status,
+        Path(args.aggregates) if args.aggregates else None,
     )
     print(
         f"Exported {counts['communes']} commune payloads, {counts['indicator_files']} "
         f"indicator payloads, {counts['national_indicators']} national indicators, "
+        f"{counts['comparisons']} comparison cells, "
         f"{counts['geographies']} geographies to {args.out_dir}"
     )
 

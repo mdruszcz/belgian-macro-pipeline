@@ -143,7 +143,23 @@
   .theme-toggle button:focus-visible{outline:2px solid var(--focus-ring); outline-offset:-2px}
   @media (max-width:720px){
     /* Fixed position would sit on top of the content on a narrow screen. */
-    .theme-toggle{position:static; margin:0 0 16px; width:max-content}
+    .cmp{width:100%;border-collapse:collapse;margin-top:12px;font-size:.82rem}
+  .cmp th{
+    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--text-faint);font-weight:500;padding:4px 8px;border-bottom:1px solid var(--border);
+  }
+  .cmp td{padding:5px 8px;border-bottom:1px solid var(--border)}
+  .cmp tr:last-child td{border-bottom:none}
+  .cmp tr.self td{font-weight:600;background:var(--accent-soft)}
+  .cmp td.num{
+    text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  }
+  .cmp td.cov{font-size:.7rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace}
+  .cmp caption{
+    caption-side:bottom;text-align:left;font-size:.7rem;color:var(--text-faint);
+    padding-top:6px;line-height:1.5;
+  }
+  .theme-toggle{position:static; margin:0 0 16px; width:max-content}
   }
 </style>
 <script>
@@ -339,6 +355,59 @@ LocalUI.buildHeadlines = function(commune){
   });
 };
 
+// Comparison rows for one indicator: the commune's own value first, then
+// province / region / Belgium as available. A Brussels commune has no
+// province and gets one row fewer -- nothing here assumes a fixed depth
+// (docs/features/comparison.md, "The comparison set").
+//
+// `diff` is the commune's value as a percentage difference from the
+// reference. Deliberately NOT dressed up as good or bad: preferred_direction
+// is not in this payload, and "higher is better" is false for a dependency
+// ratio and meaningless for a population count. The reader gets the sign and
+// the magnitude, not a verdict.
+LocalUI.comparisonRows = function(entry){
+  if(!entry) return [];
+  const periods = Object.keys(entry.periods || {}).sort();
+  if(!periods.length) return [];
+  const period = periods[periods.length - 1];
+  const own = entry.periods[period].value;
+  const rows = [{scope: 'commune', label: 'This commune', value: own, period: period}];
+  const labels = {province: 'Province', region: 'Region', country: 'Belgium'};
+  for(const scope of ['province', 'region', 'country']){
+    const agg = (entry.comparison || {})[scope];
+    if(!agg) continue;
+    const row = {
+      scope: scope,
+      label: labels[scope],
+      name: agg.name && agg.name.en,
+      value: agg.value,
+      period: agg.period,
+      coverage: agg.coverage,
+    };
+    // WHICH RELATION MEANS SOMETHING depends on the indicator.
+    //
+    // For a COUNT or TOTAL the commune is PART of the reference, so a
+    // difference is arithmetically true and useless -- every commune is
+    // "below" its province, and Herstappe (78 people) reads -100.0% against
+    // everything. The share is the real figure: Antwerp holds 29.3% of its
+    // province's population.
+    //
+    // For a RATIO or AVERAGE the commune sits on the SAME scale as its
+    // reference, so a share would be meaningless and the difference is what
+    // a reader wants: this commune earns 15.2% less per tax return than its
+    // province.
+    if(agg.value === 0 || agg.value === null || own === null){
+      row.relation = null;
+    } else if(entry.additive){
+      row.relation = {kind: 'share', pct: own / agg.value * 100};
+    } else {
+      row.relation = {kind: 'diff', pct: (own / agg.value - 1) * 100};
+    }
+    rows.push(row);
+  }
+  return rows;
+};
+
 if(typeof module !== 'undefined') module.exports = LocalUI;
 </script>
 
@@ -477,6 +546,50 @@ function renderAttribution(commune){
 // The retrieval date is a licence condition on every published
 // Statbel-derived figure (docs/data_catalog.md); a derived figure has none
 // and says so rather than borrowing one.
+// One comparison table for an indicator, or nothing if there is no
+// reference value to compare against.
+function comparisonHTML(entry, unit){
+  const rows = LocalUI.comparisonRows(entry);
+  if(rows.length < 2) return '';
+  const additive = !!entry.additive;
+  const body = rows.map(r => {
+    const label = r.scope === 'commune' ? r.label : `${r.label} — ${r.name}`;
+    let diff = '';
+    if(r.relation){
+      // A small share must not round to "0.0%". Herstappe is 0.0086% of
+      // Limburg's population, and printing that as 0.0% says something
+      // false about a commune that does exist.
+      const p = r.relation.pct;
+      const dp = (p !== 0 && Math.abs(p) < 0.1) ? 4 : 1;
+      const n = p.toLocaleString(undefined, {maximumFractionDigits: dp});
+      diff = r.relation.kind === 'share' ? `${n}%` : `${p >= 0 ? '+' : ''}${n}%`;
+    }
+    // Coverage is shown, not hidden behind a tooltip: an aggregate built from
+    // fewer communes than exist is a materially different number, and the
+    // reader is entitled to see which.
+    const cov = r.coverage ? `${r.coverage.n}/${r.coverage.of}` : '';
+    return `<tr class="${r.scope === 'commune' ? 'self' : ''}">
+      <td>${label}</td>
+      <td class="num">${fmt(r.value, unit)}</td>
+      <td class="num">${diff}</td>
+      <td class="cov">${cov}</td>
+    </tr>`;
+  }).join('');
+  const col = additive ? 'Share' : 'Diff';
+  const explain = additive
+    ? `This commune as a share of each reference, at ${rows[0].period} — a commune is part of its
+       province, so a share is the meaningful relation, not a difference.`
+    : `This commune against each reference, at ${rows[0].period}.`;
+  return `<table class="cmp">
+    <caption>${explain}
+      The last column counts the communes behind each aggregate. Averages and ratios are
+      recomputed from totals, never averaged across communes — see
+      <code>docs/features/comparison.md</code>.</caption>
+    <thead><tr><th>Compared with</th><th style="text-align:right">Value</th>
+      <th style="text-align:right">${col}</th><th>Communes</th></tr></thead>
+    <tbody>${body}</tbody></table>`;
+}
+
 function factHTML(label, latest){
   const prov = latest.updated ? `updated ${latest.updated}` : 'derived';
   return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
@@ -492,6 +605,10 @@ function renderDemography(commune){
   body.innerHTML = '';
   body.appendChild(chartHost);
   renderChartOrNoData(chartHost, commune, 'POPULATION_BY_COMMUNE');
+
+  const popCmp = document.createElement('div');
+  popCmp.innerHTML = comparisonHTML(commune.indicators['POPULATION_BY_COMMUNE'], 'count');
+  body.appendChild(popCmp);
 
   const bands = ['POPULATION_AGE_0_14', 'POPULATION_AGE_15_64', 'POPULATION_AGE_65_PLUS'];
   const bandLabels = {POPULATION_AGE_0_14: '0–14', POPULATION_AGE_15_64: '15–64', POPULATION_AGE_65_PLUS: '65+'};
@@ -519,6 +636,10 @@ function renderIncome(commune){
   body.appendChild(chartHost);
   renderChartOrNoData(chartHost, commune, 'AVG_NET_TAXABLE_INCOME',
     'Fiscal-income data collection is deferred or absent for this commune (2025-merger successors have no fiscal history yet — see fiscal_income.md).');
+
+  const incCmp = document.createElement('div');
+  incCmp.innerHTML = comparisonHTML(commune.indicators['AVG_NET_TAXABLE_INCOME'], 'eur');
+  body.appendChild(incCmp);
 
   const fiscalCodes = ['FISCAL_TOT_NET_TAXABLE_INC', 'FISCAL_TOT_MUNICIP_TAXES', 'FISCAL_TOT_TAXES', 'FISCAL_NBR_NON_ZERO_INC'];
   const facts = [];
