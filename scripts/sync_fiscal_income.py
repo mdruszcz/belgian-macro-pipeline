@@ -52,6 +52,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from port_existing_indicators import derive_period_bounds  # noqa: E402
 
+from src.db.vintages import upsert_observation  # noqa: E402
 from src.geography.resolve import UnknownGeographyError, resolve_geo  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
@@ -240,71 +241,6 @@ def _assert_geography_vintage(
         )
 
 
-def _upsert_observation(
-    conn: sqlite3.Connection,
-    *,
-    indicator_id: str,
-    geo_id: str,
-    period: str,
-    period_start: str,
-    period_end: str,
-    value: float | None,
-    status: str,
-    vintage: str,
-    fetch_run_id: int,
-) -> int:
-    """Insert-only-on-change. Returns 1 if a new vintage was written, else 0.
-
-    Compares (value, status), NOT value alone. sync_population.py compares
-    only the value, which means a cell moving final -> suppressed at an
-    unchanged number writes no new vintage and the suppression is lost. That
-    is latent there because it hardcodes 'final'; it would be live here,
-    where status genuinely varies. See docs/features/vintages.md.
-    """
-    current = conn.execute(
-        """SELECT value, status FROM observations
-           WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-        (indicator_id, geo_id, period),
-    ).fetchone()
-    if current is not None and current[0] == value and current[1] == status:
-        return 0  # unchanged -- no new vintage
-
-    if current is not None:
-        conn.execute(
-            """UPDATE observations SET is_latest = 0
-               WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-            (indicator_id, geo_id, period),
-        )
-
-    cur = conn.execute(
-        """
-        INSERT OR IGNORE INTO observations
-            (indicator_id, geo_id, period, vintage, value, status,
-             period_start, period_end, is_latest, fetch_run_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-        """,
-        (
-            indicator_id,
-            geo_id,
-            period,
-            vintage,
-            value,
-            status,
-            period_start,
-            period_end,
-            fetch_run_id,
-            vintage,
-        ),
-    )
-    if cur.rowcount != 1:
-        raise RuntimeError(
-            f"Vintage collision writing {indicator_id}/{geo_id}/{period}/{vintage}: "
-            "a row with this exact key already exists. Refusing to silently drop "
-            "the new value (CLAUDE.md rule 13)."
-        )
-    return 1
-
-
 def ensure_reference_rows_only(db_path: Path) -> None:
     """Insert the sources/indicators rows and nothing else.
 
@@ -363,7 +299,7 @@ def sync(
             )
             if status == "suppressed":
                 suppressed += 1
-            rows_written += _upsert_observation(
+            rows_written += upsert_observation(
                 conn,
                 indicator_id=indicator_id,
                 geo_id=geo_id,

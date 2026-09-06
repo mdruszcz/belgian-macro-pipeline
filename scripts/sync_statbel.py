@@ -13,10 +13,10 @@ Scoped to exactly the indicators in STATBEL_INDICATORS below -- currently
 just LOCAL_UNITS_BY_COMMUNE. See docs/features/statbel_adapter.md, Non-goals,
 for why fiscal income and population are not included yet.
 
-Reuses the same vintage/is_latest discipline as sync_to_canonical.py (full-
-timestamp vintage, insert-only-on-change, hard rowcount check) -- see
-docs/features/data_model.md, section Vintage -- just keyed per commune geo_id
-instead of always the same national one.
+Vintage/is_latest writes go through src.db.vintages.upsert_observation, the
+one shared implementation of insert-only-on-change (Block I,
+docs/features/vintages.md) -- just keyed per commune geo_id instead of
+always the same national one.
 """
 
 import argparse
@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from port_existing_indicators import derive_period_bounds  # noqa: E402
 
+from src.db.vintages import upsert_observation  # noqa: E402
 from src.fetchers.statbel import StatbelSource  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
@@ -111,49 +112,19 @@ def sync(db_path: Path) -> tuple[int, int]:
         fetched += len(rows)
 
         for row in rows:
-            current = conn.execute(
-                """SELECT value, status FROM observations
-                   WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-                (code, row["geo_id"], row["period"]),
-            ).fetchone()
-            if current is not None and current[0] == row["value"] and current[1] == row["status"]:
-                continue  # unchanged -- no new vintage
-
-            if current is not None:
-                conn.execute(
-                    """UPDATE observations SET is_latest = 0
-                       WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-                    (code, row["geo_id"], row["period"]),
-                )
-
             period_start, period_end = derive_period_bounds(row["period"], ind["frequency"])
-            cur = conn.execute(
-                """
-                INSERT OR IGNORE INTO observations
-                    (indicator_id, geo_id, period, vintage, value, status,
-                     period_start, period_end, is_latest, fetch_run_id, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-                """,
-                (
-                    code,
-                    row["geo_id"],
-                    row["period"],
-                    now,
-                    row["value"],
-                    row["status"],
-                    period_start,
-                    period_end,
-                    fetch_run_id,
-                    now,
-                ),
+            changed += upsert_observation(
+                conn,
+                indicator_id=code,
+                geo_id=row["geo_id"],
+                period=row["period"],
+                period_start=period_start,
+                period_end=period_end,
+                value=row["value"],
+                status=row["status"],
+                vintage=now,
+                fetch_run_id=fetch_run_id,
             )
-            if cur.rowcount != 1:
-                raise RuntimeError(
-                    f"Vintage collision writing {code}/{row['geo_id']}/{row['period']}/{now}: "
-                    "a row with this exact key already exists. Refusing to silently drop "
-                    "the new value (CLAUDE.md rule 13)."
-                )
-            changed += 1
 
         conn.execute(
             "UPDATE fetch_runs SET finished_at = ?, rows_read = ?, rows_written = ? "

@@ -32,6 +32,7 @@ from port_existing_indicators import (
 )
 
 from belgian_macro_db import CONFIG_DIR, SOURCES
+from src.db.vintages import upsert_observation
 from src.validation.config_schema import is_canonical_eligible, load_and_validate_all
 
 
@@ -146,43 +147,22 @@ def sync(db_path: Path, vintage: str | None = None) -> tuple[int, int]:
         for period, value, raw_obs_status in legacy_rows:
             checked += 1
             status = map_obs_status(raw_obs_status)
-            current = conn.execute(
-                """SELECT value, status FROM observations
-                   WHERE indicator_id = ? AND geo_id = 'be:country' AND period = ? AND is_latest = 1""",
-                (code, period),
-            ).fetchone()
-
-            if current is not None and current[0] == value and current[1] == status:
-                continue  # unchanged -- no new vintage
-
-            if current is not None:
-                conn.execute(
-                    """UPDATE observations SET is_latest = 0
-                       WHERE indicator_id = ? AND geo_id = 'be:country' AND period = ? AND is_latest = 1""",
-                    (code, period),
-                )
-
             period_start, period_end = derive_period_bounds(period, meta["frequency"])
-            cur = conn.execute(
-                """
-                INSERT OR IGNORE INTO observations
-                    (indicator_id, geo_id, period, vintage, value, status,
-                     period_start, period_end, is_latest, fetch_run_id, created_at)
-                VALUES (?, 'be:country', ?, ?, ?, ?, ?, ?, 1, ?, ?)
-            """,
-                (code, period, vintage, value, status, period_start, period_end, fetch_run_id, now),
+            wrote = upsert_observation(
+                conn,
+                indicator_id=code,
+                geo_id="be:country",
+                period=period,
+                period_start=period_start,
+                period_end=period_end,
+                value=value,
+                status=status,
+                vintage=vintage,
+                fetch_run_id=fetch_run_id,
+                created_at=now,
             )
-            if cur.rowcount != 1:
-                # A genuine PK collision slipped through despite the timestamp
-                # vintage -- fail loudly rather than silently leave this cell
-                # with zero is_latest=1 rows (CLAUDE.md rule 13).
-                raise RuntimeError(
-                    f"Vintage collision writing {code}/{period}/{vintage}: "
-                    "a row with this exact (indicator_id, geo_id, period, vintage) "
-                    "already exists. Refusing to silently drop the new value."
-                )
-            changed += 1
-            rows_written += 1
+            changed += wrote
+            rows_written += wrote
 
         conn.execute(
             "UPDATE fetch_runs SET finished_at = ?, rows_read = ?, rows_written = ? WHERE fetch_run_id = ?",
