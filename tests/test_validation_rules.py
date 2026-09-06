@@ -28,6 +28,7 @@ from src.validation.rules import (  # noqa: E402
     WARN,
     Context,
     has_failures,
+    record_volume_snapshot,
     run_all,
 )
 
@@ -285,6 +286,209 @@ def test_a_placeholder_name_fires(tmp_path):
     v = run_all(_ctx(db), only=["has_trilingual_name"])
     assert _fired(v, "has_trilingual_name")
     assert "fr" in v[0].message
+
+
+# ── Volume ──────────────────────────────────────────────────────────────────
+
+
+def _set_observation_count(db: Path, n: int) -> None:
+    """Leave exactly n is_latest observations for POP, across n periods."""
+    conn = sqlite3.connect(str(db))
+    conn.execute("DELETE FROM observations")
+    conn.executemany(
+        "INSERT INTO observations (indicator_id, geo_id, period, vintage, value, status, "
+        "period_start, period_end, is_latest, fetch_run_id, created_at) "
+        "VALUES ('POP','be:mun:11002',?,'v1',1.0,'final',?,?,1,1,'x')",
+        [(str(2000 + i), f"{2000 + i}-01-01", f"{2000 + i}-12-31") for i in range(n)],
+    )
+    conn.commit()
+    conn.close()
+
+
+def test_control_h_row_collapse_breaks_the_build(tmp_path):
+    """CONTROL H, the scenario named as most likely to publish garbage:
+    17,000 rows yesterday, 436 today. The site still renders and every
+    remaining number is correct -- only most of the country is missing."""
+    db = _clean_db(tmp_path)
+    _set_observation_count(db, 17000)
+    conn = sqlite3.connect(str(db))
+    record_volume_snapshot(conn)
+    conn.close()
+
+    _set_observation_count(db, 436)
+    v = run_all(_ctx(db), only=["row_collapse"])
+    assert _fired(v, "row_collapse")
+    assert has_failures(v), "a 97% row drop must BLOCK, not merely warn"
+
+
+def test_row_collapse_tolerates_a_small_revision(tmp_path):
+    """A source withdrawing a handful of rows is routine. Failing on it
+    teaches people to ignore the rule."""
+    db = _clean_db(tmp_path)
+    _set_observation_count(db, 100)
+    conn = sqlite3.connect(str(db))
+    record_volume_snapshot(conn)
+    conn.close()
+
+    _set_observation_count(db, 95)
+    assert run_all(_ctx(db), only=["row_collapse"]) == []
+
+
+def test_row_collapse_is_silent_with_no_history(tmp_path):
+    """First ever run: nothing to compare against, so nothing to say."""
+    assert run_all(_ctx(_clean_db(tmp_path)), only=["row_collapse"]) == []
+
+
+def test_indicator_disappearing_fires_and_row_collapse_does_not_double_report(tmp_path):
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    record_volume_snapshot(conn)
+    conn.execute("DELETE FROM observations")
+    conn.commit()
+    conn.close()
+
+    v = run_all(_ctx(db), only=["indicator_disappeared", "row_collapse"])
+    assert _fired(v, "indicator_disappeared")
+    assert has_failures(v)
+    assert not _fired(v, "row_collapse"), "one event must not be reported by two rules"
+
+
+def test_snapshot_records_previous_new_and_delta(tmp_path):
+    db = _clean_db(tmp_path)
+    _set_observation_count(db, 10)
+    conn = sqlite3.connect(str(db))
+    record_volume_snapshot(conn)
+    _set_observation_count(db, 12)
+    conn2 = sqlite3.connect(str(db))
+    record_volume_snapshot(conn2)
+    row = conn2.execute(
+        "SELECT previous_count, new_count, delta FROM indicator_volume "
+        "ORDER BY snapshot_id DESC LIMIT 1"
+    ).fetchone()
+    conn.close()
+    conn2.close()
+    assert row == (10, 12, 2)
+
+
+def test_first_snapshot_has_no_previous(tmp_path):
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    record_volume_snapshot(conn)
+    row = conn.execute("SELECT previous_count, new_count, delta FROM indicator_volume").fetchone()
+    conn.close()
+    assert row == (None, 1, None)
+
+
+def test_null_share_fires_when_a_column_comes_back_empty(tmp_path):
+    """A source that answers with the right shape and none of the content.
+    Every row is individually legal, so nothing else here would notice."""
+    db = _clean_db(tmp_path)
+    _set_observation_count(db, 20)
+    conn = sqlite3.connect(str(db))
+    conn.execute("UPDATE observations SET value = NULL, status = 'na'")
+    conn.commit()
+    conn.close()
+    v = run_all(_ctx(db), only=["null_share"])
+    assert _fired(v, "null_share")
+    assert has_failures(v)
+
+
+def test_null_share_ignores_a_tiny_indicator(tmp_path):
+    """1 of 1 null is 100% and means nothing. Failing on it is the noise that
+    gets the whole layer switched off."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute("UPDATE observations SET value = NULL, status = 'na'")
+    conn.commit()
+    conn.close()
+    assert run_all(_ctx(db), only=["null_share"]) == []
+
+
+def test_stale_indicator_warns_but_does_not_block(tmp_path):
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "UPDATE observations SET period='2010', period_start='2010-01-01', "
+        "period_end='2010-12-31'"
+    )
+    conn.commit()
+    conn.close()
+    v = run_all(_ctx(db), only=["staleness"])
+    assert _fired(v, "staleness")
+    assert not has_failures(
+        v
+    ), "staleness must never block: LOCAL_UNITS_BY_COMMUNE is 1010 days old and correct"
+
+
+def test_explicit_max_age_days_silences_a_known_freeze(tmp_path):
+    """The LOCAL_UNITS_BY_COMMUNE case: correctly frozen, so configured."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "UPDATE observations SET period='2010', period_start='2010-01-01', "
+        "period_end='2010-12-31'"
+    )
+    conn.commit()
+    conn.close()
+    assert run_all(_ctx(db, max_age_days={"POP": 40000}), only=["staleness"]) == []
+
+
+def test_fetch_error_reads_the_legacy_log_too(tmp_path):
+    """fetch_runs held 162 rows, every one 'ok', while legacy_fetch_log held
+    83 ERRORs over the same period. A layer reading only the canonical table
+    reports all-clear on a day five indicators failed to fetch."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute("""CREATE TABLE legacy_fetch_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, indicator_code TEXT NOT NULL,
+        fetched_at TEXT NOT NULL, rows_upserted INTEGER NOT NULL,
+        status TEXT NOT NULL, message TEXT)""")
+    conn.execute(
+        "INSERT INTO legacy_fetch_log (indicator_code, fetched_at, rows_upserted, status) "
+        "VALUES ('HICP','2026-09-06T09:00:00+00:00',0,'ERROR')"
+    )
+    conn.commit()
+    conn.close()
+    v = run_all(_ctx(db), only=["fetch_error"])
+    assert _fired(v, "fetch_error")
+    assert has_failures(v)
+
+
+def test_fetch_error_ignores_a_retired_indicator(tmp_path):
+    """BE_CONSUMER_CONFIDENCE was tried three times on 2026-03-01, failed,
+    and was renamed the same hour. Its final entry is an ERROR that would
+    otherwise red-light every build forever."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute("""CREATE TABLE legacy_fetch_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, indicator_code TEXT NOT NULL,
+        fetched_at TEXT NOT NULL, rows_upserted INTEGER NOT NULL,
+        status TEXT NOT NULL, message TEXT)""")
+    conn.executemany(
+        "INSERT INTO legacy_fetch_log (indicator_code, fetched_at, rows_upserted, status) "
+        "VALUES (?,?,0,?)",
+        [
+            ("BE_CONSUMER_CONFIDENCE", "2026-03-01T12:07:58+00:00", "ERROR"),
+            ("CONSUMER_CONFIDENCE", "2026-09-06T09:06:44+00:00", "OK"),
+        ],
+    )
+    conn.commit()
+    conn.close()
+    assert run_all(_ctx(db), only=["fetch_error"]) == []
+
+
+def test_fetch_error_fires_on_a_failed_canonical_run(tmp_path):
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','statbel','2026-09-06T09:00:00+00:00','error')"
+    )
+    conn.commit()
+    conn.close()
+    v = run_all(_ctx(db), only=["fetch_error"])
+    assert _fired(v, "fetch_error")
+    assert has_failures(v)
 
 
 # ── Severity discipline ─────────────────────────────────────────────────────

@@ -5,6 +5,13 @@ name:
   nl: Vestigingseenheden
 unit: count
 frequency: Q
+# Staleness allowance for the Block H validation layer. This series is
+# CORRECTLY frozen at 2023-Q4 -- Statbel's standard view serves nothing
+# newer (verified 2026-09-06 against the live API), so the default 270-day
+# quarterly allowance would warn every single day on correct data. Raised
+# to four years so the warning still fires if the freeze itself becomes
+# the anomaly. Lower it the day Statbel republishes.
+max_age_days: 1460
 source_id: statbel
 geo_levels:
 - municipal

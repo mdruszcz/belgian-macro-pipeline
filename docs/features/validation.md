@@ -1,6 +1,6 @@
 # Feature: validation layer (Block H)
 
-Status: spec
+Status: implemented
 Issue: (Block H — Validation layer, docs/steps)
 Branch: feat/block-h-spec
 
@@ -183,9 +183,46 @@ review.
 
 ## Persisting counts
 
-`fetch_runs` gains `previous_count`, `new_count` and `delta` (migration `003`), so thresholds come
-from observed history rather than being guessed once and never revisited. There are already 162 runs
-of history to calibrate against.
+**Correction to the plan above.** The spec said `fetch_runs` would gain `previous_count`,
+`new_count` and `delta`. That does not work, for the reason correction 2 already established:
+volume is meaningful **per indicator**, and three columns on a *run* row cannot hold a per-indicator
+count. Migration `003` therefore creates a table keyed by indicator instead:
+
+```
+indicator_volume(snapshot_id, taken_at, indicator_id, previous_count, new_count, delta)
+```
+
+A row per indicator per recorded run, so thresholds come from observed history rather than being
+guessed once and never revisited.
+
+Snapshots are written **only after a validation pass succeeds** (`validate_data.py --record-volume`).
+Recording on a failing run would make the collapsed count the new baseline, and the alarm would
+silence itself on the very next run — the failure mode that makes most volume monitoring useless.
+
+## Two further corrections the data forced
+
+### 5. Two publication intervals is too tight
+
+The staleness default was specified as two intervals. Measured against the real store, that fires on
+correct data: `BUSINESS_CONFIDENCE` sat 68 days past the end of `2026-06`, which is an ordinary
+publication lag. The default is **three** intervals (`A` 1095, `Q` 270, `M` 93, `D` 7). At that
+setting exactly three indicators warn today — `HICP` and `EC_CONS_CONF_BE` stuck on `2025-12`,
+`EUROSTAT_GDP_Q_MEUR` on `2025-Q3` — and all three are genuinely behind.
+
+`LOCAL_UNITS_BY_COMMUNE` carries an explicit `max_age_days: 1460` in its config (a new optional key
+in `indicator_config.schema.json`), documenting *why* it is frozen, so the warning still means
+something when that changes.
+
+### 6. A retired indicator is not a failing one
+
+`fetch_error` reading "the most recent entry per code" was not enough. `BE_CONSUMER_CONFIDENCE` and
+`EU_CONSUMER_CONFIDENCE` were tried three times each on 2026-03-01, failed, and were renamed to
+`EC_CONS_CONF_BE`/`_EU` within the hour. Their final log entry is an `ERROR` that would sit at the
+top of their history forever, red-lighting every build from now on — and a permanent red light
+nobody reads is the same as no rule at all.
+
+So a key whose last entry predates the newest entry **in the same log** by more than 7 days is
+treated as retired and skipped. With that window, both fetch logs are clean today.
 
 ## Where it runs
 
@@ -200,9 +237,13 @@ It also runs in `ci.yml` against the committed stores, so a bad hand-edited CSV 
 - Each rule gets a test that constructs a violating fixture and asserts the rule fires — and one
   asserting it does **not** fire on the clean baseline, because a rule that always fires is worse
   than no rule.
-- `[H]` step: deliberately corrupt a fixture, push, and confirm the Action fails. That verifies the
-  *wiring*, which is where most validation failures actually live.
-- CONTROL H: simulate a 95% row drop and prove the build breaks.
+- `[H]` step: deliberately corrupt a fixture and confirm the run fails. That verifies the *wiring*,
+  which is where most validation failures actually live. Done against a copy of the real committed
+  database: baseline pass recorded 18 indicator counts, then 95% of `LOCAL_UNITS_BY_COMMUNE` rows
+  were deleted.
+- CONTROL H: **passed.** `row_collapse: LOCAL_UNITS_BY_COMMUNE: 565 -> 28`, exit code 1, and the
+  collapsed count was *not* written to `indicator_volume` — the snapshot still reads 565, so the
+  alarm persists into the next run rather than silencing itself.
 
 ## Open questions for the maintainer
 
