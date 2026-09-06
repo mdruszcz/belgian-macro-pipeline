@@ -113,12 +113,27 @@ same licence family already cleared here). Confirmed commune-level titles includ
 
 Index: `statbel.fgov.be/fr/open-data/consultez-tous-les-open-data-du-census-2021`
 
-They are on `statbel.fgov.be`, which automation cannot read. Note a likely refinement to
-[manual_sources.md](features/manual_sources.md)'s account: that document calls it "a
-connection-level block", and `curl` does fail outright — but search engines report the same URLs
-serving **CAPTCHA verification pages**, which points at edge bot-protection rather than a network
-block. `data.gov.be`, which mirrors Statbel, is equally unreachable from here. Either way the
-consequence is unchanged: **a human with a browser can download these; CI cannot.**
+They are on `statbel.fgov.be`, which automation cannot read.
+
+**Correction, 2026-09-06.** This section previously speculated the block was "likely bot-protection"
+rather than a network block, reasoning from search engines reporting CAPTCHA pages at the same URLs.
+Re-checked directly with `curl -v`: DNS resolves cleanly on both address families, then the **TCP
+handshake itself times out** — not an HTTP-level CAPTCHA response, a connection that never
+completes. `manual_sources.md`'s original "connection-level block" was correct; the CAPTCHA a search
+engine sees is a separate defence Statbel runs for crawlers, encountered only once a connection
+succeeds, which this pipeline's network context never reaches. `data.gov.be`, which mirrors Statbel,
+is equally unreachable. The consequence was never in question either way: **a human with a browser
+can download these; CI cannot.**
+
+**Statbel's own file-naming convention**, maintainer-supplied: pre-built table exports follow
+`.../Census2021/T01_CAS_AGE_COM_FR.XLSX` — table number, theme (`CAS`=civil status, `EDU`=education,
+`ACT`=activity/labour, `MIG`=migration, …), geography (`BE`/`REG`/`PROV`/`ARR`/`COM`/`SEC`), language.
+A commune-level French file is `*_COM_FR.XLSX`. The ten files already loaded below are a *different*
+export family — Statbel's bulk "hypercube" dumps, `TF_CENSUS_2021_HCnn_m.xlsx` — not this
+per-table naming. Both are current Census 2021 data; see
+[manual_sources.md](features/manual_sources.md) for the full breakdown. **Owed:** the `ACT`
+(employment/unemployment) and `EDU` (education) commune-level files, which are not among the ten
+already loaded and are the ones that would fill the `/local` unemployment gap.
 
 ### LOADED 2026-09-06 — Census 2021, hand-downloaded
 
