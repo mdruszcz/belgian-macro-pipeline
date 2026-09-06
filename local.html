@@ -95,8 +95,19 @@
   .fact{border:1px solid var(--border);border-radius:7px;padding:10px 12px;background:var(--surface)}
   .fact .fv{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:1.05rem}
   .fact .fl{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em}
+  .fact .fp{font-size:.68rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;margin-top:2px}
 
   footer{margin-top:30px;color:var(--text-faint);font-size:.78rem}
+
+  /* Statbel attribution. This is a LICENCE CONDITION, not decoration --
+     see docs/data_catalog.md. Styled quietly but never hidden, collapsed or
+     conditionally rendered. */
+  .attribution{
+    margin-top:26px;padding:14px 16px;border:1px solid var(--border);border-radius:8px;
+    background:var(--row-alt);color:var(--text-muted);font-size:.76rem;line-height:1.6;
+  }
+  .attribution strong{color:var(--text)}
+  .attribution a{color:var(--accent-ink)}
 
   @media (max-width:640px){
     .wrap{padding:20px 14px 60px}
@@ -164,6 +175,19 @@
       <h2>Municipal finances</h2>
       <div id="financesBody"></div>
     </section>
+
+    <div class="attribution" id="attribution">
+      <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+      (Direction générale Statistique &mdash; Statistics Belgium), reused under
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
+      and Statbel's <em>Licentie open data</em> of 22 October 2015.
+      <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
+      <strong>Changes were made:</strong> the published files are reshaped into a canonical
+      indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
+      2025 commune mergers, and used to compute derived figures. Statbel does not endorse this
+      product or how its data is used here. English commune names are unofficial translations,
+      not official Statbel labels.
+    </div>
 
     <footer>
       Data from <code>public/data/communes/{nis}.json</code> (Block J). See
@@ -235,7 +259,25 @@ LocalUI.latestOf = function(indicatorEntry){
   const periods = Object.keys(indicatorEntry.periods || {}).sort();
   if(!periods.length) return null;
   const p = periods[periods.length - 1];
-  return {value: indicatorEntry.periods[p].value, period: p, unit: indicatorEntry.unit, name: indicatorEntry.name};
+  // `updated` is the source retrieval date and is absent for a derived
+  // indicator, which was computed rather than fetched. Passed through as
+  // undefined rather than substituted, because Statbel's 2015 licence
+  // forbids misleading a reader about the update date as squarely as it
+  // requires showing one -- see docs/data_catalog.md.
+  return {
+    value: indicatorEntry.periods[p].value, period: p,
+    unit: indicatorEntry.unit, name: indicatorEntry.name,
+    updated: indicatorEntry.updated,
+  };
+};
+
+// The newest source retrieval date anywhere in this commune's data -- the
+// "date of last update" the attribution block is required to carry. Derived
+// indicators contribute nothing, correctly: they carry no retrieval date.
+LocalUI.lastUpdated = function(commune){
+  const dates = Object.values(commune.indicators || {})
+    .map(i => i.updated).filter(Boolean).sort();
+  return dates.length ? dates[dates.length - 1] : null;
 };
 
 LocalUI.buildHeadlines = function(commune){
@@ -243,7 +285,10 @@ LocalUI.buildHeadlines = function(commune){
     if(!spec.key) return {label: spec.label, available: false, why: spec.why};
     const latest = LocalUI.latestOf(commune.indicators[spec.key]);
     if(!latest) return {label: spec.label, available: false, why: 'No value published for this commune'};
-    return {label: spec.label, available: true, value: latest.value, period: latest.period, unit: latest.unit, caveat: spec.caveat};
+    return {
+      label: spec.label, available: true, value: latest.value, period: latest.period,
+      unit: latest.unit, caveat: spec.caveat, updated: latest.updated,
+    };
   });
 };
 
@@ -364,11 +409,33 @@ function renderHeadline(commune){
       return `<div class="card nodata"><span class="v">Not available</span><span class="l">${c.label}</span><span class="p">${c.why}</span></div>`;
     }
     const caveat = c.caveat ? ` <span title="${c.caveat}">*</span>` : '';
-    return `<div class="card"><span class="v">${fmt(c.value, c.unit)}${caveat}</span><span class="l">${c.label}</span><span class="p">as of ${c.period}</span></div>`;
+    // Reference period AND retrieval date. The second is a licence
+    // condition on every published Statbel-derived figure (see the
+    // attribution block below); "derived" is shown where there is no
+    // retrieval date because the figure was computed, not fetched.
+    const provenance = c.updated ? `as of ${c.period} · updated ${c.updated}`
+                                 : `as of ${c.period} · derived`;
+    return `<div class="card"><span class="v">${fmt(c.value, c.unit)}${caveat}</span><span class="l">${c.label}</span><span class="p">${provenance}</span></div>`;
   }).join('');
 }
 
+function renderAttribution(commune){
+  const updated = LocalUI.lastUpdated(commune);
+  document.getElementById('attrUpdated').textContent = updated || 'see source';
+}
+
 // ── sections ────────────────────────────────────────────────────────────
+
+// One fact tile, with its reference period AND its source retrieval date.
+// The retrieval date is a licence condition on every published
+// Statbel-derived figure (docs/data_catalog.md); a derived figure has none
+// and says so rather than borrowing one.
+function factHTML(label, latest){
+  const prov = latest.updated ? `updated ${latest.updated}` : 'derived';
+  return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
+         `<div class="fl">${label} (${latest.period})</div>` +
+         `<div class="fp">${prov}</div></div>`;
+}
 
 function renderDemography(commune){
   document.getElementById('demographySub').textContent =
@@ -384,10 +451,10 @@ function renderDemography(commune){
   const facts = [];
   for(const code of bands){
     const latest = LocalUI.latestOf(commune.indicators[code]);
-    if(latest) facts.push(`<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div><div class="fl">Age ${bandLabels[code]} (${latest.period})</div></div>`);
+    if(latest) facts.push(factHTML(`Age ${bandLabels[code]}`, latest));
   }
   const dep = LocalUI.latestOf(commune.indicators['DEPENDENCY_RATIO']);
-  if(dep) facts.push(`<div class="fact"><div class="fv">${fmt(dep.value, dep.unit)}</div><div class="fl">Dependency ratio (${dep.period})</div></div>`);
+  if(dep) facts.push(factHTML('Dependency ratio', dep));
   if(facts.length){
     const grid = document.createElement('div');
     grid.className = 'fact-grid';
@@ -410,7 +477,7 @@ function renderIncome(commune){
   const facts = [];
   for(const code of fiscalCodes){
     const latest = LocalUI.latestOf(commune.indicators[code]);
-    if(latest) facts.push(`<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div><div class="fl">${latest.name} (${latest.period})</div></div>`);
+    if(latest) facts.push(factHTML(latest.name, latest));
   }
   if(facts.length){
     const grid = document.createElement('div');
@@ -427,8 +494,7 @@ function renderBusiness(commune){
     body.innerHTML = noDataHTML('No local-unit count published for this commune.');
     return;
   }
-  body.innerHTML = `<div class="fact-grid"><div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>
-    <div class="fl">Local business units, ${latest.period}</div></div></div>
+  body.innerHTML = `<div class="fact-grid">${factHTML('Local business units', latest)}</div>
     <p class="sec-sub" style="margin-top:10px">Single snapshot only — Statbel publishes one quarter at a time for this dataset (see <code>docs/features/statbel_adapter.md</code>), so no history chart is shown.</p>`;
 }
 
@@ -463,6 +529,7 @@ function renderCommune(commune){
     noDataHTML('Mobility data collection is deferred — no dataset was selected in Block E / Block F.');
   document.getElementById('financesBody').innerHTML =
     noDataHTML('Coming in Phase II. Municipal finance (Wallonia first) is Block O of the roadmap.');
+  renderAttribution(commune);
 }
 
 // ── search panel ────────────────────────────────────────────────────────
