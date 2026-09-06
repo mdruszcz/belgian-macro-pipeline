@@ -1,0 +1,21 @@
+id: UNEMPLOYED_JOBSEEKERS
+name:
+  en: Unemployed benefit claimants seeking work
+  fr: Chômeurs complets indemnisés demandeurs d'emploi
+  nl: Uitkeringsgerechtigde volledig werklozen, werkzoekend
+unit: count
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 400
+description:
+  en: >
+    Residents receiving a full unemployment benefit while actively seeking work, averaged over
+    the twelve months of the year (ONEM's CCI-DE, column "CCI-DE" of CCI_Commune_Statut_UP_FR).
+    This is the headline ONEM figure and the pipeline's most current commune-level labour-market
+    series -- 2017 onwards, refreshed monthly, against Census 2021's single snapshot. Belgium
+    2017: 373,701 falling to 284,786 in 2023, matching ONEM's published national totals. NOT an
+    unemployment rate: it is a count of benefit claimants, so it excludes jobseekers without
+    benefit entitlement and is not the Labour Force Survey definition behind UNEMPLOYMENT_RATE_COM.
+display: null

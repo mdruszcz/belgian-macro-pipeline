@@ -1,0 +1,19 @@
+id: UNEMPLOYMENT_BENEFIT_PAID
+name:
+  en: Full unemployment benefit paid
+  fr: Montants payés en chômage complet
+  nl: Uitbetaalde bedragen volledige werkloosheid
+unit: EUR
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 400
+description:
+  en: >
+    Total euros paid in full unemployment benefit to residents of the commune over the year (the
+    "Total" column of CCI_Commune_Statut_M_FR). Direction is contextual, not "lower is better":
+    a low figure can mean few unemployed residents or low benefit entitlements, and the two mean
+    opposite things for a commune. Unlike the person counts, the euro files carry no privacy
+    masking at all -- amounts are not disclosive, so this series is complete for every commune.
+display: null

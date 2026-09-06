@@ -20,9 +20,20 @@ import csv
 import sqlite3
 from pathlib import Path
 
+# The five statuses migrations/001_core_schema.sql permits, all mapped, so
+# none can fall through to its raw name in a published column. "S" arrived
+# with ONEM, the first source that publishes privacy-masked cells: those are
+# stored with a NULL value and status "suppressed" rather than as zero, so the
+# letter has to distinguish "we know this is small and may not say" from
+# "we have no reading". "revised" and "estimate" were already reachable from
+# the observations table and were falling through unmapped.
 STATUS_TO_LETTER = {
     "final": "A",
     "provisional": "P",
+    "revised": "R",
+    "estimate": "E",
+    "suppressed": "S",
+    "na": "N",
 }
 
 

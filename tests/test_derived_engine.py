@@ -245,6 +245,10 @@ def test_the_committed_derived_configs_load_and_order():
         "SHARE_SINGLE_PERSON_HOUSEHOLDS",
         "UNEMPLOYMENT_RATE_COM",
         "AVG_HOUSE_PRICE",
+        # ONEM/RVA. Claimants over total population, NOT over the labour
+        # force -- deliberately not called an unemployment rate; see the
+        # config's own description.
+        "SHARE_POP_ON_UNEMPLOYMENT_BENEFIT",
     }
     assert resolve_order(derived, SOURCE_IDS)
 

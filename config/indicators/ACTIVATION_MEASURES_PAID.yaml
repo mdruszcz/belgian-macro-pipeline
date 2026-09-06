@@ -1,0 +1,21 @@
+id: ACTIVATION_MEASURES_PAID
+name:
+  en: Employment and activation measures paid
+  fr: Montants payés en emploi et mesures d'activation
+  nl: Uitbetaalde bedragen werkgelegenheid en activeringsmaatregelen
+unit: EUR
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 400
+description:
+  en: >
+    Total euros paid to residents of the commune under ONEM's employment and activation measures
+    over the year (the "Total" column of EMPL_Commune_Statut_M_FR), spanning the Activa hiring
+    subsidies, transition programmes, SINE social-economy places, work-resumption top-ups,
+    sheltered-workshop employment, shortage-occupation and healthcare-sector allowances,
+    vocational training allowances, transition placements and dismissal compensation. A
+    composite of 21 distinct schemes, so it is a measure of activation spending reaching the
+    commune, not of any single programme.
+display: null

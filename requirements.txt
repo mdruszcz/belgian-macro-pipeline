@@ -1,5 +1,6 @@
 pandas>=2.0
 requests>=2.31
 openpyxl
+xlrd
 pyyaml>=6.0
 jsonschema>=4.0
