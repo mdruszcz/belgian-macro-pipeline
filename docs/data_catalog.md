@@ -232,6 +232,52 @@ by hand.
 Housing prices are **not** obtainable at commune level from the API, so the `/local` housing headline
 stays unavailable and real estate sales stays DEFERRED from Block E.
 
+## ONEM/RVA — commune-level unemployment, approved 2026-09-06 (12th dataset)
+
+Approved by the maintainer 2026-09-06, who supplied both the direct download URLs and the licence
+text below. A candidate for automated (weekly) fetching, unlike every other municipal source this
+pipeline has, all of which are manual downloads.
+
+| Field | Value |
+|---|---|
+| Publisher | ONEM / RVA (Office National de l'Emploi / Rijksdienst voor Arbeidsvoorziening) — Belgium's federal unemployment office |
+| Files | `CCI_Commune_Statut_UP_FR.xls`, `CCI_Commune_Statut_M_FR.xls`, `CT_Commune_Statut_UP_FR.xls`, `CT_Commune_Statut_M_FR.xls`, `TTP_Commune_Statut_UP_FR.xls`, `EMPL_Commune_Statut_M_FR.xls` |
+| Base URL | `onem.be/sites/default/files/assets/statistiques/113/` |
+| Geography | Commune (per filename; **not yet verified** — no file has been opened) |
+| Cadence | Unknown; ONEM's site structure suggests these are refreshed periodically, not verified |
+
+**Licence** (maintainer-supplied, ONEM's own reuse conditions page), quoted in full because it
+differs from every other source's terms here — no CC BY 4.0 wrapper, its own attribution
+requirement:
+
+> Sans préjudice des droits de propriété intellectuelle de l'ONEM, les informations publiées sur ce
+> site internet sont libres de droits. Elles peuvent être réutilisées sans condition à des fins
+> privées, associatives, scientifiques et commerciales, dans le respect des droits de propriété
+> intellectuelle de l'ONEM. Les personnes qui réutilisent ces informations, en mentionneront la
+> source et indiqueront la date des informations utilisées.
+
+**Commercial reuse is explicitly permitted** ("à des fins ... commerciales"). Obligations: credit
+the source, and state the date of the information used — the same "attribution + date" shape as
+Statbel's 2015 licence, so the existing `.attribution` component pattern
+(`docs/data_catalog.md`'s Statbel section, `tests/test_statbel_attribution.py`) extends to this
+source rather than needing a new one. No "changes were made" clause and no explicit no-endorsement
+clause in this text, unlike Statbel's — not assumed present.
+
+**Not yet done, recorded so it is not silently skipped:**
+1. Whether ONEM's site is reachable from GitHub Actions' network. This pipeline's own network
+   context cannot reach `onem.be` at all — confirmed with `curl -v`: DNS resolves, then the TCP
+   handshake itself times out, the identical signature `statbel.fgov.be` gives (see
+   `manual_sources.md`). `scripts/fetch_onem_raw.py` exists to answer this for real, wired into
+   `daily_fetch.yml` as `continue-on-error`; the next run's log is the actual test.
+2. What the six files' columns mean. CCI/CT/TTP/EMPL and UP/M are undecoded abbreviations — reading
+   too much into a Statbel filename abbreviation (`CAS` = "civil status", guessed, wrong) produced a
+   real bug earlier this session, caught only once the actual file was opened. No indicator has been
+   defined from these files and none should be until one has actually been downloaded and read.
+3. Whether this duplicates or complements `UNEMPLOYMENT_RATE_COM` (Census 2021, `CAS` table, single
+   2021 snapshot). If ONEM's data is a genuine time series, it supersedes the census figure for
+   currency; if it is province/national only despite the "Commune" in the filenames, it does not
+   reach this pipeline's bar at all. Not yet known.
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new

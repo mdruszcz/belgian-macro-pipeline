@@ -204,6 +204,21 @@ jobs:
         continue-on-error: true
         run: python fetch_stocks.py
 
+      - name: Fetch ONEM/RVA commune unemployment files (reachability test)
+        id: fetch_onem
+        continue-on-error: true
+        # NOT wired into any export yet -- see docs/data_catalog.md's ONEM/RVA
+        # row and scripts/fetch_onem_raw.py's own docstring. This pipeline's
+        # own network context cannot reach onem.be at all (same TCP-handshake
+        # timeout statbel.fgov.be gives), so this step exists to answer, from
+        # a real GitHub Actions run, whether that network can. If it keeps
+        # failing, remove this step and treat ONEM as a manual-download
+        # source like Census 2021 instead. If it succeeds, the cached files
+        # under data/raw/onem/ are what a follow-up sync_onem.py parses --
+        # no indicator is defined from these files yet, deliberately: no one
+        # has read their actual columns.
+        run: python scripts/fetch_onem_raw.py
+
       - name: Guard against oversized data files
         run: |
           OVERSIZED=$(find data/ public/ -type f -size +25000k)
