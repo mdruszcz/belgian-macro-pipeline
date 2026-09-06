@@ -207,17 +207,34 @@ jobs:
       - name: Fetch ONEM/RVA commune unemployment files (reachability test)
         id: fetch_onem
         continue-on-error: true
-        # NOT wired into any export yet -- see docs/data_catalog.md's ONEM/RVA
-        # row and scripts/fetch_onem_raw.py's own docstring. This pipeline's
-        # own network context cannot reach onem.be at all (same TCP-handshake
-        # timeout statbel.fgov.be gives), so this step exists to answer, from
-        # a real GitHub Actions run, whether that network can. If it keeps
-        # failing, remove this step and treat ONEM as a manual-download
-        # source like Census 2021 instead. If it succeeds, the cached files
-        # under data/raw/onem/ are what a follow-up sync_onem.py parses --
-        # no indicator is defined from these files yet, deliberately: no one
-        # has read their actual columns.
+        # ANSWERED 2026-09-06: run 34054441348 fetched 6/6 successfully, so
+        # GitHub Actions' network reaches onem.be even though this pipeline's
+        # OWN development network context cannot (same TCP-handshake timeout
+        # statbel.fgov.be gives, confirmed separately). Still NOT wired into
+        # any export: no indicator is defined from these files, because no
+        # one has read their actual columns yet -- see
+        # docs/data_catalog.md's ONEM/RVA row and this script's own
+        # docstring. The artifact-upload step right after this one exists
+        # only to get one real download in front of a maintainer for that
+        # reading; once sync_onem.py exists and is wired into the pipeline
+        # proper, both this step's continue-on-error and the artifact
+        # upload should be reconsidered -- a working source does not need a
+        # standing reachability probe forever.
         run: python scripts/fetch_onem_raw.py
+
+      - name: Upload ONEM/RVA files as a workflow artifact
+        # One-off, so a maintainer can open a real file and read its actual
+        # columns -- CLAUDE.md rule 13 forbids guessing a source's layout,
+        # and nobody has opened one of these six files yet. Remove this step
+        # once sync_onem.py exists and reads them directly from the fetch
+        # step instead of needing a human to inspect one first.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: onem-raw-files
+          path: data/raw/onem/
+          retention-days: 14
+          if-no-files-found: warn
 
       - name: Guard against oversized data files
         run: |

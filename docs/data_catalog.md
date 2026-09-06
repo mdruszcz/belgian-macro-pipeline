@@ -263,17 +263,21 @@ Statbel's 2015 licence, so the existing `.attribution` component pattern
 source rather than needing a new one. No "changes were made" clause and no explicit no-endorsement
 clause in this text, unlike Statbel's — not assumed present.
 
+**Answered 2026-09-06:** GitHub Actions' network *can* reach `onem.be` — run 34054441348 fetched
+all six files successfully (0.5–1.4 MB each), even though this pipeline's own development network
+context cannot (confirmed separately with `curl -v`: DNS resolves, then the TCP handshake itself
+times out, the identical signature `statbel.fgov.be` gives — a fact about this development context,
+not about GitHub Actions). `daily_fetch.yml` now also uploads the fetched files as a workflow
+artifact, one-off, so a maintainer can open a real file — still nobody has.
+
 **Not yet done, recorded so it is not silently skipped:**
-1. Whether ONEM's site is reachable from GitHub Actions' network. This pipeline's own network
-   context cannot reach `onem.be` at all — confirmed with `curl -v`: DNS resolves, then the TCP
-   handshake itself times out, the identical signature `statbel.fgov.be` gives (see
-   `manual_sources.md`). `scripts/fetch_onem_raw.py` exists to answer this for real, wired into
-   `daily_fetch.yml` as `continue-on-error`; the next run's log is the actual test.
-2. What the six files' columns mean. CCI/CT/TTP/EMPL and UP/M are undecoded abbreviations — reading
-   too much into a Statbel filename abbreviation (`CAS` = "civil status", guessed, wrong) produced a
-   real bug earlier this session, caught only once the actual file was opened. No indicator has been
-   defined from these files and none should be until one has actually been downloaded and read.
-3. Whether this duplicates or complements `UNEMPLOYMENT_RATE_COM` (Census 2021, `CAS` table, single
+1. What the six files' columns mean, now that they can actually be downloaded (via the workflow
+   artifact, or directly — the URLs work in a browser). CCI/CT/TTP/EMPL and UP/M are undecoded
+   abbreviations — reading too much into a Statbel filename abbreviation (`CAS` = "civil status",
+   guessed, wrong) produced a real bug earlier this session, caught only once the actual file was
+   opened. No indicator has been defined from these files and none should be until one has actually
+   been downloaded and read.
+2. Whether this duplicates or complements `UNEMPLOYMENT_RATE_COM` (Census 2021, `CAS` table, single
    2021 snapshot). If ONEM's data is a genuine time series, it supersedes the census figure for
    currency; if it is province/national only despite the "Commune" in the filenames, it does not
    reach this pipeline's bar at all. Not yet known.
