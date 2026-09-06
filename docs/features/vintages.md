@@ -1,6 +1,6 @@
 # Feature: vintages and as-of queries (Block I)
 
-Status: spec
+Status: implemented
 Issue: (Block I — Vintages, docs/steps)
 Branch: spec/block-i-vintages
 
@@ -188,15 +188,46 @@ source returning garbage.
 - `as_of` as a bare date returns values published later that same day.
 - A vintage written with a non-UTC offset still orders correctly.
 
-## Open questions for the maintainer
+## What was built
 
-- **Storage projection for the `[REVIEW]` step.** At 200 indicators × 581 communes × 20 years the
-  base is ~2.32M rows before any revisions; at the ~414 bytes/row measured for the population data
-  that is ~960 MB, which the committed-store split (ADR 0002) already anticipated. The revision
-  multiplier is currently measured at **1.00×** — no revision has ever been recorded — so the
-  question is whether to plan against the measured rate or a guessed one.
-- **Should `sync_population.py`'s predicate be fixed in this block or in the suppression work?**
-  Fixing it here is cheap and closes a latent hole; deferring it keeps this block to query-layer
-  work. The defect cannot fire until suppression handling exists either way.
-- **Does the legacy path's `fetch_runs` logging get retired rather than documented?** Correction 3
-  is the second block in a row to trip over this column.
+- **`src/db/vintages.py`** — `upsert_observation()`, the single shared implementation of
+  insert-only-on-change that correction 1 asked for. All four writers (`sync_to_canonical.py`,
+  `sync_statbel.py`, `sync_population.py`, `sync_fiscal_income.py`) now call this one function
+  instead of each carrying its own copy — `sync_population.py`'s copy was the one comparing `value`
+  alone; it no longer has a copy to diverge in.
+- **`src/db/observations.py`** — `get_observations(as_of=...)`. `as_of=None` reads `is_latest = 1`,
+  identical to every existing caller's behaviour. `as_of=<timestamp>` walks history: for each
+  matching `(indicator_id, geo_id, period)`, the row with the greatest vintage ≤ `as_of`, comparing
+  **parsed** timestamps (`parse_vintage`), not strings — proven with a test where a `+02:00` row is
+  chronologically later than a `+00:00` row that sorts first lexically, and the correct one wins.
+  A bare `as_of` date is treated as the end of that day, so a query for "as of 2026-03-15" includes
+  a value published on the 15th rather than excluding it via a midnight parse.
+- **`scripts/revisions_report.py`** — every cell whose value changed, ordered by absolute relative
+  change (a transition with no computable percentage, e.g. a suppression, is appended after the
+  ranked ones rather than dropped). `--since` uses the OPPOSITE day-boundary rule from `as_of`,
+  deliberately: a report `--since 2026-03-01` must include a revision written at
+  `2026-03-01T09:00`, so a bare date there means the *start* of the day, not the end. Wired into
+  `daily_fetch.yml` right after validation, informational only — it does not block, for the same
+  reason Block H's staleness rule is a warn rather than a fail.
+- Ran against the real committed database: **`No revisions.`** — confirms the spec's own
+  measurement independently, from the finished code rather than a one-off query.
+
+## Open questions for the maintainer, answered
+
+- **Storage projection.** Re-measured directly rather than estimated: the two manual-store CSVs
+  (population, fiscal) run **142.7 and 148.0 bytes/row** respectively — call it **~146 bytes/row**
+  for a CSV-backed municipal indicator. (The spec's earlier figure of "~414 bytes/row" was an
+  estimate made before the fiscal store existed to measure against; this supersedes it.) At the
+  roadmap's worst-case bound of 200 indicators × 581 communes × 20 years (2.32M rows, treating every
+  indicator as municipal with full history), that is **~340 MB** — well inside what the
+  committed-store split (ADR 0002) already anticipated, and the revision multiplier is still
+  **1.00×** (zero revisions ever recorded), so nothing here compounds that projection further today.
+  That bound is deliberately pessimistic: of the ~48 indicators in the store as of this block, 9 are
+  municipal; at that ratio (200 × 9/48 ≈ 37 municipal indicators) the realistic projection is closer
+  to **~63 MB**. National indicators contribute negligibly — one row per period, not 581.
+- **`sync_population.py`'s predicate: fixed here.** Not deferred to the suppression work — the fix
+  was cheap (one shared function instead of a fourth copy) and there was no reason to leave a known
+  latent hole open once the shared module existed to close it.
+- **Does the legacy path's `fetch_runs` logging get retired rather than documented?** Still open.
+  Correction 3 is the second block in a row to trip over this column; still recorded, not fixed,
+  here.

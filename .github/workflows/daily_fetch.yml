@@ -99,6 +99,14 @@ jobs:
         # normal and silence the alarm on the next run.
         run: python scripts/validate_data.py --db data/belgian_macro.db --record-volume
 
+      - name: Report today's revisions
+        # Informational only -- does NOT block (docs/features/vintages.md).
+        # A revision is a legitimate event; the pathological case (a source
+        # returning garbage) is already caught by the row_collapse/null_share
+        # validation rules above, which DO block. --since today's date so
+        # this reports only what THIS run changed, not all history.
+        run: python scripts/revisions_report.py --db data/belgian_macro.db --since "$(date -u +%Y-%m-%d)"
+
       - name: Export canonical CSV for the dashboard
         # Overwrites belgian_macro_export.csv (written above from the legacy
         # schema) with the canonical-schema version the dashboard now reads.

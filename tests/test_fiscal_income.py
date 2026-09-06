@@ -27,11 +27,11 @@ from sync_fiscal_income import (  # noqa: E402
     MissingFiscalData,
     _assert_geography_vintage,
     _coerce,
-    _upsert_observation,
 )
 
 from src.analytics.derived import mean_from_total  # noqa: E402
 from src.db import migrate  # noqa: E402
+from src.db.vintages import upsert_observation  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 STORE = REPO / "data" / "fiscal_income_observations.csv"
@@ -103,7 +103,7 @@ def test_vintage_check_refuses_a_partial_panel(tmp_path):
 
 
 def _write(conn, value, status, vintage):
-    return _upsert_observation(
+    return upsert_observation(
         conn,
         indicator_id="FISCAL_TOT_MUNICIP_TAXES",
         geo_id="be:mun:11001",

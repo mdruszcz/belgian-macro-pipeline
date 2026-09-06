@@ -22,9 +22,13 @@ period-aware: a pre-merger year's NIS code resolves to the historical
 predecessor entity, not today's successor, which is the correct meaning of
 "population of Kruibeke in 2016" now that Kruibeke has been merged away.
 
-Vintage/is_latest discipline matches sync_statbel.py: insert-only-on-change,
-UPDATE the previous is_latest row rather than deleting it, hard rowcount
-check on insert.
+Vintage/is_latest writes go through src.db.vintages.upsert_observation, the
+one shared implementation of insert-only-on-change (Block I,
+docs/features/vintages.md). This script used to carry its own copy that
+compared `value` alone rather than `(value, status)` -- latent only because
+every row here is hardcoded to status='final', but the day suppression
+handling lands, a commune moving final -> suppressed at an unchanged number
+would have written no new vintage and the suppression would have been lost.
 """
 
 import argparse
@@ -43,6 +47,7 @@ from plot_population_continuity import (  # noqa: E402
 )
 from port_existing_indicators import derive_period_bounds  # noqa: E402
 
+from src.db.vintages import upsert_observation  # noqa: E402
 from src.geography.resolve import UnknownGeographyError, resolve_geo  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
@@ -100,67 +105,6 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) ->
     conn.commit()
 
 
-def _upsert_observation(
-    conn: sqlite3.Connection,
-    *,
-    indicator_id: str,
-    geo_id: str,
-    period: str,
-    period_start: str,
-    period_end: str,
-    value: int,
-    vintage: str,
-    fetch_run_id: int,
-) -> int:
-    """Insert-only-on-change. Returns 1 if a new vintage was written, else 0.
-
-    Extracted so the four indicators this script now writes (the total plus
-    three age bands) share one implementation of the vintage/is_latest rule
-    rather than four copies of it.
-    """
-    current = conn.execute(
-        """SELECT value FROM observations
-           WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-        (indicator_id, geo_id, period),
-    ).fetchone()
-    if current is not None and current[0] == value:
-        return 0  # unchanged -- no new vintage
-
-    if current is not None:
-        conn.execute(
-            """UPDATE observations SET is_latest = 0
-               WHERE indicator_id = ? AND geo_id = ? AND period = ? AND is_latest = 1""",
-            (indicator_id, geo_id, period),
-        )
-
-    cur = conn.execute(
-        """
-        INSERT OR IGNORE INTO observations
-            (indicator_id, geo_id, period, vintage, value, status,
-             period_start, period_end, is_latest, fetch_run_id, created_at)
-        VALUES (?, ?, ?, ?, ?, 'final', ?, ?, 1, ?, ?)
-        """,
-        (
-            indicator_id,
-            geo_id,
-            period,
-            vintage,
-            value,
-            period_start,
-            period_end,
-            fetch_run_id,
-            vintage,
-        ),
-    )
-    if cur.rowcount != 1:
-        raise RuntimeError(
-            f"Vintage collision writing {indicator_id}/{geo_id}/{period}/{vintage}: "
-            "a row with this exact key already exists. Refusing to silently drop "
-            "the new value (CLAUDE.md rule 13)."
-        )
-    return 1
-
-
 def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
     """Returns (rows_read, rows_written, rows_unresolved).
 
@@ -213,7 +157,7 @@ def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
                 values[indicator_id] = bands.get(band, 0)
 
             for indicator_id, value in values.items():
-                rows_written += _upsert_observation(
+                rows_written += upsert_observation(
                     conn,
                     indicator_id=indicator_id,
                     geo_id=geo_id,
@@ -221,6 +165,7 @@ def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
                     period_start=period_start,
                     period_end=period_end,
                     value=value,
+                    status="final",
                     vintage=now,
                     fetch_run_id=fetch_run_id,
                 )
