@@ -60,10 +60,42 @@ from src.validation.config_schema import load_and_validate_derived  # noqa: E402
 DEFAULT_DERIVED_DIR = Path(__file__).resolve().parents[1] / "config" / "indicators" / "derived"
 
 
+def canonical(geo_id: str | None) -> str | None:
+    """Drop the version suffix from a geography id.
+
+    The geographies table records historical VERSIONS of an arrondissement or
+    province whose boundaries changed when communes merged across them, as
+    `be:prov:10000@1977-01-01` alongside the current `be:prov:10000`. Same NIS
+    code, same name, same entity -- the suffix marks a boundary change, not a
+    different place. Ten such rows exist today: nine arrondissements and one
+    province.
+
+    Collapsing them matters, and got caught only by chasing a two-commune
+    discrepancy. Borsbeek and Zwijndrecht (merged away in 2025) hang off
+    `be:arr:11000@1977-01-01`, whose parent is `be:prov:10000@1977-01-01` --
+    so aggregating by raw geo_id sent their figures to a SEPARATE Antwerp
+    province, leaving the real one short EUR 0.737bn of 2023 taxable income
+    while its coverage still read a confident 67/67. A total missing two
+    communes at 100% coverage is precisely the silent-wrong-number failure
+    this pipeline exists to avoid; the equivalent Limburg case was caught
+    earlier only because its versioned arrondissement happens to parent to a
+    canonical province.
+    """
+    if geo_id is None:
+        return None
+    return geo_id.split("@", 1)[0]
+
+
 def _geography(conn: sqlite3.Connection):
     """parents, levels, names and validity windows for every geography --
     including historical ones, which is what lets a predecessor commune's
-    value reach its province for the period it existed in."""
+    value reach its province for the period it existed in.
+
+    Every id and every parent pointer is canonicalised (see above), so a
+    versioned ancestor and its current counterpart are one geography. Where
+    both rows exist, the currently-valid one supplies the name and validity
+    window; their parents agree, verified across all ten versioned rows.
+    """
     parents: dict[str, str | None] = {}
     levels: dict[str, str] = {}
     names: dict[str, tuple[str, str, str]] = {}
@@ -71,13 +103,15 @@ def _geography(conn: sqlite3.Connection):
     nis: dict[str, str | None] = {}
     for geo_id, level, parent, nis_code, en, fr, nl, valid_from, valid_to in conn.execute(
         "SELECT geo_id, level, parent_geo_id, nis_code, name_en, name_fr, name_nl, "
-        "valid_from, valid_to FROM geographies"
+        "valid_from, valid_to FROM geographies ORDER BY valid_to IS NULL"
     ):
-        parents[geo_id] = parent
-        levels[geo_id] = level
-        names[geo_id] = (en, fr, nl)
-        windows[geo_id] = (valid_from, valid_to)
-        nis[geo_id] = nis_code
+        key = canonical(geo_id)
+        parents[key] = canonical(parent)
+        levels[key] = level
+        # ORDER BY puts the currently-valid row last, so it wins these.
+        names[key] = (en, fr, nl)
+        windows[key] = (valid_from, valid_to)
+        nis[key] = nis_code
     return parents, levels, names, windows, nis
 
 
@@ -186,7 +220,7 @@ def _observations(conn: sqlite3.Connection, extra_csvs: tuple[Path, ...]):
         "JOIN geographies g ON g.geo_id = o.geo_id AND g.level = 'municipality' "
         "WHERE o.is_latest = 1 AND o.value IS NOT NULL"
     ):
-        rows.append((indicator_id, geo_id, period, float(value)))
+        rows.append((indicator_id, canonical(geo_id), period, float(value)))
 
     for path in extra_csvs:
         if not path.is_file():
@@ -199,7 +233,12 @@ def _observations(conn: sqlite3.Connection, extra_csvs: tuple[Path, ...]):
                 if row["is_latest"] != "1" or row["value"] == "":
                     continue
                 rows.append(
-                    (row["indicator_id"], row["geo_id"], row["period"], float(row["value"]))
+                    (
+                        row["indicator_id"],
+                        canonical(row["geo_id"]),
+                        row["period"],
+                        float(row["value"]),
+                    )
                 )
     return rows
 

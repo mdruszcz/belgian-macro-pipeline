@@ -13,6 +13,8 @@ import re
 import subprocess
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parents[1]
 LOCAL_HTML = REPO / "local.html"
 
@@ -168,3 +170,124 @@ def test_latest_of_picks_the_most_recent_period_not_insertion_order():
     """)
     assert results["period"] == "2021"
     assert results["value"] == 110
+
+
+# ── the comparison column (Block L) ────────────────────────────────────────
+
+_COMMUNE_WITH_COMPARISON = {
+    "nis_code": "11002",
+    "geo_id": "be:mun:11002",
+    "name": {"en": "Antwerp", "fr": "Anvers", "nl": "Antwerpen"},
+    "indicators": {
+        "POPULATION_BY_COMMUNE": {
+            "name": "Population",
+            "unit": "count",
+            "additive": True,
+            "periods": {"2025": {"value": 100.0}, "2026": {"value": 200.0}},
+            "comparison": {
+                "province": {
+                    "name": {"en": "Antwerp"},
+                    "value": 1000.0,
+                    "period": "2026",
+                    "coverage": {"n": 69, "of": 69, "pct": 100.0},
+                },
+                "country": {
+                    "name": {"en": "Belgium"},
+                    "value": 4000.0,
+                    "period": "2026",
+                    "coverage": {"n": 565, "of": 565, "pct": 100.0},
+                },
+            },
+        },
+        "AVG_INCOME": {
+            "name": "Average income",
+            "unit": "eur",
+            "additive": False,
+            "periods": {"2023": {"value": 80.0}},
+            "comparison": {
+                "region": {
+                    "name": {"en": "Flanders"},
+                    "value": 100.0,
+                    "period": "2023",
+                    "coverage": {"n": 300, "of": 300, "pct": 100.0},
+                }
+            },
+        },
+    },
+}
+
+
+def _rows(indicator):
+    return _run_node(f"""
+        const commune = {json.dumps(_COMMUNE_WITH_COMPARISON)};
+        console.log(JSON.stringify(
+            LocalUI.comparisonRows(commune.indicators[{json.dumps(indicator)}])
+        ));
+    """)
+
+
+def test_a_count_is_compared_as_a_share_of_its_reference():
+    """A commune is PART of its province, so a difference would be
+    arithmetically true and useless -- every commune is "below" its province,
+    and a tiny one reads -100% against everything. 200 of 1000 is 20%."""
+    rows = _rows("POPULATION_BY_COMMUNE")
+    by_scope = {r["scope"]: r for r in rows}
+
+    assert by_scope["commune"]["value"] == 200.0  # the latest period, not the first
+    assert by_scope["province"]["relation"] == {"kind": "share", "pct": 20.0}
+    assert by_scope["country"]["relation"] == {"kind": "share", "pct": 5.0}
+
+
+def test_a_ratio_is_compared_as_a_difference_from_its_reference():
+    """An average sits on the same scale as its reference, so a share would be
+    meaningless. 80 against 100 is -20%."""
+    rows = _rows("AVG_INCOME")
+    region = next(r for r in rows if r["scope"] == "region")
+    assert region["relation"]["kind"] == "diff"
+    # approx, not exact: 80/100 - 1 is -0.19999999999999996 in IEEE754, and
+    # pinning the exact float would be testing the arithmetic of the machine
+    # rather than the behaviour of the code.
+    assert region["relation"]["pct"] == pytest.approx(-20.0)
+
+
+def test_the_commune_is_always_the_first_row_and_has_no_relation_to_itself():
+    rows = _rows("AVG_INCOME")
+    assert rows[0]["scope"] == "commune"
+    assert "relation" not in rows[0]
+
+
+def test_a_missing_province_simply_yields_one_row_fewer():
+    """A Brussels commune has no province (geography.md Q3). The component
+    must render what resolves rather than assume a fixed depth."""
+    rows = _rows("POPULATION_BY_COMMUNE")
+    assert [r["scope"] for r in rows] == ["commune", "province", "country"]
+
+    rows = _rows("AVG_INCOME")
+    assert [r["scope"] for r in rows] == ["commune", "region"]
+
+
+def test_coverage_travels_with_every_reference_row():
+    """An aggregate built from fewer communes than exist is a materially
+    different number, so the count must reach the page, not stay in the CSV."""
+    rows = _rows("POPULATION_BY_COMMUNE")
+    province = next(r for r in rows if r["scope"] == "province")
+    assert province["coverage"] == {"n": 69, "of": 69, "pct": 100.0}
+
+
+def test_no_comparison_rows_when_there_is_nothing_to_compare_against():
+    results = _run_node("""
+        const entry = {unit: 'count', additive: true, periods: {'2026': {value: 5}}};
+        console.log(JSON.stringify(LocalUI.comparisonRows(entry).length));
+    """)
+    # Only the commune's own row, so the caller renders no table at all.
+    assert results == 1
+
+
+def test_a_zero_reference_yields_no_relation_rather_than_infinity():
+    results = _run_node("""
+        const entry = {unit: 'count', additive: true, periods: {'2026': {value: 5}},
+          comparison: {country: {name: {en: 'Belgium'}, value: 0, period: '2026'}}};
+        const rows = LocalUI.comparisonRows(entry);
+        console.log(JSON.stringify(rows[1].relation));
+    """)
+    assert results is None
