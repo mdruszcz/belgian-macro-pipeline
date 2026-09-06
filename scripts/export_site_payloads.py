@@ -230,6 +230,82 @@ def _attach_percentiles(communes: dict[str, dict], percentiles: dict) -> int:
     return attached
 
 
+def _indicator_names(db_path: Path, derived_dir: Path | None = None) -> dict[str, dict]:
+    """indicator_id -> {en, fr, nl}.
+
+    The bulk CSVs carry only the English name, because they are flat tables
+    with one name column. The payloads are what a multilingual page reads, so
+    they carry all three -- every indicator already has them, in the
+    `indicators` table for fetched ones and in the YAML for derived ones
+    (CLAUDE.md rule 7: preserve multilingual labels on every user-facing
+    string). Without this the French page would silently fall back to English
+    indicator names, which is the kind of half-translation that reads worse
+    than no translation at all.
+    """
+    names: dict[str, dict] = {}
+    conn = sqlite3.connect(str(db_path))
+    try:
+        for indicator_id, en, fr, nl in conn.execute(
+            "SELECT indicator_id, name_en, name_fr, name_nl FROM indicators"
+        ):
+            names[indicator_id] = {"en": en, "fr": fr, "nl": nl}
+    finally:
+        conn.close()
+
+    derived_dir = derived_dir or (
+        Path(__file__).resolve().parents[1] / "config" / "indicators" / "derived"
+    )
+    if derived_dir.is_dir():
+        import yaml
+
+        for path in sorted(derived_dir.glob("*.yaml")):
+            cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+            names[cfg["id"]] = {k: cfg["name"][k] for k in ("en", "fr", "nl")}
+    return names
+
+
+SECTIONS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "local_sections.yaml"
+
+
+def _sections(path: Path = SECTIONS_CONFIG) -> list[dict]:
+    """The /local page layout, so the page holds no indicator ids.
+
+    The 50% gate checks for "zero indicator-specific frontend logic", and
+    Block B's premise is that adding an indicator to a page is config rather
+    than a code change. local.html renders whatever this describes.
+
+    Every indicator named here is checked against the payloads before being
+    emitted: a section pointing at an indicator nothing provides would render
+    an empty box on 565 pages, which looks like a bug and is invisible to
+    every other test.
+    """
+    if not path.is_file():
+        return []
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8"))["sections"]
+
+
+def _check_sections(sections: list[dict], known: set[str]) -> None:
+    unknown = sorted(
+        {
+            indicator_id
+            for section in sections
+            for indicator_id in [
+                *([section["headline"]] if section.get("headline") else []),
+                *(section.get("indicators") or []),
+            ]
+            if indicator_id not in known
+        }
+    )
+    if unknown:
+        raise ValueError(
+            f"config/local_sections.yaml names indicator(s) no commune payload carries: "
+            f"{unknown}. They would render as empty boxes on every commune page. Remove "
+            "them from the layout, or load the data they need."
+        )
+
+
 def _read_aggregates(csv_path: Path) -> dict[tuple[str, str, str], dict]:
     """Aggregate values keyed by (geo_id, indicator, period).
 
@@ -345,11 +421,19 @@ def export_site_payloads(
     validation_status: str,
     aggregates_csv: Path | None = None,
     percentiles_csv: Path | None = None,
+    sections_config: Path | None = SECTIONS_CONFIG,
 ) -> dict[str, int]:
     communes = _read_communes_history(communes_history_csv)
     indicators = _read_communes_latest(communes_latest_csv)
     national = _read_national(national_csv)
     geographies = _build_geographies(db_path)
+
+    names = _indicator_names(db_path)
+    for commune in communes.values():
+        for indicator_id, entry in commune["indicators"].items():
+            # `name` stays the English string the CSV supplied, so nothing
+            # already reading it breaks; `names` adds the other two.
+            entry["names"] = names.get(indicator_id, {"en": entry.get("name")})
 
     additive = _additive_indicators(db_path)
     for commune in communes.values():
@@ -378,6 +462,18 @@ def export_site_payloads(
         )
 
     _write_json(out_dir / "metadata" / "geographies.json", {"geographies": geographies})
+
+    # None skips the layout entirely: a caller exercising the payload RESHAPE
+    # with a fixture-scale set of indicators is not testing the page layout,
+    # and the cross-check below would rightly reject every real indicator as
+    # missing from a two-row fixture.
+    sections = _sections(sections_config) if sections_config else []
+    if sections:
+        _check_sections(
+            sections,
+            {i for commune in communes.values() for i in commune["indicators"]},
+        )
+        _write_json(out_dir / "metadata" / "sections.json", {"sections": sections})
 
     manifest = {
         "build_id": build_id,

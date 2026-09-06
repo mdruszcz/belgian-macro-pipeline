@@ -117,7 +117,9 @@ def test_every_value_round_trips_between_history_csv_and_commune_payload(tmp_pat
     )
 
     out_dir = tmp_path / "public"
-    export_site_payloads(db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass")
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
 
     import json
 
@@ -170,7 +172,9 @@ def test_indicator_payload_contains_only_current_communes(tmp_path):
         encoding="utf-8",
     )
     out_dir = tmp_path / "public"
-    export_site_payloads(db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass")
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
 
     import json
 
@@ -193,7 +197,9 @@ def test_geographies_metadata_ancestor_walk_resolves_to_a_real_region(tmp_path):
         encoding="utf-8",
     )
     out_dir = tmp_path / "public"
-    export_site_payloads(db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass")
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
 
     import json
 
@@ -231,7 +237,9 @@ def test_manifest_row_counts_match_generated_payload_counts(tmp_path):
         encoding="utf-8",
     )
     out_dir = tmp_path / "public"
-    export_site_payloads(db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass")
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
 
     import json
 
@@ -282,7 +290,9 @@ def test_payload_carries_the_source_retrieval_date_for_licence_attribution(tmp_p
         encoding="utf-8",
     )
     out_dir = tmp_path / "public"
-    export_site_payloads(db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass")
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
 
     import json
 
