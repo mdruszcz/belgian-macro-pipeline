@@ -154,6 +154,22 @@ jobs:
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv
 
+      - name: Precompute communes.html's table payload
+        # communes.html used to fetch communes_history.csv directly and
+        # re-derive its own table shape (parseCSV()+pivot()) in every
+        # visitor's browser -- 162,272 rows re-parsed and re-deduplicated on
+        # every page load, for a shape that never changes between visitors.
+        # ONEM pushed that CSV from 22.9 to 32.2 MB, which is what surfaced
+        # this as worth fixing rather than only raising the size guard.
+        # communes_history.csv itself is untouched and still published, for
+        # a researcher who wants the raw rows -- this is an ADDITIONAL,
+        # smaller artifact (11.0 MB vs 32.2 MB raw; 1.33 vs 2.28 MB gzipped),
+        # not a replacement.
+        run: |
+          python scripts/export_communes_table_json.py \
+            --communes-history data/communes_history.csv \
+            --out data/communes_table.json
+
       - name: Export province/region/Belgium aggregates
         # Block L -- docs/features/comparison.md. Feeds the comparison column
         # on every commune page. Reads the UNRESTRICTED observation set

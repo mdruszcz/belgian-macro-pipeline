@@ -98,6 +98,9 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv
+          python scripts/export_communes_table_json.py \
+            --communes-history data/communes_history.csv \
+            --out data/communes_table.json
           python -m src.exporters.metadata --out data/metadata/indicators.json
 
       - name: Export province/region/Belgium aggregates
