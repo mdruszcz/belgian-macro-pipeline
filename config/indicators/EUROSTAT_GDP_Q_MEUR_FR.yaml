@@ -1,8 +1,8 @@
 id: EUROSTAT_GDP_Q_MEUR_FR
 name:
-  en: EUROSTAT_GDP_Q_MEUR_FR
-  fr: EUROSTAT_GDP_Q_MEUR_FR
-  nl: EUROSTAT_GDP_Q_MEUR_FR
+  en: GDP volume index, France (2010=100)
+  fr: Indice de volume du PIB, France (2010=100)
+  nl: Bbp-volume-index, Frankrijk (2010=100)
 country: FR
 unit: index_2010
 frequency: Q

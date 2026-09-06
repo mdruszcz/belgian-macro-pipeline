@@ -1,8 +1,8 @@
 id: EUROSTAT_GDP_Q_MEUR_ES
 name:
-  en: EUROSTAT_GDP_Q_MEUR_ES
-  fr: EUROSTAT_GDP_Q_MEUR_ES
-  nl: EUROSTAT_GDP_Q_MEUR_ES
+  en: GDP volume index, Spain (2010=100)
+  fr: Indice de volume du PIB, Espagne (2010=100)
+  nl: Bbp-volume-index, Spanje (2010=100)
 country: ES
 unit: index_2010
 frequency: Q

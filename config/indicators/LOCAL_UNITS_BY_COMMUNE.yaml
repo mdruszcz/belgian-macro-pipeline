@@ -11,12 +11,19 @@ geo_levels:
 preferred_direction: higher_is_better
 description:
   en: >
-    Number of registered local business establishment units per commune,
-    per quarter. Verified via Statbel's Bestat API (datasource
-    IM_EAF_LCL_UNIT_POP); only the latest quarter is available through a
-    standard view -- see docs/features/statbel_adapter.md for why. A row
-    where Statbel itself could not attribute the establishment to any
-    commune ("Localisation indéterminée") is excluded from ingestion, not
+    Number of local business units (establishments) per commune. Statbel's
+    own wording for datasource IM_EAF_LCL_UNIT_POP is "Number of local units
+    since 2015 per quarter, per municipality and per economic activity
+    (nacebel 2008)" -- this indicator sums across ALL economic activities,
+    so it is a commune total, not a per-sector figure.
+    IMPORTANT -- this is a single, ageing snapshot, not a live quarterly
+    series. Only one quarter is available through a standard view, and that
+    quarter is 2023-Q4: verified 2026-09-06 that the live view still serves
+    exactly "4eme trimestre 2023" and nothing newer, so the figure will not
+    move until Statbel republishes. The frequency is Q because the source is
+    quarterly, not because this pipeline holds a quarterly series.
+    A row where Statbel itself could not attribute the establishment to any
+    commune ("Localisation indeterminee") is excluded from ingestion, not
     assigned to a geography that would misrepresent it.
 fetch:
   query: /views/04f3d23b-9422-4d08-a856-ab547ccf7b38/result/JSON

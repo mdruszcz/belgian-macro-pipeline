@@ -97,3 +97,45 @@ def test_export_excludes_non_latest_rows(tmp_path):
     lines = out_path.read_text().splitlines()
     assert len(lines) == 2  # header + exactly one row (the is_latest=1 one)
     assert "2.0" in lines[1]
+
+
+def test_a_name_containing_a_comma_is_quoted_not_column_shifted(tmp_path):
+    """Indicator display names legitimately contain commas ("GDP volume
+    index, Belgium (2010=100)"). A hand-rolled f-string writer emitted them
+    unquoted, silently shifting every later column -- 287 rows of the
+    published export were broken this way before csv.writer replaced it."""
+    import csv as _csv
+
+    db_path = tmp_path / "test.db"
+    migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
+    conn = sqlite3.connect(str(db_path))
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
+        ("nbb", "NBB SDMX", "NBB", "nbb", "x"),
+    )
+    conn.execute("""INSERT INTO geographies (geo_id, level, name_nl, name_fr, name_en, valid_from)
+           VALUES ('be:country', 'country', 'B', 'B', 'Belgium', '1830-01-01')""")
+    conn.execute("""INSERT INTO indicators
+           (indicator_id, source_id, name_nl, name_fr, name_en, frequency, unit,
+            preferred_direction, is_additive, config_path)
+           VALUES ('X', 'nbb', 'n', 'n', 'GDP volume index, Belgium (2010=100)', 'Q',
+                   'index_2010', 'higher_is_better', 0, 'x')""")
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('nbb','nbb','2026-01-01','ok')"
+    )
+    conn.execute("""INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('X', 'be:country', '2024-Q1', 'v1', 1.5, 'final',
+                   '2024-01-01', '2024-03-31', 1, 1, '2026-01-01T00:00:00+00:00')""")
+    conn.commit()
+    conn.close()
+
+    out_path = tmp_path / "export.csv"
+    export_canonical_csv(db_path, out_path)
+
+    rows = list(_csv.reader(out_path.open(encoding="utf-8")))
+    assert all(len(r) == 8 for r in rows), "a comma in the name shifted the columns"
+    assert rows[1][1] == "GDP volume index, Belgium (2010=100)"
+    assert rows[1][2] == "2024-Q1"

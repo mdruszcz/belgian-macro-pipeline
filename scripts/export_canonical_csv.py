@@ -14,6 +14,7 @@ out of scope per docs/decisions/0001-data-model.md.
 """
 
 import argparse
+import csv
 import sqlite3
 from pathlib import Path
 
@@ -41,12 +42,36 @@ def export_canonical_csv(db_path: Path, out_path: Path) -> int:
     conn.close()
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", newline="") as f:
-        f.write("indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at\n")
+    # csv.writer, not f-strings: indicator display names legitimately contain
+    # commas ("GDP volume index, Belgium (2010=100)"), and an unquoted comma
+    # silently shifts every later column for that row. all_data.html parses
+    # RFC 4180 properly, so quoting here is all that is needed.
+    with open(out_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(
+            [
+                "indicator_code",
+                "name",
+                "period",
+                "value",
+                "obs_status",
+                "unit",
+                "source_agency",
+                "fetched_at",
+            ]
+        )
         for indicator_id, name, period, value, status, unit, agency, created_at in rows:
-            obs_status = status_to_obs_status(status)
-            f.write(
-                f"{indicator_id},{name},{period},{value},{obs_status},{unit},{agency},{created_at}\n"
+            writer.writerow(
+                [
+                    indicator_id,
+                    name,
+                    period,
+                    value,
+                    status_to_obs_status(status),
+                    unit,
+                    agency,
+                    created_at,
+                ]
             )
     return len(rows)
 

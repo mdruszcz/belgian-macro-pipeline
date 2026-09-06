@@ -69,26 +69,34 @@ def _ensure_reference_rows(
                 None,
             ),
         )
+        cfg = indicator_configs[code]
         conn.execute(
             """
-            INSERT OR IGNORE INTO indicators
+            INSERT INTO indicators
                 (indicator_id, source_id, name_nl, name_fr, name_en,
                  description_nl, description_fr, description_en,
                  frequency, unit, preferred_direction, aggregation_method,
                  is_additive, decimals, config_path, is_active)
             VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'population_weighted', 0, 1, ?, 1)
+            ON CONFLICT(indicator_id) DO UPDATE SET
+                name_nl = excluded.name_nl,
+                name_fr = excluded.name_fr,
+                name_en = excluded.name_en,
+                description_en = excluded.description_en,
+                unit = excluded.unit,
+                preferred_direction = excluded.preferred_direction
         """,
             (
                 code,
                 source_id,
-                meta["name"],
-                meta["name"],
-                meta["name"],
-                meta.get("description", ""),
+                cfg["name"]["nl"],
+                cfg["name"]["fr"],
+                cfg["name"]["en"],
+                cfg.get("description", {}).get("en", "") or meta.get("description", ""),
                 meta["frequency"],
                 meta["unit"],
-                indicator_configs[code]["preferred_direction"],
-                f"scripts/port_existing_indicators.py::{code}",
+                cfg["preferred_direction"],
+                f"config/indicators/{code}.yaml",
             ),
         )
     conn.commit()

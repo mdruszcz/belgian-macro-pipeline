@@ -1,8 +1,8 @@
 id: EUROSTAT_GDP_Q_MEUR
 name:
-  en: EUROSTAT_GDP_Q_MEUR
-  fr: EUROSTAT_GDP_Q_MEUR
-  nl: EUROSTAT_GDP_Q_MEUR
+  en: GDP volume index, Belgium (2010=100)
+  fr: Indice de volume du PIB, Belgique (2010=100)
+  nl: Bbp-volume-index, België (2010=100)
 unit: index_2010
 frequency: Q
 source_id: dbnomics_eurostat

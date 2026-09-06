@@ -1,8 +1,8 @@
 id: EUROSTAT_GDP_Q_MEUR_DE
 name:
-  en: EUROSTAT_GDP_Q_MEUR_DE
-  fr: EUROSTAT_GDP_Q_MEUR_DE
-  nl: EUROSTAT_GDP_Q_MEUR_DE
+  en: GDP volume index, Germany (2010=100)
+  fr: Indice de volume du PIB, Allemagne (2010=100)
+  nl: Bbp-volume-index, Duitsland (2010=100)
 country: DE
 unit: index_2010
 frequency: Q

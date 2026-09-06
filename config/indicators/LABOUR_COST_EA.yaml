@@ -1,8 +1,8 @@
 id: LABOUR_COST_EA
 name:
-  en: LABOUR_COST_EA
-  fr: LABOUR_COST_EA
-  nl: LABOUR_COST_EA
+  en: Nominal compensation per employee, euro area (2010=100)
+  fr: Rémunération nominale par salarié, zone euro (2010=100)
+  nl: Nominale beloning per werknemer, eurozone (2010=100)
 country: EA
 unit: index_2010
 frequency: A
