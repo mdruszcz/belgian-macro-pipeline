@@ -47,6 +47,7 @@ FUNCTIONS = {
         "z_score",
         "percentile",
         "regional_share",
+        "mean_from_total",
     )
 }
 
@@ -55,7 +56,13 @@ FUNCTIONS = {
 CROSS_SECTIONAL = {"percentile", "z_score"}
 
 # Functions taking several distinct indicators as positional inputs.
-MULTI_INPUT = {"per_capita", "share_of_total", "regional_share", "dependency_ratio"}
+MULTI_INPUT = {
+    "per_capita",
+    "share_of_total",
+    "regional_share",
+    "dependency_ratio",
+    "mean_from_total",
+}
 
 
 class CircularDependencyError(Exception):

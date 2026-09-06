@@ -1,0 +1,24 @@
+id: AVG_NET_TAXABLE_INCOME
+name:
+  en: Average net taxable income per tax return
+  fr: Revenu net imposable moyen par déclaration
+  nl: Gemiddeld netto belastbaar inkomen per aangifte
+unit: eur
+frequency: A
+geo_levels: [municipal]
+preferred_direction: higher_is_better
+decimals: 0
+description:
+  en: >
+    Total net taxable income divided by the number of tax returns declaring a
+    non-zero income. Computed on read from the two stored measures rather than
+    stored itself, so that the pair remains additive: when communes merge, the
+    successor's average is the summed total over the summed count, which is
+    the correct figure and is NOT the average of the predecessors' averages.
+    Per TAX RETURN, not per inhabitant. One return can cover a married or
+    legally cohabiting couple, and residents with no taxable income are
+    excluded from the denominator entirely, so this figure sits well above any
+    income-per-head measure and the two must not be compared.
+derived:
+  function: mean_from_total
+  inputs: [FISCAL_TOT_NET_TAXABLE_INC, FISCAL_NBR_NON_ZERO_INC]

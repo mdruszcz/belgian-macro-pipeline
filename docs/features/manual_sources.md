@@ -37,6 +37,7 @@ git cannot delta. See [ADR 0002](../decisions/0002-split-committed-stores.md) fo
 |---|---|---|---|
 | `data/belgian_macro.db` | anything CI can fetch: national macro, `LOCAL_UNITS_BY_COMMUNE` | daily, by the bot | `daily_fetch.yml` |
 | `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | only when refreshed by hand | the procedure below |
+| `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
 
 `data/local/` holds the disposable rebuild of the manual store and is gitignored. It must stay
 ignored: `daily_fetch.yml` runs `git add data/`, which would otherwise commit it.

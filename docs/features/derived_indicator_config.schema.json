@@ -57,7 +57,8 @@
             "dependency_ratio",
             "z_score",
             "percentile",
-            "regional_share"
+            "regional_share",
+            "mean_from_total"
           ]
         },
         "inputs": {

@@ -1,0 +1,17 @@
+id: FISCAL_TOT_TAXES
+name:
+  en: Total tax assessed
+  fr: Total de l'impôt
+  nl: Totaal belasting
+unit: eur
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+description:
+  en: >
+    Total personal income tax assessed on residents of the commune (state,
+    municipal and agglomeration surcharges combined), from Statbel's
+    TF_PSNL_INC_TAX_MUNTY file. Contextual: a high figure reflects high
+    incomes as much as high rates, and the two have opposite readings.
+display: null
