@@ -561,6 +561,42 @@ evasion of that control regardless of how public the data is.
 4. Whether next year's equivalent files will use the current commune map, closing the 13-commune
    gap, or continue lagging it. Not knowable until a second year's file exists to compare.
 
+## Federal subsidy register — ASSESSED AND DECLINED 2026-09-06
+
+`Registre_des_subventions_{2023,2024,2025}.csv`, supplied by the maintainer. Belgium's federal
+subsidy register: one row per individual grant payment, ~25,000 rows across three years, with
+beneficiary, address, enterprise number, paying department, budget line and amount. Real open data,
+correctly structured, and **not loaded** — recorded here so it is not re-researched later (Block E's
+deferred-not-deleted rule).
+
+**Why not, in one line:** it is a register of payments to named organisations, not a commune-level
+statistic, and both routes to making it one produce a wrong number.
+
+**Route 1 — the 129 rows that name a commune directly** (`COMMUNES Commune d'Amay`). These genuinely
+are money to that commune, but they cover only 126–133 of 565 communes depending on the year, total
+€47–77m against a €195–210bn register, and a commune's absence means "no grant of this recorded
+type this year", not "no federal money" — the absence-looks-like-zero failure `data_model.md` warns
+about. The source also **truncates beneficiary names** at ~30 characters (`Molenbeek-`,
+`Chapelle-lez-`, `Court-Saint-`), so 15 of 129 need guessing, and guessing which commune is credited
+with money is the wrong place to guess.
+
+**Route 2 — parse the postcode out of the beneficiary address and aggregate** (the maintainer's own
+suggestion, and mechanically the better one). It works: 95.3% of rows carry a parseable 4-digit
+postcode, Statbel's own `Conversion Postal code_Refnis code` file resolves 1,146 of 1,149 postcodes
+to exactly one commune (only 1040, 1050 and 1804 are ambiguous), and it attributes 8,820 rows across
+562 of 565 communes. **The result is nonetheless wrong**, measured rather than argued: it makes
+Saint-Gilles — 50,000 residents — the recipient of **44.9% of all federal subsidy in Belgium**
+(€29.4bn), with four Brussels communes taking 92% between them. The cause is that the address is the
+beneficiary's REGISTERED office: postcode 1060 hosts the Federal Pensions Service, so its €13.9bn
+national budget lands on Saint-Gilles; 1210 carries a €9.4bn transfer to the Flemish Region; 1080
+carries €4.7bn to the French Community. The method measures where national institutions are
+registered, not where money is spent, and would look entirely plausible on a page.
+
+**What it could honestly support, if ever wanted:** a NATIONAL series (federal subsidy by department
+and category), which is clean and correct but does not fit the municipal product; or a commune
+indicator labelled explicitly "grants recorded in the federal subsidy register", with absence
+stated to mean "none recorded". Neither was judged worth the misreading risk.
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new
