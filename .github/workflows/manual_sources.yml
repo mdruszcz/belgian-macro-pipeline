@@ -97,6 +97,17 @@ jobs:
             --extra-observations data/population_observations.csv \
             --extra-observations data/fiscal_income_observations.csv
 
+      - name: Export national and regional peer positions
+        # Block L -- docs/features/comparison.md. Latest period per indicator
+        # only: the full history is 174k rows / 22 MB against a 25 MB commit
+        # guard, for periods no page shows. --all-periods exists for a
+        # researcher who wants the rest.
+        run: |
+          python scripts/export_percentiles_csv.py --db data/belgian_macro.db \
+            --out data/percentiles.csv \
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv
+
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. See daily_fetch.yml for
         # the full rationale; this workflow does not run validate_data.py

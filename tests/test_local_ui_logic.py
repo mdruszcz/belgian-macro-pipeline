@@ -291,3 +291,153 @@ def test_a_zero_reference_yields_no_relation_rather_than_infinity():
         console.log(JSON.stringify(rows[1].relation));
     """)
     assert results is None
+
+
+# ── the percentile component (Block L) ─────────────────────────────────────
+
+
+def _pct_lines(percentile_block):
+    return _run_node(f"""
+        const entry = {{periods: {{'2026': {{value: 1}}}},
+                        percentile: {json.dumps(percentile_block)}}};
+        console.log(JSON.stringify(LocalUI.percentileLines(entry)));
+    """)
+
+
+def test_a_percentile_always_states_its_universe_and_period():
+    """The roadmap's requirement: "a percentile without a stated universe is
+    unfalsifiable, and the first sceptical directeur financier will ask"."""
+    lines = _pct_lines(
+        {
+            "national": {
+                "scope_name": "Belgium",
+                "pct": 14.1997,
+                "rank": 499,
+                "peers": 581,
+                "period": "2023",
+            }
+        }
+    )
+    assert len(lines) == 1
+    assert lines[0]["text"] == "14th percentile in Belgium"
+    assert lines[0]["note"] == "499th of 581 communes"
+    assert lines[0]["period"] == "2023"
+
+
+def test_a_withheld_percentile_states_the_rank_instead():
+    """Brussels-Capital's 19 communes. The exporter sends pct=None and the
+    page must say "13th of 19", never invent a percentile."""
+    lines = _pct_lines(
+        {
+            "regional": {
+                "scope_name": "Brussels-Capital Region",
+                "pct": None,
+                "rank": 13,
+                "peers": 19,
+                "period": "2023",
+            }
+        }
+    )
+    assert lines[0]["text"] == "13th of 19 in Brussels-Capital Region"
+    assert "too few communes" in lines[0]["note"]
+    assert "percentile" not in lines[0]["text"]
+
+
+def test_the_top_and_bottom_are_not_stated_as_a_percentile():
+    """Under the rank definition the highest of 565 communes scores 99.91 and
+    the lowest 0.09, which round to "100th" and "0th" -- both impossible
+    positions, and both a claim the data does not support."""
+    top = _pct_lines(
+        {
+            "national": {
+                "scope_name": "Belgium",
+                "pct": 99.9115,
+                "rank": 1,
+                "peers": 565,
+                "period": "2026",
+            }
+        }
+    )
+    assert top[0]["text"] == "Highest of 565 communes in Belgium"
+    assert "100th" not in top[0]["text"]
+
+    bottom = _pct_lines(
+        {
+            "national": {
+                "scope_name": "Belgium",
+                "pct": 0.0885,
+                "rank": 565,
+                "peers": 565,
+                "period": "2026",
+            }
+        }
+    )
+    assert bottom[0]["text"] == "Lowest of 565 communes in Belgium"
+    assert "0th" not in bottom[0]["text"]
+
+
+def test_a_near_extreme_percentile_is_clamped_rather_than_rounded_past_the_limit():
+    """99.6 must not become "100th percentile" -- a position nobody can
+    occupy -- just because it is not literally the top rank."""
+    lines = _pct_lines(
+        {
+            "national": {
+                "scope_name": "Belgium",
+                "pct": 99.6,
+                "rank": 3,
+                "peers": 565,
+                "period": "2026",
+            }
+        }
+    )
+    assert lines[0]["text"] == "99th percentile in Belgium"
+
+
+def test_both_scopes_appear_national_first():
+    lines = _pct_lines(
+        {
+            "regional": {
+                "scope_name": "Flanders",
+                "pct": 50.0,
+                "rank": 150,
+                "peers": 300,
+                "period": "2026",
+            },
+            "national": {
+                "scope_name": "Belgium",
+                "pct": 40.0,
+                "rank": 340,
+                "peers": 565,
+                "period": "2026",
+            },
+        }
+    )
+    assert [line["text"].split(" in ")[-1] for line in lines] == ["Belgium", "Flanders"]
+
+
+def test_no_percentile_block_yields_no_lines():
+    results = _run_node("""
+        console.log(JSON.stringify(LocalUI.percentileLines({periods: {'2026': {value: 1}}})));
+    """)
+    assert results == []
+
+
+def test_ordinals_handle_the_teens_correctly():
+    results = _run_node("""
+        console.log(JSON.stringify([1,2,3,4,11,12,13,21,22,23,101,111]
+          .map(n => LocalUI.ordinal(n))));
+    """)
+    assert results == [
+        "1st",
+        "2nd",
+        "3rd",
+        "4th",
+        "11th",
+        "12th",
+        "13th",
+        "21st",
+        "22nd",
+        "23rd",
+        "101st",
+        "111th",
+    ]

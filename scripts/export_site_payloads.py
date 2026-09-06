@@ -194,6 +194,42 @@ def _ancestry(db_path: Path) -> dict[str, list[str]]:
     return chains
 
 
+def _read_percentiles(csv_path: Path) -> dict[tuple[str, str], dict]:
+    """Peer positions keyed by (nis_code, indicator).
+
+    From scripts/export_percentiles_csv.py, latest period per indicator. An
+    empty `percentile` column means the peer set was below the floor and the
+    percentile was deliberately withheld -- the rank is still there, and the
+    page says "4th of 19" instead. That distinction has to survive into the
+    payload, so a withheld percentile becomes None rather than 0.
+    """
+    out: dict[tuple[str, str], dict] = {}
+    if not csv_path.is_file():
+        return out
+    with csv_path.open(encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            entry = out.setdefault((row["nis_code"], row["indicator_code"]), {})
+            entry[row["scope"]] = {
+                "scope_name": row["scope_name"],
+                "pct": float(row["percentile"]) if row["percentile"] != "" else None,
+                "rank": int(row["rank"]),
+                "peers": int(row["peers"]),
+                "period": row["period"],
+            }
+    return out
+
+
+def _attach_percentiles(communes: dict[str, dict], percentiles: dict) -> int:
+    attached = 0
+    for nis, commune in communes.items():
+        for indicator_id, entry in commune["indicators"].items():
+            pos = percentiles.get((nis, indicator_id))
+            if pos:
+                entry["percentile"] = pos
+                attached += 1
+    return attached
+
+
 def _read_aggregates(csv_path: Path) -> dict[tuple[str, str, str], dict]:
     """Aggregate values keyed by (geo_id, indicator, period).
 
@@ -308,6 +344,7 @@ def export_site_payloads(
     build_id: str,
     validation_status: str,
     aggregates_csv: Path | None = None,
+    percentiles_csv: Path | None = None,
 ) -> dict[str, int]:
     communes = _read_communes_history(communes_history_csv)
     indicators = _read_communes_latest(communes_latest_csv)
@@ -324,6 +361,10 @@ def export_site_payloads(
         compared = _attach_comparisons(
             communes, _read_aggregates(aggregates_csv), _ancestry(db_path)
         )
+
+    ranked = 0
+    if percentiles_csv is not None:
+        ranked = _attach_percentiles(communes, _read_percentiles(percentiles_csv))
 
     _write_json(out_dir / "national.json", {"geo_id": "be:country", "indicators": national})
 
@@ -345,6 +386,7 @@ def export_site_payloads(
         "datasets": {
             "national": {"indicators": len(national)},
             "comparisons": {"indicator_cells": compared},
+            "percentiles": {"indicator_cells": ranked},
             "communes": {"count": len(communes), "indicators": len(indicators)},
             "geographies": {"count": len(geographies)},
         },
@@ -354,6 +396,7 @@ def export_site_payloads(
 
     return {
         "comparisons": compared,
+        "percentiles": ranked,
         "national_indicators": len(national),
         "communes": len(communes),
         "indicator_files": len(indicators),
@@ -374,6 +417,11 @@ def main() -> None:
         default="data/aggregates.csv",
         help="Aggregate CSV from export_aggregates_csv.py; comparisons are omitted if absent",
     )
+    ap.add_argument(
+        "--percentiles",
+        default="data/percentiles.csv",
+        help="Peer positions from export_percentiles_csv.py; omitted if absent",
+    )
     ap.add_argument("--out-dir", default="public/data")
     ap.add_argument("--build-id", default="local")
     ap.add_argument("--validation-status", default="unknown")
@@ -388,11 +436,12 @@ def main() -> None:
         args.build_id,
         args.validation_status,
         Path(args.aggregates) if args.aggregates else None,
+        Path(args.percentiles) if args.percentiles else None,
     )
     print(
         f"Exported {counts['communes']} commune payloads, {counts['indicator_files']} "
         f"indicator payloads, {counts['national_indicators']} national indicators, "
-        f"{counts['comparisons']} comparison cells, "
+        f"{counts['comparisons']} comparison cells, {counts['percentiles']} ranked cells, "
         f"{counts['geographies']} geographies to {args.out_dir}"
     )
 
