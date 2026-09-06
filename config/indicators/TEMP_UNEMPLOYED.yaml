@@ -1,0 +1,19 @@
+id: TEMP_UNEMPLOYED
+name:
+  en: Temporarily unemployed
+  fr: Chômeurs temporaires
+  nl: Tijdelijk werklozen
+unit: count
+frequency: A
+source_id: onem
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 400
+description:
+  en: >
+    Residents on temporary unemployment -- still employed, but with work suspended for economic
+    or technical reasons, bad weather, or force majeure -- averaged over the year (the "Total"
+    column of CT_Commune_Statut_UP_FR). A distinct measure from full unemployment and a leading
+    indicator of local industrial stress rather than a stock of jobless residents. Includes the
+    small "foster parents" and "unpaid teaching period" allowances ONEM reports alongside it.
+display: null

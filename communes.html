@@ -253,6 +253,16 @@
     2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
     endorse this product or how its data is used here. English commune names are unofficial
     translations, not official Statbel labels.
+    <br><br>
+    <strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a>
+    (Office National de l'Emploi &mdash; Rijksdienst voor Arbeidsvoorziening), for the
+    unemployment, temporary-unemployment, part-time-benefit and activation columns.
+    <strong>Date of the information used:</strong> the files fetched for this build, covering
+    2017 onwards; the current year is a part-year average and is marked provisional, and each
+    row carries its own status letter. Reused under ONEM's own conditions, which
+    permit commercial reuse and require the source and this date &mdash; <em>not</em> under
+    CC BY 4.0, which does not apply to this source. Cells ONEM withholds for privacy
+    (fewer than 10 people) are shown as suppressed, never as zero.
   </div>
 
   <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>. Columns marked <span class="pill derived" style="vertical-align:1px">Derived</span> are computed on export from stored figures (see <code>docs/features/derived_indicators.md</code>), never a second source of truth; hover any value for its full year-by-year history.</footer>
@@ -311,11 +321,20 @@ function parseCSV(text){
   });
 }
 
+// The export writes STATUS_TO_LETTER's single letters, not the schema's
+// words, so every letter it can emit is mapped here. 'suppressed' was
+// matched as a word before and therefore never fired: the exporter has
+// always written 'S'. That mattered as soon as ONEM arrived, since ONEM
+// withholds counts under 10 and a reader must not read the resulting blank
+// as a zero -- which a bare "S" pill would not have told them.
 function statusPill(s){
   if(s === 'A') return '<span class="pill final">Final</span>';
   if(s === 'P') return '<span class="pill prov">Provisional</span>';
+  if(s === 'R') return '<span class="pill prov">Revised</span>';
+  if(s === 'E') return '<span class="pill prov">Estimate</span>';
+  if(s === 'S') return '<span class="pill suppressed" title="Withheld by the source for privacy (fewer than 10 people) — not zero">Suppressed</span>';
+  if(s === 'N') return '<span class="pill other" title="Not available">n/a</span>';
   if(s === 'derived') return '<span class="pill derived">Derived</span>';
-  if(s === 'suppressed') return '<span class="pill suppressed">Suppressed</span>';
   if(!s) return '';
   return `<span class="pill other">${s}</span>`;
 }

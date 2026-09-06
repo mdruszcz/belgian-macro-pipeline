@@ -103,16 +103,33 @@ sections:
 
   - id: employment
     label: {en: Employment, fr: Emploi, nl: Werk}
-    unavailable:
+    blurb:
       en: >
-        Not collected at municipal level by this pipeline. Census 2021 does publish employment and
-        unemployment by commune, but those tables are not among the files loaded here.
+        Unemployment benefit claimants, updated every year from ONEM/RVA — the most current
+        commune figures on this page. The Census 2021 labour-force counts below are a single
+        snapshot, but they are the ones measured against the labour force rather than population.
       fr: >
-        Non collecté au niveau communal par ce pipeline. Le Census 2021 publie bien l’emploi et le
-        chômage par commune, mais ces tableaux ne font pas partie des fichiers chargés ici.
+        Les chômeurs indemnisés, mis à jour chaque année d’après l’ONEM — les chiffres communaux
+        les plus récents de cette page. Les données du Census 2021 ci-dessous ne couvrent qu’une
+        seule année, mais elles se rapportent à la population active et non à la population totale.
       nl: >
-        Niet verzameld op gemeentelijk niveau door deze pijplijn. De Census 2021 publiceert wel
-        werk en werkloosheid per gemeente, maar die tabellen zitten niet bij de geladen bestanden.
+        Uitkeringsgerechtigde werklozen, elk jaar bijgewerkt via de RVA — de meest actuele
+        gemeentecijfers op deze pagina. De Census 2021-cijfers hieronder betreffen één jaar, maar
+        zijn gemeten tegen de beroepsbevolking in plaats van de totale bevolking.
+    headline: SHARE_POP_ON_UNEMPLOYMENT_BENEFIT
+    indicators:
+      - UNEMPLOYED_JOBSEEKERS
+      - UNEMPLOYMENT_BENEFIT_RECIPIENTS
+      - TEMP_UNEMPLOYED
+      - PART_TIME_BENEFIT_RECIPIENTS
+      - UNEMPLOYMENT_BENEFIT_PAID
+      - TEMP_UNEMPLOYMENT_BENEFIT_PAID
+      - ACTIVATION_MEASURES_PAID
+      - UNEMPLOYMENT_RATE_COM
+      - CAS_LABOUR_FORCE
+      - CAS_EMPLOYED
+      - CAS_UNEMPLOYED
+      - CAS_INACTIVE
 
   - id: mobility
     label: {en: Mobility, fr: Mobilité, nl: Mobiliteit}

@@ -1,0 +1,16 @@
+source_id: onem
+name: ONEM/RVA commune unemployment statistics
+agency: ONEM / RVA
+adapter: onem
+base_url: https://www.onem.be/sites/default/files/assets/statistiques/113
+licence: >-
+  Commercial reuse explicitly permitted by ONEM's own reuse conditions, supplied by the
+  maintainer and quoted in full in docs/data_catalog.md: the information is "libre de droits"
+  and reusable "sans condition a des fins privees, associatives, scientifiques et
+  commerciales". Obligations: credit ONEM/RVA as the source, and state the date of the
+  information used. No CC BY 4.0 wrapper and no "changes were made" clause, unlike Statbel's
+  licence -- so the attribution component must carry the source and the data date, and must
+  not claim CC BY terms that do not apply here.
+catalog_ref: docs/data_catalog.md -- ONEM/RVA row (12th dataset, approved 2026-09-06)
+cadence: monthly
+is_active: true

@@ -1,32 +1,32 @@
-"""Fetch and cache ONEM/RVA's six commune-level unemployment files -- Block F,
-docs/data_catalog.md's ONEM/RVA row.
+"""Fetch and cache ONEM/RVA's six commune-level unemployment files -- the
+fetch half of scripts/sync_onem.py, which parses what this caches.
 
-WHAT THIS DOES NOT DO YET: parse the files into indicators. Reads through
-these six .xls files' actual column layout have never happened -- this
-environment cannot reach onem.be to inspect one (confirmed: DNS resolves,
-then the TCP handshake itself times out, the identical signature
-statbel.fgov.be gives). CLAUDE.md rule 13 is explicit that a source schema
-must never be guessed at, so building `_parse` before a real file has been
-seen would be exactly the mistake that rule exists to prevent.
+Kept as its own module because the two jobs fail differently and are worth
+reading separately: this one answers "did onem.be answer?", sync_onem.py
+answers "did the file say what we expect?". `fetch_all()` is called by
+sync_onem.sync(), and this file also stays runnable on its own for
+diagnosing a fetch without touching the database.
 
-WHAT THIS DOES: attempts a real HTTP fetch of each URL and caches whatever
-comes back under data/raw/onem/{date}/, with retry on transient failures.
-That is deliberately the whole scope of this script -- it is the test of
-whether GitHub Actions' network can reach onem.be, which this environment
-cannot answer on its own. If it succeeds, the cached files are exactly what
-a follow-up needs to write EXTRACTS for a proper sync_onem.py (the same
-shape as scripts/sync_census2021.py); if it fails the same way statbel.fgov.be
-does, ONEM becomes a fourth manual-download source (docs/features/manual_sources.md)
-rather than an automated one, and this step should be removed or changed to
-continue-on-error permanently rather than paged on.
+WHAT THE FILES TURNED OUT TO BE. This module used to carry a long note
+saying their columns had never been read and must not be guessed at
+(CLAUDE.md rule 13), because this development environment cannot reach
+onem.be at all -- DNS resolves, then the TCP handshake times out, the
+identical signature statbel.fgov.be gives. That was resolved the only way it
+could be: run 34054441348 proved a GitHub Actions runner CAN reach onem.be,
+and run 34056982618 uploaded the six fetched files as an artifact so they
+could be downloaded and actually opened. They are legacy BIFF .xls (hence
+xlrd, not openpyxl), one sheet per year 2017-2026, with the unit declared in
+row 3 and the column headers in row 5. See sync_onem.py's docstring for the
+full layout and for what the UP/M filename suffixes really mean -- read off
+row 3, not inferred from the abbreviation.
 
-FILENAMES, undecoded rather than guessed at: CCI/CT/TTP/EMPL likely stand for
-different unemployment-benefit categories and UP/M likely distinguish two
-report granularities, but that is exactly the kind of reading of an
-abbreviation that led to a real bug in the Census 2021 CAS table (see
-docs/data_catalog.md) -- guessed wrong there, corrected only once the actual
-file was opened. So the six filenames are used here exactly as ONEM
-publishes them, undecoded, until a downloaded file can be read.
+RETRIES, AND WHY THIS STILL NEVER RAISES. Transient failures are retried
+with backoff; a 4xx is terminal on the first try, since it will not
+succeed on the third either. `fetch_all` returns a per-file success map and
+`main` exits 0 regardless, so a diagnostic run reports rather than crashes.
+sync_onem.py is the layer that decides a missing file is fatal: it raises
+FileNotFoundError on a file it needs, so a silent partial load cannot happen
+just because a fetch came back empty.
 """
 
 import argparse
