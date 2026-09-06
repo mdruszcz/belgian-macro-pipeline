@@ -1,0 +1,17 @@
+source_id: police
+name: Police Fédérale / Federale Politie — stats-pol
+agency: Police Fédérale — Direction de l'information policière et des moyens ICT
+adapter: police
+base_url: https://www.police.be/statistiques/
+licence: >-
+  Attribution required, maintainer-supplied 2026-09-06: "Lors de l'utilisation de ces
+  statistiques, il est demandé de toujours indiquer correctement la source des données :
+  Police fédérale - Direction de l'information policière et des moyens ICT." Thinner than every
+  other source here: no explicit grant of commercial reuse, no CC BY wrapper, no restriction
+  either -- it is silent on everything except attribution. Approved by the maintainer 2026-09-06
+  on that basis while they separately seek written confirmation from the federal police; if that
+  confirmation narrows or contradicts this reading, this licence text and every indicator sourced
+  from it must be revisited. See docs/data_catalog.md.
+catalog_ref: docs/data_catalog.md -- police.be row (14th dataset)
+cadence: annual (manual, ad hoc)
+is_active: true

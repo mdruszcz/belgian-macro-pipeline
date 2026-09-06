@@ -391,65 +391,92 @@ quote. Separators are replaced **before** the accent fold, not after: folding fi
 non-ASCII apostrophe outright and turns `Braine-l'Alleud` into `braine lalleud`. That ordering left
 exactly three communes unmatched — Braine-l'Alleud, Fontaine-l'Evêque, Mont-de-l'Enclus — and the
 loader refuses a partial load rather than dropping them.
+## police.be — house-burglary rate, APPROVED 2026-09-06, 14th dataset
 
-## police.be — commune-level crime statistics, CANDIDATE 2026-09-06 (13th dataset), licence unverified
+Raised by the maintainer 2026-09-06 with a working request captured from their own browser, then
+**approved 2026-09-06** on the licence text below, which the maintainer found and confirmed is
+acceptable while they separately email the federal police for written confirmation. If that
+confirmation narrows or contradicts the reading below, this row and every indicator sourced from it
+must be revisited.
 
-Raised by the maintainer 2026-09-06, who supplied a working request captured from their own browser.
-**Not approved yet** — the licence question below is unanswered, and until it is, nothing from this
-source may be stored or exported (CLAUDE.md rule 8). `scripts/fetch_police_raw.py` probes one
-endpoint and caches the raw response; it defines no indicator and writes nothing to the database.
+**Licence, quoted in full (maintainer-supplied 2026-09-06):**
 
-| Field | Value |
-|---|---|
-| Publisher | Police Fédérale / Federale Politie — "stats-pol", the federal police's public crime-statistics tool |
-| Endpoint | `police.be/statistiques/fr/stats-pol/criminality_table/content?nis={nis}&year={years}&month={months}` |
-| Format | JSON (`content-type: application/json`; 11,855 bytes for one commune × 10 years × 12 months) |
-| Geography | Commune, by NIS code — **with an undecoded `_4` suffix**, see below |
-| Period coverage | `year=2016…2025`, monthly — a genuine long time series, unlike Census 2021's single snapshot |
-| Authentication | **None.** Confirmed by the maintainer in a browser: no account, no login. The `TSd87778be027` cookie in the captured request is an F5 firewall session token handed to any ordinary client on page load, not a credential |
+> Lors de l'utilisation de ces statistiques, il est demandé de toujours indiquer correctement la
+> source des données : Police fédérale - Direction de l'information policière et des moyens ICT.
 
-**Licence — the open question, and the reason this row says CANDIDATE.** No reuse terms have been
-located for stats-pol. Statbel's CC BY 4.0 and ONEM's own conditions were both found on the
-publisher's site and read before either source was used; nothing equivalent has been found here.
-Public availability is not a licence, and crime data carries reuse sensitivities the other twelve
-sources do not (misattribution of a commune's figures is a reputational harm, not just a data
-error). Needed before approval: a link to the federal police's reuse/open-data conditions, or their
-written confirmation.
+**Thinner than every other source here.** Statbel's CC BY 4.0 and ONEM's own conditions both state
+commercial reuse is permitted; this text does not say that, and does not say the opposite either —
+it is silent on everything except attribution. Approved on that silence, not on an explicit grant:
+credit the source correctly, exactly as stated, and nothing else is asserted. `.attribution` on
+`communes.html` and `local.html` (all three languages) states this plainly rather than implying CC
+BY or a stated commercial-reuse grant covers it — `tests/test_statbel_attribution.py` has a section
+asserting the disclaimer is present.
 
-**Reachability — the same split question ONEM raised, and unresolved the same way.** This pipeline's
-network context is served an HTTP **403** page titled "Politie - Police - Polizei: Maintenance" on
-*every* police.be request, including the bare front page, with **no cookies set at all** — so no
-session can be started from here and the response body has never been inspected. Retried with a
-full browser User-Agent, `Accept-Language`, `Referer` and `X-Requested-With` headers, and with a
-front-page visit first to pick up the session cookie an ordinary client would get: still 403, still
-no cookie. Note this differs from `statbel.fgov.be` and `onem.be`, which fail at the TCP handshake;
-here the connection succeeds and the *application* refuses it. Whether GitHub Actions' network is
-treated the same way is a separate question, and only a real run answers it — `fetch_police_raw.py`
-is wired into `daily_fetch.yml` as `continue-on-error` with an artifact upload, exactly the pattern
-that answered it for ONEM (run 34054441348).
+**MANUAL ONLY, and for a different reason than Statbel or ONEM.** `onem.be` and `statbel.fgov.be`
+fail at the TCP handshake; `police.be` responds, but with an HTTP 403 "Maintenance" page and no
+session cookie, to every request both this pipeline's own network context AND a real GitHub Actions
+runner send (`scripts/fetch_police_raw.py`, run confirmed). The maintainer fetched the one file used
+here from their own browser, where the same request returns 200 — that gap between "reachable by an
+ordinary browser" and "reachable by anything this pipeline runs" is exactly why this stays a manual
+source rather than an automated one, the same shape as Census 2021 and real-estate.
+
+**The file, and what it actually is.** `data/raw/police/police 2025 cambriolages dans les maisons
+par 10000hab.txt` — a single JSON object, `{"error": false, "data": [{"geo_code": nis, "z": rate},
+...]}`, one row per commune: house burglaries per 10,000 inhabitants. Loaded by `scripts/sync_police.py`
+into `HOUSE_BURGLARIES_PER_10K`, committed at `data/police_observations.csv`. Three other files the
+maintainer supplied alongside it (`police2025.txt`/`a`/`b`) are GeoJSON commune/province boundary
+shapes for drawing a map, not statistics — two are byte-identical duplicates — and are not loaded.
+
+**Six of the file's 587 rows are not real geography** — the negative placeholders `-1`/`-3`/`-4`
+(a residual/unknown bucket in the source's own export) plus three positive codes (`21020`, `23095`,
+`31999`) matching no geography row, current or historical. All six are always paired with `z: 0` and
+are skipped as a GENERAL rule (any code unresolvable under either period, carrying a value of
+exactly 0), not a hardcoded list — a nonzero value on an unresolvable code would still raise.
+
+**A real geography/period mismatch, found and handled rather than guessed past.** The file labels
+itself "2025" but uses the commune map as it stood through 2024-12-31 — 32 of its codes name
+communes that merged away on 2025-01-01 (Borsbeek, Zwijndrecht, Gooik+Herne+Gammerages who became
+Pajottegem, …), while the 13 communes CREATED by that merger wave are entirely absent from the file.
+Opposite direction from ONEM, which backcasts the CURRENT map onto its past years — here the source
+has simply not caught up to the merger yet. Resolved per commune by trying
+`resolve_geo(nis, "2025")` first and falling back to `resolve_geo(nis, "2024")` for a code only
+valid before the mergers, rather than guessing which successor commune a predecessor's rate should
+attach to — there usually is no clean 1:1 successor, and a RATE cannot be apportioned across a
+merger the way a count could be summed. 581 of 587 rows resolve (6 skipped as above); the 13
+new-in-2025 communes have no value from this source.
+
+**Loaded as `status = 'provisional'`, not `'final'`.** Nothing in the file or its filename states
+whether "2025" is a completed calendar year, a rolling 12-month window, or a year-to-date snapshot.
+There is no prior year from this source to compare against and notice if that assumption is wrong,
+unlike ONEM's part-year problem — so "provisional" records the genuine uncertainty rather than
+asserting a finality nobody has confirmed. Both this and the stale-geography caveat above are stated
+in the published `.attribution` text, not left as a code comment only.
+
+**`HOUSE_BURGLARIES_PER_10K` is not aggregatable, on purpose.** It is a rate with no underlying count
+in the source to derive it from — CLAUDE.md rule 6 governs deriving a ratio FROM stored additive
+components, and there are none here to derive it from. `is_additive = 0`,
+`aggregation_method = 'not_applicable'`; `export_aggregates_csv.py`'s `methods_from_metadata()`
+refuses it, so it shows at commune level only, with no province/region/Belgium row manufactured by
+averaging a rate across communes (`docs/decisions/0003-aggregation-rule.md`). It still ranks
+correctly (percentile/rank need only a value comparison, not summability) — verified: Aartselaar
+reads 67.7th percentile nationally, 85.2nd regionally within Flanders.
+
+**Explicitly rejected approach, unchanged from the earlier note on this source.** The maintainer's
+original script pasted a session cookie copied out of a browser (their own note: expires in 1–2
+hours) and paced requests with a 2-second sleep described as preventing "the federal police WAF from
+IP-banning you". Neither is built here, for the same reasons as before: a hand-pasted expiring
+cookie is not automation, and pacing chosen to stay under a security control's ban threshold is
+evasion of that control regardless of how public the data is.
 
 **Not yet done, recorded so it is not silently skipped:**
-1. The licence, above. Blocking.
-2. What the JSON actually contains. Its keys, its offence categories, and whether the counts are
-   recorded incidents, charges, or something else are all unknown — nobody here has seen the body.
-   No indicator is defined and none should be until one has been read (rule 13).
-3. What the `_4` in `nis=21012_4` means. Police zone? Geography level? A table variant? Belgian
-   police zones do **not** map one-to-one onto communes — many zones cover several communes — so
-   this suffix may be the difference between commune-level data and zone-level data attributed to a
-   commune, which would be a serious misattribution if guessed wrong. `fetch_police_raw.py`
-   deliberately fetches the maintainer's verified request verbatim rather than constructing
-   per-commune URLs from a guess.
-4. Whether it can be fetched at all without a per-request cookie. If the F5 token turns out to
-   require a real browser rather than an ordinary HTTP session, police.be becomes a manual-download
-   source (`docs/features/manual_sources.md`) like Census 2021, not an automated one.
-
-**Explicitly rejected approach.** The maintainer's original script pasted a session cookie copied
-out of a browser (their own note: expires in 1–2 hours) and paced requests with a 2-second sleep
-described as preventing "the federal police WAF from IP-banning you". Neither is built here: a
-hand-pasted expiring cookie is not automation, and pacing chosen to stay under a security control's
-ban threshold is evasion of that control regardless of how public the data is. If police.be is
-reachable by an ordinary client that starts its own session, that is the only route this pipeline
-takes; if it is not, this source is a manual download.
+1. Written confirmation from the federal police — the maintainer is emailing separately. If it
+   contradicts the reading above, this row and `HOUSE_BURGLARIES_PER_10K` must be revisited.
+2. The wider `criminality_table` JSON endpoint this row originally investigated (year=2016…2025,
+   monthly, by NIS with an undecoded `_4` suffix) is UNCHANGED from the earlier note: still
+   unreachable from any network this pipeline controls, still undecoded, still not loaded. Only the
+   single burglary-rate snapshot the maintainer fetched by hand is live.
+3. Whether next year's equivalent file will use the current commune map, closing the 13-commune gap,
+   or continue lagging it. Not knowable until a second year's file exists to compare.
 
 ## Approved sources
 
