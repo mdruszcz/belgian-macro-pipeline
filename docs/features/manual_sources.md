@@ -43,6 +43,41 @@ git cannot delta. See [ADR 0002](../decisions/0002-split-committed-stores.md) fo
 `data/local/` holds the disposable rebuild of the manual store and is gitignored. It must stay
 ignored: `daily_fetch.yml` runs `git add data/`, which would otherwise commit it.
 
+## `statbel.fgov.be` reachability, re-checked 2026-09-06
+
+Earlier notes in this file called the block "connection-level"; a later note in `data_catalog.md`
+walked that back to "likely bot-protection" after search engines reported CAPTCHA pages at the same
+URLs. **Re-checked directly and the original claim was right.** `curl -v` against
+`statbel.fgov.be` shows DNS resolving cleanly on both address families, then the **TCP handshake
+itself timing out** — not an HTTP-level CAPTCHA response, a connection that never completes. The
+CAPTCHA a search engine sees is a separate, additional defence Statbel runs for crawlers; this
+pipeline's network context is blocked before it ever gets that far. `data_catalog.md`'s "likely
+bot-protection" framing is corrected by this note.
+
+## Statbel's file-naming conventions for direct downloads
+
+Maintainer-supplied 2026-09-06, from Statbel's own Drupal file structure — useful for knowing
+exactly what to ask for on a manual download, and for recognising a file once downloaded.
+
+**Convention 1 — pre-built table exports** (`.../Census2021/T01_CAS_AGE_COM_FR.XLSX`):
+
+| Segment | Meaning |
+|---|---|
+| `T01`, `T02`, … | Table number |
+| `CAS_AGE`, `EDU`, `ACT`, `MIG`, … | Theme: `CAS` = civil status, `AGE` = age, `EDU` = education, `ACT` = activity/labour, `MIG` = migration |
+| `BE` / `REG` / `PROV` / `ARR` / `COM` / `SEC` | Geography: national / regional / provincial / arrondissement / **commune** / statistical sector |
+| `FR` / `NL` | Language |
+
+A commune-level, French file is therefore `*_COM_FR.XLSX` (extension casing varies).
+
+**Convention 2 — the ten files already loaded here** (`TF_CENSUS_2021_HC03_1.xlsx`, …): Statbel's
+bulk "hypercube" exports, `HCnn_m` numbered, bilingual columns rather than a language suffix, and
+the shape `sync_census2021.py`'s `EXTRACTS` maps. A different corner of the same site — both are
+legitimate, current Census 2021 data.
+
+**Neither can be fetched from this pipeline's network context** — see the reachability note above —
+so both still require a maintainer download.
+
 ## Refreshing Census 2021
 
 Statbel publishes ~140 Census 2021 open datasets under CC BY 4.0, but only on
