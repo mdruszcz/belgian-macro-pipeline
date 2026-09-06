@@ -239,6 +239,11 @@
 
   /* the free four-commune picker (Block L) */
   .compare-picker{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .downloads{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);
+    font-size:.82rem;color:var(--text-muted)}
+  .downloads a{color:var(--accent-ink);text-decoration:none;font-weight:500}
+  .downloads a:hover{text-decoration:underline}
+  .downloads .sep{color:var(--text-faint);margin:0 6px}
   .compare-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
   .compare-chips:empty{margin-bottom:0}
   .chip{
@@ -327,6 +332,7 @@
         <div class="compare-chips" id="compareChips"></div>
         <div class="compare-add" id="compareAdd"></div>
       </div>
+      <div class="downloads" id="downloads"></div>
     </div>
 
     <div id="sections"></div>
@@ -372,6 +378,8 @@ LocalUI.STRINGS = {
     noData: 'No data available.',
     footer: 'Per-commune data from the published payloads. See {t} for the full commune table.',
     tableLink: 'the commune table',
+    downloadThis: 'Download this commune’s data',
+    downloadNote: 'JSON, every indicator and every period held for this commune',
     loadFail: 'Could not load the commune index',
     addCompare: 'Compare with another commune…',
     removeCompare: 'Remove from comparison',
@@ -402,6 +410,8 @@ LocalUI.STRINGS = {
     noData: 'Aucune donnée disponible.',
     footer: 'Données communales issues des fichiers publiés. Voir {t} pour le tableau complet.',
     tableLink: 'le tableau des communes',
+    downloadThis: 'Télécharger les données de cette commune',
+    downloadNote: 'JSON, tous les indicateurs et toutes les périodes de cette commune',
     loadFail: 'Impossible de charger l’index des communes',
     addCompare: 'Comparer avec une autre commune…',
     removeCompare: 'Retirer de la comparaison',
@@ -432,6 +442,8 @@ LocalUI.STRINGS = {
     noData: 'Geen gegevens beschikbaar.',
     footer: 'Gemeentegegevens uit de gepubliceerde bestanden. Zie {t} voor de volledige tabel.',
     tableLink: 'de gemeentetabel',
+    downloadThis: 'Gegevens van deze gemeente downloaden',
+    downloadNote: 'JSON, alle indicatoren en alle periodes voor deze gemeente',
     loadFail: 'Kon de gemeente-index niet laden',
     addCompare: 'Vergelijk met een andere gemeente…',
     removeCompare: 'Uit vergelijking verwijderen',
@@ -896,6 +908,17 @@ function renderCommune(){
   if(el) el.textContent = updated || '—';
   document.getElementById('pageFooter').innerHTML =
     T('footer', {t: `<a href="communes.html">${T('tableLink')}</a>`});
+
+  // The 50% gate's "per-commune data is downloadable". Points at the very
+  // payload this page just rendered from, so what a reader downloads is
+  // exactly what they are looking at -- no separate export path to drift.
+  const dl = document.getElementById('downloads');
+  if(dl && COMMUNE){
+    dl.innerHTML =
+      `<a href="public/data/communes/${esc(COMMUNE.nis_code)}.json" download>` +
+      `&darr; ${esc(T('downloadThis'))}</a>` +
+      `<span class="sep">&middot;</span>${esc(T('downloadNote'))}`;
+  }
 }
 
 function renderSearchResults(){

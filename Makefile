@@ -1,0 +1,107 @@
+# One-command rebuild -- the 50% gate's "clone -> install -> pipeline -> tests
+# -> build runs with one command".
+#
+# THE SPLIT THAT MATTERS: `make all` rebuilds every published artifact from
+# what is COMMITTED, with no network and no secrets, and then runs the tests.
+# Fetching from the outside world is a separate target (`make fetch`) because
+# it cannot work on a fresh clone: statbel.fgov.be and onem.be are unreachable
+# from most networks (docs/features/manual_sources.md), and four of this
+# pipeline's municipal sources are hand-downloaded files that live under
+# data/raw/ which is gitignored. A `make all` that tried to fetch would fail
+# on every fresh clone, which is the opposite of what this target is for.
+#
+# So: `make all` proves the repository can regenerate its own published output.
+# `make fetch` is what CI runs daily to bring in new data.
+
+PYTHON ?= python
+DB     ?= data/belgian_macro.db
+
+# Every manual store, merged into the exports at build time (ADR 0002).
+EXTRA := --extra-observations data/population_observations.csv \
+         --extra-observations data/fiscal_income_observations.csv \
+         --extra-observations data/census2021_observations.csv \
+         --extra-observations data/realestate_observations.csv \
+         --extra-observations data/police_observations.csv
+
+.PHONY: all install schema reference validate exports pages test fetch clean help
+
+## all: install deps, rebuild the database's own structure, regenerate every
+## published export, and run the tests. No network. This is the gate target.
+all: install schema reference validate exports test
+	@echo ""
+	@echo "Rebuilt from committed data and tests pass."
+
+## install: python dependencies
+install:
+	$(PYTHON) -m pip install -q -r requirements.txt
+
+## schema: apply migrations and load the geography reference data. Both are
+## idempotent and offline -- geography comes from config/geography/, not the
+## network.
+schema:
+	$(PYTHON) -m src.db.migrate --db $(DB)
+	$(PYTHON) scripts/load_geography.py --db $(DB)
+
+## reference: indicator/source metadata rows for the manual sources. Their
+## OBSERVATIONS live in committed CSVs, but their name/unit come from the
+## indicators table, so the exporters need these rows present. Config only:
+## no network, no workbook.
+reference:
+	$(PYTHON) scripts/sync_fiscal_income.py --db $(DB) --reference-rows-only
+	$(PYTHON) scripts/sync_realestate.py    --db $(DB) --reference-rows-only
+	$(PYTHON) scripts/sync_census2021.py    --db $(DB) --reference-rows-only
+	$(PYTHON) scripts/sync_police.py        --db $(DB) --reference-rows-only
+
+## validate: Block H's rules. Fails the build on a data problem, which is the
+## entire point of it existing (a validation step that only logs is decoration).
+validate:
+	$(PYTHON) scripts/validate_data.py --db $(DB)
+
+## exports: every published artifact, in dependency order -- the site payloads
+## read the bulk CSVs, and the static pages read the site payloads.
+exports:
+	$(PYTHON) scripts/export_canonical_csv.py --db $(DB) --out data/belgian_macro_export.csv
+	$(PYTHON) scripts/export_communes_csv.py --db $(DB) --out data/communes_export.csv $(EXTRA)
+	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) --out data/communes_history.csv $(EXTRA)
+	$(PYTHON) scripts/export_communes_table_json.py \
+		--communes-history data/communes_history.csv --out data/communes_table.json
+	$(PYTHON) scripts/export_aggregates_csv.py --db $(DB) --out data/aggregates.csv $(EXTRA)
+	$(PYTHON) scripts/export_percentiles_csv.py --db $(DB) --out data/percentiles.csv $(EXTRA)
+	$(PYTHON) -m src.exporters.metadata --out data/metadata/indicators.json
+	$(PYTHON) scripts/export_site_payloads.py --db $(DB) \
+		--communes-history data/communes_history.csv \
+		--communes-latest data/communes_export.csv \
+		--national data/belgian_macro_export.csv \
+		--aggregates data/aggregates.csv \
+		--percentiles data/percentiles.csv \
+		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
+	$(MAKE) pages
+
+## pages: the permanent /local/{nis} routes. Separate target because it is the
+## slowest step and is often what you want to re-run alone while iterating.
+pages:
+	$(PYTHON) scripts/export_local_pages.py --db $(DB) \
+		--payload-dir public/data --out-dir local --build-id "$${BUILD_ID:-local}"
+
+## test: the full suite
+test:
+	$(PYTHON) -m pytest tests/ -q
+
+## fetch: pull new data from the sources CI can reach. NOT part of `all` --
+## needs the network, and the manual sources need hand-downloaded files under
+## data/raw/ that are gitignored. This is what daily_fetch.yml runs.
+fetch:
+	$(PYTHON) belgian_macro_db.py --fetch --latest --export csv
+	$(PYTHON) scripts/sync_to_canonical.py --db $(DB)
+	$(PYTHON) scripts/sync_statbel.py --db $(DB)
+	$(PYTHON) scripts/sync_onem.py --db $(DB)
+
+## clean: remove generated artifacts that are safe to regenerate. Deliberately
+## does NOT touch data/*.csv or the database -- those are committed stores, and
+## a `clean` that deletes hand-downloaded or committed data would be a trap.
+clean:
+	rm -rf local/ public/data/communes public/data/indicators
+	rm -f public/data/national.json public/data/manifest.json
+
+help:
+	@grep -E '^## ' Makefile | sed 's/^## //'

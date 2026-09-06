@@ -32,6 +32,16 @@ from the first the moment either is edited. One source of truth, lifted at
 build time, with the `attrUpdated` placeholder filled with the real date --
 which is itself the "date of last update" the same licence requires.
 
+NO PER-PAGE BUILD STAMP, DELIBERATELY. An earlier version wrote
+`<!-- build:{id} -->` into every page's footer. That made all 565 files
+change on every single run even when not one figure had moved -- 565 files
+of git churn per day, on a repository already growing ~18 MB a commit from
+the database alone. public/data/manifest.json already records build_id,
+git_commit and build_date centrally, so the per-page copy bought nothing.
+A page now changes if and only if its DATA changed, which is also what makes
+the URL-stability property absolute rather than "identical apart from one
+line".
+
 ENGLISH ONLY, FOR NOW, AND THIS IS THE ONE THING WORTH ARGUING WITH. The
 payloads already carry trilingual names and the sections config carries
 trilingual labels, so generating FR and NL is the same loop with a different
@@ -416,7 +426,6 @@ def _render_page(
     <a href="{ROOT_PREFIX}/public/data/communes/{esc(nis)}.json">JSON payload</a> ·
     <a href="{ROOT_PREFIX}/communes.html">all communes</a> ·
     <a href="{ROOT_PREFIX}/">BelPulse</a>
-    <!-- build:{esc(build_id)} -->
   </footer>
 </div>
 </body>

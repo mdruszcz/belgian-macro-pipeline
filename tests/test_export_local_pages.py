@@ -164,18 +164,20 @@ def test_a_url_is_byte_identical_across_two_rebuilds(payload_dir, tmp_path, db, 
     assert first == second
 
 
-def test_only_the_build_stamp_changes_between_builds(payload_dir, tmp_path, db, attribution_file):
-    """The spec allows the build stamp to differ and nothing else. Asserted
-    by diffing with the stamp stripped, so a second varying field cannot hide
-    behind the one that is allowed to vary."""
+def test_a_different_build_id_changes_nothing_in_the_page(
+    payload_dir, tmp_path, db, attribution_file
+):
+    """Stronger than the spec asked for. The spec allowed the page to differ
+    by a build stamp; it now differs by nothing at all, because an earlier
+    version stamped every page and so changed all 565 files on every run even
+    when no figure had moved -- pure git churn on a repository already growing
+    ~18 MB a commit. public/data/manifest.json records the build id centrally
+    instead, so a page changes if and only if its data changed."""
     _run(payload_dir, tmp_path, db, attribution_file, build_id="build-1")
     first = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
-    _run(payload_dir, tmp_path, db, attribution_file, build_id="build-2")
+    _run(payload_dir, tmp_path, db, attribution_file, build_id="totally-different")
     second = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
-
-    assert first != second  # the stamp really is in there
-    strip = lambda page: re.sub(r"<!-- build:[^>]*-->", "", page)  # noqa: E731
-    assert strip(first) == strip(second)
+    assert first == second
 
 
 # --- metadata -------------------------------------------------------------
