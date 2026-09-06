@@ -1,9 +1,9 @@
 id: HOUSE_BURGLARIES_PER_10K
 name:
-  en: House burglaries (per 10,000 inhabitants)
-  fr: Cambriolages dans les maisons (par 10 000 habitants)
-  nl: Woninginbraken (per 10 000 inwoners)
-unit: per_10000_inhabitants
+  en: House burglaries (per 10,000 dwellings)
+  fr: Cambriolages dans habitation (par 10 000 logements)
+  nl: Woninginbraken (per 10 000 woningen)
+unit: per_10000_dwellings
 frequency: A
 source_id: police
 geo_levels: [municipal]
@@ -11,21 +11,30 @@ preferred_direction: lower_is_better
 max_age_days: 400
 description:
   en: >
-    House burglaries per 10,000 inhabitants, as published by the federal police's stats-pol tool
-    (police.be), taken as-is from a rate the source itself computes -- there is no underlying
-    count in the file to recompute it from, so unlike every other rate in this pipeline this one
-    is stored directly rather than derived at export time (CLAUDE.md rule 6 does not apply: there
-    are no additive components here to derive it FROM). Consequently it cannot be aggregated to
-    province, region or Belgium (is_additive=false, aggregation_method=not_applicable) -- summing
-    or averaging a per-inhabitant rate across communes would be exactly the error
-    docs/decisions/0003-aggregation-rule.md exists to prevent, and there is no commune-level
-    count to recompute a true rate from instead. Commune-level only, by design.
+    House burglaries per 10,000 dwellings, as published by the federal police's stats-pol tool
+    (police.be), which itself cites "Parc de bâtiments - SPF Economie" (Statbel's building stock)
+    as the rate's denominator. NOT per inhabitant -- an earlier version of this indicator assumed
+    that from the maintainer's own filename ("...par 10000hab"), which turned out to describe what
+    the file's downloader saw, not police.be's own methodology; corrected once the actual
+    denominator citation was found. Taken as-is from a rate the source itself computes -- there is
+    no underlying count in the file to recompute it from, so unlike every other rate in this
+    pipeline this one is stored directly rather than derived at export time (CLAUDE.md rule 6 does
+    not apply: there are no additive components here to derive it FROM). Consequently it cannot be
+    aggregated to province, region or Belgium (is_additive=false, aggregation_method=not_applicable)
+    -- summing or averaging a per-dwelling rate across communes would be exactly the error
+    docs/decisions/0003-aggregation-rule.md exists to prevent, and there is no commune-level count
+    to recompute a true rate from instead. Commune-level only, by design.
 
-    TWO CAVEATS, both unresolved as of loading: (1) the source file uses the commune boundaries
-    in force through 2024-12-31, not the post-2025-01-01 merger map, despite being labelled
-    "2025" -- resolved here against each code's own last-valid geography, per commune, rather than
-    guessed onto a successor. The 13 communes formed by the 2025 mergers have no value from this
-    source. (2) the exact reporting window "2025" covers -- a full calendar year, a rolling
-    12-month window, or a year-to-date snapshot -- is not stated anywhere in the source file or
-    its filename, so this is loaded as status "provisional" rather than "final" until confirmed.
+    EVERY YEAR IN THIS SERIES USES THE SAME FIXED (PRE-2025-MERGER) COMMUNE MAP, including years
+    long before that map existed -- proven by Kruisem (NIS 45068, created by the 2019 merger wave)
+    carrying a real value in the source's own "2000" file. police.be's own historical tool
+    backcasts its current grid onto every year it shows, so every observation here is resolved
+    against period 2024 regardless of which year's file it came from. The 13 communes formed by
+    the 2025 mergers have no value from this source.
+
+    THE MOST RECENT YEAR IS "provisional", every earlier year is "final". Nothing in any file or
+    filename states whether the latest year is a completed calendar year, a rolling window, or a
+    year-to-date snapshot -- its national total sits inside the range the 2000/2017-2024 series
+    already shows (not the sharp drop a genuinely partial period would produce), which is evidence
+    it may already be complete, not proof.
 display: null
