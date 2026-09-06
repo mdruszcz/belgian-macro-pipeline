@@ -448,3 +448,114 @@ def test_ordinals_handle_the_teens_correctly():
         "101st",
         "111th",
     ]
+
+
+# ── the free four-commune picker (Block L) ─────────────────────────────────
+
+
+def test_parse_vs_param_caps_at_three_peers():
+    results = _run_node("""
+        console.log(JSON.stringify(
+            LocalUI.parseVsParam('11002,21004,52011,73028', '11001')
+        ));
+    """)
+    assert results == ["11002", "21004", "52011"]
+
+
+def test_parse_vs_param_excludes_the_primary_commune():
+    """Comparing a commune to itself is not a peer comparison -- if the URL
+    somehow names the commune it is already on, that entry is dropped."""
+    results = _run_node("""
+        console.log(JSON.stringify(LocalUI.parseVsParam('11001,21004', '11001')));
+    """)
+    assert results == ["21004"]
+
+
+def test_parse_vs_param_deduplicates():
+    results = _run_node("""
+        console.log(JSON.stringify(LocalUI.parseVsParam('21004,21004,52011', '11001')));
+    """)
+    assert results == ["21004", "52011"]
+
+
+def test_parse_vs_param_handles_absence():
+    results = _run_node("""
+        console.log(JSON.stringify([
+            LocalUI.parseVsParam('', '11001'),
+            LocalUI.parseVsParam(null, '11001'),
+        ]));
+    """)
+    assert results == [[], []]
+
+
+_PEER_INDICATOR = "POPULATION_BY_COMMUNE"
+_PEERS = [
+    {
+        "nis_code": "21004",
+        "name": {"en": "Brussels", "fr": "Bruxelles", "nl": "Brussel"},
+        "indicators": {_PEER_INDICATOR: {"unit": "count", "periods": {"2026": {"value": 200.0}}}},
+    },
+    {
+        "nis_code": "52011",
+        "name": {"en": "Charleroi", "fr": "Charleroi", "nl": "Charleroi"},
+        "indicators": {_PEER_INDICATOR: {"unit": "count", "periods": {"2026": {"value": 50.0}}}},
+    },
+]
+
+
+def test_peer_rows_are_a_difference_from_the_primary_commune():
+    """100 (own) vs 200 (peer) is +100%; 100 vs 50 is -50%. A peer commune is
+    not a container the primary is part of, so this is always a DIFFERENCE,
+    never a share -- unlike the additive/non-additive branch aggregate rows
+    use."""
+    results = _run_node(f"""
+        console.log(JSON.stringify(
+            LocalUI.peerRows(null, 100.0, 'en', {json.dumps(_PEERS)}, {json.dumps(_PEER_INDICATOR)})
+        ));
+    """)
+    assert len(results) == 2
+    assert results[0]["label"] == "Brussels"
+    assert results[0]["value"] == 200.0
+    assert results[0]["relation"] == {"kind": "diff", "pct": pytest.approx(100.0)}
+    assert results[1]["relation"] == {"kind": "diff", "pct": pytest.approx(-50.0)}
+
+
+def test_peer_rows_skip_a_peer_with_no_value_for_this_indicator():
+    peers = [{"nis_code": "99999", "name": {"en": "Nowhere"}, "indicators": {}}]
+    results = _run_node(f"""
+        console.log(JSON.stringify(
+            LocalUI.peerRows(null, 100.0, 'en', {json.dumps(peers)}, {json.dumps(_PEER_INDICATOR)})
+        ));
+    """)
+    assert results == []
+
+
+def test_peer_rows_empty_when_no_peers_or_no_indicator_id():
+    results = _run_node(f"""
+        console.log(JSON.stringify([
+            LocalUI.peerRows(null, 100.0, 'en', [], {json.dumps(_PEER_INDICATOR)}),
+            LocalUI.peerRows(null, 100.0, 'en', {json.dumps(_PEERS)}, null),
+        ]));
+    """)
+    assert results == [[], []]
+
+
+def test_comparison_rows_places_peers_between_the_commune_and_the_aggregates():
+    """The order a reader sees: this commune, then the peers they chose to
+    add, then the province/region/Belgium aggregates -- peers are the
+    closest, most directly comparable rows and belong right after "this
+    commune"."""
+    entry = {
+        "additive": True,
+        "periods": {"2026": {"value": 100.0}},
+        "comparison": {
+            "province": {"name": {"en": "Some Province"}, "value": 1000.0, "period": "2026"}
+        },
+    }
+    results = _run_node(f"""
+        console.log(JSON.stringify(
+            LocalUI.comparisonRows({json.dumps(entry)}, 'en',
+                {{peers: {json.dumps(_PEERS)}, indicatorId: {json.dumps(_PEER_INDICATOR)}}})
+        ));
+    """)
+    assert [r["scope"] for r in results] == ["commune", "peer", "peer", "province"]
