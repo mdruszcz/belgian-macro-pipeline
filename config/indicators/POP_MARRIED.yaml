@@ -1,0 +1,16 @@
+id: POP_MARRIED
+name:
+  en: Married population
+  fr: Population mariée
+  nl: Gehuwde bevolking
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents whose legal marital status is married (Census 2021, HC03_3, CD_LMS = MAR).
+    Registered partnerships are a separate category in the source and are NOT counted here.
+display: null

@@ -1,0 +1,17 @@
+id: FAMILY_NUCLEI
+name:
+  en: Family nuclei
+  fr: Noyaux familiaux
+  nl: Familiekernen
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Family nuclei -- a couple with or without children, or a lone parent with children (Census
+    2021, HC36_1, all types). A household can contain more than one, so this is not a household
+    count.
+display: null

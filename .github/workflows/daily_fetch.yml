@@ -87,6 +87,12 @@ jobs:
         # no hand-downloaded workbook. Idempotent.
         run: python scripts/sync_fiscal_income.py --db data/belgian_macro.db --reference-rows-only
 
+      - name: Ensure Census 2021 reference rows
+        # Same pattern as the fiscal step above: the OBSERVATIONS live in a
+        # committed CSV, but name/unit come from the `indicators` table so
+        # there is one metadata path. Config only -- no network, no workbook.
+        run: python scripts/sync_census2021.py --db data/belgian_macro.db --reference-rows-only
+
       - name: Validate the data before exporting
         # Between sync and export deliberately: a `fail` here stops the run
         # BEFORE anything is written to the published CSVs or committed.
@@ -125,7 +131,8 @@ jobs:
           python scripts/export_communes_csv.py --db data/belgian_macro.db \
             --out data/communes_export.csv \
             --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv
+            --extra-observations data/fiscal_income_observations.csv \
+            --extra-observations data/census2021_observations.csv
 
       - name: Export the full commune time series for communes.html
         # Sibling to the snapshot export above: every period per (commune,
@@ -137,7 +144,8 @@ jobs:
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
             --out data/communes_history.csv \
             --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv
+            --extra-observations data/fiscal_income_observations.csv \
+            --extra-observations data/census2021_observations.csv
 
       - name: Export province/region/Belgium aggregates
         # Block L -- docs/features/comparison.md. Feeds the comparison column
@@ -149,7 +157,8 @@ jobs:
           python scripts/export_aggregates_csv.py --db data/belgian_macro.db \
             --out data/aggregates.csv \
             --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv
+            --extra-observations data/fiscal_income_observations.csv \
+            --extra-observations data/census2021_observations.csv
 
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
@@ -163,7 +172,8 @@ jobs:
           python scripts/export_percentiles_csv.py --db data/belgian_macro.db \
             --out data/percentiles.csv \
             --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv
+            --extra-observations data/fiscal_income_observations.csv \
+            --extra-observations data/census2021_observations.csv
 
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. Reshapes the bulk CSVs

@@ -1,0 +1,19 @@
+id: SHARE_FOREIGN_NATIONALS
+name:
+  en: Share of foreign nationals
+  fr: Part de la population de nationalité étrangère
+  nl: Aandeel vreemde nationaliteit
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    POP_FOREIGN_NATIONALS as a percentage of POPULATION_BY_COMMUNE, both at 2021. Computed
+    rather than stored so a correction to either count propagates. The two come from different
+    Statbel products whose 2021 commune totals match exactly, person for person, across all 581
+    communes -- which is what makes the ratio safe to publish.
+derived:
+  function: share_of_total
+  inputs: [POP_FOREIGN_NATIONALS, POPULATION_BY_COMMUNE]

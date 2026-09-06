@@ -235,6 +235,14 @@ def test_the_committed_derived_configs_load_and_order():
         "POPULATION_CAGR_10Y",
         "POPULATION_CHANGE_5Y",
         "POPULATION_PERCENTILE",
+        # Census 2021 shares -- counts are stored, the ratios a reader wants
+        # are computed from them (CLAUDE.md rule 6).
+        "AVERAGE_HOUSEHOLD_SIZE",
+        "SHARE_BORN_ABROAD",
+        "SHARE_DWELLINGS_UNOCCUPIED",
+        "SHARE_FOREIGN_NATIONALS",
+        "SHARE_SINGLE_PARENT_FAMILIES",
+        "SHARE_SINGLE_PERSON_HOUSEHOLDS",
     }
     assert resolve_order(derived, SOURCE_IDS)
 

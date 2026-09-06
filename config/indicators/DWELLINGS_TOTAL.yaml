@@ -1,0 +1,18 @@
+id: DWELLINGS_TOTAL
+name:
+  en: Dwellings, total
+  fr: Logements, total
+  nl: Woningen, totaal
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    All conventional dwellings recorded by Census 2021 (table HC38_1, both occupancy
+    states and every building type), on 1 January 2021. The denominator for
+    SHARE_DWELLINGS_UNOCCUPIED; stored rather than derived because a total is
+    additive and survives a commune merger by summation.
+display: null

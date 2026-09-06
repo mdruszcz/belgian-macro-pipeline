@@ -1,0 +1,16 @@
+id: POP_FEMALE
+name:
+  en: Female population
+  fr: Population féminine
+  nl: Vrouwelijke bevolking
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Female residents on 1 January 2021 (Census 2021, HC03_1, CD_SEX = F), summed over every age
+    band. The male count is POPULATION_BY_COMMUNE minus this, so it is not stored separately.
+display: null

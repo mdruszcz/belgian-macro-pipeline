@@ -1,0 +1,17 @@
+id: SHARE_SINGLE_PERSON_HOUSEHOLDS
+name:
+  en: Share of one-person households
+  fr: Part des ménages d’une personne
+  nl: Aandeel eenpersoonshuishoudens
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    HOUSEHOLDS_SINGLE_PERSON over HOUSEHOLDS_PRIVATE at 2021 -- a direct read on housing demand
+    and on the ageing, single-living population a commune has to plan services for.
+derived:
+  function: share_of_total
+  inputs: [HOUSEHOLDS_SINGLE_PERSON, HOUSEHOLDS_PRIVATE]
