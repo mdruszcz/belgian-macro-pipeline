@@ -1,0 +1,127 @@
+# Section layout for the /local commune page.
+#
+# THIS FILE EXISTS SO local.html CONTAINS NO INDICATOR IDS. The 50% gate's
+# "zero indicator-specific frontend logic" check (and Block B's whole premise)
+# means adding an indicator to a page must be config, not a code change. The
+# page renders whatever this file describes; it knows about sections, charts
+# and fact tiles, never about POPULATION_BY_COMMUNE.
+#
+# Every label is trilingual per CLAUDE.md rule 7. Indicator NAMES are not here
+# -- those travel in the payload from the indicators table and the derived
+# configs, so they cannot drift from the data.
+#
+# `headline`: the chart indicator for the section, which also gets the full
+#   comparison table and the percentile component.
+# `indicators`: supporting figures, rendered as fact tiles with a one-line
+#   national position each.
+# `unavailable`: a section with no data yet. The reason is shown to the
+#   reader, because "not collected" and "coming in Phase II" are different
+#   situations and a blank space reads as a bug.
+
+sections:
+  - id: demography
+    label: {en: Demography, fr: Démographie, nl: Demografie}
+    blurb:
+      en: Population, how it has moved, and its age structure.
+      fr: La population, son évolution et sa structure par âge.
+      nl: Bevolking, evolutie en leeftijdsstructuur.
+    headline: POPULATION_BY_COMMUNE
+    indicators:
+      - POPULATION_AGE_0_14
+      - POPULATION_AGE_15_64
+      - POPULATION_AGE_65_PLUS
+      - DEPENDENCY_RATIO
+      - POPULATION_CHANGE_5Y
+      - POPULATION_CAGR_10Y
+      - POP_FEMALE
+      - POP_MARRIED
+
+  - id: origins
+    label: {en: Origins, fr: Origines, nl: Herkomst}
+    blurb:
+      en: Citizenship and country of birth, from Census 2021.
+      fr: Nationalité et pays de naissance, d’après le Census 2021.
+      nl: Nationaliteit en geboorteland, volgens de Census 2021.
+    headline: SHARE_FOREIGN_NATIONALS
+    indicators:
+      - POP_FOREIGN_NATIONALS
+      - POP_NON_EU_NATIONALS
+      - POP_BORN_ABROAD
+      - SHARE_BORN_ABROAD
+
+  - id: households
+    label: {en: Households & families, fr: Ménages et familles, nl: Huishoudens en gezinnen}
+    blurb:
+      en: How people live together — the figure behind school, housing and care planning.
+      fr: La composition des ménages — ce qui détermine les besoins en écoles, logements et soins.
+      nl: Hoe mensen samenleven — bepalend voor scholen, woningen en zorg.
+    headline: AVERAGE_HOUSEHOLD_SIZE
+    indicators:
+      - HOUSEHOLDS_PRIVATE
+      - HOUSEHOLDS_SINGLE_PERSON
+      - SHARE_SINGLE_PERSON_HOUSEHOLDS
+      - FAMILY_NUCLEI
+      - FAMILY_NUCLEI_SINGLE_PARENT
+      - SHARE_SINGLE_PARENT_FAMILIES
+
+  - id: income
+    label: {en: Income & local taxes, fr: Revenus et fiscalité locale, nl: Inkomen en lokale belastingen}
+    blurb:
+      en: Average income per tax return, and the commune’s tax base.
+      fr: Revenu moyen par déclaration et base fiscale de la commune.
+      nl: Gemiddeld inkomen per aangifte en de belastingbasis van de gemeente.
+    headline: AVG_NET_TAXABLE_INCOME
+    indicators:
+      - FISCAL_TOT_NET_TAXABLE_INC
+      - FISCAL_NBR_NON_ZERO_INC
+      - FISCAL_TOT_TAXES
+      - FISCAL_TOT_MUNICIP_TAXES
+
+  - id: housing
+    label: {en: Housing, fr: Logement, nl: Wonen}
+    blurb:
+      en: The dwelling stock as counted by Census 2021.
+      fr: Le parc de logements recensé par le Census 2021.
+      nl: De woningvoorraad volgens de Census 2021.
+    headline: SHARE_DWELLINGS_UNOCCUPIED
+    indicators:
+      - DWELLINGS_TOTAL
+      - DWELLINGS_OCCUPIED
+      - DWELLINGS_VACANT
+      - DWELLINGS_IN_SINGLE_UNIT_BUILDING
+
+  - id: business
+    label: {en: Business, fr: Entreprises, nl: Ondernemingen}
+    blurb:
+      en: Local business units registered in the commune.
+      fr: Unités d’établissement enregistrées dans la commune.
+      nl: Vestigingseenheden in de gemeente.
+    headline: LOCAL_UNITS_BY_COMMUNE
+    indicators: []
+
+  - id: employment
+    label: {en: Employment, fr: Emploi, nl: Werk}
+    unavailable:
+      en: >
+        Not collected at municipal level by this pipeline. Census 2021 does publish employment and
+        unemployment by commune, but those tables are not among the files loaded here.
+      fr: >
+        Non collecté au niveau communal par ce pipeline. Le Census 2021 publie bien l’emploi et le
+        chômage par commune, mais ces tableaux ne font pas partie des fichiers chargés ici.
+      nl: >
+        Niet verzameld op gemeentelijk niveau door deze pijplijn. De Census 2021 publiceert wel
+        werk en werkloosheid per gemeente, maar die tabellen zitten niet bij de geladen bestanden.
+
+  - id: mobility
+    label: {en: Mobility, fr: Mobilité, nl: Mobiliteit}
+    unavailable:
+      en: Mobility data collection is deferred — no dataset was selected for it.
+      fr: La collecte de données de mobilité est reportée — aucun jeu de données n’a été retenu.
+      nl: Mobiliteitsdata zijn uitgesteld — er is geen dataset voor geselecteerd.
+
+  - id: finances
+    label: {en: Municipal finances, fr: Finances communales, nl: Gemeentefinanciën}
+    unavailable:
+      en: Coming in Phase II — Walloon municipal finance is the next block of the roadmap.
+      fr: Prévu en phase II — les finances communales wallonnes sont le prochain bloc de la feuille de route.
+      nl: Komt in fase II — de Waalse gemeentefinanciën zijn het volgende blok van de roadmap.

@@ -3,282 +3,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>/local — commune profile</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<style>
-  :root{
-    --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
-    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
-    --accent:#a8722f; --accent-soft:#f0e2cf; --accent-ink:#5c3d18;
-    --good:#3f7d5c; --good-soft:#e2efe7;
-    --warn:#b9762a; --warn-soft:#f6e9d6;
-    --row-alt:#fbfaf6; --focus-ring:#a8722f;
-    --chart-grid:rgba(0,0,0,.08); --chart-label:#948a76; --chart-line:#a8722f; --chart-dot:#5c3d18;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
-      --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
-      --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
-      --good:#6fbf94; --good-soft:#1f2f26;
-      --warn:#e0a355; --warn-soft:#332818;
-      --row-alt:#1f1d18; --focus-ring:#d6994f;
-      --chart-grid:rgba(255,255,255,.08); --chart-label:#a79d89; --chart-line:#d6994f; --chart-dot:#f0d4a8;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
-    --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
-    --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
-    --good:#6fbf94; --good-soft:#1f2f26;
-    --warn:#e0a355; --warn-soft:#332818;
-    --row-alt:#1f1d18; --focus-ring:#d6994f;
-    --chart-grid:rgba(255,255,255,.08); --chart-label:#a79d89; --chart-line:#d6994f; --chart-dot:#f0d4a8;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.5}
-  ::selection{background:var(--accent-soft)}
-  .wrap{max-width:980px;margin:0 auto;padding:32px 20px 80px}
-  a{color:var(--accent-ink)}
-
-  h1{font-family:"Spectral",Georgia,serif;font-weight:600;font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
-  .subtitle{color:var(--text-muted);font-size:.92rem;max-width:70ch;margin:0 0 20px}
-
-  /* ── search panel ───────────────────────────────────── */
-  #searchInput{
-    width:100%;font-family:"IBM Plex Sans",sans-serif;font-size:1rem;
-    padding:12px 14px;border-radius:8px;border:1px solid var(--border-strong);
-    background:var(--surface);color:var(--text);
-  }
-  #searchInput:focus{outline:2px solid var(--focus-ring);outline-offset:1px}
-  #searchResults{margin-top:10px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
-  .result-row{
-    padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;
-    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
-  }
-  .result-row:last-child{border-bottom:none}
-  .result-row:hover{background:var(--accent-soft)}
-  .result-row .rname{font-size:.92rem}
-  .result-row .rmeta{font-size:.76rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;white-space:nowrap}
-
-  .browse-tree{margin-top:18px}
-  .crumb{font-size:.82rem;color:var(--text-muted);margin-bottom:8px}
-  .crumb button{background:none;border:none;color:var(--accent-ink);cursor:pointer;font:inherit;padding:0}
-  .crumb .sep{color:var(--text-faint);margin:0 4px}
-  .tree-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
-  .tree-item{
-    padding:9px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);
-    cursor:pointer;font-size:.86rem;
-  }
-  .tree-item:hover{background:var(--accent-soft);border-color:var(--border-strong)}
-
-  /* ── commune page ───────────────────────────────────── */
-  #communePage{display:none}
-  .back-link{display:inline-block;margin-bottom:14px;font-size:.85rem;color:var(--text-muted);text-decoration:none;cursor:pointer}
-  .commune-title{font-family:"Spectral",Georgia,serif;font-weight:600;font-size:1.9rem;margin:0 0 2px}
-  .commune-ancestry{color:var(--text-muted);font-size:.88rem;margin-bottom:20px}
-
-  .headline{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
-    background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:28px}
-  .headline .card{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-height:78px}
-  .headline .card .v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:1.35rem;font-weight:500}
-  .headline .card .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint)}
-  .headline .card .p{font-size:.72rem;color:var(--text-faint);margin-top:auto}
-  .headline .card.nodata .v{color:var(--text-faint);font-size:.82rem;font-family:"IBM Plex Sans",sans-serif;font-weight:400;font-style:italic}
-
-  section.block{margin-bottom:30px}
-  section.block h2{font-family:"Spectral",Georgia,serif;font-size:1.2rem;font-weight:600;margin:0 0 4px}
-  section.block .sec-sub{font-size:.78rem;color:var(--text-faint);margin-bottom:14px}
-
-  .no-data{
-    border:1px dashed var(--border-strong);border-radius:8px;padding:18px 20px;
-    color:var(--text-muted);font-size:.88rem;background:var(--row-alt);
-  }
-  .no-data .why{display:block;margin-top:4px;font-size:.78rem;color:var(--text-faint)}
-
-  .chart-card{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:16px}
-  canvas.series{display:block;width:100%}
-
-  .fact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
-  .fact{border:1px solid var(--border);border-radius:7px;padding:10px 12px;background:var(--surface)}
-  .fact .fv{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:1.05rem}
-  .fact .fl{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em}
-  .fact .fp{font-size:.68rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;margin-top:2px}
-
-  footer{margin-top:30px;color:var(--text-faint);font-size:.78rem}
-
-  /* Statbel attribution. This is a LICENCE CONDITION, not decoration --
-     see docs/data_catalog.md. Styled quietly but never hidden, collapsed or
-     conditionally rendered. */
-  .attribution{
-    margin-top:26px;padding:14px 16px;border:1px solid var(--border);border-radius:8px;
-    background:var(--row-alt);color:var(--text-muted);font-size:.76rem;line-height:1.6;
-  }
-  .attribution strong{color:var(--text)}
-  .attribution a{color:var(--accent-ink)}
-
-  @media (max-width:640px){
-    .wrap{padding:20px 14px 60px}
-    .commune-title{font-size:1.5rem}
-  }
-
-  /* Light / Auto / Dark switch. These pages previously followed the device
-     setting with no way to override it, so a dark-mode device could not see
-     the light palette at all. "Auto" removes data-theme and lets the
-     prefers-color-scheme query decide. */
-  .theme-toggle{
-    position:fixed; top:12px; right:12px; z-index:50; display:flex; gap:1px;
-    background:var(--border); border:1px solid var(--border);
-    border-radius:7px; overflow:hidden;
-  }
-  .theme-toggle button{
-    appearance:none; border:none; cursor:pointer; font:inherit; font-size:.76rem;
-    padding:5px 10px; background:var(--surface); color:var(--text-muted); line-height:1.3;
-  }
-  .theme-toggle button:hover{background:var(--accent-soft); color:var(--accent-ink)}
-  .theme-toggle button[aria-pressed="true"]{
-    background:var(--accent-soft); color:var(--accent-ink); font-weight:600;
-  }
-  .theme-toggle button:focus-visible{outline:2px solid var(--focus-ring); outline-offset:-2px}
-  @media (max-width:720px){
-    /* Fixed position would sit on top of the content on a narrow screen. */
-    .cmp{width:100%;border-collapse:collapse;margin-top:12px;font-size:.82rem}
-  .cmp th{
-    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--text-faint);font-weight:500;padding:4px 8px;border-bottom:1px solid var(--border);
-  }
-  .cmp td{padding:5px 8px;border-bottom:1px solid var(--border)}
-  .cmp tr:last-child td{border-bottom:none}
-  .cmp tr.self td{font-weight:600;background:var(--accent-soft)}
-  .cmp td.num{
-    text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
-  }
-  .cmp td.cov{font-size:.7rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace}
-  .cmp caption{
-    caption-side:bottom;text-align:left;font-size:.7rem;color:var(--text-faint);
-    padding-top:6px;line-height:1.5;
-  }
-  .pctile{margin-top:10px;display:flex;flex-direction:column;gap:3px}
-  .pctile .line{font-size:.8rem}
-  .pctile .line b{font-weight:600}
-  .pctile .note{color:var(--text-faint);font-size:.72rem}
-  .fact .frank{font-size:.72rem;color:var(--accent-ink);margin-top:2px}
-  .headline .card .rk{font-size:.7rem;color:var(--accent-ink)}
-  .theme-toggle{position:static; margin:0 0 16px; width:max-content}
-  }
-</style>
+<title>Commune profile — BelPulse</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script>
-// Apply the saved theme BEFORE first paint, so the page never flashes the
-// wrong palette on load. Kept inline and tiny for that reason.
+// Apply the saved theme and language BEFORE first paint, so the page never
+// flashes the wrong palette. Kept inline and tiny for that reason.
 (function(){
   try{
     var t = localStorage.getItem('belpulse-theme');
     if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-  }catch(e){ /* localStorage can throw in private mode; auto is a fine fallback */ }
+    var l = localStorage.getItem('belpulse-lang');
+    if(l) document.documentElement.setAttribute('lang', l);
+  }catch(e){ /* localStorage throws in private mode; the defaults are fine */ }
 })();
 </script>
+<style>
+  :root{
+    --bg:#f7f5f0; --surface:#ffffff; --surface-2:#fbfaf6;
+    --border:#e6e0d3; --border-strong:#d3cab6;
+    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
+    --accent:#a8722f; --accent-soft:#f3e7d5; --accent-ink:#7a4f16;
+    --good:#3f7d5c; --good-soft:#e2efe7;
+    --warn:#b9762a; --warn-soft:#f6e9d6;
+    --focus-ring:#a8722f;
+    --chart-grid:rgba(0,0,0,.07); --chart-label:#948a76;
+    --chart-line:#a8722f; --chart-fill:rgba(168,114,47,.10); --chart-dot:#7a4f16;
+    --shadow:0 1px 2px rgba(36,31,24,.04), 0 4px 16px rgba(36,31,24,.05);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17150f; --surface:#211e17; --surface-2:#1c1913;
+      --border:#37322a; --border-strong:#4a4438;
+      --text:#efe9db; --text-muted:#aba190; --text-faint:#7d7462;
+      --accent:#d9a05c; --accent-soft:#3a2e1d; --accent-ink:#f2d7ae;
+      --good:#6fbf94; --good-soft:#1f2f26;
+      --warn:#e0a355; --warn-soft:#332818;
+      --focus-ring:#d9a05c;
+      --chart-grid:rgba(255,255,255,.07); --chart-label:#aba190;
+      --chart-line:#d9a05c; --chart-fill:rgba(217,160,92,.12); --chart-dot:#f2d7ae;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17150f; --surface:#211e17; --surface-2:#1c1913;
+    --border:#37322a; --border-strong:#4a4438;
+    --text:#efe9db; --text-muted:#aba190; --text-faint:#7d7462;
+    --accent:#d9a05c; --accent-soft:#3a2e1d; --accent-ink:#f2d7ae;
+    --good:#6fbf94; --good-soft:#1f2f26;
+    --warn:#e0a355; --warn-soft:#332818;
+    --focus-ring:#d9a05c;
+    --chart-grid:rgba(255,255,255,.07); --chart-label:#aba190;
+    --chart-line:#d9a05c; --chart-fill:rgba(217,160,92,.12); --chart-dot:#f2d7ae;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 18px rgba(0,0,0,.25);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent-soft)}
+  a{color:var(--accent-ink)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px 90px}
+
+  /* ── top bar ─────────────────────────────────────────── */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:16px 0 22px;flex-wrap:wrap;
+  }
+  .brand{
+    font-family:"Spectral",Georgia,serif;font-weight:600;font-size:1.05rem;
+    letter-spacing:-.01em;color:var(--text);text-decoration:none;
+  }
+  .brand span{color:var(--accent)}
+  .switches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .seg{
+    display:flex;gap:1px;background:var(--border);border:1px solid var(--border);
+    border-radius:8px;overflow:hidden;
+  }
+  .seg button{
+    appearance:none;border:none;cursor:pointer;font:inherit;font-size:.75rem;
+    padding:5px 11px;background:var(--surface);color:var(--text-muted);line-height:1.35;
+  }
+  .seg button:hover{background:var(--accent-soft);color:var(--accent-ink)}
+  .seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+  .seg button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
+
+  /* ── search ──────────────────────────────────────────── */
+  .lede h1{
+    font-family:"Spectral",Georgia,serif;font-weight:600;font-size:2.1rem;
+    margin:0 0 8px;letter-spacing:-.02em;text-wrap:balance;
+  }
+  .lede p{color:var(--text-muted);max-width:60ch;margin:0 0 22px}
+  #searchInput{
+    width:100%;font:inherit;font-size:1.05rem;padding:14px 16px;
+    border-radius:var(--radius);border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);box-shadow:var(--shadow);
+  }
+  #searchInput:focus{outline:2px solid var(--focus-ring);outline-offset:1px}
+  #searchResults:not(:empty){
+    margin-top:10px;border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;background:var(--surface);box-shadow:var(--shadow);
+  }
+  .result-row{
+    padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;
+    display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  }
+  .result-row:last-child{border-bottom:none}
+  .result-row:hover{background:var(--accent-soft)}
+  .result-row .rmeta{
+    font-size:.76rem;color:var(--text-faint);
+    font-family:"IBM Plex Mono",monospace;white-space:nowrap;
+  }
+  .browse{margin-top:26px}
+  .crumb{font-size:.84rem;color:var(--text-muted);margin-bottom:10px}
+  .crumb button{background:none;border:none;color:var(--accent-ink);cursor:pointer;font:inherit;padding:0}
+  .crumb button:hover{text-decoration:underline}
+  .crumb .sep{color:var(--text-faint);margin:0 5px}
+  .tree-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px}
+  .tree-item{
+    padding:10px 13px;border:1px solid var(--border);border-radius:8px;
+    background:var(--surface);cursor:pointer;font-size:.88rem;transition:.12s;
+  }
+  .tree-item:hover{background:var(--accent-soft);border-color:var(--border-strong)}
+
+  /* ── commune hero ────────────────────────────────────── */
+  #communePage{display:none}
+  .back{
+    display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;
+    font-size:.85rem;color:var(--text-muted);cursor:pointer;background:none;
+    border:none;font-family:inherit;padding:0;
+  }
+  .back:hover{color:var(--accent-ink)}
+  .hero{
+    border:1px solid var(--border);border-radius:14px;background:var(--surface);
+    padding:26px 28px;box-shadow:var(--shadow);margin-bottom:26px;
+  }
+  .hero h1{
+    font-family:"Spectral",Georgia,serif;font-weight:600;font-size:2.5rem;
+    margin:0 0 4px;letter-spacing:-.025em;line-height:1.1;
+  }
+  .hero .alt{color:var(--text-faint);font-size:.92rem;margin-bottom:2px}
+  .hero .path{color:var(--text-muted);font-size:.88rem}
+  .hero .path .nis{
+    font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--text-faint);
+    background:var(--surface-2);border:1px solid var(--border);
+    padding:1px 7px;border-radius:5px;margin-left:8px;
+  }
+
+  .headline{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+    gap:12px;margin-top:22px;
+  }
+  .card{
+    background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-height:104px;
+  }
+  .card .v{
+    font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+    font-size:1.55rem;font-weight:500;letter-spacing:-.02em;line-height:1.15;
+  }
+  .card .l{font-size:.73rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint)}
+  .card .rk{font-size:.74rem;color:var(--accent-ink)}
+  .card .p{font-size:.72rem;color:var(--text-faint);margin-top:auto;font-family:"IBM Plex Mono",monospace}
+  .card.nodata{background:transparent;border-style:dashed}
+  .card.nodata .v{
+    color:var(--text-faint);font-size:.9rem;font-family:inherit;
+    font-weight:400;font-style:italic;
+  }
+
+  /* ── sections ────────────────────────────────────────── */
+  section.block{margin-bottom:34px;scroll-margin-top:16px}
+  section.block h2{
+    font-family:"Spectral",Georgia,serif;font-size:1.4rem;font-weight:600;
+    margin:0 0 3px;letter-spacing:-.015em;
+  }
+  section.block .blurb{font-size:.88rem;color:var(--text-muted);margin-bottom:16px;max-width:62ch}
+  .panel{
+    border:1px solid var(--border);border-radius:var(--radius);
+    background:var(--surface);padding:18px 20px;box-shadow:var(--shadow);
+  }
+  .panel-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    gap:12px;margin-bottom:12px;flex-wrap:wrap;
+  }
+  .panel-head .t{font-weight:600;font-size:.95rem}
+  .panel-head .v{
+    font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+    font-size:1.3rem;font-weight:500;
+  }
+  canvas.series{display:block;width:100%}
+
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+  .fact{
+    border:1px solid var(--border);border-radius:9px;padding:11px 13px;background:var(--surface-2);
+  }
+  .fact .fv{
+    font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+    font-size:1.1rem;font-weight:500;
+  }
+  .fact .fl{font-size:.76rem;color:var(--text-muted);margin-top:1px;line-height:1.35}
+  .fact .frank{font-size:.72rem;color:var(--accent-ink);margin-top:4px}
+  .fact .fp{font-size:.68rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;margin-top:2px}
+
+  .no-data{
+    border:1px dashed var(--border-strong);border-radius:var(--radius);
+    padding:18px 20px;color:var(--text-muted);font-size:.9rem;background:var(--surface-2);
+  }
+  .no-data .why{display:block;margin-top:5px;font-size:.8rem;color:var(--text-faint);max-width:70ch}
+
+  /* comparison */
+  .cmp{width:100%;border-collapse:collapse;margin-top:14px;font-size:.85rem}
+  .cmp th{
+    text-align:left;font-size:.69rem;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--text-faint);font-weight:500;padding:5px 9px;border-bottom:1px solid var(--border);
+  }
+  .cmp td{padding:6px 9px;border-bottom:1px solid var(--border)}
+  .cmp tr:last-child td{border-bottom:none}
+  .cmp tr.self td{font-weight:600;background:var(--accent-soft)}
+  .cmp td.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  .cmp td.cov{font-size:.72rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;text-align:right}
+  .cmp caption{
+    caption-side:bottom;text-align:left;font-size:.72rem;color:var(--text-faint);
+    padding-top:8px;line-height:1.5;
+  }
+  .pctile{margin-top:12px;display:flex;flex-direction:column;gap:4px}
+  .pctile .line{font-size:.85rem}
+  .pctile .line b{font-weight:600}
+  .pctile .note{color:var(--text-faint);font-size:.75rem}
+
+  /* Statbel attribution. A LICENCE CONDITION, not decoration -- clause 6 of
+     Statbel's 2015 open-data licence terminates the grant automatically if it
+     is missing. See docs/data_catalog.md. Never hide or collapse this. */
+  .attribution{
+    margin-top:30px;padding:16px 18px;border:1px solid var(--border);border-radius:var(--radius);
+    background:var(--surface-2);color:var(--text-muted);font-size:.77rem;line-height:1.65;
+  }
+  .attribution strong{color:var(--text)}
+  .attribution a{color:var(--accent-ink)}
+  footer{margin-top:18px;color:var(--text-faint);font-size:.78rem}
+
+  @media (max-width:640px){
+    body{font-size:14px}
+    .wrap{padding:0 15px 70px}
+    .hero{padding:20px 18px}
+    .hero h1{font-size:1.85rem}
+    .lede h1{font-size:1.6rem}
+    .panel{padding:15px 14px}
+  }
+</style>
 </head>
 <body>
 <div class="wrap">
-<div class="theme-toggle" role="group" aria-label="Colour theme">
-  <button type="button" data-theme-choice="light" aria-pressed="false" title="Always light">&#9728; Light</button>
-  <button type="button" data-theme-choice="auto" aria-pressed="false" title="Follow your device setting">Auto</button>
-  <button type="button" data-theme-choice="dark" aria-pressed="false" title="Always dark">&#9790; Dark</button>
-</div>
+
+  <div class="topbar">
+    <a class="brand" href="index.html">Bel<span>Pulse</span></a>
+    <div class="switches">
+      <div class="seg" id="langSeg" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+        <button type="button" data-lang="nl" aria-pressed="false">NL</button>
+      </div>
+      <div class="seg theme-toggle" id="themeSeg" role="group" aria-label="Colour theme">
+        <button type="button" data-theme-choice="light" aria-pressed="false" title="Light">&#9728;</button>
+        <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dark">&#9790;</button>
+      </div>
+    </div>
+  </div>
 
   <div id="searchPanel">
-    <h1>Find your commune</h1>
-    <p class="subtitle">Search any of Belgium's 565 communes by name (English, French or Dutch) or NIS code, or browse by region.</p>
-    <input id="searchInput" type="text" placeholder="Type a commune name or NIS code…" autocomplete="off">
+    <div class="lede">
+      <h1 data-t="searchTitle"></h1>
+      <p data-t="searchLede"></p>
+    </div>
+    <input id="searchInput" type="text" autocomplete="off">
     <div id="searchResults"></div>
-    <div class="browse-tree" id="browseTree"></div>
+    <div class="browse" id="browseTree"></div>
   </div>
 
   <div id="communePage">
-    <a class="back-link" id="backLink">&larr; Back to search</a>
-    <h1 class="commune-title" id="cTitle">—</h1>
-    <div class="commune-ancestry" id="cAncestry"></div>
+    <button class="back" id="backLink" type="button">&larr; <span data-t="back"></span></button>
 
-    <div class="headline" id="headline"></div>
-
-    <section class="block" id="sec-overview">
-      <h2>Overview</h2>
-      <div class="sec-sub">Where this commune sits, and its own reference year for each figure above.</div>
-      <div class="fact-grid" id="overviewFacts"></div>
-    </section>
-
-    <section class="block" id="sec-demography">
-      <h2>Demography</h2>
-      <div class="sec-sub" id="demographySub"></div>
-      <div id="demographyBody"></div>
-    </section>
-
-    <section class="block" id="sec-income">
-      <h2>Income &amp; local finances</h2>
-      <div class="sec-sub" id="incomeSub"></div>
-      <div id="incomeBody"></div>
-    </section>
-
-    <section class="block" id="sec-employment">
-      <h2>Employment</h2>
-      <div id="employmentBody"></div>
-    </section>
-
-    <section class="block" id="sec-business">
-      <h2>Business</h2>
-      <div id="businessBody"></div>
-    </section>
-
-    <section class="block" id="sec-housing">
-      <h2>Housing</h2>
-      <div id="housingBody"></div>
-    </section>
-
-    <section class="block" id="sec-mobility">
-      <h2>Mobility</h2>
-      <div id="mobilityBody"></div>
-    </section>
-
-    <section class="block" id="sec-finances">
-      <h2>Municipal finances</h2>
-      <div id="financesBody"></div>
-    </section>
-
-    <div class="attribution" id="attribution">
-      <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
-      (Direction générale Statistique &mdash; Statistics Belgium), reused under
-      <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
-      and Statbel's <em>Licentie open data</em> of 22 October 2015.
-      <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
-      <strong>Changes were made:</strong> the published files are reshaped into a canonical
-      indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
-      2025 commune mergers, and used to compute derived figures. Statbel does not endorse this
-      product or how its data is used here. English commune names are unofficial translations,
-      not official Statbel labels.
+    <div class="hero">
+      <h1 id="cTitle">—</h1>
+      <div class="alt" id="cAlt"></div>
+      <div class="path" id="cPath"></div>
+      <div class="headline" id="headline"></div>
     </div>
 
-    <footer>
-      Data from <code>public/data/communes/{nis}.json</code> (Block J). See
-      <a href="communes.html">communes.html</a> for the full commune table, or
-      <a href="docs/features/local_ui.md">docs/features/local_ui.md</a> for what this page does and does not cover.
-    </footer>
+    <div id="sections"></div>
+
+    <div class="attribution" id="attribution"></div>
+    <footer id="pageFooter"></footer>
   </div>
 
 </div>
 
 <script>
-// ── shared helpers, importable from Node for logic tests (see
-// tests/test_local_ui_logic.py) without a browser ──────────────────────────
+// ── DOM-free logic, importable from Node for tests ─────────────────────────
 const LocalUI = {};
+
+LocalUI.LANGS = ['en', 'fr', 'nl'];
+LocalUI.DEFAULT_LANG = 'en';
+
+// Interface chrome only. Indicator and section NAMES are never here -- those
+// travel in the payloads from the indicators table and the section config, so
+// a label cannot drift from the data it describes (CLAUDE.md rule 7).
+LocalUI.STRINGS = {
+  en: {
+    searchTitle: 'Find your commune',
+    searchLede: 'Search any of Belgium’s 565 communes by name — in English, French or Dutch — or by NIS code. You can also browse by region.',
+    searchPlaceholder: 'Type a commune name or NIS code…',
+    noMatch: 'No commune matches',
+    back: 'Back to search',
+    thisCommune: 'This commune',
+    province: 'Province', region: 'Region', country: 'Belgium',
+    comparedWith: 'Compared with', value: 'Value', share: 'Share', diff: 'Diff', communes: 'Communes',
+    asOf: 'as of', updated: 'updated', derived: 'derived',
+    shareNote: 'This commune as a share of each reference, at {p} — a commune is part of its province, so a share is the meaningful relation, not a difference.',
+    diffNote: 'This commune against each reference, at {p}.',
+    methodNote: 'The last column counts the communes behind each aggregate. Averages and ratios are recomputed from totals, never averaged across communes.',
+    inBelgium: 'in Belgium', inRegion: 'in {r}',
+    percentileOf: '{o} percentile {w}', rankOf: '{o} of {n} {w}',
+    highestOf: 'Highest of {n} communes {w}', lowestOf: 'Lowest of {n} communes {w}',
+    ofCommunes: '{o} of {n} communes', percentileIs: 'percentile {p}',
+    tooFew: 'too few communes ({n}) for a meaningful percentile',
+    notAvailable: 'Not available',
+    noValue: 'No value published for this commune',
+    noHistory: 'No history published for this commune.',
+    noData: 'No data available.',
+    unemployment: 'Unemployment', housingPrice: 'Housing price',
+    noUnemployment: 'Not collected at municipal level in this pipeline',
+    noHousingPrice: 'Not available at commune level from the source',
+    footer: 'Per-commune data from the published payloads. See {t} for the full commune table.',
+    tableLink: 'the commune table',
+    loadFail: 'Could not load the commune index',
+    attribution: '<strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels.',
+  },
+  fr: {
+    searchTitle: 'Trouvez votre commune',
+    searchLede: 'Recherchez n’importe laquelle des 565 communes belges par son nom — en français, en néerlandais ou en anglais — ou par code NIS. Vous pouvez aussi naviguer par région.',
+    searchPlaceholder: 'Tapez un nom de commune ou un code NIS…',
+    noMatch: 'Aucune commune ne correspond à',
+    back: 'Retour à la recherche',
+    thisCommune: 'Cette commune',
+    province: 'Province', region: 'Région', country: 'Belgique',
+    comparedWith: 'Comparé à', value: 'Valeur', share: 'Part', diff: 'Écart', communes: 'Communes',
+    asOf: 'au', updated: 'mis à jour', derived: 'calculé',
+    shareNote: 'Cette commune en part de chaque référence, en {p} — une commune fait partie de sa province, la part est donc la relation pertinente, pas l’écart.',
+    diffNote: 'Cette commune comparée à chaque référence, en {p}.',
+    methodNote: 'La dernière colonne indique le nombre de communes derrière chaque agrégat. Les moyennes et les ratios sont recalculés à partir des totaux, jamais moyennés entre communes.',
+    inBelgium: 'en Belgique', inRegion: 'en {r}',
+    percentileOf: '{o} percentile {w}', rankOf: '{o} sur {n} {w}',
+    highestOf: 'La plus élevée des {n} communes {w}', lowestOf: 'La plus basse des {n} communes {w}',
+    ofCommunes: '{o} sur {n} communes', percentileIs: 'percentile {p}',
+    tooFew: 'trop peu de communes ({n}) pour un percentile significatif',
+    notAvailable: 'Non disponible',
+    noValue: 'Aucune valeur publiée pour cette commune',
+    noHistory: 'Aucun historique publié pour cette commune.',
+    noData: 'Aucune donnée disponible.',
+    unemployment: 'Chômage', housingPrice: 'Prix du logement',
+    noUnemployment: 'Non collecté au niveau communal par ce pipeline',
+    noHousingPrice: 'Non disponible au niveau communal auprès de la source',
+    footer: 'Données communales issues des fichiers publiés. Voir {t} pour le tableau complet.',
+    tableLink: 'le tableau des communes',
+    loadFail: 'Impossible de charger l’index des communes',
+    attribution: '<strong>Source :</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), réutilisé sous <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> et sous la <em>Licentie open data</em> de Statbel du 22 octobre 2015. <strong>Dernière mise à jour des données :</strong> <span id="attrUpdated">—</span>. <strong>Des modifications ont été apportées :</strong> les fichiers publiés sont restructurés selon un modèle d’indicateurs canonique, ré-indexés sur des identifiants géographiques internes, corrigés pour les fusions de communes de 2019 et 2025, et utilisés pour calculer des indicateurs dérivés. Statbel n’approuve ni ce produit ni l’usage qui est fait de ses données. Les noms de communes en anglais sont des traductions non officielles, et non des libellés officiels de Statbel.',
+  },
+  nl: {
+    searchTitle: 'Vind uw gemeente',
+    searchLede: 'Zoek een van de 565 Belgische gemeenten op naam — in het Nederlands, Frans of Engels — of op NIS-code. U kunt ook per gewest bladeren.',
+    searchPlaceholder: 'Typ een gemeentenaam of NIS-code…',
+    noMatch: 'Geen gemeente komt overeen met',
+    back: 'Terug naar zoeken',
+    thisCommune: 'Deze gemeente',
+    province: 'Provincie', region: 'Gewest', country: 'België',
+    comparedWith: 'Vergeleken met', value: 'Waarde', share: 'Aandeel', diff: 'Verschil', communes: 'Gemeenten',
+    asOf: 'op', updated: 'bijgewerkt', derived: 'berekend',
+    shareNote: 'Deze gemeente als aandeel van elke referentie, in {p} — een gemeente maakt deel uit van haar provincie, dus is het aandeel de zinvolle verhouding, niet het verschil.',
+    diffNote: 'Deze gemeente vergeleken met elke referentie, in {p}.',
+    methodNote: 'De laatste kolom telt de gemeenten achter elk aggregaat. Gemiddelden en ratio’s worden herberekend uit totalen, nooit gemiddeld over gemeenten.',
+    inBelgium: 'in België', inRegion: 'in {r}',
+    percentileOf: '{o} percentiel {w}', rankOf: '{o} van {n} {w}',
+    highestOf: 'Hoogste van {n} gemeenten {w}', lowestOf: 'Laagste van {n} gemeenten {w}',
+    ofCommunes: '{o} van {n} gemeenten', percentileIs: 'percentiel {p}',
+    tooFew: 'te weinig gemeenten ({n}) voor een zinvol percentiel',
+    notAvailable: 'Niet beschikbaar',
+    noValue: 'Geen waarde gepubliceerd voor deze gemeente',
+    noHistory: 'Geen historiek gepubliceerd voor deze gemeente.',
+    noData: 'Geen gegevens beschikbaar.',
+    unemployment: 'Werkloosheid', housingPrice: 'Woningprijs',
+    noUnemployment: 'Niet verzameld op gemeentelijk niveau door deze pijplijn',
+    noHousingPrice: 'Niet beschikbaar op gemeentelijk niveau bij de bron',
+    footer: 'Gemeentegegevens uit de gepubliceerde bestanden. Zie {t} voor de volledige tabel.',
+    tableLink: 'de gemeentetabel',
+    loadFail: 'Kon de gemeente-index niet laden',
+    attribution: '<strong>Bron:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Algemene Directie Statistiek — Statistics Belgium), hergebruikt onder <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> en Statbels <em>Licentie open data</em> van 22 oktober 2015. <strong>Gegevens laatst bijgewerkt:</strong> <span id="attrUpdated">—</span>. <strong>Er werden wijzigingen aangebracht:</strong> de gepubliceerde bestanden worden omgezet naar een canoniek indicatormodel, opnieuw gekoppeld aan interne geografische identificatoren, gecorrigeerd voor de gemeentefusies van 2019 en 2025, en gebruikt om afgeleide cijfers te berekenen. Statbel onderschrijft dit product of het gebruik van zijn gegevens niet. Engelse gemeentenamen zijn onofficiële vertalingen, geen officiële Statbel-labels.',
+  },
+};
+
+LocalUI.t = function(lang, key, vars){
+  const table = LocalUI.STRINGS[lang] || LocalUI.STRINGS[LocalUI.DEFAULT_LANG];
+  let s = table[key] !== undefined ? table[key] : (LocalUI.STRINGS[LocalUI.DEFAULT_LANG][key] || key);
+  for(const k in (vars || {})) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+};
+
+// A name object carries all three languages. Falls back to English rather
+// than to the raw id: a French reader would rather see the English name than
+// POP_FOREIGN_NATIONALS.
+LocalUI.localName = function(names, lang, fallback){
+  if(!names) return fallback || '';
+  return names[lang] || names.en || fallback || '';
+};
 
 LocalUI.matchesQuery = function(geo, q){
   if(!q) return true;
   q = q.toLowerCase();
   return geo.nis_code.includes(q)
-    || geo.name.en.toLowerCase().includes(q)
-    || geo.name.fr.toLowerCase().includes(q)
-    || geo.name.nl.toLowerCase().includes(q);
+    || LocalUI.LANGS.some(l => (geo.name[l] || '').toLowerCase().includes(q));
 };
 
 LocalUI.searchCommunes = function(geographies, q, limit){
@@ -289,7 +436,6 @@ LocalUI.searchCommunes = function(geographies, q, limit){
     .slice(0, limit);
 };
 
-// children of a geo_id, for the browse tree
 LocalUI.childrenOf = function(geographies, parentId){
   return geographies.filter(g => g.parent_geo_id === parentId)
     .sort((a,b) => a.name.en.localeCompare(b.name.en));
@@ -297,171 +443,131 @@ LocalUI.childrenOf = function(geographies, parentId){
 
 LocalUI.ancestorChain = function(geographies, geoId){
   const byId = new Map(geographies.map(g => [g.geo_id, g]));
-  const chain = [];
-  let current = byId.get(geoId);
-  const seen = new Set();
+  const chain = []; let current = byId.get(geoId); const seen = new Set();
   while(current && !seen.has(current.geo_id)){
-    seen.add(current.geo_id);
-    chain.unshift(current);
+    seen.add(current.geo_id); chain.unshift(current);
     current = current.parent_geo_id ? byId.get(current.parent_geo_id) : null;
   }
   return chain;
 };
 
-// The four headline figures the pipeline can honestly produce today, plus
-// the two the roadmap wants but this pipeline does not have (see
-// docs/features/local_ui.md's "grounded in what the pipeline actually
-// publishes" table). Each entry either resolves to {value, period, unit} or
-// is null, in which case the caller renders a .no-data card, never a blank
-// or fabricated one.
-LocalUI.HEADLINE_SPEC = [
-  {key: 'POPULATION_BY_COMMUNE', label: 'Population'},
-  {key: 'POPULATION_CHANGE_5Y', label: '5-year change'},
-  {key: 'AVG_NET_TAXABLE_INCOME', label: 'Avg. net taxable income', caveat: 'mean, not median'},
-  {key: 'LOCAL_UNITS_BY_COMMUNE', label: 'Local business units'},
-  {key: null, label: 'Unemployment', why: 'Not collected at municipal level in this pipeline'},
-  {key: null, label: 'Housing price', why: 'Housing data collection is deferred (Block F)'},
-];
-
-LocalUI.latestOf = function(indicatorEntry){
-  if(!indicatorEntry) return null;
-  const periods = Object.keys(indicatorEntry.periods || {}).sort();
+LocalUI.latestOf = function(entry){
+  if(!entry) return null;
+  const periods = Object.keys(entry.periods || {}).sort();
   if(!periods.length) return null;
   const p = periods[periods.length - 1];
   // `updated` is the source retrieval date and is absent for a derived
   // indicator, which was computed rather than fetched. Passed through as
-  // undefined rather than substituted, because Statbel's 2015 licence
-  // forbids misleading a reader about the update date as squarely as it
-  // requires showing one -- see docs/data_catalog.md.
+  // undefined rather than substituted: Statbel's licence forbids misleading
+  // a reader about the update date as squarely as it requires showing one.
   return {
-    value: indicatorEntry.periods[p].value, period: p,
-    unit: indicatorEntry.unit, name: indicatorEntry.name,
-    updated: indicatorEntry.updated,
+    value: entry.periods[p].value, period: p, unit: entry.unit,
+    names: entry.names, updated: entry.updated,
   };
 };
 
-// The newest source retrieval date anywhere in this commune's data -- the
-// "date of last update" the attribution block is required to carry. Derived
-// indicators contribute nothing, correctly: they carry no retrieval date.
 LocalUI.lastUpdated = function(commune){
-  const dates = Object.values(commune.indicators || {})
-    .map(i => i.updated).filter(Boolean).sort();
+  const dates = Object.values(commune.indicators || {}).map(i => i.updated).filter(Boolean).sort();
   return dates.length ? dates[dates.length - 1] : null;
 };
 
-LocalUI.buildHeadlines = function(commune){
+// The headline row. Two entries have no key: the roadmap wants them and this
+// pipeline has no municipal source for either, so they render as explicit
+// gaps rather than being quietly dropped.
+LocalUI.HEADLINE_SPEC = [
+  {key: 'POPULATION_BY_COMMUNE'},
+  {key: 'POPULATION_CHANGE_5Y'},
+  {key: 'AVG_NET_TAXABLE_INCOME'},
+  {key: 'LOCAL_UNITS_BY_COMMUNE'},
+  {labelKey: 'unemployment', whyKey: 'noUnemployment'},
+  {labelKey: 'housingPrice', whyKey: 'noHousingPrice'},
+];
+
+LocalUI.buildHeadlines = function(commune, lang){
+  lang = lang || LocalUI.DEFAULT_LANG;
   return LocalUI.HEADLINE_SPEC.map(spec => {
-    if(!spec.key) return {label: spec.label, available: false, why: spec.why};
-    const latest = LocalUI.latestOf(commune.indicators[spec.key]);
-    if(!latest) return {label: spec.label, available: false, why: 'No value published for this commune'};
+    if(!spec.key){
+      return {label: LocalUI.t(lang, spec.labelKey), available: false, why: LocalUI.t(lang, spec.whyKey)};
+    }
+    const entry = commune.indicators[spec.key];
+    const latest = LocalUI.latestOf(entry);
+    const label = LocalUI.localName(entry && entry.names, lang, spec.key);
+    if(!latest) return {label: label, available: false, why: LocalUI.t(lang, 'noValue')};
     return {
-      label: spec.label, available: true, value: latest.value, period: latest.period,
-      unit: latest.unit, caveat: spec.caveat, updated: latest.updated,
-      entry: commune.indicators[spec.key],
+      label: label, available: true, value: latest.value, period: latest.period,
+      unit: latest.unit, updated: latest.updated, entry: entry,
     };
   });
 };
 
-// Comparison rows for one indicator: the commune's own value first, then
-// province / region / Belgium as available. A Brussels commune has no
-// province and gets one row fewer -- nothing here assumes a fixed depth
-// (docs/features/comparison.md, "The comparison set").
-//
-// `diff` is the commune's value as a percentage difference from the
-// reference. Deliberately NOT dressed up as good or bad: preferred_direction
-// is not in this payload, and "higher is better" is false for a dependency
-// ratio and meaningless for a population count. The reader gets the sign and
-// the magnitude, not a verdict.
-LocalUI.comparisonRows = function(entry){
+LocalUI.comparisonRows = function(entry, lang){
+  lang = lang || LocalUI.DEFAULT_LANG;
   if(!entry) return [];
   const periods = Object.keys(entry.periods || {}).sort();
   if(!periods.length) return [];
   const period = periods[periods.length - 1];
   const own = entry.periods[period].value;
-  const rows = [{scope: 'commune', label: 'This commune', value: own, period: period}];
-  const labels = {province: 'Province', region: 'Region', country: 'Belgium'};
+  const rows = [{scope: 'commune', label: LocalUI.t(lang, 'thisCommune'), value: own, period: period}];
   for(const scope of ['province', 'region', 'country']){
     const agg = (entry.comparison || {})[scope];
     if(!agg) continue;
     const row = {
-      scope: scope,
-      label: labels[scope],
-      name: agg.name && agg.name.en,
-      value: agg.value,
-      period: agg.period,
-      coverage: agg.coverage,
+      scope: scope, label: LocalUI.t(lang, scope),
+      name: LocalUI.localName(agg.name, lang),
+      value: agg.value, period: agg.period, coverage: agg.coverage,
     };
-    // WHICH RELATION MEANS SOMETHING depends on the indicator.
-    //
-    // For a COUNT or TOTAL the commune is PART of the reference, so a
-    // difference is arithmetically true and useless -- every commune is
-    // "below" its province, and Herstappe (78 people) reads -100.0% against
-    // everything. The share is the real figure: Antwerp holds 29.3% of its
-    // province's population.
-    //
-    // For a RATIO or AVERAGE the commune sits on the SAME scale as its
-    // reference, so a share would be meaningless and the difference is what
-    // a reader wants: this commune earns 15.2% less per tax return than its
-    // province.
-    if(agg.value === 0 || agg.value === null || own === null){
-      row.relation = null;
-    } else if(entry.additive){
-      row.relation = {kind: 'share', pct: own / agg.value * 100};
-    } else {
-      row.relation = {kind: 'diff', pct: (own / agg.value - 1) * 100};
-    }
+    // WHICH RELATION MEANS SOMETHING depends on the indicator. For a count
+    // the commune is PART of the reference, so a difference is true and
+    // useless -- every commune is "below" its province, and a tiny one reads
+    // -100% against everything. For a ratio the two sit on the same scale
+    // and the difference is what a reader wants.
+    if(agg.value === 0 || agg.value === null || own === null) row.relation = null;
+    else if(entry.additive) row.relation = {kind: 'share', pct: own / agg.value * 100};
+    else row.relation = {kind: 'diff', pct: (own / agg.value - 1) * 100};
     rows.push(row);
   }
   return rows;
 };
 
-// A percentile is unfalsifiable without its universe, so every line carries
-// the peer count and the reference period. Where the peer set was too small
-// for a percentile to be honest (Brussels-Capital's 19 communes), the
-// exporter withholds `pct` and this states the rank instead -- "4th of 19" is
-// exactly as informative and claims nothing false.
-//
-// `ordinal` is used rather than the bare number because "499th of 581" reads
-// as a position while "499 of 581" reads as a quantity.
-LocalUI.ordinal = function(n){
-  const mod100 = n % 100;
-  if(mod100 >= 11 && mod100 <= 13) return n + 'th';
-  return n + ({1: 'st', 2: 'nd', 3: 'rd'}[n % 10] || 'th');
+LocalUI.ordinal = function(n, lang){
+  if(lang === 'fr') return n === 1 ? '1er' : n + 'e';
+  if(lang === 'nl') return n + 'e';
+  const m = n % 100;
+  if(m >= 11 && m <= 13) return n + 'th';
+  return n + ({1:'st',2:'nd',3:'rd'}[n % 10] || 'th');
 };
 
-LocalUI.percentileLines = function(entry){
+LocalUI.percentileLines = function(entry, lang){
+  lang = lang || LocalUI.DEFAULT_LANG;
   const pos = entry && entry.percentile;
   if(!pos) return [];
   const out = [];
   for(const scope of ['national', 'regional']){
     const p = pos[scope];
     if(!p) continue;
-    const where = scope === 'national' ? 'in Belgium' : `in ${p.scope_name}`;
+    const where = scope === 'national'
+      ? LocalUI.t(lang, 'inBelgium')
+      : LocalUI.t(lang, 'inRegion', {r: p.scope_name});
     if(p.pct === null || p.pct === undefined){
       out.push({
-        text: `${LocalUI.ordinal(p.rank)} of ${p.peers} ${where}`,
-        note: `too few communes (${p.peers}) for a meaningful percentile`,
-        period: p.period,
+        text: LocalUI.t(lang, 'rankOf', {o: LocalUI.ordinal(p.rank, lang), n: p.peers, w: where}),
+        note: LocalUI.t(lang, 'tooFew', {n: p.peers}), period: p.period,
       });
     } else if(p.rank === 1 || p.rank === p.peers){
-      // The extremes must not be stated as a percentile. Under the rank
-      // definition (100 x (below + 0.5 x equal) / N) the highest of 565
-      // communes scores 99.91 and the lowest 0.09, which round to "100th"
-      // and "0th" -- both impossible, and both a claim the data does not
-      // support. Highest and lowest are unambiguous and need no rounding.
+      // The extremes must not be stated as a percentile: under the rank
+      // definition the highest of 565 scores 99.91 and the lowest 0.09,
+      // which round to "100th" and "0th" -- positions nobody can occupy.
       out.push({
-        text: `${p.rank === 1 ? 'Highest' : 'Lowest'} of ${p.peers} communes ${where}`,
-        // No ordinal suffix on a decimal: "0.1th" is not English.
-        note: `percentile ${p.pct.toLocaleString(undefined, {maximumFractionDigits: 1})}`,
-        period: p.period,
+        text: LocalUI.t(lang, p.rank === 1 ? 'highestOf' : 'lowestOf', {n: p.peers, w: where}),
+        note: LocalUI.t(lang, 'percentileIs', {p: p.pct.toFixed(1)}), period: p.period,
       });
     } else {
-      // Clamped to 1..99 for the same reason: a value of 99.6 must not be
-      // rounded up into a percentile nobody can occupy.
+      // Clamped to 1..99 for the same reason: 99.6 must not round up into a
+      // percentile nobody can occupy.
       const shown = Math.min(99, Math.max(1, Math.round(p.pct)));
       out.push({
-        text: `${LocalUI.ordinal(shown)} percentile ${where}`,
-        note: `${LocalUI.ordinal(p.rank)} of ${p.peers} communes`,
+        text: LocalUI.t(lang, 'percentileOf', {o: LocalUI.ordinal(shown, lang), w: where}),
+        note: LocalUI.t(lang, 'ofCommunes', {o: LocalUI.ordinal(p.rank, lang), n: p.peers}),
         period: p.period,
       });
     }
@@ -469,73 +575,74 @@ LocalUI.percentileLines = function(entry){
   return out;
 };
 
-// A one-line version of the percentile for a fact tile. The full component
-// (percentileLines) is used under each section's headline figure; eight
-// tables on one page would be a wall nobody reads, so the supporting figures
-// get a single national line each.
-LocalUI.percentileShort = function(entry){
+// A one-line version for a fact tile. The full component is used under each
+// section's headline figure; a table per figure would be a wall nobody reads.
+LocalUI.percentileShort = function(entry, lang){
+  lang = lang || LocalUI.DEFAULT_LANG;
   const p = entry && entry.percentile && entry.percentile.national;
   if(!p) return null;
-  if(p.pct === null || p.pct === undefined) return `${LocalUI.ordinal(p.rank)} of ${p.peers} in Belgium`;
-  if(p.rank === 1) return `highest of ${p.peers} in Belgium`;
-  if(p.rank === p.peers) return `lowest of ${p.peers} in Belgium`;
+  const where = LocalUI.t(lang, 'inBelgium');
+  if(p.pct === null || p.pct === undefined)
+    return LocalUI.t(lang, 'rankOf', {o: LocalUI.ordinal(p.rank, lang), n: p.peers, w: where});
+  if(p.rank === 1) return LocalUI.t(lang, 'highestOf', {n: p.peers, w: where});
+  if(p.rank === p.peers) return LocalUI.t(lang, 'lowestOf', {n: p.peers, w: where});
   const shown = Math.min(99, Math.max(1, Math.round(p.pct)));
-  return `${LocalUI.ordinal(shown)} pct. in Belgium (${LocalUI.ordinal(p.rank)}/${p.peers})`;
+  return LocalUI.t(lang, 'percentileOf', {o: LocalUI.ordinal(shown, lang), w: where})
+    + ' (' + LocalUI.ordinal(p.rank, lang) + '/' + p.peers + ')';
 };
 
 if(typeof module !== 'undefined') module.exports = LocalUI;
 </script>
 
 <script>
-// ── rendering (browser only) ────────────────────────────────────────────
+// ── rendering (browser only) ───────────────────────────────────────────────
+let GEOGRAPHIES = [], SECTIONS = [], COMMUNE = null;
+let LANG = 'en', browseCurrentId = null;
+
+const LOCALES = {en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE'};
 
 function fmt(value, unit){
   if(value === null || value === undefined || isNaN(value)) return '—';
-  const body = value.toLocaleString(undefined, {maximumFractionDigits: unit === 'count' ? 0 : 2});
+  const loc = LOCALES[LANG] || 'en-GB';
+  const body = value.toLocaleString(loc, {maximumFractionDigits: unit === 'count' ? 0 : 2});
   if(unit === 'eur') return '€' + body;
-  if(unit && unit.startsWith('percent')) return body + '%';
+  if(unit && unit.startsWith('percent')) return body + ' %';
   return body;
 }
-
-function noDataHTML(why){
-  return `<div class="no-data">No data available.<span class="why">${why}</span></div>`;
-}
-
+function T(key, vars){ return LocalUI.t(LANG, key, vars); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function noDataHTML(why){ return `<div class="no-data">${T('noData')}<span class="why">${esc(why)}</span></div>`; }
 function gc(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 
-// Adapted from dashboard.html's canvas line-chart renderer (_rc): same
-// technique (devicePixelRatio-aware canvas, CSS-variable-driven theming,
-// "nice" gridline steps), simplified to a single trend line since this page
-// draws a plain history series, not a bar decomposition.
+// ── chart ──────────────────────────────────────────────────────────────────
 function niceSteps(mn, mx, n){
   const rg = mx - mn || 1, ro = rg / n, mg = Math.pow(10, Math.floor(Math.log10(ro)));
   const rs = ro / mg, ni = rs <= 1.5 ? mg : rs <= 3 ? 2*mg : rs <= 7 ? 5*mg : 10*mg;
-  const steps = [];
-  let v = Math.ceil(mn / ni) * ni;
+  const steps = []; let v = Math.ceil(mn / ni) * ni;
   while(v <= mx){ steps.push(parseFloat(v.toFixed(4))); v += ni; }
   return steps;
 }
 
 function drawSeries(canvas, points){
-  // points: [{period, value}], already sorted ascending. Fewer than two
-  // points means there is nothing to draw a line through -- the caller
-  // should use noDataHTML instead of calling this, per local_ui.md's
-  // ".no-data component" rule.
   const ctx = canvas.getContext('2d'), dpr = window.devicePixelRatio || 1;
-  const W = canvas.parentElement.clientWidth - 32, H = 200;
-  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, W, H);
+  const W = canvas.parentElement.clientWidth, H = 210;
+  canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
 
   const vals = points.map(p => p.value);
-  const vMin = Math.min(...vals), vMax = Math.max(...vals);
+  let vMin = Math.min(...vals), vMax = Math.max(...vals);
+  // Pad, so a flat or near-flat series does not render pinned to one edge.
+  const pad = (vMax - vMin) * 0.15 || Math.abs(vMax || 1) * 0.05;
+  vMin -= pad; vMax += pad;
   const vR = (vMax - vMin) || 1;
-  const pL = 54, pR = 12, pT = 12, pB = 28, n = points.length;
+  const pL = 62, pR = 10, pT = 12, pB = 26, n = points.length;
   const cW = W - pL - pR, slW = n > 1 ? cW / (n - 1) : 0;
   const yOf = v => pT + ((vMax - v) / vR) * (H - pT - pB);
+  const xOf = i => pL + slW * i;
 
-  const gridC = gc('--chart-grid'), labelC = gc('--chart-label'), lineC = gc('--chart-line'), dotC = gc('--chart-dot');
+  const gridC = gc('--chart-grid'), labelC = gc('--chart-label');
+  const lineC = gc('--chart-line'), fillC = gc('--chart-fill'), dotC = gc('--chart-dot');
 
   niceSteps(vMin, vMax, 4).forEach(v => {
     const y = Math.round(yOf(v)) + 0.5;
@@ -543,300 +650,206 @@ function drawSeries(canvas, points){
     ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
     ctx.font = '10px "IBM Plex Mono",monospace'; ctx.fillStyle = labelC;
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    ctx.fillText(v.toLocaleString(), pL - 8, y);
+    ctx.fillText(v.toLocaleString(LOCALES[LANG] || 'en-GB', {maximumFractionDigits: 1}), pL - 9, y);
   });
 
-  const xSkip = Math.max(1, Math.ceil(28 / Math.max(slW, 1)));
-  points.forEach((p, i) => {
-    const cx = pL + slW * i;
-    if(i % xSkip === 0 || i === n - 1){
-      ctx.font = '9px "IBM Plex Mono",monospace'; ctx.fillStyle = labelC;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText(p.period, cx, H - pB + 8);
-    }
+  const xSkip = Math.max(1, Math.ceil(34 / Math.max(slW, 1)));
+  ctx.font = '10px "IBM Plex Mono",monospace'; ctx.fillStyle = labelC;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  points.forEach((p,i) => {
+    if(i % xSkip === 0 || i === n-1) ctx.fillText(p.period, xOf(i), H - pB + 8);
   });
+
+  if(n > 1){
+    ctx.beginPath(); ctx.moveTo(xOf(0), yOf(points[0].value));
+    points.forEach((p,i) => ctx.lineTo(xOf(i), yOf(p.value)));
+    ctx.lineTo(xOf(n-1), H - pB); ctx.lineTo(xOf(0), H - pB); ctx.closePath();
+    ctx.fillStyle = fillC; ctx.fill();
+  }
 
   ctx.beginPath();
-  points.forEach((p, i) => {
-    const cx = pL + slW * i, cy = yOf(p.value);
-    i === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
-  });
-  ctx.strokeStyle = lineC; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+  points.forEach((p,i) => i === 0 ? ctx.moveTo(xOf(i), yOf(p.value)) : ctx.lineTo(xOf(i), yOf(p.value)));
+  ctx.strokeStyle = lineC; ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
 
-  points.forEach((p, i) => {
-    const cx = pL + slW * i, cy = yOf(p.value), isLast = i === n - 1;
-    ctx.beginPath(); ctx.arc(cx, cy, isLast ? 4 : 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = dotC; ctx.fill();
+  points.forEach((p,i) => {
+    const isLast = i === n-1;
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(p.value), isLast ? 4.5 : 2.5, 0, Math.PI*2);
+    ctx.fillStyle = isLast ? dotC : lineC; ctx.fill();
   });
 }
 
-function seriesOf(commune, code){
-  const ind = commune.indicators[code];
-  if(!ind) return null;
-  const periods = Object.keys(ind.periods).sort();
-  return {
-    name: ind.name, unit: ind.unit,
-    points: periods.map(p => ({period: p, value: ind.periods[p].value})),
-  };
-}
-
-function renderChartOrNoData(container, commune, code, why){
-  const s = seriesOf(commune, code);
-  if(!s || s.points.length < 2){
-    container.innerHTML = noDataHTML(why || 'No history published for this commune.');
-    return;
-  }
-  container.innerHTML = `<div class="chart-card"><canvas class="series"></canvas></div>`;
-  const canvas = container.querySelector('canvas');
-  requestAnimationFrame(() => drawSeries(canvas, s.points));
-}
-
-// ── headline cards ──────────────────────────────────────────────────────
-
-function renderHeadline(commune){
-  const cards = LocalUI.buildHeadlines(commune);
-  document.getElementById('headline').innerHTML = cards.map(c => {
-    if(!c.available){
-      return `<div class="card nodata"><span class="v">Not available</span><span class="l">${c.label}</span><span class="p">${c.why}</span></div>`;
-    }
-    const caveat = c.caveat ? ` <span title="${c.caveat}">*</span>` : '';
-    // Reference period AND retrieval date. The second is a licence
-    // condition on every published Statbel-derived figure (see the
-    // attribution block below); "derived" is shown where there is no
-    // retrieval date because the figure was computed, not fetched.
-    const provenance = c.updated ? `as of ${c.period} · updated ${c.updated}`
-                                 : `as of ${c.period} · derived`;
-    const rank = c.entry ? LocalUI.percentileShort(c.entry) : null;
-    return `<div class="card"><span class="v">${fmt(c.value, c.unit)}${caveat}</span>` +
-      `<span class="l">${c.label}</span>` +
-      (rank ? `<span class="rk">${rank}</span>` : '') +
-      `<span class="p">${provenance}</span></div>`;
-  }).join('');
-}
-
-function renderAttribution(commune){
-  const updated = LocalUI.lastUpdated(commune);
-  document.getElementById('attrUpdated').textContent = updated || 'see source';
-}
-
-// ── sections ────────────────────────────────────────────────────────────
-
-// One fact tile, with its reference period AND its source retrieval date.
-// The retrieval date is a licence condition on every published
-// Statbel-derived figure (docs/data_catalog.md); a derived figure has none
-// and says so rather than borrowing one.
-// One comparison table for an indicator, or nothing if there is no
-// reference value to compare against.
-// Percentile lines with their universe -- the roadmap's own requirement that
-// "a percentile without a stated universe is unfalsifiable, and the first
-// sceptical directeur financier will ask".
-function percentileHTML(entry){
-  const lines = LocalUI.percentileLines(entry);
-  if(!lines.length) return '';
-  return `<div class="pctile">` + lines.map(l =>
-    `<div class="line"><b>${l.text}</b> <span class="note">— ${l.note}, ${l.period}</span></div>`
-  ).join('') + `</div>`;
-}
-
-function comparisonHTML(entry, unit){
-  const rows = LocalUI.comparisonRows(entry);
+// ── components ─────────────────────────────────────────────────────────────
+function comparisonHTML(entry){
+  const rows = LocalUI.comparisonRows(entry, LANG);
   if(rows.length < 2) return '';
   const additive = !!entry.additive;
   const body = rows.map(r => {
-    const label = r.scope === 'commune' ? r.label : `${r.label} — ${r.name}`;
-    let diff = '';
+    const label = r.scope === 'commune' ? r.label : `${r.label} — ${esc(r.name)}`;
+    let rel = '';
     if(r.relation){
-      // A small share must not round to "0.0%". Herstappe is 0.0086% of
-      // Limburg's population, and printing that as 0.0% says something
-      // false about a commune that does exist.
+      // A small share must not round to "0.0 %": Herstappe is 0.0086% of
+      // Limburg, and printing 0.0 % says something false about a commune
+      // that exists.
       const p = r.relation.pct;
       const dp = (p !== 0 && Math.abs(p) < 0.1) ? 4 : 1;
-      const n = p.toLocaleString(undefined, {maximumFractionDigits: dp});
-      diff = r.relation.kind === 'share' ? `${n}%` : `${p >= 0 ? '+' : ''}${n}%`;
+      const nStr = p.toLocaleString(LOCALES[LANG] || 'en-GB', {maximumFractionDigits: dp});
+      rel = r.relation.kind === 'share' ? `${nStr} %` : `${p >= 0 ? '+' : ''}${nStr} %`;
     }
-    // Coverage is shown, not hidden behind a tooltip: an aggregate built from
-    // fewer communes than exist is a materially different number, and the
-    // reader is entitled to see which.
     const cov = r.coverage ? `${r.coverage.n}/${r.coverage.of}` : '';
-    return `<tr class="${r.scope === 'commune' ? 'self' : ''}">
-      <td>${label}</td>
-      <td class="num">${fmt(r.value, unit)}</td>
-      <td class="num">${diff}</td>
-      <td class="cov">${cov}</td>
-    </tr>`;
+    return `<tr class="${r.scope === 'commune' ? 'self' : ''}"><td>${label}</td>` +
+      `<td class="num">${fmt(r.value, entry.unit)}</td><td class="num">${rel}</td><td class="cov">${cov}</td></tr>`;
   }).join('');
-  const col = additive ? 'Share' : 'Diff';
-  const explain = additive
-    ? `This commune as a share of each reference, at ${rows[0].period} — a commune is part of its
-       province, so a share is the meaningful relation, not a difference.`
-    : `This commune against each reference, at ${rows[0].period}.`;
-  return `<table class="cmp">
-    <caption>${explain}
-      The last column counts the communes behind each aggregate. Averages and ratios are
-      recomputed from totals, never averaged across communes — see
-      <code>docs/features/comparison.md</code>.</caption>
-    <thead><tr><th>Compared with</th><th style="text-align:right">Value</th>
-      <th style="text-align:right">${col}</th><th>Communes</th></tr></thead>
+  const explain = T(additive ? 'shareNote' : 'diffNote', {p: rows[0].period});
+  return `<table class="cmp"><caption>${explain} ${T('methodNote')}</caption>
+    <thead><tr><th>${T('comparedWith')}</th><th style="text-align:right">${T('value')}</th>
+    <th style="text-align:right">${additive ? T('share') : T('diff')}</th><th style="text-align:right">${T('communes')}</th></tr></thead>
     <tbody>${body}</tbody></table>`;
 }
 
-function factHTML(label, latest, entry){
-  const prov = latest.updated ? `updated ${latest.updated}` : 'derived';
-  const rank = entry ? LocalUI.percentileShort(entry) : null;
+function percentileHTML(entry){
+  const lines = LocalUI.percentileLines(entry, LANG);
+  if(!lines.length) return '';
+  return '<div class="pctile">' + lines.map(l =>
+    `<div class="line"><b>${esc(l.text)}</b> <span class="note">— ${esc(l.note)}, ${l.period}</span></div>`
+  ).join('') + '</div>';
+}
+
+function factHTML(entry){
+  const latest = LocalUI.latestOf(entry);
+  if(!latest) return '';
+  const rank = LocalUI.percentileShort(entry, LANG);
+  const prov = latest.updated ? `${T('updated')} ${latest.updated}` : T('derived');
   return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
-         `<div class="fl">${label} (${latest.period})</div>` +
-         (rank ? `<div class="frank">${rank}</div>` : '') +
-         `<div class="fp">${prov}</div></div>`;
+    `<div class="fl">${esc(LocalUI.localName(latest.names, LANG))} (${latest.period})</div>` +
+    (rank ? `<div class="frank">${esc(rank)}</div>` : '') +
+    `<div class="fp">${prov}</div></div>`;
 }
 
-function renderDemography(commune){
-  document.getElementById('demographySub').textContent =
-    'Population history, and the age structure at its most recent year.';
-  const body = document.getElementById('demographyBody');
-  const chartHost = document.createElement('div');
-  body.innerHTML = '';
-  body.appendChild(chartHost);
-  renderChartOrNoData(chartHost, commune, 'POPULATION_BY_COMMUNE');
-
-  const popCmp = document.createElement('div');
-  popCmp.innerHTML = comparisonHTML(commune.indicators['POPULATION_BY_COMMUNE'], 'count')
-    + percentileHTML(commune.indicators['POPULATION_BY_COMMUNE']);
-  body.appendChild(popCmp);
-
-  const bands = ['POPULATION_AGE_0_14', 'POPULATION_AGE_15_64', 'POPULATION_AGE_65_PLUS'];
-  const bandLabels = {POPULATION_AGE_0_14: '0–14', POPULATION_AGE_15_64: '15–64', POPULATION_AGE_65_PLUS: '65+'};
-  const facts = [];
-  for(const code of bands){
-    const latest = LocalUI.latestOf(commune.indicators[code]);
-    if(latest) facts.push(factHTML(`Age ${bandLabels[code]}`, latest, commune.indicators[code]));
+// Sections come from public/data/metadata/sections.json, so this file holds
+// no indicator ids -- the 50% gate's "zero indicator-specific frontend logic"
+// check, and Block B's premise that adding an indicator is config not code.
+function sectionHTML(section){
+  const label = esc(LocalUI.localName(section.label, LANG));
+  const blurb = section.blurb ? `<div class="blurb">${esc(LocalUI.localName(section.blurb, LANG))}</div>` : '';
+  if(section.unavailable){
+    return `<section class="block" id="sec-${section.id}"><h2>${label}</h2>${blurb}
+      ${noDataHTML(LocalUI.localName(section.unavailable, LANG))}</section>`;
   }
-  const dep = LocalUI.latestOf(commune.indicators['DEPENDENCY_RATIO']);
-  if(dep) facts.push(factHTML('Dependency ratio', dep, commune.indicators['DEPENDENCY_RATIO']));
-  if(facts.length){
-    const grid = document.createElement('div');
-    grid.className = 'fact-grid';
-    grid.innerHTML = facts.join('');
-    body.appendChild(grid);
-  }
-}
 
-function renderIncome(commune){
-  document.getElementById('incomeSub').textContent =
-    'Average net taxable income (derived, mean per tax return) and municipal tax totals.';
-  const body = document.getElementById('incomeBody');
-  body.innerHTML = '';
-  const chartHost = document.createElement('div');
-  body.appendChild(chartHost);
-  renderChartOrNoData(chartHost, commune, 'AVG_NET_TAXABLE_INCOME',
-    'Fiscal-income data collection is deferred or absent for this commune (2025-merger successors have no fiscal history yet — see fiscal_income.md).');
-
-  const incCmp = document.createElement('div');
-  incCmp.innerHTML = comparisonHTML(commune.indicators['AVG_NET_TAXABLE_INCOME'], 'eur')
-    + percentileHTML(commune.indicators['AVG_NET_TAXABLE_INCOME']);
-  body.appendChild(incCmp);
-
-  const fiscalCodes = ['FISCAL_TOT_NET_TAXABLE_INC', 'FISCAL_TOT_MUNICIP_TAXES', 'FISCAL_TOT_TAXES', 'FISCAL_NBR_NON_ZERO_INC'];
-  const facts = [];
-  for(const code of fiscalCodes){
-    const latest = LocalUI.latestOf(commune.indicators[code]);
-    if(latest) facts.push(factHTML(latest.name, latest, commune.indicators[code]));
-  }
-  if(facts.length){
-    const grid = document.createElement('div');
-    grid.className = 'fact-grid';
-    grid.innerHTML = facts.join('');
-    body.appendChild(grid);
-  }
-}
-
-function renderBusiness(commune){
-  const latest = LocalUI.latestOf(commune.indicators['LOCAL_UNITS_BY_COMMUNE']);
-  const body = document.getElementById('businessBody');
+  const head = COMMUNE.indicators[section.headline];
+  const latest = LocalUI.latestOf(head);
+  let panel;
   if(!latest){
-    body.innerHTML = noDataHTML('No local-unit count published for this commune.');
-    return;
+    panel = noDataHTML(T('noHistory'));
+  } else {
+    const points = Object.keys(head.periods).sort().map(p => ({period: p, value: head.periods[p].value}));
+    const chart = points.length > 1 ? `<canvas class="series" data-section="${section.id}"></canvas>` : '';
+    panel = `<div class="panel">
+      <div class="panel-head">
+        <span class="t">${esc(LocalUI.localName(head.names, LANG))}</span>
+        <span class="v">${fmt(latest.value, latest.unit)} <span style="font-size:.72rem;color:var(--text-faint);font-weight:400">${T('asOf')} ${latest.period}</span></span>
+      </div>${chart}${comparisonHTML(head)}${percentileHTML(head)}</div>`;
   }
-  body.innerHTML = `<div class="fact-grid">${factHTML('Local business units', latest, commune.indicators['LOCAL_UNITS_BY_COMMUNE'])}</div>
-    <p class="sec-sub" style="margin-top:10px">Single snapshot only — Statbel publishes one quarter at a time for this dataset (see <code>docs/features/statbel_adapter.md</code>), so no history chart is shown.</p>`
-    + comparisonHTML(commune.indicators['LOCAL_UNITS_BY_COMMUNE'], 'count')
-    + percentileHTML(commune.indicators['LOCAL_UNITS_BY_COMMUNE']);
+
+  const facts = (section.indicators || []).map(id => factHTML(COMMUNE.indicators[id])).filter(Boolean).join('');
+  return `<section class="block" id="sec-${section.id}"><h2>${label}</h2>${blurb}${panel}
+    ${facts ? `<div class="facts">${facts}</div>` : ''}</section>`;
 }
 
-function renderOverview(commune){
-  const facts = [];
-  if(commune.region) facts.push(`<div class="fact"><div class="fv">${commune.region}</div><div class="fl">Region</div></div>`);
-  if(commune.province) facts.push(`<div class="fact"><div class="fv">${commune.province}</div><div class="fl">Province</div></div>`);
-  if(commune.arrondissement) facts.push(`<div class="fact"><div class="fv">${commune.arrondissement}</div><div class="fl">Arrondissement</div></div>`);
-  facts.push(`<div class="fact"><div class="fv">${commune.nis_code}</div><div class="fl">NIS code</div></div>`);
-  document.getElementById('overviewFacts').innerHTML = facts.join('');
-}
-
-function renderCommune(commune){
+// ── page rendering ─────────────────────────────────────────────────────────
+function renderCommune(){
+  const c = COMMUNE;
   document.getElementById('searchPanel').style.display = 'none';
   document.getElementById('communePage').style.display = 'block';
-  document.getElementById('cTitle').textContent = commune.name.en;
-  const altNames = [commune.name.fr, commune.name.nl].filter(n => n && n !== commune.name.en);
-  document.getElementById('cAncestry').textContent =
-    (altNames.length ? altNames.join(' / ') + ' — ' : '') +
-    [commune.region, commune.province, commune.arrondissement].filter(Boolean).join(' › ');
 
-  renderHeadline(commune);
-  renderOverview(commune);
-  renderDemography(commune);
-  renderIncome(commune);
-  document.getElementById('employmentBody').innerHTML =
-    noDataHTML('Municipal-level employment data is not collected by this pipeline (no dataset selected in Block E).');
-  renderBusiness(commune);
-  document.getElementById('housingBody').innerHTML =
-    noDataHTML('Housing data collection is deferred — no dataset was selected in Block E / Block F.');
-  document.getElementById('mobilityBody').innerHTML =
-    noDataHTML('Mobility data collection is deferred — no dataset was selected in Block E / Block F.');
-  document.getElementById('financesBody').innerHTML =
-    noDataHTML('Coming in Phase II. Municipal finance (Wallonia first) is Block O of the roadmap.');
-  renderAttribution(commune);
+  const name = LocalUI.localName(c.name, LANG);
+  document.title = name + ' — BelPulse';
+  document.getElementById('cTitle').textContent = name;
+  const alts = LocalUI.LANGS.filter(l => l !== LANG).map(l => c.name[l]).filter(n => n && n !== name);
+  document.getElementById('cAlt').textContent = [...new Set(alts)].join(' · ');
+  document.getElementById('cPath').innerHTML =
+    esc([c.region, c.province, c.arrondissement].filter(Boolean).join(' › ')) +
+    `<span class="nis">NIS ${esc(c.nis_code)}</span>`;
+
+  document.getElementById('headline').innerHTML = LocalUI.buildHeadlines(c, LANG).map(h => {
+    if(!h.available)
+      return `<div class="card nodata"><span class="v">${T('notAvailable')}</span>
+        <span class="l">${esc(h.label)}</span><span class="p">${esc(h.why)}</span></div>`;
+    const rank = h.entry ? LocalUI.percentileShort(h.entry, LANG) : null;
+    const prov = h.updated ? `${T('asOf')} ${h.period} · ${T('updated')} ${h.updated}`
+                           : `${T('asOf')} ${h.period} · ${T('derived')}`;
+    return `<div class="card"><span class="v">${fmt(h.value, h.unit)}</span>
+      <span class="l">${esc(h.label)}</span>${rank ? `<span class="rk">${esc(rank)}</span>` : ''}
+      <span class="p">${prov}</span></div>`;
+  }).join('');
+
+  document.getElementById('sections').innerHTML = SECTIONS.map(sectionHTML).join('');
+  requestAnimationFrame(() => {
+    document.querySelectorAll('canvas.series').forEach(cv => {
+      const section = SECTIONS.find(s => s.id === cv.dataset.section);
+      const head = COMMUNE.indicators[section.headline];
+      const pts = Object.keys(head.periods).sort().map(p => ({period: p, value: head.periods[p].value}));
+      drawSeries(cv, pts);
+    });
+  });
+
+  document.getElementById('attribution').innerHTML = T('attribution');
+  const updated = LocalUI.lastUpdated(c);
+  const el = document.getElementById('attrUpdated');
+  if(el) el.textContent = updated || '—';
+  document.getElementById('pageFooter').innerHTML =
+    T('footer', {t: `<a href="communes.html">${T('tableLink')}</a>`});
 }
-
-// ── search panel ────────────────────────────────────────────────────────
-
-let GEOGRAPHIES = [];
-let browseCurrentId = null; // null = country root
 
 function renderSearchResults(){
   const q = document.getElementById('searchInput').value.trim();
   const el = document.getElementById('searchResults');
-  if(!q){ el.innerHTML = ''; document.getElementById('browseTree').style.display = ''; return; }
-  document.getElementById('browseTree').style.display = 'none';
+  const tree = document.getElementById('browseTree');
+  if(!q){ el.innerHTML = ''; tree.style.display = ''; return; }
+  tree.style.display = 'none';
   const results = LocalUI.searchCommunes(GEOGRAPHIES, q);
-  if(!results.length){ el.innerHTML = '<div class="result-row">No commune matches &ldquo;' + q + '&rdquo;.</div>'; return; }
-  el.innerHTML = results.map(g =>
-    `<div class="result-row" data-nis="${g.nis_code}"><span class="rname">${g.name.en}${g.name.fr !== g.name.en ? ' / ' + g.name.fr : ''}</span><span class="rmeta">${g.nis_code}</span></div>`
-  ).join('');
-  el.querySelectorAll('.result-row[data-nis]').forEach(row => {
-    row.addEventListener('click', () => navigateTo(row.dataset.nis));
-  });
+  if(!results.length){ el.innerHTML = `<div class="result-row">${T('noMatch')} “${esc(q)}”.</div>`; return; }
+  el.innerHTML = results.map(g => {
+    const primary = LocalUI.localName(g.name, LANG);
+    const other = LocalUI.LANGS.map(l => g.name[l]).filter(n => n && n !== primary);
+    return `<div class="result-row" data-nis="${g.nis_code}"><span>${esc(primary)}` +
+      (other.length ? ` <span style="color:var(--text-faint)">/ ${esc([...new Set(other)][0])}</span>` : '') +
+      `</span><span class="rmeta">${g.nis_code}</span></div>`;
+  }).join('');
+  el.querySelectorAll('[data-nis]').forEach(r => r.addEventListener('click', () => navigateTo(r.dataset.nis)));
 }
 
 function renderBrowseTree(){
   const root = GEOGRAPHIES.find(g => g.level === 'country');
   if(!root) return;
   if(browseCurrentId === null) browseCurrentId = root.geo_id;
-
   const chain = LocalUI.ancestorChain(GEOGRAPHIES, browseCurrentId);
-  const crumbHTML = chain.map((g, i) =>
-    `<button data-id="${g.geo_id}">${g.name.en}</button>${i < chain.length - 1 ? '<span class="sep">›</span>' : ''}`
-  ).join('');
-
   const children = LocalUI.childrenOf(GEOGRAPHIES, browseCurrentId);
-  const gridHTML = children.map(c => {
-    if(c.level === 'municipality') return `<div class="tree-item" data-nis="${c.nis_code}">${c.name.en}</div>`;
-    return `<div class="tree-item" data-drill="${c.geo_id}">${c.name.en}</div>`;
-  }).join('');
-
   const el = document.getElementById('browseTree');
-  el.innerHTML = `<div class="crumb">${crumbHTML}</div><div class="tree-grid">${gridHTML}</div>`;
-  el.querySelectorAll('.crumb button').forEach(b => b.addEventListener('click', () => { browseCurrentId = b.dataset.id; renderBrowseTree(); }));
-  el.querySelectorAll('.tree-item[data-drill]').forEach(b => b.addEventListener('click', () => { browseCurrentId = b.dataset.drill; renderBrowseTree(); }));
-  el.querySelectorAll('.tree-item[data-nis]').forEach(b => b.addEventListener('click', () => navigateTo(b.dataset.nis)));
+  el.innerHTML =
+    `<div class="crumb">${chain.map((g,i) =>
+      `<button data-id="${g.geo_id}">${esc(LocalUI.localName(g.name, LANG))}</button>` +
+      (i < chain.length-1 ? '<span class="sep">›</span>' : '')).join('')}</div>` +
+    `<div class="tree-grid">${children.map(c => c.level === 'municipality'
+      ? `<div class="tree-item" data-nis="${c.nis_code}">${esc(LocalUI.localName(c.name, LANG))}</div>`
+      : `<div class="tree-item" data-drill="${c.geo_id}">${esc(LocalUI.localName(c.name, LANG))}</div>`).join('')}</div>`;
+  el.querySelectorAll('.crumb button').forEach(b =>
+    b.addEventListener('click', () => { browseCurrentId = b.dataset.id; renderBrowseTree(); }));
+  el.querySelectorAll('[data-drill]').forEach(b =>
+    b.addEventListener('click', () => { browseCurrentId = b.dataset.drill; renderBrowseTree(); }));
+  el.querySelectorAll('.tree-item[data-nis]').forEach(b =>
+    b.addEventListener('click', () => navigateTo(b.dataset.nis)));
+}
+
+function applyStaticStrings(){
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T(el.dataset.t); });
+  document.getElementById('searchInput').placeholder = T('searchPlaceholder');
+  document.documentElement.setAttribute('lang', LANG);
+}
+
+function rerender(){
+  applyStaticStrings();
+  if(COMMUNE) renderCommune(); else { renderSearchResults(); renderBrowseTree(); }
 }
 
 function navigateTo(nis){
@@ -847,66 +860,44 @@ function navigateTo(nis){
 }
 
 function showSearchPanel(){
+  COMMUNE = null;
   document.getElementById('searchPanel').style.display = 'block';
   document.getElementById('communePage').style.display = 'none';
   const url = new URL(window.location.href);
   url.searchParams.delete('nis');
   window.history.pushState({}, '', url);
+  document.title = 'Commune profile — BelPulse';
 }
 
 async function loadCommune(nis){
   try{
     const res = await fetch(`public/data/communes/${nis}.json?t=${Date.now()}`);
     if(!res.ok) throw new Error('HTTP ' + res.status);
-    const commune = await res.json();
-    renderCommune(commune);
-  } catch(e){
+    COMMUNE = await res.json();
+    renderCommune();
+  }catch(e){
     document.getElementById('communePage').style.display = 'block';
     document.getElementById('searchPanel').style.display = 'none';
-    document.getElementById('cTitle').textContent = 'Could not load this commune';
-    document.getElementById('cAncestry').innerHTML = noDataHTML('Error: ' + e.message);
+    document.getElementById('cTitle').textContent = T('loadFail');
+    document.getElementById('cPath').innerHTML = noDataHTML(e.message);
   }
 }
 
-async function init(){
-  document.getElementById('backLink').addEventListener('click', showSearchPanel);
-  document.getElementById('searchInput').addEventListener('input', renderSearchResults);
-
-  try{
-    const res = await fetch('public/data/metadata/geographies.json?t=' + Date.now());
-    // Check the status before parsing. A missing file on GitHub Pages returns
-    // an HTML 404 page, and res.json() on that throws "Unexpected token '<'"
-    // -- an error that says nothing about the actual problem, which is that
-    // the payloads were never generated.
-    if(!res.ok) throw new Error(
-      `the commune index is missing (HTTP ${res.status}). It is generated by ` +
-      `scripts/export_site_payloads.py into public/data/ — run that, or wait ` +
-      `for the daily workflow to commit it.`);
-    GEOGRAPHIES = (await res.json()).geographies;
-    if(!GEOGRAPHIES || !GEOGRAPHIES.length) throw new Error('the commune index loaded but is empty.');
-  } catch(e){
-    document.getElementById('searchResults').innerHTML = noDataHTML('Could not load the commune index: ' + e.message);
-    return;
-  }
-  renderBrowseTree();
-
-  const nis = new URL(window.location.href).searchParams.get('nis');
-  if(nis) loadCommune(nis);
+function setLang(lang, persist){
+  LANG = LocalUI.LANGS.includes(lang) ? lang : LocalUI.DEFAULT_LANG;
+  if(persist){ try{ localStorage.setItem('belpulse-lang', LANG); }catch(e){} }
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  rerender();
 }
-init();
-</script>
-<script>
-// Theme switch. Shared localStorage key across communes.html, all_data.html
-// and local.html, so a choice made on one carries to the others. Distinct
-// from dashboard.html's own day/soft/night switcher, which stores different
-// values under 'theme' -- reusing that key here would leave this page's CSS
-// with a data-theme value it has no rule for.
-(function(){
+
+(function themeSwitch(){
+  // Shared key across communes.html, all_data.html and local.html, so a
+  // choice on one carries to the others. Distinct from dashboard.html's own
+  // day/soft/night switcher, whose values this CSS has no rule for.
   var KEY = 'belpulse-theme';
-  var group = document.querySelector('.theme-toggle');
-  if(!group) return;
+  var group = document.getElementById('themeSeg');
   var buttons = group.querySelectorAll('[data-theme-choice]');
-
   function apply(choice, persist){
     if(choice === 'auto') document.documentElement.removeAttribute('data-theme');
     else document.documentElement.setAttribute('data-theme', choice);
@@ -914,16 +905,55 @@ init();
     buttons.forEach(function(b){
       b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-choice') === choice));
     });
+    // Canvas colours come from CSS variables, so the charts must be redrawn.
+    if(COMMUNE) requestAnimationFrame(renderCommune);
   }
-
   buttons.forEach(function(b){
     b.addEventListener('click', function(){ apply(b.getAttribute('data-theme-choice'), true); });
   });
-
   var saved = 'auto';
   try{ saved = localStorage.getItem(KEY) || 'auto'; }catch(e){}
   apply(saved, false);
 })();
+
+async function init(){
+  document.getElementById('backLink').addEventListener('click', showSearchPanel);
+  document.getElementById('searchInput').addEventListener('input', renderSearchResults);
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.addEventListener('click', () => setLang(b.dataset.lang, true)));
+  window.addEventListener('resize', () => { if(COMMUNE) renderCommune(); });
+
+  let saved = null;
+  try{ saved = localStorage.getItem('belpulse-lang'); }catch(e){}
+  LANG = LocalUI.LANGS.includes(saved) ? saved
+       : (LocalUI.LANGS.find(l => (navigator.language || '').toLowerCase().startsWith(l)) || 'en');
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  applyStaticStrings();
+
+  try{
+    const [geo, sec] = await Promise.all([
+      fetch('public/data/metadata/geographies.json?t=' + Date.now()),
+      fetch('public/data/metadata/sections.json?t=' + Date.now()),
+    ]);
+    // Check the status before parsing: a missing file on GitHub Pages returns
+    // an HTML 404 page, and res.json() on that throws "Unexpected token '<'"
+    // -- an error that says nothing about the actual problem.
+    if(!geo.ok) throw new Error(
+      `the commune index is missing (HTTP ${geo.status}). It is generated by ` +
+      `scripts/export_site_payloads.py into public/data/ — run that, or wait for the daily workflow.`);
+    GEOGRAPHIES = (await geo.json()).geographies;
+    if(!GEOGRAPHIES || !GEOGRAPHIES.length) throw new Error('the commune index loaded but is empty.');
+    SECTIONS = sec.ok ? (await sec.json()).sections : [];
+  }catch(e){
+    document.getElementById('searchResults').innerHTML = noDataHTML(T('loadFail') + ': ' + e.message);
+    return;
+  }
+  renderBrowseTree();
+  const nis = new URL(window.location.href).searchParams.get('nis');
+  if(nis) loadCommune(nis);
+}
+init();
 </script>
 </body>
 </html>

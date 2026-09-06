@@ -74,8 +74,11 @@ def test_page_carries_a_date_of_last_update(page):
     text = _page(page)
     assert "Data last updated:" in text
     assert 'id="attrUpdated"' in text
-    assert (
-        "attrUpdated').textContent" in text
+    # Populated from the data, however that is expressed -- directly, or via
+    # a variable holding the element. Asserting one exact syntax made this
+    # fail on a refactor that kept the obligation perfectly intact.
+    assert re.search(r"attrUpdated[^;]{0,120}textContent\s*=", text) or re.search(
+        r"getElementById\('attrUpdated'\)[\s\S]{0,200}?textContent\s*=", text
     ), f"{page} has the update-date element but never populates it from the data"
 
 
