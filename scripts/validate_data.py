@@ -15,6 +15,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.validation.config_schema import (  # noqa: E402
@@ -38,6 +40,7 @@ DEFAULT_EXPORTS = (
     REPO_ROOT / "data" / "belgian_macro_export.csv",
     REPO_ROOT / "data" / "communes_export.csv",
     REPO_ROOT / "data" / "population_observations.csv",
+    REPO_ROOT / "data" / "fiscal_income_observations.csv",
 )
 
 
@@ -73,8 +76,9 @@ def main() -> int:
     conn.execute("PRAGMA foreign_keys=ON")
 
     derived_dir = Path(args.derived_dir)
+    indicators_dir = Path(args.indicators_dir)
     derived_ids = frozenset(
-        load_and_validate_derived(derived_dir, _known_indicator_ids(conn))
+        load_and_validate_derived(derived_dir, _configured_indicator_ids(indicators_dir))
         if derived_dir.is_dir()
         else {}
     )
@@ -125,8 +129,25 @@ def _staleness_allowances(indicators_dir: Path, sources_dir: Path) -> dict[str, 
     return {code: cfg["max_age_days"] for code, cfg in indicators.items() if "max_age_days" in cfg}
 
 
-def _known_indicator_ids(conn: sqlite3.Connection) -> set[str]:
-    return {r[0] for r in conn.execute("SELECT indicator_id FROM indicators")}
+def _configured_indicator_ids(indicators_dir: Path) -> set[str]:
+    """Known indicator ids from CONFIG, not from the database.
+
+    Was reading the `indicators` table, which conflates "configured" with
+    "already loaded" and made validation depend on load order: adding a
+    derived indicator whose inputs are a manual-only source failed the build
+    until someone happened to run the loader. Config is the declaration; the
+    database is one consequence of it.
+
+    Nothing is lost by not checking the database here. An input that is
+    configured but never loaded is caught at compute time by the engine's
+    own UnknownInputError, which refuses to "compute a column that would be
+    null for every row" -- a better check, because it fires on the actual
+    data rather than on a reference table.
+    """
+    ids = set()
+    for path in sorted(indicators_dir.glob("*.yaml")):
+        ids.add(yaml.safe_load(path.read_text(encoding="utf-8"))["id"])
+    return ids
 
 
 if __name__ == "__main__":

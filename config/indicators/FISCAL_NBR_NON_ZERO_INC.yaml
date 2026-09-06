@@ -1,0 +1,20 @@
+id: FISCAL_NBR_NON_ZERO_INC
+name:
+  en: Tax returns with non-zero income
+  fr: Déclarations à revenu non nul
+  nl: Aangiften met inkomen verschillend van nul
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+description:
+  en: >
+    Number of tax returns declaring a non-zero income, from Statbel's
+    TF_PSNL_INC_TAX_MUNTY file. This is the denominator Statbel itself uses
+    for average income, so it is stored alongside the total rather than
+    inferred -- dividing by population instead would silently mix a
+    tax-return count with a resident count and produce a number that is
+    neither. It is NOT a population figure: one return can cover a couple,
+    and residents with no taxable income are excluded by construction.
+display: null

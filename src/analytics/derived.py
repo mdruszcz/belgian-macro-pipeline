@@ -136,6 +136,25 @@ def per_capita(value: float | None, population: float | None) -> float | None:
     return value / population
 
 
+def mean_from_total(total: float | None, count: float | None) -> float | None:
+    """Arithmetic mean reconstructed from a total and the count it covers.
+
+    Exists so that a mean can be PUBLISHED without being STORED. Storing the
+    mean directly would be the cheaper-looking choice and is the wrong one:
+    a total is additive and survives a commune merger by summation, a mean is
+    not and does not. Belgium merged 29 communes into 13 in 2025 alone, so
+    this is not hypothetical.
+
+    The same asymmetry is why Statbel's sector-level file cannot be rolled up
+    to communes: it publishes medians, and a median cannot be reconstructed
+    from parts at all -- only a total and a count can. See
+    docs/features/fiscal_income.md.
+    """
+    if total is None or count is None or count == 0:
+        return None
+    return total / count
+
+
 def share_of_total(value: float | None, total: float | None) -> float | None:
     """Value as a percentage of a total."""
     if value is None or total is None or total == 0:

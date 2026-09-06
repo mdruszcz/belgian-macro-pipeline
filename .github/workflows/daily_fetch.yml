@@ -79,6 +79,14 @@ jobs:
         # geography load above for observations.geo_id to resolve.
         run: python scripts/sync_statbel.py --db data/belgian_macro.db
 
+      - name: Ensure manual-source reference rows
+        # The fiscal-income OBSERVATIONS live in a committed CSV, but their
+        # name/unit metadata is read from the `indicators` table so there is
+        # exactly one metadata path (export_communes_csv.py). This inserts
+        # only those reference rows; it reads config and needs no network and
+        # no hand-downloaded workbook. Idempotent.
+        run: python scripts/sync_fiscal_income.py --db data/belgian_macro.db --reference-rows-only
+
       - name: Validate the data before exporting
         # Between sync and export deliberately: a `fail` here stops the run
         # BEFORE anything is written to the published CSVs or committed.
@@ -108,7 +116,8 @@ jobs:
         run: |
           python scripts/export_communes_csv.py --db data/belgian_macro.db \
             --out data/communes_export.csv \
-            --extra-observations data/population_observations.csv
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv
 
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json

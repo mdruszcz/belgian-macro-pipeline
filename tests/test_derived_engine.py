@@ -35,12 +35,12 @@ from src.validation.config_schema import (  # noqa: E402
 REPO = Path(__file__).resolve().parents[1]
 DERIVED_DIR = REPO / "config" / "indicators" / "derived"
 POPULATION_STORE = REPO / "data" / "population_observations.csv"
+# Read from config rather than hardcoded: this list had to be edited by hand
+# every time a source indicator was added, which is how a fixture meant to
+# describe reality drifts away from it.
 SOURCE_IDS = {
-    "POPULATION_BY_COMMUNE",
-    "POPULATION_AGE_0_14",
-    "POPULATION_AGE_15_64",
-    "POPULATION_AGE_65_PLUS",
-    "LOCAL_UNITS_BY_COMMUNE",
+    yaml.safe_load(p.read_text(encoding="utf-8"))["id"]
+    for p in sorted((REPO / "config" / "indicators").glob("*.yaml"))
 }
 
 
@@ -202,6 +202,7 @@ def test_compute_does_not_mutate_the_input_set():
 def test_the_committed_derived_configs_load_and_order():
     derived = load_and_validate_derived(DERIVED_DIR, SOURCE_IDS)
     assert set(derived) == {
+        "AVG_NET_TAXABLE_INCOME",
         "DEPENDENCY_RATIO",
         "POPULATION_CAGR_10Y",
         "POPULATION_CHANGE_5Y",

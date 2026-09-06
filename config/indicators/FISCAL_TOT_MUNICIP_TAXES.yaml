@@ -1,0 +1,21 @@
+id: FISCAL_TOT_MUNICIP_TAXES
+name:
+  en: Municipal income tax surcharge collected
+  fr: Taxe communale additionnelle perçue
+  nl: Aanvullende gemeentebelasting geïnd
+unit: eur
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+description:
+  en: >
+    The additional municipal levy on personal income tax ("additionnels
+    communaux" / "aanvullende gemeentebelasting") collected from residents --
+    for most Belgian communes the single largest own-source revenue line, so
+    this is the figure a municipal finance officer recognises immediately.
+    A value of exactly 0 is REAL, not missing: Knokke-Heist and Koksijde levy
+    no surcharge at all across 2005-2023, and De Panne from 2007, funding
+    themselves from second-home and tourism taxes instead. Suppressed cells
+    are stored as NULL with status 'suppressed' and are never zero.
+display: null

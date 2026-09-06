@@ -1,0 +1,21 @@
+id: FISCAL_TOT_NET_TAXABLE_INC
+name:
+  en: Total net taxable income
+  fr: Revenu net imposable total
+  nl: Totaal netto belastbaar inkomen
+unit: eur
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+description:
+  en: >
+    Sum of net taxable income across all tax returns filed by residents of the
+    commune, from Statbel's TF_PSNL_INC_TAX_MUNTY file (income year, not
+    assessment year). Stored as a TOTAL rather than as an average on purpose:
+    a total is additive and can be re-aggregated when communes merge, an
+    average cannot. The average is a derived indicator computed from this and
+    FISCAL_NBR_NON_ZERO_INC -- see AVG_NET_TAXABLE_INCOME.
+    Contextual, not higher_is_better: a large total mostly means a large
+    commune.
+display: null

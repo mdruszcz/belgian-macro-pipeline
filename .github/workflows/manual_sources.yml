@@ -59,7 +59,8 @@ jobs:
         run: |
           python scripts/export_communes_csv.py --db data/belgian_macro.db \
             --out data/communes_export.csv \
-            --extra-observations data/population_observations.csv
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv
           python -m src.exporters.metadata --out data/metadata/indicators.json
 
       - name: Guard against oversized data files
