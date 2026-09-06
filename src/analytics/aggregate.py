@@ -324,7 +324,17 @@ def methods_from_metadata(
     # than recomputed. Period-relative functions are computed from the
     # aggregate's OWN history by the normal derived engine afterwards, not
     # here, so they are refused at this stage too.
-    RECOMPUTABLE_FUNCTIONS = {"mean_from_total", "dependency_ratio", "per_capita"}
+    # A ratio is recomputable when its formula applied to the SUMMED inputs is
+    # the right answer at the higher level. share_of_total qualifies for the
+    # same reason mean_from_total does: sum(vacant)/sum(total) is the province's
+    # actual share, whereas averaging commune shares would weight Herstappe's
+    # 36 dwellings equally with Antwerp's 283,976.
+    RECOMPUTABLE_FUNCTIONS = {
+        "mean_from_total",
+        "dependency_ratio",
+        "per_capita",
+        "share_of_total",
+    }
 
     methods: dict[str, str] = {}
 

@@ -1,0 +1,16 @@
+id: HOUSEHOLDS_PRIVATE
+name:
+  en: Private households
+  fr: Ménages privés
+  nl: Particuliere huishoudens
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Private households on 1 January 2021 (Census 2021, HC35_1, all types). The denominator for
+    average household size, which is derived from this and POPULATION_BY_COMMUNE.
+display: null

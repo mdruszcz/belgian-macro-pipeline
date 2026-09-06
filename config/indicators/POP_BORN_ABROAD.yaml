@@ -1,0 +1,17 @@
+id: POP_BORN_ABROAD
+name:
+  en: Population born abroad
+  fr: Population née à l’étranger
+  nl: In het buitenland geboren bevolking
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents whose place of birth is outside Belgium, whatever their citizenship (Census 2021,
+    HC08_2, CD_POB_LVL_1 = FOR). Distinct from POP_FOREIGN_NATIONALS: the two differ by
+    naturalisation.
+display: null

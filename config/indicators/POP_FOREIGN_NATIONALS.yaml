@@ -1,0 +1,18 @@
+id: POP_FOREIGN_NATIONALS
+name:
+  en: Population of foreign nationality
+  fr: Population de nationalité étrangère
+  nl: Bevolking met vreemde nationaliteit
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents whose citizenship is not Belgian, on 1 January 2021 (Census 2021, table HC08_1,
+    CD_COC_LVL_1 = FOR). Stored as a count; the share of the population is derived. Citizenship,
+    not place of birth -- a Belgian-born resident who never naturalised counts here, and a
+    naturalised immigrant does not. POP_BORN_ABROAD answers the other question.
+display: null

@@ -1,0 +1,16 @@
+id: HOUSEHOLDS_SINGLE_PERSON
+name:
+  en: One-person households
+  fr: Ménages d’une personne
+  nl: Eenpersoonshuishoudens
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Households consisting of one person (Census 2021, HC35_1, CD_TPH_LVL_2 = P1). A subset of
+    HOUSEHOLDS_PRIVATE.
+display: null

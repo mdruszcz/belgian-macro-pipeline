@@ -1,0 +1,16 @@
+id: POP_NON_EU_NATIONALS
+name:
+  en: Population of non-EU nationality
+  fr: Population de nationalité hors UE
+  nl: Bevolking met niet-EU-nationaliteit
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents holding the citizenship of a country outside the European Union (Census 2021,
+    HC08_1, CD_COC_LVL_2 = NEU). A subset of POP_FOREIGN_NATIONALS.
+display: null

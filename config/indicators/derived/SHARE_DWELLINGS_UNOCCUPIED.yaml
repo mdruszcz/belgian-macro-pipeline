@@ -1,0 +1,22 @@
+id: SHARE_DWELLINGS_UNOCCUPIED
+name:
+  en: Share of dwellings unoccupied (census definition)
+  fr: Part des logements inoccupés (définition du recensement)
+  nl: Aandeel onbewoonde woningen (volkstellingsdefinitie)
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    DWELLINGS_VACANT over DWELLINGS_TOTAL at 2021 -- unoccupied conventional dwellings
+    as a share of the whole stock. NOT a vacancy rate in the everyday sense, and
+    deliberately not named one. The census counts a dwelling as unoccupied if nobody
+    was registered there on 1 January 2021, which sweeps in second homes, dwellings
+    under renovation and dwellings between tenants. It measures 14.45% nationally,
+    where Flemish administrative vacancy registers report low single digits, so the two
+    are not comparable and a reader must not be invited to compare them.
+derived:
+  function: share_of_total
+  inputs: [DWELLINGS_VACANT, DWELLINGS_TOTAL]

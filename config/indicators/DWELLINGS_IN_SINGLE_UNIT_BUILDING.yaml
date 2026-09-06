@@ -1,0 +1,16 @@
+id: DWELLINGS_IN_SINGLE_UNIT_BUILDING
+name:
+  en: Dwellings in single-dwelling buildings
+  fr: Logements dans un bâtiment à un seul logement
+  nl: Woningen in eengezinswoningen
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Conventional dwellings in a building containing exactly one dwelling (Census 2021, HC38_1,
+    CD_TOB_LVL_2 = RES1) -- the detached/terraced house stock, as against flats.
+display: null

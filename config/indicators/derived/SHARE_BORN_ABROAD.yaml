@@ -1,0 +1,17 @@
+id: SHARE_BORN_ABROAD
+name:
+  en: Share born abroad
+  fr: Part de la population née à l’étranger
+  nl: Aandeel in het buitenland geboren
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    POP_BORN_ABROAD over POPULATION_BY_COMMUNE at 2021. Differs from SHARE_FOREIGN_NATIONALS by
+    naturalisation: a commune with many naturalised residents scores higher here.
+derived:
+  function: share_of_total
+  inputs: [POP_BORN_ABROAD, POPULATION_BY_COMMUNE]

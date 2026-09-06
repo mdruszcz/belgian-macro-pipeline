@@ -1,0 +1,16 @@
+id: FAMILY_NUCLEI_SINGLE_PARENT
+name:
+  en: Single-parent families
+  fr: Familles monoparentales
+  nl: Eenoudergezinnen
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Family nuclei consisting of one parent with children (Census 2021, HC36_1, CD_TFN in M1_CH,
+    F1_CH -- lone fathers and lone mothers summed). A subset of FAMILY_NUCLEI.
+display: null

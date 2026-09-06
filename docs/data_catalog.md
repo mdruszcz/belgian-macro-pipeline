@@ -120,7 +120,46 @@ serving **CAPTCHA verification pages**, which points at edge bot-protection rath
 block. `data.gov.be`, which mirrors Statbel, is equally unreachable from here. Either way the
 consequence is unchanged: **a human with a browser can download these; CI cannot.**
 
-### The decision
+### LOADED 2026-09-06 — Census 2021, hand-downloaded
+
+The maintainer downloaded ten Census 2021 workbooks into `data/raw/statbel/census2021/`
+(gitignored). `scripts/sync_census2021.py` loads them into `data/census2021_observations.csv`:
+**13 counts × 581 communes, 7,552 observations at period 2021**, plus six derived shares.
+
+| Stored counts | Derived shares |
+|---|---|
+| `POP_FOREIGN_NATIONALS`, `POP_NON_EU_NATIONALS`, `POP_BORN_ABROAD`, `POP_FEMALE`, `POP_MARRIED` | `SHARE_FOREIGN_NATIONALS`, `SHARE_BORN_ABROAD` |
+| `HOUSEHOLDS_PRIVATE`, `HOUSEHOLDS_SINGLE_PERSON` | `SHARE_SINGLE_PERSON_HOUSEHOLDS`, `AVERAGE_HOUSEHOLD_SIZE` |
+| `FAMILY_NUCLEI`, `FAMILY_NUCLEI_SINGLE_PARENT` | `SHARE_SINGLE_PARENT_FAMILIES` |
+| `DWELLINGS_TOTAL`, `DWELLINGS_OCCUPIED`, `DWELLINGS_VACANT`, `DWELLINGS_IN_SINGLE_UNIT_BUILDING` | `SHARE_DWELLINGS_UNOCCUPIED` |
+
+**Indicators per commune went from 14 to 32.** Belgium-level results, recomputed from summed
+components: average household size **2.29**, one-person households **35.39%**, foreign nationals
+**12.35%**, born abroad **17.68%**, single-parent families **16.05%**.
+
+**The check that anchors it.** Census 2021's population summed per commune equals the pipeline's
+existing `TF_SOC_POP_STRUCT` series for 2021 **exactly — 11,521,238 people, all 581 communes
+matching commune by commune**. Two unrelated Statbel products agreeing to the person is what fixes
+the reference date (1 January 2021), validates the NIS mapping, and independently corroborates the
+population series already published. Asserted in `tests/test_census2021.py`, not just described.
+
+**Two label decisions worth recording**, both caught by checking a figure that looked wrong:
+
+- The first version published a **"dwelling vacancy rate" of 24–29%**. The counts were right, the
+  framing was not. The census calls a dwelling unoccupied if nobody was registered there on 1
+  January, which sweeps in second homes, renovations and dwellings between tenants — 14.45%
+  nationally, against low single digits in Flemish administrative vacancy registers. Renamed
+  `SHARE_DWELLINGS_UNOCCUPIED`, denominator corrected from occupied-only to the whole stock, and the
+  config states plainly that the two measures are not comparable.
+- **Herstappe has no `POP_NON_EU_NATIONALS` row.** These files carry no explicit zeros anywhere
+  (verified: zero rows with value 0), so an absent slice is either a true zero or a suppressed small
+  count and the file cannot distinguish them. Left absent rather than written as 0 — the
+  "suppression looks like zero" failure `data_model.md` warns about.
+
+**Not obtained:** employment, unemployment and education level. Those tables were not among the ten
+downloaded, so the `/local` unemployment headline is still unavailable.
+
+### The decision on the 2011 set
 
 Census 2021 is worth having and 2011 alone is not. Publishing 38 fifteen-year-old indicators to
 clear a 50-indicator gate would make the product worse, not better — a directeur financier reads the
