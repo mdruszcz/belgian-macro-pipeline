@@ -99,6 +99,21 @@ def load_exonyms(path: Path) -> dict[str, str]:
         return {row["nis_code"]: row["name_en"] for row in csv.DictReader(handle)}
 
 
+def load_fr_corrections(path: Path) -> dict[str, str]:
+    """Hand-checked corrections to Statbel's own French commune names.
+
+    Same spirit as name_en_exonyms.csv and merger_effective_dates.csv: small,
+    cited, and reviewable in a diff. Unlike those, every row here is a
+    correction of a SOURCE ERROR rather than a name the source never supplies,
+    so each note must say how the error was established and which independent
+    Statbel product disagrees.
+    """
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as handle:
+        return {row["nis_code"]: row["name_fr"] for row in csv.DictReader(handle)}
+
+
 def read_effective_dates(path: Path) -> dict[str, str]:
     """Official effective dates, where they differ from the vintage boundary.
 
@@ -234,6 +249,20 @@ def derive(raw_dir: Path, config_dir: Path) -> tuple[int, int, int]:
     current_by_geo_id = {row["geo_id"]: row for row in current}
     regime_by_code = {r["nis_code"]: r["language_regime"] for r in latest_refnis}
     hierarchy = build_windowed_rows(windows, current_by_geo_id, exonyms, regime_by_code)
+
+    # Correct Statbel's own French-name errors last, so the correction applies
+    # to every window of an affected entity and cannot be undone by a later
+    # step. See config/geography/name_fr_corrections.csv for the evidence
+    # behind each row.
+    fr_corrections = load_fr_corrections(config_dir / "name_fr_corrections.csv")
+    corrected = 0
+    for row in hierarchy:
+        fixed = fr_corrections.get(row.get("nis_code"))
+        if fixed and row.get("name_fr") != fixed:
+            row["name_fr"] = fixed
+            corrected += 1
+    if corrected:
+        log.info("Applied %d French-name correction(s) from name_fr_corrections.csv", corrected)
 
     effective = read_effective_dates(config_dir / "merger_effective_dates.csv")
     # Applied after sign-offs are matched, so a corrected date does not read as

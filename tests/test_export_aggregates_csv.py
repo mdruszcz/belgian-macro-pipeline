@@ -35,9 +35,14 @@ from export_aggregates_csv import (  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 DB = REPO / "data" / "belgian_macro.db"
+# Every committed manual store, exactly as both workflows pass them via
+# --extra-observations. A store missing here would leave the real derived
+# configs referencing inputs nothing provides, which load_and_validate_derived
+# rightly rejects -- so this list has to stay in step with the workflows.
 STORES = (
     REPO / "data" / "population_observations.csv",
     REPO / "data" / "fiscal_income_observations.csv",
+    REPO / "data" / "census2021_observations.csv",
 )
 
 # The commune counts this repo derived and then independently corroborated in

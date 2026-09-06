@@ -1,0 +1,18 @@
+id: SHARE_SINGLE_PARENT_FAMILIES
+name:
+  en: Share of single-parent families
+  fr: Part des familles monoparentales
+  nl: Aandeel eenoudergezinnen
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    FAMILY_NUCLEI_SINGLE_PARENT over FAMILY_NUCLEI at 2021. Denominator is family nuclei, not
+    households: a household can hold more than one nucleus, so households would understate the
+    share.
+derived:
+  function: share_of_total
+  inputs: [FAMILY_NUCLEI_SINGLE_PARENT, FAMILY_NUCLEI]

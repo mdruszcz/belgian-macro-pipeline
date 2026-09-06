@@ -1,0 +1,15 @@
+id: DWELLINGS_OCCUPIED
+name:
+  en: Occupied dwellings
+  fr: Logements occupés
+  nl: Bewoonde woningen
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Conventional dwellings recorded as occupied (Census 2021, HC38_1, CD_OCS = DW_OC).
+display: null

@@ -1,0 +1,18 @@
+id: AVERAGE_HOUSEHOLD_SIZE
+name:
+  en: Average household size
+  fr: Taille moyenne des ménages
+  nl: Gemiddelde huishoudgrootte
+unit: count
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 2
+description:
+  en: >
+    POPULATION_BY_COMMUNE divided by HOUSEHOLDS_PRIVATE at 2021. Slightly overstates the true
+    private-household average, because the numerator includes residents of collective households
+    (care homes, communities) whom the denominator does not count.
+derived:
+  function: mean_from_total
+  inputs: [POPULATION_BY_COMMUNE, HOUSEHOLDS_PRIVATE]

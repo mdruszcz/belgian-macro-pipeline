@@ -124,6 +124,10 @@ COMMUNE_WITH_PARTIAL_DATA = {
     "indicators": {
         "POPULATION_BY_COMMUNE": {
             "name": "Population",
+            # Trilingual names travel in the payload, so the page can label a
+            # figure in the reader's language without holding any indicator
+            # metadata itself (CLAUDE.md rule 7).
+            "names": {"en": "Population", "fr": "Population", "nl": "Bevolking"},
             "unit": "count",
             "periods": {
                 "2020": {"value": 100, "status": "final"},
@@ -149,8 +153,10 @@ def test_headlines_report_unavailable_honestly_not_as_a_blank_or_zero():
 
     # Missing indicator on this commune -> unavailable with a reason, not a
     # zero or a null value rendered as "€0".
-    assert by_label["Avg. net taxable income"]["available"] is False
-    assert "why" in by_label["Avg. net taxable income"]
+    # Missing indicator on this commune -> the label falls back to the id,
+    # and the entry is unavailable with a reason rather than a zero.
+    assert by_label["AVG_NET_TAXABLE_INCOME"]["available"] is False
+    assert "why" in by_label["AVG_NET_TAXABLE_INCOME"]
 
     # Structurally absent from the whole pipeline (roadmap wants it, no
     # dataset provides it) -- a different reason string than "missing for
@@ -158,7 +164,11 @@ def test_headlines_report_unavailable_honestly_not_as_a_blank_or_zero():
     assert by_label["Unemployment"]["available"] is False
     assert "municipal level" in by_label["Unemployment"]["why"]
     assert by_label["Housing price"]["available"] is False
-    assert "deferred" in by_label["Housing price"]["why"]
+    # The reason changed once the API was actually probed: housing price is
+    # not merely "deferred", it is genuinely unavailable at commune level --
+    # every Statbel price view whose name promises "par commune" returns
+    # region rows. The page says what is true, not what was once planned.
+    assert "commune level" in by_label["Housing price"]["why"]
 
 
 def test_latest_of_picks_the_most_recent_period_not_insertion_order():

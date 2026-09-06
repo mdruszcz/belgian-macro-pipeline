@@ -38,9 +38,50 @@ git cannot delta. See [ADR 0002](../decisions/0002-split-committed-stores.md) fo
 | `data/belgian_macro.db` | anything CI can fetch: national macro, `LOCAL_UNITS_BY_COMMUNE` | daily, by the bot | `daily_fetch.yml` |
 | `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | only when refreshed by hand | the procedure below |
 | `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
+| `data/census2021_observations.csv` | 13 Census 2021 counts: citizenship, birthplace, sex, marital status, households, family nuclei, dwellings | only when refreshed by hand (decennial) | the procedure below |
 
 `data/local/` holds the disposable rebuild of the manual store and is gitignored. It must stay
 ignored: `daily_fetch.yml` runs `git add data/`, which would otherwise commit it.
+
+## Refreshing Census 2021
+
+Statbel publishes ~140 Census 2021 open datasets under CC BY 4.0, but only on
+`statbel.fgov.be`, which automation cannot read. The Bestat API *does* carry Census 2021
+(`IM_SOC_GEO_IND_CENSUS_2021`, `IM_SOC_GEO_NUC_CENSUS_2021`), but all 174 of its views were probed
+across four locales and every one stops at province or arrondissement — none reaches commune. So the
+workbooks are downloaded by hand from
+`statbel.fgov.be/fr/open-data/consultez-tous-les-open-data-du-census-2021` into
+`data/raw/statbel/census2021/` (gitignored), and then:
+
+```bash
+# 1. Disposable local database (schema + geography, both offline)
+python -m src.db.migrate --db data/local/census.db
+python scripts/load_geography.py --db data/local/census.db
+
+# 2. Load the workbooks -- resolve_geo applies directly, since these files
+#    carry a real NIS code in CD_REFNIS_LVL_4
+python scripts/sync_census2021.py --db data/local/census.db
+
+# 3. Write the committed store
+python scripts/export_observations_csv.py --db data/local/census.db \
+  --out data/census2021_observations.csv \
+  --indicators "$(python -c "import sys;sys.path.insert(0,'scripts');from sync_census2021 import EXTRACTS;print(','.join(EXTRACTS))")"
+```
+
+**Which tables map to which indicators is in `EXTRACTS` in `scripts/sync_census2021.py`**, keyed by
+the files' own coded columns rather than their French labels — the labels are prose that a future
+publication could re-word, the codes are the file's keys. A renamed or missing column raises rather
+than being patched around.
+
+**The check that anchors the whole dataset:** summing Census 2021's population table gives 11,521,238
+people over 581 communes, and the pipeline's independent `TF_SOC_POP_STRUCT` series gives the
+identical total for 2021 with **all 581 communes matching exactly, commune by commune**. Two
+unrelated Statbel products agreeing to the person is what establishes the reference date (1 January
+2021) and validates the NIS mapping. `tests/test_census2021.py` asserts it rather than describing it.
+
+**Total population is deliberately not stored again** — it is already `POPULATION_BY_COMMUNE`, and
+the exact match proves the two are interchangeable. Shares are not stored either; they are derived
+from these counts at export time so a correction propagates (CLAUDE.md rule 6).
 
 ## Refreshing population data
 

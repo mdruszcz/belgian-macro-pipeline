@@ -1,0 +1,16 @@
+id: DWELLINGS_VACANT
+name:
+  en: Vacant dwellings
+  fr: Logements inoccupés
+  nl: Onbewoonde woningen
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Conventional dwellings recorded as unoccupied (Census 2021, HC38_1, CD_OCS = DW_NOC). With
+    DWELLINGS_OCCUPIED this gives the vacancy rate, which is derived rather than stored.
+display: null

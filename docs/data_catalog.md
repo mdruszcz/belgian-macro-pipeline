@@ -70,6 +70,112 @@ permits), 12–13 (ABB municipal finance — both the interactive tool and the P
 (data.gov.be). `datastore.brussels` (Brussels-region aggregator, see below) was never formally
 offered as a candidate and stays unresolved rather than silently deferred.
 
+## Census indicators — 2021 wanted, 2011 available (approved 2026-09-06, revised same day)
+
+**Status: approved in principle, blocked on a hand-download. Do not build the 2011-only adapter.**
+
+### What happened
+
+The Bestat API turned out to hold 38 commune-level indicators that no view name advertises — the
+views are called *"Communes dont le taux de chômage des 15-64 ans est le plus élevé"*, which reads
+like a top-ten extract but returns **all 589 communes**. Measured: 590 rows, 589 naming a commune,
+values from 1.76% to 24.06% (Saint-Josse-ten-Noode), median 6.0%.
+
+That was approved as an eleventh dataset, and then the maintainer asked the right question: *nothing
+more recent than 2011?* Checking rather than defending it changed the decision.
+
+### What the API actually has, measured
+
+Every municipal-named view in all 1,341 was probed. Only **three** datasources return commune-level
+rows at all:
+
+| Datasource | Communes | Periods |
+|---|---|---|
+| `IM_SOC_GEO_IND_CENSUS` | 589 | **2011 only** |
+| `IM_EAF_LCL_UNIT_POP` | 565 | 2023-Q4 (already loaded) |
+| `IM_EAF_PROP_TRANS_PRCL_EXT` (building-land prices) | 589 | 1992, 2000, 2005, **stops 2014** |
+
+Everything Statbel updated recently — June 2026 property prices, VAT turnover, population by marital
+status — is national or regional. The house and apartment price views whose names promise *"par
+commune"* return 48 region rows.
+
+**`IM_SOC_GEO_IND_CENSUS_2021` and `IM_SOC_GEO_NUC_CENSUS_2021` do exist**, updated 2024-04 and
+2025-02, carrying *both* 2011 and 2021. All 174 of their views were probed across four locales:
+every one stops at **province or arrondissement**. None reaches commune.
+
+### Census 2021 at commune level exists, off-API
+
+Statbel published **~140 Census 2021 open datasets** under CC BY 4.0 (commercial reuse permitted,
+same licence family already cleared here). Confirmed commune-level titles include:
+
+- *Census 2021 — Population selon : Lieu de résidence (Commune), sexe et pays de citoyenneté*
+- *Census 2021 — Locaux d'habitation selon : Lieu de résidence (Commune) et Type de local d'habitation*
+
+Index: `statbel.fgov.be/fr/open-data/consultez-tous-les-open-data-du-census-2021`
+
+They are on `statbel.fgov.be`, which automation cannot read. Note a likely refinement to
+[manual_sources.md](features/manual_sources.md)'s account: that document calls it "a
+connection-level block", and `curl` does fail outright — but search engines report the same URLs
+serving **CAPTCHA verification pages**, which points at edge bot-protection rather than a network
+block. `data.gov.be`, which mirrors Statbel, is equally unreachable from here. Either way the
+consequence is unchanged: **a human with a browser can download these; CI cannot.**
+
+### LOADED 2026-09-06 — Census 2021, hand-downloaded
+
+The maintainer downloaded ten Census 2021 workbooks into `data/raw/statbel/census2021/`
+(gitignored). `scripts/sync_census2021.py` loads them into `data/census2021_observations.csv`:
+**13 counts × 581 communes, 7,552 observations at period 2021**, plus six derived shares.
+
+| Stored counts | Derived shares |
+|---|---|
+| `POP_FOREIGN_NATIONALS`, `POP_NON_EU_NATIONALS`, `POP_BORN_ABROAD`, `POP_FEMALE`, `POP_MARRIED` | `SHARE_FOREIGN_NATIONALS`, `SHARE_BORN_ABROAD` |
+| `HOUSEHOLDS_PRIVATE`, `HOUSEHOLDS_SINGLE_PERSON` | `SHARE_SINGLE_PERSON_HOUSEHOLDS`, `AVERAGE_HOUSEHOLD_SIZE` |
+| `FAMILY_NUCLEI`, `FAMILY_NUCLEI_SINGLE_PARENT` | `SHARE_SINGLE_PARENT_FAMILIES` |
+| `DWELLINGS_TOTAL`, `DWELLINGS_OCCUPIED`, `DWELLINGS_VACANT`, `DWELLINGS_IN_SINGLE_UNIT_BUILDING` | `SHARE_DWELLINGS_UNOCCUPIED` |
+
+**Indicators per commune went from 14 to 32.** Belgium-level results, recomputed from summed
+components: average household size **2.29**, one-person households **35.39%**, foreign nationals
+**12.35%**, born abroad **17.68%**, single-parent families **16.05%**.
+
+**The check that anchors it.** Census 2021's population summed per commune equals the pipeline's
+existing `TF_SOC_POP_STRUCT` series for 2021 **exactly — 11,521,238 people, all 581 communes
+matching commune by commune**. Two unrelated Statbel products agreeing to the person is what fixes
+the reference date (1 January 2021), validates the NIS mapping, and independently corroborates the
+population series already published. Asserted in `tests/test_census2021.py`, not just described.
+
+**Two label decisions worth recording**, both caught by checking a figure that looked wrong:
+
+- The first version published a **"dwelling vacancy rate" of 24–29%**. The counts were right, the
+  framing was not. The census calls a dwelling unoccupied if nobody was registered there on 1
+  January, which sweeps in second homes, renovations and dwellings between tenants — 14.45%
+  nationally, against low single digits in Flemish administrative vacancy registers. Renamed
+  `SHARE_DWELLINGS_UNOCCUPIED`, denominator corrected from occupied-only to the whole stock, and the
+  config states plainly that the two measures are not comparable.
+- **Herstappe has no `POP_NON_EU_NATIONALS` row.** These files carry no explicit zeros anywhere
+  (verified: zero rows with value 0), so an absent slice is either a true zero or a suppressed small
+  count and the file cannot distinguish them. Left absent rather than written as 0 — the
+  "suppression looks like zero" failure `data_model.md` warns about.
+
+**Not obtained:** employment, unemployment and education level. Those tables were not among the ten
+downloaded, so the `/local` unemployment headline is still unavailable.
+
+### The decision on the 2011 set
+
+Census 2021 is worth having and 2011 alone is not. Publishing 38 fifteen-year-old indicators to
+clear a 50-indicator gate would make the product worse, not better — a directeur financier reads the
+vintage first. The 2011 API set stays **approved but unbuilt**, as the fallback if the 2021 download
+never happens, and only ever alongside its 2021 counterpart for the ten-year change.
+
+**Owed by the maintainer:** the Census 2021 commune-level files, hand-downloaded, exactly as
+population (`TF_SOC_POP_STRUCT`) and fiscal income (`TF_PSNL_INC_TAX_MUNTY`) already were. Those two
+are the pipeline's only current municipal series, and they are current *because* they were fetched
+by hand.
+
+### Also established
+
+Housing prices are **not** obtainable at commune level from the API, so the `/local` housing headline
+stays unavailable and real estate sales stays DEFERRED from Block E.
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new
