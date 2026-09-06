@@ -131,9 +131,50 @@ can download these; CI cannot.**
 A commune-level French file is `*_COM_FR.XLSX`. The ten files already loaded below are a *different*
 export family — Statbel's bulk "hypercube" dumps, `TF_CENSUS_2021_HCnn_m.xlsx` — not this
 per-table naming. Both are current Census 2021 data; see
-[manual_sources.md](features/manual_sources.md) for the full breakdown. **Owed:** the `ACT`
-(employment/unemployment) and `EDU` (education) commune-level files, which are not among the ten
-already loaded and are the ones that would fill the `/local` unemployment gap.
+[manual_sources.md](features/manual_sources.md) for the full breakdown.
+
+### LOADED 2026-09-06 — unemployment, found inside a file already downloaded
+
+The `ACT` file this catalogue said was owed turned out to already be sitting in
+`data/raw/statbel/census2021/`. The maintainer's file-naming note called `CAS` "civil status",
+guessing from the abbreviation; checking the actual file (`T01_CAS_AGE_BE_NL.XLSX`, one of the ten
+already downloaded) shows CAS means *arbeidsmarktsituatie* — labour-market situation — and its
+15-64 sheet is exactly the `ACT`-equivalent table thought to be missing: labour force, employed,
+unemployed, inactive, all at commune level. Despite the "BE" in the filename (Statbel's convention
+for "national report", not "national-only geography"), the sheet drills to 583 NIS-6 codes.
+
+Verified against Belgium's own 2021 total before trusting any commune row: 462,991 unemployed of
+5,376,113 in the labour force = **8.61%**, the right order of magnitude for a pandemic-affected
+year. `CAS_LABOUR_FORCE` / `CAS_EMPLOYED` / `CAS_UNEMPLOYED` / `CAS_INACTIVE` loaded as raw counts;
+`UNEMPLOYMENT_RATE_COM` derived (named `_COM` because `UNEMPLOYMENT_RATE` already exists as a
+*national* NBB indicator with a different definition and cadence — a real naming collision, caught
+before it happened).
+
+**A real bug found while loading it:** the sheet reports every geography level in one table —
+country, region, province, arrondissement *and* commune — and Flemish/Walloon Brabant's split
+province codes (`20001`, `20002`) do not end in `000`, so a first attempt at a digit-pattern filter
+missed them. 57 non-commune rows landed silently under a commune-only indicator on the first run,
+caught by inspecting the loaded row count (638, not the expected ~581) rather than by a crash. Fixed
+by filtering against the geographies table's actual commune codes, not a pattern.
+
+**Still owed:** `EDU` (education), not among the files downloaded.
+
+### LOADED 2026-09-06 — house prices, found in the same download
+
+`immo_by_municipality_2010-2019.xlsx`, downloaded alongside the census workbooks, holds real
+commune-level house-sale transactions and prices, 2010–2017, four property types. This directly
+supersedes the earlier "not available at commune level from the source" finding — that finding was
+about the Bestat *API*; this is a separate hand-supplied bulk file the API probe never saw.
+
+Scoped to ordinary houses only (`gewone woonhuizen`) for now — best commune coverage of the four
+types (588–589 of 589 per year, against 527–546 for apartments). `HOUSE_SALES_TRANSACTIONS` and
+`HOUSE_SALES_TOTAL_PRICE` stored as additive totals; `AVG_HOUSE_PRICE` derived
+(`total_price / transactions`), never Statbel's own per-row mean averaged across communes — the
+exact mistake [ADR 0003](decisions/0003-aggregation-rule.md) exists to prevent.
+
+National average verified against the file's own totals: **€181,040 (2010) → €218,722 (2017)**,
+matching published Belgian house-price trends for that period. Apartments, villas and building land
+are real data in the same file, correctly available, and not loaded by this first pass.
 
 ### LOADED 2026-09-06 — Census 2021, hand-downloaded
 

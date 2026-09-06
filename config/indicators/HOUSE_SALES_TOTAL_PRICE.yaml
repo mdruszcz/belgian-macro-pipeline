@@ -1,0 +1,18 @@
+id: HOUSE_SALES_TOTAL_PRICE
+name:
+  en: Ordinary house sales, total price
+  fr: Ventes de maisons d'habitation ordinaires, prix total
+  nl: Verkopen van gewone woonhuizen, totale prijs
+unit: eur
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 1460
+description:
+  en: >
+    Sum of sale prices for ordinary-house transactions in the commune in the year.
+    Stored as a total, not an average, for the same reason FISCAL_TOT_NET_TAXABLE_INC
+    is: a total is additive and can be re-aggregated at province/region/Belgium level
+    or across a commune merger, an average cannot.
+display: null

@@ -1,0 +1,20 @@
+id: UNEMPLOYMENT_RATE_COM
+name:
+  en: Unemployment rate (Census 2021, ages 15-64)
+  fr: Taux de chômage (Census 2021, 15-64 ans)
+  nl: Werkloosheidsgraad (Census 2021, 15-64 jaar)
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+decimals: 1
+description:
+  en: >
+    CAS_UNEMPLOYED over CAS_LABOUR_FORCE at 2021, ages 15-64 -- the EU Labour Force Survey
+    definition, so this is comparable to published EU/Eurostat unemployment rates. Named
+    _COM because UNEMPLOYMENT_RATE already exists as a NATIONAL indicator fetched from NBB
+    with a different definition and cadence; the two must not be treated as the same
+    series, so they get different ids rather than one shared one.
+derived:
+  function: share_of_total
+  inputs: [CAS_UNEMPLOYED, CAS_LABOUR_FORCE]

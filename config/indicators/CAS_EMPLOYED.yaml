@@ -1,0 +1,16 @@
+id: CAS_EMPLOYED
+name:
+  en: Employed population (15-64)
+  fr: Population active occupée (15-64 ans)
+  nl: Werkende bevolking (15-64 jaar)
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 5475
+description:
+  en: >
+    Residents aged 15-64 in employment (Census 2021, table T01_CAS1564, category 1.1 'Werkzame
+    personen'). A subset of CAS_LABOUR_FORCE.
+display: null

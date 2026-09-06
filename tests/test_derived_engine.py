@@ -243,6 +243,8 @@ def test_the_committed_derived_configs_load_and_order():
         "SHARE_FOREIGN_NATIONALS",
         "SHARE_SINGLE_PARENT_FAMILIES",
         "SHARE_SINGLE_PERSON_HOUSEHOLDS",
+        "UNEMPLOYMENT_RATE_COM",
+        "AVG_HOUSE_PRICE",
     }
     assert resolve_order(derived, SOURCE_IDS)
 

@@ -21,16 +21,17 @@ businesses, housing price") assumes six figures. Checking `data/communes_history
 | Population | yes | `POPULATION_BY_COMMUNE` |
 | 5Y growth | yes | `POPULATION_CHANGE_5Y` (derived) |
 | Median income | partial | `AVG_NET_TAXABLE_INCOME` is a **mean**, not a median — no municipal median exists (Block F's fiscal-income note: the commune file has no median column, and the sector file's median cannot be aggregated) |
-| Unemployment | **no** | `UNEMPLOYMENT_RATE` is national-only (`be:country`); no municipal unemployment series exists in this pipeline |
+| Unemployment | yes, since 2026-09-06 | `UNEMPLOYMENT_RATE_COM` (derived), from Census 2021's `CAS` employment-status table — found inside a file already downloaded for other reasons, see `data_catalog.md`. A different id from the pre-existing national `UNEMPLOYMENT_RATE` (NBB, different definition and cadence), deliberately, to avoid a naming collision between two real but incompatible series |
 | Businesses | yes, but single-period | `LOCAL_UNITS_BY_COMMUNE` — one quarter (2023-Q4) only, per `statbel_adapter.md`'s "only the latest quarter is available" |
-| Housing price | **no** | Housing is `[DEFERRED]` in Block F — no dataset was ever selected in Block E |
+| Housing price | yes, since 2026-09-06 | `AVG_HOUSE_PRICE` (derived), from a commune-level real-estate file found in the same download. Ordinary houses only, 2010–2017 — see `data_catalog.md` |
 
-**Decision: ship four of six honestly rather than fabricate or omit silently.** The header shows
-Population, 5Y growth, Avg. net taxable income (labelled "average", never "median"), and Local
-business units, each captioned with its real reference period. Unemployment and housing price render
-through the same `.no-data` component the rest of the page uses for genuinely absent sections, with
-the caption explaining why ("not collected at municipal level" / "housing data not yet collected"),
-rather than a blank space that reads as a bug.
+**Update, 2026-09-06: all six roadmap figures are now real.** The two gaps below were closed by data
+found alongside the Census 2021 workbooks, not initially planned for. Median income remains a mean
+(no municipal median exists anywhere), and Local business units remains single-period (Statbel
+publishes only one live quarter for that dataset) — both correctly labelled rather than hidden. A
+commune can still be individually missing a figure (e.g. too few house sales to publish a price for
+a small commune), which renders the same way any other missing figure does: unavailable with a
+reason, never a blank or a fabricated value.
 
 ## Fixed section structure
 

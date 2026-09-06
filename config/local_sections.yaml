@@ -80,11 +80,13 @@ sections:
   - id: housing
     label: {en: Housing, fr: Logement, nl: Wonen}
     blurb:
-      en: The dwelling stock as counted by Census 2021.
-      fr: Le parc de logements recensé par le Census 2021.
-      nl: De woningvoorraad volgens de Census 2021.
-    headline: SHARE_DWELLINGS_UNOCCUPIED
+      en: Ordinary house sale prices, and the dwelling stock as counted by Census 2021.
+      fr: Prix de vente des maisons ordinaires, et le parc de logements recensé par le Census 2021.
+      nl: Verkoopprijzen van gewone woningen, en de woningvoorraad volgens de Census 2021.
+    headline: AVG_HOUSE_PRICE
     indicators:
+      - HOUSE_SALES_TRANSACTIONS
+      - SHARE_DWELLINGS_UNOCCUPIED
       - DWELLINGS_TOTAL
       - DWELLINGS_OCCUPIED
       - DWELLINGS_VACANT

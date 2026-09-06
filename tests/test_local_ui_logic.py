@@ -151,24 +151,21 @@ def test_headlines_report_unavailable_honestly_not_as_a_blank_or_zero():
     assert by_label["Population"]["value"] == 110
     assert by_label["Population"]["period"] == "2021"
 
-    # Missing indicator on this commune -> unavailable with a reason, not a
-    # zero or a null value rendered as "€0".
     # Missing indicator on this commune -> the label falls back to the id,
-    # and the entry is unavailable with a reason rather than a zero.
-    assert by_label["AVG_NET_TAXABLE_INCOME"]["available"] is False
-    assert "why" in by_label["AVG_NET_TAXABLE_INCOME"]
-
-    # Structurally absent from the whole pipeline (roadmap wants it, no
-    # dataset provides it) -- a different reason string than "missing for
-    # this commune", which is the point of local_ui.md's table.
-    assert by_label["Unemployment"]["available"] is False
-    assert "municipal level" in by_label["Unemployment"]["why"]
-    assert by_label["Housing price"]["available"] is False
-    # The reason changed once the API was actually probed: housing price is
-    # not merely "deferred", it is genuinely unavailable at commune level --
-    # every Statbel price view whose name promises "par commune" returns
-    # region rows. The page says what is true, not what was once planned.
-    assert "commune level" in by_label["Housing price"]["why"]
+    # and the entry is unavailable with a reason rather than a zero or a
+    # null rendered as "€0". Applies uniformly across every headline key --
+    # unemployment and house price used to be structurally absent from the
+    # whole pipeline (before the Census 2021 employment-status and
+    # real-estate loads) and were tested with a different reason string;
+    # now that both are real municipal indicators, a commune missing THEM
+    # is exactly the same situation as a commune missing any other figure.
+    for indicator_id in (
+        "AVG_NET_TAXABLE_INCOME",
+        "UNEMPLOYMENT_RATE_COM",
+        "AVG_HOUSE_PRICE",
+    ):
+        assert by_label[indicator_id]["available"] is False, indicator_id
+        assert "why" in by_label[indicator_id]
 
 
 def test_latest_of_picks_the_most_recent_period_not_insertion_order():

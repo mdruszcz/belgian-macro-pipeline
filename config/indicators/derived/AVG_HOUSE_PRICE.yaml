@@ -1,0 +1,20 @@
+id: AVG_HOUSE_PRICE
+name:
+  en: Average house sale price
+  fr: Prix de vente moyen des maisons
+  nl: Gemiddelde verkoopprijs woningen
+unit: eur
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 0
+description:
+  en: >
+    HOUSE_SALES_TOTAL_PRICE over HOUSE_SALES_TRANSACTIONS, for ordinary houses only --
+    not apartments, villas or building land, which Statbel prices separately and this
+    pipeline does not yet load. Small communes can have very few transactions in a
+    year, so this figure is noisier for them than for a city; the transaction count is
+    published alongside it precisely so a reader can judge that.
+derived:
+  function: mean_from_total
+  inputs: [HOUSE_SALES_TOTAL_PRICE, HOUSE_SALES_TRANSACTIONS]
