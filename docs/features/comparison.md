@@ -21,13 +21,23 @@ correction below is a measurement, not an opinion.
 ### Correction 1 — the `[REVIEW]` step's question is a false choice
 
 The roadmap asks the reviewer to *"resolve unweighted commune average versus population-weighted
-national figure"*. Measured on `AVG_NET_TAXABLE_INCOME` for Belgium, 2023, three ways:
+national figure"*. Measured on `AVG_NET_TAXABLE_INCOME` for Belgium, 2023, three ways, over all 581
+communes that existed in that period:
 
 | Method | Result | Error |
 |---|---|---|
-| A. Unweighted mean of the 552 commune means | €41,507.47 | **+€1,540.13 (+3.85%)** |
-| B. Population-weighted mean of commune means | €39,950.17 | −€17.17 (−0.04%) |
-| C. `sum(FISCAL_TOT_NET_TAXABLE_INC) / sum(FISCAL_NBR_NON_ZERO_INC)` | **€39,967.34** | — (definitionally correct) |
+| A. Unweighted mean of the 581 commune means | €41,613.37 | **+€1,487.67 (+3.71%)** |
+| B. Population-weighted mean of commune means | €40,108.32 | −€17.38 (−0.04%) |
+| C. `sum(FISCAL_TOT_NET_TAXABLE_INC) / sum(FISCAL_NBR_NON_ZERO_INC)` | **€40,125.70** | — (definitionally correct) |
+
+> **Correction to this table, 2026-09-06.** It first read €41,507.47 / €39,950.17 / €39,967.34,
+> measured over the **552** communes in `communes_history.csv`. That file is restricted to *current*
+> communes — so those figures were themselves computed with the Correction 2 bug below still in them,
+> missing 29 predecessor communes, €14.0 bn of income and 323,573 tax returns. Caught when the
+> implemented aggregator disagreed with the spec by €158 and the disagreement was chased rather than
+> reconciled. The relationship between the three methods is unchanged, and so is the decision; only
+> the absolute figures move. The dependency-ratio table below is unaffected, since 2026 involves no
+> predecessor communes.
 
 And on `DEPENDENCY_RATIO` for Belgium, 2026:
 
