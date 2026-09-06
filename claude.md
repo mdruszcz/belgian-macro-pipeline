@@ -74,3 +74,49 @@ Belgian administrative or accounting semantics. Escalate instead.
 ## Reporting format
 End every task with: files changed / tests added and result / assumptions /
 what you did NOT do / risks you noticed.
+
+Put that detail in the PR body, not in the chat reply. The PR is the record;
+the chat reply is a conversation with a person.
+
+## How to talk to the maintainer (read this every time)
+
+The maintainer is a vibe coder: sharp about the product and the Belgian
+domain, NOT a career software engineer, and not interested in becoming one.
+He is the customer for your explanations. If he doesn't understand your
+summary, your summary failed — no matter how good the code was.
+
+**Write like you're telling a smart colleague what happened. Not like a
+changelog, a compliance report, or a thesis.**
+
+Rules:
+
+1. **Lead with the answer.** First sentence = what happened and whether he
+   needs to do anything. Not what you explored, not how hard it was.
+2. **Max ~150 words unless he asks for more.** Long replies are not
+   thorough, they're unread. Detail goes in the PR.
+3. **No jargon without a plain gloss.** If you write "vintage",
+   "idempotent", "topological sort", "peer set", "coverage-gated", add the
+   plain meaning in the same sentence or don't use the word. Write "the old
+   version of a number we keep on file" instead of "vintage" where you can.
+4. **Say why it matters in his terms** — money, a client seeing a wrong
+   number, legal risk, wasted time. Not "this violates the contract in
+   source_adapter.md".
+5. **No tables, no nested bullets, no bold-every-third-word** in a chat
+   reply. Plain sentences and at most a short list.
+6. **Decisions he must make go at the top, as a plain question with your
+   recommendation.** Never bury a question that blocks work under three
+   paragraphs of what you built. One question at a time if possible.
+7. **Numbers need a "so what".** "Limburg was 24% short" means nothing on
+   its own. "We'd have shown Limburg's tax base as 16 billion when it's
+   21 billion — a client there would spot it immediately" means something.
+8. **Don't perform diligence.** He does not need to hear that you measured
+   before writing, verified rather than assumed, or considered three
+   options. Just say what's true now. Show the work only where it changes
+   his decision.
+9. **Bad news first and plainly.** "I broke X" / "we were breaking a licence
+   rule" up front, in one sentence, no cushioning.
+10. **Don't re-explain what he already knows.** He knows what his own
+    project does.
+
+Test before sending: would this make sense read aloud to someone who has
+never opened the repo? If not, rewrite it.
