@@ -121,6 +121,13 @@ the peer-set size alongside it).
 Population standard deviation (`ddof=0`), not sample. We hold the entire peer set, not a sample from
 it. Null when the peer set has fewer than 2 members or zero variance.
 
+**Do not put a z-score on a raw count.** Measured on the real 2026 data, not assumed: Belgian commune
+sizes are heavily right-skewed — 78 residents in Herstappe, 565,615 in Antwerp — so Antwerp's
+population z-score is **15.99**. That is arithmetically correct and analytically useless, and on a
+commune page it would read as a data error. `z_score` belongs on rates, ratios and per-capita figures.
+`percentile` is the safer headline for a skewed distribution, being rank-based and therefore
+skew-insensitive.
+
 ### Aggregation across geographies is gated on `is_additive`
 
 `regional_share` and any `total` computed by summing communes require the indicator's `is_additive`
