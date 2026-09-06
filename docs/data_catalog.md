@@ -70,47 +70,72 @@ permits), 12–13 (ABB municipal finance — both the interactive tool and the P
 (data.gov.be). `datastore.brussels` (Brussels-region aggregator, see below) was never formally
 offered as a candidate and stays unresolved rather than silently deferred.
 
-## Census 2011 geographic indicators — approved 2026-09-06 (11th dataset)
+## Census indicators — 2021 wanted, 2011 available (approved 2026-09-06, revised same day)
 
-Approved by the maintainer on 2026-09-06, after Block E's "exactly 10" cut. Recorded as an
-addition, not a substitution: CONTROL E's discipline test was about not padding the initial
-selection, and this was found afterwards by measurement rather than by browsing for more sources.
+**Status: approved in principle, blocked on a hand-download. Do not build the 2011-only adapter.**
 
-| Field | Value |
-|---|---|
-| Dataset | `IM_SOC_GEO_IND_CENSUS` — *Indicateurs géographiques (basés sur le CENSUS 2011)* |
-| Publisher | Statbel (Directorate-general Statistics) |
-| Access | Bestat API, `bestat.statbel.fgov.be/bestat/api/views/{id}/result/JSON` — **fetchable by CI**, unlike the `statbel.fgov.be` bulk host |
-| Geography | 589 communes (the pre-2019 structure), named in French only, no NIS code in the response |
-| Period | 2011, single snapshot. Stated by the source itself (`IM_SOC_GEO_IND_CENSUS`, "basés sur le CENSUS 2011"), not inferred |
-| Licence | Same Statbel terms already cleared for the other four Statbel datasets — see "Statbel licence" below |
-| Indicators | 38 distinct, across 76 views (each published twice, as a "highest" and a "lowest" ranking of the same full table) |
+### What happened
 
-**Why it was approved.** It is the only identified route to the roadmap's 50-indicator gate: 14 today
-plus 38 is 52. It also supplies **unemployment at commune level**, one of the two headline figures
-`/local` currently reports as unavailable, plus employment and activity rates, population density,
-education, household composition, home ownership, building age and average age.
+The Bestat API turned out to hold 38 commune-level indicators that no view name advertises — the
+views are called *"Communes dont le taux de chômage des 15-64 ans est le plus élevé"*, which reads
+like a top-ten extract but returns **all 589 communes**. Measured: 590 rows, 589 naming a commune,
+values from 1.76% to 24.06% (Saint-Josse-ten-Noode), median 6.0%.
 
-**How it was found, and the trap in it.** The views are named *"Communes dont le taux de chômage des
-15-64 ans est le plus élevé"* — "communes with the highest unemployment" — which reads like a
-top-ten extract. It is not: the view returns **all 589 communes** with their values, ranked. Measured
-before approval: 590 rows, 589 naming a commune, 589 values present, min 1.76%, median 6.0%, max
-24.06% (Saint-Josse-ten-Noode). Judging these views by their names would have left the single
-largest available body of municipal data unused.
+That was approved as an eleventh dataset, and then the maintainer asked the right question: *nothing
+more recent than 2011?* Checking rather than defending it changed the decision.
 
-**Known limitations, recorded before any adapter exists:**
+### What the API actually has, measured
 
-- **One period, 2011.** These indicators will have no history and no trend. They fill the indicator
-  count and answer "what is this commune like", not "what is changing".
-- **Values are fractions**, not percentages (0.2406 = 24.06%). A unit decision is owed per indicator.
-- **Pre-2019 geography**, so every value needs `resolve_geo` through the merger crosswalk.
-- **Name-only geography.** Resolution measured at 585/589 by French name plus validity at 2011;
-  the four stragglers are two genuine `Saint-Nicolas` communes needing the view's own parenthetical
-  disambiguator, plus `Blégny`/`Blegny` (an accent) and `Zwalm` (Statbel's own typo, see
-  `config/geography/name_fr_corrections.csv`).
-- **Housing prices are NOT in this dataset** and remain unavailable at commune level: every Bestat
-  price view whose name promises "par commune" returns region-level rows only. The housing headline
-  figure stays unavailable, and real estate sales stays DEFERRED from Block E.
+Every municipal-named view in all 1,341 was probed. Only **three** datasources return commune-level
+rows at all:
+
+| Datasource | Communes | Periods |
+|---|---|---|
+| `IM_SOC_GEO_IND_CENSUS` | 589 | **2011 only** |
+| `IM_EAF_LCL_UNIT_POP` | 565 | 2023-Q4 (already loaded) |
+| `IM_EAF_PROP_TRANS_PRCL_EXT` (building-land prices) | 589 | 1992, 2000, 2005, **stops 2014** |
+
+Everything Statbel updated recently — June 2026 property prices, VAT turnover, population by marital
+status — is national or regional. The house and apartment price views whose names promise *"par
+commune"* return 48 region rows.
+
+**`IM_SOC_GEO_IND_CENSUS_2021` and `IM_SOC_GEO_NUC_CENSUS_2021` do exist**, updated 2024-04 and
+2025-02, carrying *both* 2011 and 2021. All 174 of their views were probed across four locales:
+every one stops at **province or arrondissement**. None reaches commune.
+
+### Census 2021 at commune level exists, off-API
+
+Statbel published **~140 Census 2021 open datasets** under CC BY 4.0 (commercial reuse permitted,
+same licence family already cleared here). Confirmed commune-level titles include:
+
+- *Census 2021 — Population selon : Lieu de résidence (Commune), sexe et pays de citoyenneté*
+- *Census 2021 — Locaux d'habitation selon : Lieu de résidence (Commune) et Type de local d'habitation*
+
+Index: `statbel.fgov.be/fr/open-data/consultez-tous-les-open-data-du-census-2021`
+
+They are on `statbel.fgov.be`, which automation cannot read. Note a likely refinement to
+[manual_sources.md](features/manual_sources.md)'s account: that document calls it "a
+connection-level block", and `curl` does fail outright — but search engines report the same URLs
+serving **CAPTCHA verification pages**, which points at edge bot-protection rather than a network
+block. `data.gov.be`, which mirrors Statbel, is equally unreachable from here. Either way the
+consequence is unchanged: **a human with a browser can download these; CI cannot.**
+
+### The decision
+
+Census 2021 is worth having and 2011 alone is not. Publishing 38 fifteen-year-old indicators to
+clear a 50-indicator gate would make the product worse, not better — a directeur financier reads the
+vintage first. The 2011 API set stays **approved but unbuilt**, as the fallback if the 2021 download
+never happens, and only ever alongside its 2021 counterpart for the ten-year change.
+
+**Owed by the maintainer:** the Census 2021 commune-level files, hand-downloaded, exactly as
+population (`TF_SOC_POP_STRUCT`) and fiscal income (`TF_PSNL_INC_TAX_MUNTY`) already were. Those two
+are the pipeline's only current municipal series, and they are current *because* they were fetched
+by hand.
+
+### Also established
+
+Housing prices are **not** obtainable at commune level from the API, so the `/local` housing headline
+stays unavailable and real estate sales stays DEFERRED from Block E.
 
 ## Approved sources
 
