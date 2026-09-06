@@ -237,6 +237,35 @@ independently computed number is a test."
   565.
 - Cycle detection gets a test asserting the error names the cycle.
 - **CONTROL G gets a test**: no derived `indicator_id` appears in `observations`.
+- **A cross-commune denominator test**, added by the `[REVIEW]` step below: a `MULTI_INPUT`
+  computation over an `ObservationSet` holding two communes must not let one commune's value leak
+  into another's ratio. Proven with deliberately mismatched numbers (`dependency_ratio` of 50.0 for
+  one commune and 1800.0 for another from the same call to `compute()`) so a silent cross-wire would
+  produce a visibly wrong number rather than an accidentally-plausible one.
+
+## `[REVIEW]` Verify CAGR, percentile method and per-capita denominators
+
+Independently re-derived from the real committed data — not read off the code that computes it, and
+not re-run through the same function — using a separate hand-written script:
+
+| Check | Independently recomputed | Documented / stored |
+|---|---|---|
+| Antwerp 10-year growth (2016→2026) | 9.3944% | 9.3944% |
+| Antwerp 10-year CAGR | 0.9019%/yr | 0.9019%/yr |
+| Herstappe 2026 population percentile (N=565, below=0, equal=1) | 0.0885 | 0.088 |
+
+All three match. **CAGR** is `(current/earlier)^(1/years) - 1`, in percent, requiring both endpoints
+strictly positive (a negative ratio has no real root; a zero one is undefined, not zero). **Percentile**
+is the rank-based definition `100 × (below + 0.5 × equal) / N`, chosen over an interpolated quantile
+because it is explainable in one sentence and reproducible by hand — the exact property this review
+step exists to protect, since the two methods differ by several points across 565 communes and a
+commune disputing its rank will notice.
+
+**Per-capita denominators**: the engine (`src/analytics/engine.py`, `MULTI_INPUT` dispatch) fetches
+every input of a multi-input function at the *same* `geo_id` and `period` by construction — there is
+no code path that could substitute one commune's value for another's. That was true by inspection
+before this review; it is now also true by test (above), which is the difference between "the code
+happens to be right" and "a future change to the dispatch logic gets caught".
 
 ## Gaps found while implementing
 

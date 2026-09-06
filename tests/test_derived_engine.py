@@ -179,6 +179,34 @@ def test_dependency_ratio_from_three_bands():
     assert out.value("DR", "be:mun:A", "2026") == 50.0
 
 
+def test_multi_input_does_not_cross_wire_two_communes():
+    """The [REVIEW] step this guards: 'verify per-capita denominators'. A
+    MULTI_INPUT function (dependency_ratio here, but the risk is identical
+    for per_capita) fetches each input at the SAME geo_id -- proven by
+    putting two communes with DIFFERENT band values in one ObservationSet
+    and asserting each commune's own ratio, not the other's, comes back.
+    A denominator silently borrowed from a neighbouring commune would still
+    produce a plausible-looking number, which is exactly the failure mode
+    that is invisible without a test like this one."""
+    obs = ObservationSet(
+        [
+            ("YOUNG", "be:mun:A", "2026", 1000.0),
+            ("WORK", "be:mun:A", "2026", 4000.0),
+            ("OLD", "be:mun:A", "2026", 1000.0),
+            ("YOUNG", "be:mun:B", "2026", 9000.0),
+            ("WORK", "be:mun:B", "2026", 1000.0),
+            ("OLD", "be:mun:B", "2026", 9000.0),
+        ]
+    )
+    configs = {"DR": _cfg("DR", "dependency_ratio", ["YOUNG", "WORK", "OLD"])}
+    out = compute(obs, configs, {"YOUNG", "WORK", "OLD"})
+    # A: (1000+1000)/4000*100 = 50.0. B: (9000+9000)/1000*100 = 1800.0.
+    # If B's WORK (a tiny 1000) leaked into A's denominator, A would come
+    # back as 1800.0 too -- the two must differ, and by the right amount.
+    assert out.value("DR", "be:mun:A", "2026") == 50.0
+    assert out.value("DR", "be:mun:B", "2026") == 1800.0
+
+
 def test_a_single_period_indicator_derives_to_null_not_zero():
     """LOCAL_UNITS_BY_COMMUNE has exactly one period, so a five-year change
     over it is undefined. Zero would read as 'no growth', which is a claim the
