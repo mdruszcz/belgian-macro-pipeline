@@ -80,10 +80,20 @@ sections:
   - id: housing
     label: {en: Housing, fr: Logement, nl: Wonen}
     blurb:
-      en: Ordinary house sale prices, and the dwelling stock as counted by Census 2021.
-      fr: Prix de vente des maisons ordinaires, et le parc de logements recensé par le Census 2021.
-      nl: Verkoopprijzen van gewone woningen, en de woningvoorraad volgens de Census 2021.
-    headline: AVG_HOUSE_PRICE
+      en: >
+        Median house sale price, updated quarterly by Statbel, and the dwelling stock as
+        counted by Census 2021. The median is not comparable to province, region or
+        Belgium — a median cannot be honestly aggregated the way a total can.
+      fr: >
+        Prix médian de vente des maisons, mis à jour chaque trimestre par Statbel, et le
+        parc de logements recensé par le Census 2021. Le prix médian n’est pas comparable
+        à la province, à la région ou à la Belgique — un tel taux ne peut être agrégé
+        honnêtement.
+      nl: >
+        Mediane verkoopprijs van woningen, elk kwartaal bijgewerkt door Statbel, en de
+        woningvoorraad volgens de Census 2021. De mediaan is niet vergelijkbaar met
+        provincie, gewest of België — een mediaan kan niet eerlijk worden opgeteld.
+    headline: MEDIAN_HOUSE_PRICE
     indicators:
       - HOUSE_SALES_TRANSACTIONS
       - SHARE_DWELLINGS_UNOCCUPIED

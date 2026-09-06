@@ -1,19 +1,29 @@
 id: HOUSE_SALES_TRANSACTIONS
 name:
-  en: Ordinary house sales
-  fr: Ventes de maisons d'habitation ordinaires
-  nl: Verkopen van gewone woonhuizen
+  en: House sales (excl. apartments)
+  fr: Ventes de maisons (hors appartements)
+  nl: Verkopen van huizen (excl. appartementen)
 unit: count
 frequency: A
 source_id: statbel
 geo_levels: [municipal]
 preferred_direction: contextual
-max_age_days: 1460
+max_age_days: 460
 description:
   en: >
-    Number of ordinary-house ("gewone woonhuizen") sale transactions recorded in the
-    commune in the year, from Statbel's real-estate statistics. One of four property
-    types Statbel publishes (houses, apartments, villas, building land); houses is
-    loaded first because it has the best commune coverage. AVG_HOUSE_PRICE is
-    recomputed from this and HOUSE_SALES_TOTAL_PRICE, never averaged across communes.
+    Number of house sale transactions recorded in the commune in the year, summed from
+    Statbel's quarterly real-estate file across every house type with 2 or more facades
+    (closed, semi-closed and open/detached) -- every house category Statbel publishes
+    except apartments. A year is only loaded once all four of its quarters are present in
+    the source file, so the most recent year appears once it is complete, never as an
+    understated partial-year total.
+
+    SCOPE CHANGED FROM AN EARLIER VERSION OF THIS INDICATOR, which loaded only "gewone
+    woonhuizen" (ordinary houses, i.e. closed + semi-closed, excluding detached/open
+    houses) from a different, annual-only Statbel file. Measured on Aartselaar 2017: the
+    old scope read 108 transactions, the closed+semi-closed subset of the new file reads
+    113 (a plausible late-registration revision), and the broader scope this indicator now
+    loads reads 146 -- open/detached houses account for the remaining gap. The step this
+    produces in the indicator's own history around the file-refresh boundary reflects that
+    scope change, not a change in the housing market.
 display: null

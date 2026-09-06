@@ -244,7 +244,10 @@ def test_the_committed_derived_configs_load_and_order():
         "SHARE_SINGLE_PARENT_FAMILIES",
         "SHARE_SINGLE_PERSON_HOUSEHOLDS",
         "UNEMPLOYMENT_RATE_COM",
-        "AVG_HOUSE_PRICE",
+        # AVG_HOUSE_PRICE retired: Statbel's newer real-estate file gives only
+        # a median, which cannot be derived from stored components the way a
+        # mean could -- MEDIAN_HOUSE_PRICE is stored directly instead (see
+        # scripts/sync_realestate.py), not a derived indicator at all.
         # ONEM/RVA. Claimants over total population, NOT over the labour
         # force -- deliberately not called an unemployment rate; see the
         # config's own description.

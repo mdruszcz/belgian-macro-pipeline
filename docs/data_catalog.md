@@ -176,6 +176,48 @@ National average verified against the file's own totals: **€181,040 (2010) →
 matching published Belgian house-price trends for that period. Apartments, villas and building land
 are real data in the same file, correctly available, and not loaded by this first pass.
 
+### UPDATED 2026-09-06 — richer quarterly file replaces the 2010–2019 one
+
+The maintainer supplied `FR_immo_statbel_trimestre_par_commune.xlsx`, a much larger Statbel
+export: **quarterly, 2010–2026 so far** (against the old file's 2010–2019 annual), covering every
+house type except apartments in one column block (closed, semi-closed and open/detached houses
+combined), plus a **median** price and its quartiles. `scripts/sync_realestate.py` rewritten to
+read it; `immo_by_municipality_2010-2019.xlsx` is no longer read by anything.
+
+**The trade this makes, plainly.** The old file gave a `MS_TOTAL_PRICE`, additive, from which a
+true mean was recomputed downstream (`AVG_HOUSE_PRICE`, `mean_from_total`, CLAUDE.md rule 6). This
+file gives only a **median** — which cannot be reconstructed from parts, the same fact
+`fiscal_income.md` already records for a different Statbel file. So `AVG_HOUSE_PRICE` and
+`HOUSE_SALES_TOTAL_PRICE` are **retired**, and `MEDIAN_HOUSE_PRICE` (quarterly, stored directly,
+`is_additive = 0`, `aggregation_method = 'not_applicable'`) replaces `AVG_HOUSE_PRICE` as the
+`/local` housing headline. Wider coverage and far more current, at the cost of the province/region
+comparison a true mean allowed and this pipeline no longer has the components to recompute.
+
+**`HOUSE_SALES_TRANSACTIONS`'s scope changed too, measured not assumed.** The old indicator counted
+`gewone woonhuizen` (ordinary houses: closed + semi-closed only). The new file's category —
+"toutes les maisons ... excl. appartements" — additionally includes open/detached houses. Aartselaar
+2017: old file 108, new file's closed+semi-closed subset alone 113 (a plausible late-registration
+revision, not investigated further), new file's full "all houses" scope 146. The ~35% step in this
+indicator's own history at the file-refresh boundary is that scope change, not a market move —
+recorded in the indicator's own description so a reader does not mistake one for the other.
+
+**Same fixed-geography pattern as ONEM and police.be, proven the same way.** All 565 `refnis` codes
+are identical across 2010 and 2024 alike; Kruisem (NIS 45068, created by the 2019 merger) carries a
+real value in the file's own 2010 rows. Resolved against a single pinned period, `"2025"` —
+deliberately the OPPOSITE choice from police.be's `"2024"` pin, because this file's 565-code set
+matches the map *after* the 2025 mergers, not before it.
+
+**The 2026 part-year problem, handled the same way ONEM's was.** 2026 has only a Q1 row so far.
+Summing it and calling the result "2026" would understate the true annual total by roughly
+three-quarters — `HOUSE_SALES_TRANSACTIONS` therefore only loads a year once all four of its
+quarters are present, so 2026 is simply absent until Q2–Q4 arrive rather than published wrong.
+`MEDIAN_HOUSE_PRICE` has no such problem — a quarter's own median is complete on its own terms —
+so it loads through 2026-Q1, marked provisional like every source's most-recent period.
+
+**Reference-row correction pattern reused from police.be.** `sync_realestate.py`'s
+`_ensure_reference_rows` now uses `ON CONFLICT ... DO UPDATE`, not `INSERT OR IGNORE`, for the same
+reason: a config correction after the first load must actually reach an already-loaded database.
+
 ### LOADED 2026-09-06 — Census 2021, hand-downloaded
 
 The maintainer downloaded ten Census 2021 workbooks into `data/raw/statbel/census2021/`
