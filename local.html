@@ -163,6 +163,8 @@
   .pctile .line{font-size:.8rem}
   .pctile .line b{font-weight:600}
   .pctile .note{color:var(--text-faint);font-size:.72rem}
+  .fact .frank{font-size:.72rem;color:var(--accent-ink);margin-top:2px}
+  .headline .card .rk{font-size:.7rem;color:var(--accent-ink)}
   .theme-toggle{position:static; margin:0 0 16px; width:max-content}
   }
 </style>
@@ -355,6 +357,7 @@ LocalUI.buildHeadlines = function(commune){
     return {
       label: spec.label, available: true, value: latest.value, period: latest.period,
       unit: latest.unit, caveat: spec.caveat, updated: latest.updated,
+      entry: commune.indicators[spec.key],
     };
   });
 };
@@ -464,6 +467,20 @@ LocalUI.percentileLines = function(entry){
     }
   }
   return out;
+};
+
+// A one-line version of the percentile for a fact tile. The full component
+// (percentileLines) is used under each section's headline figure; eight
+// tables on one page would be a wall nobody reads, so the supporting figures
+// get a single national line each.
+LocalUI.percentileShort = function(entry){
+  const p = entry && entry.percentile && entry.percentile.national;
+  if(!p) return null;
+  if(p.pct === null || p.pct === undefined) return `${LocalUI.ordinal(p.rank)} of ${p.peers} in Belgium`;
+  if(p.rank === 1) return `highest of ${p.peers} in Belgium`;
+  if(p.rank === p.peers) return `lowest of ${p.peers} in Belgium`;
+  const shown = Math.min(99, Math.max(1, Math.round(p.pct)));
+  return `${LocalUI.ordinal(shown)} pct. in Belgium (${LocalUI.ordinal(p.rank)}/${p.peers})`;
 };
 
 if(typeof module !== 'undefined') module.exports = LocalUI;
@@ -589,7 +606,11 @@ function renderHeadline(commune){
     // retrieval date because the figure was computed, not fetched.
     const provenance = c.updated ? `as of ${c.period} · updated ${c.updated}`
                                  : `as of ${c.period} · derived`;
-    return `<div class="card"><span class="v">${fmt(c.value, c.unit)}${caveat}</span><span class="l">${c.label}</span><span class="p">${provenance}</span></div>`;
+    const rank = c.entry ? LocalUI.percentileShort(c.entry) : null;
+    return `<div class="card"><span class="v">${fmt(c.value, c.unit)}${caveat}</span>` +
+      `<span class="l">${c.label}</span>` +
+      (rank ? `<span class="rk">${rank}</span>` : '') +
+      `<span class="p">${provenance}</span></div>`;
   }).join('');
 }
 
@@ -659,10 +680,12 @@ function comparisonHTML(entry, unit){
     <tbody>${body}</tbody></table>`;
 }
 
-function factHTML(label, latest){
+function factHTML(label, latest, entry){
   const prov = latest.updated ? `updated ${latest.updated}` : 'derived';
+  const rank = entry ? LocalUI.percentileShort(entry) : null;
   return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
          `<div class="fl">${label} (${latest.period})</div>` +
+         (rank ? `<div class="frank">${rank}</div>` : '') +
          `<div class="fp">${prov}</div></div>`;
 }
 
@@ -685,10 +708,10 @@ function renderDemography(commune){
   const facts = [];
   for(const code of bands){
     const latest = LocalUI.latestOf(commune.indicators[code]);
-    if(latest) facts.push(factHTML(`Age ${bandLabels[code]}`, latest));
+    if(latest) facts.push(factHTML(`Age ${bandLabels[code]}`, latest, commune.indicators[code]));
   }
   const dep = LocalUI.latestOf(commune.indicators['DEPENDENCY_RATIO']);
-  if(dep) facts.push(factHTML('Dependency ratio', dep));
+  if(dep) facts.push(factHTML('Dependency ratio', dep, commune.indicators['DEPENDENCY_RATIO']));
   if(facts.length){
     const grid = document.createElement('div');
     grid.className = 'fact-grid';
@@ -716,7 +739,7 @@ function renderIncome(commune){
   const facts = [];
   for(const code of fiscalCodes){
     const latest = LocalUI.latestOf(commune.indicators[code]);
-    if(latest) facts.push(factHTML(latest.name, latest));
+    if(latest) facts.push(factHTML(latest.name, latest, commune.indicators[code]));
   }
   if(facts.length){
     const grid = document.createElement('div');
@@ -733,8 +756,10 @@ function renderBusiness(commune){
     body.innerHTML = noDataHTML('No local-unit count published for this commune.');
     return;
   }
-  body.innerHTML = `<div class="fact-grid">${factHTML('Local business units', latest)}</div>
-    <p class="sec-sub" style="margin-top:10px">Single snapshot only — Statbel publishes one quarter at a time for this dataset (see <code>docs/features/statbel_adapter.md</code>), so no history chart is shown.</p>`;
+  body.innerHTML = `<div class="fact-grid">${factHTML('Local business units', latest, commune.indicators['LOCAL_UNITS_BY_COMMUNE'])}</div>
+    <p class="sec-sub" style="margin-top:10px">Single snapshot only — Statbel publishes one quarter at a time for this dataset (see <code>docs/features/statbel_adapter.md</code>), so no history chart is shown.</p>`
+    + comparisonHTML(commune.indicators['LOCAL_UNITS_BY_COMMUNE'], 'count')
+    + percentileHTML(commune.indicators['LOCAL_UNITS_BY_COMMUNE']);
 }
 
 function renderOverview(commune){
