@@ -1,0 +1,21 @@
+id: DEPENDENCY_RATIO
+name:
+  en: Age dependency ratio
+  fr: Rapport de dépendance démographique
+  nl: Demografische afhankelijkheidsratio
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    Residents aged 0-14 plus those aged 65 and over, as a percentage of the
+    15-64 working-age population. Computed from the three raw age bands
+    rather than stored, so a revision to any band recomputes it. A high ratio
+    is neither good nor bad on its own -- it can mean many children or many
+    pensioners, which have opposite policy implications -- hence
+    'contextual'.
+derived:
+  function: dependency_ratio
+  inputs: [POPULATION_AGE_0_14, POPULATION_AGE_15_64, POPULATION_AGE_65_PLUS]

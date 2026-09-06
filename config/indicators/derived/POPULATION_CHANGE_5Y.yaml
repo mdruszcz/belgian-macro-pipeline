@@ -1,0 +1,18 @@
+id: POPULATION_CHANGE_5Y
+name:
+  en: Population change over 5 years
+  fr: Évolution de la population sur 5 ans
+  nl: Bevolkingsverandering over 5 jaar
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    Percentage change in population over five years. Contextual, not
+    higher_is_better: growth strains schools and housing, decline erodes the
+    tax base, and which is preferable depends entirely on the commune.
+derived:
+  function: five_year_change
+  inputs: [POPULATION_BY_COMMUNE]

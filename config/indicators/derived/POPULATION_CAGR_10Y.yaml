@@ -1,0 +1,20 @@
+id: POPULATION_CAGR_10Y
+name:
+  en: Population growth, 10-year annual average
+  fr: Croissance de la population, moyenne annuelle sur 10 ans
+  nl: Bevolkingsgroei, jaarlijks gemiddelde over 10 jaar
+unit: percent_per_year
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 2
+description:
+  en: >
+    Compound annual growth rate of population over ten years. Requires both
+    endpoints to be strictly positive; a commune with no 10-years-earlier
+    figure returns null rather than a fabricated rate.
+derived:
+  function: cagr
+  inputs: [POPULATION_BY_COMMUNE]
+  args:
+    years: 10
