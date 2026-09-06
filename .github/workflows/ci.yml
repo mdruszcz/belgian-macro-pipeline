@@ -31,5 +31,11 @@ jobs:
       - name: Validate indicator/source config
         run: python scripts/validate_config.py
 
+      - name: Validate the committed data stores
+        # Catches a bad hand-edited store at PR time rather than after it is
+        # merged and published. The daily workflow runs the same rules before
+        # its export step. See docs/features/validation.md.
+        run: python scripts/validate_data.py
+
       - name: Tests
         run: pytest -q

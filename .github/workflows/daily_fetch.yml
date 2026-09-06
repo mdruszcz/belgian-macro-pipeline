@@ -70,6 +70,13 @@ jobs:
         # geography load above for observations.geo_id to resolve.
         run: python scripts/sync_statbel.py --db data/belgian_macro.db
 
+      - name: Validate the data before exporting
+        # Between sync and export deliberately: a `fail` here stops the run
+        # BEFORE anything is written to the published CSVs or committed.
+        # Validation that only logs is decoration -- see
+        # docs/features/validation.md. Warnings print and do not block.
+        run: python scripts/validate_data.py --db data/belgian_macro.db
+
       - name: Export canonical CSV for the dashboard
         # Overwrites belgian_macro_export.csv (written above from the legacy
         # schema) with the canonical-schema version the dashboard now reads.
