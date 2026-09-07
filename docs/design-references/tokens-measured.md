@@ -38,8 +38,15 @@ no margin.
 
 ## Typography
 
-The reference designs use a clean, geometric sans-serif throughout — no serif anywhere, which is
-a real mismatch worth naming plainly: **this repo's existing pages (`local.html`,
+**CORRECTED 2026-09-07 (Batch 3).** A high-fidelity homepage design supplied after this file was
+written shows the H1, every section heading and the dark CTA band set in a **transitional serif**.
+The paragraph below — written from a low-resolution screenshot — concluded the opposite. The
+redesign therefore does *not* drop this repo's existing Spectral headings; it keeps them, and
+`--bp-font-display` in `tokens.css` points at Spectral for exactly that reason. Treat the rest of
+this section as the body-text finding it accurately is, not as a claim about headings.
+
+The reference designs use a clean, geometric sans-serif for body and UI text — the original
+reading was "no serif anywhere", which is **this repo's existing pages (`local.html`,
 `communes.html`) use "Spectral" (a serif) for headings and "IBM Plex Sans/Mono" for everything
 else.** The new designs don't use that pairing at all. This is expected — `design_system.md`
 already said the new tokens sit alongside the old system until pages are actually converted —

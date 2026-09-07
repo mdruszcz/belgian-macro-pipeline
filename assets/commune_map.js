@@ -340,20 +340,27 @@ MapUI.CommuneMap = class CommuneMap {
   /* --- legend ------------------------------------------------------------ */
 
   _drawLegend(breaks, bands, colourFor, nums) {
+    // Each of the three is INDEPENDENTLY optional, which is what the
+    // constructor's own docstring has always claimed. It used to bail on the
+    // whole legend unless all three were supplied, so a caller that wanted
+    // the colour bar without the several-sentence prose note -- a compact
+    // card, where that note swamps the card -- silently got no legend at all.
     const {swatches, ticks, legendNote} = this.el;
-    if (!swatches || !ticks || !legendNote) return;
+    if (!swatches && !ticks && !legendNote) return;
 
-    swatches.innerHTML = '';
-    ticks.innerHTML = '';
+    if (swatches) swatches.innerHTML = '';
+    if (ticks) ticks.innerHTML = '';
     if (!nums.length) {
-      legendNote.textContent = MapUI.text(this.lang, 'mapNoneCarryValue');
+      if (legendNote) legendNote.textContent = MapUI.text(this.lang, 'mapNoneCarryValue');
       return;
     }
 
-    for (let i = 0; i < bands; i++) {
-      const cell = document.createElement('div');
-      cell.style.background = colourFor(i);
-      swatches.appendChild(cell);
+    if (swatches) {
+      for (let i = 0; i < bands; i++) {
+        const cell = document.createElement('div');
+        cell.style.background = colourFor(i);
+        swatches.appendChild(cell);
+      }
     }
 
     // One notation for the whole axis, decided from its largest value, so the
@@ -362,12 +369,14 @@ MapUI.CommuneMap = class CommuneMap {
     // A tick per INTERNAL boundary, at the seam between its two swatches. The
     // ends carry none: the lowest and highest are written out in the note,
     // where they have room to be exact rather than compacted.
-    ticks.style.width = (bands * MapUI.SWATCH_PX) + 'px';
-    for (let i = 0; i < breaks.length; i++) {
-      const span = document.createElement('span');
-      span.textContent = MapUI.tickLabel(breaks[i], this.meta.unit, compactAxis, this.lang);
-      span.style.left = ((i + 1) * MapUI.SWATCH_PX) + 'px';
-      ticks.appendChild(span);
+    if (ticks) {
+      ticks.style.width = (bands * MapUI.SWATCH_PX) + 'px';
+      for (let i = 0; i < breaks.length; i++) {
+        const span = document.createElement('span');
+        span.textContent = MapUI.tickLabel(breaks[i], this.meta.unit, compactAxis, this.lang);
+        span.style.left = ((i + 1) * MapUI.SWATCH_PX) + 'px';
+        ticks.appendChild(span);
+      }
     }
 
     const direction = {
@@ -386,10 +395,12 @@ MapUI.CommuneMap = class CommuneMap {
     // screenshots has to be told that.
     const basis = this.visible ? ' ' + MapUI.text(this.lang, 'mapBasisFiltered') : '';
 
-    legendNote.textContent =
-      MapUI.text(this.lang, 'mapRange', {lo: exact(nums[0]), hi: exact(nums[nums.length - 1])}) +
-      ' ' + MapUI.text(this.lang, 'mapColourRuns') + ' ' +
-      methodNote + basis + (direction ? ' ' + direction : '');
+    if (legendNote) {
+      legendNote.textContent =
+        MapUI.text(this.lang, 'mapRange', {lo: exact(nums[0]), hi: exact(nums[nums.length - 1])}) +
+        ' ' + MapUI.text(this.lang, 'mapColourRuns') + ' ' +
+        methodNote + basis + (direction ? ' ' + direction : '');
+    }
   }
 
   _reportCoverage(withValue, total, withheld) {

@@ -82,10 +82,19 @@
    * @param series   [{label, points:[{period, value}], colourIndex?}]
    * @param opts     {locale}
    */
+  /**
+   * @param opts.height    chart height in CSS px (default 210). A KPI-sized
+   *   card cannot afford a full-height chart, and scaling one down in CSS
+   *   would distort its text; this draws at the size it will be shown.
+   * @param opts.compact   drop the axis labels and gridlines, leaving the
+   *   line alone -- for a sparkline inside a small card, where the figure is
+   *   printed beside the chart and the axis would be unreadable anyway.
+   */
   function drawLine(canvas, series, opts) {
     opts = opts || {};
     if (!series.length || !series[0].points.length) return;
-    var dims = sizeCanvas(canvas, 210),
+    var compact = !!opts.compact;
+    var dims = sizeCanvas(canvas, opts.height || 210),
       ctx = dims.ctx,
       W = dims.W,
       H = dims.H;
@@ -102,10 +111,10 @@
     vMin -= pad;
     vMax += pad;
     var vR = vMax - vMin || 1;
-    var pL = 62,
-      pR = 10,
-      pT = 12,
-      pB = 26;
+    var pL = compact ? 2 : 62,
+      pR = compact ? 2 : 10,
+      pT = compact ? 4 : 12,
+      pB = compact ? 4 : 26;
     var n = series[0].points.length;
     var cW = W - pL - pR,
       slW = n > 1 ? cW / (n - 1) : 0;
@@ -119,20 +128,22 @@
     var gridC = gc('--bp-border'),
       labelC = gc('--bp-text-faint');
 
-    niceSteps(vMin, vMax, 4).forEach(function (v) {
-      var y = Math.round(yOf(v)) + 0.5;
-      ctx.strokeStyle = gridC;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(pL, y);
-      ctx.lineTo(W - pR, y);
-      ctx.stroke();
-      ctx.font = '10px "IBM Plex Mono",monospace';
-      ctx.fillStyle = labelC;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(fmtNum(v, opts.locale), pL - 9, y);
-    });
+    if (!compact) {
+      niceSteps(vMin, vMax, 4).forEach(function (v) {
+        var y = Math.round(yOf(v)) + 0.5;
+        ctx.strokeStyle = gridC;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pL, y);
+        ctx.lineTo(W - pR, y);
+        ctx.stroke();
+        ctx.font = '10px "IBM Plex Mono",monospace';
+        ctx.fillStyle = labelC;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fmtNum(v, opts.locale), pL - 9, y);
+      });
+    }
 
     ctx.font = '10px "IBM Plex Mono",monospace';
     ctx.fillStyle = labelC;
@@ -152,6 +163,7 @@
     // candidate whose centre falls inside the last label's own footprint.
     var lastLabelLeftEdge = xOf(n - 1) - widest;
     series[0].points.forEach(function (p, i) {
+      if (compact) return; // a sparkline carries no axis labels at all
       if (i === n - 1) {
         // always shown, below
       } else if (i % xSkip !== 0 || xOf(i) + widest / 2 > lastLabelLeftEdge) {

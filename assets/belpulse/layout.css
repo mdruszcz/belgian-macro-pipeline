@@ -51,10 +51,13 @@
 .bp-tagline{font-size:11px; color:var(--bp-text-muted); line-height:1.3}
 .bp-shell--navy .bp-tagline{color:var(--bp-navy-text-muted)}
 
-.bp-nav{display:flex; align-items:center; gap:var(--bp-space-5); flex:1; font-size:var(--bp-text-small)}
+.bp-nav{display:flex; align-items:center; gap:var(--bp-space-5); font-size:var(--bp-text-small)}
 .bp-nav a{
   color:var(--bp-text-muted); text-decoration:none; padding:4px 0;
   border-bottom:2px solid transparent; font-weight:var(--bp-weight-medium);
+  /* A nav item that wraps mid-label ("Commune / profiles") reads as two
+     separate links. It stays on one line and the bar wraps instead. */
+  white-space:nowrap;
 }
 .bp-shell--navy .bp-nav a{color:var(--bp-navy-text-muted)}
 .bp-nav a:hover{color:var(--bp-text)}
