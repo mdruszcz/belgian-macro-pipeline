@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>All Observations</title>
+<script src="assets/i18n.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root{
@@ -178,20 +179,27 @@
 </head>
 <body>
 <div class="wrap">
-<div class="theme-toggle" role="group" aria-label="Colour theme">
+<div class="switches">
+  <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+    <button type="button" data-lang="nl" aria-pressed="false">NL</button>
+  </div>
+</div>
+  <div class="theme-toggle" role="group" aria-label="Colour theme">
   <button type="button" data-theme-choice="light" aria-pressed="false" title="Always light">&#9728; Light</button>
   <button type="button" data-theme-choice="auto" aria-pressed="false" title="Follow your device setting">Auto</button>
   <button type="button" data-theme-choice="dark" aria-pressed="false" title="Always dark">&#9790; Dark</button>
 </div>
   <header>
-    <h1>All Observations</h1>
-    <p class="subtitle">Every row currently in <code>data/belgian_macro_export.csv</code> — unfiltered, no category grouping. For the presented view see <a href="dashboard.html">dashboard.html</a>.</p>
+    <h1 data-t="allDataTitle">All Observations</h1>
+    <p class="subtitle" data-t-html="allDataLead">Every row currently in <code>data/belgian_macro_export.csv</code> — unfiltered, no category grouping. For the presented view see <a href="dashboard.html">dashboard.html</a>.</p>
   </header>
 
   <div class="stats">
-    <div class="stat"><span class="n" id="statIndicators">—</span><span class="l">Indicators</span></div>
-    <div class="stat"><span class="n" id="statRows">—</span><span class="l">Observations</span></div>
-    <div class="stat"><span class="n" id="statUpdated">—</span><span class="l">Last fetched</span></div>
+    <div class="stat"><span class="n" id="statIndicators">—</span><span class="l" data-t="statIndicators">Indicators</span></div>
+    <div class="stat"><span class="n" id="statRows">—</span><span class="l" data-t="statObservations">Observations</span></div>
+    <div class="stat"><span class="n" id="statUpdated">—</span><span class="l" data-t="statUpdated">Last fetched</span></div>
   </div>
 
   <div class="toolbar">
@@ -203,21 +211,21 @@
     <table>
       <thead>
         <tr>
-          <th data-key="indicator_code">Code<span class="arrow">↓</span></th>
-          <th data-key="name">Name<span class="arrow">↓</span></th>
-          <th data-key="period">Period<span class="arrow">↓</span></th>
-          <th data-key="value">Value<span class="arrow">↓</span></th>
-          <th data-key="obs_status">Status<span class="arrow">↓</span></th>
-          <th data-key="unit">Unit<span class="arrow">↓</span></th>
-          <th data-key="source_agency">Source<span class="arrow">↓</span></th>
-          <th data-key="fetched_at">Fetched<span class="arrow">↓</span></th>
+          <th data-key="indicator_code"><span data-t="colCode">Code</span><span class="arrow">↓</span></th>
+          <th data-key="name"><span data-t="colName">Name</span><span class="arrow">↓</span></th>
+          <th data-key="period"><span data-t="colPeriod">Period</span><span class="arrow">↓</span></th>
+          <th data-key="value"><span data-t="colValue">Value</span><span class="arrow">↓</span></th>
+          <th data-key="obs_status"><span data-t="colStatus">Status</span><span class="arrow">↓</span></th>
+          <th data-key="unit"><span data-t="colUnit">Unit</span><span class="arrow">↓</span></th>
+          <th data-key="source_agency"><span data-t="colSource">Source</span><span class="arrow">↓</span></th>
+          <th data-key="fetched_at"><span data-t="colFetched">Fetched</span><span class="arrow">↓</span></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
 
-  <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied.</footer>
+  <footer data-t-html="allDataFooter">Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied.</footer>
 </div>
 
 <script>
@@ -356,6 +364,33 @@ load();
   try{ saved = localStorage.getItem(KEY) || 'auto'; }catch(e){}
   apply(saved, false);
 })();
+</script>
+<script>
+// The interface language, from the shared module: one localStorage key for the
+// whole site, so a choice made anywhere carries here.
+let LANG = I18N.initial();
+const T = (key, vars) => I18N.t(LANG, key, vars);
+
+function applyStrings(){
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T(el.dataset.t); });
+  document.querySelectorAll('[data-t-html]').forEach(el => { el.innerHTML = T(el.dataset.tHtml); });
+  document.querySelectorAll('[data-t-title]').forEach(el => { el.title = T(el.dataset.tTitle); });
+  document.querySelectorAll('[data-t-aria]').forEach(el => {
+    el.setAttribute('aria-label', T(el.dataset.tAria));
+  });
+  document.documentElement.setAttribute('lang', LANG);
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+}
+
+document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
+  LANG = b.dataset.lang;
+  try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(_){}
+  applyStrings();
+  if(typeof render === 'function' && typeof ROWS !== 'undefined') render();
+}));
+
+applyStrings();
 </script>
 </body>
 </html>

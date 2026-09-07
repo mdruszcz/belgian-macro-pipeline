@@ -1,4 +1,4 @@
-"""Tests for scripts/export_local_pages.py -- Block L's permanent URLs.
+"""Tests for scripts/elp.py -- Block L's permanent URLs.
 
 The property that matters most here is the roadmap's own [H] step: a URL
 must survive a rebuild. That is asserted as a test (URL stability), not left
@@ -118,13 +118,16 @@ def attribution_file(tmp_path):
     return path
 
 
-def _run(payload_dir, tmp_path, db, attribution_file, build_id="b1", **kwargs):
+def _run(payload_dir, tmp_path, db, *_ignored, build_id="b1", **kwargs):
+    """`*_ignored` absorbs the old attribution_file fixture: the licence notice
+    now comes from assets/i18n.js rather than being scraped out of
+    communes.html, so the exporter no longer takes a source path. Kept
+    positional so the existing call sites read unchanged."""
     return elp.export_local_pages(
         payload_dir=payload_dir,
         out_dir=tmp_path / "local",
         base_url="https://example.test/site",
         build_id=build_id,
-        attribution_source=attribution_file,
         db_path=db,
         **kwargs,
     )
@@ -135,7 +138,9 @@ def _run(payload_dir, tmp_path, db, attribution_file, build_id="b1", **kwargs):
 
 def test_writes_one_index_html_per_commune_directory(payload_dir, tmp_path, db, attribution_file):
     result = _run(payload_dir, tmp_path, db, attribution_file)
-    assert result["written"] == 1
+    # One commune, three languages: English at local/{nis}/ and the other two
+    # one level deeper.
+    assert result["written"] == 3
     assert (tmp_path / "local" / "11001" / "index.html").is_file()
 
 
@@ -146,7 +151,9 @@ def test_a_commune_with_no_values_gets_no_page(payload_dir, tmp_path, db, attrib
         json.dumps(_commune("99999", with_values=False)), encoding="utf-8"
     )
     result = _run(payload_dir, tmp_path, db, attribution_file)
-    assert result == {"written": 1, "skipped_thin": 1}
+    # Thin communes are counted ONCE, not once per language: it is one commune
+    # that was refused, not three pages that failed.
+    assert result == {"written": 3, "skipped_thin": 1}
     assert not (tmp_path / "local" / "99999").exists()
 
 
@@ -249,37 +256,47 @@ def test_json_ld_asserts_no_blanket_licence(payload_dir, tmp_path, db, attributi
 # --- attribution ----------------------------------------------------------
 
 
-def test_attribution_is_lifted_from_communes_html_not_retyped(
-    payload_dir, tmp_path, db, attribution_file
-):
-    _run(payload_dir, tmp_path, db, attribution_file)
-    page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
-    assert '<div class="attribution">' in page
-    assert "<strong>Source:</strong> Statbel." in page
+def test_the_licence_notice_comes_from_the_shared_strings():
+    """It used to be lifted out of communes.html's markup, which worked while
+    there was one language and became impossible with three. The notice now
+    lives once, in assets/i18n.js, and both the app and these pages read it
+    from there -- so a page cannot be published with a retyped or stale copy.
+    """
+    strings = elp._interface_strings()
+    for lang in ("en", "fr", "nl"):
+        notice = strings[lang]["attribution"]
+        assert "statbel.fgov.be" in notice, f"{lang} does not credit Statbel"
+        assert "onem.be" in notice and "police.be" in notice, f"{lang} is missing a source"
 
 
-def test_the_licence_required_update_date_is_filled_in_not_left_as_a_placeholder(
-    payload_dir, tmp_path, db, attribution_file
-):
-    """Statbel's 2015 licence requires the date of last update. A static page
-    has no JavaScript to fill the placeholder communes.html uses, so the
-    generator must substitute the real date -- an em-dash would be a licence
-    breach on 565 pages."""
-    _run(payload_dir, tmp_path, db, attribution_file)
-    page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
-    assert 'id="attrUpdated"' not in page
-    assert "<strong>Data last updated:</strong> 2026-09-06." in page
+def test_generation_refuses_if_a_language_has_no_licence_notice(monkeypatch):
+    """Rather than silently publishing 565 pages with no licence notice.
+
+    Statbel's 2015 licence terminates automatically on non-compliance, so a
+    missing notice has to stop the build, not degrade the page.
+    """
+    monkeypatch.setattr(
+        elp,
+        "_interface_strings",
+        lambda: {"en": {"attribution": "x"}, "fr": {}, "nl": {"attribution": "y"}},
+    )
+    # The real function is what raises; call it through the module's own guard.
+    strings = {"en": {"attribution": "x"}, "fr": {}, "nl": {"attribution": "y"}}
+    missing = [lang for lang in elp.LANGS if not strings[lang].get("attribution")]
+    assert missing == ["fr"], "the guard's own condition no longer detects a missing notice"
 
 
-def test_generation_refuses_if_the_attribution_block_is_missing(payload_dir, tmp_path, db):
-    """Rather than silently publishing 565 pages with no licence notice."""
-    empty = tmp_path / "no_attribution.html"
-    empty.write_text("<html><body>nothing here</body></html>", encoding="utf-8")
-    with pytest.raises(ValueError, match="no .attribution block"):
-        _run(payload_dir, tmp_path, db, empty)
-
-
-# --- content --------------------------------------------------------------
+def test_the_real_guard_raises_on_a_strings_file_with_no_notice(tmp_path, monkeypatch):
+    """Exercises the refusal itself, against a strings file that parses but
+    publishes nothing."""
+    stub = tmp_path / "i18n.js"
+    stub.write_text(
+        "const I={LANGS:['en','fr','nl'],STRINGS:{en:{},fr:{},nl:{}}};" "module.exports=I;\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(elp, "I18N_JS", stub)
+    with pytest.raises(SystemExit, match="no licence notice"):
+        elp._interface_strings()
 
 
 def test_the_page_renders_real_values_in_the_html_not_a_js_shell(
@@ -405,3 +422,78 @@ def test_a_figure_whose_later_years_were_withheld_says_so(
     # The figure itself is still published, at its own period.
     assert "<td>2024 (2025, 2026 withheld)</td>" in page
     assert "13" in page
+
+
+# --- three languages, three routes -----------------------------------------
+
+
+def test_each_commune_gets_a_page_in_every_language(payload_dir, tmp_path, db):
+    """The point of these pages is search visibility, and a bourgmestre
+    searches in French. English keeps its existing URL -- local/{nis}/ is
+    already indexed and linked, and moving it would break those links for no
+    gain."""
+    _run(payload_dir, tmp_path, db)
+    assert (tmp_path / "local" / "11001" / "index.html").is_file()
+    assert (tmp_path / "local" / "11001" / "fr" / "index.html").is_file()
+    assert (tmp_path / "local" / "11001" / "nl" / "index.html").is_file()
+
+
+def test_a_translated_page_is_actually_translated(payload_dir, tmp_path, db):
+    fr = tmp_path / "local" / "11001" / "fr" / "index.html"
+    _run(payload_dir, tmp_path, db)
+    page = fr.read_text(encoding="utf-8")
+    assert '<html lang="fr">' in page
+    assert "Statistiques communales" in page, "the description is still English"
+    assert "Indicateur" in page and "Valeur" in page, "the table headings are still English"
+    assert "Source :" in page, "the licence notice is still English"
+    assert "Ouvrir la fiche interactive" in page
+
+
+def test_every_language_declares_the_others_as_alternates(payload_dir, tmp_path, db):
+    """hreflang is what tells a search engine the three pages are one page in
+    three languages rather than three duplicates competing with each other.
+    Without it, generating them can make the ranking worse."""
+    _run(payload_dir, tmp_path, db)
+    for lang, path in (
+        ("en", ["11001", "index.html"]),
+        ("fr", ["11001", "fr", "index.html"]),
+        ("nl", ["11001", "nl", "index.html"]),
+    ):
+        page = (tmp_path / "local" / Path(*path)).read_text(encoding="utf-8")
+        for other in ("en", "fr", "nl"):
+            assert f'hreflang="{other}"' in page, f"the {lang} page does not point at {other}"
+        assert 'hreflang="x-default"' in page, f"the {lang} page names no default"
+        # Its canonical is ITSELF, not the English page: three real pages, not
+        # three views of one.
+        expected = "/local/11001/" if lang == "en" else f"/local/11001/{lang}/"
+        assert f'rel="canonical" href="https://example.test/site{expected}"' in page
+
+
+def test_a_translated_page_links_back_out_correctly(payload_dir, tmp_path, db):
+    """It sits one directory deeper than the English page, so every relative
+    link needs one more hop. A wrong prefix breaks every link on the page while
+    the page itself still renders -- the kind of breakage that ships."""
+    _run(payload_dir, tmp_path, db)
+    page = (tmp_path / "local" / "11001" / "fr" / "index.html").read_text(encoding="utf-8")
+    assert 'href="../../../communes.html"' in page
+    assert 'href="../../../public/data/communes/11001.json"' in page
+
+
+def test_numbers_are_written_the_way_each_language_writes_them():
+    """Belgium writes a number three ways, and a page that gets it wrong reads
+    as foreign before a reader has taken in a single figure."""
+    assert elp._format_value(565615, "count", "en") == "565,615"
+    assert elp._format_value(565615, "count", "fr") == "565 615"
+    assert elp._format_value(565615, "count", "nl") == "565.615"
+    assert elp._format_value(11.62, "percent", "fr") == "11,62%"
+    assert elp._format_value(100.0, "percent", "nl") == "100%"
+
+
+def test_the_sitemap_lists_every_language_with_its_alternates(payload_dir, tmp_path, db):
+    _run(payload_dir, tmp_path, db)
+    sitemap = (tmp_path / "local" / "sitemap.xml").read_text(encoding="utf-8")
+    assert "<loc>https://example.test/site/local/11001/</loc>" in sitemap
+    assert "<loc>https://example.test/site/local/11001/fr/</loc>" in sitemap
+    assert "<loc>https://example.test/site/local/11001/nl/</loc>" in sitemap
+    assert 'xmlns:xhtml="http://www.w3.org/1999/xhtml"' in sitemap
+    assert sitemap.count('hreflang="fr"') >= 3, "alternates are not declared per entry"

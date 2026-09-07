@@ -196,3 +196,53 @@ def test_the_map_component_holds_no_english_of_its_own():
         if len(literal.split()) >= 4
     ]
     assert not prose, f"user-facing English left in the component: {prose}"
+
+
+# --- one language for the whole site ---------------------------------------
+
+
+LEGACY_PAGES = ["index.html", "dashboard.html"]
+
+
+@pytest.mark.parametrize("page", LEGACY_PAGES)
+def test_the_older_pages_write_the_canonical_language_key(page):
+    """THE BUG THIS FIXES, reproduced in a browser before it was fixed.
+
+    index.html and dashboard.html have had their own translation tables and
+    their own switcher since before the shared module existed, persisting to
+    plain `lang` while local.html used `belpulse-lang`. Two language systems on
+    one site, writing to two different keys: choosing French on the dashboard
+    and clicking through to the commune table gave you English.
+    """
+    text = (REPO / page).read_text(encoding="utf-8")
+    assert "belpulse-lang" in text, f"{page} does not write the site-wide language key"
+    assert not re.search(
+        r"setItem\(\s*['\"]lang['\"]", text
+    ), f"{page} still writes the old key, so its choice will not carry"
+    # ...and still READS the old one, so nobody loses a choice they made.
+    assert re.search(
+        r"getItem\(\s*['\"]lang['\"]", text
+    ), f"{page} no longer reads the legacy key, so existing readers are reset"
+
+
+def test_a_language_already_chosen_under_the_old_key_is_honoured():
+    """A reader who picked Dutch on the dashboard last week must not be reset
+    to English by this change."""
+    out = json.loads(
+        _node(
+            "JSON.stringify({"
+            "legacyOnly: I.initial({getItem: k => k === 'lang' ? 'nl' : null}, 'en-GB'),"
+            "canonicalWins: I.initial({getItem: k => k === 'lang' ? 'nl' : 'fr'}, 'en-GB'),"
+            "})"
+        )
+    )
+    assert out["legacyOnly"] == "nl", "a choice under the old key is ignored"
+    assert out["canonicalWins"] == "fr", "the canonical key must win when both exist"
+
+
+@pytest.mark.parametrize("page", ["all_data.html", "about.html"])
+def test_the_thin_pages_are_translated_too(page):
+    text = (REPO / page).read_text(encoding="utf-8")
+    assert 'src="assets/i18n.js"' in text, f"{page} does not load the shared strings"
+    assert 'id="langSeg"' in text, f"{page} has no language switcher"
+    assert "data-t=" in text, f"{page} marks nothing for translation"
