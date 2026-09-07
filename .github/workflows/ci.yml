@@ -22,6 +22,14 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
+      - name: Install Playwright's Chromium
+        # The package alone still skips every browser-gated test (see
+        # tests/builder/test_builder_shell_service.py::_chromium); the binary
+        # has to be installed too. --with-deps pulls the system libraries
+        # ubuntu-latest doesn't ship. Chromium only -- it's the only browser
+        # any test launches.
+        run: playwright install --with-deps chromium
+
       - name: Lint
         run: ruff check .
 
