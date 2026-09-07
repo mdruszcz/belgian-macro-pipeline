@@ -629,6 +629,61 @@ Files, downloaded by the maintainer on 2026-09-05 and held under `data/raw/statb
 | `REFNIS_2025.csv` | Administrative entities, post-2025 wave (565 communes) |
 | `Conversion Postal code_Refnis code_va01012025.xlsx` | Postal code → commune; retained, not yet used |
 
+### Boundary geometry — LOADED 2026-09-07, the first geometry in the pipeline
+
+Block C deliberately stored **no geometry**: the `geographies` table carries names, codes and
+parentage only, and the note there said there was nothing to build until Block X needed
+boundaries. Block X needs them, so this is that.
+
+**Source file**, hand-downloaded by the maintainer 2026-09-07, held under
+`data/raw/statbel/sectors/` (gitignored — it is 227 MB):
+
+| File | Contents |
+|---|---|
+| `sh_statbel_statistical_sectors_3812_20260101.geojson` | 20,781 statistical sectors valid 2026-01-01, each carrying its commune/district/province/region NIS code |
+| `..._readme_{en,fr,nl,de}.doc` | Field definitions, reference system and accuracy |
+| `Licence open data_{FR,NL}.pdf` | The reuse licence shipped with the data |
+
+**The licence is one already cleared.** The NL PDF in the download is *byte-identical*
+(SHA-256 `aaf6847a…`) to
+[`licences/statbel_open_data_licence_2015-10-22.pdf`](licences/statbel_open_data_licence_2015-10-22.pdf),
+the *Licentie open data* of 22 October 2015 recorded below. The FR PDF is the French text of the
+same document, now committed alongside it as
+[`licences/statbel_open_data_licence_2015-10-22_fr.pdf`](licences/statbel_open_data_licence_2015-10-22_fr.pdf).
+So no new licence question arises: commercial reuse and derived works are granted, and the
+obligation is to name the producer and the date of last update — which the map page does.
+
+**What the file says about itself**, read from its own readme rather than assumed:
+
+- Reference system: **Belgian Lambert 2008, EPSG:3812** — projected metres, not longitude/latitude.
+- Accuracy: **1:10,000**.
+- Boundary version: the 2026 one, differing from 2025 "due to improved accuracy of the statistical
+  sector boundaries" rather than any change of commune.
+
+**What is built from it** — `scripts/build_commune_boundaries.py` → `data/geo/communes.geojson`
+(1.24 MB, ~320 KB gzipped), committed:
+
+1. The 20,781 sectors are dissolved into the **565 communes**, grouping on `cd_munty_refnis`.
+   All 565 resolve through `resolve_geo()`; none is unknown.
+2. Borders are simplified to a **50 m tolerance over a shared-arc topology**, not per polygon.
+   Simplifying each commune separately moves each shared border twice, in two directions, opening
+   visible gaps and overlaps between neighbours. Measured: 55.2 MB dissolved → 1.9 MB at 25 m,
+   1.24 MB at 50 m, 0.74 MB at 100 m.
+3. Coordinates are converted to WGS84 lon/lat, **reading EPSG:3812 from the file's own `crs`
+   member**. Statbel ships boundary layers in both 31370 and 3812; the two are about a kilometre
+   apart, and the wrong choice produces a map that looks entirely normal and is in the wrong
+   place. The script refuses to run on a file that declares no CRS rather than guess it
+   (CLAUDE.md rule 13).
+
+**Three things this is not.** It carries no indicator values, so it is reference data like the
+rest of `statbel_geography` and not an observation source. Its simplified outlines are **not**
+accurate to the source's 1:10,000 and must never be used to locate a boundary on the ground —
+stated on the page itself. And it is deliberately kept out of `requirements.txt` and `make all`:
+rebuilding needs `shapely`, `topojson` and `pyproj` (`requirements-geo.txt`) plus the 227 MB
+source, so the *output* is committed and CI reads it as data. `make boundaries` rebuilds it, and
+should be run only when Statbel publishes a new boundary vintage — the script refuses any file
+not stamped `2026-01-01`, so a new vintage is a loud failure rather than a silent change of map.
+
 ### Licence — CC BY 4.0 (see also the 2015 open-data licence below — two documents, both from Statbel)
 
 > ⚠️ **Two Statbel licence documents exist and they do not say the same thing.** This section

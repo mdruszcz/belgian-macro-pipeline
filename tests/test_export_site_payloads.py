@@ -8,6 +8,7 @@ the reshape unchanged.
 """
 
 import csv
+import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -299,3 +300,174 @@ def test_payload_carries_the_source_retrieval_date_for_licence_attribution(tmp_p
     payload = json.loads((out_dir / "communes" / "11001.json").read_text())
     assert payload["indicators"]["POP"]["updated"] == "2026-09-05"
     assert "updated" not in payload["indicators"]["POP_PCT"]
+
+
+def test_derived_indicators_get_a_cross_section_payload(tmp_path):
+    """A derived indicator must be mappable, not just visible one commune at a
+    time.
+
+    `indicators/{id}.json` is sliced from communes_export.csv, which holds only
+    STORED indicators -- the derived ones are computed on the way into the
+    history export. So until the backfill existed, the thirteen derived
+    indicators (income per return, unemployment rate, the shares) had no
+    cross-commune file at all: perfectly visible on a commune's own page and
+    impossible to draw on a map, which is precisely what they are for.
+    """
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    _write(
+        history,
+        HISTORY_HEADER,
+        [
+            # A stored indicator, present in BOTH exports.
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "POP", "Population", "count", "2024", "16000"
+            ),
+            _history_row(
+                "11002", "be:mun:11002", "Antwerpen", "POP", "Population", "count", "2024", "530000"
+            ),
+            # A derived one, present only in the history export.
+            _history_row(
+                "11001",
+                "be:mun:11001",
+                "Aartselaar",
+                "AVG_INC",
+                "Average income",
+                "eur",
+                "2022",
+                "40000",
+                "D",
+            ),
+            _history_row(
+                "11001",
+                "be:mun:11001",
+                "Aartselaar",
+                "AVG_INC",
+                "Average income",
+                "eur",
+                "2023",
+                "49360",
+                "D",
+            ),
+            _history_row(
+                "11002",
+                "be:mun:11002",
+                "Antwerpen",
+                "AVG_INC",
+                "Average income",
+                "eur",
+                "2023",
+                "35362",
+                "D",
+            ),
+        ],
+    )
+
+    latest = tmp_path / "latest.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "POP", "Population", "count", "2024", "16000"
+            ),
+            _history_row(
+                "11002", "be:mun:11002", "Antwerpen", "POP", "Population", "count", "2024", "530000"
+            ),
+        ],
+    )
+
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        sections_config=None,
+    )
+
+    derived = json.loads((out_dir / "indicators" / "AVG_INC.json").read_text())
+    # EVERY commune, not just the first -- the backfill must not stop once the
+    # indicator exists.
+    assert set(derived["communes"]) == {"11001", "11002"}
+    # The latest period per commune, matching what communes_export.csv means by
+    # "latest".
+    assert derived["communes"]["11001"]["period"] == "2023"
+    assert derived["communes"]["11001"]["value"] == 49360.0
+
+    # The stored indicator is untouched by the backfill.
+    stored = json.loads((out_dir / "indicators" / "POP.json").read_text())
+    assert set(stored["communes"]) == {"11001", "11002"}
+
+
+def test_indicator_index_lists_every_mappable_indicator(tmp_path):
+    """The index is what lets a page offer every indicator without naming one.
+    If an indicator has a payload but no index row, it simply cannot be
+    reached from the interface."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    _write(
+        history,
+        HISTORY_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "POP", "Population", "count", "2024", "16000"
+            ),
+            _history_row(
+                "11001",
+                "be:mun:11001",
+                "Aartselaar",
+                "AVG_INC",
+                "Average income",
+                "eur",
+                "2023",
+                "49360",
+                "D",
+            ),
+        ],
+    )
+    latest = tmp_path / "latest.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "POP", "Population", "count", "2024", "16000"
+            )
+        ],
+    )
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        sections_config=None,
+    )
+
+    index = json.loads((out_dir / "metadata" / "indicators.json").read_text())["indicators"]
+    by_code = {row["indicator_code"]: row for row in index}
+    assert set(by_code) == {"POP", "AVG_INC"}
+
+    payloads = {p.stem for p in (out_dir / "indicators").glob("*.json")}
+    assert set(by_code) == payloads, "index and payload files must not drift apart"
+
+    assert by_code["POP"]["coverage"] == 1
+    assert by_code["POP"]["unit"] == "count"
+    assert by_code["AVG_INC"]["names"]["en"] == "Average income"

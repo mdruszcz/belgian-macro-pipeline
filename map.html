@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commune Map</title>
+<meta name="description" content="Every municipal indicator in this pipeline, drawn on the 565 Belgian communes.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
+    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
+    --accent:#a8722f; --accent-soft:#f0e2cf; --accent-ink:#5c3d18;
+    --good:#3f7d5c; --good-soft:#e2efe7;
+    --warn:#b9762a; --warn-soft:#f6e9d6;
+    --row-alt: #fbfaf6;
+    --focus-ring: #a8722f;
+    /* The choropleth ramp. Single hue, light to dark, because dark = MORE and
+       nothing else -- a red/green ramp would tell the reader that a high value
+       is bad, which is not something a map of "population" or "median price"
+       can honestly say. Whether high is good is stated in words instead. */
+    --ramp-0:#f2e9dc; --ramp-1:#e5cfae; --ramp-2:#d6b184; --ramp-3:#c1905c;
+    --ramp-4:#a8722f; --ramp-5:#845723; --ramp-6:#5c3d18;
+    --nodata:#e8e4da; --map-stroke:#f7f5f0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+      --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+      --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+      --good:#6fbf94; --good-soft:#1f2f26;
+      --warn:#e0a355; --warn-soft:#332818;
+      --row-alt:#1f1d18;
+      --focus-ring:#d6994f;
+      --ramp-0:#2e2a22; --ramp-1:#4a3d28; --ramp-2:#6b5330; --ramp-3:#8d6c39;
+      --ramp-4:#b08745; --ramp-5:#d0a75f; --ramp-6:#eccb8d;
+      --nodata:#38332a; --map-stroke:#1a1815;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
+    --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
+    --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
+    --good:#6fbf94; --good-soft:#1f2f26;
+    --warn:#e0a355; --warn-soft:#332818;
+    --row-alt:#1f1d18;
+    --focus-ring:#d6994f;
+    --ramp-0:#2e2a22; --ramp-1:#4a3d28; --ramp-2:#6b5330; --ramp-3:#8d6c39;
+    --ramp-4:#b08745; --ramp-5:#d0a75f; --ramp-6:#eccb8d;
+    --nodata:#38332a; --map-stroke:#1a1815;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+  ::selection{background:var(--accent-soft)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+  header{margin-bottom:28px}
+  h1{
+    font-family:"Spectral",Georgia,serif; font-weight:600;
+    font-size:2rem; margin:0 0 6px; color:var(--text);
+    text-wrap:balance; letter-spacing:-.01em;
+  }
+  .subtitle{color:var(--text-muted); font-size:.95rem; max-width:70ch}
+  .subtitle code{
+    font-family:"IBM Plex Mono",monospace; font-size:.85em;
+    background:var(--accent-soft); color:var(--accent-ink);
+    padding:1px 5px; border-radius:3px;
+  }
+  a{color:var(--accent-ink)} a:hover{color:var(--accent)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:var(--accent)}}
+  :root[data-theme="dark"] a{color:var(--accent)}
+
+  .theme-toggle{float:right;display:flex;gap:2px;border:1px solid var(--border);
+    border-radius:5px;overflow:hidden;background:var(--surface)}
+  .theme-toggle button{
+    border:0;background:transparent;color:var(--text-muted);cursor:pointer;
+    font:inherit;font-size:.78rem;padding:4px 9px;
+  }
+  .theme-toggle button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    margin:22px 0 14px;
+  }
+  select,input[type=text]{
+    font:inherit;padding:7px 10px;border:1px solid var(--border-strong);
+    border-radius:5px;background:var(--surface);color:var(--text);
+  }
+  select:focus,input:focus{outline:2px solid var(--focus-ring);outline-offset:1px}
+  #indicator{min-width:340px;max-width:100%}
+  #search{min-width:230px}
+  .status{color:var(--text-faint);font-size:.85rem}
+
+  .panel{
+    border:1px solid var(--border);border-radius:8px;background:var(--surface);
+    overflow:hidden;
+  }
+  .mapbox{position:relative;background:var(--surface)}
+  svg.map{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+  svg.map.dragging{cursor:grabbing}
+  svg.map path{stroke:var(--map-stroke);stroke-width:.35;vector-effect:non-scaling-stroke}
+  svg.map path:hover{stroke:var(--text);stroke-width:1.4}
+  svg.map path.hit{stroke:var(--text);stroke-width:1.8}
+
+  .tip{
+    position:absolute;pointer-events:none;z-index:5;
+    background:var(--surface);border:1px solid var(--border-strong);
+    border-radius:6px;padding:7px 10px;font-size:.85rem;
+    box-shadow:0 4px 14px rgba(0,0,0,.13);max-width:250px;
+  }
+  .tip .n,.tip .v,.tip .m{display:block}
+  .tip .n{font-weight:600}
+  .tip .v{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tip .v{color:var(--accent)}}
+  :root[data-theme="dark"] .tip .v{color:var(--accent)}
+  .tip .m{color:var(--text-faint);font-size:.78rem}
+
+  .zoom{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px}
+  .zoom button{
+    width:30px;height:30px;font:inherit;font-size:1rem;line-height:1;
+    border:1px solid var(--border-strong);background:var(--surface);
+    color:var(--text);border-radius:5px;cursor:pointer;
+  }
+  .zoom button:hover{background:var(--accent-soft);color:var(--accent-ink)}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;
+    padding:14px 16px;border-top:1px solid var(--border);
+  }
+  .scale{display:flex;flex-direction:column;gap:4px}
+  .swatches{display:flex}
+  .swatches div{width:64px;height:13px}
+  /* Ticks are ABSOLUTELY POSITIONED on the bar rather than laid out as equal
+     cells. Fixed-width cells make each label's box overlap its neighbour's
+     whether or not the text does, and a label that is centred on a band
+     boundary has to be free to be as wide as its own text. Only the internal
+     boundaries are labelled; the two extremes are written out in the note,
+     where they have room to be exact. */
+  .ticks{position:relative;height:1.1rem;font-family:"IBM Plex Mono",monospace;
+    font-size:.7rem;color:var(--text-muted)}
+  .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+  .legend .note{color:var(--text-muted);font-size:.82rem;max-width:46ch}
+  .nodata-key{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text-muted)}
+  .nodata-key i{width:14px;height:14px;background:var(--nodata);border:1px solid var(--border-strong);display:inline-block}
+
+  .attribution{
+    margin-top:26px;padding:14px 16px;border:1px solid var(--border);
+    border-radius:8px;background:var(--row-alt);
+    font-size:.82rem;color:var(--text-muted);line-height:1.6;
+  }
+  .attribution strong{color:var(--text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace;font-size:.9em}
+  footer{margin-top:22px;color:var(--text-faint);font-size:.8rem;line-height:1.6}
+  .warn-box{
+    margin-top:14px;padding:10px 14px;border-left:3px solid var(--warn);
+    background:var(--warn-soft);color:var(--accent-ink);font-size:.85rem;border-radius:0 5px 5px 0;
+  }
+  :root[data-theme="dark"] .warn-box{color:var(--text)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .warn-box{color:var(--text)}}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="theme-toggle" role="group" aria-label="Colour theme">
+  <button type="button" data-theme-choice="light" aria-pressed="false" title="Always light">&#9728; Light</button>
+  <button type="button" data-theme-choice="auto" aria-pressed="false" title="Follow your device setting">Auto</button>
+  <button type="button" data-theme-choice="dark" aria-pressed="false" title="Always dark">&#9790; Dark</button>
+</div>
+  <header>
+    <h1>Commune Map</h1>
+    <p class="subtitle">Every municipal indicator this pipeline holds, drawn on the 565 Belgian communes.
+    Pick an indicator; hover a commune for its value; click it to open its own profile page. Communes are
+    shaded by <em>rank</em>, so each colour band holds roughly the same number of communes &mdash; that shows
+    where a commune sits relative to the rest, which is what a national map can honestly show. Communes the
+    source has no figure for are drawn flat, never as zero.
+    See <a href="communes.html">communes.html</a> for the same figures as a table,
+    <a href="all_data.html">all_data.html</a> for national-level data, or
+    <a href="local.html">local.html</a> for a single commune's profile.</p>
+  </header>
+
+  <div class="toolbar">
+    <select id="indicator" aria-label="Indicator to map"></select>
+    <input id="search" type="text" placeholder="Find a commune (name or NIS code)…" autocomplete="off" list="communeList">
+    <datalist id="communeList"></datalist>
+    <span class="status" id="status">Loading…</span>
+  </div>
+
+  <div class="panel">
+    <div class="mapbox" id="mapbox">
+      <svg class="map" id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+      <div class="zoom">
+        <button type="button" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+        <button type="button" id="zoomReset" title="Reset view" aria-label="Reset view">&#8634;</button>
+      </div>
+      <div class="tip hidden" id="tip"></div>
+    </div>
+    <div class="legend">
+      <div class="scale">
+        <div class="swatches" id="swatches"></div>
+        <div class="ticks" id="ticks"></div>
+      </div>
+      <div class="nodata-key"><i></i> no data</div>
+      <div class="note" id="legendNote"></div>
+    </div>
+  </div>
+
+  <div class="warn-box hidden" id="coverageWarn"></div>
+
+  <div class="attribution" id="attribution">
+    <strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+    1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+    document already recorded in <code>docs/licences/</code>.
+    <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+    communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+    a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+    longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+    are drawn for comparison, never for measurement or for locating a boundary on the ground.
+    <br><br>
+    <!-- values-attribution:start — copied verbatim from communes.html and held
+         identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+
+    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), reused under
+    <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
+    and Statbel's <em>Licentie open data</em> of 22 October 2015.
+    <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
+    <strong>Changes were made:</strong> the published files are reshaped into a canonical
+    indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
+    2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
+    endorse this product or how its data is used here. English commune names are unofficial
+    translations, not official Statbel labels.
+    <br><br>
+    <strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a>
+    (Office National de l'Emploi &mdash; Rijksdienst voor Arbeidsvoorziening), for the
+    unemployment, temporary-unemployment, part-time-benefit and activation columns.
+    <strong>Date of the information used:</strong> the files fetched for this build, covering
+    2017 onwards; the current year is a part-year average and is marked provisional, and each
+    row carries its own status letter. Reused under ONEM's own conditions, which
+    permit commercial reuse and require the source and this date &mdash; <em>not</em> under
+    CC BY 4.0, which does not apply to this source. Cells ONEM withholds for privacy
+    (fewer than 10 people) are shown as suppressed, never as zero.
+    <br><br>
+    <strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police
+    F&eacute;d&eacute;rale / Federale Politie</a> (Direction de l'information polici&egrave;re et
+    des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rate
+    columns. Reused under the federal police's own condition, quoted in full in
+    <code>docs/data_catalog.md</code>: correctly credit the source as stated here. That condition
+    says nothing about permitted uses beyond attribution &mdash; <em>not</em> CC BY 4.0, which does
+    not apply to this source, and not a stated grant of commercial reuse either, unlike Statbel and
+    ONEM above. Every one of these rates is resolved onto the commune boundaries in force through
+    2024, not the current map, for every year shown &mdash; including years long before that map
+    existed, since that is how the source itself publishes its own history. The most recent year of
+    each series is marked provisional; its exact reporting window is not stated by the source.
+    <!-- values-attribution:end -->
+  </div>
+
+  <footer>Reads <code>data/geo/communes.geojson</code> and <code>public/data/indicators/{id}.json</code> from
+  GitHub Pages &mdash; no server, no map tiles, no third-party requests. The indicator list is read from
+  <code>public/data/metadata/indicators.json</code>, so a new municipal dataset appears in the picker on its
+  own with no change to this page.</footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   THIS PAGE NAMES NO INDICATOR. Everything in the picker comes from
+   metadata/indicators.json, and the default selection comes from the headline
+   list in metadata/sections.json -- the same config file the commune profile
+   page reads. That is the 50% gate's "zero indicator-specific frontend logic"
+   rule: adding an indicator must be a config change, never an edit here.
+--------------------------------------------------------------------------- */
+
+// ── DOM-free logic, importable from Node for tests ────────────────────────
+const MapUI = {};
+
+const GEO_URL     = 'data/geo/communes.geojson';
+const INDEX_URL   = 'public/data/metadata/indicators.json';
+const SECTIONS_URL= 'public/data/metadata/sections.json';
+const VALUES_URL  = code => `public/data/indicators/${code}.json`;
+
+const BINS = 7;               // matches the seven --ramp-* tokens
+const SWATCH_PX = 64;         // must match .swatches div in the stylesheet
+const RAMP = Array.from({length: BINS}, (_, i) => `var(--ramp-${i})`);
+
+const state = {
+  features: [],               // {nis, name, name_fr, d} -- d is the SVG path
+  index: [],                  // the indicator catalogue
+  values: null,               // nis -> {value, period, status}
+  meta: null,                 // the selected indicator's row from the index
+  view: null,                 // current viewBox
+  home: null,                 // the fitted viewBox, for reset
+};
+
+/* --- projection ---------------------------------------------------------
+   Equirectangular, with longitude scaled by cos(mean latitude) so Belgium is
+   not stretched sideways. Over a country four degrees wide the error against
+   a proper conic is smaller than the 50 m simplification already applied, so
+   a heavier projection would be false precision. */
+MapUI.meanLatitude = function(features){
+  let sum = 0, n = 0;
+  const walk = c => {
+    if(typeof c[0] === 'number'){ sum += c[1]; n++; return; }
+    c.forEach(walk);
+  };
+  features.forEach(f => walk(f.geometry.coordinates));
+  return n ? sum / n : 0;
+};
+
+MapUI.lonScale = lat => Math.cos(lat * Math.PI / 180);
+
+MapUI.geometryToPath = function(geom, lonScale){
+  const point = (lon, la) => (lon * lonScale).toFixed(4) + ' ' + (-la).toFixed(4);
+  const ring = r => {
+    let out = '';
+    for(let i = 0; i < r.length; i++) out += (i ? 'L' : 'M') + point(r[i][0], r[i][1]);
+    return out + 'Z';
+  };
+  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+  let d = '';
+  for(const poly of polys) for(const r of poly) d += ring(r);
+  return d;
+};
+
+/* --- formatting ---------------------------------------------------------
+   Mirrors communes.html so the same number reads the same on both pages. */
+MapUI.formatValue = function(num, unit, decimals){
+  if(num === null || num === undefined || isNaN(num)) return '\u2014';
+  const digits = (decimals === null || decimals === undefined)
+    ? (Math.abs(num) >= 1000 ? 0 : 2) : decimals;
+  const body = num.toLocaleString(undefined, {maximumFractionDigits: digits});
+  const u = (unit || '').toLowerCase();
+  if(u === 'eur') return '\u20ac' + body;
+  if(u.startsWith('percent')) return body + '%';
+  return body;
+};
+
+MapUI.tickLabel = function(num, unit, compactAxis){
+  const u = (unit || '').toLowerCase();
+  const body = compactAxis
+    ? num.toLocaleString(undefined, {notation: 'compact', maximumFractionDigits: 1})
+    : num.toLocaleString(undefined, {maximumFractionDigits: Math.abs(num) < 100 ? 1 : 0});
+  if(u === 'eur') return '\u20ac' + body;
+  if(u.startsWith('percent')) return body + '%';
+  return body;
+};
+
+MapUI.unitSuffix = function(unit){
+  const u = (unit || '').toLowerCase();
+  if(!u || u === 'count' || u === 'eur' || u.startsWith('percent')) return '';
+  return ' ' + unit.replace(/_/g, ' ');
+};
+
+MapUI.pickName = function(names, fallback){
+  if(!names) return fallback || '';
+  return names.en || names.fr || names.nl || fallback || '';
+};
+
+/* --- classification -----------------------------------------------------
+   Quantiles, not equal intervals. Belgian municipal figures are heavily
+   skewed -- a handful of communes hold values many times the median, and an
+   equal-interval scale puts 550 of them in the lightest band and shows
+   nothing. Quantiles show rank, which is what the legend then says out loud.
+   Ties are collapsed, so an indicator where half the communes share a value
+   gets FEWER bands rather than empty ones that a reader would read as real. */
+MapUI.quantileBreaks = function(sorted, bins){
+  const min = sorted[0], max = sorted[sorted.length - 1];
+  const breaks = [];
+  for(let i = 1; i < bins; i++){
+    const pos = (sorted.length - 1) * (i / bins);
+    const lo = Math.floor(pos), hi = Math.ceil(pos);
+    breaks.push(sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo));
+  }
+  // Kept only if strictly inside the data. A break sitting ON the minimum
+  // makes the bottom band unreachable -- every commune, the smallest
+  // included, lands above it -- so the map would draw a colour no commune
+  // can have while giving the reader one fewer real distinction than the
+  // legend claims.
+  const unique = [];
+  for(const b of breaks){
+    if(b <= min || b > max) continue;
+    if(!unique.length || b > unique[unique.length - 1]) unique.push(b);
+  }
+  return unique;
+};
+
+MapUI.equalIntervalBreaks = function(sorted, bins){
+  const min = sorted[0], max = sorted[sorted.length - 1];
+  const step = (max - min) / bins;
+  const breaks = [];
+  for(let i = 1; i < bins; i++){
+    const b = min + step * i;
+    if(b > min && b <= max && (!breaks.length || b > breaks[breaks.length - 1])) breaks.push(b);
+  }
+  return breaks;
+};
+
+/* Quantiles first, equal intervals only as a RESCUE.
+
+   Quantiles collapse when most communes share one value -- the recorded-crime
+   rates have long runs of zeros, and every quantile of such a series lands on
+   the same number. Collapsing is the correct response to ties, but collapsing
+   all the way to one or two bands paints 90% and 10% of the country in the
+   same colour and shows the reader nothing that is there. Equal intervals do
+   separate them, so the page switches method rather than draw a flat map, and
+   says which method it used -- the two answer different questions and a reader
+   comparing two maps has to know which one they are looking at. */
+MapUI.MIN_USEFUL_BANDS = 3;
+
+MapUI.classify = function(sorted, bins){
+  if(!sorted.length) return {breaks: [], method: 'none'};
+  if(sorted[0] === sorted[sorted.length - 1]) return {breaks: [], method: 'uniform'};
+  const quantile = MapUI.quantileBreaks(sorted, bins);
+  if(quantile.length + 1 >= MapUI.MIN_USEFUL_BANDS) return {breaks: quantile, method: 'quantile'};
+  const equal = MapUI.equalIntervalBreaks(sorted, bins);
+  if(equal.length > quantile.length) return {breaks: equal, method: 'equal'};
+  return {breaks: quantile, method: 'quantile'};
+};
+
+MapUI.bandFor = function(value, breaks){
+  let i = 0;
+  while(i < breaks.length && value >= breaks[i]) i++;
+  return i;
+};
+
+/* Spread whatever bands survived tie-collapsing across the full ramp, so a
+   three-band indicator still runs light to dark instead of using three
+   near-identical colours from one end of it. */
+MapUI.colourIndex = function(band, bands, rampLength){
+  if(bands <= 1) return rampLength - 1;
+  return Math.round(band * (rampLength - 1) / (bands - 1));
+};
+
+/* The indicator to open with. Config first (the headline list local.html
+   already drives its hero row from), then simply the first indicator -- so
+   this page never names one itself. */
+MapUI.defaultIndicator = function(requested, headlines, available){
+  const known = new Set(available);
+  if(requested && known.has(requested)) return requested;
+  const headline = (headlines || []).find(h => known.has(h));
+  return headline || available[0] || null;
+};
+
+if(typeof module !== 'undefined') module.exports = MapUI;
+</script>
+
+<script>
+// ── rendering (browser only) ─────────────────────────────────────
+const {
+  meanLatitude, lonScale, geometryToPath, formatValue, tickLabel, unitSuffix,
+  pickName, classify, bandFor, colourIndex, defaultIndicator,
+} = MapUI;
+
+/* --- rendering ----------------------------------------------------------- */
+const svg   = document.getElementById('svg');
+const tip   = document.getElementById('tip');
+const mapbox= document.getElementById('mapbox');
+
+function buildMap(geojson){
+  const feats = [];
+
+  // Mean latitude first: the projection constant is derived from the data, so
+  // no path can be built until it is known.
+  const scale = lonScale(meanLatitude(geojson.features));
+
+  for(const f of geojson.features){
+    const d = geometryToPath(f.geometry, scale);
+    feats.push({
+      nis: f.properties.nis,
+      name: f.properties.name_nl,
+      name_fr: f.properties.name_fr,
+      d,
+    });
+  }
+
+  const frag = document.createDocumentFragment();
+  for(const f of feats){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    el.setAttribute('d', f.d);
+    el.setAttribute('fill', 'var(--nodata)');
+    el.dataset.nis = f.nis;
+    frag.appendChild(el);
+    f.el = el;
+  }
+  svg.appendChild(frag);
+
+  // Fit the viewBox to what was actually drawn, rather than to a hardcoded
+  // bounding box for Belgium -- if the boundary file ever changes vintage the
+  // map still frames itself correctly.
+  const box = svg.getBBox();
+  const pad = Math.max(box.width, box.height) * 0.02;
+  state.home = {x: box.x - pad, y: box.y - pad, w: box.width + pad*2, h: box.height + pad*2};
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.style.aspectRatio = (state.home.w / state.home.h).toFixed(4);
+  setView(state.home);
+
+  state.features = feats;
+  state.byNis = Object.fromEntries(feats.map(f => [f.nis, f]));
+}
+
+function setView(v){
+  state.view = v;
+  svg.setAttribute('viewBox', `${v.x} ${v.y} ${v.w} ${v.h}`);
+}
+
+function paint(){
+  const meta = state.meta, values = state.values;
+  const nums = [];
+  for(const f of state.features){
+    const row = values[f.nis];
+    if(row && typeof row.value === 'number') nums.push(row.value);
+  }
+  nums.sort((a, b) => a - b);
+
+  const {breaks, method} = classify(nums, BINS);
+  const bands  = breaks.length + 1;
+  state.method = method;
+  const colourFor = band => RAMP[colourIndex(band, bands, RAMP.length)];
+
+  let withValue = 0;
+  for(const f of state.features){
+    const row = values[f.nis];
+    if(row && typeof row.value === 'number'){
+      f.el.setAttribute('fill', colourFor(bandFor(row.value, breaks)));
+      withValue++;
+    } else {
+      f.el.setAttribute('fill', 'var(--nodata)');
+    }
+  }
+
+  drawLegend(breaks, bands, colourFor, nums);
+  reportCoverage(withValue, nums);
+}
+
+function drawLegend(breaks, bands, colourFor, nums){
+  const sw = document.getElementById('swatches');
+  const tk = document.getElementById('ticks');
+  sw.innerHTML = ''; tk.innerHTML = '';
+  if(!nums.length){
+    document.getElementById('legendNote').textContent =
+      'No commune carries a value for this indicator.';
+    return;
+  }
+  for(let i = 0; i < bands; i++){
+    const cell = document.createElement('div');
+    cell.style.background = colourFor(i);
+    sw.appendChild(cell);
+  }
+  // Compact labels on the axis only. Eight full figures like "565,615" do not
+  // fit under 44-pixel swatches and collide into an unreadable run of digits;
+  // the exact value is one hover away, so the legend's job is the shape of the
+  // scale, not the precision.
+  // Decided once for the whole axis from its largest value, so every tick is
+  // written the same way rather than mixing "8,302" with "11.5K".
+  const compactAxis = Math.abs(nums[nums.length - 1]) >= 10000;
+  const label = v => tickLabel(v, state.meta.unit, compactAxis);
+  // One tick per INTERNAL boundary, placed at the seam between its two
+  // swatches. The ends carry no tick: the lowest and highest values are stated
+  // in the note below instead, in full rather than compacted.
+  tk.style.width = (bands * SWATCH_PX) + 'px';
+  for(let i = 0; i < breaks.length; i++){
+    const s = document.createElement('span');
+    s.textContent = label(breaks[i]);
+    s.style.left = ((i + 1) * SWATCH_PX) + 'px';
+    tk.appendChild(s);
+  }
+
+  const dir = {
+    higher_is_better: 'For this indicator the source considers a higher value better.',
+    lower_is_better:  'For this indicator the source considers a lower value better.',
+    contextual:       'This indicator has no better or worse direction — it is context, not a score.',
+  }[state.meta.direction] || '';
+
+  const exact = v => formatValue(v, state.meta.unit, state.meta.decimals) +
+                    unitSuffix(state.meta.unit);
+  const methodNote = state.method === 'equal'
+    ? `Too many communes share the same figure for rank-based bands to separate them, ` +
+      `so these bands are equal steps in value instead — the colour shows distance from ` +
+      `the lowest, not rank.`
+    : `Each band holds roughly the same number of communes, so the colour shows rank ` +
+      `rather than distance.`;
+  document.getElementById('legendNote').textContent =
+    `Lowest ${exact(nums[0])}, highest ${exact(nums[nums.length - 1])}. ` +
+    `Colour runs low to high, left to right along the bar. ` +
+    methodNote + ' ' + dir;
+}
+
+function reportCoverage(withValue, nums){
+  const box = document.getElementById('coverageWarn');
+  const total = state.features.length;
+  const missing = total - withValue;
+  document.getElementById('status').textContent =
+    `${withValue} of ${total} communes shown`;
+  if(missing === 0){ box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  box.textContent =
+    `${missing} of the ${total} communes have no value for this indicator and are drawn as ` +
+    `“no data”. That is a gap in the source, not a zero — where the source withholds a figure ` +
+    `(for example a count below 10) it is suppressed rather than published, and a merged commune ` +
+    `may have no row on the map vintage this outline uses.`;
+}
+
+/* --- interaction --------------------------------------------------------- */
+function tipHtml(f){
+  const row = state.values ? state.values[f.nis] : null;
+  const name = f.name === f.name_fr ? f.name : `${f.name} / ${f.name_fr}`;
+  if(!row || typeof row.value !== 'number'){
+    return `<span class="n">${name}</span><span class="m">no data for this indicator</span>`;
+  }
+  const status = row.status && row.status !== 'final' ? ` · ${row.status}` : '';
+  return `<span class="n">${name}</span>` +
+         `<span class="v">${formatValue(row.value, state.meta.unit, state.meta.decimals)}` +
+         `${unitSuffix(state.meta.unit)}</span>` +
+         `<span class="m">${row.period}${status}</span>`;
+}
+
+svg.addEventListener('mousemove', e => {
+  const nis = e.target && e.target.dataset ? e.target.dataset.nis : null;
+  if(!nis){ tip.classList.add('hidden'); return; }
+  const f = state.byNis[nis];
+  tip.innerHTML = tipHtml(f);
+  tip.classList.remove('hidden');
+  const box = mapbox.getBoundingClientRect();
+  let x = e.clientX - box.left + 14, y = e.clientY - box.top + 14;
+  if(x + tip.offsetWidth > box.width) x = e.clientX - box.left - tip.offsetWidth - 14;
+  if(y + tip.offsetHeight > box.height) y = e.clientY - box.top - tip.offsetHeight - 14;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+});
+svg.addEventListener('mouseleave', () => tip.classList.add('hidden'));
+
+svg.addEventListener('click', e => {
+  if(drag && drag.panning) return;   // finishing a pan is not a click
+  const nis = e.target && e.target.dataset ? e.target.dataset.nis : null;
+  if(nis) window.location.href = `local/${nis}/`;
+});
+
+/* Zoom and pan by moving the viewBox. No library: 565 static paths and a
+   viewBox do everything a tile map would, without a third-party request. */
+function zoomBy(factor, cx, cy){
+  const v = state.view;
+  const nx = cx === undefined ? v.x + v.w/2 : cx;
+  const ny = cy === undefined ? v.y + v.h/2 : cy;
+  let w = v.w * factor, h = v.h * factor;
+  const maxW = state.home.w, maxH = state.home.h;
+  if(w > maxW || h > maxH){ setView({...state.home}); return; }
+  const minW = maxW / 60;
+  if(w < minW){ w = minW; h = minW * (maxH / maxW); }
+  setView({
+    x: nx - (nx - v.x) * (w / v.w),
+    y: ny - (ny - v.y) * (h / v.h),
+    w, h,
+  });
+}
+
+function svgPoint(e){
+  const r = svg.getBoundingClientRect(), v = state.view;
+  return {
+    x: v.x + (e.clientX - r.left) / r.width  * v.w,
+    y: v.y + (e.clientY - r.top)  / r.height * v.h,
+  };
+}
+
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const p = svgPoint(e);
+  zoomBy(e.deltaY > 0 ? 1.2 : 1/1.2, p.x, p.y);
+}, {passive: false});
+
+/* Pointer capture is taken only ONCE THE POINTER HAS ACTUALLY MOVED. Capturing
+   it on pointerdown retargets every later event to the <svg>, which silently
+   breaks both the hover tooltip and the click-through to a commune page --
+   e.target is then the SVG and carries no data-nis. The 4-pixel threshold is
+   also what separates a click from a drag, so a shaky click still opens the
+   commune rather than nudging the map. */
+const DRAG_THRESHOLD_PX = 4;
+let drag = null;
+
+svg.addEventListener('pointerdown', e => {
+  if(e.button !== 0) return;
+  drag = {
+    origin: {x: e.clientX, y: e.clientY},
+    p: svgPoint(e),
+    v: {...state.view},
+    panning: false,
+  };
+});
+
+svg.addEventListener('pointermove', e => {
+  if(!drag) return;
+  if(!drag.panning){
+    const far = Math.hypot(e.clientX - drag.origin.x, e.clientY - drag.origin.y);
+    if(far < DRAG_THRESHOLD_PX) return;
+    drag.panning = true;
+    svg.classList.add('dragging');
+    svg.setPointerCapture(e.pointerId);
+    tip.classList.add('hidden');
+  }
+  const r = svg.getBoundingClientRect();
+  const dx = (e.clientX - r.left) / r.width  * drag.v.w;
+  const dy = (e.clientY - r.top)  / r.height * drag.v.h;
+  setView({x: drag.p.x - dx, y: drag.p.y - dy, w: drag.v.w, h: drag.v.h});
+});
+
+const endDrag = e => {
+  if(!drag) return;
+  if(drag.panning){
+    svg.classList.remove('dragging');
+    if(e && e.pointerId !== undefined && svg.hasPointerCapture(e.pointerId)){
+      svg.releasePointerCapture(e.pointerId);
+    }
+  }
+  drag = null;
+};
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+
+document.getElementById('zoomIn').onclick    = () => zoomBy(1/1.4);
+document.getElementById('zoomOut').onclick   = () => zoomBy(1.4);
+document.getElementById('zoomReset').onclick = () => setView({...state.home});
+
+/* Search: zoom to the commune and outline it. */
+document.getElementById('search').addEventListener('change', e => {
+  const q = e.target.value.trim().toLowerCase();
+  if(!q) return;
+  const f = state.features.find(f =>
+    f.nis === q || f.name.toLowerCase() === q || f.name_fr.toLowerCase() === q ||
+    `${f.name} (${f.nis})`.toLowerCase() === q);
+  if(!f) return;
+  svg.querySelectorAll('path.hit').forEach(p => p.classList.remove('hit'));
+  f.el.classList.add('hit');
+  const b = f.el.getBBox();
+  const pad = Math.max(b.width, b.height) * 1.2;
+  setView({x: b.x - pad, y: b.y - pad, w: b.width + pad*2, h: b.height + pad*2});
+});
+
+/* --- theme (same three-state control as the other pages) ------------------ */
+(function theme(){
+  const KEY = 'belpulse-theme';
+  const apply = choice => {
+    if(choice === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', choice);
+    document.querySelectorAll('[data-theme-choice]').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)));
+  };
+  let saved = 'auto';
+  try{ saved = localStorage.getItem(KEY) || 'auto'; }catch(_){}
+  apply(saved);
+  document.querySelectorAll('[data-theme-choice]').forEach(b => b.onclick = () => {
+    apply(b.dataset.themeChoice);
+    try{ localStorage.setItem(KEY, b.dataset.themeChoice); }catch(_){}
+  });
+})();
+
+/* --- boot ---------------------------------------------------------------- */
+async function selectIndicator(code){
+  const meta = state.index.find(i => i.indicator_code === code);
+  if(!meta) return;
+  state.meta = meta;
+  document.getElementById('status').textContent = 'Loading…';
+  const res = await fetch(VALUES_URL(code) + '?t=' + Date.now());
+  if(!res.ok){
+    document.getElementById('status').textContent = `Could not load ${code}`;
+    return;
+  }
+  const payload = await res.json();
+  state.values = payload.communes || {};
+  paint();
+
+  /* The 2015 Statbel licence requires the DATE OF LAST UPDATE beside the
+     figures. This page shows one indicator at a time, so it shows THAT
+     indicator's own retrieval date rather than a whole-site date -- the
+     sources refresh on entirely different cadences, and a single date beside
+     a figure it does not describe is the misstatement the licence forbids.
+     A derived indicator carries no date, because it was computed rather than
+     fetched; it says so instead of borrowing its inputs' date. */
+  const updated = document.getElementById('attrUpdated');
+  if(updated){
+    updated.textContent = payload.updated
+      ? payload.updated.slice(0, 10)
+      : 'derived — computed from the figures above, not separately fetched';
+  }
+  try{
+    const url = new URL(window.location);
+    url.searchParams.set('indicator', code);
+    history.replaceState(null, '', url);
+  }catch(_){}
+}
+
+async function init(){
+  try{
+    const [geoRes, idxRes, secRes] = await Promise.all([
+      fetch(GEO_URL + '?t=' + Date.now()),
+      fetch(INDEX_URL + '?t=' + Date.now()),
+      fetch(SECTIONS_URL + '?t=' + Date.now()),
+    ]);
+    if(!geoRes.ok) throw new Error('boundaries missing');
+    if(!idxRes.ok) throw new Error('indicator index missing');
+
+    const geojson = await geoRes.json();
+    state.index = (await idxRes.json()).indicators || [];
+    const sections = secRes.ok ? await secRes.json() : {headlines: []};
+
+    buildMap(geojson);
+
+    const list = document.getElementById('communeList');
+    for(const f of state.features){
+      const o = document.createElement('option');
+      o.value = `${f.name} (${f.nis})`;
+      list.appendChild(o);
+    }
+
+    const sel = document.getElementById('indicator');
+    const rows = state.index
+      .map(i => ({code: i.indicator_code, label: pickName(i.names, i.indicator_code), coverage: i.coverage}))
+      .sort((a, b) => a.label.localeCompare(b.label));
+    for(const r of rows){
+      const o = document.createElement('option');
+      o.value = r.code;
+      o.textContent = r.label;
+      sel.appendChild(o);
+    }
+    sel.onchange = () => selectIndicator(sel.value);
+
+    // Default: the first configured headline that actually has a payload,
+    // else simply the first indicator. No id is written into this page.
+    const start = defaultIndicator(
+      new URLSearchParams(location.search).get('indicator'),
+      sections.headlines,
+      rows.map(r => r.code),
+    );
+    if(!start){
+      document.getElementById('status').textContent = 'No municipal indicators published.';
+      return;
+    }
+    sel.value = start;
+    await selectIndicator(start);
+  }catch(err){
+    document.getElementById('status').textContent =
+      'Could not load the map: ' + err.message;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
