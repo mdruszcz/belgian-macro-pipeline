@@ -389,10 +389,10 @@ Batch 1's own note for what that means for precision). Batches 3, 4, 6, 7 are UN
 designs but each has its own real sub-blockers found while transcribing (see
 docs/design-references/component-inventory.md's table -- missing municipal finance data, no
 Peer Model, a 3-vs-4 age-band mismatch, a dead international-GDP fetch, no photo library).
-Batches 9-14 (the block engine and builder itself) never needed the designs. DEFERRED
-2026-09-07 by maintainer instruction ("we'll work on the app version later") -- the redesign
-batches (1-8) continue; the builder application itself (9-16) does not start without further
-direction.
+Batches 9-14 (the block engine and builder itself) never needed the designs. Briefly deferred
+2026-09-07 by maintainer instruction ("we'll work on the app version later"); UN-DEFERRED the
+same day ("the builder app is back on the menu") -- both tracks (1-8 redesign, 9-16 builder)
+now proceed.
  ✅ [BUILD] Batch 0 -- protect the existing baseline (2026-09-07: full report at
 docs/implementation/batches/batch-0-baseline.md. Local tag belpulse-v0.5-pre-redesign (NOT
 pushed -- that's a shared action and this is an internal checkpoint, not the real v0.5 release
@@ -506,7 +506,69 @@ Why: Matches the design while staying completely honest about what this pipeline
 How: Redesign all_data.html with search/filters/table/chart/map modes and virtualization;
 restyle map.html without replacing its map engine.
 Why: The explorer must stay usable at full data scale and never disagree with a download.
- [BUILD] Batch 9 -- page-document schema
+ ✅ [BUILD] Batch 9 -- page-document schema (2026-09-07: docs/features/page_document.schema.json
++ src/pages/ (schema, semantics, registry, metadata, document, migrations, serialize) +
+assets/belpulse/blocks/registry.json, tested by 6 new test modules including
+tests/security/test_page_document_hardening.py. Full report at
+docs/implementation/batches/batch-9-page-document-schema.md. THE SPEC WAS WRONG ABOUT THE
+INDICATOR UNIVERSE, caught by the pre-implementation architecture check before a line was
+written: block_contract.md said to validate a binding against "the published metadata", which
+reads as metadata/indicators.json -- but that file is MUNICIPAL-ONLY (52 indicators). The 17
+national ones (GDP, inflation, unemployment) live only inside national.json's own "indicators"
+key and appear in NO metadata index; the overlap is zero, verified three times independently.
+A validator built on the first file alone would have rejected every national binding -- the
+whole homepage and the whole macro page. src/pages/metadata.py now treats the universe as the
+UNION of both, recording which side each code came from because they carry different fields.
+aggregation_method MUST NOT BE ENFORCED, and both block_contract.md and data_binding.md were
+corrected to say so: it is a DB column that is not declarable in config, not published in any
+payload, and read by nothing (aggregate.py's whole live rule is "SUM if is_additive else
+REFUSE"), and 17 live indicators carry 'population_weighted' -- the method ADR 0003 measured as
+WRONG. Enforcing the column as originally written would have encoded a prohibited method
+against real indicators; a test now asserts the column is not read. THE FORMAT NEARLY SHIPPED
+MONOLINGUAL -- the first spec draft never mentioned rule 7; every user-facing string in a page
+document is now {en, fr, nl}. GRID OVERLAP WAS UNDER-REPORTED and was sent back: the first
+implementation flagged a clash only when two blocks overlapped at EVERY breakpoint, reasoning
+that a narrowing grid reflows -- but this format has no reflow engine, every breakpoint's
+x/y/w/h is hand-declared, so two blocks both authored at mobile (0,0,4,2) is an authored
+collision that was passing silently. Now reported per (pair, breakpoint), with mobile-only,
+tablet-only and desktop-only tests. CONTENT SAFETY IS STRUCTURAL, NOT A KEYWORD BLOCKLIST, and
+deliberately so: allowlisted keys/types per props schema, no '<' or '>' in any string anywhere,
+no on* keys, site-relative URLs only, rich text as an allowlisted node set rather than a
+sanitiser over raw HTML -- a SQL-keyword scanner was explicitly rejected because a legitimate
+French or Dutch label containing "Union" or "ORDER" would trip it, and a validator that fires on
+real content gets switched off. Binding RESOLUTION is absent by design (Batch 14): nothing in
+src/pages/ reads an observation, imports analytics/fetchers/geography/exporters, or opens
+sqlite. security-red-team review is DEFERRED to Batches 11 and 14 as a recorded decision, not
+skipped -- this batch has no network surface and no resolution path to attack yet, and it is a
+gate on those batches. A PROCESS FAILURE IS ALSO ON THE RECORD, against the orchestration and
+not the implementers: two builder-core instances wrote src/pages/ concurrently after status was
+reported as "with the implementers" while nothing was yet on disk. Both flagged the collision
+themselves and nothing was lost, but a schema settled by last-writer-wins is not a settled
+schema; the merged result was re-verified end-to-end (test count, forbidden imports, the union
+fix, the overlap fix) before acceptance. AGGREGATION ENFORCES ONLY THE UNAMBIGUOUS CASE -- a SUM
+against an indicator published additive:false -- and deliberately does NOT decide
+recomputability, because 18 of the 52 municipal indicators are non-additive (13 derived plus 5
+raw ratios) yet the live site genuinely publishes a province-level AVG_NET_TAXABLE_INCOME by
+RECOMPUTING it from summed components, so a blunt "non-additive means no aggregate" rule would
+have rejected a figure already on the site. aggregate.py's RECOMPUTABLE_FUNCTIONS set is NOT
+copied into src/pages/ (rule 19, invariant 4); Batch 14 must import that answer rather than
+restate it. A MERGED COMMUNE YIELDS retired_nis_code "merged in 2025", NOT invalid_nis_code:
+geographies.json is current-only and all 55 old_nis codes in the crosswalk are absent from it,
+so without the distinct code Batch 15 and the maintainer would read a real historical code as a
+typo. The crosswalk is read for the MESSAGE TEXT ONLY -- src/pages/ never resolves a NIS, walks
+parent_geo_id or substitutes a successor, because ten NIS codes carry two validity windows and
+only resolve_geo() knows that; the boundary is written into semantics.py's own module docstring
+so the next agent reads it before deciding to be helpful. A wrong-LEVEL code is caught too
+(all 622 geographies carry a nis_code, so a naive membership test would pass 01000/country for
+a municipal binding -> geo_level_mismatch). Registry ships 6 block types as DATA with
+registry_version 1, a written "Batch 10 may add keys, never change or remove ours" clause, every
+props schema marked provisional, and kpi_card carrying BOTH v1 and v2 so unsupported-version
+rejection and the migration ladder are testable against the real registry rather than a mock.
+Guards boundary-tested on both sides (512 blocks pass / 513 reject; 64 sections / 65; 8192-char
+string / 8193; >1 MiB and 5000-deep both refused, the latter converting CPython's RecursionError
+into a domain error instead of crashing). Validation of a 30-block document runs in 12.6 ms
+against a 50 ms budget; zero new dependencies, pyproject.toml untouched. 169 new tests, 923
+passing, from a 754 baseline measured before any change)
 How: JSON Schema for a page document (spec: docs/features/block_contract.md); reject
 duplicate ids, unknown blocks, invalid grid positions, unknown indicators/NIS codes, forbidden
 aggregation, raw SQL, scripts, remote URLs.

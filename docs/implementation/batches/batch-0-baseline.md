@@ -58,6 +58,8 @@ every commune — no gaps.
 | `public/data/metadata/` | 144 KB |
 | `assets/commune_map.js` + `.css` (shared map component) | 32 KB |
 | `assets/i18n.js` (shared strings, 81 keys × 3 languages) | 32 KB |
+| `assets/belpulse/` (Batch 1-2 tokens/layout/components/charts) | 80 KB |
+| `assets/belpulse/blocks/registry.json` (Batch 9 block registry) | 11.6 KB |
 | `data/geo/communes.geojson` (boundary file) | 1.2 MB |
 | `data/communes_history.csv` (bulk export) | 37 MB |
 | `data/communes_table.json` (communes.html's own payload) | 12 MB |
@@ -65,6 +67,15 @@ every commune — no gaps.
 
 This is the number every later batch's asset-size comparison (release-engineer's release gate)
 measures against. A regression is "grew unexpectedly against this table," not a guess.
+
+**Amended as later batches add browser-served files.** The last two rows were added after
+Batches 1-2 and Batch 9 respectively — `assets/belpulse/blocks/registry.json` is fetched by the
+browser (Batch 10's renderer reads the same file the Python validator does, which is why it
+lives under `assets/` rather than `config/`), so it belongs in this table rather than being
+invisible to the next size audit. `docs/features/page_document.schema.json` (10.6 KB) is *not*
+listed: it is validated against in Python at build time and never served to a visitor. Keep
+appending rows here rather than starting a second table, or the release gate ends up comparing
+against a baseline that no longer describes the site.
 
 ## 5. Screenshots
 

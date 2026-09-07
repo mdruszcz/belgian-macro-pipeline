@@ -1,8 +1,16 @@
 # Feature: page-document schema and block contract
 
-Status: draft — spec only, Batch 9/10 not yet implemented
+Status: Batch 9 IMPLEMENTED (2026-09-07) — the page document, its validator, the block registry
+and forward migrations are live and tested. Batch 10 (the shared renderer that consumes the
+registry) is not started. The "Semantic validation" list below is fully enforced, with one
+bullet corrected during implementation (see the `aggregation_method` note) and one open
+question resolved (`page_type`'s set is enumerated but provisional until Batch 15).
+Full report: docs/implementation/batches/batch-9-page-document-schema.md
 Issue: none (part of docs/features/page_builder.md, Batches 9-10)
-Branch: feat/page-document-schema (when started)
+Branch: feat/page-document-schema
+Implementation: `docs/features/page_document.schema.json` (the schema),
+`assets/belpulse/blocks/registry.json` (the registry), `src/pages/` (validator, serializer,
+migrations). Report: `docs/implementation/batches/batch-9-page-document-schema.md`.
 
 ## Problem
 
@@ -78,8 +86,25 @@ a dead block id without colliding with a new one).
   section that doesn't allow it)
 - A binding naming an indicator that doesn't exist in the published metadata
 - A binding naming an invalid NIS code
-- A binding requesting an aggregation the indicator's `is_additive`/`aggregation_method`
-  forbids (claude.md rule 27 / the existing Definitions section)
+- A binding requesting an aggregation the indicator's additivity forbids — concretely, a SUM
+  across geographies against an indicator published `additive: false` (claude.md rule 27 / the
+  existing Definitions section).
+
+  **Corrected 2026-09-07, during Batch 9.** This bullet originally read
+  "`is_additive`/`aggregation_method`". `aggregation_method` is a database column
+  (`migrations/001_core_schema.sql`) that is **not declarable in `config/indicators/*.yaml`**,
+  **not published in any payload**, and **read by nothing** — `src/analytics/aggregate.py`'s
+  entire live rule is `SUM if meta.get("is_additive") else REFUSE`. Worse, 17 live indicators
+  carry `aggregation_method = 'population_weighted'`, a method ADR 0003 measured as wrong and
+  says "must not be added". Enforcing the column as written would have encoded a prohibited
+  method against real indicators. The validator does not read it, and neither should Batch 14.
+
+  Note also what this bullet does *not* license: `additive: false` alone does not mean "no
+  aggregate exists". 18 of the 52 municipal indicators are non-additive (13 derived, all of
+  them non-additive, plus 5 raw ratios), yet this pipeline genuinely publishes province-level
+  `AVG_NET_TAXABLE_INCOME` by recomputing it. Deciding *recomputability* is Batch 14's job,
+  using `src/analytics/aggregate.py`'s own answer — never a copy of it in `src/pages/`
+  (claude.md rule 19, invariant 4).
 - Missing accessible name on an interactive block
 - Raw SQL, a `<script>` tag, a remote URL, or unsafe rich text anywhere in the document
 

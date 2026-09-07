@@ -1,0 +1,135 @@
+"""Forward-only migrations for page documents.
+
+Two independent ladders, both climbed by `migrate()`:
+
+1. **Document `schema_version`.** `DOCUMENT_MIGRATIONS` maps a version to the
+   step that turns it into the next one. It is EMPTY at
+   `CURRENT_SCHEMA_VERSION == 1`, and empty by construction rather than by
+   omission: 1 is the first published version, so there is nothing older to
+   come from. The first `schema_version: 2` adds `{1: _document_1_to_2}` here
+   and nothing else changes.
+
+2. **Block `version`.** `BLOCK_MIGRATIONS` maps `(block_type, version)` to the
+   step that turns that block into the next version of itself. This ladder is
+   populated: `kpi_card` v1 -> v2 is real, because the registry declares two
+   supported `kpi_card` versions so that both the unsupported-version
+   rejection and this framework are testable against the real registry rather
+   than a fixture.
+
+Forward only. There is no downgrade path, on purpose: a v2 document opened by
+a build that only understands v1 is rejected with
+`unsupported_schema_version` rather than silently degraded.
+
+**Never silently drops a field.** A prop a migration does not recognise is
+carried through untouched. It will then usually fail the target version's
+props schema (every one is `additionalProperties: false`) -- which is the
+point: an unexpected field becomes a loud `schema_violation` naming the field,
+not a value that vanished between two saves.
+
+Never write a bare `import migrations` from inside this package. The
+repository has a top-level `migrations/` directory (the SQL schema), which is
+an implicit namespace package on `sys.path` and would shadow this module. Use
+`from src.pages import migrations`.
+"""
+
+import copy
+from collections.abc import Callable
+
+from src.pages.schema import (
+    CURRENT_SCHEMA_VERSION,
+    PageValidationError,
+    check_schema_version,
+)
+
+#: version -> step producing version + 1. See the module docstring for why
+#: this is empty rather than missing.
+DOCUMENT_MIGRATIONS: dict[int, Callable[[dict], dict]] = {}
+
+
+def _kpi_card_1_to_2(props: dict) -> dict:
+    """kpi_card v1 -> v2.
+
+    v2 renamed `show_sparkline` to `sparkline` and added `show_provenance`,
+    which defaults to true because claude.md rule 28 wants a figure's source,
+    unit, period and freshness shown -- a v1 card that predates the flag
+    should start showing them, not stay silent.
+    """
+    out = dict(props)
+    if "show_sparkline" in out:
+        out["sparkline"] = out.pop("show_sparkline")
+    out.setdefault("show_provenance", True)
+    return out
+
+
+#: (block_type, from_version) -> step producing from_version + 1 props.
+BLOCK_MIGRATIONS: dict[tuple[str, int], Callable[[dict], dict]] = {
+    ("kpi_card", 1): _kpi_card_1_to_2,
+}
+
+
+def migrate_block(block: dict) -> dict:
+    """Climb one block up its version ladder as far as steps exist.
+
+    A block type with no step registered at its current version is already
+    current and is returned unchanged (a copy). An unknown type is left
+    completely alone -- rejecting it is `semantics.check_block_type_and_version`'s
+    job, and doing it here would turn an `unknown_block_type` finding into an
+    exception from the migrator.
+    """
+    out = copy.deepcopy(block)
+    block_type = out.get("type")
+    seen: set[int] = set()
+    while True:
+        version = out.get("version")
+        if not isinstance(version, int) or isinstance(version, bool):
+            return out
+        if version in seen:  # pragma: no cover - guards a malformed table
+            return out
+        seen.add(version)
+        step = BLOCK_MIGRATIONS.get((block_type, version))
+        if step is None:
+            return out
+        props = out.get("props")
+        out["props"] = step(props) if isinstance(props, dict) else props
+        out["version"] = version + 1
+
+
+def migrate(doc: dict) -> dict:
+    """Bring a document forward to `CURRENT_SCHEMA_VERSION` and every block
+    forward to its newest registered version.
+
+    Never mutates its argument. Raises `PageValidationError` with
+    `unsupported_schema_version` if the document's version is one this build
+    cannot start from.
+    """
+    version_errors = check_schema_version(doc)
+    if version_errors:
+        raise version_errors[0]
+
+    out = copy.deepcopy(doc)
+    version = out["schema_version"]
+    while version < CURRENT_SCHEMA_VERSION:
+        step = DOCUMENT_MIGRATIONS.get(version)
+        if step is None:
+            raise PageValidationError(
+                "unsupported_schema_version",
+                "schema_version",
+                f"no migration exists from schema_version {version} to {version + 1}",
+            )
+        out = step(out)
+        version += 1
+        out["schema_version"] = version
+
+    sections = out.get("sections")
+    if isinstance(sections, list):
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            blocks = section.get("blocks")
+            if not isinstance(blocks, list):
+                continue
+            for b_index, block in enumerate(blocks):
+                if isinstance(block, dict):
+                    blocks[b_index] = migrate_block(block)
+
+    return out
