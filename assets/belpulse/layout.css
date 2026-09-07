@@ -99,6 +99,23 @@
   .bp-body--editorial-with-sidebar{grid-template-columns:1fr}
 }
 
+/* The top bar is one flex row of logo + nav + actions, which on a narrow
+   viewport pushes past the right edge and makes the whole PAGE scroll
+   sideways -- found the first time a real page used this shell, because no
+   mobile mockup was ever supplied (see docs/design-references/tokens-measured.md).
+   Let it wrap, and let the nav scroll within itself rather than pushing. */
+@media (max-width:768px){
+  .bp-topbar{flex-wrap:wrap; gap:var(--bp-space-3)}
+  .bp-nav{
+    order:3; flex-basis:100%; overflow-x:auto; gap:var(--bp-space-4);
+    -webkit-overflow-scrolling:touch;
+  }
+  .bp-nav a{white-space:nowrap}
+  .bp-topbar-actions{margin-left:auto; flex-wrap:wrap; row-gap:var(--bp-space-2)}
+  .bp-search{min-width:0; flex:1}
+  .bp-cta-band{margin-left:var(--bp-space-4); margin-right:var(--bp-space-4)}
+}
+
 /* ---- analytical sidebar --------------------------------------------------- */
 .bp-sidebar{
   background:var(--bp-navy-bg); color:var(--bp-navy-text); border-radius:var(--bp-radius-card);

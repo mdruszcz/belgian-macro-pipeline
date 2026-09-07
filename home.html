@@ -1,0 +1,726 @@
+<!--
+  BelPulse homepage redesign -- Batch 3 (docs/design-references/homepage.md),
+  built on Batch 1's tokens and Batch 2's shared components.
+
+  A PREVIEW ROUTE, deliberately not index.html. docs/features/page_builder.md's
+  own Batch 15 gate: a redesigned page stays a preview until it is proven
+  equivalent or better against the page it replaces, then the canonical route
+  switches -- never a silent cutover. index.html is untouched and still what
+  a visitor gets today; this file is reachable only by its own URL until that
+  review happens and the maintainer decides to link or promote it.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BelPulse — Belgium's economic data, updated automatically</title>
+<meta name="description" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
+
+<!-- Theme and language before first paint, so the page does not flash the
+     wrong one. Same two localStorage keys every other page already uses
+     (assets/i18n.js: belpulse-lang; the theme key the rest of the site sets). -->
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem('belpulse-theme') || localStorage.getItem('theme');
+      if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/commune_map.css">
+<style>
+  /* Page-specific composition only. Anything reusable belongs in
+     assets/belpulse/components.css, not here (Batch 2 owns the library). */
+  .hero{
+    display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-8);
+    padding:var(--bp-space-10) var(--bp-space-6) var(--bp-space-8);
+    align-items:start;
+  }
+  @media (max-width:1024px){ .hero{grid-template-columns:1fr} }
+  .eyebrow{
+    font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold);
+    letter-spacing:.08em; color:var(--bp-text-muted); margin-bottom:var(--bp-space-4);
+  }
+  .hero h1{
+    font-size:var(--bp-text-h1); font-weight:var(--bp-weight-bold);
+    line-height:1.15; margin:0 0 var(--bp-space-4); max-width:22ch;
+  }
+  .hero .lead{color:var(--bp-text-muted); max-width:52ch; margin:0 0 var(--bp-space-6)}
+  .hero-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap}
+  .hero .bp-pull-quote{margin-top:var(--bp-space-8)}
+
+  section.band{padding:var(--bp-space-8) var(--bp-space-6)}
+  section.band > h2{
+    font-size:var(--bp-text-h1); font-weight:var(--bp-weight-bold);
+    margin:0 0 var(--bp-space-2);
+  }
+  section.band > .lead{color:var(--bp-text-muted); max-width:64ch; margin:0 0 var(--bp-space-6)}
+  .more{
+    display:inline-block; margin-top:var(--bp-space-5);
+    color:var(--bp-accent); font-size:var(--bp-text-small);
+    font-weight:var(--bp-weight-medium); text-decoration:none;
+  }
+  .more:hover{text-decoration:underline}
+  .caption{font-size:12px; color:var(--bp-text-faint); margin-top:var(--bp-space-3); max-width:70ch}
+
+  .map-frame{padding:0 var(--bp-space-5) var(--bp-space-5)}
+  .map-frame .mapbox{position:relative}
+  /* The shared map's legend is a fixed 7 x 64px of swatches (MapUI.SWATCH_PX,
+     pinned to commune_map.css by its own test), which is wider than a phone.
+     It scrolls inside its own box so the page body never scrolls sideways. */
+  .map-frame .legend{overflow-x:auto}
+  .featured{display:grid; grid-template-columns:320px 1fr; gap:var(--bp-space-6); align-items:start}
+  @media (max-width:900px){ .featured{grid-template-columns:1fr} }
+
+  .attribution{
+    padding:var(--bp-space-6); font-size:12px; line-height:1.6;
+    color:var(--bp-text-muted); background:var(--bp-surface-alt);
+    border-top:1px solid var(--bp-border);
+  }
+  .attribution strong{color:var(--bp-text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+</style>
+</head>
+<body class="bp-shell">
+
+<header class="bp-topbar">
+  <a class="bp-logo" href="index.html">
+    <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+    <span>
+      <span class="bp-wordmark">BelPulse</span>
+      <span class="bp-tagline" data-t="aboutTagline">Your window into the Belgian macroeconomic pulse</span>
+    </span>
+  </a>
+  <nav class="bp-nav" aria-label="Main">
+    <a href="home.html" aria-current="page" data-t="navHome">Home</a>
+    <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+    <a href="all_data.html" data-t="navMacro">Macro</a>
+    <a href="map.html" data-t="navMaps">Maps</a>
+    <a href="about.html" data-t="navMethodology">Methodology</a>
+  </nav>
+  <div class="bp-topbar-actions">
+    <div class="bp-theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+      <button type="button" data-lang="nl" aria-pressed="false">NL</button>
+    </div>
+    <div class="bp-theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
+      <button type="button" data-theme-choice="light" aria-pressed="false" data-t="themeLight">Light</button>
+      <button type="button" data-theme-choice="auto" aria-pressed="false" data-t="themeAuto">Auto</button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false" data-t="themeDark">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── hero ────────────────────────────────────────────────────────────── -->
+  <div class="hero">
+    <div>
+      <div class="eyebrow" data-t="homeEyebrow">DATA · TERRITORIES · PROSPERITY</div>
+      <h1 data-t="homeTitle">Belgium’s economic data, updated automatically.</h1>
+      <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
+      <div class="hero-actions">
+        <a class="bp-btn bp-btn--primary" href="communes.html" data-t="homeExplore">Explore the data</a>
+        <a class="bp-btn bp-btn--outline" href="about.html" data-t="navMethodology">Methodology</a>
+      </div>
+      <p class="bp-pull-quote" data-t="homePullQuote">A better-informed Belgium</p>
+    </div>
+
+    <div class="bp-map-card bp-state" id="mapCard" data-state="loading">
+      <div class="bp-state-skeleton"></div>
+      <div class="bp-chart-head">
+        <div>
+          <h3 id="mapTitle" style="margin:0">—</h3>
+          <div class="subtitle" data-t="homeMapSubtitle">Pick an indicator; every commune this pipeline covers is drawn.</div>
+        </div>
+        <select class="bp-chart-select" id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map"></select>
+      </div>
+      <div class="map-frame">
+        <div class="mapbox" id="mapbox">
+          <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <div class="legend">
+          <div class="swatches" id="swatches"></div>
+          <div class="ticks" id="ticks"></div>
+          <div class="legend-note" id="legendNote"></div>
+        </div>
+        <div class="coverage" id="coverageWarn"></div>
+        <div id="mapProvenance" class="bp-freshness"></div>
+        <p class="caption" data-t="homeMapCaption">The reference design asks for GDP per capita per commune. Belgium does not publish GDP below the regional level and this pipeline holds none, so the map opens on average net taxable income — a different measure, named as itself.</p>
+      </div>
+      <div class="bp-state-message"><span class="headline">—</span></div>
+    </div>
+  </div>
+
+  <!-- ── public finances: honestly unavailable ───────────────────────────── -->
+  <section class="band">
+    <h2 data-t="homeFinanceTitle">Public finances</h2>
+    <div class="bp-chart-card bp-state" data-state="unavailable">
+      <div class="bp-state-body"></div>
+      <div class="bp-state-message">
+        <span class="headline" data-t="homeFinanceUnavailable">Not published by this pipeline yet</span>
+        <span class="why" data-t="homeFinanceWhy">State spending, revenue, budget balance and public debt need levels this pipeline does not hold: its government series are contributions to GDP growth, not amounts. Shown as unavailable rather than filled with a plausible number.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── national key indicators ─────────────────────────────────────────── -->
+  <section class="band">
+    <h2 data-t="homeIndicatorsTitle">Key indicators for the Belgian economy</h2>
+    <p class="lead" data-t="homeIndicatorsLead">National series, each with the period it describes.</p>
+    <div class="bp-kpi-grid" id="nationalGrid"></div>
+    <a class="more" href="all_data.html" data-t="homeAllIndicators">See all national data →</a>
+  </section>
+
+  <!-- ── Belgium in maps: themes from config, redrawing the map above ────── -->
+  <section class="band">
+    <h2 data-t="homeMapsTitle">Belgium in maps</h2>
+    <p class="lead" data-t="homeMapsLead">Draw any indicator across the country. The tabs below re-draw the map above.</p>
+    <div class="bp-tabs" id="themeTabs" role="tablist" aria-label="Map themes"></div>
+    <div class="bp-chips" id="themeChips"></div>
+    <a class="more" href="map.html" data-t="homeAllMaps">See the full-page map →</a>
+  </section>
+
+  <!-- ── featured commune ────────────────────────────────────────────────── -->
+  <section class="band">
+    <h2 data-t="homeCommunesTitle">Commune profiles</h2>
+    <p class="lead" data-t="homeCommunesLead">Every Belgian commune has its own page: its indicators, its own map, and how it compares with its province, its region and the country.</p>
+    <div class="featured">
+      <div class="bp-commune-card bp-state" id="featuredCard" data-state="loading">
+        <div class="bp-state-skeleton"></div>
+        <div class="bp-commune-card-body bp-state-body">
+          <div class="bp-kpi-label" data-t="homeFeaturedCommune">Featured commune</div>
+          <h4 id="featuredName">—</h4>
+          <div class="region" id="featuredRegion">—</div>
+          <div class="bp-commune-card-stats" id="featuredStats"></div>
+          <a class="more" id="featuredLink" href="communes.html" data-t="homeViewProfile">See the full profile →</a>
+        </div>
+        <div class="bp-state-message"><span class="headline">—</span></div>
+      </div>
+      <div>
+        <p class="caption" id="featuredCaption"></p>
+        <a class="more" href="communes.html" data-t="homeAllCommunes">Explore every commune →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── how this site works (editorial, no data) ────────────────────────── -->
+  <section class="band">
+    <h2 data-t="homeFeaturesTitle">How this site works</h2>
+    <div class="bp-kpi-grid">
+      <div class="bp-chart-card bp-feature-tile">
+        <h4 data-t="homeFeatureAutoTitle">Updated automatically</h4>
+        <p data-t="homeFeatureAutoBody">A scheduled job fetches every source and rebuilds the site. No figure is typed in by hand.</p>
+      </div>
+      <div class="bp-chart-card bp-feature-tile">
+        <h4 data-t="homeFeatureSourcesTitle">Official sources</h4>
+        <p data-t="homeFeatureSourcesBody">Statbel, the NBB, ONEM/RVA, the federal police and Eurostat — each credited under its own licence.</p>
+      </div>
+      <div class="bp-chart-card bp-feature-tile">
+        <h4 data-t="homeFeatureTraceTitle">Traceable and transparent</h4>
+        <p data-t="homeFeatureTraceBody">Every figure states its source, the period it covers, when it was retrieved and whether it was measured or computed.</p>
+      </div>
+      <div class="bp-chart-card bp-feature-tile">
+        <h4 data-t="homeFeatureCitizensTitle">For citizens and decision-makers</h4>
+        <p data-t="homeFeatureCitizensBody">Open data, open code, no account required, and every underlying file downloadable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA band: real counts, read from the manifest ───────────────────── -->
+  <div class="bp-cta-band">
+    <div>
+      <h2 data-t="homeCtaTitle">Explore your commune’s data</h2>
+      <p data-t="homeCtaLead">Every commune this pipeline covers, with its own indicators and its own map.</p>
+    </div>
+    <div class="bp-cta-actions">
+      <a class="bp-btn bp-btn--primary" href="communes.html" data-t="homeExplore">Explore the data</a>
+      <a class="bp-btn bp-btn--outline" href="map.html" data-t="homeAllMaps">See the full-page map</a>
+    </div>
+    <div class="bp-cta-stats">
+      <div><b id="statCommunes">—</b><span data-t="homeStatCommunes">communes</span></div>
+      <div><b id="statIndicators">—</b><span data-t="homeStatIndicators">municipal indicators</span></div>
+      <div><b id="statNational">—</b><span data-t="homeStatNational">national series</span></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="bp-footer bp-footer--dark">
+  <div data-t="homeFooterNote">Static pages built from committed data and served from GitHub Pages — no server, no tracking, no account.</div>
+  <div>
+    <a href="communes.html" data-t="navCommunes">Commune profiles</a> ·
+    <a href="map.html" data-t="navMaps">Maps</a> ·
+    <a href="about.html" data-t="navMethodology">Methodology</a>
+  </div>
+</footer>
+
+<!-- The licence notice. This page publishes municipal (Statbel-derived)
+     figures through the choropleth, so it carries the same conditions as
+     communes.html, local.html and map.html, and is listed alongside them in
+     tests/test_statbel_attribution.py. English stays in the markup so a
+     reader whose JavaScript never runs still gets the complete notice. -->
+<div class="attribution" id="attribution">
+  <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+  (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+  1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+  document already recorded in <code>docs/licences/</code>.
+  <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+  communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+  a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+  longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+  are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+  <br><br>
+  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+  <!-- values-attribution:end --></span>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/belpulse/charts.js"></script>
+<script src="assets/belpulse/components.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* BelPulse homepage — Batch 3 (docs/design-references/homepage.md).
+ *
+ * NOT ONE INDICATOR CODE APPEARS IN THIS FILE, and that is a hard rule, not a
+ * style: adding an indicator is a config change, never a page edit (the 50%
+ * gate's rule, enforced by tests/test_map_ui_logic.py against the real
+ * published index). Everything this page features it reads from
+ * metadata/sections.json -- `headlines` drives the map's opening indicator and
+ * the featured commune's stat grid, `sections` drives the map theme tabs. Edit
+ * config/local_sections.yaml and this page follows.
+ *
+ * The map itself is assets/commune_map.js, the same component map.html and
+ * communes.html use (claude.md rule 29). No second implementation.
+ */
+(function(){
+  'use strict';
+
+  var GEO_URL     = 'data/geo/communes.geojson';
+  var INDEX_URL   = 'public/data/metadata/indicators.json';
+  var SECTIONS_URL= 'public/data/metadata/sections.json';
+  var SOURCES_URL = 'public/data/metadata/sources.json';
+  var NATIONAL_URL= 'public/data/national.json';
+  var MANIFEST_URL= 'public/data/manifest.json';
+  var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
+  var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
+
+  var LANG = I18N.initial();
+  var T = function(key, vars){ return I18N.t(LANG, key, vars); };
+
+  var state = {
+    index: [],        // municipal indicator index rows
+    byCode: {},
+    sections: {headlines: [], sections: []},
+    sources: {},
+    grades: {},
+    map: null,
+    geojson: null,
+    activeTheme: null,
+  };
+
+  /* ---- language and theme, the site's existing two-track pattern -------- */
+  function applyStrings(){
+    document.querySelectorAll('[data-t]').forEach(function(el){
+      el.textContent = T(el.dataset.t);
+    });
+    document.querySelectorAll('[data-t-html]').forEach(function(el){
+      el.innerHTML = T(el.dataset.tHtml);
+    });
+    document.querySelectorAll('[data-t-title]').forEach(function(el){
+      el.title = T(el.dataset.tTitle);
+    });
+    document.querySelectorAll('[data-t-aria]').forEach(function(el){
+      el.setAttribute('aria-label', T(el.dataset.tAria));
+    });
+    // The attribution is rewritten wholesale, which destroys the span the
+    // date was written into -- and that date is a LICENCE CONDITION
+    // (docs/data_catalog.md). Put it back.
+    var updated = document.getElementById('attrUpdated');
+    if(updated && state.attrUpdated) updated.textContent = state.attrUpdated;
+    document.documentElement.setAttribute('lang', LANG);
+    document.querySelectorAll('#langSeg button').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.dataset.lang === LANG));
+    });
+  }
+
+  function initLang(){
+    document.querySelectorAll('#langSeg button').forEach(function(b){
+      b.addEventListener('click', function(){
+        LANG = b.dataset.lang;
+        try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(e){}
+        applyStrings();
+        renderNational();
+        renderThemes();
+        renderFeatured();
+        if(state.map){ state.map.setLang(LANG); }
+        populateIndicatorPicker();
+      });
+    });
+  }
+
+  function nameOf(code){
+    var row = state.byCode[code];
+    if(!row) return code;
+    return (row.names && (row.names[LANG] || row.names.en)) || code;
+  }
+
+  /* ---- the map: the shared component, opened on a CONFIGURED indicator -- */
+  function populateIndicatorPicker(){
+    var sel = document.getElementById('mapIndicator');
+    var current = sel.value;
+    sel.innerHTML = '';
+    state.index
+      .map(function(r){ return {code: r.indicator_code, label: nameOf(r.indicator_code)}; })
+      .sort(function(a, b){ return a.label.localeCompare(b.label, LANG); })
+      .forEach(function(r){
+        var o = document.createElement('option');
+        o.value = r.code;
+        o.textContent = r.label;
+        sel.appendChild(o);
+      });
+    if(current) sel.value = current;
+  }
+
+  function provenanceLine(meta){
+    var bits = [];
+    var source = meta.source ? state.sources[meta.source] : null;
+    if(source) bits.push(source.label ? (source.label[LANG] || source.label.en) : meta.source);
+    var grade = state.grades[meta.grade];
+    if(grade) bits.push('(' + meta.grade + ') ' + (grade[LANG] || grade.en));
+    // A derived figure carries its INPUTS' date, labelled as theirs -- never
+    // its own (docs/features/provenance.md).
+    if(meta.updated) bits.push(T('retrieved') + ' ' + meta.updated);
+    else if(meta.inputs_updated) bits.push(T('inputsPrefix') + ' ' + meta.inputs_updated);
+    return bits.join(' · ');
+  }
+
+  async function drawIndicator(code){
+    var card = document.getElementById('mapCard');
+    var meta = state.byCode[code];
+    if(!meta){ return; }
+    document.getElementById('mapTitle').textContent = nameOf(code);
+
+    var res = await fetch(VALUES_URL(code));
+    if(!res.ok){
+      card.dataset.state = 'error';
+      card.querySelector('.bp-state-message .headline').textContent = T('loading');
+      return;
+    }
+    var payload = await res.json();
+    card.dataset.state = 'ready';
+    state.map.setData(payload.communes || {}, {
+      unit: meta.unit, decimals: meta.decimals, direction: meta.direction,
+    });
+    document.getElementById('mapProvenance').textContent = provenanceLine(meta);
+    document.getElementById('mapIndicator').value = code;
+    state.drawnIndicator = code;
+    document.querySelectorAll('#themeChips .bp-chip').forEach(function(chip){
+      chip.setAttribute('aria-pressed', String(chip.dataset.code === code));
+    });
+  }
+
+  /* ---- national key indicators -----------------------------------------
+     Selected by a DATA PROPERTY, not by a list of codes: the national series
+     expressed as a rate, which are the ones a reader can read year-on-year
+     without knowing a base. Today that is three of the seventeen; a new
+     percent-shaped national series appears here on its own.
+
+     Their labels come from the payload (claude.md rule 2), and national.json
+     publishes a single monolingual `name` -- so these read English in all
+     three languages. That is a real gap in the national configs, recorded in
+     the batch report, not something to paper over by typing French names into
+     this page. */
+  function rateShapedNational(national){
+    return Object.keys(national)
+      .filter(function(code){
+        var unit = (national[code].unit || '');
+        return unit.indexOf('percent') === 0;
+      })
+      .sort();
+  }
+
+  function renderNational(){
+    var host = document.getElementById('nationalGrid');
+    host.innerHTML = '';
+    var national = state.national || {};
+    // Two passes, deliberately. .bp-kpi-grid is `auto-fit, minmax(180px,1fr)`,
+    // so its column count depends on how many cards are IN THE DOM at layout
+    // time -- drawing a chart synchronously right after appendChild measured
+    // each canvas against a grid still growing mid-loop: card 1 alone got the
+    // whole row (~1334px), card 2 got half of it, and only the last card ever
+    // saw the grid's final, correct width. Found by comparing three canvases'
+    // baked-in widths against each other, not by eye -- the first two charts
+    // still looked plausible, just squashed. Build every card first, let the
+    // grid settle, draw after.
+    var toDraw = [];
+    rateShapedNational(national).forEach(function(code, i){
+      var entry = national[code];
+      var periods = Object.keys(entry.periods || {}).sort();
+      var latest = periods[periods.length - 1];
+      var cell = latest ? entry.periods[latest] : null;
+
+      var card = document.createElement('div');
+      card.className = 'bp-chart-card bp-state';
+      card.dataset.state = cell && typeof cell.value === 'number' ? 'ready' : 'missing';
+
+      var head = document.createElement('div');
+      head.className = 'bp-chart-head';
+      var title = document.createElement('div');
+      var h3 = document.createElement('h3');
+      h3.style.margin = '0';
+      h3.style.fontSize = 'var(--bp-text-small)';
+      h3.textContent = entry.name || code;
+      var sub = document.createElement('div');
+      sub.className = 'subtitle';
+      sub.textContent = latest || '';
+      title.appendChild(h3);
+      title.appendChild(sub);
+      head.appendChild(title);
+      card.appendChild(head);
+
+      var body = document.createElement('div');
+      body.className = 'bp-state-body';
+      var value = document.createElement('div');
+      value.className = 'bp-value';
+      value.style.fontSize = 'var(--bp-text-kpi)';
+      value.style.fontWeight = 'var(--bp-weight-bold)';
+      value.textContent = cell && typeof cell.value === 'number'
+        ? MapUI.formatValue(cell.value, entry.unit, 1, LANG) : '';
+      body.appendChild(value);
+
+      var wrap = document.createElement('div');
+      wrap.className = 'bp-chart-canvas-wrap';
+      var canvas = document.createElement('canvas');
+      wrap.appendChild(canvas);
+      body.appendChild(wrap);
+      card.appendChild(body);
+
+      var msg = document.createElement('div');
+      msg.className = 'bp-state-message';
+      var headline = document.createElement('span');
+      headline.className = 'headline';
+      headline.textContent = T('mapNoData');
+      msg.appendChild(headline);
+      card.appendChild(msg);
+
+      host.appendChild(card);
+
+      // Last 24 periods, so a monthly series shows two years rather than
+      // fifteen compressed into 200 pixels.
+      var points = periods.slice(-24)
+        .map(function(p){ return {period: p, value: (entry.periods[p] || {}).value}; })
+        .filter(function(pt){ return typeof pt.value === 'number'; });
+      if(points.length > 1){
+        toDraw.push({canvas: canvas, points: points, label: entry.name || code, colourIndex: i});
+      }
+    });
+
+    // Now the grid holds every card at its final column count, so this is
+    // the first point at which measuring any one canvas is meaningful.
+    toDraw.forEach(function(d){
+      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.colourIndex}], {locale: LANG});
+    });
+  }
+
+  /* ---- map theme tabs, straight from sections.json ---------------------- */
+  function renderThemes(){
+    var tabs = document.getElementById('themeTabs');
+    var chips = document.getElementById('themeChips');
+    tabs.innerHTML = '';
+    var sections = state.sections.sections || [];
+    if(!state.activeTheme && sections.length) state.activeTheme = sections[0].id;
+
+    sections.forEach(function(sec){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', String(sec.id === state.activeTheme));
+      btn.textContent = (sec.label && (sec.label[LANG] || sec.label.en)) || sec.id;
+      btn.addEventListener('click', function(){
+        state.activeTheme = sec.id;
+        renderThemes();
+      });
+      tabs.appendChild(btn);
+    });
+
+    chips.innerHTML = '';
+    var active = sections.find(function(s){ return s.id === state.activeTheme; });
+    if(!active) return;
+    (active.indicators || []).forEach(function(code){
+      if(!state.byCode[code]) return;  // configured but not published yet
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'bp-chip';
+      chip.dataset.code = code;
+      chip.setAttribute('aria-pressed', String(code === state.drawnIndicator));
+      chip.textContent = nameOf(code);
+      chip.addEventListener('click', function(){
+        drawIndicator(code);
+        document.getElementById('mapCard').scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+      chips.appendChild(chip);
+    });
+  }
+
+  /* ---- featured commune ------------------------------------------------
+     The commune with the highest value of the FIRST CONFIGURED headline
+     indicator. No NIS code and no indicator code is written here: reorder
+     `headlines` in config/local_sections.yaml and the homepage follows.
+     homepage.md's own note asks for a configured featured commune rather
+     than a hardcoded one; a per-page `props` field is the better long-term
+     answer and arrives with Batch 15's page documents. */
+  async function renderFeatured(){
+    var card = document.getElementById('featuredCard');
+    var headline = (state.sections.headlines || [])[0];
+    if(!headline || !state.byCode[headline]){
+      card.dataset.state = 'unavailable';
+      return;
+    }
+    if(!state.featured){
+      var res = await fetch(VALUES_URL(headline));
+      if(!res.ok){ card.dataset.state = 'error'; return; }
+      var payload = await res.json();
+      var best = null;
+      Object.keys(payload.communes || {}).forEach(function(nis){
+        var cell = payload.communes[nis];
+        var v = cell && cell.value;
+        if(typeof v !== 'number') return;
+        if(!best || v > best.value) best = {nis: nis, value: v, name: cell.name};
+      });
+      if(!best){ card.dataset.state = 'missing'; return; }
+      var cres = await fetch(COMMUNE_URL(best.nis));
+      state.featured = {pick: best, profile: cres.ok ? await cres.json() : null};
+    }
+
+    var pick = state.featured.pick;
+    var profile = state.featured.profile;
+    card.dataset.state = 'ready';
+    // The commune payload carries `name` as a trilingual object; its
+    // province/region are flat strings the pipeline publishes in English
+    // only, used as published rather than translated here (claude.md rule 2).
+    document.getElementById('featuredName').textContent =
+      (profile && profile.name && (profile.name[LANG] || profile.name.en)) || pick.nis;
+    document.getElementById('featuredRegion').textContent =
+      [profile && profile.province, profile && profile.region].filter(Boolean).join(' · ');
+    document.getElementById('featuredLink').href = 'local/' + pick.nis + '/';
+    document.getElementById('featuredCaption').textContent =
+      T('homeFeaturedWhy', {indicator: nameOf(headline)});
+
+    var stats = document.getElementById('featuredStats');
+    stats.innerHTML = '';
+    (state.sections.headlines || []).slice(0, 4).forEach(function(code){
+      var meta = state.byCode[code];
+      var entry = profile && profile.indicators && profile.indicators[code];
+      if(!meta) return;
+      var cellDiv = document.createElement('div');
+      var label = document.createElement('span');
+      label.className = 'bp-kpi-label';
+      label.textContent = nameOf(code);
+      var b = document.createElement('b');
+      b.style.display = 'block';
+      var shown = '—';
+      if(entry && entry.periods){
+        var ps = Object.keys(entry.periods).sort();
+        for(var i = ps.length - 1; i >= 0; i--){
+          var v = entry.periods[ps[i]].value;
+          if(typeof v === 'number'){
+            shown = MapUI.formatValue(v, meta.unit, meta.decimals, LANG);
+            break;
+          }
+        }
+      }
+      b.textContent = shown;
+      cellDiv.appendChild(label);
+      cellDiv.appendChild(b);
+      stats.appendChild(cellDiv);
+    });
+  }
+
+  /* ---- boot ------------------------------------------------------------- */
+  async function init(){
+    BPComponents.initThemeToggle(document, 'belpulse-theme');
+    initLang();
+    applyStrings();
+
+    var responses = await Promise.all([
+      fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
+      fetch(NATIONAL_URL), fetch(MANIFEST_URL),
+    ]);
+    var indexJson  = responses[0].ok ? await responses[0].json() : {indicators: []};
+    state.index = indexJson.indicators || [];
+    state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
+    if(responses[1].ok) state.sections = await responses[1].json();
+    if(responses[2].ok){
+      var reg = await responses[2].json();
+      state.sources = reg.sources || {};
+      state.grades = reg.grades || {};
+    }
+    if(responses[3].ok) state.national = (await responses[3].json()).indicators || {};
+    if(responses[4].ok){
+      var manifest = await responses[4].json();
+      var ds = manifest.datasets || {};
+      document.getElementById('statCommunes').textContent = (ds.communes || {}).count || '—';
+      document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
+      document.getElementById('statNational').textContent = (ds.national || {}).indicators || '—';
+    }
+
+    // The licence date: the most recent retrieval date across the published
+    // municipal indicators, which is what "data last updated" means here.
+    var dates = state.index.map(function(r){ return r.updated; }).filter(Boolean).sort();
+    state.attrUpdated = dates[dates.length - 1] || '';
+    var updatedEl = document.getElementById('attrUpdated');
+    if(updatedEl && state.attrUpdated) updatedEl.textContent = state.attrUpdated;
+
+    populateIndicatorPicker();
+    renderNational();
+    renderThemes();
+    renderFeatured();
+
+    // The map last: it is the heaviest thing on the page and everything above
+    // is readable without it.
+    var geoRes = await fetch(GEO_URL);
+    if(!geoRes.ok){
+      document.getElementById('mapCard').dataset.state = 'error';
+      return;
+    }
+    state.geojson = await geoRes.json();
+    state.map = new MapUI.CommuneMap({
+      svg:        document.getElementById('svg'),
+      tip:        document.getElementById('tip'),
+      mapbox:     document.getElementById('mapbox'),
+      swatches:   document.getElementById('swatches'),
+      ticks:      document.getElementById('ticks'),
+      legendNote: document.getElementById('legendNote'),
+      coverage:   document.getElementById('coverageWarn'),
+    }, {
+      lang: LANG,
+      onSelect: function(nis){ window.location.href = 'local/' + nis + '/'; },
+    }).build(state.geojson);
+
+    document.getElementById('mapIndicator').addEventListener('change', function(e){
+      drawIndicator(e.target.value);
+    });
+
+    var opening = (state.sections.headlines || [])[0];
+    if(opening && state.byCode[opening]) drawIndicator(opening);
+    else document.getElementById('mapCard').dataset.state = 'unavailable';
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
