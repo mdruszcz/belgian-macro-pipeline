@@ -545,7 +545,30 @@ not the implementers: two builder-core instances wrote src/pages/ concurrently a
 reported as "with the implementers" while nothing was yet on disk. Both flagged the collision
 themselves and nothing was lost, but a schema settled by last-writer-wins is not a settled
 schema; the merged result was re-verified end-to-end (test count, forbidden imports, the union
-fix, the overlap fix) before acceptance. 923 tests passing, from a 754 baseline)
+fix, the overlap fix) before acceptance. AGGREGATION ENFORCES ONLY THE UNAMBIGUOUS CASE -- a SUM
+against an indicator published additive:false -- and deliberately does NOT decide
+recomputability, because 18 of the 52 municipal indicators are non-additive (13 derived plus 5
+raw ratios) yet the live site genuinely publishes a province-level AVG_NET_TAXABLE_INCOME by
+RECOMPUTING it from summed components, so a blunt "non-additive means no aggregate" rule would
+have rejected a figure already on the site. aggregate.py's RECOMPUTABLE_FUNCTIONS set is NOT
+copied into src/pages/ (rule 19, invariant 4); Batch 14 must import that answer rather than
+restate it. A MERGED COMMUNE YIELDS retired_nis_code "merged in 2025", NOT invalid_nis_code:
+geographies.json is current-only and all 55 old_nis codes in the crosswalk are absent from it,
+so without the distinct code Batch 15 and the maintainer would read a real historical code as a
+typo. The crosswalk is read for the MESSAGE TEXT ONLY -- src/pages/ never resolves a NIS, walks
+parent_geo_id or substitutes a successor, because ten NIS codes carry two validity windows and
+only resolve_geo() knows that; the boundary is written into semantics.py's own module docstring
+so the next agent reads it before deciding to be helpful. A wrong-LEVEL code is caught too
+(all 622 geographies carry a nis_code, so a naive membership test would pass 01000/country for
+a municipal binding -> geo_level_mismatch). Registry ships 6 block types as DATA with
+registry_version 1, a written "Batch 10 may add keys, never change or remove ours" clause, every
+props schema marked provisional, and kpi_card carrying BOTH v1 and v2 so unsupported-version
+rejection and the migration ladder are testable against the real registry rather than a mock.
+Guards boundary-tested on both sides (512 blocks pass / 513 reject; 64 sections / 65; 8192-char
+string / 8193; >1 MiB and 5000-deep both refused, the latter converting CPython's RecursionError
+into a domain error instead of crashing). Validation of a 30-block document runs in 12.6 ms
+against a 50 ms budget; zero new dependencies, pyproject.toml untouched. 169 new tests, 923
+passing, from a 754 baseline measured before any change)
 How: JSON Schema for a page document (spec: docs/features/block_contract.md); reject
 duplicate ids, unknown blocks, invalid grid positions, unknown indicators/NIS codes, forbidden
 aggregation, raw SQL, scripts, remote URLs.
