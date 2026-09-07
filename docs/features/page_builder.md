@@ -67,7 +67,7 @@ Full detail lives in `docs/implementation/batches/` as each one starts; this is 
 | 7 | Microeconomics page | Batch 6 | not started |
 | 8 | Data and map explorers | Batch 2 | not started, unblocked |
 | 9 | Page-document schema | Batch 0 | done |
-| 10 | Shared block renderer | Batch 9 | not started |
+| 10 | Shared block renderer | Batch 9 | done |
 | 11 | Builder service | Batch 9 | not started |
 | 12 | Builder shell | Batch 11 | not started |
 | 13 | Drag, resize, responsive layouts | Batch 12 | not started |

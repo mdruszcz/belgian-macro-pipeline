@@ -644,7 +644,39 @@ duplicate ids, unknown blocks, invalid grid positions, unknown indicators/NIS co
 aggregation, raw SQL, scripts, remote URLs.
 Why: Every later batch writes documents against this. Get it wrong once, pay for it in all of
 them.
- [BUILD] Batch 10 -- shared block renderer
+ ✅ [BUILD] Batch 10 -- shared block renderer (2026-09-07: src/pages/render.py +
+assets/belpulse/blocks.css + blocks.js, tested by tests/pages/test_page_document_render.py
+(43 tests). Full report at docs/implementation/batches/batch-10-block-renderer.md. THE RENDERER
+IS PYTHON, AND THAT WAS THE DECISION OF THE BATCH: "what the maintainer sees is what ships" can
+only be guaranteed by ONE implementation, and Batch 9's registry.py docstring pointed the other
+way ("Batch 10's renderer can fetch the registry in the browser"). A browser renderer would put
+every published figure behind JavaScript, which breaks two standing commitments --
+export_local_pages.py calls its output "the crawler-visible copy of the data", and
+docs/features/i18n.md requires a reader with JavaScript disabled to still get a complete page
+including the licence notice. So the public build renders to static HTML with figures inline
+(rule 30) and the builder service (Batch 11) previews by calling THE SAME FUNCTION; the registry
+staying browser-fetchable still serves Batch 12's block-library UI, which is a different consumer
+from the renderer -- the distinction Batch 9's docstring did not draw. Only charts and maps are
+hydrated, because canvas pixels and a 1.2 MB boundary file cannot be produced server-side; that
+file is now fetched AT MOST ONCE PER PAGE and shared by every map block, and a page with no map
+never fetches it. A PROTOCOL-RELATIVE URL PASSED MY OWN SAFETY CHECK -- a real hole I introduced:
+every character of //evil.example after the leading slash is inside the allowed class, so it
+matched a guard whose only job is to reject off-site links, and a browser resolves //host against
+the current scheme and leaves the site. Found by my own parametrised test, not by reading the
+regex. Fixed with (?!/) plus a separate '..' rejection, since . and / are both legitimate path
+characters. THE SAME SHAPE IS IN registry.json's own relative_url pattern, whose description
+promises "no protocol-relative //host" while the pattern does not enforce it -- verified against
+the real validator that semantics.py catches all of these separately as unsafe_content, so NO
+DOCUMENT WAS EVER ACCEPTED and only the renderer's independent guard was fooled, which is exactly
+the case for defence in depth. THE STATE WIRING WAS LABELLED BUT NOT CONNECTED: the wrapper
+carried data-state but not the bp-state class or the body/message children, so none of Batch 2's
+seven-state CSS engaged and a KPI whose data had not resolved rendered as an ordinary card with an
+empty value -- a missing figure looking like no figure. The test asserting "state != ready" passed
+the whole time; only looking at the rendered page caught it. `ready` deliberately carries no
+message so a real measured zero can never read as an absence (rule 26). Two of my own tests were
+also wrong: one asserted nothing (`assert ... or True`, the dead-assertion pattern flagged in
+earlier batches) and one compared page structure too naively and failed on correct output --
+fixed the test, not the renderer. 999 tests passing, from 956)
 How: One block registry consumed identically by the editor preview and the public build;
 responsive CSS grid; per-block failure isolation; lazy-loaded maps and charts.
 Why: What the maintainer sees while editing must be exactly what ships.
