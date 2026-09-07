@@ -392,6 +392,22 @@ also match ONEM's published figures directly: 373,701 in 2017 falling to 284,786
    Consequence, visible and correct: `PART_TIME_BENEFIT_RECIPIENTS` is masked for 132 of 618 rows,
    so its national and regional aggregates fall below the 90% coverage floor and **are withheld
    entirely** rather than published from four communes in five.
+
+   **FIXED 2026-09-07 — the masked cells were reaching the store and not the pages.** The site
+   payloads dropped every one of them: both readers in `export_site_payloads.py` skipped an empty
+   value before recording anything. That silently erased **1,044 cells** — 203 (commune, indicator)
+   pairs across **188 of the 565 communes** — and for 36 of those pairs the indicator disappeared
+   from the commune page entirely, so a reader could not learn it existed. On `/local` a figure ONEM
+   deliberately withheld was indistinguishable from one never collected, while the attribution block
+   on that very page stated, in all three languages, that withheld figures "are shown as suppressed,
+   never as zero". No code did that. `communes.html`'s table did render its Suppressed pill
+   correctly, so the site contradicted itself.
+
+   They are now published as `{"value": null, "status": "suppressed"}` and rendered as withheld on
+   `/local`, on the 565 static `/local/{nis}` pages, and in both map tooltips — which now separate
+   three states a reader must be able to tell apart: withheld, never collected, and a real zero.
+   For the 158 pairs whose **latest** period is masked, the figure shown is the newest published one
+   and the withheld years are named beside it. See `docs/features/provenance.md`.
 2. **An explicit `0.0` is a real zero.** ONEM writes both, and they mean different things. There is
    exactly one in ten years of the CCI-DE column: Herstappe in 2026. The loader keeps that
    distinction.

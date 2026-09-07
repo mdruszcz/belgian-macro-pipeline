@@ -18,8 +18,9 @@ records `"unknown"` there instead of a check that did not happen).
 Measured against the real committed data: 565 commune payloads, 5 indicator
 payloads (raw indicators only — `communes_export.csv` is latest-only and does
 not carry derived indicators), 17 national indicators, 622 geographies. The
-largest commune payload (Antwerp, 14 indicators, full 2005–2026 history) is
-9.5 KB compact / 2.3 KB gzip — comfortably inside the ~150 KB budget, and
+largest commune payload (Antwerp, full history) was 9.5 KB compact / 2.3 KB gzip
+when this was measured at 14 indicators; it is 52 indicators today and larger,
+still far inside the ~150 KB budget, and
 close to the pre-build projection above.
 
 Tests in `tests/test_export_site_payloads.py` cover the round-trip (every
@@ -98,6 +99,39 @@ those files — the 13 communes formed in the 2025 merger wave, see `fiscal_inco
 fewer keys in `indicators`; there is no placeholder, no `n/a` sentinel. An indicator's absence *is*
 the "no data" signal a Block K missing-data component reads, matching how the CSV exports already
 treat a missing cell as an absent row rather than a null one.
+
+#### The one exception to absent-not-null: a WITHHELD cell (added 2026-09-07)
+
+A cell the source holds and refuses to publish **is** published here, as
+`{"value": null, "status": "suppressed"}`. It is the only null value this format emits, and it is
+deliberate.
+
+ONEM masks any count below 10 for privacy. The canonical schema models that explicitly —
+`migrations/001_core_schema.sql`: `CHECK (value IS NOT NULL OR status IN ('suppressed','na'))` —
+and `communes_history.csv` carries 1,044 such rows today.
+
+Absence and a withheld cell are **different facts**:
+
+| | Meaning |
+|---|---|
+| key absent | we have no reading |
+| `{"value": null, "status": "suppressed"}` | the source has a reading and will not publish it |
+| `{"value": 0, ...}` | a real, measured zero |
+
+Collapsing the first two destroys a distinction the source deliberately created. Until 2026-09-07
+this file did collapse them: both readers in `export_site_payloads.py` skipped an empty value before
+recording anything, so those 1,044 cells never appeared — 203 (commune, indicator) pairs across
+**188 of the 565 communes**, 36 of which vanished entirely, taking the whole indicator off those
+commune pages. `local.html`'s attribution block meanwhile stated in all three languages that
+withheld figures "are shown as suppressed, never as zero", which the page had no code to do. That
+sentence is part of a licence notice. See `docs/features/provenance.md`.
+
+**Consequences a consumer must handle.** A null can be the newest cell — for 158 pairs it is — so
+nothing may take `sorted(periods)[-1]` and assume a number. Read the latest *valued* period instead
+(`_latest_valued_period()` in the exporter, `LocalUI.latestPeriodWithValue()` on the page). A chart
+drops withheld cells, leaving a visible gap; a comparison is drawn at the latest valued period; and
+`coverage` in `metadata/indicators.json` counts numbers, never keys, with a sibling `suppressed`
+count so "the source masked 152 communes" and "13 were never measured" stay separable.
 
 ### `indicators/{id}.json` — one indicator, every commune, latest only
 

@@ -208,6 +208,15 @@
   .fact .fl{font-size:.76rem;color:var(--text-muted);margin-top:1px;line-height:1.35}
   .fact .frank{font-size:.72rem;color:var(--accent-ink);margin-top:4px}
   .fact .fp{font-size:.68rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;margin-top:2px}
+  /* A withheld figure reads as deliberately absent, not as a rendering
+     failure: the dash is muted and the reason sits under it in words. It is
+     styled DOWN rather than flagged up -- it is not a warning, it is the
+     source exercising a privacy rule. */
+  .fact.withheld .fv{color:var(--text-faint);font-weight:500}
+  .fact .fp.withheld-note{font-family:inherit;font-size:.7rem;line-height:1.3;
+    color:var(--text-muted);margin-top:4px}
+  .withheld-note{font-size:.72rem;color:var(--text-muted);
+    padding:6px 10px 0;line-height:1.4}
 
   .no-data{
     border:1px dashed var(--border-strong);border-radius:var(--radius);
@@ -364,6 +373,8 @@ LocalUI.STRINGS = {
     province: 'Province', region: 'Region', country: 'Belgium',
     comparedWith: 'Compared with', value: 'Value', share: 'Share', diff: 'Diff', communes: 'Communes',
     asOf: 'as of', updated: 'updated', derived: 'derived',
+    withheld: 'Withheld by the source for privacy — fewer than 10 people, not zero.',
+    withheldSince: 'Withheld by the source for {p}.',
     shareNote: 'This commune as a share of each reference, at {p} — a commune is part of its province, so a share is the meaningful relation, not a difference.',
     diffNote: 'This commune against each reference, at {p}.',
     methodNote: 'The last column counts the communes behind each aggregate. Averages and ratios are recomputed from totals, never averaged across communes.',
@@ -396,6 +407,8 @@ LocalUI.STRINGS = {
     province: 'Province', region: 'Région', country: 'Belgique',
     comparedWith: 'Comparé à', value: 'Valeur', share: 'Part', diff: 'Écart', communes: 'Communes',
     asOf: 'au', updated: 'mis à jour', derived: 'calculé',
+    withheld: 'Non communiqué par la source pour raison de confidentialité — moins de 10 personnes, et non zéro.',
+    withheldSince: 'Non communiqué par la source pour {p}.',
     shareNote: 'Cette commune en part de chaque référence, en {p} — une commune fait partie de sa province, la part est donc la relation pertinente, pas l’écart.',
     diffNote: 'Cette commune comparée à chaque référence, en {p}.',
     methodNote: 'La dernière colonne indique le nombre de communes derrière chaque agrégat. Les moyennes et les ratios sont recalculés à partir des totaux, jamais moyennés entre communes.',
@@ -428,6 +441,8 @@ LocalUI.STRINGS = {
     province: 'Provincie', region: 'Gewest', country: 'België',
     comparedWith: 'Vergeleken met', value: 'Waarde', share: 'Aandeel', diff: 'Verschil', communes: 'Gemeenten',
     asOf: 'op', updated: 'bijgewerkt', derived: 'berekend',
+    withheld: 'Niet vrijgegeven door de bron wegens privacy — minder dan 10 personen, en niet nul.',
+    withheldSince: 'Niet vrijgegeven door de bron voor {p}.',
     shareNote: 'Deze gemeente als aandeel van elke referentie, in {p} — een gemeente maakt deel uit van haar provincie, dus is het aandeel de zinvolle verhouding, niet het verschil.',
     diffNote: 'Deze gemeente vergeleken met elke referentie, in {p}.',
     methodNote: 'De laatste kolom telt de gemeenten achter elk aggregaat. Gemiddelden en ratio’s worden herberekend uit totalen, nooit gemiddeld over gemeenten.',
@@ -497,11 +512,67 @@ LocalUI.ancestorChain = function(geographies, geoId){
   return chain;
 };
 
+/* The newest period that actually carries a NUMBER -- not simply the newest
+   period.
+
+   The payloads now publish cells the source WITHHELD: ONEM masks any count
+   below 10 for privacy, and those arrive as {value: null, status:
+   "suppressed"}. For 158 (commune, indicator) pairs the withheld cell is the
+   most recent one, so taking the last period blindly hands a null to
+   everything downstream -- a headline card showing a dash, a comparison table
+   pitting nothing against a real province figure of 4,120, and a chart with a
+   hole in it. Every caller that needs "the current figure" goes through here. */
+LocalUI.latestPeriodWithValue = function(entry){
+  if(!entry || !entry.periods) return null;
+  const periods = Object.keys(entry.periods).sort();
+  for(let i = periods.length - 1; i >= 0; i--){
+    if(entry.periods[periods[i]].value !== null && entry.periods[periods[i]].value !== undefined){
+      return periods[i];
+    }
+  }
+  return null;
+};
+
+/* The withheld periods AFTER the newest published one, oldest first.
+
+   This is what makes the figure on screen honest. Without it a reader sees a
+   2024 number on a page dated 2026 and cannot tell whether the series stopped,
+   or whether 2025 exists and the source refused to publish it. With it the page
+   can say which. */
+LocalUI.suppressedTail = function(entry){
+  if(!entry || !entry.periods) return [];
+  const latest = LocalUI.latestPeriodWithValue(entry);
+  return Object.keys(entry.periods).sort().filter(p =>
+    (latest === null || p > latest) && entry.periods[p].status === 'suppressed');
+};
+
+/* True when the source holds figures for this indicator and has published
+   none of them -- 36 (commune, indicator) pairs today, every one of which used
+   to be absent from the payload entirely and therefore invisible on the page. */
+LocalUI.isWhollyWithheld = function(entry){
+  if(!entry || !entry.periods || !Object.keys(entry.periods).length) return false;
+  return LocalUI.latestPeriodWithValue(entry) === null
+    && Object.values(entry.periods).some(c => c.status === 'suppressed');
+};
+
+/* Chart points, withheld cells omitted.
+
+   A chart has nowhere to put a withheld cell: there is no number to place. It
+   is dropped, which leaves a visible gap in the line -- the honest rendering.
+   Plotting it as null breaks the path; plotting it as zero would state a
+   figure the source refused to publish. The withheld years are named in words
+   beside the chart instead. */
+LocalUI.chartPoints = function(entry){
+  if(!entry || !entry.periods) return [];
+  return Object.keys(entry.periods).sort()
+    .filter(p => entry.periods[p].value !== null && entry.periods[p].value !== undefined)
+    .map(p => ({period: p, value: entry.periods[p].value}));
+};
+
 LocalUI.latestOf = function(entry){
   if(!entry) return null;
-  const periods = Object.keys(entry.periods || {}).sort();
-  if(!periods.length) return null;
-  const p = periods[periods.length - 1];
+  const p = LocalUI.latestPeriodWithValue(entry);
+  if(p === null) return null;
   // `updated` is the source retrieval date and is absent for a derived
   // indicator, which was computed rather than fetched. Passed through as
   // undefined rather than substituted: Statbel's licence forbids misleading
@@ -509,6 +580,7 @@ LocalUI.latestOf = function(entry){
   return {
     value: entry.periods[p].value, period: p, unit: entry.unit,
     names: entry.names, updated: entry.updated,
+    withheldSince: LocalUI.suppressedTail(entry),
   };
 };
 
@@ -579,9 +651,8 @@ LocalUI.comparisonRows = function(entry, lang, opts){
   lang = lang || LocalUI.DEFAULT_LANG;
   opts = opts || {};
   if(!entry) return [];
-  const periods = Object.keys(entry.periods || {}).sort();
-  if(!periods.length) return [];
-  const period = periods[periods.length - 1];
+  const period = LocalUI.latestPeriodWithValue(entry);
+  if(period === null) return [];
   const own = entry.periods[period].value;
   const rows = [{scope: 'commune', label: LocalUI.t(lang, 'thisCommune'), value: own, period: period}];
   rows.push(...LocalUI.peerRows(entry, own, lang, opts.peers, opts.indicatorId));
@@ -819,15 +890,43 @@ function percentileHTML(entry){
   ).join('') + '</div>';
 }
 
+/* The withheld years after the figure on screen. Shown beside the chart as
+   well as on the tiles: the chart drops those years, so without this the line
+   just stops and the reader cannot tell whether the series ended or the source
+   declined to publish. */
+function withheldNoteHTML(latest){
+  if(!latest || !latest.withheldSince || !latest.withheldSince.length) return '';
+  return `<div class="withheld-note">` +
+    esc(T('withheldSince').replace('{p}', latest.withheldSince.join(', '))) + `</div>`;
+}
+
 function factHTML(entry){
   const latest = LocalUI.latestOf(entry);
-  if(!latest) return '';
+
+  /* A WHOLLY WITHHELD INDICATOR STILL GETS A TILE. 36 (commune, indicator)
+     pairs have figures the source holds and has published none of -- until
+     now they were absent from the payload, so the indicator simply did not
+     appear and a reader had no way to know it existed. The tile carries no
+     number and says why, which is the behaviour this page's own attribution
+     block has always promised: withheld figures "are shown as suppressed,
+     never as zero". */
+  if(!latest){
+    if(!LocalUI.isWhollyWithheld(entry)) return '';
+    return `<div class="fact withheld"><div class="fv">&mdash;</div>` +
+      `<div class="fl">${esc(LocalUI.localName(entry.names, LANG))}</div>` +
+      `<div class="fp">${esc(T('withheld'))}</div></div>`;
+  }
+
   const rank = LocalUI.percentileShort(entry, LANG);
   const prov = latest.updated ? `${T('updated')} ${latest.updated}` : T('derived');
+  // Named years, so the reader knows the series did not simply stop.
+  const tail = latest.withheldSince.length
+    ? `<div class="fp withheld-note">${esc(T('withheldSince').replace('{p}', latest.withheldSince.join(', ')))}</div>`
+    : '';
   return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
     `<div class="fl">${esc(LocalUI.localName(latest.names, LANG))} (${latest.period})</div>` +
     (rank ? `<div class="frank">${esc(rank)}</div>` : '') +
-    `<div class="fp">${prov}</div></div>`;
+    `<div class="fp">${prov}</div>${tail}</div>`;
 }
 
 // Sections come from public/data/metadata/sections.json, so this file holds
@@ -847,13 +946,13 @@ function sectionHTML(section){
   if(!latest){
     panel = noDataHTML(T('noHistory'));
   } else {
-    const points = Object.keys(head.periods).sort().map(p => ({period: p, value: head.periods[p].value}));
+    const points = LocalUI.chartPoints(head);
     const chart = points.length > 1 ? `<canvas class="series" data-section="${section.id}"></canvas>` : '';
     panel = `<div class="panel">
       <div class="panel-head">
         <span class="t">${esc(LocalUI.localName(head.names, LANG))}</span>
         <span class="v">${fmt(latest.value, latest.unit)} <span style="font-size:.72rem;color:var(--text-faint);font-weight:400">${T('asOf')} ${latest.period}</span></span>
-      </div>${chart}${comparisonHTML(head, section.headline)}${percentileHTML(head)}</div>`;
+      </div>${chart}${withheldNoteHTML(latest)}${comparisonHTML(head, section.headline)}${percentileHTML(head)}</div>`;
   }
 
   const facts = (section.indicators || []).map(id => factHTML(COMMUNE.indicators[id])).filter(Boolean).join('');
@@ -897,7 +996,7 @@ function renderCommune(){
     document.querySelectorAll('canvas.series').forEach(cv => {
       const section = SECTIONS.find(s => s.id === cv.dataset.section);
       const head = COMMUNE.indicators[section.headline];
-      const pts = Object.keys(head.periods).sort().map(p => ({period: p, value: head.periods[p].value}));
+      const pts = LocalUI.chartPoints(head);
       drawSeries(cv, pts);
     });
   });

@@ -273,9 +273,11 @@ MapUI.CommuneMap = class CommuneMap {
     const shownSet = this.visible;
 
     const nums = [];
+    let withheld = 0;
     for (const f of shown) {
       const row = this.values[f.nis];
       if (row && typeof row.value === 'number') nums.push(row.value);
+      else if (row && row.value === null && row.status === 'suppressed') withheld++;
     }
     nums.sort((a, b) => a - b);
 
@@ -297,8 +299,9 @@ MapUI.CommuneMap = class CommuneMap {
     }
 
     this.method = method;
+    this.withheld = withheld;
     this._drawLegend(breaks, bands, colourFor, nums);
-    this._reportCoverage(withValue, shown.length);
+    this._reportCoverage(withValue, shown.length, withheld);
     return this;
   }
 
@@ -363,7 +366,7 @@ MapUI.CommuneMap = class CommuneMap {
       methodNote + basis + (direction ? ' ' + direction : '');
   }
 
-  _reportCoverage(withValue, total) {
+  _reportCoverage(withValue, total, withheld) {
     const box = this.el.coverage;
     if (!box) return;
     const missing = total - withValue;
@@ -373,11 +376,22 @@ MapUI.CommuneMap = class CommuneMap {
       return;
     }
     box.classList.remove('map-hidden');
-    box.textContent =
-      `${missing} of the ${total} communes shown have no value here and are drawn as ` +
-      '“no data”. That is a gap in the source, not a zero — where the source withholds a ' +
-      'figure (for example a count below 10) it is suppressed rather than published, and a ' +
-      'merged commune may have no row on the map vintage this outline uses.';
+    /* This sentence used to describe withholding in prose while the data it
+       received could not distinguish it. It can now, so the two are counted
+       separately -- "the source masked 152 communes" and "13 were never
+       measured" are different facts about an indicator, and lumping them
+       together as one number was the vaguer half of the old wording. */
+    const uncollected = missing - (withheld || 0);
+    let text = `${missing} of the ${total} communes shown have no value here and are drawn as “no data”. `;
+    if (withheld) {
+      text += `${withheld} ${withheld === 1 ? 'was' : 'were'} withheld by the source — a count below ` +
+              '10, suppressed for privacy rather than published, and never a zero. ';
+    }
+    if (uncollected > 0) {
+      text += `${uncollected} ${uncollected === 1 ? 'has' : 'have'} no figure at all: a gap in the ` +
+              'source, or a merged commune with no row on the map vintage this outline uses.';
+    }
+    box.textContent = text.trim();
   }
 
   coverage() {
@@ -434,6 +448,16 @@ MapUI.CommuneMap = class CommuneMap {
   _tipHtml(f) {
     const row = this.values[f.nis];
     const name = f.name === f.name_fr ? f.name : `${f.name} / ${f.name_fr}`;
+    /* THREE STATES, NOT TWO. A commune with no figure is either one the
+       source WITHHELD (ONEM masks any count below 10 for privacy) or one
+       never measured. Both are drawn in the no-data colour because neither
+       can be placed on a scale, but they are different facts and the reader
+       has to be able to tell which they are looking at. */
+    if (row && row.value === null && row.status === 'suppressed') {
+      return `<span class="n">${name}</span>` +
+             `<span class="m">withheld by the source — fewer than 10, not zero` +
+             `${row.period ? ' · ' + row.period : ''}</span>`;
+    }
     if (!row || typeof row.value !== 'number') {
       return `<span class="n">${name}</span><span class="m">no data here</span>`;
     }

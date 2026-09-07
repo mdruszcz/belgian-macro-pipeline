@@ -13,6 +13,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from export_site_payloads import export_site_payloads  # noqa: E402
@@ -338,7 +340,7 @@ def test_derived_indicators_get_a_cross_section_payload(tmp_path):
                 "eur",
                 "2022",
                 "40000",
-                "D",
+                "derived",
             ),
             _history_row(
                 "11001",
@@ -349,7 +351,7 @@ def test_derived_indicators_get_a_cross_section_payload(tmp_path):
                 "eur",
                 "2023",
                 "49360",
-                "D",
+                "derived",
             ),
             _history_row(
                 "11002",
@@ -360,7 +362,7 @@ def test_derived_indicators_get_a_cross_section_payload(tmp_path):
                 "eur",
                 "2023",
                 "35362",
-                "D",
+                "derived",
             ),
         ],
     )
@@ -432,7 +434,7 @@ def test_indicator_index_lists_every_mappable_indicator(tmp_path):
                 "eur",
                 "2023",
                 "49360",
-                "D",
+                "derived",
             ),
         ],
     )
@@ -471,3 +473,258 @@ def test_indicator_index_lists_every_mappable_indicator(tmp_path):
     assert by_code["POP"]["coverage"] == 1
     assert by_code["POP"]["unit"] == "count"
     assert by_code["AVG_INC"]["names"]["en"] == "Average income"
+
+
+def test_a_withheld_cell_is_published_not_dropped(tmp_path):
+    """The core of the defect.
+
+    ONEM masks any count below 10 for privacy; the schema stores those with a
+    NULL value and status 'suppressed'
+    (migrations/001_core_schema.sql: CHECK (value IS NOT NULL OR status IN
+    ('suppressed','na'))). Both readers here used to `continue` on the empty
+    value before recording anything, so 1,044 such cells never reached
+    public/data -- across 188 of the 565 communes. A figure the source
+    deliberately withheld then looked exactly like one never collected, and
+    local.html's attribution block promised the opposite in three languages.
+    """
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    _write(
+        history,
+        HISTORY_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2023", "12"
+            ),
+            # Withheld: empty value, status S.
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2024", "", "S"
+            ),
+            # A blank with no status to explain it is still nothing.
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2025", "", "A"
+            ),
+        ],
+    )
+    latest = tmp_path / "latest.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2024", "", "S"
+            )
+        ],
+    )
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        sections_config=None,
+    )
+
+    periods = json.loads((out_dir / "communes" / "11001.json").read_text())["indicators"]["PT"][
+        "periods"
+    ]
+    assert periods["2023"] == {"value": 12.0, "status": "final"}
+    assert periods["2024"] == {"value": None, "status": "suppressed"}
+    assert "2025" not in periods, "a blank with no explaining status must still be skipped"
+
+    # The cross-section carries it too, so a map can say why a commune is blank.
+    cross = json.loads((out_dir / "indicators" / "PT.json").read_text())["communes"]
+    assert cross["11001"] == {"value": None, "status": "suppressed", "period": "2024"}
+
+
+def test_an_indicator_a_commune_has_only_withheld_values_for_still_appears(tmp_path):
+    """36 (commune, indicator) pairs are in this position. Every one of them
+    used to be absent from the payload entirely, so the indicator did not exist
+    on that commune's page at all -- the reader could not learn that the source
+    holds the figure and withholds it."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    _write(
+        history,
+        HISTORY_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "POP", "Population", "count", "2024", "16000"
+            ),
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2023", "", "S"
+            ),
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2024", "", "S"
+            ),
+        ],
+    )
+    latest = tmp_path / "latest.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "POP", "Population", "count", "2024", "16000"
+            )
+        ],
+    )
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        sections_config=None,
+    )
+
+    entry = json.loads((out_dir / "communes" / "11001.json").read_text())["indicators"]["PT"]
+    assert set(entry["periods"]) == {"2023", "2024"}
+    assert all(cell["value"] is None for cell in entry["periods"].values())
+    assert all(cell["status"] == "suppressed" for cell in entry["periods"].values())
+    # No retrieval date: `updated` means "when the number you are looking at
+    # was retrieved", and there is no number.
+    assert "updated" not in entry
+
+
+def test_a_comparison_is_never_drawn_from_a_withheld_period(tmp_path):
+    """Was the single most likely way this change could ship a wrong answer.
+
+    158 (commune, indicator) pairs have a SUPPRESSED latest period, and
+    _attach_comparisons took sorted(periods)[-1] unconditionally. It would have
+    matched the withheld period against a real province aggregate and printed
+    a dash beside a figure of 4,120 -- a comparison of nothing with something.
+    """
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    _write(
+        history,
+        HISTORY_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2024", "11"
+            ),
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2025", "", "S"
+            ),
+        ],
+    )
+    latest = tmp_path / "latest.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2024", "11"
+            )
+        ],
+    )
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    # Aggregates for BOTH years, so the wrong choice would silently succeed.
+    aggregates = tmp_path / "aggregates.csv"
+    aggregates.write_text(
+        "geo_id,nis_code,level,name_en,name_fr,name_nl,indicator_code,"
+        "indicator_name,unit,period,value,coverage_n,coverage_of,coverage_pct\n"
+        "be:reg:02000,02000,region,Flanders,Flandre,Vlaanderen,PT,"
+        "Part-time,count,2024,4120,1,1,100.0\n"
+        "be:reg:02000,02000,region,Flanders,Flandre,Vlaanderen,PT,"
+        "Part-time,count,2025,4200,1,1,100.0\n",
+        encoding="utf-8",
+    )
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        aggregates_csv=aggregates,
+        sections_config=None,
+    )
+
+    entry = json.loads((out_dir / "communes" / "11001.json").read_text())["indicators"]["PT"]
+    comparison = entry["comparison"]
+    assert comparison["region"]["period"] == "2024", "compared at the withheld period"
+    assert comparison["region"]["value"] == 4120
+
+
+def test_an_unknown_status_letter_stops_the_build(tmp_path):
+    """Rule 13. A new status letter arriving from a source is a schema change,
+    and it must stop the build rather than render itself onto a published page
+    as an unexplained capital letter a reader cannot look up. communes.html
+    shipped exactly this bug once -- see the comment above its statusPill()."""
+    import export_site_payloads as mod
+
+    assert mod._status_word("A") == "final"
+    assert mod._status_word("S") == "suppressed"
+    assert mod._status_word("derived") == "derived"
+    assert mod._status_word("") is None
+    with pytest.raises(ValueError, match="unknown observation status"):
+        mod._status_word("X")
+
+
+def test_coverage_counts_numbers_not_keys(tmp_path):
+    """A withheld commune is published now, so counting keys would tell a
+    reader the map has data it cannot draw. The two are reported separately
+    because "the source masked 152 communes" and "13 were never measured" are
+    different facts about an indicator."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    rows = [
+        _history_row(
+            "11001", "be:mun:11001", "Aartselaar", "PT", "Part-time", "count", "2024", "12"
+        ),
+        _history_row(
+            "11002", "be:mun:11002", "Antwerpen", "PT", "Part-time", "count", "2024", "", "S"
+        ),
+    ]
+    _write(history, HISTORY_HEADER, rows)
+    latest = tmp_path / "latest.csv"
+    _write(latest, LATEST_HEADER, rows)
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        sections_config=None,
+    )
+
+    row = next(
+        r
+        for r in json.loads((out_dir / "metadata" / "indicators.json").read_text())["indicators"]
+        if r["indicator_code"] == "PT"
+    )
+    assert row["coverage"] == 1, "a withheld commune must not count as covered"
+    assert row["suppressed"] == 1

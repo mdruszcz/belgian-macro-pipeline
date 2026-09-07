@@ -20,14 +20,89 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+# EVERY letter export_communes_csv.py's STATUS_TO_LETTER can emit. It was
+# mapping two of the six, and _status_word passed the rest through, so a
+# revised or estimate value would have reached 565 published pages as a bare
+# "R" or "E". communes.html shipped exactly this bug once already -- see the
+# comment above its statusPill(). Nothing in the store hits R/E/N today, which
+# is precisely why the gap was invisible.
 STATUS_LETTER_TO_WORD = {
     "A": "final",
     "P": "provisional",
+    "R": "revised",
+    "E": "estimate",
+    "S": "suppressed",
+    "N": "na",
 }
+
+# Written as a word, not a letter, by export_communes_history_csv.py, because a
+# derived figure has no source status to letter-code. Allowed through as-is.
+STATUS_WORDS_PASSED_THROUGH = {"derived"}
 
 
 def _status_word(status: str) -> str:
-    return STATUS_LETTER_TO_WORD.get(status, status or None)
+    """A single status letter as the word the pages publish.
+
+    RAISES on anything unrecognised rather than passing it through. Rule 13:
+    a new status letter arriving from a source is a schema change, and it has
+    to stop the build rather than render itself onto a commune page as an
+    unexplained capital letter that a reader cannot look up.
+    """
+    if not status:
+        return None
+    if status in STATUS_WORDS_PASSED_THROUGH:
+        return status
+    try:
+        return STATUS_LETTER_TO_WORD[status]
+    except KeyError:
+        raise ValueError(
+            f"unknown observation status {status!r}. The permitted statuses are "
+            f"{sorted(STATUS_LETTER_TO_WORD)} (letters) and "
+            f"{sorted(STATUS_WORDS_PASSED_THROUGH)} (words). If a source has "
+            "started emitting a new one, map it here deliberately -- do not let "
+            "it reach a published page unexplained."
+        ) from None
+
+
+# Statuses that explain a NULL value. The schema permits a null only for these
+# (migrations/001_core_schema.sql: CHECK (value IS NOT NULL OR status IN
+# ('suppressed','na'))), and they are the whole reason this pipeline can tell
+# "the source has this figure and will not publish it" apart from "we have no
+# reading at all".
+STATUSES_EXPLAINING_A_NULL = {"suppressed", "na"}
+
+
+def _cell(row: dict) -> dict | None:
+    """One observation as the payload publishes it, or None to skip the row.
+
+    A WITHHELD CELL IS PUBLISHED, NOT DROPPED. ONEM masks any count below 10
+    for privacy; those arrive with an empty value and status `S`. Both readers
+    here used to `continue` on the empty value before recording anything, so
+    1,044 such cells never reached public/data at all -- 203 (commune,
+    indicator) pairs across 188 of the 565 communes, 36 of which vanished
+    entirely. On a commune page a figure the source deliberately withheld then
+    looked exactly like one that was never collected.
+
+    That also made local.html's attribution block untrue. It states, in all
+    three languages, that figures ONEM withholds "are shown as suppressed,
+    never as zero" -- and the page had no rendering path for it. That sentence
+    is part of a licence notice.
+
+    Publishing `{"value": null, "status": "suppressed"}` is the ONE documented
+    exception to this format's absent-means-no-data rule (see
+    docs/features/site_payloads.md and docs/features/provenance.md). Absence
+    means "we have no reading"; a null with a status means "the source has a
+    reading and will not publish it". Collapsing the two destroys a
+    distinction the source deliberately created.
+
+    A blank with no status to explain it is still nothing, and is skipped.
+    """
+    status = _status_word(row["status"])
+    if row["value"] == "":
+        if status not in STATUSES_EXPLAINING_A_NULL:
+            return None
+        return {"value": None, "status": status}
+    return {"value": float(row["value"]), "status": status}
 
 
 def _note_updated(indicator: dict, fetched_at: str) -> None:
@@ -78,13 +153,15 @@ def _read_communes_history(csv_path: Path) -> dict[str, dict]:
                 row["indicator_code"],
                 {"name": row["indicator_name"], "unit": row["unit"], "periods": {}},
             )
-            if row["value"] == "":
+            cell = _cell(row)
+            if cell is None:
                 continue
-            indicator["periods"][row["period"]] = {
-                "value": float(row["value"]),
-                "status": _status_word(row["status"]),
-            }
-            _note_updated(indicator, row["fetched_at"])
+            indicator["periods"][row["period"]] = cell
+            # Gated on a real value, so `updated` keeps meaning "when the
+            # number you are looking at was retrieved" rather than "when we
+            # last read a file that declined to give us one".
+            if cell["value"] is not None:
+                _note_updated(indicator, row["fetched_at"])
     return communes
 
 
@@ -100,14 +177,12 @@ def _read_communes_latest(csv_path: Path) -> dict[str, dict]:
                 row["indicator_code"],
                 {"name": row["indicator_name"], "unit": row["unit"], "communes": {}},
             )
-            if row["value"] == "":
+            cell = _cell(row)
+            if cell is None:
                 continue
-            indicator["communes"][row["nis_code"]] = {
-                "value": float(row["value"]),
-                "period": row["period"],
-                "status": _status_word(row["status"]),
-            }
-            _note_updated(indicator, row["fetched_at"])
+            indicator["communes"][row["nis_code"]] = {**cell, "period": row["period"]}
+            if cell["value"] is not None:
+                _note_updated(indicator, row["fetched_at"])
     return indicators
 
 
@@ -126,13 +201,15 @@ def _read_national(csv_path: Path) -> dict[str, dict]:
                     "periods": {},
                 },
             )
-            if row["value"] == "":
+            # Same rule as the commune readers, via the same helper. Nothing
+            # national is suppressed today; keeping one rule means a national
+            # source that starts masking cells does not need this remembered.
+            cell = _cell({**row, "status": row["obs_status"]})
+            if cell is None:
                 continue
-            _note_updated(indicator, row["fetched_at"])
-            indicator["periods"][row["period"]] = {
-                "value": float(row["value"]),
-                "status": _status_word(row["obs_status"]),
-            }
+            if cell["value"] is not None:
+                _note_updated(indicator, row["fetched_at"])
+            indicator["periods"][row["period"]] = cell
     return indicators
 
 
@@ -377,6 +454,25 @@ def _additive_indicators(db_path: Path) -> set[str]:
         conn.close()
 
 
+def _latest_valued_period(periods: dict) -> str | None:
+    """The newest period that actually carries a number, or None.
+
+    NOT simply the newest period. 158 (commune, indicator) pairs have a
+    SUPPRESSED latest period -- ONEM withheld the most recent year -- and
+    `sorted(periods)[-1]` picks it. Every caller here goes on to use the value
+    at that period, so taking the newest blindly would compare a null against
+    a real province aggregate and print a dash beside a figure of 4,120, or
+    plot a chart point with a hole in it.
+
+    One helper rather than a check at each call site, because there are
+    several and the failure is silent at every one of them.
+    """
+    for period in sorted(periods, reverse=True):
+        if periods[period].get("value") is not None:
+            return period
+    return None
+
+
 def _attach_comparisons(
     communes: dict[str, dict],
     aggregates: dict[tuple[str, str, str], dict],
@@ -394,10 +490,9 @@ def _attach_comparisons(
     attached = 0
     for commune in communes.values():
         for indicator_id, entry in commune["indicators"].items():
-            periods = sorted(entry["periods"])
-            if not periods:
+            period = _latest_valued_period(entry["periods"])
+            if period is None:
                 continue
-            period = periods[-1]
             comparison = {}
             for ancestor in ancestry.get(commune["geo_id"], []):
                 agg = aggregates.get((ancestor, indicator_id, period))
@@ -498,10 +593,24 @@ def _indicator_index(
                 "additive": indicator_id in additive,
                 "direction": directions.get(indicator_id),
                 "decimals": decimals.get(indicator_id),
-                # How many communes actually carry a value. A choropleth over
+                # How many communes actually carry a NUMBER. A choropleth over
                 # an indicator covering 40 communes is a map of the gaps, so
                 # the page shows this before drawing rather than after.
-                "coverage": len(payload["communes"]),
+                #
+                # Counts values, not keys: withheld cells are now published
+                # (with a null value and status "suppressed"), and counting
+                # them as coverage would tell a reader the map has data it
+                # cannot draw. They are reported separately instead, because
+                # "the source masked 13 communes" and "13 communes were never
+                # measured" are different facts about an indicator.
+                "coverage": sum(
+                    1 for cell in payload["communes"].values() if cell["value"] is not None
+                ),
+                "suppressed": sum(
+                    1
+                    for cell in payload["communes"].values()
+                    if cell["value"] is None and cell.get("status") == "suppressed"
+                ),
             }
         )
     return index
