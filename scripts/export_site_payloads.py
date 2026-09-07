@@ -409,6 +409,104 @@ def _attach_comparisons(
     return attached
 
 
+def _backfill_cross_sections(indicators: dict[str, dict], communes: dict[str, dict]) -> int:
+    """Give the DERIVED indicators a cross-section payload too.
+
+    `indicators/{id}.json` is sliced from communes_export.csv, which reads the
+    observations table directly and therefore holds only STORED indicators.
+    The derived ones -- average income, unemployment rate, dependency ratio,
+    the share indicators -- are computed by the Block G engine on the way into
+    communes_history.csv, so until now they existed in every commune's own
+    payload but had no cross-commune file at all.
+
+    That was invisible while the only consumer was the commune profile page,
+    which reads one commune. A map reads one INDICATOR across every commune,
+    and the thirteen indicators missing here are precisely the ones worth
+    mapping: a choropleth of a rate says something about a commune, while a
+    choropleth of a headcount mostly redraws the population.
+
+    Built from the same history the commune payloads use, taking each commune's
+    most recent period -- the same "latest per (commune, indicator)" rule
+    communes_export.csv applies, so the two agree on what "latest" means.
+    Stored indicators are left exactly as the CSV produced them; this only
+    fills gaps, so nothing already published changes shape.
+    """
+    # Worked out UP FRONT, before anything is added. Testing `indicator_id in
+    # indicators` inside the loop would be true again as soon as the first
+    # commune contributed, leaving every indicator with exactly one commune.
+    stored = set(indicators)
+
+    added = 0
+    for nis, commune in communes.items():
+        for indicator_id, entry in commune["indicators"].items():
+            if indicator_id in stored:
+                continue
+            periods = entry["periods"]
+            if not periods:
+                continue
+            latest = max(periods)
+            payload = indicators.setdefault(
+                indicator_id,
+                {"name": entry["name"], "unit": entry["unit"], "communes": {}},
+            )
+            payload["communes"][nis] = {
+                "value": periods[latest]["value"],
+                "period": latest,
+                "status": periods[latest]["status"],
+            }
+            if "updated" in entry:
+                payload["updated"] = max(payload.get("updated", ""), entry["updated"])
+            added += 1
+    return added
+
+
+def _indicator_index(
+    indicators: dict[str, dict],
+    names: dict[str, dict],
+    additive: set[str],
+    db_path: Path,
+) -> list[dict]:
+    """One row per municipal indicator, for a page that must not name any.
+
+    THE MAP NEEDS THIS TO EXIST. `indicators/{id}.json` is one file per
+    indicator, and a browser cannot list a directory, so without an index the
+    only way for a page to know what it may draw is to hardcode the ids --
+    exactly what the 50% gate's "zero indicator-specific frontend logic" check
+    forbids, and what config/local_sections.yaml was created to avoid.
+
+    `direction` travels because a choropleth has to choose which end of the
+    colour ramp is which. Guessing from the name ("unemployment sounds bad")
+    would be the page inventing meaning; preferred_direction is the source of
+    truth the indicators table already holds.
+    """
+    conn = sqlite3.connect(str(db_path))
+    try:
+        directions = dict(
+            conn.execute("SELECT indicator_id, preferred_direction FROM indicators").fetchall()
+        )
+        decimals = dict(conn.execute("SELECT indicator_id, decimals FROM indicators").fetchall())
+    finally:
+        conn.close()
+
+    index = []
+    for indicator_id, payload in sorted(indicators.items()):
+        index.append(
+            {
+                "indicator_code": indicator_id,
+                "names": names.get(indicator_id, {"en": payload["name"]}),
+                "unit": payload["unit"],
+                "additive": indicator_id in additive,
+                "direction": directions.get(indicator_id),
+                "decimals": decimals.get(indicator_id),
+                # How many communes actually carry a value. A choropleth over
+                # an indicator covering 40 communes is a map of the gaps, so
+                # the page shows this before drawing rather than after.
+                "coverage": len(payload["communes"]),
+            }
+        )
+    return index
+
+
 def _write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
@@ -439,6 +537,8 @@ def export_site_payloads(
     indicators = _read_communes_latest(communes_latest_csv)
     national = _read_national(national_csv)
     geographies = _build_geographies(db_path)
+
+    _backfill_cross_sections(indicators, communes)
 
     names = _indicator_names(db_path)
     for commune in communes.values():
@@ -474,6 +574,11 @@ def export_site_payloads(
         )
 
     _write_json(out_dir / "metadata" / "geographies.json", {"geographies": geographies})
+
+    _write_json(
+        out_dir / "metadata" / "indicators.json",
+        {"indicators": _indicator_index(indicators, names, additive, db_path)},
+    )
 
     # None skips the layout entirely: a caller exercising the payload RESHAPE
     # with a fixture-scale set of indicators is not testing the page layout,

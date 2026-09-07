@@ -1,0 +1,11 @@
+# Only needed to REBUILD data/geo/communes.geojson (`make boundaries`).
+#
+# Deliberately not in requirements.txt. These three pull in compiled GEOS and
+# PROJ libraries, and nothing in the daily pipeline, the exports or the test
+# suite needs them: the boundary file is COMMITTED, so `make all` and CI read
+# it as data. Rebuilding is a rare, manual step -- once per Statbel boundary
+# vintage -- and it already needs a 227 MB hand-downloaded source that CI does
+# not have either.
+shapely>=2.0      # dissolve the 20,781 statistical sectors into 565 communes
+topojson>=1.9     # simplify SHARED borders once, so neighbours still meet
+pyproj>=3.6       # EPSG:3812 (Belgian Lambert 2008) -> WGS84

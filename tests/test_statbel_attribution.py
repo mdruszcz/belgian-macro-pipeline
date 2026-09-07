@@ -25,7 +25,7 @@ REPO = Path(__file__).resolve().parents[1]
 # Pages that render municipal (Statbel-derived) figures. all_data.html and
 # dashboard.html are national-only (NBB / Eurostat / FPB) and so are not
 # listed; add a page here the moment it starts showing commune data.
-MUNICIPAL_PAGES = ["communes.html", "local.html"]
+MUNICIPAL_PAGES = ["communes.html", "local.html", "map.html"]
 
 
 def _page(name: str) -> str:
@@ -214,4 +214,37 @@ def test_page_flags_the_stale_geography_and_unstated_period(page):
     assert "through 2024" in text or "jusqu'en 2024" in text or "tot en met 2024" in text
     assert (
         "provisional" in text.lower() or "provisoire" in text.lower() or "voorlopig" in text.lower()
+    )
+
+
+def test_map_page_value_attribution_is_identical_to_communes_html():
+    """map.html publishes the same municipal figures as communes.html, so it
+    carries the same source paragraphs -- and they must stay the same words.
+
+    export_local_pages.py LIFTS this block rather than retyping it, precisely
+    because a second hand-written copy drifts. map.html is a static file and
+    cannot lift it at build time, so this test is the equivalent guard: the
+    value-source attribution is copied, and reworded on one page only if it is
+    reworded on both. The boundary paragraph above it is map.html's own and is
+    deliberately not covered here.
+    """
+    communes = re.search(
+        r'<div class="attribution" id="attribution">(.*?)</div>',
+        (REPO / "communes.html").read_text(encoding="utf-8"),
+        re.DOTALL,
+    )
+    assert communes, "communes.html has no attribution block to compare against"
+
+    mapped = re.search(
+        r"<!-- values-attribution:start.*?-->(.*?)<!-- values-attribution:end -->",
+        (REPO / "map.html").read_text(encoding="utf-8"),
+        re.DOTALL,
+    )
+    assert mapped, "map.html has no values-attribution block"
+
+    def normalise(text):
+        return re.sub(r"\s+", " ", text).strip()
+
+    assert normalise(mapped.group(1)) == normalise(communes.group(1)), (
+        "map.html's value attribution has drifted from communes.html -- " "change both or neither"
     )

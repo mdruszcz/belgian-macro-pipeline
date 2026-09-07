@@ -23,7 +23,7 @@ EXTRA := --extra-observations data/population_observations.csv \
          --extra-observations data/realestate_observations.csv \
          --extra-observations data/police_observations.csv
 
-.PHONY: all install schema reference validate exports pages test fetch clean help
+.PHONY: all install schema reference validate exports pages boundaries test fetch clean help
 
 ## all: install deps, rebuild the database's own structure, regenerate every
 ## published export, and run the tests. No network. This is the gate target.
@@ -82,6 +82,15 @@ exports:
 pages:
 	$(PYTHON) scripts/export_local_pages.py --db $(DB) \
 		--payload-dir public/data --out-dir local --build-id "$${BUILD_ID:-local}"
+
+## boundaries: rebuild data/geo/communes.geojson from the Statbel statistical-
+## sectors file. NOT in `all`: the 227 MB source is a hand-downloaded file under
+## gitignored data/raw/, so a fresh clone cannot run this -- the OUTPUT is
+## committed instead, which is what map.html actually reads. Re-run this only
+## when Statbel publishes a new boundary vintage.
+boundaries:
+	$(PYTHON) -m pip install -q -r requirements-geo.txt
+	$(PYTHON) scripts/build_commune_boundaries.py --db $(DB)
 
 ## test: the full suite
 test:
