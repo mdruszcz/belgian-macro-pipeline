@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commune Data</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/commune_map.css">
 <style>
   :root{
     --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
@@ -102,6 +103,37 @@
   }
   #status.err{color:#c0392b}
 
+  /* The map panel. Collapsed until asked for, because the boundary file is
+     1.2 MB and most visitors to a data TABLE came for the table -- making
+     every one of them download a map they did not open would be a tax on the
+     page's main job. */
+  .map-panel{
+    border:1px solid var(--border);border-radius:8px;background:var(--surface);
+    overflow:hidden;margin:0 0 18px;
+  }
+  .map-controls{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    padding:12px 16px;border-bottom:1px solid var(--border);
+  }
+  .map-controls select{
+    font:inherit;padding:6px 9px;border:1px solid var(--border-strong);
+    border-radius:5px;background:var(--surface);color:var(--text);min-width:280px;max-width:100%;
+  }
+  .map-controls .hint{color:var(--text-faint);font-size:.82rem}
+  .year-jump{
+    font:inherit;font-size:.8rem;padding:3px 8px;margin-left:2px;cursor:pointer;
+    border:1px solid var(--border-strong);border-radius:4px;
+    background:var(--accent-soft);color:var(--accent-ink);
+  }
+  .year-jump:hover{background:var(--accent);color:var(--surface)}
+  #mapToggle{
+    font:inherit;font-size:.85rem;padding:7px 12px;cursor:pointer;
+    border:1px solid var(--border-strong);border-radius:5px;
+    background:var(--surface);color:var(--text);
+  }
+  #mapToggle:hover{background:var(--accent-soft);color:var(--accent-ink)}
+  #mapToggle[aria-expanded="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+
   .table-scroll{
     overflow-x:auto; border:1px solid var(--border); border-radius:8px;
     background:var(--surface);
@@ -158,6 +190,10 @@
     background:var(--row-alt); color:var(--text-muted); font-size:.76rem; line-height:1.6;
   }
   .attribution strong{color:var(--text)}
+  a{color:var(--accent-ink)}
+  a:hover{color:var(--accent)}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:var(--accent)}}
+  :root[data-theme="dark"] a{color:var(--accent)}
   .attribution a{color:var(--accent-ink)}
 
   @media (max-width:640px){
@@ -210,7 +246,7 @@
 </div>
   <header>
     <h1>Commune Data</h1>
-    <p class="subtitle">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. See <a href="map.html">map.html</a> for these same figures drawn on a map, <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
+    <p class="subtitle">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. Or press <strong>Show map</strong> to draw the column you are sorting by, in the year you have picked. See <a href="map.html">map.html</a> for a full-page map of the latest figures, <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
   </header>
 
   <div class="stats">
@@ -224,7 +260,36 @@
     <input id="search" type="text" placeholder="Filter by commune name (EN/FR/NL) or NIS code…" autocomplete="off">
     <select id="regionFilter"><option value="">All regions</option></select>
     <select id="yearFilter" title="Not every indicator covers every year -- a column shows &quot;n/a&quot; for a year outside its own coverage"></select>
+    <button type="button" id="mapToggle" aria-expanded="false" aria-controls="mapPanel">Show map</button>
     <span id="status">Loading…</span>
+  </div>
+
+  <!-- The map draws the SAME table, in the SAME year, under the SAME filters.
+       It is not a second dataset and must never look like one: every value it
+       colours is read from the rows below, so the two cannot disagree. -->
+  <div class="map-panel map-hidden" id="mapPanel">
+    <div class="map-controls">
+      <select id="mapIndicator" aria-label="Indicator to draw on the map"></select>
+      <span class="hint" id="mapHint"></span>
+    </div>
+    <div class="mapbox" id="mapBox">
+      <svg class="map" id="mapSvg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+      <div class="zoom">
+        <button type="button" id="mapZoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="mapZoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+        <button type="button" id="mapZoomReset" title="Reset view" aria-label="Reset view">&#8634;</button>
+      </div>
+      <div class="map-tip map-hidden" id="mapTip"></div>
+    </div>
+    <div class="legend">
+      <div class="scale">
+        <div class="swatches" id="mapSwatches"></div>
+        <div class="ticks" id="mapTicks"></div>
+      </div>
+      <div class="nodata-key"><i></i> no data</div>
+      <div class="note" id="mapLegendNote"></div>
+    </div>
+    <div class="map-warn map-hidden" id="mapCoverage" style="margin:0;border-radius:0"></div>
   </div>
 
   <div class="table-scroll">
@@ -343,11 +408,13 @@ function populateYearFilter(){
     opt.value = y; opt.textContent = y;
     sel.appendChild(opt);
   }
-  // Default to the most recent year overall -- indicators that stop earlier
-  // (fiscal income: 2023; LOCAL_UNITS_BY_COMMUNE: one quarter of 2023) show
-  // "n/a" for later years, same as any other missing cell, rather than the
-  // page silently picking an artificial year where everything happens to
-  // overlap.
+  // Default to the most recent year overall. Indicators whose coverage stops
+  // earlier -- and several do, from a single census year to one quarter --
+  // show "n/a" for later years, the same as any other missing cell. The
+  // alternative would be silently picking an artificial year where everything
+  // happens to overlap, which would hide how current each series really is.
+  // Each column header carries its own coverage range, so the reader can see
+  // which ones those are without this comment naming any.
   selectedYear = YEARS[YEARS.length - 1];
   sel.value = selectedYear;
 }
@@ -440,6 +507,12 @@ function render(){
     const arrow = th.querySelector('.arrow');
     if(th.dataset.key === sortKey) arrow.textContent = sortDir === 1 ? '↑' : '↓';
   });
+
+  // The map hangs off the end of render() so it follows the year selector, the
+  // region filter and the search box without any of them knowing it exists.
+  // Guarded by typeof: if the map script failed to load, the TABLE must still
+  // work -- it is this page's actual job, and the map is an addition to it.
+  if(typeof MapView !== 'undefined' && MapView.map) refreshMap();
 }
 
 document.querySelectorAll('#headRow th').forEach(th => {
@@ -488,6 +561,7 @@ async function load(){
     document.getElementById('attrUpdated').textContent = latest ? latest.slice(0,10) : 'see source';
 
     render();
+    if(typeof wireMapToggle === 'function') wireMapToggle();
   } catch(e){
     statusEl.textContent = 'Error: ' + e.message;
     statusEl.classList.add('err');
@@ -495,6 +569,214 @@ async function load(){
 }
 load();
 </script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* ---------------------------------------------------------------------------
+   The map view of this table.
+
+   IT IS THE SAME DATA, NOT A SECOND COPY. Every value it colours is read out
+   of COMMUNES -- the rows rendered below -- so the map and the table cannot
+   disagree about a figure, and an indicator added to the pipeline appears in
+   both without a change here.
+
+   What it adds over map.html is TIME. map.html reads the latest-value
+   payloads, so it can only ever draw the most recent figure. This page holds
+   every year, so its map follows the year selector: pick 2017 and you get the
+   2017 map. It also follows the region filter and the search box, because a
+   map that ignored the filters while the table obeyed them would be showing
+   two different answers to one question on one screen.
+
+   Nothing here names an indicator: the picker is built from INDICATOR_CODES,
+   which comes from the data.
+--------------------------------------------------------------------------- */
+
+const MapView = {
+  map: null,          // the shared MapUI.CommuneMap, once boundaries load
+  code: null,         // the indicator currently drawn
+  loading: false,
+  failed: false,
+};
+
+// The export writes single status letters; the map's tooltip wants the word.
+// Kept beside statusPill() above, which maps the same letters for the table.
+const MAP_STATUS_WORDS = {
+  A: 'final', P: 'provisional', R: 'revised', E: 'estimate',
+  S: 'suppressed', N: 'n/a', derived: 'derived',
+};
+
+/* The set of communes the table is currently showing. The map dims everything
+   outside it rather than removing it: a Belgium with holes is harder to read
+   than a Belgium with a highlighted region, and the surrounding outline is
+   what tells you where you are looking. */
+function visibleNisSet(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const region = document.getElementById('regionFilter').value;
+  if(!q && !region) return null;
+  const shown = COMMUNES.filter(c => {
+    if(region && c.region !== region) return false;
+    if(!q) return true;
+    return c.nis_code.includes(q)
+      || c.name_en.toLowerCase().includes(q)
+      || c.name_fr.toLowerCase().includes(q)
+      || c.name_nl.toLowerCase().includes(q);
+  });
+  return new Set(shown.map(c => c.nis_code));
+}
+
+/* Read one indicator, one year, straight out of the rendered rows.
+
+   A SUPPRESSED CELL IS NOT A ZERO. ONEM withholds counts under 10, and those
+   arrive with status 'S' and an EMPTY value. Passing it through as 0 would
+   paint the commune at the bottom of the scale and state, in colour, a figure
+   the source explicitly refused to publish. It is left out, so the commune is
+   drawn as "no data" -- the same distinction the table's Suppressed pill
+   makes. */
+function valuesForMap(code, year){
+  const values = {};
+  for(const c of COMMUNES){
+    const cell = c.indicators[code]?.byYear[year];
+    if(!cell || cell.value === '') continue;
+    const num = parseFloat(cell.value);
+    if(isNaN(num)) continue;
+    values[c.nis_code] = {
+      value: num,
+      period: cell.period,
+      status: MAP_STATUS_WORDS[cell.status] || cell.status,
+    };
+  }
+  return values;
+}
+
+function mapMeta(code){
+  const m = INDICATOR_META[code] || {};
+  return {unit: m.unit, name: m.name || code};
+}
+
+/* Repaint for the current indicator, year and filters. Cheap -- it recolours
+   565 existing paths and never rebuilds them. */
+function refreshMap(){
+  if(!MapView.map || !MapView.code) return;
+  MapView.map.setVisible(visibleNisSet());
+  MapView.map.setData(valuesForMap(MapView.code, selectedYear), mapMeta(MapView.code));
+
+  const meta = INDICATOR_META[MapView.code] || {};
+  const cov = MapView.map.coverage();
+  const covers = (meta.minYear && meta.maxYear)
+    ? (meta.minYear === meta.maxYear ? meta.minYear : `${meta.minYear}–${meta.maxYear}`)
+    : '';
+  // Said plainly, because an empty map has two very different causes and the
+  // reader cannot tell them apart by looking: the indicator may not run in
+  // this year at all, or it may run and simply have gaps.
+  const outOfRange = covers && (selectedYear < meta.minYear || selectedYear > meta.maxYear);
+  const hint = document.getElementById('mapHint');
+  hint.textContent = '';
+  if(outOfRange){
+    hint.append(`No data in ${selectedYear} — this indicator covers ${covers}. `);
+    // A blank map with an explanation is honest but a dead end. Offer the way
+    // out, as an explicit click rather than a silent jump: changing the year
+    // changes the TABLE too, and moving a reader's year under them without
+    // asking would be the page deciding what they meant.
+    const jump = document.createElement('button');
+    jump.type = 'button';
+    jump.className = 'year-jump';
+    jump.textContent = `Show ${meta.maxYear} instead`;
+    jump.onclick = () => {
+      selectedYear = meta.maxYear;
+      document.getElementById('yearFilter').value = meta.maxYear;
+      render();
+    };
+    hint.appendChild(jump);
+  } else {
+    hint.append(`${cov.withValue} of ${cov.shown} communes shown have a figure for ${selectedYear}.`);
+  }
+}
+
+function buildMapIndicatorPicker(){
+  const sel = document.getElementById('mapIndicator');
+  sel.innerHTML = '';
+  const rows = INDICATOR_CODES
+    .map(code => ({code, label: (INDICATOR_META[code] || {}).name || code}))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  for(const r of rows){
+    const o = document.createElement('option');
+    o.value = r.code;
+    o.textContent = r.label;
+    sel.appendChild(o);
+  }
+  sel.onchange = () => { MapView.code = sel.value; refreshMap(); };
+}
+
+/* Opening the map draws whatever column you are already sorting by -- the one
+   you were just looking at -- rather than an arbitrary default. */
+function indicatorToOpenWith(){
+  if(sortKey.startsWith('ind:')){
+    const code = sortKey.slice(4);
+    if(INDICATOR_CODES.includes(code)) return code;
+  }
+  return MapView.code || INDICATOR_CODES[0] || null;
+}
+
+async function openMap(){
+  const panel = document.getElementById('mapPanel');
+  const hint = document.getElementById('mapHint');
+  panel.classList.remove('map-hidden');
+
+  if(MapView.map || MapView.loading) { refreshMap(); return; }
+  MapView.loading = true;
+  hint.textContent = 'Loading boundaries…';
+
+  try{
+    const res = await fetch('data/geo/communes.geojson?t=' + Date.now());
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const geojson = await res.json();
+
+    MapView.map = new MapUI.CommuneMap({
+      svg:        document.getElementById('mapSvg'),
+      tip:        document.getElementById('mapTip'),
+      mapbox:     document.getElementById('mapBox'),
+      swatches:   document.getElementById('mapSwatches'),
+      ticks:      document.getElementById('mapTicks'),
+      legendNote: document.getElementById('mapLegendNote'),
+      coverage:   document.getElementById('mapCoverage'),
+    }, {
+      onSelect: nis => { window.location.href = `local/${nis}/`; },
+    }).build(geojson);
+
+    document.getElementById('mapZoomIn').onclick    = () => MapView.map.zoomBy(1/1.4);
+    document.getElementById('mapZoomOut').onclick   = () => MapView.map.zoomBy(1.4);
+    document.getElementById('mapZoomReset').onclick = () => MapView.map.resetView();
+
+    refreshMap();
+  }catch(e){
+    MapView.failed = true;
+    // The table is unaffected by a missing boundary file, so the page says what
+    // is wrong with the map and leaves the rest of itself working.
+    hint.textContent = 'Could not load the commune boundaries: ' + e.message;
+  }finally{
+    MapView.loading = false;
+  }
+}
+
+function wireMapToggle(){
+  const button = document.getElementById('mapToggle');
+  const panel = document.getElementById('mapPanel');
+  buildMapIndicatorPicker();
+
+  button.addEventListener('click', () => {
+    const open = panel.classList.contains('map-hidden');
+    button.setAttribute('aria-expanded', String(open));
+    button.textContent = open ? 'Hide map' : 'Show map';
+    if(open){
+      MapView.code = indicatorToOpenWith();
+      document.getElementById('mapIndicator').value = MapView.code || '';
+      openMap();
+    } else {
+      panel.classList.add('map-hidden');
+    }
+  });
+}
+</script>
+
 <script>
 // Theme switch. Shared localStorage key across communes.html, all_data.html
 // and local.html, so a choice made on one carries to the others. Distinct
