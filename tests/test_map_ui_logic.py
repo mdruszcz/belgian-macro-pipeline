@@ -22,12 +22,13 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 MAP_HTML = REPO / "map.html"
 COMMUNES_HTML = REPO / "communes.html"
+HOME_HTML = REPO / "home.html"
 COMPONENT_JS = REPO / "assets" / "commune_map.js"
 COMPONENT_CSS = REPO / "assets" / "commune_map.css"
 
 # Pages that draw a map, and therefore must load the shared component rather
 # than carry their own copy of it.
-MAP_PAGES = [MAP_HTML, COMMUNES_HTML]
+MAP_PAGES = [MAP_HTML, COMMUNES_HTML, HOME_HTML]
 
 
 def _extract_map_ui_js() -> str:

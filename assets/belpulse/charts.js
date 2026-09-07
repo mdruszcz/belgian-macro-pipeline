@@ -49,8 +49,20 @@
   function sizeCanvas(canvas, height) {
     var ctx = canvas.getContext('2d'),
       dpr = window.devicePixelRatio || 1;
-    var W = canvas.parentElement.clientWidth,
-      H = height;
+    // The canvas's OWN laid-out width, not the parent's clientWidth.
+    // components.css sets `.bp-chart-canvas-wrap canvas{width:100%}`, which
+    // overrides the inline style.width this function writes -- so if the two
+    // disagree the browser silently squashes the drawing to fit, and every
+    // label and gridline lands in the wrong place while the chart still
+    // looks plausible. Measuring what is actually on screen cannot disagree
+    // with what is actually on screen. Falls back to the parent for a canvas
+    // that stylesheet has not stretched, and to a sane default if neither has
+    // been laid out yet.
+    var W =
+      Math.round(canvas.getBoundingClientRect().width) ||
+      (canvas.parentElement && canvas.parentElement.clientWidth) ||
+      300;
+    var H = height;
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     canvas.style.width = W + 'px';
@@ -122,14 +134,38 @@
       ctx.fillText(fmtNum(v, opts.locale), pL - 9, y);
     });
 
-    var xSkip = Math.max(1, Math.ceil(34 / Math.max(slW, 1)));
     ctx.font = '10px "IBM Plex Mono",monospace';
     ctx.fillStyle = labelC;
-    ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    series[0].points.forEach(function (p, i) {
-      if (i % xSkip === 0 || i === n - 1) ctx.fillText(p.period, xOf(i), H - pB + 8);
+    // Skip interval from the MEASURED widest label, not a guessed constant.
+    // A guess sized for "2019" collides as soon as the periods are quarterly
+    // ("2020-Q3") or monthly, which is most of this pipeline's series.
+    var widest = 0;
+    series[0].points.forEach(function (p) {
+      widest = Math.max(widest, ctx.measureText(String(p.period)).width);
     });
+    var xSkip = Math.max(1, Math.ceil((widest + 10) / Math.max(slW, 1)));
+    // The last label is right-anchored (see below), so its LEFT edge sits at
+    // xOf(n-1) - widest, not at its centre -- a plain i % xSkip test placed
+    // an ordinary centred label within that span for a dense series (24
+    // quarterly points), and the two ran together. Drop any interior
+    // candidate whose centre falls inside the last label's own footprint.
+    var lastLabelLeftEdge = xOf(n - 1) - widest;
+    series[0].points.forEach(function (p, i) {
+      if (i === n - 1) {
+        // always shown, below
+      } else if (i % xSkip !== 0 || xOf(i) + widest / 2 > lastLabelLeftEdge) {
+        return;
+      }
+      // Only the LAST label needs re-anchoring: centred on the right plot
+      // edge, half of it falls outside the canvas and renders clipped. The
+      // first label stays centred -- it spills left into the y-axis gutter,
+      // which is empty, and left-anchoring it instead pushed it right into
+      // the next label.
+      ctx.textAlign = i === n - 1 ? 'right' : 'center';
+      ctx.fillText(p.period, xOf(i), H - pB + 8);
+    });
+    ctx.textAlign = 'center';
 
     series.forEach(function (s, si) {
       var colour = chartColour(s.colourIndex != null ? s.colourIndex : si);

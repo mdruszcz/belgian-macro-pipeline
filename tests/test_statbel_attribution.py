@@ -27,7 +27,7 @@ REPO = Path(__file__).resolve().parents[1]
 # Pages that render municipal (Statbel-derived) figures. all_data.html and
 # dashboard.html are national-only (NBB / Eurostat / FPB) and so are not
 # listed; add a page here the moment it starts showing commune data.
-MUNICIPAL_PAGES = ["communes.html", "local.html", "map.html"]
+MUNICIPAL_PAGES = ["communes.html", "local.html", "map.html", "home.html"]
 
 
 def _rendered_strings() -> str:
@@ -299,14 +299,16 @@ def test_every_page_carries_the_one_canonical_licence_notice(page):
     canonical = _canonical_attribution()
     text = (REPO / page).read_text(encoding="utf-8")
 
-    if page == "map.html":
-        block = re.search(
-            r"<!-- values-attribution:start.*?-->(.*?)<!-- values-attribution:end -->",
-            text,
-            re.DOTALL,
-        )
-    else:
-        block = re.search(r'<div class="attribution" id="attribution">(.*?)</div>', text, re.DOTALL)
+    # A page that also draws the map carries a SECOND notice (the boundary
+    # licence) in the same block, so it marks off the values notice explicitly
+    # and that marked span is what must match. Keyed on the marker being
+    # present rather than on a filename, so the next map-bearing page is held
+    # to the same standard without editing this test.
+    block = re.search(
+        r"<!-- values-attribution:start.*?-->(.*?)<!-- values-attribution:end -->",
+        text,
+        re.DOTALL,
+    ) or re.search(r'<div class="attribution" id="attribution">(.*?)</div>', text, re.DOTALL)
     assert block, f"{page} has no attribution block"
 
     def normalise(value):

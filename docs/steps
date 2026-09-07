@@ -477,8 +477,45 @@ implementing all seven data states (loading, ready, explicit zero, missing, supp
 unavailable, error).
 Why: Full page work should assemble from a tested component gallery, not invent components
 per page.
- [BUILD] Batch 3 -- homepage reproduction (unblocked on design per Batch 1; real sub-blockers
-recorded in docs/design-references/component-inventory.md, e.g. no photo library)
+ ✅ [BUILD] Batch 3 -- homepage reproduction (2026-09-07: home.html, a PREVIEW route --
+index.html is untouched, per Batch 15's own cutover gate. Full report at
+docs/implementation/batches/batch-3-homepage.md. THE FIRST REAL PAGE TO USE BATCH 2's SHARED
+COMPONENTS FOUND FOUR BUGS IN THEM that a component gallery alone never would have: (1) chart
+canvases sized against a CSS grid that was still growing mid-render -- drawing each chart
+synchronously right after appending its card measured it against however many siblings existed
+AT THAT INSTANT, so card 1 (alone) baked in ~1334px, card 2 baked in ~638px, only the last card
+ever saw the grid's true 406px width; fixed by splitting into a build pass then a draw pass, and
+by hardening charts.js's own sizeCanvas() to measure the canvas's OWN rendered width rather than
+its parent's; (2) the x-axis label skip interval was a guessed constant sized for a 4-digit year
+and collided the moment periods were quarterly, replaced with a measured interval; (3) fixing
+that still let the second-to-last label collide with the right-anchored last one, since a plain
+"every Nth index" rule doesn't know the last label's footprint extends further left than its
+own x-coordinate; (4) the mobile top bar pushed the WHOLE PAGE 803px wide in a 390px viewport --
+never caught because no page had used the analytical top bar below 1024px before, and no mobile
+mockup exists for any of the four reference designs (a gap already on record from Batch 1).
+COMPONENT GALLERY'S OWN CHIP DEMO ONLY EVER TESTED AN <a> TAG: home.html correctly uses <button>
+for the map's same-page filter chips rather than a fake <a href="#">, and .bp-chip had never had
+its background/font explicitly reset, so a button-shaped chip rendered near-invisible light-text-
+on-light-grey-face in dark mode -- invisible in light mode, where the same grey face reads as
+"a plain chip." All four are fixes to assets/belpulse/{charts.js,layout.css,components.css},
+so every future page inherits them, not a home.html workaround. TWO MORE BUGS FOUND BY RENDERING
+THE PAGE, NOT BY REVIEW: the featured-commune block read profile.names/profile.parents, which
+don't exist on communes/{nis}.json (the real shape is profile.name + flat profince/region
+strings) -- rendered as the bare NIS code with a blank region until fixed; and the map's own
+caption claimed a specific substitute figure ("opens on average net taxable income") that didn't
+match what the page actually draws (whatever config lists first), corrected to describe the real
+behaviour in all three languages. THREE INTERFACE STRINGS DELETED before commit for typing an
+indicator's name into assets/i18n.js -- a rule 2 violation caught by cross-checking the drafted
+keys against what the finished markup actually used. FEATURED COMMUNE IS PICKED BY THE DATA
+(highest value of the first configured headline indicator), never hardcoded, resolving
+homepage.md's own open question. Public finances shown as explicitly UNAVAILABLE rather than
+filled with a plausible number -- this pipeline's government series are GDP-growth contributions,
+not spending/revenue/debt levels, so there is no honest figure to show yet. Zero indicator codes
+in the page source (test_no_page_names_an_indicator now covers this file); the map-theme tabs
+and chips are driven entirely by metadata/sections.json, so reordering
+config/local_sections.yaml changes the homepage with no code edit. Licence attribution
+registered in test_statbel_attribution.py alongside communes.html/local.html/map.html, since
+this page also draws municipal figures through the choropleth. 940 tests passing, from 923)
 How: Reproduce nav, hero, choropleth, featured GDP/inflation, public-finance summary, featured
 municipality, macro indicator grid, sources strip, CTA, footer -- all configuration-driven,
 all figures real.
