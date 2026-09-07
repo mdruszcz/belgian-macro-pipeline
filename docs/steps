@@ -520,8 +520,41 @@ How: Reproduce nav, hero, choropleth, featured GDP/inflation, public-finance sum
 municipality, macro indicator grid, sources strip, CTA, footer -- all configuration-driven,
 all figures real.
 Why: The homepage is what gets shared and judged first.
- [BUILD] Batch 4 -- municipal profile redesign (unblocked on design per Batch 1; real
-sub-blockers recorded in component-inventory.md, e.g. the 3-vs-4 age-band mismatch)
+ ✅ [BUILD] Batch 4 -- municipal profile redesign (2026-09-07: commune.html, a PREVIEW route --
+local.html and the 565 static local/{nis}/ pages are untouched. Full report at
+docs/implementation/batches/batch-4-commune-profile.md. Built against the HIGH-FIDELITY Namur
+design supplied the same day, not the low-resolution transcription -- Batch 3 had just proved
+those get a page's whole shape wrong, so this batch waited for the real thing rather than
+building twice. THE DESIGN IS LARGELY AHEAD OF THE DATA, and every gap was verified rather than
+assumed: municipal finance has NO CONFIG AT ALL (budget/spending/revenue/debt), there is NO
+COMMUNE-ADJACENCY TABLE anywhere in this pipeline (so the neighbours list and neighbour map
+cannot be built), no employment-by-sector breakdown is collected, named composite ranks need the
+unbuilt peer model and fiscal score, there is no photo library, and only commune-level boundaries
+exist (not the statistical sectors the design's population map wants). Each of those is built at
+its designed size and marked unavailable WITH ITS OWN REASON, so the page doubles as a live
+checklist of the data work left. Three labels differ from the design and the real figure is used
+and named as itself: an AVERAGE (not median) net taxable income, a median SALE PRICE in euro (not
+a price per m2), and THREE age bands (not four). THE AGE DONUT IS THE INTERESTING ONE -- the data
+IS there (the three bands sum to exactly the published population, 16,782+73,781+24,894=115,457
+for Namur) and it still cannot be drawn, because NOTHING PUBLISHED SAYS WHICH INDICATORS PARTITION
+A WHOLE: the index row carries unit, additivity, direction, decimals, coverage and provenance, and
+other additive counts (women, married people) sit in the same configured section, indistinguishable
+from an age band by any published property. Drawing it would mean hardcoding indicator names (which
+test_no_page_names_an_indicator forbids against this very file) or guessing a subset that happens to
+add up -- which WOULD have worked today and produced a silently wrong donut the first time another
+additive count joined that section. So the panel names the gap instead; adding a part-of declaration
+to config/indicators/*.yaml lights it up with no page change. FIVE MORE BUGS FOUND BY RENDERING, not
+by review: the locator map used the shared component's focus(), which outlines AND ZOOMS, so the card
+showed one flat shape and read as an empty box (now highlights via the component's own published
+data-nis, national view intact); the evolution chart indexed RATES to base 100, putting an
+unemployment rate at 400 on the axis beside real levels; series with different periods were plotted
+against each other because charts.js positions every series against the FIRST series' points, so an
+annual and a quarterly series silently slid out of alignment; the first two fixes for that were in
+turn too strict (intersecting everything gave an empty set) and then biased (seeding from the longest
+series picked the quarterly one and left a one-line "comparison"); and the ranking panel asserted ONE
+denominator for every row when they genuinely differ -- some indicators rank against 565 communes,
+others against 581, WHICH IS THE PRE-2019-MERGER COMMUNE MAP some sources still publish on, so the
+design's own "581" turns out not to be aspirational at all. 956 tests passing, from 940)
 How: Reproduce the Namur design as a generic template bound to real payloads; preserve both
 local.html?nis= and /local/{nis}/; test Namur, Antwerp, Herstappe, a Brussels commune, a
 2025-merger successor, a suppressed-value commune.

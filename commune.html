@@ -1,0 +1,1142 @@
+<!--
+  BelPulse commune profile -- Batch 4 (docs/design-references/municipality-profile.md
+  plus the high-fidelity Namur design supplied 2026-09-07), built on Batch 1's
+  tokens and Batch 2's shared components.
+
+  A PREVIEW ROUTE, deliberately not local.html. local.html and the 565 static
+  pages under local/{nis}/ are untouched and still what a visitor gets today;
+  Batch 15's cutover gate decides when a redesigned page replaces the one it
+  is modelled on, never a silent switch. Open as commune.html?nis=92094.
+
+  WHAT THE DESIGN ASKS FOR THAT THIS PIPELINE CANNOT SHOW. Every one of these
+  is a missing DATA source, not a layout decision. Each is built at its
+  designed size and position and then rendered in the component library's
+  `unavailable` state with the specific reason, so this page doubles as an
+  honest, live checklist of what data work remains:
+    * Local finances (budget / spending / revenue / debt per inhabitant, and
+      the debt trend chart): needs the Walloon municipal-finance source. No
+      config for it exists -- verified, not assumed.
+    * Employment by sector (services / industry / construction / public
+      administration / agriculture): no sector breakdown is collected.
+    * Neighbouring communes (the list and the neighbour map): this pipeline
+      holds no commune-adjacency table at all.
+    * Named composite rankings ("economic dynamism", "residential
+      attractiveness"): need a peer model and a fiscal score, neither built.
+      Per-indicator ranks ARE real and are shown.
+    * The hero photograph and its editorial tagline: no photo library.
+    * A population map by STATISTICAL SECTOR: this pipeline holds commune
+      boundaries only, so the map shows the commune on the national map.
+  And three where the design's label and the real figure differ, so the real
+  one is used and named as itself: the income figure is an AVERAGE net
+  taxable income per return (the design says median), the housing figure is a
+  median SALE price in euro (the design says a price per m2), and the age
+  split has THREE bands here, not the design's four.
+  The CTA reads the real counts from manifest.json, not the design's
+  aspirational "581 communes / 200+ indicators".
+
+  NOT ONE INDICATOR CODE APPEARS IN THIS FILE. Every figure, every key-figure
+  card, every table row and every rank comes from metadata/sections.json's
+  `headlines` and `sections`, so editing config/local_sections.yaml changes
+  this page with no code edit (enforced by
+  tests/test_map_ui_logic.py::test_no_page_names_an_indicator).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BelPulse — Commune profile</title>
+<meta name="description" content="Economic, social and territorial indicators for a Belgian commune, from official sources, each with its period and retrieval date.">
+
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem('belpulse-theme') || localStorage.getItem('theme');
+      if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/commune_map.css">
+<style>
+  body{background:var(--bp-bg)}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 var(--bp-space-6)}
+  h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%}
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .searchbox{
+    display:flex; align-items:center; gap:8px; flex:1; max-width:330px; margin-left:auto;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:7px 12px; background:var(--bp-bg);
+  }
+  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+  .searchbox svg{color:var(--bp-text-faint); flex:none}
+  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
+
+  /* ---- page head ---- */
+  .pagehead{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--bp-space-6); padding:var(--bp-space-5) 0 var(--bp-space-4)}
+  .pagehead h1{font-size:2rem; margin:0 0 4px}
+  .pagehead .sub{color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+  .badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:var(--bp-space-3)}
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px;
+    border-radius:var(--bp-radius-pill); padding:4px 11px;
+    background:var(--bp-accent-soft); color:var(--bp-accent-ink);
+  }
+  .badge.neutral{background:var(--bp-surface-alt); color:var(--bp-text-muted)}
+  .headactions{display:flex; gap:8px; flex-wrap:wrap; flex:none}
+  .headactions .bp-btn{font-size:var(--bp-text-small)}
+  .bp-btn--dark{background:var(--bp-navy-bg); color:#fff}
+
+  /* ---- hero row ---- */
+  .hero3{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,.9fr) minmax(0,1.2fr); gap:var(--bp-space-5)}
+  .card{
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card);
+  }
+  .photo{
+    border-radius:var(--bp-radius-card); overflow:hidden; position:relative; min-height:210px;
+    display:flex; flex-direction:column; justify-content:flex-end; padding:var(--bp-space-5);
+    background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290); color:#fff;
+  }
+  .photo .cname{font-family:var(--bp-font-display); font-size:1.9rem; font-weight:600; line-height:1.1}
+  .photo .cnote{font-size:11px; color:rgba(255,255,255,.7); margin-top:8px; max-width:34ch}
+  .locator{padding:var(--bp-space-4); display:flex; flex-direction:column}
+  .locator h3, .panel h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
+  .locator .mapbox{position:relative; flex:1; min-height:150px}
+  /* Picks this commune out of the national outline. The shared map component
+     publishes `data-nis` on every path, so this styles its own output rather
+     than reimplementing anything -- and it does NOT use the component's
+     focus(), which frames and zooms into the commune: at that zoom the
+     locator showed a single flat shape and read as an empty box. */
+  svg.map path.locate-me{fill:var(--bp-accent); stroke:var(--bp-accent-ink); stroke-width:1.2}
+  .intro{font-size:var(--bp-text-small); color:var(--bp-text-muted); line-height:1.6; margin:0 0 var(--bp-space-4)}
+  .tiles{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .tile{display:flex; gap:10px; align-items:flex-start; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:10px}
+  .ficon{width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none}
+  .tile .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3}
+  .tile .val{font-size:1rem; font-weight:var(--bp-weight-bold); line-height:1.25}
+  .tile .per{font-size:10px; color:var(--bp-text-faint)}
+
+  /* ---- tabs ---- */
+  .tabs{display:flex; gap:var(--bp-space-5); border-bottom:1px solid var(--bp-border); margin:var(--bp-space-6) 0 var(--bp-space-6); overflow-x:auto}
+  .tabs button{
+    background:none; border:0; border-bottom:2px solid transparent; cursor:pointer;
+    padding:10px 2px; font:inherit; font-size:var(--bp-text-small);
+    font-weight:var(--bp-weight-medium); color:var(--bp-text-muted); white-space:nowrap;
+  }
+  .tabs button[aria-selected="true"]{color:var(--bp-accent); border-bottom-color:var(--bp-accent)}
+
+  /* ---- body grid ---- */
+  .body{display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--bp-space-8); align-items:start}
+  h2.sec{font-size:1.4rem; margin:0 0 var(--bp-space-4)}
+  .sechead{display:flex; align-items:baseline; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:var(--bp-space-4)}
+  .sechead h2{font-size:1.4rem; margin:0}
+  .sechead a{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap}
+  .sechead a:hover{text-decoration:underline}
+  .stack{display:flex; flex-direction:column; gap:var(--bp-space-8)}
+
+  .keyrow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-4)}
+  .keycard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4)}
+  .keycard .top{display:flex; gap:9px; align-items:flex-start; margin-bottom:6px}
+  .keycard .lbl{font-size:11px; color:var(--bp-text-muted); line-height:1.3}
+  .keycard .figure{display:flex; align-items:baseline; gap:8px}
+  .keycard .figure b{font-size:1.3rem; font-weight:var(--bp-weight-bold)}
+  .keycard .per{font-size:10px; color:var(--bp-text-faint)}
+  .keycard .chartslot{margin-top:6px; min-width:0}
+  .keycard canvas{display:block; width:100%}
+  .nohist{font-size:10px; color:var(--bp-text-faint); padding:14px 0 4px}
+
+  .panelrow{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
+  .panel{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5); min-width:0}
+  .panel .psub{font-size:11px; color:var(--bp-text-faint); margin:2px 0 var(--bp-space-3)}
+  .panel canvas{display:block; width:100%}
+  .legendrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:11px}
+  .legendrow .it{display:flex; align-items:center; gap:5px; color:var(--bp-text-muted)}
+  .legendrow .dot{width:9px; height:9px; border-radius:3px; flex:none}
+
+  .fin4{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--bp-space-4)}
+  .maprow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
+  .maprow .mapbox{position:relative; min-height:230px}
+  .maprow .legend{overflow-x:auto; margin-top:8px}
+
+  table.cmp{width:100%; border-collapse:collapse; font-size:var(--bp-text-small)}
+  table.cmp th,table.cmp td{padding:8px 9px; text-align:right; border-bottom:1px solid var(--bp-border); white-space:nowrap}
+  table.cmp th:first-child,table.cmp td:first-child{text-align:left; white-space:normal}
+  table.cmp thead th{color:var(--bp-text-muted); font-weight:var(--bp-weight-medium); font-size:11px}
+  table.cmp tbody tr:hover{background:var(--bp-surface-alt)}
+  table.cmp .self{font-weight:var(--bp-weight-bold)}
+  .rel-pos{color:var(--bp-green)}
+  .rel-neg{color:var(--bp-red-signal)}
+
+  .focus{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-4)}
+  .focustile{display:flex; gap:10px; align-items:flex-start; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); padding:var(--bp-space-4)}
+  .focustile h4{font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0 0 3px}
+  .focustile p{font-size:11px; color:var(--bp-text-muted); margin:0; line-height:1.5}
+
+  /* ---- sidebar ---- */
+  .side{display:flex; flex-direction:column; gap:var(--bp-space-5); position:sticky; top:var(--bp-space-4)}
+  .spanel{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5)}
+  .spanel .shead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:var(--bp-space-4)}
+  .spanel h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0; display:flex; align-items:center; gap:7px}
+  .spanel .shead a{font-size:11px; color:var(--bp-accent); text-decoration:none; white-space:nowrap}
+  .spanel .note{font-size:11px; color:var(--bp-text-muted); line-height:1.55; margin:0}
+  .selects{display:flex; flex-direction:column; gap:8px}
+  .selects select{
+    width:100%; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:8px 10px; font:inherit; font-size:var(--bp-text-small); background:var(--bp-surface); color:inherit;
+  }
+  .rankrow{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--bp-border); font-size:var(--bp-text-small)}
+  .rankrow:last-child{border-bottom:0}
+  .rankrow .lbl{flex:1; color:var(--bp-text-muted); line-height:1.3}
+  .rankrow .rk{font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums; white-space:nowrap}
+  .linkbtn{
+    display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:10px 12px; font-size:var(--bp-text-small); color:inherit; text-decoration:none;
+    background:var(--bp-surface); margin-bottom:8px;
+  }
+  .linkbtn:last-child{margin-bottom:0}
+  .linkbtn:hover{border-color:var(--bp-accent); color:var(--bp-accent)}
+
+  /* ---- CTA + footer ---- */
+  .cta{
+    margin-top:var(--bp-space-10); color:#fff;
+    background:radial-gradient(900px 400px at 78% 20%, rgba(70,110,175,.4), transparent 60%),
+               linear-gradient(135deg,#0b1730,#14284c 60%,#0c1c38);
+  }
+  .cta .wrap{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--bp-space-8); align-items:center; padding:var(--bp-space-10) var(--bp-space-6)}
+  .cta h2{font-size:1.8rem; margin:0 0 var(--bp-space-3); max-width:18ch}
+  .cta p{color:rgba(255,255,255,.72); margin:0; max-width:42ch; font-size:var(--bp-text-small)}
+  .cta-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap}
+  .cta .bp-btn--outline{border-color:rgba(255,255,255,.32); color:#fff; background:rgba(255,255,255,.06)}
+  .cta-stats{display:flex; gap:var(--bp-space-8)}
+  .cta-stats b{display:block; font-family:var(--bp-font-display); font-size:1.6rem; font-weight:600}
+  .cta-stats span{font-size:11px; color:rgba(255,255,255,.66)}
+
+  .foot{background:var(--bp-surface); border-top:1px solid var(--bp-border)}
+  .foot .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; padding-top:var(--bp-space-6); padding-bottom:var(--bp-space-6)}
+  .foot nav{display:flex; gap:var(--bp-space-5); flex-wrap:wrap}
+  .foot a{font-size:var(--bp-text-small); color:var(--bp-text-muted); text-decoration:none}
+  .foot a:hover{color:var(--bp-text)}
+  .foot-script{font-family:var(--bp-font-decorative); font-size:.95rem; color:var(--bp-text-muted); display:flex; align-items:center; gap:8px; margin-left:auto}
+  .flagbar{display:inline-flex; height:11px; width:26px; border-radius:2px; overflow:hidden; flex:none}
+  .flagbar i{flex:1}
+  .flagbar i:nth-child(1){background:#000}
+  .flagbar i:nth-child(2){background:#fdda24}
+  .flagbar i:nth-child(3){background:#ef3340}
+
+  .attribution{padding:var(--bp-space-6) 0; font-size:11px; line-height:1.6; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border)}
+  .attribution strong{color:var(--bp-text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+
+  @media (max-width:1080px){
+    .body{grid-template-columns:minmax(0,1fr)}
+    .side{position:static}
+    .hero3{grid-template-columns:minmax(0,1fr)}
+    .panelrow{grid-template-columns:minmax(0,1fr)}
+    .cta .wrap{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:768px){
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
+    .searchbox{max-width:none; margin-left:0; order:2; flex:1}
+    .pagehead{flex-direction:column}
+    .keyrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .fin4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .maprow{grid-template-columns:minmax(0,1fr)}
+    .focus{grid-template-columns:minmax(0,1fr)}
+    .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cta-stats{flex-wrap:wrap; gap:var(--bp-space-5)}
+  }
+  @media (max-width:520px){ .keyrow{grid-template-columns:minmax(0,1fr)} }
+</style>
+</head>
+<body class="bp-shell">
+
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span>
+        <span class="bp-wordmark">BelPulse</span>
+        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
+      </span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home.html" data-t="navHome">Home</a>
+      <a href="communes.html" aria-current="page" data-t="navCommunes">Commune profiles</a>
+      <a href="all_data.html" data-t="navMacro">Macro</a>
+      <a href="map.html" data-t="navMaps">Maps</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+    </nav>
+    <label class="searchbox">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+      <datalist id="communeList"></datalist>
+    </label>
+    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
+      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
+    </select>
+  </div>
+</header>
+
+<nav class="bp-breadcrumb" aria-label="Breadcrumb">
+  <div class="wrap">
+    <a href="home.html" data-t="navHome">Home</a><span class="sep">/</span>
+    <a href="communes.html" data-t="navCommunes">Commune profiles</a><span class="sep">/</span>
+    <span id="crumbName">—</span>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+    <div class="pagehead">
+      <div>
+        <h1><span data-t="cpTitle">Commune profile</span> — <span id="headName">—</span></h1>
+        <div class="sub" id="headRegion">—</div>
+        <div class="badges">
+          <span class="badge" data-t="cpBadgeCommune">Commune</span>
+          <span class="badge neutral"><span data-t="cpBadgeUpdated">Last updated</span>:&nbsp;<span id="badgeUpdated">—</span></span>
+          <span class="badge neutral" data-t="cpBadgeSources">Official sources</span>
+        </div>
+      </div>
+      <div class="headactions">
+        <a class="bp-btn bp-btn--outline" href="communes.html" data-t="cpCompare">Compare</a>
+        <a class="bp-btn bp-btn--outline" id="shareLink" href="#" data-t="cpShare">Share</a>
+        <a class="bp-btn bp-btn--dark" id="downloadLink" href="communes.html" data-t="cpDownload">Download the profile</a>
+      </div>
+    </div>
+
+    <!-- ── hero row ─────────────────────────────────────────────────────── -->
+    <div class="hero3">
+      <div class="photo">
+        <div class="cname" id="photoName">—</div>
+        <div class="cnote" data-t="cpPhotoNote">No photo library or per-commune editorial copy exists in this pipeline</div>
+      </div>
+
+      <div class="card locator">
+        <div class="shead" style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+          <h3 id="locatorTitle">—</h3>
+          <a href="map.html" style="font-size:11px;color:var(--bp-accent);text-decoration:none" data-t="cpSeeOnMap">See on the map</a>
+        </div>
+        <div class="mapbox" id="locBox">
+          <svg id="locSvg" role="img" aria-label="Locator map"></svg>
+          <div class="tip" id="locTip" hidden></div>
+        </div>
+      </div>
+
+      <div>
+        <p class="intro" id="introText">—</p>
+        <div class="tiles" id="heroTiles"></div>
+      </div>
+    </div>
+
+    <!-- ── section tabs, from sections.json ─────────────────────────────── -->
+    <div class="tabs" id="tabs" role="tablist" aria-label="Sections"></div>
+
+    <div class="body">
+      <div class="stack">
+
+        <section>
+          <h2 class="sec" data-t="cpKeyFigures">Key figures and recent trends</h2>
+          <div class="keyrow" id="keyRow"></div>
+        </section>
+
+        <section class="panelrow">
+          <div class="panel">
+            <h3 data-t="cpEvolution">How the main indicators have moved</h3>
+            <div class="psub" data-t="cpEvolutionSub">Each series indexed to 100 in its own first year on record</div>
+            <div style="min-width:0"><canvas id="evoCanvas"></canvas></div>
+            <div class="legendrow" id="evoLegend"></div>
+          </div>
+
+          <div class="panel bp-state" data-state="unavailable">
+            <h3 data-t="cpEmployment">Employment by sector</h3>
+            <div class="bp-state-body"></div>
+            <div class="bp-state-message">
+              <span class="headline" data-t="cpUnavailSectors">Employment by sector is not in this pipeline yet</span>
+              <span class="why" data-t="cpUnavailSectorsWhy">No sector breakdown is collected for communes.</span>
+            </div>
+          </div>
+
+          <div class="panel bp-state" id="agePanel" data-state="loading">
+            <h3 data-t="cpAgeSplit">Age structure</h3>
+            <div class="psub" data-t="cpAgeNote">This pipeline stores three age bands, not the four the design shows.</div>
+            <div class="bp-state-body">
+              <div style="min-width:0"><canvas id="ageCanvas"></canvas></div>
+              <div class="legendrow" id="ageLegend"></div>
+            </div>
+            <div class="bp-state-message">
+              <span class="headline" data-t="cpUnavailAge">No part-of-whole relationship is declared</span>
+              <span class="why" data-t="cpUnavailAgeWhy">Nothing published says which indicators partition a whole.</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="sec" data-t="cpFinances">Local finances</h2>
+          <div class="fin4" id="finRow"></div>
+          <div class="bp-state" id="finNote" data-state="unavailable" style="margin-top:var(--bp-space-3)">
+            <div class="bp-state-body"></div>
+            <div class="bp-state-message" style="padding:0">
+              <span class="headline">—</span><span class="why">—</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="sec" data-t="cpMaps">Commune maps</h2>
+          <div class="maprow">
+            <div class="panel bp-state" id="mapCard" data-state="loading">
+              <h3 id="mapTitle">—</h3>
+              <div class="psub" id="mapProvenance"></div>
+              <div class="mapbox" id="mapbox">
+                <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+                <div class="tip" id="tip" hidden></div>
+              </div>
+              <div class="legend">
+                <div class="swatches" id="swatches"></div>
+                <div class="ticks" id="ticks"></div>
+              </div>
+            </div>
+            <div class="panel bp-state" data-state="unavailable">
+              <h3 data-t="cpNeighbours">Neighbouring communes</h3>
+              <div class="bp-state-body"></div>
+              <div class="bp-state-message">
+                <span class="headline" data-t="cpUnavailNeighbours">No adjacency data</span>
+                <span class="why" data-t="cpUnavailNeighboursWhy">This pipeline holds no commune-adjacency table.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="sechead">
+            <h2 id="comparedTitle">—</h2>
+            <a href="communes.html" data-t="cpMoreIndicators">See more indicators →</a>
+          </div>
+          <div class="panel" style="padding:var(--bp-space-3) var(--bp-space-4)">
+            <div style="overflow-x:auto"><table class="cmp" id="cmpTable"></table></div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="sec" data-t="cpFocus">Thematic focus</h2>
+          <div class="focus" id="focusGrid"></div>
+        </section>
+
+      </div>
+
+      <!-- ── sidebar ────────────────────────────────────────────────────── -->
+      <aside class="side">
+        <div class="spanel">
+          <div class="shead"><h3 id="compareTitle">—</h3></div>
+          <div class="selects">
+            <select id="cmpSelf" disabled></select>
+            <select id="cmpA"></select>
+            <select id="cmpB"></select>
+          </div>
+          <a class="bp-btn bp-btn--primary" href="communes.html" style="margin-top:var(--bp-space-4); width:100%; justify-content:center" data-t="cpCompare">Compare</a>
+        </div>
+
+        <div class="spanel">
+          <div class="shead">
+            <h3 id="rankTitle">—</h3>
+            <a href="communes.html" data-t="cpAllRankings">See all rankings</a>
+          </div>
+          <p class="note" id="rankSub" style="margin-bottom:var(--bp-space-3)">—</p>
+          <div id="rankList"></div>
+          <p class="note" style="margin-top:var(--bp-space-3); color:var(--bp-text-faint)" data-t="cpUnavailCompositeWhy">Named composite rankings need a peer model and a fiscal score, neither built.</p>
+        </div>
+
+        <div class="spanel">
+          <div class="shead"><h3 data-t="cpSourcesTitle">Sources and methodology</h3>
+            <a href="about.html" data-t="cpSeeMethod">See the methodology</a></div>
+          <p class="note" data-t="cpSourcesBody">Figures come from official sources, reshaped into one canonical model and rebuilt automatically.</p>
+        </div>
+
+        <div class="spanel">
+          <div class="shead"><h3 data-t="cpLinks">Useful links</h3></div>
+          <a class="linkbtn" id="linkMap" href="map.html"><span data-t="cpLinkMap">See on the map</span></a>
+          <a class="linkbtn" id="linkCsv" href="communes.html"><span data-t="cpLinkCsv">Export the data (CSV)</span></a>
+          <a class="linkbtn" href="about.html"><span data-t="cpLinkMethod">Read the methodology</span></a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <section class="cta">
+    <div class="wrap">
+      <div>
+        <h2 id="ctaTitle">—</h2>
+        <p data-t="cpCtaLead">Reliable, comparable data to understand your territory better.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="bp-btn bp-btn--primary" href="communes.html" data-t="cpCtaCompare">Compare another commune</a>
+        <a class="bp-btn bp-btn--outline" href="map.html" data-t="homeAllMaps">See the full-page map</a>
+      </div>
+      <div class="cta-stats">
+        <div><b id="statCommunes">—</b><span data-t="cpStatCovered">communes covered</span></div>
+        <div><b id="statIndicators">—</b><span data-t="cpStatIndicators">indicators</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
+    </a>
+    <nav>
+      <a href="about.html" data-t="homeFooterAbout">About</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+      <a href="about.html" data-t="homeFooterSources">Sources</a>
+      <a href="about.html" data-t="homeFooterContact">Contact</a>
+    </nav>
+    <span class="foot-script">
+      <span class="flagbar"><i></i><i></i><i></i></span>
+      <span data-t="homeFooterScript">Data shared for a stronger Belgium.</span>
+    </span>
+  </div>
+</footer>
+
+<!-- The licence notice. This page publishes municipal (Statbel-derived)
+     figures, so it carries the same conditions as communes.html, local.html,
+     map.html and home.html, and is listed alongside them in
+     tests/test_statbel_attribution.py. English stays in the markup so a
+     reader whose JavaScript never runs still gets the complete notice. -->
+<div class="attribution" id="attribution">
+  <div class="wrap">
+  <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+  (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+  1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+  document already recorded in <code>docs/licences/</code>.
+  <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+  communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+  a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+  longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+  are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+  <br><br>
+  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+  <!-- values-attribution:end --></span>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/belpulse/charts.js"></script>
+<script src="assets/belpulse/components.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* BelPulse commune profile — Batch 4.
+ *
+ * Config-driven throughout: metadata/sections.json's `headlines` drive the
+ * key-figure cards, the hero tiles, the comparison table and the ranking
+ * panel; its `sections` drive the tabs and the thematic-focus tiles. Editing
+ * config/local_sections.yaml changes this page with no code edit.
+ *
+ * The maps are assets/commune_map.js -- the same component every other map on
+ * this site uses (claude.md rule 29). No second implementation.
+ */
+(function(){
+  'use strict';
+
+  var GEO_URL     = 'data/geo/communes.geojson';
+  var INDEX_URL   = 'public/data/metadata/indicators.json';
+  var SECTIONS_URL= 'public/data/metadata/sections.json';
+  var SOURCES_URL = 'public/data/metadata/sources.json';
+  var MANIFEST_URL= 'public/data/manifest.json';
+  var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
+  var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
+
+  var LANG = I18N.initial();
+  var T = function(k, v){ return I18N.t(LANG, k, v); };
+  var DEFAULT_NIS = '92094';   // Namur -- the commune the supplied design shows
+
+  var state = {
+    nis: null, profile: null, index: [], byCode: {},
+    sections: {headlines: [], sections: []}, sources: {}, grades: {},
+    geojson: null, map: null, locator: null, manifest: {},
+  };
+
+  function qs(name){
+    var m = new RegExp('[?&]' + name + '=([^&#]*)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  function nameOf(code){
+    var r = state.byCode[code];
+    return (r && r.names && (r.names[LANG] || r.names.en)) || code;
+  }
+  function communeName(){
+    var p = state.profile;
+    return (p && p.name && (p.name[LANG] || p.name.en)) || state.nis;
+  }
+  function fmt(v, meta){
+    return MapUI.formatValue(v, meta.unit, meta.decimals, LANG);
+  }
+  function latestNumeric(entry){
+    if(!entry || !entry.periods) return null;
+    var ps = Object.keys(entry.periods).sort();
+    for(var i = ps.length - 1; i >= 0; i--){
+      var v = entry.periods[ps[i]].value;
+      if(typeof v === 'number') return {period: ps[i], value: v};
+    }
+    return null;
+  }
+  function numericPoints(entry){
+    if(!entry || !entry.periods) return [];
+    return Object.keys(entry.periods).sort()
+      .map(function(p){ return {period: p, value: entry.periods[p].value}; })
+      .filter(function(pt){ return typeof pt.value === 'number'; });
+  }
+
+  function applyStrings(){
+    document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = T(el.dataset.t); });
+    document.querySelectorAll('[data-t-html]').forEach(function(el){ el.innerHTML = T(el.dataset.tHtml); });
+    document.querySelectorAll('[data-t-title]').forEach(function(el){ el.title = T(el.dataset.tTitle); });
+    document.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
+    document.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
+    // applyStrings rewrites the attribution wholesale, destroying the span the
+    // date was written into -- and that date is a LICENCE CONDITION.
+    var u = document.getElementById('attrUpdated');
+    if(u && state.attrUpdated) u.textContent = state.attrUpdated;
+    document.documentElement.setAttribute('lang', LANG);
+    document.getElementById('langPick').value = LANG;
+  }
+
+  /* ---- header, hero tiles ------------------------------------------------ */
+  function renderHead(){
+    var name = communeName();
+    document.title = 'BelPulse — ' + T('cpTitle') + ' — ' + name;
+    document.getElementById('crumbName').textContent = name;
+    document.getElementById('headName').textContent = name;
+    document.getElementById('photoName').textContent = name;
+    document.getElementById('headRegion').textContent =
+      [state.profile.province, state.profile.region].filter(Boolean).join(' · ');
+    document.getElementById('locatorTitle').textContent = T('cpLocator', {name: name});
+    document.getElementById('comparedTitle').textContent = T('cpCompared', {name: name});
+    document.getElementById('compareTitle').textContent = T('cpCompareTitle', {name: name});
+    document.getElementById('rankTitle').textContent = T('cpRanking', {name: name});
+    document.getElementById('introText').textContent = T('cpIntro') + ' ' + T('cpIntro2', {name: name});
+    document.getElementById('linkMap').querySelector('span').textContent = T('cpLinkMap', {name: name});
+    document.getElementById('shareLink').href = window.location.href;
+    document.getElementById('downloadLink').href = COMMUNE_URL(state.nis);
+    document.getElementById('linkCsv').href = 'data/communes_history.csv';
+    document.getElementById('linkMap').href = 'map.html';
+    var dates = Object.keys(state.profile.indicators)
+      .map(function(c){ return state.profile.indicators[c].updated; })
+      .filter(Boolean).sort();
+    document.getElementById('badgeUpdated').textContent = dates[dates.length - 1] || '—';
+  }
+
+  function iconSquare(i){
+    var s = document.createElement('span');
+    s.className = 'ficon';
+    s.style.background = 'color-mix(in srgb, var(--bp-chart-' + ((i % 8) + 1) + ') 14%, transparent)';
+    s.style.color = 'var(--bp-chart-' + ((i % 8) + 1) + ')';
+    s.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>';
+    return s;
+  }
+
+  function headlines(){
+    return (state.sections.headlines || []).filter(function(c){
+      return state.byCode[c] && state.profile.indicators[c];
+    });
+  }
+
+  function renderTiles(){
+    var host = document.getElementById('heroTiles');
+    host.innerHTML = '';
+    headlines().slice(0, 6).forEach(function(code, i){
+      var meta = state.byCode[code];
+      var latest = latestNumeric(state.profile.indicators[code]);
+      var el = document.createElement('div');
+      el.className = 'tile';
+      el.appendChild(iconSquare(i));
+      var box = document.createElement('div');
+      box.innerHTML = '<div class="lbl"></div><div class="val"></div><div class="per"></div>';
+      box.querySelector('.lbl').textContent = nameOf(code);
+      box.querySelector('.val').textContent = latest ? fmt(latest.value, meta) : '—';
+      box.querySelector('.per').textContent = latest ? latest.period : T('cpNoHistory');
+      el.appendChild(box);
+      host.appendChild(el);
+    });
+  }
+
+  /* ---- key-figure cards --------------------------------------------------
+     A card whose indicator has only ONE period on record shows the figure and
+     says so, instead of drawing a one-point "trend". Rendering a single
+     observation as a line is the exact failure docs/features/data_binding.md
+     warns about: it reads as a flat trend the source never published. */
+  function renderKeyFigures(){
+    var host = document.getElementById('keyRow');
+    host.innerHTML = '';
+    var draws = [];
+    headlines().slice(0, 6).forEach(function(code, i){
+      var meta = state.byCode[code];
+      var entry = state.profile.indicators[code];
+      var pts = numericPoints(entry);
+      var latest = latestNumeric(entry);
+
+      var card = document.createElement('div');
+      card.className = 'keycard';
+      card.innerHTML =
+        '<div class="top"></div>' +
+        '<div class="figure"><b></b><span class="per"></span></div>' +
+        '<div class="chartslot"></div>';
+      var top = card.querySelector('.top');
+      top.appendChild(iconSquare(i));
+      var lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = nameOf(code);
+      top.appendChild(lbl);
+      card.querySelector('.figure b').textContent = latest ? fmt(latest.value, meta) : '—';
+      card.querySelector('.figure .per').textContent = latest ? latest.period : '';
+
+      var slot = card.querySelector('.chartslot');
+      if(pts.length > 1){
+        var canvas = document.createElement('canvas');
+        slot.appendChild(canvas);
+        draws.push({canvas: canvas, points: pts.slice(-16), label: nameOf(code), i: i});
+      } else {
+        var note = document.createElement('div');
+        note.className = 'nohist';
+        note.textContent = T('cpSinglePeriod');
+        slot.appendChild(note);
+      }
+      host.appendChild(card);
+    });
+    // Drawn only once every card is in the DOM: a canvas measured while the
+    // grid is still growing bakes in the wrong width (Batch 3's own lesson).
+    draws.forEach(function(d){
+      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
+        {locale: LANG, height: 74, compact: true});
+    });
+  }
+
+  /* ---- indexed evolution chart ------------------------------------------
+     Each series is rescaled to 100 at its OWN first period on record, which
+     is a per-series presentation rescale of published values, not a new
+     aggregation -- and the base year is read from the data rather than
+     assumed, so a series that starts later is not silently stretched. */
+  function renderEvolution(){
+    var canvas = document.getElementById('evoCanvas');
+    var legend = document.getElementById('evoLegend');
+    legend.innerHTML = '';
+
+    // ONLY LEVELS, NEVER RATES. Indexing a level (a count, a euro amount) to
+    // 100 restates the same quantity on a common scale. Indexing a RATE does
+    // not mean anything: an unemployment rate that goes 8% -> 9% is not "112"
+    // of anything, and drawn beside real levels it reads as a series that
+    // grew 12%. The first version of this chart did exactly that and put a
+    // rate's rebased line at 400 on the axis.
+    var candidates = headlines().filter(function(code){
+      var m = state.byCode[code];
+      return m && String(m.unit || '').indexOf('percent') !== 0 &&
+             numericPoints(state.profile.indicators[code]).length >= 3;
+    });
+    if(!candidates.length) return;
+
+    // ONE SHARED X-AXIS. charts.js places every series against the FIRST
+    // series' point positions, so series of different lengths would silently
+    // slide out of alignment -- 2015 on one line sitting above 2019 on
+    // another. Every series here must therefore share the same periods.
+    //
+    // Intersecting ALL candidates is too strict: these series mix
+    // granularities (annual counts against a quarterly house price), and an
+    // annual set never intersects a quarterly one, so the panel drew nothing
+    // at all. Take the longest series, then keep only the others that still
+    // leave at least three shared periods -- so the chart shows the largest
+    // group that is genuinely comparable, and silently drops the rest rather
+    // than plotting them against the wrong years.
+    // Seeding from the LONGEST series is the wrong bias: the longest here is
+    // a quarterly price series, and seeding on it excluded both annual
+    // series, leaving a one-line "comparison". Try every candidate as the
+    // seed and keep the group with the MOST SERIES (ties broken by the most
+    // shared periods) -- with a handful of candidates this is cheap, and it
+    // is deterministic, so the same data always produces the same chart.
+    var periodsOf = {};
+    candidates.forEach(function(code){
+      periodsOf[code] = numericPoints(state.profile.indicators[code]).map(function(p){ return p.period; });
+    });
+
+    var best = null;
+    candidates.forEach(function(seed){
+      var group = [seed];
+      var shared = periodsOf[seed].slice();
+      candidates.forEach(function(code){
+        if(code === seed) return;
+        var next = shared.filter(function(p){ return periodsOf[code].indexOf(p) !== -1; });
+        if(next.length >= 3){ group.push(code); shared = next; }
+      });
+      if(shared.length < 3) return;
+      if(!best || group.length > best.group.length ||
+         (group.length === best.group.length && shared.length > best.shared.length)){
+        best = {group: group, shared: shared};
+      }
+    });
+    if(!best) return;
+    var common = best.shared.slice().sort();
+    candidates = best.group;
+
+    var series = [];
+    candidates.forEach(function(code){
+      var byPeriod = {};
+      numericPoints(state.profile.indicators[code]).forEach(function(p){ byPeriod[p.period] = p.value; });
+      var base = byPeriod[common[0]];
+      if(!base) return;                       // cannot index off zero or a gap
+      series.push({
+        label: nameOf(code),
+        colourIndex: headlines().indexOf(code),
+        points: common.map(function(per){ return {period: per, value: (byPeriod[per] / base) * 100}; }),
+      });
+    });
+    if(!series.length) return;
+
+    BPCharts.drawLine(canvas, series, {locale: LANG, height: 210});
+    series.forEach(function(s){
+      var it = document.createElement('span');
+      it.className = 'it';
+      it.innerHTML = '<span class="dot" style="background:var(--bp-chart-' + ((s.colourIndex % 8) + 1) + ')"></span>';
+      it.appendChild(document.createTextNode(s.label));
+      legend.appendChild(it);
+    });
+  }
+
+  /* ---- age donut: honestly unavailable, and worth explaining why ---------
+     THE DATA IS THERE AND STILL CANNOT BE DRAWN. This pipeline holds three
+     age bands whose values sum to EXACTLY the published population. But a
+     donut of shares needs to know which indicators partition a whole, and
+     nothing published says so: the index row carries unit, additivity,
+     direction, decimals, coverage and provenance -- no part-of-whole
+     relationship. Other additive counts (women, married people) sit in the
+     same configured section and are indistinguishable from an age band by
+     any published property.
+
+     So the only ways to draw this are to hardcode the three indicator names
+     into this page -- which the 50%-gate rule forbids, and which
+     tests/test_map_ui_logic.py enforces against this very file -- or to
+     guess a subset that happens to add up, which would silently produce a
+     wrong donut the first time a new additive count joined the section.
+     Neither is acceptable, so the panel says what is missing instead. Adding
+     a part-of declaration to config/indicators/*.yaml turns this on with no
+     change here. */
+  function renderAge(){
+    document.getElementById('agePanel').dataset.state = 'unavailable';
+  }
+
+  /* ---- local finances: designed shape, honest state ---------------------- */
+  /* The four tiles the design asks for, at their designed size and in their
+     designed order, each LABELLED and each showing a dash instead of a
+     number. An earlier version left three of them completely blank, which
+     reads as a broken render rather than a deliberate "we do not have this";
+     and repeating the same explanation four times is noise, so the reason is
+     said once, beneath the row. */
+  var FINANCE_LABELS = ['cpFinBudget', 'cpFinSpending', 'cpFinRevenue', 'cpFinDebt'];
+
+  function renderFinances(){
+    var host = document.getElementById('finRow');
+    host.innerHTML = '';
+    FINANCE_LABELS.forEach(function(key, i){
+      var tile = document.createElement('div');
+      tile.className = 'keycard';
+      tile.innerHTML =
+        '<div class="top"></div>' +
+        '<div class="figure"><b style="color:var(--bp-text-faint)">—</b></div>';
+      tile.querySelector('.top').appendChild(iconSquare(i + 2));
+      var lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = T(key);
+      tile.querySelector('.top').appendChild(lbl);
+      host.appendChild(tile);
+    });
+    var note = document.getElementById('finNote');
+    note.querySelector('.headline').textContent = T('cpUnavailFinance');
+    note.querySelector('.why').textContent = T('cpUnavailFinanceWhy');
+  }
+
+  /* ---- comparison table --------------------------------------------------
+     Straight from each indicator's own published `comparison` block. The
+     relation is a SHARE for an additive indicator (this commune as a part of
+     its province) and a DIFFERENCE for a non-additive one (a rate against a
+     rate) -- the distinction this repo's Definitions section already makes,
+     never a single hardcoded percentage style. */
+  function relation(meta, own, other){
+    if(!other || typeof other.value !== 'number' || !own) return null;
+    if(meta.additive === true){
+      if(!other.value) return null;
+      return {kind: 'share', pct: (own.value / other.value) * 100};
+    }
+    return {kind: 'diff', pct: own.value - other.value};
+  }
+  function relationText(meta, rel){
+    if(!rel) return '—';
+    var n = rel.pct;
+    var dp = (n !== 0 && Math.abs(n) < 0.1) ? 3 : 1;
+    var s = n.toLocaleString(LANG, {maximumFractionDigits: dp});
+    if(rel.kind === 'share') return s + ' %';
+    return (n >= 0 ? '+' : '') + s;
+  }
+
+  function renderComparison(){
+    var table = document.getElementById('cmpTable');
+    var name = communeName();
+    var head = '<thead><tr><th>' + T('cpColIndicator') + '</th><th>' + name + '</th><th>' +
+      T('cpColProvince') + '</th><th>' + T('cpColRegion') + '</th><th>' + T('cpColCountry') + '</th></tr></thead>';
+    var rows = '';
+    headlines().forEach(function(code){
+      var meta = state.byCode[code];
+      var entry = state.profile.indicators[code];
+      var own = latestNumeric(entry);
+      var cmp = entry.comparison || {};
+      function cell(scope){
+        var c = cmp[scope];
+        if(!c || typeof c.value !== 'number') return '<td>—</td>';
+        var rel = relation(meta, own, c);
+        var cls = '';
+        if(rel && rel.kind === 'diff') cls = rel.pct >= 0 ? 'rel-pos' : 'rel-neg';
+        return '<td>' + fmt(c.value, meta) +
+          '<br><span class="' + cls + '" style="font-size:10px">' + relationText(meta, rel) + '</span></td>';
+      }
+      rows += '<tr><td>' + nameOf(code) + '</td>' +
+        '<td class="self">' + (own ? fmt(own.value, meta) : '—') + '</td>' +
+        cell('province') + cell('region') + cell('country') + '</tr>';
+    });
+    table.innerHTML = head + '<tbody>' + rows + '</tbody>';
+  }
+
+  /* ---- rankings: real per-indicator percentiles only --------------------- */
+  function renderRanks(){
+    var host = document.getElementById('rankList');
+    host.innerHTML = '';
+    var counts = {};
+    headlines().forEach(function(code){
+      var p = (state.profile.indicators[code] || {}).percentile;
+      var nat = p && p.national;
+      if(!nat || typeof nat.rank !== 'number') return;
+      counts[nat.peers] = true;
+      var row = document.createElement('div');
+      row.className = 'rankrow';
+      row.innerHTML = '<span class="lbl"></span><span class="rk"></span>';
+      row.querySelector('.lbl').textContent = nameOf(code);
+      row.querySelector('.rk').textContent = nat.rank + ' / ' + nat.peers;
+      host.appendChild(row);
+    });
+    // EACH RANK HAS ITS OWN DENOMINATOR and they genuinely differ -- an
+    // indicator ranked against 565 communes, another against 581 (the
+    // pre-2019-merger vintage the source still publishes on), another against
+    // however many carry a value at all. The subtitle asserted one number for
+    // all of them, taken from whichever row happened to come last. It now
+    // states a single total only when every rank really shares one.
+    var totals = Object.keys(counts);
+    document.getElementById('rankSub').textContent =
+      totals.length === 1 ? T('cpRankingSub', {n: totals[0]}) : T('cpRankingVaries');
+  }
+
+  /* ---- thematic focus tiles, from the config's own sections -------------- */
+  function renderFocus(){
+    var host = document.getElementById('focusGrid');
+    host.innerHTML = '';
+    (state.sections.sections || []).slice(0, 6).forEach(function(sec, i){
+      var el = document.createElement('div');
+      el.className = 'focustile';
+      el.appendChild(iconSquare(i));
+      var box = document.createElement('div');
+      box.innerHTML = '<h4></h4><p></p>';
+      box.querySelector('h4').textContent = (sec.label && (sec.label[LANG] || sec.label.en)) || sec.id;
+      box.querySelector('p').textContent = (sec.blurb && (sec.blurb[LANG] || sec.blurb.en)) || '';
+      el.appendChild(box);
+      host.appendChild(el);
+    });
+  }
+
+  function renderTabs(){
+    var host = document.getElementById('tabs');
+    host.innerHTML = '';
+    (state.sections.sections || []).forEach(function(sec, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(i === 0));
+      b.textContent = (sec.label && (sec.label[LANG] || sec.label.en)) || sec.id;
+      b.addEventListener('click', function(){
+        host.querySelectorAll('button').forEach(function(o){ o.setAttribute('aria-selected', 'false'); });
+        b.setAttribute('aria-selected', 'true');
+        document.getElementById('focusGrid').scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function renderCompareSelects(){
+    var self = document.getElementById('cmpSelf');
+    self.innerHTML = '<option>' + communeName() + '</option>';
+    [['cmpA', 'cpColRegion'], ['cmpB', 'cpColCountry']].forEach(function(pair){
+      var sel = document.getElementById(pair[0]);
+      sel.innerHTML = '';
+      var o = document.createElement('option');
+      o.textContent = T(pair[1]);
+      sel.appendChild(o);
+    });
+  }
+
+  /* ---- maps -------------------------------------------------------------- */
+  // Outline this commune without zooming to it. The component's own focus()
+  // does both, and framing one commune is wrong for a map whose whole job is
+  // to show WHERE in the country it sits.
+  function highlight(svg){
+    var path = svg.querySelector('path[data-nis="' + state.nis + '"]');
+    if(path) path.classList.add('locate-me');
+  }
+
+  async function renderMaps(){
+    var name = communeName();
+    document.getElementById('mapTitle').textContent = T('cpMapPopulation', {name: name});
+
+    // Locator: the whole country, this commune picked out. Uses the shared
+    // component with no legend elements at all, which is now a supported
+    // shape (Batch 3 made each legend element independently optional).
+    state.locator = new MapUI.CommuneMap({
+      svg: document.getElementById('locSvg'),
+      mapbox: document.getElementById('locBox'),
+      tip: document.getElementById('locTip'),
+    }, {lang: LANG}).build(state.geojson);
+    highlight(document.getElementById('locSvg'));
+
+    var code = (state.sections.headlines || [])[0];
+    var meta = state.byCode[code];
+    var card = document.getElementById('mapCard');
+    if(!code || !meta){ card.dataset.state = 'unavailable'; return; }
+
+    state.map = new MapUI.CommuneMap({
+      svg: document.getElementById('svg'),
+      tip: document.getElementById('tip'),
+      mapbox: document.getElementById('mapbox'),
+      swatches: document.getElementById('swatches'),
+      ticks: document.getElementById('ticks'),
+    }, {
+      lang: LANG,
+      onSelect: function(nis){ window.location.search = '?nis=' + nis; },
+    }).build(state.geojson);
+
+    var res = await fetch(VALUES_URL(code));
+    if(!res.ok){ card.dataset.state = 'error'; return; }
+    var payload = await res.json();
+    card.dataset.state = 'ready';
+    state.map.setData(payload.communes || {}, {
+      unit: meta.unit, decimals: meta.decimals, direction: meta.direction,
+    });
+    // Outline, not focus: the whole country stays visible, with this commune
+    // picked out in it. setData repaints every path, so highlight after.
+    document.getElementById('svg').querySelectorAll('path.locate-me')
+      .forEach(function(p){ p.classList.remove('locate-me'); });
+    var own = document.getElementById('svg').querySelector('path[data-nis="' + state.nis + '"]');
+    if(own) own.classList.add('hit');
+
+    var bits = [];
+    var src = meta.source ? state.sources[meta.source] : null;
+    if(src) bits.push(src.label ? (src.label[LANG] || src.label.en) : meta.source);
+    if(meta.updated) bits.push(T('retrieved') + ' ' + meta.updated);
+    document.getElementById('mapProvenance').textContent = nameOf(code) + ' · ' + bits.join(' · ');
+  }
+
+  function wireSearch(){
+    var input = document.getElementById('communeSearch');
+    var list = document.getElementById('communeList');
+    if(!state.locator) return;
+    list.innerHTML = '';
+    state.locator.features.forEach(function(f){
+      var o = document.createElement('option');
+      o.value = f.name + ' (' + f.nis + ')';
+      list.appendChild(o);
+    });
+    input.addEventListener('change', function(){
+      var m = /\((\d{4,5})\)\s*$/.exec(input.value);
+      if(m) window.location.search = '?nis=' + m[1];
+    });
+  }
+
+  function renderAll(){
+    renderHead();
+    renderTiles();
+    renderKeyFigures();
+    renderEvolution();
+    renderAge();
+    renderFinances();
+    renderComparison();
+    renderRanks();
+    renderFocus();
+    renderTabs();
+    renderCompareSelects();
+    var ds = state.manifest.datasets || {};
+    document.getElementById('statCommunes').textContent = (ds.communes || {}).count || '—';
+    document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
+    document.getElementById('ctaTitle').textContent =
+      T('cpCtaTitle', {n: (ds.communes || {}).count || ''});
+  }
+
+  async function init(){
+    document.getElementById('langPick').addEventListener('change', function(e){
+      LANG = e.target.value;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(err){}
+      applyStrings();
+      renderAll();
+      if(state.map) state.map.setLang(LANG);
+      if(state.locator) state.locator.setLang(LANG);
+    });
+    applyStrings();
+
+    state.nis = qs('nis') || DEFAULT_NIS;
+
+    var res = await Promise.all([
+      fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
+      fetch(MANIFEST_URL), fetch(COMMUNE_URL(state.nis)),
+    ]);
+    var idx = res[0].ok ? await res[0].json() : {indicators: []};
+    state.index = idx.indicators || [];
+    state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
+    if(res[1].ok) state.sections = await res[1].json();
+    if(res[2].ok){
+      var reg = await res[2].json();
+      state.sources = reg.sources || {}; state.grades = reg.grades || {};
+    }
+    if(res[3].ok) state.manifest = await res[3].json();
+    if(!res[4].ok){
+      document.getElementById('headName').textContent = state.nis;
+      document.getElementById('headRegion').textContent = T('mapNoData');
+      return;
+    }
+    state.profile = await res[4].json();
+
+    var dates = state.index.map(function(r){ return r.updated; }).filter(Boolean).sort();
+    state.attrUpdated = dates[dates.length - 1] || '';
+    var u = document.getElementById('attrUpdated');
+    if(u && state.attrUpdated) u.textContent = state.attrUpdated;
+
+    renderAll();
+
+    var geo = await fetch(GEO_URL);
+    if(!geo.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
+    state.geojson = await geo.json();
+    await renderMaps();
+    wireSearch();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
