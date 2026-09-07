@@ -82,11 +82,18 @@ def test_one_commune_one_indicator_round_trips(tmp_path):
         "status": "final",
     }
     assert table["codes"] == ["POPULATION_BY_COMMUNE"]
+    # Provenance keys are present but empty: build_table was called without a
+    # lineage, which is the shape a caller with only a CSV gets. The exporter
+    # emits the keys either way so a page never has to distinguish "no lineage
+    # was supplied" from "this indicator has no source".
     assert table["meta"]["POPULATION_BY_COMMUNE"] == {
         "name": "Population",
         "unit": "count",
         "minYear": "2024",
         "maxYear": "2024",
+        "grade": None,
+        "source": None,
+        "inputSources": None,
     }
     assert table["years"] == ["2024"]
 
@@ -228,3 +235,42 @@ def test_latest_fetched_at_is_the_max_across_all_rows(tmp_path):
     )
     table = build_table(csv_path)
     assert table["latest_fetched_at"] == "2026-09-06T20:00:00+00:00"
+
+
+def test_provenance_travels_in_the_meta_block(tmp_path):
+    """communes.html reads this file and nothing else, so its column headers
+    can only show where a figure came from if the lineage rides along here.
+    A second fetch on a page already loading 5.4 MB is the alternative."""
+    csv_path = tmp_path / "history.csv"
+    _write_csv(
+        csv_path,
+        [
+            {**BASE_ROW, "period": "2024", "value": "14832.0", "status": "final"},
+            {
+                **BASE_ROW,
+                "indicator_code": "AVG_NET_TAXABLE_INCOME",
+                "indicator_name": "Average income",
+                "unit": "eur",
+                "period": "2023",
+                "value": "40000.0",
+                "status": "derived",
+            },
+        ],
+    )
+    lineage = {
+        "POPULATION_BY_COMMUNE": {"grade": "A", "source": "statbel"},
+        "AVG_NET_TAXABLE_INCOME": {
+            "grade": "C",
+            "source": None,
+            "input_sources": ["statbel"],
+        },
+    }
+    meta = build_table(csv_path, lineage)["meta"]
+
+    assert meta["POPULATION_BY_COMMUNE"]["grade"] == "A"
+    assert meta["POPULATION_BY_COMMUNE"]["source"] == "statbel"
+    # A derived indicator names no source of its own -- attributing a computed
+    # figure to one of its inputs' agencies would say that agency published it.
+    assert meta["AVG_NET_TAXABLE_INCOME"]["source"] is None
+    assert meta["AVG_NET_TAXABLE_INCOME"]["grade"] == "C"
+    assert meta["AVG_NET_TAXABLE_INCOME"]["inputSources"] == ["statbel"]

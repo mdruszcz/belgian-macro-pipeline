@@ -4,6 +4,9 @@ name:
   fr: Indice du coût de la main-d'œuvre
   nl: Loonkostenindex
 unit: index_2010
+transform:
+  method: rebase
+  base: 2010
 frequency: A
 source_id: dbnomics_ameco
 geo_levels:

@@ -248,3 +248,32 @@ def test_map_page_value_attribution_is_identical_to_communes_html():
     assert normalise(mapped.group(1)) == normalise(communes.group(1)), (
         "map.html's value attribution has drifted from communes.html -- " "change both or neither"
     )
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_says_a_derived_figures_date_belongs_to_its_inputs(page):
+    """The ruling recorded in docs/features/provenance.md, asserted on the page.
+
+    Point 2 of Statbel's 2015 licence requires the date of last update of the
+    information reused, and the information reused in a derived figure IS its
+    inputs -- they are published inside that number. Point 5 forbids
+    misleading a reader about the update date. Both are satisfied only if the
+    date is shown AND attributed to the inputs rather than to the figure, so
+    the page has to say which it is showing.
+    """
+    text = _page(page)
+    assert re.search(
+        r"computed from these data carries the date its INPUTS", text
+    ), f"{page} shows no derived-input date statement"
+    assert (
+        "computed, not retrieved" in text
+    ), f"{page} does not distinguish a computed figure from a retrieved one"
+
+
+def test_the_commune_page_carries_that_statement_in_all_three_languages():
+    """local.html is the translated page, and a licence condition met only in
+    English is met only for English readers."""
+    text = (REPO / "local.html").read_text(encoding="utf-8")
+    assert "carries the date its INPUTS were last updated" in text
+    assert "de dernière mise à jour de ses DONNÉES SOURCES" in text
+    assert "waarop de BRONCIJFERS voor het laatst zijn bijgewerkt" in text

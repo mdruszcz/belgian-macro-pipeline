@@ -3,17 +3,122 @@
   "$id": "https://belgian-macro-pipeline/source_config.schema.json",
   "title": "Source configuration",
   "type": "object",
-  "required": ["source_id", "name", "agency", "adapter", "is_active"],
+  "required": [
+    "source_id",
+    "name",
+    "agency",
+    "adapter",
+    "is_active"
+  ],
   "additionalProperties": false,
   "properties": {
-    "source_id": { "type": "string", "minLength": 1 },
-    "name": { "type": "string", "minLength": 1 },
-    "agency": { "type": "string", "minLength": 1 },
-    "adapter": { "type": "string", "enum": ["nbb", "dbnomics", "fpb", "statbel", "onem", "police"] },
-    "base_url": { "type": ["string", "null"] },
-    "licence": { "type": ["string", "null"] },
-    "catalog_ref": { "type": ["string", "null"] },
-    "cadence": { "type": ["string", "null"] },
-    "is_active": { "type": "boolean" }
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter": {
+      "type": "string",
+      "enum": [
+        "nbb",
+        "dbnomics",
+        "fpb",
+        "statbel",
+        "onem",
+        "police"
+      ]
+    },
+    "base_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "licence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "catalog_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cadence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "homepage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "label": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "en",
+        "fr",
+        "nl"
+      ]
+    },
+    "licence_note": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "en",
+        "fr",
+        "nl"
+      ]
+    }
   }
 }

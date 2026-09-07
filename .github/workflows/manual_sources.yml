@@ -108,7 +108,8 @@ jobs:
             --extra-observations data/police_observations.csv
           python scripts/export_communes_table_json.py \
             --communes-history data/communes_history.csv \
-            --out data/communes_table.json
+            --out data/communes_table.json \
+            --db data/belgian_macro.db
           python -m src.exporters.metadata --out data/metadata/indicators.json
 
       - name: Export province/region/Belgium aggregates

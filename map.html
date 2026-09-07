@@ -84,6 +84,16 @@
   #indicator{min-width:340px;max-width:100%}
   #search{min-width:230px}
   .status{color:var(--text-faint);font-size:.85rem}
+  .provenance{color:var(--text-muted);font-size:.8rem;flex-basis:100%}
+  .provenance a{color:inherit;text-decoration:underline;text-decoration-thickness:1px}
+  /* One neutral colour for every grade: A is not "good" and C is not "bad" --
+     a derived figure is a different kind of figure, not a worse one. */
+  .grade{
+    display:inline-block;min-width:1.15em;text-align:center;
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:600;
+    padding:0 3px;border-radius:3px;cursor:help;
+    background:var(--accent-soft);color:var(--accent-ink);
+  }
 
   .panel{
     border:1px solid var(--border);border-radius:8px;background:var(--surface);
@@ -130,6 +140,7 @@
     <input id="search" type="text" placeholder="Find a commune (name or NIS code)…" autocomplete="off" list="communeList">
     <datalist id="communeList"></datalist>
     <span class="status" id="status">Loading…</span>
+    <span class="provenance" id="provenance"></span>
   </div>
 
   <div class="panel">
@@ -173,6 +184,7 @@
     <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
     and Statbel's <em>Licentie open data</em> of 22 October 2015.
     <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
+    A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved.
     <strong>Changes were made:</strong> the published files are reshaped into a canonical
     indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
     2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
@@ -224,9 +236,10 @@
 const GEO_URL      = 'data/geo/communes.geojson';
 const INDEX_URL    = 'public/data/metadata/indicators.json';
 const SECTIONS_URL = 'public/data/metadata/sections.json';
+const SOURCES_URL  = 'public/data/metadata/sources.json';
 const VALUES_URL   = code => `public/data/indicators/${code}.json`;
 
-const state = {index: [], map: null};
+const state = {index: [], map: null, sources: {}, grades: {}};
 
 async function selectIndicator(code){
   const meta = state.index.find(i => i.indicator_code === code);
@@ -248,6 +261,27 @@ async function selectIndicator(code){
   const shown = state.map.coverage();
   statusEl.textContent = `${shown.withValue} of ${shown.total} communes shown`;
 
+  /* Where this indicator came from and how it was made, beside the map that
+     draws it. Built from the same index row the picker was built from, so a
+     new indicator arrives with its badge already correct. */
+  const source = meta.source ? (state.sources[meta.source] || null) : null;
+  const grade = state.grades[meta.grade] || null;
+  const bits = [];
+  if(source){
+    bits.push(source.homepage
+      ? `<a href="${source.homepage}" rel="noopener">${source.label.en}</a>`
+      : source.label.en);
+  }
+  if(grade) bits.push(`<span class="grade" title="${grade.definition.en}">${meta.grade}</span> ${grade.en}`);
+  if(meta.updated){
+    bits.push(`retrieved ${meta.updated}`);
+  } else if(meta.inputs_updated){
+    const names = (meta.input_sources || [])
+      .map(id => (state.sources[id] ? state.sources[id].label.en : id)).join(', ');
+    bits.push(`computed from ${names || 'other figures'} last updated ${meta.inputs_updated}`);
+  }
+  document.getElementById('provenance').innerHTML = bits.join(' · ');
+
   /* The 2015 Statbel licence requires the DATE OF LAST UPDATE beside the
      figures. This page shows one indicator at a time, so it shows THAT
      indicator's own retrieval date rather than a whole-site date -- the
@@ -257,9 +291,23 @@ async function selectIndicator(code){
      fetched; it says so instead of borrowing its inputs' date. */
   const updated = document.getElementById('attrUpdated');
   if(updated){
-    updated.textContent = payload.updated
-      ? payload.updated.slice(0, 10)
-      : 'derived — computed from the figures above, not separately fetched';
+    if(payload.updated){
+      updated.textContent = payload.updated.slice(0, 10);
+    } else if(meta.inputs_updated){
+      /* WAS A LICENCE GAP: this said "derived — computed from the figures
+         above, not separately fetched" and carried NO DATE, for 13 of 52
+         indicators, on a page publishing Statbel-derived municipal figures.
+         Point 2 of Statbel's 2015 licence requires the date of last update of
+         the information reused, and the information reused in a derived figure
+         is its inputs. Attributed to the inputs, so it cannot be read as this
+         figure's own retrieval date -- which point 5 forbids. */
+      const names = (meta.input_sources || [])
+        .map(id => (state.sources[id] ? state.sources[id].label.en : id)).join(', ');
+      updated.textContent =
+        `computed from ${names || 'other published figures'} last updated ${meta.inputs_updated}`;
+    } else {
+      updated.textContent = 'derived — computed from the figures above, not separately fetched';
+    }
   }
 
   try{
@@ -271,10 +319,11 @@ async function selectIndicator(code){
 
 async function init(){
   try{
-    const [geoRes, idxRes, secRes] = await Promise.all([
+    const [geoRes, idxRes, secRes, srcRes] = await Promise.all([
       fetch(GEO_URL + '?t=' + Date.now()),
       fetch(INDEX_URL + '?t=' + Date.now()),
       fetch(SECTIONS_URL + '?t=' + Date.now()),
+      fetch(SOURCES_URL + '?t=' + Date.now()),
     ]);
     if(!geoRes.ok) throw new Error('boundaries missing');
     if(!idxRes.ok) throw new Error('indicator index missing');
@@ -282,6 +331,11 @@ async function init(){
     const geojson = await geoRes.json();
     state.index = (await idxRes.json()).indicators || [];
     const sections = secRes.ok ? await secRes.json() : {headlines: []};
+    if(srcRes.ok){
+      const registry = await srcRes.json();
+      state.sources = registry.sources || {};
+      state.grades = registry.grades || {};
+    }
 
     state.map = new MapUI.CommuneMap({
       svg:        document.getElementById('svg'),

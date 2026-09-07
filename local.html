@@ -208,6 +208,19 @@
   .fact .fl{font-size:.76rem;color:var(--text-muted);margin-top:1px;line-height:1.35}
   .fact .frank{font-size:.72rem;color:var(--accent-ink);margin-top:4px}
   .fact .fp{font-size:.68rem;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;margin-top:2px}
+  /* The grade chip. One neutral colour for every grade: A is not "good" and C
+     is not "bad" -- a derived figure is not a worse figure, it is a different
+     kind of figure, and colour-coding the letters would say otherwise. The
+     letter and its tooltip carry the meaning. */
+  .grade{
+    display:inline-block;min-width:1.15em;text-align:center;
+    font-family:"IBM Plex Mono",monospace;font-size:.66rem;font-weight:600;
+    line-height:1.5;padding:0 3px;margin-right:5px;border-radius:3px;
+    background:var(--accent-soft);color:var(--accent-ink);cursor:help;
+  }
+  .fact .fp a,.panel-prov a{color:inherit;text-decoration:underline;text-decoration-thickness:1px}
+  .panel-prov{padding:8px 12px 0}
+  .panel-prov .fp{font-size:.7rem;color:var(--text-faint)}
   /* A withheld figure reads as deliberately absent, not as a rendering
      failure: the dash is muted and the reason sits under it in words. It is
      styled DOWN rather than flagged up -- it is not a warning, it is the
@@ -375,6 +388,9 @@ LocalUI.STRINGS = {
     asOf: 'as of', updated: 'updated', derived: 'derived',
     withheld: 'Withheld by the source for privacy — fewer than 10 people, not zero.',
     withheldSince: 'Withheld by the source for {p}.',
+    retrieved: 'retrieved',
+    computedFrom: 'computed from {s} figures last updated {d}',
+    source: 'Source',
     shareNote: 'This commune as a share of each reference, at {p} — a commune is part of its province, so a share is the meaningful relation, not a difference.',
     diffNote: 'This commune against each reference, at {p}.',
     methodNote: 'The last column counts the communes behind each aggregate. Averages and ratios are recomputed from totals, never averaged across communes.',
@@ -395,7 +411,7 @@ LocalUI.STRINGS = {
     addCompare: 'Compare with another commune…',
     removeCompare: 'Remove from comparison',
     peerDiffNote: 'A compared commune shows its own difference from this commune.',
-    attribution: '<strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l\'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section\'s unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM\'s own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href=\"https://www.police.be/statistiques/\" rel=\"noopener\">Police Fédérale / Federale Politie</a> (Direction de l\'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police\'s own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.',
+    attribution: '<strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l\'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section\'s unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM\'s own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href=\"https://www.police.be/statistiques/\" rel=\"noopener\">Police Fédérale / Federale Politie</a> (Direction de l\'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police\'s own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.',
   },
   fr: {
     searchTitle: 'Trouvez votre commune',
@@ -409,6 +425,9 @@ LocalUI.STRINGS = {
     asOf: 'au', updated: 'mis à jour', derived: 'calculé',
     withheld: 'Non communiqué par la source pour raison de confidentialité — moins de 10 personnes, et non zéro.',
     withheldSince: 'Non communiqué par la source pour {p}.',
+    retrieved: 'extrait le',
+    computedFrom: 'calculé à partir de données {s} mises à jour le {d}',
+    source: 'Source',
     shareNote: 'Cette commune en part de chaque référence, en {p} — une commune fait partie de sa province, la part est donc la relation pertinente, pas l’écart.',
     diffNote: 'Cette commune comparée à chaque référence, en {p}.',
     methodNote: 'La dernière colonne indique le nombre de communes derrière chaque agrégat. Les moyennes et les ratios sont recalculés à partir des totaux, jamais moyennés entre communes.',
@@ -429,7 +448,7 @@ LocalUI.STRINGS = {
     addCompare: 'Comparer avec une autre commune…',
     removeCompare: 'Retirer de la comparaison',
     peerDiffNote: 'Une commune comparée affiche son propre écart par rapport à cette commune.',
-    attribution: '<strong>Source :</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), réutilisé sous <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> et sous la <em>Licentie open data</em> de Statbel du 22 octobre 2015. <strong>Dernière mise à jour des données :</strong> <span id="attrUpdated">—</span>. <strong>Des modifications ont été apportées :</strong> les fichiers publiés sont restructurés selon un modèle d’indicateurs canonique, ré-indexés sur des identifiants géographiques internes, corrigés pour les fusions de communes de 2019 et 2025, et utilisés pour calculer des indicateurs dérivés. Statbel n’approuve ni ce produit ni l’usage qui est fait de ses données. Les noms de communes en anglais sont des traductions non officielles, et non des libellés officiels de Statbel. <br><br><strong>Source :</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l\'Emploi — Rijksdienst voor Arbeidsvoorziening), pour les chiffres du chômage, du chômage temporaire, du temps partiel et de l\'activation dans la section Emploi. <strong>Date des informations utilisées :</strong> les fichiers récupérés pour cette version, couvrant 2017 et suivantes ; l\'année en cours est une moyenne partielle, signalée comme provisoire. Réutilisé selon les conditions propres à l\'ONEM, qui autorisent la réutilisation commerciale et exigent la source et cette date — et <em>non</em> sous CC BY 4.0, qui ne s\'applique pas à cette source. Les chiffres que l\'ONEM masque pour préserver la vie privée (moins de 10 personnes) sont indiqués comme supprimés, jamais comme zéro. <br><br><strong>Source :</strong> <a href=\"https://www.police.be/statistiques/\" rel=\"noopener\">Police Fédérale / Federale Politie</a> (Direction de l\'information policière et des moyens ICT), pour les taux de cambriolage dans habitation, de vol de voiture, de vol de véhicule et de violence intrafamiliale. Réutilisé selon la condition propre à la police fédérale : mentionner correctement la source telle qu\'indiquée ici. Cette condition ne dit rien des usages permis au-delà de l\'attribution — <em>non</em> sous CC BY 4.0, et sans octroi énoncé de réutilisation commerciale, contrairement à Statbel et à l\'ONEM ci-dessus. Chacun de ces taux est calculé sur les limites communales en vigueur jusqu\'en 2024, pas la carte actuelle, pour chaque année affichée — y compris des années bien antérieures à cette carte, car c\'est ainsi que la source publie elle-même son historique. L\'année la plus récente de chaque série est indiquée comme provisoire.',
+    attribution: '<strong>Source :</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), réutilisé sous <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> et sous la <em>Licentie open data</em> de Statbel du 22 octobre 2015. <strong>Dernière mise à jour des données :</strong> <span id="attrUpdated">—</span>. Un chiffre calculé à partir de ces données porte la date de dernière mise à jour de ses DONNÉES SOURCES, présentée comme la leur et non comme la sienne — il a été calculé, non extrait. <strong>Des modifications ont été apportées :</strong> les fichiers publiés sont restructurés selon un modèle d’indicateurs canonique, ré-indexés sur des identifiants géographiques internes, corrigés pour les fusions de communes de 2019 et 2025, et utilisés pour calculer des indicateurs dérivés. Statbel n’approuve ni ce produit ni l’usage qui est fait de ses données. Les noms de communes en anglais sont des traductions non officielles, et non des libellés officiels de Statbel. <br><br><strong>Source :</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l\'Emploi — Rijksdienst voor Arbeidsvoorziening), pour les chiffres du chômage, du chômage temporaire, du temps partiel et de l\'activation dans la section Emploi. <strong>Date des informations utilisées :</strong> les fichiers récupérés pour cette version, couvrant 2017 et suivantes ; l\'année en cours est une moyenne partielle, signalée comme provisoire. Réutilisé selon les conditions propres à l\'ONEM, qui autorisent la réutilisation commerciale et exigent la source et cette date — et <em>non</em> sous CC BY 4.0, qui ne s\'applique pas à cette source. Les chiffres que l\'ONEM masque pour préserver la vie privée (moins de 10 personnes) sont indiqués comme supprimés, jamais comme zéro. <br><br><strong>Source :</strong> <a href=\"https://www.police.be/statistiques/\" rel=\"noopener\">Police Fédérale / Federale Politie</a> (Direction de l\'information policière et des moyens ICT), pour les taux de cambriolage dans habitation, de vol de voiture, de vol de véhicule et de violence intrafamiliale. Réutilisé selon la condition propre à la police fédérale : mentionner correctement la source telle qu\'indiquée ici. Cette condition ne dit rien des usages permis au-delà de l\'attribution — <em>non</em> sous CC BY 4.0, et sans octroi énoncé de réutilisation commerciale, contrairement à Statbel et à l\'ONEM ci-dessus. Chacun de ces taux est calculé sur les limites communales en vigueur jusqu\'en 2024, pas la carte actuelle, pour chaque année affichée — y compris des années bien antérieures à cette carte, car c\'est ainsi que la source publie elle-même son historique. L\'année la plus récente de chaque série est indiquée comme provisoire.',
   },
   nl: {
     searchTitle: 'Vind uw gemeente',
@@ -443,6 +462,9 @@ LocalUI.STRINGS = {
     asOf: 'op', updated: 'bijgewerkt', derived: 'berekend',
     withheld: 'Niet vrijgegeven door de bron wegens privacy — minder dan 10 personen, en niet nul.',
     withheldSince: 'Niet vrijgegeven door de bron voor {p}.',
+    retrieved: 'opgehaald op',
+    computedFrom: 'berekend uit {s}-cijfers, laatst bijgewerkt op {d}',
+    source: 'Bron',
     shareNote: 'Deze gemeente als aandeel van elke referentie, in {p} — een gemeente maakt deel uit van haar provincie, dus is het aandeel de zinvolle verhouding, niet het verschil.',
     diffNote: 'Deze gemeente vergeleken met elke referentie, in {p}.',
     methodNote: 'De laatste kolom telt de gemeenten achter elk aggregaat. Gemiddelden en ratio’s worden herberekend uit totalen, nooit gemiddeld over gemeenten.',
@@ -463,7 +485,7 @@ LocalUI.STRINGS = {
     addCompare: 'Vergelijk met een andere gemeente…',
     removeCompare: 'Uit vergelijking verwijderen',
     peerDiffNote: 'Een vergeleken gemeente toont haar eigen verschil ten opzichte van deze gemeente.',
-    attribution: '<strong>Bron:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Algemene Directie Statistiek — Statistics Belgium), hergebruikt onder <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> en Statbels <em>Licentie open data</em> van 22 oktober 2015. <strong>Gegevens laatst bijgewerkt:</strong> <span id="attrUpdated">—</span>. <strong>Er werden wijzigingen aangebracht:</strong> de gepubliceerde bestanden worden omgezet naar een canoniek indicatormodel, opnieuw gekoppeld aan interne geografische identificatoren, gecorrigeerd voor de gemeentefusies van 2019 en 2025, en gebruikt om afgeleide cijfers te berekenen. Statbel onderschrijft dit product of het gebruik van zijn gegevens niet. Engelse gemeentenamen zijn onofficiële vertalingen, geen officiële Statbel-labels. <br><br><strong>Bron:</strong> <a href="https://www.onem.be/" rel="noopener">RVA/ONEM</a> (Rijksdienst voor Arbeidsvoorziening — Office National de l\'Emploi), voor de cijfers over werkloosheid, tijdelijke werkloosheid, deeltijdse uitkeringen en activering in de sectie Werk. <strong>Datum van de gebruikte informatie:</strong> de bestanden die voor deze build zijn opgehaald, met cijfers vanaf 2017; het huidige jaar is een gedeeltelijk jaargemiddelde en wordt als voorlopig aangeduid. Hergebruikt onder de eigen voorwaarden van de RVA, die commercieel hergebruik toestaan en de bron en deze datum vereisen — <em>niet</em> onder CC BY 4.0, dat niet op deze bron van toepassing is. Cijfers die de RVA om privacyredenen achterhoudt (minder dan 10 personen) worden als onderdrukt weergegeven, nooit als nul. <br><br><strong>Bron:</strong> <a href=\"https://www.police.be/statistiques/\" rel=\"noopener\">Federale Politie / Police Fédérale</a> (Directie van de politionele informatie en ICT-middelen), voor de cijfers over woninginbraak, autodiefstal, voertuigdiefstal en intrafamiliaal geweld. Hergebruikt onder de eigen voorwaarde van de federale politie: de bron correct vermelden zoals hier aangegeven. Die voorwaarde zegt niets over toegelaten gebruik buiten de bronvermelding — <em>niet</em> onder CC BY 4.0, en zonder uitdrukkelijke toelating voor commercieel hergebruik, in tegenstelling tot Statbel en de RVA hierboven. Elk van deze cijfers wordt berekend op de gemeentegrenzen die golden tot en met 2024, niet de huidige kaart, voor elk weergegeven jaar — ook jaren van ver voor die kaart bestond, want zo publiceert de bron zelf haar eigen geschiedenis. Het meest recente jaar van elke reeks wordt als voorlopig aangeduid.',
+    attribution: '<strong>Bron:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Algemene Directie Statistiek — Statistics Belgium), hergebruikt onder <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> en Statbels <em>Licentie open data</em> van 22 oktober 2015. <strong>Gegevens laatst bijgewerkt:</strong> <span id="attrUpdated">—</span>. Een berekend cijfer vermeldt de datum waarop de BRONCIJFERS voor het laatst zijn bijgewerkt, aangeduid als de hunne en niet als de zijne — het is berekend, niet opgehaald. <strong>Er werden wijzigingen aangebracht:</strong> de gepubliceerde bestanden worden omgezet naar een canoniek indicatormodel, opnieuw gekoppeld aan interne geografische identificatoren, gecorrigeerd voor de gemeentefusies van 2019 en 2025, en gebruikt om afgeleide cijfers te berekenen. Statbel onderschrijft dit product of het gebruik van zijn gegevens niet. Engelse gemeentenamen zijn onofficiële vertalingen, geen officiële Statbel-labels. <br><br><strong>Bron:</strong> <a href="https://www.onem.be/" rel="noopener">RVA/ONEM</a> (Rijksdienst voor Arbeidsvoorziening — Office National de l\'Emploi), voor de cijfers over werkloosheid, tijdelijke werkloosheid, deeltijdse uitkeringen en activering in de sectie Werk. <strong>Datum van de gebruikte informatie:</strong> de bestanden die voor deze build zijn opgehaald, met cijfers vanaf 2017; het huidige jaar is een gedeeltelijk jaargemiddelde en wordt als voorlopig aangeduid. Hergebruikt onder de eigen voorwaarden van de RVA, die commercieel hergebruik toestaan en de bron en deze datum vereisen — <em>niet</em> onder CC BY 4.0, dat niet op deze bron van toepassing is. Cijfers die de RVA om privacyredenen achterhoudt (minder dan 10 personen) worden als onderdrukt weergegeven, nooit als nul. <br><br><strong>Bron:</strong> <a href=\"https://www.police.be/statistiques/\" rel=\"noopener\">Federale Politie / Police Fédérale</a> (Directie van de politionele informatie en ICT-middelen), voor de cijfers over woninginbraak, autodiefstal, voertuigdiefstal en intrafamiliaal geweld. Hergebruikt onder de eigen voorwaarde van de federale politie: de bron correct vermelden zoals hier aangegeven. Die voorwaarde zegt niets over toegelaten gebruik buiten de bronvermelding — <em>niet</em> onder CC BY 4.0, en zonder uitdrukkelijke toelating voor commercieel hergebruik, in tegenstelling tot Statbel en de RVA hierboven. Elk van deze cijfers wordt berekend op de gemeentegrenzen die golden tot en met 2024, niet de huidige kaart, voor elk weergegeven jaar — ook jaren van ver voor die kaart bestond, want zo publiceert de bron zelf haar eigen geschiedenis. Het meest recente jaar van elke reeks wordt als voorlopig aangeduid.',
   },
 };
 
@@ -582,6 +604,56 @@ LocalUI.latestOf = function(entry){
     names: entry.names, updated: entry.updated,
     withheldSince: LocalUI.suppressedTail(entry),
   };
+};
+
+/* The provenance of one figure: who published it, how it was made, and when
+   it was retrieved.
+
+   Pure and testable. Takes the indicator's row from metadata/indicators.json
+   and the source registry, and returns strings a template drops in -- so the
+   page never decides what a grade MEANS, and the four grade words live in one
+   place (src/exporters/provenance.py) rather than in three pages.
+
+   A DERIVED FIGURE GETS A DIFFERENT SENTENCE, not a missing one. It has no
+   retrieval date of its own -- it was computed, not fetched -- but the figures
+   it was computed FROM do, and Statbel's 2015 licence requires the date of
+   last update of the information reused. Those inputs are published inside
+   this number. So `updated` stays absent and `computedFrom` carries the
+   inputs' date instead, worded so it cannot be mistaken for this figure's own.
+   That is the answer to the question docs/data_catalog.md left open. */
+LocalUI.provenance = function(indicatorId, meta, sources, grades, lang){
+  lang = lang || LocalUI.DEFAULT_LANG;
+  const row = (meta || {})[indicatorId];
+  if(!row) return null;
+
+  const gradeInfo = (grades || {})[row.grade] || null;
+  const source = row.source ? (sources || {})[row.source] : null;
+
+  const out = {
+    grade: row.grade || null,
+    gradeLabel: gradeInfo ? (gradeInfo[lang] || gradeInfo.en) : null,
+    gradeTitle: gradeInfo && gradeInfo.definition
+      ? (gradeInfo.definition[lang] || gradeInfo.definition.en) : null,
+    sourceLabel: source ? LocalUI.localName(source.label, lang) : null,
+    sourceUrl: source ? (source.homepage || null) : null,
+    licenceNote: source && source.licence_note
+      ? LocalUI.localName(source.licence_note, lang) : null,
+    updated: row.updated || null,
+    line: null,
+  };
+
+  if(row.updated){
+    out.line = `${LocalUI.t(lang, 'retrieved')} ${row.updated}`;
+  } else if(row.inputs_updated){
+    const names = (row.input_sources || [])
+      .map(id => ((sources || {})[id] ? LocalUI.localName(sources[id].label, lang) : id))
+      .join(', ');
+    out.line = LocalUI.t(lang, 'computedFrom')
+      .replace('{s}', names || LocalUI.t(lang, 'derived'))
+      .replace('{d}', row.inputs_updated);
+    out.inputsUpdated = row.inputs_updated;
+  }
+  return out;
 };
 
 LocalUI.lastUpdated = function(commune){
@@ -765,6 +837,9 @@ if(typeof module !== 'undefined') module.exports = LocalUI;
 let GEOGRAPHIES = [], SECTIONS = [], COMMUNE = null;
 let VS_NIS = [], VS_COMMUNES = [];  // the free four-commune picker: up to 3 peers alongside COMMUNE
 let LANG = 'en', browseCurrentId = null;
+// Provenance, from public/data/metadata/. Empty objects are a working state,
+// not an error: the page renders exactly as before without them.
+let INDICATOR_META = {}, SOURCES = {}, GRADE_LABELS = {};
 
 const LOCALES = {en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE'};
 
@@ -894,13 +969,31 @@ function percentileHTML(entry){
    well as on the tiles: the chart drops those years, so without this the line
    just stops and the reader cannot tell whether the series ended or the source
    declined to publish. */
+/* The badge: a grade chip and a source line. Returns '' when the metadata
+   file is absent, so the page looks exactly as it did before rather than
+   showing empty furniture. */
+function provenanceHTML(indicatorId, fallbackLine){
+  const prov = LocalUI.provenance(indicatorId, INDICATOR_META, SOURCES, GRADE_LABELS, LANG);
+  if(!prov) return fallbackLine ? `<div class="fp">${esc(fallbackLine)}</div>` : '';
+  const chip = prov.grade
+    ? `<span class="grade g${prov.grade}" title="${esc([prov.gradeLabel, prov.gradeTitle].filter(Boolean).join(' — '))}">${prov.grade}</span>`
+    : '';
+  const src = prov.sourceLabel
+    ? (prov.sourceUrl
+        ? `<a href="${esc(prov.sourceUrl)}" rel="noopener">${esc(prov.sourceLabel)}</a>`
+        : esc(prov.sourceLabel))
+    : (prov.gradeLabel ? esc(prov.gradeLabel) : '');
+  const line = [src, prov.line].filter(Boolean).join(' · ');
+  return `<div class="fp">${chip}${line ? ' ' + line : ''}</div>`;
+}
+
 function withheldNoteHTML(latest){
   if(!latest || !latest.withheldSince || !latest.withheldSince.length) return '';
   return `<div class="withheld-note">` +
     esc(T('withheldSince').replace('{p}', latest.withheldSince.join(', '))) + `</div>`;
 }
 
-function factHTML(entry){
+function factHTML(entry, indicatorId){
   const latest = LocalUI.latestOf(entry);
 
   /* A WHOLLY WITHHELD INDICATOR STILL GETS A TILE. 36 (commune, indicator)
@@ -914,11 +1007,13 @@ function factHTML(entry){
     if(!LocalUI.isWhollyWithheld(entry)) return '';
     return `<div class="fact withheld"><div class="fv">&mdash;</div>` +
       `<div class="fl">${esc(LocalUI.localName(entry.names, LANG))}</div>` +
-      `<div class="fp">${esc(T('withheld'))}</div></div>`;
+      `<div class="fp">${esc(T('withheld'))}</div>` +
+      provenanceHTML(indicatorId, '') + `</div>`;
   }
 
   const rank = LocalUI.percentileShort(entry, LANG);
-  const prov = latest.updated ? `${T('updated')} ${latest.updated}` : T('derived');
+  const badge = provenanceHTML(
+    indicatorId, latest.updated ? `${T('updated')} ${latest.updated}` : T('derived'));
   // Named years, so the reader knows the series did not simply stop.
   const tail = latest.withheldSince.length
     ? `<div class="fp withheld-note">${esc(T('withheldSince').replace('{p}', latest.withheldSince.join(', ')))}</div>`
@@ -926,7 +1021,7 @@ function factHTML(entry){
   return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
     `<div class="fl">${esc(LocalUI.localName(latest.names, LANG))} (${latest.period})</div>` +
     (rank ? `<div class="frank">${esc(rank)}</div>` : '') +
-    `<div class="fp">${prov}</div>${tail}</div>`;
+    `${badge}${tail}</div>`;
 }
 
 // Sections come from public/data/metadata/sections.json, so this file holds
@@ -952,10 +1047,10 @@ function sectionHTML(section){
       <div class="panel-head">
         <span class="t">${esc(LocalUI.localName(head.names, LANG))}</span>
         <span class="v">${fmt(latest.value, latest.unit)} <span style="font-size:.72rem;color:var(--text-faint);font-weight:400">${T('asOf')} ${latest.period}</span></span>
-      </div>${chart}${withheldNoteHTML(latest)}${comparisonHTML(head, section.headline)}${percentileHTML(head)}</div>`;
+      </div>${chart}<div class="panel-prov">${provenanceHTML(section.headline, latest.updated ? `${T('updated')} ${latest.updated}` : T('derived'))}</div>${withheldNoteHTML(latest)}${comparisonHTML(head, section.headline)}${percentileHTML(head)}</div>`;
   }
 
-  const facts = (section.indicators || []).map(id => factHTML(COMMUNE.indicators[id])).filter(Boolean).join('');
+  const facts = (section.indicators || []).map(id => factHTML(COMMUNE.indicators[id], id)).filter(Boolean).join('');
   return `<section class="block" id="sec-${section.id}"><h2>${label}</h2>${blurb}${panel}
     ${facts ? `<div class="facts">${facts}</div>` : ''}</section>`;
 }
@@ -1244,9 +1339,11 @@ async function init(){
   applyStaticStrings();
 
   try{
-    const [geo, sec] = await Promise.all([
+    const [geo, sec, idx, src] = await Promise.all([
       fetch('public/data/metadata/geographies.json?t=' + Date.now()),
       fetch('public/data/metadata/sections.json?t=' + Date.now()),
+      fetch('public/data/metadata/indicators.json?t=' + Date.now()),
+      fetch('public/data/metadata/sources.json?t=' + Date.now()),
     ]);
     // Check the status before parsing: a missing file on GitHub Pages returns
     // an HTML 404 page, and res.json() on that throws "Unexpected token '<'"
@@ -1264,6 +1361,17 @@ async function init(){
       LocalUI.setHeadlines(layout.headlines);
     } else {
       SECTIONS = [];
+    }
+    // PROVENANCE DEGRADES SILENTLY. The page's job is the figures; where each
+    // came from is an addition to them, so a missing metadata file must cost
+    // the reader a badge, never a commune page. Same posture as SECTIONS above.
+    if(idx.ok){
+      for(const row of ((await idx.json()).indicators || [])) INDICATOR_META[row.indicator_code] = row;
+    }
+    if(src.ok){
+      const registry = await src.json();
+      SOURCES = registry.sources || {};
+      GRADE_LABELS = registry.grades || {};
     }
   }catch(e){
     document.getElementById('searchResults').innerHTML = noDataHTML(T('loadFail') + ': ' + e.message);

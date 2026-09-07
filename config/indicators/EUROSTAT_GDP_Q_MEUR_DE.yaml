@@ -5,6 +5,9 @@ name:
   nl: Bbp-volume-index, Duitsland (2010=100)
 country: DE
 unit: index_2010
+transform:
+  method: rebase
+  base: 2010
 frequency: Q
 source_id: dbnomics_eurostat
 geo_levels:

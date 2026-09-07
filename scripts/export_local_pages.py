@@ -157,19 +157,42 @@ def _describe(commune: dict, lang: str) -> str:
     return f"{lead}. {covered} indicators with history, sources and comparisons."
 
 
-SOURCE_HOMEPAGES = {
-    "statbel": "https://statbel.fgov.be/",
-    "onem": "https://www.onem.be/",
-    "police": "https://www.police.be/statistiques/",
-}
+def _source_registry(payload_dir: Path) -> dict[str, dict]:
+    """The published source registry, or {} if it has not been generated.
+
+    Read from the payloads rather than kept as a dict in this file. There WAS
+    such a dict here -- three homepages typed into a script -- and a source
+    added anywhere else would have left it silently stale, which for a licence
+    notice is the failure that matters most.
+    """
+    path = payload_dir / "metadata" / "sources.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("sources") or {}
+
+
+def _indicator_provenance(payload_dir: Path) -> dict[str, dict]:
+    """indicator_id -> its row from the published indicator index.
+
+    Carries grade, source and the retrieval dates. Absent index => {}, and
+    every caller falls back to what the page showed before it existed.
+    """
+    path = payload_dir / "metadata" / "indicators.json"
+    if not path.is_file():
+        return {}
+    return {
+        row["indicator_code"]: row
+        for row in json.loads(path.read_text(encoding="utf-8")).get("indicators") or []
+    }
 
 
 def _indicator_sources(db_path: Path) -> dict[str, dict[str, str]]:
     """indicator_id -> {source_id, agency}, read from the indicators table.
 
-    Read rather than hardcoded because the mapping changes every time a
-    source is added, and a stale hardcoded copy would misattribute a figure
-    -- which for a licence notice is the failure that matters.
+    Still read from the database rather than the registry: this feeds the
+    JSON-LD `creator` list, which must name the agencies that actually
+    contributed a value to THIS commune, and the indicators table is the
+    authoritative indicator-to-source mapping.
     """
     conn = sqlite3.connect(str(db_path))
     try:
@@ -182,7 +205,9 @@ def _indicator_sources(db_path: Path) -> dict[str, dict[str, str]]:
     return {row[0]: {"source_id": row[1], "agency": row[2]} for row in rows}
 
 
-def _creators_for(commune: dict, sources: dict[str, dict[str, str]]) -> list[dict]:
+def _creators_for(
+    commune: dict, sources: dict[str, dict[str, str]], registry: dict[str, dict] | None = None
+) -> list[dict]:
     """The agencies that actually contributed a value to THIS commune's page,
     deduplicated and ordered so two builds produce identical bytes."""
     agencies: dict[str, str] = {}
@@ -196,7 +221,7 @@ def _creators_for(commune: dict, sources: dict[str, dict[str, str]]) -> list[dic
     creators = []
     for agency in sorted(agencies):
         creator = {"@type": "Organization", "name": agency}
-        url = SOURCE_HOMEPAGES.get(agencies[agency])
+        url = (registry or {}).get(agencies[agency], {}).get("homepage")
         if url:
             creator["url"] = url
         creators.append(creator)
@@ -289,7 +314,63 @@ def _withheld_periods(entry: dict) -> list[str]:
     return sorted(p for p, cell in periods.items() if cell.get("status") == "suppressed")
 
 
-def _section_rows(commune: dict, section: dict, lang: str) -> list[tuple[str, str, str, str, bool]]:
+def _source_cell(
+    indicator_id: str,
+    registry: dict[str, dict] | None,
+    provenance: dict[str, dict] | None,
+    lang: str = "en",
+) -> str:
+    """ "Statbel (A)" -- who published the figure, and how it was made.
+
+    A derived figure names no source: it has none, and attributing a computed
+    number to one of its inputs' agencies would say that agency published it.
+    It carries its grade word instead, and its inputs' retrieval date lands in
+    the Updated column.
+    """
+    row = (provenance or {}).get(indicator_id) or {}
+    grade = row.get("grade")
+    source_id = row.get("source")
+    entry = ((registry or {}).get(source_id) or {}) if source_id else {}
+    # The SHORT label, not the full agency name: "Police Fédérale — Direction de
+    # l'information policière et des moyens ICT" is the credit the licence
+    # requires and it is in the attribution block, in full, where it belongs.
+    # In a table cell it is unreadable. Falls back to the agency for a source
+    # with no short label yet.
+    label = _local_name(entry.get("label"), lang, "") or entry.get("agency")
+    if label and grade:
+        return f"{label} ({grade})"
+    if label:
+        return label
+    if grade:
+        return {"A": "Official", "B": "Restated", "C": "Derived", "D": "Forecast"}.get(grade, grade)
+    return ""
+
+
+def _updated_cell(indicator_id: str, entry: dict, provenance: dict[str, dict] | None) -> str:
+    """The retrieval date -- or, for a derived figure, its INPUTS' date, said
+    to be theirs.
+
+    Statbel's 2015 licence requires the date of last update of the information
+    reused, and the information reused in a derived figure is its inputs. This
+    column used to be blank for those, which satisfied neither the clause
+    requiring a date nor the one forbidding a wrong one.
+    """
+    own = entry.get("updated")
+    if own:
+        return own
+    row = (provenance or {}).get(indicator_id) or {}
+    if row.get("inputs_updated"):
+        return f"inputs {row['inputs_updated']}"
+    return ""
+
+
+def _section_rows(
+    commune: dict,
+    section: dict,
+    lang: str,
+    registry: dict[str, dict] | None = None,
+    provenance: dict[str, dict] | None = None,
+) -> list[tuple[str, str, str, str, bool, str]]:
     """(label, value, period, updated, is_withheld) per indicator in this
     section that this commune has something to say about.
 
@@ -324,6 +405,7 @@ def _section_rows(commune: dict, section: dict, lang: str) -> list[tuple[str, st
                     ", ".join(withheld),
                     "",
                     True,
+                    _source_cell(indicator_id, registry, provenance, lang),
                 )
             )
             continue
@@ -343,8 +425,9 @@ def _section_rows(commune: dict, section: dict, lang: str) -> list[tuple[str, st
                 _local_name(entry.get("names"), lang, indicator_id),
                 _format_value(cell["value"], entry.get("unit")),
                 period_cell,
-                entry.get("updated") or "",
+                _updated_cell(indicator_id, entry, provenance),
                 False,
+                _source_cell(indicator_id, registry, provenance, lang),
             )
         )
     return rows
@@ -358,6 +441,8 @@ def _render_page(
     attribution: str,
     build_id: str,
     creators: list[dict],
+    registry: dict[str, dict] | None = None,
+    provenance: dict[str, dict] | None = None,
 ) -> str:
     nis = commune["nis_code"]
     name = _local_name(commune.get("name"), lang, nis)
@@ -380,7 +465,7 @@ def _render_page(
     body: list[str] = []
     covered = 0
     for section in sections:
-        rows = _section_rows(commune, section, lang)
+        rows = _section_rows(commune, section, lang, registry, provenance)
         if not rows:
             continue
         # Real figures only. A page whose only content is withheld cells is
@@ -390,13 +475,14 @@ def _render_page(
         body.append(f"<section><h2>{esc(label)}</h2>")
         body.append(
             "<table><thead><tr><th>Indicator</th><th>Value</th><th>Period</th>"
-            "<th>Updated</th></tr></thead><tbody>"
+            "<th>Source</th><th>Updated</th></tr></thead><tbody>"
         )
-        for indicator_label, value, period, indicator_updated, withheld in rows:
+        for indicator_label, value, period, indicator_updated, withheld, source in rows:
             css = " class='withheld'" if withheld else ""
             body.append(
                 f"<tr{css}><td>{esc(indicator_label)}</td><td class='v'>{esc(value)}</td>"
-                f"<td>{esc(period)}</td><td>{esc(indicator_updated)}</td></tr>"
+                f"<td>{esc(period)}</td><td>{esc(source)}</td>"
+                f"<td>{esc(indicator_updated)}</td></tr>"
             )
         body.append("</tbody></table></section>")
 
@@ -501,6 +587,8 @@ def export_local_pages(
     ]
     attribution = _read_attribution(attribution_source)
     sources = _indicator_sources(db_path)
+    registry = _source_registry(payload_dir)
+    provenance = _indicator_provenance(payload_dir)
 
     written = 0
     skipped_thin = 0
@@ -520,7 +608,9 @@ def export_local_pages(
             base_url,
             attribution,
             build_id,
-            _creators_for(commune, sources),
+            _creators_for(commune, sources, registry),
+            registry,
+            provenance,
         )
         target = out_dir / commune["nis_code"] / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)

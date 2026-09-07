@@ -42,14 +42,22 @@ written here already exists in the CSV this script reads.
 import argparse
 import csv
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def year_of(period: str) -> str:
     return period[:4]
 
 
-def build_table(csv_path: Path) -> dict:
+def build_table(csv_path: Path, lineage: dict[str, dict] | None = None) -> dict:
+    """`lineage` is optional so every existing caller keeps working; when it is
+    given, each indicator's `meta` entry carries how the figure was made and
+    which agency published it. communes.html reads this file and nothing else,
+    so putting provenance here spares that page a second fetch on top of the
+    5.4 MB it already loads."""
     by_geo: dict[str, dict] = {}
     codes_seen: list[str] = []
     meta: dict[str, dict] = {}
@@ -102,14 +110,19 @@ def build_table(csv_path: Path) -> dict:
             )
             entry["years"].add(year)
 
+    lineage = lineage or {}
     meta_out = {}
     for code, entry in meta.items():
         ys = sorted(entry["years"])
+        provenance = lineage.get(code, {})
         meta_out[code] = {
             "name": entry["name"],
             "unit": entry["unit"],
             "minYear": ys[0],
             "maxYear": ys[-1],
+            "grade": provenance.get("grade"),
+            "source": provenance.get("source"),
+            "inputSources": provenance.get("input_sources") or None,
         }
 
     return {
@@ -121,8 +134,8 @@ def build_table(csv_path: Path) -> dict:
     }
 
 
-def write_table(csv_path: Path, out_path: Path) -> int:
-    table = build_table(csv_path)
+def write_table(csv_path: Path, out_path: Path, lineage: dict[str, dict] | None = None) -> int:
+    table = build_table(csv_path, lineage)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(table, ensure_ascii=False, separators=(",", ":")))
     return len(table["communes"])
@@ -134,8 +147,19 @@ def main() -> None:
     )
     ap.add_argument("--communes-history", type=Path, default=Path("data/communes_history.csv"))
     ap.add_argument("--out", type=Path, default=Path("data/communes_table.json"))
+    # Optional: without it the table is built exactly as before, just with no
+    # provenance in `meta`. That keeps this script runnable on its own against a
+    # CSV alone, which is how it is used in tests.
+    ap.add_argument("--db", type=Path, default=None)
     args = ap.parse_args()
-    n = write_table(args.communes_history, args.out)
+
+    lineage = None
+    if args.db is not None:
+        from src.exporters.provenance import indicator_lineage
+
+        lineage = indicator_lineage(args.db)
+
+    n = write_table(args.communes_history, args.out, lineage)
     size_mb = args.out.stat().st_size / 1e6
     print(f"Wrote {n} commune entries to {args.out} ({size_mb:.2f} MB)")
 

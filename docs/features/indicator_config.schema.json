@@ -3,45 +3,100 @@
   "$id": "https://belgian-macro-pipeline/indicator_config.schema.json",
   "title": "Indicator configuration",
   "type": "object",
-  "required": ["id", "name", "unit", "frequency", "source_id", "geo_levels", "preferred_direction", "display"],
+  "required": [
+    "id",
+    "name",
+    "unit",
+    "frequency",
+    "source_id",
+    "geo_levels",
+    "preferred_direction",
+    "display"
+  ],
   "additionalProperties": false,
   "properties": {
-    "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
     "name": {
       "type": "object",
-      "required": ["en", "fr", "nl"],
+      "required": [
+        "en",
+        "fr",
+        "nl"
+      ],
       "additionalProperties": false,
       "properties": {
-        "en": { "type": "string" },
-        "fr": { "type": "string" },
-        "nl": { "type": "string" }
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        },
+        "nl": {
+          "type": "string"
+        }
       }
     },
     "description": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "en": { "type": "string" },
-        "fr": { "type": "string" },
-        "nl": { "type": "string" }
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        },
+        "nl": {
+          "type": "string"
+        }
       }
     },
-    "unit": { "type": "string", "minLength": 1 },
-    "frequency": { "type": "string", "enum": ["A", "Q", "M", "F"] },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "A",
+        "Q",
+        "M",
+        "F"
+      ]
+    },
     "max_age_days": {
       "type": "integer",
       "minimum": 1,
       "description": "Staleness allowance for the validation layer (Block H): days past the end of the latest period before the `staleness` rule warns. Omit unless the frequency default is wrong -- set it only to record a known, verified reason the series is frozen, so the warning still means something when that changes."
     },
-    "source_id": { "type": "string", "minLength": 1 },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "geo_levels": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string", "enum": ["national", "regional", "provincial", "municipal"] }
+      "items": {
+        "type": "string",
+        "enum": [
+          "national",
+          "regional",
+          "provincial",
+          "municipal"
+        ]
+      }
     },
     "preferred_direction": {
       "type": "string",
-      "enum": ["lower_is_better", "higher_is_better", "neutral", "contextual"]
+      "enum": [
+        "lower_is_better",
+        "higher_is_better",
+        "neutral",
+        "contextual"
+      ]
     },
     "country": {
       "type": "string",
@@ -49,51 +104,123 @@
     },
     "fetch": {
       "type": "object",
-      "required": ["query"],
+      "required": [
+        "query"
+      ],
       "additionalProperties": false,
       "properties": {
-        "query": { "type": "string", "minLength": 1 }
+        "query": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "display": {
       "oneOf": [
-        { "type": "null" },
+        {
+          "type": "null"
+        },
         {
           "type": "object",
-          "required": ["category", "title", "sort_order"],
+          "required": [
+            "category",
+            "title",
+            "sort_order"
+          ],
           "additionalProperties": false,
           "properties": {
             "category": {
               "type": "string",
-              "enum": ["gdp", "confidence", "prices", "labour", "employment",
-                       "unemployment", "business", "fiscal"]
+              "enum": [
+                "gdp",
+                "confidence",
+                "prices",
+                "labour",
+                "employment",
+                "unemployment",
+                "business",
+                "fiscal"
+              ]
             },
             "title": {
               "type": "object",
-              "required": ["en", "fr", "nl"],
+              "required": [
+                "en",
+                "fr",
+                "nl"
+              ],
               "additionalProperties": false,
               "properties": {
-                "en": { "type": "string" },
-                "fr": { "type": "string" },
-                "nl": { "type": "string" }
+                "en": {
+                  "type": "string"
+                },
+                "fr": {
+                  "type": "string"
+                },
+                "nl": {
+                  "type": "string"
+                }
               }
             },
             "description": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "en": { "type": "string" },
-                "fr": { "type": "string" },
-                "nl": { "type": "string" }
+                "en": {
+                  "type": "string"
+                },
+                "fr": {
+                  "type": "string"
+                },
+                "nl": {
+                  "type": "string"
+                }
               }
             },
-            "sort_order": { "type": "number" },
-            "sdmx_code": { "type": "string" },
-            "combined": { "type": "boolean" },
-            "forecast_of": { "type": "string", "enum": ["GDP_VOL", "CPI", "FISCAL_BAL"] }
+            "sort_order": {
+              "type": "number"
+            },
+            "sdmx_code": {
+              "type": "string"
+            },
+            "combined": {
+              "type": "boolean"
+            },
+            "forecast_of": {
+              "type": "string",
+              "enum": [
+                "GDP_VOL",
+                "CPI",
+                "FISCAL_BAL"
+              ]
+            }
           }
         }
       ]
+    },
+    "transform": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "method"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "rebase"
+          ]
+        },
+        "base": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
     }
   }
 }

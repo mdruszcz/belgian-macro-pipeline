@@ -17,8 +17,13 @@ import csv
 import json
 import sqlite3
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.exporters.provenance import GRADES, indicator_lineage, source_registry  # noqa: E402
 
 # EVERY letter export_communes_csv.py's STATUS_TO_LETTER can emit. It was
 # mapping two of the six, and _status_word passed the rest through, so a
@@ -555,11 +560,28 @@ def _backfill_cross_sections(indicators: dict[str, dict], communes: dict[str, di
     return added
 
 
+def _inputs_updated(inputs: list[str], indicators: dict[str, dict]) -> str | None:
+    """The newest retrieval date among a derived indicator's inputs.
+
+    THE ANSWER TO A LICENCE QUESTION, not a convenience. Statbel's 2015 open
+    data licence requires the date of last update of the information reused,
+    and the information reused in a derived figure IS its inputs -- they are
+    published inside that number. `updated` stays absent on a derived
+    indicator, because putting the inputs' date in the figure's own update slot
+    would misstate when THAT figure was retrieved, which point 5 of the same
+    licence forbids as squarely as point 2 requires showing a date. Two slots,
+    two different sentences on the page. See docs/features/provenance.md.
+    """
+    dates = [indicators[i]["updated"] for i in inputs if indicators.get(i, {}).get("updated")]
+    return max(dates) if dates else None
+
+
 def _indicator_index(
     indicators: dict[str, dict],
     names: dict[str, dict],
     additive: set[str],
     db_path: Path,
+    lineage: dict[str, dict] | None = None,
 ) -> list[dict]:
     """One row per municipal indicator, for a page that must not name any.
 
@@ -583,8 +605,11 @@ def _indicator_index(
     finally:
         conn.close()
 
+    lineage = lineage or {}
     index = []
     for indicator_id, payload in sorted(indicators.items()):
+        provenance = lineage.get(indicator_id, {})
+        inputs = provenance.get("derived_from") or []
         index.append(
             {
                 "indicator_code": indicator_id,
@@ -611,6 +636,18 @@ def _indicator_index(
                     for cell in payload["communes"].values()
                     if cell["value"] is None and cell.get("status") == "suppressed"
                 ),
+                # How the figure was MADE, and by whom. Grade is per indicator
+                # because lineage is a property of the series, not of any one
+                # commune or period -- which is also why it lives here rather
+                # than in all 565 commune payloads, where the same source name
+                # would be repeated some 29,000 times.
+                "grade": provenance.get("grade"),
+                "source": provenance.get("source"),
+                "transform": provenance.get("transform"),
+                "derived_from": inputs or None,
+                "input_sources": provenance.get("input_sources") or None,
+                "inputs_updated": _inputs_updated(inputs, indicators) if inputs else None,
+                "updated": payload.get("updated"),
             }
         )
     return index
@@ -649,6 +686,9 @@ def export_site_payloads(
 
     _backfill_cross_sections(indicators, communes)
 
+    lineage = indicator_lineage(db_path)
+    registry = source_registry()
+
     names = _indicator_names(db_path)
     for commune in communes.values():
         for indicator_id, entry in commune["indicators"].items():
@@ -671,22 +711,48 @@ def export_site_payloads(
     if percentiles_csv is not None:
         ranked = _attach_percentiles(communes, _read_percentiles(percentiles_csv))
 
+    for indicator_id, entry in national.items():
+        provenance = lineage.get(indicator_id, {})
+        entry["grade"] = provenance.get("grade")
+        entry["source"] = provenance.get("source")
     _write_json(out_dir / "national.json", {"geo_id": "be:country", "indicators": national})
 
     for nis, payload in communes.items():
         _write_json(out_dir / "communes" / f"{nis}.json", payload)
 
     for indicator_id, payload in indicators.items():
+        provenance = lineage.get(indicator_id, {})
         _write_json(
             out_dir / "indicators" / f"{indicator_id}.json",
-            {"indicator_code": indicator_id, **payload},
+            {
+                "indicator_code": indicator_id,
+                "grade": provenance.get("grade"),
+                "source": provenance.get("source"),
+                "input_sources": provenance.get("input_sources") or None,
+                "inputs_updated": (
+                    _inputs_updated(provenance.get("derived_from") or [], indicators)
+                    if provenance.get("derived_from")
+                    else None
+                ),
+                **payload,
+            },
         )
 
     _write_json(out_dir / "metadata" / "geographies.json", {"geographies": geographies})
 
     _write_json(
         out_dir / "metadata" / "indicators.json",
-        {"indicators": _indicator_index(indicators, names, additive, db_path)},
+        {"indicators": _indicator_index(indicators, names, additive, db_path, lineage)},
+    )
+
+    # The source registry, fetched once by a page and referenced by id from
+    # the index. Kept SEPARATE per source and never composed into a single
+    # "Sources: Statbel, ONEM, Police" line: the three grants genuinely differ
+    # -- Statbel and ONEM state commercial reuse, the federal police state only
+    # attribution -- and blurring them would claim a permission nobody gave.
+    _write_json(
+        out_dir / "metadata" / "sources.json",
+        {"sources": registry, "grades": GRADES},
     )
 
     # None skips the layout entirely: a caller exercising the payload RESHAPE

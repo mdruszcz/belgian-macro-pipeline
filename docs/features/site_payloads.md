@@ -148,6 +148,27 @@ second "latest value" computation — filtered to one indicator and reshaped, th
 the same way as a commune payload. One file rather than one-per-indicator because there is only one
 national geography — splitting it further would multiply file count for no fetch-size benefit.
 
+### `metadata/sources.json`
+
+One entry per data source, plus the grade vocabulary. ~5.5 KB, fetched once by a page and
+referenced by id from `metadata/indicators.json`, which is why no source name is repeated in the
+565 commune payloads.
+
+Built from `config/sources/*.yaml`, **not** the `sources` table: three rows in that table were
+written by `scripts/port_existing_indicators.py` with the agency copied into the name and
+`catalog_ref = "docs/data_catalog.md (pending)"`, so reading the database would publish the weaker
+copy of a licence notice.
+
+Each entry carries `source_id`, a trilingual `label`, `agency`, `name`, `homepage`, a trilingual
+`licence_note`, `cadence` and `catalog_ref`. **The notes are per source and are never composed into
+one string** — Statbel and ONEM state commercial reuse, the federal police state only attribution,
+and a combined "Sources: Statbel, ONEM, Police" line would claim a permission nobody granted.
+
+`metadata/indicators.json` gains, per indicator: `grade` (A/B/C/D), `source` (null for a derived
+indicator, which has none), `transform`, `derived_from`, `input_sources`, `inputs_updated` and
+`updated`. See `docs/features/provenance.md` for what the grades mean and why a suppressed cell
+carries no grade at all.
+
 ### `metadata/geographies.json`
 
 Every currently-valid geography (622 rows measured today: country, regions, provinces,

@@ -5,6 +5,9 @@ name:
   nl: Bbp-volume-index, eurozone (2010=100)
 country: EA
 unit: index_2010
+transform:
+  method: rebase
+  base: 2010
 frequency: Q
 source_id: dbnomics_eurostat
 geo_levels:
