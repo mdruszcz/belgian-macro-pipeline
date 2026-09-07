@@ -13,6 +13,7 @@ licence: >-
   obligations until Statbel confirms which governs. See docs/data_catalog.md "Statbel licence".
 catalog_ref: docs/data_catalog.md rows 7, 7b
 cadence: quarterly
+fetch_window_days: 7
 is_active: true
 homepage: https://statbel.fgov.be/
 label:

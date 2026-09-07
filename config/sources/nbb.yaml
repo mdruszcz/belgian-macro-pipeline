@@ -6,4 +6,5 @@ base_url: https://nsidisseminate-stat.nbb.be/rest/data/BE2
 licence: null  # TODO: confirm licence terms (CLAUDE.md rule 8) -- already in production use
 catalog_ref: null
 cadence: daily
+fetch_window_days: 7
 is_active: true

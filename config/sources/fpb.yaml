@@ -6,4 +6,5 @@ base_url: null
 licence: null  # TODO: confirm licence terms (CLAUDE.md rule 8) -- already in production use
 catalog_ref: null
 cadence: quarterly
+fetch_window_days: 7
 is_active: true

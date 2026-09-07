@@ -514,3 +514,115 @@ def test_the_real_committed_stores_pass(tmp_path):
     violations = run_all(Context(conn=conn, exports=exports))
     conn.close()
     assert not has_failures(violations), [str(v) for v in violations]
+
+
+# ── fetch_silence: a source that stopped arriving ───────────────────────────
+#
+# The blind spot this fills is structural rather than accidental. fetch_error
+# checks the STATUS of each source's most recent run, and _still_active
+# deliberately drops any source whose last entry is far behind the newest, so
+# a retired code does not red-light every build. The consequence is that a
+# source going quiet was the one failure mode actively filtered OUT of the
+# checks: last run 'ok', excluded as retired, reported nowhere.
+
+
+def test_a_source_that_stopped_being_fetched_fires(tmp_path):
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    # Two sources: one fetched today, one last seen two months ago.
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
+        ("onem", "ONEM", "ONEM", "onem", "x"),
+    )
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','statbel','2026-09-06T00:00:00+00:00','ok')"
+    )
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('onem','onem','2026-07-01T00:00:00+00:00','ok')"
+    )
+    conn.commit()
+    conn.close()
+
+    fired = _fired(
+        run_all(_ctx(db, fetch_window_days={"statbel": 7, "onem": 7})),
+        "fetch_silence",
+    )
+    assert len(fired) == 1
+    assert "onem" in fired[0].message
+    # It must say what it measured against, not just "stale".
+    assert "behind the newest run" in fired[0].message
+    assert fired[0].severity == WARN
+
+
+def test_a_source_fetched_alongside_the_others_is_silent(tmp_path):
+    """The property that keeps this rule switched on."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','statbel','2026-09-06T00:00:00+00:00','ok')"
+    )
+    conn.commit()
+    conn.close()
+    assert not _fired(run_all(_ctx(db, fetch_window_days={"statbel": 7})), "fetch_silence")
+
+
+def test_a_source_declaring_no_window_is_never_checked(tmp_path):
+    """Opt-in per source, and this is why: police's files are hand-downloaded,
+    so it has no fetch_runs rows at all and any window would red-light it
+    forever. A permanent red light is the same as no rule."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
+        ("police", "Police", "Police", "police", "x"),
+    )
+    conn.commit()
+    conn.close()
+    # police has no runs and no window -> silent. statbel has a window and a run.
+    fired = _fired(run_all(_ctx(db, fetch_window_days={"statbel": 7})), "fetch_silence")
+    assert not fired
+
+
+def test_a_source_that_has_never_been_fetched_says_so(tmp_path):
+    """A different and more alarming sentence than "fell behind": the adapter
+    has never run at all."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
+        ("onem", "ONEM", "ONEM", "onem", "x"),
+    )
+    conn.commit()
+    conn.close()
+    fired = _fired(run_all(_ctx(db, fetch_window_days={"statbel": 7, "onem": 7})), "fetch_silence")
+    assert len(fired) == 1
+    assert "has no fetch_runs entry at all" in fired[0].message
+
+
+def test_silence_is_measured_against_the_log_not_the_wall_clock(tmp_path):
+    """The database is a COMMITTED store. Measured against wall-clock, a clone
+    opened three months from now would warn about every source at once --
+    which is the permanent red light this module keeps refusing to build. Read
+    relative to the newest run, an old-but-consistent log is silent."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
+        ("onem", "ONEM", "ONEM", "onem", "x"),
+    )
+    # _clean_db seeds a 2026 statbel run; clear it so the whole log is ancient.
+    conn.execute("DELETE FROM fetch_runs")
+    # Both ancient, both consistent with each other.
+    for source in ("statbel", "onem"):
+        conn.execute(
+            "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+            f"VALUES ('{source}','{source}','2019-01-01T00:00:00+00:00','ok')"
+        )
+    conn.commit()
+    conn.close()
+    assert not _fired(
+        run_all(_ctx(db, fetch_window_days={"statbel": 7, "onem": 7})), "fetch_silence"
+    )

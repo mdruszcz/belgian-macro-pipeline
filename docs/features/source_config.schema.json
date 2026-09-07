@@ -119,6 +119,13 @@
         "fr",
         "nl"
       ]
+    },
+    "fetch_window_days": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
     }
   }
 }
