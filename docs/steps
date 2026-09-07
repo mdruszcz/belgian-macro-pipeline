@@ -724,7 +724,14 @@ port, session token, origin check, path allowlisted to config/pages/, atomic wri
 no credentials sent to the browser, no server-side commit or push.
 Why: No builder action may ever overwrite an arbitrary repository file or corrupt the last
 published version.
- [BUILD] Batch 12 -- builder shell
+ [BUILD] Batch 12 -- builder shell (2026-09-07: SPECCED and architecture pre-checked, not yet
+implemented. Spec: docs/implementation/batches/batch-12-builder-shell-spec.md, revision 2. The
+pre-check found two P0s in revision 1 before any code existed -- a shell that could not load
+itself, and a headline round-trip property the code contradicts -- both closed in revision 2.
+Runs as two SEQUENTIAL steps, never concurrent: 12a service seam (builder-core: bootstrap_html
+inlines the shell, /api/registry, the CSP decision, history.js), then 12b the shell itself
+(builder-ui, everything else under builder/app/). "Template selector" becomes a PAGE selector:
+no template exists until Batch 15.)
 How: Page/template selector, block library, structure tree, canvas, inspector panels
 (content/layout/appearance/data/accessibility/visibility), top bar (undo/redo, viewport,
 save/validate/publish).
@@ -749,6 +756,24 @@ How: draft.json/published.json split; publish validates first, builds to a temp 
 runs required tests, replaces published files atomically only on success; make all never
 promotes a draft.
 Why: No builder or test failure may ever corrupt the current public site.
+ [BUILD] Batch 17 -- publication allowlist (2026-09-07: SPECCED, not started. Spec:
+docs/implementation/batches/batch-17-publication-allowlist-spec.md. Maintainer's decision: keep
+committing drafts, exclude them from the published site, so the DEPLOY changes -- Pages publishes
+a default-deny allowlist instead of serving the repository root. The allowlist governs the SITE'S
+URL SURFACE, not secrecy: the repo is public, so committed files stay fetchable from github.com
+whatever Pages publishes -- reviewed and accepted by the maintainer, see known-risks. The most
+valuable part is the route inventory: rule 31 has NO mechanical baseline anywhere -- nothing
+asserts any public URL resolves, across 1,695 commune pages in three languages -- so that lands
+first as a test, and is worth keeping even if the deploy change is reverted. Runs after 12b and
+chore/playwright-ci-gate is merged. NOT done when the workflow merges: the maintainer must flip
+the Pages source setting to GitHub Actions by hand, and until he does, the workflow goes green
+while the site still serves the repository root.)
+How: One default-deny allowlist of what belongs on the public site; a test that FAILS if a draft
+or anything else outside it is reachable in the built output; a route inventory that every
+canonical and legacy URL must still satisfy.
+Why: A mistake here is silent in both directions -- a leak nobody notices, or a dead URL that
+breaks rule 31 and is worse than the leak it fixes.
+
  [REVIEW] Full audit pass -- visual, data, accessibility, security, performance, licence, SEO
 How: Run every audit in docs/features/page_builder.md's Test matrix against the finished
 batches; zero P0/P1 findings remain open.
