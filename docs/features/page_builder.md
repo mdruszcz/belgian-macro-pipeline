@@ -45,9 +45,11 @@ is visible in the one place the maintainer already checks (claude.md rule 16).
 A page is a JSON document (`config/pages/{page_id}/{draft,published}.json`) describing sections
 and blocks, each block typed and versioned, each block's data supplied by a **binding** — a
 reference to an existing payload (national/municipal/indicator/geography/comparison/ranking),
-never a raw query. One shared renderer (`assets/belpulse/renderer.js`) turns a page document into
-DOM, and both the public site and the builder's own preview call that same renderer, so what the
-maintainer sees while editing is what ships. The builder (`builder/`) edits `draft.json` only;
+never a raw query. One shared renderer
+(`src/pages/render.py`'s `render_document()`, Python — see the "superseded in part" note in ADR
+0004; the originally-planned `assets/belpulse/renderer.js` was deliberately never written) turns a
+page document into static HTML, and both the public site and the builder's own preview call that
+same function, so what the maintainer sees while editing is what ships. The builder (`builder/`) edits `draft.json` only;
 publishing validates the draft and atomically replaces `published.json`; the existing static
 export reads only `published.json`.
 
@@ -68,7 +70,7 @@ Full detail lives in `docs/implementation/batches/` as each one starts; this is 
 | 8 | Data and map explorers | Batch 2 | not started, unblocked |
 | 9 | Page-document schema | Batch 0 | done |
 | 10 | Shared block renderer | Batch 9 | done |
-| 11 | Builder service | Batch 9 | not started |
+| 11 | Builder service | Batch 9 | done |
 | 12 | Builder shell | Batch 11 | not started |
 | 13 | Drag, resize, responsive layouts | Batch 12 | not started |
 | 14 | Data-binding engine | Batch 10 | not started |

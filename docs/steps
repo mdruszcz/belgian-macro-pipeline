@@ -680,7 +680,45 @@ fixed the test, not the renderer. 999 tests passing, from 956)
 How: One block registry consumed identically by the editor preview and the public build;
 responsive CSS grid; per-block failure isolation; lazy-loaded maps and charts.
 Why: What the maintainer sees while editing must be exactly what ships.
- [BUILD] Batch 11 -- builder service
+ ✅ [BUILD] Batch 11 -- builder service (2026-09-07: src/builder/{paths,store,service}.py +
+scripts/serve_builder.py, tested by tests/builder/*.py + tests/security/test_builder_service_hardening.py
+(126 tests). Full report at docs/implementation/batches/batch-11-builder-service.md. WENT THROUGH
+THE FULL REVIEW CHAIN, UNLIKE EVERY OTHER BATCH SO FAR, because this is the first thing in the
+programme that opens a socket and writes to the filesystem on request, and known-risks.md's Batch 9
+row makes an adversarial pass against src/pages/ a HARD GATE on this batch's acceptance. The
+PRE-IMPLEMENTATION SPEC REVIEW found 5 P1s before a line of code existed: the body cap didn't match
+MAX_DOCUMENT_BYTES, /preview was UNREACHABLE under its own auth rule (an iframe cannot set a header),
+the publish ordering contradicted its own acceptance test, the token would have leaked into the
+terminal log, and a same-origin preview of an UNVALIDATED draft would have turned any renderer-
+escaping slip into token theft plus writes. THE SECURITY-RED-TEAM PASS FOUND ONE P1 THAT BLOCKED
+ACCEPTANCE: a FAILED publish -- reachable by the store's own documented version_space_exhausted
+refusal after 9999 ordinary publishes, no sabotage needed -- could already have replaced
+published.json while the HTTP caller was told the publish had failed, because the version snapshot
+was claimed AFTER os.replace. Fixed by claiming the snapshot BEFORE the replace, so every failure up
+to and including a full versions/ directory now happens before published.json is touched; the one
+residual case (os.replace itself failing after the snapshot is claimed) is accepted and documented,
+since no filesystem offers a rename atomic across two files at once. THE SAME PASS FOUND SIX MORE
+FINDINGS INSIDE src/pages/ ITSELF, none reachable through a VALIDATED document, only through
+/preview's by-design rendering of an unvalidated draft: loads() raised a bare ValueError (not
+PageValidationError) on an oversized integer literal, which also made /api/document 500 on any
+malformed on-disk document instead of a proper 400/413/422 -- BOTH FIXED in this batch, at the root,
+in src/pages/serialize.py; a non-mapping visibility/layout escapes render.py's own per-block failure
+isolation; control/bidi characters pass content-safety and render unescaped; a float heading level
+(2.0) matches the registry's integer enum by JSON Schema's numeric-equality rule and emits a
+malformed tag; a registry-declared "link" rich_text node silently renders as nothing. All four left
+open, scoped to their own future specs. EVERYTHING ELSE ATTACKED AND HELD: path traversal (incl. six
+planted symlinks), the Origin check is exact-match (not the prefix-match shape that bit Batch 10),
+Host-header DNS rebinding, every cross-origin request shape a browser can send, the preview iframe's
+bare sandbox (no allow-same-origin, no allow-scripts) escaping a hand-crafted hostile document fully,
+process survival under every resource-guard payload, determinism, and the src/pages/ trust boundary
+confirmed LIVE (no sqlite3, no geography, no fetcher code loaded) rather than by import-scan alone.
+THREE MORE BUGS THE IMPLEMENTER'S OWN LIVE RUN FOUND, in no spec item: a POST rejected before its
+body was read desynchronised keep-alive and printed the unread document into the terminal log as a
+parsed request line; a disconnecting client printed a full traceback; a 30-second timeout let one
+silent socket stall the single-threaded server for the whole 30 seconds. KNOWN-RISKS ROW PARTIALLY
+DISCHARGED: closed for this batch's HTTP surface, reopened narrowed to Batch 14, since binding
+resolution is entirely unexercised -- /preview is only ever handed {} or an "unavailable" stand-in,
+never real data. 1128 tests passing, from 999)
 How: scripts/serve_builder.py behind `make builder`; validate/save/publish/restore API; private
 port, session token, origin check, path allowlisted to config/pages/, atomic writes, no shell=True,
 no credentials sent to the browser, no server-side commit or push.

@@ -84,6 +84,18 @@ def loads(text: str) -> dict:
         ) from exc
     except json.JSONDecodeError as exc:
         raise PageValidationError("schema_violation", ROOT_PATH, f"not valid JSON: {exc}") from exc
+    except ValueError as exc:
+        # CPython's json.loads also raises a bare ValueError -- not
+        # JSONDecodeError -- for an integer literal beyond
+        # sys.get_int_max_str_digits() (a DoS guard added to int() itself,
+        # unrelated to and uncoordinated with anything in this module). A
+        # security-red-team pass found this reaches a caller as an unhandled
+        # exception: a builder route parsing an on-disk draft containing a
+        # 5000-digit "version" value 500'd instead of answering the ordinary
+        # "not valid JSON" rejection every other malformed-JSON shape gets.
+        # Caught here, at the one function this whole module exists to make
+        # total, rather than patched at each call site.
+        raise PageValidationError("schema_violation", ROOT_PATH, f"not valid JSON: {exc}") from exc
 
     if not isinstance(doc, dict):
         raise PageValidationError(
