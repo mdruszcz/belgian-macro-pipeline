@@ -1,6 +1,7 @@
 # Feature: BelPulse design tokens and shared components
 
-Status: Batch 1 (tokens) done 2026-09-07; Batch 2 (shared components) not started
+Status: Batch 1 (tokens) done 2026-09-07; Batch 2 (shared components) done 2026-09-07 --
+see docs/implementation/batches/batch-2-shared-components.md
 Issue: none (part of docs/features/page_builder.md, Batches 1-2)
 Branch: not started
 

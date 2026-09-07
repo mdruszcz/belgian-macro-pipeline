@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BelPulse component gallery</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="../../assets/belpulse/tokens.css">
+<link rel="stylesheet" href="../../assets/belpulse/layout.css">
+<link rel="stylesheet" href="../../assets/belpulse/components.css">
+<style>
+  html,body{margin:0;padding:0}
+  body{background:var(--bp-bg); color:var(--bp-text); font-family:var(--bp-font-ui);
+    font-size:var(--bp-text-body); line-height:1.5; padding:var(--bp-space-8) var(--bp-space-8) var(--bp-space-10)}
+  h1{font-size:var(--bp-text-h1); font-weight:var(--bp-weight-bold); margin:0 0 var(--bp-space-2)}
+  p.lede{color:var(--bp-text-muted); max-width:70ch}
+  h2{font-size:var(--bp-text-h2); font-weight:var(--bp-weight-semibold);
+     margin:var(--bp-space-10) 0 var(--bp-space-3); border-bottom:1px solid var(--bp-border);
+     padding-bottom:var(--bp-space-3)}
+  h3{font-size:var(--bp-text-small); text-transform:uppercase; letter-spacing:.05em;
+     color:var(--bp-text-muted); margin:var(--bp-space-6) 0 var(--bp-space-3); font-weight:var(--bp-weight-semibold)}
+  .toggle{position:fixed; top:var(--bp-space-4); right:var(--bp-space-4); z-index:10}
+  .row{display:flex; flex-wrap:wrap; gap:var(--bp-space-4)}
+  .row > *{flex:1; min-width:220px}
+  .state-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:var(--bp-space-4)}
+  .state-grid .cell{display:flex; flex-direction:column; gap:6px}
+  .state-grid .cell code{font-size:10px; color:var(--bp-text-faint)}
+  .stack{display:flex; flex-direction:column; gap:var(--bp-space-4)}
+  .navy-demo{background:var(--bp-navy-bg); padding:var(--bp-space-6); border-radius:var(--bp-radius-card)}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-6)}
+  @media (max-width:800px){.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="toggle bp-theme-toggle" role="group" aria-label="Theme">
+  <button type="button" data-theme-choice="light">Light</button>
+  <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+  <button type="button" data-theme-choice="dark">Dark</button>
+</div>
+
+<h1>BelPulse component gallery</h1>
+<p class="lede">
+  Every shared component from Batch 2 (<code>docs/features/page_builder.md</code>), built only from
+  <code>tokens.css</code> + <code>layout.css</code> + <code>components.css</code> + <code>charts.js</code> +
+  <code>components.js</code>. This page is the Batch 2 gate: it must demonstrate every component and every
+  data state before any full page is redesigned against them.
+</p>
+
+<h2 id="states">Data states</h2>
+<p class="lede">
+  Seven states, five of them borrowed from vocabulary this repo already has rather than invented here — see
+  the comment at the top of <code>components.css</code>. <code>missing</code> and <code>unavailable</code>
+  render identically on purpose (both mean "no data" to a reader) but are distinct states in the markup below,
+  because they come from different places in the data.
+</p>
+<div class="state-grid" id="kpi-states"></div>
+
+<h2 id="kpi">KPI card</h2>
+<h3>Full (as a bp-kpi-grid)</h3>
+<div class="bp-kpi-grid" id="kpi-full"></div>
+<h3>Compact</h3>
+<div class="row" id="kpi-compact"></div>
+<h3>Mini (with sparkline slot)</h3>
+<div class="row" id="kpi-mini"></div>
+
+<h2 id="stat-tile">Stat tile</h2>
+<div class="row" id="stat-tiles"></div>
+
+<h2 id="list-panel">List panel</h2>
+<div class="two-col">
+  <div class="bp-side-panel">
+    <h2>Indicateurs clés</h2>
+    <ul class="bp-list-panel" id="list-panel-ready"></ul>
+  </div>
+  <div class="bp-side-panel">
+    <h2>Every state, one indicator each</h2>
+    <ul class="bp-list-panel" id="list-panel-states"></ul>
+  </div>
+</div>
+
+<h2 id="charts">Charts</h2>
+<div class="row">
+  <div class="bp-chart-card">
+    <div class="bp-chart-head">
+      <div><h3 style="margin:0">Line — unemployment rate</h3><div class="subtitle">2019–2025, monthly</div></div>
+    </div>
+    <div class="bp-chart-canvas-wrap"><canvas id="chart-line"></canvas></div>
+  </div>
+  <div class="bp-chart-card">
+    <div class="bp-chart-head">
+      <div><h3 style="margin:0">Bar — GDP per capita, neighbours</h3></div>
+    </div>
+    <div class="bp-chart-canvas-wrap"><canvas id="chart-bar"></canvas></div>
+  </div>
+</div>
+<div class="row" style="margin-top:var(--bp-space-4)">
+  <div class="bp-chart-card">
+    <div class="bp-chart-head"><div><h3 style="margin:0">Donut — age structure</h3></div></div>
+    <div class="bp-chart-canvas-wrap" style="max-width:210px; margin:0 auto"><canvas id="chart-donut"></canvas></div>
+    <div class="bp-chart-legend" id="donut-legend"></div>
+  </div>
+  <div class="bp-chart-card">
+    <div class="bp-chart-head"><div><h3 style="margin:0">Ranking — unemployment among peers</h3></div></div>
+    <div class="bp-chart-canvas-wrap"><canvas id="chart-ranking"></canvas></div>
+  </div>
+</div>
+<h3>Chart container states</h3>
+<div class="state-grid" id="chart-states"></div>
+
+<h2 id="compare">Comparison table</h2>
+<div class="bp-chart-card">
+  <table class="bp-compare-table" id="compare-table"></table>
+</div>
+
+<h2 id="ranking-list">Ranking list (text)</h2>
+<div class="bp-chart-card" style="max-width:360px">
+  <ol class="bp-ranking-list" id="ranking-list-demo"></ol>
+</div>
+
+<h2 id="live">Simulated live counter</h2>
+<div class="navy-demo">
+  <div class="bp-live-counter" style="max-width:280px">
+    <div class="bp-live-counter-label">
+      <span>Jobseekers registered today</span>
+      <span class="bp-simulated-badge">Simulated</span>
+    </div>
+    <div class="bp-value" id="live-counter-value">0</div>
+    <div class="bp-live-counter-rate">≈ 1 every 2s, for demonstration only — not a real feed</div>
+    <div class="bp-live-counter-bar"><span style="width:64%"></span></div>
+  </div>
+</div>
+
+<h2 id="editorial">Editorial and static components</h2>
+<div class="row">
+  <div class="bp-chart-card"><p class="bp-pull-quote">&ldquo;Des données locales pour comprendre l'économie réelle.&rdquo;</p></div>
+  <div class="bp-chart-card"><div class="bp-news-card">
+    <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'/%3E">
+    <div><div class="date">3 sept. 2026</div><h4>Le chômage recule à Namur</h4><p>Le taux de chômage a baissé de 0,4 point sur un an.</p></div>
+  </div></div>
+</div>
+<div class="row" style="margin-top:var(--bp-space-4)">
+  <div class="bp-commune-card">
+    <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='140'/%3E">
+    <div class="bp-commune-card-body">
+      <h4>Namur</h4>
+      <div class="region">Province de Namur · Wallonie</div>
+      <div class="bp-commune-card-stats">
+        <div><span class="bp-list-panel-label">Population</span><br><b>111 998</b></div>
+        <div><span class="bp-list-panel-label">Chômage</span><br><b>8,4 %</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="bp-chart-card">
+    <div class="bp-feature-tile">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+      <h4>565 communes couvertes</h4>
+      <p>Chaque commune belge, avec ses propres indicateurs et sa propre carte.</p>
+    </div>
+  </div>
+  <div class="bp-chart-card">
+    <div class="bp-chips" id="chip-list"></div>
+  </div>
+</div>
+
+<h2 id="badges">Freshness / grade badges</h2>
+<div class="row" id="badge-demo"></div>
+
+<h2 id="shell">Shell chrome (layout.css)</h2>
+<p class="lede">The page-shell pieces from Batch 2's other file, shown standalone rather than inside a full page — the full-page assembly is Batches 3/4/6/7's job.</p>
+
+<h3>Buttons</h3>
+<div class="row" style="gap:var(--bp-space-3)">
+  <button class="bp-btn bp-btn--primary" type="button">Explorer les données</button>
+  <button class="bp-btn bp-btn--outline" type="button">En savoir plus</button>
+</div>
+
+<h3>Breadcrumb</h3>
+<nav class="bp-breadcrumb" aria-label="Fil d'Ariane" style="border:1px solid var(--bp-border); border-radius:var(--bp-radius-card)">
+  <a href="#">Accueil</a><span class="sep">/</span><a href="#">Communes</a><span class="sep">/</span>Namur
+</nav>
+
+<h3>Section tabs</h3>
+<div class="bp-tabs" role="tablist" aria-label="Sections">
+  <button type="button" role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true" tabindex="0">Vue d'ensemble</button>
+  <button type="button" role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1">Emploi</button>
+  <button type="button" role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1">Démographie</button>
+</div>
+<div id="panel-1" role="tabpanel" aria-labelledby="tab-1">Contenu de la vue d'ensemble.</div>
+<div id="panel-2" role="tabpanel" aria-labelledby="tab-2" hidden>Contenu emploi.</div>
+<div id="panel-3" role="tabpanel" aria-labelledby="tab-3" hidden>Contenu démographie.</div>
+
+<h3>Dark CTA band</h3>
+<div class="bp-cta-band">
+  <div>
+    <h2>Explorez les données de votre commune</h2>
+    <p>565 communes, 52 indicateurs, mis à jour chaque jour ouvré.</p>
+  </div>
+  <div class="bp-cta-actions">
+    <button class="bp-btn bp-btn--primary" type="button">Commencer</button>
+    <button class="bp-btn bp-btn--outline" type="button">Voir la carte</button>
+  </div>
+  <div class="bp-cta-stats">
+    <div><b>565</b>communes</div>
+    <div><b>52</b>indicateurs</div>
+  </div>
+</div>
+
+<h3>Footer — light</h3>
+<footer class="bp-footer" style="border-radius:var(--bp-radius-card); border:1px solid var(--bp-border)">
+  <div>© 2026 BelPulse</div>
+  <div><a href="#">Sources</a> · <a href="#">Méthodologie</a> · <a href="#">Contact</a></div>
+</footer>
+
+<h3>Footer — dark</h3>
+<footer class="bp-footer bp-footer--dark" style="border-radius:var(--bp-radius-card)">
+  <div>© 2026 BelPulse</div>
+  <div><a href="#">Sources</a> · <a href="#">Méthodologie</a> · <a href="#">Contact</a></div>
+</footer>
+
+<h2 id="map">Map card (frame only)</h2>
+<p class="lede">
+  Per claude.md rule 29, the map itself is <code>assets/commune_map.js</code>, not reimplemented here — this
+  is only the surrounding card so a map matches every other chart's presentation.
+</p>
+<div class="bp-map-card" style="max-width:420px">
+  <div class="bp-chart-head"><div><h3 style="margin:0">Taux de chômage par commune</h3></div>
+    <select class="bp-chart-select"><option>2025</option><option>2024</option></select></div>
+  <div class="mapbox" style="height:160px; display:flex; align-items:center; justify-content:center; color:var(--bp-text-faint); font-size:12px">
+    assets/commune_map.js renders here
+  </div>
+</div>
+
+<script src="../../assets/belpulse/charts.js"></script>
+<script src="../../assets/belpulse/components.js"></script>
+<script>
+(function(){
+  BPComponents.initThemeToggle(document, 'belpulse-component-gallery-theme');
+  BPComponents.initTabs(document);
+
+  var STATES = [
+    {state:'ready', label:'ready', value:'8,4 %'},
+    {state:'ready', label:'explicit zero', value:'0'},
+    {state:'loading', label:'loading', value:''},
+    {state:'missing', label:'missing', headline:'No figure', why:'No row exists for this indicator here.'},
+    {state:'suppressed', label:'suppressed', value:''},
+    {state:'unavailable', label:'unavailable', headline:'Not tracked here', why:'This section does not apply to this geography.'},
+    {state:'error', label:'error', headline:'Could not load', why:'The data request failed. Try again later.'}
+  ];
+
+  function kpiCard(s){
+    var el = document.createElement('div');
+    el.className = 'bp-kpi bp-state';
+    el.setAttribute('data-state', s.state);
+    el.innerHTML =
+      '<div class="bp-state-skeleton"></div>' +
+      '<div class="bp-state-body">' +
+        '<div class="bp-kpi-label">Taux de chômage</div>' +
+        '<div class="bp-value">' + (s.value||'') + '</div>' +
+        (s.state==='suppressed' ? '<div class="bp-suppressed-note">Non publié par la source (moins de 10 personnes)</div>' : '') +
+      '</div>' +
+      '<div class="bp-state-message"><span class="headline">' + (s.headline||'') + '</span>' +
+        (s.why ? '<span class="why">' + s.why + '</span>' : '') + '</div>';
+    return el;
+  }
+
+  var statesHost = document.getElementById('kpi-states');
+  STATES.forEach(function(s){
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.appendChild(kpiCard(s));
+    var code = document.createElement('code');
+    code.textContent = 'data-state="' + s.state + '"' + (s.label!==s.state ? ' (' + s.label + ')' : '');
+    cell.appendChild(code);
+    statesHost.appendChild(cell);
+  });
+
+  // KPI variants, ready state
+  function kpiReady(cls, label, value, dir, delta){
+    var el = document.createElement('div');
+    el.className = 'bp-kpi bp-state ' + cls;
+    el.setAttribute('data-state', 'ready');
+    el.innerHTML =
+      '<div class="bp-state-skeleton"></div>' +
+      '<div class="bp-state-body">' +
+        '<div class="bp-kpi-label">' + label + '</div>' +
+        '<div class="bp-value">' + value + '</div>' +
+        '<span class="bp-delta" data-direction="' + dir + '">' + delta + '</span>' +
+      '</div>';
+    return el;
+  }
+  document.getElementById('kpi-full').append(
+    kpiReady('', 'Taux de chômage', '8,4 %', 'favourable', '▼ 0,4 pt sur un an'),
+    kpiReady('', 'PIB par habitant', '46 200 €', 'neutral', '▲ 2,1 % sur un an')
+  );
+  document.getElementById('kpi-compact').append(
+    kpiReady('bp-kpi--compact', 'Population', '111 998', 'neutral', '▲ 0,6 %'),
+    kpiReady('bp-kpi--compact', 'Revenu médian', '23 400 €', 'favourable', '▲ 1,8 %')
+  );
+  document.getElementById('kpi-mini').append(
+    kpiReady('bp-kpi--mini', 'Emploi', '52,1 %', 'favourable', '▲ 0,3 pt'),
+    kpiReady('bp-kpi--mini', 'Chômage', '8,4 %', 'favourable', '▼ 0,4 pt')
+  );
+
+  document.getElementById('stat-tiles').append(
+    (function(){ var d=document.createElement('div'); d.className='bp-chart-card bp-stat-tile';
+      d.innerHTML = '<div class="bp-kpi-icon">🏠</div><div><div class="bp-kpi-label">Communes</div><div class="bp-value">565</div></div>';
+      return d; })(),
+    (function(){ var d=document.createElement('div'); d.className='bp-chart-card bp-stat-tile';
+      d.innerHTML = '<div class="bp-kpi-icon">📊</div><div><div class="bp-kpi-label">Indicateurs</div><div class="bp-value">52</div></div>';
+      return d; })()
+  );
+
+  var LIST_READY = [
+    ['Population', '111 998', 'hab.'],
+    ['Taux de chômage', '8,4', '%'],
+    ['Revenu médian', '23 400', '€']
+  ];
+  var listReady = document.getElementById('list-panel-ready');
+  LIST_READY.forEach(function(r){
+    var li = document.createElement('li');
+    li.innerHTML = '<span class="label">' + r[0] + '</span><span class="value">' + r[1] + '<span class="unit">' + r[2] + '</span></span>';
+    listReady.appendChild(li);
+  });
+
+  var listStates = document.getElementById('list-panel-states');
+  STATES.forEach(function(s){
+    var li = document.createElement('li');
+    li.className = 'bp-state';
+    li.setAttribute('data-state', s.state);
+    li.innerHTML =
+      '<span class="label">' + s.label + '</span>' +
+      '<span class="bp-state-body value">' + (s.value || '—') + '</span>' +
+      '<span class="bp-state-message" style="padding:0"><span class="headline" style="font-size:11px">' + (s.headline||'') + '</span></span>';
+    listStates.appendChild(li);
+  });
+
+  // Charts
+  var linePoints = [];
+  var periods = ['2019','2020','2021','2022','2023','2024','2025'];
+  var base = 9.8;
+  periods.forEach(function(p,i){ linePoints.push({period:p, value: base - i*0.25 + (i%2?0.15:-0.1)}); });
+  BPCharts.drawLine(document.getElementById('chart-line'), [{label:'Namur', points: linePoints}]);
+
+  BPCharts.drawBar(document.getElementById('chart-bar'), [
+    {label:'BE', value: 46200, highlight:true},
+    {label:'FR', value: 43500},
+    {label:'DE', value: 48900},
+    {label:'NL', value: 52700},
+    {label:'LU', value: 118000}
+  ]);
+
+  var donutData = [
+    {label:'0–19', value: 22},
+    {label:'20–39', value: 26},
+    {label:'40–64', value: 32},
+    {label:'65+', value: 20}
+  ];
+  BPCharts.drawDonut(document.getElementById('chart-donut'), donutData);
+  var legend = document.getElementById('donut-legend');
+  donutData.forEach(function(d,i){
+    var item = document.createElement('span');
+    item.className = 'item';
+    item.innerHTML = '<span class="dot" style="background:var(--bp-chart-' + (i+1) + ')"></span>' + d.label + ' (' + d.value + '%)';
+    legend.appendChild(item);
+  });
+
+  BPCharts.drawRanking(document.getElementById('chart-ranking'), [
+    {label:'Namur', value: 8.4, highlight:true},
+    {label:'Andenne', value: 9.1},
+    {label:'Gembloux', value: 6.7},
+    {label:'Sambreville', value: 11.2},
+    {label:'Jemeppe', value: 7.5}
+  ]);
+
+  var chartStatesHost = document.getElementById('chart-states');
+  STATES.forEach(function(s){
+    var card = document.createElement('div');
+    card.className = 'bp-chart-card bp-state';
+    card.setAttribute('data-state', s.state);
+    card.innerHTML =
+      '<div class="bp-state-skeleton"></div>' +
+      '<div class="bp-state-body" style="height:80px; display:flex; align-items:center; justify-content:center; color:var(--bp-text-faint); font-size:12px">chart canvas</div>' +
+      '<div class="bp-state-message"><span class="headline">' + (s.headline || s.label) + '</span>' + (s.why ? '<span class="why">' + s.why + '</span>' : '') + '</div>';
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.appendChild(card);
+    var code = document.createElement('code');
+    code.textContent = 'data-state="' + s.state + '"';
+    cell.appendChild(code);
+    chartStatesHost.appendChild(cell);
+  });
+
+  // Comparison table
+  var ct = document.getElementById('compare-table');
+  ct.innerHTML =
+    '<thead><tr><th>Commune</th><th>Chômage</th><th>vs Namur</th></tr></thead><tbody>' +
+    '<tr class="subject"><td>Namur</td><td>8,4 %</td><td>—</td></tr>' +
+    '<tr><td>Andenne</td><td>9,1 %</td><td class="delta-unfav">+0,7 pt</td></tr>' +
+    '<tr><td>Gembloux</td><td>6,7 %</td><td class="delta-fav">−1,7 pt</td></tr>' +
+    '</tbody>';
+
+  // Ranking list (text form)
+  var rl = document.getElementById('ranking-list-demo');
+  [
+    ['1 / 581', 'Knokke-Heist', '3,2 %'],
+    ['214 / 581', 'Namur', '8,4 %', true],
+    ['581 / 581', 'Charleroi', '15,9 %']
+  ].forEach(function(r){
+    var li = document.createElement('li');
+    li.className = 'bp-ranking-item' + (r[3] ? ' bp-ranking-item--composite' : '');
+    li.innerHTML = '<span class="rank">' + r[0] + '</span><span>' + r[1] + '</span><span>' + r[2] + '</span>';
+    rl.appendChild(li);
+  });
+
+  // Simulated live counter
+  var counterEl = document.querySelector('.bp-live-counter');
+  counterEl.setAttribute('data-simulated', 'true');
+  BPComponents.initSimulatedCounter(counterEl, {start: 1284, perTick: 3, intervalMs: 2000});
+
+  // Chips
+  var chipHost = document.getElementById('chip-list');
+  ['Emploi', 'Démographie', 'Finances communales', 'Logement'].forEach(function(t){
+    var a = document.createElement('a');
+    a.className = 'bp-chip';
+    a.href = '#';
+    a.textContent = t;
+    chipHost.appendChild(a);
+  });
+
+  // Badges
+  var badgeHost = document.getElementById('badge-demo');
+  [
+    ['A', 'Official', 'Statbel, published as reported'],
+    ['B', 'Restated', 'Rebased by us from the source series'],
+    ['C', 'Derived', 'Computed from two or more series'],
+    ['D', 'Forecast', 'A value for a period not yet measured']
+  ].forEach(function(g){
+    var d = document.createElement('div');
+    d.className = 'bp-chart-card';
+    d.style.display = 'flex';
+    d.style.alignItems = 'center';
+    d.style.gap = '10px';
+    d.innerHTML = '<span class="bp-grade" title="' + g[2] + '">' + g[0] + '</span>' +
+      '<div><b style="font-size:13px">' + g[1] + '</b><br><span class="bp-freshness">Statbel · retrieved 2026-09-06</span></div>';
+    badgeHost.appendChild(d);
+  });
+})();
+</script>
+</body>
+</html>

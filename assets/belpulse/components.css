@@ -1,0 +1,241 @@
+/* BelPulse shared data components — Batch 2 (docs/features/page_builder.md).
+ *
+ * Requires assets/belpulse/tokens.css and layout.css loaded first.
+ *
+ * EVERY DATA-BEARING COMPONENT HERE HAS SEVEN STATES, per Batch 2's own gate:
+ * loading, ready, explicit zero, missing, suppressed, unavailable, error.
+ * They are not seven looks invented for this file -- five of them already
+ * exist elsewhere in this repo under different names, reused rather than
+ * reinvented:
+ *
+ *   ready        the ordinary case
+ *   explicit zero  a real measured 0 -- rendered exactly like "ready", on
+ *                purpose: claude.md rule 26 says a zero must never look like
+ *                an absence, so it gets NO special styling at all
+ *   missing      no row exists for this indicator/geography/period --
+ *                local.html's existing .no-data / noDataHTML() pattern
+ *   suppressed   the source has the figure and withheld it -- local.html's
+ *                existing .fact.withheld pattern (ONEM's "<10" masking)
+ *   unavailable  the whole indicator/section doesn't apply here --
+ *                config/local_sections.yaml's existing `unavailable:` blocks
+ *   loading      new to the styled component library (the current site is
+ *                statically pre-rendered, so nothing in it has ever needed
+ *                a loading state before the builder's live preview)
+ *   error        new for the same reason
+ *
+ * .bp-state-missing and .bp-state-unavailable render IDENTICALLY (both are
+ * "no data" to a reader) but are two distinct HTML/data states underneath,
+ * because rule 26 forbids collapsing them at the DATA layer even where the
+ * visual treatment is deliberately the same.
+ */
+
+/* ---- state wrapper, used by every data component below -------------------- */
+.bp-state{position:relative}
+.bp-state[data-state="loading"] .bp-state-body{opacity:.5}
+.bp-state-skeleton{
+  display:none; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(90deg, var(--bp-surface-alt) 25%, var(--bp-border) 37%, var(--bp-surface-alt) 63%);
+  background-size:400% 100%; animation:bp-shimmer 1.4s ease infinite;
+}
+.bp-state[data-state="loading"] .bp-state-skeleton{display:block}
+@keyframes bp-shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+@media (prefers-reduced-motion: reduce){
+  .bp-state-skeleton{animation:none; background:var(--bp-surface-alt)}
+}
+
+.bp-state-message{display:none; padding:var(--bp-space-4); text-align:left}
+.bp-state[data-state="missing"] .bp-state-message,
+.bp-state[data-state="unavailable"] .bp-state-message,
+.bp-state[data-state="error"] .bp-state-message{display:block}
+.bp-state[data-state="missing"] .bp-state-body,
+.bp-state[data-state="unavailable"] .bp-state-body,
+.bp-state[data-state="error"] .bp-state-body,
+.bp-state[data-state="loading"] .bp-state-message{display:none}
+
+.bp-state-message .headline{font-weight:var(--bp-weight-medium); color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+.bp-state-message .why{display:block; margin-top:4px; font-size:12px; color:var(--bp-text-faint); max-width:60ch}
+.bp-state[data-state="error"] .headline{color:var(--bp-red-signal)}
+
+/* Suppressed is a MODIFIER on the ready state, not a replacement for it --
+   the figure's label and card are still shown, just with no number and a
+   reason (matches local.html's .fact.withheld exactly, not a new pattern). */
+.bp-state[data-state="suppressed"] .bp-value{color:var(--bp-text-faint); font-weight:var(--bp-weight-medium)}
+.bp-state[data-state="suppressed"] .bp-value::after{content:'—'}
+.bp-suppressed-note{font-size:12px; color:var(--bp-text-muted); margin-top:4px; display:none}
+.bp-state[data-state="suppressed"] .bp-suppressed-note{display:block}
+
+/* ---- KPI card --------------------------------------------------------------
+   Three size variants seen across the four designs (component-inventory.md):
+   full (macro/micro rows), compact (homepage), mini (profile page, adds a
+   small chart under the value). Same markup, a modifier class. */
+.bp-kpi{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4) var(--bp-space-5);
+  display:flex; flex-direction:column; gap:6px;
+}
+.bp-kpi-icon{
+  width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  background:var(--bp-accent-soft); color:var(--bp-accent-ink); flex:none; margin-bottom:4px;
+}
+.bp-kpi-label{font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+.bp-kpi .bp-value{font-size:var(--bp-text-kpi); font-weight:var(--bp-weight-bold); line-height:1.1}
+.bp-kpi--compact .bp-value{font-size:1.35rem}
+.bp-kpi--mini{padding:var(--bp-space-3) var(--bp-space-4)}
+.bp-kpi--mini .bp-value{font-size:1.15rem}
+
+.bp-delta{display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:var(--bp-weight-medium)}
+.bp-delta[data-direction="favourable"]{color:var(--bp-green)}
+.bp-delta[data-direction="unfavourable"]{color:var(--bp-red-signal)}
+.bp-delta[data-direction="neutral"]{color:var(--bp-text-muted)}
+/* Direction is set from the indicator's OWN preferred_direction, never
+   hardcoded up=green/down=red -- docs/design-references/micro.md's own note
+   on the unemployment KPI: a falling rate is favourable there, so its arrow
+   is green even though the NUMBER went down. */
+
+.bp-kpi-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:var(--bp-space-4)}
+
+/* ---- stat tile (simpler sibling: no sparkline) ----------------------------- */
+.bp-stat-tile{display:flex; align-items:center; gap:var(--bp-space-3)}
+.bp-stat-tile .bp-kpi-icon{width:28px; height:28px; margin:0}
+.bp-stat-tile .bp-value{font-size:1.1rem}
+
+/* ---- list panel ("Indicateurs clés") --------------------------------------- */
+.bp-list-panel{list-style:none; margin:0; padding:0}
+.bp-list-panel li{
+  display:flex; align-items:center; gap:var(--bp-space-3);
+  padding:var(--bp-space-3) 0; border-bottom:1px solid var(--bp-border);
+}
+.bp-list-panel li:last-child{border-bottom:0}
+.bp-list-panel .label{flex:1; color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+.bp-list-panel .value{font-weight:var(--bp-weight-semibold)}
+.bp-list-panel .unit{color:var(--bp-text-faint); font-size:12px; margin-left:4px}
+
+/* ---- chart container -------------------------------------------------------
+   Wraps assets/belpulse/charts.js's canvas output. The dropdown is a real
+   UX question flagged in docs/design-references/micro.md -- built here as an
+   optional slot, wired or not depending on the block that uses it. */
+.bp-chart-card{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5);
+}
+.bp-shell--navy .bp-chart-card,
+.bp-chart-card--navy{background:var(--bp-navy-surface); border-color:var(--bp-navy-border); color:var(--bp-navy-text)}
+.bp-chart-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--bp-space-3); margin-bottom:var(--bp-space-4)}
+.bp-chart-head h3{font-size:var(--bp-text-h2); margin:0}
+.bp-chart-head .subtitle{font-size:12px; color:var(--bp-text-muted); margin-top:2px}
+.bp-chart-select{
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:5px 10px;
+  font:inherit; font-size:12px; background:var(--bp-surface); color:inherit; flex:none;
+}
+.bp-chart-legend{display:flex; flex-wrap:wrap; gap:var(--bp-space-4); margin-top:var(--bp-space-3); font-size:12px}
+.bp-chart-legend .item{display:flex; align-items:center; gap:6px; color:var(--bp-text-muted)}
+.bp-chart-legend .dot{width:10px; height:10px; border-radius:3px; flex:none}
+.bp-chart-canvas-wrap{position:relative}
+.bp-chart-canvas-wrap canvas{display:block; width:100%}
+
+/* ---- comparison table -------------------------------------------------------
+   Maps directly onto the existing `comparison` payload shape -- see
+   docs/features/comparison.md. A count is a SHARE against its container, a
+   ratio is a DIFFERENCE -- this pipeline's own rule (claude.md, Definitions),
+   never a hardcoded percentage style. */
+.bp-compare-table{width:100%; border-collapse:collapse; font-size:var(--bp-text-small)}
+.bp-compare-table th,.bp-compare-table td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--bp-border)}
+.bp-compare-table th:first-child,.bp-compare-table td:first-child{text-align:left}
+.bp-compare-table thead th{color:var(--bp-text-muted); font-weight:var(--bp-weight-medium); font-size:12px}
+.bp-compare-table tbody tr:hover{background:var(--bp-surface-alt)}
+.bp-compare-table .subject{font-weight:var(--bp-weight-semibold)}
+.bp-compare-table .delta-fav{color:var(--bp-green)}
+.bp-compare-table .delta-unfav{color:var(--bp-red-signal)}
+
+/* ---- ranking list ------------------------------------------------------------
+   "N / 581" rows. component-inventory.md: real for a single indicator's own
+   percentile; NOT real yet for a named composite score (Peer Model/Fiscal
+   Score, not built) -- the .bp-ranking-item--composite modifier exists so a
+   page can mark that distinction rather than silently faking a formula. */
+.bp-ranking-list{list-style:none; margin:0; padding:0}
+.bp-ranking-item{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bp-border); font-size:var(--bp-text-small)}
+.bp-ranking-item:last-child{border-bottom:0}
+.bp-ranking-item .rank{font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
+.bp-ranking-item--composite .rank::after{
+  content:'*'; color:var(--bp-text-faint); font-weight:var(--bp-weight-regular); margin-left:2px;
+}
+
+/* ---- simulated live counter --------------------------------------------------
+   docs/design-references/macro.md: the ONE component that is not, and must
+   never silently become, a real-time data feed. The "simulated" label is
+   REQUIRED markup, not optional styling -- see components.js's own guard. */
+.bp-live-counter{background:var(--bp-navy-surface); border-radius:var(--bp-radius-card); padding:var(--bp-space-5); color:var(--bp-navy-text)}
+.bp-live-counter-label{font-size:var(--bp-text-small); color:var(--bp-navy-text-muted); display:flex; align-items:center; gap:6px}
+.bp-live-counter .bp-value{font-size:1.6rem; font-weight:var(--bp-weight-bold); font-variant-numeric:tabular-nums; margin:4px 0}
+.bp-live-counter-rate{font-size:11px; color:var(--bp-navy-text-muted)}
+.bp-live-counter-bar{height:5px; border-radius:3px; background:rgba(255,255,255,.12); margin-top:8px; overflow:hidden}
+.bp-live-counter-bar span{display:block; height:100%; background:var(--bp-blue)}
+.bp-simulated-badge{
+  font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:var(--bp-weight-semibold);
+  color:var(--bp-navy-text-muted); border:1px solid var(--bp-navy-border); border-radius:var(--bp-radius-pill);
+  padding:1px 7px;
+}
+
+/* ---- editorial pull-quote ---------------------------------------------------- */
+.bp-pull-quote{
+  font-family:var(--bp-font-decorative); font-size:1.3rem; color:var(--bp-accent-ink);
+  max-width:32ch; line-height:1.3;
+}
+
+/* ---- news / article card ------------------------------------------------------
+   Static editorial content -- no pipeline data source exists for this
+   (component-inventory.md). */
+.bp-news-card{display:flex; gap:var(--bp-space-3)}
+.bp-news-card img{width:72px; height:72px; border-radius:var(--bp-radius-control); object-fit:cover; flex:none; background:var(--bp-surface-alt)}
+.bp-news-card .date{font-size:11px; color:var(--bp-text-faint)}
+.bp-news-card h4{font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:2px 0}
+.bp-news-card p{font-size:12px; color:var(--bp-text-muted); margin:0}
+
+/* ---- commune preview card (homepage) ------------------------------------------- */
+.bp-commune-card{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  overflow:hidden; box-shadow:var(--bp-shadow-card);
+}
+.bp-commune-card img{width:100%; height:140px; object-fit:cover; display:block; background:var(--bp-surface-alt)}
+.bp-commune-card-body{padding:var(--bp-space-4)}
+.bp-commune-card h4{margin:0 0 2px; font-size:var(--bp-text-h2)}
+.bp-commune-card .region{font-size:12px; color:var(--bp-text-muted); margin-bottom:var(--bp-space-3)}
+.bp-commune-card-stats{display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px}
+
+/* ---- feature/benefit tile (no data) ------------------------------------------ */
+.bp-feature-tile{display:flex; flex-direction:column; gap:8px}
+.bp-feature-tile .icon{width:32px; height:32px; color:var(--bp-accent)}
+.bp-feature-tile h4{margin:0; font-size:var(--bp-text-body); font-weight:var(--bp-weight-semibold)}
+.bp-feature-tile p{margin:0; font-size:12px; color:var(--bp-text-muted)}
+
+/* ---- chip / tag list ----------------------------------------------------------- */
+.bp-chips{display:flex; flex-wrap:wrap; gap:8px}
+.bp-chip{
+  display:inline-flex; align-items:center; gap:4px; border-radius:var(--bp-radius-pill);
+  border:1px solid var(--bp-border); padding:6px 14px; font-size:12px; color:inherit; text-decoration:none;
+}
+.bp-chip:hover{background:var(--bp-surface-alt)}
+
+/* ---- freshness / grade badge ----------------------------------------------------
+   Reuses the exact vocabulary local.html's provenance badge already uses
+   (docs/features/provenance.md) -- one neutral colour for every grade letter,
+   A is not "good" and C is not "bad" (see local.html's own comment, restated
+   here verbatim as a decision, not a coincidence). */
+.bp-grade{
+  display:inline-block; min-width:1.1em; text-align:center; font-family:"IBM Plex Mono",monospace;
+  font-size:10px; font-weight:var(--bp-weight-semibold); padding:1px 4px; border-radius:3px;
+  background:var(--bp-accent-soft); color:var(--bp-accent-ink); cursor:help;
+}
+.bp-freshness{font-size:11px; color:var(--bp-text-faint)}
+
+/* ---- choropleth map wrapper -------------------------------------------------
+   claude.md rule 29: map blocks reuse assets/commune_map.js, never a second
+   implementation. This is only the CARD FRAME around it -- legend and
+   dropdown live in the same card so the map matches every other chart's
+   presentation, not a special case. */
+.bp-map-card{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  box-shadow:var(--bp-shadow-card); overflow:hidden;
+}
+.bp-map-card .bp-chart-head{padding:var(--bp-space-5) var(--bp-space-5) 0}
+.bp-map-card .mapbox{padding:0 var(--bp-space-5) var(--bp-space-5)}

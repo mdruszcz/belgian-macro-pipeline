@@ -1,0 +1,183 @@
+/* BelPulse shared layout — Batch 2 (docs/features/page_builder.md).
+ *
+ * The SHELL chrome: top bars, sidebars, breadcrumb, section tabs, the dark
+ * CTA band, footers. docs/design-references/component-inventory.md is what
+ * this was built against -- two page shells, not one:
+ *
+ *   .bp-shell--analytical   macro/micro: top bar + LEFT sidebar, icon nav
+ *   .bp-shell--editorial    homepage/municipality profile: top bar only,
+ *                           breadcrumb, hero, a RIGHT sidebar on the
+ *                           municipality profile specifically
+ *
+ * Requires assets/belpulse/tokens.css loaded first. Grid widths follow
+ * docs/features/block_contract.md: 12 columns desktop, 8 tablet, 4 mobile.
+ */
+
+*{box-sizing:border-box}
+
+.bp-shell{
+  min-height:100vh; background:var(--bp-bg); color:var(--bp-text);
+  font-family:var(--bp-font-ui); font-size:var(--bp-text-body); line-height:1.5;
+}
+.bp-shell--navy{background:var(--bp-navy-bg); color:var(--bp-navy-text)}
+
+/* ---- top bar ------------------------------------------------------------
+   One markup shape, two looks: the editorial top bar (light only) and the
+   analytical one (light for micro, navy for macro -- .bp-shell--navy on the
+   ancestor recolours it, nothing here hardcodes a theme). */
+.bp-topbar{
+  display:flex; align-items:center; gap:var(--bp-space-6);
+  padding:var(--bp-space-4) var(--bp-space-6);
+  background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
+}
+.bp-shell--navy .bp-topbar{background:var(--bp-navy-bg); border-color:var(--bp-navy-border)}
+
+.bp-logo{display:flex; align-items:center; gap:var(--bp-space-3); text-decoration:none; color:inherit}
+/* Three ascending bars, Belgian tricolour -- a placeholder standing in for
+   the "Belpulse.be" pictogram from the analytical-shell designs. See
+   docs/design-references/README.md: the OTHER two designs use a different
+   mark under a different wordmark ("BelPulse"), an unresolved conflict in
+   the source material. Good enough to build and test the layout against;
+   swap for a real asset the instant the maintainer picks one -- this is the
+   one place in the whole component library that changes. */
+.bp-logo-mark{
+  width:26px; height:20px; flex:none; display:flex; align-items:flex-end; gap:2px;
+}
+.bp-logo-mark span{width:6px; border-radius:1px}
+.bp-logo-mark span:nth-child(1){height:40%; background:#000}
+.bp-logo-mark span:nth-child(2){height:70%; background:#fdda24}
+.bp-logo-mark span:nth-child(3){height:100%; background:#ef3340}
+.bp-wordmark{font-weight:var(--bp-weight-bold); font-size:1.05rem; line-height:1.2}
+.bp-tagline{font-size:11px; color:var(--bp-text-muted); line-height:1.3}
+.bp-shell--navy .bp-tagline{color:var(--bp-navy-text-muted)}
+
+.bp-nav{display:flex; align-items:center; gap:var(--bp-space-5); flex:1; font-size:var(--bp-text-small)}
+.bp-nav a{
+  color:var(--bp-text-muted); text-decoration:none; padding:4px 0;
+  border-bottom:2px solid transparent; font-weight:var(--bp-weight-medium);
+}
+.bp-shell--navy .bp-nav a{color:var(--bp-navy-text-muted)}
+.bp-nav a:hover{color:var(--bp-text)}
+.bp-nav a[aria-current="page"]{color:var(--bp-accent); border-bottom-color:var(--bp-accent)}
+.bp-shell--navy .bp-nav a[aria-current="page"]{color:var(--bp-accent-ink)}
+
+.bp-topbar-actions{display:flex; align-items:center; gap:var(--bp-space-3); margin-left:auto}
+.bp-search{
+  display:flex; align-items:center; gap:6px;
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-pill);
+  padding:6px 12px; font-size:var(--bp-text-small); color:var(--bp-text-muted);
+  background:var(--bp-surface); min-width:220px;
+}
+.bp-shell--navy .bp-search{background:var(--bp-navy-surface); border-color:var(--bp-navy-border); color:var(--bp-navy-text-muted)}
+.bp-search input{border:0; background:transparent; outline:0; font:inherit; color:inherit; flex:1}
+.bp-lang-select{
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  padding:5px 10px; font:inherit; font-size:var(--bp-text-small); background:var(--bp-surface); color:inherit;
+}
+
+/* ---- breadcrumb (editorial shell) ---------------------------------------- */
+.bp-breadcrumb{
+  padding:var(--bp-space-3) var(--bp-space-6); font-size:var(--bp-text-small);
+  color:var(--bp-text-muted); background:var(--bp-bg);
+}
+.bp-breadcrumb a{color:inherit; text-decoration:none}
+.bp-breadcrumb a:hover{color:var(--bp-text)}
+.bp-breadcrumb .sep{margin:0 6px; color:var(--bp-text-faint)}
+
+/* ---- body grid ------------------------------------------------------------
+   Analytical shell: sidebar + content, sidebar first in markup (left).
+   Editorial shell (municipality profile only): content + sidebar, sidebar
+   LAST in markup (right) -- see component-inventory.md, the profile page's
+   sidebar sits on the opposite side from the analytical shell's. */
+.bp-body{display:grid; gap:var(--bp-space-6); padding:var(--bp-space-6)}
+.bp-body--analytical{grid-template-columns:260px 1fr}
+.bp-body--editorial-with-sidebar{grid-template-columns:1fr 320px}
+.bp-body--editorial{grid-template-columns:1fr}
+
+@media (max-width:1024px){
+  .bp-body--analytical,
+  .bp-body--editorial-with-sidebar{grid-template-columns:1fr}
+}
+
+/* ---- analytical sidebar --------------------------------------------------- */
+.bp-sidebar{
+  background:var(--bp-navy-bg); color:var(--bp-navy-text); border-radius:var(--bp-radius-card);
+  padding:var(--bp-space-5); align-self:start;
+}
+.bp-shell--navy .bp-sidebar{background:var(--bp-navy-surface)}
+.bp-sidebar h2{font-size:var(--bp-text-small); text-transform:uppercase; letter-spacing:.06em;
+  color:var(--bp-navy-text-muted); margin:0 0 var(--bp-space-4); font-weight:var(--bp-weight-semibold)}
+.bp-sidebar-nav{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px}
+.bp-sidebar-nav a{
+  display:flex; align-items:center; gap:var(--bp-space-3);
+  padding:9px var(--bp-space-3); border-radius:var(--bp-radius-control);
+  color:var(--bp-navy-text-muted); text-decoration:none; font-size:var(--bp-text-small);
+}
+.bp-sidebar-nav a:hover{background:rgba(255,255,255,.06); color:var(--bp-navy-text)}
+.bp-sidebar-nav a[aria-current="page"]{background:var(--bp-accent); color:var(--bp-on-accent)}
+.bp-sidebar-nav .icon{width:16px; height:16px; flex:none; opacity:.85}
+
+/* ---- editorial right sidebar (municipality profile) ------------------------ */
+.bp-side-panel{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  padding:var(--bp-space-5); margin-bottom:var(--bp-space-5);
+}
+.bp-side-panel h2{font-size:var(--bp-text-h2); margin:0 0 var(--bp-space-3)}
+
+/* ---- section tabs (municipality profile) ----------------------------------- */
+.bp-tabs{display:flex; gap:var(--bp-space-5); border-bottom:1px solid var(--bp-border);
+  margin-bottom:var(--bp-space-6); overflow-x:auto}
+.bp-tabs button{
+  background:none; border:0; border-bottom:2px solid transparent; cursor:pointer;
+  padding:var(--bp-space-3) 2px; font:inherit; font-size:var(--bp-text-small);
+  font-weight:var(--bp-weight-medium); color:var(--bp-text-muted); white-space:nowrap;
+}
+.bp-tabs button[aria-selected="true"]{color:var(--bp-accent); border-bottom-color:var(--bp-accent)}
+
+/* ---- dark CTA band ---------------------------------------------------------
+   Appears once, near the bottom, on both editorial pages. */
+.bp-cta-band{
+  background:var(--bp-navy-bg); color:var(--bp-navy-text);
+  border-radius:var(--bp-radius-card); padding:var(--bp-space-8) var(--bp-space-6);
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:var(--bp-space-6); margin:var(--bp-space-8) var(--bp-space-6);
+}
+.bp-cta-band h2{font-size:var(--bp-text-h1); margin:0 0 var(--bp-space-2)}
+.bp-cta-band p{color:var(--bp-navy-text-muted); margin:0; max-width:60ch}
+.bp-cta-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap}
+.bp-cta-stats{display:flex; gap:var(--bp-space-6); font-size:var(--bp-text-small); color:var(--bp-navy-text-muted)}
+.bp-cta-stats b{display:block; font-size:var(--bp-text-h2); color:var(--bp-navy-text); font-weight:var(--bp-weight-bold)}
+
+/* ---- footer ----------------------------------------------------------------
+   Two variants seen: light (micro page only) and dark (everywhere else).
+   .bp-footer--dark switches it; the default is light. */
+.bp-footer{
+  padding:var(--bp-space-6); border-top:1px solid var(--bp-border);
+  font-size:var(--bp-text-small); color:var(--bp-text-muted);
+  display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--bp-space-4);
+}
+.bp-footer--dark{
+  background:var(--bp-navy-bg); color:var(--bp-navy-text-muted); border-top:0;
+}
+.bp-footer a{color:inherit}
+.bp-footer a:hover{color:var(--bp-text)}
+.bp-footer--dark a:hover{color:var(--bp-navy-text)}
+
+/* ---- buttons (shared by every shell) --------------------------------------- */
+.bp-btn{
+  display:inline-flex; align-items:center; gap:6px; border:0; cursor:pointer;
+  border-radius:var(--bp-radius-control); padding:9px 18px; font:inherit;
+  font-size:var(--bp-text-small); font-weight:var(--bp-weight-medium);
+  text-decoration:none;
+}
+.bp-btn--primary{background:var(--bp-accent); color:var(--bp-on-accent)}
+.bp-btn--primary:hover{filter:brightness(1.08)}
+.bp-btn--outline{background:transparent; border:1px solid var(--bp-border); color:inherit}
+.bp-shell--navy .bp-btn--outline,
+.bp-cta-band .bp-btn--outline{border-color:var(--bp-navy-border); color:var(--bp-navy-text)}
+.bp-btn--outline:hover{background:var(--bp-surface-alt)}
+
+/* ---- theme toggle (matches the pattern every existing page already uses) --- */
+.bp-theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}
+.bp-theme-toggle button{border:0; background:var(--bp-surface); color:var(--bp-text-muted); font:inherit; font-size:11px; padding:5px 10px; cursor:pointer}
+.bp-theme-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
