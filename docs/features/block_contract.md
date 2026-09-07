@@ -100,8 +100,8 @@ a dead block id without colliding with a new one).
   method against real indicators. The validator does not read it, and neither should Batch 14.
 
   Note also what this bullet does *not* license: `additive: false` alone does not mean "no
-  aggregate exists". 13 of the 52 municipal indicators are derived and all carry
-  `additive: false`, yet this pipeline genuinely publishes province-level
+  aggregate exists". 18 of the 52 municipal indicators are non-additive (13 derived, all of
+  them non-additive, plus 5 raw ratios), yet this pipeline genuinely publishes province-level
   `AVG_NET_TAXABLE_INCOME` by recomputing it. Deciding *recomputability* is Batch 14's job,
   using `src/analytics/aggregate.py`'s own answer — never a copy of it in `src/pages/`
   (claude.md rule 19, invariant 4).
