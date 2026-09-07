@@ -829,10 +829,28 @@ reader about the update date, which point 5 of this same licence forbids as squa
 requires showing one. Today that affects `AVG_NET_TAXABLE_INCOME`, `DEPENDENCY_RATIO`,
 `POPULATION_CHANGE_5Y`, `POPULATION_CAGR_10Y` and `POPULATION_PERCENTILE`.
 
-**Still open:** whether "derived" is a sufficient disclosure for a derived figure under point 2,
-or whether such a figure must also expose the retrieval dates of its inputs. Block X's freshness
-badge is where that would land. `all_data.html` and `dashboard.html` are unaffected — national
-sources only, no Statbel data.
+**RULED 2026-09-07 — a derived figure must expose its inputs' retrieval dates, attributed to the
+inputs and never presented as the figure's own update date.**
+
+- Point 2 requires the date of last update *of the information reused*, and the information reused
+  in `AVG_NET_TAXABLE_INCOME` **is** two Statbel series — they are published inside that number.
+  "derived" discloses the method and withholds the date the clause actually names.
+- Point 5 forbids misleading a reader about the update date. Putting the inputs' date in the
+  figure's own update slot would do exactly that, which is the correct reason the payload leaves
+  `updated` absent for a derived indicator. That reasoning is unchanged.
+- The two conflict only if the date has one slot. It now has two: `updated` (this figure's own
+  retrieval date, still absent for a derived figure) and `inputs_updated` + `input_sources`, worded
+  differently on the page — *"computed from Statbel figures last updated 2026-09-06"*. No indicator
+  carries both, asserted by test.
+- It cost nothing to build: every `config/indicators/derived/*.yaml` already names `derived.inputs`.
+
+**This closed a live gap rather than a theoretical one.** `map.html` was printing *"derived —
+computed from the figures above, not separately fetched"* with **no date at all**, for 13 of 52
+indicators, on a page publishing Statbel-derived municipal figures. The static `/local/{nis}`
+pages left the Updated column blank for the same figures. Both now carry the inputs' date, labelled
+as the inputs'. See `docs/features/provenance.md`.
+
+`all_data.html` and `dashboard.html` remain unaffected — national sources only, no Statbel data.
 
 #### Open question for the maintainer
 

@@ -14,3 +14,21 @@ licence: >-
 catalog_ref: docs/data_catalog.md rows 7, 7b
 cadence: quarterly
 is_active: true
+homepage: https://statbel.fgov.be/
+label:
+  en: Statbel
+  fr: Statbel
+  nl: Statbel
+licence_note:
+  en: >-
+    Reused under CC BY 4.0 and Statbel's Licentie open data of 22 October 2015. Commercial
+    reuse permitted. Both require attribution; the 2015 document also requires the date of
+    last update.
+  fr: >-
+    Réutilisé sous CC BY 4.0 et la Licence open data de Statbel du 22 octobre 2015.
+    Réutilisation commerciale autorisée. Les deux exigent la mention de la source ; le
+    document de 2015 exige en outre la date de dernière mise à jour.
+  nl: >-
+    Hergebruikt onder CC BY 4.0 en Statbels Licentie open data van 22 oktober 2015.
+    Commercieel hergebruik toegestaan. Beide vereisen bronvermelding; het document van 2015
+    vereist bovendien de datum van laatste bijwerking.

@@ -14,3 +14,20 @@ licence: >-
 catalog_ref: docs/data_catalog.md -- ONEM/RVA row (12th dataset, approved 2026-09-06)
 cadence: monthly
 is_active: true
+homepage: https://www.onem.be/
+label:
+  en: ONEM/RVA
+  fr: ONEM
+  nl: RVA
+licence_note:
+  en: >-
+    Reused under ONEM's own conditions, which permit commercial reuse and require the source
+    and the date of the information used. NOT CC BY 4.0, which does not apply here.
+  fr: >-
+    Réutilisé selon les conditions propres de l'ONEM, qui autorisent la réutilisation
+    commerciale et exigent la source et la date des informations utilisées. PAS sous
+    CC BY 4.0, qui ne s'applique pas ici.
+  nl: >-
+    Hergebruikt volgens de eigen voorwaarden van de RVA, die commercieel hergebruik toestaan
+    en de bron en de datum van de gebruikte informatie vereisen. NIET onder CC BY 4.0, dat
+    hier niet van toepassing is.

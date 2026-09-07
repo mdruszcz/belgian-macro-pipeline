@@ -64,7 +64,7 @@ exports:
 	$(PYTHON) scripts/export_communes_csv.py --db $(DB) --out data/communes_export.csv $(EXTRA)
 	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) --out data/communes_history.csv $(EXTRA)
 	$(PYTHON) scripts/export_communes_table_json.py \
-		--communes-history data/communes_history.csv --out data/communes_table.json
+		--communes-history data/communes_history.csv --out data/communes_table.json --db $(DB)
 	$(PYTHON) scripts/export_aggregates_csv.py --db $(DB) --out data/aggregates.csv $(EXTRA)
 	$(PYTHON) scripts/export_percentiles_csv.py --db $(DB) --out data/percentiles.csv $(EXTRA)
 	$(PYTHON) -m src.exporters.metadata --out data/metadata/indicators.json

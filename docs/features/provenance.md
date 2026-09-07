@@ -1,8 +1,8 @@
 # Feature: provenance — where every figure came from, and how it was made
 
-Status: in-progress
+Status: done (2026-09-07)
 Issue: none (roadmap-driven — `docs/steps`, Block X)
-Branch: feat/withheld-figures-visible
+Branch: feat/withheld-figures-visible (the defect), then feat/provenance-badge (the badge)
 
 ## Problem
 
@@ -279,6 +279,23 @@ Compliance:
 
 17. In `tests/test_statbel_attribution.py`: every municipal page states that a derived figure's date
     is its **inputs'** date and not its own.
+
+## A finding worth recording: the config and the database disagree on two source ids
+
+The lineage joins `indicators.source_id` to the source configs, and two of them do not match:
+
+| indicator | config declares | `indicators` table says |
+|---|---|---|
+| `EUROSTAT_GDP_Q_MEUR` | `dbnomics_eurostat` | `eurostat` |
+| `LABOUR_COST_BE` | `dbnomics_ameco` | `ameco_ec` |
+
+Same sources, two identifiers each. The join would have silently found nothing for them, and two
+national figures would have published with no attributable source.
+
+Aliased explicitly in `DB_TO_CONFIG_SOURCE_ID` rather than renamed on either side: renaming a
+`source_id` touches the observations that reference it and is a migration, not an export change.
+`indicator_lineage()` **refuses** on an id it cannot resolve, so a third mismatch cannot hide the
+way these two did.
 
 ## Assumptions and open questions
 

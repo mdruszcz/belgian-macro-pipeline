@@ -15,3 +15,23 @@ licence: >-
 catalog_ref: docs/data_catalog.md -- police.be row (14th dataset)
 cadence: annual (manual, ad hoc)
 is_active: true
+homepage: https://www.police.be/statistiques/
+label:
+  en: Federal Police
+  fr: Police Fédérale
+  nl: Federale Politie
+licence_note:
+  en: >-
+    Reused under the federal police's own condition: credit the source as stated. That
+    condition says nothing about permitted uses beyond attribution — NOT CC BY 4.0, and not a
+    stated grant of commercial reuse either, unlike Statbel and ONEM.
+  fr: >-
+    Réutilisé selon la seule condition de la police fédérale : citer correctement la source.
+    Cette condition ne dit rien des usages autorisés au-delà de l'attribution — PAS sous
+    CC BY 4.0, et pas non plus une autorisation explicite de réutilisation commerciale,
+    contrairement à Statbel et à l'ONEM.
+  nl: >-
+    Hergebruikt onder de enige voorwaarde van de federale politie: de bron correct vermelden.
+    Die voorwaarde zegt niets over toegestaan gebruik buiten de bronvermelding — NIET onder
+    CC BY 4.0, en evenmin een uitdrukkelijke toestemming voor commercieel hergebruik, anders
+    dan bij Statbel en de RVA.

@@ -5,6 +5,9 @@ name:
   nl: Nominale beloning per werknemer, Frankrijk (2010=100)
 country: FR
 unit: index_2010
+transform:
+  method: rebase
+  base: 2010
 frequency: A
 source_id: dbnomics_ameco
 geo_levels:

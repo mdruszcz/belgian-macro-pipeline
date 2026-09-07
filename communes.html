@@ -313,6 +313,7 @@
     <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
     and Statbel's <em>Licentie open data</em> of 22 October 2015.
     <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
+    A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved.
     <strong>Changes were made:</strong> the published files are reshaped into a canonical
     indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
     2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
@@ -352,6 +353,13 @@ let INDICATOR_META = {};  // code -> {name, unit, years: sorted list of years th
 let YEARS = [];       // every distinct year across the whole dataset, sorted ascending
 let selectedYear = null;
 let sortKey = 'name_en', sortDir = 1;
+
+// Display names for the provenance shown in a column header. English only,
+// like the rest of this page; the trilingual copies live in the payloads and
+// are used by local.html, which is the translated page.
+const SOURCE_LABELS = {statbel: 'Statbel', onem: 'ONEM/RVA', police: 'Federal Police',
+                       nbb: 'NBB', eurostat: 'Eurostat', ameco_ec: 'AMECO/EC', fpb: 'FPB'};
+const GRADE_WORDS = {A: 'Official', B: 'Restated', C: 'Derived', D: 'Forecast'};
 
 function formatValue(value, unit){
   if(value === '' || value === undefined || value === null) return '';
@@ -393,8 +401,17 @@ function buildHeader(){
     const th = document.createElement('th');
     th.dataset.key = 'ind:' + code;
     th.dataset.indicator = '1';
-    th.title = `${label} \u00b7 covers ${coverage}`;
-    th.innerHTML = `${label}<span class="arrow">↓</span><span class="coverage">${coverage}</span>`;
+    // WHO published this column, and HOW the number was made. Carried in the
+    // table payload's own `meta` block (export_communes_table_json.py), so
+    // this page needs no second fetch on top of the 5.4 MB it already loads,
+    // and a new indicator arrives with its provenance already attached.
+    const provenance = [
+      m.source ? SOURCE_LABELS[m.source] || m.source : null,
+      m.grade ? `${GRADE_WORDS[m.grade] || ''} (${m.grade})`.trim() : null,
+    ].filter(Boolean).join(' \u00b7 ');
+    th.title = [`${label} \u00b7 covers ${coverage}`, provenance].filter(Boolean).join('\n');
+    th.innerHTML = `${label}<span class="arrow">↓</span>` +
+      `<span class="coverage">${coverage}${m.grade ? ` \u00b7 ${m.grade}` : ''}</span>`;
     th.addEventListener('click', () => sortBy(th.dataset.key));
     headRow.appendChild(th);
   }

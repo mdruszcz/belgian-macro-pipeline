@@ -176,7 +176,8 @@ jobs:
         run: |
           python scripts/export_communes_table_json.py \
             --communes-history data/communes_history.csv \
-            --out data/communes_table.json
+            --out data/communes_table.json \
+            --db data/belgian_macro.db
 
       - name: Export province/region/Belgium aggregates
         # Block L -- docs/features/comparison.md. Feeds the comparison column

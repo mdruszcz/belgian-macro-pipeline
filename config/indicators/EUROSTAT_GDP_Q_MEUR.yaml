@@ -4,6 +4,9 @@ name:
   fr: Indice de volume du PIB, Belgique (2010=100)
   nl: Bbp-volume-index, België (2010=100)
 unit: index_2010
+transform:
+  method: rebase
+  base: 2010
 frequency: Q
 source_id: dbnomics_eurostat
 geo_levels:
