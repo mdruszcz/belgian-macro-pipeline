@@ -61,7 +61,7 @@ Full detail lives in `docs/implementation/batches/` as each one starts; this is 
 | 1 | BelPulse design tokens | reference designs | done |
 | 2 | Shared presentation components | Batch 1 | done |
 | 3 | Homepage reproduction | Batch 2, reference designs | done (preview route, home.html) |
-| 4 | Municipal profile redesign | Batch 2, reference designs (Namur) | not started, unblocked |
+| 4 | Municipal profile redesign | Batch 2, reference designs (Namur) | done (preview route, commune.html) |
 | 5 | Municipality explorer redesign | Batch 2 | not started, unblocked |
 | 6 | Macroeconomics reproduction | Batch 2, reference designs | not started, unblocked |
 | 7 | Microeconomics page | Batch 6 | not started |
