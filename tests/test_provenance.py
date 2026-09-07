@@ -253,3 +253,34 @@ def test_the_derived_date_is_the_newest_of_its_inputs(published):
     assert row["derived_from"] == inputs
     assert row["inputs_updated"] == max(index[i]["updated"] for i in inputs)
     assert row["updated"] is None, "a computed figure must carry no retrieval date of its own"
+
+
+def test_every_source_config_resolves_to_a_row_in_the_sources_table():
+    """The guard for the mismatch that has now bitten twice.
+
+    `dbnomics_eurostat` vs `eurostat` and `dbnomics_ameco` vs `ameco_ec` broke
+    the provenance join first, and then broke the fetch-silence rule, which
+    reported both as "never fetched" while they were being fetched daily. Any
+    third mismatch fails here instead of surfacing as a wrong badge or a false
+    alarm months later.
+    """
+    db = REPO / "data" / "belgian_macro.db"
+    if not db.is_file():
+        pytest.skip("database not built in this working tree")
+    conn = sqlite3.connect(db)
+    try:
+        db_ids = {row[0] for row in conn.execute("SELECT source_id FROM sources")}
+    finally:
+        conn.close()
+
+    unresolved = []
+    for path in sorted((REPO / "config" / "sources").glob("*.yaml")):
+        config_id = (yaml.safe_load(path.read_text(encoding="utf-8")) or {})["source_id"]
+        resolved = {v: k for k, v in DB_TO_CONFIG_SOURCE_ID.items()}.get(config_id, config_id)
+        if resolved not in db_ids:
+            unresolved.append(f"{path.name}: {config_id} -> {resolved}")
+    assert not unresolved, (
+        "source configs that match no row in the sources table: "
+        + "; ".join(unresolved)
+        + ". Either the id is wrong or DB_TO_CONFIG_SOURCE_ID needs an entry."
+    )

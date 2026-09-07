@@ -97,6 +97,10 @@ class Context:
     # Per-indicator staleness allowances from config (`max_age_days`).
     # Absent an entry, the frequency default above applies.
     max_age_days: Mapping[str, int] = field(default_factory=dict)
+    # Per-source fetch windows from config (`fetch_window_days`). A source
+    # absent from this map is not checked for silence at all -- see the
+    # fetch_silence rule for why that has to be opt-in.
+    fetch_window_days: Mapping[str, int] = field(default_factory=dict)
     # Injected so staleness is testable without freezing the clock globally.
     now: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -628,6 +632,84 @@ def fetch_error(ctx: Context) -> list[Violation]:
                         f"legacy_fetch_log: latest fetch of {code} is {status!r} ({fetched_at})",
                     )
                 )
+    return violations
+
+
+@rule("fetch_silence", WARN)
+def fetch_silence(ctx: Context) -> list[Violation]:
+    """A source that has stopped being fetched at all, while the rest carry on.
+
+    THE BLIND SPOT THIS FILLS. fetch_error checks the STATUS of each source's
+    most recent run, and _still_active deliberately DROPS any source whose last
+    entry is far behind the newest entry in the log -- correctly, so a retired
+    code does not red-light every build forever. The consequence is that a
+    source going quiet is the one failure mode actively filtered out of the
+    checks: its last run says 'ok', it is excluded as retired, and nothing
+    reports it. The pipeline looks green while one source silently stops
+    arriving. Roadmap Block X: "Sources go quiet without announcing it. You
+    want to know before a client does."
+
+    MEASURED AGAINST THE NEWEST RUN IN THE LOG, NOT THE WALL CLOCK. The
+    database is a committed store, so a clone opened three months from now has
+    a fetch log three months old -- against wall-clock every source would warn,
+    which is the permanent red light this module keeps refusing to build. Read
+    relative to the newest run, the question becomes the one that actually
+    matters: did THIS source fall behind while the others were fetched? A
+    whole workflow that stops running is visible in GitHub Actions itself.
+
+    OPT-IN PER SOURCE, via `fetch_window_days` in config/sources/*.yaml.
+    Sources whose files are hand-downloaded (police) have no fetch_runs rows at
+    all and would warn forever; their data freshness is the staleness rule's
+    job, not this one. Declaring a window is an editorial statement that CI is
+    expected to fetch this source, exactly as `max_age_days` is an editorial
+    statement about a source's publication behaviour.
+    """
+    if not ctx.fetch_window_days:
+        return []
+
+    rows = ctx.conn.execute(
+        "SELECT source_id, MAX(started_at) FROM fetch_runs GROUP BY source_id"
+    ).fetchall()
+    last_run = {}
+    for source_id, when in rows:
+        parsed = _parse_ts(when)
+        if parsed is not None:
+            last_run[source_id] = parsed
+
+    violations = []
+
+    # A source that declares a window and has NEVER been fetched is a
+    # different sentence, and a more alarming one: the adapter has never run.
+    for source_id in sorted(ctx.fetch_window_days):
+        if source_id not in last_run:
+            violations.append(
+                Violation(
+                    "fetch_silence",
+                    WARN,
+                    f"source {source_id!r} declares fetch_window_days but has no fetch_runs "
+                    "entry at all -- it has never been fetched successfully",
+                )
+            )
+
+    if not last_run:
+        return violations
+
+    newest = max(last_run.values())
+    for source_id, when in sorted(last_run.items()):
+        allowance = ctx.fetch_window_days.get(source_id)
+        if allowance is None:
+            continue
+        behind = (newest - when).days
+        if behind > allowance:
+            violations.append(
+                Violation(
+                    "fetch_silence",
+                    WARN,
+                    f"source {source_id!r} was last fetched {when.date()}, {behind} days "
+                    f"behind the newest run in the log ({newest.date()}); its window is "
+                    f"{allowance} days. It has gone quiet while other sources kept arriving",
+                )
+            )
     return violations
 
 

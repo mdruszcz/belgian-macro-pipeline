@@ -114,7 +114,27 @@ jobs:
         # this run passed, so tomorrow's row_collapse rule has a baseline.
         # Recording on a failing run would make the collapsed count the new
         # normal and silence the alarm on the next run.
-        run: python scripts/validate_data.py --db data/belgian_macro.db --record-volume
+        #
+        # --summary-file writes the violations to the run's own summary page.
+        # The ::warning:: annotations alone were not an alert: a green run with
+        # warnings looks identical from the outside to a clean one, and nobody
+        # opens the log of a build that passed. Roadmap Block X: "Sources go
+        # quiet without announcing it. You want to know before a client does."
+        #
+        # THE EXIT CODE IS CAPTURED, NOT PROPAGATED IMMEDIATELY. A `run:` block
+        # is bash -e, so a failing validation would abort the step before the
+        # summary was copied -- losing the report in precisely the case it
+        # matters most. Write it first, then exit with the real code.
+        run: |
+          SUMMARY="$RUNNER_TEMP/validation-summary.md"
+          set +e
+          python scripts/validate_data.py --db data/belgian_macro.db --record-volume \
+            --summary-file "$SUMMARY"
+          STATUS=$?
+          set -e
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+          echo "validation_summary=$SUMMARY" >> "$GITHUB_ENV"
+          exit $STATUS
 
       - name: Report today's revisions
         # Informational only -- does NOT block (docs/features/vintages.md).
@@ -347,7 +367,9 @@ jobs:
             --body "Automated daily fetch of Belgian macro indicators and market data.
 
           Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, market=${{ steps.fetch_stocks.outcome }}")
+          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, market=${{ steps.fetch_stocks.outcome }}
+
+          $(cat "$validation_summary" 2>/dev/null || echo '_Validation summary unavailable._')")
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           echo "Opened $PR_URL"
 

@@ -167,6 +167,7 @@ there is not a missing number, it is a wrong one.
 | `indicator_disappeared` | **`fail`** | an indicator that had observations now has none |
 | `staleness` | `warn` | latest period older than the indicator's allowance |
 | `fetch_error` | `fail` | either fetch log records an error for a source expected to succeed |
+| `fetch_silence` | `warn` | a source declaring `fetch_window_days` has fallen that far behind the newest run in the log, or has never been fetched at all |
 
 `row_collapse` is the one CONTROL H names as the scenario most likely to publish garbage — "17,000
 rows yesterday, 436 today" — so it blocks even though it is a volume rule.
@@ -180,6 +181,62 @@ rows yesterday, 436 today" — so it blocks even though it is a volume rule.
 
 `has_trilingual_name` would have caught the twelve placeholder-named indicators found in the Block F
 review.
+
+### 7. A source going quiet was the one failure actively filtered out
+
+`fetch_error` checks the **status** of each source's most recent run, and `_still_active`
+deliberately drops any source whose last entry is far behind the newest entry in the log — so a
+retired indicator code does not red-light every build forever. Both are right.
+
+Together they left a hole: **a source that simply stops arriving is excluded from every check.**
+Its last run says `ok`, `_still_active` treats it as retired, and nothing reports it. The pipeline
+stays green while one source silently stops. That is precisely the roadmap's reason for the item —
+*"Sources go quiet without announcing it. You want to know before a client does."*
+
+**Rule:** `fetch_silence`, a `warn`, with three deliberate properties.
+
+- **Measured against the newest run in the log, not the wall clock.** The database is a committed
+  store, so a clone opened three months from now has a three-month-old fetch log; against wall-clock
+  every source would warn at once, which is the permanent red light this document keeps refusing to
+  build. Read relative to the newest run, the question becomes the one that matters: *did this
+  source fall behind while the others were fetched?* A workflow that stops running altogether is
+  visible in GitHub Actions itself.
+- **Opt-in per source**, via `fetch_window_days` in `config/sources/*.yaml`. `police`'s files are
+  hand-downloaded, so it has no `fetch_runs` rows at all and any window would warn forever; its data
+  freshness is `staleness`'s job. Declaring a window is an editorial statement that CI is expected
+  to fetch this source, exactly as `max_age_days` is a statement about publication behaviour.
+- **Declared as a number, not parsed from `cadence`.** Turning `"annual (manual, ad hoc)"` into a
+  number would be guessing at prose, and the number is not the publication cadence anyway:
+  `fetch_runs` records *our runs*, so the window is "how long may this source go without a
+  successful run". The daily workflow runs daily, so 7 days is three runs' grace — the same
+  reasoning as staleness's three publication intervals.
+
+**A false positive it caught immediately:** keyed by the config's own `source_id`, the rule reported
+`dbnomics_eurostat` and `dbnomics_ameco` as never fetched, because `fetch_runs` knows them as
+`eurostat` and `ameco_ec`. That mismatch had already broken the provenance join once. It is resolved
+through the single alias map in `src/exporters/provenance.py`, and a test now asserts every source
+config resolves to a row in the `sources` table, so a third mismatch fails there rather than
+surfacing as a false alarm months later.
+
+## Alerting: the checks were not the missing half
+
+Every rule already printed a `::warning::` annotation, which is not nothing. But **a daily run with
+warnings looked identical from the outside to a clean one**, and nobody opens the log of a build
+that passed.
+
+`validate_data.py --summary-file PATH` appends a markdown table of every violation. The daily
+workflow points it at `$GITHUB_STEP_SUMMARY`, so it renders on the run page, and copies it into the
+daily pull request body, so it arrives as a notification rather than only living on a page someone
+has to visit.
+
+Two details that are load-bearing:
+
+- **A clean run writes a line too.** Silence would make "validated, nothing wrong" indistinguishable
+  from "the validation step never ran" — the same class of failure, one level up.
+- **The exit code is captured, not propagated immediately.** A workflow `run:` block is `bash -e`,
+  so a *failing* validation would abort the step before the summary was copied, losing the report in
+  exactly the case it matters most. The step writes the summary first and then exits with the real
+  code; a test asserts that, because there is no cheap way to run Actions locally.
 
 ## Persisting counts
 

@@ -19,12 +19,14 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.exporters.provenance import DB_TO_CONFIG_SOURCE_ID  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     load_and_validate_all,
     load_and_validate_derived,
 )
 from src.validation.rules import (  # noqa: E402
     FAIL,
+    RULES,
     WARN,
     Context,
     has_failures,
@@ -67,6 +69,16 @@ def main() -> int:
         help="Published CSV to parse-check. Repeatable; defaults to all three.",
     )
     ap.add_argument(
+        "--summary-file",
+        default=None,
+        help=(
+            "Append a markdown summary of every violation to this file. Point it at "
+            "$GITHUB_STEP_SUMMARY so warnings appear on the run page instead of scrolling "
+            "past in the log. Written even on a clean run, so 'checked, nothing wrong' and "
+            "'never checked' are distinguishable."
+        ),
+    )
+    ap.add_argument(
         "--warnings-as-errors",
         action="store_true",
         help="Treat warn as fail. Off by default -- see the severity rationale in the spec.",
@@ -91,6 +103,7 @@ def main() -> int:
             derived_ids=derived_ids,
             exports=exports,
             max_age_days=_staleness_allowances(Path(args.indicators_dir), Path(args.sources_dir)),
+            fetch_window_days=_fetch_windows(Path(args.sources_dir)),
         )
     )
 
@@ -105,6 +118,9 @@ def main() -> int:
     if not violations:
         print("All rules pass.")
 
+    if args.summary_file:
+        _write_summary(Path(args.summary_file), fails, warns)
+
     blocked = has_failures(violations) or (args.warnings_as_errors and warns)
 
     if args.record_volume and not blocked:
@@ -115,6 +131,80 @@ def main() -> int:
 
     conn.close()
     return 1 if blocked else 0
+
+
+_CONFIG_TO_DB_SOURCE_ID = {v: k for k, v in DB_TO_CONFIG_SOURCE_ID.items()}
+
+
+def _write_summary(path: Path, fails: list, warns: list) -> None:
+    """A markdown summary of this run, appended to `path`.
+
+    WHY THIS EXISTS. Warnings already print as ::warning:: annotations, which
+    is not nothing -- but a daily run with warnings looks identical from the
+    outside to a clean one, and nobody opens the log of a green build. The
+    roadmap's reason for the stale-data alert is exactly that: "Sources go
+    quiet without announcing it. You want to know before a client does."
+
+    A CLEAN RUN WRITES A LINE TOO. Silence would make "validated, nothing
+    wrong" indistinguishable from "the validation step never ran", which is
+    the failure this is supposed to catch, one level up.
+    """
+    lines = ["## Data validation", ""]
+    if not fails and not warns:
+        lines.append(f"All {len(RULES)} rules pass. No failures, no warnings.")
+    else:
+        lines.append(
+            f"**{len(fails)} failure(s), {len(warns)} warning(s)** across {len(RULES)} rules."
+        )
+        lines.append("")
+        for label, group in (("Failures", fails), ("Warnings", warns)):
+            if not group:
+                continue
+            lines.append(f"### {label}")
+            lines.append("")
+            lines.append("| Rule | Detail |")
+            lines.append("| --- | --- |")
+            for v in group:
+                detail = v.message.replace("|", "\\|")
+                suffix = f" ({v.count} rows)" if v.count > 1 else ""
+                lines.append(f"| `{v.rule}` | {detail}{suffix} |")
+            lines.append("")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+
+
+def _fetch_windows(sources_dir: Path) -> dict[str, int]:
+    """`fetch_window_days` from the source configs, for the silence rule.
+
+    Config rather than the `sources` table, and per source rather than parsed
+    out of the free-text `cadence` string: turning "annual (manual, ad hoc)"
+    into a number would be guessing at prose. Declaring a window is an
+    editorial statement that CI is expected to fetch this source; a source
+    without one is not checked, which is what keeps the hand-downloaded ones
+    from warning forever.
+    """
+    if not sources_dir.is_dir():
+        return {}
+
+    # KEYED BY THE ID fetch_runs USES, not the one the config declares. Two of
+    # them differ -- config `dbnomics_eurostat`/`dbnomics_ameco` versus
+    # `eurostat`/`ameco_ec` in the database -- and reading the config id
+    # straight would report both as "never fetched" when they are fetched
+    # daily. The alias map lives in src/exporters/provenance.py, which already
+    # owns the config-to-database source mapping and documents the evidence;
+    # a second copy here is exactly how the two would drift.
+    windows = {}
+    for path in sorted(sources_dir.glob("*.yaml")):
+        cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        days = cfg.get("fetch_window_days")
+        if days is None:
+            continue
+        config_id = cfg["source_id"]
+        db_id = _CONFIG_TO_DB_SOURCE_ID.get(config_id, config_id)
+        windows[db_id] = int(days)
+    return windows
 
 
 def _staleness_allowances(indicators_dir: Path, sources_dir: Path) -> dict[str, int]:

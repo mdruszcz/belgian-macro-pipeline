@@ -13,6 +13,7 @@ licence: >-
   not claim CC BY terms that do not apply here.
 catalog_ref: docs/data_catalog.md -- ONEM/RVA row (12th dataset, approved 2026-09-06)
 cadence: monthly
+fetch_window_days: 7
 is_active: true
 homepage: https://www.onem.be/
 label:
