@@ -18,7 +18,25 @@
  * them up, so one page can hold more than one map without them colliding.
  */
 
+/* The shared interface strings, taken from the global that i18n.js defines.
+   Read through one reference so this component holds no English of its own --
+   a second copy of these sentences is how a translated page ends up half
+   translated.
+
+   NOT require()d as a fallback: the Node test harness concatenates these files
+   and evaluates them, so a relative require would resolve against the working
+   directory rather than this file. The harness prepends i18n.js instead, and
+   MapUI.text degrades to the key if it is ever genuinely absent, so a missing
+   strings file costs a label rather than taking the whole map down. */
+const I18N_SRC = (typeof I18N !== 'undefined') ? I18N : null;
+
 const MapUI = {};
+
+/* One indirection, so a missing strings file degrades to the key rather than
+   throwing and taking the whole map down. */
+MapUI.text = function(lang, key, vars){
+  return I18N_SRC ? I18N_SRC.t(lang || 'en', key, vars) : key;
+};
 
 MapUI.BINS = 7;          // matches the seven --ramp-* tokens in commune_map.css
 MapUI.SWATCH_PX = 64;    // must match .swatches div in commune_map.css
@@ -55,22 +73,27 @@ MapUI.geometryToPath = function(geom, lonScale){
 
 /* --- formatting ---------------------------------------------------------
    Mirrors communes.html so the same number reads the same on both pages. */
-MapUI.formatValue = function(num, unit, decimals){
+/* FORMATTED FOR THE READER'S LANGUAGE, not the browser's locale. A French page
+   read in a browser set to English would otherwise print "35,363" where a
+   Belgian reader expects "35 363", and Dutch expects "35.363". Passing
+   undefined to toLocaleString takes the browser's locale, which is the one
+   thing on the page the reader did not choose. */
+MapUI.formatValue = function(num, unit, decimals, lang){
   if(num === null || num === undefined || isNaN(num)) return '\u2014';
   const digits = (decimals === null || decimals === undefined)
     ? (Math.abs(num) >= 1000 ? 0 : 2) : decimals;
-  const body = num.toLocaleString(undefined, {maximumFractionDigits: digits});
+  const body = num.toLocaleString(lang || undefined, {maximumFractionDigits: digits});
   const u = (unit || '').toLowerCase();
   if(u === 'eur') return '\u20ac' + body;
   if(u.startsWith('percent')) return body + '%';
   return body;
 };
 
-MapUI.tickLabel = function(num, unit, compactAxis){
+MapUI.tickLabel = function(num, unit, compactAxis, lang){
   const u = (unit || '').toLowerCase();
   const body = compactAxis
-    ? num.toLocaleString(undefined, {notation: 'compact', maximumFractionDigits: 1})
-    : num.toLocaleString(undefined, {maximumFractionDigits: Math.abs(num) < 100 ? 1 : 0});
+    ? num.toLocaleString(lang || undefined, {notation: 'compact', maximumFractionDigits: 1})
+    : num.toLocaleString(lang || undefined, {maximumFractionDigits: Math.abs(num) < 100 ? 1 : 0});
   if(u === 'eur') return '\u20ac' + body;
   if(u.startsWith('percent')) return body + '%';
   return body;
@@ -192,6 +215,7 @@ MapUI.CommuneMap = class CommuneMap {
   constructor(elements, options = {}) {
     this.el = elements;
     this.onSelect = options.onSelect || null;
+    this.lang = options.lang || 'en';
     this.features = [];
     this.byNis = {};
     this.values = {};
@@ -256,6 +280,14 @@ MapUI.CommuneMap = class CommuneMap {
 
   /* Restrict the map to a subset -- communes.html's region filter and search
      box. Passing null restores every commune. */
+  /* Re-language in place. Cheaper and less jarring than rebuilding: the paths
+     and the view stay exactly as the reader left them, only the words change. */
+  setLang(lang) {
+    this.lang = lang || 'en';
+    this.paint();
+    return this;
+  }
+
   setVisible(nisSet) {
     this.visible = nisSet;
     this.paint();
@@ -314,7 +346,7 @@ MapUI.CommuneMap = class CommuneMap {
     swatches.innerHTML = '';
     ticks.innerHTML = '';
     if (!nums.length) {
-      legendNote.textContent = 'No commune shown carries a value for this indicator.';
+      legendNote.textContent = MapUI.text(this.lang, 'mapNoneCarryValue');
       return;
     }
 
@@ -333,36 +365,30 @@ MapUI.CommuneMap = class CommuneMap {
     ticks.style.width = (bands * MapUI.SWATCH_PX) + 'px';
     for (let i = 0; i < breaks.length; i++) {
       const span = document.createElement('span');
-      span.textContent = MapUI.tickLabel(breaks[i], this.meta.unit, compactAxis);
+      span.textContent = MapUI.tickLabel(breaks[i], this.meta.unit, compactAxis, this.lang);
       span.style.left = ((i + 1) * MapUI.SWATCH_PX) + 'px';
       ticks.appendChild(span);
     }
 
     const direction = {
-      higher_is_better: 'For this indicator the source considers a higher value better.',
-      lower_is_better: 'For this indicator the source considers a lower value better.',
-      contextual: 'This indicator has no better or worse direction — it is context, not a score.',
+      higher_is_better: MapUI.text(this.lang, 'mapDirHigher'),
+      lower_is_better: MapUI.text(this.lang, 'mapDirLower'),
+      contextual: MapUI.text(this.lang, 'mapDirContextual'),
     }[this.meta.direction] || '';
 
-    const exact = v => MapUI.formatValue(v, this.meta.unit, this.meta.decimals) +
+    const exact = v => MapUI.formatValue(v, this.meta.unit, this.meta.decimals, this.lang) +
                        MapUI.unitSuffix(this.meta.unit);
-    const methodNote = this.method === 'equal'
-      ? 'Too many communes share the same figure for rank-based bands to separate them, ' +
-        'so these bands are equal steps in value instead — the colour shows distance from ' +
-        'the lowest, not rank.'
-      : 'Each band holds roughly the same number of communes, so the colour shows rank ' +
-        'rather than distance.';
+    const methodNote = MapUI.text(
+      this.lang, this.method === 'equal' ? 'mapMethodEqual' : 'mapMethodQuantile');
     // Said out loud because it changes what a colour MEANS: with a filter on,
     // the bands rank the communes shown, not all 565, so the same commune can
     // be dark here and pale on the unfiltered map. A reader comparing two
     // screenshots has to be told that.
-    const basis = this.visible
-      ? ' Bands are computed over the communes currently shown, not all 565.'
-      : '';
+    const basis = this.visible ? ' ' + MapUI.text(this.lang, 'mapBasisFiltered') : '';
 
     legendNote.textContent =
-      `Lowest ${exact(nums[0])}, highest ${exact(nums[nums.length - 1])}. ` +
-      'Colour runs low to high, left to right along the bar. ' +
+      MapUI.text(this.lang, 'mapRange', {lo: exact(nums[0]), hi: exact(nums[nums.length - 1])}) +
+      ' ' + MapUI.text(this.lang, 'mapColourRuns') + ' ' +
       methodNote + basis + (direction ? ' ' + direction : '');
   }
 
@@ -382,14 +408,12 @@ MapUI.CommuneMap = class CommuneMap {
        measured" are different facts about an indicator, and lumping them
        together as one number was the vaguer half of the old wording. */
     const uncollected = missing - (withheld || 0);
-    let text = `${missing} of the ${total} communes shown have no value here and are drawn as “no data”. `;
+    let text = MapUI.text(this.lang, 'mapMissingLead', {n: missing, total}) + ' ';
     if (withheld) {
-      text += `${withheld} ${withheld === 1 ? 'was' : 'were'} withheld by the source — a count below ` +
-              '10, suppressed for privacy rather than published, and never a zero. ';
+      text += MapUI.text(this.lang, 'mapMissingWithheld', {n: withheld}) + ' ';
     }
     if (uncollected > 0) {
-      text += `${uncollected} ${uncollected === 1 ? 'has' : 'have'} no figure at all: a gap in the ` +
-              'source, or a merged commune with no row on the map vintage this outline uses.';
+      text += MapUI.text(this.lang, 'mapMissingUncollected', {n: uncollected});
     }
     box.textContent = text.trim();
   }
@@ -455,15 +479,16 @@ MapUI.CommuneMap = class CommuneMap {
        has to be able to tell which they are looking at. */
     if (row && row.value === null && row.status === 'suppressed') {
       return `<span class="n">${name}</span>` +
-             `<span class="m">withheld by the source — fewer than 10, not zero` +
+             `<span class="m">${MapUI.text(this.lang, 'mapWithheld')}` +
              `${row.period ? ' · ' + row.period : ''}</span>`;
     }
     if (!row || typeof row.value !== 'number') {
-      return `<span class="n">${name}</span><span class="m">no data here</span>`;
+      return `<span class="n">${name}</span>` +
+             `<span class="m">${MapUI.text(this.lang, 'mapNoValueHere')}</span>`;
     }
     const status = row.status && row.status !== 'final' ? ` · ${row.status}` : '';
     return `<span class="n">${name}</span>` +
-           `<span class="v">${MapUI.formatValue(row.value, this.meta.unit, this.meta.decimals)}` +
+           `<span class="v">${MapUI.formatValue(row.value, this.meta.unit, this.meta.decimals, this.lang)}` +
            `${MapUI.unitSuffix(this.meta.unit)}</span>` +
            `<span class="m">${row.period || ''}${status}</span>`;
   }

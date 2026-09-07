@@ -88,6 +88,9 @@ def test_one_commune_one_indicator_round_trips(tmp_path):
     # was supplied" from "this indicator has no source".
     assert table["meta"]["POPULATION_BY_COMMUNE"] == {
         "name": "Population",
+        # Falls back to the English name from the CSV when no name map is
+        # supplied, so a caller with only a CSV still gets a usable structure.
+        "names": {"en": "Population"},
         "unit": "count",
         "minYear": "2024",
         "maxYear": "2024",

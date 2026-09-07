@@ -35,16 +35,25 @@
         .feature-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; font-weight: 500; }
         .feature-icon { font-size: 1.5rem; }
     </style>
+<script src="assets/i18n.js"></script>
 </head>
 <body>
+<div class="switches" style="position:fixed;top:12px;right:12px;z-index:50;display:flex;gap:8px">
+  <div id="langSeg" role="group" data-t-aria="language" aria-label="Language"
+       style="display:flex;gap:1px;border:1px solid rgba(0,0,0,.15);border-radius:7px;overflow:hidden">
+    <button type="button" data-lang="en" aria-pressed="false" style="border:0;cursor:pointer;font:inherit;font-size:.76rem;padding:5px 10px">EN</button>
+    <button type="button" data-lang="fr" aria-pressed="false" style="border:0;cursor:pointer;font:inherit;font-size:.76rem;padding:5px 10px">FR</button>
+    <button type="button" data-lang="nl" aria-pressed="false" style="border:0;cursor:pointer;font:inherit;font-size:.76rem;padding:5px 10px">NL</button>
+  </div>
+</div>
     <div class="container">
-        <h1 id="page-title">About BelPulse</h1>
-        <p class="subtitle" id="page-subtitle">Your window into the Belgian macroeconomic pulse</p>
-        
+        <h1 id="page-title"><span data-t="aboutTitle">About BelPulse</span></h1>
+        <p class="subtitle" id="page-subtitle"><span data-t="aboutTagline">Your window into the Belgian macroeconomic pulse</span></p>
+
         <div class="card">
             <p id="about-text-1">BelPulse is an independent intelligence platform dedicated to providing real-time transparency into Belgium's economic and financial health. Our mission is to democratize access to complex macroeconomic data through intuitive visualizations and expert commentary.</p>
             <p id="about-text-2">We aggregate data from the National Bank of Belgium (NBB), Statbel, the Federal Planning Bureau, and international institutions to offer a comprehensive view of the national landscape.</p>
-            
+
             <ul class="feature-list">
                 <li class="feature-item"><span class="feature-icon">📊</span> <span id="feat-1">Real-time data synchronization</span></li>
                 <li class="feature-item"><span class="feature-icon">🔍</span> <span id="feat-2">Deep-dive structural analysis</span></li>
@@ -100,7 +109,7 @@
             document.getElementById('page-subtitle').textContent = t.subtitle;
             document.getElementById('about-text-1').textContent = t.text1;
             document.getElementById('about-text-2').textContent = t.text2;
-            
+
             document.getElementById('feat-1').textContent = t.features[0];
             document.getElementById('feat-2').textContent = t.features[1];
             document.getElementById('feat-3').textContent = t.features[2];
@@ -121,5 +130,24 @@
             }
         });
     </script>
+<script>
+// One localStorage key for the whole site, from the shared module.
+let LANG = I18N.initial();
+function applyStrings(){
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = I18N.t(LANG, el.dataset.t); });
+  document.querySelectorAll('[data-t-aria]').forEach(el => {
+    el.setAttribute('aria-label', I18N.t(LANG, el.dataset.tAria));
+  });
+  document.documentElement.setAttribute('lang', LANG);
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+}
+document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
+  LANG = b.dataset.lang;
+  try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(_){}
+  applyStrings();
+}));
+applyStrings();
+</script>
 </body>
 </html>

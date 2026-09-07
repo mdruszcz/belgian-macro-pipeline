@@ -58,6 +58,7 @@ import html
 import json
 import re
 import sqlite3
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -70,9 +71,86 @@ DEFAULT_DB = REPO / "data" / "belgian_macro.db"
 
 # Depth from local/{nis}/index.html back to the site root, used for every
 # asset and payload link on the page.
-ROOT_PREFIX = "../.."
+# Depth from a page back to the site root. An English page lives at
+# local/{nis}/ and a translated one at local/{nis}/{lang}/, so it is computed
+# rather than fixed -- a wrong prefix breaks every link and every asset on the
+# page while the page itself still renders, which is the kind of breakage that
+# ships.
+#
+# English keeps the existing URL: local/{nis}/ is already indexed and linked,
+# and moving it to local/{nis}/en/ would break those links for no gain.
+DEFAULT_LANG = "en"
 
+# Every language the static pages are generated in.
 LANGS = ("en", "fr", "nl")
+
+
+def _t(strings: dict | None, lang: str, key: str, **subs: str) -> str:
+    """One interface string. Falls back to English and then to the key, so an
+    omission is visible rather than rendering an empty cell."""
+    tables = strings or {}
+    value = (tables.get(lang) or {}).get(key) or (tables.get("en") or {}).get(key) or key
+    for name, replacement in subs.items():
+        value = value.replace("{" + name + "}", str(replacement))
+    return value
+
+
+def _root_prefix(lang: str) -> str:
+    return "../.." if lang == DEFAULT_LANG else "../../.."
+
+
+def _route(nis: str, lang: str) -> str:
+    """The site-relative URL of a commune page in one language."""
+    return f"/local/{nis}/" if lang == DEFAULT_LANG else f"/local/{nis}/{lang}/"
+
+
+I18N_JS = Path(__file__).resolve().parents[1] / "assets" / "i18n.js"
+
+
+def _interface_strings() -> dict[str, dict[str, str]]:
+    """Every language's interface strings, read from assets/i18n.js.
+
+    Read through node rather than regexed, because the file is JavaScript and
+    parsing it by pattern is exactly the guessing rule 13 forbids. node is
+    already a hard dependency of this repository's test suite
+    (tests/test_i18n.py, tests/test_local_ui_logic.py), so requiring it here
+    adds nothing a contributor did not already need.
+
+    THIS REPLACED SCRAPING communes.html. These pages used to lift the licence
+    notice out of that page's markup, which worked while there was one language
+    and became impossible with three. The notice now lives once, in the strings
+    file, and both the app and these pages read it from there.
+    """
+    result = subprocess.run(
+        [
+            "node",
+            "-e",
+            "const I=require(process.argv[1]);" "process.stdout.write(JSON.stringify(I.STRINGS))",
+            str(I18N_JS),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        raise SystemExit(
+            f"could not read {I18N_JS} through node: {result.stderr.strip()}\n"
+            "node is required to build the static pages, because the interface "
+            "strings (including the licence notice) live in a JavaScript module "
+            "the browser also loads."
+        )
+    strings = json.loads(result.stdout)
+    missing = [lang for lang in LANGS if lang not in strings]
+    if missing:
+        raise SystemExit(f"{I18N_JS} has no strings for {missing}")
+    for lang in LANGS:
+        if not strings[lang].get("attribution"):
+            raise SystemExit(
+                f"{I18N_JS} has no licence notice for {lang!r}. Refusing to generate "
+                "pages that publish municipal data without one -- Statbel's 2015 "
+                "licence terminates automatically on non-compliance."
+            )
+    return strings
 
 
 def _read_attribution(path: Path = ATTRIBUTION_SOURCE) -> str:
@@ -108,17 +186,39 @@ def _latest(entry: dict) -> tuple[str, dict] | tuple[None, None]:
     return None, None
 
 
-def _format_value(value: float, unit: str | None) -> str:
+# Digit grouping and decimal marks per language. Belgium writes a number three
+# ways and a page that gets it wrong reads as foreign before a reader has taken
+# in a single figure -- which is the whole reason this roadmap step exists.
+# Done by substitution rather than through the `locale` module: locale is
+# process-global, depends on which locales the machine happens to have
+# generated, and would make this exporter's output depend on the host.
+_NUMBER_FORMATS = {
+    "en": (",", "."),
+    "fr": ("\u202f", ","),  # narrow no-break space, as French typography wants
+    "nl": (".", ","),
+}
+
+
+def _format_value(value: float, unit: str | None, lang: str = "en") -> str:
     if value is None:
         return ""
     unit = unit or ""
+    group, decimal = _NUMBER_FORMATS.get(lang, _NUMBER_FORMATS["en"])
+
+    def render(number: float, places: int) -> str:
+        # Formatted English first, then re-punctuated: doing it the other way
+        # round means writing a grouping algorithm, and this one is already
+        # correct.
+        text = f"{number:,.{places}f}"
+        return text.replace(",", "\x00").replace(".", decimal).replace("\x00", group)
+
     if unit == "eur":
-        return f"€{value:,.0f}"
+        return "€" + render(value, 0)
     if unit.startswith("percent"):
-        return f"{value:,.2f}%".replace(".00%", "%")
+        return render(value, 2).replace(f"{decimal}00", "") + "%"
     if abs(value - round(value)) < 1e-9:
-        return f"{round(value):,}"
-    return f"{value:,.2f}"
+        return render(round(value), 0)
+    return render(value, 2)
 
 
 def _local_name(names: dict | None, lang: str, fallback: str) -> str:
@@ -135,7 +235,7 @@ def _has_any_value(commune: dict) -> bool:
     return False
 
 
-def _describe(commune: dict, lang: str) -> str:
+def _describe(commune: dict, lang: str, strings: dict | None = None) -> str:
     """The meta description: real figures, not a template with a name slotted
     in, since a description that says nothing is why thin pages get demoted."""
     name = _local_name(commune.get("name"), lang, commune["nis_code"])
@@ -149,12 +249,18 @@ def _describe(commune: dict, lang: str) -> str:
         if period is None:
             continue
         label = _local_name(entry.get("names"), lang, indicator_id)
-        bits.append(f"{label} {_format_value(cell['value'], entry.get('unit'))} ({period})")
+        bits.append(f"{label} {_format_value(cell['value'], entry.get('unit'), lang)} ({period})")
     covered = sum(1 for e in indicators.values() if _latest(e)[0] is not None)
-    lead = f"Municipal statistics for {name}, Belgium"
+    table = (strings or {}).get(lang, {})
+    lead = table.get("describeLead", "Municipal statistics for {name}, Belgium").replace(
+        "{name}", name
+    )
     if bits:
         lead += ": " + "; ".join(bits)
-    return f"{lead}. {covered} indicators with history, sources and comparisons."
+    tail = table.get(
+        "describeTail", "{n} indicators with history, sources and comparisons."
+    ).replace("{n}", str(covered))
+    return f"{lead}. {tail}"
 
 
 def _source_registry(payload_dir: Path) -> dict[str, dict]:
@@ -169,6 +275,18 @@ def _source_registry(payload_dir: Path) -> dict[str, dict]:
     if not path.is_file():
         return {}
     return json.loads(path.read_text(encoding="utf-8")).get("sources") or {}
+
+
+def _grade_words(payload_dir: Path) -> dict[str, dict]:
+    """The A/B/C/D vocabulary, in three languages, from metadata/sources.json.
+
+    Read from the payload rather than restated here, so this page and the app
+    cannot disagree about what a "C" means in any language.
+    """
+    path = payload_dir / "metadata" / "sources.json"
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("grades") or {}
 
 
 def _indicator_provenance(payload_dir: Path) -> dict[str, dict]:
@@ -292,12 +410,9 @@ def _latest_updated(commune: dict) -> str | None:
     return max(dates) if dates else None
 
 
-# Shown in the Value column when the source holds a figure and withholds it.
-# The word matters more than the dash: a blank cell reads as a bug, and a zero
-# would state a number the source explicitly refused to publish.
-WITHHELD_NOTE = "withheld by the source (fewer than 10)"
-# Appended to the period of a figure whose LATER years the source withheld.
-WITHHELD_SUFFIX = "withheld"
+# The withheld wording lives in assets/i18n.js, in three languages, beside the
+# app's own. The word matters more than the dash: a blank cell reads as a bug,
+# and a zero would state a number the source explicitly refused to publish.
 
 
 def _withheld_periods(entry: dict) -> list[str]:
@@ -319,6 +434,7 @@ def _source_cell(
     registry: dict[str, dict] | None,
     provenance: dict[str, dict] | None,
     lang: str = "en",
+    grades: dict[str, dict] | None = None,
 ) -> str:
     """ "Statbel (A)" -- who published the figure, and how it was made.
 
@@ -342,11 +458,21 @@ def _source_cell(
     if label:
         return label
     if grade:
-        return {"A": "Official", "B": "Restated", "C": "Derived", "D": "Forecast"}.get(grade, grade)
+        # The grade WORDS come from metadata/sources.json, which publishes them
+        # in all three languages -- so this page and the app cannot disagree
+        # about what a "C" means, in any language.
+        word = (grades or {}).get(grade) or {}
+        return word.get(lang) or word.get("en") or grade
     return ""
 
 
-def _updated_cell(indicator_id: str, entry: dict, provenance: dict[str, dict] | None) -> str:
+def _updated_cell(
+    indicator_id: str,
+    entry: dict,
+    provenance: dict[str, dict] | None,
+    strings: dict | None = None,
+    lang: str = "en",
+) -> str:
     """The retrieval date -- or, for a derived figure, its INPUTS' date, said
     to be theirs.
 
@@ -360,7 +486,7 @@ def _updated_cell(indicator_id: str, entry: dict, provenance: dict[str, dict] | 
         return own
     row = (provenance or {}).get(indicator_id) or {}
     if row.get("inputs_updated"):
-        return f"inputs {row['inputs_updated']}"
+        return f"{_t(strings, lang, 'inputsPrefix')} {row['inputs_updated']}"
     return ""
 
 
@@ -370,6 +496,8 @@ def _section_rows(
     lang: str,
     registry: dict[str, dict] | None = None,
     provenance: dict[str, dict] | None = None,
+    strings: dict | None = None,
+    grades: dict[str, dict] | None = None,
 ) -> list[tuple[str, str, str, str, bool, str]]:
     """(label, value, period, updated, is_withheld) per indicator in this
     section that this commune has something to say about.
@@ -401,11 +529,11 @@ def _section_rows(
             rows.append(
                 (
                     _local_name(entry.get("names"), lang, indicator_id),
-                    WITHHELD_NOTE,
+                    _t(strings, lang, "withheldCell"),
                     ", ".join(withheld),
                     "",
                     True,
-                    _source_cell(indicator_id, registry, provenance, lang),
+                    _source_cell(indicator_id, registry, provenance, lang, grades),
                 )
             )
             continue
@@ -416,18 +544,18 @@ def _section_rows(
         # the copy a crawler and a reader without JavaScript actually get.
         later_withheld = [p for p in withheld if p > period]
         period_cell = (
-            f"{period} ({', '.join(later_withheld)} {WITHHELD_SUFFIX})"
+            f"{period} ({', '.join(later_withheld)} {_t(strings, lang, 'withheldSuffix')})"
             if later_withheld
             else period
         )
         rows.append(
             (
                 _local_name(entry.get("names"), lang, indicator_id),
-                _format_value(cell["value"], entry.get("unit")),
+                _format_value(cell["value"], entry.get("unit"), lang),
                 period_cell,
-                _updated_cell(indicator_id, entry, provenance),
+                _updated_cell(indicator_id, entry, provenance, strings, lang),
                 False,
-                _source_cell(indicator_id, registry, provenance, lang),
+                _source_cell(indicator_id, registry, provenance, lang, grades),
             )
         )
     return rows
@@ -443,11 +571,27 @@ def _render_page(
     creators: list[dict],
     registry: dict[str, dict] | None = None,
     provenance: dict[str, dict] | None = None,
+    strings: dict | None = None,
+    grades: dict[str, dict] | None = None,
 ) -> str:
     nis = commune["nis_code"]
     name = _local_name(commune.get("name"), lang, nis)
-    canonical = f"{base_url}/local/{nis}/"
-    description = _describe(commune, lang)
+    canonical = f"{base_url}{_route(nis, lang)}"
+    root = _root_prefix(lang)
+    description = _describe(commune, lang, strings)
+
+    # hreflang, pointing each language at the others AND at itself, which is
+    # what search engines require to treat the three as one page in three
+    # languages rather than as duplicates competing with each other. This is
+    # the entire reason for generating them: a bourgmestre searches in French.
+    alternates = (
+        "\n".join(
+            f'<link rel="alternate" hreflang="{other}" href="{base_url}{_route(nis, other)}">'
+            for other in LANGS
+        )
+        + f'\n<link rel="alternate" hreflang="x-default" href="{base_url}{_route(nis, DEFAULT_LANG)}">'
+    )
+
     updated = _latest_updated(commune)
     esc = html.escape
 
@@ -465,7 +609,7 @@ def _render_page(
     body: list[str] = []
     covered = 0
     for section in sections:
-        rows = _section_rows(commune, section, lang, registry, provenance)
+        rows = _section_rows(commune, section, lang, registry, provenance, strings, grades)
         if not rows:
             continue
         # Real figures only. A page whose only content is withheld cells is
@@ -474,8 +618,13 @@ def _render_page(
         label = _local_name(section.get("label"), lang, section["id"])
         body.append(f"<section><h2>{esc(label)}</h2>")
         body.append(
-            "<table><thead><tr><th>Indicator</th><th>Value</th><th>Period</th>"
-            "<th>Source</th><th>Updated</th></tr></thead><tbody>"
+            "<table><thead><tr>"
+            f"<th>{_t(strings, lang, 'colIndicator')}</th>"
+            f"<th>{_t(strings, lang, 'colValue')}</th>"
+            f"<th>{_t(strings, lang, 'colPeriod')}</th>"
+            f"<th>{_t(strings, lang, 'colSource')}</th>"
+            f"<th>{_t(strings, lang, 'colUpdated')}</th>"
+            "</tr></thead><tbody>"
         )
         for indicator_label, value, period, indicator_updated, withheld, source in rows:
             css = " class='withheld'" if withheld else ""
@@ -500,6 +649,7 @@ def _render_page(
 <title>{esc(name)} — municipal statistics | BelPulse</title>
 <meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{esc(canonical)}">
+{alternates}
 <meta property="og:type" content="website">
 <meta property="og:title" content="{esc(name)} — municipal statistics">
 <meta property="og:description" content="{esc(description)}">
@@ -551,21 +701,20 @@ def _render_page(
 <body>
 <div class="wrap">
   <h1>{esc(name)}</h1>
-  <p class="ancestry">NIS {esc(nis)} · {esc(ancestry)}</p>
+  <p class="ancestry">{esc(_t(strings, lang, "nis"))} {esc(nis)} · {esc(ancestry)}</p>
   <p class="lede">{esc(description)}</p>
 
-  <a class="interactive" href="{ROOT_PREFIX}/local.html?nis={esc(nis)}">Open the interactive
-    profile — charts, comparisons and peer communes</a>
+  <a class="interactive" href="{root}/local.html?nis={esc(nis)}">{esc(_t(strings, lang, "openInteractive"))}</a>
 
   {"".join(body)}
 
   <div class="attribution">{attribution_html}</div>
 
   <footer>
-    {covered} indicators shown. Full history for this commune:
-    <a href="{ROOT_PREFIX}/public/data/communes/{esc(nis)}.json">JSON payload</a> ·
-    <a href="{ROOT_PREFIX}/communes.html">all communes</a> ·
-    <a href="{ROOT_PREFIX}/">BelPulse</a>
+    {esc(_t(strings, lang, "staticFooter", n=covered))}
+    <a href="{root}/public/data/communes/{esc(nis)}.json">{esc(_t(strings, lang, "jsonPayload"))}</a> ·
+    <a href="{root}/communes.html">{esc(_t(strings, lang, "allCommunes"))}</a> ·
+    <a href="{root}/">BelPulse</a>
   </footer>
 </div>
 </body>
@@ -577,18 +726,27 @@ def export_local_pages(
     payload_dir: Path = DEFAULT_PAYLOAD_DIR,
     out_dir: Path = DEFAULT_OUT_DIR,
     base_url: str = DEFAULT_BASE_URL,
-    lang: str = "en",
+    # "all" by default, matching the CLI: these pages exist for search
+    # visibility, and a French-language commune page is the highest-value thing
+    # this repository publishes into a Belgian search result.
+    lang: str = "all",
     build_id: str = "local",
-    attribution_source: Path = ATTRIBUTION_SOURCE,
     db_path: Path = DEFAULT_DB,
 ) -> dict[str, int]:
     sections = json.loads((payload_dir / "metadata" / "sections.json").read_text(encoding="utf-8"))[
         "sections"
     ]
-    attribution = _read_attribution(attribution_source)
+    strings = _interface_strings()
     sources = _indicator_sources(db_path)
     registry = _source_registry(payload_dir)
     provenance = _indicator_provenance(payload_dir)
+    grades = _grade_words(payload_dir)
+
+    # One language, or all of them. The default is all: these pages exist for
+    # search visibility, and a French-language commune page is the single
+    # highest-value thing this repository publishes into a Belgian search
+    # result. English keeps its existing URL.
+    languages = LANGS if lang == "all" else (lang,)
 
     written = 0
     skipped_thin = 0
@@ -598,24 +756,30 @@ def export_local_pages(
         commune = json.loads(payload_path.read_text(encoding="utf-8"))
         if not _has_any_value(commune):
             # comparison.md's "no data, no page" rule, enforced rather than
-            # assumed -- an empty page is worse than a missing one.
+            # assumed -- an empty page is worse than a missing one. Counted
+            # once per commune, not once per language.
             skipped_thin += 1
             continue
-        page = _render_page(
-            commune,
-            sections,
-            lang,
-            base_url,
-            attribution,
-            build_id,
-            _creators_for(commune, sources, registry),
-            registry,
-            provenance,
-        )
-        target = out_dir / commune["nis_code"] / "index.html"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(page, encoding="utf-8")
-        written += 1
+        creators = _creators_for(commune, sources, registry)
+        for page_lang in languages:
+            page = _render_page(
+                commune,
+                sections,
+                page_lang,
+                base_url,
+                strings[page_lang]["attribution"],
+                build_id,
+                creators,
+                registry,
+                provenance,
+                strings,
+                grades,
+            )
+            relative = _route(commune["nis_code"], page_lang).strip("/").split("/", 1)[1]
+            target = out_dir / relative / "index.html"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(page, encoding="utf-8")
+            written += 1
 
     _write_sitemap(out_dir, base_url, payload_dir)
     return {"written": written, "skipped_thin": skipped_thin}
@@ -625,17 +789,36 @@ def _write_sitemap(out_dir: Path, base_url: str, payload_dir: Path) -> None:
     """A sitemap listing every generated route. Roadmap Block AD asks for
     sitemap submission later; emitting it alongside the pages costs nothing
     and means the routes are discoverable the moment they exist."""
-    routes = sorted(p.parent.name for p in out_dir.glob("*/index.html"))
+    communes = sorted(p.parent.name for p in out_dir.glob("*/index.html"))
     today = datetime.now(timezone.utc).date().isoformat()
-    urls = "\n".join(
-        f"  <url><loc>{base_url}/local/{nis}/</loc><lastmod>{today}</lastmod></url>"
-        for nis in routes
-    )
+
+    # EVERY LANGUAGE'S ROUTE, each declaring the others as alternates. A
+    # sitemap that listed only the English page would leave the French and
+    # Dutch ones discoverable by crawl alone, and would not tell a search
+    # engine the three are the same page -- which is the difference between
+    # ranking in French and competing with yourself in three languages.
+    entries = []
+    for nis in communes:
+        for lang in LANGS:
+            target = out_dir / _route(nis, lang).strip("/").split("/", 1)[1] / "index.html"
+            if not target.is_file():
+                continue
+            links = "".join(
+                f'<xhtml:link rel="alternate" hreflang="{other}" '
+                f'href="{base_url}{_route(nis, other)}"/>'
+                for other in LANGS
+            )
+            entries.append(
+                f"  <url><loc>{base_url}{_route(nis, lang)}</loc>"
+                f"<lastmod>{today}</lastmod>{links}</url>"
+            )
+
     (out_dir / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f"{urls}\n"
-        "</urlset>\n",
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+        '        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+        + "\n".join(entries)
+        + "\n</urlset>\n",
         encoding="utf-8",
     )
 
@@ -647,7 +830,12 @@ def main() -> None:
     ap.add_argument("--payload-dir", type=Path, default=DEFAULT_PAYLOAD_DIR)
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     ap.add_argument("--base-url", default=DEFAULT_BASE_URL)
-    ap.add_argument("--lang", default="en", choices=LANGS)
+    ap.add_argument(
+        "--lang",
+        default="all",
+        choices=(*LANGS, "all"),
+        help="One language, or 'all' (the default) for every language.",
+    )
     ap.add_argument("--build-id", default="local")
     ap.add_argument("--db", type=Path, default=DEFAULT_DB)
     args = ap.parse_args()

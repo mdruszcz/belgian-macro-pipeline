@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BelPulse (Beta) — Belgium Economic Intelligence</title>
-    
+
     <script>
       (function() {
         const t = localStorage.getItem("theme") || "soft";
         document.documentElement.setAttribute('data-theme', t);
-        const l = localStorage.getItem("lang") || "en";
+        const l = (localStorage.getItem("belpulse-lang") || localStorage.getItem("lang")) || "en";
         document.documentElement.lang = l;
       })();
     </script>
@@ -56,18 +56,18 @@
 
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-page); color: var(--text-cell); transition: background 0.3s, color 0.3s; }
        .header-font { font-family: 'Playfair Display', serif; font-weight: 700; }
-        
+
        .iframe-container {
             height: calc(100vh - 166px); /* Exact height between menu and footer */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-        
+
        .nav-button { transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); border: none; background: transparent; color: var(--text-cell-muted); font-weight: 500; }
        .nav-button:hover { color: var(--text-cell); }
        .nav-button.active {
@@ -78,18 +78,18 @@
             text-decoration: underline;
             text-underline-offset: 4px;
         }
-        
+
        .belgian-flag {
             background: linear-gradient(to right, #000000 33.33%, #FFCC00 33.33%, #FFCC00 66.66%, #C8102E 66.66%);
         }
-        
+
         .ecg-line {
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
             animation: dash 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
         }
-        
+
         @keyframes dash {
             0% { stroke-dashoffset: 100; opacity: 0; }
             10% { opacity: 1; }
@@ -218,7 +218,7 @@
                     class="nav-button active px-2 py-1 transition-all flex items-center">
                 <span id="menu-stats">STATISTICS</span>
             </button>
-            
+
             <button onclick="loadDashboard(1)" id="btn-1"
                     class="nav-button px-2 py-1 transition-all flex items-center">
                 <span id="menu-clock">CLOCK</span>
@@ -233,7 +233,7 @@
 
     <div class="w-full h-full">
         <div class="iframe-container overflow-hidden" style="background: var(--bg-controls);">
-            <iframe id="dashboard-frame" 
+            <iframe id="dashboard-frame"
                     src="dashboard.html"
                     allowfullscreen></iframe>
         </div>
@@ -267,11 +267,11 @@
         function setLang(l) {
             if (currentLang === l && document.getElementById('btn-' + l).classList.contains('active')) return;
             currentLang = l;
-            localStorage.setItem('lang', l);
+            localStorage.setItem('belpulse-lang', l);
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             const btn = document.getElementById('btn-' + l);
             if (btn) btn.classList.add('active');
-            
+
             // Update UI translations
             document.getElementById('subtitle').textContent = translations[l].subtitle;
 
@@ -333,10 +333,10 @@
                 // Give it a moment to load then sync
                 setTimeout(syncDashboard, 500);
             }, 300);
-            
+
             // Remove active class from all nav buttons
             document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-            
+
             // Add active class to the correct button based on ID
             const activeBtn = document.getElementById('btn-' + index);
             if (activeBtn) activeBtn.classList.add('active');
@@ -356,13 +356,13 @@
         window.onload = function() {
             // Default to News (index 2)
             loadDashboard(2);
-            const savedLang = localStorage.getItem("lang") || 'en';
+            const savedLang = (localStorage.getItem("belpulse-lang") || localStorage.getItem("lang")) || 'en';
             const savedTheme = localStorage.getItem("theme") || 'soft';
-            
+
             // Set initial state without triggering sync yet
             currentLang = savedLang;
             document.documentElement.setAttribute('data-theme', savedTheme);
-            
+
             // Update active buttons
             const themeBtn = document.getElementById('t-' + savedTheme);
             if (themeBtn) themeBtn.classList.add('active');
@@ -371,17 +371,17 @@
 
             // Apply translations
             document.getElementById('subtitle').textContent = translations[savedLang].subtitle;
-            
+
             document.getElementById('menu-stats').textContent = translations[savedLang].menuStats;
             document.getElementById('menu-clock').textContent = translations[savedLang].menuClock;
             document.getElementById('menu-news').textContent = translations[savedLang].menuNews;
             document.getElementById('menu-analysis').textContent = translations[savedLang].menuAnalysis;
             document.getElementById('menu-about').textContent = translations[savedLang].menuAbout;
-            
+
             // Sync with iframe after a short delay
             setTimeout(syncDashboard, 1000);
 
-            console.log('%c🚀 BelPulse (Beta) ready — Shared Dashboard Styles & Sync live!', 
+            console.log('%c🚀 BelPulse (Beta) ready — Shared Dashboard Styles & Sync live!',
                         'color:#c49a3c; font-family:monospace; font-size:11px');
         };
 
@@ -412,7 +412,7 @@
                 if(s.currency === 'USD') formattedPrice = `$${s.price.toFixed(4)}`;
                 else if(s.currency === '%') formattedPrice = `${s.price.toFixed(2)}%`;
                 else formattedPrice = `${s.price.toFixed(2)}€`;
-                
+
                 return `
                     <div class="stock-item">
                         <span class="stock-label">${s.name} (${s.ticker})</span>
@@ -422,7 +422,7 @@
             }).join('');
 
             container.innerHTML = content;
-            
+
             // Speed control: total passing time (increased by 30% for slower scroll)
             const duration = Math.max(60, Math.floor(keys.length * 6));
             container.style.animationDuration = `${duration}s`;

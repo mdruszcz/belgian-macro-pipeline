@@ -15,7 +15,9 @@ open in the first place (data_catalog.md tracked it as a "Block K/J item"
 while communes.html was already live).
 """
 
+import json
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -28,16 +30,49 @@ REPO = Path(__file__).resolve().parents[1]
 MUNICIPAL_PAGES = ["communes.html", "local.html", "map.html"]
 
 
-def _page(name: str) -> str:
-    """Page source with runs of whitespace collapsed to single spaces.
+def _rendered_strings() -> str:
+    """Every language's interface strings from assets/i18n.js, as a browser
+    gets them -- escapes resolved, not the source literals."""
+    result = subprocess.run(
+        [
+            "node",
+            "-e",
+            # Values joined plainly, NOT JSON-stringified: stringifying escapes
+            # the quotes in markup like id="attrUpdated", and the assertions
+            # below look for the markup a reader's browser receives.
+            "const I=require('./assets/i18n.js');"
+            "process.stdout.write(I.LANGS.map(l => "
+            "Object.values(I.STRINGS[l]).join('\\n')).join('\\n'))",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPO,
+        timeout=15,
+    )
+    assert result.returncode == 0, result.stderr
+    return result.stdout
 
-    HTML collapses whitespace when rendered, so a phrase the reader sees as
-    "does not endorse" may be split across source lines. Asserting on the raw
-    bytes would make these tests fail on a reflow that changed nothing a
-    visitor sees -- and a compliance test that fires on cosmetics is one that
-    gets weakened.
+
+def _page(name: str) -> str:
+    """THE LICENCE SURFACE OF A PAGE: its own markup, plus the shared strings
+    it renders.
+
+    The notice used to be written out on every page, so reading the file was
+    enough. It now lives once in assets/i18n.js, and a page that loads that
+    module publishes those words just as surely as if they were inline --
+    local.html renders the notice from it. Checking only the file would let
+    every obligation below pass vacuously on a page whose notice had been
+    deleted from the module.
+
+    Runs of whitespace are collapsed because HTML collapses them when
+    rendered: a phrase a reader sees as "does not endorse" may be split across
+    source lines, and a compliance test that fires on a reflow is one that gets
+    weakened.
     """
-    return re.sub(r"\s+", " ", (REPO / name).read_text(encoding="utf-8"))
+    text = (REPO / name).read_text(encoding="utf-8")
+    if 'src="assets/i18n.js"' in text:
+        text += "\n" + _rendered_strings()
+    return re.sub(r"\s+", " ", text)
 
 
 @pytest.mark.parametrize("page", MUNICIPAL_PAGES)
@@ -217,37 +252,92 @@ def test_page_flags_the_stale_geography_and_unstated_period(page):
     )
 
 
-def test_map_page_value_attribution_is_identical_to_communes_html():
-    """map.html publishes the same municipal figures as communes.html, so it
-    carries the same source paragraphs -- and they must stay the same words.
+def _canonical_attribution() -> str:
+    """The one wording of the licence notice, from assets/i18n.js.
 
-    export_local_pages.py LIFTS this block rather than retyping it, precisely
-    because a second hand-written copy drifts. map.html is a static file and
-    cannot lift it at build time, so this test is the equivalent guard: the
-    value-source attribution is copied, and reworded on one page only if it is
-    reworded on both. The boundary paragraph above it is map.html's own and is
-    deliberately not covered here.
+    Rendered through node rather than regexed out of the file, so the test
+    compares what a browser would actually get -- escapes resolved -- and not
+    the source literal.
     """
-    communes = re.search(
-        r'<div class="attribution" id="attribution">(.*?)</div>',
-        (REPO / "communes.html").read_text(encoding="utf-8"),
-        re.DOTALL,
+    result = subprocess.run(
+        [
+            "node",
+            "-e",
+            "process.stdout.write(require('./assets/i18n.js').STRINGS.en.attribution)",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPO,
+        timeout=15,
     )
-    assert communes, "communes.html has no attribution block to compare against"
+    assert result.returncode == 0, result.stderr
+    return result.stdout
 
-    mapped = re.search(
-        r"<!-- values-attribution:start.*?-->(.*?)<!-- values-attribution:end -->",
-        (REPO / "map.html").read_text(encoding="utf-8"),
-        re.DOTALL,
+
+# Pages that carry the notice in their own MARKUP. local.html is deliberately
+# absent: it is a JavaScript application, and its no-JavaScript story is the 565
+# static /local/{nis} pages, which lift this same markup from communes.html.
+HTML_ATTRIBUTION_PAGES = ["communes.html", "map.html"]
+
+
+@pytest.mark.parametrize("page", HTML_ATTRIBUTION_PAGES)
+def test_every_page_carries_the_one_canonical_licence_notice(page):
+    """Replaces a weaker test that compared two pages to each other.
+
+    The licence notice was written out four times: three languages in
+    local.html plus an English copy each in communes.html and map.html, held in
+    step only by a byte comparison between the last two. Four copies of a
+    LICENCE CONDITION drifting apart is not untidiness -- it is the notice
+    becoming wrong on some pages and not others.
+
+    There is now one string, in assets/i18n.js, and every page's HTML must
+    match it exactly. The HTML keeps the English rendering rather than being
+    injected by script, because a reader with JavaScript disabled must still
+    see the notice and scripts/export_local_pages.py lifts it from
+    communes.html's markup to put on all 565 static pages.
+    """
+    canonical = _canonical_attribution()
+    text = (REPO / page).read_text(encoding="utf-8")
+
+    if page == "map.html":
+        block = re.search(
+            r"<!-- values-attribution:start.*?-->(.*?)<!-- values-attribution:end -->",
+            text,
+            re.DOTALL,
+        )
+    else:
+        block = re.search(r'<div class="attribution" id="attribution">(.*?)</div>', text, re.DOTALL)
+    assert block, f"{page} has no attribution block"
+
+    def normalise(value):
+        return re.sub(r"\s+", " ", value).strip()
+
+    assert normalise(block.group(1)) == normalise(canonical), (
+        f"{page}'s licence notice has drifted from assets/i18n.js. "
+        "Change the string there, not the page."
     )
-    assert mapped, "map.html has no values-attribution block"
 
-    def normalise(text):
-        return re.sub(r"\s+", " ", text).strip()
 
-    assert normalise(mapped.group(1)) == normalise(communes.group(1)), (
-        "map.html's value attribution has drifted from communes.html -- " "change both or neither"
+def test_the_canonical_notice_exists_in_all_three_languages():
+    """A licence condition met only in English is met only for English readers,
+    and the whole point of this file is that the condition is met."""
+    result = subprocess.run(
+        [
+            "node",
+            "-e",
+            "const I=require('./assets/i18n.js');"
+            "process.stdout.write(JSON.stringify("
+            "I.LANGS.map(l => (I.STRINGS[l].attribution || '').length)))",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPO,
+        timeout=15,
     )
+    assert result.returncode == 0, result.stderr
+    lengths = json.loads(result.stdout)
+    assert len(lengths) == 3
+    assert all(n > 2000 for n in lengths), f"a language has a truncated notice: {lengths}"
 
 
 @pytest.mark.parametrize("page", MUNICIPAL_PAGES)
@@ -270,10 +360,23 @@ def test_page_says_a_derived_figures_date_belongs_to_its_inputs(page):
     ), f"{page} does not distinguish a computed figure from a retrieved one"
 
 
-def test_the_commune_page_carries_that_statement_in_all_three_languages():
-    """local.html is the translated page, and a licence condition met only in
-    English is met only for English readers."""
-    text = (REPO / "local.html").read_text(encoding="utf-8")
+def test_the_statement_exists_in_all_three_languages():
+    """A licence condition met only in English is met only for English
+    readers. Asserted against the shared strings, which is where all three
+    now live."""
+    text = _rendered_strings()
     assert "carries the date its INPUTS were last updated" in text
     assert "de dernière mise à jour de ses DONNÉES SOURCES" in text
     assert "waarop de BRONCIJFERS voor het laatst zijn bijgewerkt" in text
+
+
+def test_the_commune_app_renders_the_notice_from_the_shared_module():
+    """local.html held the notice three times, once per language. It now holds
+    it zero times and renders it from assets/i18n.js, so the wording cannot
+    differ between the app and the pages around it."""
+    text = (REPO / "local.html").read_text(encoding="utf-8")
+    assert "I18N.t(LANG, 'attribution')" in text, "the app does not render the shared notice"
+    assert 'src="assets/i18n.js"' in text, "the app does not load the shared strings"
+    # And keeps no copy of its own.
+    assert "attribution: '" not in text, "local.html still carries its own copy of the notice"
+    assert "Licentie open data" not in text, "licence prose is still inlined in local.html"

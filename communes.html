@@ -6,6 +6,7 @@
 <title>Commune Data</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/commune_map.css">
+<script src="assets/i18n.js"></script>
 <style>
   :root{
     --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
@@ -207,8 +208,11 @@
      setting with no way to override it, so a dark-mode device could not see
      the light palette at all. "Auto" removes data-theme and lets the
      prefers-color-scheme query decide. */
+  /* Language and theme sit side by side, top right, so the wrapper owns the
+     fixed position and each switcher is just a segmented control. */
+  .switches{position:fixed; top:12px; right:12px; z-index:50; display:flex; gap:8px}
   .theme-toggle{
-    position:fixed; top:12px; right:12px; z-index:50; display:flex; gap:1px;
+    display:flex; gap:1px;
     background:var(--border); border:1px solid var(--border);
     border-radius:7px; overflow:hidden;
   }
@@ -239,27 +243,34 @@
 </head>
 <body>
 <div class="wrap">
-<div class="theme-toggle" role="group" aria-label="Colour theme">
-  <button type="button" data-theme-choice="light" aria-pressed="false" title="Always light">&#9728; Light</button>
-  <button type="button" data-theme-choice="auto" aria-pressed="false" title="Follow your device setting">Auto</button>
-  <button type="button" data-theme-choice="dark" aria-pressed="false" title="Always dark">&#9790; Dark</button>
+<div class="switches">
+  <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+    <button type="button" data-lang="nl" aria-pressed="false">NL</button>
+  </div>
+  <div class="theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
+    <button type="button" data-theme-choice="light" aria-pressed="false" data-t-title="themeLight">&#9728; <span data-t="themeLight">Light</span></button>
+    <button type="button" data-theme-choice="auto" aria-pressed="false" data-t-title="themeAuto"><span data-t="themeAuto">Auto</span></button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false" data-t-title="themeDark">&#9790; <span data-t="themeDark">Dark</span></button>
+  </div>
 </div>
   <header>
-    <h1>Commune Data</h1>
-    <p class="subtitle">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. Or press <strong>Show map</strong> to draw the column you are sorting by, in the year you have picked. See <a href="map.html">map.html</a> for a full-page map of the latest figures, <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
+    <h1 data-t="communesTitle">Commune Data</h1>
+    <p class="subtitle" data-t-html="communesLead">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. Or press <strong>Show map</strong> to draw the column you are sorting by, in the year you have picked. See <a href="map.html">map.html</a> for a full-page map of the latest figures, <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
   </header>
 
   <div class="stats">
-    <div class="stat"><span class="n" id="statCommunes">—</span><span class="l">Communes</span></div>
-    <div class="stat"><span class="n" id="statIndicators">—</span><span class="l">Indicators</span></div>
-    <div class="stat"><span class="n" id="statYears">—</span><span class="l">Years covered</span></div>
-    <div class="stat"><span class="n" id="statUpdated">—</span><span class="l">Last fetched</span></div>
+    <div class="stat"><span class="n" id="statCommunes">—</span><span class="l" data-t="statCommunes">Communes</span></div>
+    <div class="stat"><span class="n" id="statIndicators">—</span><span class="l" data-t="statIndicators">Indicators</span></div>
+    <div class="stat"><span class="n" id="statYears">—</span><span class="l" data-t="statYears">Years covered</span></div>
+    <div class="stat"><span class="n" id="statUpdated">—</span><span class="l" data-t="statUpdated">Last fetched</span></div>
   </div>
 
   <div class="toolbar">
-    <input id="search" type="text" placeholder="Filter by commune name (EN/FR/NL) or NIS code…" autocomplete="off">
-    <select id="regionFilter"><option value="">All regions</option></select>
-    <select id="yearFilter" title="Not every indicator covers every year -- a column shows &quot;n/a&quot; for a year outside its own coverage"></select>
+    <input id="search" type="text" data-t-placeholder="filterPlaceholder" placeholder="Filter by commune name (EN/FR/NL) or NIS code…" autocomplete="off">
+    <select id="regionFilter"><option value="" data-t="allRegions">All regions</option></select>
+    <select id="yearFilter" data-t-title="yearHint" title="Not every indicator covers every year -- a column shows &quot;n/a&quot; for a year outside its own coverage"></select>
     <button type="button" id="mapToggle" aria-expanded="false" aria-controls="mapPanel">Show map</button>
     <span id="status">Loading…</span>
   </div>
@@ -269,15 +280,15 @@
        colours is read from the rows below, so the two cannot disagree. -->
   <div class="map-panel map-hidden" id="mapPanel">
     <div class="map-controls">
-      <select id="mapIndicator" aria-label="Indicator to draw on the map"></select>
+      <select id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map"></select>
       <span class="hint" id="mapHint"></span>
     </div>
     <div class="mapbox" id="mapBox">
       <svg class="map" id="mapSvg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
       <div class="zoom">
-        <button type="button" id="mapZoomIn" title="Zoom in" aria-label="Zoom in">+</button>
-        <button type="button" id="mapZoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
-        <button type="button" id="mapZoomReset" title="Reset view" aria-label="Reset view">&#8634;</button>
+        <button type="button" id="mapZoomIn" data-t-title="zoomIn" data-t-aria="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="mapZoomOut" data-t-title="zoomOut" data-t-aria="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+        <button type="button" id="mapZoomReset" data-t-title="resetView" data-t-aria="resetView" title="Reset view" aria-label="Reset view">&#8634;</button>
       </div>
       <div class="map-tip map-hidden" id="mapTip"></div>
     </div>
@@ -286,7 +297,7 @@
         <div class="swatches" id="mapSwatches"></div>
         <div class="ticks" id="mapTicks"></div>
       </div>
-      <div class="nodata-key"><i></i> no data</div>
+      <div class="nodata-key"><i></i> <span data-t="mapNoData">no data</span></div>
       <div class="note" id="mapLegendNote"></div>
     </div>
     <div class="map-warn map-hidden" id="mapCoverage" style="margin:0;border-radius:0"></div>
@@ -297,10 +308,10 @@
       <thead>
         <tr id="headRow">
           <th data-key="nis_code">NIS<span class="arrow">↓</span></th>
-          <th data-key="name_en">Commune<span class="arrow">↓</span></th>
-          <th data-key="region">Region<span class="arrow">↓</span></th>
-          <th data-key="province">Province<span class="arrow">↓</span></th>
-          <th data-key="arrondissement">Arrondissement<span class="arrow">↓</span></th>
+          <th data-key="name_en"><span data-t="colCommune">Commune</span><span class="arrow">↓</span></th>
+          <th data-key="region"><span data-t="colRegion">Region</span><span class="arrow">↓</span></th>
+          <th data-key="province"><span data-t="colProvince">Province</span><span class="arrow">↓</span></th>
+          <th data-key="arrondissement"><span data-t="colArrondissement">Arrondissement</span><span class="arrow">↓</span></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -308,42 +319,10 @@
   </div>
 
   <div class="attribution" id="attribution">
-    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
-    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), reused under
-    <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
-    and Statbel's <em>Licentie open data</em> of 22 October 2015.
-    <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
-    A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved.
-    <strong>Changes were made:</strong> the published files are reshaped into a canonical
-    indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
-    2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
-    endorse this product or how its data is used here. English commune names are unofficial
-    translations, not official Statbel labels.
-    <br><br>
-    <strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a>
-    (Office National de l'Emploi &mdash; Rijksdienst voor Arbeidsvoorziening), for the
-    unemployment, temporary-unemployment, part-time-benefit and activation columns.
-    <strong>Date of the information used:</strong> the files fetched for this build, covering
-    2017 onwards; the current year is a part-year average and is marked provisional, and each
-    row carries its own status letter. Reused under ONEM's own conditions, which
-    permit commercial reuse and require the source and this date &mdash; <em>not</em> under
-    CC BY 4.0, which does not apply to this source. Cells ONEM withholds for privacy
-    (fewer than 10 people) are shown as suppressed, never as zero.
-    <br><br>
-    <strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police
-    F&eacute;d&eacute;rale / Federale Politie</a> (Direction de l'information polici&egrave;re et
-    des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rate
-    columns. Reused under the federal police's own condition, quoted in full in
-    <code>docs/data_catalog.md</code>: correctly credit the source as stated here. That condition
-    says nothing about permitted uses beyond attribution &mdash; <em>not</em> CC BY 4.0, which does
-    not apply to this source, and not a stated grant of commercial reuse either, unlike Statbel and
-    ONEM above. Every one of these rates is resolved onto the commune boundaries in force through
-    2024, not the current map, for every year shown &mdash; including years long before that map
-    existed, since that is how the source itself publishes its own history. The most recent year of
-    each series is marked provisional; its exact reporting window is not stated by the source.
+    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
   </div>
 
-  <footer>Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>. Columns marked <span class="pill derived" style="vertical-align:1px">Derived</span> are computed on export from stored figures (see <code>docs/features/derived_indicators.md</code>), never a second source of truth; hover any value for its full year-by-year history.</footer>
+  <footer data-t-html="communesFooter">Data from GitHub Pages · reads the same files as the main dashboard, no server, no filtering applied. Indicator columns appear automatically as new municipal-level datasets are added — see <code>docs/features/statbel_adapter.md</code>. Columns marked <span class="pill derived" style="vertical-align:1px">Derived</span> are computed on export from stored figures (see <code>docs/features/derived_indicators.md</code>), never a second source of truth; hover any value for its full year-by-year history.</footer>
 </div>
 
 <script>
@@ -353,6 +332,39 @@ let INDICATOR_META = {};  // code -> {name, unit, years: sorted list of years th
 let YEARS = [];       // every distinct year across the whole dataset, sorted ascending
 let selectedYear = null;
 let sortKey = 'name_en', sortDir = 1;
+
+// The interface language. Read from the shared module so a choice made on any
+// page carries here, and vice versa (one localStorage key, site-wide).
+let LANG = I18N.initial();
+const T = (key, vars) => I18N.t(LANG, key, vars);
+
+/* Swap every marked element. The English is IN THE MARKUP, so a reader whose
+   JavaScript never runs still gets a complete page -- this replaces text
+   rather than supplying it. Four attributes, because a placeholder, a title
+   and an aria-label are as user-facing as body text and a page translated
+   only in its visible prose is half translated. */
+function applyStrings(){
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T(el.dataset.t); });
+  document.querySelectorAll('[data-t-html]').forEach(el => { el.innerHTML = T(el.dataset.tHtml); });
+  document.querySelectorAll('[data-t-title]').forEach(el => { el.title = T(el.dataset.tTitle); });
+  document.querySelectorAll('[data-t-aria]').forEach(el => {
+    el.setAttribute('aria-label', T(el.dataset.tAria));
+  });
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    el.placeholder = T(el.dataset.tPlaceholder);
+  });
+  document.getElementById('attribution').innerHTML = T('attribution');
+  const updated = document.getElementById('attrUpdated');
+  if(updated && ATTR_UPDATED) updated.textContent = ATTR_UPDATED;
+  document.documentElement.setAttribute('lang', LANG);
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+}
+
+// Held separately because applyStrings() rewrites the attribution wholesale,
+// which destroys the span the date was written into. The date is a LICENCE
+// CONDITION (docs/data_catalog.md), so it has to survive a language change.
+let ATTR_UPDATED = '';
 
 // Display names for the provenance shown in a column header. English only,
 // like the rest of this page; the trilingual copies live in the payloads and
@@ -365,7 +377,10 @@ function formatValue(value, unit){
   if(value === '' || value === undefined || value === null) return '';
   const num = parseFloat(value);
   if(isNaN(num)) return value;
-  const body = num.toLocaleString(undefined, {maximumFractionDigits: 2});
+  // The reader's language, not the browser's locale: a French page read in an
+  // English browser would otherwise print "35,363" where Belgium expects
+  // "35 363", and Dutch expects "35.363".
+  const body = num.toLocaleString(LANG || undefined, {maximumFractionDigits: 2});
   if(unit === 'eur') return '\u20ac' + body;
   if(unit && unit.startsWith('percent')) return body + '%';
   return body;
@@ -396,7 +411,7 @@ function buildHeader(){
   headRow.querySelectorAll('th[data-indicator]').forEach(th => th.remove());
   for(const code of INDICATOR_CODES){
     const m = INDICATOR_META[code] || {};
-    const label = m.name || code;
+    const label = (m.names && (m.names[LANG] || m.names.en)) || m.name || code;
     const coverage = (m.minYear === m.maxYear) ? m.minYear : `${m.minYear}\u2013${m.maxYear}`;
     const th = document.createElement('th');
     th.dataset.key = 'ind:' + code;
@@ -516,8 +531,9 @@ function render(){
     </tr>`;
   }).join('');
 
-  document.getElementById('status').textContent =
-    (q || region) ? `${rows.length} of ${COMMUNES.length} communes` : `${rows.length} communes`;
+  document.getElementById('status').textContent = (q || region)
+    ? T('nOfCommunes', {n: rows.length, total: COMMUNES.length})
+    : T('nCommunes', {n: rows.length});
 
   document.querySelectorAll('thead th').forEach(th => {
     th.classList.toggle('sorted', th.dataset.key === sortKey);
@@ -535,6 +551,28 @@ function render(){
 document.querySelectorAll('#headRow th').forEach(th => {
   th.addEventListener('click', () => sortBy(th.dataset.key));
 });
+document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
+  LANG = b.dataset.lang;
+  try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(_){}
+  applyStrings();
+  // The table's own chrome and the map's legend both hold translated text, so
+  // both are redrawn. Cheap: no fetch, and the map keeps its view.
+  buildHeader();
+  if(typeof buildMapIndicatorPicker === 'function'){
+    const chosen = document.getElementById('mapIndicator').value;
+    buildMapIndicatorPicker();
+    document.getElementById('mapIndicator').value = chosen;
+  }
+  if(typeof MapView !== 'undefined' && MapView.map){
+    MapView.map.setLang(LANG);
+    refreshMap();
+  }
+  const toggle = document.getElementById('mapToggle');
+  const open = !document.getElementById('mapPanel').classList.contains('map-hidden');
+  toggle.textContent = T(open ? 'hideMap' : 'showMap');
+  render();
+}));
+
 document.getElementById('search').addEventListener('input', render);
 document.getElementById('regionFilter').addEventListener('change', render);
 document.getElementById('yearFilter').addEventListener('change', e => {
@@ -575,8 +613,10 @@ async function load(){
     document.getElementById('statUpdated').textContent = latest ? latest.slice(0,10) : '—';
     // Same date, in the attribution block -- required there by licence, not
     // merely informative. See docs/data_catalog.md.
-    document.getElementById('attrUpdated').textContent = latest ? latest.slice(0,10) : 'see source';
+    ATTR_UPDATED = latest ? latest.slice(0,10) : 'see source';
+    document.getElementById('attrUpdated').textContent = ATTR_UPDATED;
 
+    applyStrings();
     render();
     if(typeof wireMapToggle === 'function') wireMapToggle();
   } catch(e){
@@ -672,7 +712,7 @@ function valuesForMap(code, year){
 
 function mapMeta(code){
   const m = INDICATOR_META[code] || {};
-  return {unit: m.unit, name: m.name || code};
+  return {unit: m.unit, name: (m.names && (m.names[LANG] || m.names.en)) || m.name || code};
 }
 
 /* Repaint for the current indicator, year and filters. Cheap -- it recolours
@@ -694,7 +734,7 @@ function refreshMap(){
   const hint = document.getElementById('mapHint');
   hint.textContent = '';
   if(outOfRange){
-    hint.append(`No data in ${selectedYear} — this indicator covers ${covers}. `);
+    hint.append(T('noDataInYear', {y: selectedYear, c: covers}) + ' ');
     // A blank map with an explanation is honest but a dead end. Offer the way
     // out, as an explicit click rather than a silent jump: changing the year
     // changes the TABLE too, and moving a reader's year under them without
@@ -702,7 +742,7 @@ function refreshMap(){
     const jump = document.createElement('button');
     jump.type = 'button';
     jump.className = 'year-jump';
-    jump.textContent = `Show ${meta.maxYear} instead`;
+    jump.textContent = T('showYearInstead', {y: meta.maxYear});
     jump.onclick = () => {
       selectedYear = meta.maxYear;
       document.getElementById('yearFilter').value = meta.maxYear;
@@ -710,7 +750,7 @@ function refreshMap(){
     };
     hint.appendChild(jump);
   } else {
-    hint.append(`${cov.withValue} of ${cov.shown} communes shown have a figure for ${selectedYear}.`);
+    hint.append(T('figuresFor', {n: cov.withValue, shown: cov.shown, y: selectedYear}));
   }
 }
 
@@ -718,7 +758,10 @@ function buildMapIndicatorPicker(){
   const sel = document.getElementById('mapIndicator');
   sel.innerHTML = '';
   const rows = INDICATOR_CODES
-    .map(code => ({code, label: (INDICATOR_META[code] || {}).name || code}))
+    .map(code => {
+      const m = INDICATOR_META[code] || {};
+      return {code, label: (m.names && (m.names[LANG] || m.names.en)) || m.name || code};
+    })
     .sort((a, b) => a.label.localeCompare(b.label));
   for(const r of rows){
     const o = document.createElement('option');
@@ -762,6 +805,7 @@ async function openMap(){
       legendNote: document.getElementById('mapLegendNote'),
       coverage:   document.getElementById('mapCoverage'),
     }, {
+      lang: LANG,
       onSelect: nis => { window.location.href = `local/${nis}/`; },
     }).build(geojson);
 
@@ -788,7 +832,7 @@ function wireMapToggle(){
   button.addEventListener('click', () => {
     const open = panel.classList.contains('map-hidden');
     button.setAttribute('aria-expanded', String(open));
-    button.textContent = open ? 'Hide map' : 'Show map';
+    button.textContent = T(open ? 'hideMap' : 'showMap');
     if(open){
       MapView.code = indicatorToOpenWith();
       document.getElementById('mapIndicator').value = MapView.code || '';

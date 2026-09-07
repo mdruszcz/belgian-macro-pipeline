@@ -72,8 +72,13 @@ def test_the_map_component_distinguishes_withheld_from_never_collected(page):
     component = (REPO / "assets" / "commune_map.js").read_text(encoding="utf-8")
     tip = re.search(r"_tipHtml\(f\) \{(.*?)\n  \}", component, re.DOTALL).group(1)
     assert "suppressed" in tip, "no withheld branch in the tooltip"
-    assert "no data here" in tip, "no never-collected branch in the tooltip"
-    assert "not zero" in tip, "the tooltip does not rule out a zero reading"
+    # The wording itself now lives in assets/i18n.js, in three languages, so
+    # the component is asserted to reach for the right KEYS rather than to
+    # contain the English sentences it used to hold.
+    assert "mapNoValueHere" in tip, "no never-collected branch in the tooltip"
+    assert "mapWithheld" in tip, "no withheld wording in the tooltip"
+    strings = (REPO / "assets" / "i18n.js").read_text(encoding="utf-8")
+    assert "not zero" in strings, "the withheld wording does not rule out a zero reading"
 
 
 def test_the_map_reads_the_table_rather_than_fetching_its_own_data(page):

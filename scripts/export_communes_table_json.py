@@ -52,7 +52,11 @@ def year_of(period: str) -> str:
     return period[:4]
 
 
-def build_table(csv_path: Path, lineage: dict[str, dict] | None = None) -> dict:
+def build_table(
+    csv_path: Path,
+    lineage: dict[str, dict] | None = None,
+    names: dict[str, dict] | None = None,
+) -> dict:
     """`lineage` is optional so every existing caller keeps working; when it is
     given, each indicator's `meta` entry carries how the figure was made and
     which agency published it. communes.html reads this file and nothing else,
@@ -111,12 +115,19 @@ def build_table(csv_path: Path, lineage: dict[str, dict] | None = None) -> dict:
             entry["years"].add(year)
 
     lineage = lineage or {}
+    names = names or {}
     meta_out = {}
     for code, entry in meta.items():
         ys = sorted(entry["years"])
         provenance = lineage.get(code, {})
         meta_out[code] = {
             "name": entry["name"],
+            # ALL THREE LANGUAGES, because the column headers are user-facing
+            # and the history CSV is a flat table with one name column. Without
+            # this a French reader gets a translated interface with English
+            # column headings -- the half-translation rule 7 exists to prevent.
+            # ~5 KB across 52 indicators, against an 11 MB file.
+            "names": names.get(code) or {"en": entry["name"]},
             "unit": entry["unit"],
             "minYear": ys[0],
             "maxYear": ys[-1],
@@ -134,8 +145,13 @@ def build_table(csv_path: Path, lineage: dict[str, dict] | None = None) -> dict:
     }
 
 
-def write_table(csv_path: Path, out_path: Path, lineage: dict[str, dict] | None = None) -> int:
-    table = build_table(csv_path, lineage)
+def write_table(
+    csv_path: Path,
+    out_path: Path,
+    lineage: dict[str, dict] | None = None,
+    names: dict[str, dict] | None = None,
+) -> int:
+    table = build_table(csv_path, lineage, names)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(table, ensure_ascii=False, separators=(",", ":")))
     return len(table["communes"])
@@ -154,12 +170,19 @@ def main() -> None:
     args = ap.parse_args()
 
     lineage = None
+    names = None
     if args.db is not None:
         from src.exporters.provenance import indicator_lineage
 
-        lineage = indicator_lineage(args.db)
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from export_site_payloads import _indicator_names
 
-    n = write_table(args.communes_history, args.out, lineage)
+        lineage = indicator_lineage(args.db)
+        # The same helper the site payloads use, so the table's headings and
+        # the commune pages' labels cannot disagree about an indicator's name.
+        names = _indicator_names(args.db)
+
+    n = write_table(args.communes_history, args.out, lineage, names)
     size_mb = args.out.stat().st_size / 1e6
     print(f"Wrote {n} commune entries to {args.out} ({size_mb:.2f} MB)")
 
