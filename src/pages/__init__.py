@@ -17,6 +17,9 @@ so which module a name is defined in stays an implementation detail.
         block type is.
     load_metadata(root=None) -> PageMetadata
         The published metadata this validator checks bindings against.
+    is_guard_error(error) -> bool
+        Whether a finding is a resource guard rather than a content problem,
+        so Batch 11's API can answer it 413-shaped without echoing detail.
     CURRENT_SCHEMA_VERSION, PageValidationError, PageDocumentError
 
 What this package does NOT do, and must not grow into: it never resolves a
@@ -25,7 +28,7 @@ renders a block (Batch 10), and it never resolves geography -- see the
 boundary spelled out in `semantics.py`'s module docstring.
 """
 
-from src.pages.document import load_document, validate_document
+from src.pages.document import is_guard_error, load_document, validate_document
 from src.pages.metadata import load_metadata
 from src.pages.migrations import migrate
 from src.pages.registry import load_registry
@@ -41,6 +44,7 @@ __all__ = [
     "PageDocumentError",
     "PageValidationError",
     "dumps",
+    "is_guard_error",
     "load_document",
     "load_metadata",
     "load_registry",

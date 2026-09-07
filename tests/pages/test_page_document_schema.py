@@ -19,6 +19,7 @@ import pytest
 from src.pages import (
     CURRENT_SCHEMA_VERSION,
     PageDocumentError,
+    is_guard_error,
     load_document,
     load_metadata,
     load_registry,
@@ -270,3 +271,29 @@ def test_seo_title_rejects_unknown_language_key(metadata, registry):
     doc["seo"]["title"]["de"] = "German is not one of the three supported languages"
     errors = validate_document(doc, metadata=metadata, registry=registry)
     assert errors, "seo.title should be additionalProperties: false over {en, fr, nl}"
+
+
+# --- guard vs content, told apart (Batch 11's 413-shaped answer) ----------------
+
+
+def test_a_guard_rejection_is_distinguishable_from_a_content_rejection(metadata, registry):
+    """Batch 11's API answers the two differently: a guard rejection is
+    413-shaped and echoes no detail back, a content rejection tells the author
+    what to fix. That only works if the distinction is reachable through the
+    public API, so this pins both halves against real findings rather than
+    against a hand-written code string."""
+    hero = builders.make_block("hero", block_id="blk-hero-1", binding=None)
+    oversized = builders.minimal_valid_document()
+    # 65 sections, one past the documented cap of 64.
+    oversized["sections"] = [builders.make_section(f"sec-{i}", [hero]) for i in range(65)]
+    for i, section in enumerate(oversized["sections"]):
+        section["blocks"][0]["id"] = f"blk-hero-{i}"
+    guard_errors = validate_document(oversized, metadata=metadata, registry=registry)
+    assert "too_many_sections" in _codes(guard_errors)
+    assert all(is_guard_error(e) for e in guard_errors), [e.code for e in guard_errors]
+
+    bad_content = builders.minimal_valid_document()
+    bad_content["page_type"] = "not-a-real-page-type"
+    content_errors = validate_document(bad_content, metadata=metadata, registry=registry)
+    assert content_errors, "an unknown page_type should be rejected"
+    assert not any(is_guard_error(e) for e in content_errors), [e.code for e in content_errors]
