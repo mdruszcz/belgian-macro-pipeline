@@ -1,0 +1,405 @@
+{
+  "registry_version": 1,
+  "forward_compatibility": "Batch 10 (the shared renderer) may ADD keys to this file -- new block types, new versions of an existing type, new per-type keys, new entries under $defs. It may NOT change or remove anything Batch 9 wrote here: no renaming a block type or a prop, no narrowing an existing props schema, no dropping a version from supported_versions. A prop shape has to change? Add a new block version and a migration step in src/pages/migrations.py; the old version keeps rendering. Bump registry_version only when that rule itself has to be broken, which needs an ADR.",
+  "accessible_name_note": "A block type with interactive: true MUST carry a trilingual accessible_name prop. That is enforced by src/pages/semantics.py so the failure reports as `missing_accessible_name`; the props schemas below deliberately do not list it under `required`, because a schema `required` would report it as `schema_violation` instead.",
+  "props_schema_note": "Every props schema below is marked props_schema_status: \"provisional\". Batch 9 defines the document format; no block here has been rendered yet, so prop shapes are not frozen. Batch 10 tightens them by adding a version, not by editing one.",
+  "deliberately_absent": {
+    "ranking_list": "needs the Peer Model / Fiscal Score, which is not built (Block M).",
+    "news_card": "no content source exists in this repository.",
+    "simulated_live_counter": "Batch 2 made it throw without data-simulated=\"true\"; its contract belongs to Batch 10.",
+    "page_shell_and_sidebars": "layout chrome, not document content; Batch 10/13."
+  },
+  "$defs": {
+    "trilingual_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "en",
+        "fr",
+        "nl"
+      ],
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nl": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "relative_url": {
+      "description": "Site-relative path or in-page fragment only. No scheme, no host, no protocol-relative //host (claude.md rule 23). src/pages/semantics.py additionally rejects '..' and '//' in any URL-bearing prop.",
+      "type": "string",
+      "pattern": "^(/[A-Za-z0-9._~/-]*|#[A-Za-z0-9_-]+)$"
+    },
+    "cta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "href"
+      ],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/trilingual_text"
+        },
+        "href": {
+          "$ref": "#/$defs/relative_url"
+        }
+      }
+    },
+    "rich_text_node": {
+      "description": "An allowlisted node set expressed in the schema, NOT a sanitiser over raw HTML. There is no node that carries markup.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "node",
+            "text"
+          ],
+          "properties": {
+            "node": {
+              "const": "paragraph"
+            },
+            "text": {
+              "$ref": "#/$defs/trilingual_text"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "node",
+            "level",
+            "text"
+          ],
+          "properties": {
+            "node": {
+              "const": "heading"
+            },
+            "level": {
+              "enum": [
+                2,
+                3,
+                4
+              ]
+            },
+            "text": {
+              "$ref": "#/$defs/trilingual_text"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "node",
+            "items"
+          ],
+          "properties": {
+            "node": {
+              "const": "list"
+            },
+            "ordered": {
+              "type": "boolean"
+            },
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 64,
+              "items": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "node",
+            "text",
+            "href"
+          ],
+          "properties": {
+            "node": {
+              "const": "link"
+            },
+            "text": {
+              "$ref": "#/$defs/trilingual_text"
+            },
+            "href": {
+              "$ref": "#/$defs/relative_url"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "block_types": {
+    "hero": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": null,
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "block_contract.md's own worked example.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "heading"
+            ],
+            "properties": {
+              "heading": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "subheading": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "eyebrow": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "cta": {
+                "$ref": "#/$defs/cta"
+              }
+            }
+          }
+        }
+      }
+    },
+    "kpi_card": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 2,
+      "interactive": false,
+      "reuses": ".bp-kpi in assets/belpulse/components.css",
+      "requires_binding": true,
+      "supported_versions": [
+        1,
+        2
+      ],
+      "why_in_batch_9": "exercises the indicator / NIS / additivity rejections, and carries two versions so unsupported-version rejection and forward migration are both testable against the real registry.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label"
+            ],
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "show_sparkline": {
+                "type": "boolean"
+              },
+              "size": {
+                "enum": [
+                  "full",
+                  "compact",
+                  "mini"
+                ]
+              }
+            }
+          }
+        },
+        "2": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label"
+            ],
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "sparkline": {
+                "type": "boolean"
+              },
+              "show_provenance": {
+                "type": "boolean"
+              },
+              "size": {
+                "enum": [
+                  "full",
+                  "compact",
+                  "mini"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "chart": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": true,
+      "reuses": null,
+      "requires_binding": true,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "interactive, so it exercises the missing-accessible-name rejection.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chart_type"
+            ],
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "caption": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "chart_type": {
+                "enum": [
+                  "line",
+                  "bar",
+                  "area",
+                  "scatter"
+                ]
+              },
+              "show_legend": {
+                "type": "boolean"
+              },
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "comparison_table": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "the existing `comparison` payload shape",
+      "requires_binding": true,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "matches the comparison payload this pipeline already publishes.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "caption"
+            ],
+            "properties": {
+              "caption": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "show_rank": {
+                "type": "boolean"
+              },
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "map": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": true,
+      "reuses": "assets/commune_map.js (claude.md rule 29 -- no second map implementation)",
+      "requires_binding": true,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "rule 29: the registry has to state that a map block reuses the shared map engine.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "legend_title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "show_legend": {
+                "type": "boolean"
+              },
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rich_text": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": null,
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "the unsafe-rich-text rejection needs something to run against.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 128,
+                "items": {
+                  "$ref": "#/$defs/rich_text_node"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

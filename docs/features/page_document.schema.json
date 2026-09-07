@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://belgian-macro-pipeline/page_document.schema.json",
+  "title": "BelPulse page document",
+  "description": "Structural contract for a page-builder document (docs/features/block_contract.md, Batch 9). STRUCTURE ONLY. Everything that needs another file to decide -- block type/version against assets/belpulse/blocks/registry.json, indicator and NIS existence against published metadata, grid bounds, grid overlap, duplicate block ids, accessible names, URL and rich-text safety -- is enforced by src/pages/semantics.py so it can carry a specific error code. Numeric grid bounds are deliberately NOT expressed here: JSON Schema's `integer` type accepts 12.0, and a schema `minimum` would report the failure as `schema_violation` instead of `invalid_grid_position`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "page_id",
+    "revision",
+    "route",
+    "page_type",
+    "theme",
+    "context",
+    "seo",
+    "sections"
+  ],
+  "properties": {
+    "schema_version": {
+      "description": "Document format version. src/pages/migrations.py upgrades older versions forward; a newer one is rejected rather than guessed at. No `minimum` here on purpose -- an out-of-range version is reported as `unsupported_schema_version`, not `schema_violation`.",
+      "type": "integer"
+    },
+    "page_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "revision": {
+      "description": "Monotonic per-page revision counter. Batch 16's publication transaction owns how it advances.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "route": {
+      "description": "Checked against the allowlist in src/pages/semantics.py, not by a pattern here, so a rejection can say which allowlisted shape was expected.",
+      "type": "string",
+      "minLength": 1
+    },
+    "page_type": {
+      "description": "One of homepage, macro, micro, municipality-profile, explorer, data-explorer, map-explorer, blank. Provisional set, per block_contract.md's own open question: it will be reconciled with whatever Batch 15 actually converts. Enforced by src/pages/semantics.py (PAGE_TYPES) rather than by an enum here, so an unknown value is reported as `unknown_page_type`.",
+      "type": "string",
+      "minLength": 1
+    },
+    "theme": {
+      "description": "A named theme, resolved by the renderer (Batch 10) against assets/belpulse/. Deliberately a pattern and not an enum: Batch 9 does not own the theme inventory.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "context": {
+      "$ref": "#/$defs/page_context"
+    },
+    "seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "title": {"$ref": "#/$defs/trilingual_text"},
+        "description": {"$ref": "#/$defs/trilingual_text"}
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/section"}
+    }
+  },
+  "$defs": {
+    "trilingual_text": {
+      "description": "Every user-facing string in a page document (claude.md rule 7). Shape copied from indicator_config.schema.json's `name`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en", "fr", "nl"],
+      "properties": {
+        "en": {"type": "string", "minLength": 1},
+        "fr": {"type": "string", "minLength": 1},
+        "nl": {"type": "string", "minLength": 1}
+      }
+    },
+    "page_context": {
+      "description": "Template variables a route supplies. Only `nis` exists at schema_version 1 (block_contract.md leaves the wider shape open until Batch 4). `{nis}` is the literal placeholder used by a templated commune route.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nis": {
+          "type": "string",
+          "pattern": "^([0-9]{5}|\\{nis\\})$"
+        }
+      }
+    },
+    "nis_code": {
+      "type": "string",
+      "pattern": "^[0-9]{5}$"
+    },
+    "indicator_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+    },
+    "geo_level": {
+      "enum": ["country", "region", "province", "arrondissement", "municipality"]
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "blocks"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+        "label": {"$ref": "#/$defs/trilingual_text"},
+        "allow_overlap": {
+          "description": "Whether two blocks in this section may occupy the same grid cell at the same breakpoint. Absent means false; src/pages/semantics.py reports a violation as `grid_overlap`.",
+          "type": "boolean"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/block"}
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "version", "props", "binding", "visibility", "layout"],
+      "properties": {
+        "id": {
+          "description": "Unique across the whole document and never reused after deletion, so undo/redo history can name a dead block without colliding with a live one.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "type": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+        "version": {
+          "description": "No `minimum` here on purpose -- the registry decides which versions exist, and a bad one is reported as `unsupported_block_version`.",
+          "type": "integer"
+        },
+        "props": {"type": "object"},
+        "binding": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/binding"}
+          ]
+        },
+        "visibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["desktop", "tablet", "mobile"],
+          "properties": {
+            "desktop": {"type": "boolean"},
+            "tablet": {"type": "boolean"},
+            "mobile": {"type": "boolean"}
+          }
+        },
+        "layout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["desktop", "tablet", "mobile"],
+          "properties": {
+            "desktop": {"$ref": "#/$defs/grid_cell"},
+            "tablet": {"$ref": "#/$defs/grid_cell"},
+            "mobile": {"$ref": "#/$defs/grid_cell"}
+          }
+        }
+      }
+    },
+    "grid_cell": {
+      "description": "Grid units, never pixels: 12 / 8 / 4 columns for desktop / tablet / mobile. Bounds and positivity are checked in src/pages/semantics.py (error code `invalid_grid_position`), because `integer` here would still admit 12.0.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": {"type": "integer"},
+        "y": {"type": "integer"},
+        "w": {"type": "integer"},
+        "h": {"type": "integer"}
+      }
+    },
+    "binding": {
+      "description": "A closed vocabulary, not a query language (claude.md rules 20, 21, 23). There is no generic `query` operation -- it is absent, not disabled. `peer` is deliberately absent from `provider` until Peer Model v1 exists (docs/features/data_binding.md's open question); a document naming it fails here rather than being silently ignored. RESOLUTION is Batch 14's: nothing in Batch 9 opens a payload or computes a value.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "operation"],
+      "properties": {
+        "provider": {
+          "enum": [
+            "national",
+            "municipal",
+            "indicator_snapshot",
+            "geography",
+            "context",
+            "comparison",
+            "ranking"
+          ]
+        },
+        "indicator": {"$ref": "#/$defs/indicator_code"},
+        "geography": {"$ref": "#/$defs/binding_geography"},
+        "period": {"$ref": "#/$defs/binding_period"},
+        "operation": {
+          "enum": [
+            "latest",
+            "history",
+            "comparison",
+            "ranking",
+            "percentile",
+            "table",
+            "map_values",
+            "aggregate"
+          ]
+        },
+        "aggregate": {"$ref": "#/$defs/binding_aggregate"},
+        "comparison_scope": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {"$ref": "#/$defs/geo_level"}
+        }
+      }
+    },
+    "binding_geography": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {"mode": {"const": "context"}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "nis"],
+          "properties": {
+            "mode": {"const": "fixed"},
+            "nis": {"$ref": "#/$defs/nis_code"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "level"],
+          "properties": {
+            "mode": {"const": "level"},
+            "level": {"$ref": "#/$defs/geo_level"}
+          }
+        }
+      ]
+    },
+    "binding_period": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {"mode": {"const": "latest"}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "period"],
+          "properties": {
+            "mode": {"const": "fixed"},
+            "period": {"$ref": "#/$defs/period_label"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "from", "to"],
+          "properties": {
+            "mode": {"const": "range"},
+            "from": {"$ref": "#/$defs/period_label"},
+            "to": {"$ref": "#/$defs/period_label"}
+          }
+        }
+      ]
+    },
+    "period_label": {
+      "description": "A period label as the published payloads already write them: YYYY, YYYY-MM, or YYYY-Qn.",
+      "type": "string",
+      "pattern": "^[0-9]{4}(-(0[1-9]|1[0-2])|-Q[1-4])?$"
+    },
+    "binding_aggregate": {
+      "description": "`sum` is the ONLY declarable function at schema_version 1, on purpose. Deciding whether a non-additive indicator has a defensible recomputed aggregate is Batch 14's job, using src/analytics/aggregate.py's own answer -- src/pages/ must never restate that decision table (claude.md rule 19, invariant 4).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["function", "over"],
+      "properties": {
+        "function": {"enum": ["sum"]},
+        "over": {"$ref": "#/$defs/geo_level"}
+      }
+    }
+  }
+}

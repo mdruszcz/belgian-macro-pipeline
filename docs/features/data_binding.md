@@ -43,7 +43,18 @@ No generic "query" operation exists in the schema at all — not disabled, absen
 - Whether a geography level is valid for an indicator comes from the indicator's own
   `geo_levels`.
 - A non-additive indicator cannot be bound to a "sum" operation; the binding validator rejects it
-  using the same `is_additive`/`aggregation_method` check the exporters already apply.
+  using the same additivity check the exporters already apply — `src/analytics/aggregate.py`'s
+  `SUM if meta.get("is_additive") else REFUSE`, surfaced in published metadata as `additive`.
+
+  **Corrected 2026-09-07, during Batch 9.** This line previously claimed the exporters apply an
+  "`is_additive`/`aggregation_method`" check. They do not: `grep aggregation_method src/
+  scripts/export_*.py` returns zero hits. The column is vestigial and must not be read here
+  either — see docs/features/block_contract.md's own corrected bullet for why reading it would
+  be actively harmful.
+- Whether a non-additive indicator nonetheless has a defensible *recomputed* aggregate is a
+  separate question from additivity, and it is this batch's to answer — by importing
+  `src/analytics/aggregate.py`'s decision, never by restating its `RECOMPUTABLE_FUNCTIONS` set
+  in binding code (claude.md rule 19, invariant 4).
 - A single-period indicator (e.g. a census snapshot) cannot be bound to a "history" operation
   that would silently render a one-point line chart as if it were a trend.
 - A suppressed value resolves to the suppressed state (claude.md rule 26), never to a number,
