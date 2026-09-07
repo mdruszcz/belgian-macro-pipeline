@@ -1,5 +1,63 @@
 # Batch 3 — homepage reproduction
 
+## Second pass: a high-fidelity design arrived (2026-09-07)
+
+The first pass was built against `docs/design-references/homepage.md`, itself
+transcribed from a low-resolution screenshot in Batch 1. A **high-fidelity
+homepage design** was then supplied, and the first pass was wrong about the
+page's whole shape, not just its details. What actually changed:
+
+| | First pass (from the transcription) | The real design |
+|---|---|---|
+| Hero | light background, one map card | **dark navy band**, three cards (map + two stacked mini charts) |
+| Headings | sans-serif throughout | **serif** H1 and section headings |
+| Top bar | 3 language buttons + a theme toggle | logo + tagline, nav, **search box**, a single language dropdown |
+| Mid page | two full-width stacked sections | **two columns**: commune profile beside the maps section |
+| Maps section | text chips only | **pill tabs + three live map thumbnails** |
+| National row | 3 cards | **6 cards** |
+| Finance band | one wide "unavailable" panel | **4 tiles in a strip**, each with a tinted icon |
+| Footer | dark | **light**, with logo, links and a script tagline |
+
+**A Batch 1 finding is corrected by this.** `tokens-measured.md` recorded "no
+serif anywhere… the new designs don't use that pairing at all", and Batch 1
+concluded the redesign was dropping the site's existing Spectral headings.
+The high-fidelity design shows the opposite: the H1, every section heading and
+the CTA are set in a serif. A `--bp-font-display` token now exists and points
+at Spectral — the face `local.html` and `communes.html` already use — so the
+redesign converges on the site's existing serif instead of introducing a third
+typeface. The original reading was a limitation of the screenshot, not a
+mistake in the design.
+
+**Three more bugs in shared components, found by this second pass:**
+
+1. **`.bp-chip`'s `<button>` problem, again in a new form** — fixed in the
+   first pass.
+2. **The shared map component's legend was all-or-nothing.**
+   `commune_map.js`'s constructor docstring says `swatches`, `ticks` and
+   `legendNote` are "optional", but `_drawLegend` bailed out entirely unless
+   **all three** were passed. The hero card wants the colour bar without the
+   several-sentence prose note (which is right on `map.html`, where the map is
+   the page, and swamps a hero card) — so omitting `legendNote` silently
+   produced **no legend at all**, with no error. Each of the three is now
+   independently optional, which is what the docstring always promised.
+   `map.html` and `communes.html` pass all three and are unaffected.
+3. **Canvases with no CSS width silently drew at 300px.** `components.css`
+   stretches canvases inside `.bp-chart-canvas-wrap`; this page's smaller
+   chart slot is its own class, so each sparkline kept the canvas element's
+   300px *intrinsic* width and **drew straight out of its card into the
+   neighbouring ones**. Fixed here, and it is the second time in one batch
+   that a canvas measured the wrong width — `charts.js` now takes an explicit
+   `height` and a `compact` (sparkline) mode so a small card gets a chart
+   drawn at the size it is actually shown, rather than a full-size chart
+   scaled down by CSS.
+4. **Mobile overflow, a second and different cause.** The first pass fixed the
+   top bar in `layout.css`. This layout reintroduced sideways scrolling from
+   two new causes: plain `1fr` grid tracks (whose implied minimum is
+   *min-content*, so a wide map card refuses to shrink and pushes the page
+   instead — every collapsed track is now `minmax(0,1fr)`), and this page
+   putting its top-bar flex row in an inner `.wrap` that `layout.css`'s own
+   mobile rule does not select.
+
 ```
 Batch: 3 (docs/features/page_builder.md; design docs/design-references/homepage.md)
 Base commit: 1c50e0ba (Batch 9: page-document schema, #104)

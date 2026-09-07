@@ -131,6 +131,15 @@
      intended look. */
   --bp-font-ui: "Inter", "IBM Plex Sans", system-ui, -apple-system, sans-serif;
   --bp-font-decorative: "Caveat", "IBM Plex Sans", cursive;
+  /* Display serif for the page H1 and section headings.
+     CORRECTION to this file's first version, which recorded "no serif
+     anywhere" -- that reading came from low-resolution screenshots. A
+     high-fidelity homepage design supplied 2026-09-07 shows the H1 and every
+     section heading set in a transitional serif, and the dark CTA band too.
+     Spectral is what local.html and communes.html already use for headings,
+     so the redesign converges on the site's existing serif rather than
+     introducing a third typeface. */
+  --bp-font-display: "Spectral", "Playfair Display", Georgia, serif;
 
   --bp-text-h1:      2rem;
   --bp-text-h2:      1.25rem;
