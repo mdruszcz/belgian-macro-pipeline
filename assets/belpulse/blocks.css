@@ -1,0 +1,110 @@
+/* Block layout for rendered page documents -- Batch 10
+ * (docs/features/page_builder.md, docs/features/block_contract.md).
+ *
+ * Requires tokens.css and components.css. The BLOCKS themselves reuse Batch
+ * 2's component classes (.bp-kpi, .bp-compare-table, .bp-chart-canvas-wrap,
+ * .bp-state); what lives here is only the GRID they sit in and the few
+ * block-specific pieces that have no component equivalent.
+ *
+ * THE GRID IS IN GRID UNITS, NEVER PIXELS. src/pages/render.py emits each
+ * block's x/y/w/h for all three breakpoints as custom properties in one
+ * inline style (--dx/--dy/--dw/--dh, --tx/..., --mx/...), and the media
+ * queries below decide which set applies. A layout therefore survives a
+ * redesign of this stylesheet, which is the whole reason block_contract.md
+ * stores columns rather than coordinates.
+ */
+
+.bp-page{display:flex; flex-direction:column; gap:var(--bp-space-8)}
+
+.bp-grid{
+  display:grid;
+  grid-template-columns:repeat(12, minmax(0, 1fr));
+  gap:var(--bp-space-4);
+  align-items:start;
+}
+
+/* minmax(0,1fr), never a bare 1fr: a 1fr track's implied minimum is
+   min-content, so one wide block (a map, a long table) refuses to shrink and
+   pushes the whole page sideways instead. Learned the hard way in Batch 3. */
+
+.bp-block{min-width:0}
+
+/* Desktop is the default; 12 columns. `span` so a block occupies its declared
+   width from its declared column, and grid-row so y/h are honoured too. */
+.bp-block{
+  grid-column:calc(var(--dx, 0) + 1) / span var(--dw, 12);
+  grid-row:calc(var(--dy, 0) + 1) / span var(--dh, 1);
+}
+
+@media (max-width: 1024px){
+  .bp-grid{grid-template-columns:repeat(8, minmax(0, 1fr))}
+  .bp-block{
+    grid-column:calc(var(--tx, 0) + 1) / span var(--tw, 8);
+    grid-row:calc(var(--ty, 0) + 1) / span var(--th, 1);
+  }
+}
+
+@media (max-width: 640px){
+  .bp-grid{grid-template-columns:repeat(4, minmax(0, 1fr))}
+  .bp-block{
+    grid-column:calc(var(--mx, 0) + 1) / span var(--mw, 4);
+    grid-row:calc(var(--my, 0) + 1) / span var(--mh, 1);
+  }
+}
+
+/* Per-breakpoint visibility. The renderer writes the breakpoints a block is
+   hidden at into one attribute, so a block hidden on mobile is still IN the
+   document (and still in the builder's structure tree) rather than dropped. */
+@media (min-width: 1025px){ .bp-block[data-hidden~="desktop"]{display:none} }
+@media (min-width: 641px) and (max-width: 1024px){ .bp-block[data-hidden~="tablet"]{display:none} }
+@media (max-width: 640px){ .bp-block[data-hidden~="mobile"]{display:none} }
+
+/* ---- block chrome ------------------------------------------------------- */
+
+.bp-block-title{
+  font-size:var(--bp-text-h2); font-weight:var(--bp-weight-semibold);
+  margin:0 0 var(--bp-space-2);
+}
+.bp-block-caption{font-size:12px; color:var(--bp-text-muted); margin:var(--bp-space-2) 0 0}
+.bp-block-spark{min-height:34px; margin-top:6px}
+.bp-block-spark canvas{display:block; width:100%}
+
+.bp-block--hero{
+  background:var(--bp-surface); border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-card); padding:var(--bp-space-8) var(--bp-space-6);
+}
+.bp-hero-eyebrow{
+  font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold);
+  letter-spacing:.1em; color:var(--bp-text-muted); margin:0 0 var(--bp-space-3);
+}
+.bp-hero-heading{font-family:var(--bp-font-display); font-size:2rem; font-weight:600; margin:0 0 var(--bp-space-3)}
+.bp-hero-sub{color:var(--bp-text-muted); margin:0 0 var(--bp-space-5); max-width:60ch}
+
+.bp-block--chart, .bp-block--comparison_table, .bp-block--map, .bp-block--rich_text{
+  background:var(--bp-surface); border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card);
+  padding:var(--bp-space-5);
+}
+.bp-block--rich_text h2,.bp-block--rich_text h3,.bp-block--rich_text h4{
+  font-family:var(--bp-font-display); font-weight:600; margin:var(--bp-space-4) 0 var(--bp-space-2);
+}
+.bp-block--rich_text p{margin:0 0 var(--bp-space-3); color:var(--bp-text)}
+.bp-block--rich_text ul,.bp-block--rich_text ol{margin:0 0 var(--bp-space-3); padding-left:1.3em}
+
+.bp-block-map .mapbox{position:relative; min-height:240px}
+.bp-block-map .legend{overflow-x:auto; margin-top:var(--bp-space-3)}
+
+/* A block whose canvas has not been hydrated yet reserves its height, so
+   scrolling past a lazy chart does not shift everything below it. */
+.bp-chart-canvas-wrap{min-height:210px}
+.bp-chart-canvas-wrap canvas{display:block; width:100%}
+
+/* ---- a block that failed to render --------------------------------------
+   Deliberately visible rather than silent: a page that quietly drops a block
+   looks correct while being wrong, and the maintainer is the person who most
+   needs to see that one is broken. */
+.bp-block--failed{
+  border:1px dashed var(--bp-border); border-radius:var(--bp-radius-card);
+  padding:var(--bp-space-5); background:var(--bp-surface-alt);
+}
+.bp-block-failed{margin:0; font-size:var(--bp-text-small); color:var(--bp-text-muted)}

@@ -20,18 +20,26 @@ so which module a name is defined in stays an implementation detail.
     is_guard_error(error) -> bool
         Whether a finding is a resource guard rather than a content problem,
         so Batch 11's API can answer it 413-shaped without echoing detail.
+    render_document(doc, *, registry, lang, data, errors) -> str
+        The one renderer (Batch 10). The public build and the builder preview
+        both call this, so what is edited and what ships cannot drift.
+    BlockRenderError
+        One block that failed to render; collected, never raised out of a page.
     CURRENT_SCHEMA_VERSION, PageValidationError, PageDocumentError
 
 What this package does NOT do, and must not grow into: it never resolves a
-binding, opens a commune payload or computes a value (Batch 14), it never
-renders a block (Batch 10), and it never resolves geography -- see the
-boundary spelled out in `semantics.py`'s module docstring.
+binding, opens a commune payload or computes a value (Batch 14), and it never
+resolves geography -- see the boundary spelled out in `semantics.py`'s module
+docstring. Batch 10 added rendering, which is why `render_document` takes
+already-resolved `data` and renders what it is handed: the line it must not
+cross is fetching or computing that data itself.
 """
 
 from src.pages.document import is_guard_error, load_document, validate_document
 from src.pages.metadata import load_metadata
 from src.pages.migrations import migrate
 from src.pages.registry import load_registry
+from src.pages.render import BlockRenderError, render_document
 from src.pages.schema import (
     CURRENT_SCHEMA_VERSION,
     PageDocumentError,
@@ -43,6 +51,7 @@ __all__ = [
     "CURRENT_SCHEMA_VERSION",
     "PageDocumentError",
     "PageValidationError",
+    "BlockRenderError",
     "dumps",
     "is_guard_error",
     "load_document",
@@ -50,5 +59,6 @@ __all__ = [
     "load_registry",
     "loads",
     "migrate",
+    "render_document",
     "validate_document",
 ]
