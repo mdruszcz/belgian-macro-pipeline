@@ -484,6 +484,9 @@ def test_a_shell_file_carrying_the_sequence_cannot_break_out(config, monkeypatch
     hostile.write_text(f"shell.note = '{SCRIPT_END}><h1>escaped</h1>';\n", encoding="utf-8")
     monkeypatch.setattr(service, "BUILDER_APP_DIR", tmp_path)
     monkeypatch.setattr(service, "SHELL_JS_FILES", ("hostile.js",))
+    # The real stylesheet lives in the real app directory, not this fixture's.
+    # This test is about the JS escaping only.
+    monkeypatch.setattr(service, "SHELL_CSS_FILES", ())
 
     html = service.bootstrap_html(config, "nonce-value")
     # Exactly one `</script` in the whole document: the real closing tag. The

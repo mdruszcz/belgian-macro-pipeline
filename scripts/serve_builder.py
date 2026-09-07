@@ -64,7 +64,7 @@ def main(argv=None) -> int:
         print(f"error: cannot serve on port {config.port}: {exc.strerror}", file=sys.stderr)
         return 2
 
-    print("BelPulse builder service (Batch 11: API only, no UI yet).")
+    print("BelPulse builder service (Batch 12: page/block editing shell).")
     print("Open exactly this URL -- the token is this process's and is not stored anywhere:")
     print(f"  {config.token_url}")
     print("Ctrl-C to stop.")

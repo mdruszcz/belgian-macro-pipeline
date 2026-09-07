@@ -131,8 +131,18 @@ DESIGN_SYSTEM_DIR = _REPO_ROOT / "assets" / "belpulse"
 #:
 #: Batch 12b adds its own filenames here -- that ONE-LINE edit is the only
 #: change to this module its scope allows.
-SHELL_JS_FILES: tuple[str, ...] = ("history.js",)
-SHELL_CSS_FILES: tuple[str, ...] = ()
+SHELL_JS_FILES: tuple[str, ...] = (
+    "history.js",
+    "dom.js",
+    "model.js",
+    "api.js",
+    "canvas.js",
+    "inspector.js",
+    "sidebar.js",
+    "topbar.js",
+    "app.js",
+)
+SHELL_CSS_FILES: tuple[str, ...] = ("shell.css",)
 
 #: Read and handed to the shell as a string constant for `srcdoc` injection.
 #: The preview iframe has a BARE sandbox, so it has an opaque origin and a

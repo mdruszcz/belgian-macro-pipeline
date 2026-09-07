@@ -92,7 +92,7 @@ boundaries:
 	$(PYTHON) -m pip install -q -r requirements-geo.txt
 	$(PYTHON) scripts/build_commune_boundaries.py --db $(DB)
 
-## builder: run the local page builder API on 127.0.0.1:8787 (Ctrl-C to stop).
+## builder: run the local page builder shell on 127.0.0.1:8787 (Ctrl-C to stop).
 ## Loopback only, one session token per process, printed as the URL to open.
 ## Editing saves a draft; nothing becomes public until you publish explicitly,
 ## and nothing is ever committed for you. Needs the published payloads, so run
