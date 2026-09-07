@@ -1,0 +1,182 @@
+/* BelPulse design tokens — Batch 1 (docs/features/page_builder.md).
+ *
+ * Source: docs/design-references/tokens-measured.md, itself a transcription
+ * of four reference designs (micro, macro, municipality profile, homepage)
+ * shared in chat on 2026-09-07 as images, not files. Values here are
+ * ESTIMATED FROM SCREENSHOTS, not measured from a source file -- see that
+ * document for which values are confident and which are a best-effort read.
+ * Tighten these later if the original design files ever land in
+ * docs/design-references/originals/.
+ *
+ * THIS FILE DOES NOT REPLACE the existing --bg/--surface/--accent system used
+ * by local.html, communes.html, map.html and assets/commune_map.css. Those
+ * pages keep working exactly as they do today. This is a second, separate
+ * token set for the redesigned pages (Batches 3, 4, 6, 7), reconciled with
+ * the old one only when a page is actually converted (Batch 15) -- see
+ * docs/features/design_system.md, "Non-goals".
+ *
+ * Semantic names, not raw colour names (a --bp-accent, never a --bp-red-500):
+ * a rebrand or accessibility fix is a token edit here, not a find-and-replace
+ * across every block.
+ *
+ * Two THEMES exist in the reference designs themselves, not just light/dark
+ * preference: the "editorial" shell (homepage, municipality profile) is
+ * light-only; the "analytical" shell (macro, micro) is used in BOTH a light
+ * variant (micro) and a dark "navy-analytical" variant (macro) -- both are
+ * deliberate looks a reader can land on, not a light/dark-mode preference
+ * pair. --bp-theme-navy below is that deliberate dark surface, selected by a
+ * page (or a block's own prop), independent of the reader's OS colour-scheme
+ * preference, which is handled separately in the block below it -- exactly
+ * the two-track pattern assets/commune_map.css already uses for the
+ * choropleth ramp (data-theme for an explicit choice, prefers-color-scheme
+ * for the default), followed here rather than invented twice.
+ */
+
+:root{
+  /* ---- brand ---------------------------------------------------------- */
+  --bp-accent:        #c8402f;  /* primary CTA, active nav, "this is the subject" highlight */
+  --bp-accent-ink:     #7a2116; /* accent text on a light background (AA against --bp-bg) */
+  --bp-accent-soft:    #f6e3df; /* accent-tinted background, e.g. a selected chip */
+  --bp-blue:           #3a67e0; /* links, chart series, KPI icon backgrounds */
+  --bp-green:          #278a53; /* a favourable delta, per the indicator's own preferred_direction.
+                                    Darkened from the screenshot's brighter green -- the lighter
+                                    read measured 2.94:1 against --bp-bg, short of the 3:1 floor
+                                    for large/icon text; this version measures 4.04:1, with real
+                                    margin rather than sitting on the line. */
+  --bp-red-signal:     #c8402f; /* an unfavourable delta -- same hue as --bp-accent on purpose:
+                                    this is not a coincidence in the reference designs, the brand
+                                    red doubles as the "needs attention" signal colour. Kept as a
+                                    separate token anyway, because the day that stops being true
+                                    (a rebrand, an accessibility fix) the two must be free to
+                                    diverge without an edit to every place a delta is rendered. */
+
+  /* ---- light / editorial surface --------------------------------------- */
+  --bp-bg:             #f8f7f4;
+  --bp-surface:        #ffffff;
+  --bp-surface-alt:    #f1efe9;  /* a card-within-a-card, or a subtle row stripe */
+  --bp-border:         #e5e2da;
+  --bp-text:           #1a1f2e;
+  --bp-text-muted:     #5b6270;  /* darkened from the screenshot read: #6b7280 measured 4.51:1
+                                    against --bp-bg, a hair over the 4.5:1 floor with no real
+                                    margin -- this measures 5.72:1 */
+  --bp-text-faint:     #94989f;  /* below AA on purpose -- used only for non-essential decoration
+                                    (a unit caption already restated elsewhere, a watermark-style
+                                    label), never for text that is the only carrier of a fact */
+
+  /* ---- dark / navy-analytical surface ---------------------------------- */
+  --bp-navy-bg:        #0e1c3a;
+  --bp-navy-surface:   #152647;
+  --bp-navy-border:    #23345a;
+  --bp-navy-text:      #eef1f8;
+  --bp-navy-text-muted:#a3aec9;
+
+  /* ---- chart palette ---------------------------------------------------
+     A categorical 8-colour set for a multi-series chart (e.g. the macro
+     page's international comparison, or micro's sector breakdown). NOT
+     lifted from a screenshot swatch by swatch -- chosen against WCAG
+     contrast and checked for colour-blind confusion, which a screenshot
+     cannot verify. Order matters: assigned to series in this order, so a
+     chart with fewer series always uses the same colour for the same
+     position rather than an arbitrary subset. */
+  --bp-chart-1: #3a67e0;
+  --bp-chart-2: #c8402f;
+  --bp-chart-3: #278a53;  /* same value as --bp-green, kept as a separate token: a chart series
+                              and "this delta is favourable" are different meanings that happen
+                              to share a colour today, and must be free to diverge */
+  --bp-chart-4: #b8811f;  /* darkened from the screenshot's brighter amber -- the lighter read
+                              measured 1.99:1 against --bp-bg, a chart series a reader could
+                              barely see; this measures 3.16:1 */
+  --bp-chart-5: #7a5ce0;
+  --bp-chart-6: #1c7f86;  /* darkened from the screenshot's brighter teal -- 2.68:1 -> 4.43:1 */
+  --bp-chart-7: #d1668f;
+  --bp-chart-8: #75797f;  /* darkened from the screenshot's lighter grey -- 3.03:1 sat right on
+                              the 3:1 floor with no margin; this measures 4.09:1 */
+
+  /* ---- shape ------------------------------------------------------------ */
+  --bp-radius-card:    10px;
+  --bp-radius-control: 7px;
+  --bp-radius-pill:    999px;
+  --bp-shadow-card:    0 1px 2px rgba(20, 20, 30, .04), 0 4px 16px rgba(20, 20, 30, .06);
+
+  /* ---- spacing scale ------------------------------------------------------
+     A named scale, not raw px in every block -- so "the gap between cards"
+     stays one number to change, not a search-and-replace. */
+  --bp-space-1: 4px;
+  --bp-space-2: 8px;
+  --bp-space-3: 12px;
+  --bp-space-4: 16px;
+  --bp-space-5: 20px;
+  --bp-space-6: 24px;
+  --bp-space-8: 32px;
+  --bp-space-10: 40px;
+
+  /* ---- type --------------------------------------------------------------
+     See docs/design-references/tokens-measured.md: Inter is a RECOMMENDATION
+     for this visual style, not a confirmed match to the reference designs --
+     no typeface can be identified with confidence from a screenshot. The
+     decorative face is used ONLY for the small editorial pull-quote
+     component, nowhere else. */
+  /* A page using either of these must link the actual font, the same way
+     every existing page already links Google Fonts -- this file only
+     declares the CSS variable, it cannot fetch a font by itself. See
+     docs/design-references/token-gallery.html's <head> for the exact line:
+     https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700
+     &family=Caveat:wght@500;600&display=swap -- matching the weights
+     actually used below (400/500/600/700 for Inter, 500/600 for Caveat).
+     Without that link both fall back to IBM Plex Sans, which is a
+     legitimate fallback (already used elsewhere in this repo) but not the
+     intended look. */
+  --bp-font-ui: "Inter", "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --bp-font-decorative: "Caveat", "IBM Plex Sans", cursive;
+
+  --bp-text-h1:      2rem;
+  --bp-text-h2:      1.25rem;
+  --bp-text-kpi:     1.75rem;
+  --bp-text-body:    .9375rem;
+  --bp-text-small:   .8125rem;
+  --bp-text-eyebrow: .75rem;
+
+  --bp-weight-regular: 400;
+  --bp-weight-medium:  500;
+  --bp-weight-semibold:600;
+  --bp-weight-bold:    700;
+
+  /* ---- breakpoints ---------------------------------------------------
+     NOT informed by the reference designs -- all four supplied images are
+     desktop-only. These follow this repo's own existing convention until a
+     tablet/mobile mockup says otherwise (docs/design-references/
+     tokens-measured.md, "Breakpoints"). Grid widths per docs/features/
+     block_contract.md: 12 columns desktop, 8 tablet, 4 mobile. */
+  --bp-breakpoint-tablet: 1024px;
+  --bp-breakpoint-mobile: 640px;
+}
+
+/* Reader's OS preference, no explicit choice made -- the editorial shell's
+   OWN surface tokens (bg/surface/text) get a dark variant here so a reader
+   who prefers dark system-wide isn't handed a bright white editorial page.
+   This is independent of --bp-navy-*, which a page selects deliberately
+   (the analytical shell's own "dark version," not a preference response). */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bp-bg:          #14131a;
+    --bp-surface:     #1c1b24;
+    --bp-surface-alt: #24232e;
+    --bp-border:      #322f3d;
+    --bp-text:        #eeecf3;
+    --bp-text-muted:  #a7a3b5;
+    --bp-text-faint:  #78748a;
+    --bp-accent-soft: #3a2420;
+    --bp-accent-ink:  #e8836f;  /* accent-ink is defined for LIGHT-background use elsewhere; without a dark override it would keep that dark brownish-red value, unreadable against a dark background. Measured: #c8402f (--bp-accent itself) only reaches 3.72:1 here, short of 4.5:1 for body text -- this lighter tint reaches 6.95:1. */
+  }
+}
+:root[data-theme="dark"]{
+  --bp-bg:          #14131a;
+  --bp-surface:     #1c1b24;
+  --bp-surface-alt: #24232e;
+  --bp-border:      #322f3d;
+  --bp-text:        #eeecf3;
+  --bp-text-muted:  #a7a3b5;
+  --bp-text-faint:  #78748a;
+  --bp-accent-soft: #3a2420;
+  --bp-accent-ink:  #e8836f;
+}
