@@ -7,6 +7,7 @@
 <meta name="description" content="Every municipal indicator in this pipeline, drawn on the 565 Belgian communes.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/commune_map.css">
+<script src="assets/i18n.js"></script>
 <style>
   :root{
     --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
@@ -64,7 +65,8 @@
   @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:var(--accent)}}
   :root[data-theme="dark"] a{color:var(--accent)}
 
-  .theme-toggle{float:right;display:flex;gap:2px;border:1px solid var(--border);
+  .switches{float:right;display:flex;gap:8px}
+  .theme-toggle{display:flex;gap:2px;border:1px solid var(--border);
     border-radius:5px;overflow:hidden;background:var(--surface)}
   .theme-toggle button{
     border:0;background:transparent;color:var(--text-muted);cursor:pointer;
@@ -118,14 +120,21 @@
 </head>
 <body>
 <div class="wrap">
-<div class="theme-toggle" role="group" aria-label="Colour theme">
-  <button type="button" data-theme-choice="light" aria-pressed="false" title="Always light">&#9728; Light</button>
-  <button type="button" data-theme-choice="auto" aria-pressed="false" title="Follow your device setting">Auto</button>
-  <button type="button" data-theme-choice="dark" aria-pressed="false" title="Always dark">&#9790; Dark</button>
+<div class="switches">
+  <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+    <button type="button" data-lang="nl" aria-pressed="false">NL</button>
+  </div>
+  <div class="theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
+    <button type="button" data-theme-choice="light" aria-pressed="false" data-t-title="themeLight">&#9728; <span data-t="themeLight">Light</span></button>
+    <button type="button" data-theme-choice="auto" aria-pressed="false" data-t-title="themeAuto"><span data-t="themeAuto">Auto</span></button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false" data-t-title="themeDark">&#9790; <span data-t="themeDark">Dark</span></button>
+  </div>
 </div>
   <header>
-    <h1>Commune Map</h1>
-    <p class="subtitle">Every municipal indicator this pipeline holds, drawn on the 565 Belgian communes.
+    <h1 data-t="mapTitle">Commune Map</h1>
+    <p class="subtitle" data-t-html="mapLead">Every municipal indicator this pipeline holds, drawn on the 565 Belgian communes.
     Pick an indicator; hover a commune for its value; click it to open its own profile page. Communes are
     shaded by <em>rank</em>, so each colour band holds roughly the same number of communes &mdash; that shows
     where a commune sits relative to the rest, which is what a national map can honestly show. Communes the
@@ -136,10 +145,10 @@
   </header>
 
   <div class="toolbar">
-    <select id="indicator" aria-label="Indicator to map"></select>
-    <input id="search" type="text" placeholder="Find a commune (name or NIS code)…" autocomplete="off" list="communeList">
+    <select id="indicator" data-t-aria="indicatorToMap" aria-label="Indicator to map"></select>
+    <input id="search" type="text" data-t-placeholder="findCommune" placeholder="Find a commune (name or NIS code)…" autocomplete="off" list="communeList">
     <datalist id="communeList"></datalist>
-    <span class="status" id="status">Loading…</span>
+    <span class="status" id="status" data-t="loading">Loading…</span>
     <span class="provenance" id="provenance"></span>
   </div>
 
@@ -147,9 +156,9 @@
     <div class="mapbox" id="mapbox">
       <svg class="map" id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
       <div class="zoom">
-        <button type="button" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
-        <button type="button" id="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
-        <button type="button" id="zoomReset" title="Reset view" aria-label="Reset view">&#8634;</button>
+        <button type="button" id="zoomIn" data-t-title="zoomIn" data-t-aria="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoomOut" data-t-title="zoomOut" data-t-aria="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+        <button type="button" id="zoomReset" data-t-title="resetView" data-t-aria="resetView" title="Reset view" aria-label="Reset view">&#8634;</button>
       </div>
       <div class="map-tip map-hidden" id="tip"></div>
     </div>
@@ -158,7 +167,7 @@
         <div class="swatches" id="swatches"></div>
         <div class="ticks" id="ticks"></div>
       </div>
-      <div class="nodata-key"><i></i> no data</div>
+      <div class="nodata-key"><i></i> <span data-t="mapNoData">no data</span></div>
       <div class="note" id="legendNote"></div>
     </div>
   </div>
@@ -166,7 +175,7 @@
   <div class="map-warn map-hidden" id="coverageWarn"></div>
 
   <div class="attribution" id="attribution">
-    <strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+    <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
     (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
     1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
     document already recorded in <code>docs/licences/</code>.
@@ -174,48 +183,15 @@
     communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
     a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
     longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
-    are drawn for comparison, never for measurement or for locating a boundary on the ground.
+    are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
     <br><br>
-    <!-- values-attribution:start — copied verbatim from communes.html and held
+    <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
          identical to it by test_statbel_attribution.py. Reword on both or neither. -->
-
-    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
-    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), reused under
-    <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
-    and Statbel's <em>Licentie open data</em> of 22 October 2015.
-    <strong>Data last updated:</strong> <span id="attrUpdated">&mdash;</span>.
-    A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved.
-    <strong>Changes were made:</strong> the published files are reshaped into a canonical
-    indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and
-    2025 commune mergers, and used to compute the derived columns marked above. Statbel does not
-    endorse this product or how its data is used here. English commune names are unofficial
-    translations, not official Statbel labels.
-    <br><br>
-    <strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a>
-    (Office National de l'Emploi &mdash; Rijksdienst voor Arbeidsvoorziening), for the
-    unemployment, temporary-unemployment, part-time-benefit and activation columns.
-    <strong>Date of the information used:</strong> the files fetched for this build, covering
-    2017 onwards; the current year is a part-year average and is marked provisional, and each
-    row carries its own status letter. Reused under ONEM's own conditions, which
-    permit commercial reuse and require the source and this date &mdash; <em>not</em> under
-    CC BY 4.0, which does not apply to this source. Cells ONEM withholds for privacy
-    (fewer than 10 people) are shown as suppressed, never as zero.
-    <br><br>
-    <strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police
-    F&eacute;d&eacute;rale / Federale Politie</a> (Direction de l'information polici&egrave;re et
-    des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rate
-    columns. Reused under the federal police's own condition, quoted in full in
-    <code>docs/data_catalog.md</code>: correctly credit the source as stated here. That condition
-    says nothing about permitted uses beyond attribution &mdash; <em>not</em> CC BY 4.0, which does
-    not apply to this source, and not a stated grant of commercial reuse either, unlike Statbel and
-    ONEM above. Every one of these rates is resolved onto the commune boundaries in force through
-    2024, not the current map, for every year shown &mdash; including years long before that map
-    existed, since that is how the source itself publishes its own history. The most recent year of
-    each series is marked provisional; its exact reporting window is not stated by the source.
-    <!-- values-attribution:end -->
+    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+    <!-- values-attribution:end --></span>
   </div>
 
-  <footer>Reads <code>data/geo/communes.geojson</code> and <code>public/data/indicators/{id}.json</code> from
+  <footer data-t-html="mapFooter">Reads <code>data/geo/communes.geojson</code> and <code>public/data/indicators/{id}.json</code> from
   GitHub Pages &mdash; no server, no map tiles, no third-party requests. The indicator list is read from
   <code>public/data/metadata/indicators.json</code>, so a new municipal dataset appears in the picker on its
   own with no change to this page.</footer>
@@ -241,12 +217,54 @@ const VALUES_URL   = code => `public/data/indicators/${code}.json`;
 
 const state = {index: [], map: null, sources: {}, grades: {}};
 
+// The interface language, from the shared module so a choice made on any page
+// carries here and back again (one localStorage key, site-wide).
+let LANG = I18N.initial();
+const T = (key, vars) => I18N.t(LANG, key, vars);
+
+// Held separately: applyStrings() rewrites the attribution wholesale, which
+// destroys the span the date was written into, and that date is a LICENCE
+// CONDITION (docs/data_catalog.md).
+let ATTR_UPDATED = '';
+
+/* Swap every marked element. The English stays IN THE MARKUP so a reader whose
+   JavaScript never runs still gets a complete page, licence notice included --
+   this replaces text rather than supplying it. */
+function applyStrings(){
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T(el.dataset.t); });
+  document.querySelectorAll('[data-t-html]').forEach(el => { el.innerHTML = T(el.dataset.tHtml); });
+  document.querySelectorAll('[data-t-title]').forEach(el => { el.title = T(el.dataset.tTitle); });
+  document.querySelectorAll('[data-t-aria]').forEach(el => {
+    el.setAttribute('aria-label', T(el.dataset.tAria));
+  });
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    el.placeholder = T(el.dataset.tPlaceholder);
+  });
+  const values = document.getElementById('attrValues');
+  if(values) values.innerHTML = T('attribution');
+  const updated = document.getElementById('attrUpdated');
+  if(updated && ATTR_UPDATED) updated.textContent = ATTR_UPDATED;
+  document.documentElement.setAttribute('lang', LANG);
+  document.querySelectorAll('#langSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+}
+
+// The reader's language for each of a derived indicator's input sources.
+function sourceNames(meta){
+  return (meta.input_sources || [])
+    .map(id => {
+      const src = state.sources[id];
+      return src ? (src.label[LANG] || src.label.en) : id;
+    })
+    .join(', ');
+}
+
 async function selectIndicator(code){
   const meta = state.index.find(i => i.indicator_code === code);
   if(!meta) return;
 
   const statusEl = document.getElementById('status');
-  statusEl.textContent = 'Loading…';
+  statusEl.textContent = T('loading');
 
   const res = await fetch(VALUES_URL(code) + '?t=' + Date.now());
   if(!res.ok){ statusEl.textContent = `Could not load ${code}`; return; }
@@ -259,26 +277,31 @@ async function selectIndicator(code){
   });
 
   const shown = state.map.coverage();
-  statusEl.textContent = `${shown.withValue} of ${shown.total} communes shown`;
+  statusEl.textContent = T('communesShown', {n: shown.withValue, total: shown.total});
 
   /* Where this indicator came from and how it was made, beside the map that
      draws it. Built from the same index row the picker was built from, so a
      new indicator arrives with its badge already correct. */
   const source = meta.source ? (state.sources[meta.source] || null) : null;
+  const label = source ? (source.label[LANG] || source.label.en) : null;
   const grade = state.grades[meta.grade] || null;
   const bits = [];
   if(source){
     bits.push(source.homepage
-      ? `<a href="${source.homepage}" rel="noopener">${source.label.en}</a>`
-      : source.label.en);
+      ? `<a href="${source.homepage}" rel="noopener">${label}</a>`
+      : label);
   }
-  if(grade) bits.push(`<span class="grade" title="${grade.definition.en}">${meta.grade}</span> ${grade.en}`);
+  // The grade word and its definition come from the payload in all three
+  // languages (metadata/sources.json), so this picks the reader's.
+  if(grade){
+    const label = grade[LANG] || grade.en;
+    const definition = (grade.definition || {})[LANG] || (grade.definition || {}).en || '';
+    bits.push(`<span class="grade" title="${definition}">${meta.grade}</span> ${label}`);
+  }
   if(meta.updated){
-    bits.push(`retrieved ${meta.updated}`);
+    bits.push(`${T('retrieved')} ${meta.updated}`);
   } else if(meta.inputs_updated){
-    const names = (meta.input_sources || [])
-      .map(id => (state.sources[id] ? state.sources[id].label.en : id)).join(', ');
-    bits.push(`computed from ${names || 'other figures'} last updated ${meta.inputs_updated}`);
+    bits.push(T('computedFromShort', {s: sourceNames(meta), d: meta.inputs_updated}));
   }
   document.getElementById('provenance').innerHTML = bits.join(' · ');
 
@@ -301,10 +324,8 @@ async function selectIndicator(code){
          the information reused, and the information reused in a derived figure
          is its inputs. Attributed to the inputs, so it cannot be read as this
          figure's own retrieval date -- which point 5 forbids. */
-      const names = (meta.input_sources || [])
-        .map(id => (state.sources[id] ? state.sources[id].label.en : id)).join(', ');
       updated.textContent =
-        `computed from ${names || 'other published figures'} last updated ${meta.inputs_updated}`;
+        T('computedFromShort', {s: sourceNames(meta), d: meta.inputs_updated});
     } else {
       updated.textContent = 'derived — computed from the figures above, not separately fetched';
     }
@@ -315,6 +336,17 @@ async function selectIndicator(code){
     url.searchParams.set('indicator', code);
     history.replaceState(null, '', url);
   }catch(_){}
+}
+
+/* Indicator names are trilingual in the payload, so re-languaging the picker
+   is a relabel, not a refetch -- and the selected indicator is kept. */
+function relabelPicker(sel){
+  const chosen = sel.value;
+  for(const option of sel.options){
+    const row = state.index.find(i => i.indicator_code === option.value);
+    if(row) option.textContent = (row.names && (row.names[LANG] || row.names.en)) || option.value;
+  }
+  sel.value = chosen;
 }
 
 async function init(){
@@ -330,6 +362,7 @@ async function init(){
 
     const geojson = await geoRes.json();
     state.index = (await idxRes.json()).indicators || [];
+    applyStrings();
     const sections = secRes.ok ? await secRes.json() : {headlines: []};
     if(srcRes.ok){
       const registry = await srcRes.json();
@@ -346,6 +379,7 @@ async function init(){
       legendNote: document.getElementById('legendNote'),
       coverage:   document.getElementById('coverageWarn'),
     }, {
+      lang: LANG,
       onSelect: nis => { window.location.href = `local/${nis}/`; },
     }).build(geojson);
 
@@ -358,7 +392,7 @@ async function init(){
 
     const sel = document.getElementById('indicator');
     const rows = state.index
-      .map(i => ({code: i.indicator_code, label: MapUI.pickName(i.names, i.indicator_code)}))
+      .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
       .sort((a, b) => a.label.localeCompare(b.label));
     for(const r of rows){
       const o = document.createElement('option');
@@ -392,6 +426,17 @@ async function init(){
     }
     sel.value = start;
     await selectIndicator(start);
+
+    document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
+      LANG = b.dataset.lang;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(_){}
+      applyStrings();
+      // The picker's labels, the map's legend and the provenance line all
+      // hold translated text. Nothing is refetched and the map keeps its view.
+      relabelPicker(sel);
+      state.map.setLang(LANG);
+      selectIndicator(sel.value);
+    }));
   }catch(err){
     document.getElementById('status').textContent =
       'Could not load the map: ' + err.message;

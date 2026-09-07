@@ -31,8 +31,15 @@ MAP_PAGES = [MAP_HTML, COMMUNES_HTML]
 
 
 def _extract_map_ui_js() -> str:
-    """The shared component, exactly as the pages load it."""
-    return COMPONENT_JS.read_text(encoding="utf-8")
+    """The shared component, exactly as the pages load it -- preceded by the
+    strings file, exactly as the pages load that.
+
+    The component reads its user-facing text from the I18N global rather than
+    holding any English of its own, so a harness that omitted i18n.js would be
+    testing a map whose every label was a bare key.
+    """
+    strings = (REPO / "assets" / "i18n.js").read_text(encoding="utf-8")
+    return strings + "\n" + COMPONENT_JS.read_text(encoding="utf-8")
 
 
 def _run_node(js_body: str):
