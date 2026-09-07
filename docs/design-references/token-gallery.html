@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BelPulse design tokens</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="../../assets/belpulse/tokens.css">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bp-bg); color:var(--bp-text);
+    font-family:var(--bp-font-ui);
+    font-size:var(--bp-text-body); line-height:1.5;
+    padding:var(--bp-space-8);
+  }
+  h1{font-size:var(--bp-text-h1); font-weight:var(--bp-weight-bold); margin:0 0 var(--bp-space-2)}
+  h2{font-size:var(--bp-text-h2); font-weight:var(--bp-weight-semibold);
+     margin:var(--bp-space-10) 0 var(--bp-space-4); border-bottom:1px solid var(--bp-border);
+     padding-bottom:var(--bp-space-3)}
+  p.lede{color:var(--bp-text-muted); max-width:70ch}
+  .toggle{position:fixed; top:var(--bp-space-4); right:var(--bp-space-4); display:flex; gap:2px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}
+  .toggle button{border:0; background:var(--bp-surface); color:var(--bp-text-muted);
+    font:inherit; font-size:var(--bp-text-small); padding:6px 12px; cursor:pointer}
+  .toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+
+  .swatch-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+    gap:var(--bp-space-4)}
+  .swatch{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); overflow:hidden;
+    background:var(--bp-surface)}
+  .swatch .fill{height:64px}
+  .swatch .label{padding:var(--bp-space-3); font-size:var(--bp-text-small)}
+  .swatch .label b{display:block; font-size:var(--bp-text-body); font-weight:var(--bp-weight-medium)}
+  .swatch .label code{color:var(--bp-text-muted); font-size:11px}
+  .swatch .contrast{margin-top:4px; font-size:11px}
+  .contrast.pass{color:var(--bp-green)}
+  .contrast.fail{color:var(--bp-red-signal); font-weight:var(--bp-weight-semibold)}
+
+  .type-row{display:flex; align-items:baseline; gap:var(--bp-space-4); margin-bottom:var(--bp-space-4);
+    padding-bottom:var(--bp-space-4); border-bottom:1px solid var(--bp-border)}
+  .type-row code{width:180px; flex:none; color:var(--bp-text-muted); font-size:11px}
+  .type-h1{font-size:var(--bp-text-h1); font-weight:var(--bp-weight-bold)}
+  .type-h2{font-size:var(--bp-text-h2); font-weight:var(--bp-weight-semibold)}
+  .type-kpi{font-size:var(--bp-text-kpi); font-weight:var(--bp-weight-bold)}
+  .type-body{font-size:var(--bp-text-body)}
+  .type-small{font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+  .type-eyebrow{font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold);
+    letter-spacing:.08em; text-transform:uppercase; color:var(--bp-text-muted)}
+  .type-decorative{font-family:var(--bp-font-decorative); font-size:1.4rem; color:var(--bp-accent-ink)}
+
+  .space-row{display:flex; align-items:center; gap:var(--bp-space-3); margin-bottom:var(--bp-space-2)}
+  .space-row code{width:120px; flex:none; font-size:11px; color:var(--bp-text-muted)}
+  .space-bar{background:var(--bp-accent); height:14px; border-radius:2px}
+
+  .card-demo{display:flex; gap:var(--bp-space-4); flex-wrap:wrap}
+  .card{background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card);
+    padding:var(--bp-space-5); width:220px}
+  .card.navy{background:var(--bp-navy-surface); border-color:var(--bp-navy-border);
+    color:var(--bp-navy-text)}
+  .card .kpi-label{font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+  .card.navy .kpi-label{color:var(--bp-navy-text-muted)}
+  .card .kpi-value{font-size:var(--bp-text-kpi); font-weight:var(--bp-weight-bold); margin:4px 0}
+  .btn{display:inline-block; border:0; border-radius:var(--bp-radius-control); padding:9px 18px;
+    font:inherit; font-size:var(--bp-text-small); font-weight:var(--bp-weight-medium); cursor:pointer}
+  .btn.primary{background:var(--bp-accent); color:#fff}
+  .btn.outline{background:transparent; border:1px solid var(--bp-border); color:var(--bp-text)}
+
+  .torture{background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); padding:var(--bp-space-5); max-width:280px}
+  .torture .kpi-label{font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+</style>
+</head>
+<body>
+
+<div class="toggle" role="group" aria-label="Theme">
+  <button type="button" data-theme="light" aria-pressed="false">Light</button>
+  <button type="button" data-theme="auto" aria-pressed="true">Auto</button>
+  <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+</div>
+
+<h1>BelPulse design tokens</h1>
+<p class="lede">Batch 1 (docs/features/page_builder.md). Every value here comes from
+<code>assets/belpulse/tokens.css</code> — nothing on this page is hardcoded, so if a token
+changes, this page changes with it. Values were read from four reference-design screenshots,
+not measured from a source file — see <code>docs/design-references/README.md</code>.</p>
+
+<h2>Colour — light / editorial surface</h2>
+<div class="swatch-grid" id="light-swatches"></div>
+
+<h2>Colour — navy analytical surface (macro page's own dark theme)</h2>
+<div class="swatch-grid" id="navy-swatches"></div>
+
+<h2>Chart palette</h2>
+<div class="swatch-grid" id="chart-swatches"></div>
+
+<h2>Type scale</h2>
+<div class="type-row"><code>--bp-text-eyebrow</code><span class="type-eyebrow">Données · Territoires · Prospérité</span></div>
+<div class="type-row"><code>--bp-text-h1</code><span class="type-h1">Microéconomie belge</span></div>
+<div class="type-row"><code>--bp-text-h2</code><span class="type-h2">Évolution du tissu entrepreneurial</span></div>
+<div class="type-row"><code>--bp-text-kpi</code><span class="type-kpi">565 615</span></div>
+<div class="type-row"><code>--bp-text-body</code><span class="type-body">BelPulse centralise les indicateurs économiques, sociaux et territoriaux de toutes les communes belges.</span></div>
+<div class="type-row"><code>--bp-text-small</code><span class="type-small">↑ +2,1 % vs. 2023</span></div>
+<div class="type-row"><code>--bp-font-decorative</code><span class="type-decorative">Des données locales pour comprendre l'économie réelle.</span></div>
+
+<h2>Long-label torture test (French / Dutch)</h2>
+<p class="lede">Batch 1's own test list requires this explicitly — a token/component pass that
+only looks right in English is not done.</p>
+<div class="card-demo">
+  <div class="torture">
+    <div class="kpi-label">Taux d'emploi des 20 à 64 ans, corrigé des variations saisonnières</div>
+  </div>
+  <div class="torture">
+    <div class="kpi-label">Werkgelegenheidsgraad van de 20- tot 64-jarigen, seizoengecorrigeerd</div>
+  </div>
+  <div class="torture">
+    <div class="kpi-label">Communes de la Région de Bruxelles-Capitale, comparées à la moyenne wallonne et flamande</div>
+  </div>
+</div>
+
+<h2>Spacing scale</h2>
+<div id="space-rows"></div>
+
+<h2>Cards, radius, shadow</h2>
+<div class="card-demo">
+  <div class="card">
+    <div class="kpi-label">Revenu médian</div>
+    <div class="kpi-value">26 350 €</div>
+    <span class="type-small" style="color:var(--bp-green)">↑ +2,8 % vs. 2023</span>
+  </div>
+  <div class="card navy">
+    <div class="kpi-label">Dette publique</div>
+    <div class="kpi-value">106,2 %</div>
+    <span class="type-small">du PIB, 2024 (estim.)</span>
+  </div>
+  <div class="card">
+    <button class="btn primary">Explorer les données</button>
+    <div style="height:12px"></div>
+    <button class="btn outline">Voir la carte</button>
+  </div>
+</div>
+
+<script>
+const LIGHT_TOKENS = [
+  ['--bp-accent','Accent'], ['--bp-accent-ink','Accent ink'], ['--bp-accent-soft','Accent soft'],
+  ['--bp-blue','Blue'], ['--bp-green','Green (favourable)'], ['--bp-red-signal','Red (unfavourable)'],
+  ['--bp-bg','Background'], ['--bp-surface','Surface'], ['--bp-surface-alt','Surface alt'],
+  ['--bp-border','Border'], ['--bp-text','Text'], ['--bp-text-muted','Text muted'],
+  ['--bp-text-faint','Text faint (decorative only)'],
+];
+const NAVY_TOKENS = [
+  ['--bp-navy-bg','Navy background'], ['--bp-navy-surface','Navy surface'],
+  ['--bp-navy-border','Navy border'], ['--bp-navy-text','Navy text'],
+  ['--bp-navy-text-muted','Navy text muted'],
+];
+const CHART_TOKENS = Array.from({length:8}, (_, i) => [`--bp-chart-${i+1}`, `Series ${i+1}`]);
+const SPACE_TOKENS = ['1','2','3','4','5','6','8','10'].map(n => [`--bp-space-${n}`, `Space ${n}`]);
+
+function resolved(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function luminance(hex){
+  hex = hex.replace('#','');
+  const [r,g,b] = [0,2,4].map(i => parseInt(hex.slice(i,i+2),16)/255)
+    .map(c => c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4));
+  return 0.2126*r + 0.7152*g + 0.0722*b;
+}
+function contrast(hex1, hex2){
+  const l1 = luminance(hex1), l2 = luminance(hex2);
+  const [hi, lo] = l1 > l2 ? [l1,l2] : [l2,l1];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/* Only a token actually USED as text, an icon, or a chart fill needs a
+   contrast grade against the background -- a background/border/surface
+   token compared against the background is a category error (it partly
+   IS the background), not a finding. The first version of this page graded
+   every swatch the same way and flagged --bp-bg, --bp-border and
+   --bp-navy-bg as "failing contrast against the background," which is not
+   a sentence that means anything -- caught by actually reading the
+   rendered output, not assumed correct because it type-checked. */
+const SURFACE_SHAPED = /^--bp-(bg|surface|surface-alt|border|navy-bg|navy-surface|navy-border|accent-soft)$/;
+
+function renderSwatches(container, tokenList, bgTokenName){
+  const el = document.getElementById(container);
+  el.innerHTML = '';
+  const bg = resolved(bgTokenName);
+  for(const [name, label] of tokenList){
+    const value = resolved(name);
+    if(!value.startsWith('#')) continue;
+    const isSurface = SURFACE_SHAPED.test(name);
+    const div = document.createElement('div');
+    div.className = 'swatch';
+    let gradeHtml;
+    if(isSurface){
+      gradeHtml = `<div class="contrast" style="color:var(--bp-text-faint)">background/surface token -- not graded for text contrast</div>`;
+    } else {
+      const ratio = contrast(value, bg);
+      const passes = ratio >= 3.0;
+      gradeHtml = `<div class="contrast ${passes ? 'pass' : 'fail'}">${ratio.toFixed(2)}:1 vs. background ` +
+        `${passes ? '(readable as text/icon/chart fill)' : '(too faint to use as text or a chart series)'}</div>`;
+    }
+    div.innerHTML = `<div class="fill" style="background:${value}"></div>` +
+      `<div class="label"><b>${label}</b><code>${name}: ${value}</code>${gradeHtml}</div>`;
+    el.appendChild(div);
+  }
+}
+
+function renderSpacing(){
+  const el = document.getElementById('space-rows');
+  el.innerHTML = '';
+  for(const [name, label] of SPACE_TOKENS){
+    const px = resolved(name);
+    const row = document.createElement('div');
+    row.className = 'space-row';
+    row.innerHTML = `<code>${name} (${px})</code><div class="space-bar" style="width:${px}"></div>`;
+    el.appendChild(row);
+  }
+}
+
+function renderAll(){
+  renderSwatches('light-swatches', LIGHT_TOKENS, '--bp-bg');
+  renderSwatches('navy-swatches', NAVY_TOKENS, '--bp-navy-bg');
+  renderSwatches('chart-swatches', CHART_TOKENS, '--bp-bg');
+  renderSpacing();
+}
+
+(function theme(){
+  const KEY = 'belpulse-token-gallery-theme';
+  function apply(choice){
+    if(choice === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', choice);
+    document.querySelectorAll('.toggle button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.theme === choice)));
+    renderAll();
+  }
+  let saved = 'auto';
+  try{ saved = localStorage.getItem(KEY) || 'auto'; }catch(e){}
+  apply(saved);
+  document.querySelectorAll('.toggle button').forEach(b => b.addEventListener('click', () => {
+    apply(b.dataset.theme);
+    try{ localStorage.setItem(KEY, b.dataset.theme); }catch(e){}
+  }));
+})();
+
+renderAll();
+</script>
+</body>
+</html>

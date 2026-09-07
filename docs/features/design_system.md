@@ -1,6 +1,6 @@
 # Feature: BelPulse design tokens and shared components
 
-Status: blocked — needs the supplied reference designs
+Status: Batch 1 (tokens) done 2026-09-07; Batch 2 (shared components) not started
 Issue: none (part of docs/features/page_builder.md, Batches 1-2)
 Branch: not started
 
@@ -43,12 +43,43 @@ Breakpoints: desktop / tablet / mobile, values to be fixed once the designs are 
   against English-only mockups)
 - No indicator IDs anywhere in a design asset (claude.md rule 24)
 
+## What actually happened (2026-09-07)
+
+The four reference designs arrived as **images pasted into chat, not files**. Full transcription
+of all four, plus a de-duplicated component inventory and the measured/estimated token values,
+is in `docs/design-references/` — that directory is now the authoritative record, not this
+document's earlier speculative section.
+
+Two real findings from looking closely at the designs, not implied by the plan beforehand:
+
+1. **Two page shells, not one.** Macro/micro share an "analytical" shell (top bar + left
+   sidebar), in a light variant (micro) and a dark "navy-analytical" variant (macro) — literally
+   the two surfaces this document already named before the designs existed to confirm it.
+   Homepage/municipality-profile share a completely different "editorial" shell (top bar only,
+   breadcrumb, hero imagery, dark CTA band). Batch 2 builds both.
+2. **Two logo/brand-name treatments appear across the four designs** ("Belpulse.be" vs
+   "BelPulse", two different pictograms) — a genuine conflict in the source material, not
+   resolved here. See `docs/design-references/README.md`.
+
+`assets/belpulse/tokens.css` is built and tested (`tests/pages/test_design_tokens.py`, 17
+tests): colour, chart palette, type scale, spacing, radius, shadow, both themes. Every colour
+that started below WCAG contrast was caught by actually computing the ratio (not eyeballing a
+screenshot) and darkened with margin, not to the bare minimum — see the token file's own
+comments for the before/after numbers. A working component gallery
+(`docs/design-references/token-gallery.html`) renders every token live, in both themes, verified
+in a real headless browser with zero console errors.
+
 ## Assumptions and open questions
 
-- **Blocked entirely on the maintainer supplying the reference designs** (homepage, macro, micro,
-  municipality/Namur). Nothing in this document can be finalised before then.
+- **No breakpoints were informed by the designs at all** — all four supplied images are
+  desktop-only. Tablet/mobile follow this repo's own existing convention until real mobile
+  mockups exist.
+- Typeface is a **recommendation** (Inter for UI, Caveat for the decorative pull-quote), not a
+  confirmed match — no typeface can be identified with confidence from a screenshot.
 - Whether the new tokens eventually replace the current CSS custom-property system, or the two
   are reconciled into one, is a decision for Batch 15 (page conversion), not this batch.
+- The two open items from `docs/design-references/README.md` (logo/brand-name conflict, no
+  original design files in the repo) carry forward unresolved.
 
 ## Rollout / risks
 
