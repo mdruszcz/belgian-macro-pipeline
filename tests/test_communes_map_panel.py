@@ -47,8 +47,33 @@ def test_a_suppressed_cell_is_never_drawn_as_a_value(page):
     colour scale and state, in colour, a figure the source refused to publish.
     """
     body = re.search(r"function valuesForMap\(.*?\n\}", page, re.DOTALL).group(0)
-    assert "cell.value === ''" in body, "empty (suppressed) cells are not skipped"
-    assert "isNaN(num)" in body, "non-numeric cells are not skipped"
+    assert "isNaN(num)" in body, "non-numeric cells are not separated out"
+    # A withheld cell must never acquire a number on the way through.
+    assert "value: null" in body, "a withheld cell is not passed through as null"
+    assert "parseFloat" in body and "|| 0" not in body, "a blank must not become a zero"
+
+
+def test_a_withheld_cell_is_passed_through_so_the_map_can_say_why(page):
+    """It is still never COLOURED -- the component only paints a numeric value
+    -- but dropping it left the map unable to tell a figure the source withheld
+    from one that never existed, a distinction the table beside it has always
+    made with its Suppressed pill."""
+    body = re.search(r"function valuesForMap\(.*?\n\}", page, re.DOTALL).group(0)
+    assert "'suppressed'" in body, "suppressed cells are not recognised"
+    # And only suppressed: a merely blank cell is "no row", a different fact.
+    assert re.search(
+        r"status === 'suppressed'\s*\)\s*values\[", body
+    ), "every non-numeric cell is passed through, not only the withheld ones"
+
+
+def test_the_map_component_distinguishes_withheld_from_never_collected(page):
+    """The tooltip must have three branches, not two. Asserted on the shared
+    component, which is where both maps get this behaviour."""
+    component = (REPO / "assets" / "commune_map.js").read_text(encoding="utf-8")
+    tip = re.search(r"_tipHtml\(f\) \{(.*?)\n  \}", component, re.DOTALL).group(1)
+    assert "suppressed" in tip, "no withheld branch in the tooltip"
+    assert "no data here" in tip, "no never-collected branch in the tooltip"
+    assert "not zero" in tip, "the tooltip does not rule out a zero reading"
 
 
 def test_the_map_reads_the_table_rather_than_fetching_its_own_data(page):

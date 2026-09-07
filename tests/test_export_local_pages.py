@@ -295,9 +295,17 @@ def test_the_page_renders_real_values_in_the_html_not_a_js_shell(
     assert "Demography" in page and "Safety" in page
 
 
-def test_an_indicator_with_no_value_is_omitted_rather_than_shown_empty(
+def test_a_figure_the_source_withheld_is_shown_as_withheld(
     payload_dir, tmp_path, db, attribution_file
 ):
+    """The opposite of what this test used to assert, deliberately.
+
+    It previously required a suppressed cell to be OMITTED, which is the bug:
+    the attribution block these pages lift from communes.html states that
+    figures ONEM withholds "are shown as suppressed, never as zero", and these
+    static pages are the crawler-visible copy of the data. Omitting the row
+    published silence where the source published a refusal.
+    """
     commune = _commune()
     commune["indicators"]["POPULATION_AGE_0_14"] = {
         "names": {"en": "Population aged 0 to 14"},
@@ -307,7 +315,48 @@ def test_an_indicator_with_no_value_is_omitted_rather_than_shown_empty(
     (payload_dir / "communes" / "11001.json").write_text(json.dumps(commune), encoding="utf-8")
     _run(payload_dir, tmp_path, db, attribution_file)
     page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
+    assert "Population aged 0 to 14" in page
+    assert "withheld by the source (fewer than 10)" in page
+    # Never as a zero, and never as an empty cell that reads as a bug.
+    assert "<td class='v'></td>" not in page
+    assert "<td class='v'>0</td>" not in page
+
+
+def test_an_indicator_with_nothing_at_all_is_still_omitted(
+    payload_dir, tmp_path, db, attribution_file
+):
+    """The original intent, preserved. A figure the pipeline never collected is
+    not a fact about the commune, and an empty row reads as a rendering fault.
+    local.html remains the place that explains coverage gaps."""
+    commune = _commune()
+    commune["indicators"]["POPULATION_AGE_0_14"] = {
+        "names": {"en": "Population aged 0 to 14"},
+        "unit": "count",
+        "periods": {},
+    }
+    (payload_dir / "communes" / "11001.json").write_text(json.dumps(commune), encoding="utf-8")
+    _run(payload_dir, tmp_path, db, attribution_file)
+    page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
     assert "Population aged 0 to 14" not in page
+
+
+def test_a_page_of_only_withheld_figures_is_still_refused_as_thin(
+    payload_dir, tmp_path, db, attribution_file
+):
+    """The thin-page refusal must not be satisfied by rows carrying no number.
+    Otherwise a commune whose every figure was masked would ship a page that
+    looks substantive and says nothing."""
+    commune = _commune()
+    commune["indicators"] = {
+        "POPULATION_BY_COMMUNE": {
+            "names": {"en": "Population"},
+            "unit": "count",
+            "periods": {"2026": {"value": None, "status": "suppressed"}},
+        }
+    }
+    (payload_dir / "communes" / "11001.json").write_text(json.dumps(commune), encoding="utf-8")
+    _run(payload_dir, tmp_path, db, attribution_file)
+    assert not (tmp_path / "local" / "11001" / "index.html").exists()
 
 
 def test_a_sitemap_lists_every_generated_route(payload_dir, tmp_path, db, attribution_file):
@@ -329,3 +378,30 @@ def test_the_real_antwerp_page_is_substantive():
     page = (REPO / "local" / "11002" / "index.html").read_text(encoding="utf-8")
     assert "565,615" in page  # real 2026 population
     assert page.count("<tr>") > 20  # many indicators, not a stub
+
+
+def test_a_figure_whose_later_years_were_withheld_says_so(
+    payload_dir, tmp_path, db, attribution_file
+):
+    """158 (commune, indicator) pairs publish a figure whose NEWER years the
+    source withheld. Showing 2024 on a 2026 site without saying so leaves a
+    reader unable to tell a series that stopped from one the source declined to
+    publish. The interactive page states it; these pages are the copy a crawler
+    and a reader without JavaScript actually get."""
+    commune = _commune()
+    commune["indicators"]["POPULATION_AGE_0_14"] = {
+        "names": {"en": "Population aged 0 to 14"},
+        "unit": "count",
+        "updated": "2026-09-06",
+        "periods": {
+            "2024": {"value": 13, "status": "final"},
+            "2025": {"value": None, "status": "suppressed"},
+            "2026": {"value": None, "status": "suppressed"},
+        },
+    }
+    (payload_dir / "communes" / "11001.json").write_text(json.dumps(commune), encoding="utf-8")
+    _run(payload_dir, tmp_path, db, attribution_file)
+    page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
+    # The figure itself is still published, at its own period.
+    assert "<td>2024 (2025, 2026 withheld)</td>" in page
+    assert "13" in page

@@ -267,11 +267,38 @@ def _latest_updated(commune: dict) -> str | None:
     return max(dates) if dates else None
 
 
-def _section_rows(commune: dict, section: dict, lang: str) -> list[tuple[str, str, str, str]]:
-    """(label, value, period, updated) per indicator this section lists that
-    this commune actually has a value for. An indicator with no value is
-    omitted rather than rendered as an empty row -- the page is a summary,
-    and local.html remains the place that explains WHY a figure is missing."""
+# Shown in the Value column when the source holds a figure and withholds it.
+# The word matters more than the dash: a blank cell reads as a bug, and a zero
+# would state a number the source explicitly refused to publish.
+WITHHELD_NOTE = "withheld by the source (fewer than 10)"
+# Appended to the period of a figure whose LATER years the source withheld.
+WITHHELD_SUFFIX = "withheld"
+
+
+def _withheld_periods(entry: dict) -> list[str]:
+    """Periods this commune has for the indicator that the source withheld.
+
+    ONEM masks any count below 10 for privacy; those cells carry a null value
+    and status "suppressed". They used never to reach the payloads at all, so
+    this page could not show them -- while the attribution block it lifts from
+    communes.html states that withheld figures "are shown as suppressed, never
+    as zero". These pages are the crawler-visible copy of the data, so the
+    claim has to be true here too, not only in the interactive app.
+    """
+    periods = entry.get("periods") or {}
+    return sorted(p for p, cell in periods.items() if cell.get("status") == "suppressed")
+
+
+def _section_rows(commune: dict, section: dict, lang: str) -> list[tuple[str, str, str, str, bool]]:
+    """(label, value, period, updated, is_withheld) per indicator in this
+    section that this commune has something to say about.
+
+    An indicator with no figure AND nothing withheld is omitted rather than
+    rendered as an empty row -- the page is a summary, and local.html remains
+    the place that explains a figure the pipeline never collected. An
+    indicator the SOURCE withheld is different: that is a fact about the
+    commune, and omitting it publishes silence where the source published a
+    refusal."""
     indicators = commune.get("indicators") or {}
     ids = [section["headline"]] if section.get("headline") else []
     ids += list(section.get("indicators") or [])
@@ -286,14 +313,38 @@ def _section_rows(commune: dict, section: dict, lang: str) -> list[tuple[str, st
         if not entry:
             continue
         period, cell = _latest(entry)
+        withheld = _withheld_periods(entry)
         if period is None:
+            if not withheld:
+                continue
+            rows.append(
+                (
+                    _local_name(entry.get("names"), lang, indicator_id),
+                    WITHHELD_NOTE,
+                    ", ".join(withheld),
+                    "",
+                    True,
+                )
+            )
             continue
+        # A figure whose NEWER years were withheld says so in its period
+        # cell. Without it the static page shows 2024 on a 2026 site and a
+        # reader cannot tell whether the series stopped or the source declined
+        # to publish -- the interactive page states this, and these pages are
+        # the copy a crawler and a reader without JavaScript actually get.
+        later_withheld = [p for p in withheld if p > period]
+        period_cell = (
+            f"{period} ({', '.join(later_withheld)} {WITHHELD_SUFFIX})"
+            if later_withheld
+            else period
+        )
         rows.append(
             (
                 _local_name(entry.get("names"), lang, indicator_id),
                 _format_value(cell["value"], entry.get("unit")),
-                period,
+                period_cell,
                 entry.get("updated") or "",
+                False,
             )
         )
     return rows
@@ -332,16 +383,19 @@ def _render_page(
         rows = _section_rows(commune, section, lang)
         if not rows:
             continue
-        covered += len(rows)
+        # Real figures only. A page whose only content is withheld cells is
+        # still a thin page, and the refusal exists to stop those shipping.
+        covered += sum(1 for row in rows if not row[4])
         label = _local_name(section.get("label"), lang, section["id"])
         body.append(f"<section><h2>{esc(label)}</h2>")
         body.append(
             "<table><thead><tr><th>Indicator</th><th>Value</th><th>Period</th>"
             "<th>Updated</th></tr></thead><tbody>"
         )
-        for indicator_label, value, period, indicator_updated in rows:
+        for indicator_label, value, period, indicator_updated, withheld in rows:
+            css = " class='withheld'" if withheld else ""
             body.append(
-                f"<tr><td>{esc(indicator_label)}</td><td class='v'>{esc(value)}</td>"
+                f"<tr{css}><td>{esc(indicator_label)}</td><td class='v'>{esc(value)}</td>"
                 f"<td>{esc(period)}</td><td>{esc(indicator_updated)}</td></tr>"
             )
         body.append("</tbody></table></section>")

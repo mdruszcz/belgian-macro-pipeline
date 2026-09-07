@@ -598,3 +598,117 @@ def test_headlines_come_from_the_layout_not_a_builtin_default():
         console.log(JSON.stringify(LocalUI.buildHeadlines({indicators: {}})));
     """)
     assert results == []
+
+
+# ── withheld figures ────────────────────────────────────────────────────────
+#
+# The payloads now publish cells the SOURCE withheld: ONEM masks any count
+# below 10 for privacy, and those arrive as {value: null, status:
+# "suppressed"}. For 158 (commune, indicator) pairs the withheld cell is the
+# most recent one, so anything that takes "the last period" now has to reckon
+# with a null. Four places in this page did.
+
+
+def test_the_latest_figure_skips_a_withheld_newest_period():
+    """Otherwise the headline card shows a dash where a real 2024 figure
+    exists, purely because the source declined to publish 2025."""
+    out = _run_node("""
+        const entry = {unit: 'count', names: {en: 'Part-time'}, updated: '2026-09-06',
+          periods: {'2023': {value: 12, status: 'final'},
+                    '2024': {value: 11, status: 'final'},
+                    '2025': {value: null, status: 'suppressed'},
+                    '2026': {value: null, status: 'suppressed'}}};
+        const latest = LocalUI.latestOf(entry);
+        console.log(JSON.stringify({
+          period: latest.period, value: latest.value,
+          withheldSince: latest.withheldSince,
+          picked: LocalUI.latestPeriodWithValue(entry),
+        }));
+        """)
+    assert out["period"] == "2024"
+    assert out["value"] == 11
+    # And the reader is told which years were withheld, so a 2024 figure on a
+    # 2026 page does not read as a series that simply stopped.
+    assert out["withheldSince"] == ["2025", "2026"]
+
+
+def test_a_comparison_is_made_at_the_latest_published_period():
+    """comparisonRows had its own copy of the last-period assumption. Left
+    alone it would pit a null against a real province aggregate."""
+    out = _run_node("""
+        const entry = {unit: 'count', names: {en: 'Part-time'},
+          periods: {'2024': {value: 11, status: 'final'},
+                    '2025': {value: null, status: 'suppressed'}},
+          comparison: {province: {level: 'province', name: {en: 'Antwerp'},
+                       value: 4120, period: '2024',
+                       coverage: {n: 67, of: 67, pct: 100}}}};
+        const rows = LocalUI.comparisonRows(entry, 'en', {});
+        console.log(JSON.stringify(rows.map(r => ({scope: r.scope, value: r.value, period: r.period}))));
+        """)
+    own = next(r for r in out if r["scope"] == "commune")
+    assert own["period"] == "2024"
+    assert own["value"] == 11
+    assert all(r["value"] is not None for r in out)
+
+
+def test_a_chart_never_receives_a_null_point():
+    """A chart has nowhere to put a withheld cell. Dropping it leaves a visible
+    gap, which is honest; a null breaks the path and a zero would state a
+    figure the source refused to publish."""
+    out = _run_node("""
+        const entry = {periods: {'2023': {value: 12, status: 'final'},
+                                 '2024': {value: null, status: 'suppressed'},
+                                 '2025': {value: 14, status: 'final'}}};
+        console.log(JSON.stringify(LocalUI.chartPoints(entry)));
+        """)
+    assert [p["period"] for p in out] == ["2023", "2025"]
+    assert all(p["value"] is not None for p in out)
+
+
+def test_an_indicator_with_nothing_but_withheld_values_is_recognised():
+    """36 (commune, indicator) pairs are in this position and used to be absent
+    from the payload entirely. The page must render a tile that says the source
+    holds the figure and withholds it, rather than omitting the indicator."""
+    out = _run_node("""
+        const withheld = {names: {en: 'Part-time'},
+          periods: {'2023': {value: null, status: 'suppressed'},
+                    '2024': {value: null, status: 'suppressed'}}};
+        const empty  = {names: {en: 'Other'}, periods: {}};
+        const normal = {names: {en: 'Pop'}, periods: {'2024': {value: 5, status: 'final'}}};
+        console.log(JSON.stringify({
+          withheld: LocalUI.isWhollyWithheld(withheld),
+          tail:     LocalUI.suppressedTail(withheld),
+          empty:    LocalUI.isWhollyWithheld(empty),
+          normal:   LocalUI.isWhollyWithheld(normal),
+          latest:   LocalUI.latestOf(withheld),
+        }));
+        """)
+    assert out["withheld"] is True
+    assert out["tail"] == ["2023", "2024"]
+    # An indicator with no rows at all is NOT withheld -- it was never
+    # collected, a different fact, and the page must not claim otherwise.
+    assert out["empty"] is False
+    assert out["normal"] is False
+    assert out["latest"] is None
+
+
+def test_the_withheld_wording_exists_in_all_three_languages():
+    """Rule 7. LocalUI.t falls back to English for a missing key, so a string
+    added to `en` alone would silently render English on the French page --
+    the exact half-translation this rule exists to prevent."""
+    out = _run_node("""
+        const keys = ['withheld', 'withheldSince'];
+        const out = {};
+        for(const lang of LocalUI.LANGS){
+          out[lang] = keys.map(k => (LocalUI.STRINGS[lang] || {})[k] || null);
+        }
+        console.log(JSON.stringify(out));
+        """)
+    for lang in ("en", "fr", "nl"):
+        assert all(out[lang]), f"{lang} is missing a withheld string: {out[lang]}"
+    # Genuinely translated, not copied from English.
+    assert out["fr"][0] != out["en"][0]
+    assert out["nl"][0] != out["en"][0]
+    # And each keeps the placeholder the caller substitutes.
+    for lang in ("en", "fr", "nl"):
+        assert "{p}" in out[lang][1], f"{lang} lost the period placeholder"
