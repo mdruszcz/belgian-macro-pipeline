@@ -1,0 +1,93 @@
+/* Styles for the shared commune-map component (assets/commune_map.js).
+ *
+ * Linked by both map.html and communes.html so the two maps cannot drift
+ * apart visually any more than they can behaviourally. It defines ONLY the
+ * map: the surrounding page palette (--bg, --surface, --text, --accent…) is
+ * each page's own and is assumed to exist, since both already share it.
+ */
+
+/* The choropleth ramp. Single hue, light to dark, because dark = MORE and
+   nothing else -- a red/green ramp would tell the reader that a high value is
+   bad, which is not something a map of "population" or "median price" can
+   honestly say. Whether high is good is stated in words in the legend note.
+
+   The DARK theme runs the other way on purpose: on a dark ground it is the
+   PALE end that reads as "more". That is why nothing in the legend text talks
+   about darkness -- it would be false in one of the two themes -- and why the
+   note describes the bar instead. */
+:root{
+  --ramp-0:#f2e9dc; --ramp-1:#e5cfae; --ramp-2:#d6b184; --ramp-3:#c1905c;
+  --ramp-4:#a8722f; --ramp-5:#845723; --ramp-6:#5c3d18;
+  --nodata:#e8e4da; --map-stroke:#f7f5f0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ramp-0:#2e2a22; --ramp-1:#4a3d28; --ramp-2:#6b5330; --ramp-3:#8d6c39;
+    --ramp-4:#b08745; --ramp-5:#d0a75f; --ramp-6:#eccb8d;
+    --nodata:#38332a; --map-stroke:#1a1815;
+  }
+}
+:root[data-theme="dark"]{
+  --ramp-0:#2e2a22; --ramp-1:#4a3d28; --ramp-2:#6b5330; --ramp-3:#8d6c39;
+  --ramp-4:#b08745; --ramp-5:#d0a75f; --ramp-6:#eccb8d;
+  --nodata:#38332a; --map-stroke:#1a1815;
+}
+
+.mapbox{position:relative;background:var(--surface)}
+svg.map{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+svg.map.dragging{cursor:grabbing}
+svg.map path{stroke:var(--map-stroke);stroke-width:.35;vector-effect:non-scaling-stroke}
+svg.map path:hover{stroke:var(--text);stroke-width:1.4}
+svg.map path.hit{stroke:var(--text);stroke-width:1.8}
+/* Filtered-out communes stay ON the map rather than vanishing: a Belgium with
+   holes in it is harder to read than a Belgium with a highlighted region, and
+   the surrounding shape is what tells you where you are looking. */
+svg.map path.filtered-out{opacity:.18}
+
+.map-tip{
+  position:absolute;pointer-events:none;z-index:5;
+  background:var(--surface);border:1px solid var(--border-strong);
+  border-radius:6px;padding:7px 10px;font-size:.85rem;
+  box-shadow:0 4px 14px rgba(0,0,0,.13);max-width:250px;
+}
+.map-tip .n,.map-tip .v,.map-tip .m{display:block}
+.map-tip .n{font-weight:600}
+.map-tip .v{font-family:"IBM Plex Mono",monospace;color:var(--accent-ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .map-tip .v{color:var(--accent)}}
+:root[data-theme="dark"] .map-tip .v{color:var(--accent)}
+.map-tip .m{color:var(--text-faint);font-size:.78rem}
+
+.zoom{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px}
+.zoom button{
+  width:30px;height:30px;font:inherit;font-size:1rem;line-height:1;
+  border:1px solid var(--border-strong);background:var(--surface);
+  color:var(--text);border-radius:5px;cursor:pointer;
+}
+.zoom button:hover{background:var(--accent-soft);color:var(--accent-ink)}
+
+.legend{
+  display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;
+  padding:14px 16px;border-top:1px solid var(--border);
+}
+.scale{display:flex;flex-direction:column;gap:4px}
+.swatches{display:flex}
+.swatches div{width:64px;height:13px}
+/* Ticks are ABSOLUTELY POSITIONED on the bar rather than laid out as equal
+   cells. Fixed-width cells make each label's box overlap its neighbour's
+   whether or not the text does, and a label centred on a band boundary has to
+   be free to be as wide as its own text. */
+.ticks{position:relative;height:1.1rem;font-family:"IBM Plex Mono",monospace;
+  font-size:.7rem;color:var(--text-muted)}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.legend .note{color:var(--text-muted);font-size:.82rem;max-width:46ch}
+.nodata-key{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text-muted)}
+.nodata-key i{width:14px;height:14px;background:var(--nodata);border:1px solid var(--border-strong);display:inline-block}
+
+.map-warn{
+  margin-top:14px;padding:10px 14px;border-left:3px solid var(--warn);
+  background:var(--warn-soft);color:var(--accent-ink);font-size:.85rem;border-radius:0 5px 5px 0;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .map-warn{color:var(--text)}}
+:root[data-theme="dark"] .map-warn{color:var(--text)}
+
+.map-hidden{display:none}

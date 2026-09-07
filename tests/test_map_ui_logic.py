@@ -1,10 +1,15 @@
-"""Logic tests for map.html's DOM-free helpers (MapUI), run under Node -- the
-same method test_local_ui_logic.py uses for local.html.
+"""Logic tests for the shared map component's DOM-free helpers (MapUI), run
+under Node -- the same method test_local_ui_logic.py uses for local.html.
 
 The classification is the part worth testing rather than eyeballing: a
 choropleth is a picture, and a picture of a wrong break table looks exactly as
-convincing as a picture of a right one. Rendering and DOM wiring are covered by
-the browser check recorded in docs/steps.
+convincing as a picture of a right one. Two pages now draw these maps
+(map.html and communes.html), so a second copy of this arithmetic would let the
+same commune sit in different bands on two pages of the same site -- which is
+why it lives in one file and is tested here once.
+
+Rendering and DOM wiring are covered by the browser check recorded in
+docs/steps.
 """
 
 import json
@@ -12,18 +17,22 @@ import re
 import subprocess
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parents[1]
 MAP_HTML = REPO / "map.html"
+COMMUNES_HTML = REPO / "communes.html"
+COMPONENT_JS = REPO / "assets" / "commune_map.js"
+COMPONENT_CSS = REPO / "assets" / "commune_map.css"
+
+# Pages that draw a map, and therefore must load the shared component rather
+# than carry their own copy of it.
+MAP_PAGES = [MAP_HTML, COMMUNES_HTML]
 
 
 def _extract_map_ui_js() -> str:
-    """Pull the MapUI <script> block out of map.html, so the test exercises the
-    exact code the page ships rather than a copy that could drift from it."""
-    text = MAP_HTML.read_text(encoding="utf-8")
-    for script in re.findall(r"<script>(.*?)</script>", text, re.DOTALL):
-        if "MapUI" in script and "module.exports" in script:
-            return script
-    raise AssertionError("Could not find the MapUI <script> block in map.html")
+    """The shared component, exactly as the pages load it."""
+    return COMPONENT_JS.read_text(encoding="utf-8")
 
 
 def _run_node(js_body: str):
@@ -216,13 +225,60 @@ def test_geometry_to_path_handles_multipolygons_and_closes_every_ring():
     assert out["closes"] == 2
 
 
-def test_page_names_no_indicator():
+def test_no_page_names_an_indicator():
     """The 50% gate's rule: adding an indicator is a config change, never an
-    edit to this page. An indicator id appearing here would silently make one
-    dataset special."""
-    text = MAP_HTML.read_text(encoding="utf-8")
-    # Indicator ids are SCREAMING_SNAKE_CASE with at least two segments.
-    suspects = set(re.findall(r"\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+){2,}\b", text))
-    # Names that belong to the page's own vocabulary, not to any dataset.
-    allowed = {"DRAG_THRESHOLD_PX", "MIN_USEFUL_BANDS"}
-    assert suspects <= allowed, f"map.html names indicators directly: {suspects - allowed}"
+    edit to a page.
+
+    Checked against the ACTUAL published indicator list rather than a regex for
+    shouty names -- that way the test cannot be satisfied by renaming a
+    constant, and it grows automatically as indicators are added.
+    """
+    index_path = REPO / "public" / "data" / "metadata" / "indicators.json"
+    if not index_path.exists():
+        pytest.skip("site payloads not built")
+    codes = {
+        row["indicator_code"]
+        for row in json.loads(index_path.read_text(encoding="utf-8"))["indicators"]
+    }
+    assert codes, "the indicator index is empty, so this test would prove nothing"
+
+    for path in MAP_PAGES + [COMPONENT_JS]:
+        text = path.read_text(encoding="utf-8")
+        named = sorted(code for code in codes if code in text)
+        assert not named, f"{path.name} names indicators directly: {named}"
+
+
+@pytest.mark.parametrize("page", MAP_PAGES, ids=lambda p: p.name)
+def test_map_pages_load_the_shared_component(page):
+    """Neither page may inline its own copy of the map.
+
+    Two copies of the classification would eventually disagree, and the same
+    commune would sit in different bands on two pages of the same site.
+    """
+    text = page.read_text(encoding="utf-8")
+    assert 'src="assets/commune_map.js"' in text, f"{page.name} does not load the component"
+    assert 'href="assets/commune_map.css"' in text, f"{page.name} does not load its styles"
+    assert (
+        "MapUI.quantileBreaks = function" not in text
+    ), f"{page.name} carries its own copy of the classification"
+
+
+def test_swatch_width_agrees_between_the_component_and_its_stylesheet():
+    """The legend positions its ticks in pixels, so the number in the JS and
+    the width in the CSS are one fact stored twice. If they drift, every tick
+    is drawn at the wrong place -- and the map still looks perfectly fine."""
+    js = COMPONENT_JS.read_text(encoding="utf-8")
+    css = COMPONENT_CSS.read_text(encoding="utf-8")
+    js_px = int(re.search(r"MapUI\.SWATCH_PX\s*=\s*(\d+)", js).group(1))
+    css_px = int(re.search(r"\.swatches div\{width:(\d+)px", css).group(1))
+    assert js_px == css_px, f"SWATCH_PX is {js_px} but the swatch is {css_px}px wide"
+
+
+def test_the_ramp_has_exactly_as_many_colours_as_bands():
+    """MapUI.BINS bands are drawn with --ramp-0..N tokens. One missing token
+    renders as a transparent commune, which reads as a hole in the country."""
+    js = COMPONENT_JS.read_text(encoding="utf-8")
+    css = COMPONENT_CSS.read_text(encoding="utf-8")
+    bins = int(re.search(r"MapUI\.BINS\s*=\s*(\d+)", js).group(1))
+    defined = {int(m) for m in re.findall(r"--ramp-(\d+):", css)}
+    assert defined == set(range(bins)), f"ramp tokens {sorted(defined)} for {bins} bands"
