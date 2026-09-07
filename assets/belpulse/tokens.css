@@ -37,6 +37,9 @@
   --bp-accent:        #c8402f;  /* primary CTA, active nav, "this is the subject" highlight */
   --bp-accent-ink:     #7a2116; /* accent text on a light background (AA against --bp-bg) */
   --bp-accent-soft:    #f6e3df; /* accent-tinted background, e.g. a selected chip */
+  --bp-on-accent:      #ffffff; /* text/icon colour drawn ON a filled --bp-accent surface
+                                    (a primary button's label) -- same in both themes, since
+                                    the accent fill itself doesn't change between them. */
   --bp-blue:           #3a67e0; /* links, chart series, KPI icon backgrounds */
   --bp-green:          #278a53; /* a favourable delta, per the indicator's own preferred_direction.
                                     Darkened from the screenshot's brighter green -- the lighter

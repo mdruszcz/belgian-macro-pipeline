@@ -57,23 +57,23 @@ Full detail lives in `docs/implementation/batches/` as each one starts; this is 
 
 | # | Batch | Depends on | Status |
 |---|---|---|---|
-| 0 | Protect the existing baseline | — | in progress |
-| 1 | BelPulse design tokens | reference designs | blocked |
-| 2 | Shared presentation components | Batch 1 | blocked |
-| 3 | Homepage reproduction | Batch 2, reference designs | blocked |
-| 4 | Municipal profile redesign | Batch 2, reference designs (Namur) | blocked |
-| 5 | Municipality explorer redesign | Batch 2 | blocked |
-| 6 | Macroeconomics reproduction | Batch 2, reference designs | blocked |
-| 7 | Microeconomics page | Batch 6 | blocked |
-| 8 | Data and map explorers | Batch 2 | blocked |
-| 9 | Page-document schema | Batch 0 | not started, unblocked |
-| 10 | Shared block renderer | Batch 9 | not started |
-| 11 | Builder service | Batch 9 | not started |
-| 12 | Builder shell | Batch 11 | not started |
-| 13 | Drag, resize, responsive layouts | Batch 12 | not started |
-| 14 | Data-binding engine | Batch 10 | not started |
-| 15 | Convert pages into templates | Batches 3-8, 10, 14 | blocked (transitively) |
-| 16 | Draft/publication transaction | Batch 11 | not started |
+| 0 | Protect the existing baseline | — | done |
+| 1 | BelPulse design tokens | reference designs | done |
+| 2 | Shared presentation components | Batch 1 | done |
+| 3 | Homepage reproduction | Batch 2, reference designs | not started, unblocked |
+| 4 | Municipal profile redesign | Batch 2, reference designs (Namur) | not started, unblocked |
+| 5 | Municipality explorer redesign | Batch 2 | not started, unblocked |
+| 6 | Macroeconomics reproduction | Batch 2, reference designs | not started, unblocked |
+| 7 | Microeconomics page | Batch 6 | not started |
+| 8 | Data and map explorers | Batch 2 | not started, unblocked |
+| 9 | Page-document schema | Batch 0 | deferred (maintainer, 2026-09-07: "work on the app version later") |
+| 10 | Shared block renderer | Batch 9 | deferred (see Batch 9) |
+| 11 | Builder service | Batch 9 | deferred (see Batch 9) |
+| 12 | Builder shell | Batch 11 | deferred (see Batch 9) |
+| 13 | Drag, resize, responsive layouts | Batch 12 | deferred (see Batch 9) |
+| 14 | Data-binding engine | Batch 10 | deferred (see Batch 9) |
+| 15 | Convert pages into templates | Batches 3-8, 10, 14 | deferred (see Batch 9) |
+| 16 | Draft/publication transaction | Batch 11 | deferred (see Batch 9) |
 
 Batches 9-14 (the block engine and builder itself) do **not** need the reference designs and can
 proceed once Batch 0 is closed. Batches 1, 3, 4, 6, 7 (visual reproduction) are blocked until the

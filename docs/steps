@@ -389,7 +389,10 @@ Batch 1's own note for what that means for precision). Batches 3, 4, 6, 7 are UN
 designs but each has its own real sub-blockers found while transcribing (see
 docs/design-references/component-inventory.md's table -- missing municipal finance data, no
 Peer Model, a 3-vs-4 age-band mismatch, a dead international-GDP fetch, no photo library).
-Batches 9-14 (the block engine and builder itself) never needed the designs.
+Batches 9-14 (the block engine and builder itself) never needed the designs. DEFERRED
+2026-09-07 by maintainer instruction ("we'll work on the app version later") -- the redesign
+batches (1-8) continue; the builder application itself (9-16) does not start without further
+direction.
  ✅ [BUILD] Batch 0 -- protect the existing baseline (2026-09-07: full report at
 docs/implementation/batches/batch-0-baseline.md. Local tag belpulse-v0.5-pre-redesign (NOT
 pushed -- that's a shared action and this is an internal checkpoint, not the real v0.5 release
@@ -447,19 +450,41 @@ alongside it until Batch 15 converts a page. 701 tests passing)
 How: Measure colour, type, spacing, breakpoints and component dimensions from the supplied
 homepage/macro/micro/municipality designs; define semantic tokens, not page-specific ones.
 Why: No later page should need to invent a second spacing or colour system.
- [BUILD] Batch 2 -- shared presentation components
+ ✅ [BUILD] Batch 2 -- shared presentation components (2026-09-07: assets/belpulse/layout.css
++ components.css + charts.js + components.js, tested by tests/pages/test_shared_components.py
+(53 tests) and demonstrated live by docs/design-references/component-gallery.html. Full report
+at docs/implementation/batches/batch-2-shared-components.md. TWO SHELLS built as CSS, matching
+Batch 1's finding exactly: .bp-shell--analytical (top bar + LEFT sidebar) and the editorial
+shell (top bar only, breadcrumb, hero, optional RIGHT sidebar for the municipality profile).
+CHARTS GENERALISE local.html's OWN gc()/niceSteps()/drawSeries() rather than reinventing chart
+maths -- four renderers (line, bar, donut, horizontal ranking), all colour read from
+--bp-chart-1..8, none hardcoded. EVERY DATA-BEARING COMPONENT CARRIES ALL SEVEN STATES via one
+shared .bp-state[data-state=...] mechanism, reusing this repo's own existing vocabulary rather
+than inventing new terms: "missing" and "suppressed" match local.html's existing .no-data and
+.fact.withheld patterns, "unavailable" matches config/local_sections.yaml's existing
+unavailable: blocks -- only "loading" and "error" are genuinely new, since the current static
+site has never needed them before. THE SIMULATED-LIVE-COUNTER REFUSES TO RUN without an explicit
+data-simulated="true" attribute (throws otherwise) so a real metric can never be silently wired
+to a decorative animation. RENDERING THE GALLERY CAUGHT A DUPLICATE id="ranking-list" (an <h2>
+and a demo list shared one id, so getElementById silently returned the heading and the real list
+rendered empty) -- not visible from reading the HTML, only from looking at the rendered page.
+Fixed. TWO RAW #fff VALUES caught by a new test (rule: no colour outside tokens.css) --
+added one new semantic token, --bp-on-accent, rather than smuggling white in through an existing
+token. 754 tests passing)
 How: Header, nav, sidebar, hero, KPI/KPI grid, sparkline, chart container, comparison table,
 ranking panel, map container, tabs, filters, source/freshness badges, footer -- every one
 implementing all seven data states (loading, ready, explicit zero, missing, suppressed,
 unavailable, error).
 Why: Full page work should assemble from a tested component gallery, not invent components
 per page.
- [BUILD] Batch 3 -- homepage reproduction (BLOCKED: needs the supplied homepage design)
+ [BUILD] Batch 3 -- homepage reproduction (unblocked on design per Batch 1; real sub-blockers
+recorded in docs/design-references/component-inventory.md, e.g. no photo library)
 How: Reproduce nav, hero, choropleth, featured GDP/inflation, public-finance summary, featured
 municipality, macro indicator grid, sources strip, CTA, footer -- all configuration-driven,
 all figures real.
 Why: The homepage is what gets shared and judged first.
- [BUILD] Batch 4 -- municipal profile redesign (BLOCKED: needs the supplied Namur design)
+ [BUILD] Batch 4 -- municipal profile redesign (unblocked on design per Batch 1; real
+sub-blockers recorded in component-inventory.md, e.g. the 3-vs-4 age-band mismatch)
 How: Reproduce the Namur design as a generic template bound to real payloads; preserve both
 local.html?nis= and /local/{nis}/; test Namur, Antwerp, Herstappe, a Brussels commune, a
 2025-merger successor, a suppressed-value commune.
@@ -468,11 +493,12 @@ Why: This is the page a bourgmestre actually opens; nothing here may regress.
 How: Preserve every current communes.html behaviour (search, filters, year/indicator
 selection, suppression state, lazy map, URL state); add card view and a mobile filter drawer.
 Why: The redesign must show the same observations as today, just presented better.
- [BUILD] Batch 6 -- macroeconomics reproduction (BLOCKED: needs the supplied macro design)
+ [BUILD] Batch 6 -- macroeconomics reproduction (unblocked on design per Batch 1; real
+sub-blockers recorded in component-inventory.md, e.g. the dead international-GDP fetch)
 How: Reproduce the analytical sidebar, KPI row, GDP history, international comparison,
 public-finance counters, economic map -- configuration-driven, national data logic unchanged.
 Why: Matches the macro design without touching how national numbers are computed.
- [BUILD] Batch 7 -- microeconomics page (BLOCKED: needs the supplied micro design)
+ [BUILD] Batch 7 -- microeconomics page (unblocked on design per Batch 1; depends on Batch 6)
 How: Reuse the macro analytical shell for enterprises, households, income, labour, sectors,
 housing, prices; explicit coverage notices where data doesn't exist, never a fabricated series.
 Why: Matches the design while staying completely honest about what this pipeline actually has.
