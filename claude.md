@@ -115,6 +115,17 @@ replace rules 1-16.
    of work in docs/steps), update docs/steps' checkmarks first, then run
    /clear before starting the next big step. Keeps context focused on the
    step at hand instead of dragging the whole history forward.
+7. Mid-task, if a single step is running long (many files read, many tool
+   calls, a long back-and-forth with a reviewer agent), run /compact rather
+   than pushing through on a bloated context. Do this between logical
+   sub-steps (e.g. after a spec is written, after an audit finishes), never
+   mid-edit. /compact keeps the step's own thread of work; /clear (rule 6)
+   is for leaving that thread behind entirely once the step is done.
+8. When orchestrating other agents (belpulse-lead and any batch owner), keep
+   each spawned agent's task narrowly scoped to what its batch spec assigns
+   it -- a smaller, well-scoped task uses less context on its own and needs
+   /compact less often. Don't have one agent re-read files another agent in
+   the same batch already summarized; pass the summary forward instead.
 
 ## Prohibited until the 50% milestone
 - AI chatbot interfaces
