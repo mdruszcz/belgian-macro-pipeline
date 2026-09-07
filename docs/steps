@@ -380,6 +380,123 @@ Why: Structured markup is how Google understands that these thousands of pages a
  ✅ [H] Verify a URL survives a rebuild and is indexable (2026-09-06: done as a TEST rather than a manual check, because it regresses silently -- anything putting a timestamp or an unsorted dict into the page breaks it and nothing visibly fails. Two builds of the same commune are byte-identical; a second test diffs two builds with the build stamp stripped, so a second varying field cannot hide behind the one field allowed to vary. Indexability verified in a real headless browser with JAVASCRIPT DISABLED: title, canonical and 51 populated table rows all present, robots index,follow, valid parseable JSON-LD. The clean /local/11002/ URL resolves through directory-plus-index.html with no server rewrite rules, as comparison.md specified)
 How: Rebuild, reload the same URL, check the rendered <title> and robots directives.
 Why: Journalists and civil servants bookmark links. A URL that breaks on rebuild destroys the trust the whole public side is built on.
+Block WEB — BelPulse redesign and repository-native page builder (added 2026-09-07, expands
+Phase I -- maintainer-directed, spec at docs/features/page_builder.md, ADR at
+docs/decisions/0004-repository-native-website-builder.md. Extends CLAUDE.md with rules 17-36.
+Batches 1, 3, 4, 6, 7 are visual reproduction and are BLOCKED until the maintainer supplies the
+actual reference design files -- nothing gets guessed at. Batches 9-14 (the block engine and
+builder itself) do not need the designs and can proceed once Batch 0 closes.
+ ✅ [BUILD] Batch 0 -- protect the existing baseline (2026-09-07: full report at
+docs/implementation/batches/batch-0-baseline.md. Local tag belpulse-v0.5-pre-redesign (NOT
+pushed -- that's a shared action and this is an internal checkpoint, not the real v0.5 release
+GATE 50% already owns as its own [H] step). `make all` -- 684/684 tests pass, fully offline.
+Every route recorded: 7 hand-built pages, 1,695 static commune pages (565 communes x 3
+languages, all present, no gaps). Every current asset/payload size recorded in a table --
+public/data/ 39 MB, local/ 40 MB, communes_history.csv 37 MB, belgian_macro.db 18 MB -- so a
+later batch's size comparison is against a real number, not a guess. 18 screenshots captured
+(7 root pages + a static commune page + a searched local.html view, desktop + mobile, zero
+console errors) via a new reusable script, scripts/capture_baseline_screenshots.py -- the 15 MB
+of images themselves are DELIBERATELY NOT COMMITTED (rule 12: new binary artefacts need asking
+first, and a "before" set is exactly what gets recaptured fresh before every later visual
+batch's audit anyway, not accumulated in git history). Lighthouse baseline recorded for 4 core
+pages via Playwright's own bundled Chromium (CHROME_PATH pointed at it, no separate install
+needed) -- communes.html and map.html score 46/59 on performance, which is not new information,
+just the first time it's written down: 11 MB and 1.2 MB payloads respectively, both deliberate
+trade-offs from when those pages were built. Worktree clean, confirmed)
+How: Tag the pre-redesign state, run the full pipeline and test suite, record every current
+route, screenshot the existing public pages, record current asset/payload sizes, confirm the
+worktree is clean.
+Why: A future regression must be measurable against a real baseline, not a memory of what the
+site used to do.
+ [BUILD] Batch 1 -- BelPulse design tokens (BLOCKED: no reference design files supplied yet)
+How: Measure colour, type, spacing, breakpoints and component dimensions from the supplied
+homepage/macro/micro/municipality designs; define semantic tokens, not page-specific ones.
+Why: No later page should need to invent a second spacing or colour system.
+ [BUILD] Batch 2 -- shared presentation components
+How: Header, nav, sidebar, hero, KPI/KPI grid, sparkline, chart container, comparison table,
+ranking panel, map container, tabs, filters, source/freshness badges, footer -- every one
+implementing all seven data states (loading, ready, explicit zero, missing, suppressed,
+unavailable, error).
+Why: Full page work should assemble from a tested component gallery, not invent components
+per page.
+ [BUILD] Batch 3 -- homepage reproduction (BLOCKED: needs the supplied homepage design)
+How: Reproduce nav, hero, choropleth, featured GDP/inflation, public-finance summary, featured
+municipality, macro indicator grid, sources strip, CTA, footer -- all configuration-driven,
+all figures real.
+Why: The homepage is what gets shared and judged first.
+ [BUILD] Batch 4 -- municipal profile redesign (BLOCKED: needs the supplied Namur design)
+How: Reproduce the Namur design as a generic template bound to real payloads; preserve both
+local.html?nis= and /local/{nis}/; test Namur, Antwerp, Herstappe, a Brussels commune, a
+2025-merger successor, a suppressed-value commune.
+Why: This is the page a bourgmestre actually opens; nothing here may regress.
+ [BUILD] Batch 5 -- municipality explorer redesign
+How: Preserve every current communes.html behaviour (search, filters, year/indicator
+selection, suppression state, lazy map, URL state); add card view and a mobile filter drawer.
+Why: The redesign must show the same observations as today, just presented better.
+ [BUILD] Batch 6 -- macroeconomics reproduction (BLOCKED: needs the supplied macro design)
+How: Reproduce the analytical sidebar, KPI row, GDP history, international comparison,
+public-finance counters, economic map -- configuration-driven, national data logic unchanged.
+Why: Matches the macro design without touching how national numbers are computed.
+ [BUILD] Batch 7 -- microeconomics page (BLOCKED: needs the supplied micro design)
+How: Reuse the macro analytical shell for enterprises, households, income, labour, sectors,
+housing, prices; explicit coverage notices where data doesn't exist, never a fabricated series.
+Why: Matches the design while staying completely honest about what this pipeline actually has.
+ [BUILD] Batch 8 -- data and map explorers
+How: Redesign all_data.html with search/filters/table/chart/map modes and virtualization;
+restyle map.html without replacing its map engine.
+Why: The explorer must stay usable at full data scale and never disagree with a download.
+ [BUILD] Batch 9 -- page-document schema
+How: JSON Schema for a page document (spec: docs/features/block_contract.md); reject
+duplicate ids, unknown blocks, invalid grid positions, unknown indicators/NIS codes, forbidden
+aggregation, raw SQL, scripts, remote URLs.
+Why: Every later batch writes documents against this. Get it wrong once, pay for it in all of
+them.
+ [BUILD] Batch 10 -- shared block renderer
+How: One block registry consumed identically by the editor preview and the public build;
+responsive CSS grid; per-block failure isolation; lazy-loaded maps and charts.
+Why: What the maintainer sees while editing must be exactly what ships.
+ [BUILD] Batch 11 -- builder service
+How: scripts/serve_builder.py behind `make builder`; validate/save/publish/restore API; private
+port, session token, origin check, path allowlisted to config/pages/, atomic writes, no shell=True,
+no credentials sent to the browser, no server-side commit or push.
+Why: No builder action may ever overwrite an arbitrary repository file or corrupt the last
+published version.
+ [BUILD] Batch 12 -- builder shell
+How: Page/template selector, block library, structure tree, canvas, inspector panels
+(content/layout/appearance/data/accessibility/visibility), top bar (undo/redo, viewport,
+save/validate/publish).
+Why: A valid page must be loadable, editable and saveable without ever touching raw JSON.
+ [BUILD] Batch 13 -- drag, resize and responsive layouts
+How: Reorder, grid move/resize, collision handling, per-breakpoint layouts, duplicate/lock,
+undo/redo, debounced autosave, full keyboard alternative for every pointer action.
+Why: This is the actual "drag-and-drop builder" the maintainer asked for; everything before it
+is scaffolding for this batch.
+ [BUILD] Batch 14 -- data-binding engine
+How: Closed vocabulary of provider/indicator/geography/period/operation (spec:
+docs/features/data_binding.md); no generic query operation exists at all.
+Why: A block can only ever ask for what the existing exporters would also produce.
+ [BUILD] Batch 15 -- convert pages into templates
+How: One page at a time (blank, homepage, macro, micro, municipality profile last), freeze the
+hand-built version, recreate through blocks, compare data/screenshots/states, ship behind a
+preview route, switch the canonical route only after independent review.
+Why: The hand-built page stays live until its block version is proven equivalent or better --
+never a risky cutover.
+ [BUILD] Batch 16 -- draft and publication transaction
+How: draft.json/published.json split; publish validates first, builds to a temp directory,
+runs required tests, replaces published files atomically only on success; make all never
+promotes a draft.
+Why: No builder or test failure may ever corrupt the current public site.
+ [REVIEW] Full audit pass -- visual, data, accessibility, security, performance, licence, SEO
+How: Run every audit in docs/features/page_builder.md's Test matrix against the finished
+batches; zero P0/P1 findings remain open.
+Why: This is the gate between "looks done" and "is done" for a redesign this size.
+ [H] Physical-device and non-technical-user check
+How: Ten diverse communes on a real phone (iPhone/Safari and Android/Chrome); watch a
+non-technical person use the public site and a non-developer build a page in the builder,
+silently, then ask them to find a source, compare two communes, and download data.
+Why: Nobody else can do this one, and it is the check most likely to catch what every
+automated audit misses.
+
 🚦 GATE 50%
  🛑 [BLOCKED] Any commune returns >= 50 standardized indicators (2026-09-06: MEASURED, and it passes for 552 of 565 communes but not all -- median 52, max 52, and the roadmap's own How: (pick five at random and count) passes cleanly, all five between 51 and 52. The 13 that fail carry 17 each and are EXACTLY the 2025 merger successors plus Bastogne (which merged 2024-12-02): Pajottegem, Wingene, Tielt, Nazareth-De Pinte, Lochristi, Merelbeke-Melle, Lokeren, Beveren-Kruibeke-Zwijndrecht, Tessenderlo-Ham, Hasselt, Bilzen-Hoeselt, Tongeren-Borgloon, Bastogne. The reason is structural and already documented across this file: every historical source predates them -- fiscal income stops at the 2019 map, Census 2021 is a 2021 snapshot, police.be and ONEM backcast a pre-2025 grid -- so a commune created in 2025 only carries the sources expressed on the current map. Marking this gate item done at "five random ones passed" would be exactly the averages-hide-gaps failure the 80% gate warns about, and the weakest page is what a sceptical prospect opens. NOT a data-loading bug and not fixable by loading more of the same sources; it needs either a source that covers the new communes, or an explicit decision to show a merger successor its predecessors' history with the discontinuity labelled)
 How: Pick five at random and count.

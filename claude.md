@@ -37,6 +37,46 @@ than a missing feature.
     check off a step (✅) the moment it is genuinely done; never batch this
     for later, and never check off a step you have not personally verified.
 
+## Builder and redesign rules (added 2026-09-07)
+
+These extend the rules above for the website redesign and page-builder work. They do not
+replace rules 1-16.
+
+17. Do not rewrite the public website in Next.js, React or any other framework. A separate
+    framework may be used for the builder interface only, and never for public pages.
+18. Do not redesign the canonical database schema to serve the builder.
+19. Do not alter source adapters, geography resolution, or analytical formulas without a
+    separate ADR and explicit maintainer approval.
+20. Public page blocks consume approved generated payloads (public/data/**), never SQLite
+    directly and never a raw source file.
+21. No browser-side arbitrary SQL, ever.
+22. No arbitrary JavaScript inside a page definition (config/pages/**/*.json). A page document
+    is data, not code; blocks are typed and come from the shared registry.
+23. No arbitrary remote-data URL in a page or block definition.
+24. Indicator IDs may appear in page configuration and data bindings, but never inside generic
+    renderer or block-registry logic -- rule 2 extended to the builder.
+25. NIS codes remain the one geographic key, resolved the same way everywhere -- rule 3
+    extended to the builder.
+26. Missing, unavailable, suppressed, not-applicable and an explicit zero are five distinct
+    states and must never collapse into each other inside a block.
+27. Ratios are recomputed using the existing aggregation rules (see Definitions below); a block
+    never averages a ratio across geographies in the browser.
+28. Source, unit, reference period, status and freshness on a block come from existing metadata
+    (public/data/metadata/**), never hand-typed into a page definition.
+29. Map blocks reuse the shared map engine (assets/commune_map.js). No second map
+    implementation.
+30. The public site stays static and GitHub Pages-compatible. Nothing the builder produces may
+    require a server to view.
+31. Every existing canonical and legacy URL remains valid after the redesign.
+32. A draft page edited in the builder never becomes public automatically; publishing is a
+    separate, explicit step.
+33. A failed publication must leave the previously published version exactly intact.
+34. Publishing may generate files on disk but must never automatically commit or push to git.
+35. Identical inputs must keep producing byte-identical public output -- the same determinism
+    the exporters already guarantee (see the `make all` byte-identical rebuild tests).
+36. No indicator, commune or figure is ever hand-typed into a block, template or design asset.
+    If a real value is needed to lay out a component, read it from a real payload.
+
 ## Definitions you must respect
 - period: YYYY, YYYY-Qn, YYYY-MM, or YYYY-MM-DD, matching the indicator's
   declared frequency.
