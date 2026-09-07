@@ -23,7 +23,7 @@ EXTRA := --extra-observations data/population_observations.csv \
          --extra-observations data/realestate_observations.csv \
          --extra-observations data/police_observations.csv
 
-.PHONY: all install schema reference validate exports pages boundaries test fetch clean help
+.PHONY: all install schema reference validate exports pages boundaries builder test fetch clean help
 
 ## all: install deps, rebuild the database's own structure, regenerate every
 ## published export, and run the tests. No network. This is the gate target.
@@ -91,6 +91,14 @@ pages:
 boundaries:
 	$(PYTHON) -m pip install -q -r requirements-geo.txt
 	$(PYTHON) scripts/build_commune_boundaries.py --db $(DB)
+
+## builder: run the local page builder API on 127.0.0.1:8787 (Ctrl-C to stop).
+## Loopback only, one session token per process, printed as the URL to open.
+## Editing saves a draft; nothing becomes public until you publish explicitly,
+## and nothing is ever committed for you. Needs the published payloads, so run
+## `make exports` first if you have run `make clean`. NOT part of `all`.
+builder:
+	$(PYTHON) scripts/serve_builder.py
 
 ## test: the full suite
 test:

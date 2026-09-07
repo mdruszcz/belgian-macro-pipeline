@@ -18,8 +18,18 @@ Repository-native. A `builder/` app served locally (via `make builder`, in a Cod
 laptop) edits `config/pages/{page_id}/draft.json` through a small local API
 (`scripts/serve_builder.py`). Publishing validates a draft and, only on success, atomically
 replaces `config/pages/{page_id}/published.json`. The existing static-export pipeline reads only
-`published.json` and renders it through the same block registry (`assets/belpulse/renderer.js`)
-the builder preview uses.
+`published.json` and renders it through the same shared renderer the builder preview uses.
+
+> **Superseded in part by Batch 10 (2026-09-07).** This decision named that renderer
+> `assets/belpulse/renderer.js`, a browser-side implementation. That file was never written and
+> must not be: a JavaScript renderer would put every published figure behind JavaScript, which
+> breaks `scripts/export_local_pages.py`'s commitment that its output is "the crawler-visible
+> copy of the data" and `docs/features/i18n.md`'s requirement that a reader with JavaScript
+> disabled still gets a complete page. The one renderer is **Python**, `src/pages/render.py`, and
+> both the static export and the builder preview (Batch 11) call `render_document()` directly.
+> `assets/belpulse/blocks.json`/`blocks.js` remain browser-side for chart and map hydration and
+> for Batch 12's block-library UI, which is a different consumer from the renderer. Everything
+> else this decision records is unchanged.
 
 This keeps the entire public site static and GitHub-Pages-compatible, keeps the canonical
 database and the payload pipeline completely untouched by the builder, and keeps publishing an
