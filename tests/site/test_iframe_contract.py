@@ -98,6 +98,42 @@ def browser():
         manager.stop()
 
 
+#: How long any single step of the contract may take. Generous, because it is
+#: only ever reached on failure -- every wait below is on a CONDITION, not a
+#: duration.
+SETTLE_MS = 15000
+
+#: How long to watch for a navigation that must NOT happen. See the loop-guard
+#: test for why this one cannot be a condition.
+NO_EVENT_MS = 3000
+
+
+def _wait_for(page, expression: str, what: str) -> None:
+    """Wait for a condition in the page, never for a number of milliseconds.
+
+    THIS FILE WAS FLAKY WITH FIXED SLEEPS AND WENT RED IN CI ON ITS FIRST RUN.
+    The chain being tested is long and every hop has its own delay: index.html
+    fades the iframe over 300 ms, sets `src`, the page loads, posts
+    `dashboard-ready`, the parent waits `setTimeout(syncDashboard, 500)`, sends
+    `setLang`, and the frame navigates and loads again. A sleep long enough on
+    a developer laptop is not long enough on a cold CI runner, and picking a
+    bigger number is guessing -- so nothing here sleeps.
+    """
+    page.wait_for_function(
+        f"() => {{ try {{ return {expression}; }} catch (e) {{ return false; }} }}",
+        timeout=SETTLE_MS,
+    )
+
+
+def _wait_for_frame_path(page, expected: str) -> None:
+    _wait_for(
+        page,
+        f"document.getElementById('dashboard-frame').contentWindow"
+        f".location.pathname === {expected!r}",
+        f"the frame to reach {expected}",
+    )
+
+
 def _open_about(browser, site, *, lang=None, theme=None):
     """index.html with the About tab showing, optionally with a language and
     theme already chosen the way a returning reader would have them."""
@@ -111,9 +147,17 @@ def _open_about(browser, site, *, lang=None, theme=None):
             + "}catch(e){}"
         )
     page.goto(f"{site}/index.html", wait_until="networkidle")
-    page.wait_for_timeout(800)
+    # The shell has to have defined its own controls before we drive them.
+    _wait_for(page, "typeof loadDashboard === 'function'", "index.html to initialise")
     page.evaluate(f"loadDashboard({ABOUT_TAB})")
-    page.wait_for_timeout(1800)
+    # The frame has arrived when the contract script has run in it -- which is
+    # the thing under test, so it is also the right thing to wait for.
+    _wait_for(
+        page,
+        "document.getElementById('dashboard-frame').contentDocument"
+        ".documentElement.getAttribute('data-framed') === '1'",
+        "the framed page to run its contract script",
+    )
     return context, page
 
 
@@ -135,7 +179,7 @@ def test_the_framed_page_announces_itself(browser, site):
     try:
         # The proof it arrived: the parent acted on it. Nothing else would have
         # moved this frame off the English page.
-        assert _frame_path(page) == "/fr/about.html"
+        _wait_for_frame_path(page, "/fr/about.html")
     finally:
         context.close()
 
@@ -149,7 +193,12 @@ def test_the_parents_theme_reaches_the_frame_through_the_mapping(
     matches no stylesheet and the page silently stops following the shell."""
     context, page = _open_about(browser, site, theme=parent_theme)
     try:
-        assert _frame_theme(page) == expected
+        _wait_for(
+            page,
+            "document.getElementById('dashboard-frame').contentDocument"
+            f".documentElement.getAttribute('data-theme') === {expected!r}",
+            f"the frame to adopt {expected}",
+        )
     finally:
         context.close()
 
@@ -164,8 +213,12 @@ def test_an_unknown_theme_falls_back_rather_than_being_applied_raw(browser, site
             "document.getElementById('dashboard-frame').contentWindow"
             ".postMessage({type:'setTheme',value:'dusk'},'*')"
         )
-        page.wait_for_timeout(400)
-        assert _frame_theme(page) == "light"
+        _wait_for(
+            page,
+            "document.getElementById('dashboard-frame').contentDocument"
+            ".documentElement.getAttribute('data-theme') === 'light'",
+            "the unknown theme to fall back",
+        )
     finally:
         context.close()
 
@@ -178,8 +231,7 @@ def test_the_parents_language_navigates_the_frame_to_that_edition(browser, site,
     context, page = _open_about(browser, site)
     try:
         page.evaluate(f"setLang({lang!r})")
-        page.wait_for_timeout(1800)
-        assert _frame_path(page) == path
+        _wait_for_frame_path(page, path)
     finally:
         context.close()
 
@@ -197,7 +249,12 @@ def test_resending_the_same_language_does_not_reload_the_frame(browser, site):
         )
         for _ in range(3):
             page.evaluate("setLang('en')")
-            page.wait_for_timeout(500)
+        # THE ONE WAIT HERE THAT MUST BE A DURATION. Every other wait in this
+        # file is on a condition; you cannot wait on a condition for something
+        # NOT happening. Erring long on purpose -- too short and a navigation
+        # that is about to happen has simply not happened yet, and the test
+        # passes for the wrong reason, which is worse than being slow.
+        page.wait_for_timeout(NO_EVENT_MS)
         assert navigations == [], f"the frame reloaded {len(navigations)} time(s)"
         assert _frame_path(page) == "/about.html"
     finally:
