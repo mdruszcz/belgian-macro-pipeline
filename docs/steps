@@ -724,14 +724,42 @@ port, session token, origin check, path allowlisted to config/pages/, atomic wri
 no credentials sent to the browser, no server-side commit or push.
 Why: No builder action may ever overwrite an arbitrary repository file or corrupt the last
 published version.
- [BUILD] Batch 12 -- builder shell (2026-09-07: SPECCED and architecture pre-checked, not yet
-implemented. Spec: docs/implementation/batches/batch-12-builder-shell-spec.md, revision 2. The
-pre-check found two P0s in revision 1 before any code existed -- a shell that could not load
-itself, and a headline round-trip property the code contradicts -- both closed in revision 2.
-Runs as two SEQUENTIAL steps, never concurrent: 12a service seam (builder-core: bootstrap_html
-inlines the shell, /api/registry, the CSP decision, history.js), then 12b the shell itself
-(builder-ui, everything else under builder/app/). "Template selector" becomes a PAGE selector:
-no template exists until Batch 15.)
+ ✅ [BUILD] Batch 12 -- builder shell (2026-09-08: SHIPPED. 12a = 8f97da65, 12b = 2ac23de5,
+audit fixes = 6feecda1. Spec: docs/implementation/batches/batch-12-builder-shell-spec.md,
+revision 2. Ran as two SEQUENTIAL steps, never concurrent: 12a the service seam (bootstrap_html
+inlines the shell, /api/registry, the CSP, history.js), then 12b everything under builder/app/.
+"Template selector" became a PAGE selector -- no template exists until Batch 15.
+THE PRE-CHECK PAID FOR ITSELF TWICE, before a line of code existed: revision 1 described a shell
+that COULD NOT LOAD ITSELF (it required the session-token header on a static route while loading
+those files with <script src>/<link>, which cannot send a header), and made byte-identical
+load-save round-tripping its headline acceptance property when the code contradicts it three ways
+by design. Revision 2 struck the static route entirely -- which also removed the batch's largest
+piece of new attack surface rather than trading one risk for another.
+THEN IT WAS AUDITED, which this programme had skipped for every batch except 11, and the audit
+found four defects INCLUDING TWO THAT WOULD HAVE FAILED THE FIRST PR -- neither of them a bug in
+the shell. (1) The keyboard-only accessibility test asserted no console errors, but Chromium logs
+every non-2xx fetch as one, including the 422 the service is SUPPOSED to answer when live
+validation fires mid-word on a half-typed form; it reproduced deterministically under CPU load,
+which is what a GitHub runner is, so the batch's own accessibility gate would have gone red for a
+reason unrelated to accessibility. (2) CI's timeout-minutes: 10 could not fit a suite measured at
+7m51 locally before a cold runner downloads Chromium -- raised to 25, and the eventual real run
+took 10m54, so 10 would have killed it mid-run and read as a hang rather than a budget. (3) The
+api() closure that attaches the session token refused //host but not /\host, which the WHATWG URL
+parser resolves cross-origin WITH THE TOKEN ATTACHED -- only connect-src 'self' was stopping it,
+and it would have gone live the moment Batch 13/14 built a path from data. The test covering it
+asserted the SOURCE CONTAINED two substrings, which is exactly how the hole survived it; replaced
+with a behavioural test that lifts the shipped condition out of the generated page and runs it
+against paths the browser's own URL parser confirms leave the origin -- and that test immediately
+caught an over-claim of my own, since a backslash INSIDE a path does not escape, only one in the
+authority position does. (4) Closing any dialog dropped keyboard focus to <body> because the
+re-render destroys the button that opened it, and the focus trap was written and never read.
+THAT FOURTH ONE MATTERS BEYOND ITS OWN FIX: the identical re-render-drops-focus trap appeared
+independently in Batch 13's brand-new layout editor hours later, where only the FIRST arrow key of
+a run did anything. It is a trap this architecture invites, not a one-off.
+ONE P2 LEFT OPEN DELIBERATELY: the axe accessibility scan finds axe-core by globbing a local npx
+cache, so it skips on CI and proves nothing there. The auditor ran axe by hand against every panel
+the e2e tests never reach and found 0 serious/critical, so the gap is real but currently benign.
+1269 tests passing after the audit fixes, from 1128.)
 How: Page/template selector, block library, structure tree, canvas, inspector panels
 (content/layout/appearance/data/accessibility/visibility), top bar (undo/redo, viewport,
 save/validate/publish).
