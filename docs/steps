@@ -859,7 +859,46 @@ refuse to write one it cannot verify. That guard then caught the third attempt h
 How: Closed vocabulary of provider/indicator/geography/period/operation (spec:
 docs/features/data_binding.md); no generic query operation exists at all.
 Why: A block can only ever ask for what the existing exporters would also produce.
- [BUILD] Batch 15 -- convert pages into templates
+ [BUILD] Batch 15 -- convert pages into templates (2026-09-08: 15a SHIPPED -- the publish path,
+proved on about.html. src/pages/shell.py + scripts/export_page_documents.py +
+config/pages/about/published.json + tests/pages/test_about_conversion.py. 1349 tests passing,
+from 1339. THE BATCH TURNED OUT NOT TO BE ABOUT AUTHORING DOCUMENTS. render_document returns a
+FRAGMENT -- no <html>, no head, no nav, no footer, no licence attribution -- and NOTHING in
+scripts/, the Makefile or CI turned a page document into a file on the site; config/pages/ held
+only a README and zero documents existed. So the first job was building that path, and proving
+it on a page small enough that the proof is about the path rather than the page.
+WHY about.html FIRST: 152 lines, prose only, already on the route allowlist, and expressible
+with the six existing block types. It also carries NO municipal figure, which cuts both ways and
+is stated rather than glossed -- the infrastructure gets proved without a wrong number being
+possible, but this conversion exercises the publish path and NOT the resolver. The
+data-equivalence assertions were written anyway so the next page inherits them.
+TWO CONSTRAINTS FOUND BEFORE ANY CODE. (1) The six block types CANNOT express the homepage --
+no stat tile, commune preview card, feature tile, chip list or tabs, and the hero-with-map
+composite has no block shape; converting it needs new types first, which is why it is not this
+batch. (2) The route allowlist FORBIDS the preview-route trick Batches 3 and 4 used: /home.html
+and /commune.html are not in ROUTE_EXACT, so a page document could not declare the very shape
+that precedent established (known-risks:41). One route added, /preview/about.html, under a
+directory so Batch 17's publication allowlist can treat the whole set as one decision.
+THREE DEFECTS FOUND BY BUILDING AND THEN LOOKING. (1) THE STYLESHEETS 404'd: a page one
+directory down linking "assets/..." asks for /preview/assets/..., and the page still renders,
+which is exactly the trap export_local_pages.py:76 records for its own translated pages. The
+prefix is now computed from route depth. (2) THE PAGE HAD NO <h1>: render.py emitted <h2> for a
+hero, correct-looking while nothing published a page document and wrong the moment something
+did. A hero IS a page's main heading; changed, and the class carries the styling so nothing
+visual moved. (3) THE WEBFONT WAS MISSING -- tokens.css says in as many words that a page using
+it must link the font itself, since the stylesheet declares a variable and cannot fetch a face.
+Without it the page silently falls back to IBM Plex Sans: legitimate, invisible to any test that
+only reads markup.
+THE LICENCE REFUSAL IS THE PART THAT MATTERS BEYOND THIS PAGE. about.html owes no attribution,
+but the shell every later page will use REFUSES to render a document that declares municipal
+data without one, and the notice is LIFTED from communes.html rather than retyped -- the same
+decision export_local_pages.py made, for the same reason: a second hand-written copy drifts, and
+a drifted licence notice is a breach that looks like a typo. Statbel's 2015 licence terminates
+automatically on non-compliance and this project has already published unattributed municipal
+figures once.
+NOT DONE, and gates on any canonical cutover: the exporter emits ENGLISH ONLY. about.html is
+trilingual and the document carries all three languages, but a cutover that shipped one would
+drop two thirds of the audience invisibly. about.html itself is untouched, asserted by a test.)
 How: One page at a time (blank, homepage, macro, micro, municipality profile last), freeze the
 hand-built version, recreate through blocks, compare data/screenshots/states, ship behind a
 preview route, switch the canonical route only after independent review.

@@ -1,0 +1,144 @@
+{
+  "context": {},
+  "page_id": "about",
+  "page_type": "blank",
+  "revision": 1,
+  "route": "/preview/about.html",
+  "schema_version": 2,
+  "sections": [
+    {
+      "blocks": [
+        {
+          "binding": null,
+          "id": "about-hero-1",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "locked": false,
+          "props": {
+            "heading": {
+              "en": "About BelPulse",
+              "fr": "À Propos de BelPulse",
+              "nl": "Over BelPulse"
+            },
+            "subheading": {
+              "en": "Your window into the Belgian macroeconomic pulse",
+              "fr": "Votre fenêtre sur le pouls macroéconomique belge",
+              "nl": "Uw venster op de Belgische macro-economische polslag"
+            }
+          },
+          "type": "hero",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "about-text-1",
+          "layout": {
+            "desktop": {
+              "h": 6,
+              "w": 12,
+              "x": 0,
+              "y": 2
+            },
+            "mobile": {
+              "h": 6,
+              "w": 4,
+              "x": 0,
+              "y": 2
+            },
+            "tablet": {
+              "h": 6,
+              "w": 8,
+              "x": 0,
+              "y": 2
+            }
+          },
+          "locked": false,
+          "props": {
+            "content": [
+              {
+                "node": "paragraph",
+                "text": {
+                  "en": "BelPulse is an independent intelligence platform dedicated to providing real-time transparency into Belgium's economic and financial health. Our mission is to democratize access to complex macroeconomic data through intuitive visualizations and expert commentary.",
+                  "fr": "BelPulse est une plateforme de veille indépendante dédiée à la transparence en temps réel de la santé économique et financière de la Belgique. Notre mission est de démocratiser l'accès aux données macroéconomiques complexes grâce à des visualisations intuitives et des commentaires d'experts.",
+                  "nl": "BelPulse is een onafhankelijk platform dat zich toelegt op het bieden van real-time transparantie in de economische en financiële gezondheid van België. Onze missie is om de toegang tot complexe macro-economische gegevens te democratiseren via intuïtieve visualisaties en deskundig commentaar."
+                }
+              },
+              {
+                "node": "paragraph",
+                "text": {
+                  "en": "We aggregate data from the National Bank of Belgium (NBB), Statbel, the Federal Planning Bureau, and international institutions to offer a comprehensive view of the national landscape.",
+                  "fr": "Nous agrégons les données de la Banque Nationale de Belgique (BNB), de Statbel, du Bureau fédéral du Plan et des institutions internationales pour offrir une vue d'ensemble du paysage national.",
+                  "nl": "We verzamelen gegevens van de Nationale Bank van België (NBB), Statbel, het Federaal Planbureau en internationale instellingen om een uitgebreid beeld van het nationale landschap te bieden."
+                }
+              },
+              {
+                "items": [
+                  {
+                    "en": "Real-time data synchronization",
+                    "fr": "Synchronisation des données en temps réel",
+                    "nl": "Real-time gegevenssynchronisatie"
+                  },
+                  {
+                    "en": "Deep-dive structural analysis",
+                    "fr": "Analyse structurelle approfondie",
+                    "nl": "Diepgaande structurele analyse"
+                  },
+                  {
+                    "en": "Multi-institution forecast consensus",
+                    "fr": "Consensus de prévisions multi-institutions",
+                    "nl": "Consensus tussen prognoses van meerdere instellingen"
+                  }
+                ],
+                "node": "list"
+              }
+            ]
+          },
+          "type": "rich_text",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        }
+      ],
+      "id": "intro"
+    }
+  ],
+  "seo": {
+    "description": {
+      "en": "Your window into the Belgian macroeconomic pulse",
+      "fr": "Votre fenêtre sur le pouls macroéconomique belge",
+      "nl": "Uw venster op de Belgische macro-economische polslag"
+    },
+    "title": {
+      "en": "About BelPulse",
+      "fr": "À Propos de BelPulse",
+      "nl": "Over BelPulse"
+    }
+  },
+  "theme": "light-institutional"
+}
