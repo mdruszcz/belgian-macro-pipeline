@@ -57,12 +57,20 @@ import html
 import json
 import re
 import sqlite3
-from datetime import datetime, timezone
+import sys
 from pathlib import Path
 
-from src.pages import strings as _shared_strings
-
 REPO = Path(__file__).resolve().parents[1]
+
+# Run from anywhere and still import src/. Batch 15c added the `src.pages`
+# import below without this line: the module resolved under pytest, whose
+# rootdir is already on sys.path, and failed the moment anyone ran
+# `make pages` -- which is not something the test suite does. Every other
+# script here already does this; this one had needed no src import until 15c.
+sys.path.insert(0, str(REPO))
+
+from src.pages import strings as _shared_strings  # noqa: E402
+
 DEFAULT_PAYLOAD_DIR = REPO / "public" / "data"
 DEFAULT_OUT_DIR = REPO / "local"
 DEFAULT_BASE_URL = "https://mdruszcz.github.io/belgian-macro-pipeline"
@@ -751,12 +759,40 @@ def export_local_pages(
     return {"written": written, "skipped_thin": skipped_thin}
 
 
+def _data_date(payload_dir: Path, nis: str) -> str:
+    """When this commune's figures last changed -- NOT when the build ran.
+
+    `lastmod` used to be `datetime.now()`, identical on all 1,695 entries. That
+    rewrote every line of this file on every build even when not one figure had
+    moved: `git log` shows `1 file changed, 1695 insertions(+), 1695
+    deletions(-)` on days nothing happened. It is the same churn this module's
+    docstring says was deliberately removed from the PAGES -- the fix landed
+    there and the sitemap kept the timestamp, because
+    `test_a_url_is_byte_identical_across_two_rebuilds` reads one commune page
+    and never opened the sitemap.
+
+    It was also a false statement to a crawler. `lastmod` means "this page
+    changed"; a build date claims all 1,695 changed daily, and a search engine
+    that learns the claim is worthless starts ignoring it.
+
+    Every indicator in a commune payload already carries `updated`. The newest
+    of them is the date this page's content actually last moved. A payload with
+    no dated indicator falls back to the empty string, and the caller omits the
+    element rather than inventing one.
+    """
+    payload = payload_dir / "communes" / f"{nis}.json"
+    if not payload.is_file():
+        return ""
+    indicators = (json.loads(payload.read_text(encoding="utf-8")).get("indicators") or {}).values()
+    dates = [entry["updated"] for entry in indicators if entry.get("updated")]
+    return max(dates) if dates else ""
+
+
 def _write_sitemap(out_dir: Path, base_url: str, payload_dir: Path) -> None:
     """A sitemap listing every generated route. Roadmap Block AD asks for
     sitemap submission later; emitting it alongside the pages costs nothing
     and means the routes are discoverable the moment they exist."""
     communes = sorted(p.parent.name for p in out_dir.glob("*/index.html"))
-    today = datetime.now(timezone.utc).date().isoformat()
 
     # EVERY LANGUAGE'S ROUTE, each declaring the others as alternates. A
     # sitemap that listed only the English page would leave the French and
@@ -774,10 +810,12 @@ def _write_sitemap(out_dir: Path, base_url: str, payload_dir: Path) -> None:
                 f'href="{base_url}{_route(nis, other)}"/>'
                 for other in LANGS
             )
-            entries.append(
-                f"  <url><loc>{base_url}{_route(nis, lang)}</loc>"
-                f"<lastmod>{today}</lastmod>{links}</url>"
-            )
+            # Omitted entirely rather than emitted empty when a payload
+            # carries no dated indicator: `<lastmod></lastmod>` is invalid
+            # against the sitemap schema, and a crawler may reject the file.
+            changed = _data_date(payload_dir, nis)
+            stamp = f"<lastmod>{changed}</lastmod>" if changed else ""
+            entries.append(f"  <url><loc>{base_url}{_route(nis, lang)}</loc>{stamp}{links}</url>")
 
     (out_dir / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'

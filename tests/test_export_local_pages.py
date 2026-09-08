@@ -171,6 +171,35 @@ def test_a_url_is_byte_identical_across_two_rebuilds(payload_dir, tmp_path, db, 
     assert first == second
 
 
+def test_the_sitemap_is_byte_identical_across_two_rebuilds(payload_dir, tmp_path, db):
+    """The property the pages had and the sitemap did not.
+
+    `lastmod` was `datetime.now()`, identical on all 1,695 entries, so this
+    file was rewritten in full on every build even when no figure had moved --
+    `1 file changed, 1695 insertions(+), 1695 deletions(-)` on quiet days. The
+    page-level fix landed and the sitemap kept the timestamp, because the test
+    above reads one commune page and never opened the sitemap. It does now.
+    """
+    _run(payload_dir, tmp_path, db)
+    first = (tmp_path / "local" / "sitemap.xml").read_text(encoding="utf-8")
+    _run(payload_dir, tmp_path, db)
+    assert (tmp_path / "local" / "sitemap.xml").read_text(encoding="utf-8") == first
+
+
+def test_lastmod_is_the_data_s_date_and_not_the_build_s(payload_dir, tmp_path, db):
+    """`lastmod` means "this page changed". A build date claims all 1,695
+    changed today, every day -- a false statement to a crawler, and one that
+    teaches it to ignore the field."""
+    import datetime as _dt
+
+    _run(payload_dir, tmp_path, db)
+    sitemap = (tmp_path / "local" / "sitemap.xml").read_text(encoding="utf-8")
+    today = _dt.datetime.now(_dt.timezone.utc).date().isoformat()
+    stamps = set(re.findall(r"<lastmod>([^<]+)</lastmod>", sitemap))
+    assert stamps, "no lastmod at all"
+    assert stamps != {today}, "every entry carries today's date -- that is the build stamp again"
+
+
 def test_a_different_build_id_changes_nothing_in_the_page(
     payload_dir, tmp_path, db, attribution_file
 ):

@@ -79,6 +79,13 @@ ROUTE_EXACT = frozenset(
         "/local.html",
         "/all_data.html",
         "/about.html",
+        # Batch 3 and 4's rebuilt pages, live and served, and MISSING from this
+        # list until Batch 17a -- known-risks.md:41 recorded the gap and nothing
+        # enforced it. tests/site/test_route_inventory.py now requires this set
+        # and src/site/routes.py's inventory to agree, so a served page cannot
+        # be absent from one of them again.
+        "/home.html",
+        "/commune.html",
         # PREVIEW routes, added one at a time as Batch 15 converts a page.
         #
         # Batches 3 and 4 established the pattern -- ship the rebuilt page
