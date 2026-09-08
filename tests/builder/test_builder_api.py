@@ -205,7 +205,13 @@ def test_correct_prefix_truncated_token_is_unauthorized(server):
 
 
 def test_token_differing_by_one_character_is_unauthorized(server):
-    mutated = ("a" if server.token[-1] != "a" else "b") + server.token[1:]
+    # Inspect the character actually being REPLACED. The first version of this
+    # read token[-1] while substituting at position 0, so a token starting with
+    # "a" and not ending in one rebuilt itself byte for byte and the assertion
+    # below failed -- roughly one run in sixty-five with token_urlsafe's
+    # alphabet, which is why it passed locally for days and then failed in CI.
+    first = server.token[0]
+    mutated = ("b" if first == "a" else "a") + server.token[1:]
     assert mutated != server.token
     resp, _raw = server.request("GET", "/api/pages", token=mutated)
     assert resp.status == 401
