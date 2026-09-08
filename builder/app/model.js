@@ -83,6 +83,125 @@
     };
   }
 
+  /* --- grid geometry (Batch 13) ---------------------------------------
+   *
+   * The grid is the same one the page document declares and the renderer
+   * lays out: a fixed column count per breakpoint, rows of arbitrary depth.
+   * Column counts are NOT invented here -- they are the widths the existing
+   * defaultLayoutAt already places blocks at, and the validator's own
+   * grid bounds. A block occupies [x, x+w) x [y, y+h).
+   */
+
+  var GRID_COLUMNS = { desktop: 12, tablet: 8, mobile: 4 };
+  var BREAKPOINTS = ["desktop", "tablet", "mobile"];
+
+  function columnsFor(breakpoint) {
+    return GRID_COLUMNS[breakpoint];
+  }
+
+  function cellsOverlap(a, b) {
+    // Half-open intervals on both axes: two blocks touching edge-to-edge do
+    // NOT overlap, which is the ordinary case of one sitting below another.
+    return (
+      a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+    );
+  }
+
+  function blocksWithLayout(doc, breakpoint) {
+    var out = [];
+    (doc.sections || []).forEach(function (section, sectionIndex) {
+      (section.blocks || []).forEach(function (block, blockIndex) {
+        out.push({
+          block: block,
+          sectionIndex: sectionIndex,
+          blockIndex: blockIndex,
+          cell: block.layout[breakpoint],
+        });
+      });
+    });
+    return out;
+  }
+
+  /**
+   * Why a proposed cell cannot be used, or "" if it can.
+   *
+   * Returns a REASON rather than a boolean so the interface can say what is
+   * wrong instead of just refusing -- a silent refusal during a drag reads as
+   * a broken builder, and an operator cannot fix what they are not told.
+   * Collision is reported against a named block for the same reason.
+   */
+  function rejectionFor(doc, sectionIndex, blockIndex, breakpoint, cell) {
+    var columns = columnsFor(breakpoint);
+    if (!cell || cell.w < 1 || cell.h < 1) {
+      return "A block must stay at least one column wide and one row tall.";
+    }
+    if (cell.x < 0 || cell.y < 0) {
+      return "A block cannot move above or to the left of the grid.";
+    }
+    if (cell.x + cell.w > columns) {
+      return (
+        "That would put the block past the right edge of the " +
+        breakpoint +
+        " grid, which is " +
+        columns +
+        " columns wide."
+      );
+    }
+    var section = doc.sections[sectionIndex];
+    if (section.allow_overlap) {
+      return "";
+    }
+    var moving = section.blocks[blockIndex];
+    var clash = null;
+    blocksWithLayout(doc, breakpoint).forEach(function (entry) {
+      if (entry.block.id === moving.id || clash) {
+        return;
+      }
+      if (entry.sectionIndex === sectionIndex && cellsOverlap(cell, entry.cell)) {
+        clash = entry.block;
+      }
+    });
+    if (clash) {
+      return "That would overlap " + clash.id + ", and this section does not allow overlap.";
+    }
+    return "";
+  }
+
+  function lockRejection(block) {
+    return block.locked ? "This block is locked. Unlock it to move or resize it." : "";
+  }
+
+  /**
+   * Place a block at a new cell on ONE breakpoint.
+   *
+   * Per-breakpoint by design: the three layouts are independently authored
+   * (the page document has no reflow engine -- every breakpoint's x/y/w/h is
+   * declared), so moving a block on desktop must not silently move it on
+   * mobile, where the operator may have arranged something different.
+   */
+  function setBlockCell(doc, sectionIndex, blockIndex, breakpoint, cell) {
+    var next = deepClone(doc);
+    var block = next.sections[sectionIndex].blocks[blockIndex];
+    block.layout[breakpoint] = { x: cell.x, y: cell.y, w: cell.w, h: cell.h };
+    return next;
+  }
+
+  function setBlockLocked(doc, sectionIndex, blockIndex, locked) {
+    var next = deepClone(doc);
+    next.sections[sectionIndex].blocks[blockIndex].locked = !!locked;
+    return next;
+  }
+
+  /** The cell a block would occupy after a relative nudge. */
+  function nudge(cell, dx, dy) {
+    return { x: cell.x + dx, y: cell.y + dy, w: cell.w, h: cell.h };
+  }
+
+  /** The cell a block would occupy after a relative resize. */
+  function grow(cell, dw, dh) {
+    return { x: cell.x, y: cell.y, w: cell.w + dw, h: cell.h + dh };
+  }
+
   function slugify(blockType) {
     return String(blockType).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   }
@@ -368,6 +487,17 @@
     emptyTrilingual: emptyTrilingual,
     defaultVisibility: defaultVisibility,
     defaultLayoutAt: defaultLayoutAt,
+    GRID_COLUMNS: GRID_COLUMNS,
+    BREAKPOINTS: BREAKPOINTS,
+    columnsFor: columnsFor,
+    cellsOverlap: cellsOverlap,
+    blocksWithLayout: blocksWithLayout,
+    rejectionFor: rejectionFor,
+    lockRejection: lockRejection,
+    setBlockCell: setBlockCell,
+    setBlockLocked: setBlockLocked,
+    nudge: nudge,
+    grow: grow,
     isTrilingualSchema: isTrilingualSchema,
     resolveRef: resolveRef,
     minimalValueFor: minimalValueFor,

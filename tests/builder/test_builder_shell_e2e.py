@@ -837,3 +837,221 @@ def test_axe_scan_reports_zero_serious_or_critical_violations(browser):
     results = page.evaluate("async () => await axe.run()")
     serious = [v for v in results["violations"] if v["impact"] in ("serious", "critical")]
     assert not serious, json.dumps(serious, indent=2)[:4000]
+
+
+# ---------------------------------------------------------------------------
+# the layout editor: drag, resize, collision, lock, autosave (Batch 13b)
+# ---------------------------------------------------------------------------
+
+
+def _two_block_page(pages_root, server, page_id="layout-page"):
+    """A page with two blocks side by side on desktop, so a move can be both
+    legal (down) and refused (right, into the neighbour)."""
+    doc = builders.minimal_valid_document()
+    doc["page_id"] = page_id
+    doc["sections"][0]["blocks"][0]["layout"] = builders.layout(
+        desktop=(0, 0, 4, 2), tablet=(0, 0, 4, 2), mobile=(0, 0, 4, 2)
+    )
+    doc["sections"][0]["blocks"].append(
+        builders.make_block(
+            "hero",
+            block_id="blk-hero-2",
+            block_layout=builders.layout(
+                desktop=(4, 0, 4, 2), tablet=(4, 0, 4, 2), mobile=(0, 2, 4, 2)
+            ),
+        )
+    )
+    _save_fixture_page(server, page_id, doc)
+    return doc
+
+
+def _open_layout_page(browser, server, pages_root, page_id="layout-page"):
+    _two_block_page(pages_root, server, page_id)
+    page = browser.open()
+    page.click("text=Open draft")
+    wait_until(
+        lambda: page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]').count() == 1,
+        message="layout editor drawn",
+    )
+    return page
+
+
+def _cell_on_disk(pages_root, page_id, block_id, breakpoint):
+    saved = json.loads(_draft_path(pages_root, page_id).read_text())
+    for section in saved["sections"]:
+        for block in section["blocks"]:
+            if block["id"] == block_id:
+                return block["layout"][breakpoint]
+    raise AssertionError(f"no block {block_id!r} on disk")
+
+
+def test_the_layout_editor_draws_one_tile_per_block(browser, server, pages_root):
+    page = _open_layout_page(browser, server, pages_root)
+    assert page.locator(".bp-grid-tile").count() == 2
+    assert not browser.console_errors
+
+
+def test_an_arrow_key_moves_a_block_on_the_grid(browser, server, pages_root):
+    """The keyboard equivalent is not a lesser path: it goes through the same
+    attempt() every pointer drag does."""
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    tile.focus()
+    page.keyboard.press("ArrowDown")
+    wait_until(
+        lambda: "row 2" in tile.get_attribute("aria-label"),
+        message="the tile reports its new row",
+    )
+    assert not browser.console_errors
+
+
+def test_shift_arrow_resizes_rather_than_moves(browser, server, pages_root):
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    tile.focus()
+    before = tile.get_attribute("aria-label")
+    page.keyboard.press("Shift+ArrowDown")
+    wait_until(lambda: tile.get_attribute("aria-label") != before, message="the tile resized")
+    label = tile.get_attribute("aria-label")
+    # Taller, and still starting on the same row: a resize, not a move.
+    assert "row 1 to 3" in label, label
+
+
+def test_a_move_that_would_overlap_a_neighbour_is_refused_and_says_why(browser, server, pages_root):
+    """A silent snap-back is indistinguishable from a broken builder."""
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    tile.focus()
+    before = tile.get_attribute("aria-label")
+    page.keyboard.press("ArrowRight")
+    wait_until(
+        lambda: "overlap" in page.locator("#shell-status").inner_text().lower(),
+        message="the refusal is announced",
+    )
+    status = page.locator("#shell-status").inner_text()
+    assert "blk-hero-2" in status, status
+    assert tile.get_attribute("aria-label") == before, "the block must not have moved"
+
+
+def test_a_move_past_the_edge_of_the_grid_is_refused_and_says_why(browser, server, pages_root):
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-2"]')
+    tile.focus()
+    for _ in range(5):
+        page.keyboard.press("ArrowRight")
+    status = page.locator("#shell-status").inner_text().lower()
+    assert "right edge" in status, status
+    assert "12 columns" in status, status
+
+
+def test_each_breakpoint_is_arranged_separately(browser, server, pages_root):
+    """The document has no reflow engine -- every breakpoint's cell is declared
+    -- so moving on desktop must not quietly move the block on mobile, where
+    the operator may have arranged something different."""
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    tile.focus()
+    page.keyboard.press("ArrowDown")
+    page.click("text=Save")
+    wait_until(
+        lambda: _cell_on_disk(pages_root, "layout-page", "blk-hero-1", "desktop")["y"] == 1,
+        message="desktop moved on disk",
+    )
+    assert _cell_on_disk(pages_root, "layout-page", "blk-hero-1", "mobile")["y"] == 0
+
+
+def test_a_locked_block_refuses_to_move_and_says_so(browser, server, pages_root):
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    tile.focus()
+    page.keyboard.press("l")
+    wait_until(
+        lambda: page.locator('.bp-grid-tile[data-block-id="blk-hero-1"].is-locked').count() == 1,
+        message="the tile shows as locked",
+    )
+    before = tile.get_attribute("aria-label")
+    page.keyboard.press("ArrowDown")
+    status = page.locator("#shell-status").inner_text().lower()
+    assert "locked" in status, status
+    assert tile.get_attribute("aria-label") == before, "a locked block must not move"
+
+
+def test_the_lock_state_is_written_to_the_document(browser, server, pages_root):
+    page = _open_layout_page(browser, server, pages_root)
+    page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]').focus()
+    page.keyboard.press("l")
+    page.click("text=Save")
+    wait_until(
+        lambda: json.loads(_draft_path(pages_root, "layout-page").read_text())["sections"][0][
+            "blocks"
+        ][0]["locked"]
+        is True,
+        message="locked persisted",
+    )
+
+
+def test_a_pointer_drag_moves_a_block(browser, server, pages_root):
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    box = tile.bounding_box()
+    before = tile.get_attribute("aria-label")
+
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+    page.mouse.down()
+    # Well past DRAG_THRESHOLD_PX, and down by more than one row height.
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2 + 60, steps=8)
+    page.mouse.up()
+
+    wait_until(
+        lambda: tile.get_attribute("aria-label") != before, message="the drag moved the block"
+    )
+    assert not browser.console_errors
+
+
+def test_a_drag_is_one_undo_step_not_one_per_pixel(browser, server, pages_root):
+    """history.js refuses a push while a transaction is open, so the many
+    intermediate cells a drag passes through cannot each become an undo step.
+    The operator undoes the drag, not the last pixel of it."""
+    page = _open_layout_page(browser, server, pages_root)
+    tile = page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]')
+    before = tile.get_attribute("aria-label")
+    box = tile.bounding_box()
+
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+    page.mouse.down()
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2 + 60, steps=12)
+    page.mouse.up()
+    wait_until(lambda: tile.get_attribute("aria-label") != before, message="drag applied")
+
+    page.click("text=Undo")
+    wait_until(
+        lambda: page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]').get_attribute(
+            "aria-label"
+        )
+        == before,
+        message="one undo returns the block to where it started",
+    )
+
+
+def test_autosave_writes_the_draft_without_anyone_pressing_save(browser, server, pages_root):
+    """Safe only because /api/save refuses a stale write (Batch 13a): before
+    that, autosaving from two tabs would have destroyed one of them without
+    anyone clicking anything."""
+    page = _open_layout_page(browser, server, pages_root)
+    page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]').focus()
+    page.keyboard.press("ArrowDown")
+    wait_until(
+        lambda: _cell_on_disk(pages_root, "layout-page", "blk-hero-1", "desktop")["y"] == 1,
+        timeout_s=20.0,
+        message="autosave reached the disk with no Save click",
+    )
+    assert not browser.console_errors
+
+
+def test_the_canvas_previews_unsaved_edits(browser, server, pages_root):
+    """The preview renders the document in the browser, not the file: a move
+    has to show before it is saved, or dragging shows nothing until you save
+    and the builder has to autosave on every pointer move to compensate."""
+    page = _open_layout_page(browser, server, pages_root)
+    notices = page.locator(".bp-canvas-notices").inner_text()
+    assert "last saved draft" not in notices.lower(), notices

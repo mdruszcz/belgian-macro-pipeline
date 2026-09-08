@@ -137,6 +137,27 @@
     });
   }
 
+  /**
+   * postPreviewHtml -- render the document HELD IN THE BROWSER.
+   *
+   * The GET route below reads from disk, so it can only ever show the last
+   * explicitly-saved draft. Batch 13's whole point is that moving a block
+   * changes the picture immediately, which means previewing bytes that have
+   * not been written anywhere.
+   */
+  function postPreviewHtml(api, pageId, document, lang) {
+    return jsonRequest(api, "POST", "/api/preview", {
+      page_id: pageId,
+      document: document,
+      lang: lang,
+    }).then(function (raw) {
+      if (raw.status === 200) {
+        return { ok: true, html: raw.text, status: raw.status };
+      }
+      return parseEnvelope(raw);
+    });
+  }
+
   function getPreviewHtml(api, pageId, which, lang) {
     var path =
       "/preview?page_id=" +
@@ -188,6 +209,7 @@
     listVersions: listVersions,
     getDocument: getDocument,
     getPreviewHtml: getPreviewHtml,
+    postPreviewHtml: postPreviewHtml,
     postValidate: postValidate,
     postSave: postSave,
     postPublish: postPublish,

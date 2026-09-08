@@ -20,6 +20,11 @@
 
   var LIVE_VALIDATE_DEBOUNCE_MS = 400;
 
+  // Autosave fires this long after the last edit. Long enough that a burst of
+  // arrow-key nudges is one save rather than twenty, short enough that a
+  // browser closed in frustration has not lost much.
+  var AUTOSAVE_DEBOUNCE_MS = 1200;
+
   function start(context) {
     var root = context.root;
     var topbarEl = document.getElementById("shell-topbar");
@@ -30,6 +35,12 @@
 
     var bannersEl = el("div", { id: "shell-banners", className: "bp-banners" });
     root.insertBefore(bannersEl, bodyEl);
+
+    // The layout editor lives in the canvas column, ABOVE the preview frame:
+    // the preview iframe is sandboxed with no scripting, so nothing inside it
+    // can be dragged. See layout.js's header.
+    var layoutEl = el("div", { id: "shell-layout", className: "bp-layout-editor" });
+    canvasEl.parentNode.insertBefore(layoutEl, canvasEl);
 
     var previewFrame = context.preview;
 
@@ -43,6 +54,7 @@
       topbarEl: topbarEl,
       sidebarEl: sidebarEl,
       canvasEl: canvasEl,
+      layoutEl: layoutEl,
       inspectorEl: inspectorEl,
       previewFrame: previewFrame,
       bannersEl: bannersEl,
@@ -72,8 +84,12 @@
 
       modal: null,
 
+      autosave: true,
+      autosaveState: "",
+
       _liveValidateTimer: null,
       _newPageValidateTimer: null,
+      _autosaveTimer: null,
     };
 
     store.actions = buildActions(store);
@@ -102,7 +118,68 @@
     shell.sidebar.render(store, store.sidebarEl);
     shell.inspector.render(store, store.inspectorEl);
     shell.canvas.render(store, store.canvasEl);
+    shell.layout.render(store, store.layoutEl);
     renderBanners(store);
+  }
+
+  /** The layout editor plus the chrome whose state it changes. */
+  function renderLayoutAndChrome(store) {
+    shell.layout.render(store, store.layoutEl);
+    shell.topbar.render(store, store.topbarEl);
+    shell.inspector.render(store, store.inspectorEl);
+  }
+
+  /**
+   * Autosave, debounced.
+   *
+   * Safe to do at all only because /api/save now refuses a write based on a
+   * stale read (Batch 13a): before that, autosaving from two tabs would have
+   * silently destroyed one of them, and done it without anyone pressing Save.
+   * A refusal here is reported and NOT retried -- retrying is how you overwrite
+   * the other tab a second time.
+   */
+  function scheduleAutosave(store) {
+    if (!store.autosave || !store.pageId || !store.doc) {
+      return;
+    }
+    store.autosaveState = "pending";
+    debounced(
+      store,
+      "_autosaveTimer",
+      function () {
+        if (!store.dirty) {
+          return;
+        }
+        store.autosaveState = "saving";
+        shell.topbar.render(store, store.topbarEl);
+        api.postSave(store.api, store.pageId, store.doc, store.baseSha256).then(function (result) {
+          if (result.ok) {
+            store.dirty = false;
+            store.baseSha256 = result.sha256 || "";
+            store.autosaveState = "saved";
+            dom.announce(store.statusEl, "Autosaved.");
+          } else if (result.code === "stale_write") {
+            store.autosave = false;
+            store.autosaveState = "stopped";
+            store.startupError = result.message + " Autosave is off until you reload.";
+            dom.announce(store.statusEl, store.startupError);
+            renderBanners(store);
+          } else {
+            store.autosaveState = "failed";
+            dom.announce(store.statusEl, "Autosave failed: " + result.message);
+          }
+          shell.topbar.render(store, store.topbarEl);
+          refreshPreview(store);
+        });
+      },
+      AUTOSAVE_DEBOUNCE_MS
+    );
+  }
+
+  function refreshPreview(store) {
+    return shell.canvas.refresh(store).then(function () {
+      shell.canvas.render(store, store.canvasEl);
+    });
   }
 
   function renderBanners(store) {
@@ -511,6 +588,92 @@
     };
 
     /* --- selection / panels / viewport ---------------------------------- */
+
+    /* --- layout: drag, resize, lock, autosave (Batch 13b) --------------- */
+
+    /**
+     * A cell change made DURING a pointer drag.
+     *
+     * Deliberately does not touch history: the drag opened a transaction, and
+     * history.js refuses a push while one is open, so the intermediate cells a
+     * drag passes through never become undo steps. The operator undoes the
+     * drag, not the last pixel of it.
+     */
+    actions.previewLayout = function (target, breakpoint, cell) {
+      store.doc = model.setBlockCell(
+        store.doc,
+        target.sectionIndex,
+        target.blockIndex,
+        breakpoint,
+        cell
+      );
+      shell.layout.render(store, store.layoutEl);
+    };
+
+    actions.commitLayout = function (token, target, breakpoint, cell, mode) {
+      store.doc = model.setBlockCell(
+        store.doc,
+        target.sectionIndex,
+        target.blockIndex,
+        breakpoint,
+        cell
+      );
+      store.dirty = true;
+      if (token) {
+        store.history.commit(token, store.doc);
+      }
+      var block = store.doc.sections[target.sectionIndex].blocks[target.blockIndex];
+      dom.announce(
+        store.statusEl,
+        (mode === "resize" ? "Resized " : "Moved ") + shell.layout.describe(block, cell, breakpoint)
+      );
+      renderLayoutAndChrome(store);
+      scheduleAutosave(store);
+    };
+
+    actions.abandonLayout = function (token) {
+      if (token) {
+        store.history.abort(token);
+      }
+      // The document was mutated in place while dragging, so the abandoned
+      // gesture has to be undone from history's own last committed state
+      // rather than by replaying the drag backwards.
+      var restored = store.history.current();
+      if (restored) {
+        store.doc = restored;
+      }
+      renderLayoutAndChrome(store);
+      dom.announce(store.statusEl, "Move cancelled.");
+    };
+
+    /** A single, committed cell change -- the keyboard path. */
+    actions.applyLayout = function (target, breakpoint, cell, label) {
+      store.doc = model.setBlockCell(
+        store.doc,
+        target.sectionIndex,
+        target.blockIndex,
+        breakpoint,
+        cell
+      );
+      commitDocChange(store, { label: label, coalesceKey: "layout:" + target.sectionIndex + ":" + target.blockIndex });
+      renderLayoutAndChrome(store);
+      scheduleAutosave(store);
+    };
+
+    actions.toggleLock = function (target) {
+      var block = store.doc.sections[target.sectionIndex].blocks[target.blockIndex];
+      var next = !block.locked;
+      store.doc = model.setBlockLocked(
+        store.doc,
+        target.sectionIndex,
+        target.blockIndex,
+        next
+      );
+      commitDocChange(store, { label: next ? "lock block" : "unlock block" });
+      renderLayoutAndChrome(store);
+      dom.announce(store.statusEl, (next ? "Locked " : "Unlocked ") + block.id + ".");
+      scheduleAutosave(store);
+    };
 
     actions.selectBlock = function (blockId) {
       store.selection = blockId;

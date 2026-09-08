@@ -141,6 +141,7 @@ SHELL_JS_FILES: tuple[str, ...] = (
     "model.js",
     "api.js",
     "canvas.js",
+    "layout.js",
     "inspector.js",
     "sidebar.js",
     "topbar.js",

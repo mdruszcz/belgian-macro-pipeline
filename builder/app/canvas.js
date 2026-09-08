@@ -106,7 +106,8 @@
     if (store.dirty) {
       notices.appendChild(
         el("p", { className: "bp-notice bp-notice-dirty" }, [
-          "The canvas shows the last saved draft. Save to update it with your edits.",
+          "Unsaved changes. This preview already shows them -- it renders the " +
+            "document in the browser, not the file on disk.",
         ])
       );
     }
@@ -144,8 +145,15 @@
       store.previewFrame.srcdoc = "";
       return Promise.resolve();
     }
-    return shell.api
-      .getPreviewHtml(store.api, store.pageId, store.which, store.lang || "en")
+    // The IN-MEMORY document, not the file: a move must show immediately, and
+    // /preview reads from disk (Batch 13a added the POST route for exactly
+    // this). Falls back to the disk route only when there is no document to
+    // send, which is the "published" view.
+    var pending =
+      store.which === "draft" && store.doc
+        ? shell.api.postPreviewHtml(store.api, store.pageId, store.doc, store.lang || "en")
+        : shell.api.getPreviewHtml(store.api, store.pageId, store.which, store.lang || "en");
+    return pending
       .then(function (result) {
         if (result.ok) {
           store.previewError = null;

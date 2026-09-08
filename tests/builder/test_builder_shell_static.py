@@ -93,6 +93,7 @@ def test_load_order_respects_each_files_own_top_level_dependency():
         "inspector.js": ["dom", "model"],
         "sidebar.js": ["dom", "model"],
         "topbar.js": ["dom", "canvas"],
+        "layout.js": ["dom", "model"],
         "app.js": ["dom", "model", "api"],
     }
     providers = {"dom": "dom.js", "model": "model.js", "api": "api.js", "canvas": "canvas.js"}
@@ -228,6 +229,11 @@ ALLOWED_BARE_NUMBERS = {
     "1024",
     "1280",
     "1440",
+    # Batch 13b, named constants in layout.js, listed so that adding a new
+    # magic number to the drag code is a deliberate edit to this set rather
+    # than something that slips through review.
+    "28",  # ROW_HEIGHT_PX -- editor drawing height for one grid row
+    "1200",  # AUTOSAVE_DEBOUNCE_MS
 }
 
 
@@ -318,6 +324,17 @@ def test_shell_css_contains_only_structural_numbers():
         "100",
         "600",
         "700",
+        # Batch 13b, the layout editor's own chrome.
+        "3",
+        "4",
+        "6",
+        "13",
+        "45",  # a 45deg hatch on a locked tile
+        "60",
+        "90",  # a 90deg column-guide gradient
+        "135",  # a 135deg resize-handle corner
+        "0.6875",
+        "0.8125",
     }
     unexpected = {n for n in numbers if n not in allowed}
     assert not unexpected, f"shell.css has unexpected numeric literals: {sorted(unexpected)}"

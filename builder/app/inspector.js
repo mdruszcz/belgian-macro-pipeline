@@ -541,19 +541,78 @@
 
   /* --- layout / visibility panels ---------------------------------------- */
 
-  function renderLayoutPanel(container, block) {
+  function renderLayoutPanel(store, container, block) {
+    var target = shell.model.findBlock(store.doc, block.id);
+
+    container.appendChild(
+      booleanField("Locked (refuses move, resize and delete)", block.locked === true, function (
+        next
+      ) {
+        if (next !== (block.locked === true)) {
+          store.actions.toggleLock(target);
+        }
+      })
+    );
     container.appendChild(
       el("p", { className: "bp-help" }, [
-        "Per-breakpoint position and size are set here as read-only values. " +
-          "Dragging and resizing on the grid is a later batch; nothing here is editable yet.",
+        "Each breakpoint is arranged separately: changing a number here moves the " +
+          "block on that breakpoint only. Drag on the grid above for the same effect. " +
+          "A value that would leave the grid or overlap another block is refused and " +
+          "the reason is announced.",
       ])
     );
-    ["desktop", "tablet", "mobile"].forEach(function (bp) {
+
+    shell.model.BREAKPOINTS.forEach(function (bp) {
       var cell = block.layout[bp];
-      container.appendChild(
-        readOnlyField(titleCase(bp) + " grid position", cell)
-      );
+      var group = el("fieldset", { className: "bp-field-group" }, [
+        el("legend", {}, [
+          titleCase(bp) + " (" + shell.model.columnsFor(bp) + " columns)",
+        ]),
+      ]);
+      [
+        ["x", "Column", 0],
+        ["y", "Row", 0],
+        ["w", "Width", 1],
+        ["h", "Height", 1],
+      ].forEach(function (spec) {
+        var key = spec[0];
+        group.appendChild(
+          numberField(spec[1], cell[key], spec[2], function (value) {
+            var proposed = {
+              x: cell.x,
+              y: cell.y,
+              w: cell.w,
+              h: cell.h,
+            };
+            proposed[key] = value;
+            shell.layout.attempt(store, target, bp, proposed, "set " + key);
+          })
+        );
+      });
+      container.appendChild(group);
     });
+  }
+
+  function numberField(labelText, value, min, onChange) {
+    var input = el("input", {
+      type: "number",
+      value: String(value),
+      min: String(min),
+      onchange: function (evt) {
+        var parsed = parseInt(evt.target.value, 10);
+        if (isNaN(parsed)) {
+          // Put the real value back rather than writing NaN into a document.
+          evt.target.value = String(value);
+          return;
+        }
+        onChange(parsed);
+      },
+    });
+    var id = (input.id = nextId("f"));
+    return el("div", { className: "bp-field" }, [
+      el("label", { for: id }, [labelText]),
+      input,
+    ]);
   }
 
   function renderVisibilityPanel(store, container, block) {
@@ -640,7 +699,7 @@
     if (store.panel === "content") {
       renderContentPanel(store, panelBody, block, blockEntry);
     } else if (store.panel === "layout") {
-      renderLayoutPanel(panelBody, block);
+      renderLayoutPanel(store, panelBody, block);
     } else if (store.panel === "appearance") {
       renderAppearanceAndAccessibility(store, panelBody, block, blockEntry, "appearance");
     } else if (store.panel === "data") {
