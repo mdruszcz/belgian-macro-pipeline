@@ -554,6 +554,15 @@
 
     actions.confirmDeleteBlock = function (sectionIndex, blockIndex) {
       var block = store.doc.sections[sectionIndex].blocks[blockIndex];
+      // The schema says a locked block refuses move, resize AND delete. It has
+      // to actually refuse all three: a lock that stops a one-cell nudge but
+      // not a deletion protects nothing, and the description would be
+      // documenting behaviour the code does not have.
+      var locked = model.lockRejection(block);
+      if (locked) {
+        dom.announce(store.statusEl, "This block is locked. Unlock it before deleting it.");
+        return;
+      }
       store.modal = {
         title: "Delete block?",
         body: "Delete " + block.type + " block " + block.id + "?",

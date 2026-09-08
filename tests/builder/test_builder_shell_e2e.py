@@ -1055,3 +1055,24 @@ def test_the_canvas_previews_unsaved_edits(browser, server, pages_root):
     page = _open_layout_page(browser, server, pages_root)
     notices = page.locator(".bp-canvas-notices").inner_text()
     assert "last saved draft" not in notices.lower(), notices
+
+
+def test_a_locked_block_refuses_to_be_deleted(browser, server, pages_root):
+    """The schema says lock refuses move, resize AND delete. A lock that stops
+    a one-cell nudge but not a deletion protects nothing, and the schema would
+    be describing behaviour the code does not have."""
+    page = _open_layout_page(browser, server, pages_root)
+    page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]').focus()
+    page.keyboard.press("l")
+    wait_until(
+        lambda: page.locator('.bp-grid-tile[data-block-id="blk-hero-1"].is-locked').count() == 1,
+        message="locked",
+    )
+
+    # By its accessible name, which is stable, rather than by a class.
+    page.click('button[aria-label="Delete blk-hero-1"]')
+    page.wait_for_timeout(300)
+
+    assert page.locator(".bp-modal").count() == 0, "a locked block must not even reach the dialog"
+    assert "locked" in page.locator("#shell-status").inner_text().lower()
+    assert page.locator('.bp-grid-tile[data-block-id="blk-hero-1"]').count() == 1

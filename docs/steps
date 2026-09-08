@@ -736,7 +736,53 @@ How: Page/template selector, block library, structure tree, canvas, inspector pa
 (content/layout/appearance/data/accessibility/visibility), top bar (undo/redo, viewport,
 save/validate/publish).
 Why: A valid page must be loadable, editable and saveable without ever touching raw JSON.
- [BUILD] Batch 13 -- drag, resize and responsive layouts
+ ✅ [BUILD] Batch 13 -- drag, resize and responsive layouts (2026-09-08: builder/app/layout.js
++ schema_version 2 + POST /api/preview + stale-write refusal, tested by 19 new e2e tests.
+1306 tests passing, from 1288. RAN IN TWO SEQUENTIAL STEPS, never concurrent.
+13a (4e6b305e) was the plumbing, and each piece existed for a reason found by measuring rather
+than assumed. (1) SCHEMA VERSION 2 adds a required `locked` flag per block -- the project's FIRST
+document migration, and the ladder in src/pages/migrations.py had a docstring predicting exactly
+how it would go ("one entry here, one constant bumped, nothing else changed"), which is what it
+took. Defaults to UNLOCKED: defaulting the other way would silently freeze every block on every
+existing page and read as a broken builder. (2) POST /api/preview renders a document held in the
+browser without writing it -- GET /preview reads from disk, so before this the canvas could only
+show the last SAVED draft and dragging would have moved nothing on screen until you saved, which
+would have pushed this batch into autosaving on every pointer move just to make the picture
+update. It deliberately renders an INVALID document rather than refusing one, because a document
+is transiently invalid mid-edit and a preview that blanks exactly while it is being watched is
+useless; the document is canonicalised and re-parsed so it passes the same caps, fidelity checks
+and migration ladder as one read from disk, and a test pins that both routes return IDENTICAL
+BYTES. (3) STALE-WRITE REFUSAL closes the two-tab overwrite that autosave would otherwise turn
+from a rare accident into an ordinary one. Keyed on the FILE'S HASH, not the document's `revision`
+field, and that choice matters: detecting conflicts by revision means the stored revision must
+advance on every save, which would break the property Batch 12 was accepted on -- that a canonical
+draft saved without edits comes back byte-identical. Hashing changes no bytes and catches strictly
+more, including a draft hand-edited outside the builder.
+13b (d8f92c2b) is the editor itself, and its shape is a deliberate trade: it is a GRID MAP OF THE
+DOCUMENT SITTING BESIDE THE PREVIEW, not a drag surface on top of it. The preview iframe has a bare
+sandbox (no scripting, opaque origin) -- a P0 security property from Batch 11 this batch does not
+get to trade away for a nicer interaction -- so nothing inside it can be measured or listened to.
+Dragging over a picture we cannot measure would mean guessing where blocks are, and a builder that
+guesses puts figures in the wrong place. Every tile is positioned from the block's own declared
+x/y/w/h, so where it sits IS where the block is. EVERY POINTER ACTION HAS A KEYBOARD EQUIVALENT and
+they are not two implementations -- both funnel through one attempt(), so a rule enforced for one is
+enforced for the other (arrows move, shift+arrows resize, L locks). REFUSALS SAY WHY: moving into a
+neighbour names the block it would overlap, pushing past the edge says the grid is 12 columns wide;
+a drag that silently snaps back is indistinguishable from a broken builder. A DRAG IS ONE UNDO STEP,
+not one per pixel, using history.js's begin/commit/abort transaction -- which Batch 12a had built
+and labelled as this batch's extension point, and which worked unchanged. Each breakpoint is
+arranged SEPARATELY, because the document has no reflow engine and every breakpoint's cell is
+declared, so a desktop move must not quietly move the block on mobile. Autosave is debounced and,
+on a stale-write conflict, STOPS rather than retrying -- retrying is how you overwrite the other
+tab a second time. TWO THINGS FOUND BY ITS OWN TESTS: every move rebuilds the editor, which
+destroyed the focused tile so only the FIRST arrow key of a run did anything (the same
+re-render-drops-focus trap the Batch 12 audit had just found in modals, appearing independently in
+new code hours later); and the schema described lock as refusing "move, resize and delete" while the
+code refused only the first two -- the same class as the Statbel-attribution breach and the
+route-table comment, documentation describing behaviour that did not exist. Both fixed with tests.
+The bare-number guard earned its keep: the drag threshold, row height and autosave window each had
+to be added to its allowlist deliberately rather than slipping in. NOT DONE, deliberately: block
+REORDER within the structure tree already existed from Batch 12 and was not rebuilt.)
 How: Reorder, grid move/resize, collision handling, per-breakpoint layouts, duplicate/lock,
 undo/redo, debounced autosave, full keyboard alternative for every pointer action.
 Why: This is the actual "drag-and-drop builder" the maintainer asked for; everything before it
