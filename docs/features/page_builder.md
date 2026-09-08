@@ -89,13 +89,23 @@ Recorded as claude.md rules 17-36, not duplicated here. Every batch's acceptance
 
 ### Agents
 
-`.claude/agents/` gets one file per role in section 4 of the maintainer's plan
-(`belpulse-lead`, `repository-architect`, `frontend-implementer`, `builder-core`, `builder-ui`,
-`test-engineer`, `visual-auditor`, `data-auditor`, `security-red-team`, `release-engineer`,
-`scan-assistant`). Model assignment follows Anthropic's own guidance: Opus 5 for architecture and
-high-risk work, Sonnet 5 for most implementation, Haiku 4.5 for read-only inventories. Fable 5.1
-is available as an optional final red-team pass, invoked manually, not part of the default
-pipeline.
+`.claude/agents/` holds three: `belpulse-lead` (architecture, batch scope, risk, the handoff,
+the final go/no-go), `builder` (all implementation, end-to-end, including its own tests), and
+`auditor` (independent read-only review of the dimensions a batch actually touched).
+
+This replaced an eleven-agent roster on 2026-09-07 (`repository-architect`,
+`frontend-implementer`, `builder-core`, `builder-ui`, `test-engineer`, `visual-auditor`,
+`data-auditor`, `security-red-team`, `release-engineer`, `scan-assistant`). Every one of them
+carried the same standing instruction to read this file, `invariants.md` and `known-risks.md`
+before starting, so each batch paid for the same reconnaissance five or six times over and
+each handoff lost information across another boundary. Their substantive rules were migrated
+into `builder.md` and `auditor.md`; the roles were not. Model assignment: Opus 5 for the lead
+and the auditor, Sonnet 5 for the builder, overridable per spawn for an
+architecture-critical batch. Fable 5.1 remains available as an optional manual red-team pass.
+
+Ceremony is matched to risk, not applied uniformly — see claude.md, "Agents". A trivial fix
+goes straight to `builder`; only architecture-, security- or data-sensitive work runs the full
+lead → builder → auditor → decision chain.
 
 ### Test matrix, audit plan, batch report format, severity levels
 

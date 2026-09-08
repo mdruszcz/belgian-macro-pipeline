@@ -117,15 +117,66 @@ replace rules 1-16.
    step at hand instead of dragging the whole history forward.
 7. Mid-task, if a single step is running long (many files read, many tool
    calls, a long back-and-forth with a reviewer agent), run /compact rather
-   than pushing through on a bloated context. Do this between logical
-   sub-steps (e.g. after a spec is written, after an audit finishes), never
-   mid-edit. /compact keeps the step's own thread of work; /clear (rule 6)
-   is for leaving that thread behind entirely once the step is done.
-8. When orchestrating other agents (belpulse-lead and any batch owner), keep
-   each spawned agent's task narrowly scoped to what its batch spec assigns
-   it -- a smaller, well-scoped task uses less context on its own and needs
-   /compact less often. Don't have one agent re-read files another agent in
-   the same batch already summarized; pass the summary forward instead.
+   than pushing through on a bloated context. Do this between genuine
+   logical phases (e.g. after a spec is written, after an audit finishes),
+   never mid-edit. /compact keeps the step's own thread of work; /clear
+   (rule 6) is for leaving that thread behind entirely once the step is
+   done. Compaction is NOT a substitute for not making the unnecessary
+   reads in the first place.
+
+## Context is a project resource
+
+Context is a project resource. Do not consume it merely for reassurance.
+
+- Before reading a large file, ask: what concrete unresolved question will
+  this read answer? If there isn't one, don't read it.
+- Do not reread information already present in the current handoff.
+- Prefer a targeted grep, search, or line-range read to a full-file read.
+- Previous batch reports are historical evidence, not mandatory onboarding
+  material. Open one when a specific compatibility question is unresolved,
+  and read that section, not the file.
+- docs/steps is maintained by the lead and is not required reading for
+  implementation agents unless the task explicitly concerns the roadmap.
+- claude.md is read once by the parent session. Spawned agents receive the
+  rules they need through their agent definition and their handoff -- do not
+  instruct an agent to go and read this file.
+- Do not spawn an agent to summarize material another agent has just read.
+- One agent should normally own implementation end-to-end.
+- Independent review is valuable; duplicated reconnaissance is not.
+
+## Agents
+
+Three agents, in .claude/agents/:
+
+- **belpulse-lead** -- architecture, batch scope, dependencies and risks,
+  whether a batch needs an audit, the handoff, and the final go/no-go.
+  Does not implement.
+- **builder** -- all implementation: Python, frontend, the builder UI, the
+  page renderer, schemas, APIs, pipelines, tests, refactors. Owns a batch
+  end-to-end and writes its own tests.
+- **auditor** -- independent read-only review of a finished batch, covering
+  only the dimensions that batch actually touched. Never writes code.
+
+Match the ceremony to the risk:
+
+- trivial fix: builder, tests, done -- no lead, no auditor;
+- normal feature: lead -> builder -> done;
+- large or risky feature: lead -> builder -> auditor -> builder fixes;
+- architecture, security or data-integrity sensitive: lead -> builder ->
+  auditor -> lead's final decision.
+
+Do not build longer chains than that unless the maintainer explicitly asks
+for that level of independent review. A batch with no reviewer findings
+recorded is unaudited, not clean -- those are different states.
+
+The lead's handoff to builder or auditor is a self-contained packet of
+roughly 500-1500 words: objective, files likely involved, relevant
+invariants, contracts that matter, risks specific to this change,
+acceptance criteria, tests required, explicit exclusions. A downstream
+agent is never told to go and read claude.md, docs/steps, the roadmap,
+previous batch reports, architecture documents, known-risks.md, or
+unrelated specs -- unless one specific unresolved question needs one named
+section of one named file.
 
 ## Prohibited until the 50% milestone
 - AI chatbot interfaces

@@ -20,6 +20,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
+from src.pages.schema import CURRENT_SCHEMA_VERSION
 from tests.fixtures.pages import real_data
 
 # --- generic "smallest valid instance of a JSON Schema fragment" ---------------
@@ -232,6 +233,7 @@ def make_block(
     props: dict | None = None,
     block_layout: dict | None = None,
     block_visibility: dict | None = None,
+    locked: bool = False,
 ) -> dict:
     resolved_version = current_version(block_type) if version is None else version
     resolved_props = props if props is not None else props_for(block_type, resolved_version)
@@ -243,6 +245,7 @@ def make_block(
         "binding": binding,
         "visibility": block_visibility or visibility(),
         "layout": block_layout or layout(),
+        "locked": locked,
     }
 
 
@@ -258,7 +261,7 @@ def minimal_valid_document(route: str = "/", page_type: str = "blank") -> dict:
     block (no binding, no NIS/indicator involved at all)."""
     hero = make_block("hero", block_id="blk-hero-1", binding=None)
     return {
-        "schema_version": 1,
+        "schema_version": CURRENT_SCHEMA_VERSION,
         "page_id": "test-minimal",
         "revision": 1,
         "route": route,
@@ -296,7 +299,7 @@ def realistic_multi_section_document() -> dict:
         binding=municipal_binding(real_data.an_additive_municipal_indicator_id()),
     )
     return {
-        "schema_version": 1,
+        "schema_version": CURRENT_SCHEMA_VERSION,
         "page_id": "test-realistic",
         "revision": 2,
         "route": f"/local/{real_data.a_municipal_nis_code()}/",

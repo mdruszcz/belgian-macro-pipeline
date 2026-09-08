@@ -1,14 +1,13 @@
 """Tests for src/pages/migrations.py: forward-only, never silently drops a field it
 doesn't understand (block_contract.md, "Versioning and migration"; batch spec §2.5).
 
-At the time this batch ships, schema_version 1 is the *only* version that has ever
-existed -- there is no schema_version 0 fixture to migrate from, so "migration from
-each superseded schema_version" (spec §15) is exercised here only to the extent that
-is currently possible: migrate() is a safe no-op on the current version, it preserves
-fields it doesn't recognise rather than dropping them, and it refuses (rather than
-guesses at) a schema_version that has never existed or is newer than this code
-understands. See the batch report for what could not be tested and why.
+Batch 13 added schema_version 2 (every block carries a required `locked` flag),
+so this file now exercises a REAL document migration rather than only the
+framework around one: a v1 document is upgraded, the flag defaults to unlocked,
+an author's existing choice is never overwritten, and the result validates.
 """
+
+import copy
 
 import pytest
 
@@ -65,3 +64,63 @@ def test_migrate_rejects_a_schema_version_newer_than_this_code_understands():
     doc["schema_version"] = CURRENT_SCHEMA_VERSION + 1
     with pytest.raises(PageDocumentError):
         migrate(doc)
+
+
+# ---------------------------------------------------------------------------
+# schema_version 1 -> 2: every block gains a required `locked` flag (Batch 13)
+# ---------------------------------------------------------------------------
+
+
+def _as_v1(doc: dict) -> dict:
+    """The same document as it would have been written before Batch 13:
+    schema_version 1 and no `locked` on any block."""
+    out = copy.deepcopy(doc)
+    out["schema_version"] = 1
+    for section in out["sections"]:
+        for block in section["blocks"]:
+            block.pop("locked", None)
+    return out
+
+
+def test_a_v1_document_gains_locked_on_every_block():
+    doc = _as_v1(builders.realistic_multi_section_document())
+    assert all("locked" not in b for s in doc["sections"] for b in s["blocks"])
+
+    migrated = migrate(doc)
+
+    assert migrated["schema_version"] == CURRENT_SCHEMA_VERSION
+    blocks = [b for s in migrated["sections"] for b in s["blocks"]]
+    assert blocks, "fixture must have blocks or this asserts nothing"
+    assert all(b["locked"] is False for b in blocks)
+
+
+def test_the_upgrade_defaults_to_unlocked_not_locked():
+    """Defaulting to True would silently freeze every block on every existing
+    page, and would read as a broken builder rather than as a migration."""
+    migrated = migrate(_as_v1(builders.minimal_valid_document()))
+    assert migrated["sections"][0]["blocks"][0]["locked"] is False
+
+
+def test_the_upgrade_never_overwrites_a_choice_already_recorded():
+    doc = _as_v1(builders.minimal_valid_document())
+    doc["sections"][0]["blocks"][0]["locked"] = True
+    assert migrate(doc)["sections"][0]["blocks"][0]["locked"] is True
+
+
+def test_a_migrated_v1_document_actually_validates():
+    """The migration is only worth anything if its output passes the schema it
+    was written for -- otherwise every pre-Batch-13 draft becomes unopenable."""
+    from src.pages.document import validate_document
+    from src.pages.metadata import load_metadata
+    from src.pages.registry import load_registry
+
+    migrated = migrate(_as_v1(builders.realistic_multi_section_document()))
+    errors = validate_document(migrated, metadata=load_metadata(), registry=load_registry())
+    assert errors == [], [(e.path, e.code, e.message) for e in errors]
+
+
+def test_a_v1_document_is_not_mutated_by_its_own_upgrade():
+    doc = _as_v1(builders.minimal_valid_document())
+    before = copy.deepcopy(doc)
+    migrate(doc)
+    assert doc == before

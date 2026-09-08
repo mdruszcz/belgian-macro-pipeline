@@ -39,12 +39,15 @@ What holds this together:
   the forbidden spellings do not appear even inside a docstring.
 """
 
+import hashlib
 import hmac
 import json
+import re
 import secrets
 import traceback
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from src.builder import store
@@ -62,6 +65,7 @@ from src.pages import (
 from src.pages.metadata import PageMetadata
 from src.pages.registry import Registry
 from src.pages.schema import (
+    CURRENT_SCHEMA_VERSION,
     MAX_DOCUMENT_BYTES,  # deep import on purpose: not in src.pages.__all__
     PageValidationError,
     check_raw_size,
@@ -88,11 +92,83 @@ LANGUAGES = ("en", "fr", "nl")
 
 JSON_CONTENT_TYPE = "application/json"
 
-#: Route allowlists. A request path is decoded ONCE and must equal one of
-#: these exactly, so there is no path to normalise and `/api/%73ave` is a 404
-#: rather than a second spelling of `/api/save`.
-GET_ROUTES = frozenset({"/", "/api/pages", "/api/document", "/api/versions", "/preview"})
-POST_ROUTES = frozenset({"/api/validate", "/api/save", "/api/publish", "/api/restore"})
+#: Route allowlists. A request path is decoded ONCE and must then equal one of
+#: these exactly, so there is nothing left to normalise afterwards and
+#: `/api/pages/../pages` is a 404 rather than a second spelling of
+#: `/api/pages`.
+#:
+#: Note what this does NOT mean, corrected in Batch 12a because the sentence
+#: that used to stand here said the opposite and would have misled the next
+#: reader: decoding happens BEFORE the comparison, so `/api/%73ave` IS matched
+#: as `/api/save` (it answers 405 to a GET, not 404). That is the intended and
+#: correct behaviour -- percent-encoding is a transport spelling of the same
+#: path, and treating the two differently is how a filter and a handler end up
+#: disagreeing about which route ran. The traversal defence is the exact match
+#: after a single decode, not a refusal to decode.
+GET_ROUTES = frozenset(
+    {"/", "/api/pages", "/api/document", "/api/registry", "/api/versions", "/preview"}
+)
+POST_ROUTES = frozenset(
+    {"/api/validate", "/api/save", "/api/publish", "/api/restore", "/api/preview"}
+)
+
+#: The repository root, derived from this file's own location and from nothing
+#: a request can influence.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+#: Where the shell's real, separately-owned source files live (ADR 0004).
+BUILDER_APP_DIR = _REPO_ROOT / "builder" / "app"
+
+#: The PUBLIC design system. READ from here, never copied into `builder/app/`:
+#: a second copy is exactly the drift the shared renderer exists to prevent.
+DESIGN_SYSTEM_DIR = _REPO_ROOT / "assets" / "belpulse"
+
+#: THERE IS NO STATIC-FILE ROUTE, DELIBERATELY. `bootstrap_html` inlines the
+#: shell from these fixed tuples, so no filename is ever derived from a
+#: request: there is no path to traverse, no allowlist to get wrong and no
+#: directory to list. A route that cannot be addressed cannot be attacked.
+#:
+#: ORDER IS LOAD ORDER. Every file is concatenated into ONE closure, in which a
+#: `shell` namespace object and the `api(path, options)` token closure are
+#: already in scope. `history.js` is builder-core's and must stay first, since
+#: the interface layer builds on it.
+#:
+#: Batch 12b adds its own filenames here -- that ONE-LINE edit is the only
+#: change to this module its scope allows.
+SHELL_JS_FILES: tuple[str, ...] = (
+    "history.js",
+    "dom.js",
+    "model.js",
+    "api.js",
+    "canvas.js",
+    "layout.js",
+    "inspector.js",
+    "sidebar.js",
+    "topbar.js",
+    "app.js",
+)
+SHELL_CSS_FILES: tuple[str, ...] = ("shell.css",)
+
+#: Read and handed to the shell as a string constant for `srcdoc` injection.
+#: The preview iframe has a BARE sandbox, so it has an opaque origin and a
+#: `<link rel=stylesheet>` inside it cannot load. Inlining the text is the only
+#: way to style the preview that does not require `allow-same-origin`, which is
+#: forbidden.
+PREVIEW_CSS_FILES: tuple[str, ...] = (
+    "tokens.css",
+    "components.css",
+    "layout.css",
+    "blocks.css",
+)
+
+#: A shell filename must be a plain lowercase basename with a .js/.css suffix.
+#: Nothing user-controlled reaches these tuples, so this is not the security
+#: boundary -- it is the guard that keeps a future one-line edit to the tuples
+#: from quietly introducing a path component.
+_SHELL_FILENAME = re.compile(r"\A[a-z0-9]+(?:[._-][a-z0-9]+)*\.(?:js|css)\Z")
+
+#: Bytes of entropy for the per-response script nonce in the CSP on `/`.
+CSP_NONCE_BYTES = 16
 
 STATUS_FOR_CODE = {
     "bad_request": 400,
@@ -105,6 +181,10 @@ STATUS_FOR_CODE = {
     "guard_rejected": 413,
     "payload_too_large": 413,
     "version_space_exhausted": 409,
+    # A save based on a copy of the draft that is no longer what is on disk.
+    # 409 for the same reason as above: the request is well-formed and the
+    # caller is allowed to make it -- it just lost a race.
+    "stale_write": 409,
     "internal_error": 500,
 }
 
@@ -240,6 +320,16 @@ def preview_data(doc) -> dict:
     return data
 
 
+def _sha256_of_text(text: str) -> str:
+    """Hash of the file's bytes as they are stored.
+
+    Encoded here rather than taking bytes, because every caller holds decoded
+    text -- and encoding in one place is what keeps the hash `/api/document`
+    hands out identical to the one `/api/save` compares it against.
+    """
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def _canonical_text(doc) -> str:
     """The exact text about to be written, size-checked before writing.
 
@@ -297,88 +387,259 @@ def _from_finding(exc: PageValidationError) -> ClientError:
     return ClientError("validation_failed", "the document is not valid", _project([exc]))
 
 
-def bootstrap_html(config: BuilderConfig) -> str:
-    """The minimal page that holds the token and proves the API is reachable.
+def registry_payload(registry: Registry) -> dict:
+    """`config.registry` as something `json.dumps` will actually accept.
 
-    Generated here, in Python, and stored as a file NOWHERE: anything at the
-    repository root is published by GitHub Pages, `builder/app/` is ADR 0004's
-    home for the Batch 12 UI, and `assets/` is served publicly too. There is
-    no builder UI in this batch by design.
+    Two traps, both of which a reasonable implementation walks straight into:
 
-    Two things it must do beyond fetching:
+    * `Registry` is a FROZEN dataclass whose `block_types` and `defs` are
+      `MappingProxyType`. `json.dumps` raises `TypeError` on a mappingproxy,
+      and `dataclasses.asdict` raises too (it deep-copies, and a mappingproxy
+      cannot be pickled). Both would be a 500 on every request, so the plain
+      dict below is built by hand and a test pins the serialisation.
+    * `load_registry()` DROPS four top-level keys the file carries
+      (`accessible_name_note`, `deliberately_absent`, `forward_compatibility`,
+      `props_schema_note`). So this endpoint does not return "the registry
+      file"; it returns what the loader kept, which is what the validator and
+      the renderer actually use. The block library must be driven by THIS, so
+      that what the editor offers and what the public site renders cannot
+      drift.
 
-    * `history.replaceState` drops `?token=` from the address bar, so the
-      token does not sit in the browser's history for the next person at this
-      machine.
-    * the preview is fetched WITH the token header and injected via `srcdoc`
-      into an iframe sandboxed without `allow-same-origin` and without
-      `allow-scripts`. An `<iframe src="/preview?...">` cannot send a header,
-      and a same-origin preview would mean any renderer escaping slip in an
-      UNVALIDATED on-disk draft could read the token out of this page and then
-      write anywhere under `config/pages/`. The token exists only in the
-      parent document.
+    `$defs` keeps its JSON-Schema spelling, because a shell that hands a props
+    schema to a JSON-Schema-shaped control needs the `#/$defs/...` refs to
+    resolve against the same key name the schema uses.
+    """
+    return {
+        "registry_version": registry.registry_version,
+        "block_types": dict(registry.block_types),
+        "$defs": dict(registry.defs),
+    }
+
+
+def _read_shell_file(directory: Path, name: str) -> str:
+    """One file's text, by a name that came from a module constant.
+
+    Raises rather than skipping a missing file. A silent skip would ship a
+    shell with a module quietly absent -- the interface would half-work, and
+    the cause (a typo in the tuple above) would be invisible in the browser.
+    """
+    if not _SHELL_FILENAME.match(name):
+        raise ValueError(f"{name!r} is not a plain shell filename")
+    target = directory / name
+    if not target.is_file():
+        # The path is NOT quoted into the message: this string can reach the
+        # operator's log, and nothing about this machine goes to the browser.
+        raise FileNotFoundError(f"the builder shell file {name!r} is missing")
+    return target.read_text(encoding="utf-8")
+
+
+def _escape_script_end(text: str) -> str:
+    """Neutralise `</script` in text that is about to sit inside `<script>`.
+
+    The HTML parser ends a script element at the first `</script`, whatever the
+    surrounding JavaScript thinks -- so one such sequence in a shell file would
+    close the element early and spray the rest of the shell into the document
+    as markup. `<\\/script` is a valid escape both inside a JavaScript string
+    and inside a regular expression literal, and `</script` outside either is
+    already a syntax error, so this rewrite can never break working code. A
+    test also asserts no shell file contains the sequence in the first place;
+    this is the second of the two locks, not the only one.
+    """
+    return text.replace("</script", "<\\/script")
+
+
+def _js_string(text: str) -> str:
+    """`text` as a JavaScript string literal, safe inside `<script>`."""
+    return _escape_script_end(json.dumps(text, ensure_ascii=False))
+
+
+def content_security_policy(nonce: str) -> str:
+    """The policy `/` sends, decided here rather than left to a later batch.
+
+    This was gated on a real browser, not reasoned about, because the failure
+    mode is silent: a `srcdoc` iframe INHERITS its embedder's policy, so the
+    preview's inlined stylesheet lives or dies by this string. `/` shipping no
+    policy at all is the only reason the preview was styled before this batch,
+    and the first person to add the obvious hardening would have unstyled the
+    canvas without any error appearing anywhere.
+
+    Why each directive is what it is:
+
+    * `default-src 'none'` -- nothing loads unless named below.
+    * `script-src 'nonce-...'` -- a fresh nonce per response. The shell is the
+      only script in the document, and an injected `<script>` has no nonce.
+    * `style-src 'unsafe-inline'` -- and it cannot be a nonce. Nonces are NOT
+      inherited by a `srcdoc` document, so a nonce here would block the
+      preview's inlined design-system CSS. Note the preview frame's bare
+      sandbox already denies it script execution entirely, so inline style
+      there is style and nothing else.
+    * `connect-src 'self'` -- the API, on loopback, and nowhere else. The shell
+      makes zero external requests and this makes that enforceable rather than
+      merely true today.
+    * `img-src 'self' data:` / `font-src 'self' data:` -- a block may carry an
+      inline image; nothing may be fetched off this machine.
+    * `frame-src 'self'` -- the preview frame only.
+    * `base-uri 'none'`, `form-action 'none'`, `frame-ancestors 'none'` -- no
+      base-tag hijack, no form posting anywhere, and this page may not be
+      embedded by anything.
+    """
+    return "; ".join(
+        (
+            "default-src 'none'",
+            f"script-src 'nonce-{nonce}'",
+            "style-src 'unsafe-inline'",
+            "connect-src 'self'",
+            "img-src 'self' data:",
+            "font-src 'self' data:",
+            "frame-src 'self'",
+            "base-uri 'none'",
+            "form-action 'none'",
+            "frame-ancestors 'none'",
+        )
+    )
+
+
+#: The shell's own chrome. Deliberately small: it exists so the skeleton is a
+#: usable page rather than unstyled text, and so the mount points below have a
+#: shape. Batch 12b's stylesheet is concatenated AFTER this one and wins.
+_SHELL_BASE_CSS = (
+    ":root{color-scheme:light}"
+    "*{box-sizing:border-box}"
+    "body{margin:0;font:14px/1.5 system-ui,sans-serif;background:#fafafa;color:#18181b}"
+    "#shell-root{display:flex;flex-direction:column;height:100vh}"
+    "#shell-topbar{display:flex;gap:.5rem;align-items:center;padding:.5rem .75rem;"
+    "border-bottom:1px solid #d4d4d8;background:#fff}"
+    "#shell-body{display:flex;flex:1;min-height:0}"
+    "#shell-sidebar,#shell-inspector{width:18rem;overflow:auto;background:#fff;padding:.75rem}"
+    "#shell-sidebar{border-right:1px solid #d4d4d8}"
+    "#shell-inspector{border-left:1px solid #d4d4d8}"
+    "#shell-canvas{flex:1;min-width:0;display:flex;flex-direction:column;padding:.75rem;gap:.5rem}"
+    "#shell-preview{flex:1;width:100%;border:1px solid #d4d4d8;background:#fff}"
+    "#shell-status{margin:0;padding:.25rem .75rem;border-top:1px solid #d4d4d8;background:#fff}"
+    ":focus-visible{outline:2px solid #1d4ed8;outline-offset:2px}"
+    "#shell-too-narrow{display:none;padding:2rem}"
+    "@media (max-width:1023px){#shell-root{display:none}#shell-too-narrow{display:block}}"
+)
+
+
+def bootstrap_html(config: BuilderConfig, nonce: str = "") -> str:
+    """The builder shell: skeleton, inlined stylesheet, inlined script, token.
+
+    Batch 12a. Batch 11's demo controls are gone; this is the page the real
+    interface is built into.
+
+    THERE IS NO STATIC-FILE ROUTE. The shell's files are read from
+    `BUILDER_APP_DIR` at request time, by names taken from module constants,
+    and emitted inline in this one document. That is not a shortcut -- it is
+    what makes the shell loadable at all:
+
+    * A subresource cannot send a header, and `_check_token` accepts a query
+      token on `/` and nowhere else. `<script src=...>` would have 401'd on
+      every load.
+    * The token literal is therefore already inside the same closure as the
+      code that needs it. It goes into no global, no storage, no cookie, no
+      DOM attribute and no URL -- and the shell modules never receive the token
+      at all, only an `api(path, options)` closure that adds the header for
+      them. That closure also refuses any path that is not same-origin, so a
+      mistyped absolute URL in a later batch cannot send the token elsewhere.
+    * A stale cached script against a restarted server (and so a dead token) is
+      impossible; there is nothing to cache.
+
+    `history.replaceState` still drops `?token=` from the address bar, so the
+    token does not sit in the browser's history for the next person here.
+
+    The preview stays in a `<iframe sandbox>` with NO extra permissions --
+    which is why the design-system CSS is read from `assets/belpulse/` and
+    handed to the shell as a string for `srcdoc` injection. `/preview` renders
+    UNVALIDATED on-disk content on the same origin as the write API; relaxing
+    that sandbox so a stylesheet link would load turns any renderer slip into
+    token theft plus arbitrary writes under `config/pages/`. The frame element
+    stays in this Python skeleton on purpose, so the assertion about it is made
+    against something a later batch cannot move.
     """
     token_literal = json.dumps(config.token)
+    shell_css = "".join(_read_shell_file(BUILDER_APP_DIR, name) for name in SHELL_CSS_FILES)
+    shell_js = "\n".join(
+        f"/* builder/app/{name} */\n{_read_shell_file(BUILDER_APP_DIR, name)}"
+        for name in SHELL_JS_FILES
+    )
+    preview_css = "\n".join(_read_shell_file(DESIGN_SYSTEM_DIR, name) for name in PREVIEW_CSS_FILES)
+    nonce_attr = f' nonce="{nonce}"' if nonce else ""
     return (
         "<!doctype html>\n"
         '<html lang="en"><head><meta charset="utf-8">'
         '<meta name="referrer" content="no-referrer">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        "<title>BelPulse builder service</title>"
-        "<style>"
-        "body{font:14px/1.5 system-ui,sans-serif;margin:2rem;max-width:60rem}"
-        "h1{font-size:1.25rem}code,pre{font-family:ui-monospace,monospace}"
-        "pre{background:#f4f4f5;padding:.75rem;overflow:auto;max-height:20rem}"
-        "iframe{width:100%;height:24rem;border:1px solid #d4d4d8;background:#fff}"
-        "label{display:inline-block;margin-right:1rem}"
-        "</style></head><body>"
-        "<h1>BelPulse builder service</h1>"
-        "<p>Batch 11: the API only. There is no builder interface yet "
-        "(Batch 12), and nothing here changes what a visitor sees until you "
-        "publish explicitly.</p>"
-        '<p><label>page_id <input id="page" value=""></label>'
-        '<label>which <select id="which">'
-        '<option value="draft">draft</option>'
-        '<option value="published">published</option>'
-        "</select></label>"
-        '<label>lang <select id="lang">'
-        '<option value="en">en</option><option value="fr">fr</option>'
-        '<option value="nl">nl</option></select></label></p>'
-        '<p><button id="list">List pages</button> '
-        '<button id="load">Load document</button> '
-        '<button id="show">Preview</button></p>'
-        '<pre id="out">ready</pre>'
-        '<iframe id="frame" sandbox referrerpolicy="no-referrer" '
+        "<title>BelPulse builder</title>"
+        f"<style>{_escape_script_end(_SHELL_BASE_CSS)}"
+        f"{_escape_script_end(shell_css)}</style>"
+        "</head><body>"
+        '<div id="shell-too-narrow"><h1>The builder needs a wider window</h1>'
+        "<p>This is a desktop tool. Widen the window to at least 1024 pixels "
+        "rather than working in a layout that would misrepresent what a "
+        "visitor sees.</p></div>"
+        '<div id="shell-root">'
+        '<header id="shell-topbar" role="banner"></header>'
+        '<div id="shell-body">'
+        '<nav id="shell-sidebar" aria-label="Pages and blocks"></nav>'
+        '<main id="shell-canvas">'
+        '<iframe id="shell-preview" sandbox referrerpolicy="no-referrer" '
         'title="page preview"></iframe>'
-        "<script>\n"
+        "</main>"
+        '<aside id="shell-inspector" aria-label="Inspector"></aside>'
+        "</div>"
+        '<p id="shell-status" role="status" aria-live="polite">The builder '
+        "interface is not built yet. Nothing here changes what a visitor sees "
+        "until you publish explicitly.</p>"
+        "</div>"
+        f"<script{nonce_attr}>\n"
+        "(function () {\n"
+        '"use strict";\n'
         f"const TOKEN = {token_literal};\n"
         "history.replaceState(null, '', location.pathname);\n"
-        "const out = document.getElementById('out');\n"
-        "const qs = () => new URLSearchParams({\n"
-        "  page_id: document.getElementById('page').value,\n"
-        "  which: document.getElementById('which').value,\n"
-        "  lang: document.getElementById('lang').value,\n"
-        "});\n"
-        "async function call(path, options) {\n"
-        "  const opts = options || {};\n"
-        "  opts.headers = Object.assign({}, opts.headers, "
-        f"{{'{TOKEN_HEADER}': TOKEN}});\n"
-        "  const response = await fetch(path, opts);\n"
-        "  const body = await response.text();\n"
-        "  return { status: response.status, body };\n"
+        "// The ONLY thing that ever sees TOKEN. Shell modules get this\n"
+        "// closure, never the value, and a path that is not same-origin is\n"
+        "// refused rather than sent.\n"
+        "function api(path, options) {\n"
+        "  // A backslash counts as a separator too: the WHATWG URL parser\n"
+        "  // treats '/\\\\host' exactly like '//host' for http(s), so checking\n"
+        "  // only for a second '/' would let a path built from data resolve\n"
+        "  // cross-origin WITH the token attached. connect-src 'self' blocks\n"
+        "  // the request today, but a guard that relies on the CSP to be\n"
+        "  // correct is not a guard.\n"
+        "  if (typeof path !== 'string' || path.charAt(0) !== '/'\n"
+        "      || path.charAt(1) === '/' || path.charAt(1) === '\\\\'\n"
+        "      || path.indexOf('\\\\') !== -1) {\n"
+        "    return Promise.reject(new Error('builder paths must start with a "
+        "single /'));\n"
+        "  }\n"
+        "  const opts = Object.assign({}, options || {});\n"
+        f"  opts.headers = Object.assign({{}}, opts.headers, {{'{TOKEN_HEADER}': TOKEN}});\n"
+        "  opts.credentials = 'omit';\n"
+        "  opts.referrerPolicy = 'no-referrer';\n"
+        "  return fetch(path, opts);\n"
         "}\n"
-        "function report(result) {\n"
-        "  out.textContent = result.status + '\\n' + result.body;\n"
+        f"const PREVIEW_CSS = {_js_string(preview_css)};\n"
+        f"const LANGUAGES = {json.dumps(list(LANGUAGES))};\n"
+        # Injected rather than written into the shell's JavaScript, so a
+        # schema bump changes one Python constant and the browser follows.
+        f"const SCHEMA_VERSION = {CURRENT_SCHEMA_VERSION};\n"
+        "const shell = {};\n"
+        f"{_escape_script_end(shell_js)}\n"
+        "// Entry point. Batch 12b's module assigns shell.start; until it\n"
+        "// does, the skeleton stands on its own and says so.\n"
+        "if (typeof shell.start === 'function') {\n"
+        "  shell.start({\n"
+        "    api: api,\n"
+        "    previewCss: PREVIEW_CSS,\n"
+        "    languages: LANGUAGES,\n"
+        "    schemaVersion: SCHEMA_VERSION,\n"
+        "    root: document.getElementById('shell-root'),\n"
+        "    preview: document.getElementById('shell-preview'),\n"
+        "    status: document.getElementById('shell-status'),\n"
+        "  });\n"
         "}\n"
-        "document.getElementById('list').onclick = async () => "
-        "report(await call('/api/pages'));\n"
-        "document.getElementById('load').onclick = async () => "
-        "report(await call('/api/document?' + qs()));\n"
-        "document.getElementById('show').onclick = async () => {\n"
-        "  const result = await call('/preview?' + qs());\n"
-        "  document.getElementById('frame').srcdoc = result.body;\n"
-        "  out.textContent = 'preview status ' + result.status;\n"
-        "};\n"
+        "})();\n"
         "</script></body></html>\n"
     )
 
@@ -622,9 +883,21 @@ class BuilderHandler(BaseHTTPRequestHandler):
 
     def _route_get(self, path: str, query: dict) -> None:
         if path == "/":
-            self._send_html(200, bootstrap_html(self.config))
+            # A fresh nonce per response, minted next to the header that
+            # names it so the two cannot drift apart.
+            nonce = secrets.token_urlsafe(CSP_NONCE_BYTES)
+            self._send_html(
+                200,
+                bootstrap_html(self.config, nonce),
+                extra=(("Content-Security-Policy", content_security_policy(nonce)),),
+            )
         elif path == "/api/pages":
             self._send_json(200, {"ok": True, "pages": store.list_pages()})
+        elif path == "/api/registry":
+            # The block library and the inspector are driven by THIS, never by
+            # a second copy of the block list inside the shell -- two lists
+            # drift the first time a block type gains a prop.
+            self._send_json(200, {"ok": True, "registry": registry_payload(self.config.registry)})
         elif path == "/api/versions":
             page_id = validate_page_id(_single(query, "page_id"))
             self._send_json(
@@ -659,6 +932,11 @@ class BuilderHandler(BaseHTTPRequestHandler):
                 # silently on the next save.
                 "document": migrated,
                 "migrated": migrated != stored,
+                # The hash of the bytes ON DISK, which the caller hands back on
+                # save so a write based on a stale read can be refused. See
+                # _post_save for why this is the file's hash and not the
+                # document's `revision` field.
+                "sha256": _sha256_of_text(text),
             },
         )
 
@@ -711,6 +989,8 @@ class BuilderHandler(BaseHTTPRequestHandler):
             self._post_publish(page_id)
         elif path == "/api/restore":
             self._post_restore(page_id, payload)
+        elif path == "/api/preview":
+            self._post_preview(payload)
 
     def _findings(self, doc) -> list:
         return validate_document(doc, metadata=self.config.metadata, registry=self.config.registry)
@@ -734,6 +1014,7 @@ class BuilderHandler(BaseHTTPRequestHandler):
             # Rejected BEFORE any filesystem call, so draft.json is byte
             # unchanged -- and if it did not exist, it still does not.
             self._reject_findings(findings)
+        self._refuse_a_stale_write(page_id, payload)
         text = _canonical_text(doc)
         result = store.save_draft(page_id, text)
         self._send_json(
@@ -744,6 +1025,92 @@ class BuilderHandler(BaseHTTPRequestHandler):
                 "bytes": result.bytes,
                 "sha256": result.sha256,
             },
+        )
+
+    def _post_preview(self, payload: dict) -> None:
+        """Render a document held in the browser, WITHOUT writing it anywhere.
+
+        `GET /preview` reads from disk, so before this existed the canvas could
+        only ever show the last explicitly-saved draft. Dragging a block would
+        have moved nothing on screen until the operator saved -- which is the
+        opposite of direct manipulation, and would have pushed Batch 13 toward
+        autosaving on every pointer move just to make the picture update.
+
+        Deliberately renders an INVALID document rather than refusing one: a
+        document is transiently invalid in the middle of an edit (a block put
+        down before its binding is filled in), and a preview that blanked at
+        those moments would be useless exactly when it is being watched. The
+        renderer isolates a failing block, so an invalid one shows the failure
+        in place. `/api/validate` is what says whether it is valid.
+
+        The document is canonicalised and re-parsed rather than rendered from
+        the payload dict, so it goes through byte-for-byte the same size caps,
+        numeric-fidelity checks and migration ladder as a document read from
+        disk. Two rendering paths that guard differently is how the safe one
+        stops being the one that matters.
+        """
+        doc = payload.get("document")
+        lang = payload.get("lang") or "en"
+        if lang not in LANGUAGES:
+            raise ClientError("bad_request", "lang must be en, fr or nl")
+        parsed = _parse_document_text(_canonical_text(doc))
+        html = render_document(
+            parsed,
+            registry=self.config.registry,
+            lang=lang,
+            data=preview_data(parsed),
+        )
+        self._send_html(
+            200,
+            html,
+            extra=(
+                # Identical to GET /preview's: this is unvalidated content
+                # rendered on the same origin as the write API, and it is now
+                # unvalidated content that never even reached the disk.
+                (
+                    "Content-Security-Policy",
+                    "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+                ),
+            ),
+        )
+
+    def _refuse_a_stale_write(self, page_id: str, payload: dict) -> None:
+        """Optimistic concurrency, keyed on the FILE's hash.
+
+        Two tabs open on one page used to overwrite each other silently, and
+        autosave turns that from a rare accident into an ordinary Tuesday. The
+        caller sends `base_sha256` -- the hash `/api/document` gave it when it
+        read the draft -- and a write is refused if the bytes on disk are no
+        longer those bytes.
+
+        WHY NOT the document's own `revision` field, which exists and is
+        required: detecting a conflict that way means the stored revision has
+        to advance on every save, and that would break the property Batch 12
+        was accepted on -- that a canonical draft saved without edits comes
+        back byte-identical. Hashing the file costs nothing, changes no bytes,
+        and catches strictly more: it also refuses a write over a draft edited
+        by hand in an editor, which a revision counter never would.
+
+        `base_sha256` is OPTIONAL and its absence means "I am not claiming to
+        have read anything" -- a first save of a page that does not exist yet
+        has no hash to send. It is a guard against a stale overwrite, not an
+        authentication step; the token is what makes this endpoint privileged.
+        """
+        claimed = payload.get("base_sha256")
+        if claimed is None:
+            return
+        if not isinstance(claimed, str):
+            raise ClientError("bad_request", "base_sha256 must be a string")
+        current_text = store.read_document_text(page_id, "draft")
+        current = _sha256_of_text(current_text) if current_text is not None else None
+        if current == claimed:
+            return
+        raise ClientError(
+            "stale_write",
+            (
+                "this draft changed on disk since it was opened, so saving now "
+                "would overwrite that change; reload the page to see it first"
+            ),
         )
 
     def _post_publish(self, page_id: str) -> None:

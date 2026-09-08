@@ -97,5 +97,6 @@ No generic "query" operation exists in the schema at all — not disabled, absen
 ## Rollout / risks
 
 The binding vocabulary is the single most security-sensitive surface in the builder (it is the
-one place a page document reaches back into the data pipeline). `security-red-team` review is
-required before this ships, per the audit plan in docs/features/page_builder.md.
+one place a page document reaches back into the data pipeline). An `auditor` pass scoped to
+security and write-path safety is required before this ships, per the audit plan in
+docs/features/page_builder.md.

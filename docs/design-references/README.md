@@ -13,8 +13,8 @@ label and figure, approximate colours, and component inventory.
 That's enough to build from — Batch 1 (design tokens) and Batches 2-4/6/7 (components and page
 reproduction) proceed against these transcriptions. It is **not** the same as having the source
 files. A transcription can get a colour approximately right from a screenshot; it cannot get it
-exactly right the way a colour picker on the real asset can, and it can't be handed to
-`visual-auditor` for a pixel-diff — there's nothing to diff against.
+exactly right the way a colour picker on the real asset can, and it can't be handed to an
+`auditor` visual pass for a pixel-diff — there's nothing to diff against.
 
 **Ask, not a blocker:** if the original files exist (Figma, Sketch, exported PNGs at full
 resolution, anything), dropping them into `docs/design-references/originals/` would let a later

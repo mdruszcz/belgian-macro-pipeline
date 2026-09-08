@@ -33,10 +33,12 @@ from pathlib import Path
 
 import jsonschema
 
-CURRENT_SCHEMA_VERSION = 1
+#: 2 adds the required `locked` flag on every block (Batch 13).
+CURRENT_SCHEMA_VERSION = 2
 
 #: The oldest `schema_version` `migrations.migrate()` can still bring forward.
-#: 1 is the first published version, so today it is the current one too.
+#: 1 is the first published version, and `_document_1_to_2` still exists, so a
+#: v1 document on disk is upgraded rather than refused.
 MIN_MIGRATABLE_SCHEMA_VERSION = 1
 
 # Resource-exhaustion caps. Chosen far above any real page (Batch 0's largest

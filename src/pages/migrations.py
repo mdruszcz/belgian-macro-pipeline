@@ -3,11 +3,10 @@
 Two independent ladders, both climbed by `migrate()`:
 
 1. **Document `schema_version`.** `DOCUMENT_MIGRATIONS` maps a version to the
-   step that turns it into the next one. It is EMPTY at
-   `CURRENT_SCHEMA_VERSION == 1`, and empty by construction rather than by
-   omission: 1 is the first published version, so there is nothing older to
-   come from. The first `schema_version: 2` adds `{1: _document_1_to_2}` here
-   and nothing else changes.
+   step that turns it into the next one. At `CURRENT_SCHEMA_VERSION == 2` it
+   holds one step, `{1: _document_1_to_2}`, which adds the required `locked`
+   flag to every block. It went in exactly as this docstring predicted it
+   would: one entry here, one constant bumped, and nothing else changed.
 
 2. **Block `version`.** `BLOCK_MIGRATIONS` maps `(block_type, version)` to the
    step that turns that block into the next version of itself. This ladder is
@@ -41,9 +40,46 @@ from src.pages.schema import (
     check_schema_version,
 )
 
-#: version -> step producing version + 1. See the module docstring for why
-#: this is empty rather than missing.
-DOCUMENT_MIGRATIONS: dict[int, Callable[[dict], dict]] = {}
+
+def _document_1_to_2(doc: dict) -> dict:
+    """schema_version 1 -> 2: every block gains a required `locked` flag.
+
+    Defaults to False, which is the only safe direction: locking is an editing
+    guard, and a document written before the flag existed had no blocks anyone
+    had chosen to protect. Defaulting to True would silently freeze every block
+    on every existing page and look like a broken builder.
+
+    A block that somehow already carries the field keeps it -- a migration that
+    overwrote a real value would lose an author's choice, and this ladder never
+    silently drops or rewrites a field it did not add.
+    """
+    out = dict(doc)
+    sections = out.get("sections")
+    if not isinstance(sections, list):
+        return out
+    out["sections"] = [
+        (
+            section
+            if not isinstance(section, dict) or not isinstance(section.get("blocks"), list)
+            else {
+                **section,
+                "blocks": [
+                    (
+                        {**block, "locked": block.get("locked", False)}
+                        if isinstance(block, dict)
+                        else block
+                    )
+                    for block in section["blocks"]
+                ],
+            }
+        )
+        for section in sections
+    ]
+    return out
+
+
+#: version -> step producing version + 1.
+DOCUMENT_MIGRATIONS: dict[int, Callable[[dict], dict]] = {1: _document_1_to_2}
 
 
 def _kpi_card_1_to_2(props: dict) -> dict:
