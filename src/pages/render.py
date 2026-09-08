@@ -457,7 +457,7 @@ def _render_block(block, *, registry: Registry, lang: str, data, errors: list) -
     renderer = BLOCK_RENDERERS.get(block_type)
     if renderer is None or not registry.has_type(block_type):
         errors.append(BlockRenderError(block_id, block_type, "no renderer for this block type"))
-        return _failed_block(block_id, block_type, _grid_style(block.get("layout")), block)
+        return _failed_block(block_id, block_type, _grid_style(block.get("layout")), block, lang)
 
     try:
         state = _state_for(block, data, registry)
@@ -470,7 +470,7 @@ def _render_block(block, *, registry: Registry, lang: str, data, errors: list) -
         # implementation might fail, and the alternative -- letting it escape
         # -- is a blank page.
         errors.append(BlockRenderError(block_id, block_type, "renderer raised"))
-        return _failed_block(block_id, block_type, _grid_style(block.get("layout")), block)
+        return _failed_block(block_id, block_type, _grid_style(block.get("layout")), block, lang)
 
     visibility = block.get("visibility") or {}
     hidden = [name for name in BREAKPOINTS if visibility.get(name) is False]
@@ -514,7 +514,17 @@ def _render_block(block, *, registry: Registry, lang: str, data, errors: list) -
     )
 
 
-def _failed_block(block_id: str, block_type: str, style: str, block) -> str:
+#: What a reader gets where a block failed. Trilingual like every other
+#: user-facing string (rule 7): this was the one sentence in the renderer the
+#: rule did not reach, so a French page whose block broke said so in English.
+FAILED_TEXT = {
+    "en": "This block could not be displayed.",
+    "fr": "Ce bloc n\u2019a pas pu \u00eatre affich\u00e9.",
+    "nl": "Dit blok kon niet worden weergegeven.",
+}
+
+
+def _failed_block(block_id: str, block_type: str, style: str, block, lang: str = "en") -> str:
     """What a reader gets where a block failed. Says a block is missing and
     which one, and nothing about why -- a reason can quote data."""
     visibility = (block or {}).get("visibility") or {}
@@ -531,7 +541,9 @@ def _failed_block(block_id: str, block_type: str, style: str, block) -> str:
                 ("style", style),
             ]
         )
-        + '><p class="bp-block-failed">This block could not be displayed.</p></div>'
+        + '><p class="bp-block-failed">'
+        + esc(FAILED_TEXT.get(lang, FAILED_TEXT["en"]))
+        + "</p></div>"
     )
 
 

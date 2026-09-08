@@ -84,9 +84,10 @@ pages:
 	$(PYTHON) scripts/export_local_pages.py --db $(DB) \
 		--payload-dir public/data --out-dir local --build-id "$${BUILD_ID:-local}"
 
-## page-documents: build every config/pages/*/published.json into its route.
-## Only PUBLISHED documents -- a draft never reaches the site without an
-## explicit publish (invariant 10). Fast, so it runs inside `exports`.
+## page-documents: build every config/pages/*/published.json into its route,
+## in all three languages -- en at the declared route, fr and nl one directory
+## deeper (Batch 15c). Only PUBLISHED documents: a draft never reaches the site
+## without an explicit publish (invariant 10). Fast, so it runs inside `exports`.
 page-documents:
 	$(PYTHON) scripts/export_page_documents.py
 
