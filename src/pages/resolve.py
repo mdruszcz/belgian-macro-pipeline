@@ -27,6 +27,7 @@ withheld").
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -35,6 +36,18 @@ from src.pages.schema import PageDocumentError
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 PAYLOAD_ROOT = Path("public") / "data"
+
+#: A NIS code and an indicator code, re-checked HERE and not merely relied on
+#: from the schema. The schema does constrain both -- but resolution also runs
+#: on documents that were never validated, because POST /api/preview renders an
+#: invalid document on purpose. A guard that only holds when the validator ran
+#: first is not a guard on the path where it is actually needed.
+#:
+#: Without this, `Path("communes") / f"{nis}.json"` with an ABSOLUTE nis throws
+#: the prefix away entirely (pathlib does that silently), and "../manifest"
+#: climbs out of the directory. Both were demonstrated, not theorised.
+_NIS_RE = re.compile(r"\A[0-9]{5}\Z")
+_INDICATOR_RE = re.compile(r"\A[A-Z][A-Z0-9_]{0,63}\Z")
 
 #: Operations this batch answers, each from a payload that already holds the
 #: result. `aggregate` is deliberately absent -- see `_AGGREGATE_REFUSAL`.
@@ -45,9 +58,14 @@ RESOLVABLE_OPERATIONS = frozenset(
 #: Said out loud rather than silently returning nothing. A block that shows
 #: no reason is indistinguishable from a broken one.
 _AGGREGATE_REFUSAL = (
-    "A province- or region-level figure is not available to a block yet. The "
-    "aggregate exists, but it is published only inside each commune's own "
-    "comparison, not as a payload a block can read on its own."
+    "A {level}-level figure is not available to a block on its own yet. The "
+    "aggregate exists, but it is published only inside each commune's "
+    "comparison, not as a payload a block can read directly."
+)
+
+_SUPPRESSED_MESSAGE = (
+    "The source holds this figure and does not publish it, because the count "
+    "is too small to release."
 )
 
 _NO_CONTEXT = (
@@ -75,20 +93,40 @@ class PayloadReader:
         if relative in self._cache:
             return self._cache[relative]
         path = self._base / relative
+        # Belt and braces: even with both names regex-checked above, confirm
+        # the resolved path is still inside the payload directory. This is what
+        # catches a symlink planted under public/data/, which no amount of
+        # name-checking can see.
+        try:
+            resolved = path.resolve()
+            base = self._base.resolve()
+        except OSError as exc:
+            raise PayloadError(f"cannot resolve payload {relative.as_posix()}") from exc
+        if not resolved.is_relative_to(base):
+            raise PayloadError(f"payload {relative.as_posix()} resolves outside public/data")
+
         loaded: dict | None
         try:
-            loaded = json.loads(path.read_text(encoding="utf-8"))
+            loaded = json.loads(resolved.read_text(encoding="utf-8"))
         except FileNotFoundError:
             loaded = None
         except (OSError, ValueError) as exc:
-            raise PayloadError(f"cannot read payload {relative.as_posix()}: {exc}") from exc
+            # The message names the payload, never the exception: `exc` carries
+            # the absolute path on this machine, and service.py puts this string
+            # into the data a browser is handed. Nothing about this machine
+            # reaches the client (service.py's own rule).
+            raise PayloadError(f"payload {relative.as_posix()} could not be read") from exc
         self._cache[relative] = loaded
         return loaded
 
-    def commune(self, nis: str) -> dict | None:
+    def commune(self, nis) -> dict | None:
+        if not isinstance(nis, str) or not _NIS_RE.match(nis):
+            raise PayloadError("a NIS code must be five digits")
         return self._read(Path("communes") / f"{nis}.json")
 
-    def indicator(self, code: str) -> dict | None:
+    def indicator(self, code) -> dict | None:
+        if not isinstance(code, str) or not _INDICATOR_RE.match(code):
+            raise PayloadError("an indicator code must be A-Z, digits and underscores")
         return self._read(Path("indicators") / f"{code}.json")
 
     def national(self) -> dict | None:
@@ -102,24 +140,49 @@ def _state(state: str, message: str = "") -> dict:
     return out
 
 
-def _format_value(value, meta: Mapping) -> str:
-    """A figure written the way its own metadata says to write it.
+#: How each language writes a thousands separator. Substituted rather than
+#: taken from Python's `locale`, which is process-global and depends on which
+#: locales the host happens to have generated -- the same reason the exporters
+#: do it this way.
+_GROUPING = {"en": ",", "fr": "\u202f", "nl": "."}
 
-    Unit and decimals come from `metadata/indicators.json`, never from the
-    binding (data_binding.md) and never guessed here.
+
+def _format_value(value, meta: Mapping, lang: str = "en") -> str:
+    """A figure written the way the PUBLISHED SITE writes it.
+
+    Deliberately mirrors `assets/commune_map.js`'s formatValue, because the
+    claim of this batch is that a block shows the same number the live site
+    shows -- and a number that differs in magnitude or loses its unit is not
+    the same number. An earlier version matched only unit "EUR" and "%", so a
+    percentage came out as a bare integer: an 18.16% unemployment rate rendered
+    as "18", which a reader can only misread.
+
+    `decimals: null` means "two digits below a thousand, none above", which is
+    what the site does and what 13 indicators rely on -- not zero.
     """
     if value is None:
         return ""
-    decimals = meta.get("decimals")
-    if not isinstance(decimals, int) or isinstance(decimals, bool):
-        decimals = 0
     try:
-        rendered = f"{float(value):,.{decimals}f}"
+        number = float(value)
     except (TypeError, ValueError):
         return str(value)
-    unit = meta.get("unit") or ""
-    if unit in ("EUR", "%"):
-        return f"{rendered} {unit}" if unit == "EUR" else f"{rendered}{unit}"
+
+    decimals = meta.get("decimals")
+    if not isinstance(decimals, int) or isinstance(decimals, bool):
+        decimals = 0 if abs(number) >= 1000 else 2
+
+    rendered = f"{number:,.{decimals}f}"
+    separator = _GROUPING.get(lang, ",")
+    if separator != ",":
+        # Swap via a placeholder so the decimal point is not caught by the
+        # thousands replacement on its way past.
+        rendered = rendered.replace(",", "\x00").replace(".", ",").replace("\x00", separator)
+
+    unit = (meta.get("unit") or "").lower()
+    if unit == "eur":
+        return f"\u20ac{rendered}"
+    if unit.startswith("percent"):
+        return f"{rendered}%"
     return rendered
 
 
@@ -198,16 +261,35 @@ def _resolve_binding(
     binding: Mapping, context_nis, metadata, lang: str, reader: PayloadReader
 ) -> dict:
     operation = binding.get("operation")
-    if operation == "aggregate" or (binding.get("geography") or {}).get("mode") == "level":
-        return _state("unavailable", _AGGREGATE_REFUSAL)
+    code = binding.get("indicator")
+    if code is not None and not isinstance(code, str):
+        # Reached only through /api/preview, which renders unvalidated
+        # documents by design. Without this the dict lands in a Mapping.get()
+        # and raises TypeError: unhashable, which escapes as an opaque 500 on
+        # the one route whose whole job is to render malformed input.
+        return _state("error", "the indicator on this block is not a code")
+
+    provider = binding.get("provider")
+    geography = binding.get("geography") or {"mode": "context"}
+    level = geography.get("level")
+
+    if operation == "aggregate" or geography.get("mode") == "level":
+        # `country` is NOT in this refusal: national.json publishes it, and
+        # `geography: {mode: level, level: country}` is the schema's own shape
+        # for a national binding. Refusing it would deny a figure that exists.
+        if level != "country":
+            return _state("unavailable", _AGGREGATE_REFUSAL.format(level=level or "that"))
+
     if operation not in RESOLVABLE_OPERATIONS:
         return _state("unavailable", f"the {operation!r} operation is not available yet")
 
-    code = binding.get("indicator")
     meta = metadata.municipal_indicators.get(code) or metadata.national_indicators.get(code) or {}
 
+    if provider == "national" or level == "country":
+        return _resolve_national(code, meta, binding, lang, reader)
+
     if operation in ("map_values", "table"):
-        return _resolve_across_communes(code, meta, reader)
+        return _resolve_across_communes(code, meta, lang, reader)
 
     nis = _subject_nis(binding, context_nis)
     if nis is None:
@@ -220,12 +302,46 @@ def _resolve_binding(
         return _state("missing", f"{code} is not published for this commune")
 
     if operation == "latest":
-        return _resolve_latest(binding, entry, meta)
+        return _resolve_latest(binding, entry, meta, lang)
     if operation == "history":
-        return _resolve_history(entry, meta)
+        return _resolve_history(binding, entry, meta)
     if operation == "comparison":
         return _resolve_comparison(entry, meta, payload, lang)
     return _resolve_percentile(entry)
+
+
+def _resolve_national(code, meta: Mapping, binding: Mapping, lang: str, reader) -> dict:
+    """A national figure, from national.json.
+
+    `reader.national()` existed and was never called: every binding went to the
+    commune payload regardless of provider, so a valid, validator-approved
+    national binding was told "not published for this commune" for a figure
+    that IS published, one directory up.
+    """
+    payload = reader.national()
+    if payload is None:
+        return _state("missing", "no national payload is published")
+    entry = (payload.get("indicators") or {}).get(code)
+    if entry is None:
+        return _state("missing", f"{code} is not published at national level")
+    operation = binding.get("operation")
+    if operation == "history":
+        return _resolve_history(binding, entry, meta)
+    period = _chosen_period(binding, entry)
+    if period is None:
+        return _state("missing", "this indicator has no periods")
+    state, value = _cell_state(entry, period)
+    if state == "suppressed":
+        return {"state": "suppressed", "period": period, "message": _SUPPRESSED_MESSAGE}
+    if state == "missing":
+        return _state("missing", f"no value published for {period}")
+    return {
+        "state": "ready",
+        "value": value,
+        "period": period,
+        "formatted_value": _format_value(value, meta, lang),
+        "provenance": _provenance(meta),
+    }
 
 
 def _subject_nis(binding: Mapping, context_nis):
@@ -247,7 +363,7 @@ def _chosen_period(binding: Mapping, entry: Mapping):
     return _sorted_periods(periods)[-1]
 
 
-def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping) -> dict:
+def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping, lang: str) -> dict:
     period = _chosen_period(binding, entry)
     if period is None:
         return _state("missing", "this indicator has no periods for this commune")
@@ -256,10 +372,7 @@ def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping) -> dict:
         return {
             "state": "suppressed",
             "period": period,
-            "message": (
-                "The source holds this figure and does not publish it, because "
-                "the count is too small to release."
-            ),
+            "message": _SUPPRESSED_MESSAGE,
         }
     if state == "missing":
         return _state("missing", f"no value published for {period}")
@@ -267,14 +380,21 @@ def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping) -> dict:
         "state": "ready",
         "value": value,
         "period": period,
-        "formatted_value": _format_value(value, meta),
+        "formatted_value": _format_value(value, meta, lang),
         "provenance": _provenance(meta),
     }
 
 
-def _resolve_history(entry: Mapping, meta: Mapping) -> dict:
+def _resolve_history(binding: Mapping, entry: Mapping, meta: Mapping) -> dict:
     periods = entry.get("periods") or {}
     labels = _sorted_periods(periods)
+    # `range` is schema-valid and validator-accepted. Ignoring it drew every
+    # period in the payload on a chart authored for a specific window --
+    # silently showing something other than what was asked for.
+    window = binding.get("period") or {}
+    if window.get("mode") == "range":
+        start, end = window.get("from"), window.get("to")
+        labels = [x for x in labels if (not start or x >= start) and (not end or x <= end)]
     if len(labels) < 2:
         return _state(
             "unavailable",
@@ -301,6 +421,21 @@ def _resolve_history(entry: Mapping, meta: Mapping) -> dict:
 
 
 def _resolve_comparison(entry: Mapping, meta: Mapping, payload: Mapping, lang: str) -> dict:
+    """The subject beside its province, region and country.
+
+    THE SUBJECT'S OWN CELL CARRIES ITS STATE. An earlier version took the value
+    and threw the state away, so a commune whose figure the source WITHHOLDS sat
+    next to real province and country numbers with an empty box, inside a block
+    reporting state "ready" -- a withheld figure presented as nothing at all.
+    That is the regression docs/steps records as already shipped once, on a
+    different code path.
+
+    EACH ROW CARRIES ITS OWN PERIOD AND COVERAGE. The aggregates are not
+    necessarily from the subject's latest period -- 53 mismatches in the first
+    150 payloads, some six years apart -- and an aggregate below full coverage
+    is a total built from part of the country. Printing either without saying so
+    is how a figure becomes a wrong figure.
+    """
     comparison = entry.get("comparison") or {}
     if not comparison:
         return _state(
@@ -309,30 +444,62 @@ def _resolve_comparison(entry: Mapping, meta: Mapping, payload: Mapping, lang: s
             "parts has no defensible province or region figure",
         )
     period = _chosen_period({}, entry)
-    _, own = _cell_state(entry, period) if period else ("missing", None)
+    state, own = _cell_state(entry, period) if period else ("missing", None)
     rows = [
         {
             "label": _label(payload.get("name"), lang) or payload.get("nis_code") or "",
-            "cells": [_format_value(own, meta)],
+            "cells": [_cell_text(state, own, meta, lang)],
+            "period": period,
             "is_subject": True,
         }
     ]
+    periods_shown = {period} if period else set()
     for scope in ("province", "region", "country"):
         row = comparison.get(scope)
         if not row:
             continue
+        coverage = row.get("coverage") or {}
+        pct = coverage.get("pct")
+        label = _label(row.get("name"), lang) or scope
+        if isinstance(pct, (int, float)) and pct < 100:
+            # Said on the row, not in a footnote nobody reads.
+            label = f"{label} ({coverage.get('n')} of {coverage.get('of')})"
         rows.append(
             {
-                "label": _label(row.get("name"), lang) or scope,
-                "cells": [_format_value(row.get("value"), meta)],
+                "label": label,
+                "cells": [_cell_text("ready", row.get("value"), meta, lang)],
+                "period": row.get("period"),
+                "coverage": coverage or None,
             }
         )
-    return {
+        if row.get("period"):
+            periods_shown.add(row.get("period"))
+
+    out = {
         "state": "ready",
         "columns": [period or ""],
         "rows": rows,
         "provenance": _provenance(meta),
     }
+    if len(periods_shown) > 1:
+        # A single column header over rows from different years would state
+        # something false about three of them.
+        out["mixed_periods"] = sorted(p for p in periods_shown if p)
+    return out
+
+
+def _cell_text(state: str, value, meta: Mapping, lang: str) -> str:
+    """One table cell as text, INCLUDING the not-a-number states.
+
+    A table has no per-cell state machine, so the state has to survive as
+    words. Blank is not an option: it reads as "nothing here" for a figure the
+    source is deliberately holding back.
+    """
+    if state == "suppressed":
+        return "withheld"
+    if state == "missing" or value is None:
+        return "no data"
+    return _format_value(value, meta, lang)
 
 
 def _resolve_percentile(entry: Mapping) -> dict:
@@ -348,7 +515,7 @@ def _resolve_percentile(entry: Mapping) -> dict:
     }
 
 
-def _resolve_across_communes(code, meta: Mapping, reader: PayloadReader) -> dict:
+def _resolve_across_communes(code, meta: Mapping, lang: str, reader: PayloadReader) -> dict:
     payload = reader.indicator(code)
     if payload is None:
         return _state("missing", f"{code} has no cross-commune payload")

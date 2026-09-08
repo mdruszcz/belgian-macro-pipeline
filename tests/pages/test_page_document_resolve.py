@@ -228,7 +228,8 @@ def test_a_level_binding_is_refused_with_a_reason_never_silently(metadata, reade
     }
     result = resolve_document(doc, metadata=metadata, reader=reader)["b"]
     assert result["state"] == "unavailable"
-    assert "not available to a block yet" in result["message"]
+    assert "not available to a block on its own yet" in result["message"]
+    assert "province" in result["message"], "the refusal must name the level asked for"
 
 
 def test_an_unbound_block_gets_no_entry_at_all(metadata, reader):
@@ -252,3 +253,207 @@ def test_the_resolver_reaches_no_database_and_computes_no_analytics():
     source = Path("src/pages/resolve.py").read_text(encoding="utf-8")
     for forbidden in ("sqlite3", "src.analytics", "src.fetchers", "src.exporters", "pandas"):
         assert forbidden not in source, f"resolve.py must not reach for {forbidden}"
+
+
+# --- what the Batch 14 audit found -----------------------------------------
+
+
+def test_a_withheld_subject_is_not_a_blank_cell_in_a_comparison(metadata, reader):
+    """A withheld figure beside real province and country numbers, rendered as
+    an empty box inside a block reporting "ready", is a figure the source holds
+    back presented as nothing at all. Shipped once already on another path."""
+    for path in sorted((PAYLOADS / "communes").glob("*.json"))[:150]:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        for code, entry in payload.get("indicators", {}).items():
+            periods = entry.get("periods") or {}
+            if not periods or not entry.get("comparison"):
+                continue
+            latest = sorted(periods)[-1]
+            if periods[latest].get("status") != "suppressed":
+                continue
+            result = _resolve(metadata, reader, code, path.stem, operation="comparison")
+            subject = result["rows"][0]
+            assert subject["cells"][0] != "", "a withheld figure must never be a blank cell"
+            assert "withheld" in subject["cells"][0].lower()
+            return
+    pytest.skip("no commune with a withheld latest value carrying a comparison")
+
+
+def test_a_comparison_row_carries_its_own_period(metadata, reader):
+    """The aggregates are not always from the subject's latest period -- some
+    are years apart. A single column header over rows from different years
+    states something false about most of them."""
+    nis = real_data.a_municipal_nis_code()
+    code = real_data.an_additive_municipal_indicator_id()
+    result = _resolve(metadata, reader, code, nis, operation="comparison")
+    for row in result["rows"]:
+        assert "period" in row
+
+
+def test_an_aggregate_below_full_coverage_says_so_on_the_row(metadata, reader):
+    """A "Belgium" total built from 488 of 529 communes is not Belgium's
+    figure, and printing it without saying so is how a figure becomes wrong."""
+    for path in sorted((PAYLOADS / "communes").glob("*.json"))[:150]:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        for code, entry in payload.get("indicators", {}).items():
+            for row in (entry.get("comparison") or {}).values():
+                pct = (row.get("coverage") or {}).get("pct")
+                if isinstance(pct, (int, float)) and pct < 100:
+                    result = _resolve(metadata, reader, code, path.stem, operation="comparison")
+                    labelled = [r["label"] for r in result["rows"][1:]]
+                    assert any("of" in text for text in labelled), labelled
+                    return
+    pytest.skip("no partial-coverage aggregate in the sampled payloads")
+
+
+@pytest.mark.parametrize(
+    "nis",
+    ["/etc/passwd", "../../../../etc/passwd", "..", "11002/../../secret", "", "1100"],
+)
+def test_a_hostile_nis_never_reaches_the_filesystem(metadata, reader, nis):
+    """Resolution runs on documents the validator never saw -- POST /api/preview
+    renders an invalid document on purpose. An absolute path silently replaces
+    the whole prefix in pathlib, and ".." climbs out of the directory, so the
+    guard has to live in the reader, not in the validator that may not have
+    run."""
+    from src.pages.resolve import PayloadError
+
+    with pytest.raises(PayloadError):
+        reader.commune(nis)
+
+
+@pytest.mark.parametrize("code", ["../manifest", "/etc/passwd", "lower_case", "", "A" * 200])
+def test_a_hostile_indicator_code_never_reaches_the_filesystem(reader, code):
+    from src.pages.resolve import PayloadError
+
+    with pytest.raises(PayloadError):
+        reader.indicator(code)
+
+
+def test_a_read_error_never_names_a_path_on_this_machine(tmp_path):
+    """service.py puts this message into the data a browser is handed, and its
+    own rule is that nothing about this machine reaches the client."""
+    from src.pages.resolve import PayloadError, PayloadReader
+
+    root = tmp_path / "public" / "data" / "communes"
+    root.mkdir(parents=True)
+    broken = root / "11002.json"
+    broken.write_text("{not json", encoding="utf-8")
+    try:
+        PayloadReader(tmp_path).commune("11002")
+    except PayloadError as exc:
+        assert str(tmp_path) not in str(exc)
+        assert "communes/11002.json" in str(exc)
+    else:
+        raise AssertionError("a malformed payload must raise")
+
+
+def test_a_national_binding_reads_the_national_payload(metadata, reader):
+    """Every binding used to go to the commune payload regardless of provider,
+    so a valid national binding was told its figure was "not published for this
+    commune" -- for a figure published one directory up."""
+    code = real_data.national_indicator_ids()[0]
+    doc = {
+        "context": {},
+        "sections": [
+            {
+                "blocks": [
+                    {
+                        "id": "b",
+                        "type": "kpi_card",
+                        "binding": {
+                            "provider": "national",
+                            "indicator": code,
+                            "operation": "latest",
+                            "geography": {"mode": "level", "level": "country"},
+                        },
+                    }
+                ]
+            }
+        ],
+    }
+    result = resolve_document(doc, metadata=metadata, reader=reader)["b"]
+    assert result["state"] == "ready", result
+    assert result["formatted_value"]
+
+
+def test_history_honours_a_declared_range(metadata, reader):
+    """`range` is schema-valid. Ignoring it drew every period in the payload on
+    a chart authored for a specific window."""
+    nis = real_data.a_municipal_nis_code()
+    payload = _published(nis)
+    code, entry = next(
+        ((c, e) for c, e in payload["indicators"].items() if len(e.get("periods") or {}) >= 4),
+        (None, None),
+    )
+    if code is None:
+        pytest.skip("no indicator with enough history for this commune")
+    labels = sorted(entry["periods"])
+    binding = {
+        "provider": "municipal",
+        "indicator": code,
+        "operation": "history",
+        "geography": {"mode": "fixed", "nis": nis},
+        "period": {"mode": "range", "from": labels[1], "to": labels[2]},
+    }
+    doc = {
+        "context": {"nis": nis},
+        "sections": [{"blocks": [{"id": "b", "type": "chart", "binding": binding}]}],
+    }
+    result = resolve_document(doc, metadata=metadata, reader=reader)["b"]
+    drawn = [p["period"] for p in result.get("points", [])]
+    assert all(labels[1] <= p <= labels[2] for p in drawn), drawn
+    assert len(drawn) < len(labels), "the range must actually narrow the series"
+
+
+def test_a_figure_is_formatted_the_way_the_published_site_formats_it(metadata):
+    """The claim of this batch is that a block shows the same number the live
+    site shows. assets/commune_map.js is what the site uses; a percentage
+    rendered as a bare integer is not the same number."""
+    from src.pages.resolve import _format_value
+
+    percent = next(
+        (
+            m
+            for m in metadata.municipal_indicators.values()
+            if (m.get("unit") or "").lower().startswith("percent")
+        ),
+        None,
+    )
+    assert percent is not None, "the fixture assumes a percent indicator exists"
+    assert _format_value(18.1638, percent, "en").endswith("%")
+
+    euro = next(
+        (
+            m
+            for m in metadata.municipal_indicators.values()
+            if (m.get("unit") or "").lower() == "eur"
+        ),
+        None,
+    )
+    if euro:
+        assert _format_value(32149.0, euro, "en").startswith("\u20ac")
+
+
+def test_a_non_string_indicator_is_an_error_state_not_a_crash(metadata, reader):
+    """Reached only through the preview route, whose whole job is to render
+    malformed documents rather than refuse them."""
+    doc = {
+        "context": {"nis": real_data.a_municipal_nis_code()},
+        "sections": [
+            {
+                "blocks": [
+                    {
+                        "id": "b",
+                        "type": "kpi_card",
+                        "binding": {
+                            "provider": "municipal",
+                            "indicator": {"not": "a code"},
+                            "operation": "latest",
+                        },
+                    }
+                ]
+            }
+        ],
+    }
+    assert resolve_document(doc, metadata=metadata, reader=reader)["b"]["state"] == "error"

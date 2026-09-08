@@ -440,7 +440,13 @@ def test_preview_is_byte_identical_to_render_document_with_the_same_preview_data
     assert resp.status == 200
 
     registry = load_registry()
-    expected = render_document(doc, registry=registry, lang=lang, data=preview_data(doc))
+    # The SAME language reaches preview_data too. Since Batch 14 a resolved
+    # figure is written the way that language writes it -- "35 363" in French
+    # against "35,363" in English -- so resolving in English and rendering in
+    # French would fail this on a difference the service does not have.
+    expected = render_document(
+        doc, registry=registry, lang=lang, data=preview_data(doc, None, lang)
+    )
     assert raw == expected.encode("utf-8"), (
         "preview must be byte-identical to render_document called directly "
         "with the SAME preview_data map, or the comparison fails for the wrong reason"
@@ -477,14 +483,15 @@ def test_preview_data_never_leaves_a_bound_block_loading_forever():
     }
     assert bound_block_ids, "fixture must contain at least one bound block"
     for block_id in bound_block_ids:
-        assert result[block_id]["state"] != "loading"
+        # "error" is deliberately NOT in this set: including it would let the
+        # test pass in a world where the resolver fails on every block, which
+        # is exactly the outage it should catch.
         assert result[block_id]["state"] in {
             "ready",
             "missing",
             "suppressed",
             "unavailable",
-            "error",
-        }
+        }, result[block_id]
 
 
 def test_preview_data_resolves_a_real_figure_not_a_stand_in():
