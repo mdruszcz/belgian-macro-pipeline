@@ -1,6 +1,6 @@
 /* BelPulse builder -- the canvas: the sandboxed preview iframe, its viewport
  * sizing, block-selection highlight, and the honest labels the batch spec
- * requires (stand-in data, unhydrated interactive blocks).
+ * requires (resolved figures since Batch 14, unhydrated interactive blocks).
  *
  * Batch 12b (builder-ui). See history.js's header for the delivery mechanism.
  *
@@ -88,10 +88,11 @@
     var notices = el("div", { className: "bp-canvas-notices" });
     notices.appendChild(
       el("p", { className: "bp-notice", role: "note" }, [
-        "This preview shows stand-in data, not real figures. Bound blocks display " +
-          "their loading / missing / suppressed / not-applicable / zero states exactly " +
-          "as the live site would, but no indicator value is resolved until the " +
-          "data-binding engine (Batch 14) exists.",
+        "This preview shows REAL published figures: a bound block reads the same " +
+          "payload the live site reads, so the number here is the number that " +
+          "ships. A block whose figure is missing, withheld by the source, or " +
+          "not available at that geography says which of those it is rather " +
+          "than rendering blank.",
       ])
     );
     if (hasInteractiveBlock(store.doc, store.registry)) {

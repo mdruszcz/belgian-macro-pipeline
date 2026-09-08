@@ -100,8 +100,16 @@ select {
   box-sizing: border-box;
 }
 
+/* Label above input, always. Left inline, a short label sits beside its box
+ * while a longer one wraps above it, so a column of fields reads as
+ * "Row0 / Width12 / Height2" -- three different shapes in one panel. */
 .bp-field {
   margin: 0.6rem 0;
+}
+
+.bp-field > label {
+  display: block;
+  margin-bottom: 0.15rem;
 }
 
 .bp-field-title {
@@ -310,8 +318,13 @@ select {
 
 /* --- inspector tabs --------------------------------------------------- */
 
+/* Six tabs do not fit on one line across the inspector's narrow column.
+ * Without wrapping, Data / Accessibility / Visibility fall off the right edge
+ * and cannot be clicked at all -- reachable by keyboard, invisible to a
+ * mouse. */
 .bp-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.2rem;
   border-bottom: 1px solid #d4d4d8;
   margin-bottom: 0.5rem;
@@ -423,9 +436,19 @@ select {
  * colour; nothing in this file styles published output.
  */
 
+/* A column in #shell-body's flex row, beside the preview -- see layout.js's
+ * header for why the grid editor cannot sit ON the preview. It MUST declare
+ * its own flex sizing: without it the element takes its content width, and the
+ * canvas next to it (flex:1, min-width:0) collapses to a sliver while the
+ * inspector is pushed past the right edge of the window. That is what shipped
+ * in 13b, and no test caught it because every test asserts behaviour through
+ * the DOM rather than looking at the rendered page. */
 .bp-layout-editor {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: auto;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #d4d4d8;
+  border-right: 1px solid #d4d4d8;
 }
 
 .bp-grid-section-name {

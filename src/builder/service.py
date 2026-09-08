@@ -64,9 +64,11 @@ from src.pages import (
 )
 from src.pages.metadata import PageMetadata
 from src.pages.registry import Registry
+from src.pages.resolve import resolve_document
 from src.pages.schema import (
     CURRENT_SCHEMA_VERSION,
     MAX_DOCUMENT_BYTES,  # deep import on purpose: not in src.pages.__all__
+    PageDocumentError,
     PageValidationError,
     check_raw_size,
 )
@@ -292,22 +294,35 @@ def _reject_json_constant(name: str):
     raise ValueError(f"{name} is not valid JSON")
 
 
-def preview_data(doc) -> dict:
-    """`{block_id: {"state": "unavailable"}}` for every block with a binding.
+def preview_data(doc, metadata=None, lang: str = "en") -> dict:
+    """`{block_id: resolved}` for every block with a binding -- REAL figures.
 
-    Batch 11 resolves no bindings, and rev 1's "honest empty states" claim was
-    wrong: with `data={}`, `src/pages/render.py`'s `_state_for` returns
-    `"loading"` for any block carrying a binding, so a preview would say
-    "Loading..." forever for something that will never load -- the state
-    confusion rule 26 exists to prevent. `unavailable` is the truth in the
-    builder: there is no resolver yet.
+    Batch 11 shipped this as a stub returning `unavailable` for everything,
+    because no resolver existed: with `data={}` the renderer's `_state_for`
+    says "loading" for any bound block, and a preview that says loading for
+    something that will never load is exactly the state confusion rule 26
+    exists to prevent. Batch 14 replaces the stub with the real thing.
 
-    This resolves nothing and reads no payload. It looks at the document's own
-    structure only.
+    A payload that cannot be read is reported per block rather than failing the
+    whole preview: one unreadable commune file must not blank a page that is
+    otherwise fine, and the operator needs to see WHICH block is affected.
+
+    `metadata` is passed in by the handler, which already holds it on the
+    config -- loading it here would re-read four files on every keystroke's
+    preview. It falls back to loading for a caller that has none.
     """
-    data: dict = {}
     if not isinstance(doc, dict):
-        return data
+        return {}
+    try:
+        return resolve_document(doc, metadata=metadata or load_metadata(), lang=lang)
+    except PageDocumentError as exc:
+        return {
+            block_id: {"state": "error", "message": str(exc)} for block_id in _bound_block_ids(doc)
+        }
+
+
+def _bound_block_ids(doc) -> list:
+    out = []
     for section in doc.get("sections") or []:
         if not isinstance(section, dict):
             continue
@@ -316,8 +331,8 @@ def preview_data(doc) -> dict:
                 continue
             block_id = block.get("id")
             if isinstance(block_id, str) and block_id and block.get("binding"):
-                data[block_id] = {"state": "unavailable"}
-    return data
+                out.append(block_id)
+    return out
 
 
 def _sha256_of_text(text: str) -> str:
@@ -969,9 +984,7 @@ class BuilderHandler(BaseHTTPRequestHandler):
             doc,
             registry=self.config.registry,
             lang=lang,
-            # See preview_data: with data={} every bound block would say
-            # "Loading..." forever.
-            data=preview_data(doc),
+            data=preview_data(doc, self.config.metadata, lang),
         )
         # Served AS-IS -- a fragment, no page shell, no stylesheet link. The
         # acceptance property is that this is byte-identical to calling
@@ -1073,7 +1086,7 @@ class BuilderHandler(BaseHTTPRequestHandler):
             parsed,
             registry=self.config.registry,
             lang=lang,
-            data=preview_data(parsed),
+            data=preview_data(parsed, self.config.metadata, lang),
         )
         self._send_html(
             200,

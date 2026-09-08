@@ -26,13 +26,14 @@ import json
 import secrets
 import socket
 import threading
+from pathlib import Path
 
 import pytest
 
 from src.builder import paths as builder_paths
 from src.builder import store as builder_store
 from src.pages import load_registry, render_document
-from tests.fixtures.pages import builders
+from tests.fixtures.pages import builders, real_data
 
 try:
     from src.builder.service import BuilderConfig, make_server, preview_data
@@ -439,7 +440,13 @@ def test_preview_is_byte_identical_to_render_document_with_the_same_preview_data
     assert resp.status == 200
 
     registry = load_registry()
-    expected = render_document(doc, registry=registry, lang=lang, data=preview_data(doc))
+    # The SAME language reaches preview_data too. Since Batch 14 a resolved
+    # figure is written the way that language writes it -- "35 363" in French
+    # against "35,363" in English -- so resolving in English and rendering in
+    # French would fail this on a difference the service does not have.
+    expected = render_document(
+        doc, registry=registry, lang=lang, data=preview_data(doc, None, lang)
+    )
     assert raw == expected.encode("utf-8"), (
         "preview must be byte-identical to render_document called directly "
         "with the SAME preview_data map, or the comparison fails for the wrong reason"
@@ -456,10 +463,16 @@ def test_preview_response_has_hardening_headers(server):
     assert resp.getheader("Referrer-Policy") == "no-referrer"
 
 
-def test_preview_data_marks_bound_blocks_unavailable_not_loading():
-    """rev 2 #13: with data={}, _state_for would render 'loading' forever for
-    any block with a binding -- preview_data must instead mark those blocks
-    'unavailable' so the preview never lies about something that will load."""
+def test_preview_data_never_leaves_a_bound_block_loading_forever():
+    """rev 2 #13: with data={}, `_state_for` renders "loading" forever for any
+    block carrying a binding -- a preview lying about something that will never
+    load, which is the state confusion rule 26 exists to prevent.
+
+    Batch 11 satisfied that by marking every bound block "unavailable", which
+    was the truth while no resolver existed. Batch 14 satisfies it by
+    RESOLVING: the assertion is no longer "unavailable" but "never loading",
+    which is what the rule actually requires and what both batches deliver.
+    """
     doc = builders.realistic_multi_section_document()
     result = preview_data(doc)
     bound_block_ids = {
@@ -470,7 +483,45 @@ def test_preview_data_marks_bound_blocks_unavailable_not_loading():
     }
     assert bound_block_ids, "fixture must contain at least one bound block"
     for block_id in bound_block_ids:
-        assert result[block_id]["state"] == "unavailable"
+        # "error" is deliberately NOT in this set: including it would let the
+        # test pass in a world where the resolver fails on every block, which
+        # is exactly the outage it should catch.
+        assert result[block_id]["state"] in {
+            "ready",
+            "missing",
+            "suppressed",
+            "unavailable",
+        }, result[block_id]
+
+
+def test_preview_data_resolves_a_real_figure_not_a_stand_in():
+    """The point of Batch 14. A bound block in the builder shows the same
+    number the published site shows, read from the same payload."""
+    import json as _json
+
+    nis = real_data.a_municipal_nis_code()
+    code = real_data.an_additive_municipal_indicator_id()
+    doc = builders.minimal_valid_document()
+    doc["sections"][0]["blocks"].append(
+        builders.make_block(
+            "kpi_card",
+            block_id="blk-bound-1",
+            binding=builders.municipal_binding(code, nis=nis),
+            block_layout=builders.layout(
+                desktop=(0, 2, 4, 2), tablet=(0, 2, 4, 2), mobile=(0, 2, 4, 2)
+            ),
+        )
+    )
+    resolved = preview_data(doc)["blk-bound-1"]
+    assert resolved["state"] == "ready", resolved
+
+    published = _json.loads(
+        (Path("public/data/communes") / f"{nis}.json").read_text(encoding="utf-8")
+    )
+    periods = published["indicators"][code]["periods"]
+    latest = sorted(periods)[-1]
+    assert resolved["period"] == latest
+    assert resolved["value"] == periods[latest]["value"]
 
 
 def test_bootstrap_html_does_not_embed_a_scriptable_same_origin_iframe():
