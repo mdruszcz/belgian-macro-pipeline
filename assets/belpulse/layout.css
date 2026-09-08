@@ -222,6 +222,11 @@
    the same fact stated visually, so the two cannot disagree. */
 .bp-lang-switch a[aria-current="page"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
 .bp-lang-switch a:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
+/* Inside someone else's frame, the FRAME owns the language: index.html has its
+   own EN/FR/NL control and pushes the choice in. Showing a second control here
+   is not a duplicate, it is a fight -- the parent re-asserts its language on
+   every frame load, so a click here is visibly undone. */
+:root[data-framed] .bp-lang-switch{display:none}
 
 /* ---- the licence notice ----------------------------------------------------
    Small and quiet, but never hidden: it is a licence condition, not a footer

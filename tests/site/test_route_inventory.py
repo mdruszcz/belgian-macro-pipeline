@@ -34,6 +34,7 @@ from src.pages.strings import LANGS
 from src.site.routes import (
     NOINDEX_PREFIXES,
     ROOT_PAGES,
+    SITE_BASE,
     all_routes,
     block_page_routes,
     commune_routes,
@@ -42,6 +43,7 @@ from src.site.routes import (
     root_routes,
     route_for,
     sitemap_routes,
+    translations_of,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -145,9 +147,18 @@ def test_the_inventory_is_not_accidentally_empty():
     decorative if the derivation ever breaks."""
     assert len(commune_routes()) > 1000
     assert len(block_page_routes()) == len(LANGS) * 2
-    assert len(all_routes()) == len(root_routes()) + len(commune_routes()) + len(
-        block_page_routes()
-    )
+
+    # all_routes() DEDUPES, and the overlap is real rather than a bug: since
+    # Batch 15d, /about.html is both a root page (frozen, so a rename fails
+    # loudly) and a block-built one (generated). Asserting the union and the
+    # duplicate count separately keeps this honest -- a plain sum would have
+    # to be "fixed" every time a page is cut over, which is how a guard turns
+    # into a formality.
+    parts = root_routes() + commune_routes() + block_page_routes()
+    assert set(all_routes()) == set(parts)
+    assert len(all_routes()) == len(set(parts))
+    overlap = set(root_routes()) & set(block_page_routes())
+    assert overlap == {"/about.html"}, f"unexpected overlap: {sorted(overlap)}"
 
 
 # --- every link resolves ----------------------------------------------------
@@ -244,14 +255,30 @@ def test_the_inventory_agrees_with_the_page_document_route_allowlist():
 # --- indexing ---------------------------------------------------------------
 
 
-@pytest.mark.parametrize("route", block_page_routes())
+@pytest.mark.parametrize("route", [r for r in block_page_routes() if not is_indexable(r)])
 def test_a_preview_page_tells_crawlers_not_to_index_it(route):
-    """These duplicate about.html and map.html word for word, and each carries
-    a self-referencing canonical. The live pages carry NO canonical at all, so
-    without this the preview is the only version claiming to be canonical for
-    its own content."""
-    assert not is_indexable(route)
+    """A page still under /preview/ duplicates a live page word for word and
+    carries a self-referencing canonical, while the live page carries none --
+    so without this the preview is the only version claiming to be canonical
+    for its own content.
+
+    Parameterised over the NOINDEX routes rather than every block route:
+    Batch 15d cut about.html over, so /about.html is block-built AND indexable,
+    and a list of "block pages" is no longer a list of previews.
+    """
     assert '<meta name="robots" content="noindex">' in path_for(route).read_text("utf-8")
+
+
+@pytest.mark.parametrize("route", [r for r in block_page_routes() if is_indexable(r)])
+def test_a_block_built_page_that_went_live_is_not_left_noindexed(route):
+    """The other direction, and the one a cutover gets wrong.
+
+    /preview/about.html carried noindex for three batches. Moving the route
+    has to take that with it, or the page replaces a live, indexed page with
+    one that asks to be dropped from the index -- a silent traffic loss that
+    looks like a successful deployment.
+    """
+    assert "noindex" not in path_for(route).read_text("utf-8")
 
 
 @pytest.mark.parametrize("route", sitemap_routes())
@@ -301,6 +328,67 @@ def test_the_sitemap_index_names_every_child_sitemap():
     locs = _locs(REPO_ROOT / "sitemap.xml")
     assert any(loc.endswith("/sitemap-pages.xml") for loc in locs)
     assert any(loc.endswith("/local/sitemap.xml") for loc in locs)
+
+
+def _alternates(path: Path) -> dict:
+    """Every <loc> in a sitemap, mapped to the hreflang set it declares."""
+    tree = ElementTree.fromstring(path.read_text(encoding="utf-8"))
+    ns = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+    xh = "{http://www.w3.org/1999/xhtml}link"
+    out = {}
+    for url in tree.iter(f"{ns}url"):
+        loc = url.find(f"{ns}loc").text
+        out[loc] = {link.get("hreflang"): link.get("href") for link in url.iter(xh)}
+    return out
+
+
+def test_a_sitemapped_page_with_translations_declares_them_all():
+    """A page published in three languages and submitted with no alternates is
+    three pages competing with each other in the index -- the failure
+    docs/features/i18n.md:61 says makes ranking WORSE than not translating.
+
+    Checked against the inventory rather than a hardcoded list, so the next
+    cutover is covered on the day it lands.
+    """
+    declared = _alternates(REPO_ROOT / "sitemap-pages.xml")
+    for route in sitemap_routes():
+        siblings = translations_of(route)
+        for published in siblings or (route,):
+            loc = f"{SITE_BASE}{published}"
+            assert loc in declared, f"{published} is not in sitemap-pages.xml"
+            if not siblings:
+                assert not declared[loc], f"{published} has one URL but declares alternates"
+                continue
+            expected = {
+                lang: f"{SITE_BASE}{url}" for lang, url in zip(LANGS, siblings, strict=True)
+            }
+            expected["x-default"] = f"{SITE_BASE}{route}"
+            assert declared[loc] == expected, f"{published} declares the wrong alternates"
+
+
+def test_the_sitemap_alternates_agree_with_the_pages_own_hreflang():
+    """Two statements of the same fact, in two files, written by two scripts.
+    A reader never sees either; a crawler sees both and believes the pair."""
+    declared = _alternates(REPO_ROOT / "sitemap-pages.xml")
+    for route in sitemap_routes():
+        for published in translations_of(route):
+            page = path_for(published).read_text(encoding="utf-8")
+            for lang, href in declared[f"{SITE_BASE}{published}"].items():
+                assert (
+                    f'<link rel="alternate" hreflang="{lang}" href="{href}">' in page
+                ), f"{published} does not carry the {lang} alternate its sitemap entry claims"
+
+
+def test_the_site_index_check_mode_agrees_with_what_is_committed():
+    """`make all` regenerates these; CI runs pytest only. Without this a stale
+    robots.txt or sitemap ships green."""
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "export_site_index.py"), "--check"],
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+    )
+    assert result.returncode == 0, result.stdout
 
 
 def test_no_preview_url_is_submitted_anywhere():

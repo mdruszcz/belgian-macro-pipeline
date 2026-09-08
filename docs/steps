@@ -896,9 +896,14 @@ decision export_local_pages.py made, for the same reason: a second hand-written 
 a drifted licence notice is a breach that looks like a typo. Statbel's 2015 licence terminates
 automatically on non-compliance and this project has already published unattributed municipal
 figures once.
-NOT DONE, and gates on any canonical cutover: the exporter emits ENGLISH ONLY. about.html is
-trilingual and the document carries all three languages, but a cutover that shipped one would
-drop two thirds of the audience invisibly. about.html itself is untouched, asserted by a test.)
+DONE 2026-09-08 (Batch 15c): the exporter emits all three languages, each at its own URL with
+hreflang and a self-canonical, and the licence notice is read per language from assets/i18n.js
+rather than lifted from English communes.html. That gate on a canonical cutover is cleared.
+CUT OVER 2026-09-08 (Batch 15d): about.html IS the block-built page now -- /about.html,
+/fr/about.html, /nl/about.html. The hand-built version is frozen at
+tests/fixtures/pages/about-hand-built.html and the equivalence test compares against that
+copy, because comparing the built page to the live file would compare it to itself.
+map.html remains hand-built: one cutover at a time, and the map is the page with figures.)
 How: One page at a time (blank, homepage, macro, micro, municipality profile last), freeze the
 hand-built version, recreate through blocks, compare data/screenshots/states, ship behind a
 preview route, switch the canonical route only after independent review.

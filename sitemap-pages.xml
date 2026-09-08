@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/</loc></url>
   <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/communes.html</loc></url>
   <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/map.html</loc></url>
   <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/all_data.html</loc></url>
-  <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/about.html</loc></url>
+  <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/about.html</loc><xhtml:link rel="alternate" hreflang="en" href="https://mdruszcz.github.io/belgian-macro-pipeline/about.html"/><xhtml:link rel="alternate" hreflang="fr" href="https://mdruszcz.github.io/belgian-macro-pipeline/fr/about.html"/><xhtml:link rel="alternate" hreflang="nl" href="https://mdruszcz.github.io/belgian-macro-pipeline/nl/about.html"/><xhtml:link rel="alternate" hreflang="x-default" href="https://mdruszcz.github.io/belgian-macro-pipeline/about.html"/></url>
+  <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/fr/about.html</loc><xhtml:link rel="alternate" hreflang="en" href="https://mdruszcz.github.io/belgian-macro-pipeline/about.html"/><xhtml:link rel="alternate" hreflang="fr" href="https://mdruszcz.github.io/belgian-macro-pipeline/fr/about.html"/><xhtml:link rel="alternate" hreflang="nl" href="https://mdruszcz.github.io/belgian-macro-pipeline/nl/about.html"/><xhtml:link rel="alternate" hreflang="x-default" href="https://mdruszcz.github.io/belgian-macro-pipeline/about.html"/></url>
+  <url><loc>https://mdruszcz.github.io/belgian-macro-pipeline/nl/about.html</loc><xhtml:link rel="alternate" hreflang="en" href="https://mdruszcz.github.io/belgian-macro-pipeline/about.html"/><xhtml:link rel="alternate" hreflang="fr" href="https://mdruszcz.github.io/belgian-macro-pipeline/fr/about.html"/><xhtml:link rel="alternate" hreflang="nl" href="https://mdruszcz.github.io/belgian-macro-pipeline/nl/about.html"/><xhtml:link rel="alternate" hreflang="x-default" href="https://mdruszcz.github.io/belgian-macro-pipeline/about.html"/></url>
 </urlset>

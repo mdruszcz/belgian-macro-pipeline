@@ -98,7 +98,16 @@ ROUTE_EXACT = frozenset(
         # is one decision for Batch 17's publication allowlist instead of a
         # judgement per file. Added individually, so this stays an inventory
         # rather than an open door.
-        "/preview/about.html",
+        # Batch 15d cut about.html over: it is BUILT from
+        # config/pages/about/published.json now, and its two translations are
+        # real URLs the site publishes. Added by hand because the allowlist
+        # cannot mint a route for itself (known-risks.md:44) -- which is the
+        # guard working, not a gap.
+        "/fr/about.html",
+        "/nl/about.html",
+        # /preview/about.html is GONE: the page it previewed is live. The
+        # preview routes were always temporary, carried noindex, were in no
+        # sitemap and were linked from nowhere.
         "/preview/map.html",
     }
 )

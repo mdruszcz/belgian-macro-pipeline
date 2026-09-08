@@ -54,6 +54,22 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Fran\u00e7ais", "nl": "Nederlands"}
 #: What the switcher calls itself, for a screen reader.
 SWITCHER_LABEL = {"en": "Language", "fr": "Langue", "nl": "Taal"}
 
+#: THE SITE HAS TWO THEME VOCABULARIES AND THEY DO NOT OVERLAP.
+#:
+#: index.html offers `day`, `soft` and `night` (its `t-day`/`t-soft`/`t-night`
+#: buttons) and pushes the chosen one into its iframe. The design system these
+#: pages use defines only `[data-theme="light"]` and `[data-theme="dark"]`
+#: (assets/belpulse/tokens.css). Passing the parent's value straight through
+#: sets `data-theme="soft"`, which no stylesheet matches -- so the page keeps
+#: its default and silently stops following the shell, looking fine the whole
+#: time.
+#:
+#: Written out here, legacy names included, because that is the only place the
+#: two vocabularies meet. An unknown value maps to light rather than being
+#: applied raw: the shell is allowed to grow a fourth theme without this page
+#: rendering against a token set that does not exist.
+LEGACY_THEMES = {"day": "light", "soft": "light", "night": "dark"}
+
 #: The webfont the design system declares. tokens.css says in as many words
 #: that a page using it "must link the actual font, the same way every existing
 #: page already links Google Fonts -- this file only declares the CSS variable,
@@ -314,6 +330,47 @@ def wrap(
             f"assetPrefix: {json.dumps(asset_prefix)}, "
             "data: JSON.parse(document.getElementById('bp-block-data').textContent)"
             "});</script>"
+        )
+
+    # THE IFRAME CONTRACT. index.html loads some of these pages into an iframe
+    # and pushes the reader's theme and language in by postMessage; the page it
+    # replaced (the hand-built about.html) listened for both and announced
+    # itself back. A block-built page that ignores this sits in the front page
+    # frozen in one language and one theme, and looks perfectly fine doing it.
+    #
+    # `setLang` NAVIGATES rather than re-translating: these pages are rendered
+    # per language on the server, so the French edition is a different URL, not
+    # a different DOM. The guard against re-navigating when the language
+    # already matches is load-bearing -- the parent re-sends on every frame
+    # load, so without it the frame reloads forever.
+    #
+    # AND THE SWITCHER IS HIDDEN WHEN FRAMED (`data-framed`, styled in
+    # layout.css). Not tidiness -- leaving it visible made it actively
+    # destructive, confirmed in a browser: clicking "Francais" navigated the
+    # frame to /fr/about.html, the new page posted `dashboard-ready`, the
+    # parent answered with its own unchanged `setLang('en')`, and the reader
+    # watched their choice snap back to English while localStorage said `fr`.
+    # The parent owns the language when it owns the frame; two language
+    # controls in one viewport is the bug, not the symptom.
+    #
+    # Only when framed. A top-level page must never navigate because something
+    # sent it a message.
+    if switch_links:
+        by_lang = json.dumps({code: switch_links[code] for code in switch_links})
+        scripts += (
+            "\n<script>(function(){if(window.self===window.top)return;"
+            "document.documentElement.setAttribute('data-framed','1');"
+            f"var here={json.dumps(lang)},urls={by_lang},"
+            f"themes={json.dumps(LEGACY_THEMES)};"
+            "window.addEventListener('message',function(e){"
+            "var m=e.data;if(!m||!m.type)return;"
+            "if(m.type==='setTheme'){"
+            "document.documentElement.setAttribute("
+            "'data-theme',Object.prototype.hasOwnProperty.call(themes,m.value)"
+            "?themes[m.value]:'light');}"
+            "else if(m.type==='setLang'&&m.value!==here&&urls[m.value]){"
+            "window.location.href=urls[m.value];}});"
+            "window.parent.postMessage('dashboard-ready','*');})();</script>"
         )
 
     # Carry the choice to the JavaScript pages. A reader who picks French here

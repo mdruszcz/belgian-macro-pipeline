@@ -29,10 +29,29 @@ from pathlib import Path
 
 import pytest
 
+from src.pages.strings import LANGS
+from src.site.routes import path_for, route_for
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
-HAND_BUILT = REPO_ROOT / "about.html"
+#: THE FROZEN HAND-BUILT PAGE, not the live file.
+#:
+#: Batch 15d cut this page over: `about.html` is now GENERATED, so comparing
+#: the built page against `REPO_ROOT/"about.html"` would compare a file to
+#: itself. Every assertion below would pass while proving nothing, and the
+#: only equivalence guarantee in this programme would disappear silently at
+#: the moment it started to matter. `docs/steps:902` calls this step "freeze
+#: the hand-built version"; this file IS that freeze, committed before the
+#: route moved.
+#:
+#: It is deliberately never regenerated. It is the record of what readers had
+#: before, and a fixture that tracked the thing it audits is not a fixture.
+HAND_BUILT = REPO_ROOT / "tests" / "fixtures" / "pages" / "about-hand-built.html"
 DOCUMENT = REPO_ROOT / "config" / "pages" / "about" / "published.json"
-BUILT = REPO_ROOT / "preview" / "about.html"
+#: The canonical route this page publishes at. Its translations are derived
+#: through the inventory rather than spelled out, so a future move updates one
+#: place.
+BUILT_ROUTE = "/about.html"
+BUILT = REPO_ROOT / "about.html"
 
 EXPORTER = REPO_ROOT / "scripts" / "export_page_documents.py"
 
@@ -57,31 +76,63 @@ def _visible_text(markup: str) -> str:
     return html.unescape(re.sub(r"<[^>]+>", " ", without))
 
 
-def _hand_built_prose() -> list[str]:
-    """The sentences about.html actually shows, from its own translations
-    object -- read, never retyped, so this test cannot drift from the page."""
+def _hand_built_prose(lang: str = "en") -> list[str]:
+    """The sentences about.html actually showed IN `lang`, from its own
+    translations object -- read, never retyped, so this test cannot drift from
+    the page it audits.
+
+    The frozen page carried all three languages in that object. Checking only
+    English would have left the exact failure docs/steps names as the gate on
+    this cutover -- "drop two thirds of the audience invisibly" -- undetectable:
+    paste the English paragraph into the `fr` key and every test stays green
+    while the French page ships English prose.
+    """
     source = HAND_BUILT.read_text(encoding="utf-8")
     blob = re.search(r"const translations = (\{.*?\n        \});", source, re.S).group(1)
     as_json = re.sub(r"^(\s*)([a-z0-9_]+):", r'\1"\2":', blob, flags=re.M)
-    english = json.loads(as_json)["en"]
+    table = json.loads(as_json)[lang]
     return [
-        english["title"],
-        english["subtitle"],
-        english["text1"],
-        english["text2"],
-        *english["features"],
+        table["title"],
+        table["subtitle"],
+        table["text1"],
+        table["text2"],
+        *table["features"],
     ]
+
+
+def _built_in(lang: str) -> str:
+    """The published page in `lang`, at the URL the inventory says it lives at."""
+    return path_for(route_for(BUILT_ROUTE, lang)).read_text(encoding="utf-8")
 
 
 # --- content equivalence ---------------------------------------------------
 
 
-def test_every_sentence_of_the_hand_built_page_survives_the_conversion(built):
-    """The point of the whole batch. A conversion that drops a paragraph has
-    not converted the page, however well it renders."""
-    text = " ".join(_visible_text(built).split())
-    missing = [s for s in _hand_built_prose() if " ".join(s.split()) not in text]
-    assert not missing, f"the block version does not say: {missing}"
+@pytest.mark.parametrize("lang", LANGS)
+def test_every_sentence_of_the_hand_built_page_survives_the_conversion(built, lang):
+    """The point of the whole batch, in every language it was published in.
+
+    A conversion that drops a paragraph has not converted the page, however
+    well it renders -- and a conversion that drops it only in Dutch is worse,
+    because nobody reviewing in English will ever see it.
+    """
+    text = " ".join(_visible_text(_built_in(lang)).split())
+    missing = [s for s in _hand_built_prose(lang) if " ".join(s.split()) not in text]
+    assert not missing, f"the {lang} page does not say: {missing}"
+
+
+@pytest.mark.parametrize("lang", ["fr", "nl"])
+def test_a_translated_page_is_not_quietly_serving_english(built, lang):
+    """The specific way rule 7 breaks in a build pipeline: the structure is
+    perfect, all three files exist, all three differ (in `<html lang>`, title
+    and canonical) -- and the body is English three times over."""
+    text = " ".join(_visible_text(_built_in(lang)).split())
+    english_only = [
+        s
+        for s, translated in zip(_hand_built_prose("en"), _hand_built_prose(lang), strict=True)
+        if s != translated and " ".join(s.split()) in text
+    ]
+    assert not english_only, f"the {lang} page still shows English: {english_only}"
 
 
 def test_the_document_carries_all_three_languages(built):
@@ -145,20 +196,33 @@ def test_the_page_links_the_font_the_design_system_declares(built):
     assert "fonts.googleapis.com" in built
 
 
-def test_the_hand_built_page_is_untouched():
-    """The cutover gate: the block version ships BESIDE the live page, never
-    over it. If this fails, the batch has done the one thing it promised not
-    to."""
-    result = subprocess.run(
-        ["git", "diff", "--stat", "HEAD", "--", "about.html"],
-        capture_output=True,
-        text=True,
-        cwd=REPO_ROOT,
-    )
-    assert result.stdout.strip() == "", f"about.html was modified: {result.stdout}"
+def test_the_frozen_hand_built_page_is_never_regenerated():
+    """The fixture is the record of what readers had before the cutover.
 
+    This used to assert `git diff --stat about.html` was empty -- the hand-built
+    page had to stay untouched while the block version shipped beside it. Batch
+    15d cut it over, so about.html is GENERATED now and that assertion would
+    forbid the very change it was guarding.
 
-# --- properties every future conversion inherits ----------------------------
+    The property that survives is the one that matters: the copy this file
+    audits against must never become a copy of the thing it audits. Asserted on
+    CONTENT rather than on git state, deliberately -- a `git diff` check passes
+    the moment someone stages the regenerated file, and staging is exactly what
+    happens on the way to a commit.
+    """
+    frozen = HAND_BUILT.read_text(encoding="utf-8")
+
+    # Markers only the hand-built page has. The renderer emits none of them.
+    assert "const translations = {" in frozen, "the frozen page lost its own translations table"
+    assert 'class="feature-icon"' in frozen
+    assert "aboutTagline" in frozen
+
+    # Markers only a generated page has. Any of them means it was overwritten.
+    for generated_only in ('class="bp-page"', 'class="bp-block', 'class="bp-lang-switch"'):
+        assert generated_only not in frozen, (
+            f"the frozen page contains {generated_only} -- it has been overwritten "
+            "with the generated page it is supposed to be compared against"
+        )
 
 
 def test_building_twice_produces_identical_bytes():
