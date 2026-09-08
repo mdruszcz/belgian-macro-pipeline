@@ -654,7 +654,22 @@ class BuilderHandler(BaseHTTPRequestHandler):
     #: that blocked the whole server for the length of this timeout, so it is
     #: short. Single-threaded is still the right call (see the module
     #: docstring); the timeout is what makes it safe.
-    timeout = 10
+    #:
+    #: LOWERED FROM 10 in Batch 13. This is head-of-line blocking, not just a
+    #: scanner defence: one client holding an idle keep-alive socket stops
+    #: every other request for the whole timeout, and a browser leaves exactly
+    #: such a socket open between fetches. Measured on the browser suite --
+    #: ordinary end-to-end tests took 10.7s each, which is this number, and
+    #: 0.7s each once it came down.
+    #:
+    #: HTTP/1.0 was tried first and is the WRONG fix: closing after every
+    #: response makes the browser open a new connection per request, several
+    #: in parallel, which is strictly more work for a server that accepts one
+    #: at a time -- the preview tests went from passing in 5s to hanging.
+    #: Keep-alive is right for one browser tab; the idle window is what has to
+    #: be short. 2s is far above any real loopback round trip (measured in
+    #: milliseconds) and far below anything a person would notice.
+    timeout = 2
 
     # ---- logging -------------------------------------------------------
 
