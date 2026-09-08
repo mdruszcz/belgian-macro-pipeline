@@ -1,12 +1,10 @@
 """Batch 12b -- end-to-end tests against a REAL server and a REAL browser.
 
-This is the batch's actual gate, and the spec is explicit about why it will
-not run in CI: Playwright is importable in this Codespace but is declared in
-neither pyproject.toml's dev extras nor requirements.txt, and CI installs
-only what is declared. So every test here skips cleanly (never fails) when
-Playwright or a browser is unavailable -- `docs/implementation/known-risks.md`
-carries the row saying CI does not execute this file, and the batch report
-carries the real, pasted local run.
+This is the batch's actual gate, and it DOES run in CI: `playwright` is in
+pyproject.toml's dev extras and the workflow runs `playwright install
+--with-deps chromium`, because the package alone still skips. The skip-guard
+below is kept for a developer who has not installed the browser locally, not
+as an excuse for CI -- a green run here means these tests actually executed.
 
 No indicator id, NIS code, or commune figure is hand-typed here beyond what
 `tests/fixtures/pages/builders.py` already licenses as ordinary UI-copy test
@@ -166,16 +164,30 @@ class Browser:
     torn down together. A real route (e.g. an actual network dependency)
     would defeat the point of testing offline; this shell makes none."""
 
+    # Chromium logs every non-2xx fetch as a console error, including the 422
+    # the service is SUPPOSED to answer when live-validation fires mid-word on
+    # a form the operator has not finished filling in. That is the designed
+    # behaviour -- the shell catches it and renders the findings -- so counting
+    # it as a page error makes these tests fail on a slow machine and pass on a
+    # fast one, purely on where the 400ms debounce lands. Every other status
+    # still counts: only 422, only the browser's own resource-load line.
+    _EXPECTED_RESOURCE_LOG = "Failed to load resource: the server responded with a status of 422"
+
     def __init__(self, server: ServerHarness):
         self.manager, self.browser = _chromium()
         self.context = self.browser.new_context(viewport={"width": 1440, "height": 900})
         self.server = server
         self.console_errors = []
+        self.all_console_errors = []
         self.context.on("console", self._on_console)
 
     def _on_console(self, msg):
-        if msg.type == "error":
-            self.console_errors.append(msg.text)
+        if msg.type != "error":
+            return
+        self.all_console_errors.append(msg.text)
+        if msg.text.startswith(self._EXPECTED_RESOURCE_LOG):
+            return
+        self.console_errors.append(msg.text)
 
     def open(self, wait_until="networkidle"):
         page = self.context.new_page()
@@ -761,6 +773,36 @@ def test_keyboard_only_create_edit_save_publish(browser):
     page.keyboard.press("Enter")
     page.wait_for_timeout(600)
     assert "kb-page" in page.locator("#shell-sidebar").inner_text()
+    assert not browser.console_errors
+
+
+def test_closing_a_modal_returns_focus_to_the_control_that_opened_it(browser):
+    """Closing a dialog re-renders the whole top bar, destroying the button
+    that opened it. Without an explicit restore, focus falls to <body> and a
+    keyboard operator has to Tab through the entire shell again to get back --
+    after every cancelled publish, restore or confirmation.
+
+    axe cannot see this: the markup is correct at every instant, and only the
+    transition loses the focus.
+    """
+    page = browser.open()
+    _create_page_with_all_block_types(page)
+
+    page.locator("#bp-action-publish").focus()
+    assert (
+        page.evaluate("document.activeElement && document.activeElement.id") == "bp-action-publish"
+    )
+
+    page.keyboard.press("Enter")
+    wait_until(lambda: page.locator(".bp-modal").count() == 1, message="publish modal")
+    # Focus moved into the dialog, onto its safe default.
+    assert page.evaluate("document.activeElement && document.activeElement.textContent") == "Cancel"
+
+    page.keyboard.press("Escape")
+    wait_until(lambda: page.locator(".bp-modal").count() == 0, message="modal closed")
+    assert (
+        page.evaluate("document.activeElement && document.activeElement.id") == "bp-action-publish"
+    )
     assert not browser.console_errors
 
 

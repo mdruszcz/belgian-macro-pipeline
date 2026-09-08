@@ -65,6 +65,12 @@
         store.actions.closeModal();
       }
     });
+    // Where focus came from, captured by renderAll before this container was
+    // cleared -- reading document.activeElement here is too late, the opening
+    // button has already been destroyed and focus has fallen to <body>.
+    if (!store._modalReturnFocusId) {
+      store._modalReturnFocusId = store._preRenderFocusId || "";
+    }
     cancelBtn.focus();
     store._releaseModalTrap = release;
   }
@@ -135,6 +141,11 @@
         el(
           "button",
           {
+            // These three can open a confirmation dialog, and closing it
+            // re-renders this whole bar -- destroying the button that was
+            // focused. A stable id is what lets focus come back here instead
+            // of falling to <body>. See app.js's closeModal.
+            id: "bp-action-save",
             type: "button",
             onclick: function () {
               store.actions.save();
@@ -145,6 +156,7 @@
         el(
           "button",
           {
+            id: "bp-action-publish",
             type: "button",
             onclick: function () {
               store.actions.confirmPublish();
@@ -155,6 +167,7 @@
         el(
           "button",
           {
+            id: "bp-action-restore",
             type: "button",
             onclick: function () {
               store.actions.openRestoreDialog();

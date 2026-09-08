@@ -11,7 +11,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # The browser suite alone measures ~6 minutes locally and the full suite
+    # ~8, before a cold runner downloads Chromium and its system libraries.
+    # At 10 this job could not finish, and the failure would have looked like
+    # a hang rather than a budget.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 

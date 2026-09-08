@@ -89,6 +89,14 @@
   /* ------------------------------------------------------------------- */
 
   function renderAll(store) {
+    // Note who had focus BEFORE anything is torn down. A modal is opened by
+    // setting store.modal and re-rendering, so by the time the dialog is built
+    // the button that opened it no longer exists and document.activeElement is
+    // already <body>. Only an id survives a re-render.
+    var active = document.activeElement;
+    if (active && active.id) {
+      store._preRenderFocusId = active.id;
+    }
     shell.topbar.render(store, store.topbarEl);
     shell.sidebar.render(store, store.sidebarEl);
     shell.inspector.render(store, store.inspectorEl);
@@ -752,8 +760,27 @@
     };
 
     actions.closeModal = function () {
+      // Release the focus trap before the dialog is torn down. This was
+      // recorded and never read, which left a keydown listener behind on every
+      // modal that was opened.
+      if (typeof store._releaseModalTrap === "function") {
+        store._releaseModalTrap();
+      }
+      store._releaseModalTrap = null;
+      var returnId = store._modalReturnFocusId;
+      store._modalReturnFocusId = "";
       store.modal = null;
       renderAll(store);
+      // renderAll rebuilt the bar, so the original button object is gone; find
+      // its replacement by id. Without this, cancelling a dialog drops a
+      // keyboard operator on <body> and they Tab through the whole shell again.
+      var back = returnId ? document.getElementById(returnId) : null;
+      if (!back && store.topbarEl) {
+        back = dom.focusableIn(store.topbarEl)[0] || null;
+      }
+      if (back) {
+        back.focus();
+      }
     };
 
     return actions;

@@ -406,6 +406,47 @@ def test_the_api_closure_refuses_a_path_that_is_not_same_origin(config):
     assert "path.charAt(1) === '/'" in html
 
 
+# The paths an audit found could carry the token off-site. A backslash is a
+# path separator to the WHATWG URL parser for http(s), so "/\host" resolves
+# exactly like "//host" -- checking only for a second "/" is not enough. The
+# CSP's connect-src 'self' also blocks these, but a guard that needs the CSP
+# to be right is not a guard.
+_CROSS_ORIGIN_PATHS = ["//evil.example", "/\\evil.example", "/\\/evil.example"]
+# Not cross-origin -- a backslash INSIDE a path is normalised to "/", so this
+# stays on the origin. It is refused anyway because no legitimate builder path
+# contains one, and a narrow rule about position is easier to get wrong than a
+# blanket one. Kept separate so this test never claims it escapes.
+_REFUSED_BUT_SAME_ORIGIN = ["/a\\b"]
+_SAME_ORIGIN_PATHS = ["/api/pages", "/api/document?page_id=x", "/preview"]
+
+
+def test_the_api_guard_actually_rejects_every_cross_origin_path(browser_page, config):
+    """Behavioural, not textual: the shipped condition is lifted out of the
+    generated page and run in a real browser. The earlier version of this test
+    asserted the source CONTAINED two substrings, which is how a backslash
+    hole survived it -- the strings were both present and the guard was still
+    wrong."""
+    page, _violations = browser_page
+    html = bootstrap_html(config, "nonce-value")
+
+    marker = "  if (typeof path !== 'string'"
+    start = html.index(marker)
+    condition = html[start + len("  if (") : html.index(") {", start)]
+
+    # First: prove these really are cross-origin, using the browser's own URL
+    # parser rather than our belief about it. A test that only asserted the
+    # guard rejects them would still pass if the strings were harmless.
+    for path in _CROSS_ORIGIN_PATHS:
+        resolved = page.evaluate("(p) => new URL(p, 'http://127.0.0.1:9/x').origin", path)
+        assert resolved != "http://127.0.0.1:9", f"{path!r} was expected to leave the origin"
+
+    guard = f"(path) => !!({condition})"
+    for path in _CROSS_ORIGIN_PATHS + _REFUSED_BUT_SAME_ORIGIN:
+        assert page.evaluate(guard, path) is True, f"the guard must refuse {path!r}"
+    for path in _SAME_ORIGIN_PATHS:
+        assert page.evaluate(guard, path) is False, f"the guard must allow {path!r}"
+
+
 def test_the_script_carries_the_nonce_it_was_given(config):
     html = bootstrap_html(config, "abc123")
     assert '<script nonce="abc123">' in html
@@ -633,10 +674,9 @@ def test_the_preview_route_keeps_its_own_stricter_policy(server, pages_root):
 def _chromium():
     """A launched Chromium, or a clean skip.
 
-    Playwright is importable in the development Codespace but is declared in
-    neither pyproject.toml's dev extras nor requirements.txt, and CI installs
-    only what is declared -- so this MUST skip rather than fail there. The
-    consequence is recorded in the batch report: this gate does not run in CI.
+    Playwright IS declared (pyproject.toml dev extras) and CI installs the
+    Chromium binary, so these tests run there rather than skipping. The guard
+    stays for a developer who has not run `playwright install` locally.
     """
     try:
         from playwright import sync_api
