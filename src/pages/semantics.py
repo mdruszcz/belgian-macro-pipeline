@@ -79,6 +79,19 @@ ROUTE_EXACT = frozenset(
         "/local.html",
         "/all_data.html",
         "/about.html",
+        # PREVIEW routes, added one at a time as Batch 15 converts a page.
+        #
+        # Batches 3 and 4 established the pattern -- ship the rebuilt page
+        # beside the live one and switch the canonical route only after review
+        # -- but did it with /home.html and /commune.html, which are NOT in
+        # this allowlist, so a page DOCUMENT could not declare the very shape
+        # that precedent set (known-risks.md:41).
+        #
+        # Under /preview/ rather than beside the real pages, so the whole set
+        # is one decision for Batch 17's publication allowlist instead of a
+        # judgement per file. Added individually, so this stays an inventory
+        # rather than an open door.
+        "/preview/about.html",
     }
 )
 

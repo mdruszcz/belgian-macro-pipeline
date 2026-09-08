@@ -164,7 +164,12 @@ def _render_hero(block, props, data, lang):
     eyebrow = text_in(props.get("eyebrow"), lang)
     if eyebrow:
         parts.append(f'<p class="bp-hero-eyebrow">{esc(eyebrow)}</p>')
-    parts.append(f'<h2 class="bp-hero-heading">{esc(text_in(props.get("heading"), lang))}</h2>')
+    # h1, not h2: a hero IS the page's main heading, and a published page with
+    # no h1 fails both a screen reader's document outline and every SEO check.
+    # The h2 here was a fragment-context assumption -- correct-looking while
+    # nothing published a page document, wrong the moment something did
+    # (Batch 15a). The class carries the styling, so nothing visual changes.
+    parts.append(f'<h1 class="bp-hero-heading">{esc(text_in(props.get("heading"), lang))}</h1>')
     sub = text_in(props.get("subheading"), lang)
     if sub:
         parts.append(f'<p class="bp-hero-sub">{esc(sub)}</p>')
