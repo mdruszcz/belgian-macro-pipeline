@@ -97,9 +97,25 @@ def _kpi_card_1_to_2(props: dict) -> dict:
     return out
 
 
+def _map_1_to_2(props: dict) -> dict:
+    """map v1 -> v2 (Batch 15).
+
+    v2 adds the chrome map.html owns: zoom, an indicator picker and
+    click-through. Every one defaults to FALSE, because a v1 map was authored
+    without them and silently growing controls on an existing page is a change
+    the author did not make. A converted map.html turns them on explicitly.
+    """
+    out = dict(props)
+    out.setdefault("show_zoom", False)
+    out.setdefault("indicator_picker", False)
+    out.setdefault("click_through", False)
+    return out
+
+
 #: (block_type, from_version) -> step producing from_version + 1 props.
 BLOCK_MIGRATIONS: dict[tuple[str, int], Callable[[dict], dict]] = {
     ("kpi_card", 1): _kpi_card_1_to_2,
+    ("map", 1): _map_1_to_2,
 }
 
 

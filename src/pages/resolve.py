@@ -524,13 +524,22 @@ def _resolve_across_communes(code, meta: Mapping, lang: str, reader: PayloadRead
     suppressed = []
     for nis, cell in communes.items():
         if cell.get("status") == "suppressed":
+            # Named, not painted. A withheld figure coloured at the bottom of
+            # the scale would state a number the source refused to publish.
             suppressed.append(nis)
             continue
         if cell.get("value") is not None:
             values[nis] = cell["value"]
     return {
         "state": "ready" if values else "missing",
+        "indicator": code,
         "values": values,
         "suppressed": suppressed,
+        # The map component formats its own tooltips and legend ticks, so it
+        # needs what the figure IS, not just the number. Taken from metadata,
+        # never guessed -- the same rule the KPI formatting follows.
+        "unit": meta.get("unit"),
+        "decimals": meta.get("decimals"),
+        "direction": meta.get("direction"),
         "provenance": _provenance(meta),
     }

@@ -100,13 +100,10 @@ def build_one(page_dir: Path, *, lang: str, metadata, registry, attribution: str
         listed = "\n".join(f"  {e.path}: {e.message}" for e in errors[:10])
         raise ShellError(f"{document_path} is not valid:\n{listed}")
 
-    fragment = render_document(
-        doc,
-        registry=registry,
-        lang=lang,
-        data=resolve_document(doc, metadata=metadata, lang=lang),
-    )
+    resolved = resolve_document(doc, metadata=metadata, lang=lang)
+    fragment = render_document(doc, registry=registry, lang=lang, data=resolved)
     route = doc["route"]
+    prefix = asset_prefix_for(route)
     html = wrap(
         fragment,
         doc,
@@ -115,7 +112,11 @@ def build_one(page_dir: Path, *, lang: str, metadata, registry, attribution: str
         # Supplied only when the page owes it. Passing it always would hide the
         # refusal that exists to stop an unattributed page shipping.
         attribution=attribution if declares_municipal_data(doc) else None,
-        stylesheets=tuple(asset_prefix_for(route) + href for href in STYLESHEETS),
+        stylesheets=tuple(prefix + href for href in STYLESHEETS),
+        # The same resolved map the renderer used. A hydrated block is finished
+        # in the browser, and it can only show what reaches it.
+        data=resolved,
+        asset_prefix=prefix,
     )
     return output_path_for(route), html
 

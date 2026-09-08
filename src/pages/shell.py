@@ -31,6 +31,7 @@ adds no script that the content depends on.
 
 from __future__ import annotations
 
+import json
 import re
 from html import escape
 from pathlib import Path
@@ -54,6 +55,37 @@ FONT_HREF = (
     "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700"
     "&family=Caveat:wght@500;600&display=swap"
 )
+
+#: Scripts an interactive block needs, in load order. A page with no chart and
+#: no map links none of them: the boundary file alone is 1.2 MB, and Batch 0
+#: measured map.html at 59 on performance because of it.
+INTERACTIVE_SCRIPTS = (
+    "assets/i18n.js",
+    "assets/commune_map.js",
+    "assets/belpulse/charts.js",
+    "assets/belpulse/blocks.js",
+)
+
+#: i18n.js FIRST, and this is load-bearing order rather than tidiness:
+#: commune_map.js captures the strings table in a `const` as it loads
+#: (`const I18N_SRC = (typeof I18N !== 'undefined') ? I18N : null`), so a copy
+#: that arrives afterwards is never seen. It degrades quietly -- the legend
+#: note, coverage warning and tooltips print raw string keys.
+
+#: What a MAP block needs on top of the design system. commune_map.css owns the
+#: seven --ramp-* choropleth tokens and --nodata, the path strokes, the tooltip
+#: and the legend's geometry. This is not optional polish: every fill the
+#: component sets is `var(--ramp-N)`, so without this sheet the map draws 565
+#: paths against undefined custom properties -- silently, with the block still
+#: marked ready. Linked only when a map is present, because the rest of the
+#: site's pages have no use for it.
+MAP_STYLESHEET = "assets/commune_map.css"
+
+#: Block types whose rendered output is a SLOT that JavaScript fills. The
+#: server cannot finish these: a chart is canvas pixels and a map needs a
+#: 1.2 MB boundary file. Everything else is complete HTML from the renderer,
+#: which is why a reader without JavaScript still gets every figure.
+_HYDRATED = frozenset({"chart", "map"})
 
 #: Block types that put a municipal figure on the page. A document containing
 #: one of these with a binding is publishing Statbel-derived data and owes the
@@ -80,6 +112,29 @@ def read_attribution(path: Path = ATTRIBUTION_SOURCE) -> str:
             "condition, not decoration -- refusing to generate pages without it."
         )
     return match.group(1)
+
+
+def hydrated_block_types(doc) -> set:
+    """Which hydrated block types a document contains -- the map's stylesheet
+    is linked from this rather than from the page id."""
+    out = set()
+    for section in doc.get("sections") or []:
+        for block in (section or {}).get("blocks") or []:
+            if isinstance(block, dict) and block.get("type") in _HYDRATED:
+                out.add(block["type"])
+    return out
+
+
+def hydrated_block_ids(doc) -> list:
+    """Blocks on this page that JavaScript has to finish."""
+    out = []
+    for section in doc.get("sections") or []:
+        for block in section.get("blocks") or []:
+            if isinstance(block, dict) and block.get("type") in _HYDRATED:
+                block_id = block.get("id")
+                if isinstance(block_id, str):
+                    out.append(block_id)
+    return out
 
 
 def declares_municipal_data(doc) -> bool:
@@ -109,6 +164,8 @@ def wrap(
     canonical: str,
     attribution: str | None = None,
     stylesheets: tuple[str, ...] = (),
+    data: dict | None = None,
+    asset_prefix: str = "",
 ) -> str:
     """One published page.
 
@@ -130,9 +187,10 @@ def wrap(
     if not title:
         raise ShellError("a published page needs a title in the language it is written in")
 
+    extra_sheets = (asset_prefix + MAP_STYLESHEET,) if "map" in hydrated_block_types(doc) else ()
     links = "".join(
         f'\n    <link rel="stylesheet" href="{escape(href, quote=True)}">'
-        for href in (FONT_HREF, *stylesheets)
+        for href in (FONT_HREF, *stylesheets, *extra_sheets)
     )
     meta_description = (
         f'\n    <meta name="description" content="{escape(description, quote=True)}">'
@@ -145,6 +203,35 @@ def wrap(
         if attribution
         else ""
     )
+
+    # A hydrated block renders as an empty slot unless its resolved data
+    # reaches the browser. `about.html` had none, so this never surfaced until
+    # a page carried a map: the block was there, the figures were there, and
+    # the page showed a blank box.
+    scripts = ""
+    hydrated = hydrated_block_ids(doc)
+    if hydrated:
+        payload = {bid: (data or {}).get(bid) for bid in hydrated}
+        # </script> inside the JSON would close this element early. The same
+        # escape bootstrap_html applies to the shell's own inlined source.
+        encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False).replace("</", "<\\/")
+        tags = "".join(
+            f'\n<script src="{escape(asset_prefix + src, quote=True)}"></script>'
+            for src in INTERACTIVE_SCRIPTS
+        )
+        scripts = (
+            f"{tags}"
+            f'\n<script id="bp-block-data" type="application/json">{encoded}</script>'
+            "\n<script>BPBlocks.hydrate(document, {"
+            f"lang: {json.dumps(lang)}, "
+            # How far the site root is from this page. A block fetching
+            # "public/data/..." from a page one directory down would ask for
+            # /preview/public/data/... -- the same prefix trap the stylesheets
+            # already hit here.
+            f"assetPrefix: {json.dumps(asset_prefix)}, "
+            "data: JSON.parse(document.getElementById('bp-block-data').textContent)"
+            "});</script>"
+        )
 
     return (
         "<!DOCTYPE html>\n"
@@ -159,7 +246,8 @@ def wrap(
         "</head>\n"
         "<body>\n"
         f"{fragment}"
-        f"{footer}\n"
+        f"{footer}"
+        f"{scripts}\n"
         "</body>\n"
         "</html>\n"
     )

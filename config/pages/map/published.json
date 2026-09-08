@@ -1,0 +1,129 @@
+{
+  "context": {},
+  "page_id": "map",
+  "page_type": "map-explorer",
+  "revision": 1,
+  "route": "/preview/map.html",
+  "schema_version": 2,
+  "sections": [
+    {
+      "blocks": [
+        {
+          "binding": null,
+          "id": "map-hero-1",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "locked": false,
+          "props": {
+            "heading": {
+              "en": "Map",
+              "fr": "Carte",
+              "nl": "Kaart"
+            },
+            "subheading": {
+              "en": "Choose an indicator and compare all 565 communes.",
+              "fr": "Choisissez un indicateur et comparez les 565 communes.",
+              "nl": "Kies een indicator en vergelijk alle 565 gemeenten."
+            }
+          },
+          "type": "hero",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "map_values",
+            "provider": "municipal"
+          },
+          "id": "map-choropleth-1",
+          "layout": {
+            "desktop": {
+              "h": 10,
+              "w": 12,
+              "x": 0,
+              "y": 2
+            },
+            "mobile": {
+              "h": 10,
+              "w": 4,
+              "x": 0,
+              "y": 2
+            },
+            "tablet": {
+              "h": 10,
+              "w": 8,
+              "x": 0,
+              "y": 2
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Choropleth map of Belgian communes",
+              "fr": "Carte choroplèthe des communes belges",
+              "nl": "Choroplethenkaart van de Belgische gemeenten"
+            },
+            "click_through": true,
+            "indicator_picker": true,
+            "legend_title": {
+              "en": "Value",
+              "fr": "Valeur",
+              "nl": "Waarde"
+            },
+            "show_legend": true,
+            "show_zoom": true,
+            "title": {
+              "en": "Belgium by commune",
+              "fr": "La Belgique par commune",
+              "nl": "België per gemeente"
+            }
+          },
+          "type": "map",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        }
+      ],
+      "id": "map"
+    }
+  ],
+  "seo": {
+    "description": {
+      "en": "Every municipal indicator, mapped across all 565 Belgian communes.",
+      "fr": "Chaque indicateur communal, cartographié sur les 565 communes belges.",
+      "nl": "Elke gemeentelijke indicator, in kaart gebracht voor alle 565 Belgische gemeenten."
+    },
+    "title": {
+      "en": "Map of Belgium — BelPulse",
+      "fr": "Carte de la Belgique — BelPulse",
+      "nl": "Kaart van België — BelPulse"
+    }
+  },
+  "theme": "light-institutional"
+}
