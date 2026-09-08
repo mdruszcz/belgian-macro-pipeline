@@ -3,7 +3,7 @@
   "page_id": "about",
   "page_type": "blank",
   "revision": 1,
-  "route": "/preview/about.html",
+  "route": "/about.html",
   "schema_version": 2,
   "sections": [
     {
@@ -97,19 +97,19 @@
               {
                 "items": [
                   {
-                    "en": "Real-time data synchronization",
-                    "fr": "Synchronisation des données en temps réel",
-                    "nl": "Real-time gegevenssynchronisatie"
+                    "en": "📊 Real-time data synchronization",
+                    "fr": "📊 Synchronisation des données en temps réel",
+                    "nl": "📊 Real-time gegevenssynchronisatie"
                   },
                   {
-                    "en": "Deep-dive structural analysis",
-                    "fr": "Analyse structurelle approfondie",
-                    "nl": "Diepgaande structurele analyse"
+                    "en": "🔍 Deep-dive structural analysis",
+                    "fr": "🔍 Analyse structurelle approfondie",
+                    "nl": "🔍 Diepgaande structurele analyse"
                   },
                   {
-                    "en": "Multi-institution forecast consensus",
-                    "fr": "Consensus de prévisions multi-institutions",
-                    "nl": "Consensus tussen prognoses van meerdere instellingen"
+                    "en": "🌍 Multi-institution forecast consensus",
+                    "fr": "🌍 Consensus de prévisions multi-institutions",
+                    "nl": "🌍 Consensus tussen prognoses van meerdere instellingen"
                   }
                 ],
                 "node": "list"

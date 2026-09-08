@@ -291,8 +291,11 @@ def test_lang_restricts_what_is_built_and_never_overwrites_another_language():
     )
     assert result.returncode == 0, result.stderr
     assert _page("about", "en") == english
-    assert "preview/fr/about.html" in result.stdout
-    assert "preview/nl/about.html" not in result.stdout
+    # Derived, not typed: this assertion named "preview/fr/about.html" until
+    # Batch 15d moved the route, and a literal path in a test is a second
+    # inventory that drifts from the first.
+    assert route_for("/about.html", "fr").lstrip("/") in result.stdout
+    assert route_for("/about.html", "nl").lstrip("/") not in result.stdout
     _build()
 
 
@@ -312,9 +315,13 @@ def test_the_committed_pages_match_a_fresh_build():
     assert result.returncode == 0, result.stdout
 
 
-def test_the_hand_built_pages_are_untouched():
+def test_the_hand_built_page_that_is_still_hand_built_is_untouched():
     result = subprocess.run(
-        ["git", "diff", "--stat", "--", "about.html", "map.html"],
+        # map.html ONLY. about.html was cut over in Batch 15d and is generated
+        # now; tests/pages/test_about_conversion.py guards its frozen copy
+        # instead. One cutover at a time, and the map is the page with figures
+        # on it.
+        ["git", "diff", "--stat", "--", "map.html"],
         capture_output=True,
         text=True,
         cwd=REPO_ROOT,

@@ -14,7 +14,17 @@
  * stores columns rather than coordinates.
  */
 
-.bp-page{display:flex; flex-direction:column; gap:var(--bp-space-8)}
+/* A PAGE HAS A WIDTH. Without this every block-built page rendered edge to
+   edge at whatever the viewport happened to be -- 1000px lines of body text on
+   a laptop, which is unreadable, and nothing in the equivalence tests can see
+   it because they compare words, not measure. 1180px is the site's own content
+   width, the number home.html, commune.html and the other redesigned pages
+   already use; picking a different one here would have made the block pages
+   visibly not part of the same site. */
+.bp-page{
+  display:flex; flex-direction:column; gap:var(--bp-space-8);
+  max-width:1180px; margin:0 auto; padding:var(--bp-space-6) var(--bp-space-5);
+}
 
 .bp-grid{
   display:grid;
@@ -88,6 +98,10 @@
 .bp-block--rich_text h2,.bp-block--rich_text h3,.bp-block--rich_text h4{
   font-family:var(--bp-font-display); font-weight:600; margin:var(--bp-space-4) 0 var(--bp-space-2);
 }
+/* A READING MEASURE. The page is 1180px so a map has room; prose does not
+   want that, and the hand-built about.html set 800px for exactly this reason.
+   In ch rather than px so it tracks the font the reader actually gets. */
+.bp-block--rich_text p,.bp-block--rich_text li{max-width:72ch}
 .bp-block--rich_text p{margin:0 0 var(--bp-space-3); color:var(--bp-text)}
 .bp-block--rich_text ul,.bp-block--rich_text ol{margin:0 0 var(--bp-space-3); padding-left:1.3em}
 

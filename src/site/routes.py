@@ -79,7 +79,13 @@ ROOT_PAGES: tuple[Page, ...] = (
     Page("/communes.html", True, "the commune table -- a landing page in its own right"),
     Page("/map.html", True, "the choropleth explorer"),
     Page("/all_data.html", True, "every observation, browsable"),
-    Page("/about.html", True, "what this project is"),
+    Page(
+        "/about.html",
+        True,
+        "what this project is -- and the FIRST BLOCK-BUILT page on this site "
+        "(Batch 15d). Generated from config/pages/about/published.json, so it "
+        "also exists at /fr/about.html and /nl/about.html",
+    ),
     Page(
         "/dashboard.html",
         False,
@@ -186,21 +192,65 @@ def commune_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
     return tuple(routes)
 
 
-def block_page_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
-    """Every published page document's routes, one per language."""
+def declared_page_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
+    """The route each published document DECLARES -- the canonical one.
+
+    A document declares one route and the exporter derives the translations
+    from it, so this is the set a language may be added to. Kept separate from
+    `block_page_routes()` because the two answer different questions and
+    confusing them makes `/fr/about.html` look like a page that can itself have
+    a French edition.
+    """
     pages_root = repo_root / "config" / "pages"
     if not pages_root.is_dir():
         return ()
-    routes = []
-    for page_dir in sorted(pages_root.iterdir()):
-        document = page_dir / "published.json"
-        if not document.is_file():
-            continue
-        declared = json.loads(document.read_text(encoding="utf-8"))["route"]
-        routes.extend(route_for(declared, lang) for lang in LANGS)
-    return tuple(routes)
+    return tuple(
+        json.loads((page_dir / "published.json").read_text(encoding="utf-8"))["route"]
+        for page_dir in sorted(pages_root.iterdir())
+        if (page_dir / "published.json").is_file()
+    )
+
+
+def block_page_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
+    """Every published page document's routes, one per language."""
+    return tuple(
+        route_for(declared, lang) for declared in declared_page_routes(repo_root) for lang in LANGS
+    )
+
+
+def translations_of(route: str, repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
+    """The other languages `route` is published in, or () if it has none.
+
+    A hand-built root page exists at ONE URL and switches language in the
+    browser. A block-built one is rendered per language and exists at three.
+    Since Batch 15d the root pages are a mix of both, so the sitemap has to ask
+    rather than assume -- declaring alternates that do not exist would be worse
+    than declaring none.
+    """
+    # Against the DECLARED routes, not every published one. Asked about
+    # /fr/about.html -- which is itself in block_page_routes() -- the looser
+    # check answered /fr/fr/about.html and /fr/nl/about.html, URLs that do not
+    # exist. Nothing calls it that way today because the sitemap asks only
+    # about canonical routes, but this is a public function and the next
+    # cutover will call it from somewhere else.
+    if route not in set(declared_page_routes(repo_root)):
+        return ()
+    return tuple(route_for(route, lang) for lang in LANGS)
 
 
 def all_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
-    """Every URL this site publishes."""
-    return root_routes() + commune_routes(repo_root) + block_page_routes(repo_root)
+    """Every URL this site publishes, each once.
+
+    THE DEDUPLICATION IS NOT TIDINESS. Since Batch 15d cut about.html over,
+    `/about.html` is claimed by BOTH the frozen root table (it is a root page,
+    and must stay one so a rename fails loudly) and the derived block-page
+    routes (it is generated). Both claims are correct. Counting it twice would
+    make the inventory disagree with itself about how many URLs this site has,
+    which is the one thing an inventory may not do.
+    """
+    seen, out = set(), []
+    for route in root_routes() + commune_routes(repo_root) + block_page_routes(repo_root):
+        if route not in seen:
+            seen.add(route)
+            out.append(route)
+    return tuple(out)

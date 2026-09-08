@@ -240,9 +240,42 @@ def test_a_language_already_chosen_under_the_old_key_is_honoured():
     assert out["canonicalWins"] == "fr", "the canonical key must win when both exist"
 
 
-@pytest.mark.parametrize("page", ["all_data.html", "about.html"])
+@pytest.mark.parametrize("page", ["all_data.html"])
 def test_the_thin_pages_are_translated_too(page):
+    """Pages translated IN THE BROWSER: one URL, strings swapped by i18n.js.
+
+    about.html was in this list until Batch 15d cut it over. It is still
+    trilingual -- more so than before, since its body prose used to sit in a
+    private `translations` table this test never checked -- but it is now
+    trilingual by a DIFFERENT MECHANISM, three server-rendered URLs, so these
+    assertions no longer describe it. The property is asserted for it below
+    rather than dropped: a test removed because the page changed shape is how
+    a guarantee quietly disappears.
+    """
     text = (REPO / page).read_text(encoding="utf-8")
     assert 'src="assets/i18n.js"' in text, f"{page} does not load the shared strings"
     assert 'id="langSeg"' in text, f"{page} has no language switcher"
     assert "data-t=" in text, f"{page} marks nothing for translation"
+
+
+@pytest.mark.parametrize("page", ["about.html"])
+def test_a_page_translated_by_url_publishes_all_three(page):
+    """Pages translated BY URL: three files, one per language, linked to each
+    other. The stronger form -- a crawler and a reader with JavaScript off both
+    get the French page, which the browser-swapped pages cannot offer.
+    """
+    english = (REPO / page).read_text(encoding="utf-8")
+    assert 'class="bp-lang-switch"' in english, f"{page} has no language switcher"
+
+    rendered = {"en": english}
+    for lang in ("fr", "nl"):
+        sibling = REPO / lang / page
+        assert sibling.is_file(), f"{page} has no {lang} edition at /{lang}/{page}"
+        rendered[lang] = sibling.read_text(encoding="utf-8")
+        assert f'<html lang="{lang}">' in rendered[lang]
+
+    assert len(set(rendered.values())) == 3, f"{page} renders identically in all three languages"
+    for lang, text in rendered.items():
+        for other in ("en", "fr", "nl"):
+            href = f"{other}/{page}" if other != "en" else page
+            assert href in text, f"the {lang} edition does not link to {other}"

@@ -197,7 +197,9 @@ def test_a_page_with_no_map_links_neither(tmp_path):
     """The boundary file alone is 1.2 MB. A page without a map must not pay
     for one -- Batch 0 measured map.html at 59 on performance for exactly this.
     """
-    about = (REPO_ROOT / "preview" / "about.html").read_text(encoding="utf-8")
+    # about.html, which went canonical in Batch 15d and lives at the site root
+    # now. Still the block-built page with no map -- which is the point.
+    about = (REPO_ROOT / "about.html").read_text(encoding="utf-8")
     assert "commune_map.css" not in about
     assert "commune_map.js" not in about
 

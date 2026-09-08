@@ -35,37 +35,69 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.pages.strings import DEFAULT_LANG  # noqa: E402
 from src.site.routes import (  # noqa: E402
     NOINDEX_PREFIXES,
     SITE_BASE,
     path_for,
     sitemap_routes,
+    translations_of,
 )
+
+
+def _lang_of(canonical: str, translated: str) -> str:
+    """Which language `translated` is, given the page's canonical route.
+
+    Read back from the URL the inventory produced rather than zipped against
+    LANGS by position: `translations_of` is ordered, but a sitemap that
+    mislabels French as Dutch is a defect no test of counts would catch.
+    """
+    if translated == canonical:
+        return DEFAULT_LANG
+    head, _, _name = canonical.rpartition("/")
+    return translated[len(head) + 1 :].split("/", 1)[0]
+
 
 #: The commune sitemap, written by the other exporter and only referenced here.
 COMMUNE_SITEMAP = "local/sitemap.xml"
 
 
 def render_pages_sitemap() -> str:
-    """The root pages that stand alone, each as one `<loc>`.
+    """The root pages that stand alone.
 
-    No `hreflang` alternates: unlike the commune pages and the block-built
-    pages, the hand-built root pages exist at ONE URL each and switch language
-    in the browser. Declaring alternates that do not exist would be worse than
-    declaring none.
+    THE ROOT PAGES ARE NO LONGER ALL THE SAME SHAPE. A hand-built one exists
+    at one URL and switches language in the browser; a block-built one is
+    rendered per language and exists at three. Since Batch 15d cut about.html
+    over, this file contains both kinds, so each route is asked
+    (`translations_of`) rather than assumed. Declaring alternates a page does
+    not have would be worse than declaring none -- and NOT declaring the ones
+    it does have is the competing-duplicates failure docs/features/i18n.md:61
+    describes, where three editions of a page fight each other in the index.
     """
     entries = []
     for route in sitemap_routes():
-        if not path_for(route).is_file():
-            raise SystemExit(
-                f"refusing to submit {route}: no file serves it. A sitemap that "
-                "advertises a URL the site does not publish is a rule 31 breach "
-                "that also poisons search indexing."
+        for published in translations_of(route) or (route,):
+            if not path_for(published).is_file():
+                raise SystemExit(
+                    f"refusing to submit {published}: no file serves it. A sitemap "
+                    "that advertises a URL the site does not publish is a rule 31 "
+                    "breach that also poisons search indexing."
+                )
+            links = "".join(
+                f'<xhtml:link rel="alternate" hreflang="{_lang_of(route, other)}" '
+                f'href="{SITE_BASE}{other}"/>'
+                for other in translations_of(route)
             )
-        entries.append(f"  <url><loc>{SITE_BASE}{route}</loc></url>")
+            if links:
+                links += (
+                    f'<xhtml:link rel="alternate" hreflang="x-default" '
+                    f'href="{SITE_BASE}{route}"/>'
+                )
+            entries.append(f"  <url><loc>{SITE_BASE}{published}</loc>{links}</url>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+        '        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
         + "\n".join(entries)
         + "\n</urlset>\n"
     )
