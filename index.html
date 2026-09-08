@@ -202,29 +202,12 @@
 
     <nav class="sub-menu py-1 text-sm font-medium sticky top-[81px] z-40">
         <div class="w-full px-8 flex items-center gap-x-4">
-            <button onclick="loadDashboard(2)" id="btn-2"
-                    class="nav-button px-2 py-1 transition-all flex items-center">
-                <span id="menu-news">NEWS</span>
-            </button>
-
-            <button onclick="loadDashboard(3)" id="btn-3"
-                    class="nav-button px-2 py-1 transition-all flex items-center">
-                <span id="menu-analysis">ANALYSIS</span>
-            </button>
-
-            <div class="w-px h-4 bg-gray-500/20 mx-1"></div>
-
             <button onclick="loadDashboard(0)" id="btn-0"
                     class="nav-button active px-2 py-1 transition-all flex items-center">
                 <span id="menu-stats">STATISTICS</span>
             </button>
 
             <button onclick="loadDashboard(1)" id="btn-1"
-                    class="nav-button px-2 py-1 transition-all flex items-center">
-                <span id="menu-clock">CLOCK</span>
-            </button>
-
-            <button onclick="loadDashboard(4)" id="btn-4"
                     class="nav-button px-2 py-1 transition-all flex items-center">
                 <span id="menu-about">ABOUT US</span>
             </button>
@@ -277,9 +260,6 @@
 
             // Update Menu
             document.getElementById('menu-stats').textContent = translations[l].menuStats;
-            document.getElementById('menu-clock').textContent = translations[l].menuClock;
-            document.getElementById('menu-news').textContent = translations[l].menuNews;
-            document.getElementById('menu-analysis').textContent = translations[l].menuAnalysis;
             document.getElementById('menu-about').textContent = translations[l].menuAbout;
 
             syncDashboard();
@@ -292,35 +272,32 @@
             en: {
                 subtitle: "BELGIUM'S ECONOMIC PULSE",
                 menuStats: "STATISTICS",
-                menuClock: "CLOCK",
-                menuNews: "NEWS",
-                menuAnalysis: "ANALYSIS",
                 menuAbout: "ABOUT US"
             },
             fr: {
                 subtitle: "LE POULS ÉCONOMIQUE DE LA BELGIQUE",
                 menuStats: "STATISTIQUES",
-                menuClock: "HORLOGE",
-                menuNews: "NOUVELLES",
-                menuAnalysis: "ANALYSE",
                 menuAbout: "À PROPOS"
             },
             nl: {
                 subtitle: "BELGIË'S ECONOMISCHE PULS",
                 menuStats: "STATISTIEKEN",
-                menuClock: "KLOK",
-                menuNews: "NIEUWS",
-                menuAnalysis: "ANALYSE",
                 menuAbout: "OVER ONS"
             }
         };
 
         // === DASHBOARD SWITCHING ===
+        // ONLY PAGES THAT EXIST. This array used to name clock.html, news.html
+        // and analysis.html, none of which were ever built -- so three of the
+        // five buttons on the site's entry point loaded a 404 into the iframe,
+        // live, for as long as this page has been published. Nothing caught it
+        // because the names live in a JavaScript array rather than an href, so
+        // no link checker anywhere was looking at them.
+        //
+        // tests/site/test_route_inventory.py now reads this array. Adding a
+        // name here before the page exists fails that test.
         const dashboards = [
             "dashboard.html",
-            "clock.html",
-            "news.html",
-            "analysis.html",
             "about.html"
         ];
 
@@ -345,17 +322,18 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            if (e.key === "1") loadDashboard(2); // News
-            if (e.key === "2") loadDashboard(3); // Analysis
-            if (e.key === "3") loadDashboard(0); // Stats
-            if (e.key === "4") loadDashboard(1); // Clock
-            if (e.key === "5") loadDashboard(4); // About
+            if (e.key === "1") loadDashboard(0); // Stats
+            if (e.key === "2") loadDashboard(1); // About
         });
 
         // Init everything
         window.onload = function() {
-            // Default to News (index 2)
-            loadDashboard(2);
+            // Default to Statistics, which is also the button marked `active`
+            // in the markup -- those two disagreed. This used to be
+            // loadDashboard(2), "News", and news.html has never existed, so
+            // the front page loaded a 404 into its own iframe on every single
+            // visit while the nav highlighted a different tab.
+            loadDashboard(0);
             const savedLang = (localStorage.getItem("belpulse-lang") || localStorage.getItem("lang")) || 'en';
             const savedTheme = localStorage.getItem("theme") || 'soft';
 
@@ -373,9 +351,6 @@
             document.getElementById('subtitle').textContent = translations[savedLang].subtitle;
 
             document.getElementById('menu-stats').textContent = translations[savedLang].menuStats;
-            document.getElementById('menu-clock').textContent = translations[savedLang].menuClock;
-            document.getElementById('menu-news').textContent = translations[savedLang].menuNews;
-            document.getElementById('menu-analysis').textContent = translations[savedLang].menuAnalysis;
             document.getElementById('menu-about').textContent = translations[savedLang].menuAbout;
 
             // Sync with iframe after a short delay

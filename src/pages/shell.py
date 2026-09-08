@@ -180,6 +180,7 @@ def wrap(
     asset_prefix: str = "",
     alternates: Mapping[str, str] | None = None,
     switch_links: Mapping[str, str] | None = None,
+    indexable: bool = True,
 ) -> str:
     """One published page.
 
@@ -197,6 +198,11 @@ def wrap(
     `switch_links` is the same map as hrefs RELATIVE to this page, for the
     visible switcher. Two maps rather than one because the two have different
     jobs -- see the switcher block below.
+
+    `indexable=False` emits `<meta name="robots" content="noindex">`. The
+    CALLER decides, from `src/site/routes.py`, never this function from the
+    shape of the route -- a rule that reads a URL string is a rule that a
+    renamed directory silently switches off.
     """
     if declares_municipal_data(doc) and not attribution:
         raise ShellError(
@@ -216,6 +222,11 @@ def wrap(
         f'\n    <link rel="stylesheet" href="{escape(href, quote=True)}">'
         for href in (FONT_HREF, *stylesheets, *extra_sheets)
     )
+    # NOINDEX, and why robots.txt is not enough on its own. A path disallowed
+    # in robots.txt can still be indexed if something links to it -- the
+    # crawler simply indexes the URL without fetching it. Only the page can
+    # say "do not index me", and only a page that gets fetched can say it.
+    robots = '\n    <meta name="robots" content="noindex">' if not indexable else ""
     meta_description = (
         f'\n    <meta name="description" content="{escape(description, quote=True)}">'
         if description
@@ -325,6 +336,7 @@ def wrap(
         '    <meta charset="UTF-8">\n'
         '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
         f"    <title>{escape(title)}</title>"
+        f"{robots}"
         f"{meta_description}\n"
         f'    <link rel="canonical" href="{escape(canonical, quote=True)}">'
         f"{hreflang}"

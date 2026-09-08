@@ -23,7 +23,7 @@ EXTRA := --extra-observations data/population_observations.csv \
          --extra-observations data/realestate_observations.csv \
          --extra-observations data/police_observations.csv
 
-.PHONY: all install schema reference validate exports pages page-documents boundaries builder test fetch clean help
+.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder test fetch clean help
 
 ## all: install deps, rebuild the database's own structure, regenerate every
 ## published export, and run the tests. No network. This is the gate target.
@@ -77,6 +77,7 @@ exports:
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
 	$(MAKE) pages
 	$(MAKE) page-documents
+	$(MAKE) site-index
 
 ## pages: the permanent /local/{nis} routes. Separate target because it is the
 ## slowest step and is often what you want to re-run alone while iterating.
@@ -90,6 +91,12 @@ pages:
 ## without an explicit publish (invariant 10). Fast, so it runs inside `exports`.
 page-documents:
 	$(PYTHON) scripts/export_page_documents.py
+
+## site-index: robots.txt and the sitemap index. Runs AFTER pages and
+## page-documents, because it refuses to name a sitemap or submit a URL that
+## is not on disk yet.
+site-index:
+	$(PYTHON) scripts/export_site_index.py
 
 ## boundaries: rebuild data/geo/communes.geojson from the Statbel statistical-
 ## sectors file. NOT in `all`: the 227 MB source is a hand-downloaded file under
