@@ -45,6 +45,7 @@ from src.pages.shell import (  # noqa: E402
     read_attribution,
     wrap,
 )
+from src.pages.strings import DEFAULT_LANG, LANGS  # noqa: E402
 
 #: The design system, linked rather than inlined: a published page is served
 #: from the repository root, so it can fetch a stylesheet, unlike the builder's
@@ -60,6 +61,35 @@ STYLESHEETS = (
 #: a canonical URL that changes with the machine that built it is worse than
 #: none at all.
 SITE_BASE = "https://mdruszcz.github.io/belgian-macro-pipeline"
+
+
+def route_for(route: str, lang: str) -> str:
+    """The site-relative URL of `route` in `lang`.
+
+    THE LANGUAGE IS A DIRECTORY IMMEDIATELY ABOVE THE FILE, and English keeps
+    the URL it already has:
+
+        /preview/about.html  ->  /preview/fr/about.html
+        /local/11001/        ->  /local/11001/fr/
+
+    Both shapes are ones this site already publishes -- the second is exactly
+    what `scripts/export_local_pages.py:102` produces -- so nothing here
+    invents a URL convention. English staying put is claude.md rule 31: those
+    routes are indexed and linked, and moving them under /en/ would break them
+    for no gain.
+
+    THIS FUNCTION IS THE ONLY PLACE THAT KNOWS WHAT URLS A PAGE OCCUPIES.
+    A document declares one route; every language variant is derived here. The
+    route inventory Batch 17 owes rule 31 should expand each allowlisted route
+    through this function rather than listing variants by hand, or the
+    inventory and the build can disagree.
+    """
+    if lang == DEFAULT_LANG:
+        return route
+    if route.endswith("/"):
+        return f"{route}{lang}/"
+    head, _, name = route.rpartition("/")
+    return f"{head}/{lang}/{name}"
 
 
 def output_path_for(route: str) -> Path:
@@ -102,13 +132,24 @@ def build_one(page_dir: Path, *, lang: str, metadata, registry, attribution: str
 
     resolved = resolve_document(doc, metadata=metadata, lang=lang)
     fragment = render_document(doc, registry=registry, lang=lang, data=resolved)
-    route = doc["route"]
+    declared = doc["route"]
+    route = route_for(declared, lang)
+    # Every language's absolute URL, so each page can name the others. Built
+    # from the declared route, so the alternates cannot drift from the files.
+    alternates = {code: f"{SITE_BASE}{route_for(declared, code)}" for code in LANGS}
     prefix = asset_prefix_for(route)
+    # The same targets as site-root-relative paths, so a reader clicking a
+    # language stays on whatever server they are already on.
+    switch_links = {code: prefix + route_for(declared, code).lstrip("/") for code in LANGS}
     html = wrap(
         fragment,
         doc,
         lang=lang,
+        # Its OWN url, not English's: three real pages, not three views of one
+        # (docs/features/i18n.md:63).
         canonical=f"{SITE_BASE}{route}",
+        alternates=alternates,
+        switch_links=switch_links,
         # Supplied only when the page owes it. Passing it always would hide the
         # refusal that exists to stop an unattributed page shipping.
         attribution=attribution if declares_municipal_data(doc) else None,
@@ -124,8 +165,15 @@ def build_one(page_dir: Path, *, lang: str, metadata, registry, attribution: str
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="report changes, write nothing")
-    parser.add_argument("--lang", default="en", choices=("en", "fr", "nl"))
+    # Restricts which languages are built; it does NOT change where a language
+    # is written. Before Batch 15c this flag defaulted to "en" and every
+    # language wrote to the SAME path, so `--lang fr` did not publish a French
+    # page -- it overwrote the English one.
+    parser.add_argument(
+        "--lang", action="append", choices=LANGS, help="build only this language (repeatable)"
+    )
     args = parser.parse_args(argv)
+    languages = tuple(dict.fromkeys(args.lang)) if args.lang else LANGS
 
     page_dirs = sorted(d for d in PAGES_ROOT.iterdir() if (d / "published.json").is_file())
     if not page_dirs:
@@ -133,21 +181,28 @@ def main(argv=None) -> int:
         return 0
 
     metadata, registry = load_metadata(), load_registry()
-    attribution = read_attribution()
+    # One notice per language, read once. `interface_strings()` inside refuses
+    # if any language lacks one, so a build either has all three or stops.
+    attributions = {code: read_attribution(code) for code in languages}
 
     changed, written = [], 0
     for page_dir in page_dirs:
-        target, html = build_one(
-            page_dir, lang=args.lang, metadata=metadata, registry=registry, attribution=attribution
-        )
-        existing = target.read_text(encoding="utf-8") if target.exists() else None
-        if existing != html:
-            changed.append(target.relative_to(REPO_ROOT))
-        if not args.check:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(html, encoding="utf-8")
-            written += 1
-        print(f"  {page_dir.name:20} -> {target.relative_to(REPO_ROOT)}")
+        for lang in languages:
+            target, html = build_one(
+                page_dir,
+                lang=lang,
+                metadata=metadata,
+                registry=registry,
+                attribution=attributions[lang],
+            )
+            existing = target.read_text(encoding="utf-8") if target.exists() else None
+            if existing != html:
+                changed.append(target.relative_to(REPO_ROOT))
+            if not args.check:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(html, encoding="utf-8")
+                written += 1
+            print(f"  {page_dir.name:20} {lang}  -> {target.relative_to(REPO_ROOT)}")
 
     if args.check:
         if changed:
@@ -158,7 +213,10 @@ def main(argv=None) -> int:
         print("\nEvery published page is up to date.")
         return 0
 
-    print(f"\n{written} page(s) built from {len(page_dirs)} document(s).")
+    print(
+        f"\n{written} page(s) built from {len(page_dirs)} document(s) "
+        f"in {len(languages)} language(s)."
+    )
     return 0
 
 

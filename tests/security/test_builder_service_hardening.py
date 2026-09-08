@@ -597,14 +597,55 @@ def test_the_git_check_does_not_false_positive_on_ordinary_english_words():
     assert not visitor.shell_keyword_calls
 
 
-def test_scripts_export_local_pages_is_exempt_and_still_imports_subprocess():
-    """Confirms the path-scoping is deliberate, not accidental: this file
-    legitimately imports subprocess and must be untouched by the assertion
-    above (rev 2 correction #22)."""
-    exporter = REPO_ROOT / "scripts" / "export_local_pages.py"
-    if exporter.exists():
-        text = exporter.read_text(encoding="utf-8")
-        assert "subprocess" in text, "sanity check: this file is expected to use subprocess"
+def test_the_interface_strings_reader_is_exempt_and_still_imports_subprocess():
+    """Confirms the path-scoping is deliberate, not accidental: some file
+    outside the scanned set legitimately runs a subprocess and must be
+    untouched by the assertion above (rev 2 correction #22).
+
+    That file used to be `scripts/export_local_pages.py`. In Batch 15c the
+    node invocation moved to `src/pages/strings.py`, so both exporters read the
+    licence notice from one place -- and this sanity check follows it, because
+    an anchor pointing at a file that no longer does the thing stops proving
+    the exemption is real.
+    """
+    reader = REPO_ROOT / "src" / "pages" / "strings.py"
+    assert reader.exists(), "the shared interface-strings reader has moved again"
+    surface = _execution_surface(reader)
+    assert surface.subprocess_imports, "sanity check: this file is expected to use subprocess"
+
+
+def test_the_builder_service_still_cannot_reach_that_subprocess():
+    """The ban above is `by construction`, and construction includes IMPORTS.
+    `src/pages/strings.py` runs node, and `src/pages/shell.py` calls it -- so
+    the moment the service imports `shell`, or `src/pages/__init__` does, the
+    builder gains a transitive path to a subprocess and the guarantee above
+    quietly becomes a claim about one file rather than about the service.
+
+    Checked as a real import graph, not by grepping for the word.
+    """
+    import importlib
+    import sys as _sys
+
+    for module in ("src.builder.service", "src.pages"):
+        importlib.import_module(module)
+    for module in ("src.pages.shell", "src.pages.strings"):
+        assert module not in _sys.modules or _sys.modules[module] is not None
+    # The service's own import list is what matters: neither module may appear.
+    service_src = (REPO_ROOT / "src" / "builder" / "service.py").read_text(encoding="utf-8")
+    tree = ast.parse(service_src)
+    imported = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module)
+    assert "src.pages.shell" not in imported
+    assert "src.pages.strings" not in imported
+    package_src = (REPO_ROOT / "src" / "pages" / "__init__.py").read_text(encoding="utf-8")
+    assert "shell" not in package_src and "strings" not in package_src, (
+        "src/pages/__init__ must not re-export the shell or the strings reader: "
+        "the builder imports this package, and that would hand it a subprocess"
+    )
 
 
 # --- symlink escape reachable through the live HTTP surface -----------------

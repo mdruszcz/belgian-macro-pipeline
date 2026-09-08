@@ -14,10 +14,14 @@ non-compliance, and this project has already published municipal figures
 without attribution once (docs/steps, Block K). So a page whose document
 declares municipal data is REFUSED unless an attribution block is supplied --
 not rendered with a gap where the notice should be. The notice itself is
-LIFTED from the live site rather than retyped, the same decision
-`scripts/export_local_pages.py:156` made and for the same reason: a second
-hand-written copy drifts, and a drifted licence notice is a breach that looks
-like a typo.
+READ from `assets/i18n.js` through `src/pages/strings.py` rather than
+retyped, the same source `scripts/export_local_pages.py` uses and for the same
+reason: a second hand-written copy drifts, and a drifted licence notice is a
+breach that looks like a typo.
+
+It used to be lifted out of `communes.html`, which has exactly ONE language --
+so a French page would have carried an English notice. That is not a
+translation gap, it is a licence condition stated in the wrong language.
 
 *Determinism.* Nothing here reads a clock or iterates an unordered set, so two
 builds of the same document are byte-identical (rule 35). The build stamp that
@@ -32,18 +36,23 @@ adds no script that the content depends on.
 from __future__ import annotations
 
 import json
-import re
+from collections.abc import Mapping
 from html import escape
 from pathlib import Path
 
 from src.pages.schema import PageDocumentError
+from src.pages.strings import DEFAULT_LANG, LANGS, interface_strings
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-#: Where the live licence notice is lifted from. communes.html, not local.html:
-#: the same source `scripts/export_local_pages.py` uses, so one page cannot
-#: drift from the other.
-ATTRIBUTION_SOURCE = REPO_ROOT / "communes.html"
+#: Language names as they name THEMSELVES. A French reader looking for their
+#: language looks for "Français", not for "French" -- an endonym is what every
+#: language switcher on the web uses, and translating them would be the
+#: "foreign product" signal docs/steps warns about for this market.
+LANGUAGE_NAMES = {"en": "English", "fr": "Fran\u00e7ais", "nl": "Nederlands"}
+
+#: What the switcher calls itself, for a screen reader.
+SWITCHER_LABEL = {"en": "Language", "fr": "Langue", "nl": "Taal"}
 
 #: The webfont the design system declares. tokens.css says in as many words
 #: that a page using it "must link the actual font, the same way every existing
@@ -98,20 +107,23 @@ class ShellError(PageDocumentError):
     a page that breaches a licence or misstates its own language."""
 
 
-def read_attribution(path: Path = ATTRIBUTION_SOURCE) -> str:
-    """The `.attribution` block's inner HTML, lifted from the live site.
+def read_attribution(lang: str = DEFAULT_LANG) -> str:
+    """The licence notice, IN `lang`, from the site's one strings table.
 
-    Refuses rather than returning empty: a missing notice must stop the build,
+    `interface_strings()` already refuses if any language lacks a notice, so
+    reaching this function at all means all three exist. The guard below covers
+    the remaining case -- a language nobody has written a notice for -- and
+    refuses rather than returning empty: a missing notice must stop the build,
     not produce pages without one.
     """
-    source = path.read_text(encoding="utf-8")
-    match = re.search(r'<div class="attribution" id="attribution">(.*?)</div>', source, re.S)
-    if not match:
+    table = interface_strings().get(lang)
+    notice = (table or {}).get("attribution")
+    if not notice:
         raise ShellError(
-            f"{path.name} has no .attribution block to lift. It is a licence "
+            f"assets/i18n.js has no licence notice for {lang!r}. It is a licence "
             "condition, not decoration -- refusing to generate pages without it."
         )
-    return match.group(1)
+    return notice
 
 
 def hydrated_block_types(doc) -> set:
@@ -166,6 +178,8 @@ def wrap(
     stylesheets: tuple[str, ...] = (),
     data: dict | None = None,
     asset_prefix: str = "",
+    alternates: Mapping[str, str] | None = None,
+    switch_links: Mapping[str, str] | None = None,
 ) -> str:
     """One published page.
 
@@ -173,6 +187,16 @@ def wrap(
     passing it for a page that does not is harmless. The check is here rather
     than in the caller so that every future exporter inherits it -- a rule
     enforced in one place is a rule; enforced in each caller it is a habit.
+
+    `alternates` maps a language to this page's ABSOLUTE URL in that language.
+    Supplying it turns three files into three declared editions of one page;
+    omitting it publishes them as three pages that happen to say the same
+    thing, which docs/features/i18n.md records as making search ranking WORSE
+    rather than better.
+
+    `switch_links` is the same map as hrefs RELATIVE to this page, for the
+    visible switcher. Two maps rather than one because the two have different
+    jobs -- see the switcher block below.
     """
     if declares_municipal_data(doc) and not attribution:
         raise ShellError(
@@ -204,6 +228,54 @@ def wrap(
         else ""
     )
 
+    # THE ALTERNATES. Every language names every language, itself included, plus
+    # x-default pointing at English. Following export_local_pages.py:583-593
+    # rather than reinventing it, and for the reason docs/features/i18n.md:61
+    # gives: without this a search engine treats the three as duplicates
+    # COMPETING with each other, and generating them makes ranking worse.
+    hreflang = ""
+    if alternates:
+        hreflang = "".join(
+            f'\n    <link rel="alternate" hreflang="{escape(code, quote=True)}" '
+            f'href="{escape(href, quote=True)}">'
+            for code, href in sorted(alternates.items())
+        )
+        default = alternates.get(DEFAULT_LANG)
+        if default:
+            hreflang += (
+                '\n    <link rel="alternate" hreflang="x-default" '
+                f'href="{escape(default, quote=True)}">'
+            )
+
+    # THE SWITCHER, as three plain links. The generated commune pages have no
+    # switcher at all -- a reader on /local/85039/fr/ cannot reach the Dutch
+    # version except through a crawler's hreflang -- and every hand-built page
+    # switches with JavaScript against one URL. Because these are three real
+    # routes, links work, and they work with scripting disabled.
+    #
+    # RELATIVE, unlike the alternates above. hreflang is a statement to a
+    # crawler about the live site, so it is absolute; a link a reader clicks
+    # has to work wherever the site is being served -- a local checkout, a
+    # fork's Pages, a review build. Absolute hrefs here would walk a reader
+    # off the server they are on.
+    switcher = ""
+    if switch_links and len(switch_links) > 1:
+        items = "".join(
+            (
+                f'<a href="{escape(switch_links[code], quote=True)}" hreflang="{code}" '
+                f'lang="{code}" data-lang="{code}"'
+                + (' aria-current="page"' if code == lang else "")
+                + f">{escape(LANGUAGE_NAMES.get(code, code))}</a>"
+            )
+            for code in LANGS
+            if code in switch_links
+        )
+        switcher = (
+            f'\n<nav class="bp-lang-switch" aria-label='
+            f'"{escape(SWITCHER_LABEL.get(lang, SWITCHER_LABEL[DEFAULT_LANG]), quote=True)}">'
+            f"{items}</nav>"
+        )
+
     # A hydrated block renders as an empty slot unless its resolved data
     # reaches the browser. `about.html` had none, so this never surfaced until
     # a page carried a map: the block was there, the figures were there, and
@@ -233,6 +305,19 @@ def wrap(
             "});</script>"
         )
 
+    # Carry the choice to the JavaScript pages. A reader who picks French here
+    # and clicks through to map.html should not land in English -- one choice
+    # across the whole site is docs/features/i18n.md's own goal, and the key is
+    # I18N.STORAGE_KEY. The link has already navigated by the time this runs,
+    # so a reader without JavaScript loses the memory, not the page.
+    if switcher:
+        scripts += (
+            "\n<script>document.querySelectorAll('.bp-lang-switch a')"
+            ".forEach(function(a){a.addEventListener('click',function(){"
+            "try{localStorage.setItem('belpulse-lang',a.dataset.lang);}catch(e){}"
+            "});});</script>"
+        )
+
     return (
         "<!DOCTYPE html>\n"
         f'<html lang="{escape(lang, quote=True)}">\n'
@@ -242,9 +327,11 @@ def wrap(
         f"    <title>{escape(title)}</title>"
         f"{meta_description}\n"
         f'    <link rel="canonical" href="{escape(canonical, quote=True)}">'
+        f"{hreflang}"
         f"{links}\n"
         "</head>\n"
         "<body>\n"
+        f"{switcher}"
         f"{fragment}"
         f"{footer}"
         f"{scripts}\n"

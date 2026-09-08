@@ -201,3 +201,31 @@
 .bp-theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}
 .bp-theme-toggle button{border:0; background:var(--bp-surface); color:var(--bp-text-muted); font:inherit; font-size:11px; padding:5px 10px; cursor:pointer}
 .bp-theme-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+
+/* ---- language switcher (block-built pages) ---------------------------------
+   Three LINKS, not three buttons: a block-built page exists at three real
+   URLs, so switching is navigation and belongs in the markup a reader can use
+   with scripting off. The hand-built pages cannot do this -- they have one URL
+   and swap text in the browser -- and the generated commune pages offer no
+   switcher at all. Styled to match .bp-theme-toggle, which is the segmented
+   control every existing page already uses, so it reads as the same site. */
+.bp-lang-switch{
+  display:flex; gap:1px; overflow:hidden; width:max-content; margin:0 0 var(--bp-space-4);
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+}
+.bp-lang-switch a{
+  background:var(--bp-surface); color:var(--bp-text-muted); text-decoration:none;
+  font-size:var(--bp-text-eyebrow); padding:5px 10px;
+}
+.bp-lang-switch a:hover{background:var(--bp-surface-alt); color:var(--bp-text)}
+/* The current language is marked for a screen reader by aria-current; this is
+   the same fact stated visually, so the two cannot disagree. */
+.bp-lang-switch a[aria-current="page"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+.bp-lang-switch a:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
+
+/* ---- the licence notice ----------------------------------------------------
+   Small and quiet, but never hidden: it is a licence condition, not a footer
+   ornament, and Statbel's licence terminates on non-compliance. */
+.bp-page-footer{margin-top:var(--bp-space-8); padding-top:var(--bp-space-4); border-top:1px solid var(--bp-border)}
+.bp-page-footer .attribution{font-size:var(--bp-text-small); color:var(--bp-text-muted); line-height:1.55}
+.bp-page-footer .attribution p{margin:0 0 var(--bp-space-3)}

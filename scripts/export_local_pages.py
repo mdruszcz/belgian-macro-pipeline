@@ -25,12 +25,14 @@ Google to index and demote the domain over. Measured on the real data, no
 current commune actually trips this -- but the rule is enforced rather than
 assumed, because the failure it prevents is silent.
 
-THE ATTRIBUTION BLOCK IS EXTRACTED FROM communes.html, NOT RETYPED. It is a
+THE ATTRIBUTION BLOCK IS READ FROM assets/i18n.js, NOT RETYPED. It is a
 licence condition (docs/data_catalog.md: Statbel's 2015 licence terminates
 automatically on non-compliance), and a second hand-written copy would drift
-from the first the moment either is edited. One source of truth, lifted at
-build time, with the `attrUpdated` placeholder filled with the real date --
-which is itself the "date of last update" the same licence requires.
+from the first the moment either is edited. One source of truth, read at build
+time through `src/pages/strings.py` -- shared with the page-document exporter,
+so those pages cannot drift from these -- with the `attrUpdated` placeholder
+filled with the real date, which is itself the "date of last update" the same
+licence requires.
 
 NO PER-PAGE BUILD STAMP, DELIBERATELY. An earlier version wrote
 `<!-- build:{id} -->` into every page's footer. That made all 565 files
@@ -42,15 +44,12 @@ A page now changes if and only if its DATA changed, which is also what makes
 the URL-stability property absolute rather than "identical apart from one
 line".
 
-ENGLISH ONLY, FOR NOW, AND THIS IS THE ONE THING WORTH ARGUING WITH. The
-payloads already carry trilingual names and the sections config carries
-trilingual labels, so generating FR and NL is the same loop with a different
-language key -- 1,695 files rather than 565. It is not done here because the
-full trilingual interface is roadmap Block X's own step and the attribution
-text extracted above exists only in English on communes.html; generating a
-French page around an English licence notice would be worse than not
-generating it. `_render_page` takes `lang` so that block is a loop, not a
-rewrite.
+THREE LANGUAGES, ONE LOOP. This module was English-only until the licence
+notice moved into `assets/i18n.js` in all three languages -- generating a
+French page around an English licence notice would have been worse than not
+generating it. With the notice trilingual, `_render_page` already took `lang`
+and the change was the loop it was written to allow: 565 pages became 1,695.
+English keeps `local/{nis}/`; the others sit at `local/{nis}/{lang}/`.
 """
 
 import argparse
@@ -58,9 +57,10 @@ import html
 import json
 import re
 import sqlite3
-import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+
+from src.pages import strings as _shared_strings
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_PAYLOAD_DIR = REPO / "public" / "data"
@@ -104,53 +104,19 @@ def _route(nis: str, lang: str) -> str:
     return f"/local/{nis}/" if lang == DEFAULT_LANG else f"/local/{nis}/{lang}/"
 
 
-I18N_JS = Path(__file__).resolve().parents[1] / "assets" / "i18n.js"
+# MOVED to src/pages/strings.py, so the page-document exporter reads the same
+# licence notice from the same place. Re-exported under the old private names
+# because this module's own tests and callers use them, and because a second
+# copy of a licence-text reader is the exact drift assets/i18n.js exists to end.
+I18N_JS = _shared_strings.I18N_JS
 
 
 def _interface_strings() -> dict[str, dict[str, str]]:
-    """Every language's interface strings, read from assets/i18n.js.
-
-    Read through node rather than regexed, because the file is JavaScript and
-    parsing it by pattern is exactly the guessing rule 13 forbids. node is
-    already a hard dependency of this repository's test suite
-    (tests/test_i18n.py, tests/test_local_ui_logic.py), so requiring it here
-    adds nothing a contributor did not already need.
-
-    THIS REPLACED SCRAPING communes.html. These pages used to lift the licence
-    notice out of that page's markup, which worked while there was one language
-    and became impossible with three. The notice now lives once, in the strings
-    file, and both the app and these pages read it from there.
-    """
-    result = subprocess.run(
-        [
-            "node",
-            "-e",
-            "const I=require(process.argv[1]);" "process.stdout.write(JSON.stringify(I.STRINGS))",
-            str(I18N_JS),
-        ],
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
-    if result.returncode != 0:
-        raise SystemExit(
-            f"could not read {I18N_JS} through node: {result.stderr.strip()}\n"
-            "node is required to build the static pages, because the interface "
-            "strings (including the licence notice) live in a JavaScript module "
-            "the browser also loads."
-        )
-    strings = json.loads(result.stdout)
-    missing = [lang for lang in LANGS if lang not in strings]
-    if missing:
-        raise SystemExit(f"{I18N_JS} has no strings for {missing}")
-    for lang in LANGS:
-        if not strings[lang].get("attribution"):
-            raise SystemExit(
-                f"{I18N_JS} has no licence notice for {lang!r}. Refusing to generate "
-                "pages that publish municipal data without one -- Statbel's 2015 "
-                "licence terminates automatically on non-compliance."
-            )
-    return strings
+    """See `src/pages/strings.py`. A thin wrapper, not an alias, so this
+    module's own `I18N_JS` stays the patch point its licence-guard test
+    substitutes -- an alias would freeze the path at import time and the
+    refusal would silently stop being exercised."""
+    return _shared_strings.interface_strings(I18N_JS)
 
 
 def _read_attribution(path: Path = ATTRIBUTION_SOURCE) -> str:
