@@ -879,6 +879,12 @@ batch. (2) The route allowlist FORBIDS the preview-route trick Batches 3 and 4 u
 and /commune.html are not in ROUTE_EXACT, so a page document could not declare the very shape
 that precedent established (known-risks:41). One route added, /preview/about.html, under a
 directory so Batch 17's publication allowlist can treat the whole set as one decision.
+(BOTH SENTENCES ABOVE ARE NOW SUPERSEDED, and left standing as the record of what 15a faced:
+/preview/about.html no longer exists -- 15d moved the route to /about.html and the preview files
+were deleted, the one place that batch removed a live URL, deliberately, since they carried
+noindex, were in no sitemap and were linked from nowhere. And /home.html and /commune.html ARE
+in ROUTE_EXACT as of 17a, which also made a test require that list and src/site/routes.py's
+inventory to agree, so a served page cannot be absent from one of them again.)
 THREE DEFECTS FOUND BY BUILDING AND THEN LOOKING. (1) THE STYLESHEETS 404'd: a page one
 directory down linking "assets/..." asks for /preview/assets/..., and the page still renders,
 which is exactly the trap export_local_pages.py:76 records for its own translated pages. The
@@ -896,6 +902,28 @@ decision export_local_pages.py made, for the same reason: a second hand-written 
 a drifted licence notice is a breach that looks like a typo. Statbel's 2015 licence terminates
 automatically on non-compliance and this project has already published unattributed municipal
 figures once.
+15b SHIPPED 2026-09-08 (#117) -- map.html as a page document, and the SIX SILENT BUGS in the
+way. about.html proved the publish path and could not exercise the resolver; a choropleth of
+565 communes exercised everything else. Every defect failed silently -- no error, no failed
+request, the block reporting `ready` throughout, so a test asserting "the page renders" passes
+through all six. (1) commune_map.js opens with `const MapUI = {}`, and a top-level const in a
+classic script is a LEXICAL global: reachable by name, never a property of window. blocks.js
+read it as `global.MapUI`, got undefined, and hydration returned at its first line. (2)
+CommuneMap.setData wants ROWS and tests `typeof row.value === 'number'`; it was handed bare
+numbers, so all 565 communes failed that test and painted as no-data -- a complete grey map with
+a legend saying nothing carried a value. (3) Suppressed cells were DROPPED rather than passed as
+null-valued rows, so a withheld figure would have reported as missing, collapsing two of the
+five states rule 26 keeps apart. (4) assets/commune_map.css was never linked, so every
+var(--ramp-N) fill resolved to an undefined custom property. (5) assets/i18n.js was never
+linked, and commune_map.js captures the strings table in a const AS IT LOADS, so the legend
+would have printed raw keys. (6) The renderer hid the tooltip with the `hidden` ATTRIBUTE while
+the component shows it by removing a `map-hidden` CLASS -- invisible forever. commune_map.js
+itself is untouched: map.html, home.html, commune.html and communes.html all load it as it
+stands, and the block module is the newcomer. Proved against map.html rather than against a
+screenshot -- identical values for all 565 communes from the same published payload, the same
+legend bands, and a click landing on the same /local/{nis}/ URL. The map block went to v2
+(zoom, indicator picker, click-through) so the conversion is the whole page rather than a
+quieter subset of it.
 DONE 2026-09-08 (Batch 15c): the exporter emits all three languages, each at its own URL with
 hreflang and a self-canonical, and the licence notice is read per language from assets/i18n.js
 rather than lifted from English communes.html. That gate on a canonical cutover is cleared.
@@ -903,18 +931,106 @@ CUT OVER 2026-09-08 (Batch 15d): about.html IS the block-built page now -- /abou
 /fr/about.html, /nl/about.html. The hand-built version is frozen at
 tests/fixtures/pages/about-hand-built.html and the equivalence test compares against that
 copy, because comparing the built page to the live file would compare it to itself.
-map.html remains hand-built: one cutover at a time, and the map is the page with figures.)
+map.html remains hand-built: one cutover at a time, and the map is the page with figures.
+THREE THINGS THE DOCUMENT COULD NOT SHOW, each found before writing code. about.html is a FRAME
+of index.html, not a standalone page -- the parent pushes theme and language in by postMessage
+and waits for a 'dashboard-ready' reply, and the block shell implemented none of it, so a naive
+cutover would have left the front page's About tab frozen in one language and one theme, looking
+fine. The two theme vocabularies do not overlap (index.html sends day/soft/night, the design
+system knows light/dark), so a value passed through raw matches no stylesheet. And the
+equivalence test was about to become VACUOUS: the route is a file path, so exporting to
+/about.html overwrites the file the test compares against, and every assertion would have
+compared a file to itself -- hence the freeze, first, before anything else changed.
+THE INDEPENDENT REVIEW THIS STEP'S OWN How: DEMANDS WAS RUN, and found three P1s. (1) The
+language switcher rendered inside the frame and FOUGHT THE PARENT: clicking "Francais" navigated
+the frame, the new page announced itself, the parent answered with its own unchanged setLang,
+and the reader watched their choice snap back -- while the click had already written
+belpulse-lang: fr, so the page said English and storage said French. Reproduced in a browser;
+the switcher is now hidden when framed, because two language controls in one viewport was the
+bug. (2) The equivalence test compared ENGLISH ONLY, and the trilingual assertion beside it
+checked one hero heading rather than the six rich_text strings that are the rest of the page --
+pasting English into the fr key would have shipped an English French page with a green suite,
+the exact failure this entry names as the gate. Now parameterised over all three languages and
+verified by sabotage. (3) known-risks CLAIMED A BROWSER TEST THAT DID NOT EXIST: the contract
+had been driven by hand in a scratch script and written up as coverage, the same class as a
+screenshot caption asserting a figure that is not there.
+TWO MORE FOUND BY SCREENSHOTTING, invisible to any test comparing words: the three feature icons
+were dropped, and .bp-page had no max-width, so every block-built page rendered edge to edge --
+~1000px lines of body text. Fixed at 1180px, the width the redesigned pages already use.
+AND THE BROWSER TESTS THEMSELVES WERE FLAKY FOUR WAYS, failing CI twice and 9 of 24 runs under
+parallel load. Every one was a race in the TEST against index.html's timers, not a defect in the
+shipped page: loadDashboard fired before window.onload (whose own first act is loadDashboard(0));
+the parent can DROP a tab request mid-fade; a message posted between the frame setting
+`data-framed` and registering its listener is not slow but LOST, so waiting longer never helped;
+and a straggling navigation from setup was counted as the reload the loop-guard test watches for.
+Patching them one at a time was the wrong approach and four rounds of it is the evidence. The
+contract is now tested against a HARNESS parent with no fades and no timers, and the real front
+page gets ONE tolerant integration test proving it is such a parent -- 30 runs at the load that
+failed 9 of 24, zero failures, and 19s down to 4.3s.)
 How: One page at a time (blank, homepage, macro, micro, municipality profile last), freeze the
 hand-built version, recreate through blocks, compare data/screenshots/states, ship behind a
 preview route, switch the canonical route only after independent review.
 Why: The hand-built page stays live until its block version is proven equivalent or better --
 never a risky cutover.
- [BUILD] Batch 16 -- draft and publication transaction
+ [BUILD] Batch 16 -- draft and publication transaction (2026-09-08: MOSTLY ALREADY BUILT, in
+Batch 11, and this entry was overstating what is left. Measured rather than assumed. ALREADY
+DONE: the draft/published split (src/builder/paths.py), POST /api/publish which validates the
+draft BEFORE writing anything (service.py:_post_publish), temp-file + fsync + versioned snapshot
++ atomic os.replace (store.py:publish, with the snapshot claimed BEFORE the replace after the
+Batch 11 red-team pass found a failed publish could already have replaced published.json while
+telling the caller it failed), and `make all` never promoting a draft -- the exporter reads only
+published.json and the Makefile target says so. 24 tests already cover it.
+WHAT IS ACTUALLY LEFT, three things. (1) TEST-GATING: service.py:1146 says in as many words
+"Gating a publish on the test suite passing is Batch 16 and is deliberately not folded in here";
+no pytest or subprocess call exists anywhere in src/builder/. (2) "BUILDS TO A TEMP DIRECTORY":
+store.publish temp-writes the DOCUMENT JSON only -- nothing renders the SITE to a temp dir at
+publish time, so publishing a document does not verify the page it produces. (3) NO CONCURRENCY
+GUARD ON PUBLISH: _refuse_a_stale_write is called only from _post_save; _post_publish takes just
+a page_id and re-reads the draft from disk with no base_sha256. Related: known-risks' two-tab
+row still assigns the save-side fix here, but that shipped in Batch 12a -- the row is stale for
+save and still true for publish.)
 How: draft.json/published.json split; publish validates first, builds to a temp directory,
 runs required tests, replaces published files atomically only on success; make all never
 promotes a draft.
 Why: No builder or test failure may ever corrupt the current public site.
- [BUILD] Batch 17 -- publication allowlist (2026-09-07: SPECCED, not started. Spec:
+ [BUILD] Batch 17 -- publication allowlist (2026-09-08: SPLIT IN TWO. 17a SHIPPED (#119) --
+the route inventory, robots.txt and a sitemap index. 17b -- the allowlist and the deploy change
+-- remains as specced below, and CANNOT BE FINISHED BY AN AGENT: the Pages source is a
+repository SETTING, so the maintainer must flip it to "GitHub Actions" by hand.
+17a EXISTS BECAUSE THE SPEC SAYS SO IN ITS OWN WORDS -- "The route inventory is the most
+valuable thing in this batch [...] It lands first, and it is worth keeping even if everything
+else here is reverted." src/site/routes.py is that inventory: 1,711 URLs in three parts,
+deliberately different in kind. ROOT_PAGES is an explicit frozen table (a derived rule would
+follow a rename and report success), each row carrying `sitemap: True|False` AND A WRITTEN
+REASON, because two of the nine root pages are the unreleased redesign of two others and one is
+rendered inside another's iframe. Commune routes are derived from what was written. Block-page
+routes expand through route_for, moved out of scripts/ since src/ may not import from it and the
+inventory must use the same function the exporter writes with.
+IT WENT RED THE DAY IT WAS WRITTEN AND FOUND THREE LIVE 404s, ALL ON THE FRONT PAGE. index.html's
+nav loaded clock.html, news.html and analysis.html into its iframe; none has ever existed in this
+repository. Worse, window.onload called loadDashboard(2) -- "Default to News" -- and index 2 WAS
+news.html, so THE SITE'S ENTRY POINT LOADED A 404 INTO ITS OWN IFRAME ON EVERY VISIT while the
+nav highlighted a different tab. Neither was catchable by any link checker: the filenames live in
+a JavaScript array, not an href.
+TWO MORE FOUND ON THE WAY. `make pages` WAS BROKEN ON develop -- Batch 15c added a src.pages
+import to export_local_pages.py with no sys.path line, which resolved under pytest (whose rootdir
+is already on the path) and died on ModuleNotFoundError the moment anyone ran the Makefile, with
+a fully green suite; each exporter is now run as a subprocess with --help, because a test that
+only imports a module cannot see this. And local/sitemap.xml rewrote ALL 1,695 LINES ON EVERY
+BUILD: lastmod was datetime.now(), identical on every entry, so a build where no figure moved
+still produced 1695 insertions and 1695 deletions -- the same churn this module's docstring says
+was deliberately removed from the pages, surviving because the byte-identity test read one
+commune page and never opened the sitemap. lastmod is now each commune's own newest indicator
+date, which is also what lastmod MEANS.
+ALSO IN 17a: robots.txt and a sitemap INDEX, neither of which existed -- /sitemap.xml names
+/sitemap-pages.xml and the existing /local/sitemap.xml, so the commune sitemap keeps its own
+owner, and the 9 root pages had never been submitted for indexing at all. noindex on the
+/preview/ pages, which duplicate live pages word for word and each carried a self-referencing
+canonical while the live pages carry NO canonical -- so the preview was the only version claiming
+to be canonical for its own content. And ROUTE_EXACT, which omitted /home.html and /commune.html
+(both live served pages, recorded at known-risks:41 and enforced by nothing), now has to agree
+with the inventory or a test fails.
+17b's ORIGINAL SPEC NOTE FOLLOWS, unchanged. (2026-09-07: SPECCED, not started. Spec:
 docs/implementation/batches/batch-17-publication-allowlist-spec.md. Maintainer's decision: keep
 committing drafts, exclude them from the published site, so the DEPLOY changes -- Pages publishes
 a default-deny allowlist instead of serving the repository root. The allowlist governs the SITE'S
