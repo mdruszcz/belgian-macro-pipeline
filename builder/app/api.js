@@ -157,8 +157,20 @@
     return call(api, "POST", "/api/validate", { page_id: pageId, document: document });
   }
 
-  function postSave(api, pageId, document) {
-    return call(api, "POST", "/api/save", { page_id: pageId, document: document });
+  /**
+   * postSave -- `baseSha256` is the hash /api/document gave us for the bytes
+   * this edit started from. The service refuses the write if the file is no
+   * longer those bytes, so a second tab (or a hand edit) cannot be silently
+   * overwritten. Omitted entirely when we have no hash, which is the first
+   * save of a page that does not exist yet -- sending null would be a claim
+   * about the disk we cannot make.
+   */
+  function postSave(api, pageId, document, baseSha256) {
+    var body = { page_id: pageId, document: document };
+    if (baseSha256) {
+      body.base_sha256 = baseSha256;
+    }
+    return call(api, "POST", "/api/save", body);
   }
 
   function postPublish(api, pageId) {

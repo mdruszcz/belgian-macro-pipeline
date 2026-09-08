@@ -37,6 +37,7 @@
       api: context.api,
       previewCss: context.previewCss,
       languages: context.languages,
+      schemaVersion: context.schemaVersion,
       lang: "en",
       statusEl: context.status,
       topbarEl: topbarEl,
@@ -301,6 +302,9 @@
         store.doc = result.document;
         store.migrated = !!result.migrated;
         store.migratedAcknowledged = false;
+        // The bytes this edit starts from. Handed back on save so the service
+        // can refuse a write over someone else's change.
+        store.baseSha256 = result.sha256 || "";
         store.history = shell.createHistory(store.doc);
         store.dirty = false;
         store.selection = null;
@@ -363,7 +367,10 @@
         seo.description = draft.description;
       }
       return {
-        schema_version: 1,
+        // From the service, never a literal here: a page created by the shell
+        // must be born at the CURRENT version, or it reports itself as
+        // "migrated on load" the moment it is reopened.
+        schema_version: store.schemaVersion,
         page_id: draft.page_id,
         revision: 1,
         route: draft.route,
@@ -639,7 +646,7 @@
     };
 
     function doSave() {
-      api.postSave(store.api, store.pageId, store.doc).then(function (result) {
+      api.postSave(store.api, store.pageId, store.doc, store.baseSha256).then(function (result) {
         if (!result.ok) {
           if (result.code === "validation_failed") {
             applyValidationErrors(store, result.errors);
@@ -655,6 +662,10 @@
         store.migrated = false;
         store.lastErrors = [];
         store.startupError = null;
+        // The bytes we just wrote become the base for the next save. Without
+        // this, the second save of a session would compare against the hash
+        // from load time and refuse our own previous write.
+        store.baseSha256 = result.sha256 || "";
         renderAll(store);
         dom.announce(store.statusEl, "Saved (" + result.bytes + " bytes).");
         // Sequential, not concurrent -- see the comment on actions.init for

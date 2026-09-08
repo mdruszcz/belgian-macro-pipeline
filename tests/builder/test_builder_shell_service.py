@@ -298,7 +298,18 @@ def test_a_percent_encoded_spelling_is_the_same_route_not_a_second_one(server):
 def test_get_routes_gained_api_registry_and_nothing_else():
     assert GET_ROUTES - BATCH_11_GET_ROUTES == {"/api/registry"}
     assert BATCH_11_GET_ROUTES - GET_ROUTES == set()
-    assert POST_ROUTES == BATCH_11_POST_ROUTES
+
+
+def test_post_routes_gained_api_preview_and_nothing_else():
+    """Batch 13a adds exactly one POST route, and removes none.
+
+    The surface is pinned rather than merely counted so that a route added by
+    a later batch has to be named here deliberately -- every POST route writes,
+    renders, or publishes, and one arriving unnoticed is the kind of thing an
+    audit finds after it ships.
+    """
+    assert POST_ROUTES - BATCH_11_POST_ROUTES == {"/api/preview"}
+    assert BATCH_11_POST_ROUTES - POST_ROUTES == set()
 
 
 def test_no_route_bypasses_the_transport_and_token_checks():

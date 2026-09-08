@@ -39,6 +39,7 @@ What holds this together:
   the forbidden spellings do not appear even inside a docstring.
 """
 
+import hashlib
 import hmac
 import json
 import re
@@ -64,6 +65,7 @@ from src.pages import (
 from src.pages.metadata import PageMetadata
 from src.pages.registry import Registry
 from src.pages.schema import (
+    CURRENT_SCHEMA_VERSION,
     MAX_DOCUMENT_BYTES,  # deep import on purpose: not in src.pages.__all__
     PageValidationError,
     check_raw_size,
@@ -106,7 +108,9 @@ JSON_CONTENT_TYPE = "application/json"
 GET_ROUTES = frozenset(
     {"/", "/api/pages", "/api/document", "/api/registry", "/api/versions", "/preview"}
 )
-POST_ROUTES = frozenset({"/api/validate", "/api/save", "/api/publish", "/api/restore"})
+POST_ROUTES = frozenset(
+    {"/api/validate", "/api/save", "/api/publish", "/api/restore", "/api/preview"}
+)
 
 #: The repository root, derived from this file's own location and from nothing
 #: a request can influence.
@@ -176,6 +180,10 @@ STATUS_FOR_CODE = {
     "guard_rejected": 413,
     "payload_too_large": 413,
     "version_space_exhausted": 409,
+    # A save based on a copy of the draft that is no longer what is on disk.
+    # 409 for the same reason as above: the request is well-formed and the
+    # caller is allowed to make it -- it just lost a race.
+    "stale_write": 409,
     "internal_error": 500,
 }
 
@@ -309,6 +317,16 @@ def preview_data(doc) -> dict:
             if isinstance(block_id, str) and block_id and block.get("binding"):
                 data[block_id] = {"state": "unavailable"}
     return data
+
+
+def _sha256_of_text(text: str) -> str:
+    """Hash of the file's bytes as they are stored.
+
+    Encoded here rather than taking bytes, because every caller holds decoded
+    text -- and encoding in one place is what keeps the hash `/api/document`
+    hands out identical to the one `/api/save` compares it against.
+    """
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _canonical_text(doc) -> str:
@@ -602,6 +620,9 @@ def bootstrap_html(config: BuilderConfig, nonce: str = "") -> str:
         "}\n"
         f"const PREVIEW_CSS = {_js_string(preview_css)};\n"
         f"const LANGUAGES = {json.dumps(list(LANGUAGES))};\n"
+        # Injected rather than written into the shell's JavaScript, so a
+        # schema bump changes one Python constant and the browser follows.
+        f"const SCHEMA_VERSION = {CURRENT_SCHEMA_VERSION};\n"
         "const shell = {};\n"
         f"{_escape_script_end(shell_js)}\n"
         "// Entry point. Batch 12b's module assigns shell.start; until it\n"
@@ -611,6 +632,7 @@ def bootstrap_html(config: BuilderConfig, nonce: str = "") -> str:
         "    api: api,\n"
         "    previewCss: PREVIEW_CSS,\n"
         "    languages: LANGUAGES,\n"
+        "    schemaVersion: SCHEMA_VERSION,\n"
         "    root: document.getElementById('shell-root'),\n"
         "    preview: document.getElementById('shell-preview'),\n"
         "    status: document.getElementById('shell-status'),\n"
@@ -909,6 +931,11 @@ class BuilderHandler(BaseHTTPRequestHandler):
                 # silently on the next save.
                 "document": migrated,
                 "migrated": migrated != stored,
+                # The hash of the bytes ON DISK, which the caller hands back on
+                # save so a write based on a stale read can be refused. See
+                # _post_save for why this is the file's hash and not the
+                # document's `revision` field.
+                "sha256": _sha256_of_text(text),
             },
         )
 
@@ -961,6 +988,8 @@ class BuilderHandler(BaseHTTPRequestHandler):
             self._post_publish(page_id)
         elif path == "/api/restore":
             self._post_restore(page_id, payload)
+        elif path == "/api/preview":
+            self._post_preview(payload)
 
     def _findings(self, doc) -> list:
         return validate_document(doc, metadata=self.config.metadata, registry=self.config.registry)
@@ -984,6 +1013,7 @@ class BuilderHandler(BaseHTTPRequestHandler):
             # Rejected BEFORE any filesystem call, so draft.json is byte
             # unchanged -- and if it did not exist, it still does not.
             self._reject_findings(findings)
+        self._refuse_a_stale_write(page_id, payload)
         text = _canonical_text(doc)
         result = store.save_draft(page_id, text)
         self._send_json(
@@ -994,6 +1024,92 @@ class BuilderHandler(BaseHTTPRequestHandler):
                 "bytes": result.bytes,
                 "sha256": result.sha256,
             },
+        )
+
+    def _post_preview(self, payload: dict) -> None:
+        """Render a document held in the browser, WITHOUT writing it anywhere.
+
+        `GET /preview` reads from disk, so before this existed the canvas could
+        only ever show the last explicitly-saved draft. Dragging a block would
+        have moved nothing on screen until the operator saved -- which is the
+        opposite of direct manipulation, and would have pushed Batch 13 toward
+        autosaving on every pointer move just to make the picture update.
+
+        Deliberately renders an INVALID document rather than refusing one: a
+        document is transiently invalid in the middle of an edit (a block put
+        down before its binding is filled in), and a preview that blanked at
+        those moments would be useless exactly when it is being watched. The
+        renderer isolates a failing block, so an invalid one shows the failure
+        in place. `/api/validate` is what says whether it is valid.
+
+        The document is canonicalised and re-parsed rather than rendered from
+        the payload dict, so it goes through byte-for-byte the same size caps,
+        numeric-fidelity checks and migration ladder as a document read from
+        disk. Two rendering paths that guard differently is how the safe one
+        stops being the one that matters.
+        """
+        doc = payload.get("document")
+        lang = payload.get("lang") or "en"
+        if lang not in LANGUAGES:
+            raise ClientError("bad_request", "lang must be en, fr or nl")
+        parsed = _parse_document_text(_canonical_text(doc))
+        html = render_document(
+            parsed,
+            registry=self.config.registry,
+            lang=lang,
+            data=preview_data(parsed),
+        )
+        self._send_html(
+            200,
+            html,
+            extra=(
+                # Identical to GET /preview's: this is unvalidated content
+                # rendered on the same origin as the write API, and it is now
+                # unvalidated content that never even reached the disk.
+                (
+                    "Content-Security-Policy",
+                    "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+                ),
+            ),
+        )
+
+    def _refuse_a_stale_write(self, page_id: str, payload: dict) -> None:
+        """Optimistic concurrency, keyed on the FILE's hash.
+
+        Two tabs open on one page used to overwrite each other silently, and
+        autosave turns that from a rare accident into an ordinary Tuesday. The
+        caller sends `base_sha256` -- the hash `/api/document` gave it when it
+        read the draft -- and a write is refused if the bytes on disk are no
+        longer those bytes.
+
+        WHY NOT the document's own `revision` field, which exists and is
+        required: detecting a conflict that way means the stored revision has
+        to advance on every save, and that would break the property Batch 12
+        was accepted on -- that a canonical draft saved without edits comes
+        back byte-identical. Hashing the file costs nothing, changes no bytes,
+        and catches strictly more: it also refuses a write over a draft edited
+        by hand in an editor, which a revision counter never would.
+
+        `base_sha256` is OPTIONAL and its absence means "I am not claiming to
+        have read anything" -- a first save of a page that does not exist yet
+        has no hash to send. It is a guard against a stale overwrite, not an
+        authentication step; the token is what makes this endpoint privileged.
+        """
+        claimed = payload.get("base_sha256")
+        if claimed is None:
+            return
+        if not isinstance(claimed, str):
+            raise ClientError("bad_request", "base_sha256 must be a string")
+        current_text = store.read_document_text(page_id, "draft")
+        current = _sha256_of_text(current_text) if current_text is not None else None
+        if current == claimed:
+            return
+        raise ClientError(
+            "stale_write",
+            (
+                "this draft changed on disk since it was opened, so saving now "
+                "would overwrite that change; reload the page to see it first"
+            ),
         )
 
     def _post_publish(self, page_id: str) -> None:

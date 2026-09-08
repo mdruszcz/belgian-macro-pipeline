@@ -116,12 +116,16 @@
     "block": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "type", "version", "props", "binding", "visibility", "layout"],
+      "required": ["id", "type", "version", "props", "binding", "visibility", "layout", "locked"],
       "properties": {
         "id": {
           "description": "Unique across the whole document and never reused after deletion, so undo/redo history can name a dead block without colliding with a live one.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "locked": {
+          "description": "A locked block refuses move, resize and delete in the builder. It is an EDITING guard, not a permission and not a publication state: it changes nothing about how the block renders, and anyone who can edit the document can unlock it. Required rather than optional so that every block states its intent -- an absent field would have to mean 'unlocked', and the same absence would then also mean 'written by a tool that did not know about locking'.",
+          "type": "boolean"
         },
         "type": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
         "version": {

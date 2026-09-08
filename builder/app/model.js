@@ -256,6 +256,9 @@
       binding: null,
       visibility: defaultVisibility(),
       layout: defaultLayoutAt(row),
+      // Required since schema_version 2. A block the operator just placed is
+      // one they are about to arrange, so it starts unlocked.
+      locked: false,
     };
     next.sections[sectionIndex].blocks.push(block);
     return { doc: next, blockId: id };

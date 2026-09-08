@@ -20,6 +20,7 @@ and metadata.
 
 from __future__ import annotations
 
+import hashlib
 import http.client
 import json
 import secrets
@@ -487,3 +488,203 @@ def test_bootstrap_html_strips_token_from_url_via_history_replacestate():
     config = _Config(host="127.0.0.1", port=8787, token="x" * 43)
     html = bootstrap_html(config)
     assert "history.replaceState" in html
+
+
+# ---------------------------------------------------------------------------
+# stale-write refusal (Batch 13a)
+#
+# Two tabs open on one page used to overwrite each other with no warning, and
+# autosave turns that from a rare accident into an ordinary one. The caller
+# hands back the hash /api/document gave it; a write is refused if the file is
+# no longer those bytes.
+# ---------------------------------------------------------------------------
+
+
+def _open(server, page_id="home"):
+    """Read a draft the way the shell does, returning (document, sha256)."""
+    resp, raw = server.request("GET", f"/api/document?page_id={page_id}&which=draft")
+    assert resp.status == 200, raw
+    body = _json(raw)
+    return body["document"], body["sha256"]
+
+
+def test_get_document_hands_out_the_hash_of_the_bytes_on_disk(server):
+    doc = builders.minimal_valid_document()
+    server.request("POST", "/api/save", body={"page_id": "home", "document": doc})
+    _, sha = _open(server)
+    on_disk = (builder_store.PAGES_ROOT / "home" / "draft.json").read_bytes()
+    assert sha == hashlib.sha256(on_disk).hexdigest()
+
+
+def test_a_save_carrying_the_current_hash_is_accepted(server):
+    doc = builders.minimal_valid_document()
+    server.request("POST", "/api/save", body={"page_id": "home", "document": doc})
+    reopened, sha = _open(server)
+    resp, raw = server.request(
+        "POST",
+        "/api/save",
+        body={"page_id": "home", "document": reopened, "base_sha256": sha},
+    )
+    assert resp.status == 200, raw
+
+
+def test_a_save_based_on_a_stale_read_is_refused(server):
+    """The two-tab case, in the order it actually happens: both tabs open the
+    same draft, one saves, then the other tries."""
+    doc = builders.minimal_valid_document()
+    server.request("POST", "/api/save", body={"page_id": "home", "document": doc})
+
+    tab_a, sha_a = _open(server)
+    tab_b, sha_b = _open(server)
+    assert sha_a == sha_b, "both tabs must start from the same bytes"
+
+    tab_a["seo"]["title"]["en"] = "Saved by tab A"
+    first, raw = server.request(
+        "POST", "/api/save", body={"page_id": "home", "document": tab_a, "base_sha256": sha_a}
+    )
+    assert first.status == 200, raw
+
+    tab_b["seo"]["title"]["en"] = "Saved by tab B"
+    second, raw = server.request(
+        "POST", "/api/save", body={"page_id": "home", "document": tab_b, "base_sha256": sha_b}
+    )
+    assert second.status == 409
+    assert _json(raw)["error"]["code"] == "stale_write"
+
+
+def test_a_refused_stale_write_leaves_the_earlier_save_intact(server):
+    """Refusing is only worth anything if the first author's work survives."""
+    doc = builders.minimal_valid_document()
+    server.request("POST", "/api/save", body={"page_id": "home", "document": doc})
+    tab_a, sha_a = _open(server)
+    tab_b, sha_b = _open(server)
+
+    tab_a["seo"]["title"]["en"] = "Tab A wins"
+    server.request(
+        "POST", "/api/save", body={"page_id": "home", "document": tab_a, "base_sha256": sha_a}
+    )
+    before = (builder_store.PAGES_ROOT / "home" / "draft.json").read_bytes()
+
+    tab_b["seo"]["title"]["en"] = "Tab B should not land"
+    server.request(
+        "POST", "/api/save", body={"page_id": "home", "document": tab_b, "base_sha256": sha_b}
+    )
+    after = (builder_store.PAGES_ROOT / "home" / "draft.json").read_bytes()
+
+    assert after == before
+    assert b"Tab A wins" in after
+    assert b"Tab B should not land" not in after
+
+
+def test_a_save_with_no_claimed_hash_is_still_allowed(server):
+    """Absence means "I am not claiming to have read anything" -- the first
+    save of a page that does not exist yet has no hash to send. This guard is
+    about stale overwrites, not about authorising the request."""
+    doc = builders.minimal_valid_document()
+    resp, raw = server.request("POST", "/api/save", body={"page_id": "fresh", "document": doc})
+    assert resp.status == 200, raw
+
+
+def test_a_hash_claimed_for_a_page_that_does_not_exist_is_refused(server):
+    """A caller claiming to have read bytes that are not there is working from
+    something this service did not give it."""
+    doc = builders.minimal_valid_document()
+    resp, raw = server.request(
+        "POST",
+        "/api/save",
+        body={"page_id": "ghost", "document": doc, "base_sha256": "0" * 64},
+    )
+    assert resp.status == 409
+    assert _json(raw)["error"]["code"] == "stale_write"
+
+
+def test_a_non_string_hash_is_a_bad_request_not_a_crash(server):
+    doc = builders.minimal_valid_document()
+    resp, raw = server.request(
+        "POST", "/api/save", body={"page_id": "home", "document": doc, "base_sha256": 17}
+    )
+    assert resp.status == 400
+    assert _json(raw)["error"]["code"] == "bad_request"
+
+
+# ---------------------------------------------------------------------------
+# POST /api/preview -- rendering a document that was never written (Batch 13a)
+# ---------------------------------------------------------------------------
+
+
+def test_post_preview_renders_a_document_that_is_not_on_disk(server):
+    doc = builders.minimal_valid_document()
+    resp, raw = server.request(
+        "POST", "/api/preview", body={"page_id": "never-saved", "document": doc}
+    )
+    assert resp.status == 200, raw
+    assert resp.getheader("Content-Type", "").startswith("text/html")
+    assert raw, "a rendered document is not empty"
+    assert not (builder_store.PAGES_ROOT / "never-saved").exists(), "preview must not write"
+
+
+def test_post_preview_agrees_byte_for_byte_with_the_on_disk_route(server):
+    """The two rendering paths must not drift. If POST could ever disagree
+    with GET, the canvas would be showing something the published page will
+    not be -- which is the one thing the shared renderer exists to prevent."""
+    doc = builders.realistic_multi_section_document()
+    server.request("POST", "/api/save", body={"page_id": "home", "document": doc})
+
+    stored, _sha = _open(server)
+    from_disk_resp, from_disk = server.request("GET", "/preview?page_id=home&which=draft")
+    posted_resp, posted = server.request(
+        "POST", "/api/preview", body={"page_id": "home", "document": stored}
+    )
+
+    assert from_disk_resp.status == 200
+    assert posted_resp.status == 200
+    assert posted == from_disk
+
+
+def test_post_preview_carries_the_same_locked_down_headers_as_the_disk_route(server):
+    doc = builders.minimal_valid_document()
+    _resp_disk = server.request("POST", "/api/save", body={"page_id": "home", "document": doc})
+    disk, _ = server.request("GET", "/preview?page_id=home&which=draft")
+    posted, _ = server.request("POST", "/api/preview", body={"page_id": "home", "document": doc})
+    assert posted.getheader("Content-Security-Policy") == disk.getheader("Content-Security-Policy")
+    assert "sandbox" in posted.getheader("Content-Security-Policy")
+
+
+def test_post_preview_renders_an_invalid_document_rather_than_refusing_it(server):
+    """A document is transiently invalid mid-edit -- a block placed before its
+    binding is filled in. A preview that blanked at that moment would be
+    useless exactly while it is being watched, so the renderer's per-block
+    isolation shows the failure in place instead."""
+    doc = builders.minimal_valid_document()
+    doc["sections"][0]["blocks"].append(
+        builders.make_block("kpi_card", block_id="blk-unbound-1", binding=None)
+    )
+    validate, _raw = server.request(
+        "POST", "/api/validate", body={"page_id": "home", "document": doc}
+    )
+    assert validate.status == 422, "this fixture must really be invalid"
+
+    resp, raw = server.request("POST", "/api/preview", body={"page_id": "home", "document": doc})
+    assert resp.status == 200, raw
+    assert raw
+
+
+def test_post_preview_rejects_an_unknown_language(server):
+    doc = builders.minimal_valid_document()
+    resp, raw = server.request(
+        "POST", "/api/preview", body={"page_id": "home", "document": doc, "lang": "de"}
+    )
+    assert resp.status == 400
+    assert _json(raw)["error"]["code"] == "bad_request"
+
+
+def test_post_preview_renders_each_language(server):
+    doc = builders.minimal_valid_document()
+    rendered = {}
+    for lang in ("en", "fr", "nl"):
+        resp, raw = server.request(
+            "POST", "/api/preview", body={"page_id": "home", "document": doc, "lang": lang}
+        )
+        assert resp.status == 200, raw
+        rendered[lang] = raw
+    assert len(set(rendered.values())) == 3, "each language must render differently"
