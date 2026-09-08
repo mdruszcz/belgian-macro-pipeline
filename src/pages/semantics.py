@@ -92,6 +92,7 @@ ROUTE_EXACT = frozenset(
         # judgement per file. Added individually, so this stays an inventory
         # rather than an open door.
         "/preview/about.html",
+        "/preview/map.html",
     }
 )
 

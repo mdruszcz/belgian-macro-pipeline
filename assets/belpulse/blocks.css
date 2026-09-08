@@ -94,6 +94,39 @@
 .bp-block-map .mapbox{position:relative; min-height:240px}
 .bp-block-map .legend{overflow-x:auto; margin-top:var(--bp-space-3)}
 
+/* ---- the map block's own chrome -----------------------------------------
+   map.html floats its zoom buttons ON the map (.zoom, in commune_map.css).
+   A block does not: it can sit in any grid cell at any width, and an overlay
+   sized for a full-bleed map covers a narrow one. So the controls are a real
+   toolbar above the map, in the design system's own tokens, and the component
+   keeps its behaviour while the block keeps its layout. */
+.bp-map-toolbar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--bp-space-3);
+  margin-bottom:var(--bp-space-3);
+}
+.bp-map-picker{display:flex; align-items:center; gap:var(--bp-space-2); min-width:0}
+.bp-map-picker span{
+  font-size:var(--bp-text-eyebrow); color:var(--bp-text-muted); white-space:nowrap;
+}
+.bp-map-picker select{
+  font-size:var(--bp-text-small); font-family:var(--bp-font-ui);
+  color:var(--bp-text); background:var(--bp-surface);
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  padding:var(--bp-space-2) var(--bp-space-3); max-width:100%;
+}
+/* A disabled picker is one whose indicator list has not arrived yet, not a
+   control the reader is forbidden -- so it dims rather than looking broken. */
+.bp-map-picker select:disabled{opacity:.55; cursor:progress}
+.bp-map-zoom{display:flex; gap:var(--bp-space-2); margin-left:auto}
+.bp-map-zoom button{
+  width:2rem; height:2rem; display:flex; align-items:center; justify-content:center;
+  font-family:var(--bp-font-ui); font-size:1rem; line-height:1; cursor:pointer;
+  color:var(--bp-text); background:var(--bp-surface);
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+}
+.bp-map-zoom button:hover{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+.bp-map-zoom button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:2px}
+
 /* A block whose canvas has not been hydrated yet reserves its height, so
    scrolling past a lazy chart does not shift everything below it. */
 .bp-chart-canvas-wrap{min-height:210px}

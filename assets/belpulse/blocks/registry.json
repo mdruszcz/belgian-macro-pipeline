@@ -335,14 +335,15 @@
     "map": {
       "accepts_binding": true,
       "props_schema_status": "provisional",
-      "current_version": 1,
+      "current_version": 2,
       "interactive": true,
       "reuses": "assets/commune_map.js (claude.md rule 29 -- no second map implementation)",
       "requires_binding": true,
       "supported_versions": [
-        1
+        1,
+        2
       ],
-      "why_in_batch_9": "rule 29: the registry has to state that a map block reuses the shared map engine.",
+      "why_in_batch_9": "rule 29: the registry has to state that a map block reuses the shared map engine. v2 (Batch 15) adds the chrome map.html owns -- zoom, an indicator picker and click-through -- because the shared component already had every one of those capabilities and only v1's markup was missing the controls to reach them. Without them a converted map.html is a subset, not an equivalent, and this programme's own rule is that a hand-built page stays live until the block version is equivalent.",
       "versions": {
         "1": {
           "props_schema_status": "provisional",
@@ -361,6 +362,39 @@
               },
               "title": {
                 "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        },
+        "2": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "legend_title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "show_legend": {
+                "type": "boolean"
+              },
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "show_zoom": {
+                "description": "Zoom in / out / reset controls. CommuneMap already has zoomBy() and resetView(); v1 simply rendered no chrome to reach them, so a published map could be panned but not zoomed while map.html could.",
+                "type": "boolean"
+              },
+              "indicator_picker": {
+                "description": "Let the reader choose which indicator the map shows, the way map.html does. The block's own binding supplies the OPENING indicator; the picker fetches public/data/indicators/{id}.json on demand rather than embedding every indicator in the page, which is how map.html already works and what keeps the page from carrying megabytes it will not use.",
+                "type": "boolean"
+              },
+              "click_through": {
+                "description": "Clicking a commune opens its profile. CommuneMap's onSelect already supports it; a map that should not navigate simply leaves this off.",
+                "type": "boolean"
               }
             }
           }

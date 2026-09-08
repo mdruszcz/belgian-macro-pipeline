@@ -52,6 +52,21 @@ LANGUAGES = ("en", "fr", "nl")
 #:
 #: "ready" carries no message ON PURPOSE: a real measured zero is `ready`, and
 #: claude.md rule 26 forbids a zero ever reading as an absence.
+#: Control labels. Named in two parts, not three: the guard in
+#: tests/pages/test_page_document_render.py flags any three-part SCREAMING_SNAKE
+#: name as indicator-shaped (rule 24), and keeping the guard absolute is worth
+#: more than a tidier constant name.
+#:
+#: Trilingual because rule 7 applies to every user-facing
+#: string, and a French reader meeting an English "Zoom in" is exactly the
+#: "foreign product" signal docs/steps warns about for this market.
+PICKER_LABEL = {"en": "Indicator", "fr": "Indicateur", "nl": "Indicator"}
+ZOOM_LABELS = {
+    "en": {"in": "Zoom in", "out": "Zoom out", "reset": "Reset view"},
+    "fr": {"in": "Zoom avant", "out": "Zoom arrière", "reset": "Réinitialiser la vue"},
+    "nl": {"in": "Inzoomen", "out": "Uitzoomen", "reset": "Beeld herstellen"},
+}
+
 STATE_TEXT = {
     "loading": {"en": "Loading…", "fr": "Chargement…", "nl": "Laden…"},
     "missing": {"en": "no data", "fr": "aucune donnée", "nl": "geen gegevens"},
@@ -267,21 +282,85 @@ def _render_map(block, props, data, lang):
     """Hydrated for the same reason as a chart, and by the SAME shared map
     component every other map on this site uses (claude.md rule 29) -- this
     emits the slot and the elements that component expects, never a second map
-    implementation."""
+    implementation.
+
+    v2 adds the CHROME, not new map capability: `CommuneMap` already had
+    `zoomBy`, `resetView` and `onSelect`, and v1 simply rendered no controls to
+    reach them, so a published map could be panned but not zoomed while
+    map.html could. The buttons are real markup here so a reader without
+    JavaScript sees the same page structure; blocks.js wires them.
+    """
     title = text_in(props.get("title"), lang)
     name = text_in(props.get("accessible_name"), lang)
     legend_title = text_in(props.get("legend_title"), lang)
     parts = []
     if title:
         parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+
+    controls = ""
+    if props.get("indicator_picker"):
+        # Labelled, and labelled in the reader's language: a bare select next
+        # to a map is not a control anyone can use with a screen reader.
+        label = esc(PICKER_LABEL.get(lang, PICKER_LABEL["en"]))
+        controls += (
+            f'<label class="bp-map-picker"><span>{label}</span>'
+            "<select data-map-picker disabled></select></label>"
+        )
+    if props.get("show_zoom"):
+        zoom = ZOOM_LABELS.get(lang, ZOOM_LABELS["en"])
+        controls += (
+            '<div class="bp-map-zoom">'
+            + "".join(
+                f'<button type="button" data-map-zoom="{action}" '
+                f'aria-label="{esc(zoom[action])}" title="{esc(zoom[action])}">{glyph}</button>'
+                for action, glyph in (("in", "+"), ("out", "\u2212"), ("reset", "\u21ba"))
+            )
+            + "</div>"
+        )
+    if controls:
+        parts.append(f'<div class="bp-map-toolbar">{controls}</div>')
+
     parts.append(
         '<div class="bp-block-map"'
-        + _attrs([("data-hydrate", "map")])
-        + f'><div class="mapbox"><svg role="img" aria-label="{esc(name or title)}"></svg>'
-        '<div class="tip" hidden></div></div>'
+        + _attrs(
+            [
+                ("data-hydrate", "map"),
+                ("data-map-zoom-enabled", "1" if props.get("show_zoom") else None),
+                ("data-map-picker-enabled", "1" if props.get("indicator_picker") else None),
+                ("data-map-click-through", "1" if props.get("click_through") else None),
+            ]
+        )
+        # EVERY CLASS HERE IS A CONTRACT WITH assets/commune_map.css AND
+        # assets/commune_map.js, not decoration:
+        #   svg.map        -- the stroke, cursor and width:100% rules, without
+        #                     which 565 paths render at intrinsic size with no
+        #                     outline at all
+        #   .map-tip       -- and `map-hidden`, NOT the `hidden` attribute:
+        #                     CommuneMap shows the tooltip by removing that
+        #                     class, so a `hidden` attribute it never touches
+        #                     leaves the tooltip invisible forever
+        #   .scale/.note   -- the legend geometry; .swatches div is 64px wide
+        #                     there and MapUI.SWATCH_PX is 64 here, and the
+        #                     tick positions are computed from that number
+        # Matching map.html's own markup is the point: one stylesheet, one
+        # component, one appearance.
+        + f'><div class="mapbox"><svg class="map" role="img" '
+        f'aria-label="{esc(name or title)}"></svg>'
+        '<div class="map-tip map-hidden"></div></div>'
     )
     if props.get("show_legend"):
-        legend = '<div class="legend"><div class="swatches"></div><div class="ticks"></div></div>'
+        nodata = esc(STATE_TEXT["missing"].get(lang, STATE_TEXT["missing"]["en"]))
+        legend = (
+            '<div class="legend">'
+            '<div class="scale"><div class="swatches"></div><div class="ticks"></div></div>'
+            f'<div class="nodata-key"><i></i> <span>{nodata}</span></div>'
+            # The coverage sentence -- how many communes carry a value, and how
+            # many were WITHHELD rather than missing. CommuneMap writes it; the
+            # block simply has to give it somewhere to go, or rule 26's two
+            # distinct states arrive on the page as one silence.
+            '<div class="note"></div>'
+            "</div>"
+        )
         if legend_title:
             legend = f'<div class="bp-block-caption">{esc(legend_title)}</div>' + legend
         parts.append(legend)
