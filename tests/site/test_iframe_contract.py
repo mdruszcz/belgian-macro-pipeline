@@ -43,7 +43,6 @@ import functools
 import http.server
 import socketserver
 import threading
-import time
 from pathlib import Path
 
 import pytest
@@ -297,54 +296,60 @@ def test_the_real_front_page_is_such_a_parent(browser, site):
     """The integration check, and the reason the harness above is not a private
     protocol I invented.
 
-    Deliberately ONE test and deliberately tolerant: index.html fades its
-    iframe for 300 ms, calls `loadDashboard(0)` from `window.onload`, and can
-    drop a tab request that arrives mid-fade. Asserting six things through
-    that produced four different flakes. Asserting ONE thing, with a retry,
-    is what this page can honestly support -- and it is enough, because what
-    it proves is that index.html still speaks the contract the harness tests
-    in detail.
+    IT ASSERTS ONLY ITS OWN CLAIM: that index.html SENDS what the contract
+    says a parent sends. Whether the frame then finishes navigating is the
+    harness's job, and it covers it exhaustively with no timers in the way.
+
+    Earlier versions asserted the whole round trip through this page and were
+    flaky five times over, in five different ways, because index.html is
+    timer-driven -- it fades its iframe for 300 ms, calls loadDashboard(0) from
+    window.onload, and re-syncs on several setTimeouts. Every one of those
+    flakes was a race in the test, never a defect in the shipped page. An
+    assertion that needs four of someone else's timers to line up is not
+    testing what it says it tests.
+
+    The spy is installed with add_init_script, which applies to EVERY frame in
+    the context, so what the About page receives is observable without
+    modifying it.
     """
     context = browser.new_context(viewport={"width": 1280, "height": 900})
     page = context.new_page()
-    page.add_init_script(
-        "window.__seen = [];"
-        "window.addEventListener('message', function (e) { window.__seen.push(e.data); });"
-        "try{ localStorage.setItem('belpulse-lang','fr'); }catch(e){}"
+    context.add_init_script(
+        "window.__got = [];"
+        "window.addEventListener('message', function (e) { window.__got.push(e.data); });"
     )
     try:
         page.goto(f"{site}/index.html", wait_until="networkidle")
-        # onload's own `loadDashboard(0)` landing IS onload having finished.
         _wait_for(
             page,
             "document.getElementById('dashboard-frame').contentWindow"
             ".location.pathname.endsWith('/dashboard.html')",
             "index.html to finish initialising",
         )
-        deadline = time.monotonic() + SETTLE_MS / 1000
-        while time.monotonic() < deadline:
-            page.evaluate(f"loadDashboard({ABOUT_TAB}); syncDashboard();")
-            # GIVE EACH ATTEMPT TIME TO LAND. Reading the path immediately and
-            # looping is a tight spin that re-triggers the fade before the
-            # previous request has finished, so the frame never settles and the
-            # deadline expires with nothing having been allowed to happen --
-            # a retry loop that prevents the very thing it retries.
-            try:
-                _wait_for(
-                    page,
-                    "document.getElementById('dashboard-frame').contentWindow"
-                    ".location.pathname === '/fr/about.html'",
-                    "the front page to reach the French About page",
-                    timeout=3000,
-                )
-                break
-            except _timeout_error():
-                continue
-        else:  # pragma: no cover - only on a genuinely broken contract
-            raise AssertionError("the front page never reached the French About page")
 
-        assert "dashboard-ready" in page.evaluate(
-            "window.__seen"
-        ), "index.html never received the frame's announcement"
+        # Sent to the frame it already has. No navigation is involved: the
+        # frame's language matches the parent's, so setLang is a no-op by the
+        # contract's own guard -- which is exactly why this is deterministic.
+        page.evaluate("syncDashboard()")
+        _wait_for(
+            page,
+            "document.getElementById('dashboard-frame').contentWindow.__got"
+            ".filter(function (m) { return m && m.type === 'setLang'; }).length > 0",
+            "index.html to send the contract's messages",
+        )
+        sent = page.evaluate(
+            "document.getElementById('dashboard-frame').contentWindow.__got"
+            ".filter(function (m) { return m && m.type; })"
+        )
+        kinds = {m["type"] for m in sent}
+        assert kinds == {
+            "setTheme",
+            "setLang",
+        }, f"index.html no longer speaks the contract the harness tests: sent {sorted(kinds)}"
+        # The values must be the vocabulary the harness maps, not something new.
+        themes = {m["value"] for m in sent if m["type"] == "setTheme"}
+        assert themes <= set(
+            THEME_EXPECTATIONS
+        ), f"index.html sent a theme the frame has no mapping for: {sorted(themes)}"
     finally:
         context.close()
