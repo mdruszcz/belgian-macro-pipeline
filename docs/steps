@@ -815,7 +815,47 @@ How: Reorder, grid move/resize, collision handling, per-breakpoint layouts, dupl
 undo/redo, debounced autosave, full keyboard alternative for every pointer action.
 Why: This is the actual "drag-and-drop builder" the maintainer asked for; everything before it
 is scaffolding for this batch.
- [BUILD] Batch 14 -- data-binding engine
+ ✅ [BUILD] Batch 14 -- data-binding engine (2026-09-08: src/pages/resolve.py + preview_data
+rewritten, tested by tests/pages/test_page_document_resolve.py. 1320 tests passing, from 1307.
+THE BATCH IS A READER, NOT A CALCULATOR, and that finding shaped everything. Every figure a
+binding can ask for is ALREADY computed and published: communes/{nis}.json carries each
+indicator's periods, its province/region/country comparison with coverage, and its
+national/regional percentile with rank and peer count; indicators/{id}.json carries all 565
+communes. So five of the eight operations are a LOOKUP -- latest, history, comparison,
+percentile, map_values/table -- and none of src/analytics/ is imported to compute anything.
+That is not a shortcut, it is rule 20 (a block consumes approved payloads, never SQLite) and
+rule 27 (a block never recomputes a ratio across geographies) enforced by construction; a test
+scans the module as text for sqlite3 / src.analytics / src.fetchers, the way Batch 11's
+hardening suite asserts the service cannot spawn a process.
+REFUSED CLEANLY, NOT SILENTLY: a province- or region-level figure as a block's OWN subject.
+The number exists but only inside each commune's comparison, not as a payload a block can
+read, so the resolver says exactly that. NOT rejected by the validator, which the plan had
+called for and which was wrong: the schema deliberately permits those bindings and
+binding_aggregate's own description says deciding this is Batch 14's job, so a validator
+rejection would have made schema and validator contradict each other and blocked authoring a
+page a later batch makes work. Publishing a standalone aggregates payload is a separate batch
+-- it changes the exporter, a different risk profile from building a resolver.
+THE FIVE STATES ARE THE WHOLE JOB (rule 26) and each was verified against REAL payloads, not
+fixtures: a withheld figure resolves to `suppressed` with its reason and NO number; an explicit
+zero resolves to `ready` showing 0 rather than vanishing; an indicator absent from a commune is
+`missing` with a reason (the 2025-merger successors, which no source predating them covers); a
+single-period indicator asked for `history` is `unavailable` and says why; and a history names
+its withheld years rather than leaving an unexplained gap in the line.
+FOUR DEFECTS FOUND BY DRIVING THE REAL UI, none by the test suite. (1) AUTOSAVE AND THE PREVIEW
+REFRESH ONLY FIRED FOR LAYOUT EDITS -- Batch 13b wired them into the layout actions alone, so
+changing a block's binding or its text left the canvas rendering a document from before the
+edit, while its own notice claimed to show the in-browser document. Both now hang off
+commitDocChange, the one place every edit passes through, with the preview debounced at the
+spec's own 400 ms (measurable as time-from-keystroke only now that POST /api/preview exists).
+(2) THE LAYOUT EDITOR'S FOCUS RESTORATION STOLE THE SELECTION: it refocused the last-focused
+tile on EVERY re-render, and focusing a tile selects its block, so clicking a block in the
+structure tree and then typing switched the inspector to a different block underneath the
+operator. Now restored only when the rebuild is what took focus away. (3) The canvas notice
+still read "no indicator value is resolved until the data-binding engine (Batch 14) exists" --
+text asserting the system lacks something it now has, the same class as the Statbel attribution
+notice, pointing the other way. (4) A SCREENSHOT CAPTION CLAIMED A FIGURE THAT WAS NOT THERE,
+twice, before the script was made to PROVE its own caption against the published payload and
+refuse to write one it cannot verify. That guard then caught the third attempt honestly.)
 How: Closed vocabulary of provider/indicator/geography/period/operation (spec:
 docs/features/data_binding.md); no generic query operation exists at all.
 Why: A block can only ever ask for what the existing exporters would also produce.

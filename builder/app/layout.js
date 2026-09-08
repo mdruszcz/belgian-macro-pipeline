@@ -305,14 +305,23 @@
       container.appendChild(grid);
     });
 
-    // Put focus back where it was. Done after the whole editor is rebuilt, so
-    // a keyboard operator can hold an arrow key and keep nudging rather than
-    // being dropped out of the grid after one press.
-    if (store._focusTileId) {
+    // Put focus back where it was, but ONLY if this rebuild is what took it
+    // away. A move destroys the focused tile and leaves focus on <body>, and
+    // without restoring it a keyboard operator is dropped out of the grid
+    // after one press.
+    //
+    // Restoring it UNCONDITIONALLY is a bug, and a subtle one: every re-render
+    // would drag focus back into the grid, and because focusing a tile selects
+    // its block, it would silently overwrite a selection the operator had just
+    // made in the structure tree -- they click a block, start typing, and the
+    // inspector switches to a different block underneath them.
+    var active = document.activeElement;
+    var lostFocus = !active || active === document.body;
+    if (store._focusTileId && lostFocus) {
       var refocus = container.querySelector(
         '.bp-grid-tile[data-block-id="' + store._focusTileId + '"]'
       );
-      if (refocus && document.activeElement !== refocus) {
+      if (refocus) {
         refocus.focus();
       }
     }

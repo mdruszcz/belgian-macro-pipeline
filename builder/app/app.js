@@ -25,6 +25,9 @@
   // browser closed in frustration has not lost much.
   var AUTOSAVE_DEBOUNCE_MS = 1200;
 
+  // The batch spec's limit for "preview updated after the last keystroke".
+  var PREVIEW_DEBOUNCE_MS = 400;
+
   function start(context) {
     var root = context.root;
     var topbarEl = document.getElementById("shell-topbar");
@@ -90,6 +93,7 @@
       _liveValidateTimer: null,
       _newPageValidateTimer: null,
       _autosaveTimer: null,
+      _previewTimer: null,
     };
 
     store.actions = buildActions(store);
@@ -265,6 +269,32 @@
     if (opts.rerenderInspector) {
       shell.inspector.render(store, store.inspectorEl);
     }
+    // EVERY edit, not just a layout one. Batch 13b wired autosave and the
+    // preview refresh into the layout actions only, so changing a block's
+    // binding or its text left the canvas showing a render from before the
+    // edit -- a preview that says it shows the in-browser document while
+    // showing something else. This is the one place every edit passes through,
+    // which is why it belongs here and not in each action.
+    scheduleAutosave(store);
+    schedulePreviewRefresh(store);
+  }
+
+  /**
+   * Re-render the preview a beat after the last edit.
+   *
+   * Debounced because the service is single-threaded and a refresh per
+   * keystroke would queue behind itself. PREVIEW_DEBOUNCE_MS is the batch
+   * spec's own limit, which only became measurable as "time from keystroke"
+   * once POST /api/preview existed -- before that the canvas could only show
+   * the last SAVED draft, so the number was measured from the Save click.
+   */
+  function schedulePreviewRefresh(store) {
+    if (!store.pageId || !store.doc) {
+      return;
+    }
+    debounced(store, "_previewTimer", function () {
+      refreshPreview(store);
+    }, PREVIEW_DEBOUNCE_MS);
   }
 
   function debounced(store, key, fn, ms) {
