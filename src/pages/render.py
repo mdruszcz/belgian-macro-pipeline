@@ -197,6 +197,101 @@ def _render_hero(block, props, data, lang):
     return "".join(parts)
 
 
+def _cta_link(node, lang, css_class):
+    """One label+href pair from a `cta`, or "" if it has no label.
+
+    Shared by every block below that renders links, so a href goes through
+    `safe_href` in exactly one place rather than four.
+    """
+    if not isinstance(node, Mapping):
+        return ""
+    label = text_in(node.get("label"), lang)
+    if not label:
+        return ""
+    href = safe_href(node.get("href"))
+    return f'<a class="{css_class}" href="{esc(href)}">{esc(label)}</a>'
+
+
+def _render_cta_band(block, props, data, lang):
+    """The full-width band a page ends on. Prose and links only -- the figures
+    in the design's version ("581 communes covered") are a data block's job, so
+    this one never invents a count."""
+    # Bare h2/p, because .bp-cta-band already styles its own h2 and p
+    # (layout.css:165-166). A block-specific class here would be a second
+    # opinion about the same component.
+    parts = [f"<h2>{esc(text_in(props.get('heading'), lang))}</h2>"]
+    body = text_in(props.get("body"), lang)
+    if body:
+        parts.append(f"<p>{esc(body)}</p>")
+    buttons = [
+        _cta_link(props.get("primary_cta"), lang, "bp-btn bp-btn--primary"),
+        _cta_link(props.get("secondary_cta"), lang, "bp-btn bp-btn--outline"),
+    ]
+    buttons = [b for b in buttons if b]
+    if buttons:
+        parts.append('<div class="bp-cta-actions">' + "".join(buttons) + "</div>")
+    return '<div class="bp-cta-band">' + "".join(parts) + "</div>"
+
+
+def _render_feature_tiles(block, props, data, lang):
+    """A grid of short editorial cards. A tile with no href is a plain card
+    rather than a dead link -- the design uses both."""
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    tiles = []
+    for tile in props.get("tiles") or []:
+        if not isinstance(tile, Mapping):
+            continue
+        label = text_in(tile.get("label"), lang)
+        if not label:
+            continue
+        body = text_in(tile.get("body"), lang)
+        # h4 and p, because .bp-feature-tile styles exactly those
+        # (components.css:208-209).
+        inner = f"<h4>{esc(label)}</h4>"
+        if body:
+            inner += f"<p>{esc(body)}</p>"
+        href = tile.get("href")
+        if isinstance(href, str) and href:
+            tiles.append(f'<a class="bp-feature-tile" href="{esc(safe_href(href))}">{inner}</a>')
+        else:
+            tiles.append(f'<div class="bp-feature-tile">{inner}</div>')
+    parts.append('<div class="bp-feature-grid">' + "".join(tiles) + "</div>")
+    return "".join(parts)
+
+
+def _render_link_list(block, props, data, lang):
+    """A sidebar panel of links. Every href goes through the same guard as
+    every other block's."""
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    items = [
+        f"<li>{link}</li>"
+        for link in (_cta_link(node, lang, "bp-linkbtn") for node in props.get("links") or [])
+        if link
+    ]
+    parts.append('<ul class="bp-list-panel">' + "".join(items) + "</ul>")
+    return "".join(parts)
+
+
+def _render_section_nav(block, props, data, lang):
+    """The tab strip, as ANCHORS rather than tab panels.
+
+    The design draws tabs, but the page below is one scrolling document, not
+    switchable panes -- so these are in-page links. That is why they still work
+    with scripting off, and why a screen reader is told this is navigation
+    rather than a tablist it can step through.
+    """
+    name = text_in(props.get("accessible_name"), lang)
+    items = [_cta_link(node, lang, "bp-tab") for node in props.get("items") or []]
+    items = [i for i in items if i]
+    return f'<nav class="bp-tabs"{_attrs([("aria-label", name)])}>' + "".join(items) + "</nav>"
+
+
 def _render_kpi_card(block, props, data, lang):
     label = esc(text_in(props.get("label"), lang))
     size = props.get("size") or "full"
@@ -400,6 +495,10 @@ BLOCK_RENDERERS = {
     "comparison_table": _render_comparison_table,
     "map": _render_map,
     "rich_text": _render_rich_text,
+    "cta_band": _render_cta_band,
+    "feature_tiles": _render_feature_tiles,
+    "link_list": _render_link_list,
+    "section_nav": _render_section_nav,
 }
 
 

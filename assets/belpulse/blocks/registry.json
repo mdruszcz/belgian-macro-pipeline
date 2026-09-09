@@ -145,6 +145,170 @@
     }
   },
   "block_types": {
+    "cta_band": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/layout.css -- .bp-cta-band.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; added for the commune profile, whose design ends in a full-width call to action.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "heading"
+            ],
+            "properties": {
+              "heading": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "body": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "primary_cta": {
+                "$ref": "#/$defs/cta"
+              },
+              "secondary_cta": {
+                "$ref": "#/$defs/cta"
+              }
+            }
+          }
+        }
+      }
+    },
+    "feature_tiles": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/components.css -- .bp-feature-tile.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; the commune design's thematic-focus grid.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tiles"
+            ],
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "tiles": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 12,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label"
+                  ],
+                  "properties": {
+                    "label": {
+                      "$ref": "#/$defs/trilingual_text"
+                    },
+                    "body": {
+                      "$ref": "#/$defs/trilingual_text"
+                    },
+                    "href": {
+                      "$ref": "#/$defs/relative_url"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "link_list": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/components.css -- .bp-list-panel.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; the commune design's 'useful links' sidebar panel.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "links"
+            ],
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "links": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 24,
+                "items": {
+                  "$ref": "#/$defs/cta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "section_nav": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": true,
+      "reuses": "assets/belpulse/components.css -- .bp-tabs.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; the commune design's section tab strip. Interactive, so it carries an accessible_name -- but the links work with scripting off, because each one is an in-page anchor rather than a tab panel.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "items": {
+                  "$ref": "#/$defs/cta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "hero": {
       "accepts_binding": false,
       "props_schema_status": "provisional",
@@ -254,14 +418,16 @@
     "chart": {
       "accepts_binding": true,
       "props_schema_status": "provisional",
-      "current_version": 1,
+      "current_version": 2,
       "interactive": true,
-      "reuses": null,
+      "reuses": "assets/belpulse/charts.js -- drawLine, drawBar, drawDonut, drawRanking.",
       "requires_binding": true,
       "supported_versions": [
-        1
+        1,
+        2
       ],
       "why_in_batch_9": "interactive, so it exercises the missing-accessible-name rejection.",
+      "why_v2": "charts.js has shipped drawDonut and drawRanking since Batch 2 and no block could reach them. A donut is how a part-of-whole reads (the age bands), and a ranking is how a commune's position reads; drawing either as a line chart would be a worse picture of the same numbers.",
       "versions": {
         "1": {
           "props_schema_status": "provisional",
@@ -284,6 +450,40 @@
                   "bar",
                   "area",
                   "scatter"
+                ]
+              },
+              "show_legend": {
+                "type": "boolean"
+              },
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        },
+        "2": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chart_type"
+            ],
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "caption": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "chart_type": {
+                "enum": [
+                  "line",
+                  "bar",
+                  "area",
+                  "scatter",
+                  "donut",
+                  "ranking"
                 ]
               },
               "show_legend": {

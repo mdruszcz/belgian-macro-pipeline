@@ -155,3 +155,42 @@
   padding:var(--bp-space-5); background:var(--bp-surface-alt);
 }
 .bp-block-failed{margin:0; font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+
+/* ---- commune-profile blocks (Batch A) -------------------------------------
+   Every one of these delegates to a Batch 2 component that already existed and
+   had no way to be placed on a page. What is added here is only the glue those
+   components never needed while they lived in a gallery: a grid to sit in, and
+   the anchor variants of two controls the gallery demonstrated as buttons. */
+
+/* .bp-feature-tile styles a card; nothing styled a GRID of them. */
+.bp-feature-grid{
+  display:grid; gap:var(--bp-space-4);
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+}
+.bp-block--feature_tiles .bp-feature-tile{
+  background:var(--bp-surface); border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-card); padding:var(--bp-space-4);
+  text-decoration:none; color:inherit;
+}
+a.bp-feature-tile:hover{border-color:var(--bp-accent); background:var(--bp-surface-alt)}
+a.bp-feature-tile:focus-visible{outline:2px solid var(--bp-accent); outline-offset:2px}
+
+/* layout.css styles .bp-tabs button. These are ANCHORS -- an in-page link
+   works with scripting off, where a button does not -- so they need the same
+   treatment. Kept as a sibling rule rather than editing Batch 2's selector,
+   because the gallery still demonstrates the button form. */
+.bp-tabs a.bp-tab{
+  padding:var(--bp-space-3) 0; border-bottom:2px solid transparent;
+  color:var(--bp-text-muted); text-decoration:none; white-space:nowrap;
+}
+.bp-tabs a.bp-tab:hover{color:var(--bp-text)}
+.bp-tabs a.bp-tab[aria-current="page"]{color:var(--bp-accent); border-bottom-color:var(--bp-accent)}
+.bp-tabs a.bp-tab:focus-visible{outline:2px solid var(--bp-accent); outline-offset:2px}
+
+/* .bp-list-panel li was built for label/value rows; a links panel puts an
+   anchor in the same row. */
+.bp-list-panel a.bp-linkbtn{
+  flex:1; color:var(--bp-text); text-decoration:none; font-size:var(--bp-text-small);
+}
+.bp-list-panel a.bp-linkbtn:hover{color:var(--bp-accent-ink); text-decoration:underline}
+.bp-list-panel a.bp-linkbtn:focus-visible{outline:2px solid var(--bp-accent); outline-offset:2px}
