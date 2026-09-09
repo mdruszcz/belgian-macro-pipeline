@@ -24,7 +24,17 @@ REQUIRED_BLOCK_TYPES = {
     "rich_text": {"binding": False, "interactive": False},
 }
 
-DELIBERATELY_EXCLUDED_TYPES = {"ranking_list", "news_card", "simulated_live_counter"}
+#: Types that must NOT be declared, because nothing can feed them.
+#:
+#: `ranking_list` was here and is not any more. The reasoning that removed it:
+#: it was excluded on the grounds that it needs the unbuilt Peer Model, and
+#: half of that was true. A NAMED composite rank ("economic dynamism") does
+#: need it. A per-indicator rank does not -- `percentile.national.rank` has
+#: shipped in every commune payload since Batch 14 -- so the block renders the
+#: rank that exists and says what a composite one is waiting for. Recorded
+#: rather than quietly deleted, because "we decided not to build this" and "we
+#: changed our mind, here is why" are different states.
+DELIBERATELY_EXCLUDED_TYPES = {"news_card", "simulated_live_counter"}
 
 
 def test_registry_file_exists():

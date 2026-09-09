@@ -4,10 +4,12 @@
   "accessible_name_note": "A block type with interactive: true MUST carry a trilingual accessible_name prop. That is enforced by src/pages/semantics.py so the failure reports as `missing_accessible_name`; the props schemas below deliberately do not list it under `required`, because a schema `required` would report it as `schema_violation` instead.",
   "props_schema_note": "Every props schema below is marked props_schema_status: \"provisional\". Batch 9 defines the document format; no block here has been rendered yet, so prop shapes are not frozen. Batch 10 tightens them by adding a version, not by editing one.",
   "deliberately_absent": {
-    "ranking_list": "needs the Peer Model / Fiscal Score, which is not built (Block M).",
     "news_card": "no content source exists in this repository.",
     "simulated_live_counter": "Batch 2 made it throw without data-simulated=\"true\"; its contract belongs to Batch 10.",
     "page_shell_and_sidebars": "layout chrome, not document content; Batch 10/13."
+  },
+  "reversals": {
+    "ranking_list": "Was listed above as needing the unbuilt Peer Model. Half of that was true. A NAMED composite rank (\"economic dynamism\") does need it; a per-indicator rank does not -- percentile.national.rank has shipped in every commune payload since Batch 14. Added for the commune profile, rendering the rank that exists and saying what a composite one is waiting for. Recorded here rather than deleted, so the reasoning that changed is visible."
   },
   "$defs": {
     "trilingual_text": {
@@ -145,6 +147,209 @@
     }
   },
   "block_types": {
+    "comparison_picker": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": true,
+      "reuses": "local.html's peer-selection logic; public/data/metadata/geographies.json for the list.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; the commune design's 'compare this commune with...' panel. Takes no binding: it selects WHICH geographies the page compares, it does not read a figure itself.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "accessible_name"
+            ],
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "slots": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "submit_label": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "neighbour_list": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/components.css -- .bp-commune-card.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9. This pipeline holds NO commune-adjacency table, so the block cannot be fed today. It accepts a binding and normally carries none, which resolves to `unavailable` -- the honest state -- and it lights up unchanged the day adjacency data exists.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "unavailable_reason": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "photo": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": null,
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; the commune design opens on a photograph. No photo library exists in this repository, so a block with no src renders its caption over an empty frame rather than a broken image. src is a site-relative path only -- rule 23 forbids a remote URL in a page definition.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "alt"
+            ],
+            "properties": {
+              "src": {
+                "$ref": "#/$defs/relative_url"
+              },
+              "alt": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "caption": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "overlay_title": {
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ranking_list": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/components.css -- .bp-ranking-list, .bp-ranking-item.",
+      "requires_binding": true,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "was listed under deliberately_absent, on the grounds that it needs the unbuilt Peer Model. Half of that is true: a NAMED composite rank does. A per-indicator rank does not -- percentile.national.rank ships in every commune payload today -- so the block renders that from a `percentile` binding, and a composite row says what it is waiting for.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "scope": {
+                "enum": [
+                  "national",
+                  "regional"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "sources_panel": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/components.css -- .bp-freshness.",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; the commune design's 'sources and methodology' panel. The provenance line comes from the resolved binding, never from the document -- rule 28: source, unit, period and freshness come from published metadata and are never hand-typed into a page.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "body": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "link": {
+                "$ref": "#/$defs/cta"
+              }
+            }
+          }
+        }
+      }
+    },
+    "stat_tile": {
+      "accepts_binding": true,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/components.css -- .bp-stat-tile.",
+      "requires_binding": true,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9. kpi_card is the full card; this is the compact tile the commune design puts six of in its header. Same `latest` binding, less chrome.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "show_period": {
+                "type": "boolean"
+              },
+              "show_delta": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
     "cta_band": {
       "accepts_binding": false,
       "props_schema_status": "provisional",

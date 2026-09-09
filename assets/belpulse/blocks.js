@@ -257,7 +257,68 @@
     });
   }
 
-  var HYDRATORS = { chart: hydrateChart, map: hydrateMap };
+  /* The comparison picker's options are 565 commune names. They come from the
+     published geography metadata -- the same file local.html and map.html
+     already read -- rather than being inlined into every page that carries a
+     picker. Fetched once and shared, like the boundary file above. */
+  var geographiesPromise = null;
+  function geographies(prefix) {
+    if (!geographiesPromise) {
+      geographiesPromise = fetch((prefix || '') + 'public/data/metadata/geographies.json')
+        .then(function (r) { return r.ok ? r.json() : null; });
+    }
+    return geographiesPromise;
+  }
+
+  function hydrateComparisonPicker(slot, data, opts) {
+    var selects = slot.querySelectorAll('[data-compare-slot]');
+    if (!selects.length) return;
+    return geographies(opts.assetPrefix || '').then(function (index) {
+      if (!index) return;
+      /* Municipalities only: a region is not something this page compares
+         against in the same sense, and the aggregate rows already cover
+         province, region and country. */
+      var communes = (index.geographies || []).filter(function (g) {
+        return g && g.level === 'municipality' && g.nis_code;
+      }).sort(function (a, b) {
+        return String(nameOf(a, opts.lang)).localeCompare(String(nameOf(b, opts.lang)));
+      });
+      selects.forEach(function (select) {
+        communes.forEach(function (g) {
+          var option = document.createElement('option');
+          option.value = g.nis_code;
+          option.textContent = nameOf(g, opts.lang);
+          select.appendChild(option);
+        });
+        select.disabled = false;
+      });
+      var button = slot.querySelector('button[type="submit"]');
+      if (button) button.disabled = false;
+      /* The chosen peers go in the URL, so a comparison someone assembled is a
+         link they can send. Same contract local.html already uses. */
+      slot.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var chosen = [];
+        selects.forEach(function (s) { if (s.value) chosen.push(s.value); });
+        var url = new URL(global.location.href);
+        if (chosen.length) url.searchParams.set('vs', chosen.join(','));
+        else url.searchParams.delete('vs');
+        global.location.href = url.toString();
+      });
+    });
+  }
+
+  function nameOf(geo, lang) {
+    var names = geo && geo.name;
+    if (!names) return geo && geo.nis_code;
+    return names[lang] || names.en || geo.nis_code;
+  }
+
+  var HYDRATORS = {
+    chart: hydrateChart,
+    map: hydrateMap,
+    comparison_picker: hydrateComparisonPicker,
+  };
 
   /**
    * @param root  element containing rendered blocks (a page, or the builder's
