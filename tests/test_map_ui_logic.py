@@ -13,8 +13,10 @@ docs/steps.
 """
 
 import json
+import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -45,8 +47,31 @@ def _extract_map_ui_js() -> str:
 
 
 def _run_node(js_body: str):
+    """Run the harness through a temp FILE, not `node -e`.
+
+    i18n.js plus commune_map.js is comfortably over 32 KB, and Windows caps a
+    whole command line at about that -- so `node -e <harness>` died with
+    "[WinError 206] filename or extension too long" and took all ten tests in
+    this file with it. Linux allows a far larger argument list, which is why
+    CI never saw it. A file has no such limit on either platform.
+
+    delete=False plus an explicit unlink because Windows will not let node
+    open a NamedTemporaryFile that Python still holds open.
+    """
     harness = _extract_map_ui_js() + "\n" + js_body
-    result = subprocess.run(["node", "-e", harness], capture_output=True, text=True, timeout=10)
+    with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as handle:
+        handle.write(harness)
+        script = handle.name
+    try:
+        result = subprocess.run(
+            ["node", script],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=10,
+        )
+    finally:
+        os.unlink(script)
     if result.returncode != 0:
         raise AssertionError(f"node failed:\n{result.stderr}")
     return json.loads(result.stdout)

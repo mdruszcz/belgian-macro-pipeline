@@ -105,7 +105,9 @@ def test_the_exporters_actually_run_against_the_committed_stores(tmp_path):
         if store.is_file():
             args += ["--extra-observations", str(store)]
 
-    result = subprocess.run(args, capture_output=True, text=True, cwd=REPO, timeout=300)
+    result = subprocess.run(
+        args, capture_output=True, text=True, encoding="utf-8", cwd=REPO, timeout=300
+    )
     assert (
         result.returncode == 0
     ), f"the committed stores cannot produce communes_export.csv:\n{result.stderr}"

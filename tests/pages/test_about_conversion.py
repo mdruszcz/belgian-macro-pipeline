@@ -59,7 +59,11 @@ EXPORTER = REPO_ROOT / "scripts" / "export_page_documents.py"
 def _build() -> str:
     """Run the real exporter and return what it wrote."""
     result = subprocess.run(
-        [sys.executable, str(EXPORTER)], capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(EXPORTER)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=REPO_ROOT,
     )
     assert result.returncode == 0, result.stderr
     return BUILT.read_text(encoding="utf-8")

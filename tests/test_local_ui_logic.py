@@ -9,8 +9,10 @@ docs/steps.
 """
 
 import json
+import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -32,8 +34,25 @@ def _extract_local_ui_js() -> str:
 
 
 def _run_node(js_body: str):
+    """Run the harness through a temp FILE, not `node -e`.
+
+    Windows caps a whole command line at about 32 KB, and this harness is
+    local.html's entire LocalUI block plus the test body. Linux allows a far
+    larger argument list, which is why CI never sees the limit.
+
+    delete=False plus an explicit unlink because Windows will not let node open
+    a NamedTemporaryFile that Python still holds open.
+    """
     harness = _extract_local_ui_js() + "\n" + js_body
-    result = subprocess.run(["node", "-e", harness], capture_output=True, text=True, timeout=10)
+    with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as handle:
+        handle.write(harness)
+        script = handle.name
+    try:
+        result = subprocess.run(
+            ["node", script], capture_output=True, text=True, encoding="utf-8", timeout=10
+        )
+    finally:
+        os.unlink(script)
     if result.returncode != 0:
         raise AssertionError(f"node failed:\n{result.stderr}")
     return json.loads(result.stdout)

@@ -46,6 +46,7 @@ def _rendered_strings() -> str:
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO,
         timeout=15,
     )
@@ -267,6 +268,7 @@ def _canonical_attribution() -> str:
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO,
         timeout=15,
     )

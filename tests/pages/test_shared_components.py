@@ -11,8 +11,10 @@ report, not here.
 """
 
 import json
+import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -220,8 +222,25 @@ def test_simulated_counter_is_never_a_silent_data_source(components_js):
 
 
 def _run_node(js_body: str, *scripts: str):
+    """Run the harness through a temp FILE, not `node -e`.
+
+    Windows caps a whole command line at about 32 KB, and these harnesses are
+    whole asset files concatenated. Linux allows a far larger argument list,
+    which is why CI never sees the limit.
+
+    delete=False plus an explicit unlink because Windows will not let node open
+    a NamedTemporaryFile that Python still holds open.
+    """
     harness = "\n".join(scripts) + "\n" + js_body
-    result = subprocess.run(["node", "-e", harness], capture_output=True, text=True, timeout=10)
+    with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as handle:
+        handle.write(harness)
+        script = handle.name
+    try:
+        result = subprocess.run(
+            ["node", script], capture_output=True, text=True, encoding="utf-8", timeout=10
+        )
+    finally:
+        os.unlink(script)
     if result.returncode != 0:
         raise AssertionError(f"node failed:\n{result.stderr}")
     return result.stdout

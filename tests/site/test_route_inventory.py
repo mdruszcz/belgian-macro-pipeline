@@ -386,6 +386,7 @@ def test_the_site_index_check_mode_agrees_with_what_is_committed():
         [sys.executable, str(REPO_ROOT / "scripts" / "export_site_index.py"), "--check"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO_ROOT,
     )
     assert result.returncode == 0, result.stdout
@@ -423,6 +424,7 @@ def test_every_exporter_runs_as_a_script(script):
         [sys.executable, str(REPO_ROOT / "scripts" / script), "--help"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO_ROOT,
     )
     assert result.returncode == 0, f"{script} --help failed:\n{result.stderr}"
