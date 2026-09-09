@@ -1,4 +1,4 @@
-"""Batch 15c: are the block-built pages really three pages, or one page thrice?
+﻿"""Batch 15c: are the block-built pages really three pages, or one page thrice?
 
 Batches 15a and 15b built the publish path and proved it on a real choropleth,
 in ENGLISH. The documents were never the problem -- every user-facing string in
@@ -24,6 +24,7 @@ link prefix computed from the language.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -49,7 +50,11 @@ PAGE_IDS = sorted(
 
 def _build() -> None:
     result = subprocess.run(
-        [sys.executable, str(EXPORTER)], capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(EXPORTER)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=REPO_ROOT,
     )
     assert result.returncode == 0, result.stderr
 
@@ -287,6 +292,7 @@ def test_lang_restricts_what_is_built_and_never_overwrites_another_language():
         [sys.executable, str(EXPORTER), "--lang", "fr"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO_ROOT,
     )
     assert result.returncode == 0, result.stderr
@@ -294,8 +300,13 @@ def test_lang_restricts_what_is_built_and_never_overwrites_another_language():
     # Derived, not typed: this assertion named "preview/fr/about.html" until
     # Batch 15d moved the route, and a literal path in a test is a second
     # inventory that drifts from the first.
-    assert route_for("/about.html", "fr").lstrip("/") in result.stdout
-    assert route_for("/about.html", "nl").lstrip("/") not in result.stdout
+    #
+    # Separators normalised because the exporter prints the OS's own path --
+    # "fr\about.html" on Windows -- while a route is always URL-shaped. That
+    # difference is correct in both places; only this comparison spans them.
+    printed = result.stdout.replace(os.sep, "/")
+    assert route_for("/about.html", "fr").lstrip("/") in printed
+    assert route_for("/about.html", "nl").lstrip("/") not in printed
     _build()
 
 
@@ -310,7 +321,11 @@ def test_the_committed_pages_match_a_fresh_build():
     """`--check` exits 1 if anything would change, so a stale committed page
     fails here rather than shipping."""
     result = subprocess.run(
-        [sys.executable, str(EXPORTER), "--check"], capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(EXPORTER), "--check"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=REPO_ROOT,
     )
     assert result.returncode == 0, result.stdout
 
@@ -324,6 +339,7 @@ def test_the_hand_built_page_that_is_still_hand_built_is_untouched():
         ["git", "diff", "--stat", "--", "map.html"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO_ROOT,
     )
     assert result.stdout.strip() == "", result.stdout

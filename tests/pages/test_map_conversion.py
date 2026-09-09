@@ -50,7 +50,11 @@ BLOCKS_JS = REPO_ROOT / "assets" / "belpulse" / "blocks.js"
 
 def _build() -> str:
     result = subprocess.run(
-        [sys.executable, str(EXPORTER)], capture_output=True, text=True, cwd=REPO_ROOT
+        [sys.executable, str(EXPORTER)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=REPO_ROOT,
     )
     assert result.returncode == 0, result.stderr
     return BUILT.read_text(encoding="utf-8")
@@ -251,6 +255,7 @@ def test_the_hand_built_map_is_untouched():
         ["git", "diff", "--stat", "--", "map.html"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO_ROOT,
     )
     assert result.stdout.strip() == "", result.stdout

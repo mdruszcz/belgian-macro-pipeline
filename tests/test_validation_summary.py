@@ -98,6 +98,7 @@ def test_the_cli_writes_a_summary_against_the_real_store(tmp_path):
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO,
         timeout=180,
     )

@@ -29,6 +29,7 @@ def _node(expression: str):
         ["node", "-e", f"const I=require('./assets/i18n.js');process.stdout.write({expression})"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=REPO,
         timeout=15,
     )

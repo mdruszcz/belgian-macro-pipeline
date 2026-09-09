@@ -63,6 +63,14 @@ def interface_strings(path: Path | None = None) -> dict[str, dict[str, str]]:
         ],
         capture_output=True,
         text=True,
+        # EXPLICIT, because `text=True` alone decodes with the platform's
+        # preferred encoding -- UTF-8 on the Linux runners, cp1252 on a
+        # Belgian Windows machine. Every licence notice in this file contains
+        # accented French and Dutch, so on Windows this call died with
+        # UnicodeDecodeError and `interface_strings()` never returned: the
+        # page exporters could not run at all, and the failure was inside the
+        # one function that guards Statbel licence compliance.
+        encoding="utf-8",
         timeout=30,
     )
     if result.returncode != 0:
