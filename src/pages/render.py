@@ -197,6 +197,286 @@ def _render_hero(block, props, data, lang):
     return "".join(parts)
 
 
+def _cta_link(node, lang, css_class):
+    """One label+href pair from a `cta`, or "" if it has no label.
+
+    Shared by every block below that renders links, so a href goes through
+    `safe_href` in exactly one place rather than four.
+    """
+    if not isinstance(node, Mapping):
+        return ""
+    label = text_in(node.get("label"), lang)
+    if not label:
+        return ""
+    href = safe_href(node.get("href"))
+    return f'<a class="{css_class}" href="{esc(href)}">{esc(label)}</a>'
+
+
+def _render_cta_band(block, props, data, lang):
+    """The full-width band a page ends on. Prose and links only -- the figures
+    in the design's version ("581 communes covered") are a data block's job, so
+    this one never invents a count."""
+    # Bare h2/p, because .bp-cta-band already styles its own h2 and p
+    # (layout.css:165-166). A block-specific class here would be a second
+    # opinion about the same component.
+    parts = [f"<h2>{esc(text_in(props.get('heading'), lang))}</h2>"]
+    body = text_in(props.get("body"), lang)
+    if body:
+        parts.append(f"<p>{esc(body)}</p>")
+    buttons = [
+        _cta_link(props.get("primary_cta"), lang, "bp-btn bp-btn--primary"),
+        _cta_link(props.get("secondary_cta"), lang, "bp-btn bp-btn--outline"),
+    ]
+    buttons = [b for b in buttons if b]
+    if buttons:
+        parts.append('<div class="bp-cta-actions">' + "".join(buttons) + "</div>")
+    return '<div class="bp-cta-band">' + "".join(parts) + "</div>"
+
+
+def _render_feature_tiles(block, props, data, lang):
+    """A grid of short editorial cards. A tile with no href is a plain card
+    rather than a dead link -- the design uses both."""
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    tiles = []
+    for tile in props.get("tiles") or []:
+        if not isinstance(tile, Mapping):
+            continue
+        label = text_in(tile.get("label"), lang)
+        if not label:
+            continue
+        body = text_in(tile.get("body"), lang)
+        # h4 and p, because .bp-feature-tile styles exactly those
+        # (components.css:208-209).
+        inner = f"<h4>{esc(label)}</h4>"
+        if body:
+            inner += f"<p>{esc(body)}</p>"
+        href = tile.get("href")
+        if isinstance(href, str) and href:
+            tiles.append(f'<a class="bp-feature-tile" href="{esc(safe_href(href))}">{inner}</a>')
+        else:
+            tiles.append(f'<div class="bp-feature-tile">{inner}</div>')
+    parts.append('<div class="bp-feature-grid">' + "".join(tiles) + "</div>")
+    return "".join(parts)
+
+
+def _render_link_list(block, props, data, lang):
+    """A sidebar panel of links. Every href goes through the same guard as
+    every other block's."""
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    items = [
+        f"<li>{link}</li>"
+        for link in (_cta_link(node, lang, "bp-linkbtn") for node in props.get("links") or [])
+        if link
+    ]
+    parts.append('<ul class="bp-list-panel">' + "".join(items) + "</ul>")
+    return "".join(parts)
+
+
+def _render_section_nav(block, props, data, lang):
+    """The tab strip, as ANCHORS rather than tab panels.
+
+    The design draws tabs, but the page below is one scrolling document, not
+    switchable panes -- so these are in-page links. That is why they still work
+    with scripting off, and why a screen reader is told this is navigation
+    rather than a tablist it can step through.
+    """
+    name = text_in(props.get("accessible_name"), lang)
+    items = [_cta_link(node, lang, "bp-tab") for node in props.get("items") or []]
+    items = [i for i in items if i]
+    return f'<nav class="bp-tabs"{_attrs([("aria-label", name)])}>' + "".join(items) + "</nav>"
+
+
+def _render_stat_tile(block, props, data, lang):
+    """The compact figure tile the commune header puts six of in a row.
+
+    Same `latest` binding as kpi_card, less chrome. Kept a separate type rather
+    than a kpi_card size, because .bp-stat-tile is its own Batch 2 component
+    with its own markup -- folding it into kpi_card would mean one renderer
+    emitting two different components off a prop.
+    """
+    # .bp-kpi-label and .bp-value, because .bp-stat-tile styles exactly those
+    # two children (components.css). Inventing bp-stat-label/-value would be a
+    # second opinion about a component that already has one.
+    parts = [f'<span class="bp-kpi-label">{esc(text_in(props.get("label"), lang))}</span>']
+    value = "" if data is None else data.get("formatted_value") or ""
+    parts.append(f'<span class="bp-value">{esc(value)}</span>')
+    if data is not None and props.get("show_delta") and data.get("delta_text"):
+        direction = data.get("direction") or "neutral"
+        if direction not in ("favourable", "unfavourable", "neutral"):
+            direction = "neutral"
+        parts.append(
+            f'<span class="bp-delta" data-direction="{esc(direction)}">'
+            f'{esc(data["delta_text"])}</span>'
+        )
+    if data is not None and props.get("show_period") and data.get("period"):
+        parts.append(f'<span class="bp-stat-period">{esc(data["period"])}</span>')
+    return '<div class="bp-stat-tile">' + "".join(parts) + "</div>"
+
+
+def _render_photo(block, props, data, lang):
+    """A picture with a caption, and an empty frame when there is no picture.
+
+    This repository has no photo library, so `src` is normally absent. An
+    absent src renders the frame and the words rather than a broken image --
+    the same choice commune.html made, and the reason the block exists before
+    the asset does.
+    """
+    alt = text_in(props.get("alt"), lang)
+    src = props.get("src")
+    parts = []
+    if isinstance(src, str) and src and safe_href(src) != "#":
+        parts.append(f'<img class="bp-photo-img" src="{esc(safe_href(src))}" alt="{esc(alt)}">')
+    else:
+        # aria-hidden: the frame is decoration standing in for an absent
+        # picture, and announcing "empty frame" helps nobody. The caption
+        # below carries whatever meaning there is.
+        parts.append('<div class="bp-photo-empty" aria-hidden="true"></div>')
+    overlay = text_in(props.get("overlay_title"), lang)
+    if overlay:
+        parts.append(f'<span class="bp-photo-overlay">{esc(overlay)}</span>')
+    caption = text_in(props.get("caption"), lang)
+    if caption:
+        parts.append(f'<p class="bp-block-caption">{esc(caption)}</p>')
+    return '<figure class="bp-photo">' + "".join(parts) + "</figure>"
+
+
+def _render_sources_panel(block, props, data, lang):
+    """Editorial prose about where the figures come from, plus the machine
+    truth beside it.
+
+    The provenance line is read from the RESOLVED BINDING, never from the
+    document: rule 28 puts source, unit, period and freshness in published
+    metadata precisely so a page cannot state a date that has drifted from the
+    data.
+    """
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    body = text_in(props.get("body"), lang)
+    if body:
+        parts.append(f"<p>{esc(body)}</p>")
+    if data is not None and data.get("provenance"):
+        parts.append(f'<p class="bp-freshness">{esc(data["provenance"])}</p>')
+    link = _cta_link(props.get("link"), lang, "bp-linkbtn")
+    if link:
+        parts.append(link)
+    return "".join(parts)
+
+
+def _render_ranking_list(block, props, data, lang):
+    """Where this commune sits for one indicator.
+
+    One row per block. The design's sidebar panel is several of these stacked,
+    which the grid already expresses -- a block cannot carry several bindings,
+    and inventing a multi-indicator binding for one panel would be a bigger
+    change than the panel is worth.
+
+    A NAMED composite rank ("economic dynamism") is a different thing and needs
+    the peer model, which is not built. Such a row renders with no figure and
+    the state machine says so, rather than showing a number derived from
+    something else.
+    """
+    label = esc(text_in(props.get("label"), lang))
+    scope = props.get("scope") or "national"
+    rank = None if data is None else data.get("rank")
+    peers = None if data is None else data.get("peers")
+    parts = [f"<span>{label}</span>"]
+    # .rank is what .bp-ranking-item styles, and the --composite modifier is
+    # already in components.css for exactly this: a row whose figure needs a
+    # model that does not exist yet. Using it rather than a new class means the
+    # "waiting on the peer model" marker looks the same everywhere it appears.
+    if rank is not None and peers:
+        parts.append(f'<span class="rank">{esc(rank)} / {esc(peers)}</span>')
+        modifier = ""
+    else:
+        parts.append('<span class="rank"></span>')
+        modifier = " bp-ranking-item--composite"
+    return (
+        f'<ul class="bp-ranking-list"><li class="bp-ranking-item{modifier}"'
+        f' data-scope="{esc(scope)}">' + "".join(parts) + "</li></ul>"
+    )
+
+
+def _render_neighbour_list(block, props, data, lang):
+    """The communes next door.
+
+    THIS PIPELINE HOLDS NO ADJACENCY TABLE. Not "not yet loaded" -- there is no
+    such dataset anywhere in it, so a genuine list cannot be produced. The block
+    exists at its designed size so the page shows the gap rather than hiding
+    it, and the reason travels in the document because it is editorial, not
+    metadata.
+    """
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    if data is None:
+        reason = text_in(props.get("unavailable_reason"), lang)
+        if reason:
+            parts.append(f'<p class="bp-neighbour-why">{esc(reason)}</p>')
+        return "".join(parts)
+    cards = []
+    for row in data.get("items") or []:
+        if not isinstance(row, Mapping):
+            continue
+        name = row.get("label")
+        if not name:
+            continue
+        value = row.get("formatted_value") or ""
+        # .bp-commune-card's own markup: h4 for the name, .region beneath it.
+        cards.append(
+            '<li class="bp-commune-card"><div class="bp-commune-card-body">'
+            f"<h4>{esc(name)}</h4>"
+            f'<div class="region">{esc(value)}</div>'
+            "</div></li>"
+        )
+    parts.append('<ul class="bp-commune-list">' + "".join(cards) + "</ul>")
+    return "".join(parts)
+
+
+def _render_comparison_picker(block, props, data, lang):
+    """Choose what this page compares itself against.
+
+    Takes no binding: it selects WHICH geographies are compared, it does not
+    read a figure. The selects are rendered empty and filled by
+    assets/belpulse/blocks.js from published geography metadata -- a list of
+    565 commune names does not belong inlined into every page.
+
+    Rendered as a real <form> so that with scripting off it is visibly a
+    control that needs JavaScript, rather than three dead boxes.
+    """
+    name = text_in(props.get("accessible_name"), lang)
+    slots = props.get("slots")
+    slots = slots if isinstance(slots, int) and 1 <= slots <= 3 else 3
+    parts = []
+    title = text_in(props.get("title"), lang)
+    if title:
+        parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
+    rows = "".join(
+        f'<select class="bp-compare-select" data-compare-slot="{i}" disabled></select>'
+        for i in range(slots)
+    )
+    submit = text_in(props.get("submit_label"), lang)
+    button = (
+        f'<button type="submit" class="bp-btn bp-btn--primary" disabled>{esc(submit)}</button>'
+        if submit
+        else ""
+    )
+    parts.append(
+        '<form class="bp-compare-picker" data-hydrate="comparison_picker"'
+        + _attrs([("aria-label", name)])
+        + f">{rows}{button}</form>"
+    )
+    return "".join(parts)
+
+
 def _render_kpi_card(block, props, data, lang):
     label = esc(text_in(props.get("label"), lang))
     size = props.get("size") or "full"
@@ -400,6 +680,16 @@ BLOCK_RENDERERS = {
     "comparison_table": _render_comparison_table,
     "map": _render_map,
     "rich_text": _render_rich_text,
+    "cta_band": _render_cta_band,
+    "feature_tiles": _render_feature_tiles,
+    "link_list": _render_link_list,
+    "section_nav": _render_section_nav,
+    "stat_tile": _render_stat_tile,
+    "photo": _render_photo,
+    "sources_panel": _render_sources_panel,
+    "ranking_list": _render_ranking_list,
+    "neighbour_list": _render_neighbour_list,
+    "comparison_picker": _render_comparison_picker,
 }
 
 

@@ -79,12 +79,44 @@
     return (provided && Object.prototype.hasOwnProperty.call(provided, id)) ? provided[id] : null;
   }
 
+  /* A donut and a ranking are not time series: both want LABEL/VALUE pairs,
+     where a line and a bar want period/value points. The resolver has no
+     operation that returns "these named things and their sizes" -- a binding
+     names exactly one indicator -- so a chart of either kind is fed from
+     `data.segments` (donut) or `data.items` (ranking), and neither exists yet.
+     Wired now so the drawing code is reachable the day a part-of-whole binding
+     lands; until then the block says so rather than drawing an empty circle. */
+  function labelledPairs(data, key) {
+    var rows = data && data[key];
+    if (!Array.isArray(rows)) return null;
+    var out = rows.filter(function (row) {
+      return row && typeof row.value === 'number' && row.label;
+    });
+    return out.length ? out : null;
+  }
+
   function hydrateChart(slot, data, opts) {
     var canvas = slot.querySelector('canvas');
     if (!canvas || !global.BPCharts) return;
+    var kind = slot.getAttribute('data-chart-type') || 'line';
+
+    if (kind === 'donut' || kind === 'ranking') {
+      var pairs = labelledPairs(data, kind === 'donut' ? 'segments' : 'items');
+      if (!pairs) {
+        /* Not an error -- the binding resolved, it simply cannot express this
+           shape. Says so in the block's own message rather than leaving a
+           blank canvas, which reads as broken. */
+        var block = blockOf(slot);
+        if (block) block.setAttribute('data-state', 'unavailable');
+        return;
+      }
+      if (kind === 'donut') BPCharts.drawDonut(canvas, pairs, { locale: opts.lang });
+      else BPCharts.drawRanking(canvas, pairs, { locale: opts.lang });
+      return;
+    }
+
     var points = data && data.points;
     if (!points || points.length < 2) return;   // never a one-point "trend"
-    var kind = slot.getAttribute('data-chart-type') || 'line';
     var series = [{ label: (data && data.label) || '', points: points }];
     if (kind === 'bar') {
       BPCharts.drawBar(canvas, points.map(function (p) {
@@ -225,7 +257,68 @@
     });
   }
 
-  var HYDRATORS = { chart: hydrateChart, map: hydrateMap };
+  /* The comparison picker's options are 565 commune names. They come from the
+     published geography metadata -- the same file local.html and map.html
+     already read -- rather than being inlined into every page that carries a
+     picker. Fetched once and shared, like the boundary file above. */
+  var geographiesPromise = null;
+  function geographies(prefix) {
+    if (!geographiesPromise) {
+      geographiesPromise = fetch((prefix || '') + 'public/data/metadata/geographies.json')
+        .then(function (r) { return r.ok ? r.json() : null; });
+    }
+    return geographiesPromise;
+  }
+
+  function hydrateComparisonPicker(slot, data, opts) {
+    var selects = slot.querySelectorAll('[data-compare-slot]');
+    if (!selects.length) return;
+    return geographies(opts.assetPrefix || '').then(function (index) {
+      if (!index) return;
+      /* Municipalities only: a region is not something this page compares
+         against in the same sense, and the aggregate rows already cover
+         province, region and country. */
+      var communes = (index.geographies || []).filter(function (g) {
+        return g && g.level === 'municipality' && g.nis_code;
+      }).sort(function (a, b) {
+        return String(nameOf(a, opts.lang)).localeCompare(String(nameOf(b, opts.lang)));
+      });
+      selects.forEach(function (select) {
+        communes.forEach(function (g) {
+          var option = document.createElement('option');
+          option.value = g.nis_code;
+          option.textContent = nameOf(g, opts.lang);
+          select.appendChild(option);
+        });
+        select.disabled = false;
+      });
+      var button = slot.querySelector('button[type="submit"]');
+      if (button) button.disabled = false;
+      /* The chosen peers go in the URL, so a comparison someone assembled is a
+         link they can send. Same contract local.html already uses. */
+      slot.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var chosen = [];
+        selects.forEach(function (s) { if (s.value) chosen.push(s.value); });
+        var url = new URL(global.location.href);
+        if (chosen.length) url.searchParams.set('vs', chosen.join(','));
+        else url.searchParams.delete('vs');
+        global.location.href = url.toString();
+      });
+    });
+  }
+
+  function nameOf(geo, lang) {
+    var names = geo && geo.name;
+    if (!names) return geo && geo.nis_code;
+    return names[lang] || names.en || geo.nis_code;
+  }
+
+  var HYDRATORS = {
+    chart: hydrateChart,
+    map: hydrateMap,
+    comparison_picker: hydrateComparisonPicker,
+  };
 
   /**
    * @param root  element containing rendered blocks (a page, or the builder's

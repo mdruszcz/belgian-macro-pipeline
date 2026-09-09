@@ -112,10 +112,24 @@ def _map_1_to_2(props: dict) -> dict:
     return out
 
 
+def _chart_1_to_2(props: dict) -> dict:
+    """chart v1 -> v2 (Batch A of the commune-profile work).
+
+    v2 only WIDENS the chart_type enum, adding donut and ranking. Every v1
+    document is already valid against v2 and there is no new prop to default,
+    so this is an identity step -- present so the ladder is unbroken rather
+    than because anything needs changing. Without it a v1 chart would stay at
+    version 1 forever and the document would carry two chart versions for no
+    reason.
+    """
+    return dict(props)
+
+
 #: (block_type, from_version) -> step producing from_version + 1 props.
 BLOCK_MIGRATIONS: dict[tuple[str, int], Callable[[dict], dict]] = {
     ("kpi_card", 1): _kpi_card_1_to_2,
     ("map", 1): _map_1_to_2,
+    ("chart", 1): _chart_1_to_2,
 }
 
 

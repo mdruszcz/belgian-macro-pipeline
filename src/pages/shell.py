@@ -110,12 +110,37 @@ MAP_STYLESHEET = "assets/commune_map.css"
 #: server cannot finish these: a chart is canvas pixels and a map needs a
 #: 1.2 MB boundary file. Everything else is complete HTML from the renderer,
 #: which is why a reader without JavaScript still gets every figure.
-_HYDRATED = frozenset({"chart", "map"})
+#:
+#: comparison_picker joins them for a different reason: it does not draw a
+#: figure, but its options are 565 commune names read from published geography
+#: metadata, and inlining that list into every page is what the fetch avoids.
+_HYDRATED = frozenset({"chart", "map", "comparison_picker"})
 
 #: Block types that put a municipal figure on the page. A document containing
 #: one of these with a binding is publishing Statbel-derived data and owes the
 #: attribution. Read from the document, never assumed from the page id.
-_DATA_BEARING = frozenset({"kpi_card", "chart", "comparison_table", "map"})
+#:
+#: MISSING A TYPE HERE IS A LICENCE BREACH, not a styling bug: the page ships
+#: without the Statbel notice, `wrap()` does not catch it because it is asking
+#: this set, and Statbel's 2015 licence terminates automatically on
+#: non-compliance. Every new block that can show a municipal number belongs
+#: here the moment it exists, which is why the four added for the commune
+#: profile were added in the same change as their renderers.
+#:
+#: comparison_picker is deliberately NOT here: it chooses which geographies a
+#: page compares, and shows no figure of its own.
+_DATA_BEARING = frozenset(
+    {
+        "kpi_card",
+        "chart",
+        "comparison_table",
+        "map",
+        "stat_tile",
+        "ranking_list",
+        "neighbour_list",
+        "sources_panel",
+    }
+)
 
 
 class ShellError(PageDocumentError):
