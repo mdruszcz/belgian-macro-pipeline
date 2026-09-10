@@ -1084,6 +1084,39 @@ that counts the instances. (4) The route inventory would have published /local/{
 two siblings verbatim -- three URLs no file answers -- so block_page_routes() expands a
 templated route through commune_routes(), and the "inventory is not accidentally empty" guard
 was rewritten to expect that before it could go red on success.
+18C -- THE DESIGN PASS, because 18A was CORRECT AND LOOSE: every card right,
+every state honest, and the page still read as a stack of half-empty boxes beside the design it
+was built from. Four causes, none of them visible to a test that checks markup. (1) THE GRID ROW
+CAME FROM THE TALLEST BLOCK IN IT, so one 210px chart beside three one-unit tiles stretched each
+tile to 70px of air; the grid now has a row unit and a declared height means the same thing
+everywhere. (2) SIX BLOCK TYPES HAD NO CARD -- .bp-stat-tile, .bp-ranking-list and .bp-list-panel
+style the INSIDE of a panel and Batch 2's gallery drew the box, so the whole right-hand column
+rendered as unboxed text floating on the page background, which reads as a stylesheet that failed
+to load. (3) A CHART WAS DRAWN AT A FIXED 210px whatever cell it was placed in. (4) Padding tuned
+for an article, not a dashboard.
+THE MORE IMPORTANT HALF WAS THE DATA. The first page carried four municipal-finance tiles with
+nothing behind them and an age donut nothing could draw, while EIGHTEEN REAL FIGURES this pipeline
+already publishes for every commune appeared on no page at all -- the three age bands, the three
+Census activity statuses, benefit recipients and their share, temporary unemployment, transactions,
+unoccupied dwellings, household size, three recorded-crime rates and the four fiscal aggregates.
+54 blocks now, 52 of them with real data, and the two that are empty SAY WHY IN THEIR OWN WORDS
+rather than "not available for this selection": a block's `unavailable_reason` now beats the
+generic state sentence, which is what rule 26 means by five distinguishable kinds of nothing.
+THREE FINDINGS WORTH THE NAME. The LOCATOR map beside the photograph was a choropleth -- the one
+map whose job is "where is this commune" opened on the whole country coloured by population.
+CommuneMap gained locate(), map v3 gained locate_context, and the subject comes from the PAGE
+(context.nis, written on the wrapper) rather than from the block, so the outline cannot land on a
+different commune than the figures; a locator is also the one map that legitimately has no
+binding, which the validator now allows. A BAR CHART OF ONE SERIES was drawn in nineteen different
+colours, because drawBar's original case is one bar per country -- so a commune's tax take over
+nineteen years said "here are nineteen things" instead of "here is one history"; and its
+x-labels collided into a grey smear, fixed with the measured thinning drawLine already had. And
+the mobile page scrolled sideways: the map's indicator picker takes its width from the longest
+indicator name, the one overflow the block grid cannot cause since every track is minmax(0,1fr).
+STILL MISSING AND STILL LABELLED: no photograph (no photo library exists), no commune adjacency,
+no municipal budget or debt, no peer model, and no part-of-whole binding -- so the age structure
+is three tiles rather than the design's donut. A donut needs a binding that names several
+indicators as parts of one whole, which is a page-schema change and wants its own decision.
 NOT DONE, AND ON PURPOSE: THE CUTOVER. export_local_pages.py still owns /local/{nis}/, so the
 templated document is NOT committed -- committing it would have `make pages` overwrite all 1,695
 live pages the next time it ran. The loop is exercised by tests/pages/test_commune_loop.py,

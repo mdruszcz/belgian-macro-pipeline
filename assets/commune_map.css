@@ -39,6 +39,10 @@ svg.map.dragging{cursor:grabbing}
 svg.map path{stroke:var(--map-stroke);stroke-width:.35;vector-effect:non-scaling-stroke}
 svg.map path:hover{stroke:var(--text);stroke-width:1.4}
 svg.map path.hit{stroke:var(--text);stroke-width:1.8}
+/* The locator's subject. Filled, not only outlined: at national scale a
+   1.8px outline around a commune is a smudge, and the whole job of that
+   map is to answer "where is this one". */
+.bp-block--map svg.map path.hit{fill:var(--bp-accent); stroke:var(--bp-accent-ink); stroke-width:1}
 /* Filtered-out communes stay ON the map rather than vanishing: a Belgium with
    holes in it is harder to read than a Belgium with a highlighted region, and
    the surrounding shape is what tells you where you are looking. */

@@ -466,6 +466,18 @@ MapUI.CommuneMap = class CommuneMap {
     return this;
   }
 
+  /* Mark one commune WITHOUT moving the view -- a locator, not a search
+     result. focus() frames the commune, because framing is what a search
+     wants; a profile header wants the country with its own commune picked out
+     of it. Same class, so the two cannot look like different things. */
+  locate(nis) {
+    const f = this.byNis[nis];
+    if (!f) return false;
+    this.el.svg.querySelectorAll('path.hit').forEach(p => p.classList.remove('hit'));
+    f.el.classList.add('hit');
+    return true;
+  }
+
   /* Frame one commune and outline it -- what a search result should do. */
   focus(nis) {
     const f = this.byNis[nis];

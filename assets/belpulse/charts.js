@@ -227,7 +227,10 @@
   function drawBar(canvas, items, opts) {
     opts = opts || {};
     if (!items.length) return;
-    var dims = sizeCanvas(canvas, 210),
+    /* opts.height, like drawLine: a chart in a page-document block is sized by
+       the grid cell it was placed in, and a hardcoded 210 either overflowed
+       the card or left a band of white inside it. */
+    var dims = sizeCanvas(canvas, opts.height || 210),
       ctx = dims.ctx,
       W = dims.W,
       H = dims.H;
@@ -270,14 +273,36 @@
       ctx.fillText(fmtNum(v, opts.locale), pL - 9, y);
     });
 
+    /* ONE COLOUR WHEN THE BARS ARE ONE SERIES. The palette runs per bar
+       because this chart's original case is one bar per COUNTRY, where the
+       colour identifies the country. A commune's tax take over nineteen years
+       is one series, and colouring each year differently says there are
+       nineteen things here rather than one line of history -- it read as a
+       rainbow on the profile page. The caller says which case it is. */
+    var single = typeof opts.colourIndex === 'number';
+
+    /* Label thinning, measured rather than guessed -- the same rule drawLine
+       already applies. Nineteen four-character years in 460px collided into a
+       grey smear; the most recent bar keeps its label, being the one a reader
+       looks for first. */
+    ctx.font = '10px "IBM Plex Mono",monospace';
+    var widestLabel = 0;
+    items.forEach(function (d) {
+      widestLabel = Math.max(widestLabel, ctx.measureText(String(d.label)).width);
+    });
+    var labelEvery = Math.max(1, Math.ceil((widestLabel + 8) / Math.max(slotW, 1)));
+
     items.forEach(function (d, i) {
       var cx = pL + slotW * i + slotW / 2;
       var y = yOf(d.value);
       var top = Math.min(y, zeroY),
         h = Math.abs(zeroY - y);
-      ctx.fillStyle = d.highlight ? gc('--bp-accent') : chartColour(i);
+      ctx.fillStyle = d.highlight
+        ? gc('--bp-accent')
+        : chartColour(single ? opts.colourIndex : i);
       ctx.fillRect(cx - barW / 2, top, barW, h || 1);
 
+      if ((n - 1 - i) % labelEvery !== 0) return;
       ctx.font = '10px "IBM Plex Mono",monospace';
       ctx.fillStyle = labelC;
       ctx.textAlign = 'center';
@@ -296,7 +321,7 @@
       return s + d.value;
     }, 0);
     if (!total) return;
-    var dims = sizeCanvas(canvas, 210),
+    var dims = sizeCanvas(canvas, opts.height || 210),
       ctx = dims.ctx,
       W = dims.W,
       H = dims.H;
