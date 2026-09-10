@@ -99,6 +99,13 @@
     var canvas = slot.querySelector('canvas');
     if (!canvas || !global.BPCharts) return;
     var kind = slot.getAttribute('data-chart-type') || 'line';
+    /* THE CELL DECIDES THE HEIGHT. A block is placed on a grid with a declared
+       height, and a chart drawn at a fixed 210px either overflowed that cell or
+       left a band of white below it -- the single biggest reason the commune
+       profile read as loosely built. Measured rather than passed down from the
+       document: the same block is a different height on a phone. */
+    var box = Math.round(slot.getBoundingClientRect().height);
+    var height = box > 80 ? box : 0;
 
     if (kind === 'donut' || kind === 'ranking') {
       var pairs = labelledPairs(data, kind === 'donut' ? 'segments' : 'items');
@@ -110,7 +117,8 @@
         if (block) block.setAttribute('data-state', 'unavailable');
         return;
       }
-      if (kind === 'donut') BPCharts.drawDonut(canvas, pairs, { locale: opts.lang });
+      if (kind === 'donut')
+        BPCharts.drawDonut(canvas, pairs, { locale: opts.lang, height: height });
       else BPCharts.drawRanking(canvas, pairs, { locale: opts.lang });
       return;
     }
@@ -121,9 +129,9 @@
     if (kind === 'bar') {
       BPCharts.drawBar(canvas, points.map(function (p) {
         return { label: p.period, value: p.value };
-      }), { locale: opts.lang });
+      }), { locale: opts.lang, height: height, colourIndex: 0 });
     } else {
-      BPCharts.drawLine(canvas, series, { locale: opts.lang });
+      BPCharts.drawLine(canvas, series, { locale: opts.lang, height: height });
     }
   }
 
@@ -247,6 +255,21 @@
         map.setData(rowsFromResolved(data), {
           unit: data.unit, decimals: data.decimals, direction: data.direction,
         });
+      }
+      /* THE LOCATOR. A map that answers "where is this commune" carries no
+         figures at all: every commune stays in the no-data colour and the
+         page's own subject is outlined. Drawn as a choropleth instead, the
+         header opened on a full-country map of population -- a picture of
+         Belgium where the design asks for a picture of Namur.
+
+         The subject comes from the PAGE, not from this block: it is the
+         document's context.nis, which is also what every context-bound block
+         on the page resolved against, so the outline cannot end up on a
+         different commune than the figures. */
+      if (slot.getAttribute('data-map-locate')) {
+        var page = slot.closest('.bp-page');
+        var nis = page && page.getAttribute('data-context-nis');
+        if (nis) map.locate(nis);
       }
       if (slot.getAttribute('data-map-zoom-enabled')) wireZoom(slot, map);
       if (slot.getAttribute('data-map-picker-enabled')) wirePicker(slot, map, data, opts);

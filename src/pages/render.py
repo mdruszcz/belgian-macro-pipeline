@@ -375,21 +375,31 @@ def _render_stat_tile(block, props, data, lang, prefix=""):
     # .bp-kpi-label and .bp-value, because .bp-stat-tile styles exactly those
     # two children (components.css). Inventing bp-stat-label/-value would be a
     # second opinion about a component that already has one.
-    parts = [_icon(props.get("icon"))]
-    parts.append(f'<span class="bp-kpi-label">{esc(text_in(props.get("label"), lang))}</span>')
+    body = [f'<span class="bp-kpi-label">{esc(text_in(props.get("label"), lang))}</span>']
     value = "" if data is None else data.get("formatted_value") or ""
-    parts.append(f'<span class="bp-value">{esc(value)}</span>')
+    body.append(f'<span class="bp-value">{esc(value)}</span>')
     if data is not None and props.get("show_delta") and data.get("delta_text"):
         direction = data.get("direction") or "neutral"
         if direction not in ("favourable", "unfavourable", "neutral"):
             direction = "neutral"
-        parts.append(
+        body.append(
             f'<span class="bp-delta" data-direction="{esc(direction)}">'
             f'{esc(data["delta_text"])}</span>'
         )
     if data is not None and props.get("show_period") and data.get("period"):
-        parts.append(f'<span class="bp-stat-period">{esc(data["period"])}</span>')
-    return '<div class="bp-stat-tile">' + "".join(parts) + "</div>"
+        body.append(f'<span class="bp-stat-period">{esc(data["period"])}</span>')
+    # THE LABEL AND THE FIGURE ARE ONE COLUMN BESIDE THE ICON. Emitted flat,
+    # every child was a cell in the same flex row, so a tile read as
+    # "icon Population 115,457 +0.8% 2026" on one line and the figure had no
+    # more weight than its own footnote. The wrapper is what lets the icon sit
+    # beside a stacked label and value, which is what the design draws.
+    return (
+        '<div class="bp-stat-tile">'
+        + _icon(props.get("icon"))
+        + '<span class="bp-stat-body">'
+        + "".join(body)
+        + "</span></div>"
+    )
 
 
 def _render_photo(block, props, data, lang, prefix=""):
@@ -460,6 +470,12 @@ def _render_ranking_list(block, props, data, lang, prefix=""):
     """
     label = esc(text_in(props.get("label"), lang))
     scope = props.get("scope") or "national"
+    # v2's `title`. The design's sidebar is ONE panel of several ranks, and a
+    # block carries one binding, so the panel is several blocks -- with the
+    # heading on the first of them and blocks.css seaming them together. A
+    # heading per row would have printed "Rankings" five times.
+    heading = text_in(props.get("title"), lang)
+    heading = f'<h3 class="bp-block-title">{esc(heading)}</h3>' if heading else ""
     # The resolver's `percentile` operation returns `scopes` (national and
     # regional) plus a formatted national line -- not bare rank/peers. Reading
     # the scope the block asked for is the whole point of the `scope` prop:
@@ -481,7 +497,7 @@ def _render_ranking_list(block, props, data, lang, prefix=""):
         parts.append('<span class="rank"></span>')
         modifier = " bp-ranking-item--composite"
     return (
-        f'<ul class="bp-ranking-list"><li class="bp-ranking-item{modifier}"'
+        heading + f'<ul class="bp-ranking-list"><li class="bp-ranking-item{modifier}"'
         f' data-scope="{esc(scope)}">' + "".join(parts) + "</li></ul>"
     )
 
@@ -694,6 +710,11 @@ def _render_map(block, props, data, lang, prefix=""):
                 ("data-map-zoom-enabled", "1" if props.get("show_zoom") else None),
                 ("data-map-picker-enabled", "1" if props.get("indicator_picker") else None),
                 ("data-map-click-through", "1" if props.get("click_through") else None),
+                # v3's LOCATOR. The subject itself is not here: it is the
+                # document's context, written on the page wrapper, so the
+                # commune this map outlines is by construction the one every
+                # figure on the page was resolved for.
+                ("data-map-locate", "1" if props.get("locate_context") else None),
             ]
         )
         # EVERY CLASS HERE IS A CONTRACT WITH assets/commune_map.css AND
@@ -818,6 +839,12 @@ def _state_for(block, data, registry: Registry) -> str:
     block_type = block.get("type")
     if not registry.accepts_binding(block_type):
         return "ready"
+    if block_type == "map" and (block.get("props") or {}).get("locate_context"):
+        # A LOCATOR HAS NOTHING TO RESOLVE. It draws no figures -- it outlines
+        # the page's own subject -- so "no binding" is not a missing figure
+        # here, it is the whole design. Without this the one map that always
+        # has something to show was the one that rendered as unavailable.
+        return "ready"
     if data is None:
         return "loading" if block.get("binding") else "unavailable"
     state = data.get("state")
@@ -866,10 +893,16 @@ def _render_block(
         message = STATE_TEXT.get(state)
         body = f'<div class="bp-state-body">{inner}</div>'
         if message:
-            body += (
-                '<div class="bp-state-message"><span class="headline">'
-                f"{esc(text_in(message, lang))}</span></div>"
-            )
+            # A BLOCK'S OWN REASON BEATS THE GENERIC SENTENCE. `unavailable_reason`
+            # is editorial: "this pipeline holds no commune-adjacency table" says
+            # something a reader can act on, where "not available for this
+            # selection" reads as a temporary glitch. The state machine still
+            # decides WHETHER a message is shown; the document decides what it
+            # says when it has something better to say (rule 26 -- the five
+            # kinds of nothing are only distinguishable if they are named).
+            own = text_in((block.get("props") or {}).get("unavailable_reason"), lang)
+            said = own if own and state in ("unavailable", "missing") else text_in(message, lang)
+            body += f'<div class="bp-state-message"><span class="headline">{esc(said)}</span></div>'
         inner = f'<div class="bp-state-skeleton"></div>{body}'
 
     classes = f"bp-block bp-block--{block_type}"
@@ -992,6 +1025,12 @@ def render_document(
             [
                 ("class", "bp-page"),
                 ("data-page-id", doc.get("page_id")),
+                # THE PAGE'S SUBJECT, for the blocks finished in the browser.
+                # A hydrated block gets its own resolved payload and nothing
+                # else, so a locator map had no way to know which commune the
+                # page is about. Written once, here, rather than copied into
+                # every block that might want it.
+                ("data-context-nis", (doc.get("context") or {}).get("nis")),
                 ("data-page-type", doc.get("page_type")),
                 ("data-lang", lang),
                 ("data-grid-columns", str(GRID_COLUMNS["desktop"])),

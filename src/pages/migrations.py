@@ -125,11 +125,38 @@ def _chart_1_to_2(props: dict) -> dict:
     return dict(props)
 
 
+def _map_2_to_3(props: dict) -> dict:
+    """map v2 -> v3 (the commune-profile design pass).
+
+    v3 adds `locate_context`, and it must default to FALSE: every v2 map on
+    this site is a choropleth, and defaulting a locator on would empty them.
+    Set explicitly rather than left absent, the way v1 -> v2 set its three
+    controls, so a migrated document says what it does rather than relying on
+    the renderer's own default.
+    """
+    out = dict(props)
+    out.setdefault("locate_context", False)
+    return out
+
+
+def _ranking_list_1_to_2(props: dict) -> dict:
+    """ranking_list v1 -> v2 (the commune-profile design pass).
+
+    v2 adds one OPTIONAL prop, `title`, which is the heading over a group of
+    ranking blocks. A v1 block had no title and must not grow one here: a
+    default would print a heading over every row of the group, which is the
+    thing the prop exists to avoid. Identity, so the ladder stays unbroken.
+    """
+    return dict(props)
+
+
 #: (block_type, from_version) -> step producing from_version + 1 props.
 BLOCK_MIGRATIONS: dict[tuple[str, int], Callable[[dict], dict]] = {
     ("kpi_card", 1): _kpi_card_1_to_2,
     ("map", 1): _map_1_to_2,
     ("chart", 1): _chart_1_to_2,
+    ("ranking_list", 1): _ranking_list_1_to_2,
+    ("map", 2): _map_2_to_3,
 }
 
 

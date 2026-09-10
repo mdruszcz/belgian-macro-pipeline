@@ -246,3 +246,159 @@ a.bp-feature-tile:focus-visible{outline:2px solid var(--bp-accent); outline-offs
   padding:var(--bp-space-2) var(--bp-space-3); max-width:100%;
 }
 .bp-compare-select:disabled{opacity:.55; cursor:progress}
+
+/* ---- density: the commune profile beside its design reference ------------
+   Everything from here down exists because the first block-built profile was
+   CORRECT AND LOOSE. Every card was right, every state was honest, and the
+   page still read as a stack of half-empty boxes next to the design it was
+   built from. The four causes, each fixed below:
+
+   1. THE ROW HEIGHT CAME FROM THE TALLEST BLOCK IN THE ROW. A grid row was
+      auto-height, so one 210px chart beside three one-unit tiles stretched
+      each tile to 70px of mostly air. The grid now has a row UNIT, and a
+      block's declared height means the same thing everywhere on the page.
+   2. SIX BLOCK TYPES HAD NO SURFACE. .bp-stat-tile, .bp-ranking-list and
+      .bp-list-panel style the INSIDE of a panel; Batch 2's gallery supplied
+      the card around them, and a block had none -- so the whole right-hand
+      column rendered as unboxed text floating on the page background.
+   3. THE FIGURES WERE THE SAME SIZE AS THEIR LABELS, on a page whose entire
+      job is the figures.
+   4. PADDING TUNED FOR AN ARTICLE, not for a dashboard: 20-24px inside every
+      card and 16px between them, against roughly 14 and 12 in the design. */
+
+.bp-page{gap:var(--bp-space-5)}
+
+.bp-grid{
+  gap:var(--bp-space-3);
+  /* THE ROW UNIT. minmax, not a fixed track: a panel whose text needs more
+     room grows its row rather than clipping, which is the one thing a fixed
+     height would get wrong. 58px is one stat tile -- icon, label and figure --
+     measured from the tile, not chosen. */
+  grid-auto-rows:minmax(58px, auto);
+}
+@media (max-width: 640px){ .bp-grid{grid-auto-rows:minmax(52px, auto)} }
+
+.bp-section-title{font-size:1.45rem; margin:0 0 var(--bp-space-3)}
+
+/* A surface for the block types whose components only style their contents.
+   One rule, so a panel cannot end up looking like a different kind of card
+   depending on which block type it is. */
+.bp-block--stat_tile,
+.bp-block--ranking_list,
+.bp-block--link_list,
+.bp-block--sources_panel,
+.bp-block--comparison_picker,
+.bp-block--neighbour_list{
+  background:var(--bp-surface); border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card);
+  padding:var(--bp-space-3) var(--bp-space-4);
+  justify-content:center;
+}
+
+/* The tighter card. The same 14px the design uses, applied to the types that
+   already had a surface of their own. */
+.bp-block--chart,.bp-block--comparison_table,.bp-block--map,.bp-block--rich_text{
+  padding:var(--bp-space-4);
+}
+.bp-block-title{font-size:.95rem; margin:0 0 var(--bp-space-2)}
+.bp-block--chart .bp-block-title,
+.bp-block--comparison_table .bp-block-title,
+.bp-block--map .bp-block-title{font-weight:var(--bp-weight-semibold)}
+
+/* ---- the stat tile ------------------------------------------------------
+   Icon beside a stacked label and figure, which is what .bp-stat-body in
+   render.py exists for. */
+.bp-block--stat_tile .bp-stat-tile{gap:var(--bp-space-3); align-items:center}
+.bp-block--stat_tile .bp-stat-body{display:flex; flex-direction:column; min-width:0; gap:1px}
+.bp-block--stat_tile .bp-kpi-label{font-size:12px; line-height:1.25}
+.bp-block--stat_tile .bp-value{font-size:1.15rem; font-weight:var(--bp-weight-bold); line-height:1.2}
+.bp-block--stat_tile .bp-delta{font-size:11px}
+.bp-block--stat_tile .bp-stat-period{font-size:11px}
+
+/* ---- the KPI card -------------------------------------------------------
+   The trend cards under "key figures": label, figure, change, sparkline --
+   compact enough that six of them are a row rather than a page. */
+.bp-block--kpi_card .bp-kpi{
+  height:100%; padding:var(--bp-space-3) var(--bp-space-4); gap:2px;
+  justify-content:center;
+}
+.bp-block--kpi_card .bp-kpi-label{font-size:12px}
+.bp-block--kpi_card .bp-value{font-size:1.4rem}
+.bp-block--kpi_card .bp-kpi-icon{width:26px; height:26px; border-radius:7px; margin:0 0 2px}
+.bp-block-spark{flex:1; min-height:30px}
+.bp-block-spark canvas{height:100%}
+
+/* ---- charts fill their cell --------------------------------------------
+   The wrapper stretches, and blocks.js measures it and draws the chart at
+   that height. Without the min-height a chart in a one-unit cell would be
+   drawn a few pixels tall rather than refusing to fit. */
+.bp-block--chart{gap:var(--bp-space-2)}
+.bp-chart-canvas-wrap{flex:1; min-height:90px; display:flex}
+.bp-chart-canvas-wrap canvas{align-self:stretch; width:100%}
+
+/* ---- the sidebar panels -------------------------------------------------
+   A group of ranking blocks is ONE panel in the design and several blocks
+   here, because a block carries one binding. Consecutive ones are seamed:
+   square edges between them, no doubled border, and the grid gap pulled back
+   so they touch. The result is one panel with the heading on its first block
+   (v2's `title`), which is what the design draws. */
+.bp-block--ranking_list + .bp-block--ranking_list{
+  margin-top:calc(-1 * var(--bp-space-3));
+  border-top:0; border-top-left-radius:0; border-top-right-radius:0;
+  box-shadow:none;
+}
+.bp-block--ranking_list:has(+ .bp-block--ranking_list){
+  border-bottom-left-radius:0; border-bottom-right-radius:0; box-shadow:none;
+}
+.bp-block--ranking_list .bp-ranking-item{border-bottom:0; padding:2px 0}
+.bp-block--ranking_list .bp-block-title{margin-bottom:var(--bp-space-2)}
+
+.bp-block--link_list .bp-list-panel li{padding:6px 0}
+.bp-block--sources_panel p{margin:0 0 var(--bp-space-2); font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+.bp-block--sources_panel .bp-freshness{margin-bottom:var(--bp-space-2)}
+
+/* ---- a block with nothing to show --------------------------------------
+   The message is the card's content, centred in it, rather than a line of
+   grey text under an empty white box -- which is what an unavailable figure
+   looked like, and reads as a rendering bug rather than as a stated absence. */
+.bp-state-message{padding:0; display:none}
+.bp-state[data-state="missing"] .bp-state-message,
+.bp-state[data-state="unavailable"] .bp-state-message,
+.bp-state[data-state="error"] .bp-state-message{
+  display:flex; flex-direction:column; justify-content:center; flex:1;
+}
+.bp-state-message .headline{font-size:12px; line-height:1.35}
+
+/* ---- the section tabs ---------------------------------------------------
+   Full width, scrollable rather than wrapping: a wrapped tab strip pushes the
+   whole page down by a row on a narrow window. */
+.bp-block--section_nav{justify-content:center}
+.bp-block--section_nav .bp-tabs{
+  gap:var(--bp-space-5); overflow-x:auto; scrollbar-width:none; padding:0;
+}
+.bp-block--section_nav .bp-tabs::-webkit-scrollbar{display:none}
+.bp-tabs a.bp-tab{padding:var(--bp-space-2) 0; font-size:var(--bp-text-small)}
+
+/* ---- the photograph fills its cell -------------------------------------- */
+.bp-block--photo .bp-photo{height:100%; display:flex; flex-direction:column}
+.bp-block--photo .bp-photo-empty{flex:1; aspect-ratio:auto; min-height:120px}
+.bp-block--photo .bp-photo-img{height:100%; object-fit:cover}
+.bp-photo-overlay{font-size:1.6rem}
+
+/* The locator and choropleth maps stretch too, so a map block's height is the
+   one the layout gave it. */
+.bp-block-map{display:flex; flex-direction:column; flex:1; min-height:0}
+.bp-block-map .mapbox{flex:1; min-height:150px}
+.bp-block-map .mapbox svg{width:100%; height:100%}
+
+.bp-block--feature_tiles .bp-feature-tile{padding:var(--bp-space-3)}
+.bp-feature-grid{grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:var(--bp-space-3)}
+
+/* The map's indicator picker on a narrow screen. The select has an intrinsic
+   width from its longest option -- an indicator name -- so beside its label it
+   pushed the whole PAGE sideways on a phone: the one overflow the block grid
+   itself cannot cause, since every track is minmax(0,1fr). */
+@media (max-width: 640px){
+  .bp-map-picker{flex:1 1 100%}
+  .bp-map-picker select{flex:1; min-width:0; width:100%}
+}

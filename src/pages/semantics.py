@@ -388,7 +388,12 @@ def check_binding_presence(
                 f"block type {block_type!r} is static and accepts no binding",
             )
         ]
-    if binding is None and registry.requires_binding(block_type):
+    # THE ONE MAP WITH NOTHING TO BIND. A locator answers "where is this
+    # commune"; it draws no figures at all, so requiring an indicator would
+    # make a page fetch a payload it never reads in order to satisfy a rule
+    # about having something to show -- when what it shows is the outline.
+    locator = block_type == "map" and bool((block.get("props") or {}).get("locate_context"))
+    if binding is None and registry.requires_binding(block_type) and not locator:
         return [
             PageValidationError(
                 "schema_violation",
