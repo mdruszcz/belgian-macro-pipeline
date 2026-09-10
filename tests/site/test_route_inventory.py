@@ -32,6 +32,7 @@ import pytest
 from src.pages.semantics import ROUTE_EXACT
 from src.pages.strings import LANGS
 from src.site.routes import (
+    NIS_PLACEHOLDER,
     NOINDEX_PREFIXES,
     ROOT_PAGES,
     SITE_BASE,
@@ -151,9 +152,16 @@ def test_the_inventory_is_not_accidentally_empty():
     # hardcoded to two documents: this asserted `== LANGS * 2` and went red the
     # first time a third page was converted, which is a guard failing on
     # success rather than on a defect.
-    documents = len(declared_page_routes())
-    assert documents >= 2, "the page-document set is empty or nearly so"
-    assert len(block_page_routes()) == len(LANGS) * documents
+    declared = declared_page_routes()
+    assert len(declared) >= 2, "the page-document set is empty or nearly so"
+    # A TEMPLATED route stands for one page per commune, not for three. Written
+    # this way before any templated document exists, for the reason the comment
+    # above gives: a guard that goes red the day the cutover succeeds is a
+    # guard failing on success.
+    expected = sum(
+        len(commune_routes()) if NIS_PLACEHOLDER in route else len(LANGS) for route in declared
+    )
+    assert len(block_page_routes()) == expected
 
     # all_routes() DEDUPES, and the overlap is real rather than a bug: since
     # Batch 15d, /about.html is both a root page (frozen, so a rename fails

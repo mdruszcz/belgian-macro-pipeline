@@ -211,11 +211,29 @@ def declared_page_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
     )
 
 
+#: The placeholder a templated document carries in its route. The document is
+#: rendered once per commune, so this stands for 565 URLs and is never one.
+NIS_PLACEHOLDER = "{nis}"
+
+
 def block_page_routes(repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
-    """Every published page document's routes, one per language."""
-    return tuple(
-        route_for(declared, lang) for declared in declared_page_routes(repo_root) for lang in LANGS
-    )
+    """Every published page document's routes, one per language.
+
+    A TEMPLATED route is EXPANDED, not published. `/local/{nis}/` is one
+    document standing for one page per commune; listing it verbatim would put
+    three URLs in this inventory that no file answers -- and the inventory's
+    whole job is that every URL in it resolves. Expanded through
+    `commune_routes()` rather than through the payloads, so the templated
+    document and the commune pages live today cannot claim different sets, and
+    `all_routes()` dedupes the overlap while both exist.
+    """
+    out: list[str] = []
+    for declared in declared_page_routes(repo_root):
+        if NIS_PLACEHOLDER in declared:
+            out.extend(commune_routes(repo_root))
+            continue
+        out.extend(route_for(declared, lang) for lang in LANGS)
+    return tuple(out)
 
 
 def translations_of(route: str, repo_root: Path = REPO_ROOT) -> tuple[str, ...]:
