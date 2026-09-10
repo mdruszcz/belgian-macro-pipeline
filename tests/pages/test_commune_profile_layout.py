@@ -92,9 +92,7 @@ def test_the_locator_map_shows_the_page_subject_not_a_choropleth(rendered, docum
     assert locator["binding"] is None, "a locator resolves nothing; it outlines the subject"
     assert 'data-map-locate="1"' in rendered
     # And it is READY, not unavailable: it is showing exactly what it is for.
-    ready = re.search(
-        rf'data-block-id="{locator["id"]}"[^>]*data-state="ready"', rendered
-    )
+    ready = re.search(rf'data-block-id="{locator["id"]}"[^>]*data-state="ready"', rendered)
     assert ready, "the locator renders as having nothing to show"
 
 

@@ -902,10 +902,7 @@ def _render_block(
             # kinds of nothing are only distinguishable if they are named).
             own = text_in((block.get("props") or {}).get("unavailable_reason"), lang)
             said = own if own and state in ("unavailable", "missing") else text_in(message, lang)
-            body += (
-                '<div class="bp-state-message"><span class="headline">'
-                f"{esc(said)}</span></div>"
-            )
+            body += f'<div class="bp-state-message"><span class="headline">{esc(said)}</span></div>'
         inner = f'<div class="bp-state-skeleton"></div>{body}'
 
     classes = f"bp-block bp-block--{block_type}"
