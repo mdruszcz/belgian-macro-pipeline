@@ -34,6 +34,7 @@ from src.pages.strings import LANGS
 from src.site.routes import (
     NIS_PLACEHOLDER,
     NOINDEX_PREFIXES,
+    NOINDEX_ROUTES,
     ROOT_PAGES,
     SITE_BASE,
     all_routes,
@@ -306,9 +307,11 @@ def test_a_submitted_page_is_never_told_not_to_be_indexed(route):
 
 def test_noindex_is_driven_by_the_inventory_not_by_the_route_string():
     assert is_indexable("/about.html")
+    assert not is_indexable("/home2.html")
     assert not is_indexable("/preview/about.html")
     assert not is_indexable("/preview/fr/map.html")
     assert NOINDEX_PREFIXES, "an empty prefix tuple would make every page indexable"
+    assert NOINDEX_ROUTES, "an empty exact-route set would leave temporary root pages indexable"
 
 
 # --- sitemaps ---------------------------------------------------------------

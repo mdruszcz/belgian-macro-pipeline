@@ -1,0 +1,1215 @@
+<!--
+  BelPulse homepage redesign -- Batch 3 (docs/design-references/homepage.md),
+  built on Batch 1's tokens and Batch 2's shared components.
+
+  A PREVIEW ROUTE, deliberately not index.html. docs/features/page_builder.md's
+  own Batch 15 gate: a redesigned page stays a preview until it is proven
+  equivalent or better against the page it replaces, then the canonical route
+  switches -- never a silent cutover. index.html is untouched and still what
+  a visitor gets today.
+
+  WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY. Every departure is a
+  figure the design shows that this pipeline does not hold. None of them is a
+  layout choice:
+    * Public-finance tiles (spending / revenue / balance / debt in billions):
+      this pipeline's government series are CONTRIBUTIONS TO GDP GROWTH, not
+      levels in euro. The four tiles are built and laid out exactly as
+      designed, then rendered in the component library's `unavailable` state
+      rather than filled with a plausible number.
+    * The commune card, hero and CTA use temporary local AI-generated
+      illustrations. They are disclosed as illustrative rather than
+      documentary photographs and cause no third-party image requests.
+    * "581 communes / 200+ indicateurs" in the CTA: the real figures are read
+      live from manifest.json (565 / 52). The design's numbers are
+      aspirational; these are true.
+    * "PIB par habitant" on the hero map: Belgium publishes no GDP below the
+      regional level and this pipeline holds none. The map opens on the first
+      indicator the pipeline's own config lists as a headline, and its picker
+      holds every municipal indicator actually published.
+  NOT ONE INDICATOR CODE APPEARS IN THIS FILE -- adding an indicator is a
+  config change, never a page edit (enforced by
+  tests/test_map_ui_logic.py::test_no_page_names_an_indicator).
+-->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>BelPulse — Belgium's economic data, updated automatically</title>
+<meta name="description" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
+
+<script>
+  (function(){
+    try{
+      // This visual test targets the supplied light editorial design.
+      document.documentElement.setAttribute('data-theme', 'light');
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/commune_map.css">
+<style>
+  /* Page composition only. Anything reusable belongs in
+     assets/belpulse/components.css -- Batch 2 owns the library. */
+  body{background:var(--bp-bg)}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 var(--bp-space-6)}
+
+  h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+
+  /* ---- top bar ---- */
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%}
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .searchbox{
+    display:flex; align-items:center; gap:8px; flex:1; max-width:330px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:7px 12px; background:var(--bp-bg); margin-left:auto;
+  }
+  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+  .searchbox svg{color:var(--bp-text-faint); flex:none}
+  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
+
+  /* ---- hero ---- */
+  .hero{
+    position:relative; overflow:hidden; color:#fff;
+    background:
+      radial-gradient(1100px 420px at 82% 12%, rgba(70,110,175,.42), transparent 62%),
+      radial-gradient(760px 520px at 8% 88%, rgba(30,60,120,.5), transparent 60%),
+      linear-gradient(140deg, #0b1730 0%, #12274b 52%, #0d1c39 100%);
+  }
+  .hero .wrap{
+    display:grid; grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
+    gap:var(--bp-space-8); padding-top:var(--bp-space-10); padding-bottom:var(--bp-space-10);
+    align-items:start;
+  }
+  .hero .eyebrow{
+    font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold);
+    letter-spacing:.14em; color:rgba(255,255,255,.62); margin-bottom:var(--bp-space-5);
+  }
+  .hero h1{font-size:2.6rem; line-height:1.14; margin:0 0 var(--bp-space-5); max-width:15ch}
+  .hero .lead{color:rgba(255,255,255,.72); max-width:46ch; margin:0 0 var(--bp-space-6); font-size:var(--bp-text-body)}
+  .hero-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap; align-items:center}
+  .hero .bp-btn--outline{border-color:rgba(255,255,255,.3); color:#fff; background:rgba(255,255,255,.06)}
+  .hero .bp-btn--outline:hover{background:rgba(255,255,255,.12)}
+  .hero-script{
+    font-family:var(--bp-font-decorative); font-size:1.15rem; color:rgba(255,255,255,.82);
+    margin-top:var(--bp-space-8); display:flex; align-items:center; gap:10px;
+  }
+  .flagbar{display:inline-flex; height:11px; width:26px; border-radius:2px; overflow:hidden; flex:none}
+  .flagbar i{flex:1}
+  .flagbar i:nth-child(1){background:#000}
+  .flagbar i:nth-child(2){background:#fdda24}
+  .flagbar i:nth-child(3){background:#ef3340}
+
+  /* hero card cluster: big map + two stacked mini charts */
+  .hero-cards{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:var(--bp-space-4)}
+  .glass{
+    background:rgba(11,23,48,.62); border:1px solid rgba(255,255,255,.14);
+    border-radius:var(--bp-radius-card); backdrop-filter:blur(4px); color:#fff;
+  }
+  .glass h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
+  .glass .sub{font-size:11px; color:rgba(255,255,255,.55)}
+  .hero-mini{display:flex; flex-direction:column; gap:var(--bp-space-4)}
+  .hero-mini .glass{padding:var(--bp-space-4); display:flex; flex-direction:column; min-height:0}
+  .mini-head{display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
+  .seemore{font-size:11px; color:#8fb4ff; text-decoration:none; white-space:nowrap}
+  .seemore:hover{text-decoration:underline}
+  .mini-figure{display:flex; align-items:baseline; justify-content:flex-end; gap:8px; margin-top:2px}
+  .mini-figure b{font-size:1.5rem; font-weight:var(--bp-weight-bold)}
+  .mini-delta{font-size:11px}
+  /* A canvas with no CSS width keeps its 300px intrinsic size, so
+     sizeCanvas() measures 300 and the drawing spills straight out of a
+     narrower card into its neighbours. components.css only stretches
+     canvases inside .bp-chart-canvas-wrap; this is the same rule for this
+     page's own smaller chart slot. */
+  .mini-canvas{position:relative; margin-top:4px; min-width:0}
+  .mini-canvas canvas{display:block; width:100%}
+
+  .hero-map{padding:var(--bp-space-4); position:relative}
+  .hero-map .maphead{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--bp-space-3); gap:8px}
+  .hero-map .mapbox{position:relative; min-height:210px}
+  .hero-map .legend{overflow-x:auto; margin-top:var(--bp-space-3)}
+  /* The shared map component styles its own legend/tooltip for a light card;
+     inside the dark hero those need the dark treatment, which is what
+     .bp-shell--navy already means elsewhere in layout.css. */
+  .hero-map .swatches div{border-color:rgba(255,255,255,.2)}
+  .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage{color:rgba(255,255,255,.6)}
+  .zoombtns{display:flex; flex-direction:column; gap:4px; position:absolute; top:var(--bp-space-4); right:var(--bp-space-4); z-index:2}
+  .zoombtns button{
+    width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
+    background:rgba(11,23,48,.75); color:#fff; font:inherit; font-size:14px; line-height:1; cursor:pointer;
+  }
+  .zoombtns button:hover{background:rgba(255,255,255,.16)}
+
+  /* ---- finance strip ---- */
+  .finance{
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5) var(--bp-space-6);
+    display:grid; grid-template-columns:auto repeat(4, minmax(0,1fr)) auto;
+    gap:var(--bp-space-5); align-items:center; margin:calc(-1 * var(--bp-space-8)) 0 0;
+    position:relative; z-index:3;
+  }
+  .finance-title h2{font-size:var(--bp-text-h2); margin:0 0 2px}
+  .finance-title p{font-size:11px; color:var(--bp-text-faint); margin:0; max-width:20ch}
+  .ftile{display:flex; align-items:center; gap:var(--bp-space-3)}
+  .ficon{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none}
+  .ftile .lbl{font-size:11px; color:var(--bp-text-muted)}
+  .ftile .val{font-size:1.05rem; font-weight:var(--bp-weight-bold); line-height:1.2}
+  .ftile .bp-state-message{padding:0}
+  .ftile .why{font-size:10px}
+
+  /* ---- two-column mid band ---- */
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-8); margin-top:var(--bp-space-10)}
+  .sechead{display:flex; align-items:baseline; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:4px}
+  .sechead h2{font-size:1.5rem; margin:0}
+  .sechead a{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium)}
+  .sechead a:hover{text-decoration:underline}
+  .secsub{color:var(--bp-text-muted); font-size:var(--bp-text-small); margin:0 0 var(--bp-space-5)}
+
+  .commune-card{
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5);
+    display:grid; grid-template-columns:200px 1fr; gap:var(--bp-space-5);
+  }
+  .cc-photo{
+    border-radius:var(--bp-radius-control); min-height:120px; display:flex; align-items:flex-end; padding:10px;
+    background:linear-gradient(150deg,#dfe4ec,#c3ccda 60%,#aeb9cc); color:#4a5464; font-size:10px;
+  }
+  .cc-name{font-family:var(--bp-font-display); font-size:1.25rem; font-weight:600; margin:var(--bp-space-3) 0 2px}
+  .cc-region{font-size:11px; color:var(--bp-text-muted); margin-bottom:var(--bp-space-3)}
+  .cc-stats{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-4) var(--bp-space-5)}
+  .cc-stat{display:flex; gap:10px; align-items:flex-start}
+  .cc-stat .ficon{width:30px; height:30px; border-radius:8px}
+  .cc-stat .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3}
+  .cc-stat .val{font-size:.95rem; font-weight:var(--bp-weight-semibold)}
+  .cc-stat .sub{font-size:10px; color:var(--bp-text-faint)}
+
+  .pilltabs{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:var(--bp-space-4)}
+  .pilltabs button{
+    border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text-muted);
+    border-radius:var(--bp-radius-control); padding:6px 13px; font:inherit; font-size:var(--bp-text-small); cursor:pointer;
+  }
+  .pilltabs button[aria-selected="true"]{background:var(--bp-navy-bg); border-color:var(--bp-navy-bg); color:#fff}
+  .thumbs{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--bp-space-4)}
+  .thumb{
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    overflow:hidden; text-align:left; padding:0; font:inherit; color:inherit; cursor:pointer; display:block;
+  }
+  .thumb:hover{border-color:var(--bp-accent)}
+  .thumb .tmap{height:118px; position:relative; background:var(--bp-surface-alt)}
+  .thumb .tmap svg{width:100%; height:100%; display:block}
+  .thumb .tcap{padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:6px}
+  .thumb .tcap b{font-size:11px; font-weight:var(--bp-weight-semibold); display:block; line-height:1.3}
+  .thumb .tcap span{font-size:10px; color:var(--bp-text-faint)}
+
+  /* ---- national indicator row ---- */
+  .kpirow{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-4); margin-top:var(--bp-space-5)}
+  .kpicard{
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4); display:flex; flex-direction:column;
+  }
+  .kpicard h3{font-family:var(--bp-font-ui); font-size:11px; font-weight:var(--bp-weight-semibold); margin:0; line-height:1.3}
+  .kpicard .unitline{font-size:10px; color:var(--bp-text-faint); margin-bottom:6px}
+  .kpicard .figure{display:flex; align-items:baseline; justify-content:flex-end; gap:6px; margin-top:6px}
+  .kpicard .figure b{font-size:1.15rem; font-weight:var(--bp-weight-bold)}
+  .kpicard .period{font-size:10px; color:var(--bp-text-faint); text-align:right}
+
+  /* ---- feature band ---- */
+  .features{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:var(--bp-space-6);
+    background:var(--bp-surface-alt); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); padding:var(--bp-space-6); margin-top:var(--bp-space-10);
+  }
+  .feat{display:flex; gap:var(--bp-space-3); align-items:flex-start}
+  .feat .circ{
+    width:42px; height:42px; border-radius:50%; background:var(--bp-surface); flex:none;
+    display:flex; align-items:center; justify-content:center; color:var(--bp-navy-bg);
+    border:1px solid var(--bp-border);
+  }
+  .feat h4{font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0 0 3px}
+  .feat p{font-size:11px; color:var(--bp-text-muted); margin:0; line-height:1.5}
+
+  /* ---- CTA ---- */
+  .cta{
+    margin-top:var(--bp-space-10); color:#fff; position:relative; overflow:hidden;
+    background:
+      radial-gradient(900px 400px at 78% 20%, rgba(70,110,175,.4), transparent 60%),
+      linear-gradient(135deg,#0b1730,#14284c 60%,#0c1c38);
+  }
+  .cta .wrap{
+    display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--bp-space-8);
+    align-items:center; padding-top:var(--bp-space-10); padding-bottom:var(--bp-space-10);
+  }
+  .cta h2{font-size:1.9rem; margin:0 0 var(--bp-space-3); line-height:1.2; max-width:16ch}
+  .cta p{color:rgba(255,255,255,.72); margin:0; max-width:42ch; font-size:var(--bp-text-small)}
+  .cta-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap}
+  .cta .bp-btn--outline{border-color:rgba(255,255,255,.32); color:#fff; background:rgba(255,255,255,.06)}
+  .cta-stats{display:flex; gap:var(--bp-space-8); text-align:left}
+  .cta-stats b{display:block; font-family:var(--bp-font-display); font-size:1.7rem; font-weight:600; line-height:1.1}
+  .cta-stats span{font-size:11px; color:rgba(255,255,255,.66)}
+
+  /* ---- footer ---- */
+  .foot{background:var(--bp-surface); border-top:1px solid var(--bp-border); margin-top:0}
+  .foot .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; padding-top:var(--bp-space-6); padding-bottom:var(--bp-space-6)}
+  .foot nav{display:flex; gap:var(--bp-space-5); flex-wrap:wrap}
+  .foot a{font-size:var(--bp-text-small); color:var(--bp-text-muted); text-decoration:none}
+  .foot a:hover{color:var(--bp-text)}
+  .foot-script{font-family:var(--bp-font-decorative); font-size:.95rem; color:var(--bp-text-muted); display:flex; align-items:center; gap:8px; margin-left:auto}
+
+  .attribution{
+    padding:var(--bp-space-6) 0; font-size:11px; line-height:1.6;
+    color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border);
+  }
+  .attribution strong{color:var(--bp-text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+
+  /* Every collapsed track is minmax(0,1fr), never plain 1fr. A `1fr` track's
+     implied minimum is min-content, so a wide child (the map card, a long
+     nav) refuses to shrink and pushes the whole PAGE sideways instead --
+     which is exactly what it did here at 390px. */
+  @media (max-width:1024px){
+    .hero .wrap{grid-template-columns:minmax(0,1fr)}
+    .hero-cards{grid-template-columns:minmax(0,1fr)}
+    .finance{grid-template-columns:minmax(0,1fr) minmax(0,1fr); margin-top:var(--bp-space-6)}
+    .duo{grid-template-columns:minmax(0,1fr)}
+    .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .features{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .cta .wrap{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:768px){
+    /* layout.css wraps .bp-topbar itself; this page puts its flex row in an
+       inner .wrap, so the same rule has to reach that. */
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
+    .searchbox{max-width:none; margin-left:0; order:2; flex:1}
+  }
+  @media (max-width:680px){
+    .hero h1{font-size:2rem}
+    .finance{grid-template-columns:minmax(0,1fr)}
+    .commune-card{grid-template-columns:minmax(0,1fr)}
+    .thumbs{grid-template-columns:minmax(0,1fr)}
+    .kpirow{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .features{grid-template-columns:minmax(0,1fr)}
+    .cc-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .cta-stats{gap:var(--bp-space-5); flex-wrap:wrap}
+  }
+
+  /* ---- home2 high-fidelity composition ---------------------------------
+     This test route keeps home.html untouched. Values and map geometry still
+     come from the same published payloads; only composition and presentation
+     are specialised here. */
+  .home2 .wrap{max-width:1096px; padding-left:14px; padding-right:14px}
+  .home2 .bp-topbar{height:51px; padding:5px 0}
+  .home2 .bp-topbar .wrap{gap:22px; flex-wrap:nowrap}
+  .home2 .bp-logo-mark{width:24px; height:28px}
+  .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
+  .home2 .bp-tagline{font-size:8px; line-height:1.1}
+  .home2 .bp-nav{gap:21px; font-size:10px}
+  .home2 .searchbox{max-width:310px; padding:6px 10px}
+  .home2 .searchbox input,.home2 .langpick{font-size:10px}
+
+  .home2 .hero{
+    min-height:339px;
+    background-image:
+      linear-gradient(90deg,rgba(5,22,45,.97) 0%,rgba(7,28,55,.89) 42%,rgba(8,31,57,.78) 72%,rgba(6,25,48,.66) 100%),
+      url('assets/belpulse/home2/home2-hero-brussels.png');
+    background-size:cover; background-position:center right;
+  }
+  .home2 .hero .wrap{
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1.05fr) minmax(0,.8fr);
+    gap:14px; padding-top:11px; padding-bottom:11px; align-items:stretch;
+  }
+  .home2 .hero-cards{display:contents}
+  .home2 .hero .eyebrow{font-size:8px; margin:3px 0 14px}
+  .home2 .hero h1{font-size:2.15rem; line-height:1.08; max-width:17ch; margin-bottom:13px}
+  .home2 .hero .lead{font-size:12px; line-height:1.45; max-width:48ch; margin-bottom:16px}
+  .home2 .hero .bp-btn{font-size:10px; padding:8px 13px}
+  .home2 .hero-script{margin-top:17px; font-size:1rem}
+  .home2 .glass{border-radius:6px; background:rgba(5,25,50,.78); backdrop-filter:blur(3px)}
+  .home2 .hero-map{
+    padding:11px; display:flex; flex-direction:column;
+    --ramp-0:#c92535; --ramp-1:#ef6548; --ramp-2:#fdae61;
+    --ramp-3:#fff4bd; --ramp-4:#abd9e9; --ramp-5:#5aa6d1; --ramp-6:#2166ac;
+    --nodata:#dbe5e8; --map-stroke:rgba(255,255,255,.75);
+  }
+  .home2 .hero-map .maphead{margin-bottom:4px}
+  .home2 .hero-map .mapbox{height:auto; min-height:240px; flex:1 1 auto; background:transparent}
+  .home2 .hero-map .mapbox > svg{width:100%; height:100%}
+  .home2 .hero-map .legend{margin-top:4px; overflow:hidden}
+  .home2 .hero-map .ticks{width:100%!important; overflow:hidden}
+  .home2 .hero-map .swatches div{height:8px; width:35px}
+  .home2 .hero-map .ticks{font-size:8px}
+  .home2 .hero-map .sub{font-size:8px}
+  .home2 .hero-mini{gap:9px; min-width:0}
+  .home2 .hero-mini .glass{padding:10px; min-height:0; flex:1}
+  .home2 .hero-mini .glass h3{font-size:10px; line-height:1.2}
+  .home2 .hero-mini .sub,.home2 .seemore{font-size:8px}
+  .home2 .hero-mini .provenance,.home2 .national-provenance{font-size:7px; line-height:1.25; color:rgba(255,255,255,.58)}
+  .home2 .mini-figure b{font-size:1.1rem}
+  .home2 .mini-canvas{margin-top:0}
+
+  .home2 .finance{
+    min-height:88px; margin-top:10px; padding:10px 12px;
+    grid-template-columns:145px repeat(4,minmax(0,1fr)) 88px; gap:9px;
+    border-radius:6px; box-shadow:none;
+  }
+  .home2 .finance > *{min-width:0}
+  .home2 .finance > .sechead-link{white-space:normal!important; text-align:center; line-height:1.25}
+  .home2 .finance-title h2{font-size:1rem}
+  .home2 .finance-title p,.home2 .ftile .lbl{font-size:9px}
+  .home2 .ftile{gap:7px; padding:7px 6px; border:1px solid var(--bp-border); border-radius:5px; min-height:62px}
+  .home2 .ficon{width:33px; height:33px; border-radius:8px}
+  .home2 .ftile .why{font-size:8px; line-height:1.2}
+
+  .home2 .duo{gap:26px; margin-top:25px}
+  .home2 .duo > section{min-width:0}
+  .home2 .sechead{margin-bottom:2px}
+  .home2 .sechead h2{font-size:1.25rem}
+  .home2 .sechead a,.home2 .secsub{font-size:9px}
+  .home2 .secsub{margin-bottom:11px}
+  .home2 .commune-card{padding:10px; grid-template-columns:195px 1fr; gap:12px; min-height:204px; box-shadow:none}
+  .home2 .cc-photo{min-height:117px; padding:0; overflow:hidden; background:var(--bp-surface-alt)}
+  .home2 .cc-photo img{display:block; width:100%; height:117px; object-fit:cover; object-position:center}
+  .home2 .cc-name{font-size:1rem; margin:6px 0 0}
+  .home2 .cc-region{font-size:8px; margin-bottom:7px}
+  .home2 .cc-stats{gap:10px 13px}
+  .home2 .cc-stat{gap:7px}
+  .home2 .cc-stat .ficon{width:26px; height:26px}
+  .home2 .cc-stat .lbl{font-size:8px}
+  .home2 .cc-stat .val{font-size:.78rem}
+  .home2 .pilltabs{gap:4px; margin-bottom:9px; width:100%; max-width:100%; min-width:0; flex-wrap:wrap; overflow:hidden}
+  .home2 .pilltabs button{padding:5px 10px; font-size:9px; white-space:nowrap}
+  .home2 .thumbs{gap:8px}
+  .home2 .thumb{border-radius:5px}
+  .home2 .thumb .tmap{height:111px}
+  .home2 .thumb .tcap{padding:7px 8px}
+  .home2 .thumb .tcap b{font-size:9px}
+  .home2 .thumb .tcap span{font-size:8px}
+  .home2 .thumb:nth-child(1){--ramp-0:#fff5eb;--ramp-1:#fee6ce;--ramp-2:#fdd0a2;--ramp-3:#fdae6b;--ramp-4:#fd8d3c;--ramp-5:#e6550d;--ramp-6:#a63603}
+  .home2 .thumb:nth-child(2){--ramp-0:#f7fbff;--ramp-1:#deebf7;--ramp-2:#c6dbef;--ramp-3:#9ecae1;--ramp-4:#6baed6;--ramp-5:#3182bd;--ramp-6:#08519c}
+  .home2 .thumb:nth-child(3){--ramp-0:#f7fcf5;--ramp-1:#e5f5e0;--ramp-2:#c7e9c0;--ramp-3:#a1d99b;--ramp-4:#74c476;--ramp-5:#31a354;--ramp-6:#006d2c}
+
+  .home2 .national-section{margin-top:24px!important}
+  .home2 .kpirow{gap:8px; margin-top:10px}
+  .home2 .kpicard{padding:9px; min-height:151px; border-radius:5px; box-shadow:none}
+  .home2 .kpicard h3{font-size:9px; min-height:22px}
+  .home2 .kpicard .unitline,.home2 .kpicard .period{font-size:8px}
+  .home2 .kpicard .national-provenance{color:var(--bp-text-faint); margin-top:3px}
+  .home2 .kpicard .figure b{font-size:.95rem}
+  .home2 .features{gap:14px; padding:13px; margin-top:23px; border-radius:5px}
+  .home2 .feat{gap:8px}
+  .home2 .feat .circ{width:34px; height:34px}
+  .home2 .feat h4{font-size:9px}
+  .home2 .feat p{font-size:8px; line-height:1.35}
+
+  .home2 .cta{
+    margin-top:21px;
+    background-image:linear-gradient(90deg,rgba(4,22,44,.94),rgba(7,32,59,.76)),url('assets/belpulse/home2/home2-namur-cta.png');
+    background-size:cover; background-position:center;
+  }
+  .home2 .cta .wrap{grid-template-columns:minmax(0,1.2fr) auto minmax(0,1fr); gap:22px; padding-top:27px; padding-bottom:27px; min-height:169px}
+  .home2 .cta h2{font-size:1.55rem; margin-bottom:7px}
+  .home2 .cta p{font-size:9px}
+  .home2 .cta .bp-btn{font-size:9px; padding:8px 12px}
+  .home2 .cta-stats{gap:25px}
+  .home2 .cta-stats b{font-size:1.25rem}
+  .home2 .cta-stats span{font-size:8px}
+  .home2 .foot .wrap{padding-top:12px; padding-bottom:12px; min-height:65px}
+  .home2 .foot a{font-size:9px}
+  .home2 .foot-script{font-size:.82rem}
+  .home2 .ai-image-note{font-size:8px; color:var(--bp-text-faint); margin:5px 0 0}
+  .home2 .featured-meta{position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important}
+  .home2 .attribution{font-size:9px; padding:14px 0}
+
+  @media (max-width:1024px){
+    .home2 .bp-topbar{height:auto; min-height:51px}
+    .home2 .hero .wrap{grid-template-columns:minmax(0,1fr)}
+    .home2 .hero-cards{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+    .home2 .hero-mini{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .finance{grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:12px}
+    .home2 .finance-title,.home2 .finance .sechead-link{grid-column:1/-1}
+    .home2 .duo{grid-template-columns:minmax(0,1fr)}
+    .home2 .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .home2 .features{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .cta .wrap{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:768px){
+    .home2 .bp-topbar .wrap{flex-wrap:wrap}
+    .home2 .bp-nav{order:3; flex-basis:100%}
+    .home2 .searchbox{order:2; max-width:none; margin-left:auto}
+  }
+  @media (max-width:640px){
+    .home2 .hero h1{font-size:2rem}
+    .home2 .hero-cards,.home2 .hero-mini{grid-template-columns:minmax(0,1fr)}
+    .home2 .finance{grid-template-columns:minmax(0,1fr)}
+    .home2 .commune-card{grid-template-columns:minmax(0,1fr)}
+    .home2 .cc-photo img{height:160px}
+    .home2 .thumbs{grid-template-columns:minmax(0,1fr)}
+    .home2 .kpirow{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .features{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:420px){.home2 .kpirow{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body class="bp-shell home2">
+
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span>
+        <span class="bp-wordmark">BelPulse</span>
+        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
+      </span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home2.html" aria-current="page" data-t="navHome">Home</a>
+      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+      <a href="all_data.html" data-t="navMacro">Macro</a>
+      <a href="all_data.html" data-t="navMicro">Micro</a>
+      <a href="map.html" data-t="navMaps">Maps</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+    </nav>
+    <label class="searchbox">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+      <datalist id="communeList"></datalist>
+    </label>
+    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
+      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
+    </select>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── hero ────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow" data-t="homeEyebrow">DATA · TERRITORIES · PROSPERITY</div>
+        <h1 data-t="homeTitle">Belgium’s economic data, updated automatically.</h1>
+        <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
+        <div class="hero-actions">
+          <a class="bp-btn bp-btn--primary" href="communes.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <span data-t="homeExplore">Explore the data</span>
+          </a>
+          <a class="bp-btn bp-btn--outline" href="about.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span data-t="homeWatchVideo">Watch the video</span>
+          </a>
+        </div>
+        <div class="hero-script">
+          <span data-t="homePullQuote">A better-informed Belgium</span>
+          <span class="flagbar"><i></i><i></i><i></i></span>
+        </div>
+      </div>
+
+      <div class="hero-cards">
+        <div class="glass hero-map bp-state" id="mapCard" data-state="loading">
+          <div class="maphead">
+            <div>
+              <h3 id="mapTitle">—</h3>
+              <div class="sub" id="mapSubtitle" data-t="homeMapSubtitle">Pick an indicator; every commune this pipeline covers is drawn.</div>
+            </div>
+            <select class="bp-chart-select" id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map" style="background:rgba(11,23,48,.8); color:#fff; border-color:rgba(255,255,255,.22); max-width:120px"></select>
+          </div>
+          <div class="zoombtns">
+            <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
+            <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
+          </div>
+          <div class="mapbox" id="mapbox">
+            <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+            <div class="map-tip map-hidden" id="tip"></div>
+          </div>
+          <!-- Swatches and ticks only. The shared component also writes a
+               full prose explanation of its own classification (how the bands
+               were chosen, what "no data" means, the direction of the
+               indicator) into #legendNote and #coverage -- several sentences,
+               which is right on map.html where the map IS the page, and
+               swamps a hero card. Those elements are deliberately not passed
+               to the component here; map.html, one click away and linked
+               below, carries the full explanation. -->
+          <div class="legend">
+            <div class="swatches" id="swatches"></div>
+            <div class="ticks" id="ticks"></div>
+          </div>
+          <div class="sub" id="mapProvenance" style="margin-top:6px"></div>
+        </div>
+
+        <div class="hero-mini" id="heroMini"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── public finances: built as designed, honestly unavailable ───────── -->
+  <div class="wrap">
+    <section class="finance" id="financeStrip">
+      <div class="finance-title">
+        <h2 data-t="homeFinanceTitle">Public finances</h2>
+        <p data-t="homeFinanceLead">Live figures (updated daily)</p>
+      </div>
+      <!-- the four tiles are injected here, each in the `unavailable` state -->
+      <a class="sechead-link" href="all_data.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap" data-t="homeAllIndicators">See all national data →</a>
+    </section>
+  </div>
+
+  <!-- ── commune profiles | Belgium in maps ─────────────────────────────── -->
+  <div class="wrap">
+    <div class="duo">
+      <section>
+        <div class="sechead">
+          <h2 data-t="homeCommunesTitle">Commune profiles</h2>
+          <a href="communes.html" data-t="homeAllCommunes">Explore every commune →</a>
+        </div>
+        <p class="secsub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
+        <div class="commune-card bp-state" id="featuredCard" data-state="loading">
+          <div class="bp-state-skeleton"></div>
+          <div>
+            <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur"></div>
+            <div class="cc-name" id="featuredName">—</div>
+            <div class="cc-region" id="featuredRegion">—</div>
+            <a class="bp-btn bp-btn--outline" id="featuredLink" href="communes.html" style="border-color:var(--bp-accent); color:var(--bp-accent); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
+          </div>
+          <div class="cc-stats" id="featuredStats"></div>
+        </div>
+        <p class="featured-meta" id="featuredCaption"></p>
+      </section>
+
+      <section>
+        <div class="sechead">
+          <h2 data-t="homeMapsTitle">Belgium in maps</h2>
+          <a href="map.html" data-t="homeAllMaps">See the full-page map →</a>
+        </div>
+        <p class="secsub" data-t="homeMapsSub">Explore regional dynamics through interactive maps built on official data.</p>
+        <div class="pilltabs" id="themeTabs" role="tablist" aria-label="Map themes"></div>
+        <div class="thumbs" id="themeThumbs"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ── national key indicators ─────────────────────────────────────────── -->
+  <div class="wrap national-section" style="margin-top:var(--bp-space-10)">
+    <div class="sechead">
+      <h2 data-t="homeIndicatorsTitle">Key indicators for the Belgian economy</h2>
+      <a href="all_data.html" data-t="homeAllIndicators">See all national data →</a>
+    </div>
+    <p class="secsub" data-t="homeIndicatorsLead">National series, each with the period it describes.</p>
+    <div class="kpirow" id="nationalGrid"></div>
+  </div>
+
+  <!-- ── how this site works ─────────────────────────────────────────────── -->
+  <div class="wrap">
+    <section class="features">
+      <div class="feat">
+        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg></span>
+        <div><h4 data-t="homeFeatureAutoTitle">Updated automatically</h4>
+        <p data-t="homeFeatureAutoBody">A scheduled job fetches every source and rebuilds the site. No figure is typed in by hand.</p></div>
+      </div>
+      <div class="feat">
+        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+        <div><h4 data-t="homeFeatureSourcesTitle">Official sources</h4>
+        <p data-t="homeFeatureSourcesBody">Statbel, the NBB, ONEM/RVA, the federal police and Eurostat — each credited under its own licence.</p></div>
+      </div>
+      <div class="feat">
+        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6v20h12V6z"/><path d="M14 2v4h4"/><path d="M9 13h6M9 17h6"/></svg></span>
+        <div><h4 data-t="homeFeatureTraceTitle">Traceable and transparent</h4>
+        <p data-t="homeFeatureTraceBody">Every figure states its source, the period it covers, when it was retrieved and whether it was measured or computed.</p></div>
+      </div>
+      <div class="feat">
+        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 14c2.8 0 5 2.2 5 5"/></svg></span>
+        <div><h4 data-t="homeFeatureCitizensTitle">For citizens and decision-makers</h4>
+        <p data-t="homeFeatureCitizensBody">Open data, open code, no account required, and every underlying file downloadable.</p></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── CTA ─────────────────────────────────────────────────────────────── -->
+  <section class="cta">
+    <div class="wrap">
+      <div>
+        <h2 data-t="homeCtaTitle">Explore your commune’s data</h2>
+        <p data-t="homeCtaLead">Every commune this pipeline covers, with its own indicators and its own map.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="bp-btn bp-btn--primary" href="communes.html" data-t="homeCtaStart">Start exploring</a>
+        <a class="bp-btn bp-btn--outline" href="about.html" data-t="homeCtaAbout">Learn more about BelPulse</a>
+      </div>
+      <div class="cta-stats">
+        <div><b id="statCommunes">—</b><span data-t="homeStatCommunes">communes</span></div>
+        <div><b id="statIndicators">—</b><span data-t="homeStatIndicators">municipal indicators</span></div>
+        <div><b data-t="homeStatSources">Official sources</b><span data-t="homeStatSourcesSub">updated regularly</span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
+    </a>
+    <nav>
+      <a href="about.html" data-t="homeFooterAbout">About</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+      <a href="about.html" data-t="homeFooterSources">Sources</a>
+      <a href="all_data.html" data-t="homeFooterNews">News</a>
+      <a href="about.html" data-t="homeFooterContact">Contact</a>
+    </nav>
+    <span class="foot-script">
+      <span class="flagbar"><i></i><i></i><i></i></span>
+      <span data-t="homeFooterScript">Data shared for a stronger Belgium.</span>
+      <small class="ai-image-note" data-t="homeAiImageNote">Temporary AI-generated illustrative imagery — not documentary photography.</small>
+    </span>
+  </div>
+</footer>
+
+<!-- The licence notice. This page publishes municipal (Statbel-derived)
+     figures through the choropleth, so it carries the same conditions as
+     communes.html, local.html and map.html, and is listed alongside them in
+     tests/test_statbel_attribution.py. English stays in the markup so a
+     reader whose JavaScript never runs still gets the complete notice. -->
+<div class="attribution" id="attribution">
+  <div class="wrap">
+  <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+  (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+  1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+  document already recorded in <code>docs/licences/</code>.
+  <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+  communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+  a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+  longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+  are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+  <br><br>
+  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+  <!-- values-attribution:end --></span>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/belpulse/charts.js"></script>
+<script src="assets/belpulse/components.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* BelPulse homepage — Batch 3 (docs/design-references/homepage.md).
+ *
+ * Indicators come from metadata/sections.json. The featured commune and its
+ * six tiles come from the published commune-profile page configuration, so
+ * this temporary composition cannot drift from the profile it previews.
+ *
+ * The map is assets/commune_map.js -- the same component map.html and
+ * communes.html use (claude.md rule 29). No second implementation.
+ */
+(function(){
+  'use strict';
+
+  var GEO_URL     = 'data/geo/communes.geojson';
+  var INDEX_URL   = 'public/data/metadata/indicators.json';
+  var SECTIONS_URL= 'public/data/metadata/sections.json';
+  var SOURCES_URL = 'public/data/metadata/sources.json';
+  var NATIONAL_URL= 'public/data/national.json';
+  var MANIFEST_URL= 'public/data/manifest.json';
+  var FEATURED_CONFIG_URL = 'config/pages/commune-profile/published.json';
+  var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
+  var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
+
+  var LANG = I18N.initial();
+  var T = function(key, vars){ return I18N.t(LANG, key, vars); };
+
+  // The finance tiles' icon tints, by position. Not indicator colours -- the
+  // four tiles are a fixed editorial group in the design, and none of them
+  // has any data behind it yet (see the file header).
+  var FINANCE_TINTS = ['--bp-accent', '--bp-green', '--bp-red-signal', '--bp-chart-5'];
+  var FINANCE_KEYS = ['homeFinanceSpending', 'homeFinanceRevenue', 'homeFinanceBalance', 'homeFinanceDebt'];
+
+  var state = {
+    index: [], byCode: {}, sections: {headlines: [], sections: []},
+    sources: {}, grades: {}, national: {}, map: null, geojson: null,
+    activeTheme: null, thumbs: [], drawnIndicator: null,
+    featuredNis: null, featuredCodes: [], featured: null,
+  };
+
+  /* ---- language, the site's existing pattern ---------------------------- */
+  function applyStrings(){
+    document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = T(el.dataset.t); });
+    document.querySelectorAll('[data-t-html]').forEach(function(el){ el.innerHTML = T(el.dataset.tHtml); });
+    document.querySelectorAll('[data-t-title]').forEach(function(el){ el.title = T(el.dataset.tTitle); });
+    document.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
+    document.querySelectorAll('[data-t-alt]').forEach(function(el){ el.alt = T(el.dataset.tAlt); });
+    document.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
+    // applyStrings rewrites the attribution wholesale, which destroys the
+    // span the date was written into -- and that date is a LICENCE CONDITION
+    // (docs/data_catalog.md). Put it back.
+    var updated = document.getElementById('attrUpdated');
+    if(updated && state.attrUpdated) updated.textContent = state.attrUpdated;
+    document.documentElement.setAttribute('lang', LANG);
+    document.getElementById('langPick').value = LANG;
+  }
+
+  function nameOf(code){
+    var row = state.byCode[code];
+    if(!row) return code;
+    return (row.names && (row.names[LANG] || row.names.en)) || code;
+  }
+
+  function fmt(v, meta){
+    return MapUI.formatValue(v, meta.unit, meta.decimals, LANG);
+  }
+
+  function latestNumeric(entry){
+    if(!entry || !entry.periods) return null;
+    var ps = Object.keys(entry.periods).sort();
+    for(var i = ps.length - 1; i >= 0; i--){
+      var v = entry.periods[ps[i]].value;
+      if(typeof v === 'number') return {period: ps[i], value: v, status: entry.periods[ps[i]].status};
+    }
+    return null;
+  }
+
+  /* ---- hero map --------------------------------------------------------- */
+  function populateIndicatorPicker(){
+    var sel = document.getElementById('mapIndicator');
+    var current = sel.value;
+    sel.innerHTML = '';
+    state.index
+      .map(function(r){ return {code: r.indicator_code, label: nameOf(r.indicator_code)}; })
+      .sort(function(a, b){ return a.label.localeCompare(b.label, LANG); })
+      .forEach(function(r){
+        var o = document.createElement('option');
+        o.value = r.code; o.textContent = r.label;
+        sel.appendChild(o);
+      });
+    if(current) sel.value = current;
+  }
+
+  function provenanceLine(meta){
+    var bits = [];
+    var source = meta.source ? state.sources[meta.source] : null;
+    if(source) bits.push(source.label ? (source.label[LANG] || source.label.en) : meta.source);
+    var grade = state.grades[meta.grade];
+    if(grade) bits.push('(' + meta.grade + ') ' + (grade[LANG] || grade.en));
+    if(meta.updated) bits.push(T('retrieved') + ' ' + meta.updated);
+    else if(meta.inputs_updated) bits.push(T('inputsPrefix') + ' ' + meta.inputs_updated);
+    return bits.join(' · ');
+  }
+
+  function nationalProvenance(entry, latest){
+    var bits = [];
+    var source = entry.source ? state.sources[entry.source] : null;
+    bits.push((source && source.label && (source.label[LANG] || source.label.en)) || entry.source_agency || entry.source || T('unavailable'));
+    var grade = state.grades[entry.grade];
+    if(grade) bits.push('(' + entry.grade + ') ' + (grade[LANG] || grade.en));
+    if(entry.updated) bits.push(T('retrieved') + ' ' + entry.updated);
+    if(latest && latest.status && latest.status !== 'final') bits.push(T('status_' + latest.status));
+    return bits.join(' · ');
+  }
+
+  var valuesCache = {};
+  async function loadValues(code){
+    if(valuesCache[code]) return valuesCache[code];
+    var res = await fetch(VALUES_URL(code));
+    if(!res.ok) return null;
+    valuesCache[code] = await res.json();
+    return valuesCache[code];
+  }
+
+  async function drawIndicator(code){
+    var card = document.getElementById('mapCard');
+    var meta = state.byCode[code];
+    if(!meta || !state.map) return;
+    document.getElementById('mapTitle').textContent = nameOf(code);
+    var payload = await loadValues(code);
+    if(!payload){ card.dataset.state = 'error'; return; }
+    card.dataset.state = 'ready';
+    state.map.setData(payload.communes || {}, {
+      unit: meta.unit, decimals: meta.decimals, direction: meta.direction,
+    });
+    var heroTicks = document.getElementById('ticks');
+    heroTicks.style.width = '100%';
+    Array.from(heroTicks.children).forEach(function(tick, i){
+      tick.style.left = (((i + 1) / 7) * 100) + '%';
+    });
+    document.getElementById('mapProvenance').textContent = provenanceLine(meta);
+    document.getElementById('mapIndicator').value = code;
+    state.drawnIndicator = code;
+  }
+
+  /* ---- the two hero mini-charts and the six national cards --------------
+     Both read national.json. Series are chosen by a DATA PROPERTY, never a
+     list of codes: rate-shaped series first (a reader can read a percentage
+     year-on-year without knowing a base), then the rest, so the row fills
+     with real series and grows on its own when a national series is added.
+
+     Their labels come from the payload (claude.md rule 2). national.json
+     publishes a single monolingual `name`, so these read English in all
+     three languages -- a real gap in the national exporter, recorded in the
+     batch report rather than papered over by typing translations here. */
+  function nationalOrder(){
+    var codes = Object.keys(state.national);
+    var rate = codes.filter(function(c){ return (state.national[c].unit || '').indexOf('percent') === 0; }).sort();
+    var rest = codes.filter(function(c){ return rate.indexOf(c) === -1; }).sort();
+    return rate.concat(rest).filter(function(c){
+      return latestNumeric(state.national[c]) !== null;
+    });
+  }
+
+  function seriesPoints(entry, limit){
+    var ps = Object.keys(entry.periods || {}).sort().slice(-limit);
+    return ps.map(function(p){ return {period: p, value: (entry.periods[p] || {}).value}; })
+             .filter(function(pt){ return typeof pt.value === 'number'; });
+  }
+
+  function renderHeroMini(){
+    var host = document.getElementById('heroMini');
+    host.innerHTML = '';
+    var draws = [];
+    nationalOrder().slice(0, 2).forEach(function(code, i){
+      var entry = state.national[code];
+      var latest = latestNumeric(entry);
+      var el = document.createElement('div');
+      el.className = 'glass';
+      el.innerHTML =
+        '<div class="mini-head"><div><h3></h3><div class="sub"></div></div>' +
+        '<a class="seemore" href="all_data.html"></a></div>' +
+        '<div class="mini-figure"><b></b></div>' +
+        '<div class="period sub" style="text-align:right"></div>' +
+        '<div class="provenance sub"></div>' +
+        '<div class="mini-canvas"><canvas></canvas></div>';
+      el.querySelector('h3').textContent = entry.name || code;
+      el.querySelector('.sub').textContent = entry.unit || '';
+      el.querySelector('.seemore').textContent = T('homeSeeMore');
+      el.querySelector('.mini-figure b').textContent =
+        latest ? MapUI.formatValue(latest.value, entry.unit, 1, LANG) : '—';
+      el.querySelector('.period').textContent = latest ? latest.period : '';
+      el.querySelector('.provenance').textContent = nationalProvenance(entry, latest);
+      host.appendChild(el);
+      var pts = seriesPoints(entry, 24);
+      if(pts.length > 1) draws.push({canvas: el.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
+    });
+    // Draw only once every card is in the DOM: .hero-mini is a flex column
+    // whose children size against the grid, and a canvas measured mid-append
+    // bakes in the wrong width (found the hard way in this batch's first pass).
+    draws.forEach(function(d){
+      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
+        {locale: LANG, height: 104});
+    });
+  }
+
+  function renderNational(){
+    var host = document.getElementById('nationalGrid');
+    host.innerHTML = '';
+    var draws = [];
+    nationalOrder().slice(0, 6).forEach(function(code, i){
+      var entry = state.national[code];
+      var latest = latestNumeric(entry);
+      var card = document.createElement('div');
+      card.className = 'kpicard';
+      card.innerHTML =
+        '<h3></h3><div class="unitline"></div>' +
+        '<div class="mini-canvas"><canvas></canvas></div>' +
+        '<div class="figure"><b></b></div><div class="period"></div>' +
+        '<div class="national-provenance"></div>';
+      card.querySelector('h3').textContent = entry.name || code;
+      card.querySelector('.unitline').textContent = entry.unit || '';
+      card.querySelector('.figure b').textContent =
+        latest ? MapUI.formatValue(latest.value, entry.unit, 1, LANG) : '—';
+      card.querySelector('.period').textContent = latest ? latest.period : '';
+      card.querySelector('.national-provenance').textContent = nationalProvenance(entry, latest);
+      host.appendChild(card);
+      var pts = seriesPoints(entry, 20);
+      if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
+    });
+    draws.forEach(function(d){
+      // A sparkline: at this card size an axis would be unreadable, and the
+      // figure and its period are printed right beneath it anyway.
+      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
+        {locale: LANG, height: 58, compact: true});
+    });
+  }
+
+  /* ---- finance strip: designed shape, honest state ---------------------- */
+  function renderFinance(){
+    var strip = document.getElementById('financeStrip');
+    strip.querySelectorAll('.ftile').forEach(function(n){ n.remove(); });
+    var before = strip.querySelector('.sechead-link');
+    FINANCE_KEYS.forEach(function(key, i){
+      var tile = document.createElement('div');
+      tile.className = 'ftile bp-state';
+      tile.dataset.state = 'unavailable';
+      tile.innerHTML =
+        '<span class="ficon"></span>' +
+        '<div><div class="lbl"></div>' +
+        '<div class="bp-state-body"><div class="val">—</div></div>' +
+        '<div class="bp-state-message"><span class="why"></span></div></div>';
+      var icon = tile.querySelector('.ficon');
+      icon.style.background = 'color-mix(in srgb, var(' + FINANCE_TINTS[i] + ') 14%, transparent)';
+      icon.style.color = 'var(' + FINANCE_TINTS[i] + ')';
+      icon.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg>';
+      tile.querySelector('.lbl').textContent = T(key);
+      tile.querySelector('.why').textContent = T('homeFinanceUnavailable');
+      tile.title = T('homeFinanceWhy');
+      strip.insertBefore(tile, before);
+    });
+  }
+
+  /* ---- map theme tabs + three thumbnails --------------------------------
+     The thumbnails are three more instances of the SAME shared map
+     component, built from the one already-parsed boundary file -- not a
+     second, smaller map implementation (rule 29). */
+  function renderThemes(){
+    var tabs = document.getElementById('themeTabs');
+    tabs.innerHTML = '';
+    var sections = state.sections.sections || [];
+    if(!state.activeTheme && sections.length) state.activeTheme = sections[0].id;
+    sections.forEach(function(sec){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', String(sec.id === state.activeTheme));
+      btn.textContent = (sec.label && (sec.label[LANG] || sec.label.en)) || sec.id;
+      btn.addEventListener('click', function(){
+        state.activeTheme = sec.id;
+        renderThemes();
+        renderThumbs();
+      });
+      tabs.appendChild(btn);
+    });
+  }
+
+  async function renderThumbs(){
+    var host = document.getElementById('themeThumbs');
+    host.innerHTML = '';
+    state.thumbs = [];
+    var sections = state.sections.sections || [];
+    var active = sections.find(function(s){ return s.id === state.activeTheme; });
+    if(!active || !state.geojson) return;
+
+    var codes = (active.indicators || []).filter(function(c){ return state.byCode[c]; }).slice(0, 3);
+    codes.forEach(function(code){
+      var meta = state.byCode[code];
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'thumb';
+      el.innerHTML =
+        '<div class="tmap"><svg></svg><div class="map-tip map-hidden"></div></div>' +
+        '<div class="tcap"><span><b></b><span class="per"></span></span>' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>';
+      el.querySelector('b').textContent = nameOf(code);
+      el.querySelector('.per').textContent = meta.updated || '';
+      el.addEventListener('click', function(){
+        drawIndicator(code);
+        document.getElementById('mapCard').scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+      host.appendChild(el);
+      state.thumbs.push({code: code, el: el});
+    });
+
+    // Built after every thumb is in the DOM, for the same layout reason the
+    // charts are drawn in a second pass.
+    for(const t of state.thumbs){
+      var meta = state.byCode[t.code];
+      var map = new MapUI.CommuneMap({
+        svg: t.el.querySelector('.tmap svg'),
+        mapbox: t.el.querySelector('.tmap'),
+        tip: t.el.querySelector('.map-tip'),
+      }, {lang: LANG}).build(state.geojson);
+      var payload = await loadValues(t.code);
+      if(payload) map.setData(payload.communes || {}, {
+        unit: meta.unit, decimals: meta.decimals, direction: meta.direction,
+      });
+    }
+  }
+
+  /* ---- featured commune -------------------------------------------------
+     Both the commune and tile bindings come from the existing published
+     commune-profile document. No NIS or indicator code is duplicated here. */
+  function featuredUnavailable(){
+    var card = document.getElementById('featuredCard');
+    card.dataset.state = 'unavailable';
+    document.getElementById('featuredName').textContent = '—';
+    document.getElementById('featuredRegion').textContent = '';
+    document.getElementById('featuredStats').innerHTML = '';
+    document.getElementById('featuredCaption').textContent = T('unavailable');
+  }
+
+  async function renderFeatured(){
+    var card = document.getElementById('featuredCard');
+    if(!state.featuredNis || state.featuredCodes.length < 6){
+      featuredUnavailable();
+      return;
+    }
+
+    if(!state.featured){
+      try{
+        var cres = await fetch(COMMUNE_URL(state.featuredNis));
+        if(!cres.ok) throw new Error('profile unavailable');
+        var communeProfile = await cres.json();
+        if(!communeProfile || !communeProfile.indicators) throw new Error('profile malformed');
+        state.featured = {nis: state.featuredNis, profile: communeProfile};
+      }catch(err){
+        featuredUnavailable();
+        return;
+      }
+    }
+
+    var profile = state.featured.profile;
+    if(!profile || !profile.indicators){ featuredUnavailable(); return; }
+    card.dataset.state = 'ready';
+    // communes/{nis}.json carries `name` as a trilingual object; its
+    // province/region are flat strings the pipeline publishes in English
+    // only, used as published rather than translated here (rule 2).
+    document.getElementById('featuredName').textContent =
+      (profile.name && (profile.name[LANG] || profile.name.en)) || state.featured.nis;
+    document.getElementById('featuredRegion').textContent =
+      [profile && profile.province, profile && profile.region].filter(Boolean).join(' · ');
+    document.getElementById('featuredLink').href = 'local/' + state.featured.nis + '/';
+    document.getElementById('featuredCaption').textContent = T('homeFeaturedConfigured');
+
+    var stats = document.getElementById('featuredStats');
+    stats.innerHTML = '';
+    state.featuredCodes.forEach(function(code, i){
+      var meta = state.byCode[code];
+      if(!meta) return;
+      var entry = profile && profile.indicators && profile.indicators[code];
+      var latest = latestNumeric(entry);
+      var cell = document.createElement('div');
+      cell.className = 'cc-stat';
+      cell.innerHTML = '<span class="ficon"></span><div><div class="lbl"></div><div class="val"></div></div>';
+      var icon = cell.querySelector('.ficon');
+      icon.style.background = 'color-mix(in srgb, var(--bp-chart-' + ((i % 8) + 1) + ') 14%, transparent)';
+      icon.style.color = 'var(--bp-chart-' + ((i % 8) + 1) + ')';
+      icon.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>';
+      cell.querySelector('.lbl').textContent = nameOf(code);
+      cell.querySelector('.val').textContent = latest ? fmt(latest.value, meta) : '—';
+      stats.appendChild(cell);
+    });
+  }
+
+  /* ---- commune search --------------------------------------------------- */
+  function wireSearch(){
+    var input = document.getElementById('communeSearch');
+    var list = document.getElementById('communeList');
+    if(!state.map) return;
+    list.innerHTML = '';
+    state.map.features.forEach(function(f){
+      var o = document.createElement('option');
+      o.value = f.name + ' (' + f.nis + ')';
+      list.appendChild(o);
+    });
+    input.addEventListener('change', function(){
+      var m = /\((\d{4,5})\)\s*$/.exec(input.value);
+      if(m) window.location.href = 'local/' + m[1] + '/';
+    });
+  }
+
+  /* ---- boot ------------------------------------------------------------- */
+  async function init(){
+    document.getElementById('langPick').addEventListener('change', function(e){
+      LANG = e.target.value;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(err){}
+      applyStrings();
+      renderFinance(); renderHeroMini(); renderNational();
+      renderThemes(); renderThumbs(); renderFeatured();
+      populateIndicatorPicker();
+      if(state.map) state.map.setLang(LANG);
+      if(state.drawnIndicator) document.getElementById('mapTitle').textContent = nameOf(state.drawnIndicator);
+    });
+    applyStrings();
+
+    var responses = await Promise.all([
+      fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
+      fetch(NATIONAL_URL), fetch(MANIFEST_URL), fetch(FEATURED_CONFIG_URL).catch(function(){ return null; }),
+    ]);
+    var indexJson = responses[0].ok ? await responses[0].json() : {indicators: []};
+    state.index = indexJson.indicators || [];
+    state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
+    if(responses[1].ok) state.sections = await responses[1].json();
+    if(responses[2].ok){
+      var reg = await responses[2].json();
+      state.sources = reg.sources || {}; state.grades = reg.grades || {};
+    }
+    if(responses[3].ok) state.national = (await responses[3].json()).indicators || {};
+    if(responses[4].ok){
+      var ds = (await responses[4].json()).datasets || {};
+      document.getElementById('statCommunes').textContent = (ds.communes || {}).count || '—';
+      document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
+    }
+    if(responses[5] && responses[5].ok){
+      try{
+        var featuredConfig = await responses[5].json();
+        var configuredNis = featuredConfig && featuredConfig.context && featuredConfig.context.nis;
+        var headerSection = (featuredConfig.sections || []).find(function(section){ return section.id === 'header'; });
+        var configuredCodes = (headerSection && headerSection.blocks || [])
+          .filter(function(block){ return block.type === 'stat_tile' && block.binding && block.binding.provider === 'municipal'; })
+          .map(function(block){ return block.binding.indicator; })
+          .filter(function(code){ return state.byCode[code]; })
+          .slice(0, 6);
+        if(/^\d{5}$/.test(configuredNis || '') && configuredCodes.length === 6){
+          state.featuredNis = configuredNis;
+          state.featuredCodes = configuredCodes;
+        }
+      }catch(err){
+        state.featuredNis = null;
+        state.featuredCodes = [];
+      }
+    }
+
+    // The licence date: the most recent retrieval date across the published
+    // municipal indicators, which is what "data last updated" means here.
+    var dates = state.index.map(function(r){ return r.updated; }).filter(Boolean).sort();
+    state.attrUpdated = dates[dates.length - 1] || '';
+    var upd = document.getElementById('attrUpdated');
+    if(upd && state.attrUpdated) upd.textContent = state.attrUpdated;
+
+    renderFinance();
+    renderHeroMini();
+    renderNational();
+    populateIndicatorPicker();
+    renderThemes();
+    renderFeatured();
+
+    var geoRes = await fetch(GEO_URL);
+    if(!geoRes.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
+    state.geojson = await geoRes.json();
+
+    state.map = new MapUI.CommuneMap({
+      svg: document.getElementById('svg'),
+      tip: document.getElementById('tip'),
+      mapbox: document.getElementById('mapbox'),
+      swatches: document.getElementById('swatches'),
+      ticks: document.getElementById('ticks'),
+      // legendNote and coverage deliberately omitted -- see the markup.
+    }, {
+      lang: LANG,
+      onSelect: function(nis){ window.location.href = 'local/' + nis + '/'; },
+    }).build(state.geojson);
+
+    document.getElementById('zoomIn').onclick = function(){ state.map.zoomBy(1/1.4); };
+    document.getElementById('zoomOut').onclick = function(){ state.map.zoomBy(1.4); };
+    document.getElementById('mapIndicator').addEventListener('change', function(e){ drawIndicator(e.target.value); });
+
+    wireSearch();
+    renderThumbs();
+
+    var opening = (state.sections.headlines || [])[0];
+    if(opening && state.byCode[opening]) drawIndicator(opening);
+    else document.getElementById('mapCard').dataset.state = 'unavailable';
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

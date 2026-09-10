@@ -85,6 +85,7 @@ ROUTE_EXACT = frozenset(
         # and src/site/routes.py's inventory to agree, so a served page cannot
         # be absent from one of them again.
         "/home.html",
+        "/home2.html",
         "/commune.html",
         # PREVIEW routes, added one at a time as Batch 15 converts a page.
         #
