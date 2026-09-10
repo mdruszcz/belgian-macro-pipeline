@@ -369,6 +369,9 @@ def _sections(path: Path = SECTIONS_CONFIG) -> dict:
     return {
         "headlines": layout.get("headlines") or [],
         "sections": layout.get("sections") or [],
+        # Part-of-whole groups. Declared here, verified against the data
+        # by _check_compositions before anything is written.
+        "compositions": layout.get("compositions") or [],
     }
 
 
@@ -391,6 +394,15 @@ def _check_sections(layout: dict, known: set[str]) -> None:
             if indicator_id not in known
         }
         | {i for i in layout["headlines"] if i not in known}
+        | {
+            i
+            for group in layout.get("compositions") or []
+            for i in [
+                *(group.get("parts") or []),
+                *([group["whole"]] if group.get("whole") else []),
+            ]
+            if i not in known
+        }
     )
     if unknown:
         raise ValueError(
@@ -398,6 +410,59 @@ def _check_sections(layout: dict, known: set[str]) -> None:
             f"{unknown}. They would render as empty boxes on every commune page. Remove "
             "them from the layout, or load the data they need."
         )
+
+
+#: How far the parts may miss the whole before the layout is refused. The
+#: age bands reproduce the population EXACTLY by construction
+#: (sync_population.py derives the total as the band sum), so any real
+#: disagreement is a data defect, not rounding -- but a published float that
+#: went through CSV once deserves a hair of tolerance, not a byte-for-byte
+#: test.
+COMPOSITION_TOLERANCE = 0.5
+
+
+def _check_compositions(layout: dict, communes: dict) -> None:
+    """Every declared part-of-whole group must be TRUE in the data.
+
+    The page draws a donut from these parts. If the parts do not add up to
+    the whole, the donut is a picture of something that is not the case -- a
+    "38% aged 15-64" that is really 38% of some other total. So the claim is
+    checked in every commune and every period where the whole and all parts
+    carry a value, and one miss refuses the whole layout (rule 13): a wrong
+    picture published to 565 communes is worse than a missing panel.
+
+    A group with no `whole` is a breakdown; its parts are checked only for
+    existence, above, since there is no claimed total to verify.
+    """
+    for group in layout.get("compositions") or []:
+        whole = group.get("whole")
+        parts = group.get("parts") or []
+        if not parts:
+            raise ValueError(f"composition {group.get('id')!r} declares no parts")
+        if not whole:
+            continue
+        checked = 0
+        for nis, commune in communes.items():
+            indicators = commune["indicators"]
+            if whole not in indicators or any(p not in indicators for p in parts):
+                continue
+            for period, cell in indicators[whole]["periods"].items():
+                total = cell.get("value")
+                pieces = [indicators[p]["periods"].get(period, {}).get("value") for p in parts]
+                if total is None or any(v is None for v in pieces):
+                    continue
+                checked += 1
+                if abs(sum(pieces) - total) > COMPOSITION_TOLERANCE:
+                    raise ValueError(
+                        f"composition {group.get('id')!r} is not a partition: in commune {nis}, "
+                        f"period {period}, the parts sum to {sum(pieces)} and {whole} is "
+                        f"{total}. Refusing to publish a donut of shares that do not add up."
+                    )
+        if not checked:
+            raise ValueError(
+                f"composition {group.get('id')!r} could not be verified in a single "
+                "commune-period: no commune carries the whole and every part together."
+            )
 
 
 def _read_aggregates(csv_path: Path) -> dict[tuple[str, str, str], dict]:
@@ -655,7 +720,15 @@ def _indicator_index(
 
 def _write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    # EXPLICIT UTF-8. `ensure_ascii=False` puts every accented commune name
+    # into the file as-is, and write_text with no encoding then encodes it in
+    # the platform codepage -- cp1252 on a Belgian Windows machine -- so the
+    # first payload build on the maintainer's laptop wrote "Répartition" as
+    # a byte no UTF-8 reader can decode. The runners are Linux and never saw
+    # it (tests/test_cross_platform.py).
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+    )
 
 
 def _git_commit(repo_root: Path) -> str:
@@ -759,15 +832,24 @@ def export_site_payloads(
     # with a fixture-scale set of indicators is not testing the page layout,
     # and the cross-check below would rightly reject every real indicator as
     # missing from a two-row fixture.
-    layout = _sections(sections_config) if sections_config else {"headlines": [], "sections": []}
+    layout = (
+        _sections(sections_config)
+        if sections_config
+        else {"headlines": [], "sections": [], "compositions": []}
+    )
     if layout["sections"] or layout["headlines"]:
         _check_sections(
             layout,
             {i for commune in communes.values() for i in commune["indicators"]},
         )
+        _check_compositions(layout, communes)
         _write_json(
             out_dir / "metadata" / "sections.json",
-            {"headlines": layout["headlines"], "sections": layout["sections"]},
+            {
+                "headlines": layout["headlines"],
+                "sections": layout["sections"],
+                "compositions": layout.get("compositions") or [],
+            },
         )
 
     manifest = {

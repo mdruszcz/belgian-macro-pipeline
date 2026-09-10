@@ -1165,6 +1165,43 @@ part-of-whole binding (so the age structure is three tiles, not a donut), no sea
 bar, no header action buttons, and the comparison table is one indicator across four geographies
 rather than the reference's six indicators against two averages -- that last one needs a binding
 shape this vocabulary does not have.
+18E -- commune.html, THE HAND-BUILT PREVIEW, brought to the model (2026-09-10). The maintainer
+asked for the root commune.html to look like the model PNG, assets included. Four of its "honest
+checklist" gaps closed, each by DATA WORK rather than by a picture of data:
+THE PHOTOGRAPH: assets/belpulse/commune/photos.json, keyed by NIS, pointing at resized copies
+(262 KB and 138 KB) of the maintainer's own Namur images; the hero carries the name, a tagline, a
+caption chip and a credit that says the image is generated, and the CTA band takes the dusk
+panorama. A commune with no entry keeps the plain frame and its note -- a picture of one place
+never stands in for another.
+NEIGHBOURING COMMUNES, which every page said this pipeline could not produce. It could: the
+boundary file is a shared-arc topology (build_commune_boundaries.py, point 2), so two communes
+that border share the same vertex coordinates, and adjacency is a set intersection in pure Python
+-- scripts/export_commune_adjacency.py, 565 communes, 1,580 borders, two shared vertices per
+border because one is a tripoint. Namur's ten computed neighbours are its ten real ones, asserted
+against a hand-written list. The sidebar lists them with the headline figure from the SAME payload
+the map is painted with; a second map frames the commune among them and names each (CommuneMap
+gained frame()). Two traps on the way: build() appends to the SVG, so a second render drew every
+path twice; and a map built inside a `loading` state body has no layout, so getBBox() returned
+zeros and the card was one dark slab. And a third: labels at any fixed size in a frame under one
+projected degree wide are a wall of ink -- sized from the frame.
+THE AGE DONUT AND AN ACTIVITY BREAKDOWN, waiting since Batch 4 for something published to say
+which indicators partition a whole. config/local_sections.yaml now has a `compositions:` block,
+and export_site_payloads.py VERIFIES it before publishing: for a group with a `whole`, the parts
+must sum to it in every commune and every period they share, or the layout is refused (rule 13).
+The page draws one panel per group from sections.json and holds no indicator id; the sector
+breakdown the design shows is not collected anywhere, so the second panel is the Census activity
+status and says so.
+THE LOCATOR tints the commune's own province and region from geographies.json's parent chain,
+with a legend and zoom -- and the subtitle reads "Region wallonne . Province de Namur" in French
+instead of the payload's English-only "Wallonia . Namur".
+ONE MORE WINDOWS FINDING: three payload writers wrote JSON with ensure_ascii=False and no
+encoding, so the first payload build on the maintainer's machine put accented commune names into
+public/data in cp1252 and json.load died on the first one. All three fixed, guarded in
+tests/test_cross_platform.py for shipping code; 54 fixture writes in tests/ do the same and are a
+separate cleanup (they are why test_geography_load.py fails on Windows).
+STILL MISSING, still labelled: municipal finance (no source), employment by sector (no source),
+a statistical-sector population map (commune boundaries only), named composite ranks (no peer
+model). 14 new tests.
 NOT DONE, AND ON PURPOSE: THE CUTOVER. export_local_pages.py still owns /local/{nis}/, so the
 templated document is NOT committed -- committing it would have `make pages` overwrite all 1,695
 live pages the next time it ran. The loop is exercised by tests/pages/test_commune_loop.py,

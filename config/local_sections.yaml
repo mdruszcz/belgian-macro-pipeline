@@ -32,6 +32,45 @@ headlines:
   - UNEMPLOYMENT_RATE_COM
   - MEDIAN_HOUSE_PRICE
 
+# Part-of-whole groups: which indicators together make up a whole. This is
+# the declaration the age donut on commune.html waited for since Batch 4 --
+# nothing published said WHICH indicators partition a whole, and the page
+# refused to guess. The exporter does not take the claim on trust: where a
+# `whole` is named, it checks that the parts sum to it in every commune and
+# every period they share, and refuses to publish the layout if they do not
+# (rule 13). A group with no `whole` is a breakdown whose total is simply
+# the sum of its parts.
+#
+# `chart` is a hint for the page, not a data property: `donut` for a
+# structure of shares, `bars` for a breakdown read left to right.
+compositions:
+  - id: age_structure
+    label: {en: Age structure, fr: Répartition par âge, nl: Leeftijdsstructuur}
+    note:
+      en: Three bands, not the four the design shows — that is how the source publishes them.
+      fr: Trois tranches, et non les quatre de la maquette — c’est ainsi que la source les publie.
+      nl: Drie groepen, niet de vier van het ontwerp — zo publiceert de bron ze.
+    chart: donut
+    whole: POPULATION_BY_COMMUNE
+    parts:
+      - POPULATION_AGE_0_14
+      - POPULATION_AGE_15_64
+      - POPULATION_AGE_65_PLUS
+  - id: activity_status
+    label:
+      en: Activity status (15–64)
+      fr: Statut d’activité (15–64 ans)
+      nl: Activiteitsstatus (15–64)
+    note:
+      en: Census 2021. Employed, unemployed and inactive residents — not the sector breakdown the design shows, which no source collects for communes.
+      fr: Census 2021. Habitants en emploi, sans emploi et inactifs — et non la répartition sectorielle de la maquette, qu’aucune source ne collecte par commune.
+      nl: Census 2021. Werkende, werkloze en niet-actieve inwoners — niet de sectorverdeling van het ontwerp, die geen enkele bron per gemeente verzamelt.
+    chart: bars
+    parts:
+      - CAS_EMPLOYED
+      - CAS_UNEMPLOYED
+      - CAS_INACTIVE
+
 sections:
   - id: demography
     label: {en: Demography, fr: Démographie, nl: Demografie}
