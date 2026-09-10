@@ -1048,6 +1048,57 @@ canonical and legacy URL must still satisfy.
 Why: A mistake here is silent in both directions -- a leak nobody notices, or a dead URL that
 breaks rule 31 and is worse than the leak it fixes.
 
+ [BUILD] Batch 18 -- the commune profile from blocks (2026-09-10: SPLIT IN TWO, A shipped and
+B shipped, THE CUTOVER DELIBERATELY NOT. The goal is that the maintainer can reorder or add a
+section across all 565 commune pages himself, instead of every change going through an agent
+editing scripts/export_local_pages.py.
+18A -- THE BLOCK TYPES. The builder had six; the design needs sixteen. Ten new types
+(stat_tile, section_nav, sources_panel, link_list, feature_tiles, cta_band, comparison_picker,
+ranking_list, photo, neighbour_list) plus chart v2 (donut and ranking, which charts.js could
+already draw and no block could reach), plus the page chrome a block-built page never had --
+topbar, breadcrumb, page title and footer, in src/pages/shell.py beside the language switcher.
+MOST OF THE CSS ALREADY EXISTED AND WAS UNUSED: Batch 2 built the component gallery and
+commune.html reimplemented every one of them as page-local CSS, so most new types needed a
+registry entry and a renderer, not new styling. ONE DELIBERATE REVERSAL, RECORDED RATHER THAN
+DELETED: ranking_list sat on two "not building this" lists because named composite ranks need
+the unbuilt peer model; it ships in the partial form that DOES exist -- per-indicator percentile
+ranks, which are already in every payload -- with the composite rows saying why they are empty.
+Proved on one hand-authored page, config/pages/commune-profile/published.json, 35 blocks over 8
+sections at /preview/commune.html, pinned to Namur and read from real payloads (rule 36: no
+figure typed into a design asset, and the estimate-the-missing-graphs idea was refused for the
+same reason).
+18B -- ONE DOCUMENT, 565 COMMUNES. build_one() now takes a NIS: it substitutes {nis} in the
+route, sets context.nis, and fills the placeholders. FOUR DEFECTS FOUND BEFORE ANY PAGE WAS
+MULTIPLIED. (1) asset_prefix_for() counted slashes, so /local/11001/ got ../ while the file it
+writes lives two directories down -- every stylesheet, script and block link on all 1,695 pages
+one level short, while the page still renders perfectly. It never fired because no document had
+a directory route yet. (2) THE COMMUNE'S NAME IS NOT ONLY IN THE SEO STRINGS: four block props
+name the subject (the hero overlay, the locator map's accessible name, both comparison
+headings), so templating <title> alone would have left every page in the country greeting its
+reader as Namur. localise() fills {commune}, {nis} and {figures:block-id,block-id} through props
+AND seo -- and {figures:} names BLOCKS, not indicators, so a description cannot state a number
+the reader does not see, and a commune missing one gets a shorter sentence rather than one with
+a hole in it. (3) One PayloadReader across the loop would have accumulated all 565 payloads,
+about 37 MB; it is one per commune, shared by that commune's three languages, guarded by a test
+that counts the instances. (4) The route inventory would have published /local/{nis}/ and its
+two siblings verbatim -- three URLs no file answers -- so block_page_routes() expands a
+templated route through commune_routes(), and the "inventory is not accidentally empty" guard
+was rewritten to expect that before it could go red on success.
+NOT DONE, AND ON PURPOSE: THE CUTOVER. export_local_pages.py still owns /local/{nis}/, so the
+templated document is NOT committed -- committing it would have `make pages` overwrite all 1,695
+live pages the next time it ran. The loop is exercised by tests/pages/test_commune_loop.py,
+which builds the templated document from the real one, and by `--nis 92094` for looking at a
+single commune. TWO THINGS THE CUTOVER MUST WEIGH: a block-built commune page is 58 KB against
+the hand-built 16.5 KB, so the committed site goes from 34 MB to about 98 MB; and the two
+exporters state "no data, no page" separately, which a test now pins to the same 565 communes.
+Also still missing and still labelled: municipal finance, employment by sector, price per m2,
+migratory balance, median age, commune adjacency, photos, the peer model, and the part-of-whole
+binding the donut wants. 12 new tests)
+How: The commune profile becomes a page document, and the 565 pages become one document
+rendered per commune.
+Why: A design change to every commune page in the country should be a page edit, not a code
+change -- and every commune page is the top of the SEO funnel this whole roadmap rests on.
+
  [REVIEW] Full audit pass -- visual, data, accessibility, security, performance, licence, SEO
 How: Run every audit in docs/features/page_builder.md's Test matrix against the finished
 batches; zero P0/P1 findings remain open.

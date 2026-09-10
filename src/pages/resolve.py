@@ -235,17 +235,31 @@ def _label(value, lang: str) -> str:
 
 
 def resolve_document(
-    doc: Mapping, *, metadata, lang: str = "en", reader: PayloadReader | None = None
+    doc: Mapping,
+    *,
+    metadata,
+    lang: str = "en",
+    reader: PayloadReader | None = None,
+    nis: str | None = None,
 ) -> dict:
     """`{block_id: payload}` for every block carrying a binding.
 
     A block WITHOUT a binding gets no entry at all -- `render.py`'s
     `_state_for` already renders those as `ready`, and inventing an entry for
     them would say something about data where there is none to say.
+
+    `nis` RENDERS A TEMPLATED DOCUMENT FOR ONE COMMUNE. A commune-profile
+    document declares `context.nis` as the literal `{nis}` placeholder and is
+    rendered once per commune; the subject came only from the document, so
+    there was no way to say which commune this pass is for without editing the
+    document 565 times. Passing it wins over the placeholder and over nothing
+    at all, and a document that names a CONCRETE commune still wins over this
+    -- a page pinned to Namur stays pinned to Namur however it is rendered.
     """
     reader = reader or PayloadReader()
     out: dict[str, dict] = {}
-    context_nis = (doc.get("context") or {}).get("nis")
+    declared = (doc.get("context") or {}).get("nis")
+    context_nis = declared if declared and declared != "{nis}" else nis
     for section in doc.get("sections") or []:
         for block in section.get("blocks") or []:
             binding = block.get("binding")
