@@ -150,6 +150,22 @@ def _ranking_list_1_to_2(props: dict) -> dict:
     return dict(props)
 
 
+def _section_nav_1_to_2(props: dict) -> dict:
+    """section_nav v1 -> v2: an optional parallel list of icon names.
+
+    Identity. A v1 strip had no icons and must not be given any here -- which
+    icon belongs on which tab is editorial, and a default would be a guess
+    printed on every page.
+    """
+    return dict(props)
+
+
+def _feature_tiles_1_to_2(props: dict) -> dict:
+    """feature_tiles v1 -> v2: an optional icon per tile. Identity, for the
+    same reason as section_nav above."""
+    return dict(props)
+
+
 #: (block_type, from_version) -> step producing from_version + 1 props.
 BLOCK_MIGRATIONS: dict[tuple[str, int], Callable[[dict], dict]] = {
     ("kpi_card", 1): _kpi_card_1_to_2,
@@ -157,6 +173,8 @@ BLOCK_MIGRATIONS: dict[tuple[str, int], Callable[[dict], dict]] = {
     ("chart", 1): _chart_1_to_2,
     ("ranking_list", 1): _ranking_list_1_to_2,
     ("map", 2): _map_2_to_3,
+    ("section_nav", 1): _section_nav_1_to_2,
+    ("feature_tiles", 1): _feature_tiles_1_to_2,
 }
 
 

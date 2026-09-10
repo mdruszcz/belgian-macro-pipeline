@@ -34,19 +34,19 @@
 
 :root{
   /* ---- brand ---------------------------------------------------------- */
-  --bp-accent:        #c8402f;  /* primary CTA, active nav, "this is the subject" highlight */
-  --bp-accent-ink:     #7a2116; /* accent text on a light background (AA against --bp-bg) */
-  --bp-accent-soft:    #f6e3df; /* accent-tinted background, e.g. a selected chip */
+  --bp-accent:        #cc2b38;  /* primary CTA, active nav, "this is the subject" highlight */
+  --bp-accent-ink:     #9c1f29; /* accent text on a light background (AA against --bp-bg) */
+  --bp-accent-soft:    #fceaec; /* accent-tinted background, e.g. a selected chip */
   --bp-on-accent:      #ffffff; /* text/icon colour drawn ON a filled --bp-accent surface
                                     (a primary button's label) -- same in both themes, since
                                     the accent fill itself doesn't change between them. */
   --bp-blue:           #3a67e0; /* links, chart series, KPI icon backgrounds */
-  --bp-green:          #278a53; /* a favourable delta, per the indicator's own preferred_direction.
+  --bp-green:          #1a7a4a; /* a favourable delta, per the indicator's own preferred_direction.
                                     Darkened from the screenshot's brighter green -- the lighter
                                     read measured 2.94:1 against --bp-bg, short of the 3:1 floor
                                     for large/icon text; this version measures 4.04:1, with real
                                     margin rather than sitting on the line. */
-  --bp-red-signal:     #c8402f; /* an unfavourable delta -- same hue as --bp-accent on purpose:
+  --bp-red-signal:     #cc2b38; /* an unfavourable delta -- same hue as --bp-accent on purpose:
                                     this is not a coincidence in the reference designs, the brand
                                     red doubles as the "needs attention" signal colour. Kept as a
                                     separate token anyway, because the day that stops being true
@@ -54,18 +54,50 @@
                                     diverge without an edit to every place a delta is rendered. */
 
   /* ---- light / editorial surface --------------------------------------- */
-  --bp-bg:             #f8f7f4;
+  --bp-bg:             #f6f8fb;
   --bp-surface:        #ffffff;
-  --bp-surface-alt:    #f1efe9;  /* a card-within-a-card, or a subtle row stripe */
-  --bp-border:         #e5e2da;
-  --bp-text:           #1a1f2e;
-  --bp-text-muted:     #5b6270;  /* darkened from the screenshot read: #6b7280 measured 4.51:1
+  --bp-surface-alt:    #eef2f8;  /* a card-within-a-card, or a subtle row stripe */
+  --bp-border:         #e2e8f0;
+  --bp-text:           #14213d;
+  --bp-text-muted:     #55617a;  /* darkened from the screenshot read: #6b7280 measured 4.51:1
                                     against --bp-bg, a hair over the 4.5:1 floor with no real
                                     margin -- this measures 5.72:1 */
-  --bp-text-faint:     #94989f;  /* below AA on purpose -- used only for non-essential decoration
+  --bp-text-faint:     #8e98ad;  /* below AA on purpose -- used only for non-essential decoration
                                     (a unit caption already restated elsewhere, a watermark-style
                                     label), never for text that is the only carrier of a fact */
 
+
+
+  /* ---- icon tints ------------------------------------------------------
+     THE REFERENCE GIVES EVERY FIGURE A TINTED SQUARE, and not all the same
+     tint: population is blue, money green, housing amber, safety red. It is
+     the most recognisable thing about that design and the reason a wall of
+     tiles reads as a dashboard rather than as a list -- one accent-pink
+     square repeated eighteen times does not.
+     Which tint an icon gets is decided in assets/belpulse/blocks.css, by the
+     icon's own name, so a block author picks an icon and never a colour. */
+  --bp-icon-blue-bg:   #e8effb;
+  --bp-icon-blue-ink:  #2b57c9;
+  --bp-icon-green-bg:  #e7f5ee;
+  --bp-icon-green-ink: #147a49;
+  --bp-icon-violet-bg: #f0ebfa;
+  --bp-icon-violet-ink:#6742c0;
+  --bp-icon-amber-bg:  #fdf3e3;
+  --bp-icon-amber-ink: #8a5a12;
+
+  /* ---- WHY THESE ARE COOL AND NOT WARM (2026-09-10) --------------------
+     Batch 1 measured the first reference set, whose editorial shell was
+     WARM: bg #f8f7f4, borders #e5e2da, a brick accent #c8402f. The
+     maintainer then supplied a new reference for the homepage and the
+     commune profile (docs/design-references/homepage.png) and the palette
+     had moved: a cool near-white ground, cool grey hairlines, navy ink and
+     a cleaner crimson. Sampled from that PNG in a browser rather than
+     guessed -- the accent is its own #cc2b38 -- because "looks about right"
+     is how a page ends up almost matching its design, which reads worse
+     than not matching at all.
+     Every contrast pair in tests/pages/test_design_tokens.py still passes
+     on these values; two of them (text-muted, green) keep the deliberate
+     darkening Batch 1 applied for exactly that reason. */
   /* ---- dark / navy-analytical surface ---------------------------------- */
   --bp-navy-bg:        #0e1c3a;
   --bp-navy-surface:   #152647;
@@ -177,6 +209,17 @@
     --bp-text:        #eeecf3;
     --bp-text-muted:  #a7a3b5;
     --bp-text-faint:  #78748a;
+    /* The icon tints, dark. Same names, so nothing goes undefined in one
+       theme -- a pale square with dark ink on a dark card is the light
+       version leaking through, which is exactly what this prevents. */
+    --bp-icon-blue-bg:   #1c2742;
+    --bp-icon-blue-ink:  #9ab6f8;
+    --bp-icon-green-bg:  #162c22;
+    --bp-icon-green-ink: #6fc99b;
+    --bp-icon-violet-bg: #241f3a;
+    --bp-icon-violet-ink:#b9a3ef;
+    --bp-icon-amber-bg:  #2c2417;
+    --bp-icon-amber-ink: #e0b264;
     --bp-accent-soft: #3a2420;
     --bp-accent-ink:  #e8836f;  /* accent-ink is defined for LIGHT-background use elsewhere; without a dark override it would keep that dark brownish-red value, unreadable against a dark background. Measured: #c8402f (--bp-accent itself) only reaches 3.72:1 here, short of 4.5:1 for body text -- this lighter tint reaches 6.95:1. */
   }
@@ -189,6 +232,17 @@
   --bp-text:        #eeecf3;
   --bp-text-muted:  #a7a3b5;
   --bp-text-faint:  #78748a;
+    /* The icon tints, dark. Same names, so nothing goes undefined in one
+       theme -- a pale square with dark ink on a dark card is the light
+       version leaking through, which is exactly what this prevents. */
+    --bp-icon-blue-bg:   #1c2742;
+    --bp-icon-blue-ink:  #9ab6f8;
+    --bp-icon-green-bg:  #162c22;
+    --bp-icon-green-ink: #6fc99b;
+    --bp-icon-violet-bg: #241f3a;
+    --bp-icon-violet-ink:#b9a3ef;
+    --bp-icon-amber-bg:  #2c2417;
+    --bp-icon-amber-ink: #e0b264;
   --bp-accent-soft: #3a2420;
   --bp-accent-ink:  #e8836f;
 }

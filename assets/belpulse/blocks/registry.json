@@ -432,12 +432,13 @@
     "feature_tiles": {
       "accepts_binding": false,
       "props_schema_status": "provisional",
-      "current_version": 1,
+      "current_version": 2,
       "interactive": false,
       "reuses": "assets/belpulse/components.css -- .bp-feature-tile.",
       "requires_binding": false,
       "supported_versions": [
-        1
+        1,
+        2
       ],
       "why_in_batch_9": "not in Batch 9; the commune design's thematic-focus grid.",
       "versions": {
@@ -478,8 +479,60 @@
               }
             }
           }
+        },
+        "2": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tiles"
+            ],
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "tiles": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 12,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label"
+                  ],
+                  "properties": {
+                    "label": {
+                      "$ref": "#/$defs/trilingual_text"
+                    },
+                    "body": {
+                      "$ref": "#/$defs/trilingual_text"
+                    },
+                    "href": {
+                      "$ref": "#/$defs/relative_url"
+                    },
+                    "icon": {
+                      "description": "The same icon set the figures use, so a tile about housing and a housing KPI carry the same picture.",
+                      "enum": [
+                        "people",
+                        "money",
+                        "work",
+                        "home",
+                        "chart",
+                        "shield",
+                        "map",
+                        "scale"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-      }
+      },
+      "why_v2": "the reference's thematic tiles are icon-led; without one, six tiles of small grey prose read as a table of contents."
     },
     "link_list": {
       "accepts_binding": false,
@@ -521,12 +574,13 @@
     "section_nav": {
       "accepts_binding": false,
       "props_schema_status": "provisional",
-      "current_version": 1,
+      "current_version": 2,
       "interactive": true,
       "reuses": "assets/belpulse/components.css -- .bp-tabs.",
       "requires_binding": false,
       "supported_versions": [
-        1
+        1,
+        2
       ],
       "why_in_batch_9": "not in Batch 9; the commune design's section tab strip. Interactive, so it carries an accessible_name -- but the links work with scripting off, because each one is an in-page anchor rather than a tab panel.",
       "versions": {
@@ -552,8 +606,49 @@
               }
             }
           }
+        },
+        "2": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "accessible_name": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "items": {
+                  "$ref": "#/$defs/cta"
+                }
+              },
+              "icons": {
+                "description": "One icon name per item in `items`, in the same order. Shorter than `items` is allowed; the remaining tabs simply have no icon.",
+                "type": "array",
+                "maxItems": 16,
+                "items": {
+                  "enum": [
+                    "people",
+                    "money",
+                    "work",
+                    "home",
+                    "chart",
+                    "shield",
+                    "map",
+                    "scale"
+                  ]
+                }
+              }
+            }
+          }
         }
-      }
+      },
+      "why_v2": "the reference draws an icon on every tab, and a tab strip of bare words reads as a row of links rather than as the page's own navigation."
     },
     "hero": {
       "accepts_binding": false,

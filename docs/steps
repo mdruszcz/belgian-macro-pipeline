@@ -1117,6 +1117,54 @@ STILL MISSING AND STILL LABELLED: no photograph (no photo library exists), no co
 no municipal budget or debt, no peer model, and no part-of-whole binding -- so the age structure
 is three tiles rather than the design's donut. A donut needs a binding that names several
 indicators as parts of one whole, which is a page-schema change and wants its own decision.
+18D -- MATCHING THE DESIGN, not merely being tighter than the last version (2026-09-10). The
+maintainer looked at 18C beside his reference and said it still looked nothing like it, and he was
+right: the comparison I had made was "tighter than before" rather than "the same as that". The
+palette was the largest part. BATCH 1 MEASURED A WARM EDITORIAL SHELL -- bg #f8f7f4, beige
+hairlines, a brick accent -- and the new reference (docs/design-references/homepage.png, supplied
+for the homepage and the profile together) had moved to a cool near-white ground, cool grey
+hairlines, navy ink and a cleaner crimson. Sampled from that PNG rather than guessed, by drawing
+it on a canvas in the browser that is already installed for the screenshot tests, because "looks
+about right" is how a page ends up ALMOST matching its design, which reads worse than not matching
+at all. Every contrast floor in test_design_tokens.py still passes on the new values.
+THE TINTED ICON SQUARE was the second part: the reference gives every figure a coloured square and
+NOT ALL THE SAME COLOUR -- population blue, money green, work violet, housing amber, safety red --
+and one accent-pink square repeated eighteen times does not read as a dashboard. Chosen by the
+icon's own name in the stylesheet, so a block author picks a picture and never a colour.
+THE DELTA WAS A DEAD PROP. `show_delta` existed on stat_tile and `delta_text` in kpi_card since
+Batch A, and the resolver produced neither, so the badge the design puts beside every number could
+not appear. Computing it turned up two ways this kind of badge lies, both live in this data. A
+PERCENTAGE MOVES IN POINTS: 8.9% to 8.3% is a fall of 0.6 points, and calling that "-6.7%" is a
+different and much more alarming claim. And A PART-YEAR READING IS NOT COMPARABLE to a full one:
+the police series publish the current year part-way through it, marked `provisional`, so the first
+working version reported Namur's burglary rate as down 55.8% when the truth is eight months
+against twelve. Deltas now refuse to cross a provisional or estimated cell -- and `derived` is
+comparable, which was the first thing that rule got wrong, silently dropping the delta from
+average income, the page's second headline figure. 10 hand-computed tests (rule 5), one of which
+caught my own arithmetic: 123.45 rounds to 123.4, not 123.5.
+WHILE FIXING IT, THE PAGE STARTED MARKING PROVISIONAL FIGURES AT ALL. The licence notice this site
+publishes states in three languages that the most recent year of each police series is marked
+provisional; the tiles did not mark it, and a quarter-to-date median price read as a year. The
+period now carries the status word beside it.
+ALSO: six key figures in one row rather than two rows of three; the header in the reference's own
+proportions (picture, narrow locator, then the standfirst over two rows of three figures), which
+took 474px down to 336px; icons on the tabs and on the thematic tiles (two version bumps); and the
+standfirst names the region and province, read from the trilingual geography metadata rather than
+from the commune payload's own English-only `region` field -- which had the French page reading
+"Wallonia . Namur" instead of "Region wallonne . Province de Namur". `localise()` now runs for a
+page PINNED to one commune as well as for the templated build, which is what makes those
+placeholders work on a preview page at all.
+ONE MORE CSS TRAP WORTH RECORDING: capping the map's height on its .mapbox did nothing, because
+that box is a flex item with `flex:1` -- a flex-basis of 0 overrides any height it is given, and it
+grows to fill a block which, in an auto-height grid row, is sized by its own content. 565 communes
+at 722px wide asked for 596px and got it. The cap belongs on the SVG, which is where the height
+actually comes from.
+STILL NOT THE REFERENCE, and each of these is a missing dataset or a decision rather than a
+styling gap: no photograph, no commune adjacency, no municipal budget or debt, no peer model, no
+part-of-whole binding (so the age structure is three tiles, not a donut), no search box in the top
+bar, no header action buttons, and the comparison table is one indicator across four geographies
+rather than the reference's six indicators against two averages -- that last one needs a binding
+shape this vocabulary does not have.
 NOT DONE, AND ON PURPOSE: THE CUTOVER. export_local_pages.py still owns /local/{nis}/, so the
 templated document is NOT committed -- committing it would have `make pages` overwrite all 1,695
 live pages the next time it ran. The loop is exercised by tests/pages/test_commune_loop.py,
