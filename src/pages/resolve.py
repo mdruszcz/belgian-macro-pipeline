@@ -382,7 +382,38 @@ def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping, lang: str) 
         "period": period,
         "formatted_value": _format_value(value, meta, lang),
         "provenance": _provenance(meta),
+        # THE SERIES BEHIND THE FIGURE, for a sparkline beside it.
+        #
+        # A kpi_card asks for `latest` because it shows one number, and it also
+        # wants the small line under it -- but those were two different
+        # operations and a block carries ONE binding, so the card rendered
+        # blank with `history` and drew no line with `latest`.
+        #
+        # Included here rather than making the card ask twice: the periods are
+        # already in the entry this function is reading, so it costs nothing. A
+        # single-period indicator yields an empty list and no line is drawn,
+        # which is right -- one point is not a trend.
+        #
+        # Municipal only. `_resolve_national` reads a different entry shape and
+        # no national block asks for a sparkline yet; adding it there without a
+        # caller would be guessing at that shape.
+        "points": _series(entry),
     }
+
+
+def _series(entry: Mapping) -> list:
+    """Every published (period, value) pair, oldest first, suppressed cells
+    skipped.
+
+    Shared with `_resolve_history` so one indicator cannot produce two
+    different pictures of itself depending on which operation asked.
+    """
+    points = []
+    for label in _sorted_periods(entry.get("periods") or {}):
+        state, value = _cell_state(entry, label)
+        if state == "ready":
+            points.append({"period": label, "value": value})
+    return points
 
 
 def _resolve_history(binding: Mapping, entry: Mapping, meta: Mapping) -> dict:

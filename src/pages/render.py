@@ -106,6 +106,54 @@ STATE_TEXT = {
 SAFE_HREF = re.compile(r"^(/(?!/)[A-Za-z0-9._~/-]*|#[A-Za-z0-9_-]+)$")
 
 
+#: A tiny stroked icon set, drawn inline.
+#:
+#: Inline SVG rather than an icon font or a sprite file: a font is a second
+#: network request and a webfont failure shows a missing glyph, and a sprite
+#: needs a build step this repository does not have. These are 24x24 stroke
+#: paths, coloured by `currentColor`, so they follow the theme with no extra
+#: tokens.
+#:
+#: DECORATION, NEVER MEANING. Each one is `aria-hidden`: the label beside it
+#: already says what the figure is, and an icon that a screen reader announced
+#: would say it twice. A block names its icon by a ROLE WORD ("people",
+#: "money"), never by an indicator id -- rule 24 keeps those out of renderer
+#: logic, and a map keyed to one would make this file work for one dataset
+#: only. (Naming such an id even in this comment trips the guard in
+#: tests/pages/test_page_document_render.py, which is the rule being absolute
+#: rather than the test being fussy.)
+ICONS = {
+    "people": "M16 19v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
+    "M22 19v-2a4 4 0 0 0-3-3.9",
+    "money": "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
+    "work": "M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"
+    "M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",
+    "home": "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
+    "chart": "M3 3v18h18M7 16v-5M12 16V8M17 16v-9",
+    "shield": "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+    "map": "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z M8 2v16M16 6v16",
+    "scale": "M12 3v18M5 7h14M7 7l-4 7h8zM17 7l-4 7h8z",
+}
+
+
+def _icon(name) -> str:
+    """One inline icon, or "" for an unknown name.
+
+    Unknown rather than raising: an icon is decoration, and a page whose
+    author picked a name this set does not have should lose the picture, not
+    the figure.
+    """
+    path = ICONS.get(name) if isinstance(name, str) else None
+    if not path:
+        return ""
+    return (
+        '<span class="bp-kpi-icon" aria-hidden="true">'
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        f'<path d="{esc(path)}"/></svg></span>'
+    )
+
+
 class BlockRenderError(Exception):
     """One block failed to render. Collected, never raised out of a page.
 
@@ -142,16 +190,36 @@ def text_in(node, lang: str) -> str:
     return value if isinstance(value, str) else ""
 
 
-def safe_href(value) -> str:
+def safe_href(value, prefix: str = "") -> str:
     """A site-relative path or in-page fragment, or '#' if it is neither.
 
     Traversal is refused separately from the pattern: `.` and `/` are both
     legitimate in a path, so `/a/../../etc/passwd` satisfies the character
     class perfectly well and has to be rejected on its own terms.
+
+    THE PREFIX IS WHY THIS TAKES A SECOND ARGUMENT. A document writes
+    `/about.html`, which reads as "the site root" -- but this site is served
+    from `mdruszcz.github.io/belgian-macro-pipeline/`, not from a domain root,
+    so a leading slash points at the wrong host entirely and every such link
+    404s. It never showed up before because the only page documents that
+    existed linked nothing; the first one with a menu broke all six of its
+    links at once.
+
+    So a site-absolute href is rewritten relative to the page, using the same
+    prefix the stylesheets already use. An in-page fragment is left alone: it
+    means "here" and has no depth to correct for.
     """
     if not isinstance(value, str) or ".." in value:
         return "#"
-    return value if SAFE_HREF.match(value) else "#"
+    if not SAFE_HREF.match(value):
+        return "#"
+    if value.startswith("#"):
+        return value
+    relative = (prefix or "") + value.lstrip("/")
+    # "/" strips to nothing, and an empty href means "this page" rather than
+    # "the home page" -- so a Home link on a root-level page would have pointed
+    # at itself. "./" is the directory, which is what "/" meant.
+    return relative or "./"
 
 
 def _attrs(pairs) -> str:
@@ -174,7 +242,7 @@ def _attrs(pairs) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _render_hero(block, props, data, lang):
+def _render_hero(block, props, data, lang, prefix=""):
     parts = []
     eyebrow = text_in(props.get("eyebrow"), lang)
     if eyebrow:
@@ -197,7 +265,7 @@ def _render_hero(block, props, data, lang):
     return "".join(parts)
 
 
-def _cta_link(node, lang, css_class):
+def _cta_link(node, lang, css_class, prefix=""):
     """One label+href pair from a `cta`, or "" if it has no label.
 
     Shared by every block below that renders links, so a href goes through
@@ -208,11 +276,11 @@ def _cta_link(node, lang, css_class):
     label = text_in(node.get("label"), lang)
     if not label:
         return ""
-    href = safe_href(node.get("href"))
+    href = safe_href(node.get("href"), prefix)
     return f'<a class="{css_class}" href="{esc(href)}">{esc(label)}</a>'
 
 
-def _render_cta_band(block, props, data, lang):
+def _render_cta_band(block, props, data, lang, prefix=""):
     """The full-width band a page ends on. Prose and links only -- the figures
     in the design's version ("581 communes covered") are a data block's job, so
     this one never invents a count."""
@@ -224,8 +292,8 @@ def _render_cta_band(block, props, data, lang):
     if body:
         parts.append(f"<p>{esc(body)}</p>")
     buttons = [
-        _cta_link(props.get("primary_cta"), lang, "bp-btn bp-btn--primary"),
-        _cta_link(props.get("secondary_cta"), lang, "bp-btn bp-btn--outline"),
+        _cta_link(props.get("primary_cta"), lang, "bp-btn bp-btn--primary", prefix),
+        _cta_link(props.get("secondary_cta"), lang, "bp-btn bp-btn--outline", prefix),
     ]
     buttons = [b for b in buttons if b]
     if buttons:
@@ -233,7 +301,7 @@ def _render_cta_band(block, props, data, lang):
     return '<div class="bp-cta-band">' + "".join(parts) + "</div>"
 
 
-def _render_feature_tiles(block, props, data, lang):
+def _render_feature_tiles(block, props, data, lang, prefix=""):
     """A grid of short editorial cards. A tile with no href is a plain card
     rather than a dead link -- the design uses both."""
     parts = []
@@ -255,14 +323,16 @@ def _render_feature_tiles(block, props, data, lang):
             inner += f"<p>{esc(body)}</p>"
         href = tile.get("href")
         if isinstance(href, str) and href:
-            tiles.append(f'<a class="bp-feature-tile" href="{esc(safe_href(href))}">{inner}</a>')
+            tiles.append(
+                f'<a class="bp-feature-tile" href="{esc(safe_href(href, prefix))}">{inner}</a>'
+            )
         else:
             tiles.append(f'<div class="bp-feature-tile">{inner}</div>')
     parts.append('<div class="bp-feature-grid">' + "".join(tiles) + "</div>")
     return "".join(parts)
 
 
-def _render_link_list(block, props, data, lang):
+def _render_link_list(block, props, data, lang, prefix=""):
     """A sidebar panel of links. Every href goes through the same guard as
     every other block's."""
     parts = []
@@ -271,14 +341,16 @@ def _render_link_list(block, props, data, lang):
         parts.append(f'<h3 class="bp-block-title">{esc(title)}</h3>')
     items = [
         f"<li>{link}</li>"
-        for link in (_cta_link(node, lang, "bp-linkbtn") for node in props.get("links") or [])
+        for link in (
+            _cta_link(node, lang, "bp-linkbtn", prefix) for node in props.get("links") or []
+        )
         if link
     ]
     parts.append('<ul class="bp-list-panel">' + "".join(items) + "</ul>")
     return "".join(parts)
 
 
-def _render_section_nav(block, props, data, lang):
+def _render_section_nav(block, props, data, lang, prefix=""):
     """The tab strip, as ANCHORS rather than tab panels.
 
     The design draws tabs, but the page below is one scrolling document, not
@@ -287,12 +359,12 @@ def _render_section_nav(block, props, data, lang):
     rather than a tablist it can step through.
     """
     name = text_in(props.get("accessible_name"), lang)
-    items = [_cta_link(node, lang, "bp-tab") for node in props.get("items") or []]
+    items = [_cta_link(node, lang, "bp-tab", prefix) for node in props.get("items") or []]
     items = [i for i in items if i]
     return f'<nav class="bp-tabs"{_attrs([("aria-label", name)])}>' + "".join(items) + "</nav>"
 
 
-def _render_stat_tile(block, props, data, lang):
+def _render_stat_tile(block, props, data, lang, prefix=""):
     """The compact figure tile the commune header puts six of in a row.
 
     Same `latest` binding as kpi_card, less chrome. Kept a separate type rather
@@ -303,7 +375,8 @@ def _render_stat_tile(block, props, data, lang):
     # .bp-kpi-label and .bp-value, because .bp-stat-tile styles exactly those
     # two children (components.css). Inventing bp-stat-label/-value would be a
     # second opinion about a component that already has one.
-    parts = [f'<span class="bp-kpi-label">{esc(text_in(props.get("label"), lang))}</span>']
+    parts = [_icon(props.get("icon"))]
+    parts.append(f'<span class="bp-kpi-label">{esc(text_in(props.get("label"), lang))}</span>')
     value = "" if data is None else data.get("formatted_value") or ""
     parts.append(f'<span class="bp-value">{esc(value)}</span>')
     if data is not None and props.get("show_delta") and data.get("delta_text"):
@@ -319,7 +392,7 @@ def _render_stat_tile(block, props, data, lang):
     return '<div class="bp-stat-tile">' + "".join(parts) + "</div>"
 
 
-def _render_photo(block, props, data, lang):
+def _render_photo(block, props, data, lang, prefix=""):
     """A picture with a caption, and an empty frame when there is no picture.
 
     This repository has no photo library, so `src` is normally absent. An
@@ -330,8 +403,10 @@ def _render_photo(block, props, data, lang):
     alt = text_in(props.get("alt"), lang)
     src = props.get("src")
     parts = []
-    if isinstance(src, str) and src and safe_href(src) != "#":
-        parts.append(f'<img class="bp-photo-img" src="{esc(safe_href(src))}" alt="{esc(alt)}">')
+    if isinstance(src, str) and src and safe_href(src, prefix) != "#":
+        parts.append(
+            f'<img class="bp-photo-img" src="{esc(safe_href(src, prefix))}" alt="{esc(alt)}">'
+        )
     else:
         # aria-hidden: the frame is decoration standing in for an absent
         # picture, and announcing "empty frame" helps nobody. The caption
@@ -346,7 +421,7 @@ def _render_photo(block, props, data, lang):
     return '<figure class="bp-photo">' + "".join(parts) + "</figure>"
 
 
-def _render_sources_panel(block, props, data, lang):
+def _render_sources_panel(block, props, data, lang, prefix=""):
     """Editorial prose about where the figures come from, plus the machine
     truth beside it.
 
@@ -364,13 +439,13 @@ def _render_sources_panel(block, props, data, lang):
         parts.append(f"<p>{esc(body)}</p>")
     if data is not None and data.get("provenance"):
         parts.append(f'<p class="bp-freshness">{esc(data["provenance"])}</p>')
-    link = _cta_link(props.get("link"), lang, "bp-linkbtn")
+    link = _cta_link(props.get("link"), lang, "bp-linkbtn", prefix)
     if link:
         parts.append(link)
     return "".join(parts)
 
 
-def _render_ranking_list(block, props, data, lang):
+def _render_ranking_list(block, props, data, lang, prefix=""):
     """Where this commune sits for one indicator.
 
     One row per block. The design's sidebar panel is several of these stacked,
@@ -385,8 +460,15 @@ def _render_ranking_list(block, props, data, lang):
     """
     label = esc(text_in(props.get("label"), lang))
     scope = props.get("scope") or "national"
-    rank = None if data is None else data.get("rank")
-    peers = None if data is None else data.get("peers")
+    # The resolver's `percentile` operation returns `scopes` (national and
+    # regional) plus a formatted national line -- not bare rank/peers. Reading
+    # the scope the block asked for is the whole point of the `scope` prop:
+    # taking `formatted_value` would silently show the national rank on a block
+    # that says regional.
+    rank = peers = None
+    if data is not None:
+        chosen = (data.get("scopes") or {}).get(scope) or {}
+        rank, peers = chosen.get("rank"), chosen.get("peers")
     parts = [f"<span>{label}</span>"]
     # .rank is what .bp-ranking-item styles, and the --composite modifier is
     # already in components.css for exactly this: a row whose figure needs a
@@ -404,7 +486,7 @@ def _render_ranking_list(block, props, data, lang):
     )
 
 
-def _render_neighbour_list(block, props, data, lang):
+def _render_neighbour_list(block, props, data, lang, prefix=""):
     """The communes next door.
 
     THIS PIPELINE HOLDS NO ADJACENCY TABLE. Not "not yet loaded" -- there is no
@@ -441,7 +523,7 @@ def _render_neighbour_list(block, props, data, lang):
     return "".join(parts)
 
 
-def _render_comparison_picker(block, props, data, lang):
+def _render_comparison_picker(block, props, data, lang, prefix=""):
     """Choose what this page compares itself against.
 
     Takes no binding: it selects WHICH geographies are compared, it does not
@@ -477,7 +559,7 @@ def _render_comparison_picker(block, props, data, lang):
     return "".join(parts)
 
 
-def _render_kpi_card(block, props, data, lang):
+def _render_kpi_card(block, props, data, lang, prefix=""):
     label = esc(text_in(props.get("label"), lang))
     size = props.get("size") or "full"
     # v1 called it show_sparkline, v2 calls it sparkline. Both versions stay
@@ -485,7 +567,7 @@ def _render_kpi_card(block, props, data, lang):
     # here would break documents migrations.py deliberately still accepts.
     wants_spark = bool(props.get("sparkline", props.get("show_sparkline")))
     value = "" if data is None else data.get("formatted_value") or ""
-    parts = [f'<div class="bp-kpi-label">{label}</div>']
+    parts = [_icon(props.get("icon")), f'<div class="bp-kpi-label">{label}</div>']
     parts.append(f'<div class="bp-value">{esc(value)}</div>')
     if data is not None and data.get("delta_text"):
         direction = data.get("direction") or "neutral"
@@ -496,13 +578,17 @@ def _render_kpi_card(block, props, data, lang):
             f'{esc(data["delta_text"])}</span>'
         )
     if wants_spark:
-        parts.append('<div class="bp-block-spark"></div>')
+        # A CANVAS, not an empty div. This emitted a bare <div> from Batch 10
+        # onward, so every kpi_card that asked for a sparkline reserved space
+        # for a line nothing ever drew -- and the block still reported `ready`.
+        # `latest` now carries the series, so there is something to draw.
+        parts.append('<div class="bp-block-spark" data-hydrate="spark"><canvas></canvas></div>')
     if props.get("show_provenance") and data is not None and data.get("provenance"):
         parts.append(f'<div class="bp-freshness">{esc(data["provenance"])}</div>')
     return f'<div class="bp-kpi bp-kpi--{esc(size)}">' + "".join(parts) + "</div>"
 
 
-def _render_chart(block, props, data, lang):
+def _render_chart(block, props, data, lang, prefix=""):
     """A chart is HYDRATED, not drawn here: canvas pixels cannot be produced
     server-side, and a reader without JavaScript must still get the figures.
     So the caption and the accessible name are real HTML, and the canvas is a
@@ -530,7 +616,7 @@ def _render_chart(block, props, data, lang):
     return "".join(parts)
 
 
-def _render_comparison_table(block, props, data, lang):
+def _render_comparison_table(block, props, data, lang, prefix=""):
     """The one data block rendered FULLY server-side. A comparison is a table
     of numbers a crawler and a JavaScript-less reader must both be able to
     read, so it is never hydrated."""
@@ -558,7 +644,7 @@ def _render_comparison_table(block, props, data, lang):
     return "".join(parts)
 
 
-def _render_map(block, props, data, lang):
+def _render_map(block, props, data, lang, prefix=""):
     """Hydrated for the same reason as a chart, and by the SAME shared map
     component every other map on this site uses (claude.md rule 29) -- this
     emits the slot and the elements that component expects, never a second map
@@ -648,7 +734,7 @@ def _render_map(block, props, data, lang):
     return "".join(parts)
 
 
-def _render_rich_text(block, props, data, lang):
+def _render_rich_text(block, props, data, lang, prefix=""):
     """An allowlisted NODE SET, not a sanitiser over raw HTML. Every node type
     is handled explicitly and anything unrecognised is skipped, so there is no
     path by which a document can carry markup into the page."""
@@ -740,7 +826,9 @@ def _state_for(block, data, registry: Registry) -> str:
     return "ready"
 
 
-def _render_block(block, *, registry: Registry, lang: str, data, errors: list) -> str:
+def _render_block(
+    block, *, registry: Registry, lang: str, data, errors: list, prefix: str = ""
+) -> str:
     block_id = block.get("id") or ""
     block_type = block.get("type") or ""
 
@@ -751,7 +839,7 @@ def _render_block(block, *, registry: Registry, lang: str, data, errors: list) -
 
     try:
         state = _state_for(block, data, registry)
-        inner = renderer(block, block.get("props") or {}, data, lang)
+        inner = renderer(block, block.get("props") or {}, data, lang, prefix)
     except Exception:  # noqa: BLE001 -- deliberate: see below
         # PER-BLOCK FAILURE ISOLATION. One malformed block must not cost the
         # reader the other twenty on the page, so the exception is caught
@@ -844,6 +932,7 @@ def render_document(
     lang: str = "en",
     data: Mapping | None = None,
     errors: list | None = None,
+    asset_prefix: str = "",
 ) -> str:
     """Render a validated page document to HTML.
 
@@ -870,14 +959,31 @@ def render_document(
                 lang=lang,
                 data=data.get(block.get("id")),
                 errors=sink,
+                prefix=asset_prefix,
             )
             for block in (section.get("blocks") or [])
             if isinstance(block, Mapping)
         ]
+        # THE SECTION'S OWN HEADING. The document has carried a trilingual
+        # `label` per section since Batch 9 and this function discarded it, so
+        # every page rendered as one undifferentiated stack of cards with no
+        # "Key figures" or "Local finances" above them. The id was kept and the
+        # words thrown away.
+        #
+        # An id doubles as the anchor a section_nav block links to, so the
+        # heading and the in-page navigation now agree by construction.
+        label = text_in(section.get("label"), lang)
+        heading = f'<h2 class="bp-section-title">{esc(label)}</h2>' if label else ""
         sections.append(
             "<section"
-            + _attrs([("class", "bp-section"), ("data-section-id", section.get("id"))])
-            + f'><div class="bp-grid">{"".join(blocks)}</div></section>'
+            + _attrs(
+                [
+                    ("class", "bp-section"),
+                    ("id", section.get("id")),
+                    ("data-section-id", section.get("id")),
+                ]
+            )
+            + f'>{heading}<div class="bp-grid">{"".join(blocks)}</div></section>'
         )
 
     return (

@@ -122,12 +122,26 @@ def test_a_block_needing_javascript_is_registered_for_it():
     stays empty while the block still reports `ready` -- exactly how the
     Batch 15b map failed, silently and looking fine."""
     assert "comparison_picker" in _HYDRATED
-    hydrated_markup = re.findall(
-        r'data-hydrate="([a-z_]+)"',
-        (REPO / "src" / "pages" / "render.py").read_text(encoding="utf-8"),
+    # kpi_card too, since its sparkline is drawn in the browser.
+    assert "kpi_card" in _HYDRATED
+
+    # A `data-hydrate` value names a SLOT, not a block type -- `spark` is a
+    # slot inside kpi_card, not a type of its own -- so the check is that
+    # blocks.js has a hydrator for every slot the renderer emits. Asserting
+    # slot names against _HYDRATED was the wrong pairing and passed only while
+    # every slot happened to share its block type's name.
+    slots = set(
+        re.findall(
+            r'data-hydrate="([a-z_]+)"',
+            (REPO / "src" / "pages" / "render.py").read_text(encoding="utf-8"),
+        )
     )
-    for name in set(hydrated_markup):
-        assert name in _HYDRATED, f"render.py emits data-hydrate={name} but shell.py omits it"
+    hydrators = (REPO / "assets" / "belpulse" / "blocks.js").read_text(encoding="utf-8")
+    for name in slots:
+        assert re.search(rf"\b{name}\s*:", hydrators), (
+            f"render.py emits data-hydrate={name} but blocks.js has no hydrator for it, "
+            "so the slot stays empty while the block still reports ready"
+        )
 
 
 # --- absent data is stated, never drawn as an empty shape --------------------
@@ -159,10 +173,13 @@ def test_a_rank_with_no_figure_is_marked_as_waiting_on_the_model(registry):
     than showing a number borrowed from somewhere else."""
     html = _render("ranking_list", {"label": TRI}, registry=registry)
     assert "bp-ranking-item--composite" in html
+    # The resolver's `percentile` payload nests each scope under `scopes` --
+    # the block reads the one its `scope` prop names, so a regional block
+    # cannot quietly show a national rank.
     html_with_rank = _render(
         "ranking_list",
-        {"label": TRI},
-        data={"state": "ready", "rank": 78, "peers": 581},
+        {"label": TRI, "scope": "national"},
+        data={"state": "ready", "scopes": {"national": {"rank": 78, "peers": 581}}},
         registry=registry,
     )
     assert "78 / 581" in html_with_rank
