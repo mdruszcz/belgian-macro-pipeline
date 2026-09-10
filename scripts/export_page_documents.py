@@ -107,7 +107,13 @@ def build_one(page_dir: Path, *, lang: str, metadata, registry, attribution: str
         raise ShellError(f"{document_path} is not valid:\n{listed}")
 
     resolved = resolve_document(doc, metadata=metadata, lang=lang)
-    fragment = render_document(doc, registry=registry, lang=lang, data=resolved)
+    # The prefix the stylesheets already use, now also given to the renderer:
+    # a block writes `/about.html`, and this site is served from a SUBPATH, so
+    # a leading slash points at the wrong host and 404s.
+    prefix = asset_prefix_for(route_for(doc["route"], lang))
+    fragment = render_document(
+        doc, registry=registry, lang=lang, data=resolved, asset_prefix=prefix
+    )
     declared = doc["route"]
     route = route_for(declared, lang)
     # Every language's absolute URL, so each page can name the others. Built

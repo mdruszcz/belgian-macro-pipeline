@@ -30,8 +30,24 @@
   display:grid;
   grid-template-columns:repeat(12, minmax(0, 1fr));
   gap:var(--bp-space-4);
-  align-items:start;
+  /* STRETCH, not start. With `start`, a short block in a row made tall by its
+     neighbour sat at the top of its cell and left the rest as white space --
+     visible as a gap under every card on the commune profile, and easy to read
+     as "the page is broken" rather than "this card is short". Stretching makes
+     a card fill the cell it was given, which is what declaring a height meant. */
+  align-items:stretch;
 }
+
+/* A section's own heading. The document has always carried one; the renderer
+   discarded it until the commune profile made the absence obvious. */
+.bp-section-title{
+  font-family:var(--bp-font-display); font-size:var(--bp-text-h1);
+  font-weight:var(--bp-weight-bold); margin:0 0 var(--bp-space-4);
+}
+
+/* A block is a box that fills its cell, so its own card surface has to be the
+   full height rather than only as tall as its text. */
+.bp-block{display:flex; flex-direction:column}
 
 /* minmax(0,1fr), never a bare 1fr: a 1fr track's implied minimum is
    min-content, so one wide block (a map, a long table) refuses to shrink and

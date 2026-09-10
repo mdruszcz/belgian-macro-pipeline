@@ -38,6 +38,7 @@ from src.site.routes import (
     all_routes,
     block_page_routes,
     commune_routes,
+    declared_page_routes,
     is_indexable,
     path_for,
     root_routes,
@@ -146,7 +147,13 @@ def test_the_inventory_is_not_accidentally_empty():
     empty list passes silently. This is what stops the whole file becoming
     decorative if the derivation ever breaks."""
     assert len(commune_routes()) > 1000
-    assert len(block_page_routes()) == len(LANGS) * 2
+    # One route per published document per language. Derived rather than
+    # hardcoded to two documents: this asserted `== LANGS * 2` and went red the
+    # first time a third page was converted, which is a guard failing on
+    # success rather than on a defect.
+    documents = len(declared_page_routes())
+    assert documents >= 2, "the page-document set is empty or nearly so"
+    assert len(block_page_routes()) == len(LANGS) * documents
 
     # all_routes() DEDUPES, and the overlap is real rather than a bug: since
     # Batch 15d, /about.html is both a root page (frozen, so a rename fails

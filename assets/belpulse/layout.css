@@ -234,3 +234,41 @@
 .bp-page-footer{margin-top:var(--bp-space-8); padding-top:var(--bp-space-4); border-top:1px solid var(--bp-border)}
 .bp-page-footer .attribution{font-size:var(--bp-text-small); color:var(--bp-text-muted); line-height:1.55}
 .bp-page-footer .attribution p{margin:0 0 var(--bp-space-3)}
+
+/* ---- page chrome for a block-built page (Batch A follow-up) ---------------
+   layout.css already styled the top bar, logo, nav and breadcrumb -- a
+   block-built page simply never emitted any of them. These are the two pieces
+   that did not exist, plus the width alignment: .bp-topbar spans the viewport
+   like the design, while everything below it lines up with .bp-page's own
+   1180px column. */
+.bp-page-head{
+  max-width:1180px; margin:0 auto;
+  padding:var(--bp-space-6) var(--bp-space-5) 0;
+}
+.bp-page-title{
+  font-family:var(--bp-font-display); font-size:var(--bp-text-h1);
+  font-weight:var(--bp-weight-bold); margin:var(--bp-space-2) 0 0;
+}
+.bp-site-footer{
+  max-width:1180px; margin:var(--bp-space-8) auto 0;
+  padding:var(--bp-space-5); border-top:1px solid var(--bp-border);
+  display:flex; flex-wrap:wrap; gap:var(--bp-space-4);
+  align-items:center; justify-content:space-between;
+  font-size:var(--bp-text-small); color:var(--bp-text-muted);
+}
+.bp-site-footer nav{display:flex; flex-wrap:wrap; gap:var(--bp-space-4)}
+.bp-site-footer a{color:var(--bp-text-muted); text-decoration:none}
+.bp-site-footer a:hover{color:var(--bp-accent-ink); text-decoration:underline}
+
+/* The language switcher sits in the top bar now, not floating above the page,
+   so it should not also carry the bottom margin it needed when it stood alone. */
+.bp-topbar .bp-lang-switch{margin:0 0 0 auto}
+
+/* The breadcrumb's own separator. layout.css styles the bar but assumed the
+   page supplied its own dividers, so "Home" ran straight into the page title. */
+.bp-breadcrumb{display:flex; align-items:center; gap:var(--bp-space-2)}
+.bp-breadcrumb > * + *::before{content:"/"; margin-right:var(--bp-space-2); color:var(--bp-text-faint)}
+
+/* The wordmark and its tagline are two lines, not one run of text. */
+.bp-logo > span:last-child{display:flex; flex-direction:column; line-height:1.2}
+.bp-tagline{display:block}

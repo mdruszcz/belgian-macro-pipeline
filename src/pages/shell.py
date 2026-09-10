@@ -54,6 +54,34 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Fran\u00e7ais", "nl": "Nederlands"}
 #: What the switcher calls itself, for a screen reader.
 SWITCHER_LABEL = {"en": "Language", "fr": "Langue", "nl": "Taal"}
 
+#: THE SITE'S OWN CHROME -- top bar, breadcrumb, footer.
+#:
+#: This is interface text, not content, so it lives here beside the switcher
+#: labels rather than in a page document: every page says the same thing, and a
+#: document that had to restate the navigation would be 30 lines of menu before
+#: it got to its own subject. Trilingual for the same reason everything else is
+#: (rule 7).
+#:
+#: A block-built page had NONE of this until the commune profile made the
+#: absence obvious -- it rendered as a bare stack of cards with a language
+#: switcher floating above it and nothing identifying the site at all.
+BRAND = "BelPulse"
+TAGLINE = {
+    "en": "The data that moves Belgium forward",
+    "fr": "Les données qui font avancer la Belgique",
+    "nl": "De data die België vooruithelpt",
+}
+NAV_LINKS = (
+    ("/", {"en": "Home", "fr": "Accueil", "nl": "Start"}),
+    ("/communes.html", {"en": "Communes", "fr": "Communes", "nl": "Gemeenten"}),
+    ("/map.html", {"en": "Maps", "fr": "Cartes", "nl": "Kaarten"}),
+    ("/all_data.html", {"en": "All data", "fr": "Toutes les données", "nl": "Alle data"}),
+    ("/about.html", {"en": "Methodology", "fr": "Méthodologie", "nl": "Methodologie"}),
+)
+HOME_LABEL = {"en": "Home", "fr": "Accueil", "nl": "Start"}
+NAV_LABEL = {"en": "Main navigation", "fr": "Navigation principale", "nl": "Hoofdnavigatie"}
+CRUMB_LABEL = {"en": "Breadcrumb", "fr": "Fil d’Ariane", "nl": "Kruimelpad"}
+
 #: THE SITE HAS TWO THEME VOCABULARIES AND THEY DO NOT OVERLAP.
 #:
 #: index.html offers `day`, `soft` and `night` (its `t-day`/`t-soft`/`t-night`
@@ -114,7 +142,13 @@ MAP_STYLESHEET = "assets/commune_map.css"
 #: comparison_picker joins them for a different reason: it does not draw a
 #: figure, but its options are 565 commune names read from published geography
 #: metadata, and inlining that list into every page is what the fetch avoids.
-_HYDRATED = frozenset({"chart", "map", "comparison_picker"})
+#:
+#: kpi_card joins them for its sparkline. Coarse on purpose: the set is by
+#: block TYPE, so a page with a kpi_card that asks for no sparkline still links
+#: the chart script. Splitting it per-prop would mean the shell inspecting
+#: block props to decide what a page loads, which is a worse trade than one
+#: small script.
+_HYDRATED = frozenset({"chart", "map", "comparison_picker", "kpi_card"})
 
 #: Block types that put a municipal figure on the page. A document containing
 #: one of these with a binding is publishing Statbel-derived data and owes the
@@ -411,6 +445,66 @@ def wrap(
             "});});</script>"
         )
 
+    # THE TOP BAR. Every link is site-relative and prefixed the same way the
+    # stylesheets are, so it resolves from a page one or two directories down.
+    def _local(href):
+        return (
+            escape(asset_prefix + href.lstrip("/"), quote=True)
+            if href != "/"
+            else escape(asset_prefix or "./", quote=True)
+        )
+
+    nav_items = "".join(
+        f'<a href="{_local(href)}">{escape(_text(labels, lang))}</a>' for href, labels in NAV_LINKS
+    )
+    topbar = (
+        '\n<header class="bp-topbar">'
+        f'<a class="bp-logo" href="{_local("/")}">'
+        f'<span class="bp-logo-mark"><span></span><span></span><span></span></span>'
+        f"<span><strong>{escape(BRAND)}</strong>"
+        f'<span class="bp-tagline">{escape(_text(TAGLINE, lang))}</span></span></a>'
+        f'<nav class="bp-nav" aria-label="{escape(_text(NAV_LABEL, lang), quote=True)}">'
+        f"{nav_items}</nav>"
+        f"{switcher}"
+        "</header>"
+    )
+
+    # The breadcrumb, and the page's own title as an h1. The document's seo
+    # title is the page's name; repeating it in the body is what gives a
+    # reader (and a crawler) the heading the hero used to have to carry.
+    # THE PAGE'S h1 IS EMITTED HERE ONLY IF NO BLOCK CLAIMS IT.
+    #
+    # A hero block renders an h1 -- Batch 15a made that change deliberately,
+    # because a published page with no h1 fails both a screen reader's document
+    # outline and every SEO check. So a page with a hero already has one, and
+    # adding a second here gave about.html two, which is the same failure in
+    # the other direction.
+    #
+    # A commune profile has no hero (it opens on a photograph), so there the
+    # shell's title IS the page heading.
+    has_hero = any(
+        isinstance(block, Mapping) and block.get("type") == "hero"
+        for section in (doc.get("sections") or [])
+        if isinstance(section, Mapping)
+        for block in (section.get("blocks") or [])
+    )
+    page_title = "" if has_hero else f'<h1 class="bp-page-title">{escape(title)}</h1>'
+    crumb = (
+        '\n<div class="bp-page-head">'
+        f'<nav class="bp-breadcrumb" aria-label="{escape(_text(CRUMB_LABEL, lang), quote=True)}">'
+        f'<a href="{_local("/")}">{escape(_text(HOME_LABEL, lang))}</a>'
+        f"<span>{escape(title)}</span></nav>"
+        f"{page_title}"
+        "</div>"
+    )
+
+    site_footer = (
+        '\n<div class="bp-site-footer">'
+        f"<span><strong>{escape(BRAND)}</strong> — {escape(_text(TAGLINE, lang))}</span>"
+        f'<nav aria-label="{escape(_text(NAV_LABEL, lang), quote=True)}">{nav_items}</nav>'
+        "</div>"
+    )
+
     return (
         "<!DOCTYPE html>\n"
         f'<html lang="{escape(lang, quote=True)}">\n'
@@ -425,9 +519,16 @@ def wrap(
         f"{links}\n"
         "</head>\n"
         "<body>\n"
-        f"{switcher}"
+        # .bp-shell wraps everything: it carries the page background, the base
+        # font and the min-height, and the navy variant recolours the top bar
+        # through it. The top bar has to be inside it, not above it.
+        '<div class="bp-shell">'
+        f"{topbar}"
+        f"{crumb}"
         f"{fragment}"
+        f"{site_footer}"
         f"{footer}"
+        "\n</div>"
         f"{scripts}\n"
         "</body>\n"
         "</html>\n"

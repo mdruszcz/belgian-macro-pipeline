@@ -314,10 +314,24 @@
     return names[lang] || names.en || geo.nis_code;
   }
 
+  /* The small line under a KPI figure. Same series the headline came from, so
+     the number and the shape cannot disagree. Compact and axis-free: at this
+     size a scale would be unreadable, and the point is the direction. */
+  function hydrateSpark(slot, data, opts) {
+    var canvas = slot.querySelector('canvas');
+    if (!canvas || !global.BPCharts) return;
+    var points = data && data.points;
+    if (!points || points.length < 2) return;   // one point is not a trend
+    BPCharts.drawLine(canvas, [{ label: '', points: points }], {
+      locale: opts.lang, height: 40, compact: true,
+    });
+  }
+
   var HYDRATORS = {
     chart: hydrateChart,
     map: hydrateMap,
     comparison_picker: hydrateComparisonPicker,
+    spark: hydrateSpark,
   };
 
   /**

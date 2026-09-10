@@ -191,9 +191,31 @@ def test_unsafe_hrefs_are_refused(href):
     assert safe_href(href) == "#"
 
 
-@pytest.mark.parametrize("href", ["/", "/communes.html", "/local/12345/", "#section-2"])
-def test_safe_hrefs_pass_through(href):
-    assert safe_href(href) == href
+@pytest.mark.parametrize(
+    "href, prefix, expected",
+    [
+        # A fragment means "here" and has no depth to correct, so it is
+        # untouched at any prefix.
+        ("#section-2", "", "#section-2"),
+        ("#section-2", "../", "#section-2"),
+        # A site-absolute href is REWRITTEN RELATIVE TO THE PAGE. It used to
+        # pass through unchanged, which was wrong the moment a page document
+        # contained a link: this site is served from
+        # mdruszcz.github.io/belgian-macro-pipeline/, so a leading slash points
+        # at the domain root and 404s. The first converted page with a menu had
+        # six such links and every one was broken.
+        ("/communes.html", "", "communes.html"),
+        ("/communes.html", "../", "../communes.html"),
+        ("/communes.html", "../../", "../../communes.html"),
+        ("/local/12345/", "../", "../local/12345/"),
+        # "/" strips to nothing, and an empty href means "this page" rather
+        # than "the home page".
+        ("/", "", "./"),
+        ("/", "../", "../"),
+    ],
+)
+def test_a_safe_href_is_rewritten_relative_to_the_page(href, prefix, expected):
+    assert safe_href(href, prefix) == expected
 
 
 def test_a_hostile_href_never_reaches_the_output(registry):

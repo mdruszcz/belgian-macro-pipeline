@@ -260,7 +260,7 @@
       "current_version": 1,
       "interactive": false,
       "reuses": "assets/belpulse/components.css -- .bp-ranking-list, .bp-ranking-item.",
-      "requires_binding": true,
+      "requires_binding": false,
       "supported_versions": [
         1
       ],
@@ -324,11 +324,12 @@
       "current_version": 1,
       "interactive": false,
       "reuses": "assets/belpulse/components.css -- .bp-stat-tile.",
-      "requires_binding": true,
+      "requires_binding": false,
       "supported_versions": [
         1
       ],
       "why_in_batch_9": "not in Batch 9. kpi_card is the full card; this is the compact tile the commune design puts six of in its header. Same `latest` binding, less chrome.",
+      "why_binding_is_optional": "A tile with no binding is a DESIGNED PLACEHOLDER, not a mistake: it resolves to `unavailable` and shows the label at full size, which is how the four municipal-finance tiles state a gap the reader can see. Requiring a binding would force either a fabricated figure or a hole in the layout, and both are worse than saying so.",
       "versions": {
         "1": {
           "props_schema_status": "provisional",
@@ -344,6 +345,18 @@
               },
               "show_delta": {
                 "type": "boolean"
+              },
+              "icon": {
+                "enum": [
+                  "people",
+                  "money",
+                  "work",
+                  "home",
+                  "chart",
+                  "shield",
+                  "map",
+                  "scale"
+                ]
               }
             }
           }
@@ -613,6 +626,18 @@
                   "full",
                   "compact",
                   "mini"
+                ]
+              },
+              "icon": {
+                "enum": [
+                  "people",
+                  "money",
+                  "work",
+                  "home",
+                  "chart",
+                  "shield",
+                  "map",
+                  "scale"
                 ]
               }
             }

@@ -1,0 +1,1795 @@
+{
+  "context": {
+    "nis": "92094"
+  },
+  "page_id": "commune-profile",
+  "page_type": "municipality-profile",
+  "revision": 1,
+  "route": "/preview/commune.html",
+  "schema_version": 2,
+  "sections": [
+    {
+      "blocks": [
+        {
+          "binding": null,
+          "id": "cp-photo",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 7,
+              "x": 0,
+              "y": 0
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "locked": false,
+          "props": {
+            "alt": {
+              "en": "Namur",
+              "fr": "Namur",
+              "nl": "Namen"
+            },
+            "caption": {
+              "en": "No photo library exists in this pipeline yet.",
+              "fr": "Aucune photothèque n’existe encore dans ce pipeline.",
+              "nl": "Er bestaat nog geen fotobibliotheek in deze pijplijn."
+            },
+            "overlay_title": {
+              "en": "Namur",
+              "fr": "Namur",
+              "nl": "Namen"
+            }
+          },
+          "type": "photo",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "map_values",
+            "provider": "municipal"
+          },
+          "id": "cp-locator",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 5,
+              "x": 7,
+              "y": 0
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 3
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 3
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Namur within Belgium",
+              "fr": "Namur en Belgique",
+              "nl": "Namen in België"
+            },
+            "click_through": false,
+            "indicator_picker": false,
+            "show_legend": false,
+            "show_zoom": false
+          },
+          "type": "map",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-stat-0",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 3
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 6
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 6
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "people",
+            "label": {
+              "en": "Population",
+              "fr": "Population",
+              "nl": "Bevolking"
+            },
+            "show_delta": true,
+            "show_period": true
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "AVG_NET_TAXABLE_INCOME",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-stat-1",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 4,
+              "y": 3
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 7
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 7
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "money",
+            "label": {
+              "en": "Average income",
+              "fr": "Revenu moyen",
+              "nl": "Gemiddeld inkomen"
+            },
+            "show_delta": true,
+            "show_period": true
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "UNEMPLOYMENT_RATE_COM",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-stat-2",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 8,
+              "y": 3
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 8
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 8
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "work",
+            "label": {
+              "en": "Unemployment rate",
+              "fr": "Taux de chômage",
+              "nl": "Werkloosheidsgraad"
+            },
+            "show_delta": true,
+            "show_period": true
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "LOCAL_UNITS_BY_COMMUNE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-stat-3",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 4
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 9
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 9
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "chart",
+            "label": {
+              "en": "Local units",
+              "fr": "Unités locales",
+              "nl": "Lokale eenheden"
+            },
+            "show_delta": true,
+            "show_period": true
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "MEDIAN_HOUSE_PRICE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-stat-4",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 4,
+              "y": 4
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 10
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 10
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "home",
+            "label": {
+              "en": "Median house price",
+              "fr": "Prix médian",
+              "nl": "Mediane huisprijs"
+            },
+            "show_delta": true,
+            "show_period": true
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_CHANGE_5Y",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-stat-5",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 8,
+              "y": 4
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 11
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 11
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "scale",
+            "label": {
+              "en": "Population, 5 years",
+              "fr": "Population, 5 ans",
+              "nl": "Bevolking, 5 jaar"
+            },
+            "show_delta": true,
+            "show_period": true
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        }
+      ],
+      "id": "header"
+    },
+    {
+      "blocks": [
+        {
+          "binding": null,
+          "id": "cp-nav",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Page sections",
+              "fr": "Sections",
+              "nl": "Secties"
+            },
+            "items": [
+              {
+                "href": "#figures",
+                "label": {
+                  "en": "Overview",
+                  "fr": "Vue d’ensemble",
+                  "nl": "Overzicht"
+                }
+              },
+              {
+                "href": "#charts",
+                "label": {
+                  "en": "Population",
+                  "fr": "Population",
+                  "nl": "Bevolking"
+                }
+              },
+              {
+                "href": "#finances",
+                "label": {
+                  "en": "Local finances",
+                  "fr": "Finances locales",
+                  "nl": "Lokale financiën"
+                }
+              },
+              {
+                "href": "#maps",
+                "label": {
+                  "en": "Maps",
+                  "fr": "Cartes",
+                  "nl": "Kaarten"
+                }
+              },
+              {
+                "href": "#compare",
+                "label": {
+                  "en": "Comparison",
+                  "fr": "Comparaison",
+                  "nl": "Vergelijking"
+                }
+              }
+            ]
+          },
+          "type": "section_nav",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        }
+      ],
+      "id": "nav"
+    },
+    {
+      "blocks": [
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-kpi-0",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "people",
+            "label": {
+              "en": "Population",
+              "fr": "Population",
+              "nl": "Bevolking"
+            },
+            "show_provenance": true,
+            "sparkline": true
+          },
+          "type": "kpi_card",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "AVG_NET_TAXABLE_INCOME",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-kpi-1",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 4,
+              "y": 0
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 2
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 2
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "money",
+            "label": {
+              "en": "Average income",
+              "fr": "Revenu moyen",
+              "nl": "Gemiddeld inkomen"
+            },
+            "show_provenance": true,
+            "sparkline": true
+          },
+          "type": "kpi_card",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "UNEMPLOYMENT_RATE_COM",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-kpi-2",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 2
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 4
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 4
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "work",
+            "label": {
+              "en": "Unemployment rate",
+              "fr": "Taux de chômage",
+              "nl": "Werkloosheidsgraad"
+            },
+            "show_provenance": true,
+            "sparkline": true
+          },
+          "type": "kpi_card",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "LOCAL_UNITS_BY_COMMUNE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-kpi-3",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 4,
+              "y": 2
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 6
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 6
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "chart",
+            "label": {
+              "en": "Local units",
+              "fr": "Unités locales",
+              "nl": "Lokale eenheden"
+            },
+            "show_provenance": true,
+            "sparkline": true
+          },
+          "type": "kpi_card",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "MEDIAN_HOUSE_PRICE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-kpi-4",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 4
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 8
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 8
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "home",
+            "label": {
+              "en": "Median house price",
+              "fr": "Prix médian",
+              "nl": "Mediane huisprijs"
+            },
+            "show_provenance": true,
+            "sparkline": true
+          },
+          "type": "kpi_card",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_CHANGE_5Y",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-kpi-5",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 4,
+              "y": 4
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 10
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 10
+            }
+          },
+          "locked": false,
+          "props": {
+            "icon": "scale",
+            "label": {
+              "en": "Population, 5 years",
+              "fr": "Population, 5 ans",
+              "nl": "Bevolking, 5 jaar"
+            },
+            "show_provenance": true,
+            "sparkline": true
+          },
+          "type": "kpi_card",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "history",
+            "provider": "municipal"
+          },
+          "id": "cp-trend",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 6,
+              "x": 0,
+              "y": 6
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 12
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 12
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Population over time",
+              "fr": "Population dans le temps",
+              "nl": "Bevolking door de tijd"
+            },
+            "chart_type": "line",
+            "show_legend": true,
+            "title": {
+              "en": "How population has moved",
+              "fr": "Évolution de la population",
+              "nl": "Evolutie van de bevolking"
+            }
+          },
+          "type": "chart",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_AGE_0_14",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-donut",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 3,
+              "x": 0,
+              "y": 9
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 15
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 15
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Age structure",
+              "fr": "Répartition par âge",
+              "nl": "Leeftijdsstructuur"
+            },
+            "chart_type": "donut",
+            "title": {
+              "en": "Age structure",
+              "fr": "Répartition par âge",
+              "nl": "Leeftijdsstructuur"
+            }
+          },
+          "type": "chart",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "AVG_NET_TAXABLE_INCOME",
+            "operation": "history",
+            "provider": "municipal"
+          },
+          "id": "cp-income",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 4,
+              "x": 4,
+              "y": 9
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 18
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 18
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Average income over time",
+              "fr": "Revenu moyen dans le temps",
+              "nl": "Gemiddeld inkomen door de tijd"
+            },
+            "chart_type": "bar",
+            "title": {
+              "en": "Average income",
+              "fr": "Revenu moyen",
+              "nl": "Gemiddeld inkomen"
+            }
+          },
+          "type": "chart",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-fin-0",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 3,
+              "x": 0,
+              "y": 12
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 21
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 21
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Budget",
+              "fr": "Budget",
+              "nl": "Begroting"
+            },
+            "show_delta": false,
+            "show_period": false
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-fin-1",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 4,
+              "y": 12
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 22
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 22
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Spending",
+              "fr": "Dépenses",
+              "nl": "Uitgaven"
+            },
+            "show_delta": false,
+            "show_period": false
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-fin-2",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 3,
+              "x": 0,
+              "y": 13
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 23
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 23
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Revenue",
+              "fr": "Recettes",
+              "nl": "Ontvangsten"
+            },
+            "show_delta": false,
+            "show_period": false
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-fin-3",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 4,
+              "y": 13
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 24
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 24
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Debt per inhabitant",
+              "fr": "Dette par habitant",
+              "nl": "Schuld per inwoner"
+            },
+            "show_delta": false,
+            "show_period": false
+          },
+          "type": "stat_tile",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-fin-why",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 14
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 25
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 25
+            }
+          },
+          "locked": false,
+          "props": {
+            "content": [
+              {
+                "node": "paragraph",
+                "text": {
+                  "en": "Municipal budget, spending, revenue and debt need the Walloon municipal-finance source, which is on the roadmap and not built. Shown as unavailable rather than filled with a plausible number.",
+                  "fr": "Le budget, les dépenses, les recettes et la dette communale nécessitent la source des finances communales wallonnes, prévue mais non construite. Affiché comme indisponible plutôt que rempli d’un chiffre plausible.",
+                  "nl": "Gemeentelijke begroting, uitgaven, ontvangsten en schuld vereisen de Waalse bron voor gemeentefinanciën, die gepland maar niet gebouwd is. Getoond als niet beschikbaar in plaats van gevuld met een plausibel cijfer."
+                }
+              }
+            ]
+          },
+          "type": "rich_text",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "map_values",
+            "provider": "municipal"
+          },
+          "id": "cp-choropleth",
+          "layout": {
+            "desktop": {
+              "h": 4,
+              "w": 8,
+              "x": 0,
+              "y": 16
+            },
+            "mobile": {
+              "h": 4,
+              "w": 4,
+              "x": 0,
+              "y": 27
+            },
+            "tablet": {
+              "h": 4,
+              "w": 8,
+              "x": 0,
+              "y": 27
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Belgium by commune",
+              "fr": "La Belgique par commune",
+              "nl": "België per gemeente"
+            },
+            "click_through": true,
+            "indicator_picker": true,
+            "show_legend": true,
+            "show_zoom": true
+          },
+          "type": "map",
+          "version": 2,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "AVG_NET_TAXABLE_INCOME",
+            "operation": "comparison",
+            "provider": "municipal"
+          },
+          "id": "cp-compare",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 20
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 31
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 31
+            }
+          },
+          "locked": false,
+          "props": {
+            "caption": {
+              "en": "Commune, province, region, country",
+              "fr": "Commune, province, region, pays",
+              "nl": "Gemeente, provincie, gewest, land"
+            },
+            "title": {
+              "en": "Namur compared",
+              "fr": "Namur comparée",
+              "nl": "Namen vergeleken"
+            }
+          },
+          "type": "comparison_table",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-picker",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 8,
+              "y": 0
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 34
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 34
+            }
+          },
+          "locked": false,
+          "props": {
+            "accessible_name": {
+              "en": "Compare with",
+              "fr": "Comparer avec",
+              "nl": "Vergelijken met"
+            },
+            "slots": 3,
+            "submit_label": {
+              "en": "Compare",
+              "fr": "Comparer",
+              "nl": "Vergelijken"
+            },
+            "title": {
+              "en": "Compare Namur",
+              "fr": "Comparer Namur",
+              "nl": "Namen vergelijken"
+            }
+          },
+          "type": "comparison_picker",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "AVG_NET_TAXABLE_INCOME",
+            "operation": "percentile",
+            "provider": "municipal"
+          },
+          "id": "cp-rank-0",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 8,
+              "y": 2
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 36
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 36
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Average income",
+              "fr": "Revenu moyen",
+              "nl": "Gemiddeld inkomen"
+            },
+            "scope": "national"
+          },
+          "type": "ranking_list",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "UNEMPLOYMENT_RATE_COM",
+            "operation": "percentile",
+            "provider": "municipal"
+          },
+          "id": "cp-rank-1",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 8,
+              "y": 3
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 37
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 37
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Unemployment",
+              "fr": "Chômage",
+              "nl": "Werkloosheid"
+            },
+            "scope": "national"
+          },
+          "type": "ranking_list",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "MEDIAN_HOUSE_PRICE",
+            "operation": "percentile",
+            "provider": "municipal"
+          },
+          "id": "cp-rank-2",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 8,
+              "y": 4
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 38
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 38
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "House price",
+              "fr": "Prix des logements",
+              "nl": "Huisprijs"
+            },
+            "scope": "national"
+          },
+          "type": "ranking_list",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-rank-composite",
+          "layout": {
+            "desktop": {
+              "h": 1,
+              "w": 4,
+              "x": 8,
+              "y": 5
+            },
+            "mobile": {
+              "h": 1,
+              "w": 4,
+              "x": 0,
+              "y": 39
+            },
+            "tablet": {
+              "h": 1,
+              "w": 8,
+              "x": 0,
+              "y": 39
+            }
+          },
+          "locked": false,
+          "props": {
+            "label": {
+              "en": "Economic dynamism",
+              "fr": "Dynamisme économique",
+              "nl": "Economische dynamiek"
+            },
+            "scope": "national"
+          },
+          "type": "ranking_list",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": {
+            "indicator": "POPULATION_BY_COMMUNE",
+            "operation": "latest",
+            "provider": "municipal"
+          },
+          "id": "cp-sources",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 8,
+              "y": 6
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 40
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 40
+            }
+          },
+          "locked": false,
+          "props": {
+            "body": {
+              "en": "Figures come from official sources and are updated automatically.",
+              "fr": "Les chiffres proviennent de sources officielles et sont mis à jour automatiquement.",
+              "nl": "Cijfers komen uit officiële bronnen en worden automatisch bijgewerkt."
+            },
+            "link": {
+              "href": "/about.html",
+              "label": {
+                "en": "Read the methodology",
+                "fr": "Lire la méthodologie",
+                "nl": "Lees de methodologie"
+              }
+            },
+            "title": {
+              "en": "Sources and methodology",
+              "fr": "Sources et méthodologie",
+              "nl": "Bronnen en methodologie"
+            }
+          },
+          "type": "sources_panel",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-links",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 4,
+              "x": 8,
+              "y": 8
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 42
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 42
+            }
+          },
+          "locked": false,
+          "props": {
+            "links": [
+              {
+                "href": "/map.html",
+                "label": {
+                  "en": "See the map",
+                  "fr": "Voir la carte",
+                  "nl": "Bekijk de kaart"
+                }
+              },
+              {
+                "href": "/communes.html",
+                "label": {
+                  "en": "All communes",
+                  "fr": "Toutes les communes",
+                  "nl": "Alle gemeenten"
+                }
+              },
+              {
+                "href": "/all_data.html",
+                "label": {
+                  "en": "All observations",
+                  "fr": "Toutes les observations",
+                  "nl": "Alle waarnemingen"
+                }
+              }
+            ],
+            "title": {
+              "en": "Useful links",
+              "fr": "Liens utiles",
+              "nl": "Nuttige links"
+            }
+          },
+          "type": "link_list",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-neighbours",
+          "layout": {
+            "desktop": {
+              "h": 4,
+              "w": 4,
+              "x": 8,
+              "y": 10
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 44
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 44
+            }
+          },
+          "locked": false,
+          "props": {
+            "title": {
+              "en": "Neighbouring communes",
+              "fr": "Communes voisines",
+              "nl": "Buurgemeenten"
+            },
+            "unavailable_reason": {
+              "en": "This pipeline holds no commune-adjacency table, so a genuine list of neighbours cannot be produced.",
+              "fr": "Ce pipeline ne contient aucune table d’adjacence communale ; une véritable liste de communes voisines ne peut donc pas être produite.",
+              "nl": "Deze pijplijn bevat geen tabel met aangrenzende gemeenten, dus een echte lijst van buurgemeenten kan niet worden gemaakt."
+            }
+          },
+          "type": "neighbour_list",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        }
+      ],
+      "id": "body",
+      "label": {
+        "en": "Key figures and comparison",
+        "fr": "Chiffres clés et comparaison",
+        "nl": "Kerncijfers en vergelijking"
+      }
+    },
+    {
+      "blocks": [
+        {
+          "binding": null,
+          "id": "cp-focus",
+          "layout": {
+            "desktop": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            },
+            "mobile": {
+              "h": 3,
+              "w": 4,
+              "x": 0,
+              "y": 0
+            },
+            "tablet": {
+              "h": 3,
+              "w": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "locked": false,
+          "props": {
+            "tiles": [
+              {
+                "body": {
+                  "en": "Population and its age structure.",
+                  "fr": "La population et sa structure par âge.",
+                  "nl": "Bevolking en leeftijdsstructuur."
+                },
+                "label": {
+                  "en": "Demography",
+                  "fr": "Démographie",
+                  "nl": "Demografie"
+                }
+              },
+              {
+                "body": {
+                  "en": "Net taxable income per return.",
+                  "fr": "Revenu net imposable par déclaration.",
+                  "nl": "Netto belastbaar inkomen per aangifte."
+                },
+                "label": {
+                  "en": "Income",
+                  "fr": "Revenus",
+                  "nl": "Inkomen"
+                }
+              },
+              {
+                "body": {
+                  "en": "Unemployment and benefit recipients.",
+                  "fr": "Chômage et bénéficiaires d’allocations.",
+                  "nl": "Werkloosheid en uitkeringsgerechtigden."
+                },
+                "label": {
+                  "en": "Labour market",
+                  "fr": "Marché du travail",
+                  "nl": "Arbeidsmarkt"
+                }
+              },
+              {
+                "body": {
+                  "en": "Median sale price and transactions.",
+                  "fr": "Prix médian et transactions.",
+                  "nl": "Mediane prijs en transacties."
+                },
+                "label": {
+                  "en": "Housing",
+                  "fr": "Logement",
+                  "nl": "Huisvesting"
+                }
+              },
+              {
+                "body": {
+                  "en": "Local units registered here.",
+                  "fr": "Unités locales enregistrées ici.",
+                  "nl": "Hier geregistreerde lokale eenheden."
+                },
+                "label": {
+                  "en": "Business",
+                  "fr": "Économie locale",
+                  "nl": "Lokale economie"
+                }
+              },
+              {
+                "body": {
+                  "en": "Recorded crime rates.",
+                  "fr": "Taux de criminalité enregistrés.",
+                  "nl": "Geregistreerde criminaliteitscijfers."
+                },
+                "label": {
+                  "en": "Safety",
+                  "fr": "Sécurité",
+                  "nl": "Veiligheid"
+                }
+              }
+            ],
+            "title": {
+              "en": "Thematic focus",
+              "fr": "Focus thématiques",
+              "nl": "Thematische focus"
+            }
+          },
+          "type": "feature_tiles",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        },
+        {
+          "binding": null,
+          "id": "cp-cta",
+          "layout": {
+            "desktop": {
+              "h": 2,
+              "w": 12,
+              "x": 0,
+              "y": 4
+            },
+            "mobile": {
+              "h": 2,
+              "w": 4,
+              "x": 0,
+              "y": 7
+            },
+            "tablet": {
+              "h": 2,
+              "w": 8,
+              "x": 0,
+              "y": 7
+            }
+          },
+          "locked": false,
+          "props": {
+            "body": {
+              "en": "Reliable, comparable figures for every commune.",
+              "fr": "Des données fiables et comparables pour chaque commune.",
+              "nl": "Betrouwbare, vergelijkbare cijfers voor elke gemeente."
+            },
+            "heading": {
+              "en": "Explore all Belgian communes",
+              "fr": "Explorez toutes les communes belges",
+              "nl": "Verken alle Belgische gemeenten"
+            },
+            "primary_cta": {
+              "href": "/communes.html",
+              "label": {
+                "en": "Compare another commune",
+                "fr": "Comparer une autre commune",
+                "nl": "Vergelijk een andere gemeente"
+              }
+            },
+            "secondary_cta": {
+              "href": "/map.html",
+              "label": {
+                "en": "See all maps",
+                "fr": "Voir toutes les cartes",
+                "nl": "Bekijk alle kaarten"
+              }
+            }
+          },
+          "type": "cta_band",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
+        }
+      ],
+      "id": "closing",
+      "label": {
+        "en": "More",
+        "fr": "Plus",
+        "nl": "Meer"
+      }
+    }
+  ],
+  "seo": {
+    "description": {
+      "en": "Population, income, employment, housing and safety figures for Namur.",
+      "fr": "Population, revenus, emploi, logement et sécurité pour Namur.",
+      "nl": "Bevolking, inkomen, werk, wonen en veiligheid voor Namen."
+    },
+    "title": {
+      "en": "Namur — commune profile",
+      "fr": "Namur — profil communal",
+      "nl": "Namen — gemeenteprofiel"
+    }
+  },
+  "theme": "belpulse"
+}

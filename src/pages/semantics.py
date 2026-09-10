@@ -109,6 +109,10 @@ ROUTE_EXACT = frozenset(
         # preview routes were always temporary, carried noindex, were in no
         # sitemap and were linked from nowhere.
         "/preview/map.html",
+        # The commune profile, authored once against Namur. The real route it
+        # is heading for is the templated /local/{nis}/ below -- this preview
+        # exists so the layout can be looked at before it is multiplied by 565.
+        "/preview/commune.html",
     }
 )
 
