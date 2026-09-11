@@ -1,0 +1,820 @@
+<!--
+  BelPulse macroeconomics page -- Batch 6 (docs/design-references/macro.md and
+  assets/belpulse/macro page.png), built on Batch 1's tokens and Batch 2's
+  shared components, to home2.html's standard.
+
+  A PREVIEW ROUTE, noindexed, beside dashboard.html rather than replacing it.
+  The canonical route switches only when this page is proven equivalent or
+  better (docs/features/page_builder.md, the Batch 15 gate).
+
+  WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Every series drawn here is named
+  in config/national_sections.yaml and published as
+  public/data/metadata/national_sections.json -- NOT ONE INDICATOR CODE
+  APPEARS IN THIS FILE, so adding a series to the page is a config change
+  (enforced by tests/test_macro.py). Values, names, units, sources, grades and
+  retrieval dates come from public/data/national.json and
+  public/data/metadata/sources.json, never from the markup.
+
+  WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY. Every departure is a
+  figure the design shows that this pipeline does not hold:
+    * The KPI row draws the design's six cards, but four of its six figures
+      (population, employment rate, fiscal balance, public debt) have no
+      national series here. The row shows the six series that exist and a
+      line under it says which four do not.
+    * "Comparaison internationale": the five foreign GDP series are configured
+      and empty (a pre-existing DBnomics timeout, recorded under Block H).
+      Built at its designed size in the `unavailable` state, with that reason.
+    * "Finances publiques (compteurs simulés)": there is no national revenue,
+      expenditure, balance or debt series to extrapolate from, and a counter
+      ticking up from nothing would be an invention (CLAUDE.md rule 36).
+      Built at its designed size, unavailable, reason on the card.
+    * "Carte économique": Belgium publishes no GDP below the regional level.
+      The card says so and links to the interactive map of the municipal
+      indicators that do exist.
+    * "Actualités": this pipeline holds no article store; nothing here is
+      written by hand.
+    * The sidebar lists this page's own sections, not the design's eleven
+      themes -- an anchor to a section that does not exist is a broken
+      promise, and the design's "Mon espace" account button is omitted (no
+      accounts before the 50% milestone).
+    * The skyline is a small inline line drawing, not the design's
+      illustration; nothing here loads a third-party image.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>BelPulse — Belgian macroeconomy</title>
+<meta name="description" content="The headline indicators of the Belgian economy from official sources, with the date each figure was retrieved and how it was made.">
+
+<script>
+  (function(){
+    try{
+      // The reader's saved theme, the same key the block-built pages use.
+      var t = localStorage.getItem('belpulse-theme');
+      if(t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<style>
+  /* Page composition only. Anything reusable belongs in
+     assets/belpulse/components.css -- Batch 2 owns the library. */
+  body{background:var(--bp-bg); color:var(--bp-text); margin:0}
+  h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+
+  /* ---- top bar (home2's composition, so the two pages read as one site) ---- */
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%; max-width:1400px; margin:0 auto; padding:0 var(--bp-space-6)}
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .searchbox{
+    display:flex; align-items:center; gap:8px; flex:1; max-width:330px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:7px 12px; background:var(--bp-bg); margin-left:auto;
+  }
+  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+  .searchbox svg{color:var(--bp-text-faint); flex:none}
+  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
+
+  /* ---- body: navy sidebar, light content (the supplied PNG) ---- */
+  .bp-body--analytical{max-width:1400px; margin:0 auto}
+  .bp-sidebar{position:sticky; top:var(--bp-space-4); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
+  .side-title{display:flex; align-items:center; gap:10px; margin:0 0 var(--bp-space-5)}
+  .side-title h2{font-family:var(--bp-font-display); font-size:1.15rem; text-transform:none; letter-spacing:0; color:var(--bp-navy-text); margin:0; font-weight:600}
+  .side-title .icon{width:22px; height:22px; color:#8fb4ff}
+  .bp-sidebar-nav a[aria-current="page"]{background:rgba(255,255,255,.12); color:var(--bp-navy-text)}
+  .side-update{
+    margin-top:auto; padding:var(--bp-space-4); border:1px solid var(--bp-navy-border); border-radius:var(--bp-radius-control);
+    font-size:12px; color:var(--bp-navy-text-muted);
+  }
+  .side-update .lbl{margin-bottom:6px}
+  .side-update .when{display:flex; align-items:center; gap:8px; color:var(--bp-navy-text); font-weight:var(--bp-weight-medium); font-size:var(--bp-text-small)}
+  .side-update .dot{width:8px; height:8px; border-radius:50%; background:var(--bp-green); flex:none}
+  .side-update[data-status="other"] .dot{background:#e0a92b}
+  .side-update .status{margin-top:4px; font-size:11px}
+  .side-quote{
+    font-family:var(--bp-font-decorative); font-size:1.1rem; color:var(--bp-navy-text-muted);
+    margin:var(--bp-space-5) 0 0; padding-top:var(--bp-space-4); border-top:1px solid var(--bp-navy-border); line-height:1.35;
+  }
+  .side-quote small{display:block; font-family:var(--bp-font-ui); font-size:11px; text-align:right; margin-top:6px; color:var(--bp-navy-text)}
+
+  /* ---- main column ---- */
+  .macro-main{min-width:0; display:flex; flex-direction:column; gap:var(--bp-space-5)}
+  .bp-breadcrumb{font-size:12px; color:var(--bp-text-muted)}
+  .page-head{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.9fr); gap:var(--bp-space-6); align-items:end; margin-bottom:var(--bp-space-2)}
+  .page-head h1{font-size:2.3rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
+  .page-head .lead{color:var(--bp-text-muted); margin:0; max-width:52ch; font-size:var(--bp-text-body)}
+  .skyline{position:relative; min-height:120px; display:flex; align-items:flex-end; justify-content:flex-end}
+  .skyline svg{width:100%; max-width:520px; height:auto; color:var(--bp-blue); opacity:.38}
+  .skyline .script{
+    position:absolute; right:0; top:0; max-width:18ch; text-align:right; transform:rotate(-6deg);
+    font-family:var(--bp-font-decorative); font-size:1.15rem; color:var(--bp-text-muted); line-height:1.25;
+  }
+
+  /* ---- KPI row ---- */
+  .kpi-row{grid-template-columns:repeat(6, minmax(0,1fr))}
+  .macro-kpi{gap:4px; min-width:0}
+  .kpi-top{display:flex; align-items:flex-start; gap:10px}
+  .kpi-top .bp-kpi-icon{margin:0; width:30px; height:30px; border-radius:8px}
+  .kpi-top .bp-kpi-label{line-height:1.25; min-width:0}
+  /* Two lines, never an ellipsis: "Croissance trimestrielle du PIB (A-A)" cut
+     to "Croissance..." is indistinguishable from the annual series beside it. */
+  .kpi-top .bp-kpi-label .name{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; font-weight:var(--bp-weight-medium); color:var(--bp-text); font-size:12px; line-height:1.25}
+  .kpi-top .bp-kpi-label .period{font-size:11px; color:var(--bp-text-faint)}
+  .macro-kpi .bp-value{font-size:1.45rem; margin-top:2px; white-space:nowrap}
+  .macro-kpi .bp-value .unit{font-size:.7rem; color:var(--bp-text-faint); font-weight:var(--bp-weight-regular); margin-left:3px}
+  .macro-kpi .bp-delta{min-height:16px}
+  .mini-canvas{position:relative; margin-top:6px; min-width:0}
+  .mini-canvas canvas{display:block; width:100%}
+  .kpi-note{font-size:12px; color:var(--bp-text-faint); margin:calc(-1 * var(--bp-space-3)) 0 0}
+
+  /* ---- card rows ---- */
+  .row{display:grid; gap:var(--bp-space-5); min-width:0}
+  .row-3{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)}
+  .row-2{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+  .row-2r{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+  .bp-chart-card{min-width:0; display:flex; flex-direction:column}
+  .bp-chart-head h3{font-family:var(--bp-font-display); font-size:1.15rem}
+  .bp-chart-head .subtitle{max-width:60ch}
+  .pill{font-size:12px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:5px 10px; color:var(--bp-text-muted); white-space:nowrap}
+  /* The chart FILLS whatever height the row gives this card -- the list
+     panel beside it sets that height, and a fixed chart height left a band
+     of empty surface under the bars. The canvas is taken out of flow so
+     measuring the wrapper cannot be circular. */
+  .bp-chart-canvas-wrap{flex:1; position:relative; min-height:240px}
+  .bp-chart-canvas-wrap canvas{position:absolute; inset:0; display:block; width:100%}
+  .provenance{font-size:11px; color:var(--bp-text-faint); margin-top:var(--bp-space-3)}
+  .bp-list-panel li{display:flex; align-items:flex-start; gap:var(--bp-space-3); padding:9px 0; border-bottom:1px solid var(--bp-border)}
+  .bp-list-panel .label small{display:block; color:var(--bp-text-faint); font-size:11px; margin-top:2px}
+  .bp-list-panel .value{text-align:right; white-space:nowrap}
+  .bp-list-panel .value small{display:block; color:var(--bp-text-faint); font-size:11px; font-weight:var(--bp-weight-regular)}
+
+  /* Contributions: a signed bar per part, drawn in HTML so a negative
+     contribution reads to the left of a shared zero line. */
+  .contrib{list-style:none; margin:var(--bp-space-2) 0 0; padding:0; display:flex; flex-direction:column; gap:7px}
+  .contrib li{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) 64px; align-items:center; gap:var(--bp-space-3); font-size:var(--bp-text-small)}
+  .contrib .name{color:var(--bp-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .contrib .bar{position:relative; height:12px; background:var(--bp-surface-alt); border-radius:3px}
+  .contrib .bar::before{content:''; position:absolute; left:50%; top:-3px; bottom:-3px; width:1px; background:var(--bp-text-faint)}
+  .contrib .bar span{position:absolute; top:0; bottom:0; border-radius:3px; background:var(--bp-chart-1)}
+  .contrib .bar span.neg{background:var(--bp-red-signal)}
+  .contrib .val{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
+  .contrib-total{
+    display:flex; justify-content:space-between; gap:var(--bp-space-3); flex-wrap:wrap;
+    margin-top:var(--bp-space-4); padding-top:var(--bp-space-3); border-top:1px solid var(--bp-border);
+    font-size:var(--bp-text-small); color:var(--bp-text-muted);
+  }
+  .contrib-total b{color:var(--bp-text)}
+
+  /* Unavailable cards: designed size, honest state. */
+  .bp-state[data-state="unavailable"] .bp-state-message{padding:0}
+  .bp-state .placeholder{flex:1; min-height:120px; border:1px dashed var(--bp-border); border-radius:var(--bp-radius-control); margin:var(--bp-space-3) 0; background:repeating-linear-gradient(135deg, transparent 0 10px, var(--bp-surface-alt) 10px 11px)}
+  .bp-state .why{font-size:12px}
+  .card-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium); margin-top:var(--bp-space-3); align-self:flex-end}
+  .card-link:hover{text-decoration:underline}
+
+  /* ---- footer ---- */
+  .foot{border-top:1px solid var(--bp-border); background:var(--bp-surface); margin-top:var(--bp-space-6)}
+  .foot .wrap{max-width:1400px; margin:0 auto; padding:var(--bp-space-5) var(--bp-space-6); display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; font-size:12px; color:var(--bp-text-muted)}
+  .foot nav{display:flex; gap:var(--bp-space-4); margin-left:auto}
+  .foot nav a{color:inherit; text-decoration:none}
+  .foot nav a:hover{color:var(--bp-text)}
+  .foot .sources b{color:var(--bp-text); font-weight:var(--bp-weight-medium)}
+
+  @media (max-width:1180px){
+    .kpi-row{grid-template-columns:repeat(3, minmax(0,1fr))}
+    .row-3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .row-3 .card-wide{grid-column:1 / -1}
+  }
+  @media (max-width:1024px){
+    .bp-sidebar{position:static; min-height:0}
+    .side-update{margin-top:var(--bp-space-4)}
+    /* The top bar is one flex row of logo + six nav links + search + language,
+       which stops fitting at about 1000px and pushes the whole PAGE sideways
+       (measured, not guessed: at 820 the language select sat at x=959 in a
+       820-wide viewport). Let it wrap, and let the nav scroll within itself
+       rather than pushing -- the same fix layout.css already carries for the
+       shared shell, at the width THIS page's nav actually needs it. */
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto; -webkit-overflow-scrolling:touch}
+    .bp-nav a{white-space:nowrap}
+    .searchbox{max-width:none; flex:1 1 220px}
+  }
+  /* No mobile mockup was ever supplied (tokens-measured.md). On a phone the
+     navy sidebar filled the ENTIRE first screen before a single figure, so
+     below the one-column breakpoint it becomes a horizontal strip of links:
+     still the page's own section list, no longer a wall between the reader
+     and the data. The build stamp and the quote go to the end of the page,
+     where they read as a footnote rather than as the opening. */
+  @media (max-width:1024px){
+    .bp-sidebar{flex-direction:row; align-items:center; gap:var(--bp-space-4); overflow-x:auto; padding:var(--bp-space-3) var(--bp-space-4)}
+    .side-title{margin:0; flex:none}
+    .side-title h2{font-size:1rem; white-space:nowrap}
+    .bp-sidebar-nav{flex-direction:row; gap:var(--bp-space-2); flex:1}
+    .bp-sidebar-nav a{white-space:nowrap; padding:6px 10px}
+    .side-update, .side-quote{display:none}
+  }
+  @media (max-width:768px){
+    .bp-body{padding:var(--bp-space-4); gap:var(--bp-space-4)}
+    .page-head{grid-template-columns:1fr}
+    .skyline{display:none}
+    .page-head h1{font-size:1.8rem}
+    .kpi-row{grid-template-columns:repeat(2, minmax(0,1fr))}
+    .row-3, .row-2, .row-2r{grid-template-columns:1fr}
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
+    .bp-nav a{white-space:nowrap}
+    .searchbox{max-width:none; margin-left:0; order:4; flex-basis:100%}
+  }
+  @media (max-width:480px){
+    .kpi-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body class="bp-shell macro">
+
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span>
+        <span class="bp-wordmark">BelPulse</span>
+        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
+      </span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home2.html" data-t="navHome">Home</a>
+      <a href="macro.html" aria-current="page" data-t="navMacro">Macro</a>
+      <a href="all_data.html" data-t="navMicro">Micro</a>
+      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+      <a href="map.html" data-t="navMaps">Maps</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+    </nav>
+    <label class="searchbox">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+      <datalist id="communeList"></datalist>
+    </label>
+    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
+      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
+    </select>
+  </div>
+</header>
+
+<div class="bp-body bp-body--analytical">
+
+  <aside class="bp-sidebar" aria-label="Sections">
+    <div class="side-title">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M5 16l4-6 4 3 6-8"/></svg>
+      <h2 data-t="macroSidebarTitle">Macroeconomics</h2>
+    </div>
+    <ul class="bp-sidebar-nav" id="sideNav">
+      <li><a href="#overview" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-t="macroNavOverview">Overview</span></a></li>
+      <li><a href="#growth"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-t="macroNavGrowth">Growth &amp; GDP</span></a></li>
+      <li><a href="#key"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-t="macroNavKey">Key indicators</span></a></li>
+      <li><a href="#drivers"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span data-t="macroNavDrivers">Drivers of growth</span></a></li>
+      <li><a href="#international"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="macroNavInternational">International comparison</span></a></li>
+      <li><a href="#public-finance"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/></svg><span data-t="macroNavPublicFinance">Public finances</span></a></li>
+      <li><a href="#map"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span data-t="macroNavMap">Economic map</span></a></li>
+      <li><a href="#news"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg><span data-t="macroNavNews">Economic news</span></a></li>
+    </ul>
+    <div class="side-update" id="sideUpdate" data-status="other">
+      <div class="lbl" data-t="macroLastUpdate">Last data update</div>
+      <div class="when"><span class="dot"></span><span id="updateDate">—</span></div>
+      <div class="status" id="updateStatus"></div>
+      <div class="status" data-t="macroAutoUpdate">Automatic update</div>
+    </div>
+    <p class="side-quote">« <span data-t="macroQuote">Reliable data for a stronger Belgium.</span> »<small>BelPulse</small></p>
+  </aside>
+
+  <main class="macro-main">
+    <nav class="bp-breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
+    </nav>
+
+    <header class="page-head" id="overview">
+      <div>
+        <h1 data-t="macroTitle">The Belgian macroeconomy</h1>
+        <p class="lead" data-t="macroLead">The headline indicators for reading Belgium's economic situation, updated automatically from official sources.</p>
+      </div>
+      <div class="skyline" aria-hidden="true">
+        <span class="script" data-t="macroScript">Today's data for tomorrow's decisions.</span>
+        <svg viewBox="0 0 520 110" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M0 108h520"/>
+          <path d="M14 108V70h18v38M22 70V58l5-8 5 8v12"/>
+          <path d="M48 108V84h26v24M56 84V72h10v12"/>
+          <path d="M90 108V62h12V48l6-10 6 10v14h12v46"/>
+          <path d="M136 108V88h34v20M146 88V76h14v12"/>
+          <path d="M186 108V56h8V40l4-14 4 14v16h8v52M198 40v-8"/>
+          <path d="M222 108V80h40v28M232 80V66h20v14M240 66v-8"/>
+          <path d="M278 108V64h10V44l7-18 7 18v20h10v44"/>
+          <path d="M328 108V86h30v22M338 86V74h10v12"/>
+          <path d="M372 108V70h14V54l5-12 5 12v16h14v38"/>
+          <path d="M424 108V88h26v20M432 88V78h10v10"/>
+          <path d="M464 108V74h12V60l6-10 6 10v14h12v34"/>
+          <path d="M0 108c30-4 60-4 90 0s60 4 90 0 60-4 90 0 60 4 90 0 60-4 90 0 50 4 70 0" opacity=".5"/>
+        </svg>
+      </div>
+    </header>
+
+    <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
+    <p class="kpi-note" id="kpiNote"></p>
+
+    <section class="row row-3">
+      <article class="bp-chart-card card-wide bp-state" id="growth" data-state="loading">
+        <div class="bp-chart-head">
+          <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
+          <span class="pill" data-t="macroSubject">Belgium</span>
+        </div>
+        <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="historyProvenance"></div>
+      </article>
+      <article class="bp-chart-card" id="key">
+        <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
+        <ul class="bp-list-panel" id="keyList"></ul>
+      </article>
+      <article class="bp-chart-card bp-state" id="international" data-slot="international" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+    </section>
+
+    <section class="row row-2">
+      <article class="bp-chart-card card-wide bp-state" id="drivers" data-state="loading">
+        <div class="bp-chart-head">
+          <div><h3 id="contribTitle">&nbsp;</h3><div class="subtitle" id="contribNote"></div></div>
+          <span class="pill" id="contribPeriod"></span>
+        </div>
+        <div class="bp-state-body">
+          <ol class="contrib" id="contribList"></ol>
+          <div class="contrib-total" id="contribTotal"></div>
+        </div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="contribProvenance"></div>
+      </article>
+      <article class="bp-chart-card bp-state" id="public-finance" data-slot="public_finance" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+    </section>
+
+    <section class="row row-2r">
+      <article class="bp-chart-card bp-state" id="map" data-slot="economic_map" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        <a class="card-link slot-link" hidden><span data-t="macroSeeMap">See the interactive map</span> →</a>
+      </article>
+      <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
+    </a>
+    <span data-t="macroFooterTagline">Data. Analysis. Territories. Belgium in perspective.</span>
+    <span class="sources"><b data-t="macroSourcesPrefix">Sources:</b> <span id="sourcesLine">—</span> · <span data-t="macroAutoUpdated">data updated automatically</span></span>
+    <nav>
+      <a href="about.html" data-t="homeFooterAbout">About</a>
+      <a href="about.html" data-t="homeFooterSources">Sources</a>
+      <a href="about.html" data-t="homeFooterContact">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/belpulse/charts.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* BelPulse macroeconomics page -- Batch 6.
+ *
+ * The layout comes from metadata/national_sections.json, the values from
+ * national.json, the source labels from metadata/sources.json, the build
+ * date from manifest.json. This script knows about a KPI row, one history
+ * chart, a list panel, a contributions breakdown and unavailable slots --
+ * never about a particular series.
+ */
+(function(){
+  'use strict';
+
+  var LAYOUT_URL   = 'public/data/metadata/national_sections.json';
+  var SOURCES_URL  = 'public/data/metadata/sources.json';
+  var NATIONAL_URL = 'public/data/national.json';
+  var MANIFEST_URL = 'public/data/manifest.json';
+  var GEO_URL      = 'public/data/metadata/geographies.json';
+
+  var LANG = I18N.initial();
+  var T = function(key, vars){ return I18N.t(LANG, key, vars); };
+
+  // Icon tints by POSITION, the same rule home2's finance strip uses: a
+  // card's colour says "this is the second card", never "this is inflation".
+  var TINTS = ['blue', 'violet', 'amber', 'green', 'blue', 'violet'];
+  var ICONS = [
+    '<path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/>',
+    '<rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/>',
+    '<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    '<path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/>',
+    '<path d="M4 15l4-4 4 3 8-8"/><path d="M4 20h16"/>',
+  ];
+
+  var state = {layout: null, national: {}, sources: {}, grades: {}, attrUpdated: null};
+
+  /* ---- language, the site's existing pattern ---------------------------- */
+  function applyStrings(){
+    document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = T(el.dataset.t); });
+    document.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
+    document.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
+    document.documentElement.setAttribute('lang', LANG);
+    document.getElementById('langPick').value = LANG;
+  }
+
+  function text(obj){
+    if(!obj) return '';
+    if(typeof obj === 'string') return obj;
+    return obj[LANG] || obj.en || '';
+  }
+
+  function nameOf(code){
+    var entry = state.national[code];
+    if(!entry) return code;
+    return (entry.names && (entry.names[LANG] || entry.names.en)) || entry.name || code;
+  }
+
+  function latestNumeric(entry){
+    if(!entry || !entry.periods) return null;
+    var ps = Object.keys(entry.periods).sort();
+    for(var i = ps.length - 1; i >= 0; i--){
+      var v = entry.periods[ps[i]].value;
+      if(typeof v === 'number') return {period: ps[i], value: v, status: entry.periods[ps[i]].status, index: i, periods: ps};
+    }
+    return null;
+  }
+
+  function previousNumeric(entry, latest){
+    if(!latest) return null;
+    for(var i = latest.index - 1; i >= 0; i--){
+      var v = entry.periods[latest.periods[i]].value;
+      if(typeof v === 'number') return {period: latest.periods[i], value: v};
+    }
+    return null;
+  }
+
+  /* A period as a reader writes it: "2026-Q2" -> "Q2 2026" / "T2 2026" /
+     "K2 2026"; "2025-12" -> the month name; a year stays a year. */
+  function fmtPeriod(p){
+    var q = /^(\d{4})-Q([1-4])$/.exec(p);
+    if(q) return ({en: 'Q', fr: 'T', nl: 'K'}[LANG] || 'Q') + q[2] + ' ' + q[1];
+    var m = /^(\d{4})-(\d{2})$/.exec(p);
+    if(m){
+      try{ return new Date(Number(m[1]), Number(m[2]) - 1, 1).toLocaleDateString(LANG, {month: 'short', year: 'numeric'}); }
+      catch(e){ return p; }
+    }
+    return p;
+  }
+
+  /* Unit hints that are about the UNIT, not the series: a percentage-point
+     contribution, an index and its base year. Anything else falls back to
+     the shared formatter's own suffix. */
+  function unitHint(unit){
+    var u = (unit || '').toLowerCase();
+    if(u === 'pp_contribution') return 'pp';
+    var idx = /^index_(\d{4})$/.exec(u);
+    if(idx) return idx[1] + '=100';
+    if(u === 'balance') return T('macroBalance');
+    return MapUI.unitSuffix(unit).trim();
+  }
+
+  function fmtValue(v, entry){
+    var d = (typeof entry.decimals === 'number') ? entry.decimals : 1;
+    return MapUI.formatValue(v, entry.unit, d, LANG);
+  }
+
+  function fmtSigned(v, entry){
+    var s = fmtValue(Math.abs(v), entry);
+    return (v > 0 ? '+' : (v < 0 ? '−' : '')) + s;
+  }
+
+  /* Favourable or not comes from the indicator's OWN preferred direction
+     (payload metadata), never from the sign: a falling unemployment rate is
+     favourable, a falling growth rate is not, and an index is neither. */
+  function deltaDirection(delta, direction){
+    if(!delta || !direction) return 'neutral';
+    if(direction === 'higher_is_better') return delta > 0 ? 'favourable' : 'unfavourable';
+    if(direction === 'lower_is_better') return delta < 0 ? 'favourable' : 'unfavourable';
+    return 'neutral';
+  }
+
+  function provenance(entry, latest){
+    var bits = [];
+    var source = entry.source ? state.sources[entry.source] : null;
+    bits.push((source && source.label && (source.label[LANG] || source.label.en)) || entry.source_agency || entry.source || '');
+    var grade = state.grades[entry.grade];
+    if(grade) bits.push('(' + entry.grade + ') ' + (grade[LANG] || grade.en));
+    if(entry.updated) bits.push(T('retrieved') + ' ' + entry.updated);
+    if(latest && latest.status && latest.status !== 'final') bits.push(T('status_' + latest.status));
+    return bits.filter(Boolean).join(' · ');
+  }
+
+  function seriesPoints(entry, limit){
+    var ps = Object.keys(entry.periods || {}).sort().slice(-limit);
+    return ps.map(function(p){ return {period: p, value: (entry.periods[p] || {}).value}; })
+             .filter(function(pt){ return typeof pt.value === 'number'; });
+  }
+
+  /* ---- KPI row ---------------------------------------------------------- */
+  function renderKpis(){
+    var host = document.getElementById('kpiRow');
+    host.innerHTML = '';
+    var draws = [];
+    (state.layout.kpis || []).forEach(function(code, i){
+      var entry = state.national[code];
+      if(!entry) return;
+      var latest = latestNumeric(entry);
+      var prev = previousNumeric(entry, latest);
+      var card = document.createElement('article');
+      card.className = 'bp-kpi macro-kpi bp-state';
+      card.dataset.state = latest ? 'ready' : 'missing';
+      var tint = TINTS[i % TINTS.length];
+      card.innerHTML =
+        '<div class="kpi-top">' +
+          '<span class="bp-kpi-icon" style="background:var(--bp-icon-' + tint + '-bg);color:var(--bp-icon-' + tint + '-ink)">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>' +
+          '</span>' +
+          '<div class="bp-kpi-label"><span class="name"></span><span class="period"></span></div>' +
+        '</div>' +
+        '<div class="bp-state-body"><div class="bp-value"><span class="num"></span><span class="unit"></span></div>' +
+        '<div class="bp-delta" data-direction="neutral"></div></div>' +
+        '<div class="bp-state-message"><span class="headline"></span></div>' +
+        '<div class="mini-canvas"><canvas></canvas></div>';
+      card.querySelector('.name').textContent = nameOf(code);
+      card.querySelector('.name').title = nameOf(code);
+      card.querySelector('.period').textContent = latest ? fmtPeriod(latest.period) : '';
+      card.querySelector('.headline').textContent = T('macroUnavailable');
+      if(latest){
+        card.querySelector('.num').textContent = fmtValue(latest.value, entry);
+        var hint = unitHint(entry.unit);
+        if(hint && !/^percent/.test((entry.unit || '').toLowerCase())) card.querySelector('.unit').textContent = hint;
+        if(prev){
+          var delta = latest.value - prev.value;
+          var el = card.querySelector('.bp-delta');
+          el.dataset.direction = deltaDirection(delta, entry.direction);
+          el.textContent = fmtSigned(delta, entry) + ' ' + T('macroVsPrevious', {period: fmtPeriod(prev.period)});
+        }
+      }
+      card.title = provenance(entry, latest);
+      host.appendChild(card);
+      var pts = seriesPoints(entry, 20);
+      if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: nameOf(code), i: i});
+    });
+    // Draw only once every card is in the DOM, so each canvas measures its
+    // real grid width (home2 found this the hard way).
+    draws.forEach(function(d){
+      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
+        {locale: LANG, height: 52, compact: true});
+    });
+    document.getElementById('kpiNote').textContent = text(state.layout.kpis_note);
+  }
+
+  /* ---- GDP history ------------------------------------------------------ */
+  function renderHistory(){
+    var card = document.getElementById('growth');
+    var spec = state.layout.history || {};
+    var entry = spec.series ? state.national[spec.series] : null;
+    document.getElementById('historyTitle').textContent = text(spec.label) || (entry ? nameOf(spec.series) : '');
+    document.getElementById('historyNote').textContent = text(spec.note);
+    if(!entry){ card.dataset.state = 'unavailable'; return; }
+    var pts = seriesPoints(entry, 10000);
+    if(!pts.length){ card.dataset.state = 'missing'; return; }
+    card.dataset.state = 'ready';
+    var items = pts.map(function(pt){
+      // A contraction is the one bar drawn in the accent colour: the chart
+      // does not hide a bad year, it lets it read as the outlier it is.
+      return {label: pt.period, value: pt.value, highlight: pt.value < 0};
+    });
+    var canvas = document.getElementById('historyCanvas');
+    var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
+    BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 0});
+    document.getElementById('historyProvenance').textContent = provenance(entry, latestNumeric(entry));
+  }
+
+  /* ---- key indicators list --------------------------------------------- */
+  function renderKeyList(){
+    var host = document.getElementById('keyList');
+    host.innerHTML = '';
+    (state.layout.key_list || []).forEach(function(code){
+      var entry = state.national[code];
+      if(!entry) return;
+      var latest = latestNumeric(entry);
+      var li = document.createElement('li');
+      li.className = 'bp-state';
+      li.dataset.state = latest ? 'ready' : 'missing';
+      li.innerHTML = '<span class="label"><span class="name"></span><small class="prov"></small></span>' +
+                     '<span class="value"><span class="num"></span><small class="when"></small></span>';
+      li.querySelector('.name').textContent = nameOf(code);
+      li.querySelector('.prov').textContent = provenance(entry, latest);
+      if(latest){
+        var hint = unitHint(entry.unit);
+        li.querySelector('.num').textContent = fmtValue(latest.value, entry) +
+          (hint && !/^percent/.test((entry.unit || '').toLowerCase()) ? ' ' + hint : '');
+        li.querySelector('.when').textContent = fmtPeriod(latest.period);
+      }else{
+        li.querySelector('.num').textContent = '—';
+        li.querySelector('.when').textContent = T('macroUnavailable');
+      }
+      host.appendChild(li);
+    });
+  }
+
+  /* ---- contributions to growth ------------------------------------------ */
+  function renderContributions(){
+    var card = document.getElementById('drivers');
+    var spec = state.layout.contributions || {};
+    document.getElementById('contribTitle').textContent = text(spec.label);
+    document.getElementById('contribNote').textContent = text(spec.note);
+    var parts = (spec.parts || []).filter(function(c){ return state.national[c]; });
+    var whole = spec.whole ? state.national[spec.whole] : null;
+    if(!parts.length){ card.dataset.state = 'unavailable'; return; }
+
+    // The latest year every part (and the whole) has a number for.
+    var common = null;
+    parts.concat(whole ? [whole] : []).forEach(function(entryOrCode){
+      var entry = typeof entryOrCode === 'string' ? state.national[entryOrCode] : entryOrCode;
+      var ps = Object.keys(entry.periods).filter(function(p){ return typeof entry.periods[p].value === 'number'; });
+      common = common === null ? ps : common.filter(function(p){ return ps.indexOf(p) !== -1; });
+    });
+    if(!common || !common.length){ card.dataset.state = 'missing'; return; }
+    var period = common.sort().slice(-1)[0];
+    card.dataset.state = 'ready';
+    document.getElementById('contribPeriod').textContent = fmtPeriod(period);
+
+    var rows = parts.map(function(code){
+      return {code: code, entry: state.national[code], value: state.national[code].periods[period].value};
+    });
+    var maxAbs = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.value); }).concat([0.0001]));
+    var host = document.getElementById('contribList');
+    host.innerHTML = '';
+    var sum = 0;
+    rows.forEach(function(r, i){
+      sum += r.value;
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="name"></span><span class="bar"><span></span></span><span class="val"></span>';
+      li.querySelector('.name').textContent = nameOf(r.code);
+      li.querySelector('.name').title = nameOf(r.code);
+      var bar = li.querySelector('.bar span');
+      var w = (Math.abs(r.value) / maxAbs) * 50;
+      if(r.value < 0){ bar.className = 'neg'; bar.style.right = '50%'; bar.style.width = w + '%'; }
+      else{ bar.style.left = '50%'; bar.style.width = Math.max(w, r.value === 0 ? 0 : 0.5) + '%'; bar.style.background = 'var(--bp-chart-' + ((i % 8) + 1) + ')'; }
+      li.querySelector('.val').textContent = fmtSigned(r.value, r.entry) + ' pp';
+      host.appendChild(li);
+    });
+    var total = document.getElementById('contribTotal');
+    total.innerHTML = '';
+    var a = document.createElement('span');
+    a.innerHTML = '<span class="k"></span> <b></b>';
+    a.querySelector('.k').textContent = T('macroSumOfParts');
+    a.querySelector('b').textContent = fmtSigned(sum, rows[0].entry) + ' pp';
+    total.appendChild(a);
+    if(whole){
+      var b = document.createElement('span');
+      b.innerHTML = '<span class="k"></span> <b></b>';
+      b.querySelector('.k').textContent = nameOf(spec.whole) + ' (' + fmtPeriod(period) + ')';
+      b.querySelector('b').textContent = fmtSigned(whole.periods[period].value, whole) + ' ' + unitHint(whole.unit);
+      total.appendChild(b);
+    }
+    document.getElementById('contribProvenance').textContent = provenance(rows[0].entry, null);
+  }
+
+  /* ---- unavailable slots: designed size, honest state ------------------- */
+  function renderUnavailable(){
+    var byId = {};
+    (state.layout.unavailable || []).forEach(function(u){ byId[u.id] = u; });
+    document.querySelectorAll('[data-slot]').forEach(function(card){
+      var u = byId[card.dataset.slot];
+      card.dataset.state = 'unavailable';
+      card.querySelector('.slot-title').textContent = u ? text(u.label) : '';
+      card.querySelector('.slot-reason').textContent = u ? text(u.reason) : T('macroUnavailable');
+      var link = card.querySelector('.slot-link');
+      if(link){
+        if(u && u.link){ link.href = u.link; link.hidden = false; }
+        else link.hidden = true;
+      }
+    });
+  }
+
+  /* ---- sidebar: build date, sources line -------------------------------- */
+  function renderManifest(manifest){
+    var box = document.getElementById('sideUpdate');
+    var when = document.getElementById('updateDate');
+    var status = document.getElementById('updateStatus');
+    if(!manifest){ when.textContent = '—'; return; }
+    try{
+      when.textContent = new Date(manifest.build_date).toLocaleString(LANG, {dateStyle: 'medium', timeStyle: 'short'});
+    }catch(e){ when.textContent = manifest.build_date || '—'; }
+    var pass = manifest.validation_status === 'pass';
+    box.dataset.status = pass ? 'pass' : 'other';
+    status.textContent = pass ? T('macroValidationPass') : T('macroValidationOther', {status: manifest.validation_status || '—'});
+  }
+
+  function renderSources(){
+    var shown = {};
+    [].concat(state.layout.kpis || [], state.layout.key_list || [],
+              state.layout.history && state.layout.history.series ? [state.layout.history.series] : [],
+              (state.layout.contributions || {}).parts || [])
+      .forEach(function(code){ var e = state.national[code]; if(e && e.source) shown[e.source] = true; });
+    var labels = Object.keys(shown).map(function(id){
+      var s = state.sources[id];
+      return (s && s.label && (s.label[LANG] || s.label.en)) || id;
+    }).sort();
+    document.getElementById('sourcesLine').textContent = labels.length ? labels.join(', ') : '—';
+  }
+
+  /* ---- search: the commune list, as home2 offers it --------------------- */
+  async function loadSearch(){
+    try{
+      var res = await fetch(GEO_URL);
+      if(!res.ok) return;
+      var geo = await res.json();
+      var list = document.getElementById('communeList');
+      list.innerHTML = '';
+      (geo.geographies || []).filter(function(g){ return g.level === 'municipality' && g.nis; }).forEach(function(g){
+        var o = document.createElement('option');
+        o.value = (g.names && (g.names[LANG] || g.names.en)) || g.nis;
+        o.dataset.nis = g.nis;
+        list.appendChild(o);
+      });
+      document.getElementById('communeSearch').addEventListener('change', function(){
+        var opt = Array.prototype.find.call(list.options, function(o){ return o.value === this.value; }, this);
+        if(opt) location.href = 'commune.html?nis=' + opt.dataset.nis;
+      });
+    }catch(e){}
+  }
+
+  /* ---- boot ------------------------------------------------------------- */
+  function renderAll(){
+    applyStrings();
+    if(!state.layout) return;
+    renderKpis();
+    renderHistory();
+    renderKeyList();
+    renderContributions();
+    renderUnavailable();
+    renderSources();
+    // The chart's card is as tall as the list panel beside it, and that height
+    // is only known once every card in the row has rendered -- so the history
+    // chart is drawn a second time, at the height it actually got.
+    requestAnimationFrame(renderHistory);
+  }
+
+  async function boot(){
+    applyStrings();
+    document.getElementById('langPick').addEventListener('change', function(){
+      LANG = this.value;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(e){}
+      renderAll();
+      if(state.manifest) renderManifest(state.manifest);
+    });
+    var results = await Promise.all([LAYOUT_URL, NATIONAL_URL, SOURCES_URL, MANIFEST_URL].map(function(url){
+      return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+    }));
+    state.layout = results[0];
+    state.national = (results[1] && results[1].indicators) || {};
+    state.sources = (results[2] && results[2].sources) || {};
+    state.grades = (results[2] && results[2].grades) || {};
+    state.manifest = results[3];
+    if(!state.layout){
+      document.querySelectorAll('.bp-state').forEach(function(el){ el.dataset.state = 'error'; });
+      return;
+    }
+    renderAll();
+    renderManifest(state.manifest);
+    loadSearch();
+    var redraw;
+    window.addEventListener('resize', function(){ clearTimeout(redraw); redraw = setTimeout(renderAll, 150); });
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

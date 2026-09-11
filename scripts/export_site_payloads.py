@@ -346,6 +346,26 @@ def _indicator_names(db_path: Path, derived_dir: Path | None = None) -> dict[str
     return names
 
 
+def _display_metadata(db_path: Path) -> dict[str, dict]:
+    """indicator_id -> {direction, decimals}, from the indicators table.
+
+    The national page colours a change by the indicator's OWN preferred
+    direction (a falling unemployment rate is favourable, a falling GDP
+    growth is not) and rounds to the declared decimals -- both metadata,
+    never typed into the page (CLAUDE.md rule 28).
+    """
+    conn = sqlite3.connect(str(db_path))
+    try:
+        return {
+            indicator_id: {"direction": direction, "decimals": decimals}
+            for indicator_id, direction, decimals in conn.execute(
+                "SELECT indicator_id, preferred_direction, decimals FROM indicators"
+            )
+        }
+    finally:
+        conn.close()
+
+
 SECTIONS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "local_sections.yaml"
 
 
@@ -408,6 +428,56 @@ def _check_sections(layout: dict, known: set[str]) -> None:
         raise ValueError(
             f"config/local_sections.yaml names indicator(s) no commune payload carries: "
             f"{unknown}. They would render as empty boxes on every commune page. Remove "
+            "them from the layout, or load the data they need."
+        )
+
+
+NATIONAL_SECTIONS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "national_sections.yaml"
+
+
+def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
+    """The macro.html layout, so that page holds no indicator ids either.
+
+    Same premise as `_sections`: the page renders whatever this describes --
+    a KPI row, one history chart, a list panel, a contributions breakdown and
+    the cards the design draws that no series can fill yet. An empty dict
+    means "no layout", and nothing is written.
+    """
+    if not path.is_file():
+        return {}
+    import yaml
+
+    layout = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {
+        "kpis": layout.get("kpis") or [],
+        "kpis_note": layout.get("kpis_note") or {},
+        "history": layout.get("history") or {},
+        "key_list": layout.get("key_list") or [],
+        "contributions": layout.get("contributions") or {},
+        "unavailable": layout.get("unavailable") or [],
+    }
+
+
+def _check_national_sections(layout: dict, known: set[str]) -> None:
+    """Every series the macro layout names must exist in national.json.
+
+    A card pointing at a series nothing provides would render as an empty
+    box on the one national page, invisible to every other test.
+    """
+    history = layout.get("history") or {}
+    contributions = layout.get("contributions") or {}
+    named = [
+        *(layout.get("kpis") or []),
+        *([history["series"]] if history.get("series") else []),
+        *(layout.get("key_list") or []),
+        *([contributions["whole"]] if contributions.get("whole") else []),
+        *(contributions.get("parts") or []),
+    ]
+    unknown = sorted({i for i in named if i not in known})
+    if unknown:
+        raise ValueError(
+            f"config/national_sections.yaml names indicator(s) the national payload does "
+            f"not carry: {unknown}. They would render as empty cards on macro.html. Remove "
             "them from the layout, or load the data they need."
         )
 
@@ -751,6 +821,12 @@ def export_site_payloads(
     aggregates_csv: Path | None = None,
     percentiles_csv: Path | None = None,
     sections_config: Path | None = SECTIONS_CONFIG,
+    # Defaults to None, unlike `sections_config`: a caller exercising the
+    # payload RESHAPE with a two-indicator fixture is not testing the macro
+    # page's layout, and the cross-check below would rightly reject every
+    # real national series as missing from that fixture. main() passes the
+    # real path, which is the production route.
+    national_sections_config: Path | None = None,
 ) -> dict[str, int]:
     communes = _read_communes_history(communes_history_csv)
     indicators = _read_communes_latest(communes_latest_csv)
@@ -784,10 +860,18 @@ def export_site_payloads(
     if percentiles_csv is not None:
         ranked = _attach_percentiles(communes, _read_percentiles(percentiles_csv))
 
+    display = _display_metadata(db_path)
     for indicator_id, entry in national.items():
         provenance = lineage.get(indicator_id, {})
         entry["grade"] = provenance.get("grade")
         entry["source"] = provenance.get("source")
+        # `name` stays the English string the CSV supplied; `names` adds the
+        # other two, as the commune payloads already do. Until Batch 6 the
+        # national payload was the one monolingual payload on the site, so
+        # home2's national cards read English in French and Dutch.
+        entry["names"] = names.get(indicator_id, {"en": entry.get("name")})
+        entry["direction"] = display.get(indicator_id, {}).get("direction")
+        entry["decimals"] = display.get(indicator_id, {}).get("decimals")
     _write_json(out_dir / "national.json", {"geo_id": "be:country", "indicators": national})
 
     for nis, payload in communes.items():
@@ -852,6 +936,13 @@ def export_site_payloads(
             },
         )
 
+    national_layout = (
+        _national_sections(national_sections_config) if national_sections_config else {}
+    )
+    if national_layout:
+        _check_national_sections(national_layout, set(national))
+        _write_json(out_dir / "metadata" / "national_sections.json", national_layout)
+
     manifest = {
         "build_id": build_id,
         "git_commit": _git_commit(db_path.resolve().parents[0]),
@@ -910,6 +1001,7 @@ def main() -> None:
         args.validation_status,
         Path(args.aggregates) if args.aggregates else None,
         Path(args.percentiles) if args.percentiles else None,
+        national_sections_config=NATIONAL_SECTIONS_CONFIG,
     )
     print(
         f"Exported {counts['communes']} commune payloads, {counts['indicator_files']} "

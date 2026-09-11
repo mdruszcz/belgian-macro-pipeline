@@ -5,7 +5,6 @@ from pathlib import Path
 
 from src.site.routes import is_indexable, sitemap_routes
 
-
 REPO = Path(__file__).resolve().parents[1]
 PAGE = REPO / "home2.html"
 ASSETS = (
@@ -42,7 +41,12 @@ def test_home2_reuses_the_shared_map_and_has_page_scoped_seven_band_palettes():
     assert '<script src="assets/commune_map.js"></script>' in html
     assert "new MapUI.CommuneMap" in html
     assert "class CommuneMap" not in html
-    for palette_owner in (".home2 .hero-map", ".home2 .thumb:nth-child(1)", ".home2 .thumb:nth-child(2)", ".home2 .thumb:nth-child(3)"):
+    for palette_owner in (
+        ".home2 .hero-map",
+        ".home2 .thumb:nth-child(1)",
+        ".home2 .thumb:nth-child(2)",
+        ".home2 .thumb:nth-child(3)",
+    ):
         rule = re.search(re.escape(palette_owner) + r"\s*\{([^}]+)\}", html)
         assert rule, palette_owner
         assert all(f"--ramp-{band}:" in rule.group(1) for band in range(7))

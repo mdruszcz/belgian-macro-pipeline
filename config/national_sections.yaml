@@ -1,0 +1,96 @@
+# Section layout for the national (macroeconomics) page, macro.html -- Batch 6.
+#
+# THIS FILE EXISTS SO macro.html CONTAINS NO INDICATOR IDS, for the same reason
+# config/local_sections.yaml exists for the commune page: adding a series to
+# the page is config, never a code change (the 50% gate's "zero
+# indicator-specific frontend logic"). The exporter checks every id named here
+# against the national payload and refuses to publish a layout that names a
+# series nothing provides, so a card can never render as an empty box.
+#
+# Every label is trilingual (CLAUDE.md rule 7). Indicator NAMES are not here;
+# they travel with the payload, from the indicators table.
+
+# The headline cards, in this order. The design draws real GDP, population,
+# employment rate, inflation, fiscal balance and public debt; this pipeline
+# holds national series for two of those (GDP growth, inflation) and none for
+# the other four, so the row shows the six series that exist and `kpis_note`
+# says plainly what does not.
+kpis:
+  - GDP_QUARTERLY_YY
+  - GDP_ANNUAL_CY
+  - HICP
+  - UNEMPLOYMENT_RATE
+  - INDUSTRIAL_PROD
+  - EC_CONS_CONF_BE
+kpis_note:
+  en: Population, the employment rate, the fiscal balance and public debt have no national series in this pipeline yet; the cards show the six that exist.
+  fr: La population, le taux d’emploi, le solde budgétaire et la dette publique n’ont pas encore de série nationale dans ce pipeline ; les cartes montrent les six séries qui existent.
+  nl: Bevolking, werkgelegenheidsgraad, begrotingssaldo en overheidsschuld hebben in dit pipeline nog geen nationale reeks; de kaarten tonen de zes reeksen die er zijn.
+
+# The big chart: annual real GDP growth, as bars, every year on record.
+history:
+  series: GDP_ANNUAL_CY
+  chart: bar
+  label: {en: Real GDP growth, fr: Croissance du PIB réel, nl: Reële bbp-groei}
+  note:
+    en: Year-on-year change in volume, in percent, every year on record. A year of contraction is drawn in the accent colour rather than hidden.
+    fr: Variation annuelle en volume, en pourcentage, sur toute la période disponible. Une année de contraction est dessinée dans la couleur d’accent plutôt que masquée.
+    nl: Jaarlijkse volumeverandering, in procent, over de hele beschikbare periode. Een krimpjaar wordt in de accentkleur getekend in plaats van verborgen.
+
+# The "key indicators" list panel: latest value and period for each.
+key_list:
+  - EUROSTAT_GDP_Q_MEUR
+  - LABOUR_COST_BE
+  - BUSINESS_CONFIDENCE
+  - CONSUMER_CONFIDENCE
+  - PRIV_CONSUMPTION_CY
+  - GFCF_ENTERPRISES_CY
+
+# What makes up GDP growth: the seven expenditure-side contributions, in
+# percentage points, for the latest year they share. `whole` is the series
+# they add up to; the page prints both so a reader can see they agree.
+contributions:
+  label: {en: What drove growth, fr: Les moteurs de la croissance, nl: Wat de groei dreef}
+  note:
+    en: Contributions to real GDP growth in percentage points, latest year; they add up to the growth rate.
+    fr: Contributions à la croissance du PIB réel en points de pourcentage, dernière année ; leur somme est le taux de croissance.
+    nl: Bijdragen aan de reële bbp-groei in procentpunten, laatste jaar; samen vormen ze het groeicijfer.
+  whole: GDP_ANNUAL_CY
+  parts:
+    - PRIV_CONSUMPTION_CY
+    - GOV_CONSUMPTION_CY
+    - GFCF_DWELLINGS_CY
+    - GFCF_ENTERPRISES_CY
+    - GFCF_PUBLIC_CY
+    - CHG_STOCKS_CY
+    - NET_EXPORTS_CY
+
+# Sections the design draws that this pipeline cannot fill, built at their
+# designed size with the reason on the card. Each names a real gap, not a
+# style choice. `link` is an optional page the card points the reader to.
+unavailable:
+  - id: international
+    label: {en: International comparison, fr: Comparaison internationale, nl: Internationale vergelijking}
+    reason:
+      en: The five foreign GDP series (DE, EA, ES, FR, NL) are configured but hold no observations — the DBnomics fetch has timed out since Block H — and Poland is not configured.
+      fr: Les cinq séries de PIB étrangères (DE, EA, ES, FR, NL) sont configurées mais vides — la récupération DBnomics expire depuis le bloc H — et la Pologne n’est pas configurée.
+      nl: De vijf buitenlandse bbp-reeksen (DE, EA, ES, FR, NL) zijn geconfigureerd maar leeg — de DBnomics-ophaling loopt sinds blok H af — en Polen is niet geconfigureerd.
+  - id: public_finance
+    label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
+    reason:
+      en: No national series for state revenue, expenditure, balance or debt is in this pipeline. The design’s live counters are simulated; a simulation from nothing would be an invention, so the card says so instead.
+      fr: Aucune série nationale de recettes, dépenses, solde ou dette de l’État n’est dans ce pipeline. Les compteurs en direct de la maquette sont simulés ; une simulation sans base serait une invention, la carte le dit plutôt.
+      nl: Geen enkele nationale reeks over ontvangsten, uitgaven, saldo of schuld van de Staat zit in dit pipeline. De live tellers van het ontwerp zijn gesimuleerd; een simulatie uit het niets zou verzinsel zijn, dus zegt de kaart dat.
+  - id: economic_map
+    label: {en: Economic map, fr: Carte économique, nl: Economische kaart}
+    reason:
+      en: No GDP per inhabitant exists at commune level in this pipeline. The interactive map of every municipal indicator is one click away.
+      fr: Aucun PIB par habitant n’existe au niveau communal dans ce pipeline. La carte interactive de tous les indicateurs communaux est à un clic.
+      nl: Er bestaat in dit pipeline geen bbp per inwoner op gemeenteniveau. De interactieve kaart van elke gemeentelijke indicator is één klik verder.
+    link: map.html
+  - id: news
+    label: {en: Economic news, fr: Actualités économiques, nl: Economisch nieuws}
+    reason:
+      en: This pipeline holds no article store; nothing here is written by hand.
+      fr: Ce pipeline ne contient aucun fonds d’articles ; rien ici n’est rédigé à la main.
+      nl: Dit pipeline bevat geen artikelbestand; niets hier wordt met de hand geschreven.

@@ -80,9 +80,17 @@ MapUI.geometryToPath = function(geom, lonScale){
    thing on the page the reader did not choose. */
 MapUI.formatValue = function(num, unit, decimals, lang){
   if(num === null || num === undefined || isNaN(num)) return '\u2014';
-  const digits = (decimals === null || decimals === undefined)
-    ? (Math.abs(num) >= 1000 ? 0 : 2) : decimals;
-  const body = num.toLocaleString(lang || undefined, {maximumFractionDigits: digits});
+  const declared = !(decimals === null || decimals === undefined);
+  const digits = declared ? decimals : (Math.abs(num) >= 1000 ? 0 : 2);
+  /* A DECLARED number of decimals is how many the indicator is published to,
+     so it is a minimum as well as a maximum: GDP growth of exactly 1.0 %
+     belongs beside 0.5 % and 2.2 % as "1,0", not as "1". This is what
+     src/pages/resolve.py's _format_value has always done for the static
+     pages; the two mirrors disagreed until Batch 6. With no declared
+     decimals the old guess stands, and a trailing "0,00" would be noise. */
+  const body = num.toLocaleString(lang || undefined, declared
+    ? {minimumFractionDigits: digits, maximumFractionDigits: digits}
+    : {maximumFractionDigits: digits});
   const u = (unit || '').toLowerCase();
   if(u === 'eur') return '\u20ac' + body;
   if(u.startsWith('percent')) return body + '%';
