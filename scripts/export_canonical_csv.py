@@ -1,7 +1,6 @@
 """
-Export the canonical schema's latest observations (be:country, the 16
-in-scope Belgium-only indicators) to the same 8-column CSV shape
-dashboard.html already depends on:
+Export the canonical schema's latest country and EU-aggregate observations
+to the same 8-column CSV shape dashboard.html already depends on:
     indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at
 
 `status` is mapped back to the single-letter convention the frontend already
@@ -36,7 +35,8 @@ def export_canonical_csv(db_path: Path, out_path: Path) -> int:
         FROM observations o
         JOIN indicators i ON o.indicator_id = i.indicator_id
         JOIN sources s ON i.source_id = s.source_id
-        WHERE o.geo_id = 'be:country' AND o.is_latest = 1
+        JOIN geographies g ON o.geo_id = g.geo_id
+        WHERE g.level IN ('country', 'eu_aggregate') AND o.is_latest = 1
         ORDER BY o.indicator_id, o.period
         """).fetchall()
     conn.close()

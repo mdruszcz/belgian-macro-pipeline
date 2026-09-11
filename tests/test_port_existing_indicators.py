@@ -103,7 +103,7 @@ def migrated_db(tmp_path: Path) -> Path:
     return db_path
 
 
-def test_port_skips_non_belgium_indicators(monkeypatch, tmp_path, migrated_db):
+def test_port_includes_configured_international_gdp_indicators(monkeypatch, tmp_path, migrated_db):
     fake_sources = {
         "GDP_QUARTERLY_YY": {
             "name": "GDP",
@@ -113,7 +113,7 @@ def test_port_skips_non_belgium_indicators(monkeypatch, tmp_path, migrated_db):
             "source_agency": "NBB",
             "type": "nbb",
         },
-        "EUROSTAT_GDP_Q_MEUR_DE": {  # non-Belgium: must be skipped
+        "EUROSTAT_GDP_Q_MEUR_DE": {
             "name": "GDP DE",
             "url": "https://example.test/dbnomics",
             "frequency": "Q",
@@ -144,12 +144,21 @@ def test_port_skips_non_belgium_indicators(monkeypatch, tmp_path, migrated_db):
             {"period": "2024-Q1", "value": 1.5, "obs_status": "A"}
         ],
     )
+    monkeypatch.setattr(
+        port_mod.EurostatSource,
+        "fetch",
+        lambda self, url, *, cache_key, conn=None, unit="": [
+            {"period": "2024-Q1", "value": 100.0, "obs_status": "A"}
+        ],
+    )
 
     port_mod.port(migrated_db, run_date="2026-09-05")
 
     conn = sqlite3.connect(str(migrated_db))
-    codes = {r[0] for r in conn.execute("SELECT indicator_id FROM observations")}
-    assert codes == {"GDP_QUARTERLY_YY"}
+    rows = conn.execute(
+        "SELECT indicator_id, geo_id FROM observations ORDER BY indicator_id"
+    ).fetchall()
+    assert rows == [("EUROSTAT_GDP_Q_MEUR_DE", "de:country"), ("GDP_QUARTERLY_YY", "be:country")]
     conn.close()
 
 
@@ -221,4 +230,6 @@ def test_port_idempotent_same_day(monkeypatch, tmp_path, migrated_db):
     conn = sqlite3.connect(str(migrated_db))
     count = conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
     assert count == 1
+    latest = conn.execute("SELECT is_latest FROM observations").fetchone()[0]
+    assert latest == 1
     conn.close()
