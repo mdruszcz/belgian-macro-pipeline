@@ -1,0 +1,45 @@
+source_id: walstat
+name: WalStat open-data API (IWEPS)
+agency: IWEPS — Institut wallon de l'évaluation, de la prospective et de la statistique
+adapter: walstat
+base_url: https://opendata.iweps.be/api/data
+licence: >-
+  CC0 for the data, verified 2026-09-06 from IWEPS' own FAQ (maintainer-supplied, quoted in
+  docs/data_catalog.md "WalStat licence"): "Pour les données, nous appliquons le CC0 : la
+  personne qui ré-utilise les données est libre et responsable de ce qu'elle en fait
+  (croisements, interprétations, représentations…). L'IWEPS ne peut, en aucun cas être tenu
+  responsable d'une mauvaise utilisation secondaire des données publiées." The open-data page
+  repeats it: "Les données et le catalogue sont distribués sous Licence CC0". Two things that
+  are NOT covered: WalStat's MAPS are CC BY-SA (this pipeline reuses none), and IWEPS disclaims
+  any responsibility for secondary use -- every ratio BelPulse derives from these figures is
+  BelPulse's own claim, not IWEPS'. The underlying accounts are compiled by the SPW Intérieur et
+  Action sociale, Département des Finances locales; WalStat republishes them per inhabitant.
+catalog_ref: docs/data_catalog.md -- WalStat rows 8, 9 (Selected 10, row 5)
+cadence: annual accounts, published by IWEPS around March (catalogue refreshed twice yearly); fetched daily
+# fetch_window_days is deliberately absent until the daily workflow runs
+# sync_walstat.py: with a window and no fetch_runs row the fetch_silence rule
+# warns on every build forever. Set it to 14 in the same change that adds
+# the workflow step (docs/implementation/batches/batch-O-walstat.md).
+is_active: true
+homepage: https://walstat.iweps.be/
+label:
+  en: IWEPS (WalStat)
+  fr: IWEPS (WalStat)
+  nl: IWEPS (WalStat)
+licence_note:
+  en: >-
+    Municipal accounts compiled by the Walloon public service (SPW, Département des Finances
+    locales) and republished per inhabitant by IWEPS on WalStat under CC0 -- no attribution
+    required, reused freely. Walloon communes only. IWEPS accepts no responsibility for how the
+    figures are reused; every ratio computed here is BelPulse's own.
+  fr: >-
+    Comptes communaux établis par le Service public de Wallonie (SPW, Département des Finances
+    locales) et republiés par habitant par l'IWEPS sur WalStat sous licence CC0 — sans
+    obligation de mention, librement réutilisables. Communes wallonnes uniquement. L'IWEPS
+    décline toute responsabilité quant à la réutilisation ; chaque ratio calculé ici est celui
+    de BelPulse.
+  nl: >-
+    Gemeenterekeningen opgesteld door de Waalse overheidsdienst (SPW, Département des Finances
+    locales) en per inwoner heruitgegeven door het IWEPS op WalStat onder CC0 — geen
+    bronvermelding vereist, vrij herbruikbaar. Alleen Waalse gemeenten. Het IWEPS aanvaardt geen
+    aansprakelijkheid voor het hergebruik; elke hier berekende ratio is die van BelPulse.

@@ -1,0 +1,17 @@
+id: MUN_DEBT_TO_REVENUE
+name:
+  en: Municipal debt as a share of annual revenue
+  fr: Dette communale en pourcentage des recettes annuelles
+  nl: Gemeenteschuld als percentage van de jaarlijkse ontvangsten
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+decimals: 1
+description:
+  en: >
+    Total debt over total revenue of the same year, both per inhabitant for the same commune, so the population denominators cancel. 100 means one year of revenue would repay the debt. The roadmap's 'debt / revenue'.
+    Source figures: WalStat (IWEPS), CC0; Walloon communes only, 2013 onward.
+derived:
+  function: share_of_total
+  inputs: [MUN_DEBT_TOTAL_PER_CAPITA, MUN_REVENUE_TOTAL_PER_CAPITA]

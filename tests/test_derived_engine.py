@@ -243,6 +243,13 @@ def test_the_committed_derived_configs_load_and_order():
         "SHARE_FOREIGN_NATIONALS",
         "SHARE_SINGLE_PARENT_FAMILIES",
         "SHARE_SINGLE_PERSON_HOUSEHOLDS",
+        # Block O: WalStat municipal finance, per-inhabitant series in, four
+        # ratios out (the other three the roadmap names need series the
+        # source does not publish -- docs/features/walstat_adapter.md).
+        "MUN_DEBT_TO_REVENUE",
+        "MUN_EXPENDITURE_GROWTH_1Y",
+        "MUN_INVESTMENT_SHARE_OF_EXPENDITURE",
+        "MUN_REVENUE_GROWTH_1Y",
         "UNEMPLOYMENT_RATE_COM",
         # AVG_HOUSE_PRICE retired: Statbel's newer real-estate file gives only
         # a median, which cannot be derived from stored components the way a

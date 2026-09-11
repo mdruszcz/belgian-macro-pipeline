@@ -1,0 +1,17 @@
+id: MUN_INVESTMENT_SHARE_OF_EXPENDITURE
+name:
+  en: Extraordinary (investment) share of municipal expenditure
+  fr: Part des dépenses extraordinaires (investissement) dans les dépenses communales
+  nl: Aandeel buitengewone (investerings)uitgaven in de gemeentelijke uitgaven
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    Extraordinary expenditure as a share of total expenditure, both per inhabitant for the same commune and year, so the denominators cancel and the share is the same as on totals. The roadmap's 'investment / expenditure', with WalStat's extraordinary expenditure standing in for investment, which the source does not publish separately.
+    Source figures: WalStat (IWEPS), CC0; Walloon communes only, 2013 onward.
+derived:
+  function: share_of_total
+  inputs: [MUN_EXPENDITURE_EXTRAORDINARY_PER_CAPITA, MUN_EXPENDITURE_TOTAL_PER_CAPITA]

@@ -127,6 +127,7 @@ fetch:
 	$(PYTHON) scripts/sync_to_canonical.py --db $(DB)
 	$(PYTHON) scripts/sync_statbel.py --db $(DB)
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
+	$(PYTHON) scripts/sync_walstat.py --db $(DB)
 
 ## clean: remove generated artifacts that are safe to regenerate. Deliberately
 ## does NOT touch data/*.csv or the database -- those are committed stores, and

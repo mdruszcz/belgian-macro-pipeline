@@ -188,6 +188,11 @@ def _format_value(value: float, unit: str | None, lang: str = "en") -> str:
 
     if unit == "eur":
         return "€" + render(value, 0)
+    if unit == "eur_per_inhabitant":
+        # A rate, written as one, so a per-head figure is never read as a
+        # total. Mirrors MapUI.formatValue and src/pages/resolve.py; one
+        # decimal is what every eur_per_inhabitant config declares.
+        return "€" + render(value, 1) + "\u202f/\u202fhab."
     if unit.startswith("percent"):
         return render(value, 2).replace(f"{decimal}00", "") + "%"
     if abs(value - round(value)) < 1e-9:
