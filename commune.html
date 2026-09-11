@@ -161,6 +161,7 @@
   .loczoom button{width:22px; height:22px; border:1px solid var(--bp-border); border-radius:5px; background:var(--bp-surface); color:var(--bp-text); font:inherit; font-size:13px; line-height:1; cursor:pointer}
   /* The neighbours map: the commune among the communes it borders, the rest
      of the country faded by the component's own filtered-out rule. */
+  .nbmap{display:flex; flex-direction:column}
   .nbmap .mapbox{position:relative; min-height:230px}
   .nbmap svg.map text{font-family:var(--bp-font-ui); font-weight:600; fill:var(--bp-text); paint-order:stroke; stroke:var(--bp-surface); stroke-linejoin:round; pointer-events:none}
   .nblist{margin:0; padding:0; list-style:none}
@@ -184,7 +185,11 @@
   .tiles{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
   .tile{display:flex; gap:10px; align-items:flex-start; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:10px}
   .ficon{width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none}
-  .tile .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3}
+  /* Two lines, then an ellipsis; the full name is in the title attribute.
+     Indicator names are honest and long ("Average net taxable income per
+     return"), and a tile that grows to four lines of label pushes its own
+     figure out of the eye's path. */
+  .tile .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
   .tile .val{font-size:1rem; font-weight:var(--bp-weight-bold); line-height:1.25}
   .tile .per{font-size:10px; color:var(--bp-text-faint)}
 
@@ -206,16 +211,23 @@
   .sechead a:hover{text-decoration:underline}
   .stack{display:flex; flex-direction:column; gap:var(--bp-space-8)}
 
-  .keyrow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-4)}
-  .keycard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4)}
-  .keycard .top{display:flex; gap:9px; align-items:flex-start; margin-bottom:6px}
-  .keycard .lbl{font-size:11px; color:var(--bp-text-muted); line-height:1.3}
-  .keycard .figure{display:flex; align-items:baseline; gap:8px}
-  .keycard .figure b{font-size:1.3rem; font-weight:var(--bp-weight-bold)}
-  .keycard .per{font-size:10px; color:var(--bp-text-faint)}
-  .keycard .chartslot{margin-top:6px; min-width:0}
+  /* Six across, the model's own count, at the sizes home2's sparkline cards
+     use: title, a small chart, then the figure bottom-right with its period.
+     Three across on a tablet, two on a phone. */
+  .keyrow{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .keycard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-3); display:flex; flex-direction:column; min-width:0}
+  .keycard .top{display:flex; gap:7px; align-items:flex-start; margin-bottom:4px}
+  .keycard .top .ficon{width:24px; height:24px; border-radius:7px}
+  .keycard .top .ficon svg{width:12px; height:12px}
+  .keycard .lbl{font-size:10px; font-weight:var(--bp-weight-semibold); color:var(--bp-text); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:26px}
+  .keycard .chartslot{min-width:0; margin-top:2px}
   .keycard canvas{display:block; width:100%}
-  .nohist{font-size:10px; color:var(--bp-text-faint); padding:14px 0 4px}
+  .keycard .figure{display:flex; align-items:baseline; justify-content:flex-end; gap:6px; margin-top:auto; padding-top:6px}
+  .keycard .figure b{font-size:1.1rem; font-weight:var(--bp-weight-bold); font-variant-numeric:tabular-nums}
+  .keycard .per{font-size:10px; color:var(--bp-text-faint)}
+  .nohist{font-size:10px; color:var(--bp-text-faint); line-height:1.35; height:54px; display:flex; align-items:center}
+  @media (max-width:1024px){ .keyrow{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media (max-width:640px){ .keyrow{grid-template-columns:repeat(2,minmax(0,1fr))} }
 
   .panelrow{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .panel{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5); min-width:0}
@@ -226,6 +238,21 @@
   .legendrow .dot{width:9px; height:9px; border-radius:3px; flex:none}
 
   .fin4{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--bp-space-4)}
+  /* A finance tile with nothing behind it says so in the tile, the way home2's
+     do -- a labelled dash read as a broken render. */
+  .ftile{display:flex; align-items:center; gap:var(--bp-space-3); background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-3) var(--bp-space-4); min-width:0}
+  .ftile .lbl{font-size:11px; font-weight:var(--bp-weight-semibold); line-height:1.3}
+  .ftile .why{font-size:10px; color:var(--bp-text-faint); margin-top:2px}
+  /* The activity breakdown: label, bar, share -- the model's own three-column
+     row, in HTML rather than on a canvas whose label gutter was fixed at
+     120px and crushed every French indicator name. */
+  .barlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .barlist li{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:11px}
+  .barlist .lbl{color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .barlist .bar{height:9px; border-radius:5px; background:var(--bp-surface-alt); overflow:hidden}
+  .barlist .bar i{display:block; height:100%; border-radius:5px}
+  .barlist .pct{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
+  .barlist .abs{font-size:10px; color:var(--bp-text-faint); grid-column:2 / span 2; margin-top:-5px}
   .maprow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .maprow .mapbox{position:relative; min-height:230px}
   .maprow .legend{overflow-x:auto; margin-top:8px}
@@ -419,7 +446,10 @@
       <div class="stack">
 
         <section>
-          <h2 class="sec" data-t="cpKeyFigures">Key figures and recent trends</h2>
+          <div class="sechead">
+            <h2 data-t="cpKeyFigures">Key figures and recent trends</h2>
+            <a href="communes.html" data-t="cpMoreIndicators">See more indicators →</a>
+          </div>
           <div class="keyrow" id="keyRow"></div>
         </section>
 
@@ -450,7 +480,10 @@
         </section>
 
         <section>
-          <h2 class="sec" data-t="cpMaps">Commune maps</h2>
+          <div class="sechead">
+            <h2 data-t="cpMaps">Commune maps</h2>
+            <a href="map.html" data-t="homeAllMaps">See the full-page map</a>
+          </div>
           <div class="maprow">
             <div class="panel bp-state" id="mapCard" data-state="loading">
               <h3 id="mapTitle">—</h3>
@@ -806,6 +839,7 @@
       var box = document.createElement('div');
       box.innerHTML = '<div class="lbl"></div><div class="val"></div><div class="per"></div>';
       box.querySelector('.lbl').textContent = nameOf(code);
+      box.querySelector('.lbl').title = nameOf(code);
       box.querySelector('.val').textContent = latest ? fmt(latest.value, meta) : '—';
       box.querySelector('.per').textContent = latest ? latest.period : T('cpNoHistory');
       el.appendChild(box);
@@ -830,15 +864,18 @@
 
       var card = document.createElement('div');
       card.className = 'keycard';
+      // Title, chart, then the figure bottom-right -- home2's card order,
+      // which the model draws too.
       card.innerHTML =
         '<div class="top"></div>' +
-        '<div class="figure"><b></b><span class="per"></span></div>' +
-        '<div class="chartslot"></div>';
+        '<div class="chartslot"></div>' +
+        '<div class="figure"><b></b><span class="per"></span></div>';
       var top = card.querySelector('.top');
       top.appendChild(iconSquare(i));
       var lbl = document.createElement('div');
       lbl.className = 'lbl';
       lbl.textContent = nameOf(code);
+      lbl.title = nameOf(code);
       top.appendChild(lbl);
       card.querySelector('.figure b').textContent = latest ? fmt(latest.value, meta) : '—';
       card.querySelector('.figure .per').textContent = latest ? latest.period : '';
@@ -860,7 +897,7 @@
     // grid is still growing bakes in the wrong width (Batch 3's own lesson).
     draws.forEach(function(d){
       BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: 74, compact: true});
+        {locale: LANG, height: 54, compact: true});
     });
   }
 
@@ -1042,23 +1079,24 @@
         });
         BPCharts.drawDonut(wrap.querySelector('canvas'), items, {locale: LANG, height: 160});
       } else {
-        var slot = document.createElement('div');
-        slot.style.minWidth = '0';
-        slot.innerHTML = '<canvas></canvas>';
-        body.appendChild(slot);
+        // Label, bar, share: the model's own row. HTML rather than the canvas
+        // ranking, whose 120px label gutter crushed every French name.
+        var list = document.createElement('ul');
+        list.className = 'barlist';
         items.sort(function(a, b){ return b.value - a.value; });
-        BPCharts.drawRanking(slot.querySelector('canvas'), items.map(function(d){
-          return {label: d.label, value: d.value};
-        }), {locale: LANG});
-        var note = document.createElement('div');
-        note.className = 'legendrow';
+        var max = items[0].value || 1;
         items.forEach(function(d){
-          var it = document.createElement('span');
-          it.className = 'it';
-          it.textContent = d.label + ' ' + (total ? MapUI.formatValue(d.value / total * 100, 'percent', 1, LANG) : '');
-          note.appendChild(it);
+          var li = document.createElement('li');
+          li.innerHTML = '<span class="lbl"></span><span class="bar"><i></i></span><span class="pct"></span><span class="abs"></span>';
+          li.querySelector('.lbl').textContent = d.label;
+          li.querySelector('.lbl').title = d.label;
+          li.querySelector('.bar i').style.width = (d.value / max * 100).toFixed(1) + '%';
+          li.querySelector('.bar i').style.background = 'var(--bp-chart-' + ((d.colourIndex % 8) + 1) + ')';
+          li.querySelector('.pct').textContent = total ? MapUI.formatValue(d.value / total * 100, 'percent', 1, LANG) : '—';
+          li.querySelector('.abs').textContent = fmt(d.value, d.meta);
+          list.appendChild(li);
         });
-        body.appendChild(note);
+        body.appendChild(list);
       }
       panel.dataset.state = 'ready';
     });
@@ -1078,15 +1116,15 @@
     host.innerHTML = '';
     FINANCE_LABELS.forEach(function(key, i){
       var tile = document.createElement('div');
-      tile.className = 'keycard';
-      tile.innerHTML =
-        '<div class="top"></div>' +
-        '<div class="figure"><b style="color:var(--bp-text-faint)">—</b></div>';
-      tile.querySelector('.top').appendChild(iconSquare(i + 2));
-      var lbl = document.createElement('div');
-      lbl.className = 'lbl';
-      lbl.textContent = T(key);
-      tile.querySelector('.top').appendChild(lbl);
+      tile.className = 'ftile';
+      tile.appendChild(iconSquare(i + 2));
+      var box = document.createElement('div');
+      box.innerHTML = '<div class="lbl"></div><div class="why"></div>';
+      box.querySelector('.lbl').textContent = T(key);
+      // The same sentence home2 puts on its own finance tiles, so the two
+      // pages say the same thing about the same gap.
+      box.querySelector('.why').textContent = T('homeFinanceUnavailable');
+      tile.appendChild(box);
       host.appendChild(tile);
     });
     var note = document.getElementById('finNote');
