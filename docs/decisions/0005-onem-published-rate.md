@@ -115,9 +115,15 @@ shown "Namur 6.74 %, down 3.9 points" concludes something false about Namur.
   out of the committed `data/communes_history.csv` (already 35 MB) while still reaching the
   gitignored `--all-periods` file that feeds the payloads, so the commune page has the whole stored
   series. Neither filter changes any output that shipped before: no municipal indicator was monthly.
-- **The committed database is over the size rule and this change made it worse**, 34 MB to 42.6 MB.
-  That is flagged for the maintainer, not resolved here: the structural fix is to stop committing a
-  SQLite file that `daily_fetch.yml` rewrites daily, which is a separate decision.
+- **The committed database is over the size rule and this change made it worse.** Flagged for the
+  maintainer, not resolved here. The fix is *not* to stop committing it: `daily_fetch.yml` appends
+  to that file rather than rebuilding it, and it is the only store holding the automated sources and
+  every superseded vintage. Measured with `dbstat`, **62 % of the 37.9 MB is index** — 23.2 MB
+  across the primary key's own B-tree and five secondary indexes. An index holds no information and
+  the five rebuild from the data in 0.68 s, so leaving them out of the commit gives **21.96 MB**,
+  inside rule 12's 25 MB ceiling for the first time since WalStat landed. (Making `observations`
+  `WITHOUT ROWID` to absorb the PK B-tree was measured too and is *worse* — 51.14 MB, because every
+  secondary index then stores the four-column TEXT primary key as its row locator.)
 - Geography resolution is against **current** municipalities, not period-accurate: ONEM restates all
   124 periods on today's 565-commune map, and 31 of those codes did not exist in January 2017. This
   is the same pinned-vintage treatment `scripts/sync_onem.py` already applies to the same

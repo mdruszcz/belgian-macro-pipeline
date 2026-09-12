@@ -26,7 +26,8 @@ Two indicators, both `source_id: onem`, loaded by `scripts/sync_onem_rates.py`:
 
 - **`UNEMPLOYMENT_RATE_INSURED`** (annual) — the level. Full history from 2017. The running year is
   `provisional` because ONEM's annual row averages only the months published so far.
-- **`UNEMPLOYMENT_RATE_INSURED_MONTHLY`** (monthly) — the shape. The last 36 months.
+- **`UNEMPLOYMENT_RATE_INSURED_MONTHLY`** (monthly) — the shape. The last 18 months, a file-size
+  limit and not a data one; see "Known costs" below.
 
 Both are the same published quotient:
 
@@ -132,11 +133,39 @@ both ways against the real file.
 
 ## Known costs, recorded rather than hidden
 
-- **The committed database grew from 34 MB to 42.6 MB.** It was already over the 25 MB ceiling
-  CLAUDE.md rule 12 sets. Loading all 114 monthly periods would have taken it to 63 MB, so the
-  monthly window is 36 months; 60 months would be 48.9 MB. Widening it is one constant in
-  `scripts/sync_onem_rates.py`. **The structural fix is to stop committing a SQLite file that
-  `daily_fetch.yml` rewrites daily, which is a separate decision for the maintainer.**
+- **The committed database is 37.9 MB against `daily_fetch.yml`'s own 39.06 MB guard**, and was
+  already past CLAUDE.md rule 12's 25 MB ceiling before this change. That guard, not data quality,
+  is why the monthly window is 18 months: 24 months measures 39.45 MB and fails it.
+
+  **The fix is not to stop committing the database.** `daily_fetch.yml` checks it out, applies
+  pending migrations and *appends*; it never rebuilds it. It is the only store that holds the
+  automated sources — ONEM, WalStat, Statbel, the macro series — and superseded vintages exist
+  nowhere else at all. Feeding it is right; dropping it would lose data.
+
+  What is actually big is **index, 62 % of the file**, measured with `dbstat`:
+
+  | object | size | share |
+  |---|---|---|
+  | `observations` (the data) | 13.60 MB | 35.9 % |
+  | the primary key's own B-tree | 7.31 MB | 19.3 % |
+  | `idx_obs_series` | 4.91 MB | 13.0 % |
+  | `idx_obs_geo_indicator` | 4.10 MB | 10.8 % |
+  | `idx_obs_indicator_period` | 3.48 MB | 9.2 % |
+  | `idx_obs_geo_period` | 2.55 MB | 6.7 % |
+  | `idx_obs_run` | 0.88 MB | 2.3 % |
+  | everything else | 1.05 MB | 2.8 % |
+
+  An index holds no information. The five secondary ones rebuild from the data in **0.68 s**
+  (measured on 86k rows) and their DDL is already `CREATE INDEX IF NOT EXISTS` in
+  `migrations/002_indexes.sql`. Not committing them gives **21.96 MB** — inside rule 12's ceiling
+  for the first time since WalStat landed — and **17.1 MB of headroom** instead of 1.18 MB, which
+  is about five more years of monthly detail.
+
+  One obvious-looking idea was measured and **rejected**: making `observations` `WITHOUT ROWID` to
+  fold that 7.31 MB primary-key B-tree into the table makes the file **bigger, 51.14 MB**, because
+  a `WITHOUT ROWID` table's secondary indexes each store the whole primary key — four TEXT columns
+  here — as their row locator. It only pays combined with dropping the secondary indexes
+  (14.38 MB), which is option one plus a schema migration for no extra gain.
 - The monthly series is kept out of the committed `data/communes_history.csv` (already 35 MB) but
   does reach the gitignored `--all-periods` file that feeds the payloads, so the commune page has
   the whole stored series.

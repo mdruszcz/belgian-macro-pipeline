@@ -154,9 +154,13 @@ INDICATOR_IDS = [INDICATOR_ANNUAL, INDICATOR_MONTHLY]
 # February 2026, and a full year-on-year comparison is still possible.
 #
 # WIDENING THIS NEEDS THE FILE-SIZE PROBLEM SOLVED FIRST, not just a bigger
-# number here: at 24 months the daily run breaks. The real fix is to stop
-# committing a SQLite file that the workflow rewrites every day, which is the
-# maintainer's decision and is flagged in
+# number here: at 24 months the daily run breaks. The fix is NOT to stop
+# committing the database -- daily_fetch.yml appends to it rather than
+# rebuilding it, and it is the only store that holds the automated sources and
+# their superseded vintages. It is that 62 % of the file is INDEX: 23.2 MB of
+# 37.9 MB, measured with dbstat. The five secondary indexes hold no
+# information and rebuild from the data in 0.68 s, so not committing them
+# gives 21.96 MB and 17.1 MB of headroom. See
 # docs/features/onem_unemployment_rate.md.
 #
 # Counted from the LATEST MONTH IN THE FILE, never from today's date, so the
