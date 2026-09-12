@@ -813,10 +813,7 @@ function _drawContrib(yearData) {
 // ═══════════════════════════════════════════════════════
 
 const INTL_SERIES = [
-  {code:'EUROSTAT_GDP_Q_MEUR_EA', label:'Euro Area', color:'#dc2626', width:2.5},
   {code:'EUROSTAT_GDP_Q_MEUR',    label:'BE',        color:'_theme_', width:3},
-  {code:'EUROSTAT_GDP_Q_MEUR_DE', label:'DE',        color:'#84cc16', width:2},
-  {code:'EUROSTAT_GDP_Q_MEUR_ES', label:'ES',        color:'#3b82f6', width:2},
   {code:'_COMPOSITE_DEFRNL',      label:'DE/FR/NL',  color:'#f59e0b', width:2, composite:true},
 ];
 
@@ -924,7 +921,7 @@ function _drawIntl() {
   });
 
   // Draw lines — order matters (thicker BE on top)
-  const drawOrder = [3, 4, 2, 0, 1]; // ES, composite, DE, EA, BE
+  const drawOrder = [1, 0]; // DE/FR/NL composite, then BE
   drawOrder.forEach(si => {
     const s = INTL_SERIES[si];
     const src = s.composite ? DATA['_COMPOSITE_DEFRNL'] : DATA[s.code];

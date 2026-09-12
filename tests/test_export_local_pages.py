@@ -514,6 +514,10 @@ def test_numbers_are_written_the_way_each_language_writes_them():
     assert elp._format_value(565615, "count", "en") == "565,615"
     assert elp._format_value(565615, "count", "fr") == "565 615"
     assert elp._format_value(565615, "count", "nl") == "565.615"
+    # Audit P2-1: the third formatter on the site, mirrored with the other two.
+    assert elp._format_value(2319.7, "eur_per_inhabitant", "en") == "€2,319.7\u202f/\u202fhab."
+    assert elp._format_value(2319.7, "eur_per_inhabitant", "fr") == "€2\u202f319,7\u202f/\u202fhab."
+    assert elp._format_value(2319.7, "eur_per_inhabitant", "nl") == "€2.319,7\u202f/\u202fhab."
     assert elp._format_value(11.62, "percent", "fr") == "11,62%"
     assert elp._format_value(100.0, "percent", "nl") == "100%"
 

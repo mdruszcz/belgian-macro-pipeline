@@ -1,0 +1,26 @@
+id: MUN_DEBT_TOTAL_PER_CAPITA
+name:
+  en: Municipal debt per inhabitant (total)
+  fr: Dette communale par habitant (globale)
+  nl: Gemeenteschuld per inwoner (totaal)
+unit: eur_per_inhabitant
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 730
+description:
+  en: >
+    Long-term plus short-term debt. lower_is_better as the roadmap's own reading of municipal debt, while noting that debt financing investment is not in itself a deficiency.
+    Source: WalStat (IWEPS), series 811506_0, theme "Pouvoirs locaux", republishing the
+    municipal accounts compiled by the SPW Intérieur et Action sociale, Département des
+    Finances locales (with the Communauté germanophone's DG Stat for its nine communes).
+    Walloon communes only, accounts 2013 onward; the 2024 accounts were published in March
+    2026, fifteen months after the year they close, hence a two-year max_age_days. EUROS PER INHABITANT AS PUBLISHED -- WalStat gives
+    no total, so none is derived here, and the figure cannot be summed or averaged to a
+    province or region (is_additive false, aggregation_method not_applicable, per
+    docs/decisions/0003). Outstanding municipal debt at the end of the accounting year, per inhabitant. Every row is a closed account and carries status
+    final; WalStat publishes no provisional marker.
+fetch:
+  query: /json/811506_0/com+period=all
+display: null

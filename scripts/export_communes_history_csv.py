@@ -28,6 +28,13 @@ here is fed the UNRESTRICTED observation set (every historical geo_id the
 population CSV carries), and only the final OUTPUT rows are filtered down to
 current communes -- the same two-stage shape as sync_population.py resolving
 historical NIS codes and export_communes_csv.py display only today's set.
+
+By default only the most recent 10 years are WRITTEN, for the same reason:
+this file is the one that gets committed, and its every-name-every-row shape
+makes old years expensive to keep around forever. --all-periods (or
+all_periods=True) always computes on the FULL series first regardless -- the
+trim only ever removes which rows make it to the file, never what a derived
+indicator is computed from.
 """
 
 import argparse
@@ -105,6 +112,8 @@ def export_communes_history_csv(
     out_path: Path,
     extra_observations: tuple[Path, ...] = (),
     derived_dir: Path = DEFAULT_DERIVED_DIR,
+    all_periods: bool = False,
+    recent_years: int = 10,
 ) -> int:
     conn = sqlite3.connect(str(db_path))
     communes = conn.execute(
@@ -154,6 +163,31 @@ def export_communes_history_csv(
 
     obs.sort(key=lambda r: (r[0], r[1], r[4]))
     conn.close()
+
+    # THE SIZE TRIPWIRE, FIXED AT THE SOURCE RATHER THAN RAISED AGAIN.
+    # ONEM (2026-09-06) and WalStat (2026-09-11) each pushed this file into
+    # the workflows' 40 MB commit guard, and each time the guard was simply
+    # raised -- a stopgap docs/steps kept flagging as unfixed. The guard was
+    # never wrong: this file repeats five names, a region, a province and an
+    # arrondissement on every row, back to 2005, for a download link nothing
+    # else on the site depends on (communes.html reads communes_table.json;
+    # only commune.html's "download the data" link points here).
+    #
+    # So by default only the most recent `recent_years` calendar years are
+    # WRITTEN -- applied here, after every row above is already computed on
+    # the FULL history, never before. A 10-year CAGR for 2026 still needs
+    # 2016's value as an INPUT even though 2016 itself falls outside a
+    # 10-year output window; trimming the observation set instead of the
+    # output would have silently emptied exactly the indicators built to
+    # look back the furthest. `--all-periods` (or `all_periods=True`) is the
+    # one-flag full history back -- for export_communes_table_json.py and
+    # export_site_payloads.py, whose own contract is the full range
+    # (docs/features/site_payloads.md: "communes/{nis}.json ... full
+    # history"), and for a researcher who wants everything back to 2005.
+    if not all_periods and obs:
+        newest_year = max(int(row[4][:4]) for row in obs)
+        cutoff = newest_year - recent_years + 1
+        obs = [row for row in obs if int(row[4][:4]) >= cutoff]
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", newline="", encoding="utf-8") as f:
@@ -216,14 +250,31 @@ def main() -> None:
         help="Manual-only committed observations CSV to merge in (repeatable).",
     )
     ap.add_argument("--derived-dir", type=Path, default=DEFAULT_DERIVED_DIR)
+    ap.add_argument(
+        "--all-periods",
+        action="store_true",
+        help="Write every year back to 2005 instead of the last --recent-years. "
+        "Needed by export_communes_table_json.py and export_site_payloads.py, "
+        "whose own contract is the full history -- never pass this for the "
+        "copy that gets committed to data/communes_history.csv.",
+    )
+    ap.add_argument(
+        "--recent-years",
+        type=int,
+        default=10,
+        help="Years of history to keep by default (ignored with --all-periods).",
+    )
     args = ap.parse_args()
     n = export_communes_history_csv(
         Path(args.db),
         Path(args.out),
         tuple(Path(p) for p in args.extra_observations),
         args.derived_dir,
+        all_periods=args.all_periods,
+        recent_years=args.recent_years,
     )
-    print(f"Exported {n} rows to {args.out}")
+    scope = "all periods" if args.all_periods else f"last {args.recent_years} years"
+    print(f"Exported {n} rows ({scope}) to {args.out}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,19 @@
+id: MUN_REVENUE_GROWTH_1Y
+name:
+  en: Ordinary municipal revenue, change over one year
+  fr: Recettes ordinaires communales, évolution sur un an
+  nl: Gewone gemeentelijke ontvangsten, verandering over een jaar
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    Year-on-year change in ordinary revenue per inhabitant. Per-inhabitant on both sides, so population growth is netted out: this is the change in what the commune raises per resident, not in its budget size. Contextual -- rising revenue can be a growing tax base or a rising tax rate, and the figure does not say which.
+    Source figures: WalStat (IWEPS), CC0; Walloon communes only, 2013 onward.
+derived:
+  function: growth_rate
+  inputs: [MUN_REVENUE_ORDINARY_PER_CAPITA]
+  args:
+    years: 1

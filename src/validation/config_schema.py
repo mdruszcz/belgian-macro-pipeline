@@ -72,7 +72,17 @@ def load_and_validate_derived(derived_dir: Path, known_indicator_ids: set[str]) 
             continue
         derived[data["id"]] = data
 
-    resolvable = known_indicator_ids | set(derived)
+    # An input may also be a CONFIGURED source indicator whose data has not
+    # reached this store yet: a new source's ratios are checked in beside its
+    # adapter, and the daily workflow exports from the committed database
+    # BEFORE that day's sync loads the rows (found by Batch O's audit, P0-1 --
+    # the four municipal-finance ratios stopped every export on a database
+    # without WalStat rows). Such a config is DEFERRED: left out of the result
+    # so the engine, which rightly refuses to compute a column that would be
+    # null for every row, never sees it. A typo still fails here, because it
+    # resolves nowhere -- not in the store, not in a config, not derived.
+    configured = _configured_indicator_ids(derived_dir.parent)
+    resolvable = known_indicator_ids | configured | set(derived)
     for ind_id, cfg in sorted(derived.items()):
         for dep in cfg["derived"]["inputs"]:
             if dep not in resolvable:
@@ -83,7 +93,38 @@ def load_and_validate_derived(derived_dir: Path, known_indicator_ids: set[str]) 
 
     if errors:
         raise ConfigValidationError("\n".join(errors))
-    return derived
+    return _computable(derived, known_indicator_ids)
+
+
+def _computable(derived: dict[str, dict], known_indicator_ids: set[str]) -> dict[str, dict]:
+    """The derived configs whose inputs are all in the store, or derived from
+    it -- iterated to a fixed point so a ratio of a deferred ratio is deferred
+    too. Order is preserved."""
+    available = set(known_indicator_ids)
+    kept: set[str] = set()
+    changed = True
+    while changed:
+        changed = False
+        for ind_id, cfg in derived.items():
+            if ind_id in kept:
+                continue
+            if all(dep in available for dep in cfg["derived"]["inputs"]):
+                kept.add(ind_id)
+                available.add(ind_id)
+                changed = True
+    return {ind_id: cfg for ind_id, cfg in derived.items() if ind_id in kept}
+
+
+def _configured_indicator_ids(indicators_dir: Path) -> set[str]:
+    """The `id` of every source-indicator config beside the derived ones."""
+    ids: set[str] = set()
+    if not indicators_dir.is_dir():
+        return ids
+    for path in sorted(indicators_dir.glob("*.yaml")):
+        data = yaml.safe_load(path.read_text())
+        if isinstance(data, dict) and isinstance(data.get("id"), str):
+            ids.add(data["id"])
+    return ids
 
 
 def load_and_validate_all(indicators_dir: Path, sources_dir: Path) -> tuple[dict, dict]:

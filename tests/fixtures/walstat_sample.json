@@ -1,0 +1,1532 @@
+{
+ "811506_0": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "2147.2"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "2290.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "2399.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "2386.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "2350.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "2469.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "2723.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "2659.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "2757.9"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "3061.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "3077.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "2965.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "2632.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "3001.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "3102.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "3170.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "3167.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "3674.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "3776.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "4195.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "4762.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "5459.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "5561.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "6239.3"
+  }
+ ],
+ "811500_1": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "1482.2"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "1575.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "1479.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "1655.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "1642.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "1677.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "1762.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "1857.9"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "1863.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "2093.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "2411.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "2319.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "2161.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "2246.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "2296.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "2415.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "2396.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "2392.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "2369.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "2361.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "2344.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "2562.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "2973.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "3154.5"
+  }
+ ],
+ "811501_1": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "1438.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "1566.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "1495.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "1608.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "1585.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "1614.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "1635.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "1683.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "1758.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "1979.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "2296.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "2167.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "1869.4"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "1943.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "1895.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "2054.4"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "2099.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "2088.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "2139.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "2231.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "2209.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "2308.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "2675.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "2735.0"
+  }
+ ],
+ "811501_0": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "1722.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "1920.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "2045.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "1949.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "2018.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "2125.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "2315.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "2264.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "2295.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "2717.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "3030.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "2733.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "2372.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "2504.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "2277.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "2506.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "2462.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "2505.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "2876.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "2837.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "3075.4"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "3296.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "4127.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "3713.3"
+  }
+ ],
+ "811501_2": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "283.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "354.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "549.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "340.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "432.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "511.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "680.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "581.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "537.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "738.2"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "733.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "566.4"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "502.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "561.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "382.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "452.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "363.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "417.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "737.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "606.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "866.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "987.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "1452.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "978.2"
+  }
+ ],
+ "811500_0": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "1993.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "2246.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "2025.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "2162.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "2060.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "2250.2"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "2623.2"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "2422.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "2427.2"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "2912.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "3352.9"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "3000.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "3399.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "3486.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "3326.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "3547.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "3401.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "3804.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "3939.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "3994.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "4275.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "4978.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "5958.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "5769.9"
+  }
+ ],
+ "811500_2": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "511.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "670.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "546.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "507.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "418.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "573.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "860.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "564.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "563.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "818.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "941.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "680.9"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "1238.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "1239.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "1029.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "1131.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "1005.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "1412.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "1570.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "1632.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "1931.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "2415.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "2985.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "2615.4"
+  }
+ ],
+ "811506_1": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "1838.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "2073.9"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "2105.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "2244.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "2122.3"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "2318.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "2496.7"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "2494.8"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "2580.4"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "2865.9"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "2887.9"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "2704.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "2394.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "2683.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "2744.8"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "2763.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "2848.9"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "3273.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "3310.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "3552.2"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "3820.0"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "4488.4"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "4935.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "5505.4"
+  }
+ ],
+ "811506_2": [
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2013",
+   "valeur": "308.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2014",
+   "valeur": "216.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2015",
+   "valeur": "294.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2016",
+   "valeur": "142.0"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2017",
+   "valeur": "228.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2018",
+   "valeur": "151.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2019",
+   "valeur": "226.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2020",
+   "valeur": "164.1"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2021",
+   "valeur": "177.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2022",
+   "valeur": "195.5"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2023",
+   "valeur": "189.6"
+  },
+  {
+   "ins": "92094",
+   "type_entite": "Commune",
+   "entite": "Namur",
+   "periode": "année 2024",
+   "valeur": "261.4"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2013",
+   "valeur": "238.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2014",
+   "valeur": "318.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2015",
+   "valeur": "357.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2016",
+   "valeur": "406.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2017",
+   "valeur": "318.9"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2018",
+   "valeur": "401.7"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2019",
+   "valeur": "466.3"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2020",
+   "valeur": "643.6"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2021",
+   "valeur": "942.5"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2022",
+   "valeur": "970.9"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2023",
+   "valeur": "626.1"
+  },
+  {
+   "ins": "52011",
+   "type_entite": "Commune",
+   "entite": "Charleroi",
+   "periode": "année 2024",
+   "valeur": "733.9"
+  }
+ ]
+}
