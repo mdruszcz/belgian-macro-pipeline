@@ -62,14 +62,21 @@ validate:
 exports:
 	$(PYTHON) scripts/export_canonical_csv.py --db $(DB) --out data/belgian_macro_export.csv
 	$(PYTHON) scripts/export_communes_csv.py --db $(DB) --out data/communes_export.csv $(EXTRA)
+	# Two passes, on purpose. _full feeds the two internal steps below, whose
+	# own contract is the complete history (site_payloads.md); the second
+	# pass, with no --all-periods, is the trimmed last-10-years file that
+	# actually gets committed and offered as a download -- data/communes_history_full.csv
+	# is gitignored so it never reaches the commit-size guard it exists to avoid.
+	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) \
+		--out data/communes_history_full.csv --all-periods $(EXTRA)
 	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) --out data/communes_history.csv $(EXTRA)
 	$(PYTHON) scripts/export_communes_table_json.py \
-		--communes-history data/communes_history.csv --out data/communes_table.json --db $(DB)
+		--communes-history data/communes_history_full.csv --out data/communes_table.json --db $(DB)
 	$(PYTHON) scripts/export_aggregates_csv.py --db $(DB) --out data/aggregates.csv $(EXTRA)
 	$(PYTHON) scripts/export_percentiles_csv.py --db $(DB) --out data/percentiles.csv $(EXTRA)
 	$(PYTHON) -m src.exporters.metadata --out data/metadata/indicators.json
 	$(PYTHON) scripts/export_site_payloads.py --db $(DB) \
-		--communes-history data/communes_history.csv \
+		--communes-history data/communes_history_full.csv \
 		--communes-latest data/communes_export.csv \
 		--national data/belgian_macro_export.csv \
 		--aggregates data/aggregates.csv \
@@ -128,6 +135,7 @@ fetch:
 	$(PYTHON) scripts/sync_to_canonical.py --db $(DB)
 	$(PYTHON) scripts/sync_statbel.py --db $(DB)
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
+	$(PYTHON) scripts/sync_walstat.py --db $(DB)
 
 ## clean: remove generated artifacts that are safe to regenerate. Deliberately
 ## does NOT touch data/*.csv or the database -- those are committed stores, and

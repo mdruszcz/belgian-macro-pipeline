@@ -167,12 +167,38 @@ jobs:
             --extra-observations data/realestate_observations.csv \
             --extra-observations data/police_observations.csv
 
-      - name: Export the full commune time series for communes.html
+      - name: Export the full commune time series (internal, gitignored)
         # Sibling to the snapshot export above: every period per (commune,
         # indicator), not just the latest, plus every configured derived
         # indicator computed over the whole history (Block G engine).
         # docs/features/statbel_adapter.md's "a time-series view is a
         # different, future feature" note -- this is that feature.
+        #
+        # --all-periods, to data/communes_history_full.csv: THIS copy feeds
+        # the two steps below, whose own contract is the complete series
+        # (site_payloads.md: "communes/{nis}.json ... full history"). It is
+        # gitignored and never committed -- ONEM (32.2 MB) and WalStat
+        # (45.2 MB) each pushed the OLD single committed file past the 40 MB
+        # guard in turn, each time "fixed" by raising the guard rather than
+        # the file. The step after this one writes the copy that actually
+        # gets committed.
+        run: |
+          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+            --out data/communes_history_full.csv --all-periods \
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv \
+            --extra-observations data/census2021_observations.csv \
+            --extra-observations data/realestate_observations.csv \
+            --extra-observations data/police_observations.csv
+
+      - name: Export the committed commune time series (last 10 years)
+        # THE FIX ITSELF: the committed data/communes_history.csv repeats
+        # five names, a region, a province and an arrondissement on every
+        # row back to 2005, for a download link nothing else on the site
+        # depends on (communes.html reads communes_table.json below, not
+        # this file). Trimmed to the last 10 calendar years by default; a
+        # researcher who wants the rest runs this same command with
+        # --all-periods, same as export_percentiles_csv.py already offers.
         run: |
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
             --out data/communes_history.csv \
@@ -189,13 +215,12 @@ jobs:
         # every page load, for a shape that never changes between visitors.
         # ONEM pushed that CSV from 22.9 to 32.2 MB, which is what surfaced
         # this as worth fixing rather than only raising the size guard.
-        # communes_history.csv itself is untouched and still published, for
-        # a researcher who wants the raw rows -- this is an ADDITIONAL,
-        # smaller artifact (11.0 MB vs 32.2 MB raw; 1.33 vs 2.28 MB gzipped),
-        # not a replacement.
+        # Reads the FULL (gitignored) history, not the trimmed committed
+        # copy -- communes.html's own year selector spans 2005-2026 and
+        # would otherwise silently lose everything before the trim window.
         run: |
           python scripts/export_communes_table_json.py \
-            --communes-history data/communes_history.csv \
+            --communes-history data/communes_history_full.csv \
             --out data/communes_table.json \
             --db data/belgian_macro.db
 
@@ -239,7 +264,7 @@ jobs:
         # job on failure, so validation-status is always "pass" here.
         run: |
           python scripts/export_site_payloads.py --db data/belgian_macro.db \
-            --communes-history data/communes_history.csv \
+            --communes-history data/communes_history_full.csv \
             --communes-latest data/communes_export.csv \
             --national data/belgian_macro_export.csv \
             --out-dir public/data \
@@ -289,6 +314,32 @@ jobs:
         # same shape as sync_statbel: a source being down must not throw away
         # the day's other data, but must still fail the run visibly.
         run: python scripts/sync_onem.py --db data/belgian_macro.db
+
+      - name: Sync WalStat (IWEPS) municipal finance
+        id: sync_walstat
+        continue-on-error: true
+        # THE SECOND AUTOMATED MUNICIPAL SOURCE, and the first that publishes
+        # NIS codes directly (Block O, docs/features/walstat_adapter.md).
+        # Nine series of municipal accounts per inhabitant for the Walloon
+        # communes, from the keyless IWEPS open-data API -- the runner reaches
+        # opendata.iweps.be the same way it reaches onem.be; this step is the
+        # first live check of that, not merely a plan.
+        #
+        # LANDS FOR TOMORROW'S EXPORTS, not today's, same as sync_onem right
+        # above it: this step runs after export_site_payloads.py and the
+        # /local page generation, so today's newly-fetched rows enter the
+        # committed database but are not reflected in today's build. Moving
+        # every sync ahead of every export is a bigger, unrelated change to
+        # this workflow's history -- not something to fold into this batch.
+        #
+        # The adapter refuses a partial year, a non-commune row or an
+        # unreadable value rather than loading it (rule 13), so a failure
+        # here is the API changing shape -- visible through the gate below,
+        # without discarding the day's other data. Needs the last-10-years
+        # trim on data/communes_history.csv landing in the same change as
+        # this step: loading these nine series once took that file past the
+        # 40 MB commit guard outright (measured 45.2 MB, 2026-09-11).
+        run: python scripts/sync_walstat.py --db data/belgian_macro.db
 
       - name: Probe police.be crime statistics (reachability test)
         id: fetch_police
@@ -382,7 +433,7 @@ jobs:
           fi
 
       - name: Fail run if any source failed
-        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.sync_onem.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.sync_onem.outcome == 'failure' || steps.sync_walstat.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
         run: |
-          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
+          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
           exit 1

@@ -93,6 +93,10 @@ MapUI.formatValue = function(num, unit, decimals, lang){
     : {maximumFractionDigits: digits});
   const u = (unit || '').toLowerCase();
   if(u === 'eur') return '\u20ac' + body;
+  /* Euros PER INHABITANT (WalStat's municipal accounts), written as a rate so
+     it can never be read as a total: Namur's 2 319,7 is what the commune
+     raises per resident, not its budget. Mirrored in src/pages/resolve.py. */
+  if(u === 'eur_per_inhabitant') return '\u20ac' + body + '\u202f/\u202fhab.';
   if(u.startsWith('percent')) return body + '%';
   return body;
 };
@@ -102,14 +106,14 @@ MapUI.tickLabel = function(num, unit, compactAxis, lang){
   const body = compactAxis
     ? num.toLocaleString(lang || undefined, {notation: 'compact', maximumFractionDigits: 1})
     : num.toLocaleString(lang || undefined, {maximumFractionDigits: Math.abs(num) < 100 ? 1 : 0});
-  if(u === 'eur') return '\u20ac' + body;
+  if(u === 'eur' || u === 'eur_per_inhabitant') return '\u20ac' + body;
   if(u.startsWith('percent')) return body + '%';
   return body;
 };
 
 MapUI.unitSuffix = function(unit){
   const u = (unit || '').toLowerCase();
-  if(!u || u === 'count' || u === 'eur' || u.startsWith('percent')) return '';
+  if(!u || u === 'count' || u === 'eur' || u === 'eur_per_inhabitant' || u.startsWith('percent')) return '';
   return ' ' + unit.replace(/_/g, ' ');
 };
 

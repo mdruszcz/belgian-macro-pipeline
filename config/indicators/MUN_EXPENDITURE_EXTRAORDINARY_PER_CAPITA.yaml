@@ -1,0 +1,26 @@
+id: MUN_EXPENDITURE_EXTRAORDINARY_PER_CAPITA
+name:
+  en: Extraordinary municipal expenditure per inhabitant
+  fr: Dépenses extraordinaires communales par habitant
+  nl: Buitengewone gemeentelijke uitgaven per inwoner
+unit: eur_per_inhabitant
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 730
+description:
+  en: >
+    Expenditure of the extraordinary budget -- essentially investment. The closest published figure to the roadmap's 'investment'; WalStat publishes no separate investment series.
+    Source: WalStat (IWEPS), series 811501_2, theme "Pouvoirs locaux", republishing the
+    municipal accounts compiled by the SPW Intérieur et Action sociale, Département des
+    Finances locales (with the Communauté germanophone's DG Stat for its nine communes).
+    Walloon communes only, accounts 2013 onward; the 2024 accounts were published in March
+    2026, fifteen months after the year they close, hence a two-year max_age_days. EUROS PER INHABITANT AS PUBLISHED -- WalStat gives
+    no total, so none is derived here, and the figure cannot be summed or averaged to a
+    province or region (is_additive false, aggregation_method not_applicable, per
+    docs/decisions/0003). IWEPS' definition: expenditure figures rest on 'imputations comptables à l'exercice global' -- amounts actually spent in the budget year, not commitments. Every row is a closed account and carries status
+    final; WalStat publishes no provisional marker.
+fetch:
+  query: /json/811501_2/com+period=all
+display: null

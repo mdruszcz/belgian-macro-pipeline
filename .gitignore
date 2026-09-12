@@ -9,6 +9,13 @@ __pycache__/
 # Disposable: rebuilt from data/population_observations.csv. Must stay ignored, or
 # daily_fetch.yml's `git add data/` would commit it.
 /data/local/**
+# Full-history intermediate for export_communes_table_json.py and
+# export_site_payloads.py, whose contract is the complete series
+# (docs/features/site_payloads.md). Disposable: regenerated every run from
+# the DB and the manual CSVs. Must stay ignored -- it is what
+# data/communes_history.csv committed to WITHOUT this trim, 45+ MB and
+# rising with every new source, before the last-10-years default fixed it.
+/data/communes_history_full.csv
 *.egg-info/
 .pytest_cache/
 .ruff_cache/

@@ -32,7 +32,8 @@
         "fpb",
         "statbel",
         "onem",
-        "police"
+        "police",
+        "walstat"
       ]
     },
     "base_url": {

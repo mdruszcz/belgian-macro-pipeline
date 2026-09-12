@@ -91,9 +91,22 @@ jobs:
           PY
 
       - name: Regenerate exports
+        # The history export runs twice: --all-periods to the gitignored
+        # data/communes_history_full.csv, which feeds the table-json and
+        # site-payloads steps below (their own contract is the complete
+        # series); then again with no flag, which is the last-10-years file
+        # that actually gets committed. See daily_fetch.yml for why -- this
+        # is the same fix, mirrored here rather than duplicated in prose.
         run: |
           python scripts/export_communes_csv.py --db data/belgian_macro.db \
             --out data/communes_export.csv \
+            --extra-observations data/population_observations.csv \
+            --extra-observations data/fiscal_income_observations.csv \
+            --extra-observations data/census2021_observations.csv \
+            --extra-observations data/realestate_observations.csv \
+            --extra-observations data/police_observations.csv
+          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+            --out data/communes_history_full.csv --all-periods \
             --extra-observations data/population_observations.csv \
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
@@ -107,7 +120,7 @@ jobs:
             --extra-observations data/realestate_observations.csv \
             --extra-observations data/police_observations.csv
           python scripts/export_communes_table_json.py \
-            --communes-history data/communes_history.csv \
+            --communes-history data/communes_history_full.csv \
             --out data/communes_table.json \
             --db data/belgian_macro.db
           python -m src.exporters.metadata --out data/metadata/indicators.json
@@ -149,7 +162,7 @@ jobs:
         # claiming a check that did not happen.
         run: |
           python scripts/export_site_payloads.py --db data/belgian_macro.db \
-            --communes-history data/communes_history.csv \
+            --communes-history data/communes_history_full.csv \
             --communes-latest data/communes_export.csv \
             --national data/belgian_macro_export.csv \
             --out-dir public/data \

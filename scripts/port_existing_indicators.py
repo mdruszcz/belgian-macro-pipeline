@@ -15,12 +15,11 @@ this script already opens and closes its own fetch_runs row per indicator
 second, adapter-level row would describe the same network call from a
 different angle and is not needed for a one-off migration script.
 
-SCOPE: eligibility (which indicators are Belgium-only, canonical-eligible)
-and preferred_direction both come from config/indicators/*.yaml
-(src.validation.config_schema.is_canonical_eligible), not a hardcoded list.
-A non-Belgium indicator (config `country` != "BE", e.g. the DE/FR/NL/ES/EA
-feeder series) is skipped with a logged reason; the canonical model's
-geo_id convention has no codes for those yet.
+SCOPE: eligibility and preferred_direction both come from
+config/indicators/*.yaml. Belgium indicators are written to `be:country`;
+the configured Eurostat GDP comparison series are written to explicit country
+or EU-aggregate geographies so the dashboard's international comparison can
+be regenerated from the canonical store too.
 
 The OBS_STATUS mapping below is a plausible reading of the SDMX
 CL_OBS_STATUS codelist as commonly used by NBB's SDMX 2.1 API. It has NOT
@@ -62,6 +61,89 @@ BE_COUNTRY_GEO = {
     "successor_geo_id": None,
     "population": None,
     "area_km2": None,
+}
+
+COUNTRY_GEOS = {
+    "BE": BE_COUNTRY_GEO,
+    "DE": {
+        "geo_id": "de:country",
+        "nis_code": None,
+        "level": "country",
+        "name_nl": "Duitsland",
+        "name_fr": "Allemagne",
+        "name_en": "Germany",
+        "parent_geo_id": None,
+        "valid_from": "1990-10-03",
+        "valid_to": None,
+        "successor_geo_id": None,
+        "population": None,
+        "area_km2": None,
+    },
+    "ES": {
+        "geo_id": "es:country",
+        "nis_code": None,
+        "level": "country",
+        "name_nl": "Spanje",
+        "name_fr": "Espagne",
+        "name_en": "Spain",
+        "parent_geo_id": None,
+        "valid_from": "1978-12-29",
+        "valid_to": None,
+        "successor_geo_id": None,
+        "population": None,
+        "area_km2": None,
+    },
+    "FR": {
+        "geo_id": "fr:country",
+        "nis_code": None,
+        "level": "country",
+        "name_nl": "Frankrijk",
+        "name_fr": "France",
+        "name_en": "France",
+        "parent_geo_id": None,
+        "valid_from": "1958-10-04",
+        "valid_to": None,
+        "successor_geo_id": None,
+        "population": None,
+        "area_km2": None,
+    },
+    "NL": {
+        "geo_id": "nl:country",
+        "nis_code": None,
+        "level": "country",
+        "name_nl": "Nederland",
+        "name_fr": "Pays-Bas",
+        "name_en": "Netherlands",
+        "parent_geo_id": None,
+        "valid_from": "1815-03-16",
+        "valid_to": None,
+        "successor_geo_id": None,
+        "population": None,
+        "area_km2": None,
+    },
+    "EA": {
+        "geo_id": "ea:aggregate",
+        "nis_code": None,
+        "level": "eu_aggregate",
+        "name_nl": "Eurozone",
+        "name_fr": "Zone euro",
+        "name_en": "Euro area",
+        "parent_geo_id": None,
+        "valid_from": "1999-01-01",
+        "valid_to": None,
+        "successor_geo_id": None,
+        "population": None,
+        "area_km2": None,
+    },
+}
+
+INTERNATIONAL_CANONICAL_INDICATORS = {
+    "EUROSTAT_GDP_Q_MEUR",
+    "EUROSTAT_GDP_Q_MEUR_DE",
+    "EUROSTAT_GDP_Q_MEUR_EA",
+    "EUROSTAT_GDP_Q_MEUR_ES",
+    "EUROSTAT_GDP_Q_MEUR_FR",
+    "EUROSTAT_GDP_Q_MEUR_NL",
 }
 
 # SDMX CL_OBS_STATUS -> canonical status enum. Any code not listed here is a
@@ -113,6 +195,15 @@ def source_id_for(agency: str) -> str:
     return agency.lower().replace("/", "_").replace(" ", "_")
 
 
+def geography_for_indicator(code: str, indicator: dict, sources: dict) -> dict | None:
+    if is_canonical_eligible(indicator, sources):
+        return BE_COUNTRY_GEO
+    if code not in INTERNATIONAL_CANONICAL_INDICATORS:
+        return None
+    country = indicator.get("country", "BE")
+    return COUNTRY_GEOS.get(country)
+
+
 def port(db_path: Path, run_date: str | None = None) -> None:
     run_date = run_date or date.today().isoformat()
     now = datetime.now(timezone.utc).isoformat()
@@ -137,13 +228,23 @@ def port(db_path: Path, run_date: str | None = None) -> None:
     ported = 0
     for code, meta in SOURCES.items():
         ind_config = indicator_configs[code]
-        if not is_canonical_eligible(ind_config, source_configs):
-            log.warning(f"SKIP {code}: non-Belgium series, out of scope this port (see docstring)")
+        geography = geography_for_indicator(code, ind_config, source_configs)
+        if geography is None:
+            log.warning(f"SKIP {code}: not in canonical national/international scope")
             continue
         preferred_direction = ind_config["preferred_direction"]
 
         agency = meta["source_agency"]
         source_id = source_id_for(agency)
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO geographies
+                (geo_id, nis_code, level, name_nl, name_fr, name_en, parent_geo_id,
+                 valid_from, valid_to, successor_geo_id, population, area_km2)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+            tuple(geography.values()),
+        )
         conn.execute(
             """
             INSERT OR IGNORE INTO sources
@@ -205,17 +306,30 @@ def port(db_path: Path, run_date: str | None = None) -> None:
             # claim asserted by this migration.
             mapped = [(r["period"], r["value"], "final") for r in rows]
 
+        conn.execute(
+            "UPDATE observations SET is_latest = 0 WHERE indicator_id = ? AND geo_id = ?",
+            (code, geography["geo_id"]),
+        )
         for period, value, status in mapped:
             period_start, period_end = derive_period_bounds(period, meta["frequency"])
             conn.execute(
                 """
-                INSERT OR IGNORE INTO observations
+                INSERT INTO observations
                     (indicator_id, geo_id, period, vintage, value, status,
                      period_start, period_end, is_latest, fetch_run_id, created_at)
-                VALUES (?, 'be:country', ?, ?, ?, ?, ?, ?, 1, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
+                ON CONFLICT(indicator_id, geo_id, period, vintage) DO UPDATE SET
+                    value = excluded.value,
+                    status = excluded.status,
+                    period_start = excluded.period_start,
+                    period_end = excluded.period_end,
+                    is_latest = 1,
+                    fetch_run_id = excluded.fetch_run_id,
+                    created_at = excluded.created_at
             """,
                 (
                     code,
+                    geography["geo_id"],
                     period,
                     run_date,
                     value,

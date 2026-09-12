@@ -284,6 +284,10 @@ def _format_value(value, meta: Mapping, lang: str = "en") -> str:
     unit = (meta.get("unit") or "").lower()
     if unit == "eur":
         return f"\u20ac{rendered}"
+    if unit == "eur_per_inhabitant":
+        # A rate, written as one, so a per-head figure is never read as a
+        # total. Mirrors MapUI.formatValue in assets/commune_map.js.
+        return f"\u20ac{rendered}\u202f/\u202fhab."
     if unit.startswith("percent"):
         return f"{rendered}%"
     return rendered

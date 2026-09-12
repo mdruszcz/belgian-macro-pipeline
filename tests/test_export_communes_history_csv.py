@@ -198,3 +198,73 @@ def test_a_derived_cell_with_no_value_is_dropped_not_written_blank(merger_db, tm
     export_communes_history_csv(merger_db, out, derived_dir=derived_dir)
     rows = _rows(out)
     assert not any(r["indicator_code"] == "POPULATION_CAGR_10Y" for r in rows)
+
+
+# ── The size-guard trim: last N years by default, --all-periods for the rest ─
+
+
+@pytest.fixture
+def long_history_db(tmp_path):
+    """One commune, one value per year from 2005 to 2026 -- 22 years, wide
+    enough that a 10-year default trim and a full 22-year read are visibly
+    different outputs, not an off-by-one away from each other."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    for year in range(2005, 2027):
+        _pop(conn, "be:mun:A", str(year), float(year))
+    conn.commit()
+    conn.close()
+    return db_path
+
+
+def test_by_default_only_the_last_ten_years_are_written(long_history_db, tmp_path):
+    out = tmp_path / "history.csv"
+    n = export_communes_history_csv(long_history_db, out, derived_dir=tmp_path / "empty")
+    rows = _rows(out)
+    periods = {r["period"] for r in rows}
+    # Newest row is 2026, so the last 10 calendar years are 2017-2026 inclusive.
+    assert periods == {str(y) for y in range(2017, 2027)}
+    assert n == len(rows) == 10
+
+
+def test_all_periods_writes_every_year_back_to_the_start(long_history_db, tmp_path):
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        long_history_db, out, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    rows = _rows(out)
+    periods = {r["period"] for r in rows}
+    assert periods == {str(y) for y in range(2005, 2027)}
+
+
+def test_recent_years_is_configurable(long_history_db, tmp_path):
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        long_history_db, out, derived_dir=tmp_path / "empty", recent_years=3
+    )
+    rows = _rows(out)
+    periods = {r["period"] for r in rows}
+    assert periods == {"2024", "2025", "2026"}
+
+
+def test_the_trim_never_starves_a_derived_indicators_own_lookback(long_history_db, tmp_path):
+    """THE CORRECTNESS PROPERTY THE WHOLE DESIGN DEPENDS ON. POPULATION_CAGR_10Y
+    for 2026 needs 2016's value as an INPUT, and 2016 falls seven years before
+    the default 10-year output WINDOW's start (2017). If the trim were applied
+    to the observation set fed to the engine rather than only to the rows
+    written afterwards, this value would silently vanish -- exactly the
+    indicators built to look back the furthest would be the first casualty of
+    a fix aimed at file size, not correctness."""
+    derived_dir = _derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(long_history_db, out, derived_dir=derived_dir)
+    rows = _rows(out)
+    cagr_2026 = [
+        r for r in rows if r["indicator_code"] == "POPULATION_CAGR_10Y" and r["period"] == "2026"
+    ]
+    assert len(cagr_2026) == 1, "the trim must not have starved this value of its own input"
+    # 2016 -> 2026, 10 years, values equal to the year themselves: CAGR of
+    # 2026/2016 over 10 years.
+    expected = (2026 / 2016) ** (1 / 10) - 1
+    assert float(cagr_2026[0]["value"]) == pytest.approx(expected * 100, abs=1e-6)
