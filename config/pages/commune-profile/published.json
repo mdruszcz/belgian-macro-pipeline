@@ -246,7 +246,7 @@
         },
         {
           "binding": {
-            "indicator": "UNEMPLOYMENT_RATE_COM",
+            "indicator": "ADMIN_UNEMPLOYMENT_RATE_COM",
             "operation": "latest",
             "provider": "municipal"
           },
@@ -613,7 +613,7 @@
         },
         {
           "binding": {
-            "indicator": "UNEMPLOYMENT_RATE_COM",
+            "indicator": "ADMIN_UNEMPLOYMENT_RATE_COM",
             "operation": "latest",
             "provider": "municipal"
           },

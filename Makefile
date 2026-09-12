@@ -21,7 +21,8 @@ EXTRA := --extra-observations data/population_observations.csv \
          --extra-observations data/fiscal_income_observations.csv \
          --extra-observations data/census2021_observations.csv \
          --extra-observations data/realestate_observations.csv \
-         --extra-observations data/police_observations.csv
+         --extra-observations data/police_observations.csv \
+         --extra-observations data/var_unemployment_observations.csv
 
 .PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder test fetch clean help
 
@@ -51,6 +52,7 @@ reference:
 	$(PYTHON) scripts/sync_realestate.py    --db $(DB) --reference-rows-only
 	$(PYTHON) scripts/sync_census2021.py    --db $(DB) --reference-rows-only
 	$(PYTHON) scripts/sync_police.py        --db $(DB) --reference-rows-only
+	$(PYTHON) scripts/sync_var.py           --db $(DB) --reference-rows-only
 
 ## validate: Block H's rules. Fails the build on a data problem, which is the
 ## entire point of it existing (a validation step that only logs is decoration).

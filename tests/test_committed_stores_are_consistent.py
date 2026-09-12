@@ -30,6 +30,7 @@ DB = REPO / "data" / "belgian_macro.db"
 MANUAL_STORES = [
     REPO / "data" / "population_observations.csv",
     REPO / "data" / "fiscal_income_observations.csv",
+    REPO / "data" / "var_unemployment_observations.csv",
 ]
 
 

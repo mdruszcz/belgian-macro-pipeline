@@ -29,7 +29,7 @@ headlines:
   - POPULATION_CHANGE_5Y
   - AVG_NET_TAXABLE_INCOME
   - LOCAL_UNITS_BY_COMMUNE
-  - UNEMPLOYMENT_RATE_COM
+  - ADMIN_UNEMPLOYMENT_RATE_COM
   - MEDIAN_HOUSE_PRICE
 
 # Part-of-whole groups: which indicators together make up a whole. This is
@@ -56,21 +56,6 @@ compositions:
       - POPULATION_AGE_0_14
       - POPULATION_AGE_15_64
       - POPULATION_AGE_65_PLUS
-  - id: activity_status
-    label:
-      en: Activity status (15–64)
-      fr: Statut d’activité (15–64 ans)
-      nl: Activiteitsstatus (15–64)
-    note:
-      en: Census 2021. Employed, unemployed and inactive residents — not the sector breakdown the design shows, which no source collects for communes.
-      fr: Census 2021. Habitants en emploi, sans emploi et inactifs — et non la répartition sectorielle de la maquette, qu’aucune source ne collecte par commune.
-      nl: Census 2021. Werkende, werkloze en niet-actieve inwoners — niet de sectorverdeling van het ontwerp, die geen enkele bron per gemeente verzamelt.
-    chart: bars
-    parts:
-      - CAS_EMPLOYED
-      - CAS_UNEMPLOYED
-      - CAS_INACTIVE
-
 sections:
   - id: demography
     label: {en: Demography, fr: Démographie, nl: Demografie}
@@ -168,18 +153,18 @@ sections:
     label: {en: Employment, fr: Emploi, nl: Werk}
     blurb:
       en: >
-        Unemployment benefit claimants, updated every year from ONEM/RVA — the most current
-        commune figures on this page. The Census 2021 labour-force counts below are a single
-        snapshot, but they are the ones measured against the labour force rather than population.
+        The administrative unemployment rate for ages 15–64 from Steunpunt Werk's Vlaamse
+        Arbeidsrekening, complemented by annual ONEM/RVA benefit-claimant figures. The two are
+        related but not interchangeable: only the first is measured against the labour force.
       fr: >
-        Les chômeurs indemnisés, mis à jour chaque année d’après l’ONEM — les chiffres communaux
-        les plus récents de cette page. Les données du Census 2021 ci-dessous ne couvrent qu’une
-        seule année, mais elles se rapportent à la population active et non à la population totale.
+        Le taux de chômage administratif des 15–64 ans de la Vlaamse Arbeidsrekening de Steunpunt
+        Werk, complété par les chiffres annuels des bénéficiaires de l’ONEM. Ces mesures sont liées
+        mais non interchangeables : seule la première est rapportée à la population active.
       nl: >
-        Uitkeringsgerechtigde werklozen, elk jaar bijgewerkt via de RVA — de meest actuele
-        gemeentecijfers op deze pagina. De Census 2021-cijfers hieronder betreffen één jaar, maar
-        zijn gemeten tegen de beroepsbevolking in plaats van de totale bevolking.
-    headline: SHARE_POP_ON_UNEMPLOYMENT_BENEFIT
+        De administratieve werkloosheidsgraad voor 15–64-jarigen uit de Vlaamse Arbeidsrekening van
+        Steunpunt Werk, aangevuld met jaarlijkse RVA-cijfers over uitkeringsgerechtigden. De maten
+        hangen samen maar zijn niet onderling verwisselbaar: alleen de eerste gebruikt de beroepsbevolking.
+    headline: ADMIN_UNEMPLOYMENT_RATE_COM
     indicators:
       - UNEMPLOYED_JOBSEEKERS
       - UNEMPLOYMENT_BENEFIT_RECIPIENTS
@@ -188,11 +173,6 @@ sections:
       - UNEMPLOYMENT_BENEFIT_PAID
       - TEMP_UNEMPLOYMENT_BENEFIT_PAID
       - ACTIVATION_MEASURES_PAID
-      - UNEMPLOYMENT_RATE_COM
-      - CAS_LABOUR_FORCE
-      - CAS_EMPLOYED
-      - CAS_UNEMPLOYED
-      - CAS_INACTIVE
 
   - id: safety
     label: {en: Safety, fr: Sécurité, nl: Veiligheid}

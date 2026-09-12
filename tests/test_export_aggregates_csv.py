@@ -44,6 +44,7 @@ STORES = (
     REPO / "data" / "fiscal_income_observations.csv",
     REPO / "data" / "census2021_observations.csv",
     REPO / "data" / "realestate_observations.csv",
+    REPO / "data" / "var_unemployment_observations.csv",
 )
 
 # The commune counts this repo derived and then independently corroborated in

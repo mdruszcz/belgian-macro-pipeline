@@ -58,12 +58,12 @@ def test_the_registry_is_keyed_by_the_id_the_indicators_table_uses():
 
 
 def test_every_municipal_source_carries_a_trilingual_label_and_licence_note():
-    """These are the three sources whose figures appear on a commune page, and
-    each has a DIFFERENT grant. The note is published per source and never
+    """These are the sources whose figures appear on a commune page, and
+    each grant or reuse notice is published per source and never
     composed into one string -- Statbel and ONEM state commercial reuse, the
     federal police state only attribution."""
     registry = source_registry()
-    for source_id in ("statbel", "onem", "police"):
+    for source_id in ("statbel", "onem", "police", "steunpunt_werk"):
         entry = registry[source_id]
         for lang in LANGS:
             assert entry["label"].get(lang), f"{source_id} has no {lang} label"

@@ -90,15 +90,27 @@ def test_a_composition_naming_an_unknown_indicator_is_caught_with_the_sections()
         _check_sections(layout(parts=["A", "NOPE"]), known={"A", "B", "C", "TOTAL"})
 
 
-def test_the_real_layout_declares_the_age_bands_and_the_activity_statuses():
-    """What ships: two groups, the donut with a whole and the bars without."""
+def test_the_real_layout_declares_the_age_bands_and_not_the_activity_statuses():
+    """What ships: ONE group, the age donut with its whole.
+
+    `activity_status` (Census 2021 employed / unemployed / inactive, drawn as
+    bars) was REMOVED on 2026-09-12, deliberately and with the maintainer's
+    approval, alongside the headline switch from UNEMPLOYMENT_RATE_COM to
+    ADMIN_UNEMPLOYMENT_RATE_COM: it was the same frozen 2021 register snapshot
+    the switch exists to stop presenting as current. The census counts are
+    still in the store as research data (CAS_EMPLOYED, CAS_UNEMPLOYED,
+    CAS_INACTIVE are all still exported) -- they are simply no longer drawn.
+
+    Asserted as an ABSENCE rather than by deleting the old assertion, so that
+    re-adding the group is a deliberate act that has to change this test and
+    read this reason first.
+    """
     groups = {g["id"]: g for g in _sections()["compositions"]}
-    assert set(groups) == {"age_structure", "activity_status"}
+    assert set(groups) == {"age_structure"}
+    assert "activity_status" not in groups
     assert groups["age_structure"]["chart"] == "donut"
     assert groups["age_structure"]["whole"]
     assert len(groups["age_structure"]["parts"]) == 3
-    assert groups["activity_status"]["chart"] == "bars"
-    assert not groups["activity_status"].get("whole")
     for group in groups.values():
         for field in ("label", "note"):
             assert set(group[field]) == {
@@ -114,4 +126,4 @@ def test_the_published_sections_carry_the_compositions():
     if not SECTIONS_JSON.is_file():
         pytest.skip("site payloads not built")
     published = json.loads(SECTIONS_JSON.read_text(encoding="utf-8"))
-    assert [g["id"] for g in published["compositions"]] == ["age_structure", "activity_status"]
+    assert [g["id"] for g in published["compositions"]] == ["age_structure"]

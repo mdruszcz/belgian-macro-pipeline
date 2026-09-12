@@ -1,0 +1,31 @@
+source_id: steunpunt_werk
+name: Vlaamse Arbeidsrekening
+agency: Steunpunt Werk
+adapter: var
+base_url: https://analytics.data.wewis.vlaanderen.be/t/Steunpuntwerk/views/VARpt2-T3/BNW-T1tabel
+licence: >-
+  The publisher explicitly offers table exports and requires this exact credit when figures are
+  used or distributed: "Steunpunt Werk - Vlaamse Arbeidsrekening o.b.v. DWH AM&SB - KSZ, BISA".
+  No standard open-data licence or separate commercial-reuse grant was identified on the source
+  page, so BelPulse states that limitation instead of applying Statbel's CC BY 4.0 terms.
+catalog_ref: docs/data_catalog.md -- Vlaamse Arbeidsrekening row (approved 2026-09-12)
+cadence: annual (manual Tableau export)
+is_active: true
+homepage: https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening
+label:
+  en: Steunpunt Werk
+  fr: Steunpunt Werk
+  nl: Steunpunt Werk
+licence_note:
+  en: >-
+    Source credit required: Steunpunt Werk - Vlaamse Arbeidsrekening based on DWH AM&SB - KSZ,
+    BISA. The publisher offers export and distribution with attribution, but states no standard
+    open-data licence on this page; CC BY 4.0 must not be implied.
+  fr: >-
+    Mention de source obligatoire : Steunpunt Werk - Vlaamse Arbeidsrekening sur la base de DWH
+    AM&SB - KSZ, BISA. L'éditeur permet l'export et la diffusion avec attribution, mais n'indique
+    aucune licence ouverte standard sur cette page ; la licence CC BY 4.0 ne doit pas être sous-entendue.
+  nl: >-
+    Verplichte bronvermelding: Steunpunt Werk - Vlaamse Arbeidsrekening o.b.v. DWH AM&SB - KSZ,
+    BISA. De uitgever biedt export en verspreiding met bronvermelding aan, maar vermeldt op deze
+    pagina geen standaard open-datalicentie; CC BY 4.0 mag niet worden geïmpliceerd.

@@ -1100,7 +1100,8 @@ function renderCommune(){
   // It used to sit here three times over, with a fourth English copy in
   // communes.html and a fifth in map.html -- four copies of a licence
   // condition, kept in step by a test comparing two of them.
-  document.getElementById('attribution').innerHTML = I18N.t(LANG, 'attribution');
+  document.getElementById('attribution').innerHTML =
+    I18N.t(LANG, 'attribution') + '<br><br>' + I18N.t(LANG, 'varAttribution');
   const updated = LocalUI.lastUpdated(c);
   const el = document.getElementById('attrUpdated');
   if(el) el.textContent = updated || '—';
