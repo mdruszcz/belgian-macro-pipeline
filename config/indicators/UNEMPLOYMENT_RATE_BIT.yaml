@@ -16,12 +16,23 @@ description:
     is comparable to published EU/Eurostat rates. Source: WalStat (IWEPS), series
     236400_0, "Taux de chômage BIT pour comparaisons internationales par âge et sexe".
 
-    WALLOON COMMUNES ONLY -- 262 of Belgium's 565. IWEPS publishes the same calibration
-    for Flanders and Brussels on iweps.be, but that site's legal notice restricts reuse to
-    non-commercial purposes, while WalStat's own data are CC0; only the CC0 route is used
-    here (docs/data_catalog.md, "IWEPS: two sites, two licences"). A Flemish or Brussels
-    equivalent needs VDAB/Arvastat and Actiris respectively, which use ADMINISTRATIVE
-    definitions that are not this one and must not be merged into this series.
+    WALLOON COMMUNES ONLY -- 262 of Belgium's 565 -- and that is a LICENCE boundary, not
+    a gap in the data. IWEPS computes this same calibration for all three regions: their
+    spreadsheet on iweps.be carries 581 communes over 1999-2022, downloaded and read
+    2026-09-12. But the CC0 grant is the one on IWEPS' Open Data page, and it covers the
+    opendata.iweps.be catalogue and API this series is fetched through -- "Les données et
+    le catalogue sont distribués sous Licence CC0" -- and THAT CATALOGUE IS WALLOON.
+    Tested, not assumed: on series 236400_0, ins=3000 (Wallonie) answers and `prov`
+    returns the five Walloon provinces, while ins=1000 (Belgium), ins=2000 (Flanders),
+    ins=4000 (Brussels), 11001 Aartselaar, 11002 Antwerpen and 21004 Bruxelles every one
+    return "la requete ne retourne aucun resultat". The all-Belgium spreadsheet sits on
+    the institute's ordinary website instead, whose legal notice permits reuse only
+    "moyennant mention de la source et uniquement pour un usage qui ne soit ni commercial,
+    ni publicitaire", so it is not used here -- the maintainer's standing rule is not to
+    build on data that cannot be resold. Extending this series past Wallonia therefore
+    needs written permission from IWEPS for that file. The regional alternatives
+    (VDAB/Arvastat, Actiris) publish ADMINISTRATIVE rates, a different measure -- see
+    ADMIN_UNEMPLOYMENT_RATE_COM -- which must never be merged into this series.
 
     NOT INTERCHANGEABLE WITH UNEMPLOYMENT_RATE_COM, despite both being "the unemployment
     rate, 15-64". Measured on the 262 Walloon communes at 2021, the Census-derived figure
@@ -33,7 +44,7 @@ description:
     fewer people meet. THIS series is the one comparable to Eurostat -- it is what
     "pour comparaisons internationales" in WalStat's own title means, and 9.29% is the
     order of the published Walloon rate for 2021. The two must never be drawn as one
-    line, and the relationship is pinned by tests/test_unemployment_rate_bit.py so a
+    line, and the relationship is pinned by tests/test_unemployment_rates.py so a
     future load that made them converge would fail rather than pass quietly.
 
     Neither is the same thing as UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE, which counts
@@ -43,11 +54,13 @@ description:
     denominator alongside it, so a province or regional figure cannot be recomputed from
     these rows and none is derived. Published to one decimal, as WalStat rounds it.
 
-    PUBLICATION LAG: IWEPS publishes year Y around December Y+1. The 2024 figures were
-    expected around December 2025 and had not appeared by September 2026, which is why
-    max_age_days is three years rather than the two a normal annual lag would need.
-    Revisit when 2024 lands -- if the allowance is still needed then, the series has a
-    real problem rather than a slow publisher.
+    PUBLICATION LAG: the API serves live data, but the catalogue behind it is refreshed
+    only TWICE A YEAR, at the end of June and the end of December (IWEPS' own Open Data
+    page). The series topped out at 2023 in September 2026, so the 2024 figures are due at
+    one of those two refreshes; max_age_days is three years rather than the two a plain
+    annual lag would need, to span a missed window without warning on every build. Revisit
+    after the next end-December refresh: if the allowance is still doing work then, the
+    series has a real problem rather than a slow publisher.
 fetch:
   query: /json/236400_0/com+period=all
 display: null
