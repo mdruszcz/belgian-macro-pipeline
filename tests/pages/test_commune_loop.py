@@ -49,6 +49,11 @@ from src.site.routes import block_page_routes, path_for  # noqa: E402
 A, B = "11001", "92094"
 
 
+# The sweep over generated output. One case per route or page, so this file
+# belongs to the `generated_site` tier (pyproject.toml), not the everyday loop.
+pytestmark = pytest.mark.generated_site
+
+
 @pytest.fixture(scope="module")
 def catalogue():
     return load_metadata(), load_registry()

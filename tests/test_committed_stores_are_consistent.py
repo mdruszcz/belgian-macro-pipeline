@@ -86,6 +86,7 @@ def test_every_geography_in_a_manual_store_exists(store):
     assert not missing, f"{store.name} references unknown geo_id(s): {missing[:10]}"
 
 
+@pytest.mark.slow
 def test_the_exporters_actually_run_against_the_committed_stores(tmp_path):
     """End-to-end, the guard the two tests above only approximate: run the
     real snapshot exporter the way both workflows do. If this passes, the

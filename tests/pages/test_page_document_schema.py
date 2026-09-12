@@ -160,6 +160,7 @@ def test_pathologically_deep_json_does_not_crash_with_recursion_error(metadata, 
     assert not isinstance(exc_info.value, RecursionError)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("count,should_pass", [(512, True), (513, False)])
 def test_block_count_boundary(metadata, registry, count, should_pass):
     hero_type = "hero"
