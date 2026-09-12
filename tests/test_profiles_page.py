@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-
 REPO = Path(__file__).resolve().parents[1]
 PROFILES_HTML = REPO / "profiles.html"
 GEOGRAPHIES = REPO / "public" / "data" / "metadata" / "geographies.json"
