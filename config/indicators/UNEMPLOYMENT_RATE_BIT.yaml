@@ -1,0 +1,73 @@
+id: UNEMPLOYMENT_RATE_BIT
+name:
+  en: Unemployment rate, ILO definition (15-64)
+  fr: Taux de chômage BIT (15-64 ans)
+  nl: Werkloosheidsgraad IAB-definitie (15-64 jaar)
+unit: percent
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Unemployed as a share of the labour force aged 15-64, on the International Labour
+    Office definition, calibrated by IWEPS on Statbel's Labour Force Survey so the figure
+    is comparable to published EU/Eurostat rates. Source: WalStat (IWEPS), series
+    236400_0, "Taux de chômage BIT pour comparaisons internationales par âge et sexe".
+
+    WALLOON COMMUNES ONLY -- 262 of Belgium's 565 -- and the reason is the CATALOGUE'S
+    SCOPE, not its licence. IWEPS computes this same calibration for all three regions:
+    their spreadsheet on iweps.be carries 581 communes over 1999-2022, downloaded and
+    read 2026-09-12. The CC0 grant on IWEPS' Open Data page covers the opendata.iweps.be
+    catalogue and API this series is fetched through -- "Les données et le catalogue sont
+    distribués sous Licence CC0" -- and THAT CATALOGUE IS WALLOON. Tested, not assumed:
+    on series 236400_0, ins=3000 (Wallonie) answers and `prov` returns the five Walloon
+    provinces, while ins=1000 (Belgium), ins=2000 (Flanders), ins=4000 (Brussels), 11001
+    Aartselaar, 11002 Antwerpen and 21004 Bruxelles every one return "la requete ne
+    retourne aucun resultat".
+
+    THE LICENCE IS NOT A BLOCKER, settled by the maintainer 2026-09-12. iweps.be's legal
+    notice does open with "Sauf stipulation contraire ... uniquement pour un usage qui ne
+    soit ni commercial, ni publicitaire", but it predates the institute's open-data
+    policy and IWEPS now publishes under CC0 throughout -- the Open Data page being
+    precisely the "stipulation contraire" that notice defers to. So extending this series
+    to the other 319 communes is ordinary work, not a legal question: the all-Belgium
+    figures are in a spreadsheet, which means a manual-source loader on the route
+    census2021 and realestate already take. Worth doing whenever those communes are
+    wanted.
+
+    The regional alternatives (VDAB/Arvastat, Actiris) publish ADMINISTRATIVE rates, a
+    different measure -- see ADMIN_UNEMPLOYMENT_RATE_COM -- which must never be merged
+    into this series whatever the licence says.
+
+    NOT INTERCHANGEABLE WITH UNEMPLOYMENT_RATE_COM, despite both being "the unemployment
+    rate, 15-64". Measured on the 262 Walloon communes at 2021, the Census-derived figure
+    is HIGHER IN ALL 262 -- median +2.44 pp, ratio 1.37x -- and at regional level the
+    census counts give Wallonia 12.09% against this series' 9.29%. That gap is
+    structural, not noise: the census records a labour-market situation from the register
+    and the census declaration, while the Labour Force Survey applies the ILO's strict
+    tests (actively sought work in the last four weeks AND available within two), which
+    fewer people meet. THIS series is the one comparable to Eurostat -- it is what
+    "pour comparaisons internationales" in WalStat's own title means, and 9.29% is the
+    order of the published Walloon rate for 2021. The two must never be drawn as one
+    line, and the relationship is pinned by tests/test_unemployment_rates.py so a
+    future load that made them converge would fail rather than pass quietly.
+
+    Neither is the same thing as UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE, which counts
+    benefit claimants rather than applying any survey definition.
+
+    A RATE, SO NOT AGGREGATABLE (docs/decisions/0003): WalStat publishes no labour-force
+    denominator alongside it, so a province or regional figure cannot be recomputed from
+    these rows and none is derived. Published to one decimal, as WalStat rounds it.
+
+    PUBLICATION LAG: the API serves live data, but the catalogue behind it is refreshed
+    only TWICE A YEAR, at the end of June and the end of December (IWEPS' own Open Data
+    page). The series topped out at 2023 in September 2026, so the 2024 figures are due at
+    one of those two refreshes; max_age_days is three years rather than the two a plain
+    annual lag would need, to span a missed window without warning on every build. Revisit
+    after the next end-December refresh: if the allowance is still doing work then, the
+    series has a real problem rather than a slow publisher.
+fetch:
+  query: /json/236400_0/com+period=all
+display: null

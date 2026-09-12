@@ -19,7 +19,9 @@ refuses rather than coerces (rule 13):
 * every row must be a commune -- the same series ids answer `provinces` and
   `arr` selections with other entity types, and a province row loaded as a
   commune would be a wrong number under a real NIS code;
-* the period must read "année YYYY" (the site varies the capital), and the
+* the period must read "année YYYY" or "moyenne annuelle YYYY" (the site
+  varies the capital, and the labour-market series are annual averages rather
+  than closed accounts), and the
   value must be a number -- with ONE documented exception, learned from the
   first live run: WalStat writes the literal string "non disponible" where a
   commune's account for a year is not yet available (row 407 of the 2024
@@ -54,10 +56,13 @@ refuses rather than coerces (rule 13):
   response -- the same 90% floor this pipeline already applies to
   aggregates (CLAUDE.md, Definitions), not a new threshold.
 
-Status is `final` on every row: WalStat publishes closed municipal accounts
-(the source is the SPW's Département des Finances locales, accounts "à
-l'exercice global"), and it publishes no provisional marker to carry. Stated
-here rather than assumed elsewhere.
+Status is `final` on every row, and WalStat publishes no provisional marker to
+carry on any of them. For the finance series that is because they are closed
+municipal accounts (the source is the SPW's Département des Finances locales,
+accounts "à l'exercice global"); for UNEMPLOYMENT_RATE_BIT it is because the
+figure is a settled annual average, calibrated by IWEPS on Statbel's Labour
+Force Survey and republished unchanged. Stated here rather than assumed
+elsewhere.
 """
 
 from __future__ import annotations
@@ -74,7 +79,13 @@ from src.geography.resolve import UnknownGeographyError, period_to_date, resolve
 EXPECTED_KEYS = frozenset({"ins", "type_entite", "entite", "periode", "valeur"})
 
 #: "année 2024", "Année 2023" -- the site is not consistent about the capital.
-_PERIOD = re.compile(r"^ann[ée]e\s+(\d{4})$", re.IGNORECASE)
+#: The finance series write that form; the labour-market ones write "moyenne
+#: annuelle 1999" instead, because they ARE an annual average of monthly
+#: readings rather than a closed account (UNEMPLOYMENT_RATE_BIT, series
+#: 236400_0). Both name one calendar year and resolve to the same period, so
+#: both are accepted -- and nothing else is, so a form nobody has seen still
+#: refuses rather than being parsed by a looser pattern (rule 13).
+_PERIOD = re.compile(r"^(?:ann[ée]e|moyenne\s+annuelle)\s+(\d{4})$", re.IGNORECASE)
 
 #: The Walloon Region's geo_id, the root every commune here must chain up to.
 WALLONIA = "be:reg:03000"

@@ -43,41 +43,71 @@ def db(tmp_path):
     return path
 
 
-def series_by_code() -> dict[str, str]:
-    """indicator id -> WalStat series id, read from the configs' own fetch queries."""
+def series_by_code(finance_only: bool = True) -> dict[str, str]:
+    """indicator id -> WalStat series id, read from the configs' own fetch queries.
+
+    FINANCE-ONLY BY DEFAULT. WalStat is no longer only a municipal-finance
+    source: UNEMPLOYMENT_RATE_BIT (series 236400_0) is a PERCENTAGE RATE for
+    15-64-year-olds, not a per-inhabitant euro amount, and it carries none of
+    the properties the tests below assert about the nine accounts series --
+    the unit, the decimals, the direction and even the period form all differ.
+    Lumping it in would have made those assertions say something weaker about
+    all ten rather than something exact about the nine, so the two groups are
+    separated here instead.
+    """
     indicators, _ = load_and_validate_all(
         REPO / "config" / "indicators", REPO / "config" / "sources"
     )
     out = {}
     for code, cfg in sync_walstat.walstat_indicators(indicators).items():
+        if finance_only and not code.startswith("MUN_"):
+            continue
         out[code] = cfg["fetch"]["query"].split("/")[2]  # /json/811500_1/com+period=all
     return out
 
 
 def build_replay(db: Path, out_dir: Path, drop_one_from: str | None = None) -> dict[str, str]:
-    """Nine complete files; optionally one with a commune missing for 2024."""
+    """One complete file per WalStat series the configs name -- the sync reads
+    the configs, so a series with no file is a FileNotFoundError, not a skip.
+
+    Optionally drops one commune from 2024 in one series, to exercise the
+    missing-reading path.
+
+    The nine finance series are replayed from the committed API fixture where
+    it has a row and filled with plausible euro amounts elsewhere.
+    UNEMPLOYMENT_RATE_BIT has no fixture (it was added later) and is generated
+    entirely -- with ITS OWN PERIOD FORM, "moyenne annuelle YYYY", which is
+    the difference that made the adapter's period pattern need widening.
+    """
     conn = sqlite3.connect(str(db))
     communes = {year: walloon_communes_on(conn, year) for year in YEARS}
     conn.close()
-    codes = series_by_code()
+    codes = series_by_code(finance_only=False)
     out_dir.mkdir()
     for code, series in codes.items():
-        real = {(r["ins"], r["periode"].split()[-1]): r for r in FIXTURE[series]}
+        is_rate = not code.startswith("MUN_")
+        real = {(r["ins"], r["periode"].split()[-1]): r for r in FIXTURE.get(series, [])}
         rows = []
         for year in YEARS:
             for index, nis in enumerate(sorted(communes[year])):
                 if (nis, year) in real:
                     rows.append(real[(nis, year)])
-                else:
-                    rows.append(
-                        {
-                            "ins": nis,
-                            "type_entite": "Commune",
-                            "entite": f"Commune {nis}",
-                            "periode": f"année {year}",
-                            "valeur": f"{1000 + index}.{int(series[-1])}",
-                        }
-                    )
+                    continue
+                rows.append(
+                    {
+                        "ins": nis,
+                        "type_entite": "Commune",
+                        "entite": f"Commune {nis}",
+                        "periode": (f"moyenne annuelle {year}" if is_rate else f"année {year}"),
+                        # A rate has to look like a rate: a euro amount in a
+                        # percent series would load happily and be wrong.
+                        "valeur": (
+                            f"{3 + index % 15}.{index % 10}"
+                            if is_rate
+                            else f"{1000 + index}.{int(series[-1])}"
+                        ),
+                    }
+                )
         if code == drop_one_from:
             rows = [r for r in rows if not (r["ins"] == "93090" and r["periode"].endswith("2024"))]
         (out_dir / f"{code}.json").write_text(
@@ -102,13 +132,17 @@ def test_a_replayed_day_loads_every_series_for_every_walloon_commune(db, tmp_pat
     assert namur["MUN_REVENUE_ORDINARY_PER_CAPITA"] == 2319.7
     assert namur["MUN_EXPENDITURE_ORDINARY_PER_CAPITA"] == 2167.1
     assert namur["MUN_DEBT_TOTAL_PER_CAPITA"] == 2965.5
-    assert len(namur) == 9
+    assert len(namur) == len(codes)
+    # The tenth series rode the same path, from a period form the nine do not
+    # use -- so this asserts the widened pattern end to end, not just in a
+    # regex unit test.
+    assert "UNEMPLOYMENT_RATE_BIT" in namur
+    assert 0 < namur["UNEMPLOYMENT_RATE_BIT"] < 100, "a rate outside 0-100 is not a rate"
     statuses = {s for (s,) in conn.execute("SELECT DISTINCT status FROM observations")}
     assert statuses == {"final"}
-    assert (
-        conn.execute("SELECT COUNT(*) FROM fetch_runs WHERE source_id = 'walstat'").fetchone()[0]
-        == 9
-    )
+    assert conn.execute("SELECT COUNT(*) FROM fetch_runs WHERE source_id = 'walstat'").fetchone()[
+        0
+    ] == len(codes)
 
 
 def test_reference_rows_say_per_inhabitant_figures_cannot_be_aggregated(db):
@@ -116,7 +150,8 @@ def test_reference_rows_say_per_inhabitant_figures_cannot_be_aggregated(db):
     conn = sqlite3.connect(str(db))
     rows = conn.execute(
         "SELECT indicator_id, unit, aggregation_method, is_additive, decimals, preferred_direction "
-        "FROM indicators WHERE source_id = 'walstat' ORDER BY indicator_id"
+        "FROM indicators WHERE source_id = 'walstat' AND indicator_id LIKE 'MUN_%' "
+        "ORDER BY indicator_id"
     ).fetchall()
     assert len(rows) == 9
     for code, unit, method, additive, decimals, direction in rows:
@@ -133,11 +168,31 @@ def test_reference_rows_say_per_inhabitant_figures_cannot_be_aggregated(db):
     assert conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0] == 0
 
 
+def test_the_unemployment_rate_is_a_percentage_and_equally_unaggregatable(db):
+    """The tenth WalStat series is a RATE, so it must not inherit the euro
+    unit the nine accounts series carry -- and it must still refuse to be
+    aggregated, for a different reason: WalStat publishes no labour-force
+    denominator, so a province figure cannot be recomputed from these rows
+    (docs/decisions/0003, "refuse, do not invent")."""
+    sync_walstat.sync(db, reference_rows_only=True)
+    conn = sqlite3.connect(str(db))
+    row = conn.execute(
+        "SELECT unit, aggregation_method, is_additive, preferred_direction "
+        "FROM indicators WHERE indicator_id = 'UNEMPLOYMENT_RATE_BIT'"
+    ).fetchone()
+    assert row is not None, "the BIT series has no reference row"
+    unit, method, additive, direction = row
+    assert unit == "percent"
+    assert method == "not_applicable"
+    assert additive == 0
+    assert direction == "lower_is_better"
+
+
 def test_a_second_replay_writes_no_new_vintage(db, tmp_path):
-    build_replay(db, tmp_path / "replay")
+    codes = build_replay(db, tmp_path / "replay")
     sync_walstat.sync(db, from_dir=tmp_path / "replay")
     fetched, changed = sync_walstat.sync(db, from_dir=tmp_path / "replay")
-    assert fetched == 9 * 524
+    assert fetched == len(codes) * 524
     assert changed == 0
 
 

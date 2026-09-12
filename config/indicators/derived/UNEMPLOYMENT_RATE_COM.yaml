@@ -10,11 +10,32 @@ preferred_direction: lower_is_better
 decimals: 1
 description:
   en: >
-    CAS_UNEMPLOYED over CAS_LABOUR_FORCE at 2021, ages 15-64 -- the EU Labour Force Survey
-    definition, so this is comparable to published EU/Eurostat unemployment rates. Named
-    _COM because UNEMPLOYMENT_RATE already exists as a NATIONAL indicator fetched from NBB
-    with a different definition and cadence; the two must not be treated as the same
-    series, so they get different ids rather than one shared one.
+    CAS_UNEMPLOYED over CAS_LABOUR_FORCE at 2021, ages 15-64, from Statbel's Census 2021
+    labour-market situation table (T01_CAS1564). A full-count register measure: everyone
+    recorded as unemployed on the census reference date over everyone recorded as active.
+
+    NOT THE EUROSTAT-COMPARABLE RATE, corrected 2026-09-12. This description previously
+    claimed it was "the EU Labour Force Survey definition, so comparable to published
+    EU/Eurostat unemployment rates". That was measured and is false. Against
+    UNEMPLOYMENT_RATE_BIT -- the LFS-calibrated series IWEPS publishes for the same year,
+    same age range, same communes -- this figure is HIGHER IN ALL 262 WALLOON COMMUNES,
+    median +2.44 pp, ratio 1.37x; recomputed over Wallonia it gives 12.09% where the LFS
+    gives 9.29%, and it is the LFS figure that matches the published Walloon rate for
+    2021. The census records a situation from the register and the census declaration;
+    the LFS applies the ILO's strict tests (actively sought work in the last four weeks
+    AND available within two), which fewer people meet. Both are legitimate measures of
+    different things -- this one is a full count with no sampling error, the other is the
+    internationally comparable one -- but only one of them may be called "the
+    unemployment rate" beside a Eurostat figure, and it is not this one.
+
+    Nor is it UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE, which counts ONEM benefit claimants
+    over the working-age population and reads lower again (about 5.6 % for Namur where
+    this figure is 14.4 %): that one is current to 2026 and covers all 565 communes,
+    but it is a claimant count, not any survey's unemployment definition.
+
+    Named _COM because UNEMPLOYMENT_RATE already exists as a NATIONAL indicator fetched
+    from NBB with a different definition and cadence; the two must not be treated as the
+    same series, so they get different ids rather than one shared one.
 derived:
   function: share_of_total
   inputs: [CAS_UNEMPLOYED, CAS_LABOUR_FORCE]
