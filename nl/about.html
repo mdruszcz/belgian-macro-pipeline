@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <script>(function(){try{var t=localStorage.getItem('belpulse-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+    <script>(function(){try{var t=localStorage.getItem('belpulse-theme');if(t!=='auto')document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Over BelPulse</title>
     <meta name="description" content="Uw venster op de Belgische macro-economische polslag">
@@ -25,7 +25,7 @@
 <div class="bp-site-footer"><span><strong>BelPulse</strong> — De data die België vooruithelpt</span><nav aria-label="Hoofdnavigatie"><a href="../">Start</a><a href="../communes.html">Gemeenten</a><a href="../map.html">Kaarten</a><a href="../all_data.html">Alle data</a><a href="../about.html">Methodologie</a></nav></div>
 </div>
 <script>(function(){if(window.self===window.top)return;document.documentElement.setAttribute('data-framed','1');var here="nl",urls={"en": "../about.html", "fr": "../fr/about.html", "nl": "../nl/about.html"},themes={"day": "light", "soft": "light", "night": "dark"};window.addEventListener('message',function(e){var m=e.data;if(!m||!m.type)return;if(m.type==='setTheme'){document.documentElement.setAttribute('data-theme',Object.prototype.hasOwnProperty.call(themes,m.value)?themes[m.value]:'light');}else if(m.type==='setLang'&&m.value!==here&&urls[m.value]){window.location.href=urls[m.value];}});window.parent.postMessage('dashboard-ready','*');})();</script>
-<script>(function(){var k='belpulse-theme',b=document.querySelectorAll('.bp-theme-toggle button[data-theme-choice]'),saved=null;try{saved=localStorage.getItem(k);}catch(e){}b.forEach(function(x){x.setAttribute('aria-pressed',String((saved||'auto')===x.getAttribute('data-theme-choice')));x.addEventListener('click',function(){var c=x.getAttribute('data-theme-choice');if(c==='auto'){document.documentElement.removeAttribute('data-theme');}else{document.documentElement.setAttribute('data-theme',c);}try{localStorage.setItem(k,c);}catch(e){}b.forEach(function(y){y.setAttribute('aria-pressed',String(y===x));});});});})();</script>
+<script>(function(){var k='belpulse-theme',b=document.querySelectorAll('.bp-theme-toggle button[data-theme-choice]'),saved=null;try{saved=localStorage.getItem(k);}catch(e){}b.forEach(function(x){x.setAttribute('aria-pressed',String((saved||'light')===x.getAttribute('data-theme-choice')));x.addEventListener('click',function(){var c=x.getAttribute('data-theme-choice');if(c==='auto'){document.documentElement.removeAttribute('data-theme');}else{document.documentElement.setAttribute('data-theme',c);}try{localStorage.setItem(k,c);}catch(e){}b.forEach(function(y){y.setAttribute('aria-pressed',String(y===x));});});});})();</script>
 <script>document.querySelectorAll('.bp-lang-switch a').forEach(function(a){a.addEventListener('click',function(){try{localStorage.setItem('belpulse-lang',a.dataset.lang);}catch(e){}});});</script>
 </body>
 </html>

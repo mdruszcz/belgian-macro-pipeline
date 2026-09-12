@@ -7,6 +7,17 @@
 <meta name="description" content="Every municipal indicator in this pipeline, drawn on the 565 Belgian communes.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/commune_map.css">
+<script>
+  /* Before the first paint: light unless the reader chose otherwise. A
+     linked file cannot promise to run before the stylesheets apply, so
+     this one is inline, like every other page's. */
+  (function(){
+    try{
+      var t = localStorage.getItem('belpulse-theme');
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+  })();
+</script>
 <script src="assets/i18n.js"></script>
 <style>
   :root{
@@ -457,8 +468,8 @@ init();
     document.querySelectorAll('[data-theme-choice]').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)));
   };
-  let saved = 'auto';
-  try{ saved = localStorage.getItem(KEY) || 'auto'; }catch(_){}
+  let saved = 'light';
+  try{ saved = localStorage.getItem(KEY) || 'light'; }catch(_){}
   apply(saved);
   document.querySelectorAll('[data-theme-choice]').forEach(b => b.onclick = () => {
     apply(b.dataset.themeChoice);
