@@ -27,9 +27,11 @@
     * Named composite rankings ("economic dynamism", "residential
       attractiveness"): need a peer model and a fiscal score, neither built.
       Per-indicator ranks ARE real and are shown.
-    * The hero photograph and its editorial tagline: from
-      assets/belpulse/commune/photos.json, keyed by NIS. One commune has an
-      entry; the rest keep the plain frame and say so.
+    * The hero photograph: NOW SHOWN for every commune, from communes/{nis}.webp
+      (2026-09-12). assets/belpulse/commune/photos.json still keyed by NIS, but
+      now optional enrichment only -- a caption, tagline, credit line or a
+      separate CTA-band image, layered on top of the real photo when a curated
+      entry exists. Today only Namur (92094) has one.
     * A population map by STATISTICAL SECTOR: this pipeline holds commune
       boundaries only, so the map shows the commune on the national map.
   And three where the design's label and the real figure differ, so the real
@@ -115,11 +117,15 @@
     display:flex; flex-direction:column; justify-content:flex-end; padding:var(--bp-space-5);
     background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290); color:#fff;
   }
-  /* The photograph, when this commune has one (assets/belpulse/commune/photos.json).
-     Behind everything, cover-fitted, with a gradient over its lower half so
-     the name stays legible on a bright sky. A commune with no entry keeps the
-     plain gradient and its note -- a picture of one place never stands in
-     for another. */
+  /* The photograph: communes/{nis}.webp, one real file per commune (565/565,
+     2026-09-12). Behind everything, cover-fitted, with a gradient over its
+     lower half so the name stays legible on a bright sky. A future commune
+     with no file yet keeps the plain gradient and its note -- a picture of
+     one place must never stand in for another. photos.json (still keyed by
+     NIS) is now optional enrichment ONLY -- caption, tagline, credit, a
+     separate CTA-band image -- layered on top of the real photo, never a
+     precondition for showing one; the :empty rules below hide a chip whose
+     text a commune simply does not have. */
   .photo img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none}
   .photo.has-photo img{display:block}
   .photo.has-photo::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,20,40,0) 35%, rgba(10,20,40,.78) 100%)}
@@ -128,6 +134,7 @@
   .photo .cnote{font-size:11px; color:rgba(255,255,255,.7); margin-top:8px; max-width:34ch}
   .photo .tagline{font-family:var(--bp-font-display); font-style:italic; font-size:.95rem; color:rgba(255,255,255,.88); margin-top:4px; display:none}
   .photo.has-photo .tagline{display:block}
+  .photo.has-photo .tagline:empty{display:none}
   /* Room for the caption chip at bottom right, so the tagline does not run under it. */
   .photo.has-photo .cname, .photo.has-photo .tagline{max-width:calc(100% - 150px)}
   .photo.has-photo .cnote{display:none}
@@ -137,8 +144,10 @@
     border-radius:var(--bp-radius-pill); padding:4px 9px; backdrop-filter:blur(3px);
   }
   .photo.has-photo .capchip{display:inline-flex; align-items:center; gap:5px}
+  .photo.has-photo .capchip:empty{display:none}
   .photo .credit{position:absolute; left:var(--bp-space-4); top:var(--bp-space-3); z-index:2; font-size:9px; color:rgba(255,255,255,.55); display:none}
   .photo.has-photo .credit{display:block}
+  .photo.has-photo .credit:empty{display:none}
   .locator{padding:var(--bp-space-4); display:flex; flex-direction:column}
   .locator h3, .panel h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
   .locator .mapbox{position:relative; flex:1; min-height:150px}
@@ -787,30 +796,34 @@
   }
 
   /* ---- the photograph ----------------------------------------------------
-     Keyed by NIS in assets/belpulse/commune/photos.json. A commune with no
-     entry keeps the plain frame and its note: the one thing worse than no
-     picture is the wrong town's. The CTA band takes the same commune's dusk
-     panorama when there is one. */
+     The real file is communes/{nis}.webp -- one per commune, 565/565 as of
+     2026-09-12. photos.json (still keyed by NIS) is now purely optional
+     enrichment on top of that real photo: a caption, a tagline, a credit
+     line, or a separate dusk panorama for the CTA band. A commune with no
+     curated entry still gets its real photo, just with no caption chip,
+     tagline or credit shown (the :empty CSS rules hide those). Only a
+     genuinely MISSING file (a future commune with no photo yet -- none
+     today) falls back to the plain gradient frame and its note. */
   function renderPhoto(){
-    var entry = state.photos[state.nis];
+    var entry = state.photos[state.nis] || {};
     var box = document.getElementById('photo');
     var cta = document.getElementById('cta');
-    box.classList.toggle('has-photo', Boolean(entry && entry.hero));
-    if(!entry || !entry.hero){
-      cta.classList.remove('has-photo');
-      return;
-    }
     var img = document.getElementById('photoImg');
-    img.src = entry.hero;
+    img.onerror = function(){ box.classList.remove('has-photo'); };
     img.alt = (entry.caption && (entry.caption[LANG] || entry.caption.en)) || communeName();
-    document.getElementById('photoCaption').textContent = img.alt;
+    img.src = 'communes/' + state.nis + '.webp';
+    box.classList.add('has-photo');
+    document.getElementById('photoCaption').textContent =
+      (entry.caption && (entry.caption[LANG] || entry.caption.en)) || '';
     document.getElementById('photoTagline').textContent =
       (entry.tagline && (entry.tagline[LANG] || entry.tagline.en)) || '';
-    document.getElementById('photoCredit').textContent =
-      T('cpPhotoCredit') + ' · ' + ((entry.credit && (entry.credit[LANG] || entry.credit.en)) || '');
+    var credit = entry.credit && (entry.credit[LANG] || entry.credit.en);
+    document.getElementById('photoCredit').textContent = credit ? T('cpPhotoCredit') + ' · ' + credit : '';
     if(entry.cta){
       cta.style.setProperty('--cta-photo', 'url("' + entry.cta + '")');
       cta.classList.add('has-photo');
+    } else {
+      cta.classList.remove('has-photo');
     }
   }
 
