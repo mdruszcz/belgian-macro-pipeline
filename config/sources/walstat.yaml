@@ -16,10 +16,7 @@ licence: >-
   Action sociale, Département des Finances locales; WalStat republishes them per inhabitant.
 catalog_ref: docs/data_catalog.md -- WalStat rows 8, 9 (Selected 10, row 5)
 cadence: annual accounts, published by IWEPS around March (catalogue refreshed twice yearly); fetched daily
-# fetch_window_days is deliberately absent until the daily workflow runs
-# sync_walstat.py: with a window and no fetch_runs row the fetch_silence rule
-# warns on every build forever. Set it to 14 in the same change that adds
-# the workflow step (docs/implementation/batches/batch-O-walstat.md).
+fetch_window_days: 14
 is_active: true
 homepage: https://walstat.iweps.be/
 label:

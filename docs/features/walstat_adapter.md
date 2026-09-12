@@ -137,13 +137,25 @@ cannot be summed or averaged to a province (docs/decisions/0003). Observations g
 `upsert_observation` (Block I, insert-only-on-change). `--from-dir` replays cached files with the
 same parse and the same refusals; `--reference-rows-only` needs no network.
 
-Wired into `make fetch`. NOT yet into `.github/workflows/daily_fetch.yml`: the daily run
-exports `data/communes_history.csv`, and with the nine series loaded that file measures
-45.2 MB against the workflow's 40 MB commit tripwire (measured on a copy, 2026-09-11) — the
-first daily build after the load would refuse to commit anything, for every source. The
-step (`sync_walstat`, `continue-on-error`, in the failure gate, with
-`fetch_window_days: 14` on the source) lands once the maintainer has chosen between raising
-the tripwire and trimming the history CSV (docs/implementation/batches/batch-O-walstat.md).
+Wired into `make fetch` and, since 2026-09-12, `.github/workflows/daily_fetch.yml`
+(`sync_walstat`, `continue-on-error`, in the failure gate, right after `sync_onem`).
+
+That wiring was held for one day: exporting `data/communes_history.csv` with the nine series
+loaded measured 45.2 MB against the workflow's 40 MB commit tripwire (measured on a copy,
+2026-09-11) — the first daily build after the load would have refused to commit anything, for
+every source, not only WalStat's. Fixed at the source rather than by raising the tripwire again
+(it had already been raised twice, for ONEM and for the real-estate refresh):
+`export_communes_history_csv.py` now writes the last 10 calendar years by default and the
+complete series with `--all-periods`, mirroring `export_percentiles_csv.py`'s own precedent.
+The full series still reaches every page that reads it — `export_communes_table_json.py` and
+`export_site_payloads.py` are pointed at a gitignored `data/communes_history_full.csv`
+(`--all-periods`), never at the trimmed file that gets committed — and the trim is applied only
+to which rows are WRITTEN, after the derived engine has already computed on the untrimmed
+series, so a 10-year CAGR still sees the value 10 years back even though that row itself falls
+outside the output window. Verified against a live sync on a copy of the database: the
+committed file lands at 32.5 MB (was 19.7 MB before WalStat, would have been 45.2 MB
+untrimmed), the gitignored full file at 44.8 MB, and Namur's `communes/92094.json` still
+carries its complete 2013-2024 WalStat history — unaffected by the trim, as designed.
 
 Ratios, config only (`config/indicators/derived/`): `MUN_REVENUE_GROWTH_1Y`,
 `MUN_EXPENDITURE_GROWTH_1Y` (`growth_rate`, years 1), `MUN_INVESTMENT_SHARE_OF_EXPENDITURE`
@@ -183,17 +195,21 @@ language rather than as a euro total.
 
 - Nothing changes for any existing indicator; the new rows are additive and behind their own
   source id. Rollback is dropping the nine indicators' observations and configs.
-- `fetch_window_days` is left unset until the daily step exists: with a window declared and
-  no `fetch_runs` row, the `fetch_silence` rule warns on every build, forever. It goes to 14
-  in the change that adds the workflow step, so the rule fires the first day the runner
-  cannot reach opendata.iweps.be.
-- The committed database carries the nine reference rows and the `sources` row, no
-  observations: loading them takes it from 19.8 MB to 33.9 MB, over CLAUDE.md rule 12's
-  25 MB, and the daily run loads them itself once the step exists. A derived config whose
-  inputs are configured but not yet in the store is DEFERRED by `load_and_validate_derived`
-  — left out of that export, never an error — so the four ratios appear the first build
-  after the nine series load, and until then every other export is untouched (audit P0-1:
-  before this, they stopped every export on a database without WalStat rows).
+- `fetch_window_days: 14` is now set, alongside the workflow step that gives it a `fetch_runs`
+  row to measure against -- declared with no such row, the `fetch_silence` rule would have
+  warned on every build, forever. It fires correctly from the step's first run onward: silent
+  for 14 days after a successful fetch, then WARN if the runner stops reaching
+  opendata.iweps.be.
+- The committed database still carries the nine reference rows and the `sources` row, no
+  observations, on this branch: loading them takes it from 19.8 MB to 32.3 MB (measured with
+  the trim above already in place), safely under CLAUDE.md rule 12's 25 MB single-file
+  threshold on its own, well under the workflows' 40 MB tripwire. The daily run loads the
+  observations itself the first time it runs with the new step; nothing here does it
+  pre-emptively; a derived config whose inputs are configured but not yet in the store is
+  DEFERRED by `load_and_validate_derived` — left out of that export, never an error — so the
+  four ratios appear the first build after the nine series load, and until then every other
+  export is untouched (audit P0-1: before this, they stopped every export on a database
+  without WalStat rows).
 - Two `fetch_runs` rows per series, as in `sync_statbel.py`: the adapter logs its own
   (`rows_read` counting the unavailable and backcast rows), and the script writes the one its
   observations reference. A series that refuses marks the script's row `error` too, so the
