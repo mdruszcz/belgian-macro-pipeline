@@ -14,9 +14,13 @@ import jsonschema
 import yaml
 
 SCHEMA_DIR = Path(__file__).resolve().parents[2] / "docs" / "features"
-INDICATOR_SCHEMA = json.loads((SCHEMA_DIR / "indicator_config.schema.json").read_text())
-SOURCE_SCHEMA = json.loads((SCHEMA_DIR / "source_config.schema.json").read_text())
-DERIVED_SCHEMA = json.loads((SCHEMA_DIR / "derived_indicator_config.schema.json").read_text())
+INDICATOR_SCHEMA = json.loads(
+    (SCHEMA_DIR / "indicator_config.schema.json").read_text(encoding="utf-8")
+)
+SOURCE_SCHEMA = json.loads((SCHEMA_DIR / "source_config.schema.json").read_text(encoding="utf-8"))
+DERIVED_SCHEMA = json.loads(
+    (SCHEMA_DIR / "derived_indicator_config.schema.json").read_text(encoding="utf-8")
+)
 
 
 class ConfigValidationError(Exception):
@@ -65,7 +69,7 @@ def load_and_validate_derived(derived_dir: Path, known_indicator_ids: set[str]) 
         return derived
 
     for path in sorted(derived_dir.glob("*.yaml")):
-        data = yaml.safe_load(path.read_text())
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
         errs = validate_derived_config(data, path)
         if errs:
             errors.extend(errs)
@@ -121,7 +125,7 @@ def _configured_indicator_ids(indicators_dir: Path) -> set[str]:
     if not indicators_dir.is_dir():
         return ids
     for path in sorted(indicators_dir.glob("*.yaml")):
-        data = yaml.safe_load(path.read_text())
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
         if isinstance(data, dict) and isinstance(data.get("id"), str):
             ids.add(data["id"])
     return ids
@@ -132,7 +136,7 @@ def load_and_validate_all(indicators_dir: Path, sources_dir: Path) -> tuple[dict
 
     sources: dict[str, dict] = {}
     for path in sorted(sources_dir.glob("*.yaml")):
-        data = yaml.safe_load(path.read_text())
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
         errs = validate_source_config(data, path)
         if errs:
             errors.extend(errs)
@@ -141,7 +145,7 @@ def load_and_validate_all(indicators_dir: Path, sources_dir: Path) -> tuple[dict
 
     indicators: dict[str, dict] = {}
     for path in sorted(indicators_dir.glob("*.yaml")):
-        data = yaml.safe_load(path.read_text())
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
         errs = validate_indicator_config(data, path)
         if errs:
             errors.extend(errs)

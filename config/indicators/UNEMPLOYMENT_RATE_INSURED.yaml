@@ -1,0 +1,73 @@
+id: UNEMPLOYMENT_RATE_INSURED
+name:
+  en: Unemployment rate (ONEM definition, annual average)
+  fr: Taux de chômage (définition ONEM, moyenne annuelle)
+  nl: Werkloosheidsgraad (RVA-definitie, jaargemiddelde)
+unit: percent
+frequency: A
+source_id: onem
+geo_levels: [municipal, national]
+preferred_direction: lower_is_better
+max_age_days: 400
+description:
+  en: >
+    ONEM's own unemployment rate, taken as published and not recomputed here: fully unemployed
+    benefit claimants seeking work (CCI-DE) divided by the number of persons insured against
+    unemployment, from ONEM's calculation on ONEM, ONSS and INAMI data. This is the only current
+    commune-level rate in the pipeline with a real labour-force denominator, and the denominator
+    itself is NOT published, so no aggregate above the commune can be recomputed from it (see
+    docs/decisions/0005-onem-published-rate.md). The annual figure is the mean of the months
+    published so far, so the running year is written `provisional`: 2026 averages six months.
+    A DEFINITIONAL BREAK OPENS IN MARCH 2026. Belgium sits between 6.26 and 6.85 percent from
+    2023 to February 2026, then reads 5.47 in March and 4.41 in April, and the fall appears in
+    546 of 565 communes. Time-limiting unemployment benefit removes people from the CCI-DE
+    numerator whether or not they find work, so the drop is not evidence of a stronger labour
+    market and must never be presented as one. Herstappe reads a true 0.00 in 42 of 124 periods
+    and a real value in the rest: that zero is an observed zero, not a suppression.
+    NOT the same measure as any of the four already here, and the gaps are definitional rather
+    than noise. UNEMPLOYMENT_RATE_COM is the Census 2021 register snapshot over one period and
+    reads about 1.08x this rate for the same year, with a 0.53-2.11 spread per commune.
+    ADMIN_UNEMPLOYMENT_RATE_COM is Steunpunt Werk's administrative rate for 2024.
+    UNEMPLOYMENT_RATE_BIT is the ILO/LFS figure but only for Wallonia and only to 2023.
+    UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE shares this numerator and divides by the whole 15-64
+    population, which is not a labour force, so it reads roughly a third of this rate.
+  fr: >
+    Le taux de chômage propre à l'ONEM, repris tel que publié et non recalculé ici : les chômeurs
+    complets indemnisés demandeurs d'emploi (CCI-DE) divisés par le nombre d'assurés contre le
+    chômage, selon les calculs de l'ONEM sur les données de l'ONEM, de l'ONSS et de l'INAMI.
+    C'est le seul taux communal courant du pipeline doté d'un vrai dénominateur de population
+    active, et ce dénominateur n'est PAS publié : aucun agrégat au-dessus de la commune ne peut
+    donc en être recalculé (voir docs/decisions/0005-onem-published-rate.md). Le chiffre annuel
+    est la moyenne des mois publiés à ce jour, d'où le statut `provisional` pour l'année en
+    cours : 2026 ne moyenne que six mois.
+    UNE RUPTURE DE DÉFINITION S'OUVRE EN MARS 2026. La Belgique se tient entre 6,26 et 6,85 %
+    de 2023 à février 2026, puis affiche 5,47 en mars et 4,41 en avril, et la baisse touche 546
+    des 565 communes. La limitation des allocations de chômage dans le temps retire des personnes
+    du numérateur CCI-DE qu'elles retrouvent un emploi ou non : la baisse n'atteste donc pas d'un
+    marché du travail plus solide et ne doit jamais être présentée comme telle. Herstappe affiche
+    un 0,00 réel sur 42 des 124 périodes et une valeur réelle sur les autres : ce zéro est un
+    zéro observé, pas une suppression.
+    CE N'EST PAS la même mesure que les quatre déjà présentes, et les écarts sont de définition
+    et non de bruit. UNEMPLOYMENT_RATE_COM est l'instantané du recensement de 2021 sur une seule
+    période et vaut environ 1,08 fois ce taux pour la même année, avec une dispersion de 0,53 à
+    2,11 selon la commune. ADMIN_UNEMPLOYMENT_RATE_COM est le taux administratif de Steunpunt
+    Werk pour 2024. UNEMPLOYMENT_RATE_BIT est le chiffre BIT/EFT, mais pour la Wallonie seulement
+    et jusqu'en 2023. UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE partage ce numérateur et divise par
+    l'ensemble de la population de 15 à 64 ans, qui n'est pas une population active, et vaut donc
+    environ un tiers de ce taux.
+  nl: >
+    De eigen werkloosheidsgraad van de RVA, overgenomen zoals gepubliceerd en hier niet
+    herberekend: uitkeringsgerechtigde volledig werklozen die werk zoeken (UVW-WZ) gedeeld door
+    het aantal tegen werkloosheid verzekerde personen, volgens berekeningen van de RVA op
+    gegevens van de RVA, de RSZ en het RIZIV. Dit is de enige actuele gemeentelijke graad in de
+    pijplijn met een echte noemer van de beroepsbevolking, en die noemer wordt NIET gepubliceerd,
+    zodat geen enkel aggregaat boven het gemeentelijke niveau eruit kan worden herberekend (zie
+    docs/decisions/0005-onem-published-rate.md). Het jaarcijfer is het gemiddelde van de tot nu
+    toe gepubliceerde maanden, waardoor het lopende jaar `provisional` is: 2026 bevat zes maanden.
+    EEN DEFINITIEBREUK BEGINT IN MAART 2026. België ligt tussen 6,26 en 6,85 procent van 2023 tot
+    februari 2026, leest dan 5,47 in maart en 4,41 in april, en de daling verschijnt in 546 van
+    de 565 gemeenten. De beperking van de werkloosheidsuitkering in de tijd haalt mensen uit de
+    UVW-WZ-teller, of ze werk vinden of niet; de daling bewijst dus geen sterkere arbeidsmarkt en
+    mag nooit als zodanig worden gepresenteerd. Herstappe leest een echte 0,00 in 42 van de 124
+    periodes en een reële waarde in de rest: die nul is een waargenomen nul, geen onderdrukking.
+display: null

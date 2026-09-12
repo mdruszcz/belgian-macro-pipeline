@@ -208,11 +208,33 @@ jobs:
         # export_percentiles_csv.py already got (trimmed scope plus an
         # --all-periods flag for researchers), which is a Block J/K change,
         # not something to bolt onto a data load.
+        #
+        # SCOPED TO FILES GIT WOULD ACTUALLY COMMIT (2026-09-12). The message
+        # says "refusing to commit", but `find` also matched
+        # data/communes_history_full.csv -- which .gitignore excludes, and
+        # which the step that builds it above calls "gitignored and never
+        # committed". A file that is never committed cannot bloat the
+        # repository, so failing the whole daily run over it threw away every
+        # other source's data for nothing. Measured on run 34699560386 that
+        # file is ~37.5 MB against this 39.06 MB threshold (find's `k` is
+        # 1024 bytes), so it was ~1.5 MB from stopping the pipeline.
+        #
+        # The THRESHOLD IS UNCHANGED and every committed file is still
+        # checked. docs/steps records the decision to fix the next overrun at
+        # the source rather than raise this guard a third time; that still
+        # holds.
         run: |
-          OVERSIZED=$(find data/ public/ local/ -type f -size +40000k)
+          OVERSIZED=""
+          while IFS= read -r f; do
+            # check-ignore exits 0 when the path IS ignored, so the `||`
+            # branch collects exactly the files that would be committed.
+            git check-ignore -q "$f" || OVERSIZED="${OVERSIZED}${f}"$'\n'
+          done < <(find data/ public/ local/ -type f -size +40000k)
           if [ -n "$OVERSIZED" ]; then
-            echo "::error::File(s) under data/ or public/ exceed 25 MB; refusing to commit:"
-            echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done
+            echo "::error::Committed file(s) under data/, public/ or local/ exceed 40 MB; refusing to commit:"
+            echo "$OVERSIZED" | while read -r f; do
+              [ -n "$f" ] && echo "  $f ($(du -h "$f" | cut -f1))"
+            done
             exit 1
           fi
 
