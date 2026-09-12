@@ -161,11 +161,27 @@ both ways against the real file.
   for the first time since WalStat landed — and **17.1 MB of headroom** instead of 1.18 MB, which
   is about five more years of monthly detail.
 
+  **That reframes the window entirely.** Not committing the indexes, the FULL 114-month history
+  measures **35.89 MB and passes the guard** (63.04 MB with the indexes, which fails). So the real
+  choice is not "18 months or break the daily run" — it is:
+
+  | | database | 39.06 MB guard | rule 12's 25 MB |
+  |---|---|---|---|
+  | 18 months, indexes committed (shipped) | 37.88 MB | pass, 1.18 MB spare | over |
+  | 18 months, indexes not committed | 21.96 MB | pass | **inside** |
+  | **all 114 months, indexes not committed** | **35.89 MB** | **pass** | over |
+
   One obvious-looking idea was measured and **rejected**: making `observations` `WITHOUT ROWID` to
   fold that 7.31 MB primary-key B-tree into the table makes the file **bigger, 51.14 MB**, because
   a `WITHOUT ROWID` table's secondary indexes each store the whole primary key — four TEXT columns
   here — as their row locator. It only pays combined with dropping the secondary indexes
   (14.38 MB), which is option one plus a schema migration for no extra gain.
+
+  **What it would take:** one step dropping the five secondary indexes just before the commit, and
+  `migrations/002_indexes.sql` replayed at the start of each run. That DDL is already
+  `CREATE INDEX IF NOT EXISTS`, so the replay is idempotent by construction and no data can be
+  lost — an index is rebuildable output, not input. Not implemented here; it changes the daily
+  workflow's commit step and is the maintainer's call.
 - The monthly series is kept out of the committed `data/communes_history.csv` (already 35 MB) but
   does reach the gitignored `--all-periods` file that feeds the payloads, so the commune page has
   the whole stored series.
