@@ -136,6 +136,32 @@ ICONS = {
 }
 
 
+#: A reading that is not final, in the reader's language (rule 7). The map
+#: tooltip already appends the raw status word after the period; this is the
+#: same convention, translated, because a French page saying "provisional" is
+#: the same defect Batch 15c existed to fix.
+STATUS_TEXT = {
+    "provisional": {"en": "provisional", "fr": "provisoire", "nl": "voorlopig"},
+    "estimate": {"en": "estimate", "fr": "estimation", "nl": "raming"},
+    "revised": {"en": "revised", "fr": "révisé", "nl": "herzien"},
+    "na": {"en": "not applicable", "fr": "sans objet", "nl": "niet van toepassing"},
+}
+
+
+def _period_text(data, lang: str) -> str:
+    """The period a figure is for, and what kind of reading it is.
+
+    "2025 · provisoire" rather than "2025": the police series publish the
+    current year part-way through it, and a part-year total shown as a year is
+    a number a reader will compare against a full one.
+    """
+    period = (data or {}).get("period")
+    if not period:
+        return ""
+    word = STATUS_TEXT.get((data or {}).get("status"))
+    return f"{period} · {text_in(word, lang)}" if word else str(period)
+
+
 def _icon(name) -> str:
     """One inline icon, or "" for an unknown name.
 
@@ -147,7 +173,9 @@ def _icon(name) -> str:
     if not path:
         return ""
     return (
-        '<span class="bp-kpi-icon" aria-hidden="true">'
+        # data-icon: the tint is chosen by the stylesheet from the icon's own
+        # name, so a block author picks a picture and never a colour.
+        f'<span class="bp-kpi-icon" data-icon="{esc(name)}" aria-hidden="true">'
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
         'stroke-linecap="round" stroke-linejoin="round">'
         f'<path d="{esc(path)}"/></svg></span>'
@@ -317,8 +345,9 @@ def _render_feature_tiles(block, props, data, lang, prefix=""):
             continue
         body = text_in(tile.get("body"), lang)
         # h4 and p, because .bp-feature-tile styles exactly those
-        # (components.css:208-209).
-        inner = f"<h4>{esc(label)}</h4>"
+        # (components.css:208-209). v2's icon goes above them, which is where
+        # .bp-feature-tile's own `.icon` rule already expects one.
+        inner = _icon(tile.get("icon")) + f"<h4>{esc(label)}</h4>"
         if body:
             inner += f"<p>{esc(body)}</p>"
         href = tile.get("href")
@@ -359,9 +388,17 @@ def _render_section_nav(block, props, data, lang, prefix=""):
     rather than a tablist it can step through.
     """
     name = text_in(props.get("accessible_name"), lang)
-    items = [_cta_link(node, lang, "bp-tab", prefix) for node in props.get("items") or []]
-    items = [i for i in items if i]
-    return f'<nav class="bp-tabs"{_attrs([("aria-label", name)])}>' + "".join(items) + "</nav>"
+    # v2's icons: a parallel list, positional. The icon goes INSIDE the anchor,
+    # so the whole tab is one target rather than a picture beside a link.
+    icons = props.get("icons") or []
+    rendered = []
+    for index, node in enumerate(props.get("items") or []):
+        link = _cta_link(node, lang, "bp-tab", prefix)
+        if not link:
+            continue
+        icon = _icon(icons[index]) if index < len(icons) else ""
+        rendered.append(link.replace(">", ">" + icon, 1) if icon else link)
+    return f'<nav class="bp-tabs"{_attrs([("aria-label", name)])}>' + "".join(rendered) + "</nav>"
 
 
 def _render_stat_tile(block, props, data, lang, prefix=""):
@@ -387,7 +424,7 @@ def _render_stat_tile(block, props, data, lang, prefix=""):
             f'{esc(data["delta_text"])}</span>'
         )
     if data is not None and props.get("show_period") and data.get("period"):
-        body.append(f'<span class="bp-stat-period">{esc(data["period"])}</span>')
+        body.append(f'<span class="bp-stat-period">{esc(_period_text(data, lang))}</span>')
     # THE LABEL AND THE FIGURE ARE ONE COLUMN BESIDE THE ICON. Emitted flat,
     # every child was a cell in the same flex row, so a tile read as
     # "icon Population 115,457 +0.8% 2026" on one line and the figure had no

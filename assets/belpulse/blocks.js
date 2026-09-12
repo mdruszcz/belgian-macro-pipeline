@@ -386,6 +386,41 @@
       }
     }
 
+    /* REDRAW WHEN THE PALETTE CHANGES. A chart reads its gridline, label and
+       series colours from the design tokens AT DRAW TIME, so a canvas drawn in
+       the dark palette keeps its dark ink after the reader picks Light: grey
+       gridlines and grey labels on a white card. Canvas has no equivalent of a
+       stylesheet reflow, so the only fix is to draw it again.
+
+       The map needs nothing and is deliberately left out: CommuneMap fills its
+       paths with `var(--ramp-N)`, which the browser recolours itself -- and
+       re-hydrating it would rebuild the map and throw away the reader's pan
+       and zoom.
+
+       Only slots already drawn are redrawn. One that has not scrolled into
+       view yet will read the new palette when it does. */
+    function repaint() {
+      slots.forEach(function (slot) {
+        var kind = slot.getAttribute('data-hydrate');
+        if (kind !== 'chart' && kind !== 'spark') return;
+        if (slot.getAttribute('data-hydrated') !== '1') return;
+        slot.removeAttribute('data-hydrated');
+        run(slot);
+      });
+    }
+    /* Both ways the palette can move: the reader choosing on the page (which
+       writes data-theme on <html>), and the operating system switching under
+       a page left on Auto. */
+    if (global.MutationObserver) {
+      new global.MutationObserver(repaint).observe(document.documentElement, {
+        attributes: true, attributeFilter: ['data-theme'],
+      });
+    }
+    if (global.matchMedia) {
+      var os = global.matchMedia('(prefers-color-scheme: dark)');
+      if (os.addEventListener) os.addEventListener('change', repaint);
+    }
+
     if (!global.IntersectionObserver) {
       slots.forEach(run);   // no observer: correctness over laziness
       return;

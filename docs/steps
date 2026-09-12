@@ -1117,6 +1117,91 @@ STILL MISSING AND STILL LABELLED: no photograph (no photo library exists), no co
 no municipal budget or debt, no peer model, and no part-of-whole binding -- so the age structure
 is three tiles rather than the design's donut. A donut needs a binding that names several
 indicators as parts of one whole, which is a page-schema change and wants its own decision.
+18D -- MATCHING THE DESIGN, not merely being tighter than the last version (2026-09-10). The
+maintainer looked at 18C beside his reference and said it still looked nothing like it, and he was
+right: the comparison I had made was "tighter than before" rather than "the same as that". The
+palette was the largest part. BATCH 1 MEASURED A WARM EDITORIAL SHELL -- bg #f8f7f4, beige
+hairlines, a brick accent -- and the new reference (docs/design-references/homepage.png, supplied
+for the homepage and the profile together) had moved to a cool near-white ground, cool grey
+hairlines, navy ink and a cleaner crimson. Sampled from that PNG rather than guessed, by drawing
+it on a canvas in the browser that is already installed for the screenshot tests, because "looks
+about right" is how a page ends up ALMOST matching its design, which reads worse than not matching
+at all. Every contrast floor in test_design_tokens.py still passes on the new values.
+THE TINTED ICON SQUARE was the second part: the reference gives every figure a coloured square and
+NOT ALL THE SAME COLOUR -- population blue, money green, work violet, housing amber, safety red --
+and one accent-pink square repeated eighteen times does not read as a dashboard. Chosen by the
+icon's own name in the stylesheet, so a block author picks a picture and never a colour.
+THE DELTA WAS A DEAD PROP. `show_delta` existed on stat_tile and `delta_text` in kpi_card since
+Batch A, and the resolver produced neither, so the badge the design puts beside every number could
+not appear. Computing it turned up two ways this kind of badge lies, both live in this data. A
+PERCENTAGE MOVES IN POINTS: 8.9% to 8.3% is a fall of 0.6 points, and calling that "-6.7%" is a
+different and much more alarming claim. And A PART-YEAR READING IS NOT COMPARABLE to a full one:
+the police series publish the current year part-way through it, marked `provisional`, so the first
+working version reported Namur's burglary rate as down 55.8% when the truth is eight months
+against twelve. Deltas now refuse to cross a provisional or estimated cell -- and `derived` is
+comparable, which was the first thing that rule got wrong, silently dropping the delta from
+average income, the page's second headline figure. 10 hand-computed tests (rule 5), one of which
+caught my own arithmetic: 123.45 rounds to 123.4, not 123.5.
+WHILE FIXING IT, THE PAGE STARTED MARKING PROVISIONAL FIGURES AT ALL. The licence notice this site
+publishes states in three languages that the most recent year of each police series is marked
+provisional; the tiles did not mark it, and a quarter-to-date median price read as a year. The
+period now carries the status word beside it.
+ALSO: six key figures in one row rather than two rows of three; the header in the reference's own
+proportions (picture, narrow locator, then the standfirst over two rows of three figures), which
+took 474px down to 336px; icons on the tabs and on the thematic tiles (two version bumps); and the
+standfirst names the region and province, read from the trilingual geography metadata rather than
+from the commune payload's own English-only `region` field -- which had the French page reading
+"Wallonia . Namur" instead of "Region wallonne . Province de Namur". `localise()` now runs for a
+page PINNED to one commune as well as for the templated build, which is what makes those
+placeholders work on a preview page at all.
+ONE MORE CSS TRAP WORTH RECORDING: capping the map's height on its .mapbox did nothing, because
+that box is a flex item with `flex:1` -- a flex-basis of 0 overrides any height it is given, and it
+grows to fill a block which, in an auto-height grid row, is sized by its own content. 565 communes
+at 722px wide asked for 596px and got it. The cap belongs on the SVG, which is where the height
+actually comes from.
+STILL NOT THE REFERENCE, and each of these is a missing dataset or a decision rather than a
+styling gap: no photograph, no commune adjacency, no municipal budget or debt, no peer model, no
+part-of-whole binding (so the age structure is three tiles, not a donut), no search box in the top
+bar, no header action buttons, and the comparison table is one indicator across four geographies
+rather than the reference's six indicators against two averages -- that last one needs a binding
+shape this vocabulary does not have.
+18E -- commune.html, THE HAND-BUILT PREVIEW, brought to the model (2026-09-10). The maintainer
+asked for the root commune.html to look like the model PNG, assets included. Four of its "honest
+checklist" gaps closed, each by DATA WORK rather than by a picture of data:
+THE PHOTOGRAPH: assets/belpulse/commune/photos.json, keyed by NIS, pointing at resized copies
+(262 KB and 138 KB) of the maintainer's own Namur images; the hero carries the name, a tagline, a
+caption chip and a credit that says the image is generated, and the CTA band takes the dusk
+panorama. A commune with no entry keeps the plain frame and its note -- a picture of one place
+never stands in for another.
+NEIGHBOURING COMMUNES, which every page said this pipeline could not produce. It could: the
+boundary file is a shared-arc topology (build_commune_boundaries.py, point 2), so two communes
+that border share the same vertex coordinates, and adjacency is a set intersection in pure Python
+-- scripts/export_commune_adjacency.py, 565 communes, 1,580 borders, two shared vertices per
+border because one is a tripoint. Namur's ten computed neighbours are its ten real ones, asserted
+against a hand-written list. The sidebar lists them with the headline figure from the SAME payload
+the map is painted with; a second map frames the commune among them and names each (CommuneMap
+gained frame()). Two traps on the way: build() appends to the SVG, so a second render drew every
+path twice; and a map built inside a `loading` state body has no layout, so getBBox() returned
+zeros and the card was one dark slab. And a third: labels at any fixed size in a frame under one
+projected degree wide are a wall of ink -- sized from the frame.
+THE AGE DONUT AND AN ACTIVITY BREAKDOWN, waiting since Batch 4 for something published to say
+which indicators partition a whole. config/local_sections.yaml now has a `compositions:` block,
+and export_site_payloads.py VERIFIES it before publishing: for a group with a `whole`, the parts
+must sum to it in every commune and every period they share, or the layout is refused (rule 13).
+The page draws one panel per group from sections.json and holds no indicator id; the sector
+breakdown the design shows is not collected anywhere, so the second panel is the Census activity
+status and says so.
+THE LOCATOR tints the commune's own province and region from geographies.json's parent chain,
+with a legend and zoom -- and the subtitle reads "Region wallonne . Province de Namur" in French
+instead of the payload's English-only "Wallonia . Namur".
+ONE MORE WINDOWS FINDING: three payload writers wrote JSON with ensure_ascii=False and no
+encoding, so the first payload build on the maintainer's machine put accented commune names into
+public/data in cp1252 and json.load died on the first one. All three fixed, guarded in
+tests/test_cross_platform.py for shipping code; 54 fixture writes in tests/ do the same and are a
+separate cleanup (they are why test_geography_load.py fails on Windows).
+STILL MISSING, still labelled: municipal finance (no source), employment by sector (no source),
+a statistical-sector population map (commune boundaries only), named composite ranks (no peer
+model). 14 new tests.
 NOT DONE, AND ON PURPOSE: THE CUTOVER. export_local_pages.py still owns /local/{nis}/, so the
 templated document is NOT committed -- committing it would have `make pages` overwrite all 1,695
 live pages the next time it ran. The loop is exercised by tests/pages/test_commune_loop.py,

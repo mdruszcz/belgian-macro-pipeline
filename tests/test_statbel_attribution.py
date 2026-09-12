@@ -27,7 +27,14 @@ REPO = Path(__file__).resolve().parents[1]
 # Pages that render municipal (Statbel-derived) figures. all_data.html and
 # dashboard.html are national-only (NBB / Eurostat / FPB) and so are not
 # listed; add a page here the moment it starts showing commune data.
-MUNICIPAL_PAGES = ["communes.html", "local.html", "map.html", "home.html", "commune.html"]
+MUNICIPAL_PAGES = [
+    "communes.html",
+    "local.html",
+    "map.html",
+    "home.html",
+    "home2.html",
+    "commune.html",
+]
 
 
 def _rendered_strings() -> str:

@@ -15,19 +15,19 @@
           "id": "cp-photo",
           "layout": {
             "desktop": {
-              "h": 4,
-              "w": 5,
+              "h": 3,
+              "w": 4,
               "x": 0,
               "y": 0
             },
             "mobile": {
-              "h": 4,
+              "h": 3,
               "w": 4,
               "x": 0,
               "y": 0
             },
             "tablet": {
-              "h": 4,
+              "h": 3,
               "w": 8,
               "x": 0,
               "y": 0
@@ -64,22 +64,22 @@
           "id": "cp-locator",
           "layout": {
             "desktop": {
-              "h": 4,
-              "w": 3,
-              "x": 5,
+              "h": 3,
+              "w": 2,
+              "x": 4,
               "y": 0
             },
             "mobile": {
-              "h": 4,
+              "h": 3,
               "w": 4,
               "x": 0,
-              "y": 4
+              "y": 3
             },
             "tablet": {
-              "h": 4,
+              "h": 3,
               "w": 8,
               "x": 0,
-              "y": 4
+              "y": 3
             }
           },
           "locked": false,
@@ -93,7 +93,12 @@
             "indicator_picker": false,
             "locate_context": true,
             "show_legend": false,
-            "show_zoom": false
+            "show_zoom": false,
+            "title": {
+              "en": "{commune} within Belgium",
+              "fr": "{commune} en Belgique",
+              "nl": "{commune} in België"
+            }
           },
           "type": "map",
           "version": 3,
@@ -109,21 +114,21 @@
           "layout": {
             "desktop": {
               "h": 1,
-              "w": 4,
-              "x": 8,
+              "w": 6,
+              "x": 6,
               "y": 0
             },
             "mobile": {
               "h": 1,
               "w": 4,
               "x": 0,
-              "y": 8
+              "y": 6
             },
             "tablet": {
               "h": 1,
               "w": 8,
               "x": 0,
-              "y": 8
+              "y": 6
             }
           },
           "locked": false,
@@ -132,9 +137,9 @@
               {
                 "node": "paragraph",
                 "text": {
-                  "en": "Every economic, social and territorial indicator BelPulse publishes for this commune, updated automatically from official sources.",
-                  "fr": "Tous les indicateurs économiques, sociaux et territoriaux publiés par BelPulse pour cette commune, mis à jour automatiquement à partir de sources officielles.",
-                  "nl": "Alle economische, sociale en territoriale indicatoren die BelPulse voor deze gemeente publiceert, automatisch bijgewerkt uit officiële bronnen."
+                  "en": "{region} · {province}. Every economic, social and territorial indicator BelPulse publishes for {commune}, updated automatically from official sources.",
+                  "fr": "{region} · {province}. Tous les indicateurs économiques, sociaux et territoriaux publiés par BelPulse pour {commune}, mis à jour automatiquement à partir de sources officielles.",
+                  "nl": "{region} · {province}. Alle economische, sociale en territoriale indicatoren die BelPulse voor {commune} publiceert, automatisch bijgewerkt uit officiële bronnen."
                 }
               }
             ]
@@ -158,20 +163,20 @@
             "desktop": {
               "h": 1,
               "w": 2,
-              "x": 8,
+              "x": 6,
               "y": 1
             },
             "mobile": {
               "h": 1,
               "w": 2,
               "x": 0,
-              "y": 9
+              "y": 7
             },
             "tablet": {
               "h": 1,
               "w": 4,
               "x": 0,
-              "y": 9
+              "y": 7
             }
           },
           "locked": false,
@@ -182,7 +187,7 @@
               "fr": "Population",
               "nl": "Bevolking"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -204,20 +209,20 @@
             "desktop": {
               "h": 1,
               "w": 2,
-              "x": 10,
+              "x": 8,
               "y": 1
             },
             "mobile": {
               "h": 1,
               "w": 2,
               "x": 2,
-              "y": 9
+              "y": 7
             },
             "tablet": {
               "h": 1,
               "w": 4,
               "x": 4,
-              "y": 9
+              "y": 7
             }
           },
           "locked": false,
@@ -228,7 +233,7 @@
               "fr": "Revenu moyen",
               "nl": "Gemiddeld inkomen"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -250,20 +255,20 @@
             "desktop": {
               "h": 1,
               "w": 2,
-              "x": 8,
-              "y": 2
+              "x": 10,
+              "y": 1
             },
             "mobile": {
               "h": 1,
               "w": 2,
               "x": 0,
-              "y": 10
+              "y": 8
             },
             "tablet": {
               "h": 1,
               "w": 4,
               "x": 0,
-              "y": 10
+              "y": 8
             }
           },
           "locked": false,
@@ -274,7 +279,7 @@
               "fr": "Taux de chômage",
               "nl": "Werkloosheid"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -296,20 +301,20 @@
             "desktop": {
               "h": 1,
               "w": 2,
-              "x": 10,
+              "x": 6,
               "y": 2
             },
             "mobile": {
               "h": 1,
               "w": 2,
               "x": 2,
-              "y": 10
+              "y": 8
             },
             "tablet": {
               "h": 1,
               "w": 4,
               "x": 4,
-              "y": 10
+              "y": 8
             }
           },
           "locked": false,
@@ -320,7 +325,7 @@
               "fr": "Unités locales",
               "nl": "Lokale eenheden"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -343,19 +348,19 @@
               "h": 1,
               "w": 2,
               "x": 8,
-              "y": 3
+              "y": 2
             },
             "mobile": {
               "h": 1,
               "w": 2,
               "x": 0,
-              "y": 11
+              "y": 9
             },
             "tablet": {
               "h": 1,
               "w": 4,
               "x": 0,
-              "y": 11
+              "y": 9
             }
           },
           "locked": false,
@@ -366,7 +371,7 @@
               "fr": "Prix médian",
               "nl": "Mediane prijs"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -389,19 +394,19 @@
               "h": 1,
               "w": 2,
               "x": 10,
-              "y": 3
+              "y": 2
             },
             "mobile": {
               "h": 1,
               "w": 2,
               "x": 2,
-              "y": 11
+              "y": 9
             },
             "tablet": {
               "h": 1,
               "w": 4,
               "x": 4,
-              "y": 11
+              "y": 9
             }
           },
           "locked": false,
@@ -412,7 +417,7 @@
               "fr": "Population, 5 ans",
               "nl": "Bevolking, 5 jaar"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -458,6 +463,12 @@
               "fr": "Sections",
               "nl": "Secties"
             },
+            "icons": [
+              "chart",
+              "money",
+              "map",
+              "scale"
+            ],
             "items": [
               {
                 "href": "#figures",
@@ -494,7 +505,7 @@
             ]
           },
           "type": "section_nav",
-          "version": 1,
+          "version": 2,
           "visibility": {
             "desktop": true,
             "mobile": true,
@@ -516,7 +527,7 @@
           "layout": {
             "desktop": {
               "h": 2,
-              "w": 3,
+              "w": 2,
               "x": 0,
               "y": 0
             },
@@ -563,8 +574,8 @@
           "layout": {
             "desktop": {
               "h": 2,
-              "w": 3,
-              "x": 3,
+              "w": 2,
+              "x": 2,
               "y": 0
             },
             "mobile": {
@@ -610,8 +621,8 @@
           "layout": {
             "desktop": {
               "h": 2,
-              "w": 3,
-              "x": 6,
+              "w": 2,
+              "x": 4,
               "y": 0
             },
             "mobile": {
@@ -657,9 +668,9 @@
           "layout": {
             "desktop": {
               "h": 2,
-              "w": 3,
-              "x": 0,
-              "y": 2
+              "w": 2,
+              "x": 6,
+              "y": 0
             },
             "mobile": {
               "h": 2,
@@ -704,9 +715,9 @@
           "layout": {
             "desktop": {
               "h": 2,
-              "w": 3,
-              "x": 3,
-              "y": 2
+              "w": 2,
+              "x": 8,
+              "y": 0
             },
             "mobile": {
               "h": 2,
@@ -751,9 +762,9 @@
           "layout": {
             "desktop": {
               "h": 2,
-              "w": 3,
-              "x": 6,
-              "y": 2
+              "w": 2,
+              "x": 10,
+              "y": 0
             },
             "mobile": {
               "h": 2,
@@ -800,7 +811,7 @@
               "h": 3,
               "w": 5,
               "x": 0,
-              "y": 4
+              "y": 2
             },
             "mobile": {
               "h": 3,
@@ -850,7 +861,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 4
+              "y": 2
             },
             "mobile": {
               "h": 1,
@@ -873,7 +884,7 @@
               "fr": "0-14 ans",
               "nl": "0-14 jaar"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -896,7 +907,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 5
+              "y": 3
             },
             "mobile": {
               "h": 1,
@@ -919,7 +930,7 @@
               "fr": "15-64 ans",
               "nl": "15-64 jaar"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -942,7 +953,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 6
+              "y": 4
             },
             "mobile": {
               "h": 1,
@@ -965,7 +976,7 @@
               "fr": "65 ans et plus",
               "nl": "65 jaar en ouder"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -988,7 +999,7 @@
               "h": 3,
               "w": 5,
               "x": 0,
-              "y": 7
+              "y": 5
             },
             "mobile": {
               "h": 3,
@@ -1038,7 +1049,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 7
+              "y": 5
             },
             "mobile": {
               "h": 1,
@@ -1061,7 +1072,7 @@
               "fr": "En emploi",
               "nl": "Werkend"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1084,7 +1095,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 8
+              "y": 6
             },
             "mobile": {
               "h": 1,
@@ -1107,7 +1118,7 @@
               "fr": "Sans emploi",
               "nl": "Werkloos"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1130,7 +1141,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 9
+              "y": 7
             },
             "mobile": {
               "h": 1,
@@ -1153,7 +1164,7 @@
               "fr": "Inactifs",
               "nl": "Niet-actief"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1176,7 +1187,7 @@
               "h": 3,
               "w": 5,
               "x": 0,
-              "y": 10
+              "y": 8
             },
             "mobile": {
               "h": 3,
@@ -1226,7 +1237,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 10
+              "y": 8
             },
             "mobile": {
               "h": 1,
@@ -1249,7 +1260,7 @@
               "fr": "Bénéficiaires d’allocations",
               "nl": "Uitkeringsgerechtigden"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1272,7 +1283,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 11
+              "y": 9
             },
             "mobile": {
               "h": 1,
@@ -1295,7 +1306,7 @@
               "fr": "Part de la population",
               "nl": "Aandeel van de bevolking"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1318,7 +1329,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 12
+              "y": 10
             },
             "mobile": {
               "h": 1,
@@ -1341,7 +1352,7 @@
               "fr": "Chômage temporaire",
               "nl": "Tijdelijk werkloos"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1364,7 +1375,7 @@
               "h": 3,
               "w": 5,
               "x": 0,
-              "y": 13
+              "y": 11
             },
             "mobile": {
               "h": 3,
@@ -1414,7 +1425,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 13
+              "y": 11
             },
             "mobile": {
               "h": 1,
@@ -1437,7 +1448,7 @@
               "fr": "Transactions",
               "nl": "Transacties"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1460,7 +1471,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 14
+              "y": 12
             },
             "mobile": {
               "h": 1,
@@ -1483,7 +1494,7 @@
               "fr": "Logements inoccupés",
               "nl": "Onbewoonde woningen"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1506,7 +1517,7 @@
               "h": 1,
               "w": 4,
               "x": 5,
-              "y": 15
+              "y": 13
             },
             "mobile": {
               "h": 1,
@@ -1529,7 +1540,7 @@
               "fr": "Taille des ménages",
               "nl": "Huishoudgrootte"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1548,7 +1559,7 @@
               "h": 2,
               "w": 3,
               "x": 9,
-              "y": 0
+              "y": 2
             },
             "mobile": {
               "h": 2,
@@ -1602,7 +1613,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 2
+              "y": 4
             },
             "mobile": {
               "h": 1,
@@ -1651,7 +1662,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 3
+              "y": 5
             },
             "mobile": {
               "h": 1,
@@ -1695,7 +1706,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 4
+              "y": 6
             },
             "mobile": {
               "h": 1,
@@ -1735,7 +1746,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 5
+              "y": 7
             },
             "mobile": {
               "h": 1,
@@ -1784,7 +1795,7 @@
               "h": 2,
               "w": 3,
               "x": 9,
-              "y": 6
+              "y": 8
             },
             "mobile": {
               "h": 2,
@@ -1836,7 +1847,7 @@
               "h": 2,
               "w": 3,
               "x": 9,
-              "y": 8
+              "y": 10
             },
             "mobile": {
               "h": 2,
@@ -1901,7 +1912,7 @@
               "h": 2,
               "w": 3,
               "x": 9,
-              "y": 10
+              "y": 12
             },
             "mobile": {
               "h": 2,
@@ -1949,7 +1960,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 12
+              "y": 14
             },
             "mobile": {
               "h": 1,
@@ -1972,7 +1983,7 @@
               "fr": "Cambriolages",
               "nl": "Woninginbraken"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -1995,7 +2006,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 13
+              "y": 15
             },
             "mobile": {
               "h": 1,
@@ -2018,7 +2029,7 @@
               "fr": "Vols de voiture",
               "nl": "Autodiefstal"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -2041,7 +2052,7 @@
               "h": 1,
               "w": 3,
               "x": 9,
-              "y": 14
+              "y": 16
             },
             "mobile": {
               "h": 1,
@@ -2064,7 +2075,7 @@
               "fr": "Violence intrafamiliale",
               "nl": "Huiselijk geweld"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -2170,7 +2181,7 @@
               "fr": "Revenu imposable total",
               "nl": "Totaal belastbaar inkomen"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -2216,7 +2227,7 @@
               "fr": "Impôt total",
               "nl": "Totale belasting"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -2262,7 +2273,7 @@
               "fr": "Déclarations avec revenu",
               "nl": "Aangiften met inkomen"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -2308,7 +2319,7 @@
               "fr": "Impôt communal",
               "nl": "Gemeentebelasting"
             },
-            "show_delta": false,
+            "show_delta": true,
             "show_period": true
           },
           "type": "stat_tile",
@@ -2382,19 +2393,19 @@
           "id": "cp-choropleth",
           "layout": {
             "desktop": {
-              "h": 5,
-              "w": 8,
+              "h": 4,
+              "w": 6,
               "x": 0,
               "y": 0
             },
             "mobile": {
-              "h": 5,
+              "h": 4,
               "w": 4,
               "x": 0,
               "y": 0
             },
             "tablet": {
-              "h": 5,
+              "h": 4,
               "w": 8,
               "x": 0,
               "y": 0
@@ -2426,22 +2437,22 @@
           "id": "cp-map-note",
           "layout": {
             "desktop": {
-              "h": 5,
-              "w": 4,
-              "x": 8,
+              "h": 4,
+              "w": 6,
+              "x": 6,
               "y": 0
             },
             "mobile": {
-              "h": 5,
+              "h": 4,
               "w": 4,
               "x": 0,
-              "y": 5
+              "y": 4
             },
             "tablet": {
-              "h": 5,
+              "h": 4,
               "w": 8,
               "x": 0,
-              "y": 5
+              "y": 4
             }
           },
           "locked": false,
@@ -2563,6 +2574,7 @@
                   "fr": "La population et sa structure par âge.",
                   "nl": "Bevolking en leeftijdsstructuur."
                 },
+                "icon": "people",
                 "label": {
                   "en": "Demography",
                   "fr": "Démographie",
@@ -2575,6 +2587,7 @@
                   "fr": "Revenu net imposable par déclaration.",
                   "nl": "Netto belastbaar inkomen per aangifte."
                 },
+                "icon": "money",
                 "label": {
                   "en": "Income",
                   "fr": "Revenus",
@@ -2587,6 +2600,7 @@
                   "fr": "Chômage et bénéficiaires d’allocations.",
                   "nl": "Werkloosheid en uitkeringsgerechtigden."
                 },
+                "icon": "work",
                 "label": {
                   "en": "Labour market",
                   "fr": "Marché du travail",
@@ -2599,6 +2613,7 @@
                   "fr": "Prix médian et transactions.",
                   "nl": "Mediane prijs en transacties."
                 },
+                "icon": "home",
                 "label": {
                   "en": "Housing",
                   "fr": "Logement",
@@ -2611,6 +2626,7 @@
                   "fr": "Unités locales enregistrées ici.",
                   "nl": "Hier geregistreerde lokale eenheden."
                 },
+                "icon": "chart",
                 "label": {
                   "en": "Business",
                   "fr": "Économie locale",
@@ -2623,6 +2639,7 @@
                   "fr": "Taux de criminalité enregistrés.",
                   "nl": "Geregistreerde criminaliteitscijfers."
                 },
+                "icon": "shield",
                 "label": {
                   "en": "Safety",
                   "fr": "Sécurité",
@@ -2637,7 +2654,7 @@
             }
           },
           "type": "feature_tiles",
-          "version": 1,
+          "version": 2,
           "visibility": {
             "desktop": true,
             "mobile": true,

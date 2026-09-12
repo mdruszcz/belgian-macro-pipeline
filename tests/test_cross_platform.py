@@ -65,6 +65,43 @@ def test_every_text_subprocess_declares_its_encoding():
     )
 
 
+#: A `.write_text(...)` call, brace-matched shallowly like the subprocess one.
+_WRITE = re.compile(r"\.write_text\((?:[^()]|\([^()]*\))*?\)", re.S)
+
+
+def test_every_write_text_declares_its_encoding():
+    """`write_text()` with no encoding writes in the PLATFORM codepage.
+
+    Three payload writers did exactly that with `ensure_ascii=False`, so on
+    the maintainer's Windows machine every accented commune name went into
+    public/data as cp1252 -- and the first thing that read one back was
+    `json.load`, which died on "Répartition". On the Linux runners the
+    codepage is UTF-8 and nothing ever failed. The same class of defect as
+    the subprocess guard above, one layer down.
+
+    Asserted over the source: the failure only exists on a machine whose
+    codepage is not UTF-8.
+
+    SHIPPING CODE ONLY, for now. The same call shape appears some forty times
+    in tests/ as fixture writes, and it is why test_geography_load.py fails on
+    Windows (it writes a fixture in cp1252 and reads it as UTF-8). Those are
+    a separate cleanup; this guard is about what reaches public/data.
+    """
+    offenders = []
+    for path in _python_files():
+        if path.relative_to(REPO).parts[0] == "tests":
+            continue
+        source = path.read_text(encoding="utf-8")
+        for call in _WRITE.finditer(source):
+            if "encoding=" not in call.group(0):
+                line = source[: call.start()].count("\n") + 1
+                offenders.append(f"{path.relative_to(REPO)}:{line}")
+    assert not offenders, (
+        "write_text() without an explicit encoding writes in the platform codepage, "
+        "which is not UTF-8 on Windows:\n  " + "\n  ".join(offenders)
+    )
+
+
 def test_no_harness_is_passed_to_node_on_the_command_line():
     """Windows caps a whole command line at about 32 KB.
 

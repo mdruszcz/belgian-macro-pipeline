@@ -402,3 +402,60 @@ a.bp-feature-tile:focus-visible{outline:2px solid var(--bp-accent); outline-offs
   .bp-map-picker{flex:1 1 100%}
   .bp-map-picker select{flex:1; min-width:0; width:100%}
 }
+
+/* ---- the tinted icon square ---------------------------------------------
+   The reference gives every figure a coloured square, and NOT ALL THE SAME
+   COLOUR: population blue, money green, work violet, housing amber, safety
+   red. It is the most recognisable thing about that design, and the reason a
+   wall of eighteen tiles reads as a dashboard rather than as a list.
+
+   Chosen here from the icon's own name -- render.py writes data-icon -- so a
+   block author picks a picture and never a colour, and two blocks showing the
+   same kind of figure cannot end up different colours on different pages. */
+.bp-kpi-icon[data-icon="people"],
+.bp-kpi-icon[data-icon="chart"],
+.bp-kpi-icon[data-icon="map"]{background:var(--bp-icon-blue-bg); color:var(--bp-icon-blue-ink)}
+.bp-kpi-icon[data-icon="money"],
+.bp-kpi-icon[data-icon="scale"]{background:var(--bp-icon-green-bg); color:var(--bp-icon-green-ink)}
+.bp-kpi-icon[data-icon="work"]{background:var(--bp-icon-violet-bg); color:var(--bp-icon-violet-ink)}
+.bp-kpi-icon[data-icon="home"]{background:var(--bp-icon-amber-bg); color:var(--bp-icon-amber-ink)}
+.bp-kpi-icon[data-icon="shield"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+
+/* ---- the delta ----------------------------------------------------------
+   An arrow and a figure, the way the reference draws it. The arrow is CSS
+   because it is punctuation for the number beside it, not information of its
+   own: the direction is already in the sign, and a screen reader reading
+   "up arrow plus zero point four percent" is worse than reading the number. */
+.bp-delta::before{font-size:9px; line-height:1}
+.bp-delta[data-direction="favourable"]::before{content:"\25B2"}
+.bp-delta[data-direction="unfavourable"]::before{content:"\25BC"}
+/* Grey, and deliberately so: most indicators in this pipeline declare no
+   preferred direction (they are `contextual`), and colouring a change green
+   would tell a reader that a rising median price is good news for them --
+   which depends entirely on whether they are buying or selling. */
+.bp-delta[data-direction="neutral"]{color:var(--bp-text-muted)}
+.bp-delta[data-direction="neutral"]::before{content:""}
+
+/* ---- a map has a size --------------------------------------------------
+   An SVG with a viewBox and no definite height takes its own aspect ratio,
+   and a grid row sized to its content then takes that -- so the choropleth
+   grew to whatever 565 communes wanted (about 700px) whatever height the
+   layout gave the block, and the section read as a page of map with some
+   text beside it. Capped rather than fixed, so a narrow column still gets a
+   map in proportion. */
+/* CAPPED ON THE SVG ITSELF, which is where the height actually comes from.
+   Capping the .mapbox did nothing: it is a flex item with `flex:1`, so its
+   flex-basis of 0 overrides any height it is given and it simply grows to
+   whatever the block is -- and the block, in an auto-height grid row, is
+   whatever its content asks for, which is the SVG's own aspect ratio. 565
+   communes at 722px wide asked for 596px. */
+.bp-block--map .mapbox{flex:0 0 auto; min-height:0}
+.bp-block--map .mapbox svg{width:100%; height:auto; max-height:300px}
+
+/* Tab and tile icons. Small and inline on a tab -- the strip is navigation,
+   not a row of cards -- and a tinted square on a tile, matching the figures. */
+.bp-tabs a.bp-tab{display:inline-flex; align-items:center; gap:6px}
+.bp-tabs a.bp-tab .bp-kpi-icon{
+  width:16px; height:16px; border-radius:4px; margin:0; background:none; color:inherit;
+}
+.bp-block--feature_tiles .bp-kpi-icon{width:26px; height:26px; border-radius:7px; margin:0 0 2px}

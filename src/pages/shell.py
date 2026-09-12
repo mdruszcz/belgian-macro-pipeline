@@ -54,6 +54,38 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Fran\u00e7ais", "nl": "Nederlands"}
 #: What the switcher calls itself, for a screen reader.
 SWITCHER_LABEL = {"en": "Language", "fr": "Langue", "nl": "Taal"}
 
+#: The theme switch. THE SITE HAS HAD A LIGHT AND A DARK PALETTE SINCE BATCH 1
+#: and the block-built pages offered no way to choose: they followed
+#: prefers-color-scheme alone, so a maintainer whose laptop is in dark mode
+#: could not see the light design his own reference is drawn in, on the very
+#: page built to match it.
+#:
+#: Three states, and `auto` is not decoration: it REMOVES the override and
+#: hands the page back to the operating system, which is the only way back
+#: once a reader has chosen. `auto` is NOT the default, though: every design
+#: this site is drawn from is light, so a page with no saved choice opens
+#: light whatever the machine prefers. Following the OS by default handed a
+#: reader on a dark laptop a page the design was never drawn in. The key is `belpulse-theme` -- the same one
+#: all_data.html, commune.html and the component gallery already write, so a
+#: choice made anywhere on this site holds everywhere on it.
+THEME_LABEL = {"en": "Theme", "fr": "Thème", "nl": "Thema"}
+THEME_CHOICES = (
+    ("light", {"en": "Light", "fr": "Clair", "nl": "Licht"}),
+    ("auto", {"en": "Auto", "fr": "Auto", "nl": "Auto"}),
+    ("dark", {"en": "Dark", "fr": "Sombre", "nl": "Donker"}),
+)
+
+#: Read BEFORE THE FIRST PAINT, so a reader who chose light does not watch a
+#: dark page flash first. Inline and in the head for that reason: a linked file
+#: cannot promise to run before the stylesheets apply.
+THEME_BOOTSTRAP = (
+    "<script>(function(){try{var t=localStorage.getItem('belpulse-theme');"
+    "if(t!=='auto')document.documentElement.setAttribute('data-theme',"
+    "t==='dark'?'dark':'light');"
+    "}catch(e){document.documentElement.setAttribute('data-theme','light');}"
+    "})();</script>"
+)
+
 #: THE SITE'S OWN CHROME -- top bar, breadcrumb, footer.
 #:
 #: This is interface text, not content, so it lives here beside the switcher
@@ -437,6 +469,24 @@ def wrap(
     # across the whole site is docs/features/i18n.md's own goal, and the key is
     # I18N.STORAGE_KEY. The link has already navigated by the time this runs,
     # so a reader without JavaScript loses the memory, not the page.
+    # THE THEME SWITCH. Self-contained rather than calling
+    # BPComponents.initThemeToggle: components.js is linked only by a page that
+    # has an interactive block, and every page carries this control.
+    scripts += (
+        "\n<script>(function(){var k='belpulse-theme',"
+        "b=document.querySelectorAll('.bp-theme-toggle button[data-theme-choice]'),"
+        "saved=null;try{saved=localStorage.getItem(k);}catch(e){}"
+        "b.forEach(function(x){x.setAttribute('aria-pressed',"
+        "String((saved||'light')===x.getAttribute('data-theme-choice')));"
+        "x.addEventListener('click',function(){"
+        "var c=x.getAttribute('data-theme-choice');"
+        "if(c==='auto'){document.documentElement.removeAttribute('data-theme');}"
+        "else{document.documentElement.setAttribute('data-theme',c);}"
+        "try{localStorage.setItem(k,c);}catch(e){}"
+        "b.forEach(function(y){y.setAttribute('aria-pressed',String(y===x));});"
+        "});});})();</script>"
+    )
+
     if switcher:
         scripts += (
             "\n<script>document.querySelectorAll('.bp-lang-switch a')"
@@ -457,6 +507,20 @@ def wrap(
     nav_items = "".join(
         f'<a href="{_local(href)}">{escape(_text(labels, lang))}</a>' for href, labels in NAV_LINKS
     )
+    # aria-pressed says `auto` here because a static file cannot know what the
+    # reader chose; the script below corrects it from localStorage on load.
+    # Stated rather than left off, so the control is never in no state at all.
+    theme_switch = (
+        '<div class="bp-theme-toggle" role="group" '
+        f'aria-label="{escape(_text(THEME_LABEL, lang), quote=True)}">'
+        + "".join(
+            f'<button type="button" data-theme-choice="{choice}" '
+            f'aria-pressed="{"true" if choice == "auto" else "false"}">'
+            f"{escape(_text(labels, lang))}</button>"
+            for choice, labels in THEME_CHOICES
+        )
+        + "</div>"
+    )
     topbar = (
         '\n<header class="bp-topbar">'
         f'<a class="bp-logo" href="{_local("/")}">'
@@ -465,7 +529,7 @@ def wrap(
         f'<span class="bp-tagline">{escape(_text(TAGLINE, lang))}</span></span></a>'
         f'<nav class="bp-nav" aria-label="{escape(_text(NAV_LABEL, lang), quote=True)}">'
         f"{nav_items}</nav>"
-        f"{switcher}"
+        f'<div class="bp-topbar-actions">{theme_switch}{switcher}</div>'
         "</header>"
     )
 
@@ -510,6 +574,7 @@ def wrap(
         f'<html lang="{escape(lang, quote=True)}">\n'
         "<head>\n"
         '    <meta charset="UTF-8">\n'
+        f"    {THEME_BOOTSTRAP}\n"
         '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
         f"    <title>{escape(title)}</title>"
         f"{robots}"

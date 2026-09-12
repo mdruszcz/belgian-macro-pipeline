@@ -478,6 +478,20 @@ MapUI.CommuneMap = class CommuneMap {
     return true;
   }
 
+  /* Frame a SET of communes -- a commune and its neighbours. The union of
+     their boxes, padded, so the group fills the map with a margin; nothing is
+     outlined here, since which of them is the subject is the caller's own
+     styling decision (commune.html marks it with locate-me). */
+  frame(nisList) {
+    const boxes = nisList.map(n => this.byNis[n]).filter(Boolean).map(f => f.el.getBBox());
+    if (!boxes.length) return false;
+    const x0 = Math.min(...boxes.map(b => b.x)), y0 = Math.min(...boxes.map(b => b.y));
+    const x1 = Math.max(...boxes.map(b => b.x + b.width)), y1 = Math.max(...boxes.map(b => b.y + b.height));
+    const pad = Math.max(x1 - x0, y1 - y0) * 0.08;
+    this._setView({x: x0 - pad, y: y0 - pad, w: x1 - x0 + pad * 2, h: y1 - y0 + pad * 2});
+    return true;
+  }
+
   /* Frame one commune and outline it -- what a search result should do. */
   focus(nis) {
     const f = this.byNis[nis];

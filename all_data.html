@@ -172,7 +172,9 @@
 (function(){
   try{
     var t = localStorage.getItem('belpulse-theme');
-    if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    // Light by default -- the design is light; the OS preference applies
+    // only to a reader who explicitly chose 'auto'.
+    if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
   }catch(e){ /* localStorage can throw in private mode; auto is a fine fallback */ }
 })();
 </script>
@@ -360,8 +362,8 @@ load();
     b.addEventListener('click', function(){ apply(b.getAttribute('data-theme-choice'), true); });
   });
 
-  var saved = 'auto';
-  try{ saved = localStorage.getItem(KEY) || 'auto'; }catch(e){}
+  var saved = 'light';
+  try{ saved = localStorage.getItem(KEY) || 'light'; }catch(e){}
   apply(saved, false);
 })();
 </script>

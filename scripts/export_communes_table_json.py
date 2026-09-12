@@ -153,7 +153,9 @@ def write_table(
 ) -> int:
     table = build_table(csv_path, lineage, names)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(table, ensure_ascii=False, separators=(",", ":")))
+    out_path.write_text(
+        json.dumps(table, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+    )
     return len(table["communes"])
 
 
