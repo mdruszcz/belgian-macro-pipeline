@@ -16,23 +16,30 @@ description:
     is comparable to published EU/Eurostat rates. Source: WalStat (IWEPS), series
     236400_0, "Taux de chômage BIT pour comparaisons internationales par âge et sexe".
 
-    WALLOON COMMUNES ONLY -- 262 of Belgium's 565 -- and that is a LICENCE boundary, not
-    a gap in the data. IWEPS computes this same calibration for all three regions: their
-    spreadsheet on iweps.be carries 581 communes over 1999-2022, downloaded and read
-    2026-09-12. But the CC0 grant is the one on IWEPS' Open Data page, and it covers the
-    opendata.iweps.be catalogue and API this series is fetched through -- "Les données et
-    le catalogue sont distribués sous Licence CC0" -- and THAT CATALOGUE IS WALLOON.
-    Tested, not assumed: on series 236400_0, ins=3000 (Wallonie) answers and `prov`
-    returns the five Walloon provinces, while ins=1000 (Belgium), ins=2000 (Flanders),
-    ins=4000 (Brussels), 11001 Aartselaar, 11002 Antwerpen and 21004 Bruxelles every one
-    return "la requete ne retourne aucun resultat". The all-Belgium spreadsheet sits on
-    the institute's ordinary website instead, whose legal notice permits reuse only
-    "moyennant mention de la source et uniquement pour un usage qui ne soit ni commercial,
-    ni publicitaire", so it is not used here -- the maintainer's standing rule is not to
-    build on data that cannot be resold. Extending this series past Wallonia therefore
-    needs written permission from IWEPS for that file. The regional alternatives
-    (VDAB/Arvastat, Actiris) publish ADMINISTRATIVE rates, a different measure -- see
-    ADMIN_UNEMPLOYMENT_RATE_COM -- which must never be merged into this series.
+    WALLOON COMMUNES ONLY -- 262 of Belgium's 565 -- and the reason is the CATALOGUE'S
+    SCOPE, not its licence. IWEPS computes this same calibration for all three regions:
+    their spreadsheet on iweps.be carries 581 communes over 1999-2022, downloaded and
+    read 2026-09-12. The CC0 grant on IWEPS' Open Data page covers the opendata.iweps.be
+    catalogue and API this series is fetched through -- "Les données et le catalogue sont
+    distribués sous Licence CC0" -- and THAT CATALOGUE IS WALLOON. Tested, not assumed:
+    on series 236400_0, ins=3000 (Wallonie) answers and `prov` returns the five Walloon
+    provinces, while ins=1000 (Belgium), ins=2000 (Flanders), ins=4000 (Brussels), 11001
+    Aartselaar, 11002 Antwerpen and 21004 Bruxelles every one return "la requete ne
+    retourne aucun resultat".
+
+    THE LICENCE IS NOT A BLOCKER, settled by the maintainer 2026-09-12. iweps.be's legal
+    notice does open with "Sauf stipulation contraire ... uniquement pour un usage qui ne
+    soit ni commercial, ni publicitaire", but it predates the institute's open-data
+    policy and IWEPS now publishes under CC0 throughout -- the Open Data page being
+    precisely the "stipulation contraire" that notice defers to. So extending this series
+    to the other 319 communes is ordinary work, not a legal question: the all-Belgium
+    figures are in a spreadsheet, which means a manual-source loader on the route
+    census2021 and realestate already take. Worth doing whenever those communes are
+    wanted.
+
+    The regional alternatives (VDAB/Arvastat, Actiris) publish ADMINISTRATIVE rates, a
+    different measure -- see ADMIN_UNEMPLOYMENT_RATE_COM -- which must never be merged
+    into this series whatever the licence says.
 
     NOT INTERCHANGEABLE WITH UNEMPLOYMENT_RATE_COM, despite both being "the unemployment
     rate, 15-64". Measured on the 262 Walloon communes at 2021, the Census-derived figure
