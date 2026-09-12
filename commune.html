@@ -21,6 +21,8 @@
       panel shows the Census ACTIVITY STATUS breakdown instead, and says so.
     * The age structure: NOW DRAWN. config/local_sections.yaml declares which
       indicators partition the population; the exporter verifies the claim.
+      A separate Statbel-derived payload preserves the source's age × sex
+      dimensions and powers a real five-year population pyramid.
     * Neighbouring communes: NOW SHOWN. metadata/adjacency.json is derived
       from the boundary file at export (scripts/export_commune_adjacency.py);
       the list and the neighbour map read it.
@@ -37,8 +39,9 @@
   And three where the design's label and the real figure differ, so the real
   one is used and named as itself: the income figure is an AVERAGE net
   taxable income per return (the design says median), the housing figure is a
-  median SALE price in euro (the design says a price per m2), and the age
-  split has THREE bands here, not the design's four.
+  median SALE price in euro (the design says a price per m2), and the compact
+  age split has THREE bands rather than the design's four. The detailed
+  pyramid below it uses the source's single ages grouped into five-year bands.
   The CTA reads the real counts from manifest.json, not the design's
   aspirational "581 communes / 200+ indicators".
 
@@ -264,6 +267,31 @@
   .barlist .bar i{display:block; height:100%; border-radius:5px}
   .barlist .pct{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
   .barlist .abs{font-size:10px; color:var(--bp-text-faint); grid-column:2 / span 2; margin-top:-5px}
+  .pyramid-panel{padding-bottom:var(--bp-space-4)}
+  .pyramid-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:var(--bp-space-3)}
+  .pyramid-head h3{margin:0; font-size:1.1rem}
+  .pyramid-head .psub{margin-bottom:0}
+  .pyramid-legend{display:flex; gap:14px; flex:none; font-size:11px; color:var(--bp-text-muted)}
+  .pyramid-legend span{display:flex; align-items:center; gap:5px}
+  .pyramid-legend i{display:block; width:10px; height:10px; border-radius:3px}
+  .pyramid-legend .male i{background:var(--bp-chart-1)}
+  .pyramid-legend .female i{background:var(--bp-chart-7)}
+  .pyramid-chart{display:flex; flex-direction:column; gap:3px}
+  .pyramid-axis,.pyramid-row{display:grid; grid-template-columns:56px minmax(0,1fr) 46px minmax(0,1fr) 56px; gap:6px; align-items:center}
+  .pyramid-axis{font-size:10px; color:var(--bp-text-faint); margin-bottom:3px}
+  .pyramid-axis .left{text-align:right; grid-column:1 / span 2}
+  .pyramid-axis .right{grid-column:4 / span 2}
+  .pyramid-row{min-height:17px; font-size:10px; font-variant-numeric:tabular-nums}
+  .pyramid-value{color:var(--bp-text-muted)}
+  .pyramid-value.left{text-align:right}
+  .pyramid-age{text-align:center; color:var(--bp-text); font-weight:var(--bp-weight-medium); white-space:nowrap}
+  .pyramid-track{height:13px; background:var(--bp-surface-alt); overflow:hidden; display:flex}
+  .pyramid-track.left{justify-content:flex-end; border-radius:4px 0 0 4px}
+  .pyramid-track.right{justify-content:flex-start; border-radius:0 4px 4px 0}
+  .pyramid-track i{display:block; height:100%; min-width:1px}
+  .pyramid-track.left i{background:var(--bp-chart-1); border-radius:4px 0 0 4px}
+  .pyramid-track.right i{background:var(--bp-chart-7); border-radius:0 4px 4px 0}
+  .pyramid-note{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:var(--bp-space-3) 0 0}
   .maprow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .maprow .mapbox{position:relative; min-height:230px}
   .maprow .legend{overflow-x:auto; margin-top:8px}
@@ -479,6 +507,27 @@
           <div id="compositions" style="display:contents"></div>
         </section>
 
+        <section class="panel pyramid-panel bp-state" id="pyramidPanel" data-state="loading">
+          <div class="pyramid-head">
+            <div>
+              <h3 data-t="cpPyramidTitle">Population pyramid</h3>
+              <div class="psub" id="pyramidSub">—</div>
+            </div>
+            <div class="pyramid-legend" aria-hidden="true">
+              <span class="male"><i></i><span data-t="cpPyramidMale">Men</span></span>
+              <span class="female"><i></i><span data-t="cpPyramidFemale">Women</span></span>
+            </div>
+          </div>
+          <div class="bp-state-body">
+            <div class="pyramid-chart" id="pyramidChart"></div>
+            <p class="pyramid-note" data-t="cpPyramidNote">Five-year groups from Statbel's single-year ages. Sex is shown as recorded by the source (F/M); 100+ is top-coded.</p>
+          </div>
+          <div class="bp-state-message">
+            <span class="headline" data-t="cpPyramidUnavailable">No age-by-sex breakdown</span>
+            <span class="why" data-t="cpPyramidUnavailableWhy">The detailed Statbel population payload is unavailable for this commune.</span>
+          </div>
+        </section>
+
         <section>
           <h2 class="sec" data-t="cpFinances">Local finances</h2>
           <div class="fin4" id="finRow"></div>
@@ -684,6 +733,7 @@
   var ADJACENCY_URL   = 'public/data/metadata/adjacency.json';
   var PHOTOS_URL      = 'assets/belpulse/commune/photos.json';
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
+  var AGE_SEX_URL = function(nis){ return 'public/data/demography/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
 
   var LANG = I18N.initial();
@@ -695,6 +745,7 @@
     sections: {headlines: [], sections: []}, sources: {}, grades: {},
     geojson: null, map: null, locator: null, manifest: {},
     geographies: {}, adjacency: {}, photos: {}, headlineValues: null, nbMap: null,
+    ageSex: null,
   };
 
   /* The geography row for a NIS code, and the chain above it. geographies.json
@@ -748,6 +799,14 @@
     return Object.keys(entry.periods).sort()
       .map(function(p){ return {period: p, value: entry.periods[p].value}; })
       .filter(function(pt){ return typeof pt.value === 'number'; });
+  }
+  function calendarDate(iso){
+    if(!iso) return '—';
+    var date = new Date(iso + (iso.length === 10 ? 'T00:00:00Z' : ''));
+    if(isNaN(date.getTime())) return iso;
+    return new Intl.DateTimeFormat(LANG, {
+      day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+    }).format(date);
   }
 
   function applyStrings(){
@@ -1006,24 +1065,6 @@
     });
   }
 
-  /* ---- age donut: honestly unavailable, and worth explaining why ---------
-     THE DATA IS THERE AND STILL CANNOT BE DRAWN. This pipeline holds three
-     age bands whose values sum to EXACTLY the published population. But a
-     donut of shares needs to know which indicators partition a whole, and
-     nothing published says so: the index row carries unit, additivity,
-     direction, decimals, coverage and provenance -- no part-of-whole
-     relationship. Other additive counts (women, married people) sit in the
-     same configured section and are indistinguishable from an age band by
-     any published property.
-
-     So the only ways to draw this are to hardcode the three indicator names
-     into this page -- which the 50%-gate rule forbids, and which
-     tests/test_map_ui_logic.py enforces against this very file -- or to
-     guess a subset that happens to add up, which would silently produce a
-     wrong donut the first time a new additive count joined the section.
-     Neither is acceptable, so the panel says what is missing instead. Adding
-     a part-of declaration to config/indicators/*.yaml turns this on with no
-     change here. */
   /* ---- part-of-whole panels ----------------------------------------------
      One panel per group in sections.json's `compositions`. The exporter has
      already checked, in every commune and period it could, that the parts of
@@ -1041,6 +1082,65 @@
       return sets.every(function(s){ return s.indexOf(p) !== -1; });
     }).sort();
     return common.length ? common[common.length - 1] : null;
+  }
+
+  /* ---- population pyramid ----------------------------------------------
+     A purpose-built payload preserves Statbel's real age × sex dimensions.
+     It is separate from scalar indicators because neither age nor sex is an
+     indicator: together they are dimensions of one population table. The
+     exporter validates every commune's 42 cells against its published total
+     before this page can receive them. */
+  function renderAgeSex(){
+    var panel = document.getElementById('pyramidPanel');
+    var chart = document.getElementById('pyramidChart');
+    var payload = state.ageSex;
+    chart.innerHTML = '';
+    if(!payload || payload.nis_code !== state.nis || !Array.isArray(payload.bands) || !payload.bands.length){
+      panel.dataset.state = 'unavailable';
+      document.getElementById('pyramidSub').textContent = T('mapNoData');
+      return;
+    }
+
+    var values = [];
+    payload.bands.forEach(function(band){ values.push(band.male || 0, band.female || 0); });
+    var max = Math.max.apply(null, values.concat([1]));
+    var axis = document.createElement('div');
+    axis.className = 'pyramid-axis';
+    axis.innerHTML = '<span class="left"></span><span class="right"></span>';
+    axis.querySelector('.left').textContent = T('cpPyramidMale');
+    axis.querySelector('.right').textContent = T('cpPyramidFemale');
+    chart.appendChild(axis);
+
+    payload.bands.slice().reverse().forEach(function(band){
+      var male = band.male || 0, female = band.female || 0;
+      var age = band.to === null ? band.from + '+' : band.from + '–' + band.to;
+      var row = document.createElement('div');
+      row.className = 'pyramid-row';
+      row.setAttribute('aria-label', T('cpPyramidRow', {
+        age: age,
+        male: male.toLocaleString(LANG),
+        female: female.toLocaleString(LANG),
+      }));
+      row.innerHTML =
+        '<span class="pyramid-value left"></span>' +
+        '<span class="pyramid-track left"><i></i></span>' +
+        '<span class="pyramid-age"></span>' +
+        '<span class="pyramid-track right"><i></i></span>' +
+        '<span class="pyramid-value right"></span>';
+      row.querySelector('.pyramid-value.left').textContent = male.toLocaleString(LANG);
+      row.querySelector('.pyramid-value.right').textContent = female.toLocaleString(LANG);
+      row.querySelector('.pyramid-age').textContent = age;
+      row.querySelector('.pyramid-track.left i').style.width = (male / max * 100).toFixed(2) + '%';
+      row.querySelector('.pyramid-track.right i').style.width = (female / max * 100).toFixed(2) + '%';
+      chart.appendChild(row);
+    });
+
+    var reference = payload.reference_date || payload.period;
+    document.getElementById('pyramidSub').textContent = T('cpPyramidSub', {
+      date: calendarDate(reference),
+      updated: calendarDate(payload.source_updated),
+    });
+    panel.dataset.state = 'ready';
   }
 
   function renderCompositions(){
@@ -1490,6 +1590,7 @@
     renderKeyFigures();
     renderEvolution();
     renderCompositions();
+    renderAgeSex();
     renderFinances();
     renderComparison();
     renderRanks();
@@ -1520,6 +1621,7 @@
       fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
       fetch(MANIFEST_URL), fetch(COMMUNE_URL(state.nis)),
       fetch(GEOGRAPHIES_URL), fetch(ADJACENCY_URL), fetch(PHOTOS_URL),
+      fetch(AGE_SEX_URL(state.nis)),
     ]);
     // Each of these is optional and degrades to the honest state: no
     // geography metadata means English place names, no adjacency means the
@@ -1530,6 +1632,7 @@
     }
     if(res[6].ok) state.adjacency = (await res[6].json()).neighbours || {};
     if(res[7].ok) state.photos = await res[7].json();
+    if(res[8].ok) state.ageSex = await res[8].json();
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });

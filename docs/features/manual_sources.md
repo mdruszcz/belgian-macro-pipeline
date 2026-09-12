@@ -37,6 +37,7 @@ git cannot delta. See [ADR 0002](../decisions/0002-split-committed-stores.md) fo
 |---|---|---|---|
 | `data/belgian_macro.db` | anything CI can fetch: national macro, `LOCAL_UNITS_BY_COMMUNE` | daily, by the bot | `daily_fetch.yml` |
 | `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | only when refreshed by hand | the procedure below |
+| `public/data/demography/{nis}.json` | Five-year population bands crossed with Statbel's F/M dimension for the commune-profile pyramid | generated when the annual population source is refreshed | `scripts/export_commune_age_sex.py` |
 | `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
 | `data/census2021_observations.csv` | 13 Census 2021 counts: citizenship, birthplace, sex, marital status, households, family nuclei, dwellings | only when refreshed by hand (decennial) | the procedure below |
 | `data/var_unemployment_observations.csv` | `ADMIN_UNEMPLOYMENT_RATE_COM`, annual administrative unemployment rate for ages 15–64 | only when the Tableau crosstab is refreshed by hand | [var_unemployment.md](var_unemployment.md) |
@@ -149,11 +150,20 @@ python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
   --out data/communes_history.csv \
   --extra-observations data/population_observations.csv \
   --extra-observations data/fiscal_income_observations.csv
+
+# 5. After export_site_payloads.py has refreshed public/data/communes, preserve
+#    the source's age × sex dimensions for the visual population pyramid.
+#    Use the Last-Modified date reported for the downloaded Statbel file.
+python scripts/export_commune_age_sex.py \
+  --source data/raw/statbel/population/TF_SOC_POP_STRUCT_2026.zip \
+  --source-updated 2026-06-10
 ```
 
 Then commit `data/population_observations.csv`, `data/communes_export.csv` and
-`data/communes_history.csv`, and open a PR. The diff on each CSV is readable line-by-line — that is
-the point of storing them as text.
+`data/communes_history.csv`, plus the generated `public/data/demography/*.json`, and open a PR. The
+age-by-sex exporter refuses to publish unless it finds every current commune and every pyramid sums
+exactly to that commune's already-published population for the same year. The diff on each CSV is
+readable line-by-line — that is the point of storing them as text.
 
 Steps 3 and 4 are also available as `.github/workflows/manual_sources.yml`
 (`workflow_dispatch` only), which regenerates the export from the already-committed CSV and opens a

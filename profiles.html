@@ -7,14 +7,17 @@
   data table, its filters, its year selector and its URL state untouched
   (rule 31; docs/steps' Batch 5 note). Open as profiles.html. A type, family,
   province or region view is this same file with ?type=W14, ?family=rural_w,
-  ?province=be:prov:90000 or ?region=be:reg:04000 -- the pattern
-  commune.html?nis= already set.
+  ?province=be:prov:90000 or ?region=be:reg:04000. A commune opens in this
+  same file with ?nis=11001; commune.html?nis= remains available as the
+  more visual, curated profile.
 
   WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Names and the region/province
   chain come from metadata/geographies.json; the Belfius typology from
   metadata/typology.json (scripts/export_commune_typology.py); the figures on
-  a commune card are metadata/sections.json's first four HEADLINES, read from
-  indicators/{code}.json. NOT ONE INDICATOR CODE APPEARS IN THIS FILE
+  a directory card are metadata/sections.json's first four HEADLINES, read
+  from indicators/{code}.json. The ?nis= view loads communes/{nis}.json once
+  and renders every indicator and every published period in that payload.
+  NOT ONE INDICATOR CODE APPEARS IN THIS FILE
   (tests/test_map_ui_logic.py::test_no_page_names_an_indicator). Every count
   comes from the geography or manifest.json: the design's "581 communes" is
   the pre-2019 map, and the page says what the geography says.
@@ -80,13 +83,13 @@
   .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
 
   /* ---- page head + toolbar ---- */
-  .pagehead{padding:var(--bp-space-5) 0 var(--bp-space-4)}
-  .pagehead h1{font-size:2.1rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
+  .pagehead{padding:var(--bp-space-4) 0 var(--bp-space-3)}
+  .pagehead h1{font-size:2rem; line-height:1.08; margin:0 0 var(--bp-space-2)}
   .pagehead .lead{color:var(--bp-text-muted); margin:0; max-width:70ch; font-size:var(--bp-text-body)}
   .toolbar{
     display:flex; flex-wrap:wrap; gap:8px; align-items:center;
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
-    box-shadow:var(--bp-shadow-card); padding:10px; margin:var(--bp-space-4) 0 var(--bp-space-6);
+    box-shadow:var(--bp-shadow-card); padding:8px; margin:var(--bp-space-3) 0 var(--bp-space-4);
   }
   .toolbar .searchbox{margin-left:0; max-width:none; flex:1 1 260px}
   .toolbar select{
@@ -101,9 +104,9 @@
   .card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5); min-width:0}
   .card h2{font-size:1.3rem; margin:0 0 2px}
   .card .sub{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0 0 var(--bp-space-4)}
-  .row{display:grid; gap:var(--bp-space-5); margin-bottom:var(--bp-space-6); min-width:0}
+  .row{display:grid; gap:var(--bp-space-3); margin-bottom:var(--bp-space-4); min-width:0}
   .row-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .row-map{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+  .directory-card{padding:14px}
   .sechead{display:flex; align-items:baseline; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:var(--bp-space-4)}
   .sechead h2{font-size:1.4rem; margin:0}
   .sechead .sub{margin:2px 0 0}
@@ -112,16 +115,20 @@
 
   /* ---- regions and provinces ---- */
   .regions{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
-  .region{border-radius:var(--bp-radius-control); padding:var(--bp-space-3); min-width:0}
+  .region{border-radius:var(--bp-radius-control); overflow:hidden; min-width:0; border:1px solid color-mix(in srgb, var(--bp-border) 75%, transparent)}
   .region[data-region="VLA"]{background:color-mix(in srgb, #f3c95a 22%, var(--bp-surface))}
   .region[data-region="WAL"]{background:color-mix(in srgb, #e5484d 16%, var(--bp-surface))}
   .region[data-region="BXL"]{background:color-mix(in srgb, #2f6fd6 16%, var(--bp-surface))}
-  .region .rname{display:flex; align-items:center; gap:8px; font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.2}
-  .region .rname .swatch{width:12px; height:12px; border-radius:3px; flex:none}
-  .region .rcount{font-size:12px; color:var(--bp-text-muted); margin:2px 0 8px 20px}
+  .region-head{display:flex; align-items:center; gap:8px; min-height:56px; padding:8px 9px}
+  .region-mark{width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(10,35,70,.08)}
+  .region-mark svg{width:100%; height:100%; display:block}
+  .region[data-region="VLA"] .region-mark,.region[data-region="WAL"] .region-mark{background:#ffd500}
+  .region[data-region="BXL"] .region-mark{background:#34479b}
+  .region .rname{font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.2}
+  .region .rcount{font-size:11px; color:var(--bp-text-muted); margin-top:2px}
   .region ul{list-style:none; margin:0; padding:0}
   .region li a{
-    display:flex; align-items:center; gap:8px; padding:6px 4px; border-top:1px solid var(--bp-border);
+    display:flex; align-items:center; gap:8px; padding:6px 9px; border-top:1px solid color-mix(in srgb, var(--bp-border) 78%, transparent);
     color:inherit; text-decoration:none; font-size:var(--bp-text-small);
   }
   .region li a:hover{color:var(--bp-accent)}
@@ -131,44 +138,54 @@
   /* Region fills on the shared map component's own paths: styling its output,
      not a second map (rule 29). No setData() is called on this instance, so
      the class fill is what shows. */
-  .provmap{position:relative; min-height:260px}
+  .province-map-block{display:grid; grid-template-columns:minmax(145px,.7fr) minmax(0,1.3fr); gap:12px; align-items:center; border-top:1px solid var(--bp-border); margin-top:12px; padding-top:12px}
+  .province-copy h3{font-size:1rem; margin:0 0 3px}
+  .province-copy .sub{margin-bottom:8px; line-height:1.35}
+  .provmap{position:relative; min-height:190px}
+  .mapzoom{position:absolute; z-index:3; top:4px; right:4px; display:flex; flex-direction:column; gap:3px}
+  .mapzoom button{width:28px; height:28px; border:1px solid var(--bp-border-strong); border-radius:6px; background:var(--bp-surface); color:var(--bp-text); font:600 18px/1 var(--bp-font-body); cursor:pointer; box-shadow:var(--bp-shadow-card)}
+  .mapzoom button:hover{border-color:var(--bp-accent); color:var(--bp-accent)}
+  .province-map-link{text-align:right; margin-top:2px}
+  .province-map-link a{font-size:11px; color:var(--bp-accent); text-decoration:none}
   svg.map path.reg-VLA{fill:#f3c95a}
   svg.map path.reg-WAL{fill:#e5484d}
   svg.map path.reg-BXL{fill:#2f6fd6}
   svg.map path.reg-VLA:hover, svg.map path.reg-WAL:hover, svg.map path.reg-BXL:hover{fill:var(--bp-accent)}
-  .legendcol{display:flex; flex-direction:column; gap:6px; font-size:12px; margin-top:var(--bp-space-3)}
+  .legendcol{display:flex; flex-direction:column; gap:5px; font-size:11px; margin-top:6px}
   .legendcol .it{display:flex; align-items:center; gap:7px; color:var(--bp-text-muted)}
   .legendcol .it .swatch{width:12px; height:12px; border-radius:3px; flex:none}
   .legendcol .it b{color:var(--bp-text); margin-left:auto; font-variant-numeric:tabular-nums}
 
   /* ---- types (families and clusters) ---- */
-  .families{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
-  .family{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:var(--bp-space-3); display:flex; flex-direction:column; gap:6px; min-width:0}
-  .family .fhead{display:flex; gap:9px; align-items:flex-start}
-  .family .ficon{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none}
+  .families{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+  .family{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:9px; display:flex; flex-direction:column; gap:5px; min-width:0; min-height:105px}
+  .family .fhead{display:flex; gap:8px; align-items:center}
+  .family .ficon{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none}
   .family .fname{font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.25}
   .family .fregion{font-size:11px; color:var(--bp-text-faint)}
-  .family ul{list-style:none; margin:0; padding:0; font-size:12px}
-  .family li a{display:flex; gap:6px; align-items:baseline; color:inherit; text-decoration:none; padding:3px 0; line-height:1.3}
-  .family li a:hover{color:var(--bp-accent)}
-  .family li a .code{font-variant-numeric:tabular-nums; color:var(--bp-text-faint); flex:none; min-width:2.6em}
-  .family li a .n{margin-left:auto; color:var(--bp-text-muted); font-variant-numeric:tabular-nums; flex:none}
-  .family .fmore{margin-top:auto; font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium)}
+  .family .fdesc{font-size:11px; color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .family .fmore{margin-top:auto; font-size:11px; color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium)}
   .family .fmore:hover{text-decoration:underline}
+  .typology-explainer{border-top:1px solid var(--bp-border); margin-top:10px; padding-top:8px}
+  .typology-explainer summary{cursor:pointer; color:var(--bp-accent); font-size:11px; font-weight:var(--bp-weight-medium)}
+  .typology-explainer[open] summary{margin-bottom:5px}
+  .typology-explainer .typo-note{margin:5px 0}
+  .typology-explainer .typo-counts{margin:7px 0; gap:18px}
+  .typology-explainer .typo-counts b{font-size:1.05rem}
 
   /* ---- commune cards ---- */
-  .communes{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .communes{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px}
   .communes.list{grid-template-columns:repeat(4,minmax(0,1fr))}
   .ccard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); overflow:hidden; display:flex; flex-direction:column; min-width:0}
-  .ccard .cphoto{position:relative; aspect-ratio:16/10; background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290)}
+  .ccard .cphoto{position:relative; aspect-ratio:16/9; background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290)}
   .ccard .cphoto img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block}
-  .ccard .cbody{padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1}
-  .ccard .cname{font-family:var(--bp-font-display); font-size:1.05rem; font-weight:600; line-height:1.15}
+  .ccard .cbody{padding:7px 8px 8px; display:flex; flex-direction:column; gap:3px; flex:1}
+  .ccard .cname{font-family:var(--bp-font-display); font-size:.98rem; font-weight:600; line-height:1.12}
   .ccard .cwhere{font-size:11px; color:var(--bp-text-muted)}
   .ccard .cwhere span + span::before{content:' · '}
-  .ccard .cfigs{display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; margin-top:6px}
+  .ccard .cfigs{display:grid; grid-template-columns:1fr 1fr; gap:3px 6px; margin-top:4px}
   .ccard .cfig{display:flex; align-items:center; gap:6px; font-size:12px; font-variant-numeric:tabular-nums; min-width:0}
-  .ccard .cfig .ficon{width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none}
+  .ccard .cfig .ficon{width:18px; height:18px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none}
   .ccard .cfig b{font-weight:var(--bp-weight-semibold); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .ccard .ctype{font-size:11px; color:var(--bp-text-muted); margin-top:4px; line-height:1.3}
   .ccard .ctype .badge{display:inline-block; font-size:10px; border-radius:var(--bp-radius-pill); padding:1px 7px; margin-right:4px; background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
@@ -177,9 +194,10 @@
   .ccard .clink{
     margin-top:auto; display:flex; justify-content:center; gap:6px; align-items:center;
     border:1px solid var(--bp-red-signal); color:var(--bp-red-signal); border-radius:var(--bp-radius-control);
-    padding:6px; font-size:12px; text-decoration:none; font-weight:var(--bp-weight-medium);
+    padding:5px; font-size:11px; text-decoration:none; font-weight:var(--bp-weight-medium);
   }
   .ccard .clink:hover{background:var(--bp-red-signal); color:#fff}
+  #quickGrid .ctype{display:none}
 
   /* ---- explore on the map ---- */
   .explore{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:var(--bp-space-5); align-items:center}
@@ -202,6 +220,55 @@
   .mixed h2{font-size:1.15rem; margin:0 0 4px}
   .mixed .why{font-size:12px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); max-width:80ch}
   .empty{font-size:var(--bp-text-small); color:var(--bp-text-muted); padding:var(--bp-space-6) 0}
+
+  /* ---- one commune: every published indicator -------------------------- */
+  .profilehead{padding:var(--bp-space-5) 0 var(--bp-space-4)}
+  .profilehead .back{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none}
+  .profilehead h1{font-size:2rem; margin:var(--bp-space-2) 0 3px; line-height:1.1}
+  .profilehead .sub{color:var(--bp-text-muted); margin:0; font-size:var(--bp-text-small)}
+  .profile-overview{
+    display:grid; grid-template-columns:220px minmax(0,1fr); gap:var(--bp-space-5);
+    margin-bottom:var(--bp-space-5); align-items:stretch;
+  }
+  .profile-photo{min-height:145px; border-radius:var(--bp-radius-card); overflow:hidden; background:linear-gradient(150deg,#18304d,#526c88)}
+  .profile-photo img{width:100%; height:100%; min-height:145px; object-fit:cover; display:block}
+  .profile-summary{display:flex; flex-direction:column; justify-content:center}
+  .profile-summary h2{margin:0 0 4px; font-size:1.25rem}
+  .profile-summary p{margin:0; color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+  .profile-counts{display:flex; flex-wrap:wrap; gap:var(--bp-space-5); margin-top:var(--bp-space-4)}
+  .profile-counts b{display:block; font-family:var(--bp-font-display); font-size:1.45rem}
+  .profile-counts span{display:block; color:var(--bp-text-muted); font-size:11px}
+  .profile-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:var(--bp-space-5)}
+  .profile-tools .searchbox{margin:0; max-width:none; flex:1 1 280px}
+  .profile-tools .shown{font-size:12px; color:var(--bp-text-muted); margin-right:auto}
+  .indicator-group{margin-bottom:var(--bp-space-6)}
+  .indicator-group[hidden]{display:none}
+  .indicator-group-head{margin-bottom:var(--bp-space-3)}
+  .indicator-group-head h2{font-size:1.35rem; margin:0 0 2px}
+  .indicator-group-head p{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0; max-width:80ch}
+  .indicator-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .indicator-card{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); background:var(--bp-surface); padding:var(--bp-space-4); min-width:0}
+  .indicator-card[hidden]{display:none}
+  .indicator-card h3{font-family:var(--bp-font-body); font-size:var(--bp-text-small); line-height:1.35; margin:0; font-weight:var(--bp-weight-semibold)}
+  .indicator-code{font:10px/1.3 "IBM Plex Mono",monospace; color:var(--bp-text-faint); overflow-wrap:anywhere; margin-top:2px}
+  .indicator-latest{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--bp-space-3); margin:var(--bp-space-4) 0 var(--bp-space-2)}
+  .indicator-value{font-family:var(--bp-font-display); font-size:1.45rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
+  .indicator-period{font-size:11px; color:var(--bp-text-muted); text-align:right}
+  .indicator-meta{font-size:11px; color:var(--bp-text-muted); line-height:1.45; min-height:1.45em}
+  .indicator-ranks{display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px}
+  .indicator-rank{font-size:11px; color:var(--bp-accent-ink)}
+  .indicator-card details{border-top:1px solid var(--bp-border); margin-top:var(--bp-space-3); padding-top:var(--bp-space-2)}
+  .indicator-card summary{cursor:pointer; color:var(--bp-accent); font-size:11px; list-style-position:inside}
+  .indicator-history{max-height:220px; overflow:auto; margin-top:6px}
+  .indicator-history-row{display:grid; grid-template-columns:minmax(70px,.7fr) minmax(0,1fr) auto; gap:8px; padding:4px 0; border-top:1px solid var(--bp-border); font-size:11px; font-variant-numeric:tabular-nums}
+  .indicator-history-row:first-child{border-top:0}
+  .indicator-history-row .hv{text-align:right; font-weight:var(--bp-weight-medium)}
+  .indicator-history-row .hs{color:var(--bp-text-faint); text-align:right}
+  .indicator-comparison-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:5px 0; border-top:1px solid var(--bp-border); font-size:11px}
+  .indicator-comparison-row:first-child{border-top:0}
+  .indicator-comparison-row b{font-variant-numeric:tabular-nums; text-align:right}
+  .indicator-comparison-row small{display:block; color:var(--bp-text-faint); margin-top:1px}
+  .profile-error{padding:var(--bp-space-7); text-align:center; color:var(--bp-text-muted)}
 
   /* ---- CTA + footer ---- */
   .cta{
@@ -239,17 +306,24 @@
     .communes.list{grid-template-columns:repeat(3,minmax(0,1fr))}
     .row-2,.row-map,.explore{grid-template-columns:minmax(0,1fr)}
     .cta .wrap{grid-template-columns:minmax(0,1fr)}
+    .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @media (max-width:768px){
     .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
     .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
     .bp-nav a{white-space:nowrap}
     .searchbox{max-width:none; margin-left:0; order:2; flex:1}
-    .regions,.families{grid-template-columns:minmax(0,1fr)}
+    .regions{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .families{grid-template-columns:repeat(2,minmax(0,1fr))}
     .communes,.communes.list{grid-template-columns:repeat(2,minmax(0,1fr))}
     .cta-stats{flex-wrap:wrap; gap:var(--bp-space-5)}
+    .profile-overview{grid-template-columns:minmax(0,1fr)}
+    .profile-photo{max-height:240px}
   }
-  @media (max-width:480px){ .communes,.communes.list{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:480px){
+    .regions,.families,.province-map-block,.communes,.communes.list,.indicator-grid{grid-template-columns:minmax(0,1fr)}
+    .profile-tools .bp-btn{width:100%; justify-content:center}
+  }
 </style>
 </head>
 <body class="bp-shell">
@@ -314,34 +388,39 @@
       </div>
 
       <div class="row row-2">
-        <div class="card">
+        <div class="card directory-card">
           <h2 data-t="pfByRegion">By region and province</h2>
           <p class="sub" data-t="pfByRegionSub">Select a region, then a province, to explore its communes.</p>
           <div class="regions" id="regions"></div>
+          <div class="province-map-block">
+            <div class="province-copy">
+              <h3 class="display" data-t="pfProvincesMap">The provinces of Belgium</h3>
+              <p class="sub" data-t="pfProvincesMapSub">Click a commune to open its province.</p>
+              <div class="legendcol" id="provLegend"></div>
+            </div>
+            <div>
+              <div class="provmap" id="provBox">
+                <svg id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
+                <div class="tip" id="provTip" hidden></div>
+                <div class="mapzoom">
+                  <button type="button" id="provZoomIn" data-t-aria="zoomIn" aria-label="Zoom in">+</button>
+                  <button type="button" id="provZoomOut" data-t-aria="zoomOut" aria-label="Zoom out">−</button>
+                </div>
+              </div>
+              <div class="province-map-link"><a href="map.html"><span data-t="pfSeeInteractiveMap">See the interactive map</span> →</a></div>
+            </div>
+          </div>
         </div>
-        <div class="card">
+        <div class="card directory-card">
           <h2 data-t="pfByType">By type of commune</h2>
           <p class="sub" id="byTypeSub"></p>
           <div class="families" id="families"></div>
-        </div>
-      </div>
-
-      <div class="row row-map">
-        <div class="card">
-          <h2 data-t="pfProvincesMap">The provinces of Belgium</h2>
-          <p class="sub" data-t="pfProvincesMapSub">Click a commune to open its province.</p>
-          <div class="provmap" id="provBox">
-            <svg id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
-            <div class="tip" id="provTip" hidden></div>
-          </div>
-          <div class="legendcol" id="provLegend"></div>
-          <div style="text-align:right; margin-top:var(--bp-space-3)"><a href="map.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none"><span data-t="pfSeeInteractiveMap">See the interactive map</span> →</a></div>
-        </div>
-        <div class="card">
-          <h2 data-t="pfTypology">Belfius typology</h2>
-          <p class="typo-note" data-t="pfTypologyNote">Classification: Belfius Banque &amp; Assurances, socio-economic typology of municipalities (cluster composition, on the commune map before the 2019 mergers). Cluster labels in the other two languages are BelPulse’s unofficial translations.</p>
-          <div class="typo-counts" id="typoCounts"></div>
-          <p class="typo-note" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
+          <details class="typology-explainer">
+            <summary data-t="pfTypology">Belfius typology</summary>
+            <p class="typo-note" data-t="pfTypologyNote">Classification: Belfius Banque &amp; Assurances, socio-economic typology of municipalities (cluster composition, on the commune map before the 2019 mergers). Cluster labels in the other two languages are BelPulse’s unofficial translations.</p>
+            <div class="typo-counts" id="typoCounts"></div>
+            <p class="typo-note" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
+          </details>
         </div>
       </div>
 
@@ -391,6 +470,41 @@
         <p class="why" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
         <div class="communes list" id="mixedGrid"></div>
       </section>
+    </section>
+
+    <!-- One commune, with every indicator present in its published payload. -->
+    <section id="viewProfile" hidden>
+      <div class="profilehead">
+        <a class="back" href="profiles.html">← <span data-t="pfBackToAll">All commune profiles</span></a>
+        <h1 id="profileTitle">—</h1>
+        <p class="sub" id="profileWhere"></p>
+      </div>
+
+      <div class="profile-overview">
+        <div class="profile-photo" id="profilePhoto"></div>
+        <div class="card profile-summary">
+          <h2 data-t="pfAllDataTitle">All available commune data</h2>
+          <p data-t="pfAllDataLead">Every indicator in this commune's published payload, including unavailable and source-suppressed cells. Open an indicator to inspect its full history.</p>
+          <div class="profile-counts">
+            <div><b id="profileIndicatorCount">—</b><span data-t="pfAvailableIndicators">available indicators</span></div>
+            <div><b id="profilePeriodCount">—</b><span data-t="pfPublishedPeriods">published observations</span></div>
+            <div><b id="profileSourceCount">—</b><span data-t="pfDataSources">data sources</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tools">
+        <label class="searchbox">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="indicatorSearch" type="search" data-t-placeholder="pfIndicatorSearch" placeholder="Filter indicators…" autocomplete="off">
+        </label>
+        <span class="shown" id="profileShown"></span>
+        <a class="bp-btn bp-btn--outline" id="profileJson" href="#" download data-t="pfDownloadJson">Download JSON</a>
+        <a class="bp-btn bp-btn--red" id="profileInteractive" href="#" data-t="pfOpenInteractive">Open the visual profile</a>
+      </div>
+
+      <div id="profileSections"></div>
+      <p class="profile-error" id="profileError" hidden></p>
     </section>
   </div>
 
@@ -465,10 +579,11 @@
 /* BelPulse commune profiles -- the directory and its per-type views.
  *
  * Config-driven throughout: the region/province tree is metadata/geographies.json,
- * the typology is metadata/typology.json, the four figures on a card are
- * metadata/sections.json's headlines. This script knows about regions,
- * provinces, families, clusters and cards -- never about a particular
- * indicator or a particular commune.
+ * the typology is metadata/typology.json, and the compact directory cards use
+ * metadata/sections.json's headlines. A ?nis= view reads that commune's whole
+ * published payload and renders EVERY indicator found there, grouped by the
+ * same section metadata. This script never names a particular indicator or
+ * commune.
  */
 (function(){
   'use strict';
@@ -481,8 +596,10 @@
   var SOURCES_URL    = 'public/data/metadata/sources.json';
   var MANIFEST_URL   = 'public/data/manifest.json';
   var VALUES_URL     = function(code){ return 'public/data/indicators/' + code + '.json'; };
+  var COMMUNE_URL    = function(nis){ return 'public/data/communes/' + nis + '.json'; };
   var PHOTO_URL      = function(nis){ return 'communes/' + nis + '.webp'; };
-  var PROFILE_URL    = function(nis){ return 'commune.html?nis=' + nis; };
+  var PROFILE_URL    = function(nis){ return 'profiles.html?nis=' + nis; };
+  var INTERACTIVE_PROFILE_URL = function(nis){ return 'commune.html?nis=' + nis; };
 
   var REGION_CODE = {'be:reg:02000': 'VLA', 'be:reg:03000': 'WAL', 'be:reg:04000': 'BXL'};
   var REGION_COLOUR = {VLA: '#f3c95a', WAL: '#e5484d', BXL: '#2f6fd6'};
@@ -493,9 +610,9 @@
   var T = function(k, v){ return I18N.t(LANG, k, v); };
 
   var state = {
-    geographies: {}, municipalities: [], typology: null, byCode: {}, headlines: [],
+    geographies: {}, municipalities: [], typology: null, byCode: {}, headlines: [], sections: [],
     values: {}, sources: {}, manifest: {}, geojson: null, provMap: null, map: null,
-    view: null,
+    view: null, profile: null, profileNis: null, profileLoading: null,
   };
 
   /* ---- helpers ---------------------------------------------------------- */
@@ -545,6 +662,36 @@
   ];
   function icon(i, size){
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>';
+  }
+  var FAMILY_ICONS = [
+    '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/>',
+    '<path d="M20 4C11 4 5 8 5 15c0 3 2 5 5 5 7 0 10-7 10-16z"/><path d="M4 21c3-6 7-9 12-12"/>',
+    '<path d="M3 21V9l5 3V7l5 4V4l5 4v13z"/><path d="M18 13h3v8M7 16h1M12 15h1"/>',
+    '<path d="M5 21V7h14v14M3 21h18M8 10h2M14 10h2M8 14h2M14 14h2"/>',
+    '<path d="M3 21V10l6 3V9l6 4V5l6 4v12z"/><path d="M7 17h2M13 17h2M18 14v3"/>',
+    '<path d="M2 9c3-3 5 3 8 0s5 3 8 0 4 0 4 0M2 15c3-3 5 3 8 0s5 3 8 0 4 0 4 0"/>',
+    '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-2c0-4 3-7 7-7s7 3 7 7v2M15 13c4 0 7 3 7 7v1"/>',
+    '<circle cx="12" cy="5" r="3"/><circle cx="5" cy="18" r="3"/><circle cx="19" cy="18" r="3"/><path d="M10 7L6.5 15M14 7l3.5 8M8 18h8"/>',
+    '<path d="M4 20h16M6 20V9h12v11M4 9h16L12 3z"/><path d="M9 12v5M15 12v5"/>',
+  ];
+  var FAMILY_ICON_INDEX = {
+    residential_v: 0, residential_w: 0,
+    rural_v: 1, rural_w: 1,
+    cities_v: 2, urban_w: 2,
+    urbanised_v: 3, urbanised_w: 3,
+    economic_v: 4, coast_v: 5, brussels: 7,
+  };
+  function familyIcon(id, size){
+    var i = Object.prototype.hasOwnProperty.call(FAMILY_ICON_INDEX, id) ? FAMILY_ICON_INDEX[id] : 8;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + FAMILY_ICONS[i] + '</svg>';
+  }
+  function regionEmblem(code){
+    var art = {
+      VLA: '<path d="M12 38l5-8-3-6 6-3 2-8 5 5 7-5-1 8 7 4-7 4 3 8-9-3-6 7z"/><circle cx="27" cy="13" r="3"/><path d="M18 32l-8 6M30 33l7 7" fill="none" stroke="currentColor" stroke-width="3"/>',
+      WAL: '<path d="M13 31c0-8 4-14 12-15l4-6 3 7c5 2 7 6 6 11-5-3-9-2-12 1l-1 10-4-7-8 4z"/><circle cx="31" cy="18" r="1.5" fill="#fff"/><path d="M18 36l-3 7M24 37l2 6M11 24L5 18l9 2-5-8 10 6" fill="none" stroke="currentColor" stroke-width="3"/>',
+      BXL: '<path d="M24 23C9 18 9 8 16 7c5-1 8 7 8 16C24 8 32 4 36 9c5 7-4 13-12 14 15-1 20 7 15 12-5 6-13-1-15-12 2 15-5 21-11 16-6-5 1-13 11-16z"/><circle cx="24" cy="23" r="4" fill="#f3c95a"/>',
+    };
+    return '<svg viewBox="0 0 48 48" aria-hidden="true" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">' + (art[code] || '') + '</svg>';
   }
 
   function applyStrings(){
@@ -647,6 +794,243 @@
     return c;
   }
 
+  /* ---- one commune: all indicators and all published periods ----------- */
+  function latestPeriod(entry){
+    var periods = Object.keys((entry && entry.periods) || {}).sort();
+    return periods.length ? periods[periods.length - 1] : null;
+  }
+
+  function statusLabel(status){
+    if(!status) return '';
+    if(status === 'final') return T('pfStatusFinal');
+    if(status === 'derived') return T('pfStatusDerived');
+    if(status === 'suppressed') return T('pfSuppressed');
+    var translated = MapUI.text(LANG, 'status_' + status);
+    return translated && translated !== 'status_' + status ? translated : status;
+  }
+
+  function sourceLabels(meta){
+    var ids = [];
+    if(meta && meta.source) ids.push(meta.source);
+    (meta && meta.input_sources || []).forEach(function(id){ if(ids.indexOf(id) < 0) ids.push(id); });
+    return ids.map(function(id){
+      var source = state.sources[id];
+      return source && source.label ? text(source.label) : id;
+    }).filter(Boolean);
+  }
+
+  function profileIndicatorCard(code, entry, index){
+    var meta = state.byCode[code] || {unit: entry.unit, decimals: null};
+    var cardEl = el('article', 'indicator-card');
+    cardEl.dataset.search = [nameOfCode(code), code, meta.unit || entry.unit]
+      .concat(sourceLabels(meta)).join(' ').toLocaleLowerCase(LANG);
+    cardEl.appendChild(el('h3', '', nameOfCode(code)));
+    cardEl.appendChild(el('div', 'indicator-code', code));
+
+    var period = latestPeriod(entry);
+    var cell = period ? entry.periods[period] : null;
+    var latest = el('div', 'indicator-latest');
+    var value = el('div', 'indicator-value');
+    if(cell && typeof cell.value === 'number'){
+      value.textContent = fmt(cell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals});
+    }else if(cell && cell.status === 'suppressed'){
+      value.textContent = T('pfSuppressed');
+    }else{
+      value.textContent = '—';
+    }
+    latest.appendChild(value);
+    var when = el('div', 'indicator-period');
+    when.textContent = [period, cell && statusLabel(cell.status)].filter(Boolean).join(' · ');
+    latest.appendChild(when);
+    cardEl.appendChild(latest);
+
+    var provenance = sourceLabels(meta);
+    if(meta.grade) provenance.push(meta.grade);
+    if(meta.updated || meta.inputs_updated) provenance.push(meta.updated || meta.inputs_updated);
+    cardEl.appendChild(el('div', 'indicator-meta', provenance.join(' · ')));
+
+    var percentiles = entry.percentile || {};
+    var ranks = el('div', 'indicator-ranks');
+    if(percentiles.national && percentiles.national.rank && percentiles.national.peers){
+      ranks.appendChild(el('span', 'indicator-rank', T('pfNationalRank', {
+        rank: percentiles.national.rank, peers: percentiles.national.peers
+      })));
+    }
+    if(percentiles.regional && percentiles.regional.rank && percentiles.regional.peers){
+      ranks.appendChild(el('span', 'indicator-rank', T('pfRegionalRank', {
+        rank: percentiles.regional.rank, peers: percentiles.regional.peers
+      })));
+    }
+    if(ranks.children.length) cardEl.appendChild(ranks);
+
+    var comparisonKeys = ['province', 'region', 'country'].filter(function(scope){
+      return entry.comparison && entry.comparison[scope];
+    });
+    if(comparisonKeys.length){
+      var comparisons = document.createElement('details');
+      var comparisonsSummary = document.createElement('summary');
+      comparisonsSummary.textContent = T('pfComparisons', {n: comparisonKeys.length});
+      comparisons.appendChild(comparisonsSummary);
+      var comparisonsBody = el('div', 'indicator-comparisons');
+      comparisonKeys.forEach(function(scope){
+        var comparison = entry.comparison[scope];
+        var comparisonRow = el('div', 'indicator-comparison-row');
+        var comparisonLabel = el('span', '', text(comparison.name) || scope);
+        if(comparison.coverage && comparison.coverage.of){
+          comparisonLabel.appendChild(el('small', '', T('pfCoverage', {
+            n: comparison.coverage.n, of: comparison.coverage.of
+          })));
+        }
+        comparisonRow.appendChild(comparisonLabel);
+        var comparisonValue = typeof comparison.value === 'number'
+          ? fmt(comparison.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
+          : '—';
+        comparisonRow.appendChild(el('b', '', [comparisonValue, comparison.period].filter(Boolean).join(' · ')));
+        comparisonsBody.appendChild(comparisonRow);
+      });
+      comparisons.appendChild(comparisonsBody);
+      cardEl.appendChild(comparisons);
+    }
+
+    var periods = Object.keys(entry.periods || {}).sort().reverse();
+    var details = document.createElement('details');
+    var summary = document.createElement('summary');
+    summary.textContent = T('pfHistory', {n: periods.length});
+    details.appendChild(summary);
+    var history = el('div', 'indicator-history');
+    periods.forEach(function(p){
+      var historyCell = entry.periods[p];
+      var row = el('div', 'indicator-history-row');
+      row.appendChild(el('span', '', p));
+      var historyValue = typeof historyCell.value === 'number'
+        ? fmt(historyCell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
+        : (historyCell.status === 'suppressed' ? T('pfSuppressed') : '—');
+      row.appendChild(el('span', 'hv', historyValue));
+      row.appendChild(el('span', 'hs', statusLabel(historyCell.status)));
+      history.appendChild(row);
+    });
+    details.appendChild(history);
+    cardEl.appendChild(details);
+    return cardEl;
+  }
+
+  function profileGroups(indicators){
+    var remaining = {};
+    Object.keys(indicators || {}).forEach(function(code){ remaining[code] = true; });
+    var groups = [];
+    state.sections.forEach(function(section){
+      if(section.unavailable) return;
+      var declared = [section.headline].concat(section.indicators || []).filter(Boolean);
+      var codes = [];
+      declared.forEach(function(code){
+        if(remaining[code] && codes.indexOf(code) < 0){ codes.push(code); delete remaining[code]; }
+      });
+      if(codes.length) groups.push({label: section.label, blurb: section.blurb, codes: codes});
+    });
+    var other = Object.keys(remaining).sort(function(a, b){
+      return nameOfCode(a).localeCompare(nameOfCode(b), LANG);
+    });
+    if(other.length) groups.push({label: T('pfOtherData'), blurb: null, codes: other});
+    return groups;
+  }
+
+  function filterProfileIndicators(){
+    var input = document.getElementById('indicatorSearch');
+    var query = (input.value || '').trim().toLocaleLowerCase(LANG);
+    var shown = 0;
+    document.querySelectorAll('#profileSections .indicator-card').forEach(function(cardEl){
+      cardEl.hidden = !!query && cardEl.dataset.search.indexOf(query) < 0;
+      if(!cardEl.hidden) shown += 1;
+    });
+    document.querySelectorAll('#profileSections .indicator-group').forEach(function(group){
+      group.hidden = !group.querySelector('.indicator-card:not([hidden])');
+    });
+    document.getElementById('profileShown').textContent = T('pfIndicatorsShown', {n: shown});
+  }
+
+  function paintProfile(nis){
+    var payload = state.profile;
+    var geo = state.municipalities.filter(function(row){ return row.nis_code === nis; })[0];
+    var error = document.getElementById('profileError');
+    if(!payload || !geo){
+      error.hidden = false;
+      error.textContent = T('pfProfileUnavailable');
+      return;
+    }
+    error.hidden = true;
+    var name = text(payload.name) || nameOfGeo(geo);
+    document.getElementById('profileTitle').textContent = name;
+    document.title = 'BelPulse — ' + name + ' — ' + T('navCommunes');
+    var places = [levelOf(geo, 'region'), levelOf(geo, 'province'), levelOf(geo, 'arrondissement')]
+      .filter(Boolean).map(nameOfGeo);
+    document.getElementById('profileWhere').textContent = places.join(' · ') + ' · NIS ' + nis;
+    document.getElementById('crumbSep').hidden = false;
+    var crumb = document.getElementById('crumbView');
+    crumb.hidden = false;
+    crumb.textContent = name;
+
+    var photo = document.getElementById('profilePhoto');
+    photo.innerHTML = '';
+    var img = document.createElement('img');
+    img.src = PHOTO_URL(nis); img.alt = name; img.onerror = function(){ img.remove(); };
+    photo.appendChild(img);
+
+    var indicators = payload.indicators || {};
+    var codes = Object.keys(indicators);
+    var periods = codes.reduce(function(total, code){
+      return total + Object.keys(indicators[code].periods || {}).length;
+    }, 0);
+    var sources = {};
+    codes.forEach(function(code){
+      var meta = state.byCode[code] || {};
+      if(meta.source) sources[meta.source] = true;
+      (meta.input_sources || []).forEach(function(id){ sources[id] = true; });
+    });
+    document.getElementById('profileIndicatorCount').textContent = codes.length.toLocaleString(LANG);
+    document.getElementById('profilePeriodCount').textContent = periods.toLocaleString(LANG);
+    document.getElementById('profileSourceCount').textContent = Object.keys(sources).length.toLocaleString(LANG);
+    document.getElementById('profileJson').href = COMMUNE_URL(nis);
+    document.getElementById('profileInteractive').href = INTERACTIVE_PROFILE_URL(nis);
+
+    var host = document.getElementById('profileSections');
+    host.innerHTML = '';
+    var index = 0;
+    profileGroups(indicators).forEach(function(group){
+      var section = el('section', 'indicator-group');
+      var head = el('div', 'indicator-group-head');
+      head.appendChild(el('h2', '', text(group.label)));
+      if(group.blurb) head.appendChild(el('p', '', text(group.blurb)));
+      section.appendChild(head);
+      var grid = el('div', 'indicator-grid');
+      group.codes.forEach(function(code){
+        grid.appendChild(profileIndicatorCard(code, indicators[code], index++));
+      });
+      section.appendChild(grid);
+      host.appendChild(section);
+    });
+    filterProfileIndicators();
+  }
+
+  function renderProfile(nis){
+    var error = document.getElementById('profileError');
+    if(!/^\d{5}$/.test(nis)){
+      error.hidden = false; error.textContent = T('pfProfileUnavailable'); return;
+    }
+    if(state.profile && state.profileNis === nis){ paintProfile(nis); return; }
+    if(state.profileLoading === nis) return;
+    document.getElementById('profileSections').innerHTML = '<p class="profile-error">' + T('loading') + '</p>';
+    state.profileLoading = nis;
+    fetch(COMMUNE_URL(nis)).then(function(response){
+      if(!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    }).then(function(payload){
+      state.profile = payload; state.profileNis = nis; state.profileLoading = null; paintProfile(nis);
+    }).catch(function(){
+      state.profileLoading = null; error.hidden = false; error.textContent = T('pfProfileUnavailable');
+      document.getElementById('profileSections').innerHTML = '';
+    });
+  }
+
   /* ---- directory: regions and provinces --------------------------------- */
   function provincesOf(regionGeoId){
     var seen = {}, out = [];
@@ -671,12 +1055,14 @@
       var total = provinces.reduce(function(s, p){ return s + p.count; }, 0);
       var box = el('div', 'region');
       box.dataset.region = code;
-      var name = el('div', 'rname');
-      var sw = el('span', 'swatch'); sw.style.background = REGION_COLOUR[code];
-      name.appendChild(sw);
-      name.appendChild(document.createTextNode(nameOfGeo(reg)));
-      box.appendChild(name);
-      box.appendChild(el('div', 'rcount', T('pfCommunesCount', {n: total.toLocaleString(LANG)})));
+      var regionHead = el('div', 'region-head');
+      var mark = el('span', 'region-mark'); mark.innerHTML = regionEmblem(code);
+      regionHead.appendChild(mark);
+      var title = el('div');
+      title.appendChild(el('div', 'rname', nameOfGeo(reg)));
+      title.appendChild(el('div', 'rcount', T('pfCommunesCount', {n: total.toLocaleString(LANG)})));
+      regionHead.appendChild(title);
+      box.appendChild(regionHead);
       var ul = el('ul');
       provinces.forEach(function(p){
         var li = el('li');
@@ -712,7 +1098,7 @@
         var ic = el('span', 'ficon');
         var tt = tint(i);
         ic.style.background = tt.bg; ic.style.color = tt.ink;
-        ic.innerHTML = icon(i, 16);
+        ic.innerHTML = familyIcon(fid, 20);
         head.appendChild(ic);
         var names = el('div');
         names.appendChild(el('div', 'fname', text(fam.label)));
@@ -720,18 +1106,7 @@
         names.appendChild(el('div', 'fregion', regionName(region) + ' · ' + T('pfCommunesCount', {n: total})));
         head.appendChild(names);
         box.appendChild(head);
-        var ul = el('ul');
-        fam.clusters.forEach(function(code){
-          var li = el('li');
-          var a = document.createElement('a');
-          a.href = 'profiles.html?type=' + encodeURIComponent(code);
-          a.appendChild(el('span', 'code', code));
-          a.appendChild(el('span', '', clusterLabel(code)));
-          a.appendChild(el('span', 'n', String(t.clusters[code].members.length)));
-          li.appendChild(a);
-          ul.appendChild(li);
-        });
-        box.appendChild(ul);
+        box.appendChild(el('div', 'fdesc', fam.clusters.map(clusterLabel).join(' · ')));
         var more = document.createElement('a');
         more.className = 'fmore';
         more.href = 'profiles.html?family=' + encodeURIComponent(fid);
@@ -837,6 +1212,16 @@
       }).build(state.geojson);
     }else{
       state.provMap.setLang(LANG);
+    }
+    var zoomIn = document.getElementById('provZoomIn');
+    var zoomOut = document.getElementById('provZoomOut');
+    if(zoomIn && !zoomIn.dataset.wired){
+      zoomIn.dataset.wired = '1';
+      zoomIn.addEventListener('click', function(){ state.provMap.zoomBy(.8); });
+    }
+    if(zoomOut && !zoomOut.dataset.wired){
+      zoomOut.dataset.wired = '1';
+      zoomOut.addEventListener('click', function(){ state.provMap.zoomBy(1.25); });
     }
     var svg = document.getElementById('provSvg');
     state.municipalities.forEach(function(m){
@@ -997,9 +1382,14 @@
     applyStrings();
     renderCounts();
     renderSearch();
-    var sel = selection();
-    document.getElementById('viewDirectory').hidden = !!sel;
-    document.getElementById('viewList').hidden = !sel;
+    var nis = qs('nis');
+    var sel = nis ? null : selection();
+    document.getElementById('viewDirectory').hidden = !!nis || !!sel;
+    document.getElementById('viewList').hidden = !!nis || !sel;
+    document.getElementById('viewProfile').hidden = !nis;
+    if(nis){ renderProfile(nis); return; }
+    document.getElementById('crumbSep').hidden = true;
+    document.getElementById('crumbView').hidden = true;
     if(sel){ renderList(sel); return; }
     document.title = 'BelPulse — ' + T('navCommunes');
     renderRegions();
@@ -1017,6 +1407,7 @@
       try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(err){}
       renderAll();
     });
+    document.getElementById('indicatorSearch').addEventListener('input', filterProfileIndicators);
     applyStrings();
 
     var res = await Promise.all([GEOGRAPHIES_URL, TYPOLOGY_URL, INDEX_URL, SECTIONS_URL, SOURCES_URL, MANIFEST_URL]
@@ -1027,13 +1418,15 @@
     state.typology = res[1];
     var idx = res[2] || {indicators: []};
     (idx.indicators || []).forEach(function(r){ state.byCode[r.indicator_code] = r; });
-    state.headlines = ((res[3] || {}).headlines || []).filter(function(c){ return state.byCode[c]; });
+    var sectionsPayload = res[3] || {};
+    state.sections = sectionsPayload.sections || [];
+    state.headlines = (sectionsPayload.headlines || []).filter(function(c){ return state.byCode[c]; });
     state.sources = (res[4] || {}).sources || {};
     state.manifest = res[5] || {};
     var dates = (idx.indicators || []).map(function(r){ return r.updated; }).filter(Boolean).sort();
     state.attrUpdated = dates[dates.length - 1] || '';
 
-    var codes = state.headlines.slice(0, CARD_FIGURES);
+    var codes = qs('nis') ? [] : state.headlines.slice(0, CARD_FIGURES);
     var payloads = await Promise.all(codes.map(function(code){
       return fetch(VALUES_URL(code)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
     }));
@@ -1041,7 +1434,7 @@
 
     renderAll();
 
-    if(selection()) return;              // a list view draws no map
+    if(qs('nis') || selection()) return; // detail/list views draw no map
     var g = await fetch(GEO_URL).catch(function(){ return null; });
     if(!g || !g.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
     state.geojson = await g.json();
