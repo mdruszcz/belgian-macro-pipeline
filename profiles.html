@@ -83,13 +83,13 @@
   .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
 
   /* ---- page head + toolbar ---- */
-  .pagehead{padding:var(--bp-space-5) 0 var(--bp-space-4)}
-  .pagehead h1{font-size:2.1rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
+  .pagehead{padding:var(--bp-space-4) 0 var(--bp-space-3)}
+  .pagehead h1{font-size:2rem; line-height:1.08; margin:0 0 var(--bp-space-2)}
   .pagehead .lead{color:var(--bp-text-muted); margin:0; max-width:70ch; font-size:var(--bp-text-body)}
   .toolbar{
     display:flex; flex-wrap:wrap; gap:8px; align-items:center;
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
-    box-shadow:var(--bp-shadow-card); padding:10px; margin:var(--bp-space-4) 0 var(--bp-space-6);
+    box-shadow:var(--bp-shadow-card); padding:8px; margin:var(--bp-space-3) 0 var(--bp-space-4);
   }
   .toolbar .searchbox{margin-left:0; max-width:none; flex:1 1 260px}
   .toolbar select{
@@ -104,9 +104,9 @@
   .card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5); min-width:0}
   .card h2{font-size:1.3rem; margin:0 0 2px}
   .card .sub{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0 0 var(--bp-space-4)}
-  .row{display:grid; gap:var(--bp-space-5); margin-bottom:var(--bp-space-6); min-width:0}
+  .row{display:grid; gap:var(--bp-space-3); margin-bottom:var(--bp-space-4); min-width:0}
   .row-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .row-map{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+  .directory-card{padding:14px}
   .sechead{display:flex; align-items:baseline; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:var(--bp-space-4)}
   .sechead h2{font-size:1.4rem; margin:0}
   .sechead .sub{margin:2px 0 0}
@@ -115,16 +115,20 @@
 
   /* ---- regions and provinces ---- */
   .regions{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
-  .region{border-radius:var(--bp-radius-control); padding:var(--bp-space-3); min-width:0}
+  .region{border-radius:var(--bp-radius-control); overflow:hidden; min-width:0; border:1px solid color-mix(in srgb, var(--bp-border) 75%, transparent)}
   .region[data-region="VLA"]{background:color-mix(in srgb, #f3c95a 22%, var(--bp-surface))}
   .region[data-region="WAL"]{background:color-mix(in srgb, #e5484d 16%, var(--bp-surface))}
   .region[data-region="BXL"]{background:color-mix(in srgb, #2f6fd6 16%, var(--bp-surface))}
-  .region .rname{display:flex; align-items:center; gap:8px; font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.2}
-  .region .rname .swatch{width:12px; height:12px; border-radius:3px; flex:none}
-  .region .rcount{font-size:12px; color:var(--bp-text-muted); margin:2px 0 8px 20px}
+  .region-head{display:flex; align-items:center; gap:8px; min-height:56px; padding:8px 9px}
+  .region-mark{width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(10,35,70,.08)}
+  .region-mark svg{width:100%; height:100%; display:block}
+  .region[data-region="VLA"] .region-mark,.region[data-region="WAL"] .region-mark{background:#ffd500}
+  .region[data-region="BXL"] .region-mark{background:#34479b}
+  .region .rname{font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.2}
+  .region .rcount{font-size:11px; color:var(--bp-text-muted); margin-top:2px}
   .region ul{list-style:none; margin:0; padding:0}
   .region li a{
-    display:flex; align-items:center; gap:8px; padding:6px 4px; border-top:1px solid var(--bp-border);
+    display:flex; align-items:center; gap:8px; padding:6px 9px; border-top:1px solid color-mix(in srgb, var(--bp-border) 78%, transparent);
     color:inherit; text-decoration:none; font-size:var(--bp-text-small);
   }
   .region li a:hover{color:var(--bp-accent)}
@@ -134,44 +138,54 @@
   /* Region fills on the shared map component's own paths: styling its output,
      not a second map (rule 29). No setData() is called on this instance, so
      the class fill is what shows. */
-  .provmap{position:relative; min-height:260px}
+  .province-map-block{display:grid; grid-template-columns:minmax(145px,.7fr) minmax(0,1.3fr); gap:12px; align-items:center; border-top:1px solid var(--bp-border); margin-top:12px; padding-top:12px}
+  .province-copy h3{font-size:1rem; margin:0 0 3px}
+  .province-copy .sub{margin-bottom:8px; line-height:1.35}
+  .provmap{position:relative; min-height:190px}
+  .mapzoom{position:absolute; z-index:3; top:4px; right:4px; display:flex; flex-direction:column; gap:3px}
+  .mapzoom button{width:28px; height:28px; border:1px solid var(--bp-border-strong); border-radius:6px; background:var(--bp-surface); color:var(--bp-text); font:600 18px/1 var(--bp-font-body); cursor:pointer; box-shadow:var(--bp-shadow-card)}
+  .mapzoom button:hover{border-color:var(--bp-accent); color:var(--bp-accent)}
+  .province-map-link{text-align:right; margin-top:2px}
+  .province-map-link a{font-size:11px; color:var(--bp-accent); text-decoration:none}
   svg.map path.reg-VLA{fill:#f3c95a}
   svg.map path.reg-WAL{fill:#e5484d}
   svg.map path.reg-BXL{fill:#2f6fd6}
   svg.map path.reg-VLA:hover, svg.map path.reg-WAL:hover, svg.map path.reg-BXL:hover{fill:var(--bp-accent)}
-  .legendcol{display:flex; flex-direction:column; gap:6px; font-size:12px; margin-top:var(--bp-space-3)}
+  .legendcol{display:flex; flex-direction:column; gap:5px; font-size:11px; margin-top:6px}
   .legendcol .it{display:flex; align-items:center; gap:7px; color:var(--bp-text-muted)}
   .legendcol .it .swatch{width:12px; height:12px; border-radius:3px; flex:none}
   .legendcol .it b{color:var(--bp-text); margin-left:auto; font-variant-numeric:tabular-nums}
 
   /* ---- types (families and clusters) ---- */
-  .families{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
-  .family{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:var(--bp-space-3); display:flex; flex-direction:column; gap:6px; min-width:0}
-  .family .fhead{display:flex; gap:9px; align-items:flex-start}
-  .family .ficon{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none}
+  .families{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+  .family{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:9px; display:flex; flex-direction:column; gap:5px; min-width:0; min-height:105px}
+  .family .fhead{display:flex; gap:8px; align-items:center}
+  .family .ficon{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none}
   .family .fname{font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.25}
   .family .fregion{font-size:11px; color:var(--bp-text-faint)}
-  .family ul{list-style:none; margin:0; padding:0; font-size:12px}
-  .family li a{display:flex; gap:6px; align-items:baseline; color:inherit; text-decoration:none; padding:3px 0; line-height:1.3}
-  .family li a:hover{color:var(--bp-accent)}
-  .family li a .code{font-variant-numeric:tabular-nums; color:var(--bp-text-faint); flex:none; min-width:2.6em}
-  .family li a .n{margin-left:auto; color:var(--bp-text-muted); font-variant-numeric:tabular-nums; flex:none}
-  .family .fmore{margin-top:auto; font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium)}
+  .family .fdesc{font-size:11px; color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .family .fmore{margin-top:auto; font-size:11px; color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium)}
   .family .fmore:hover{text-decoration:underline}
+  .typology-explainer{border-top:1px solid var(--bp-border); margin-top:10px; padding-top:8px}
+  .typology-explainer summary{cursor:pointer; color:var(--bp-accent); font-size:11px; font-weight:var(--bp-weight-medium)}
+  .typology-explainer[open] summary{margin-bottom:5px}
+  .typology-explainer .typo-note{margin:5px 0}
+  .typology-explainer .typo-counts{margin:7px 0; gap:18px}
+  .typology-explainer .typo-counts b{font-size:1.05rem}
 
   /* ---- commune cards ---- */
-  .communes{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .communes{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px}
   .communes.list{grid-template-columns:repeat(4,minmax(0,1fr))}
   .ccard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); overflow:hidden; display:flex; flex-direction:column; min-width:0}
-  .ccard .cphoto{position:relative; aspect-ratio:16/10; background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290)}
+  .ccard .cphoto{position:relative; aspect-ratio:16/9; background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290)}
   .ccard .cphoto img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block}
-  .ccard .cbody{padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1}
-  .ccard .cname{font-family:var(--bp-font-display); font-size:1.05rem; font-weight:600; line-height:1.15}
+  .ccard .cbody{padding:7px 8px 8px; display:flex; flex-direction:column; gap:3px; flex:1}
+  .ccard .cname{font-family:var(--bp-font-display); font-size:.98rem; font-weight:600; line-height:1.12}
   .ccard .cwhere{font-size:11px; color:var(--bp-text-muted)}
   .ccard .cwhere span + span::before{content:' · '}
-  .ccard .cfigs{display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; margin-top:6px}
+  .ccard .cfigs{display:grid; grid-template-columns:1fr 1fr; gap:3px 6px; margin-top:4px}
   .ccard .cfig{display:flex; align-items:center; gap:6px; font-size:12px; font-variant-numeric:tabular-nums; min-width:0}
-  .ccard .cfig .ficon{width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none}
+  .ccard .cfig .ficon{width:18px; height:18px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none}
   .ccard .cfig b{font-weight:var(--bp-weight-semibold); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .ccard .ctype{font-size:11px; color:var(--bp-text-muted); margin-top:4px; line-height:1.3}
   .ccard .ctype .badge{display:inline-block; font-size:10px; border-radius:var(--bp-radius-pill); padding:1px 7px; margin-right:4px; background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
@@ -180,9 +194,10 @@
   .ccard .clink{
     margin-top:auto; display:flex; justify-content:center; gap:6px; align-items:center;
     border:1px solid var(--bp-red-signal); color:var(--bp-red-signal); border-radius:var(--bp-radius-control);
-    padding:6px; font-size:12px; text-decoration:none; font-weight:var(--bp-weight-medium);
+    padding:5px; font-size:11px; text-decoration:none; font-weight:var(--bp-weight-medium);
   }
   .ccard .clink:hover{background:var(--bp-red-signal); color:#fff}
+  #quickGrid .ctype{display:none}
 
   /* ---- explore on the map ---- */
   .explore{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:var(--bp-space-5); align-items:center}
@@ -298,14 +313,15 @@
     .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
     .bp-nav a{white-space:nowrap}
     .searchbox{max-width:none; margin-left:0; order:2; flex:1}
-    .regions,.families{grid-template-columns:minmax(0,1fr)}
+    .regions{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .families{grid-template-columns:repeat(2,minmax(0,1fr))}
     .communes,.communes.list{grid-template-columns:repeat(2,minmax(0,1fr))}
     .cta-stats{flex-wrap:wrap; gap:var(--bp-space-5)}
     .profile-overview{grid-template-columns:minmax(0,1fr)}
     .profile-photo{max-height:240px}
   }
   @media (max-width:480px){
-    .communes,.communes.list,.indicator-grid{grid-template-columns:minmax(0,1fr)}
+    .regions,.families,.province-map-block,.communes,.communes.list,.indicator-grid{grid-template-columns:minmax(0,1fr)}
     .profile-tools .bp-btn{width:100%; justify-content:center}
   }
 </style>
@@ -372,34 +388,39 @@
       </div>
 
       <div class="row row-2">
-        <div class="card">
+        <div class="card directory-card">
           <h2 data-t="pfByRegion">By region and province</h2>
           <p class="sub" data-t="pfByRegionSub">Select a region, then a province, to explore its communes.</p>
           <div class="regions" id="regions"></div>
+          <div class="province-map-block">
+            <div class="province-copy">
+              <h3 class="display" data-t="pfProvincesMap">The provinces of Belgium</h3>
+              <p class="sub" data-t="pfProvincesMapSub">Click a commune to open its province.</p>
+              <div class="legendcol" id="provLegend"></div>
+            </div>
+            <div>
+              <div class="provmap" id="provBox">
+                <svg id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
+                <div class="tip" id="provTip" hidden></div>
+                <div class="mapzoom">
+                  <button type="button" id="provZoomIn" data-t-aria="zoomIn" aria-label="Zoom in">+</button>
+                  <button type="button" id="provZoomOut" data-t-aria="zoomOut" aria-label="Zoom out">−</button>
+                </div>
+              </div>
+              <div class="province-map-link"><a href="map.html"><span data-t="pfSeeInteractiveMap">See the interactive map</span> →</a></div>
+            </div>
+          </div>
         </div>
-        <div class="card">
+        <div class="card directory-card">
           <h2 data-t="pfByType">By type of commune</h2>
           <p class="sub" id="byTypeSub"></p>
           <div class="families" id="families"></div>
-        </div>
-      </div>
-
-      <div class="row row-map">
-        <div class="card">
-          <h2 data-t="pfProvincesMap">The provinces of Belgium</h2>
-          <p class="sub" data-t="pfProvincesMapSub">Click a commune to open its province.</p>
-          <div class="provmap" id="provBox">
-            <svg id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
-            <div class="tip" id="provTip" hidden></div>
-          </div>
-          <div class="legendcol" id="provLegend"></div>
-          <div style="text-align:right; margin-top:var(--bp-space-3)"><a href="map.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none"><span data-t="pfSeeInteractiveMap">See the interactive map</span> →</a></div>
-        </div>
-        <div class="card">
-          <h2 data-t="pfTypology">Belfius typology</h2>
-          <p class="typo-note" data-t="pfTypologyNote">Classification: Belfius Banque &amp; Assurances, socio-economic typology of municipalities (cluster composition, on the commune map before the 2019 mergers). Cluster labels in the other two languages are BelPulse’s unofficial translations.</p>
-          <div class="typo-counts" id="typoCounts"></div>
-          <p class="typo-note" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
+          <details class="typology-explainer">
+            <summary data-t="pfTypology">Belfius typology</summary>
+            <p class="typo-note" data-t="pfTypologyNote">Classification: Belfius Banque &amp; Assurances, socio-economic typology of municipalities (cluster composition, on the commune map before the 2019 mergers). Cluster labels in the other two languages are BelPulse’s unofficial translations.</p>
+            <div class="typo-counts" id="typoCounts"></div>
+            <p class="typo-note" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
+          </details>
         </div>
       </div>
 
@@ -641,6 +662,36 @@
   ];
   function icon(i, size){
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>';
+  }
+  var FAMILY_ICONS = [
+    '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/>',
+    '<path d="M20 4C11 4 5 8 5 15c0 3 2 5 5 5 7 0 10-7 10-16z"/><path d="M4 21c3-6 7-9 12-12"/>',
+    '<path d="M3 21V9l5 3V7l5 4V4l5 4v13z"/><path d="M18 13h3v8M7 16h1M12 15h1"/>',
+    '<path d="M5 21V7h14v14M3 21h18M8 10h2M14 10h2M8 14h2M14 14h2"/>',
+    '<path d="M3 21V10l6 3V9l6 4V5l6 4v12z"/><path d="M7 17h2M13 17h2M18 14v3"/>',
+    '<path d="M2 9c3-3 5 3 8 0s5 3 8 0 4 0 4 0M2 15c3-3 5 3 8 0s5 3 8 0 4 0 4 0"/>',
+    '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-2c0-4 3-7 7-7s7 3 7 7v2M15 13c4 0 7 3 7 7v1"/>',
+    '<circle cx="12" cy="5" r="3"/><circle cx="5" cy="18" r="3"/><circle cx="19" cy="18" r="3"/><path d="M10 7L6.5 15M14 7l3.5 8M8 18h8"/>',
+    '<path d="M4 20h16M6 20V9h12v11M4 9h16L12 3z"/><path d="M9 12v5M15 12v5"/>',
+  ];
+  var FAMILY_ICON_INDEX = {
+    residential_v: 0, residential_w: 0,
+    rural_v: 1, rural_w: 1,
+    cities_v: 2, urban_w: 2,
+    urbanised_v: 3, urbanised_w: 3,
+    economic_v: 4, coast_v: 5, brussels: 7,
+  };
+  function familyIcon(id, size){
+    var i = Object.prototype.hasOwnProperty.call(FAMILY_ICON_INDEX, id) ? FAMILY_ICON_INDEX[id] : 8;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + FAMILY_ICONS[i] + '</svg>';
+  }
+  function regionEmblem(code){
+    var art = {
+      VLA: '<path d="M12 38l5-8-3-6 6-3 2-8 5 5 7-5-1 8 7 4-7 4 3 8-9-3-6 7z"/><circle cx="27" cy="13" r="3"/><path d="M18 32l-8 6M30 33l7 7" fill="none" stroke="currentColor" stroke-width="3"/>',
+      WAL: '<path d="M13 31c0-8 4-14 12-15l4-6 3 7c5 2 7 6 6 11-5-3-9-2-12 1l-1 10-4-7-8 4z"/><circle cx="31" cy="18" r="1.5" fill="#fff"/><path d="M18 36l-3 7M24 37l2 6M11 24L5 18l9 2-5-8 10 6" fill="none" stroke="currentColor" stroke-width="3"/>',
+      BXL: '<path d="M24 23C9 18 9 8 16 7c5-1 8 7 8 16C24 8 32 4 36 9c5 7-4 13-12 14 15-1 20 7 15 12-5 6-13-1-15-12 2 15-5 21-11 16-6-5 1-13 11-16z"/><circle cx="24" cy="23" r="4" fill="#f3c95a"/>',
+    };
+    return '<svg viewBox="0 0 48 48" aria-hidden="true" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">' + (art[code] || '') + '</svg>';
   }
 
   function applyStrings(){
@@ -1004,12 +1055,14 @@
       var total = provinces.reduce(function(s, p){ return s + p.count; }, 0);
       var box = el('div', 'region');
       box.dataset.region = code;
-      var name = el('div', 'rname');
-      var sw = el('span', 'swatch'); sw.style.background = REGION_COLOUR[code];
-      name.appendChild(sw);
-      name.appendChild(document.createTextNode(nameOfGeo(reg)));
-      box.appendChild(name);
-      box.appendChild(el('div', 'rcount', T('pfCommunesCount', {n: total.toLocaleString(LANG)})));
+      var regionHead = el('div', 'region-head');
+      var mark = el('span', 'region-mark'); mark.innerHTML = regionEmblem(code);
+      regionHead.appendChild(mark);
+      var title = el('div');
+      title.appendChild(el('div', 'rname', nameOfGeo(reg)));
+      title.appendChild(el('div', 'rcount', T('pfCommunesCount', {n: total.toLocaleString(LANG)})));
+      regionHead.appendChild(title);
+      box.appendChild(regionHead);
       var ul = el('ul');
       provinces.forEach(function(p){
         var li = el('li');
@@ -1045,7 +1098,7 @@
         var ic = el('span', 'ficon');
         var tt = tint(i);
         ic.style.background = tt.bg; ic.style.color = tt.ink;
-        ic.innerHTML = icon(i, 16);
+        ic.innerHTML = familyIcon(fid, 20);
         head.appendChild(ic);
         var names = el('div');
         names.appendChild(el('div', 'fname', text(fam.label)));
@@ -1053,18 +1106,7 @@
         names.appendChild(el('div', 'fregion', regionName(region) + ' · ' + T('pfCommunesCount', {n: total})));
         head.appendChild(names);
         box.appendChild(head);
-        var ul = el('ul');
-        fam.clusters.forEach(function(code){
-          var li = el('li');
-          var a = document.createElement('a');
-          a.href = 'profiles.html?type=' + encodeURIComponent(code);
-          a.appendChild(el('span', 'code', code));
-          a.appendChild(el('span', '', clusterLabel(code)));
-          a.appendChild(el('span', 'n', String(t.clusters[code].members.length)));
-          li.appendChild(a);
-          ul.appendChild(li);
-        });
-        box.appendChild(ul);
+        box.appendChild(el('div', 'fdesc', fam.clusters.map(clusterLabel).join(' · ')));
         var more = document.createElement('a');
         more.className = 'fmore';
         more.href = 'profiles.html?family=' + encodeURIComponent(fid);
@@ -1170,6 +1212,16 @@
       }).build(state.geojson);
     }else{
       state.provMap.setLang(LANG);
+    }
+    var zoomIn = document.getElementById('provZoomIn');
+    var zoomOut = document.getElementById('provZoomOut');
+    if(zoomIn && !zoomIn.dataset.wired){
+      zoomIn.dataset.wired = '1';
+      zoomIn.addEventListener('click', function(){ state.provMap.zoomBy(.8); });
+    }
+    if(zoomOut && !zoomOut.dataset.wired){
+      zoomOut.dataset.wired = '1';
+      zoomOut.addEventListener('click', function(){ state.provMap.zoomBy(1.25); });
     }
     var svg = document.getElementById('provSvg');
     state.municipalities.forEach(function(m){

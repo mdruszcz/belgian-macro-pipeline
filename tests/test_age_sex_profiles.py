@@ -51,13 +51,7 @@ def test_export_writes_21_bands_and_checks_the_published_total(tmp_path):
     communes = tmp_path / "communes"
     communes.mkdir()
     (communes / "11001.json").write_text(
-        json.dumps(
-            {
-                "indicators": {
-                    "POPULATION_BY_COMMUNE": {"periods": {"2026": {"value": 5}}}
-                }
-            }
-        ),
+        json.dumps({"indicators": {"POPULATION_BY_COMMUNE": {"periods": {"2026": {"value": 5}}}}}),
         encoding="utf-8",
     )
     output = tmp_path / "out"
@@ -82,13 +76,7 @@ def test_export_refuses_a_pyramid_that_disagrees_with_population(tmp_path):
     communes = tmp_path / "communes"
     communes.mkdir()
     (communes / "11001.json").write_text(
-        json.dumps(
-            {
-                "indicators": {
-                    "POPULATION_BY_COMMUNE": {"periods": {"2026": {"value": 6}}}
-                }
-            }
-        ),
+        json.dumps({"indicators": {"POPULATION_BY_COMMUNE": {"periods": {"2026": {"value": 6}}}}}),
         encoding="utf-8",
     )
 
@@ -101,9 +89,7 @@ def test_current_pyramids_cover_every_current_commune_and_match_samples():
         (REPO / "public/data/metadata/geographies.json").read_text(encoding="utf-8")
     )
     expected = {
-        row["nis_code"]
-        for row in geography["geographies"]
-        if row["level"] == "municipality"
+        row["nis_code"] for row in geography["geographies"] if row["level"] == "municipality"
     }
     output = REPO / "public/data/demography"
     assert {path.stem for path in output.glob("*.json")} == expected
@@ -114,9 +100,7 @@ def test_current_pyramids_cover_every_current_commune_and_match_samples():
             (REPO / "public/data/communes" / f"{nis}.json").read_text(encoding="utf-8")
         )
         total = sum(row["male"] + row["female"] for row in pyramid["bands"])
-        expected_total = commune["indicators"]["POPULATION_BY_COMMUNE"]["periods"]["2026"][
-            "value"
-        ]
+        expected_total = commune["indicators"]["POPULATION_BY_COMMUNE"]["periods"]["2026"]["value"]
         assert total == expected_total
         assert len(pyramid["bands"]) == 21
 
