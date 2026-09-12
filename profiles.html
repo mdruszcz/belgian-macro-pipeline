@@ -7,14 +7,17 @@
   data table, its filters, its year selector and its URL state untouched
   (rule 31; docs/steps' Batch 5 note). Open as profiles.html. A type, family,
   province or region view is this same file with ?type=W14, ?family=rural_w,
-  ?province=be:prov:90000 or ?region=be:reg:04000 -- the pattern
-  commune.html?nis= already set.
+  ?province=be:prov:90000 or ?region=be:reg:04000. A commune opens in this
+  same file with ?nis=11001; commune.html?nis= remains available as the
+  more visual, curated profile.
 
   WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Names and the region/province
   chain come from metadata/geographies.json; the Belfius typology from
   metadata/typology.json (scripts/export_commune_typology.py); the figures on
-  a commune card are metadata/sections.json's first four HEADLINES, read from
-  indicators/{code}.json. NOT ONE INDICATOR CODE APPEARS IN THIS FILE
+  a directory card are metadata/sections.json's first four HEADLINES, read
+  from indicators/{code}.json. The ?nis= view loads communes/{nis}.json once
+  and renders every indicator and every published period in that payload.
+  NOT ONE INDICATOR CODE APPEARS IN THIS FILE
   (tests/test_map_ui_logic.py::test_no_page_names_an_indicator). Every count
   comes from the geography or manifest.json: the design's "581 communes" is
   the pre-2019 map, and the page says what the geography says.
@@ -203,6 +206,55 @@
   .mixed .why{font-size:12px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); max-width:80ch}
   .empty{font-size:var(--bp-text-small); color:var(--bp-text-muted); padding:var(--bp-space-6) 0}
 
+  /* ---- one commune: every published indicator -------------------------- */
+  .profilehead{padding:var(--bp-space-5) 0 var(--bp-space-4)}
+  .profilehead .back{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none}
+  .profilehead h1{font-size:2rem; margin:var(--bp-space-2) 0 3px; line-height:1.1}
+  .profilehead .sub{color:var(--bp-text-muted); margin:0; font-size:var(--bp-text-small)}
+  .profile-overview{
+    display:grid; grid-template-columns:220px minmax(0,1fr); gap:var(--bp-space-5);
+    margin-bottom:var(--bp-space-5); align-items:stretch;
+  }
+  .profile-photo{min-height:145px; border-radius:var(--bp-radius-card); overflow:hidden; background:linear-gradient(150deg,#18304d,#526c88)}
+  .profile-photo img{width:100%; height:100%; min-height:145px; object-fit:cover; display:block}
+  .profile-summary{display:flex; flex-direction:column; justify-content:center}
+  .profile-summary h2{margin:0 0 4px; font-size:1.25rem}
+  .profile-summary p{margin:0; color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+  .profile-counts{display:flex; flex-wrap:wrap; gap:var(--bp-space-5); margin-top:var(--bp-space-4)}
+  .profile-counts b{display:block; font-family:var(--bp-font-display); font-size:1.45rem}
+  .profile-counts span{display:block; color:var(--bp-text-muted); font-size:11px}
+  .profile-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:var(--bp-space-5)}
+  .profile-tools .searchbox{margin:0; max-width:none; flex:1 1 280px}
+  .profile-tools .shown{font-size:12px; color:var(--bp-text-muted); margin-right:auto}
+  .indicator-group{margin-bottom:var(--bp-space-6)}
+  .indicator-group[hidden]{display:none}
+  .indicator-group-head{margin-bottom:var(--bp-space-3)}
+  .indicator-group-head h2{font-size:1.35rem; margin:0 0 2px}
+  .indicator-group-head p{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0; max-width:80ch}
+  .indicator-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .indicator-card{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); background:var(--bp-surface); padding:var(--bp-space-4); min-width:0}
+  .indicator-card[hidden]{display:none}
+  .indicator-card h3{font-family:var(--bp-font-body); font-size:var(--bp-text-small); line-height:1.35; margin:0; font-weight:var(--bp-weight-semibold)}
+  .indicator-code{font:10px/1.3 "IBM Plex Mono",monospace; color:var(--bp-text-faint); overflow-wrap:anywhere; margin-top:2px}
+  .indicator-latest{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--bp-space-3); margin:var(--bp-space-4) 0 var(--bp-space-2)}
+  .indicator-value{font-family:var(--bp-font-display); font-size:1.45rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
+  .indicator-period{font-size:11px; color:var(--bp-text-muted); text-align:right}
+  .indicator-meta{font-size:11px; color:var(--bp-text-muted); line-height:1.45; min-height:1.45em}
+  .indicator-ranks{display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px}
+  .indicator-rank{font-size:11px; color:var(--bp-accent-ink)}
+  .indicator-card details{border-top:1px solid var(--bp-border); margin-top:var(--bp-space-3); padding-top:var(--bp-space-2)}
+  .indicator-card summary{cursor:pointer; color:var(--bp-accent); font-size:11px; list-style-position:inside}
+  .indicator-history{max-height:220px; overflow:auto; margin-top:6px}
+  .indicator-history-row{display:grid; grid-template-columns:minmax(70px,.7fr) minmax(0,1fr) auto; gap:8px; padding:4px 0; border-top:1px solid var(--bp-border); font-size:11px; font-variant-numeric:tabular-nums}
+  .indicator-history-row:first-child{border-top:0}
+  .indicator-history-row .hv{text-align:right; font-weight:var(--bp-weight-medium)}
+  .indicator-history-row .hs{color:var(--bp-text-faint); text-align:right}
+  .indicator-comparison-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:5px 0; border-top:1px solid var(--bp-border); font-size:11px}
+  .indicator-comparison-row:first-child{border-top:0}
+  .indicator-comparison-row b{font-variant-numeric:tabular-nums; text-align:right}
+  .indicator-comparison-row small{display:block; color:var(--bp-text-faint); margin-top:1px}
+  .profile-error{padding:var(--bp-space-7); text-align:center; color:var(--bp-text-muted)}
+
   /* ---- CTA + footer ---- */
   .cta{
     margin-top:var(--bp-space-8); color:#fff;
@@ -239,6 +291,7 @@
     .communes.list{grid-template-columns:repeat(3,minmax(0,1fr))}
     .row-2,.row-map,.explore{grid-template-columns:minmax(0,1fr)}
     .cta .wrap{grid-template-columns:minmax(0,1fr)}
+    .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @media (max-width:768px){
     .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
@@ -248,8 +301,13 @@
     .regions,.families{grid-template-columns:minmax(0,1fr)}
     .communes,.communes.list{grid-template-columns:repeat(2,minmax(0,1fr))}
     .cta-stats{flex-wrap:wrap; gap:var(--bp-space-5)}
+    .profile-overview{grid-template-columns:minmax(0,1fr)}
+    .profile-photo{max-height:240px}
   }
-  @media (max-width:480px){ .communes,.communes.list{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:480px){
+    .communes,.communes.list,.indicator-grid{grid-template-columns:minmax(0,1fr)}
+    .profile-tools .bp-btn{width:100%; justify-content:center}
+  }
 </style>
 </head>
 <body class="bp-shell">
@@ -392,6 +450,41 @@
         <div class="communes list" id="mixedGrid"></div>
       </section>
     </section>
+
+    <!-- One commune, with every indicator present in its published payload. -->
+    <section id="viewProfile" hidden>
+      <div class="profilehead">
+        <a class="back" href="profiles.html">← <span data-t="pfBackToAll">All commune profiles</span></a>
+        <h1 id="profileTitle">—</h1>
+        <p class="sub" id="profileWhere"></p>
+      </div>
+
+      <div class="profile-overview">
+        <div class="profile-photo" id="profilePhoto"></div>
+        <div class="card profile-summary">
+          <h2 data-t="pfAllDataTitle">All available commune data</h2>
+          <p data-t="pfAllDataLead">Every indicator in this commune's published payload, including unavailable and source-suppressed cells. Open an indicator to inspect its full history.</p>
+          <div class="profile-counts">
+            <div><b id="profileIndicatorCount">—</b><span data-t="pfAvailableIndicators">available indicators</span></div>
+            <div><b id="profilePeriodCount">—</b><span data-t="pfPublishedPeriods">published observations</span></div>
+            <div><b id="profileSourceCount">—</b><span data-t="pfDataSources">data sources</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tools">
+        <label class="searchbox">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="indicatorSearch" type="search" data-t-placeholder="pfIndicatorSearch" placeholder="Filter indicators…" autocomplete="off">
+        </label>
+        <span class="shown" id="profileShown"></span>
+        <a class="bp-btn bp-btn--outline" id="profileJson" href="#" download data-t="pfDownloadJson">Download JSON</a>
+        <a class="bp-btn bp-btn--red" id="profileInteractive" href="#" data-t="pfOpenInteractive">Open the visual profile</a>
+      </div>
+
+      <div id="profileSections"></div>
+      <p class="profile-error" id="profileError" hidden></p>
+    </section>
   </div>
 
   <section class="cta">
@@ -465,10 +558,11 @@
 /* BelPulse commune profiles -- the directory and its per-type views.
  *
  * Config-driven throughout: the region/province tree is metadata/geographies.json,
- * the typology is metadata/typology.json, the four figures on a card are
- * metadata/sections.json's headlines. This script knows about regions,
- * provinces, families, clusters and cards -- never about a particular
- * indicator or a particular commune.
+ * the typology is metadata/typology.json, and the compact directory cards use
+ * metadata/sections.json's headlines. A ?nis= view reads that commune's whole
+ * published payload and renders EVERY indicator found there, grouped by the
+ * same section metadata. This script never names a particular indicator or
+ * commune.
  */
 (function(){
   'use strict';
@@ -481,8 +575,10 @@
   var SOURCES_URL    = 'public/data/metadata/sources.json';
   var MANIFEST_URL   = 'public/data/manifest.json';
   var VALUES_URL     = function(code){ return 'public/data/indicators/' + code + '.json'; };
+  var COMMUNE_URL    = function(nis){ return 'public/data/communes/' + nis + '.json'; };
   var PHOTO_URL      = function(nis){ return 'communes/' + nis + '.webp'; };
-  var PROFILE_URL    = function(nis){ return 'commune.html?nis=' + nis; };
+  var PROFILE_URL    = function(nis){ return 'profiles.html?nis=' + nis; };
+  var INTERACTIVE_PROFILE_URL = function(nis){ return 'commune.html?nis=' + nis; };
 
   var REGION_CODE = {'be:reg:02000': 'VLA', 'be:reg:03000': 'WAL', 'be:reg:04000': 'BXL'};
   var REGION_COLOUR = {VLA: '#f3c95a', WAL: '#e5484d', BXL: '#2f6fd6'};
@@ -493,9 +589,9 @@
   var T = function(k, v){ return I18N.t(LANG, k, v); };
 
   var state = {
-    geographies: {}, municipalities: [], typology: null, byCode: {}, headlines: [],
+    geographies: {}, municipalities: [], typology: null, byCode: {}, headlines: [], sections: [],
     values: {}, sources: {}, manifest: {}, geojson: null, provMap: null, map: null,
-    view: null,
+    view: null, profile: null, profileNis: null, profileLoading: null,
   };
 
   /* ---- helpers ---------------------------------------------------------- */
@@ -645,6 +741,243 @@
     body.appendChild(link);
     c.appendChild(body);
     return c;
+  }
+
+  /* ---- one commune: all indicators and all published periods ----------- */
+  function latestPeriod(entry){
+    var periods = Object.keys((entry && entry.periods) || {}).sort();
+    return periods.length ? periods[periods.length - 1] : null;
+  }
+
+  function statusLabel(status){
+    if(!status) return '';
+    if(status === 'final') return T('pfStatusFinal');
+    if(status === 'derived') return T('pfStatusDerived');
+    if(status === 'suppressed') return T('pfSuppressed');
+    var translated = MapUI.text(LANG, 'status_' + status);
+    return translated && translated !== 'status_' + status ? translated : status;
+  }
+
+  function sourceLabels(meta){
+    var ids = [];
+    if(meta && meta.source) ids.push(meta.source);
+    (meta && meta.input_sources || []).forEach(function(id){ if(ids.indexOf(id) < 0) ids.push(id); });
+    return ids.map(function(id){
+      var source = state.sources[id];
+      return source && source.label ? text(source.label) : id;
+    }).filter(Boolean);
+  }
+
+  function profileIndicatorCard(code, entry, index){
+    var meta = state.byCode[code] || {unit: entry.unit, decimals: null};
+    var cardEl = el('article', 'indicator-card');
+    cardEl.dataset.search = [nameOfCode(code), code, meta.unit || entry.unit]
+      .concat(sourceLabels(meta)).join(' ').toLocaleLowerCase(LANG);
+    cardEl.appendChild(el('h3', '', nameOfCode(code)));
+    cardEl.appendChild(el('div', 'indicator-code', code));
+
+    var period = latestPeriod(entry);
+    var cell = period ? entry.periods[period] : null;
+    var latest = el('div', 'indicator-latest');
+    var value = el('div', 'indicator-value');
+    if(cell && typeof cell.value === 'number'){
+      value.textContent = fmt(cell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals});
+    }else if(cell && cell.status === 'suppressed'){
+      value.textContent = T('pfSuppressed');
+    }else{
+      value.textContent = '—';
+    }
+    latest.appendChild(value);
+    var when = el('div', 'indicator-period');
+    when.textContent = [period, cell && statusLabel(cell.status)].filter(Boolean).join(' · ');
+    latest.appendChild(when);
+    cardEl.appendChild(latest);
+
+    var provenance = sourceLabels(meta);
+    if(meta.grade) provenance.push(meta.grade);
+    if(meta.updated || meta.inputs_updated) provenance.push(meta.updated || meta.inputs_updated);
+    cardEl.appendChild(el('div', 'indicator-meta', provenance.join(' · ')));
+
+    var percentiles = entry.percentile || {};
+    var ranks = el('div', 'indicator-ranks');
+    if(percentiles.national && percentiles.national.rank && percentiles.national.peers){
+      ranks.appendChild(el('span', 'indicator-rank', T('pfNationalRank', {
+        rank: percentiles.national.rank, peers: percentiles.national.peers
+      })));
+    }
+    if(percentiles.regional && percentiles.regional.rank && percentiles.regional.peers){
+      ranks.appendChild(el('span', 'indicator-rank', T('pfRegionalRank', {
+        rank: percentiles.regional.rank, peers: percentiles.regional.peers
+      })));
+    }
+    if(ranks.children.length) cardEl.appendChild(ranks);
+
+    var comparisonKeys = ['province', 'region', 'country'].filter(function(scope){
+      return entry.comparison && entry.comparison[scope];
+    });
+    if(comparisonKeys.length){
+      var comparisons = document.createElement('details');
+      var comparisonsSummary = document.createElement('summary');
+      comparisonsSummary.textContent = T('pfComparisons', {n: comparisonKeys.length});
+      comparisons.appendChild(comparisonsSummary);
+      var comparisonsBody = el('div', 'indicator-comparisons');
+      comparisonKeys.forEach(function(scope){
+        var comparison = entry.comparison[scope];
+        var comparisonRow = el('div', 'indicator-comparison-row');
+        var comparisonLabel = el('span', '', text(comparison.name) || scope);
+        if(comparison.coverage && comparison.coverage.of){
+          comparisonLabel.appendChild(el('small', '', T('pfCoverage', {
+            n: comparison.coverage.n, of: comparison.coverage.of
+          })));
+        }
+        comparisonRow.appendChild(comparisonLabel);
+        var comparisonValue = typeof comparison.value === 'number'
+          ? fmt(comparison.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
+          : '—';
+        comparisonRow.appendChild(el('b', '', [comparisonValue, comparison.period].filter(Boolean).join(' · ')));
+        comparisonsBody.appendChild(comparisonRow);
+      });
+      comparisons.appendChild(comparisonsBody);
+      cardEl.appendChild(comparisons);
+    }
+
+    var periods = Object.keys(entry.periods || {}).sort().reverse();
+    var details = document.createElement('details');
+    var summary = document.createElement('summary');
+    summary.textContent = T('pfHistory', {n: periods.length});
+    details.appendChild(summary);
+    var history = el('div', 'indicator-history');
+    periods.forEach(function(p){
+      var historyCell = entry.periods[p];
+      var row = el('div', 'indicator-history-row');
+      row.appendChild(el('span', '', p));
+      var historyValue = typeof historyCell.value === 'number'
+        ? fmt(historyCell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
+        : (historyCell.status === 'suppressed' ? T('pfSuppressed') : '—');
+      row.appendChild(el('span', 'hv', historyValue));
+      row.appendChild(el('span', 'hs', statusLabel(historyCell.status)));
+      history.appendChild(row);
+    });
+    details.appendChild(history);
+    cardEl.appendChild(details);
+    return cardEl;
+  }
+
+  function profileGroups(indicators){
+    var remaining = {};
+    Object.keys(indicators || {}).forEach(function(code){ remaining[code] = true; });
+    var groups = [];
+    state.sections.forEach(function(section){
+      if(section.unavailable) return;
+      var declared = [section.headline].concat(section.indicators || []).filter(Boolean);
+      var codes = [];
+      declared.forEach(function(code){
+        if(remaining[code] && codes.indexOf(code) < 0){ codes.push(code); delete remaining[code]; }
+      });
+      if(codes.length) groups.push({label: section.label, blurb: section.blurb, codes: codes});
+    });
+    var other = Object.keys(remaining).sort(function(a, b){
+      return nameOfCode(a).localeCompare(nameOfCode(b), LANG);
+    });
+    if(other.length) groups.push({label: T('pfOtherData'), blurb: null, codes: other});
+    return groups;
+  }
+
+  function filterProfileIndicators(){
+    var input = document.getElementById('indicatorSearch');
+    var query = (input.value || '').trim().toLocaleLowerCase(LANG);
+    var shown = 0;
+    document.querySelectorAll('#profileSections .indicator-card').forEach(function(cardEl){
+      cardEl.hidden = !!query && cardEl.dataset.search.indexOf(query) < 0;
+      if(!cardEl.hidden) shown += 1;
+    });
+    document.querySelectorAll('#profileSections .indicator-group').forEach(function(group){
+      group.hidden = !group.querySelector('.indicator-card:not([hidden])');
+    });
+    document.getElementById('profileShown').textContent = T('pfIndicatorsShown', {n: shown});
+  }
+
+  function paintProfile(nis){
+    var payload = state.profile;
+    var geo = state.municipalities.filter(function(row){ return row.nis_code === nis; })[0];
+    var error = document.getElementById('profileError');
+    if(!payload || !geo){
+      error.hidden = false;
+      error.textContent = T('pfProfileUnavailable');
+      return;
+    }
+    error.hidden = true;
+    var name = text(payload.name) || nameOfGeo(geo);
+    document.getElementById('profileTitle').textContent = name;
+    document.title = 'BelPulse — ' + name + ' — ' + T('navCommunes');
+    var places = [levelOf(geo, 'region'), levelOf(geo, 'province'), levelOf(geo, 'arrondissement')]
+      .filter(Boolean).map(nameOfGeo);
+    document.getElementById('profileWhere').textContent = places.join(' · ') + ' · NIS ' + nis;
+    document.getElementById('crumbSep').hidden = false;
+    var crumb = document.getElementById('crumbView');
+    crumb.hidden = false;
+    crumb.textContent = name;
+
+    var photo = document.getElementById('profilePhoto');
+    photo.innerHTML = '';
+    var img = document.createElement('img');
+    img.src = PHOTO_URL(nis); img.alt = name; img.onerror = function(){ img.remove(); };
+    photo.appendChild(img);
+
+    var indicators = payload.indicators || {};
+    var codes = Object.keys(indicators);
+    var periods = codes.reduce(function(total, code){
+      return total + Object.keys(indicators[code].periods || {}).length;
+    }, 0);
+    var sources = {};
+    codes.forEach(function(code){
+      var meta = state.byCode[code] || {};
+      if(meta.source) sources[meta.source] = true;
+      (meta.input_sources || []).forEach(function(id){ sources[id] = true; });
+    });
+    document.getElementById('profileIndicatorCount').textContent = codes.length.toLocaleString(LANG);
+    document.getElementById('profilePeriodCount').textContent = periods.toLocaleString(LANG);
+    document.getElementById('profileSourceCount').textContent = Object.keys(sources).length.toLocaleString(LANG);
+    document.getElementById('profileJson').href = COMMUNE_URL(nis);
+    document.getElementById('profileInteractive').href = INTERACTIVE_PROFILE_URL(nis);
+
+    var host = document.getElementById('profileSections');
+    host.innerHTML = '';
+    var index = 0;
+    profileGroups(indicators).forEach(function(group){
+      var section = el('section', 'indicator-group');
+      var head = el('div', 'indicator-group-head');
+      head.appendChild(el('h2', '', text(group.label)));
+      if(group.blurb) head.appendChild(el('p', '', text(group.blurb)));
+      section.appendChild(head);
+      var grid = el('div', 'indicator-grid');
+      group.codes.forEach(function(code){
+        grid.appendChild(profileIndicatorCard(code, indicators[code], index++));
+      });
+      section.appendChild(grid);
+      host.appendChild(section);
+    });
+    filterProfileIndicators();
+  }
+
+  function renderProfile(nis){
+    var error = document.getElementById('profileError');
+    if(!/^\d{5}$/.test(nis)){
+      error.hidden = false; error.textContent = T('pfProfileUnavailable'); return;
+    }
+    if(state.profile && state.profileNis === nis){ paintProfile(nis); return; }
+    if(state.profileLoading === nis) return;
+    document.getElementById('profileSections').innerHTML = '<p class="profile-error">' + T('loading') + '</p>';
+    state.profileLoading = nis;
+    fetch(COMMUNE_URL(nis)).then(function(response){
+      if(!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    }).then(function(payload){
+      state.profile = payload; state.profileNis = nis; state.profileLoading = null; paintProfile(nis);
+    }).catch(function(){
+      state.profileLoading = null; error.hidden = false; error.textContent = T('pfProfileUnavailable');
+      document.getElementById('profileSections').innerHTML = '';
+    });
   }
 
   /* ---- directory: regions and provinces --------------------------------- */
@@ -997,9 +1330,14 @@
     applyStrings();
     renderCounts();
     renderSearch();
-    var sel = selection();
-    document.getElementById('viewDirectory').hidden = !!sel;
-    document.getElementById('viewList').hidden = !sel;
+    var nis = qs('nis');
+    var sel = nis ? null : selection();
+    document.getElementById('viewDirectory').hidden = !!nis || !!sel;
+    document.getElementById('viewList').hidden = !!nis || !sel;
+    document.getElementById('viewProfile').hidden = !nis;
+    if(nis){ renderProfile(nis); return; }
+    document.getElementById('crumbSep').hidden = true;
+    document.getElementById('crumbView').hidden = true;
     if(sel){ renderList(sel); return; }
     document.title = 'BelPulse — ' + T('navCommunes');
     renderRegions();
@@ -1017,6 +1355,7 @@
       try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(err){}
       renderAll();
     });
+    document.getElementById('indicatorSearch').addEventListener('input', filterProfileIndicators);
     applyStrings();
 
     var res = await Promise.all([GEOGRAPHIES_URL, TYPOLOGY_URL, INDEX_URL, SECTIONS_URL, SOURCES_URL, MANIFEST_URL]
@@ -1027,13 +1366,15 @@
     state.typology = res[1];
     var idx = res[2] || {indicators: []};
     (idx.indicators || []).forEach(function(r){ state.byCode[r.indicator_code] = r; });
-    state.headlines = ((res[3] || {}).headlines || []).filter(function(c){ return state.byCode[c]; });
+    var sectionsPayload = res[3] || {};
+    state.sections = sectionsPayload.sections || [];
+    state.headlines = (sectionsPayload.headlines || []).filter(function(c){ return state.byCode[c]; });
     state.sources = (res[4] || {}).sources || {};
     state.manifest = res[5] || {};
     var dates = (idx.indicators || []).map(function(r){ return r.updated; }).filter(Boolean).sort();
     state.attrUpdated = dates[dates.length - 1] || '';
 
-    var codes = state.headlines.slice(0, CARD_FIGURES);
+    var codes = qs('nis') ? [] : state.headlines.slice(0, CARD_FIGURES);
     var payloads = await Promise.all(codes.map(function(code){
       return fetch(VALUES_URL(code)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
     }));
@@ -1041,7 +1382,7 @@
 
     renderAll();
 
-    if(selection()) return;              // a list view draws no map
+    if(qs('nis') || selection()) return; // detail/list views draw no map
     var g = await fetch(GEO_URL).catch(function(){ return null; });
     if(!g || !g.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
     state.geojson = await g.json();
