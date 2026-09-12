@@ -1,7 +1,8 @@
 """
-Export the canonical schema's latest country and EU-aggregate observations
-to the same 8-column CSV shape dashboard.html already depends on:
-    indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at
+Export the canonical schema's latest dashboard observations.
+
+Belgium rows stay visible as ordinary dashboard series; DE/FR/NL GDP rows are
+exported as helper series for dashboard.html's existing INT_GDP_COMP formula.
 
 `status` is mapped back to the single-letter convention the frontend already
 branches on (final->A, provisional->P, everything else->'' -- the frontend
@@ -22,6 +23,12 @@ STATUS_TO_LETTER = {
     "provisional": "P",
 }
 
+GDP_COMPARISON_HELPERS = (
+    "EUROSTAT_GDP_Q_MEUR_DE",
+    "EUROSTAT_GDP_Q_MEUR_FR",
+    "EUROSTAT_GDP_Q_MEUR_NL",
+)
+
 
 def status_to_obs_status(status: str) -> str:
     return STATUS_TO_LETTER.get(status, "")
@@ -29,16 +36,20 @@ def status_to_obs_status(status: str) -> str:
 
 def export_canonical_csv(db_path: Path, out_path: Path) -> int:
     conn = sqlite3.connect(str(db_path))
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT o.indicator_id, i.name_en, o.period, o.value, o.status,
                i.unit, s.agency, o.created_at
         FROM observations o
         JOIN indicators i ON o.indicator_id = i.indicator_id
         JOIN sources s ON i.source_id = s.source_id
         JOIN geographies g ON o.geo_id = g.geo_id
-        WHERE g.level IN ('country', 'eu_aggregate') AND o.is_latest = 1
+        WHERE o.is_latest = 1
+          AND (o.geo_id = 'be:country' OR o.indicator_id IN (?, ?, ?))
         ORDER BY o.indicator_id, o.period
-        """).fetchall()
+        """,
+        GDP_COMPARISON_HELPERS,
+    ).fetchall()
     conn.close()
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

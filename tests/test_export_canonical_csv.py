@@ -99,7 +99,7 @@ def test_export_excludes_non_latest_rows(tmp_path):
     assert "2.0" in lines[1]
 
 
-def test_export_includes_international_country_rows(tmp_path):
+def test_export_includes_de_fr_nl_gdp_helpers(tmp_path):
     db_path = tmp_path / "test.db"
     migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
     conn = sqlite3.connect(str(db_path))
@@ -107,22 +107,39 @@ def test_export_includes_international_country_rows(tmp_path):
         "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
         ("eurostat", "Eurostat", "Eurostat", "dbnomics", "x"),
     )
-    conn.execute("""INSERT INTO geographies (geo_id, level, name_nl, name_fr, name_en, valid_from)
-           VALUES ('de:country', 'country', 'Duitsland', 'Allemagne', 'Germany', '1990-10-03')""")
-    conn.execute("""INSERT INTO indicators
+    conn.executemany(
+        """INSERT INTO geographies (geo_id, level, name_nl, name_fr, name_en, valid_from)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        [
+            ("de:country", "country", "Duitsland", "Allemagne", "Germany", "1990-10-03"),
+            ("es:country", "country", "Spanje", "Espagne", "Spain", "1978-12-29"),
+        ],
+    )
+    conn.executemany(
+        """INSERT INTO indicators
            (indicator_id, source_id, name_nl, name_fr, name_en, frequency, unit,
             preferred_direction, is_additive, config_path)
-           VALUES ('EUROSTAT_GDP_Q_MEUR_DE', 'eurostat', 'DE', 'DE', 'GDP DE', 'Q',
-                   'index_2010', 'neutral', 0, 'x')""")
+           VALUES (?, 'eurostat', ?, ?, ?, 'Q', 'index_2010', 'neutral', 0, 'x')""",
+        [
+            ("EUROSTAT_GDP_Q_MEUR_DE", "DE", "DE", "GDP DE"),
+            ("EUROSTAT_GDP_Q_MEUR_ES", "ES", "ES", "GDP ES"),
+        ],
+    )
     conn.execute(
         "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
         "VALUES ('eurostat','dbnomics','2026-01-01','ok')"
     )
-    conn.execute("""INSERT INTO observations
+    conn.executemany(
+        """INSERT INTO observations
            (indicator_id, geo_id, period, vintage, value, status,
             period_start, period_end, is_latest, fetch_run_id, created_at)
-           VALUES ('EUROSTAT_GDP_Q_MEUR_DE', 'de:country', '2024-Q1', 'v1', 100.0, 'final',
-                   '2024-01-01', '2024-03-31', 1, 1, '2026-01-01T00:00:00+00:00')""")
+           VALUES (?, ?, '2024-Q1', 'v1', ?, 'final',
+                   '2024-01-01', '2024-03-31', 1, 1, '2026-01-01T00:00:00+00:00')""",
+        [
+            ("EUROSTAT_GDP_Q_MEUR_DE", "de:country", 100.0),
+            ("EUROSTAT_GDP_Q_MEUR_ES", "es:country", 101.0),
+        ],
+    )
     conn.commit()
     conn.close()
 
@@ -130,9 +147,9 @@ def test_export_includes_international_country_rows(tmp_path):
     n = export_canonical_csv(db_path, out_path)
 
     assert n == 1
-    assert "EUROSTAT_GDP_Q_MEUR_DE,GDP DE,2024-Q1,100.0,A,index_2010,Eurostat" in (
-        out_path.read_text()
-    )
+    text = out_path.read_text()
+    assert "EUROSTAT_GDP_Q_MEUR_DE,GDP DE,2024-Q1,100.0,A,index_2010,Eurostat" in text
+    assert "EUROSTAT_GDP_Q_MEUR_ES" not in text
 
 
 def test_a_name_containing_a_comma_is_quoted_not_column_shifted(tmp_path):
