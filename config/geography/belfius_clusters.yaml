@@ -1,0 +1,316 @@
+# Belfius socio-economic typology of Belgian municipalities -- the CLUSTER
+# LABELS and their FAMILIES. The per-commune composition is the sibling CSV,
+# belfius_clusters.csv, transcribed name for name from the three Belfius
+# publications under docs/Communes caracterisation/ ("Composition des clusters
+# -- Wallonie", FR; "Samenstelling van de clusters -- Vlaanderen" and "--
+# Brussel", NL). Belfius Banque & Assurances is the author of the typology;
+# BelPulse publishes it as a classification only, never as a figure.
+#
+# The labels are Belfius's own in the language of each publication (FR for the
+# Walloon clusters, NL for the Flemish and Brussels ones). The two other
+# languages are BelPulse's translations, marked so below: unofficial, like the
+# English commune names, and never presented as Belfius's wording.
+#
+# TWO CLUSTER CODES ARE CORRECTED FROM THE PRINT. The Walloon publication
+# labels both "Villes moyennes bien equipees en milieu rural" and "Grandes
+# villes et poles regionaux structurants" as W14; the Flemish one labels both
+# "Grote en regionale steden" and "Kustgemeenten" as V15. Each publication
+# numbers its clusters consecutively and those are its last two headings, so
+# the second of each pair is W16 and V16 here, with the printed code recorded
+# so the correction is auditable rather than silent.
+#
+# THE COMPOSITION PREDATES THE 2019 AND 2025 MERGERS: it lists Puurs and
+# Sint-Amands, Neerpelt and Overpelt, Bastogne and Bertogne as separate
+# communes. scripts/export_commune_typology.py resolves every printed name to
+# today's 565 communes through config/geography/municipality_crosswalk.csv;
+# a commune whose constituent parts sat in DIFFERENT clusters is published as
+# `mixed` with the parts named, never assigned to one of them (rule 26 -- the
+# five states never collapse -- and the Definitions' "refuse, do not invent").
+
+source:
+  publisher: Belfius Banque & Assurances
+  title:
+    fr: Typologie socio-économique des communes — composition des clusters
+    nl: Sociaaleconomische typologie van de gemeenten — samenstelling van de clusters
+    en: Socio-economic typology of municipalities — cluster composition
+  documents:
+    - docs/Communes caracterisation/EEPSTUDCLUWAL_FR.pdf
+    - docs/Communes caracterisation/EEPSTUDCLUVLA_NL.pdf
+    - docs/Communes caracterisation/EEPSTUDCLUBXL_NL.pdf
+  translations_note: >-
+    Cluster and family labels are Belfius's own in the language of the publication
+    that defines them (fr for W*, nl for V* and BX*); the other two languages are
+    BelPulse's unofficial translations.
+  # The composition lists Puurs and Sint-Amands, Neerpelt and Overpelt, Bastogne
+  # and Bertogne as separate communes: it describes the commune map BEFORE the
+  # 2019 mergers. Printed names are resolved against the communes valid on this
+  # date, then carried to today's through municipality_crosswalk.csv.
+  reference_date: "2018-12-31"
+  # Printed names that cannot be matched as printed, each with its reason. Kept
+  # here rather than corrected in the CSV so the transcription stays a faithful
+  # copy of the print and every departure from it is on the record.
+  printed_name_aliases:
+    AUBAGNE:
+      use: AUBANGE
+      note: >-
+        Printed "AUBAGNE" in cluster W10 of the Walloon publication. Aubagne is a
+        town in Provence; the Walloon commune is Aubange (Luxembourg province), the
+        only Belgian commune of that shape, and it appears nowhere else in the list.
+    COMINES:
+      use: COMINES-WARNETON
+      note: >-
+        Belfius prints the short name; the commune is Comines-Warneton
+        (Komen-Waasten).
+    WAISMES:
+      use: WAIMES
+      note: >-
+        Printed "WAISMES" in cluster W2. The commune is Waimes (Weismes in
+        German); no Belgian commune is spelled Waismes.
+    FOSSE-LA-VILLE:
+      use: FOSSES-LA-VILLE
+      note: >-
+        Printed without its final s in cluster W7; the commune is
+        Fosses-la-Ville (Namur province).
+
+families:
+  rural_w:
+    region: WAL
+    label: {fr: Communes rurales, nl: Landelijke gemeenten, en: Rural municipalities}
+  residential_w:
+    region: WAL
+    label: {fr: Communes résidentielles, nl: Woongemeenten, en: Residential municipalities}
+  urbanised_w:
+    region: WAL
+    label: {fr: Communes urbanisées, nl: Verstedelijkte gemeenten, en: Urbanised municipalities}
+  urban_w:
+    region: WAL
+    label:
+      fr: Communes urbaines (exerçant une fonction de centralité)
+      nl: Stedelijke gemeenten (met een centrumfunctie)
+      en: Urban municipalities (with a central function)
+  residential_v:
+    region: VLA
+    label: {nl: Woongemeenten, fr: Communes résidentielles, en: Residential municipalities}
+  rural_v:
+    region: VLA
+    label: {nl: Landelijke gemeenten, fr: Communes rurales, en: Rural municipalities}
+  economic_v:
+    region: VLA
+    label:
+      nl: Gemeenten met concentratie van economische activiteit
+      fr: Communes à concentration d’activité économique
+      en: Municipalities with a concentration of economic activity
+  urbanised_v:
+    region: VLA
+    label: {nl: Verstedelijkte gemeenten, fr: Communes urbanisées, en: Urbanised municipalities}
+  cities_v:
+    region: VLA
+    label: {nl: Grote en regionale steden, fr: Grandes villes et villes régionales, en: Large and regional cities}
+  coast_v:
+    region: VLA
+    label: {nl: Kustgemeenten, fr: Communes côtières, en: Coastal municipalities}
+  brussels:
+    region: BXL
+    label: {nl: Brussel, fr: Bruxelles, en: Brussels}
+
+clusters:
+  W1:
+    family: rural_w
+    label: {fr: Rurales peu denses, nl: Dunbevolkte landelijke gemeenten, en: Sparsely populated rural}
+  W2:
+    family: rural_w
+    label: {fr: Rurales à dominante forestière, nl: Landelijke gemeenten met overwegend bos, en: Rural, predominantly forested}
+  W3:
+    family: rural_w
+    label: {fr: Rurales et pôles multifonctionnels, nl: Landelijke gemeenten en multifunctionele polen, en: Rural with multifunctional centres}
+  W4:
+    family: rural_w
+    label:
+      fr: Rurales touristiques avec vieillissement de la population
+      nl: Landelijke toeristische gemeenten met vergrijzende bevolking
+      en: Rural tourist municipalities with an ageing population
+  W5:
+    family: rural_w
+    label:
+      fr: Rurales avec urbanisation croissante et activités économiques
+      nl: Landelijke gemeenten met toenemende verstedelijking en economische activiteit
+      en: Rural with growing urbanisation and economic activity
+  W8:
+    family: rural_w
+    label: {fr: Rurales avec expansion résidentielle, nl: Landelijke gemeenten met residentiële expansie, en: Rural with residential expansion}
+  W6:
+    family: residential_w
+    label:
+      fr: Résidentielles à vocation économique affirmée
+      nl: Woongemeenten met uitgesproken economische roeping
+      en: Residential with a marked economic vocation
+  W7:
+    family: residential_w
+    label:
+      fr: Résidentielles à moyens ou faibles revenus et peu polarisantes
+      nl: Woongemeenten met middelhoge of lage inkomens en weinig aantrekkingskracht
+      en: Residential with middle or low incomes and little pull
+  W9:
+    family: residential_w
+    label:
+      fr: Résidentielles à hauts revenus et population vieillissante
+      nl: Woongemeenten met hoge inkomens en vergrijzende bevolking
+      en: Residential with high incomes and an ageing population
+  W10:
+    family: urbanised_w
+    label: {fr: Urbanisées à faibles revenus, nl: Verstedelijkte gemeenten met lage inkomens, en: Urbanised with low incomes}
+  W11:
+    family: urbanised_w
+    label:
+      fr: Urbanisées à faibles revenus et déprise économique
+      nl: Verstedelijkte gemeenten met lage inkomens en economische achteruitgang
+      en: Urbanised with low incomes and economic decline
+  W12:
+    family: urbanised_w
+    label:
+      fr: Fortement urbanisées à faibles revenus
+      nl: Sterk verstedelijkte gemeenten met lage inkomens
+      en: Strongly urbanised with low incomes
+  W13:
+    family: urbanised_w
+    label:
+      fr: Fortement urbanisées à vocation économique affirmée
+      nl: Sterk verstedelijkte gemeenten met uitgesproken economische roeping
+      en: Strongly urbanised with a marked economic vocation
+  W14:
+    family: urban_w
+    label:
+      fr: Villes moyennes bien équipées en milieu rural
+      nl: Goed uitgeruste middelgrote steden in landelijk gebied
+      en: Well-equipped medium-sized towns in a rural setting
+    subgroups:
+      villes_moyennes: {fr: Villes moyennes bien équipées en milieu rural, nl: Goed uitgeruste middelgrote steden, en: Well-equipped medium-sized towns}
+      petites_villes: {fr: Petites villes bien équipées en milieu rural, nl: Goed uitgeruste kleine steden, en: Well-equipped small towns}
+  W15:
+    family: urban_w
+    label:
+      fr: Pôles urbains à vocation économique affirmée
+      nl: Stedelijke polen met uitgesproken economische roeping
+      en: Urban centres with a marked economic vocation
+  W16:
+    family: urban_w
+    printed_as: W14
+    label:
+      fr: Grandes villes et pôles régionaux structurants
+      nl: Grote steden en structurerende regionale polen
+      en: Large cities and structuring regional centres
+    subgroups:
+      poles_regionaux: {fr: Pôles régionaux structurants, nl: Structurerende regionale polen, en: Structuring regional centres}
+      grandes_villes: {fr: Grandes villes, nl: Grote steden, en: Large cities}
+  V1:
+    family: residential_v
+    label:
+      nl: Gemeenten in de stadsrand met hoge inkomens en vergrijzende bevolking
+      fr: Communes de périphérie urbaine à hauts revenus et population vieillissante
+      en: Suburban municipalities with high incomes and an ageing population
+  V2:
+    family: residential_v
+    label:
+      nl: Gemeenten in de stadsrand met hogere inkomens en toenemend aantal jongeren
+      fr: Communes de périphérie urbaine à revenus élevés et jeunes en nombre croissant
+      en: Suburban municipalities with higher incomes and a growing young population
+  V3:
+    family: residential_v
+    label: {nl: Woongemeenten met hogere inkomens, fr: Communes résidentielles à revenus élevés, en: Residential municipalities with higher incomes}
+  V4:
+    family: residential_v
+    label:
+      nl: Woongemeenten met toenemend aantal jongeren
+      fr: Communes résidentielles avec jeunes en nombre croissant
+      en: Residential municipalities with a growing young population
+  V5:
+    family: residential_v
+    label:
+      nl: Woongemeenten met vergrijzende bevolking
+      fr: Communes résidentielles à population vieillissante
+      en: Residential municipalities with an ageing population
+  V6:
+    family: rural_v
+    label:
+      nl: Landelijke woongemeenten met hogere inkomens
+      fr: Communes rurales résidentielles à revenus élevés
+      en: Rural residential municipalities with higher incomes
+  V7:
+    family: rural_v
+    label: {nl: Landbouwgemeenten, fr: Communes agricoles, en: Agricultural municipalities}
+  V8:
+    family: rural_v
+    label:
+      nl: Landelijke woongemeenten met eerder vergrijzende bevolking
+      fr: Communes rurales résidentielles à population plutôt vieillissante
+      en: Rural residential municipalities with a rather ageing population
+  V9:
+    family: economic_v
+    label:
+      nl: Gemeenten in de stadsrand met economische activiteit en toenemend aantal jongeren
+      fr: Communes de périphérie urbaine à activité économique et jeunes en nombre croissant
+      en: Suburban municipalities with economic activity and a growing young population
+  V10:
+    family: economic_v
+    label:
+      nl: Gemeenten met economische activiteit en vergrijzende bevolking
+      fr: Communes à activité économique et population vieillissante
+      en: Municipalities with economic activity and an ageing population
+  V11:
+    family: economic_v
+    label:
+      nl: Gemeenten met groter bevolkingsaantal en economische activiteit
+      fr: Communes plus peuplées à activité économique
+      en: More populous municipalities with economic activity
+  V12:
+    family: economic_v
+    label:
+      nl: Gemeenten en kleine steden met centrumfunctie en economische activiteit
+      fr: Communes et petites villes à fonction de centralité et activité économique
+      en: Municipalities and small towns with a central function and economic activity
+  V13:
+    family: urbanised_v
+    label:
+      nl: Goeduitgeruste gemeenten en kleine steden met vergrijzende bevolking
+      fr: Communes et petites villes bien équipées à population vieillissante
+      en: Well-equipped municipalities and small towns with an ageing population
+  V14:
+    family: urbanised_v
+    label:
+      nl: Goeduitgeruste gemeenten en kleine steden met toenemend aantal jongeren
+      fr: Communes et petites villes bien équipées avec jeunes en nombre croissant
+      en: Well-equipped municipalities and small towns with a growing young population
+  V15:
+    family: cities_v
+    label: {nl: Grote en regionale steden, fr: Grandes villes et villes régionales, en: Large and regional cities}
+  V16:
+    family: coast_v
+    printed_as: V15
+    label: {nl: Kustgemeenten, fr: Communes côtières, en: Coastal municipalities}
+  BX1:
+    family: brussels
+    label:
+      nl: Residentiële gemeenten in het noordwesten
+      fr: Communes résidentielles du nord-ouest
+      en: Residential municipalities in the north-west
+  BX2:
+    family: brussels
+    label:
+      nl: Residentiële gemeenten in het zuidoosten
+      fr: Communes résidentielles du sud-est
+      en: Residential municipalities in the south-east
+  BX3:
+    family: brussels
+    label:
+      nl: Gemeenten van de “eerste gordel”
+      fr: Communes de la « première couronne »
+      en: Municipalities of the “first ring”
+  BX4:
+    family: brussels
+    label:
+      nl: Gemeenten in industriële reconversie in de kanaalzone
+      fr: Communes en reconversion industrielle de la zone du canal
+      en: Municipalities in industrial reconversion in the canal zone
+  BX5:
+    family: brussels
+    label: {nl: Brussel stad, fr: Ville de Bruxelles, en: City of Brussels}

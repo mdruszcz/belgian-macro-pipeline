@@ -70,6 +70,24 @@ permits), 12–13 (ABB municipal finance — both the interactive tool and the P
 (data.gov.be). `datastore.brussels` (Brussels-region aggregator, see below) was never formally
 offered as a candidate and stays unresolved rather than silently deferred.
 
+## Belfius socio-economic typology of municipalities (maintainer-requested 2026-09-12)
+
+**Status: added at the maintainer's request (the request is the approval, rule 8); licence
+NOT verified.** A classification, not a figure — it is never aggregated, computed with or
+published as a number, so it sits outside the Selected-10 table above (CONTROL E: that table
+stays at exactly 10).
+
+| Field | Value |
+|---|---|
+| Publisher | Belfius Banque & Assurances — "Composition des clusters" (Wallonie, FR), "Samenstelling van de clusters" (Vlaanderen and Brussel, NL); the three PDFs are committed under `docs/Communes caracterisation/` |
+| What | 37 clusters (16 Walloon, 16 Flemish, 5 Brussels) in 11 families, one per commune |
+| Where it lives | `config/geography/belfius_clusters.csv` (composition, name for name as printed) + `belfius_clusters.yaml` (labels en/fr/nl, reference date, the two printed-name aliases) → `scripts/export_commune_typology.py` → `public/data/metadata/typology.json` |
+| Coverage | the publication is on the pre-2019 map (588 printed names over 589 communes). Resolved onto today's 565 through `municipality_crosswalk.csv`; a commune merged from parts in DIFFERENT clusters is published `mixed` and assigned to none (rule 26) — the count is in `typology.json`'s `counts` and pinned by `tests/test_commune_typology.py` |
+| Depth | one vintage; no history to compare against |
+| Comparability | Belfius clusters each region separately; families are NOT merged across regions on the site |
+| Maintenance | none until Belfius publishes a new composition; then a re-transcription |
+| Licence | **unverified.** The PDFs carry no reuse terms. Belfius is credited on every view that shows the typology; whether re-publishing the composition needs Belfius's permission is an open question for the maintainer before any commercial use |
+
 ## Census indicators — 2021 wanted, 2011 available (approved 2026-09-06, revised same day)
 
 **Status: approved in principle, blocked on a hand-download. Do not build the 2011-only adapter.**
