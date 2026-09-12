@@ -120,10 +120,8 @@
   .region[data-region="WAL"]{background:color-mix(in srgb, #e5484d 16%, var(--bp-surface))}
   .region[data-region="BXL"]{background:color-mix(in srgb, #2f6fd6 16%, var(--bp-surface))}
   .region-head{display:flex; align-items:center; gap:8px; min-height:56px; padding:8px 9px}
-  .region-mark{width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(10,35,70,.08)}
-  .region-mark svg{width:100%; height:100%; display:block}
-  .region[data-region="VLA"] .region-mark,.region[data-region="WAL"] .region-mark{background:#ffd500}
-  .region[data-region="BXL"] .region-mark{background:#34479b}
+  .region-mark{width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none}
+  .region-mark img{width:100%; height:100%; display:block; object-fit:contain}
   .region .rname{font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.2}
   .region .rcount{font-size:11px; color:var(--bp-text-muted); margin-top:2px}
   .region ul{list-style:none; margin:0; padding:0}
@@ -141,7 +139,8 @@
   .province-map-block{display:grid; grid-template-columns:minmax(145px,.7fr) minmax(0,1.3fr); gap:12px; align-items:center; border-top:1px solid var(--bp-border); margin-top:12px; padding-top:12px}
   .province-copy h3{font-size:1rem; margin:0 0 3px}
   .province-copy .sub{margin-bottom:8px; line-height:1.35}
-  .provmap{position:relative; min-height:190px}
+  .provmap{position:relative; height:190px; min-height:0}
+  .provmap svg.map,.explore .mapbox svg.map{width:100%; height:100%}
   .mapzoom{position:absolute; z-index:3; top:4px; right:4px; display:flex; flex-direction:column; gap:3px}
   .mapzoom button{width:28px; height:28px; border:1px solid var(--bp-border-strong); border-radius:6px; background:var(--bp-surface); color:var(--bp-text); font:600 18px/1 var(--bp-font-body); cursor:pointer; box-shadow:var(--bp-shadow-card)}
   .mapzoom button:hover{border-color:var(--bp-accent); color:var(--bp-accent)}
@@ -203,7 +202,7 @@
   .explore{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:var(--bp-space-5); align-items:center}
   .explore h3{font-family:var(--bp-font-display); font-size:1.25rem; margin:0 0 var(--bp-space-3); font-weight:600}
   .explore p{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); line-height:1.6}
-  .explore .mapbox{position:relative; min-height:280px}
+  .explore .mapbox{position:relative; height:275px; min-height:0}
   .explore .legend{overflow-x:auto; margin-top:8px}
   .typo-note{font-size:12px; color:var(--bp-text-muted); line-height:1.55}
   .typo-counts{display:flex; gap:var(--bp-space-4); flex-wrap:wrap; margin:var(--bp-space-3) 0}
@@ -313,6 +312,7 @@
     .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
     .bp-nav a{white-space:nowrap}
     .searchbox{max-width:none; margin-left:0; order:2; flex:1}
+    .toolbar .searchbox{order:0}
     .regions{grid-template-columns:repeat(3,minmax(0,1fr))}
     .families{grid-template-columns:repeat(2,minmax(0,1fr))}
     .communes,.communes.list{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -322,6 +322,7 @@
   }
   @media (max-width:480px){
     .regions,.families,.province-map-block,.communes,.communes.list,.indicator-grid{grid-template-columns:minmax(0,1fr)}
+    .toolbar select{flex:1 1 100%; max-width:none}
     .profile-tools .bp-btn{width:100%; justify-content:center}
   }
 </style>
@@ -400,7 +401,7 @@
             </div>
             <div>
               <div class="provmap" id="provBox">
-                <svg id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
+                <svg class="map" id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
                 <div class="tip" id="provTip" hidden></div>
                 <div class="mapzoom">
                   <button type="button" id="provZoomIn" data-t-aria="zoomIn" aria-label="Zoom in">+</button>
@@ -443,7 +444,7 @@
           </div>
           <div class="bp-state" id="mapCard" data-state="loading">
             <div class="mapbox" id="mapbox">
-              <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+              <svg class="map" id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
               <div class="tip" id="tip" hidden></div>
             </div>
             <div class="legend">
@@ -686,12 +687,12 @@
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + FAMILY_ICONS[i] + '</svg>';
   }
   function regionEmblem(code){
-    var art = {
-      VLA: '<path d="M12 38l5-8-3-6 6-3 2-8 5 5 7-5-1 8 7 4-7 4 3 8-9-3-6 7z"/><circle cx="27" cy="13" r="3"/><path d="M18 32l-8 6M30 33l7 7" fill="none" stroke="currentColor" stroke-width="3"/>',
-      WAL: '<path d="M13 31c0-8 4-14 12-15l4-6 3 7c5 2 7 6 6 11-5-3-9-2-12 1l-1 10-4-7-8 4z"/><circle cx="31" cy="18" r="1.5" fill="#fff"/><path d="M18 36l-3 7M24 37l2 6M11 24L5 18l9 2-5-8 10 6" fill="none" stroke="currentColor" stroke-width="3"/>',
-      BXL: '<path d="M24 23C9 18 9 8 16 7c5-1 8 7 8 16C24 8 32 4 36 9c5 7-4 13-12 14 15-1 20 7 15 12-5 6-13-1-15-12 2 15-5 21-11 16-6-5 1-13 11-16z"/><circle cx="24" cy="23" r="4" fill="#f3c95a"/>',
+    var urls = {
+      VLA: 'assets/belpulse/regions/flanders-emblem.png',
+      WAL: 'assets/belpulse/regions/wallonia-emblem.png',
+      BXL: 'assets/belpulse/regions/brussels-emblem.png',
     };
-    return '<svg viewBox="0 0 48 48" aria-hidden="true" fill="currentColor" stroke-linecap="round" stroke-linejoin="round">' + (art[code] || '') + '</svg>';
+    return urls[code] ? '<img src="' + urls[code] + '" alt="" aria-hidden="true" decoding="async">' : '';
   }
 
   function applyStrings(){
