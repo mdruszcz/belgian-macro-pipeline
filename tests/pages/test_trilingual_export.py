@@ -48,6 +48,12 @@ PAGE_IDS = sorted(
 )
 
 
+# Rebuilds the generated preview pages from the committed data to compare
+# bytes -- a sweep over generated output, so the `generated_site` tier
+# (pyproject.toml), not the everyday loop.
+pytestmark = pytest.mark.generated_site
+
+
 def _build() -> None:
     result = subprocess.run(
         [sys.executable, str(EXPORTER)],

@@ -58,24 +58,6 @@ ABOUT_TAB = 1
 THEME_EXPECTATIONS = {"day": "light", "soft": "light", "night": "dark"}
 
 
-def _chromium():
-    """A launched Chromium, or a clean skip. Same shape as
-    tests/builder/test_builder_shell_service.py:_chromium."""
-    try:
-        from playwright import sync_api
-    except ImportError as exc:
-        pytest.skip(f"playwright is not a declared dependency ({exc})")
-    try:
-        manager = sync_api.sync_playwright().start()
-    except Exception as exc:  # pragma: no cover - environment dependent
-        pytest.skip(f"playwright could not start: {exc}")
-    try:
-        return manager, manager.chromium.launch()
-    except Exception as exc:  # pragma: no cover - environment dependent
-        manager.stop()
-        pytest.skip(f"no chromium available: {exc}")
-
-
 #: A parent that speaks the contract and NOTHING ELSE. No fade, no setTimeout,
 #: no default tab -- it frames the page when told and posts when told, so a
 #: test that fails here failed because the contract is wrong.
@@ -138,7 +120,11 @@ def site():
             pass
 
     server = Quiet(("127.0.0.1", 0), handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread = threading.Thread(
+        target=server.serve_forever,
+        kwargs={"poll_interval": 0.02},  # shutdown() returns in ~20 ms, not up to 500
+        daemon=True,
+    )
     thread.start()
     try:
         yield f"http://127.0.0.1:{server.server_address[1]}"
@@ -150,13 +136,11 @@ def site():
 
 
 @pytest.fixture(scope="module")
-def browser():
-    manager, launched = _chromium()
-    try:
-        yield launched
-    finally:
-        launched.close()
-        manager.stop()
+def browser(chromium):
+    """The session's Chromium (tests/conftest.py). Every test here still makes
+    its own context -- `framed` does, and the two tests that take `browser`
+    directly do -- so nothing is shared between tests but the process."""
+    return chromium
 
 
 def _timeout_error():

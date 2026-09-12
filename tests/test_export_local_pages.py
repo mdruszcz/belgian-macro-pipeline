@@ -40,6 +40,11 @@ SECTIONS = {
 }
 
 
+# The sweep over generated output. One case per route or page, so this file
+# belongs to the `generated_site` tier (pyproject.toml), not the everyday loop.
+pytestmark = pytest.mark.generated_site
+
+
 def _commune(nis="11001", with_values=True):
     indicators = {}
     if with_values:

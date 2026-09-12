@@ -21,6 +21,7 @@ dev = [
     "black>=26.0",
     "ruff>=0.16",
     "pytest>=8.0",
+    "pytest-xdist>=3.5",
     "playwright>=1.62",
 ]
 
@@ -59,3 +60,9 @@ minversion = "8.0"
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra --strict-markers --strict-config"
+# The test tiers. `make test` runs none of these; `make test-full` runs all.
+markers = [
+    "browser: drives Chromium -- applied by tests/conftest.py to any test whose fixtures reach `chromium`, never by hand",
+    "generated_site: sweeps the generated local/ and preview/ output, one case per route or page",
+    "slow: reads or rebuilds committed data and takes seconds; kept out of the everyday loop",
+]

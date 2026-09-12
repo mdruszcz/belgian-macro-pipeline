@@ -27,7 +27,7 @@ EXTRA := --extra-observations data/population_observations.csv \
 
 ## all: install deps, rebuild the database's own structure, regenerate every
 ## published export, and run the tests. No network. This is the gate target.
-all: install schema reference validate exports test
+all: install schema reference validate exports test-full
 	@echo ""
 	@echo "Rebuilt from committed data and tests pass."
 
@@ -123,8 +123,38 @@ boundaries:
 builder:
 	$(PYTHON) scripts/serve_builder.py
 
-## test: the full suite
+## test: THE EVERYDAY LOOP -- every test that needs neither a browser nor the
+## generated site. Sub-minute is the target, because a 14-minute default loop
+## is one nobody runs. The tiers are pytest markers (pyproject.toml); the
+## browser one is applied automatically by tests/conftest.py.
+##
+## Sequential, deliberately. -n auto measured 91s -> 41s on 8 cores, but it
+## also surfaced two NEW failures nothing else did: test_post_with_no_origin_is_forbidden
+## and test_post_with_other_loopback_port_origin_is_forbidden, both
+## ConnectionAbortedError. Root cause, confirmed by reading the code rather than
+## guessed: tests/builder/*'s `_free_loopback_port()` probes a port by binding to
+## 0, reading it back, then CLOSING the probe -- and `BuilderServer` sets
+## `allow_reuse_address = True` (src/builder/service.py), so if two xdist workers'
+## probes land on the same freed port in that window, BOTH servers bind
+## successfully instead of one failing loudly, and requests land on whichever's
+## listening socket the OS hands them. pytest-xdist stays a declared dev
+## dependency for ad hoc use (`pytest -n auto path/to/file.py`), where the
+## collision probability is negligible -- just not wired into the default here
+## until the port-selection race is fixed. See known-risks.md.
 test:
+	$(PYTHON) -m pytest tests/ -q -m "not browser and not generated_site and not slow"
+
+## test-browser: the Playwright suite, one Chromium for the whole session.
+test-browser:
+	$(PYTHON) -m pytest tests/ -q -m browser
+
+## test-generated-site: the sweeps over local/ and preview/ output, plus
+## anything marked slow.
+test-generated-site:
+	$(PYTHON) -m pytest tests/ -q -m "generated_site or slow"
+
+## test-full: everything -- what `make all` and CI's `test` gate run.
+test-full:
 	$(PYTHON) -m pytest tests/ -q
 
 ## fetch: pull new data from the sources CI can reach. NOT part of `all` --

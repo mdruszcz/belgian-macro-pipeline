@@ -44,7 +44,11 @@ class ServerHarness:
         self.token = secrets.token_urlsafe(32)
         self.config = BuilderConfig(host="127.0.0.1", port=_free_loopback_port(), token=self.token)
         self.server = make_server(self.config)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread = threading.Thread(
+            target=self.server.serve_forever,
+            kwargs={"poll_interval": 0.02},  # shutdown() returns in ~20 ms, not up to 500
+            daemon=True,
+        )
         self.thread.start()
 
     @property
@@ -138,31 +142,29 @@ def _draft_path(pages_root, page_id: str):
 
 
 # ---------------------------------------------------------------------------
-# Playwright skip-guard -- copied in spirit from test_builder_shell_service.py
-# so this file's gate does not depend on a sibling test module's internals.
+# The browser. Chromium itself is the session-scoped `chromium` fixture in
+# tests/conftest.py (one process per run, not one per test); this wrapper
+# owns one CONTEXT per test, which is the unit of isolation a test can see.
 # ---------------------------------------------------------------------------
 
-
-def _chromium():
-    try:
-        from playwright import sync_api
-    except ImportError as exc:
-        pytest.skip(f"playwright is not a declared dependency ({exc})")
-    try:
-        manager = sync_api.sync_playwright().start()
-    except Exception as exc:  # pragma: no cover - environment dependent
-        pytest.skip(f"playwright could not start: {exc}")
-    try:
-        return manager, manager.chromium.launch()
-    except Exception as exc:  # pragma: no cover - environment dependent
-        manager.stop()
-        pytest.skip(f"no chromium available: {exc}")
+#: The shell has finished its first render when init() has announced itself
+#: into #shell-status (builder/app/app.js, actions.init) -- or has rendered
+#: its startup-error banner instead. Either is "ready" for a test: one is the
+#: builder, the other is the failure a test may be there to look at. Waiting
+#: for this instead of `networkidle` waits for the thing the test needs, not
+#: for the network to fall silent, which against a single-threaded server
+#: holding a keep-alive socket is a different and slower event.
+SHELL_READY_JS = (
+    "() => { const s = document.querySelector('#shell-status');"
+    " return !!(s && s.textContent.indexOf('The builder is ready') !== -1)"
+    " || !!document.querySelector('.bp-banner-error'); }"
+)
 
 
 class Browser:
-    """One browser, one context, a fresh page per call to `.new_page()`, all
-    torn down together. A real route (e.g. an actual network dependency)
-    would defeat the point of testing offline; this shell makes none."""
+    """One context on the session's Chromium, a fresh page per call to `.open()`,
+    the context torn down with the test. A real route (e.g. an actual network
+    dependency) would defeat the point of testing offline; this shell makes none."""
 
     # Chromium logs every non-2xx fetch as a console error, including the 422
     # the service is SUPPOSED to answer when live-validation fires mid-word on
@@ -173,9 +175,8 @@ class Browser:
     # still counts: only 422, only the browser's own resource-load line.
     _EXPECTED_RESOURCE_LOG = "Failed to load resource: the server responded with a status of 422"
 
-    def __init__(self, server: ServerHarness):
-        self.manager, self.browser = _chromium()
-        self.context = self.browser.new_context(viewport={"width": 1440, "height": 900})
+    def __init__(self, server: ServerHarness, chromium):
+        self.context = chromium.new_context(viewport={"width": 1440, "height": 900})
         self.server = server
         self.console_errors = []
         self.all_console_errors = []
@@ -189,20 +190,23 @@ class Browser:
             return
         self.console_errors.append(msg.text)
 
-    def open(self, wait_until="networkidle"):
+    def open(self, wait_until="domcontentloaded", ready_timeout_ms=15000):
         page = self.context.new_page()
         page.goto(self.server.url, wait_until=wait_until)
+        page.wait_for_function(SHELL_READY_JS, timeout=ready_timeout_ms)
         return page
 
     def close(self):
+        # The context only. Closing it drops its keep-alive sockets, and this
+        # runs BEFORE the `server` fixture shuts down (fixtures tear down in
+        # reverse order of setup), so no socket from this test can hold the
+        # single-threaded server through the next test's first request.
         self.context.close()
-        self.browser.close()
-        self.manager.stop()
 
 
 @pytest.fixture()
-def browser(server):
-    b = Browser(server)
+def browser(server, chromium):
+    b = Browser(server, chromium)
     yield b
     b.close()
 

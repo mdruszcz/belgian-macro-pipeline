@@ -56,6 +56,12 @@ BUILT = REPO_ROOT / "about.html"
 EXPORTER = REPO_ROOT / "scripts" / "export_page_documents.py"
 
 
+# Rebuilds the generated preview pages from the committed data to compare
+# bytes -- a sweep over generated output, so the `generated_site` tier
+# (pyproject.toml), not the everyday loop.
+pytestmark = pytest.mark.generated_site
+
+
 def _build() -> str:
     """Run the real exporter and return what it wrote."""
     result = subprocess.run(

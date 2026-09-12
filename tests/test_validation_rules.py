@@ -501,6 +501,7 @@ def test_each_rule_is_individually_silent_on_a_clean_store(tmp_path, name):
     assert run_all(_ctx(_clean_db(tmp_path)), only=[name]) == []
 
 
+@pytest.mark.slow
 def test_the_real_committed_stores_pass(tmp_path):
     """The baseline the spec claims. If this fails, something regressed in
     the committed data rather than in the rules."""

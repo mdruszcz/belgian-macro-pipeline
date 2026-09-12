@@ -116,6 +116,7 @@ def test_2024_anchors_to_the_start_of_the_year_not_the_end():
     not DB.is_file() or not all(s.is_file() for s in STORES),
     reason="committed stores not present",
 )
+@pytest.mark.slow
 def test_a_back_casting_source_is_measured_against_its_own_vintage():
     """The regression for coverage above 100%.
 
@@ -149,6 +150,7 @@ def test_a_back_casting_source_is_measured_against_its_own_vintage():
     not DB.is_file() or not all(s.is_file() for s in STORES),
     reason="committed stores not present",
 )
+@pytest.mark.slow
 def test_no_aggregate_reports_impossible_coverage(tmp_path):
     """End to end on the real store: contributed must never exceed expected.
 
@@ -175,6 +177,7 @@ def test_no_aggregate_reports_impossible_coverage(tmp_path):
     not DB.is_file() or not all(s.is_file() for s in STORES),
     reason="committed stores not present",
 )
+@pytest.mark.slow
 def test_the_limburg_figure_the_naive_method_got_wrong(tmp_path):
     """The measured headline from docs/features/comparison.md, Correction 2.
 
@@ -247,6 +250,7 @@ def test_a_versioned_ancestor_is_the_same_geography_as_its_current_self():
     not DB.is_file() or not all(s.is_file() for s in STORES),
     reason="committed stores not present",
 )
+@pytest.mark.slow
 def test_every_province_matches_the_independently_computed_figure(tmp_path):
     """The whole Correction 2 table from docs/features/comparison.md, whose
     "correct" column was computed by a separate ad-hoc script that matched

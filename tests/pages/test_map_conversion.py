@@ -48,6 +48,11 @@ MAP_JS = REPO_ROOT / "assets" / "commune_map.js"
 BLOCKS_JS = REPO_ROOT / "assets" / "belpulse" / "blocks.js"
 
 
+# The sweep over generated output. One case per route or page, so this file
+# belongs to the `generated_site` tier (pyproject.toml), not the everyday loop.
+pytestmark = pytest.mark.generated_site
+
+
 def _build() -> str:
     result = subprocess.run(
         [sys.executable, str(EXPORTER)],

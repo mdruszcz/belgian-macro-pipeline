@@ -67,7 +67,11 @@ class ServerHarness:
         self.token = token or secrets.token_urlsafe(32)
         self.config = BuilderConfig(host="127.0.0.1", port=_free_loopback_port(), token=self.token)
         self.server = make_server(self.config)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread = threading.Thread(
+            target=self.server.serve_forever,
+            kwargs={"poll_interval": 0.02},  # shutdown() returns in ~20 ms, not up to 500
+            daemon=True,
+        )
         self.thread.start()
 
     @property

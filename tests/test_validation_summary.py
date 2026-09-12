@@ -85,6 +85,7 @@ def test_the_row_count_is_carried_through(tmp_path):
     not (REPO / "data" / "belgian_macro.db").is_file(),
     reason="database not built in this working tree",
 )
+@pytest.mark.slow
 def test_the_cli_writes_a_summary_against_the_real_store(tmp_path):
     path = tmp_path / "summary.md"
     result = subprocess.run(

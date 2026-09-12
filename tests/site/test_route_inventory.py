@@ -78,6 +78,11 @@ _JS_COMMENT = re.compile(r"//[^\n]*|/\*.*?\*/", re.S)
 _COMMUNE_LINK_SAMPLE = 12
 
 
+# The sweep over generated output. One case per route or page, so this file
+# belongs to the `generated_site` tier (pyproject.toml), not the everyday loop.
+pytestmark = pytest.mark.generated_site
+
+
 def _pages_to_link_check() -> list[Path]:
     pages = [REPO_ROOT / name for name in sorted(p.name for p in REPO_ROOT.glob("*.html"))]
     pages += [path_for(route) for route in block_page_routes()]

@@ -88,7 +88,11 @@ class ServerHarness:
         self.token = secrets.token_urlsafe(32)
         self.config = BuilderConfig(host="127.0.0.1", port=_free_loopback_port(), token=self.token)
         self.server = make_server(self.config)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread = threading.Thread(
+            target=self.server.serve_forever,
+            kwargs={"poll_interval": 0.02},  # shutdown() returns in ~20 ms, not up to 500
+            daemon=True,
+        )
         self.thread.start()
 
     @property
@@ -682,46 +686,16 @@ def test_the_preview_route_keeps_its_own_stricter_policy(server, pages_root):
 # --------------------------------------------------------------------------
 
 
-def _chromium():
-    """A launched Chromium, or a clean skip.
-
-    Playwright IS declared (pyproject.toml dev extras) and CI installs the
-    Chromium binary, so these tests run there rather than skipping. The guard
-    stays for a developer who has not run `playwright install` locally.
-    """
-    try:
-        from playwright import sync_api
-    except ImportError as exc:
-        # Not `importorskip`: that only skips on ModuleNotFoundError, and a
-        # half-installed playwright raises a plain ImportError from its own
-        # module body. CI must skip in BOTH shapes, or this batch turns the
-        # suite red on a dependency nobody declared.
-        pytest.skip(f"playwright is not a declared dependency ({exc})")
-    try:
-        manager = sync_api.sync_playwright().start()
-    except Exception as exc:  # pragma: no cover - environment dependent
-        pytest.skip(f"playwright could not start: {exc}")
-    try:
-        return manager, manager.chromium.launch()
-    except Exception as exc:  # pragma: no cover - environment dependent
-        manager.stop()
-        pytest.skip(f"no chromium available: {exc}")
-
-
+# Chromium is the session-scoped `chromium` fixture in tests/conftest.py --
+# one process per run -- and `browser_context` is this test's own, fresh,
+# closed with the test. The skip-guard lives there too, once.
 @pytest.fixture()
-def browser_page(server):
-    manager, browser = _chromium()
-    context = browser.new_context(viewport={"width": 1440, "height": 900})
-    page = context.new_page()
+def browser_page(server, browser_context):
+    page = browser_context.new_page()
     violations = []
     page.on("console", lambda msg: violations.append(msg.text) if msg.type == "error" else None)
     page.goto(f"{server.base_url}/?token={server.token}", wait_until="load")
-    try:
-        yield page, violations
-    finally:
-        context.close()
-        browser.close()
-        manager.stop()
+    yield page, violations
 
 
 def test_the_shell_script_actually_runs_under_the_policy(browser_page):
