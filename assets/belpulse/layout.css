@@ -227,6 +227,11 @@
    is not a duplicate, it is a fight -- the parent re-asserts its language on
    every frame load, so a click here is visibly undone. */
 :root[data-framed] .bp-lang-switch{display:none}
+/* And the THEME for the same reason, exactly: index.html pushes setTheme in
+   on every frame load, so a reader's click here would snap back to the
+   parent's choice a moment later. Two controls for one setting in one
+   viewport is the bug, not the symptom. */
+:root[data-framed] .bp-theme-toggle{display:none}
 
 /* ---- the licence notice ----------------------------------------------------
    Small and quiet, but never hidden: it is a licence condition, not a footer
@@ -263,6 +268,18 @@
 /* The language switcher sits in the top bar now, not floating above the page,
    so it should not also carry the bottom margin it needed when it stood alone. */
 .bp-topbar .bp-lang-switch{margin:0 0 0 auto}
+/* The theme switch sits beside the language switcher, and the pair are
+   pushed right together -- .bp-topbar-actions already carries the
+   margin-left:auto that did, so the language control inside it must stop
+   claiming the space for itself. */
+.bp-topbar-actions .bp-lang-switch{margin:0}
+.bp-topbar-actions{flex-wrap:wrap; justify-content:flex-end}
+@media (max-width: 640px){
+  /* On a phone the two segmented controls do not fit beside the nav; the
+     theme labels are the ones a reader can do without, so they wrap
+     rather than squeeze the language codes to nothing. */
+  .bp-topbar-actions{gap:var(--bp-space-2)}
+}
 
 /* The breadcrumb's own separator. layout.css styles the bar but assumed the
    page supplied its own dividers, so "Home" ran straight into the page title. */

@@ -17,13 +17,19 @@
       the debt trend chart): needs the Walloon municipal-finance source. No
       config for it exists -- verified, not assumed.
     * Employment by sector (services / industry / construction / public
-      administration / agriculture): no sector breakdown is collected.
-    * Neighbouring communes (the list and the neighbour map): this pipeline
-      holds no commune-adjacency table at all.
+      administration / agriculture): no sector breakdown is collected. The
+      panel shows the Census ACTIVITY STATUS breakdown instead, and says so.
+    * The age structure: NOW DRAWN. config/local_sections.yaml declares which
+      indicators partition the population; the exporter verifies the claim.
+    * Neighbouring communes: NOW SHOWN. metadata/adjacency.json is derived
+      from the boundary file at export (scripts/export_commune_adjacency.py);
+      the list and the neighbour map read it.
     * Named composite rankings ("economic dynamism", "residential
       attractiveness"): need a peer model and a fiscal score, neither built.
       Per-indicator ranks ARE real and are shown.
-    * The hero photograph and its editorial tagline: no photo library.
+    * The hero photograph and its editorial tagline: from
+      assets/belpulse/commune/photos.json, keyed by NIS. One commune has an
+      entry; the rest keep the plain frame and say so.
     * A population map by STATISTICAL SECTOR: this pipeline holds commune
       boundaries only, so the map shows the commune on the national map.
   And three where the design's label and the real figure differ, so the real
@@ -52,7 +58,9 @@
   (function(){
     try{
       var t = localStorage.getItem('belpulse-theme') || localStorage.getItem('theme');
-      if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      // Light by default -- the design is light; the OS preference applies
+      // only to a reader who explicitly chose 'auto'.
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
       var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
       if(l) document.documentElement.lang = l;
     }catch(e){}
@@ -107,8 +115,30 @@
     display:flex; flex-direction:column; justify-content:flex-end; padding:var(--bp-space-5);
     background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290); color:#fff;
   }
+  /* The photograph, when this commune has one (assets/belpulse/commune/photos.json).
+     Behind everything, cover-fitted, with a gradient over its lower half so
+     the name stays legible on a bright sky. A commune with no entry keeps the
+     plain gradient and its note -- a picture of one place never stands in
+     for another. */
+  .photo img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none}
+  .photo.has-photo img{display:block}
+  .photo.has-photo::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,20,40,0) 35%, rgba(10,20,40,.78) 100%)}
+  .photo > *:not(img){position:relative; z-index:1}
   .photo .cname{font-family:var(--bp-font-display); font-size:1.9rem; font-weight:600; line-height:1.1}
   .photo .cnote{font-size:11px; color:rgba(255,255,255,.7); margin-top:8px; max-width:34ch}
+  .photo .tagline{font-family:var(--bp-font-display); font-style:italic; font-size:.95rem; color:rgba(255,255,255,.88); margin-top:4px; display:none}
+  .photo.has-photo .tagline{display:block}
+  /* Room for the caption chip at bottom right, so the tagline does not run under it. */
+  .photo.has-photo .cname, .photo.has-photo .tagline{max-width:calc(100% - 150px)}
+  .photo.has-photo .cnote{display:none}
+  .photo .capchip{
+    position:absolute; right:var(--bp-space-4); bottom:var(--bp-space-4); z-index:2; display:none;
+    font-size:10px; color:#fff; background:rgba(10,20,40,.55); border:1px solid rgba(255,255,255,.25);
+    border-radius:var(--bp-radius-pill); padding:4px 9px; backdrop-filter:blur(3px);
+  }
+  .photo.has-photo .capchip{display:inline-flex; align-items:center; gap:5px}
+  .photo .credit{position:absolute; left:var(--bp-space-4); top:var(--bp-space-3); z-index:2; font-size:9px; color:rgba(255,255,255,.55); display:none}
+  .photo.has-photo .credit{display:block}
   .locator{padding:var(--bp-space-4); display:flex; flex-direction:column}
   .locator h3, .panel h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
   .locator .mapbox{position:relative; flex:1; min-height:150px}
@@ -118,11 +148,50 @@
      focus(), which frames and zooms into the commune: at that zoom the
      locator showed a single flat shape and read as an empty box. */
   svg.map path.locate-me{fill:var(--bp-accent); stroke:var(--bp-accent-ink); stroke-width:1.2}
+  /* The locator's context: the commune's own region and province, tinted so
+     the country reads as "where in Belgium" rather than as 565 grey shapes.
+     Membership comes from metadata/geographies.json's parent chain, the same
+     containment the rest of the pipeline resolves (rule 3). */
+  svg.map path.in-region:not(.locate-me){fill:var(--bp-icon-blue-bg)}
+  svg.map path.in-province:not(.locate-me){fill:#aec3e6}
+  :root[data-theme="dark"] svg.map path.in-province:not(.locate-me){fill:#3b4f78}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) svg.map path.in-province:not(.locate-me){fill:#3b4f78} }
+  .loclegend{display:flex; flex-direction:column; gap:4px; margin-top:8px; font-size:10px; color:var(--bp-text-muted)}
+  .loclegend span{display:flex; align-items:center; gap:6px}
+  .loclegend i{width:12px; height:12px; border-radius:3px; flex:none; border:1px solid var(--bp-border)}
+  .loczoom{position:absolute; top:6px; right:6px; display:flex; flex-direction:column; gap:3px; z-index:2}
+  .loczoom button{width:22px; height:22px; border:1px solid var(--bp-border); border-radius:5px; background:var(--bp-surface); color:var(--bp-text); font:inherit; font-size:13px; line-height:1; cursor:pointer}
+  /* The neighbours map: the commune among the communes it borders, the rest
+     of the country faded by the component's own filtered-out rule. */
+  .nbmap{display:flex; flex-direction:column}
+  .nbmap .mapbox{position:relative; min-height:230px}
+  .nbmap svg.map text{font-family:var(--bp-font-ui); font-weight:600; fill:var(--bp-text); paint-order:stroke; stroke:var(--bp-surface); stroke-linejoin:round; pointer-events:none}
+  .nblist{margin:0; padding:0; list-style:none}
+  .nblist li{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--bp-border); font-size:var(--bp-text-small)}
+  .nblist li:last-child{border-bottom:0}
+  .nblist a{flex:1; color:inherit; text-decoration:none}
+  .nblist a:hover{color:var(--bp-accent)}
+  .nblist .v{font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
+  .nblist .p{font-size:10px; color:var(--bp-text-faint)}
+  .donutwrap{display:flex; flex-direction:column; align-items:stretch; gap:var(--bp-space-3)}
+  .donutwrap > div:first-child{width:160px; margin:0 auto}
+  .donutwrap canvas{width:160px !important; height:160px !important}
+  .legendcol{display:flex; flex-direction:column; gap:6px; font-size:11px}
+  .legendcol .it{display:flex; align-items:center; gap:6px; color:var(--bp-text-muted)}
+  .legendcol .it b{color:var(--bp-text); margin-left:auto; font-variant-numeric:tabular-nums}
+  .cta.has-photo{position:relative; background:#0b1730}
+  .cta.has-photo::before{content:""; position:absolute; inset:0; background:var(--cta-photo) center/cover no-repeat; opacity:.55}
+  .cta.has-photo::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(11,23,48,.92) 0%, rgba(11,23,48,.72) 55%, rgba(11,23,48,.55) 100%)}
+  .cta.has-photo .wrap{position:relative; z-index:1}
   .intro{font-size:var(--bp-text-small); color:var(--bp-text-muted); line-height:1.6; margin:0 0 var(--bp-space-4)}
   .tiles{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
   .tile{display:flex; gap:10px; align-items:flex-start; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:10px}
   .ficon{width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none}
-  .tile .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3}
+  /* Two lines, then an ellipsis; the full name is in the title attribute.
+     Indicator names are honest and long ("Average net taxable income per
+     return"), and a tile that grows to four lines of label pushes its own
+     figure out of the eye's path. */
+  .tile .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
   .tile .val{font-size:1rem; font-weight:var(--bp-weight-bold); line-height:1.25}
   .tile .per{font-size:10px; color:var(--bp-text-faint)}
 
@@ -144,16 +213,23 @@
   .sechead a:hover{text-decoration:underline}
   .stack{display:flex; flex-direction:column; gap:var(--bp-space-8)}
 
-  .keyrow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-4)}
-  .keycard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4)}
-  .keycard .top{display:flex; gap:9px; align-items:flex-start; margin-bottom:6px}
-  .keycard .lbl{font-size:11px; color:var(--bp-text-muted); line-height:1.3}
-  .keycard .figure{display:flex; align-items:baseline; gap:8px}
-  .keycard .figure b{font-size:1.3rem; font-weight:var(--bp-weight-bold)}
-  .keycard .per{font-size:10px; color:var(--bp-text-faint)}
-  .keycard .chartslot{margin-top:6px; min-width:0}
+  /* Six across, the model's own count, at the sizes home2's sparkline cards
+     use: title, a small chart, then the figure bottom-right with its period.
+     Three across on a tablet, two on a phone. */
+  .keyrow{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .keycard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-3); display:flex; flex-direction:column; min-width:0}
+  .keycard .top{display:flex; gap:7px; align-items:flex-start; margin-bottom:4px}
+  .keycard .top .ficon{width:24px; height:24px; border-radius:7px}
+  .keycard .top .ficon svg{width:12px; height:12px}
+  .keycard .lbl{font-size:10px; font-weight:var(--bp-weight-semibold); color:var(--bp-text); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:26px}
+  .keycard .chartslot{min-width:0; margin-top:2px}
   .keycard canvas{display:block; width:100%}
-  .nohist{font-size:10px; color:var(--bp-text-faint); padding:14px 0 4px}
+  .keycard .figure{display:flex; align-items:baseline; justify-content:flex-end; gap:6px; margin-top:auto; padding-top:6px}
+  .keycard .figure b{font-size:1.1rem; font-weight:var(--bp-weight-bold); font-variant-numeric:tabular-nums}
+  .keycard .per{font-size:10px; color:var(--bp-text-faint)}
+  .nohist{font-size:10px; color:var(--bp-text-faint); line-height:1.35; height:54px; display:flex; align-items:center}
+  @media (max-width:1024px){ .keyrow{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media (max-width:640px){ .keyrow{grid-template-columns:repeat(2,minmax(0,1fr))} }
 
   .panelrow{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .panel{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5); min-width:0}
@@ -164,6 +240,21 @@
   .legendrow .dot{width:9px; height:9px; border-radius:3px; flex:none}
 
   .fin4{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--bp-space-4)}
+  /* A finance tile with nothing behind it says so in the tile, the way home2's
+     do -- a labelled dash read as a broken render. */
+  .ftile{display:flex; align-items:center; gap:var(--bp-space-3); background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-3) var(--bp-space-4); min-width:0}
+  .ftile .lbl{font-size:11px; font-weight:var(--bp-weight-semibold); line-height:1.3}
+  .ftile .why{font-size:10px; color:var(--bp-text-faint); margin-top:2px}
+  /* The activity breakdown: label, bar, share -- the model's own three-column
+     row, in HTML rather than on a canvas whose label gutter was fixed at
+     120px and crushed every French indicator name. */
+  .barlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .barlist li{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:11px}
+  .barlist .lbl{color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .barlist .bar{height:9px; border-radius:5px; background:var(--bp-surface-alt); overflow:hidden}
+  .barlist .bar i{display:block; height:100%; border-radius:5px}
+  .barlist .pct{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
+  .barlist .abs{font-size:10px; color:var(--bp-text-faint); grid-column:2 / span 2; margin-top:-5px}
   .maprow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .maprow .mapbox{position:relative; min-height:230px}
   .maprow .legend{overflow-x:auto; margin-top:8px}
@@ -319,9 +410,13 @@
 
     <!-- ── hero row ─────────────────────────────────────────────────────── -->
     <div class="hero3">
-      <div class="photo">
+      <div class="photo" id="photo">
+        <img id="photoImg" alt="">
+        <span class="credit" id="photoCredit"></span>
         <div class="cname" id="photoName">—</div>
+        <div class="tagline" id="photoTagline"></div>
         <div class="cnote" data-t="cpPhotoNote">No photo library or per-commune editorial copy exists in this pipeline</div>
+        <span class="capchip" id="photoCaption"></span>
       </div>
 
       <div class="card locator">
@@ -330,9 +425,14 @@
           <a href="map.html" style="font-size:11px;color:var(--bp-accent);text-decoration:none" data-t="cpSeeOnMap">See on the map</a>
         </div>
         <div class="mapbox" id="locBox">
-          <svg id="locSvg" role="img" aria-label="Locator map"></svg>
+          <svg id="locSvg" class="map" role="img" aria-label="Locator map"></svg>
           <div class="tip" id="locTip" hidden></div>
+          <div class="loczoom">
+            <button type="button" id="locZoomIn" data-t-aria="cpZoomIn" aria-label="Zoom in">+</button>
+            <button type="button" id="locZoomOut" data-t-aria="cpZoomOut" aria-label="Zoom out">&minus;</button>
+          </div>
         </div>
+        <div class="loclegend" id="locLegend"></div>
       </div>
 
       <div>
@@ -348,7 +448,10 @@
       <div class="stack">
 
         <section>
-          <h2 class="sec" data-t="cpKeyFigures">Key figures and recent trends</h2>
+          <div class="sechead">
+            <h2 data-t="cpKeyFigures">Key figures and recent trends</h2>
+            <a href="communes.html" data-t="cpMoreIndicators">See more indicators →</a>
+          </div>
           <div class="keyrow" id="keyRow"></div>
         </section>
 
@@ -360,27 +463,11 @@
             <div class="legendrow" id="evoLegend"></div>
           </div>
 
-          <div class="panel bp-state" data-state="unavailable">
-            <h3 data-t="cpEmployment">Employment by sector</h3>
-            <div class="bp-state-body"></div>
-            <div class="bp-state-message">
-              <span class="headline" data-t="cpUnavailSectors">Employment by sector is not in this pipeline yet</span>
-              <span class="why" data-t="cpUnavailSectorsWhy">No sector breakdown is collected for communes.</span>
-            </div>
-          </div>
-
-          <div class="panel bp-state" id="agePanel" data-state="loading">
-            <h3 data-t="cpAgeSplit">Age structure</h3>
-            <div class="psub" data-t="cpAgeNote">This pipeline stores three age bands, not the four the design shows.</div>
-            <div class="bp-state-body">
-              <div style="min-width:0"><canvas id="ageCanvas"></canvas></div>
-              <div class="legendrow" id="ageLegend"></div>
-            </div>
-            <div class="bp-state-message">
-              <span class="headline" data-t="cpUnavailAge">No part-of-whole relationship is declared</span>
-              <span class="why" data-t="cpUnavailAgeWhy">Nothing published says which indicators partition a whole.</span>
-            </div>
-          </div>
+          <!-- One panel per part-of-whole group in metadata/sections.json's
+               `compositions`, drawn by renderCompositions(). The age donut sat
+               here as "unavailable" from Batch 4 until the config declared
+               which indicators partition the population. -->
+          <div id="compositions" style="display:contents"></div>
         </section>
 
         <section>
@@ -395,13 +482,16 @@
         </section>
 
         <section>
-          <h2 class="sec" data-t="cpMaps">Commune maps</h2>
+          <div class="sechead">
+            <h2 data-t="cpMaps">Commune maps</h2>
+            <a href="map.html" data-t="homeAllMaps">See the full-page map</a>
+          </div>
           <div class="maprow">
             <div class="panel bp-state" id="mapCard" data-state="loading">
               <h3 id="mapTitle">—</h3>
               <div class="psub" id="mapProvenance"></div>
               <div class="mapbox" id="mapbox">
-                <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+                <svg id="svg" class="map" role="img" aria-label="Choropleth map of Belgian communes"></svg>
                 <div class="tip" id="tip" hidden></div>
               </div>
               <div class="legend">
@@ -409,9 +499,15 @@
                 <div class="ticks" id="ticks"></div>
               </div>
             </div>
-            <div class="panel bp-state" data-state="unavailable">
-              <h3 data-t="cpNeighbours">Neighbouring communes</h3>
-              <div class="bp-state-body"></div>
+            <div class="panel bp-state nbmap" id="nbCard" data-state="loading">
+              <h3 id="nbMapTitle" data-t="cpNeighboursMap">Neighbouring communes</h3>
+              <div class="psub" id="nbMapSub"></div>
+              <div class="bp-state-body">
+                <div class="mapbox" id="nbBox">
+                  <svg id="nbSvg" class="map" role="img" aria-label="Neighbouring communes"></svg>
+                  <div class="tip" id="nbTip" hidden></div>
+                </div>
+              </div>
               <div class="bp-state-message">
                 <span class="headline" data-t="cpUnavailNeighbours">No adjacency data</span>
                 <span class="why" data-t="cpUnavailNeighboursWhy">This pipeline holds no commune-adjacency table.</span>
@@ -459,6 +555,21 @@
           <p class="note" style="margin-top:var(--bp-space-3); color:var(--bp-text-faint)" data-t="cpUnavailCompositeWhy">Named composite rankings need a peer model and a fiscal score, neither built.</p>
         </div>
 
+        <div class="spanel bp-state" id="nbPanel" data-state="loading">
+          <div class="shead">
+            <h3 data-t="cpNeighbours">Neighbouring communes</h3>
+            <a href="#nbCard" data-t="cpSeeOnMap">See on the map</a>
+          </div>
+          <div class="bp-state-body">
+            <p class="note" id="nbSub" style="margin-bottom:var(--bp-space-3)"></p>
+            <ul class="nblist" id="nbList"></ul>
+          </div>
+          <div class="bp-state-message" style="padding:0">
+            <span class="headline" data-t="cpUnavailNeighbours">No adjacency data</span>
+            <span class="why" data-t="cpUnavailNeighboursWhy">This pipeline holds no commune-adjacency table.</span>
+          </div>
+        </div>
+
         <div class="spanel">
           <div class="shead"><h3 data-t="cpSourcesTitle">Sources and methodology</h3>
             <a href="about.html" data-t="cpSeeMethod">See the methodology</a></div>
@@ -475,7 +586,7 @@
     </div>
   </div>
 
-  <section class="cta">
+  <section class="cta" id="cta">
     <div class="wrap">
       <div>
         <h2 id="ctaTitle">—</h2>
@@ -559,6 +670,9 @@
   var SECTIONS_URL= 'public/data/metadata/sections.json';
   var SOURCES_URL = 'public/data/metadata/sources.json';
   var MANIFEST_URL= 'public/data/manifest.json';
+  var GEOGRAPHIES_URL = 'public/data/metadata/geographies.json';
+  var ADJACENCY_URL   = 'public/data/metadata/adjacency.json';
+  var PHOTOS_URL      = 'assets/belpulse/commune/photos.json';
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
 
@@ -570,7 +684,30 @@
     nis: null, profile: null, index: [], byCode: {},
     sections: {headlines: [], sections: []}, sources: {}, grades: {},
     geojson: null, map: null, locator: null, manifest: {},
+    geographies: {}, adjacency: {}, photos: {}, headlineValues: null, nbMap: null,
   };
+
+  /* The geography row for a NIS code, and the chain above it. geographies.json
+     is keyed by geo_id and carries every level with a trilingual name and a
+     parent -- the same containment resolve_geo() uses (rule 3), which is why
+     the page walks it rather than reading the commune payload's English-only
+     `region` and `province` fields. */
+  function geoOf(nis){
+    var rows = state.geographies;
+    for(var id in rows){ if(rows[id].nis_code === nis) return rows[id]; }
+    return null;
+  }
+  function chainOf(nis){
+    var out = [], row = geoOf(nis), guard = 0;
+    while(row && guard++ < 6){ out.push(row); row = state.geographies[row.parent_geo_id]; }
+    return out;
+  }
+  function levelOf(nis, level){
+    return chainOf(nis).filter(function(r){ return r.level === level; })[0] || null;
+  }
+  function placeName(row){
+    return row && row.name ? (row.name[LANG] || row.name.en || '') : '';
+  }
 
   function qs(name){
     var m = new RegExp('[?&]' + name + '=([^&#]*)').exec(window.location.search);
@@ -624,8 +761,15 @@
     document.getElementById('crumbName').textContent = name;
     document.getElementById('headName').textContent = name;
     document.getElementById('photoName').textContent = name;
+    // Region then province, in the reader's language, from the geography
+    // metadata. The payload's own `region`/`province` are English-only, so
+    // the French page used to read "Wallonia · Namur" where it should read
+    // "Région wallonne · Province de Namur".
+    var region = placeName(levelOf(state.nis, 'region')) || state.profile.region;
+    var province = placeName(levelOf(state.nis, 'province')) || state.profile.province;
     document.getElementById('headRegion').textContent =
-      [state.profile.province, state.profile.region].filter(Boolean).join(' · ');
+      [region, province].filter(Boolean).join(' · ');
+    renderPhoto();
     document.getElementById('locatorTitle').textContent = T('cpLocator', {name: name});
     document.getElementById('comparedTitle').textContent = T('cpCompared', {name: name});
     document.getElementById('compareTitle').textContent = T('cpCompareTitle', {name: name});
@@ -640,6 +784,34 @@
       .map(function(c){ return state.profile.indicators[c].updated; })
       .filter(Boolean).sort();
     document.getElementById('badgeUpdated').textContent = dates[dates.length - 1] || '—';
+  }
+
+  /* ---- the photograph ----------------------------------------------------
+     Keyed by NIS in assets/belpulse/commune/photos.json. A commune with no
+     entry keeps the plain frame and its note: the one thing worse than no
+     picture is the wrong town's. The CTA band takes the same commune's dusk
+     panorama when there is one. */
+  function renderPhoto(){
+    var entry = state.photos[state.nis];
+    var box = document.getElementById('photo');
+    var cta = document.getElementById('cta');
+    box.classList.toggle('has-photo', Boolean(entry && entry.hero));
+    if(!entry || !entry.hero){
+      cta.classList.remove('has-photo');
+      return;
+    }
+    var img = document.getElementById('photoImg');
+    img.src = entry.hero;
+    img.alt = (entry.caption && (entry.caption[LANG] || entry.caption.en)) || communeName();
+    document.getElementById('photoCaption').textContent = img.alt;
+    document.getElementById('photoTagline').textContent =
+      (entry.tagline && (entry.tagline[LANG] || entry.tagline.en)) || '';
+    document.getElementById('photoCredit').textContent =
+      T('cpPhotoCredit') + ' · ' + ((entry.credit && (entry.credit[LANG] || entry.credit.en)) || '');
+    if(entry.cta){
+      cta.style.setProperty('--cta-photo', 'url("' + entry.cta + '")');
+      cta.classList.add('has-photo');
+    }
   }
 
   function iconSquare(i){
@@ -669,6 +841,7 @@
       var box = document.createElement('div');
       box.innerHTML = '<div class="lbl"></div><div class="val"></div><div class="per"></div>';
       box.querySelector('.lbl').textContent = nameOf(code);
+      box.querySelector('.lbl').title = nameOf(code);
       box.querySelector('.val').textContent = latest ? fmt(latest.value, meta) : '—';
       box.querySelector('.per').textContent = latest ? latest.period : T('cpNoHistory');
       el.appendChild(box);
@@ -693,15 +866,18 @@
 
       var card = document.createElement('div');
       card.className = 'keycard';
+      // Title, chart, then the figure bottom-right -- home2's card order,
+      // which the model draws too.
       card.innerHTML =
         '<div class="top"></div>' +
-        '<div class="figure"><b></b><span class="per"></span></div>' +
-        '<div class="chartslot"></div>';
+        '<div class="chartslot"></div>' +
+        '<div class="figure"><b></b><span class="per"></span></div>';
       var top = card.querySelector('.top');
       top.appendChild(iconSquare(i));
       var lbl = document.createElement('div');
       lbl.className = 'lbl';
       lbl.textContent = nameOf(code);
+      lbl.title = nameOf(code);
       top.appendChild(lbl);
       card.querySelector('.figure b').textContent = latest ? fmt(latest.value, meta) : '—';
       card.querySelector('.figure .per').textContent = latest ? latest.period : '';
@@ -723,7 +899,7 @@
     // grid is still growing bakes in the wrong width (Batch 3's own lesson).
     draws.forEach(function(d){
       BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: 74, compact: true});
+        {locale: LANG, height: 54, compact: true});
     });
   }
 
@@ -834,8 +1010,98 @@
      Neither is acceptable, so the panel says what is missing instead. Adding
      a part-of declaration to config/indicators/*.yaml turns this on with no
      change here. */
-  function renderAge(){
-    document.getElementById('agePanel').dataset.state = 'unavailable';
+  /* ---- part-of-whole panels ----------------------------------------------
+     One panel per group in sections.json's `compositions`. The exporter has
+     already checked, in every commune and period it could, that the parts of
+     a group with a `whole` add up to it -- so the shares drawn here are
+     shares of a total the data actually has. The period is the latest one
+     in which EVERY part carries a number; mixing a 2026 band with a 2021
+     band would draw a structure no year ever had. */
+  function latestCommonPeriod(codes){
+    var sets = codes.map(function(code){
+      var entry = state.profile.indicators[code];
+      return entry ? numericPoints(entry).map(function(p){ return p.period; }) : [];
+    });
+    if(sets.some(function(s){ return !s.length; })) return null;
+    var common = sets[0].filter(function(p){
+      return sets.every(function(s){ return s.indexOf(p) !== -1; });
+    }).sort();
+    return common.length ? common[common.length - 1] : null;
+  }
+
+  function renderCompositions(){
+    var host = document.getElementById('compositions');
+    host.innerHTML = '';
+    (state.sections.compositions || []).forEach(function(group, gi){
+      var panel = document.createElement('div');
+      panel.className = 'panel bp-state';
+      panel.innerHTML =
+        '<h3></h3><div class="psub"></div>' +
+        '<div class="bp-state-body"></div>' +
+        '<div class="bp-state-message"><span class="headline"></span><span class="why"></span></div>';
+      panel.querySelector('h3').textContent = (group.label && (group.label[LANG] || group.label.en)) || group.id;
+      var body = panel.querySelector('.bp-state-body');
+      host.appendChild(panel);
+
+      var parts = (group.parts || []).filter(function(c){ return state.byCode[c]; });
+      var period = parts.length ? latestCommonPeriod(parts) : null;
+      if(!period){
+        panel.dataset.state = 'unavailable';
+        panel.querySelector('.headline').textContent = T('mapNoData');
+        panel.querySelector('.why').textContent = (group.note && (group.note[LANG] || group.note.en)) || '';
+        return;
+      }
+      var items = parts.map(function(code, i){
+        var entry = state.profile.indicators[code];
+        var v = entry.periods[period].value;
+        return {label: nameOf(code), value: v, colourIndex: gi * 3 + i, meta: state.byCode[code]};
+      });
+      var total = items.reduce(function(a, d){ return a + d.value; }, 0);
+      panel.querySelector('.psub').textContent =
+        ((group.note && (group.note[LANG] || group.note.en)) || '') + ' · ' + period +
+        (group.whole ? ' · ' + T('cpPartsVerified') : '');
+
+      if(group.chart === 'donut'){
+        var wrap = document.createElement('div');
+        wrap.className = 'donutwrap';
+        wrap.innerHTML = '<div style="min-width:0"><canvas></canvas></div><div class="legendcol"></div>';
+        body.appendChild(wrap);
+        var legend = wrap.querySelector('.legendcol');
+        items.forEach(function(d){
+          var it = document.createElement('span');
+          it.className = 'it';
+          it.innerHTML = '<span class="dot" style="width:9px;height:9px;border-radius:3px;background:var(--bp-chart-' + ((d.colourIndex % 8) + 1) + ')"></span>';
+          it.appendChild(document.createTextNode(d.label));
+          var b = document.createElement('b');
+          // A share of the verified whole: a presentation ratio for one
+          // commune, like the indexed evolution chart above it.
+          b.textContent = total ? MapUI.formatValue(d.value / total * 100, 'percent', 1, LANG) : '—';
+          it.appendChild(b);
+          legend.appendChild(it);
+        });
+        BPCharts.drawDonut(wrap.querySelector('canvas'), items, {locale: LANG, height: 160});
+      } else {
+        // Label, bar, share: the model's own row. HTML rather than the canvas
+        // ranking, whose 120px label gutter crushed every French name.
+        var list = document.createElement('ul');
+        list.className = 'barlist';
+        items.sort(function(a, b){ return b.value - a.value; });
+        var max = items[0].value || 1;
+        items.forEach(function(d){
+          var li = document.createElement('li');
+          li.innerHTML = '<span class="lbl"></span><span class="bar"><i></i></span><span class="pct"></span><span class="abs"></span>';
+          li.querySelector('.lbl').textContent = d.label;
+          li.querySelector('.lbl').title = d.label;
+          li.querySelector('.bar i').style.width = (d.value / max * 100).toFixed(1) + '%';
+          li.querySelector('.bar i').style.background = 'var(--bp-chart-' + ((d.colourIndex % 8) + 1) + ')';
+          li.querySelector('.pct').textContent = total ? MapUI.formatValue(d.value / total * 100, 'percent', 1, LANG) : '—';
+          li.querySelector('.abs').textContent = fmt(d.value, d.meta);
+          list.appendChild(li);
+        });
+        body.appendChild(list);
+      }
+      panel.dataset.state = 'ready';
+    });
   }
 
   /* ---- local finances: designed shape, honest state ---------------------- */
@@ -852,15 +1118,15 @@
     host.innerHTML = '';
     FINANCE_LABELS.forEach(function(key, i){
       var tile = document.createElement('div');
-      tile.className = 'keycard';
-      tile.innerHTML =
-        '<div class="top"></div>' +
-        '<div class="figure"><b style="color:var(--bp-text-faint)">—</b></div>';
-      tile.querySelector('.top').appendChild(iconSquare(i + 2));
-      var lbl = document.createElement('div');
-      lbl.className = 'lbl';
-      lbl.textContent = T(key);
-      tile.querySelector('.top').appendChild(lbl);
+      tile.className = 'ftile';
+      tile.appendChild(iconSquare(i + 2));
+      var box = document.createElement('div');
+      box.innerHTML = '<div class="lbl"></div><div class="why"></div>';
+      box.querySelector('.lbl').textContent = T(key);
+      // The same sentence home2 puts on its own finance tiles, so the two
+      // pages say the same thing about the same gap.
+      box.querySelector('.why').textContent = T('homeFinanceUnavailable');
+      tile.appendChild(box);
       host.appendChild(tile);
     });
     var note = document.getElementById('finNote');
@@ -1002,6 +1268,134 @@
     if(path) path.classList.add('locate-me');
   }
 
+  /* The commune's own region and province, tinted -- and named in a legend,
+     because a tint with no key is decoration. Membership is the geography
+     metadata's parent chain, walked once for every commune on the map. */
+  function tintContext(svg){
+    var province = levelOf(state.nis, 'province');
+    var region = levelOf(state.nis, 'region');
+    if(!region && !province) return;
+    svg.querySelectorAll('path[data-nis]').forEach(function(p){
+      var chain = chainOf(p.dataset.nis);
+      var ids = chain.map(function(r){ return r.geo_id; });
+      if(province && ids.indexOf(province.geo_id) !== -1) p.classList.add('in-province');
+      else if(region && ids.indexOf(region.geo_id) !== -1) p.classList.add('in-region');
+    });
+    var legend = document.getElementById('locLegend');
+    legend.innerHTML = '';
+    [[region, 'in-region', 'cpLegendRegion'], [province, 'in-province', 'cpLegendProvince'],
+     [{name: state.profile.name}, 'locate-me', 'cpLegendCommune']].forEach(function(row){
+      if(!row[0]) return;
+      var it = document.createElement('span');
+      var sw = document.createElement('i');
+      sw.style.background = row[1] === 'in-region' ? 'var(--bp-icon-blue-bg)'
+        : row[1] === 'in-province' ? '#aec3e6' : 'var(--bp-accent)';
+      it.appendChild(sw);
+      it.appendChild(document.createTextNode(T(row[2]) + ' · ' + placeName(row[0])));
+      legend.appendChild(it);
+    });
+  }
+
+  /* ---- neighbouring communes ---------------------------------------------
+     From metadata/adjacency.json, derived at export from the boundary file
+     (two communes border when their outlines share an edge). The list shows
+     the headline indicator for each neighbour from the same payload the map
+     is painted with, so the two cannot disagree; the map frames the commune
+     among its neighbours and names them. */
+  function renderNeighbours(){
+    var panel = document.getElementById('nbPanel');
+    var card = document.getElementById('nbCard');
+    var codes = state.adjacency[state.nis];
+    if(!codes || !codes.length){
+      panel.dataset.state = 'unavailable';
+      card.dataset.state = 'unavailable';
+      return;
+    }
+    var name = communeName();
+    var headline = (state.sections.headlines || [])[0];
+    var meta = headline ? state.byCode[headline] : null;
+    var values = (state.headlineValues && state.headlineValues.communes) || {};
+
+    document.getElementById('nbSub').textContent = T('cpNeighboursSub', {n: codes.length, name: name});
+    var list = document.getElementById('nbList');
+    list.innerHTML = '';
+    var rows = codes.map(function(nis){
+      var row = values[nis] || {};
+      return {nis: nis, name: placeName(geoOf(nis)) || nis, value: row.value, period: row.period};
+    }).sort(function(a, b){
+      return (typeof b.value === 'number' ? b.value : -1) - (typeof a.value === 'number' ? a.value : -1);
+    });
+    rows.forEach(function(r){
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '?nis=' + r.nis;
+      a.textContent = r.name;
+      li.appendChild(a);
+      var v = document.createElement('span');
+      v.className = 'v';
+      v.textContent = meta && typeof r.value === 'number' ? fmt(r.value, meta) : '—';
+      li.appendChild(v);
+      if(r.period){
+        var p = document.createElement('span');
+        p.className = 'p';
+        p.textContent = r.period;
+        li.appendChild(p);
+      }
+      list.appendChild(li);
+    });
+    panel.dataset.state = 'ready';
+
+    // The map: this commune and its neighbours, framed, the rest faded.
+    // Built ONCE. This function runs twice by design -- after the locator
+    // (so the list appears) and again when the headline figures arrive (so
+    // the list gets its numbers) -- and build() appends to the SVG rather
+    // than replacing it, so a second build drew every path and label twice.
+    document.getElementById('nbMapSub').textContent = T('cpNeighboursMapSub', {name: name});
+    if(state.nbMap){ card.dataset.state = 'ready'; return; }
+    // READY BEFORE BUILDING. The map box sits inside the card's state body,
+    // which is display:none while the card says `loading` -- and getBBox()
+    // on a path nobody has laid out returns zeros, so build() computed a
+    // home view of nothing and frame() framed it: the card rendered as one
+    // dark slab. The main map avoids this by keeping its box outside the
+    // state body; here the state flips first.
+    card.dataset.state = 'ready';
+    var shown = new Set([state.nis].concat(codes));
+    state.nbMap = new MapUI.CommuneMap({
+      svg: document.getElementById('nbSvg'),
+      mapbox: document.getElementById('nbBox'),
+      tip: document.getElementById('nbTip'),
+    }, {
+      lang: LANG,
+      onSelect: function(nis){ if(shown.has(nis)) window.location.search = '?nis=' + nis; },
+    }).build(state.geojson);
+    state.nbMap.setVisible(shown);
+    state.nbMap.frame(Array.from(shown));
+    var svg = document.getElementById('nbSvg');
+    highlight(svg);
+    // Name each neighbour at the centre of its outline. The SVG's units are
+    // projected degrees, so a frame around one commune and its neighbours is
+    // well under one unit wide -- a label at any fixed size is a wall of
+    // ink (the first version drew one dark slab). Sized from the frame:
+    // about 1/32 of its width per glyph height, stroke to match.
+    var view = state.nbMap.view;
+    var fontSize = view.w / 32, halo = view.w / 400;
+    codes.forEach(function(nis){
+      var p = svg.querySelector('path[data-nis="' + nis + '"]');
+      if(!p) return;
+      var b = p.getBBox();
+      var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', b.x + b.width / 2);
+      t.setAttribute('y', b.y + b.height / 2);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('dominant-baseline', 'middle');
+      t.setAttribute('font-size', fontSize.toFixed(5));
+      t.setAttribute('stroke-width', halo.toFixed(5));
+      t.textContent = placeName(geoOf(nis)) || nis;
+      svg.appendChild(t);
+    });
+    card.dataset.state = 'ready';
+  }
+
   async function renderMaps(){
     var name = communeName();
     document.getElementById('mapTitle').textContent = T('cpMapPopulation', {name: name});
@@ -1014,7 +1408,11 @@
       mapbox: document.getElementById('locBox'),
       tip: document.getElementById('locTip'),
     }, {lang: LANG}).build(state.geojson);
+    tintContext(document.getElementById('locSvg'));
     highlight(document.getElementById('locSvg'));
+    document.getElementById('locZoomIn').onclick = function(){ state.locator.zoomBy(0.7); };
+    document.getElementById('locZoomOut').onclick = function(){ state.locator.zoomBy(1 / 0.7); };
+    renderNeighbours();
 
     var code = (state.sections.headlines || [])[0];
     var meta = state.byCode[code];
@@ -1035,6 +1433,7 @@
     var res = await fetch(VALUES_URL(code));
     if(!res.ok){ card.dataset.state = 'error'; return; }
     var payload = await res.json();
+    state.headlineValues = payload;
     card.dataset.state = 'ready';
     state.map.setData(payload.communes || {}, {
       unit: meta.unit, decimals: meta.decimals, direction: meta.direction,
@@ -1051,6 +1450,8 @@
     if(src) bits.push(src.label ? (src.label[LANG] || src.label.en) : meta.source);
     if(meta.updated) bits.push(T('retrieved') + ' ' + meta.updated);
     document.getElementById('mapProvenance').textContent = nameOf(code) + ' · ' + bits.join(' · ');
+    // Now that the headline figures are in, the neighbours list can show them.
+    renderNeighbours();
   }
 
   function wireSearch(){
@@ -1074,7 +1475,7 @@
     renderTiles();
     renderKeyFigures();
     renderEvolution();
-    renderAge();
+    renderCompositions();
     renderFinances();
     renderComparison();
     renderRanks();
@@ -1104,7 +1505,17 @@
     var res = await Promise.all([
       fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
       fetch(MANIFEST_URL), fetch(COMMUNE_URL(state.nis)),
+      fetch(GEOGRAPHIES_URL), fetch(ADJACENCY_URL), fetch(PHOTOS_URL),
     ]);
+    // Each of these is optional and degrades to the honest state: no
+    // geography metadata means English place names, no adjacency means the
+    // neighbours panels say so, no photo registry means the plain frame.
+    if(res[5].ok){
+      var geo = await res[5].json();
+      (geo.geographies || []).forEach(function(r){ state.geographies[r.geo_id] = r; });
+    }
+    if(res[6].ok) state.adjacency = (await res[6].json()).neighbours || {};
+    if(res[7].ok) state.photos = await res[7].json();
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
@@ -1128,9 +1539,9 @@
 
     renderAll();
 
-    var geo = await fetch(GEO_URL);
-    if(!geo.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
-    state.geojson = await geo.json();
+    var boundaries = await fetch(GEO_URL);
+    if(!boundaries.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
+    state.geojson = await boundaries.json();
     await renderMaps();
     wireSearch();
   }

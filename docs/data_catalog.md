@@ -690,6 +690,14 @@ obligation is to name the producer and the date of last update — which the map
    apart, and the wrong choice produces a map that looks entirely normal and is in the wrong
    place. The script refuses to run on a file that declares no CRS rather than guess it
    (CLAUDE.md rule 13).
+4. **Adjacency is derived from it** (2026-09-10): `scripts/export_commune_adjacency.py` →
+   `public/data/metadata/adjacency.json`, run by `make exports`. Because point 2 keeps a shared-arc
+   topology, two communes that border each other share the same vertex coordinates along the
+   border, so "who borders whom" is a set intersection over vertices in pure Python — no geo
+   stack. Two shared vertices make a border; one is a corner where three communes meet (1,014
+   of those). 565 communes, 1,580 borders; Namur's ten match the map, and the script refuses to
+   publish if any commune borders nothing. No new source, and no new licence: it is the same
+   Statbel boundary file restated. Pinned by `tests/test_commune_adjacency.py`.
 
 **Three things this is not.** It carries no indicator values, so it is reference data like the
 rest of `statbel_geography` and not an observation source. Its simplified outlines are **not**

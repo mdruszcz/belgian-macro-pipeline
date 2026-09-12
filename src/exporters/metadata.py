@@ -86,7 +86,9 @@ def export_metadata(indicators_dir: Path, sources_dir: Path, out_path: Path) -> 
     payload = {"categories": CATEGORY_ORDER, "indicators": out_indicators}
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    out_path.write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+    )
     return len(out_indicators)
 
 

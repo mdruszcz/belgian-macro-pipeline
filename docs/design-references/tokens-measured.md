@@ -96,3 +96,33 @@ The existing shared components (`assets/commune_map.css`) already have a working
 this: light values on `:root`, dark values under `prefers-color-scheme: dark` plus a
 `data-theme="dark"` override for an explicit user choice. The new token file follows the exact
 same structure rather than inventing a second theming mechanism — see `tokens.css`.
+
+## Re-measured 2026-09-10, against a new reference
+
+The maintainer supplied `homepage.png` — a new reference covering the homepage and, in a
+matching image, the commune profile. **The palette had moved**, and the first block-built profile
+was built against the old one, which is why it read as almost-but-not-the-design:
+
+| token | Batch 1 (warm) | now (cool) |
+|---|---|---|
+| `--bp-bg` | `#f8f7f4` | `#f6f8fb` |
+| `--bp-surface-alt` | `#f1efe9` | `#eef2f8` |
+| `--bp-border` | `#e5e2da` | `#e2e8f0` |
+| `--bp-text` | `#1a1f2e` | `#14213d` |
+| `--bp-text-muted` | `#5b6270` | `#55617a` |
+| `--bp-accent` | `#c8402f` | `#cc2b38` |
+
+**Sampled, not eyeballed.** `homepage.png` was drawn onto a canvas in the same headless Chromium
+the screenshot tests already use and read back with `getImageData` — the most common colours by
+area (the ground, the card face, the top bar) plus named points (the accent button, the hero
+navy). "Looks about right" is how a page ends up almost matching its design, which reads worse
+than not matching at all.
+
+Also added: `--bp-icon-*-bg` / `--bp-icon-*-ink`, four tint pairs. The reference gives every
+figure a tinted square and **not all the same tint** — population blue, money green, work violet,
+housing amber, safety red. Which tint an icon gets is decided in `assets/belpulse/blocks.css` from
+the icon's own name, so a block author picks a picture and never a colour.
+
+Every contrast pair in `tests/pages/test_design_tokens.py` still passes on the new values, and the
+two deliberate Batch 1 darkenings (`--bp-text-muted`, `--bp-green`) are preserved for the same
+reason they were made.

@@ -82,6 +82,7 @@ exports:
 		--aggregates data/aggregates.csv \
 		--percentiles data/percentiles.csv \
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
+	$(PYTHON) scripts/export_commune_adjacency.py
 	$(MAKE) pages
 	$(MAKE) page-documents
 	$(MAKE) site-index

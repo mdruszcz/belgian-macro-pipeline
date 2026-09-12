@@ -106,6 +106,12 @@ ROOT_PAGES: tuple[Page, ...] = (
         "two homepages in the index; it enters the sitemap when it replaces /",
     ),
     Page(
+        "/home2.html",
+        False,
+        "a temporary, explicitly noindexed visual test of the homepage redesign; "
+        "it is intentionally unreleased and must not enter a sitemap",
+    ),
+    Page(
         "/commune.html",
         False,
         "the unreleased redesign of local.html, and linked from nowhere. Same "
@@ -120,10 +126,11 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
+NOINDEX_ROUTES = frozenset({"/home2.html"})
 
 
 def is_indexable(route: str) -> bool:
-    return not route.startswith(NOINDEX_PREFIXES)
+    return route not in NOINDEX_ROUTES and not route.startswith(NOINDEX_PREFIXES)
 
 
 def route_for(route: str, lang: str) -> str:

@@ -275,6 +275,68 @@ def test_the_frame_shows_no_language_switcher_of_its_own(framed):
     assert display in ("none", "absent"), f"the framed page still offers a switcher ({display})"
 
 
+def test_the_frame_shows_no_theme_switch_of_its_own(framed):
+    """Same fight, same resolution. index.html pushes `setTheme` in on every
+    frame load, so a reader choosing Light inside the frame would watch it snap
+    back to the parent's choice a moment later -- and the click has already
+    been written to storage by then."""
+    display = framed.evaluate(
+        "(function(){var f=document.getElementById('f');"
+        "var n=f.contentDocument.querySelector('.bp-theme-toggle');"
+        "return n ? f.contentWindow.getComputedStyle(n).display : 'absent';})()"
+    )
+    assert display in ("none", "absent"), f"the framed page still offers a theme switch ({display})"
+
+
+def test_a_dark_machine_can_still_be_shown_the_light_design(browser, site):
+    """THE COMPLAINT THIS EXISTS FOR: a block-built page followed
+    prefers-color-scheme and nothing else, so a maintainer whose laptop is in
+    dark mode could not see the light palette his own design reference is drawn
+    in -- on the very page built to match it.
+
+    Run in a context that reports a dark operating system, because that is the
+    case where the design has to win.
+
+    The first fix gave the page a switch. It was not enough: a reader who had
+    never touched the switch still fell through to prefers-color-scheme, so
+    the FIRST view of every page on a dark machine was still dark. Light is
+    now the default and `auto` is an explicit choice, which is what the rest
+    of this test walks through.
+    """
+    context = browser.new_context(color_scheme="dark")
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/about.html", wait_until="load")
+        assert page.locator(".bp-theme-toggle button").count() == 3
+        # Nothing chosen yet, and the machine says dark: the page is light
+        # anyway, because that is the design it was drawn in.
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
+
+        page.click('.bp-theme-toggle button[data-theme-choice="light"]')
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
+        # The key every other page on this site already reads, so one choice
+        # holds across the hand-built pages too.
+        assert page.evaluate("localStorage.getItem('belpulse-theme')") == "light"
+
+        # And it survives a reload -- which is the whole point of storing it,
+        # and needs the pre-paint script in the head to avoid a dark flash.
+        page.reload(wait_until="load")
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
+        pressed = page.eval_on_selector_all(
+            ".bp-theme-toggle button",
+            "els => els.filter(e => e.getAttribute('aria-pressed') === 'true')"
+            ".map(e => e.getAttribute('data-theme-choice'))",
+        )
+        assert pressed == ["light"], "the control does not show what the reader chose"
+
+        # Auto gives the page back to the operating system, which is the only
+        # way back once a reader has chosen.
+        page.click('.bp-theme-toggle button[data-theme-choice="auto"]')
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") is None
+    finally:
+        context.close()
+
+
 def test_the_switcher_is_present_when_the_page_stands_alone(browser, site):
     """The other half: hidden only when framed. Opened directly, the page is
     the only place a reader can change language, and three real links are how

@@ -144,7 +144,7 @@ def communes_with_data(payload_dir: Path = PAYLOAD_DIR) -> tuple[str, ...]:
 #: already resolved for the page, so the description cannot disagree with what
 #: the reader sees, and a document cannot ask the description for a figure the
 #: page does not show.
-SEO_PLACEHOLDER = re.compile(r"\{(commune|nis|figures:[A-Za-z0-9_,-]+)\}")
+SEO_PLACEHOLDER = re.compile(r"\{(commune|region|province|nis|figures:[A-Za-z0-9_,-]+)\}")
 
 
 def local_text(value, lang: str) -> str:
@@ -168,6 +168,38 @@ def commune_name(reader: PayloadReader, nis: str, lang: str) -> str:
     """
     payload = reader.commune(nis) or {}
     return local_text(payload.get("name"), lang) or nis
+
+
+def commune_place(metadata, nis: str, lang: str, level: str) -> str:
+    """The province or region a commune sits in, named in `lang`.
+
+    Read rather than written, for the reason every figure on the page is:
+    "Province de Namur" typed into a document is correct for exactly one of
+    565 pages.
+
+    FROM THE GEOGRAPHY METADATA, NOT FROM THE COMMUNE PAYLOAD. That payload
+    carries `region` and `province` too, but as English-only strings, so the
+    French page read "Wallonia . Namur" -- and the province's own name in
+    French is "Province de Namur", not "Namur". geographies.json is trilingual
+    and links each geography to its parent, so this walks up from the commune
+    the same way the rest of the pipeline resolves containment (rule 3).
+    """
+    entry = metadata.geographies.get(nis)
+    seen = 0
+    while isinstance(entry, dict) and seen < 6:  # commune -> arr -> prov -> region
+        if entry.get("level") == level:
+            return local_text(entry.get("name"), lang)
+        parent = entry.get("parent_geo_id")
+        entry = next(
+            (
+                row
+                for row in metadata.geographies.values()
+                if isinstance(row, dict) and row.get("geo_id") == parent
+            ),
+            None,
+        )
+        seen += 1
+    return ""
 
 
 def figures_for(block_ids: str, doc: Mapping, resolved: Mapping, lang: str) -> str:
@@ -196,7 +228,7 @@ def figures_for(block_ids: str, doc: Mapping, resolved: Mapping, lang: str) -> s
 
 
 def localise(
-    doc: Mapping, *, nis: str, lang: str, resolved: Mapping, reader: PayloadReader
+    doc: Mapping, *, nis: str, lang: str, resolved: Mapping, reader: PayloadReader, metadata
 ) -> dict:
     """A copy of a templated document, made concrete for one commune.
 
@@ -224,6 +256,8 @@ def localise(
                 return name
             if token == "nis":
                 return nis
+            if token in ("region", "province"):
+                return commune_place(metadata, nis, lang, token)
             # Figures read from the ORIGINAL document, so a label that itself
             # carries a placeholder cannot feed on its own substitution.
             return figures_for(token.split(":", 1)[1], doc, resolved, lang)
@@ -313,8 +347,16 @@ def build_one(
     # 37 MB -- to no purpose, since each page reads its own exactly once.
     reader = reader or PayloadReader()
     resolved = resolve_document(doc, metadata=metadata, lang=lang, nis=nis, reader=reader)
-    if nis:
-        doc = localise(doc, nis=nis, lang=lang, resolved=resolved, reader=reader)
+    # A DOCUMENT PINNED TO ONE COMMUNE IS LOCALISED TOO. `nis` is passed when
+    # the templated page is rendered per commune; a preview page names its
+    # commune in `context.nis` instead, and used to skip this entirely -- so a
+    # placeholder in a pinned document would have reached the reader as the
+    # literal text `{commune}`. Same subject, same substitution, one path.
+    subject = nis or (doc.get("context") or {}).get("nis")
+    if subject and subject != NIS_PLACEHOLDER:
+        doc = localise(
+            doc, nis=subject, lang=lang, resolved=resolved, reader=reader, metadata=metadata
+        )
     # The prefix the stylesheets already use, now also given to the renderer:
     # a block writes `/about.html`, and this site is served from a SUBPATH, so
     # a leading slash points at the wrong host and 404s.

@@ -53,11 +53,18 @@
     } catch (e) {
       /* private browsing / storage blocked -- fall back to OS preference */
     }
-    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    // Light unless the reader said otherwise: every design this site is
+    // drawn from is light, so the OS preference is honoured only when the
+    // reader explicitly asks for 'auto'.
+    if (saved === 'auto') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+    }
 
     root.querySelectorAll('.bp-theme-toggle button[data-theme-choice]').forEach(function (btn) {
       var choice = btn.getAttribute('data-theme-choice');
-      btn.setAttribute('aria-pressed', saved === choice ? 'true' : 'false');
+      btn.setAttribute('aria-pressed', (saved || 'light') === choice ? 'true' : 'false');
       btn.addEventListener('click', function () {
         if (choice === 'auto') {
           document.documentElement.removeAttribute('data-theme');

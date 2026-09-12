@@ -147,6 +147,112 @@ def _state(state: str, message: str = "") -> dict:
 _GROUPING = {"en": ",", "fr": "\u202f", "nl": "."}
 
 
+def _number(value: float, decimals: int, lang: str = "en") -> str:
+    """A bare number with this language's separators and no unit.
+
+    Split out of `_format_value` so a delta can be written the same way the
+    figure beside it is -- Belgium writes 1 234,5 three different ways, and a
+    page that gets it wrong reads as foreign before a reader has taken in a
+    single figure.
+    """
+    rendered = f"{value:,.{decimals}f}"
+    separator = _GROUPING.get(lang, ",")
+    if separator != ",":
+        # Swap via a placeholder so the decimal point is not caught by the
+        # thousands replacement on its way past.
+        rendered = rendered.replace(",", "\x00").replace(".", ",").replace("\x00", separator)
+    return rendered
+
+
+#: Which way a RISE reads, from the indicator's own declared direction. Never
+#: inferred: a falling unemployment rate is good news and a falling population
+#: is not, and nothing about the number itself says which. An indicator whose
+#: metadata declares no direction gets a grey delta -- the change is a fact,
+#: the judgement is not ours to invent.
+#: Statuses a figure can be compared ACROSS. `final` and `revised` are settled
+#: readings; `derived` is a computed one, complete and computed the same way in
+#: every period. `provisional` and `estimate` are not: the first is a part-year
+#: total and the second is not a measurement.
+_COMPARABLE = frozenset({"final", "revised", "derived"})
+
+_RISE_IS = {
+    "higher_is_better": ("favourable", "unfavourable"),
+    "lower_is_better": ("unfavourable", "favourable"),
+}
+
+
+def _delta(entry: Mapping, period: str, value, meta: Mapping, lang: str) -> dict:
+    """Change from the previous PUBLISHED period, and how it reads.
+
+    The design puts a delta beside every figure and the resolver produced
+    none, so `show_delta` on a stat_tile and `delta_text` in a kpi_card were a
+    prop and a branch that could never fire -- both blocks have rendered them
+    since Batch A.
+
+    A PERCENTAGE MOVES IN POINTS, NOT IN PERCENT. An unemployment rate going
+    from 8.9% to 8.3% fell by 0.6 points; calling that -6.7% is a different and
+    much more alarming claim, and it is the classic way this kind of badge
+    misleads. Everything else is a relative change.
+
+    Measured against the previous period that HOLDS A VALUE, skipping a
+    suppressed cell rather than treating a withheld figure as a gap in the
+    series (rule 26). Returns {} when there is nothing honest to say: a single
+    period, or a previous value of zero, which has no relative change.
+    """
+    periods = _sorted_periods(entry.get("periods") or {})
+    if period not in periods:
+        return {}
+    # NOT ACROSS A PART-YEAR READING. The police series publish the current
+    # year as a part-year total marked `provisional`, so measuring it against a
+    # full previous year produced "−55.8%" for Namur's burglary rate -- which
+    # is not a fall in burglaries, it is eight months against twelve. A wrong
+    # number published to a municipality is worse than a missing feature.
+    #
+    # `derived` IS COMPARABLE and was the first thing this rule got wrong: the
+    # 13 computed indicators carry that status, average income among them, so
+    # a "final only" test silently dropped the delta from the page's second
+    # headline figure. A computed figure is complete; it is simply computed.
+    # An UNRECOGNISED status is refused rather than assumed comparable, which
+    # is the safe direction for a rule about misleading numbers.
+    if _status_of(entry, period) not in _COMPARABLE:
+        return {}
+    previous = None
+    for candidate in reversed(periods[: periods.index(period)]):
+        state, earlier = _cell_state(entry, candidate)
+        if state == "ready" and _status_of(entry, candidate) in _COMPARABLE:
+            previous = (candidate, earlier)
+            break
+    if previous is None:
+        return {}
+    before_period, before = previous
+    try:
+        difference = float(value) - float(before)
+    except (TypeError, ValueError):
+        return {}
+
+    unit = (meta.get("unit") or "").lower()
+    if unit.startswith("percent"):
+        amount, suffix = difference, " pt"
+    else:
+        if not float(before):
+            return {}
+        amount, suffix = difference / float(before) * 100.0, "%"
+
+    favourable, unfavourable = _RISE_IS.get(meta.get("direction"), ("neutral", "neutral"))
+    if difference > 0:
+        sign, direction = "+", favourable
+    elif difference < 0:
+        sign, direction = "−", unfavourable
+    else:
+        # An explicit no-change, which is a fact and not an absence.
+        sign, direction = "", "neutral"
+    return {
+        "delta_text": f"{sign}{_number(abs(amount), 1, lang)}{suffix}",
+        "delta_period": before_period,
+        "direction": direction,
+    }
+
+
 def _format_value(value, meta: Mapping, lang: str = "en") -> str:
     """A figure written the way the PUBLISHED SITE writes it.
 
@@ -171,12 +277,9 @@ def _format_value(value, meta: Mapping, lang: str = "en") -> str:
     if not isinstance(decimals, int) or isinstance(decimals, bool):
         decimals = 0 if abs(number) >= 1000 else 2
 
-    rendered = f"{number:,.{decimals}f}"
-    separator = _GROUPING.get(lang, ",")
-    if separator != ",":
-        # Swap via a placeholder so the decimal point is not caught by the
-        # thousands replacement on its way past.
-        rendered = rendered.replace(",", "\x00").replace(".", ",").replace("\x00", separator)
+    # Through _number, so a figure and the delta beside it cannot end up
+    # written with different separators.
+    rendered = _number(number, decimals, lang)
 
     unit = (meta.get("unit") or "").lower()
     if unit == "eur":
@@ -228,6 +331,18 @@ def _cell_state(entry: Mapping, period: str) -> tuple[str, object]:
     if value is None:
         return "missing", None
     return "ready", value
+
+
+def _status_of(entry: Mapping, period: str) -> str:
+    """A cell's status, defaulting to `final`.
+
+    The pipeline writes `final | provisional | estimate | revised | suppressed
+    | na` (claude.md's own vocabulary). Absent means final: that is how the
+    payloads are written, and treating an absent status as unknown would mark
+    every Statbel figure on the site as uncertain.
+    """
+    cell = (entry.get("periods") or {}).get(period) or {}
+    return cell.get("status") or "final"
 
 
 def _label(value, lang: str) -> str:
@@ -358,6 +473,11 @@ def _resolve_national(code, meta: Mapping, binding: Mapping, lang: str, reader) 
         "value": value,
         "period": period,
         "formatted_value": _format_value(value, meta, lang),
+        # WHAT KIND OF READING THIS IS. `final` on almost everything; the most
+        # recent year of each police series is `provisional`, and the licence
+        # notice this site publishes says in three languages that it is marked
+        # as such. It was not marked on a block-built page.
+        "status": _status_of(entry, period),
         "provenance": _provenance(meta),
     }
 
@@ -399,6 +519,12 @@ def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping, lang: str) 
         "value": value,
         "period": period,
         "formatted_value": _format_value(value, meta, lang),
+        # WHAT KIND OF READING THIS IS. `final` on most things, `derived` on
+        # the 13 computed indicators, and `provisional` on the current year of
+        # each police series -- which the licence notice this site publishes
+        # says, in three languages, is marked as such. It was not marked on a
+        # block-built page.
+        "status": _status_of(entry, period),
         "provenance": _provenance(meta),
         # THE SERIES BEHIND THE FIGURE, for a sparkline beside it.
         #
@@ -416,6 +542,10 @@ def _resolve_latest(binding: Mapping, entry: Mapping, meta: Mapping, lang: str) 
         # no national block asks for a sparkline yet; adding it there without a
         # caller would be guessing at that shape.
         "points": _series(entry),
+        # The change from the previous published period. ABSENT rather than
+        # zero when there is only one reading: one point is not a trend, and a
+        # "0%" badge would claim it is.
+        **_delta(entry, period, value, meta, lang),
     }
 
 

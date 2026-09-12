@@ -1,0 +1,22 @@
+{
+  "_note": "Per-commune editorial photographs for commune.html, keyed by NIS. A commune with no entry gets the plain frame and says why: a photo of one place must never stand in for another. Every entry names its source; files live beside this one, resized copies of the maintainer's own assets.",
+  "92094": {
+    "hero": "assets/belpulse/commune/namur-hero.jpg",
+    "cta": "assets/belpulse/commune/namur-cta.jpg",
+    "caption": {
+      "en": "Citadel of Namur",
+      "fr": "Citadelle de Namur",
+      "nl": "Citadel van Namen"
+    },
+    "tagline": {
+      "en": "Where the Sambre meets the Meuse",
+      "fr": "Au confluent de la Sambre et de la Meuse",
+      "nl": "Waar Samber en Maas samenkomen"
+    },
+    "credit": {
+      "en": "Illustration supplied by BelPulse (generated image, not a photograph of record)",
+      "fr": "Illustration fournie par BelPulse (image générée, pas une photographie documentaire)",
+      "nl": "Illustratie aangeleverd door BelPulse (gegenereerd beeld, geen documentaire foto)"
+    }
+  }
+}

@@ -16,12 +16,9 @@
       levels in euro. The four tiles are built and laid out exactly as
       designed, then rendered in the component library's `unavailable` state
       rather than filled with a plausible number.
-    * The commune card's photograph: no photo library exists. The frame is
-      kept; a neutral placeholder stands in, labelled as one.
-    * Hero and CTA background photographs: same, and this site also promises
-      "no third-party requests" (assets/i18n.js: mapFooter), so a remote
-      image would break that too. A layered gradient carries the same dark
-      editorial weight without either problem.
+    * The commune card, hero and CTA use temporary local AI-generated
+      illustrations. They are disclosed as illustrative rather than
+      documentary photographs and cause no third-party image requests.
     * "581 communes / 200+ indicateurs" in the CTA: the real figures are read
       live from manifest.json (565 / 52). The design's numbers are
       aspirational; these are true.
@@ -34,20 +31,19 @@
   tests/test_map_ui_logic.py::test_no_page_names_an_indicator).
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
 <title>BelPulse — Belgium's economic data, updated automatically</title>
 <meta name="description" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
 
 <script>
   (function(){
     try{
-      var t = localStorage.getItem('belpulse-theme') || localStorage.getItem('theme');
-      // Light by default -- the design is light; the OS preference applies
-      // only to a reader who explicitly chose 'auto'.
-      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      // This visual test targets the supplied light editorial design.
+      document.documentElement.setAttribute('data-theme', 'light');
       var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
       if(l) document.documentElement.lang = l;
     }catch(e){}
@@ -304,9 +300,165 @@
     .cc-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
     .cta-stats{gap:var(--bp-space-5); flex-wrap:wrap}
   }
+
+  /* ---- home2 high-fidelity composition ---------------------------------
+     This test route keeps home.html untouched. Values and map geometry still
+     come from the same published payloads; only composition and presentation
+     are specialised here. */
+  .home2 .wrap{max-width:1096px; padding-left:14px; padding-right:14px}
+  .home2 .bp-topbar{height:51px; padding:5px 0}
+  .home2 .bp-topbar .wrap{gap:22px; flex-wrap:nowrap}
+  .home2 .bp-logo-mark{width:24px; height:28px}
+  .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
+  .home2 .bp-tagline{font-size:8px; line-height:1.1}
+  .home2 .bp-nav{gap:21px; font-size:10px}
+  .home2 .searchbox{max-width:310px; padding:6px 10px}
+  .home2 .searchbox input,.home2 .langpick{font-size:10px}
+
+  .home2 .hero{
+    min-height:339px;
+    background-image:
+      linear-gradient(90deg,rgba(5,22,45,.97) 0%,rgba(7,28,55,.89) 42%,rgba(8,31,57,.78) 72%,rgba(6,25,48,.66) 100%),
+      url('assets/belpulse/home2/home2-hero-brussels.png');
+    background-size:cover; background-position:center right;
+  }
+  .home2 .hero .wrap{
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1.05fr) minmax(0,.8fr);
+    gap:14px; padding-top:11px; padding-bottom:11px; align-items:stretch;
+  }
+  .home2 .hero-cards{display:contents}
+  .home2 .hero .eyebrow{font-size:8px; margin:3px 0 14px}
+  .home2 .hero h1{font-size:2.15rem; line-height:1.08; max-width:17ch; margin-bottom:13px}
+  .home2 .hero .lead{font-size:12px; line-height:1.45; max-width:48ch; margin-bottom:16px}
+  .home2 .hero .bp-btn{font-size:10px; padding:8px 13px}
+  .home2 .hero-script{margin-top:17px; font-size:1rem}
+  .home2 .glass{border-radius:6px; background:rgba(5,25,50,.78); backdrop-filter:blur(3px)}
+  .home2 .hero-map{
+    padding:11px; display:flex; flex-direction:column;
+    --ramp-0:#c92535; --ramp-1:#ef6548; --ramp-2:#fdae61;
+    --ramp-3:#fff4bd; --ramp-4:#abd9e9; --ramp-5:#5aa6d1; --ramp-6:#2166ac;
+    --nodata:#dbe5e8; --map-stroke:rgba(255,255,255,.75);
+  }
+  .home2 .hero-map .maphead{margin-bottom:4px}
+  .home2 .hero-map .mapbox{height:auto; min-height:240px; flex:1 1 auto; background:transparent}
+  .home2 .hero-map .mapbox > svg{width:100%; height:100%}
+  .home2 .hero-map .legend{margin-top:4px; overflow:hidden}
+  .home2 .hero-map .ticks{width:100%!important; overflow:hidden}
+  .home2 .hero-map .swatches div{height:8px; width:35px}
+  .home2 .hero-map .ticks{font-size:8px}
+  .home2 .hero-map .sub{font-size:8px}
+  .home2 .hero-mini{gap:9px; min-width:0}
+  .home2 .hero-mini .glass{padding:10px; min-height:0; flex:1}
+  .home2 .hero-mini .glass h3{font-size:10px; line-height:1.2}
+  .home2 .hero-mini .sub,.home2 .seemore{font-size:8px}
+  .home2 .hero-mini .provenance,.home2 .national-provenance{font-size:7px; line-height:1.25; color:rgba(255,255,255,.58)}
+  .home2 .mini-figure b{font-size:1.1rem}
+  .home2 .mini-canvas{margin-top:0}
+
+  .home2 .finance{
+    min-height:88px; margin-top:10px; padding:10px 12px;
+    grid-template-columns:145px repeat(4,minmax(0,1fr)) 88px; gap:9px;
+    border-radius:6px; box-shadow:none;
+  }
+  .home2 .finance > *{min-width:0}
+  .home2 .finance > .sechead-link{white-space:normal!important; text-align:center; line-height:1.25}
+  .home2 .finance-title h2{font-size:1rem}
+  .home2 .finance-title p,.home2 .ftile .lbl{font-size:9px}
+  .home2 .ftile{gap:7px; padding:7px 6px; border:1px solid var(--bp-border); border-radius:5px; min-height:62px}
+  .home2 .ficon{width:33px; height:33px; border-radius:8px}
+  .home2 .ftile .why{font-size:8px; line-height:1.2}
+
+  .home2 .duo{gap:26px; margin-top:25px}
+  .home2 .duo > section{min-width:0}
+  .home2 .sechead{margin-bottom:2px}
+  .home2 .sechead h2{font-size:1.25rem}
+  .home2 .sechead a,.home2 .secsub{font-size:9px}
+  .home2 .secsub{margin-bottom:11px}
+  .home2 .commune-card{padding:10px; grid-template-columns:195px 1fr; gap:12px; min-height:204px; box-shadow:none}
+  .home2 .cc-photo{min-height:117px; padding:0; overflow:hidden; background:var(--bp-surface-alt)}
+  .home2 .cc-photo img{display:block; width:100%; height:117px; object-fit:cover; object-position:center}
+  .home2 .cc-name{font-size:1rem; margin:6px 0 0}
+  .home2 .cc-region{font-size:8px; margin-bottom:7px}
+  .home2 .cc-stats{gap:10px 13px}
+  .home2 .cc-stat{gap:7px}
+  .home2 .cc-stat .ficon{width:26px; height:26px}
+  .home2 .cc-stat .lbl{font-size:8px}
+  .home2 .cc-stat .val{font-size:.78rem}
+  .home2 .pilltabs{gap:4px; margin-bottom:9px; width:100%; max-width:100%; min-width:0; flex-wrap:wrap; overflow:hidden}
+  .home2 .pilltabs button{padding:5px 10px; font-size:9px; white-space:nowrap}
+  .home2 .thumbs{gap:8px}
+  .home2 .thumb{border-radius:5px}
+  .home2 .thumb .tmap{height:111px}
+  .home2 .thumb .tcap{padding:7px 8px}
+  .home2 .thumb .tcap b{font-size:9px}
+  .home2 .thumb .tcap span{font-size:8px}
+  .home2 .thumb:nth-child(1){--ramp-0:#fff5eb;--ramp-1:#fee6ce;--ramp-2:#fdd0a2;--ramp-3:#fdae6b;--ramp-4:#fd8d3c;--ramp-5:#e6550d;--ramp-6:#a63603}
+  .home2 .thumb:nth-child(2){--ramp-0:#f7fbff;--ramp-1:#deebf7;--ramp-2:#c6dbef;--ramp-3:#9ecae1;--ramp-4:#6baed6;--ramp-5:#3182bd;--ramp-6:#08519c}
+  .home2 .thumb:nth-child(3){--ramp-0:#f7fcf5;--ramp-1:#e5f5e0;--ramp-2:#c7e9c0;--ramp-3:#a1d99b;--ramp-4:#74c476;--ramp-5:#31a354;--ramp-6:#006d2c}
+
+  .home2 .national-section{margin-top:24px!important}
+  .home2 .kpirow{gap:8px; margin-top:10px}
+  .home2 .kpicard{padding:9px; min-height:151px; border-radius:5px; box-shadow:none}
+  .home2 .kpicard h3{font-size:9px; min-height:22px}
+  .home2 .kpicard .unitline,.home2 .kpicard .period{font-size:8px}
+  .home2 .kpicard .national-provenance{color:var(--bp-text-faint); margin-top:3px}
+  .home2 .kpicard .figure b{font-size:.95rem}
+  .home2 .features{gap:14px; padding:13px; margin-top:23px; border-radius:5px}
+  .home2 .feat{gap:8px}
+  .home2 .feat .circ{width:34px; height:34px}
+  .home2 .feat h4{font-size:9px}
+  .home2 .feat p{font-size:8px; line-height:1.35}
+
+  .home2 .cta{
+    margin-top:21px;
+    background-image:linear-gradient(90deg,rgba(4,22,44,.94),rgba(7,32,59,.76)),url('assets/belpulse/home2/home2-namur-cta.png');
+    background-size:cover; background-position:center;
+  }
+  .home2 .cta .wrap{grid-template-columns:minmax(0,1.2fr) auto minmax(0,1fr); gap:22px; padding-top:27px; padding-bottom:27px; min-height:169px}
+  .home2 .cta h2{font-size:1.55rem; margin-bottom:7px}
+  .home2 .cta p{font-size:9px}
+  .home2 .cta .bp-btn{font-size:9px; padding:8px 12px}
+  .home2 .cta-stats{gap:25px}
+  .home2 .cta-stats b{font-size:1.25rem}
+  .home2 .cta-stats span{font-size:8px}
+  .home2 .foot .wrap{padding-top:12px; padding-bottom:12px; min-height:65px}
+  .home2 .foot a{font-size:9px}
+  .home2 .foot-script{font-size:.82rem}
+  .home2 .ai-image-note{font-size:8px; color:var(--bp-text-faint); margin:5px 0 0}
+  .home2 .featured-meta{position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important}
+  .home2 .attribution{font-size:9px; padding:14px 0}
+
+  @media (max-width:1024px){
+    .home2 .bp-topbar{height:auto; min-height:51px}
+    .home2 .hero .wrap{grid-template-columns:minmax(0,1fr)}
+    .home2 .hero-cards{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+    .home2 .hero-mini{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .finance{grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:12px}
+    .home2 .finance-title,.home2 .finance .sechead-link{grid-column:1/-1}
+    .home2 .duo{grid-template-columns:minmax(0,1fr)}
+    .home2 .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .home2 .features{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .cta .wrap{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:768px){
+    .home2 .bp-topbar .wrap{flex-wrap:wrap}
+    .home2 .bp-nav{order:3; flex-basis:100%}
+    .home2 .searchbox{order:2; max-width:none; margin-left:auto}
+  }
+  @media (max-width:640px){
+    .home2 .hero h1{font-size:2rem}
+    .home2 .hero-cards,.home2 .hero-mini{grid-template-columns:minmax(0,1fr)}
+    .home2 .finance{grid-template-columns:minmax(0,1fr)}
+    .home2 .commune-card{grid-template-columns:minmax(0,1fr)}
+    .home2 .cc-photo img{height:160px}
+    .home2 .thumbs{grid-template-columns:minmax(0,1fr)}
+    .home2 .kpirow{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .features{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:420px){.home2 .kpirow{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
-<body class="bp-shell">
+<body class="bp-shell home2">
 
 <header class="bp-topbar">
   <div class="wrap">
@@ -318,9 +470,10 @@
       </span>
     </a>
     <nav class="bp-nav" aria-label="Main">
-      <a href="home.html" aria-current="page" data-t="navHome">Home</a>
+      <a href="home2.html" aria-current="page" data-t="navHome">Home</a>
       <a href="communes.html" data-t="navCommunes">Commune profiles</a>
       <a href="all_data.html" data-t="navMacro">Macro</a>
+      <a href="all_data.html" data-t="navMicro">Micro</a>
       <a href="map.html" data-t="navMaps">Maps</a>
       <a href="about.html" data-t="navMethodology">Methodology</a>
     </nav>
@@ -375,7 +528,7 @@
           </div>
           <div class="mapbox" id="mapbox">
             <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
-            <div class="tip" id="tip" hidden></div>
+            <div class="map-tip map-hidden" id="tip"></div>
           </div>
           <!-- Swatches and ticks only. The shared component also writes a
                full prose explanation of its own classification (how the bands
@@ -421,14 +574,14 @@
         <div class="commune-card bp-state" id="featuredCard" data-state="loading">
           <div class="bp-state-skeleton"></div>
           <div>
-            <div class="cc-photo"><span data-t="homeNoPhoto">No photo library exists in this pipeline yet</span></div>
+            <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur"></div>
             <div class="cc-name" id="featuredName">—</div>
             <div class="cc-region" id="featuredRegion">—</div>
             <a class="bp-btn bp-btn--outline" id="featuredLink" href="communes.html" style="border-color:var(--bp-accent); color:var(--bp-accent); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
           </div>
           <div class="cc-stats" id="featuredStats"></div>
         </div>
-        <p class="secsub" id="featuredCaption" style="margin-top:var(--bp-space-3); font-size:11px; color:var(--bp-text-faint)"></p>
+        <p class="featured-meta" id="featuredCaption"></p>
       </section>
 
       <section>
@@ -444,7 +597,7 @@
   </div>
 
   <!-- ── national key indicators ─────────────────────────────────────────── -->
-  <div class="wrap" style="margin-top:var(--bp-space-10)">
+  <div class="wrap national-section" style="margin-top:var(--bp-space-10)">
     <div class="sechead">
       <h2 data-t="homeIndicatorsTitle">Key indicators for the Belgian economy</h2>
       <a href="all_data.html" data-t="homeAllIndicators">See all national data →</a>
@@ -516,6 +669,7 @@
     <span class="foot-script">
       <span class="flagbar"><i></i><i></i><i></i></span>
       <span data-t="homeFooterScript">Data shared for a stronger Belgium.</span>
+      <small class="ai-image-note" data-t="homeAiImageNote">Temporary AI-generated illustrative imagery — not documentary photography.</small>
     </span>
   </div>
 </footer>
@@ -551,10 +705,9 @@
 <script>
 /* BelPulse homepage — Batch 3 (docs/design-references/homepage.md).
  *
- * Everything featured here comes from metadata/sections.json: `headlines`
- * drives the hero map's opening indicator, the featured commune's pick and
- * its stat grid; `sections` drives the map theme tabs and their thumbnails.
- * Edit config/local_sections.yaml and this page follows, with no code change.
+ * Indicators come from metadata/sections.json. The featured commune and its
+ * six tiles come from the published commune-profile page configuration, so
+ * this temporary composition cannot drift from the profile it previews.
  *
  * The map is assets/commune_map.js -- the same component map.html and
  * communes.html use (claude.md rule 29). No second implementation.
@@ -568,6 +721,7 @@
   var SOURCES_URL = 'public/data/metadata/sources.json';
   var NATIONAL_URL= 'public/data/national.json';
   var MANIFEST_URL= 'public/data/manifest.json';
+  var FEATURED_CONFIG_URL = 'config/pages/commune-profile/published.json';
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
 
@@ -584,6 +738,7 @@
     index: [], byCode: {}, sections: {headlines: [], sections: []},
     sources: {}, grades: {}, national: {}, map: null, geojson: null,
     activeTheme: null, thumbs: [], drawnIndicator: null,
+    featuredNis: null, featuredCodes: [], featured: null,
   };
 
   /* ---- language, the site's existing pattern ---------------------------- */
@@ -592,6 +747,7 @@
     document.querySelectorAll('[data-t-html]').forEach(function(el){ el.innerHTML = T(el.dataset.tHtml); });
     document.querySelectorAll('[data-t-title]').forEach(function(el){ el.title = T(el.dataset.tTitle); });
     document.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
+    document.querySelectorAll('[data-t-alt]').forEach(function(el){ el.alt = T(el.dataset.tAlt); });
     document.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
     // applyStrings rewrites the attribution wholesale, which destroys the
     // span the date was written into -- and that date is a LICENCE CONDITION
@@ -617,7 +773,7 @@
     var ps = Object.keys(entry.periods).sort();
     for(var i = ps.length - 1; i >= 0; i--){
       var v = entry.periods[ps[i]].value;
-      if(typeof v === 'number') return {period: ps[i], value: v};
+      if(typeof v === 'number') return {period: ps[i], value: v, status: entry.periods[ps[i]].status};
     }
     return null;
   }
@@ -649,6 +805,17 @@
     return bits.join(' · ');
   }
 
+  function nationalProvenance(entry, latest){
+    var bits = [];
+    var source = entry.source ? state.sources[entry.source] : null;
+    bits.push((source && source.label && (source.label[LANG] || source.label.en)) || entry.source_agency || entry.source || T('unavailable'));
+    var grade = state.grades[entry.grade];
+    if(grade) bits.push('(' + entry.grade + ') ' + (grade[LANG] || grade.en));
+    if(entry.updated) bits.push(T('retrieved') + ' ' + entry.updated);
+    if(latest && latest.status && latest.status !== 'final') bits.push(T('status_' + latest.status));
+    return bits.join(' · ');
+  }
+
   var valuesCache = {};
   async function loadValues(code){
     if(valuesCache[code]) return valuesCache[code];
@@ -668,6 +835,11 @@
     card.dataset.state = 'ready';
     state.map.setData(payload.communes || {}, {
       unit: meta.unit, decimals: meta.decimals, direction: meta.direction,
+    });
+    var heroTicks = document.getElementById('ticks');
+    heroTicks.style.width = '100%';
+    Array.from(heroTicks.children).forEach(function(tick, i){
+      tick.style.left = (((i + 1) / 7) * 100) + '%';
     });
     document.getElementById('mapProvenance').textContent = provenanceLine(meta);
     document.getElementById('mapIndicator').value = code;
@@ -713,6 +885,7 @@
         '<a class="seemore" href="all_data.html"></a></div>' +
         '<div class="mini-figure"><b></b></div>' +
         '<div class="period sub" style="text-align:right"></div>' +
+        '<div class="provenance sub"></div>' +
         '<div class="mini-canvas"><canvas></canvas></div>';
       el.querySelector('h3').textContent = entry.name || code;
       el.querySelector('.sub').textContent = entry.unit || '';
@@ -720,6 +893,7 @@
       el.querySelector('.mini-figure b').textContent =
         latest ? MapUI.formatValue(latest.value, entry.unit, 1, LANG) : '—';
       el.querySelector('.period').textContent = latest ? latest.period : '';
+      el.querySelector('.provenance').textContent = nationalProvenance(entry, latest);
       host.appendChild(el);
       var pts = seriesPoints(entry, 24);
       if(pts.length > 1) draws.push({canvas: el.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
@@ -729,7 +903,7 @@
     // bakes in the wrong width (found the hard way in this batch's first pass).
     draws.forEach(function(d){
       BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: 118});
+        {locale: LANG, height: 104});
     });
   }
 
@@ -745,12 +919,14 @@
       card.innerHTML =
         '<h3></h3><div class="unitline"></div>' +
         '<div class="mini-canvas"><canvas></canvas></div>' +
-        '<div class="figure"><b></b></div><div class="period"></div>';
+        '<div class="figure"><b></b></div><div class="period"></div>' +
+        '<div class="national-provenance"></div>';
       card.querySelector('h3').textContent = entry.name || code;
       card.querySelector('.unitline').textContent = entry.unit || '';
       card.querySelector('.figure b').textContent =
         latest ? MapUI.formatValue(latest.value, entry.unit, 1, LANG) : '—';
       card.querySelector('.period').textContent = latest ? latest.period : '';
+      card.querySelector('.national-provenance').textContent = nationalProvenance(entry, latest);
       host.appendChild(card);
       var pts = seriesPoints(entry, 20);
       if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
@@ -827,7 +1003,7 @@
       el.type = 'button';
       el.className = 'thumb';
       el.innerHTML =
-        '<div class="tmap"><svg></svg></div>' +
+        '<div class="tmap"><svg></svg><div class="map-tip map-hidden"></div></div>' +
         '<div class="tcap"><span><b></b><span class="per"></span></span>' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>';
       el.querySelector('b').textContent = nameOf(code);
@@ -847,6 +1023,7 @@
       var map = new MapUI.CommuneMap({
         svg: t.el.querySelector('.tmap svg'),
         mapbox: t.el.querySelector('.tmap'),
+        tip: t.el.querySelector('.map-tip'),
       }, {lang: LANG}).build(state.geojson);
       var payload = await loadValues(t.code);
       if(payload) map.setData(payload.communes || {}, {
@@ -856,43 +1033,53 @@
   }
 
   /* ---- featured commune -------------------------------------------------
-     The commune with the highest value of the FIRST CONFIGURED headline
-     indicator. No NIS and no indicator code is written here: reorder
-     `headlines` in config/local_sections.yaml and the homepage follows. */
+     Both the commune and tile bindings come from the existing published
+     commune-profile document. No NIS or indicator code is duplicated here. */
+  function featuredUnavailable(){
+    var card = document.getElementById('featuredCard');
+    card.dataset.state = 'unavailable';
+    document.getElementById('featuredName').textContent = '—';
+    document.getElementById('featuredRegion').textContent = '';
+    document.getElementById('featuredStats').innerHTML = '';
+    document.getElementById('featuredCaption').textContent = T('unavailable');
+  }
+
   async function renderFeatured(){
     var card = document.getElementById('featuredCard');
-    var headline = (state.sections.headlines || [])[0];
-    if(!headline || !state.byCode[headline]){ card.dataset.state = 'unavailable'; return; }
-
-    if(!state.featured){
-      var payload = await loadValues(headline);
-      if(!payload){ card.dataset.state = 'error'; return; }
-      var best = null;
-      Object.keys(payload.communes || {}).forEach(function(nis){
-        var v = (payload.communes[nis] || {}).value;
-        if(typeof v !== 'number') return;
-        if(!best || v > best.value) best = {nis: nis, value: v};
-      });
-      if(!best){ card.dataset.state = 'missing'; return; }
-      var cres = await fetch(COMMUNE_URL(best.nis));
-      state.featured = {pick: best, profile: cres.ok ? await cres.json() : null};
+    if(!state.featuredNis || state.featuredCodes.length < 6){
+      featuredUnavailable();
+      return;
     }
 
-    var pick = state.featured.pick, profile = state.featured.profile;
+    if(!state.featured){
+      try{
+        var cres = await fetch(COMMUNE_URL(state.featuredNis));
+        if(!cres.ok) throw new Error('profile unavailable');
+        var communeProfile = await cres.json();
+        if(!communeProfile || !communeProfile.indicators) throw new Error('profile malformed');
+        state.featured = {nis: state.featuredNis, profile: communeProfile};
+      }catch(err){
+        featuredUnavailable();
+        return;
+      }
+    }
+
+    var profile = state.featured.profile;
+    if(!profile || !profile.indicators){ featuredUnavailable(); return; }
     card.dataset.state = 'ready';
     // communes/{nis}.json carries `name` as a trilingual object; its
     // province/region are flat strings the pipeline publishes in English
     // only, used as published rather than translated here (rule 2).
     document.getElementById('featuredName').textContent =
-      (profile && profile.name && (profile.name[LANG] || profile.name.en)) || pick.nis;
+      (profile.name && (profile.name[LANG] || profile.name.en)) || state.featured.nis;
     document.getElementById('featuredRegion').textContent =
       [profile && profile.province, profile && profile.region].filter(Boolean).join(' · ');
-    document.getElementById('featuredLink').href = 'local/' + pick.nis + '/';
-    document.getElementById('featuredCaption').textContent = T('homeFeaturedWhy', {indicator: nameOf(headline)});
+    document.getElementById('featuredLink').href = 'local/' + state.featured.nis + '/';
+    document.getElementById('featuredCaption').textContent = T('homeFeaturedConfigured');
 
     var stats = document.getElementById('featuredStats');
     stats.innerHTML = '';
-    (state.sections.headlines || []).slice(0, 6).forEach(function(code, i){
+    state.featuredCodes.forEach(function(code, i){
       var meta = state.byCode[code];
       if(!meta) return;
       var entry = profile && profile.indicators && profile.indicators[code];
@@ -943,7 +1130,7 @@
 
     var responses = await Promise.all([
       fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
-      fetch(NATIONAL_URL), fetch(MANIFEST_URL),
+      fetch(NATIONAL_URL), fetch(MANIFEST_URL), fetch(FEATURED_CONFIG_URL).catch(function(){ return null; }),
     ]);
     var indexJson = responses[0].ok ? await responses[0].json() : {indicators: []};
     state.index = indexJson.indicators || [];
@@ -958,6 +1145,25 @@
       var ds = (await responses[4].json()).datasets || {};
       document.getElementById('statCommunes').textContent = (ds.communes || {}).count || '—';
       document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
+    }
+    if(responses[5] && responses[5].ok){
+      try{
+        var featuredConfig = await responses[5].json();
+        var configuredNis = featuredConfig && featuredConfig.context && featuredConfig.context.nis;
+        var headerSection = (featuredConfig.sections || []).find(function(section){ return section.id === 'header'; });
+        var configuredCodes = (headerSection && headerSection.blocks || [])
+          .filter(function(block){ return block.type === 'stat_tile' && block.binding && block.binding.provider === 'municipal'; })
+          .map(function(block){ return block.binding.indicator; })
+          .filter(function(code){ return state.byCode[code]; })
+          .slice(0, 6);
+        if(/^\d{5}$/.test(configuredNis || '') && configuredCodes.length === 6){
+          state.featuredNis = configuredNis;
+          state.featuredCodes = configuredCodes;
+        }
+      }catch(err){
+        state.featuredNis = null;
+        state.featuredCodes = [];
+      }
     }
 
     // The licence date: the most recent retrieval date across the published
