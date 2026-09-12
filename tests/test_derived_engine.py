@@ -259,6 +259,13 @@ def test_the_committed_derived_configs_load_and_order():
         # force -- deliberately not called an unemployment rate; see the
         # config's own description.
         "SHARE_POP_ON_UNEMPLOYMENT_BENEFIT",
+        # The same claimant count over the 15-64 POPULATION instead of the
+        # whole of it, so it moves with the labour market rather than with a
+        # commune's age structure. Still not an unemployment rate -- the
+        # numerator is benefit claimants, so it reads roughly half the ILO
+        # rate; tests/test_unemployment_rates.py holds the four "unemployment"
+        # figures apart from each other.
+        "UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE",
     }
     assert resolve_order(derived, SOURCE_IDS)
 
