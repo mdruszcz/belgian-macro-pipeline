@@ -400,8 +400,17 @@ series. It **supersedes Census 2021's `UNEMPLOYMENT_RATE_COM` for currency but n
 and the two are kept separate rather than merged: ONEM counts *benefit claimants*, so it excludes
 jobseekers without entitlement, while the census figure is the EU Labour Force Survey definition
 measured against the labour force. The derived share is over TOTAL POPULATION, not the labour force,
-because ONEM publishes no local labour-force denominator — so it is deliberately **not** called an
-unemployment rate anywhere in the config or the UI.
+so it is deliberately **not** called an unemployment rate anywhere in the config or the UI.
+
+> **Correction, 2026-09-12.** This paragraph used to give the reason as "because ONEM publishes no
+> local labour-force denominator". **That was wrong, and wrong in the way that matters most: it
+> closed a question instead of opening one.** ONEM does publish a commune-level unemployment rate
+> with a real denominator — CCI demandeurs d'emploi over *persons insured against unemployment*,
+> their own calculation on ONEM, ONSS and INAMI data — monthly, for all 565 communes, from January
+> 2017. It is simply not in the six `.xls` files this section describes: it lives in their
+> interactive statistics, and the CSV behind that application answers a plain GET. See **ONEM/RVA —
+> the published unemployment RATE** below. What remains true is the narrower claim now in the text:
+> the *derived share* has total population as its denominator and so is not an unemployment rate.
 
 ### Verified against ONEM's own published subtotals
 
@@ -489,6 +498,120 @@ quote. Separators are replaced **before** the accent fold, not after: folding fi
 non-ASCII apostrophe outright and turns `Braine-l'Alleud` into `braine lalleud`. That ordering left
 exactly three communes unmatched — Braine-l'Alleud, Fontaine-l'Evêque, Mont-de-l'Enclus — and the
 loader refuses a partial load rather than dropping them.
+
+## ONEM/RVA — the published unemployment RATE (second ONEM feed, 2026-09-12)
+
+**Not a new publisher and not a new licence.** This is the same ONEM row above, same agency, same
+`source_id: onem`, same reuse conditions and the same attribution obligation. What is new is a
+second file from a second host, so it is written down separately rather than folded into a row that
+describes six Excel tables.
+
+Raised by the maintainer on 2026-09-12, who supplied ONEM's own PDF export and then the browser
+trace of the application behind it. The maintainer's instruction on what to publish was explicit:
+*"on affiche les deux, il est important de voir les effets de la fin des allocations"* — show both
+the annual level and the monthly series, because the effect of benefit time-limiting has to be
+visible. That decision is why there are two indicators here and not one.
+
+| Field | Value |
+|---|---|
+| Publisher | ONEM / RVA — same as the row above |
+| URL | `interactivestats.services.rvaonem.fgov.be/interactivestats/csvResource/interact_taux_V1.csv` |
+| Format | Semicolon-separated CSV, 2.0 MB, 77,376 rows, header `jaar;maand;level;zonegeog;graad;diff1an` |
+| Geography | `zonegeog` at `level` 5 **is the NIS code** — resolved by code, not by name, unlike the `.xls` feed |
+| Period coverage | Monthly, 2017-01 to 2026-06, plus each year's average as `maand` 13 |
+| Cadence | Monthly, refreshed in place |
+| Volume | 70,184 observations: 565 communes + Belgium, × 124 periods |
+| Loaded by | `scripts/sync_onem_rates.py`, wired into `daily_fetch.yml` |
+| Decision record | `docs/decisions/0005-onem-published-rate.md` |
+
+**The definition, printed verbatim on every page of ONEM's own output:**
+
+> Le taux de chômage résulte de la division du nombre de CCI demandeurs d'emploi par le nombre
+> d'assurés contre le chômage.
+> Source: calculs ONEM sur base des données de l'ONEM, de l'ONSS et de l'INAMI.
+
+The numerator is `UNEMPLOYED_JOBSEEKERS`, already loaded here. The denominator — persons insured
+against unemployment, assembled across three institutions — is the piece this pipeline could not
+build. **So the rate is taken as published and nothing here divides anything** (CLAUDE.md rule 4).
+
+**Reached without touching the application.** The interactive map is a JSF app with a session, a
+`ViewState` and AJAX POSTs, which looks unautomatable. It is not: the page loads `papaparse` and its
+own controller names the CSV it parses. Verified 2026-09-12 that the file is byte-identical fetched
+with and without the browser's session cookies, so this is an ordinary download of a published file.
+
+### Two indicators, because the maintainer asked for both readings
+
+| Indicator | Frequency | What it is for |
+|---|---|---|
+| `UNEMPLOYMENT_RATE_INSURED` | A | The level. ONEM's own annual mean; the running year is `provisional` because it averages the months published so far |
+| `UNEMPLOYMENT_RATE_INSURED_MONTHLY` | M | The turning point. The whole monthly history, so a break is visible instead of buried in a mean |
+
+**Two size compromises, both recorded rather than hidden.** The monthly series stores its last **18
+months**, not all 114 — the full history is 46 % of every observation here and takes the committed
+`data/belgian_macro.db` from 34 MB to 63 MB. It is also excluded from the committed
+`data/communes_history.csv`, already 35 MB against this repository's own 25 MB rule, while still
+reaching the gitignored full history file that feeds the payloads. So each commune's own payload
+carries the whole stored monthly series, which is what the page reads. The annual series is not
+trimmed at all.
+
+### The March 2026 break, which is the reason the monthly series ships
+
+Belgium's rate sits between 6.26 % and 6.85 % from 2023 through February 2026, then reads **5.47 in
+March and 4.41 in April** — and the fall appears in 546 of 565 communes.
+
+**That is not a labour market improving.** Time-limiting unemployment benefit takes people out of
+the CCI-DE numerator whether or not they find work. A reader shown "Namur 6.74 %, down 3.9 points in
+a year" without that context would conclude something false about Namur. The break is stated in both
+indicator descriptions in all three languages, asserted by a test against the real file, and must be
+surfaced anywhere the series is drawn.
+
+### Rule 26, and the one true zero
+
+The file has **no masked cells at all**: 70,060 commune values, every one numeric, two decimals. That
+makes a coerced zero the live hazard rather than a theoretical one, so the loader **refuses** a blank
+or non-numeric `graad` instead of defaulting it.
+
+Exactly one commune ever reads `0.00` — Herstappe, roughly eighty residents, in 42 of its 124 periods
+and a real value in the other 82. **That zero is an observed zero** and is stored as one. The same
+commune, the same distinction, as the CCI-DE column in the row above.
+
+### What is NOT loaded, and why refusing is the right answer
+
+Levels 2, 3 and 4 (region, province, arrondissement) are in the file and are **skipped**:
+
+- the rate's **denominator is not published**, so `docs/decisions/0003-aggregation-rule.md` cannot be
+  satisfied — a ratio's aggregate must be recomputed from summed numerator and summed denominator,
+  and neither term is available;
+- ONEM's zones are **not this repository's zones**. Level 2 splits `Région wallonne à l'excl. de la
+  Com. germ.` (55) from `Com. germanophone` (56), while `be:reg:03000` here is Wallonia *including*
+  the German-speaking communes. Publishing 55 as Wallonia would describe a different territory under
+  our name. Level 3 uses codes `0` and `29` that are not province NIS codes.
+
+Belgium (level 1, zone 99) is unambiguous and **is** loaded. Both indicators carry
+`aggregation_method = not_applicable`, and `population_weighted` is not an option — CLAUDE.md forbids
+it, and the whole population is not this rate's denominator.
+
+`diff1an` is **not loaded** either: it is the 12-month change, a derived value, and rule 6 forbids
+writing one in as source data. It is used instead as a free audit of the parser — over 69,264 pairs
+it equals our own 12-month difference to within 0.01 pp of rounding, so a shifted column or a
+mis-built key fails the load before anything is written.
+
+### How this rate compares to the three already here
+
+Annual figures, same communes, so the differences are definitional and not noise:
+
+| Commune | ONEM rate 2021 | Census 2021 | ONEM rate 2026 (part-year) | June 2026 |
+|---|---|---|---|---|
+| Namur | 11.33 | 14.43 | 8.08 | 6.74 |
+| Liège | 16.63 | 22.02 | — | 9.02 |
+| Charleroi | 16.40 | 21.35 | — | 7.64 |
+| Brussels | 18.64 | 18.16 | — | 8.19 |
+
+Against the census measure for the same year the median ratio is 1.08 with a 0.53–2.11 spread, so
+the two agree on order of magnitude and disagree per commune. Brussels reads *higher* on ONEM's
+measure. Four distinct things are now published and `tests/test_unemployment_rates.py` holds them
+apart.
+
 ## police.be — four crime-rate indicators, APPROVED 2026-09-06, 14th dataset
 
 Raised by the maintainer 2026-09-06 with a working request captured from their own browser, then

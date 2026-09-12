@@ -54,20 +54,41 @@ from src.validation.config_schema import load_and_validate_derived  # noqa: E402
 DEFAULT_DERIVED_DIR = Path(__file__).resolve().parents[1] / "config" / "indicators" / "derived"
 
 
-def _all_municipal_rows_from_db(conn: sqlite3.Connection) -> list[tuple]:
+def _all_municipal_rows_from_db(
+    conn: sqlite3.Connection, include_monthly: bool = True
+) -> list[tuple]:
     """Every is_latest=1 municipal observation, EVERY geo_id -- including a
     commune merged away since, if one ever carries a municipal observation.
     (Measured: none does today; LOCAL_UNITS_BY_COMMUNE and the fiscal
     indicators all resolve to current geo_ids only. Kept unrestricted anyway
     so this does not silently start dropping rows the day that changes.)
+
+    `include_monthly=False` drops monthly municipal series, and that is a
+    SIZE decision about one file, not a decision about the data. It is applied
+    to the trimmed file this repository COMMITS, never to the `--all-periods`
+    file, because the two have different jobs: the full file is gitignored and
+    feeds the site payloads, so dropping a series there would make the page it
+    was loaded for render an empty box. The committed file is a download that
+    is already 35 MB, over the 25 MB ceiling CLAUDE.md rule 12 sets, and
+    UNEMPLOYMENT_RATE_INSURED_MONTHLY alone would add roughly 15 MB of it
+    (565 communes x 118 months) for a series published in full as its own
+    indicator payload anyway -- see docs/decisions/0005-onem-published-rate.md.
+
+    The filter changes nothing that shipped before it: every municipal
+    indicator in the store was annual, quarterly or four-monthly, and all
+    seven monthly indicators were national, so `make all`'s byte-identical
+    rebuild is unaffected. If a monthly municipal series ever has to be in the
+    committed file, the fix is to shrink or split that file, not to push a
+    50 MB CSV into git.
     """
-    return conn.execute("""
+    return conn.execute(f"""
         SELECT o.geo_id, o.indicator_id, i.name_en, i.unit, o.period, o.value,
                o.status, o.created_at
         FROM observations o
         JOIN indicators i ON o.indicator_id = i.indicator_id
         JOIN geographies g ON g.geo_id = o.geo_id AND g.level = 'municipality'
         WHERE o.is_latest = 1
+          {"" if include_monthly else "AND i.frequency <> 'M'"}
         """).fetchall()
 
 
@@ -128,7 +149,11 @@ def export_communes_history_csv(
         for row in conn.execute("SELECT indicator_id, name_en, unit FROM indicators")
     }
 
-    raw = _all_municipal_rows_from_db(conn)
+    # Monthly municipal series go into the gitignored --all-periods file, which
+    # feeds the site payloads, and stay out of the trimmed file this repository
+    # commits. See _all_municipal_rows_from_db for why that split and not
+    # another.
+    raw = _all_municipal_rows_from_db(conn, include_monthly=all_periods)
     for csv_path in extra_observations:
         raw = raw + _all_rows_from_csv(csv_path, indicator_meta)
 

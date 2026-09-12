@@ -1,0 +1,60 @@
+id: UNEMPLOYMENT_RATE_INSURED_MONTHLY
+name:
+  en: Unemployment rate (ONEM definition, monthly)
+  fr: Taux de chômage (définition ONEM, mensuel)
+  nl: Werkloosheidsgraad (RVA-definitie, maandelijks)
+unit: percent
+frequency: M
+source_id: onem
+geo_levels: [municipal, national]
+preferred_direction: lower_is_better
+max_age_days: 120
+description:
+  en: >
+    The monthly form of UNEMPLOYMENT_RATE_INSURED, same definition and same source file: CCI-DE
+    divided by persons insured against unemployment, as ONEM publishes it. The last 18 months up
+    to the latest one published, every commune, no gaps. It exists so the MARCH 2026 BREAK is
+    visible rather than buried inside an annual mean -- Belgium 6.28 in February, 5.47 in March,
+    4.41 in April, a two-point fall in two months that reflects the time-limiting of unemployment
+    benefit, not hiring. Read the annual series for the level and this one for the turning point.
+    Two limits are deliberate, both about file size rather than the data. The last 18 months are
+    stored, not all 114: the whole monthly history is 46 % of every observation in this
+    repository and takes the committed database from 34 MB to 63 MB. And the series is kept out
+    of the committed data/communes_history.csv, which is already over the size rule. It is
+    published in full in each commune's own payload, which is what the commune page reads.
+    NOT UNEMPLOYMENT_RATE_COM, NOT ADMIN_UNEMPLOYMENT_RATE_COM, NOT UNEMPLOYMENT_RATE_BIT and NOT
+    UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE; the comparison against all four is recorded on
+    UNEMPLOYMENT_RATE_INSURED, whose definition this shares exactly.
+  fr: >
+    La forme mensuelle de UNEMPLOYMENT_RATE_INSURED, même définition et même fichier source : les
+    CCI-DE divisés par les assurés contre le chômage, tel que l'ONEM le publie. Les 18 derniers
+    mois jusqu'au dernier publié, toutes les communes, sans trou. Elle existe pour que LA RUPTURE DE
+    DÉFINITION DE MARS 2026 soit visible au lieu d'être noyée dans une moyenne annuelle : Belgique
+    6,28 en février, 5,47 en mars, 4,41 en avril, deux points en deux mois qui traduisent la
+    limitation des allocations de chômage dans le temps, pas des embauches. La série annuelle
+    donne le niveau, celle-ci donne le point de retournement.
+    Deux limites sont volontaires, toutes deux pour la taille des fichiers et non pour les données.
+    Les 18 derniers mois sont conservés, pas les 114 : tout l'historique mensuel représente 46 %
+    de l'ensemble des observations du dépôt et fait passer la base versionnée de 34 à 63 Mo. Et la
+    série reste exclue de data/communes_history.csv, qui dépasse déjà la limite de taille. Elle
+    est publiée intégralement dans la charge utile propre à chaque commune, celle que lit la page.
+    CE N'EST PAS UNEMPLOYMENT_RATE_COM, PAS ADMIN_UNEMPLOYMENT_RATE_COM, PAS
+    UNEMPLOYMENT_RATE_BIT ni UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE ; la comparaison avec ces
+    quatre mesures figure sous UNEMPLOYMENT_RATE_INSURED, dont la définition est identique.
+  nl: >
+    De maandelijkse vorm van UNEMPLOYMENT_RATE_INSURED, zelfde definitie en zelfde bronbestand:
+    UVW-WZ gedeeld door de tegen werkloosheid verzekerde personen, zoals de RVA het publiceert.
+    De laatste 18 maanden tot de laatst gepubliceerde, elke gemeente, zonder gaten. Ze bestaat zodat DE
+    DEFINITIEBREUK VAN MAART 2026 zichtbaar is in plaats van weggemoffeld in een jaargemiddelde:
+    België 6,28 in februari, 5,47 in maart, 4,41 in april, twee punten in twee maanden die de
+    beperking van de werkloosheidsuitkering in de tijd weergeven, geen aanwervingen. De
+    jaarreeks geeft het niveau, deze geeft het kantelpunt.
+    Twee beperkingen zijn bewust, beide over bestandsgrootte en niet over de gegevens. De laatste
+    18 maanden worden opgeslagen, niet alle 114: de volledige maandelijkse historiek is 46 % van
+    alle observaties in deze repository en brengt de versiebeheerde database van 34 naar 63 MB.
+    En de reeks blijft buiten data/communes_history.csv, dat al over de groottegrens gaat. Ze
+    wordt volledig gepubliceerd in de payload van elke gemeente, die de gemeentepagina leest.
+    NIET UNEMPLOYMENT_RATE_COM, NIET ADMIN_UNEMPLOYMENT_RATE_COM, NIET UNEMPLOYMENT_RATE_BIT en
+    NIET UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE; de vergelijking met alle vier staat bij
+    UNEMPLOYMENT_RATE_INSURED, waarvan dit precies de definitie deelt.
+display: null

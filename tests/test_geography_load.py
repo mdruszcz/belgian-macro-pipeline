@@ -241,7 +241,13 @@ def test_loader_refuses_unverified_crosswalk_rows(tmp_path):
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     for name in ("geographies.csv", "municipality_crosswalk.csv", "merger_effective_dates.csv"):
-        (config_dir / name).write_text((REAL_CONFIG_DIR / name).read_text(encoding="utf-8"))
+        # The write needs the encoding as much as the read does: without it
+        # Windows writes cp1252 and the loader, which reads UTF-8, fails on the
+        # first accented commune name. Same implicit-encoding defect that made
+        # src/validation/config_schema.py mangle every French indicator label.
+        (config_dir / name).write_text(
+            (REAL_CONFIG_DIR / name).read_text(encoding="utf-8"), encoding="utf-8"
+        )
     path = config_dir / "municipality_crosswalk.csv"
     path.write_text(path.read_text(encoding="utf-8").replace(",true,", ",false,"), encoding="utf-8")
 
@@ -297,7 +303,13 @@ def test_loader_rejects_a_blank_valid_from(tmp_path):
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     for name in ("geographies.csv", "municipality_crosswalk.csv", "name_en_exonyms.csv"):
-        (config_dir / name).write_text((REAL_CONFIG_DIR / name).read_text(encoding="utf-8"))
+        # The write needs the encoding as much as the read does: without it
+        # Windows writes cp1252 and the loader, which reads UTF-8, fails on the
+        # first accented commune name. Same implicit-encoding defect that made
+        # src/validation/config_schema.py mangle every French indicator label.
+        (config_dir / name).write_text(
+            (REAL_CONFIG_DIR / name).read_text(encoding="utf-8"), encoding="utf-8"
+        )
     rows = (config_dir / "geographies.csv").read_text(encoding="utf-8").splitlines()
     header, first = rows[0], rows[1].split(",")
     first[header.split(",").index("valid_from")] = ""

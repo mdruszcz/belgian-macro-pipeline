@@ -29,7 +29,7 @@ headlines:
   - POPULATION_CHANGE_5Y
   - AVG_NET_TAXABLE_INCOME
   - LOCAL_UNITS_BY_COMMUNE
-  - ADMIN_UNEMPLOYMENT_RATE_COM
+  - UNEMPLOYMENT_RATE_INSURED
   - MEDIAN_HOUSE_PRICE
 
 # Part-of-whole groups: which indicators together make up a whole. This is
@@ -153,19 +153,31 @@ sections:
     label: {en: Employment, fr: Emploi, nl: Werk}
     blurb:
       en: >
-        The administrative unemployment rate for ages 15–64 from Steunpunt Werk's Vlaamse
-        Arbeidsrekening, complemented by annual ONEM/RVA benefit-claimant figures. The two are
-        related but not interchangeable: only the first is measured against the labour force.
+        ONEM/RVA's own unemployment rate — benefit claimants seeking work over the number of
+        people insured against unemployment — shown as the annual level and as the latest month.
+        BOTH ARE HERE ON PURPOSE: the rate falls from 6.28 % in February 2026 to 4.41 % in April
+        across almost every commune, and that is the time-limiting of unemployment benefit taking
+        people out of the count, not a labour market improving. The Steunpunt Werk administrative
+        rate and the ONEM claimant counts are beside it; they measure related but different things.
       fr: >
-        Le taux de chômage administratif des 15–64 ans de la Vlaamse Arbeidsrekening de Steunpunt
-        Werk, complété par les chiffres annuels des bénéficiaires de l’ONEM. Ces mesures sont liées
-        mais non interchangeables : seule la première est rapportée à la population active.
+        Le taux de chômage propre à l’ONEM — les chômeurs indemnisés demandeurs d’emploi rapportés
+        au nombre d’assurés contre le chômage — présenté en niveau annuel et au dernier mois connu.
+        LES DEUX SONT LÀ VOLONTAIREMENT : le taux passe de 6,28 % en février 2026 à 4,41 % en avril
+        dans presque toutes les communes, et c’est la limitation des allocations de chômage dans le
+        temps qui sort des personnes du comptage, pas un marché du travail qui s’améliore. Le taux
+        administratif de Steunpunt Werk et les effectifs de l’ONEM figurent à côté : ils mesurent
+        des choses voisines mais distinctes.
       nl: >
-        De administratieve werkloosheidsgraad voor 15–64-jarigen uit de Vlaamse Arbeidsrekening van
-        Steunpunt Werk, aangevuld met jaarlijkse RVA-cijfers over uitkeringsgerechtigden. De maten
-        hangen samen maar zijn niet onderling verwisselbaar: alleen de eerste gebruikt de beroepsbevolking.
-    headline: ADMIN_UNEMPLOYMENT_RATE_COM
+        De eigen werkloosheidsgraad van de RVA — uitkeringsgerechtigde werkzoekenden gedeeld door
+        het aantal tegen werkloosheid verzekerde personen — als jaarniveau en als laatste maand.
+        BEIDE STAAN ER BEWUST: de graad zakt van 6,28 % in februari 2026 naar 4,41 % in april in
+        bijna elke gemeente, en dat is de beperking van de werkloosheidsuitkering in de tijd die
+        mensen uit de telling haalt, geen arbeidsmarkt die verbetert. De administratieve graad van
+        Steunpunt Werk en de RVA-aantallen staan ernaast; ze meten verwante maar andere dingen.
+    headline: UNEMPLOYMENT_RATE_INSURED
     indicators:
+      - UNEMPLOYMENT_RATE_INSURED_MONTHLY
+      - ADMIN_UNEMPLOYMENT_RATE_COM
       - UNEMPLOYED_JOBSEEKERS
       - UNEMPLOYMENT_BENEFIT_RECIPIENTS
       - TEMP_UNEMPLOYED

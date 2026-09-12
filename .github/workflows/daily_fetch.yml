@@ -325,6 +325,27 @@ jobs:
         # the day's other data, but must still fail the run visibly.
         run: python scripts/sync_onem.py --db data/belgian_macro.db
 
+      - name: Sync ONEM/RVA published unemployment rate
+        id: sync_onem_rates
+        continue-on-error: true
+        # THE SECOND ONEM FEED, and the first current commune-level
+        # unemployment rate with a real labour-force denominator: ONEM's own
+        # CCI-DE over persons insured against unemployment, which they compute
+        # from ONEM, ONSS and INAMI registers. We do not divide anything --
+        # the quotient is taken as published (ADR 0005).
+        #
+        # A different host from the step above
+        # (interactivestats.services.rvaonem.fgov.be, not www.onem.be), so
+        # this step is also the live check that the runner reaches it. One
+        # plain GET of a 2 MB CSV, no session and no cookie needed, even
+        # though the page in front of it is a JSF application.
+        #
+        # Resolved by NIS code rather than by name, unlike sync_onem, so it
+        # depends on the geography load for a different reason: the file's 565
+        # codes must match the municipalities in force today exactly, in both
+        # directions, or it refuses.
+        run: python scripts/sync_onem_rates.py --db data/belgian_macro.db
+
       - name: Sync WalStat (IWEPS) municipal finance
         id: sync_walstat
         continue-on-error: true
@@ -391,11 +412,33 @@ jobs:
         # export_percentiles_csv.py already got (trimmed scope plus an
         # --all-periods flag for researchers), which is a Block J/K change,
         # not something to bolt onto a data load.
+        #
+        # SCOPED TO FILES GIT WOULD ACTUALLY COMMIT (2026-09-12). The message
+        # says "refusing to commit", but `find` also matched
+        # data/communes_history_full.csv -- which .gitignore excludes, and
+        # which the step that builds it above calls "gitignored and never
+        # committed". A file that is never committed cannot bloat the
+        # repository, so failing the whole daily run over it threw away every
+        # other source's data for nothing. Measured on run 34699560386 that
+        # file is ~37.5 MB against this 39.06 MB threshold (find's `k` is
+        # 1024 bytes), so it was ~1.5 MB from stopping the pipeline.
+        #
+        # The THRESHOLD IS UNCHANGED and every committed file is still
+        # checked. docs/steps records the decision to fix the next overrun at
+        # the source rather than raise this guard a third time; that still
+        # holds.
         run: |
-          OVERSIZED=$(find data/ public/ local/ -type f -size +40000k)
+          OVERSIZED=""
+          while IFS= read -r f; do
+            # check-ignore exits 0 when the path IS ignored, so the `||`
+            # branch collects exactly the files that would be committed.
+            git check-ignore -q "$f" || OVERSIZED="${OVERSIZED}${f}"$'\n'
+          done < <(find data/ public/ local/ -type f -size +40000k)
           if [ -n "$OVERSIZED" ]; then
-            echo "::error::File(s) under data/ or public/ exceed 25 MB; refusing to commit:"
-            echo "$OVERSIZED" | while read -r f; do echo "  $f ($(du -h "$f" | cut -f1))"; done
+            echo "::error::Committed file(s) under data/, public/ or local/ exceed 40 MB; refusing to commit:"
+            echo "$OVERSIZED" | while read -r f; do
+              [ -n "$f" ] && echo "  $f ($(du -h "$f" | cut -f1))"
+            done
             exit 1
           fi
 
@@ -443,7 +486,7 @@ jobs:
           fi
 
       - name: Fail run if any source failed
-        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.sync_onem.outcome == 'failure' || steps.sync_walstat.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.sync_onem.outcome == 'failure' || steps.sync_onem_rates.outcome == 'failure' || steps.sync_walstat.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
         run: |
-          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
+          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, onem_rates=${{ steps.sync_onem_rates.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
           exit 1

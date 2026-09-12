@@ -1,5 +1,15 @@
-"""Four figures on this site are called some form of "unemployment", and no two
+"""Six figures on this site are called some form of "unemployment", and no two
 of them mean the same thing. This file pins the differences.
+
+    UNEMPLOYMENT_RATE_INSURED   ONEM's own rate, and the only current one with
+                                a real labour-force denominator: CCI-DE over
+                                persons insured against unemployment, divided
+                                by ONEM and not by us. 565 communes + Belgium,
+                                annual 2017-2026 and monthly as
+                                UNEMPLOYMENT_RATE_INSURED_MONTHLY. Carries a
+                                DEFINITIONAL BREAK from March 2026 -- see
+                                docs/decisions/0005-onem-published-rate.md.
+    ADMIN_UNEMPLOYMENT_RATE_COM Steunpunt Werk's administrative rate, 2024.
 
     UNEMPLOYMENT_RATE_BIT       IWEPS/WalStat, ILO definition, LFS-calibrated.
                                 Wallonia only, annual 1999-2023.
@@ -50,6 +60,9 @@ BIT = "UNEMPLOYMENT_RATE_BIT"
 COM = "UNEMPLOYMENT_RATE_COM"
 CLAIMANT_WA = "UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE"
 CLAIMANT_POP = "SHARE_POP_ON_UNEMPLOYMENT_BENEFIT"
+ADMIN = "ADMIN_UNEMPLOYMENT_RATE_COM"
+INSURED = "UNEMPLOYMENT_RATE_INSURED"
+INSURED_M = "UNEMPLOYMENT_RATE_INSURED_MONTHLY"
 
 
 def _config(indicator_id: str) -> dict:
@@ -133,6 +146,66 @@ def test_each_rate_says_in_its_own_config_what_it_is_not(indicator_id):
     assert "NOT" in description
     for other in {BIT, COM, CLAIMANT_WA} - {indicator_id}:
         assert other in description, f"{indicator_id} never mentions {other}"
+
+
+def test_the_insured_rate_is_source_data_and_not_a_derived_config():
+    """ONEM performs this division, so it belongs in `config/indicators/` and
+    NOT in `config/indicators/derived/`. A derived copy would recompute a
+    published statistic and drift from what ONEM prints (ADR 0005)."""
+    for indicator_id in (INSURED, INSURED_M):
+        assert (INDICATOR_DIR / f"{indicator_id}.yaml").is_file()
+        assert not (DERIVED_DIR / f"{indicator_id}.yaml").is_file()
+        cfg = _config(indicator_id)
+        assert "derived" not in cfg
+        assert cfg["source_id"] == "onem"
+        assert cfg["unit"] == "percent"
+        assert cfg["preferred_direction"] == "lower_is_better"
+
+
+def test_the_two_insured_series_differ_only_in_frequency():
+    """Same definition, same file, same source. If they ever diverged on
+    anything else, one of them would have quietly become another measure."""
+    annual, monthly = _config(INSURED), _config(INSURED_M)
+    assert annual["frequency"] == "A"
+    assert monthly["frequency"] == "M"
+    for field in ("source_id", "unit", "preferred_direction", "geo_levels"):
+        assert annual[field] == monthly[field], field
+
+
+@pytest.mark.parametrize("indicator_id", [INSURED, INSURED_M])
+def test_the_insured_rate_names_every_other_measure_it_is_not(indicator_id):
+    """Six things on this site are called unemployment. The hazard is a reader
+    treating two of them as one series, so the newest arrivals have to point at
+    the others where the next maintainer will read it. Asserted one-way: the
+    four older configs predate these and are not required to mention them.
+    """
+    description = _config(indicator_id)["description"]["en"]
+    assert "NOT" in description
+    for other in (COM, ADMIN, BIT, CLAIMANT_WA):
+        assert other in description, f"{indicator_id} never mentions {other}"
+
+
+@pytest.mark.parametrize("lang", ["en", "fr", "nl"])
+def test_the_insured_rate_records_the_march_2026_break_in_every_language(lang):
+    """The break is the whole reason the monthly series ships, and a reader in
+    French or Dutch needs it as much as one in English. Rule 7 plus the
+    maintainer's instruction to make the reform's effect visible."""
+    description = _config(INSURED)["description"][lang]
+    assert "2026" in description
+    assert "4.41" in description or "4,41" in description
+    assert "5.47" in description or "5,47" in description
+
+
+def test_the_insured_rate_refuses_an_aggregate_rather_than_weighting_one():
+    """Its denominator -- persons insured against unemployment -- is not
+    published, so ADR 0003's recompute-from-sums is impossible and
+    population-weighting is forbidden. The config must not claim a national or
+    regional level it cannot defend beyond the one ONEM publishes itself."""
+    for indicator_id in (INSURED, INSURED_M):
+        levels = _config(indicator_id)["geo_levels"]
+        assert set(levels) == {"municipal", "national"}
+        assert "regional" not in levels
+        assert "provincial" not in levels
 
 
 def test_the_census_rate_no_longer_claims_to_be_eurostat_comparable():

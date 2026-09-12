@@ -53,6 +53,7 @@ reference:
 	$(PYTHON) scripts/sync_census2021.py    --db $(DB) --reference-rows-only
 	$(PYTHON) scripts/sync_police.py        --db $(DB) --reference-rows-only
 	$(PYTHON) scripts/sync_var.py           --db $(DB) --reference-rows-only
+	$(PYTHON) scripts/sync_onem_rates.py    --db $(DB) --reference-rows-only
 
 ## validate: Block H's rules. Fails the build on a data problem, which is the
 ## entire point of it existing (a validation step that only logs is decoration).
@@ -168,6 +169,7 @@ fetch:
 	$(PYTHON) scripts/sync_to_canonical.py --db $(DB)
 	$(PYTHON) scripts/sync_statbel.py --db $(DB)
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
+	$(PYTHON) scripts/sync_onem_rates.py --db $(DB)
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
 
 ## clean: remove generated artifacts that are safe to regenerate. Deliberately
