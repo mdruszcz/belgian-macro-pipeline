@@ -221,6 +221,8 @@ def test_units_are_formatted_the_way_communes_html_formats_them():
           percent: MapUI.formatValue(12.5, 'percent', 1),
           count:   MapUI.formatValue(565615, 'count', 0),
           missing: MapUI.formatValue(null, 'count', 0),
+          declared_pads:   MapUI.formatValue(1, 'percent', 1, 'en'),
+          undeclared_does_not: MapUI.formatValue(1, 'percent', null, 'en'),
           suffix_rate:  MapUI.unitSuffix('per_10000_cars'),
           suffix_count: MapUI.unitSuffix('count'),
         }));
@@ -228,6 +230,11 @@ def test_units_are_formatted_the_way_communes_html_formats_them():
     assert out["eur"].startswith("€")
     assert out["percent"].endswith("%")
     assert out["missing"] == "—"
+    # A declared decimals is a minimum too, matching src/pages/resolve.py:
+    # a growth rate of exactly 1.0 % reads as "1,0 %" beside "0,5 %", never
+    # as a bare "1". With nothing declared, the old guess stands.
+    assert out["declared_pads"] == "1.0%"
+    assert out["undeclared_does_not"] == "1%"
     assert out["suffix_rate"] == " per 10000 cars"
     assert out["suffix_count"] == ""
 

@@ -112,6 +112,13 @@ ROOT_PAGES: tuple[Page, ...] = (
         "it is intentionally unreleased and must not enter a sitemap",
     ),
     Page(
+        "/macro.html",
+        False,
+        "the redesigned macroeconomics page (Batch 6), a noindexed preview beside "
+        "dashboard.html until it is proven equivalent or better and the canonical "
+        "route switches",
+    ),
+    Page(
         "/commune.html",
         False,
         "the unreleased redesign of local.html, and linked from nowhere. Same "
@@ -126,7 +133,7 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
-NOINDEX_ROUTES = frozenset({"/home2.html"})
+NOINDEX_ROUTES = frozenset({"/home2.html", "/macro.html"})
 
 
 def is_indexable(route: str) -> bool:
