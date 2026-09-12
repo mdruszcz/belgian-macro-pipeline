@@ -33,7 +33,8 @@
         "statbel",
         "onem",
         "police",
-        "walstat"
+        "walstat",
+        "var"
       ]
     },
     "base_url": {

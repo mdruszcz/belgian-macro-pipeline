@@ -88,6 +88,28 @@ stays at exactly 10).
 | Maintenance | none until Belfius publishes a new composition; then a re-transcription |
 | Licence | **unverified.** The PDFs carry no reuse terms. Belfius is credited on every view that shows the typology; whether re-publishing the composition needs Belfius's permission is an open question for the maintainer before any commercial use |
 
+## Vlaamse Arbeidsrekening — municipal unemployment rate (approved 2026-09-12)
+
+**Status: loaded for 2024 at the maintainer's request.** This is outside the Selected-10 table
+above because it was approved later and directly supersedes the stale Census unemployment headline;
+it does not change CONTROL E's historical selection record.
+
+| Field | Value |
+|---|---|
+| Publisher | Steunpunt Werk — Vlaamse Arbeidsrekening, based on DWH AM&SB - KSZ and BISA |
+| What | `Werkloosheidsgraad (%)`: unemployed residents aged 15–64 divided by the administrative labour force; total men and women. This is an administrative definition, not the survey-based ILO/Eurostat rate |
+| Periods at source | Annual, 2017–2024. The first committed refresh loads the validated 2024 crosstab; the importer accepts all published years with the same schema |
+| Coverage | 565/565 current municipalities. One 2024 cell, Herstappe, is blank under the publisher's fewer-than-four disclosure rule and is stored as `suppressed`, never zero |
+| Geography | Current 565-municipality grid retrojected by the publisher, including Beveren-Kruibeke-Zwijndrecht and Bilzen-Hoeselt in 2024. Dutch names, no NIS codes; strict unique current-name matching with no fuzzy fallback |
+| Acquisition | Manual Tableau crosstab export (`BNW - T1 - Tabel`, UTF-16 TSV despite `.csv` extension), loaded by `scripts/sync_var.py`; see `docs/features/var_unemployment.md` |
+| Source page | `https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening` (page dated 2026-06-29 when checked 2026-09-12) |
+| Required credit | `Steunpunt Werk - Vlaamse Arbeidsrekening o.b.v. DWH AM&SB - KSZ, BISA` |
+| Licence caveat | The source page explicitly offers export and requires attribution for use or distribution. It names no standard open-data licence and no separate commercial-reuse grant. BelPulse credits it and explicitly does **not** claim Statbel's CC BY 4.0 terms apply |
+
+`ADMIN_UNEMPLOYMENT_RATE_COM` replaces `UNEMPLOYMENT_RATE_COM` only in the commune presentation.
+The old Census observations and derived indicator remain in the research store under their original
+identity; they are not silently overwritten with a different definition or source.
+
 ## Census indicators — 2021 wanted, 2011 available (approved 2026-09-06, revised same day)
 
 **Status: approved in principle, blocked on a hand-download. Do not build the 2011-only adapter.**

@@ -21,7 +21,7 @@ businesses, housing price") assumes six figures. Checking `data/communes_history
 | Population | yes | `POPULATION_BY_COMMUNE` |
 | 5Y growth | yes | `POPULATION_CHANGE_5Y` (derived) |
 | Median income | partial | `AVG_NET_TAXABLE_INCOME` is a **mean**, not a median — no municipal median exists (Block F's fiscal-income note: the commune file has no median column, and the sector file's median cannot be aggregated) |
-| Unemployment | yes, since 2026-09-06 | `UNEMPLOYMENT_RATE_COM` (derived), from Census 2021's `CAS` employment-status table — found inside a file already downloaded for other reasons, see `data_catalog.md`. A different id from the pre-existing national `UNEMPLOYMENT_RATE` (NBB, different definition and cadence), deliberately, to avoid a naming collision between two real but incompatible series |
+| Unemployment | yes, since 2026-09-12 | `ADMIN_UNEMPLOYMENT_RATE_COM`, the annual administrative unemployment rate for ages 15–64 published by Steunpunt Werk's Vlaamse Arbeidsrekening. It replaces the Census 2021 snapshot in the commune UI without rewriting that historical series. It remains distinct from the national NBB `UNEMPLOYMENT_RATE` (survey definition and different cadence). |
 | Businesses | yes, but single-period | `LOCAL_UNITS_BY_COMMUNE` — one quarter (2023-Q4) only, per `statbel_adapter.md`'s "only the latest quarter is available" |
 | Housing price | yes, since 2026-09-06 | `AVG_HOUSE_PRICE` (derived), from a commune-level real-estate file found in the same download. Ordinary houses only, 2010–2017 — see `data_catalog.md` |
 

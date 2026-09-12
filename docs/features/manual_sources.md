@@ -39,6 +39,7 @@ git cannot delta. See [ADR 0002](../decisions/0002-split-committed-stores.md) fo
 | `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | only when refreshed by hand | the procedure below |
 | `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
 | `data/census2021_observations.csv` | 13 Census 2021 counts: citizenship, birthplace, sex, marital status, households, family nuclei, dwellings | only when refreshed by hand (decennial) | the procedure below |
+| `data/var_unemployment_observations.csv` | `ADMIN_UNEMPLOYMENT_RATE_COM`, annual administrative unemployment rate for ages 15–64 | only when the Tableau crosstab is refreshed by hand | [var_unemployment.md](var_unemployment.md) |
 
 `data/local/` holds the disposable rebuild of the manual store and is gitignored. It must stay
 ignored: `daily_fetch.yml` runs `git add data/`, which would otherwise commit it.

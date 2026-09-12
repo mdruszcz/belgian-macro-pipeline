@@ -43,6 +43,7 @@ DEFAULT_EXPORTS = (
     REPO_ROOT / "data" / "communes_export.csv",
     REPO_ROOT / "data" / "population_observations.csv",
     REPO_ROOT / "data" / "fiscal_income_observations.csv",
+    REPO_ROOT / "data" / "var_unemployment_observations.csv",
     REPO_ROOT / "data" / "communes_history.csv",
 )
 

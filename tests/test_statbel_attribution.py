@@ -261,6 +261,31 @@ def test_page_flags_the_stale_geography_and_unstated_period(page):
     )
 
 
+# ── Steunpunt Werk / Vlaamse Arbeidsrekening ──────────────────────────────
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_carries_the_required_var_source_credit(page):
+    text = _page(page)
+    assert "Steunpunt Werk" in text
+    assert "Vlaamse Arbeidsrekening" in text
+    assert "DWH AM&amp;SB - KSZ, BISA" in text or "DWH AM&SB - KSZ, BISA" in text
+
+
+@pytest.mark.parametrize("page", MUNICIPAL_PAGES)
+def test_page_does_not_apply_statbels_cc_by_to_var(page):
+    text = _page(page)
+    assert re.search(
+        r"no standard open-data licence|aucune licence ouverte standard|geen standaard open-datalicentie",
+        text,
+    )
+    assert re.search(
+        r"<em>not</em> under Statbel|<em>non</em> sous la licence CC BY|"
+        r"<em>niet</em> onder Statbels",
+        text,
+    )
+
+
 def _canonical_attribution() -> str:
     """The one wording of the licence notice, from assets/i18n.js.
 

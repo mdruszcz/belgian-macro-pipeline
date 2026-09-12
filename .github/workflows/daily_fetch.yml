@@ -104,6 +104,11 @@ jobs:
         # there is one metadata path. Config only -- no network, no workbook.
         run: python scripts/sync_census2021.py --db data/belgian_macro.db --reference-rows-only
 
+      - name: Ensure Vlaamse Arbeidsrekening reference rows
+        # Observations live in the committed manual store; metadata stays in
+        # the canonical database so every exporter follows one path.
+        run: python scripts/sync_var.py --db data/belgian_macro.db --reference-rows-only
+
       - name: Validate the data before exporting
         # Between sync and export deliberately: a `fail` here stops the run
         # BEFORE anything is written to the published CSVs or committed.
@@ -165,7 +170,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Export the full commune time series (internal, gitignored)
         # Sibling to the snapshot export above: every period per (commune,
@@ -189,7 +195,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Export the committed commune time series (last 10 years)
         # THE FIX ITSELF: the committed data/communes_history.csv repeats
@@ -206,7 +213,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Precompute communes.html's table payload
         # communes.html used to fetch communes_history.csv directly and
@@ -237,7 +245,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
@@ -254,7 +263,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. Reshapes the bulk CSVs

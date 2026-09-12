@@ -166,7 +166,7 @@ COMMUNE_WITH_PARTIAL_DATA = {
 HEADLINES = [
     "POPULATION_BY_COMMUNE",
     "AVG_NET_TAXABLE_INCOME",
-    "UNEMPLOYMENT_RATE_COM",
+    "ADMIN_UNEMPLOYMENT_RATE_COM",
     "MEDIAN_HOUSE_PRICE",
 ]
 
@@ -193,7 +193,7 @@ def test_headlines_report_unavailable_honestly_not_as_a_blank_or_zero():
     # is exactly the same situation as a commune missing any other figure.
     for indicator_id in (
         "AVG_NET_TAXABLE_INCOME",
-        "UNEMPLOYMENT_RATE_COM",
+        "ADMIN_UNEMPLOYMENT_RATE_COM",
         "MEDIAN_HOUSE_PRICE",
     ):
         assert by_label[indicator_id]["available"] is False, indicator_id

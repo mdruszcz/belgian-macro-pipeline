@@ -1,0 +1,21 @@
+id: ADMIN_UNEMPLOYMENT_RATE_COM
+name:
+  en: Administrative unemployment rate (15-64)
+  fr: Taux de chômage administratif (15-64 ans)
+  nl: Administratieve werkloosheidsgraad (15-64 jaar)
+unit: percent
+frequency: A
+source_id: steunpunt_werk
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Unemployed residents aged 15-64 as a percentage of the administrative labour force, published
+    directly by Steunpunt Werk's Vlaamse Arbeidsrekening from the DWH AM&SB - KSZ and BISA.
+    This is an administrative rate, not the survey-based ILO/Eurostat unemployment rate. The
+    source publishes every period on its current 565-municipality grid, including the 2025 merged
+    municipalities; the series therefore follows that source-defined current geography rather
+    than pretending that those boundaries existed in each observation year. Cells based on fewer
+    than four people are suppressed by the publisher and remain suppressed, never zero.
+display: null

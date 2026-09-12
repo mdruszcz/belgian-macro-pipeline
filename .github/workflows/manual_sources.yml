@@ -73,6 +73,11 @@ jobs:
         # there is one metadata path. Config only -- no network, no workbook.
         run: python scripts/sync_census2021.py --db data/belgian_macro.db --reference-rows-only
 
+      - name: Ensure Vlaamse Arbeidsrekening reference rows
+        # Observations live in the committed manual store; metadata stays in
+        # the canonical database so every exporter follows one path.
+        run: python scripts/sync_var.py --db data/belgian_macro.db --reference-rows-only
+
       - name: Validate the manual store rebuilds cleanly
         # Fails loudly if the committed CSV cannot reconstruct a valid database
         # -- a corrupted or hand-edited store must not reach the exports.
@@ -104,21 +109,24 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
             --out data/communes_history_full.csv --all-periods \
             --extra-observations data/population_observations.csv \
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
             --out data/communes_history.csv \
             --extra-observations data/population_observations.csv \
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
           python scripts/export_communes_table_json.py \
             --communes-history data/communes_history_full.csv \
             --out data/communes_table.json \
@@ -138,7 +146,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Export national and regional peer positions
         # Block L -- docs/features/comparison.md. Latest period per indicator
@@ -152,7 +161,8 @@ jobs:
             --extra-observations data/fiscal_income_observations.csv \
             --extra-observations data/census2021_observations.csv \
             --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv
+            --extra-observations data/police_observations.csv \
+            --extra-observations data/var_unemployment_observations.csv
 
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. See daily_fetch.yml for
