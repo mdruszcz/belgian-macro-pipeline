@@ -45,7 +45,9 @@
   (function(){
     try{
       var t = localStorage.getItem('belpulse-theme') || localStorage.getItem('theme');
-      if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      // Light by default -- the design is light; the OS preference applies
+      // only to a reader who explicitly chose 'auto'.
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
       var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
       if(l) document.documentElement.lang = l;
     }catch(e){}

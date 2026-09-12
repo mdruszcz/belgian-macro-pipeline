@@ -295,15 +295,22 @@ def test_a_dark_machine_can_still_be_shown_the_light_design(browser, site):
     in -- on the very page built to match it.
 
     Run in a context that reports a dark operating system, because that is the
-    case where the choice has to win.
+    case where the design has to win.
+
+    The first fix gave the page a switch. It was not enough: a reader who had
+    never touched the switch still fell through to prefers-color-scheme, so
+    the FIRST view of every page on a dark machine was still dark. Light is
+    now the default and `auto` is an explicit choice, which is what the rest
+    of this test walks through.
     """
     context = browser.new_context(color_scheme="dark")
     page = context.new_page()
     try:
         page.goto(f"{site}/about.html", wait_until="load")
         assert page.locator(".bp-theme-toggle button").count() == 3
-        # Nothing overridden yet: the page is showing the OS preference.
-        assert page.evaluate("document.documentElement.getAttribute('data-theme')") is None
+        # Nothing chosen yet, and the machine says dark: the page is light
+        # anyway, because that is the design it was drawn in.
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
 
         page.click('.bp-theme-toggle button[data-theme-choice="light"]')
         assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"

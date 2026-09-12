@@ -62,7 +62,10 @@ SWITCHER_LABEL = {"en": "Language", "fr": "Langue", "nl": "Taal"}
 #:
 #: Three states, and `auto` is not decoration: it REMOVES the override and
 #: hands the page back to the operating system, which is the only way back
-#: once a reader has chosen. The key is `belpulse-theme` -- the same one
+#: once a reader has chosen. `auto` is NOT the default, though: every design
+#: this site is drawn from is light, so a page with no saved choice opens
+#: light whatever the machine prefers. Following the OS by default handed a
+#: reader on a dark laptop a page the design was never drawn in. The key is `belpulse-theme` -- the same one
 #: all_data.html, commune.html and the component gallery already write, so a
 #: choice made anywhere on this site holds everywhere on it.
 THEME_LABEL = {"en": "Theme", "fr": "Thème", "nl": "Thema"}
@@ -77,8 +80,10 @@ THEME_CHOICES = (
 #: cannot promise to run before the stylesheets apply.
 THEME_BOOTSTRAP = (
     "<script>(function(){try{var t=localStorage.getItem('belpulse-theme');"
-    "if(t==='light'||t==='dark')"
-    "document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>"
+    "if(t!=='auto')document.documentElement.setAttribute('data-theme',"
+    "t==='dark'?'dark':'light');"
+    "}catch(e){document.documentElement.setAttribute('data-theme','light');}"
+    "})();</script>"
 )
 
 #: THE SITE'S OWN CHROME -- top bar, breadcrumb, footer.
@@ -472,7 +477,7 @@ def wrap(
         "b=document.querySelectorAll('.bp-theme-toggle button[data-theme-choice]'),"
         "saved=null;try{saved=localStorage.getItem(k);}catch(e){}"
         "b.forEach(function(x){x.setAttribute('aria-pressed',"
-        "String((saved||'auto')===x.getAttribute('data-theme-choice')));"
+        "String((saved||'light')===x.getAttribute('data-theme-choice')));"
         "x.addEventListener('click',function(){"
         "var c=x.getAttribute('data-theme-choice');"
         "if(c==='auto'){document.documentElement.removeAttribute('data-theme');}"
