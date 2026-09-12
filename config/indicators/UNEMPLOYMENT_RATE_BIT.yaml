@@ -1,0 +1,53 @@
+id: UNEMPLOYMENT_RATE_BIT
+name:
+  en: Unemployment rate, ILO definition (15-64)
+  fr: Taux de chômage BIT (15-64 ans)
+  nl: Werkloosheidsgraad IAB-definitie (15-64 jaar)
+unit: percent
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Unemployed as a share of the labour force aged 15-64, on the International Labour
+    Office definition, calibrated by IWEPS on Statbel's Labour Force Survey so the figure
+    is comparable to published EU/Eurostat rates. Source: WalStat (IWEPS), series
+    236400_0, "Taux de chômage BIT pour comparaisons internationales par âge et sexe".
+
+    WALLOON COMMUNES ONLY -- 262 of Belgium's 565. IWEPS publishes the same calibration
+    for Flanders and Brussels on iweps.be, but that site's legal notice restricts reuse to
+    non-commercial purposes, while WalStat's own data are CC0; only the CC0 route is used
+    here (docs/data_catalog.md, "IWEPS: two sites, two licences"). A Flemish or Brussels
+    equivalent needs VDAB/Arvastat and Actiris respectively, which use ADMINISTRATIVE
+    definitions that are not this one and must not be merged into this series.
+
+    NOT INTERCHANGEABLE WITH UNEMPLOYMENT_RATE_COM, despite both being "the unemployment
+    rate, 15-64". Measured on the 262 Walloon communes at 2021, the Census-derived figure
+    is HIGHER IN ALL 262 -- median +2.44 pp, ratio 1.37x -- and at regional level the
+    census counts give Wallonia 12.09% against this series' 9.29%. That gap is
+    structural, not noise: the census records a labour-market situation from the register
+    and the census declaration, while the Labour Force Survey applies the ILO's strict
+    tests (actively sought work in the last four weeks AND available within two), which
+    fewer people meet. THIS series is the one comparable to Eurostat -- it is what
+    "pour comparaisons internationales" in WalStat's own title means, and 9.29% is the
+    order of the published Walloon rate for 2021. The two must never be drawn as one
+    line, and the relationship is pinned by tests/test_unemployment_rate_bit.py so a
+    future load that made them converge would fail rather than pass quietly.
+
+    Neither is the same thing as UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE, which counts
+    benefit claimants rather than applying any survey definition.
+
+    A RATE, SO NOT AGGREGATABLE (docs/decisions/0003): WalStat publishes no labour-force
+    denominator alongside it, so a province or regional figure cannot be recomputed from
+    these rows and none is derived. Published to one decimal, as WalStat rounds it.
+
+    PUBLICATION LAG: IWEPS publishes year Y around December Y+1. The 2024 figures were
+    expected around December 2025 and had not appeared by September 2026, which is why
+    max_age_days is three years rather than the two a normal annual lag would need.
+    Revisit when 2024 lands -- if the allowance is still needed then, the series has a
+    real problem rather than a slow publisher.
+fetch:
+  query: /json/236400_0/com+period=all
+display: null

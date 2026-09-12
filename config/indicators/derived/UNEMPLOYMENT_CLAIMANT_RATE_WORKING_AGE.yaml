@@ -1,0 +1,37 @@
+id: UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE
+name:
+  en: Unemployment benefit claimants (% of residents aged 15-64)
+  fr: Chômeurs complets indemnisés (% des 15-64 ans)
+  nl: Uitkeringsgerechtigde volledig werklozen (% van de 15-64-jarigen)
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+decimals: 1
+description:
+  en: >
+    UNEMPLOYED_JOBSEEKERS over POPULATION_AGE_15_64 -- ONEM's claimant count over
+    Statbel's working-age population. Both are annual and both are current (2017-2026 and
+    2016-2026), for all 565 communes, so this is the pipeline's most up-to-date
+    labour-market ratio and the only one that refreshes on the daily run.
+
+    NOT AN UNEMPLOYMENT RATE, and deliberately not named one. Two differences from the
+    ILO definition behind UNEMPLOYMENT_RATE_BIT and UNEMPLOYMENT_RATE_COM, both of which
+    push this figure DOWN:
+      * the numerator counts people RECEIVING A BENEFIT, so it excludes jobseekers with no
+        entitlement -- school leavers who have never worked, people whose entitlement ran
+        out, and those seeking work while supported by a partner or by social assistance;
+      * the denominator is the whole 15-64 POPULATION, not the labour force, so students,
+        homemakers, the early-retired and the long-term sick are all in it.
+    Expect it to read roughly half of the ILO rate for the same commune. It answers "how
+    many working-age residents here draw an unemployment benefit", which is a real and
+    useful question, not "what is the unemployment rate".
+
+    WHY THE 15-64 DENOMINATOR rather than the whole population, as
+    SHARE_POP_ON_UNEMPLOYMENT_BENEFIT uses: dividing by total population makes a commune
+    with many children or many pensioners look better than one with the same labour
+    market and a different age structure. Neither ratio is the ILO rate, but this one at
+    least varies with the labour market rather than with demography.
+derived:
+  function: share_of_total
+  inputs: [UNEMPLOYED_JOBSEEKERS, POPULATION_AGE_15_64]
