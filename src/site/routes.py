@@ -124,6 +124,15 @@ ROOT_PAGES: tuple[Page, ...] = (
         "the unreleased redesign of local.html, and linked from nowhere. Same "
         "reason as /home.html",
     ),
+    Page(
+        "/profiles.html",
+        False,
+        "the commune-profiles directory: every commune by region, province and "
+        "Belfius socio-economic type, one view per type behind ?type= and "
+        "?family=. A noindexed preview beside communes.html until the "
+        "canonical route switches; communes.html keeps the data table and its "
+        "URL state untouched (rule 31)",
+    ),
 )
 
 #: Routes whose pages must tell crawlers not to index them. The block-built
@@ -133,7 +142,7 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
-NOINDEX_ROUTES = frozenset({"/home2.html", "/macro.html"})
+NOINDEX_ROUTES = frozenset({"/home2.html", "/macro.html", "/profiles.html"})
 
 
 def is_indexable(route: str) -> bool:

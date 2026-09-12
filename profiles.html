@@ -1,0 +1,1056 @@
+<!--
+  BelPulse commune profiles -- the directory page (the "Profils communaux"
+  design supplied 2026-09-12), built on Batch 1's tokens and Batch 2's shared
+  components, to macro.html's and commune.html's standard.
+
+  A PREVIEW ROUTE, noindexed, BESIDE communes.html: communes.html keeps the
+  data table, its filters, its year selector and its URL state untouched
+  (rule 31; docs/steps' Batch 5 note). Open as profiles.html. A type, family,
+  province or region view is this same file with ?type=W14, ?family=rural_w,
+  ?province=be:prov:90000 or ?region=be:reg:04000 -- the pattern
+  commune.html?nis= already set.
+
+  WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Names and the region/province
+  chain come from metadata/geographies.json; the Belfius typology from
+  metadata/typology.json (scripts/export_commune_typology.py); the figures on
+  a commune card are metadata/sections.json's first four HEADLINES, read from
+  indicators/{code}.json. NOT ONE INDICATOR CODE APPEARS IN THIS FILE
+  (tests/test_map_ui_logic.py::test_no_page_names_an_indicator). Every count
+  comes from the geography or manifest.json: the design's "581 communes" is
+  the pre-2019 map, and the page says what the geography says.
+
+  WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY:
+    * "Sélection rapide ... parmi les plus consultées": nothing here measures
+      visits. The six cards are the six communes ranking highest on the first
+      headline indicator, and the caption names that indicator.
+    * "Collections thématiques" (frontalières, étudiantes, touristiques ...):
+      no source here defines any of them, so they are not drawn. The Belfius
+      families and clusters ARE a real classification and take that role.
+    * The design's nine "types" are the Belfius FAMILIES, region by region.
+      Belfius clusters Walloon, Flemish and Brussels communes separately and
+      this page does not merge families across regions.
+    * A commune merged since Belfius classified the map (2019, 2025) from
+      parts in DIFFERENT clusters is shown as "mixed" with its parts, in the
+      view of every cluster it touches, and assigned to none (rule 26).
+    * The photographs are communes/{nis}.webp -- the same file commune.html
+      shows, never a picture of another place.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>BelPulse — Commune profiles</title>
+<meta name="description" content="Every Belgian commune by region, province and socio-economic type, each with its profile of official indicators.">
+
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem('belpulse-theme');
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/commune_map.css">
+<style>
+  /* Page composition only; anything reusable belongs in components.css. */
+  body{background:var(--bp-bg); color:var(--bp-text); margin:0}
+  h1,h2,h3.display,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 var(--bp-space-6)}
+
+  /* ---- top bar (macro.html's composition, so the pages read as one site) ---- */
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%; max-width:1400px}
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .searchbox{
+    display:flex; align-items:center; gap:8px; flex:1; max-width:330px; margin-left:auto;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:7px 12px; background:var(--bp-bg);
+  }
+  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+  .searchbox svg{color:var(--bp-text-faint); flex:none}
+  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
+
+  /* ---- page head + toolbar ---- */
+  .pagehead{padding:var(--bp-space-5) 0 var(--bp-space-4)}
+  .pagehead h1{font-size:2.1rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
+  .pagehead .lead{color:var(--bp-text-muted); margin:0; max-width:70ch; font-size:var(--bp-text-body)}
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    box-shadow:var(--bp-shadow-card); padding:10px; margin:var(--bp-space-4) 0 var(--bp-space-6);
+  }
+  .toolbar .searchbox{margin-left:0; max-width:none; flex:1 1 260px}
+  .toolbar select{
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); background:var(--bp-surface);
+    color:inherit; font:inherit; font-size:var(--bp-text-small); padding:8px 10px; max-width:240px;
+  }
+  .toolbar .bp-btn{font-size:var(--bp-text-small); white-space:nowrap}
+  .bp-btn--dark{background:var(--bp-navy-bg); color:#fff}
+  .bp-btn--red{background:var(--bp-red-signal); color:#fff}
+
+  /* ---- cards and rows ---- */
+  .card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5); min-width:0}
+  .card h2{font-size:1.3rem; margin:0 0 2px}
+  .card .sub{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0 0 var(--bp-space-4)}
+  .row{display:grid; gap:var(--bp-space-5); margin-bottom:var(--bp-space-6); min-width:0}
+  .row-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .row-map{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+  .sechead{display:flex; align-items:baseline; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:var(--bp-space-4)}
+  .sechead h2{font-size:1.4rem; margin:0}
+  .sechead .sub{margin:2px 0 0}
+  .sechead a{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap}
+  .sechead a:hover{text-decoration:underline}
+
+  /* ---- regions and provinces ---- */
+  .regions{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .region{border-radius:var(--bp-radius-control); padding:var(--bp-space-3); min-width:0}
+  .region[data-region="VLA"]{background:color-mix(in srgb, #f3c95a 22%, var(--bp-surface))}
+  .region[data-region="WAL"]{background:color-mix(in srgb, #e5484d 16%, var(--bp-surface))}
+  .region[data-region="BXL"]{background:color-mix(in srgb, #2f6fd6 16%, var(--bp-surface))}
+  .region .rname{display:flex; align-items:center; gap:8px; font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.2}
+  .region .rname .swatch{width:12px; height:12px; border-radius:3px; flex:none}
+  .region .rcount{font-size:12px; color:var(--bp-text-muted); margin:2px 0 8px 20px}
+  .region ul{list-style:none; margin:0; padding:0}
+  .region li a{
+    display:flex; align-items:center; gap:8px; padding:6px 4px; border-top:1px solid var(--bp-border);
+    color:inherit; text-decoration:none; font-size:var(--bp-text-small);
+  }
+  .region li a:hover{color:var(--bp-accent)}
+  .region li a .n{margin-left:auto; font-variant-numeric:tabular-nums; color:var(--bp-text-muted)}
+  .region li a .chev{color:var(--bp-text-faint)}
+
+  /* Region fills on the shared map component's own paths: styling its output,
+     not a second map (rule 29). No setData() is called on this instance, so
+     the class fill is what shows. */
+  .provmap{position:relative; min-height:260px}
+  svg.map path.reg-VLA{fill:#f3c95a}
+  svg.map path.reg-WAL{fill:#e5484d}
+  svg.map path.reg-BXL{fill:#2f6fd6}
+  svg.map path.reg-VLA:hover, svg.map path.reg-WAL:hover, svg.map path.reg-BXL:hover{fill:var(--bp-accent)}
+  .legendcol{display:flex; flex-direction:column; gap:6px; font-size:12px; margin-top:var(--bp-space-3)}
+  .legendcol .it{display:flex; align-items:center; gap:7px; color:var(--bp-text-muted)}
+  .legendcol .it .swatch{width:12px; height:12px; border-radius:3px; flex:none}
+  .legendcol .it b{color:var(--bp-text); margin-left:auto; font-variant-numeric:tabular-nums}
+
+  /* ---- types (families and clusters) ---- */
+  .families{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .family{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:var(--bp-space-3); display:flex; flex-direction:column; gap:6px; min-width:0}
+  .family .fhead{display:flex; gap:9px; align-items:flex-start}
+  .family .ficon{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none}
+  .family .fname{font-weight:var(--bp-weight-semibold); font-size:var(--bp-text-small); line-height:1.25}
+  .family .fregion{font-size:11px; color:var(--bp-text-faint)}
+  .family ul{list-style:none; margin:0; padding:0; font-size:12px}
+  .family li a{display:flex; gap:6px; align-items:baseline; color:inherit; text-decoration:none; padding:3px 0; line-height:1.3}
+  .family li a:hover{color:var(--bp-accent)}
+  .family li a .code{font-variant-numeric:tabular-nums; color:var(--bp-text-faint); flex:none; min-width:2.6em}
+  .family li a .n{margin-left:auto; color:var(--bp-text-muted); font-variant-numeric:tabular-nums; flex:none}
+  .family .fmore{margin-top:auto; font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium)}
+  .family .fmore:hover{text-decoration:underline}
+
+  /* ---- commune cards ---- */
+  .communes{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .communes.list{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ccard{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); overflow:hidden; display:flex; flex-direction:column; min-width:0}
+  .ccard .cphoto{position:relative; aspect-ratio:16/10; background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290)}
+  .ccard .cphoto img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block}
+  .ccard .cbody{padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1}
+  .ccard .cname{font-family:var(--bp-font-display); font-size:1.05rem; font-weight:600; line-height:1.15}
+  .ccard .cwhere{font-size:11px; color:var(--bp-text-muted)}
+  .ccard .cwhere span + span::before{content:' · '}
+  .ccard .cfigs{display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; margin-top:6px}
+  .ccard .cfig{display:flex; align-items:center; gap:6px; font-size:12px; font-variant-numeric:tabular-nums; min-width:0}
+  .ccard .cfig .ficon{width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none}
+  .ccard .cfig b{font-weight:var(--bp-weight-semibold); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .ccard .ctype{font-size:11px; color:var(--bp-text-muted); margin-top:4px; line-height:1.3}
+  .ccard .ctype .badge{display:inline-block; font-size:10px; border-radius:var(--bp-radius-pill); padding:1px 7px; margin-right:4px; background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+  .ccard .ctype .badge.mixed{background:var(--bp-surface-alt); color:var(--bp-text-muted)}
+  .ccard .ctype .badge.none{background:var(--bp-surface-alt); color:var(--bp-text-faint)}
+  .ccard .clink{
+    margin-top:auto; display:flex; justify-content:center; gap:6px; align-items:center;
+    border:1px solid var(--bp-red-signal); color:var(--bp-red-signal); border-radius:var(--bp-radius-control);
+    padding:6px; font-size:12px; text-decoration:none; font-weight:var(--bp-weight-medium);
+  }
+  .ccard .clink:hover{background:var(--bp-red-signal); color:#fff}
+
+  /* ---- explore on the map ---- */
+  .explore{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:var(--bp-space-5); align-items:center}
+  .explore h3{font-family:var(--bp-font-display); font-size:1.25rem; margin:0 0 var(--bp-space-3); font-weight:600}
+  .explore p{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); line-height:1.6}
+  .explore .mapbox{position:relative; min-height:280px}
+  .explore .legend{overflow-x:auto; margin-top:8px}
+  .typo-note{font-size:12px; color:var(--bp-text-muted); line-height:1.55}
+  .typo-counts{display:flex; gap:var(--bp-space-4); flex-wrap:wrap; margin:var(--bp-space-3) 0}
+  .typo-counts b{display:block; font-family:var(--bp-font-display); font-size:1.4rem; font-weight:600}
+  .typo-counts span{font-size:11px; color:var(--bp-text-muted)}
+
+  /* ---- list view ---- */
+  .listhead{padding:var(--bp-space-5) 0 var(--bp-space-4)}
+  .listhead .back{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none}
+  .listhead h1{font-size:1.9rem; margin:var(--bp-space-2) 0 4px; line-height:1.15}
+  .listhead .sub{color:var(--bp-text-muted); font-size:var(--bp-text-small); margin:0}
+  .listhead .note{font-size:12px; color:var(--bp-text-faint); margin:var(--bp-space-2) 0 0; max-width:80ch}
+  .mixed{margin-top:var(--bp-space-6)}
+  .mixed h2{font-size:1.15rem; margin:0 0 4px}
+  .mixed .why{font-size:12px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); max-width:80ch}
+  .empty{font-size:var(--bp-text-small); color:var(--bp-text-muted); padding:var(--bp-space-6) 0}
+
+  /* ---- CTA + footer ---- */
+  .cta{
+    margin-top:var(--bp-space-8); color:#fff;
+    background:radial-gradient(900px 400px at 78% 20%, rgba(70,110,175,.4), transparent 60%),
+               linear-gradient(135deg,#0b1730,#14284c 60%,#0c1c38);
+  }
+  .cta .wrap{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--bp-space-8); align-items:center; padding:var(--bp-space-8) var(--bp-space-6)}
+  .cta h2{font-size:1.7rem; margin:0 0 var(--bp-space-2); max-width:20ch}
+  .cta p{color:rgba(255,255,255,.72); margin:0; max-width:42ch; font-size:var(--bp-text-small)}
+  .cta-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap}
+  .cta .bp-btn--outline{border-color:rgba(255,255,255,.32); color:#fff; background:rgba(255,255,255,.06)}
+  .cta-stats{display:flex; gap:var(--bp-space-6)}
+  .cta-stats b{display:block; font-family:var(--bp-font-display); font-size:1.5rem; font-weight:600}
+  .cta-stats span{font-size:11px; color:rgba(255,255,255,.66)}
+
+  .foot{background:var(--bp-surface); border-top:1px solid var(--bp-border)}
+  .foot .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; padding-top:var(--bp-space-6); padding-bottom:var(--bp-space-6)}
+  .foot nav{display:flex; gap:var(--bp-space-5); flex-wrap:wrap}
+  .foot a{font-size:var(--bp-text-small); color:var(--bp-text-muted); text-decoration:none}
+  .foot a:hover{color:var(--bp-text)}
+  .foot-script{font-family:var(--bp-font-decorative); font-size:.95rem; color:var(--bp-text-muted); display:flex; align-items:center; gap:8px; margin-left:auto}
+  .flagbar{display:inline-flex; height:11px; width:26px; border-radius:2px; overflow:hidden; flex:none}
+  .flagbar i{flex:1}
+  .flagbar i:nth-child(1){background:#000}
+  .flagbar i:nth-child(2){background:#fdda24}
+  .flagbar i:nth-child(3){background:#ef3340}
+
+  .attribution{padding:var(--bp-space-6) 0; font-size:11px; line-height:1.6; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border)}
+  .attribution strong{color:var(--bp-text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+
+  @media (max-width:1080px){
+    .communes{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .communes.list{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .row-2,.row-map,.explore{grid-template-columns:minmax(0,1fr)}
+    .cta .wrap{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:768px){
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
+    .bp-nav a{white-space:nowrap}
+    .searchbox{max-width:none; margin-left:0; order:2; flex:1}
+    .regions,.families{grid-template-columns:minmax(0,1fr)}
+    .communes,.communes.list{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cta-stats{flex-wrap:wrap; gap:var(--bp-space-5)}
+  }
+  @media (max-width:480px){ .communes,.communes.list{grid-template-columns:minmax(0,1fr)} }
+</style>
+</head>
+<body class="bp-shell">
+
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span>
+        <span class="bp-wordmark">BelPulse</span>
+        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
+      </span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home2.html" data-t="navHome">Home</a>
+      <a href="profiles.html" aria-current="page" data-t="navCommunes">Commune profiles</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
+      <a href="all_data.html" data-t="navMicro">Micro</a>
+      <a href="map.html" data-t="navMaps">Maps</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+    </nav>
+    <label class="searchbox">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+      <datalist id="communeList"></datalist>
+    </label>
+    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
+      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
+    </select>
+  </div>
+</header>
+
+<nav class="bp-breadcrumb" aria-label="Breadcrumb">
+  <div class="wrap">
+    <a href="home2.html" data-t="navHome">Home</a><span class="sep">/</span>
+    <a href="profiles.html" data-t="navCommunes">Commune profiles</a><span class="sep" id="crumbSep" hidden>/</span>
+    <span id="crumbView" hidden></span>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+    <!-- ── the directory ────────────────────────────────────────────────── -->
+    <section id="viewDirectory">
+      <div class="pagehead">
+        <h1 id="pfTitle">—</h1>
+        <p class="lead" id="pfLead"></p>
+      </div>
+
+      <div class="toolbar">
+        <label class="searchbox">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="pfSearch" list="communeList" type="text" data-t-placeholder="pfSearchPlaceholder" placeholder="Search for a commune…" autocomplete="off">
+        </label>
+        <select id="pickRegion" data-t-aria="pfRegion" aria-label="Region"></select>
+        <select id="pickProvince" data-t-aria="pfProvince" aria-label="Province"></select>
+        <select id="pickType" data-t-aria="pfType" aria-label="Type of commune"></select>
+        <a class="bp-btn bp-btn--outline" href="communes.html" data-t="cpCompare">Compare</a>
+        <a class="bp-btn bp-btn--red" href="map.html" data-t="pfExploreMap">Explore the map</a>
+        <a class="bp-btn bp-btn--dark" id="exampleLink" href="commune.html" data-t="pfExampleProfile">See an example profile</a>
+      </div>
+
+      <div class="row row-2">
+        <div class="card">
+          <h2 data-t="pfByRegion">By region and province</h2>
+          <p class="sub" data-t="pfByRegionSub">Select a region, then a province, to explore its communes.</p>
+          <div class="regions" id="regions"></div>
+        </div>
+        <div class="card">
+          <h2 data-t="pfByType">By type of commune</h2>
+          <p class="sub" id="byTypeSub"></p>
+          <div class="families" id="families"></div>
+        </div>
+      </div>
+
+      <div class="row row-map">
+        <div class="card">
+          <h2 data-t="pfProvincesMap">The provinces of Belgium</h2>
+          <p class="sub" data-t="pfProvincesMapSub">Click a commune to open its province.</p>
+          <div class="provmap" id="provBox">
+            <svg id="provSvg" role="img" aria-label="Map of Belgium by region"></svg>
+            <div class="tip" id="provTip" hidden></div>
+          </div>
+          <div class="legendcol" id="provLegend"></div>
+          <div style="text-align:right; margin-top:var(--bp-space-3)"><a href="map.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none"><span data-t="pfSeeInteractiveMap">See the interactive map</span> →</a></div>
+        </div>
+        <div class="card">
+          <h2 data-t="pfTypology">Belfius typology</h2>
+          <p class="typo-note" data-t="pfTypologyNote">Classification: Belfius Banque &amp; Assurances, socio-economic typology of municipalities (cluster composition, on the commune map before the 2019 mergers). Cluster labels in the other two languages are BelPulse’s unofficial translations.</p>
+          <div class="typo-counts" id="typoCounts"></div>
+          <p class="typo-note" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
+        </div>
+      </div>
+
+      <section style="margin-bottom:var(--bp-space-6)">
+        <div class="sechead">
+          <div><h2 data-t="pfQuickPick">Six communes to start with</h2><p class="sub" id="quickSub"></p></div>
+          <a href="communes.html"><span data-t="pfSeeAll">See all communes</span> →</a>
+        </div>
+        <div class="communes" id="quickGrid"></div>
+      </section>
+
+      <div class="card" style="margin-bottom:var(--bp-space-6)">
+        <div class="sechead" style="margin-bottom:var(--bp-space-3)"><h2 data-t="pfExploreOnMap">Explore on the map</h2></div>
+        <div class="explore">
+          <div>
+            <h3 id="exploreTitle">—</h3>
+            <p data-t="pfExploreOnMapLead">Navigate the interactive map to explore every commune and read its main indicators. Zoom, click and compare territories at a glance.</p>
+            <a class="bp-btn bp-btn--red" href="map.html"><span data-t="pfOpenMap">Open the commune map</span> →</a>
+            <p class="typo-note" id="mapProvenance" style="margin-top:var(--bp-space-3)"></p>
+          </div>
+          <div class="bp-state" id="mapCard" data-state="loading">
+            <div class="mapbox" id="mapbox">
+              <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+              <div class="tip" id="tip" hidden></div>
+            </div>
+            <div class="legend">
+              <div class="swatches" id="swatches"></div>
+              <div class="ticks" id="ticks"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── one type / family / province / region ───────────────────────── -->
+    <section id="viewList" hidden>
+      <div class="listhead">
+        <a class="back" href="profiles.html">← <span data-t="pfBackToAll">All commune profiles</span></a>
+        <h1 id="listTitle">—</h1>
+        <p class="sub" id="listSub"></p>
+        <p class="note" id="listNote" hidden></p>
+      </div>
+      <div class="communes list" id="listGrid"></div>
+      <p class="empty" id="listEmpty" hidden></p>
+      <section class="mixed" id="mixedSection" hidden>
+        <h2 data-t="pfMixed">Merged communes whose parts sat in different clusters</h2>
+        <p class="why" data-t="pfMixedWhy">Belfius classified the communes as they were before the 2019 and 2025 mergers. A commune formed from parts that sat in different clusters is assigned to none of them; its parts are listed instead.</p>
+        <div class="communes list" id="mixedGrid"></div>
+      </section>
+    </section>
+  </div>
+
+  <section class="cta">
+    <div class="wrap">
+      <div>
+        <h2 id="ctaTitle">—</h2>
+        <p data-t="pfCtaLead">Reliable, comparable data to understand the realities of your territory.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="bp-btn bp-btn--red" href="communes.html"><span data-t="pfCtaStart">Start exploring</span> →</a>
+        <a class="bp-btn bp-btn--outline" href="about.html" data-t="pfCtaAbout">Learn more about BelPulse</a>
+      </div>
+      <div class="cta-stats">
+        <div><b id="statCommunes">—</b><span data-t="cpStatCovered">communes covered</span></div>
+        <div><b id="statIndicators">—</b><span data-t="cpStatIndicators">indicators</span></div>
+        <div><b>↻</b><span data-t="pfStatAuto">Automatic updates</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
+    </a>
+    <nav>
+      <a href="about.html" data-t="homeFooterAbout">About</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+      <a href="about.html" data-t="homeFooterSources">Sources</a>
+      <a href="about.html" data-t="homeFooterContact">Contact</a>
+    </nav>
+    <span class="foot-script">
+      <span class="flagbar"><i></i><i></i><i></i></span>
+      <span data-t="homeFooterScript">Data shared for a stronger Belgium.</span>
+    </span>
+  </div>
+</footer>
+
+<!-- The licence notice. This page publishes municipal (Statbel-derived)
+     figures on every commune card, so it carries the same conditions as
+     communes.html, local.html, map.html and commune.html, and is listed
+     alongside them in tests/test_statbel_attribution.py. English stays in the
+     markup so a reader whose JavaScript never runs still gets the complete
+     notice. -->
+<div class="attribution" id="attribution">
+  <div class="wrap">
+  <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+  (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+  1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+  document already recorded in <code>docs/licences/</code>.
+  <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+  communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+  a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+  longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+  are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+  <br><br>
+  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+  <!-- values-attribution:end --></span>
+  <br><br>
+  <span><strong>Classification:</strong> Belfius Banque &amp; Assurances, socio-economic typology of Belgian municipalities (cluster composition; Wallonie in French, Vlaanderen and Brussel in Dutch), transcribed from the published composition and resolved onto today's communes across the 2019 and 2025 mergers. Cluster labels in the two other languages are BelPulse's unofficial translations. Belfius does not endorse this product or how its typology is used here.</span>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* BelPulse commune profiles -- the directory and its per-type views.
+ *
+ * Config-driven throughout: the region/province tree is metadata/geographies.json,
+ * the typology is metadata/typology.json, the four figures on a card are
+ * metadata/sections.json's headlines. This script knows about regions,
+ * provinces, families, clusters and cards -- never about a particular
+ * indicator or a particular commune.
+ */
+(function(){
+  'use strict';
+
+  var GEO_URL        = 'data/geo/communes.geojson';
+  var GEOGRAPHIES_URL= 'public/data/metadata/geographies.json';
+  var TYPOLOGY_URL   = 'public/data/metadata/typology.json';
+  var INDEX_URL      = 'public/data/metadata/indicators.json';
+  var SECTIONS_URL   = 'public/data/metadata/sections.json';
+  var SOURCES_URL    = 'public/data/metadata/sources.json';
+  var MANIFEST_URL   = 'public/data/manifest.json';
+  var VALUES_URL     = function(code){ return 'public/data/indicators/' + code + '.json'; };
+  var PHOTO_URL      = function(nis){ return 'communes/' + nis + '.webp'; };
+  var PROFILE_URL    = function(nis){ return 'commune.html?nis=' + nis; };
+
+  var REGION_CODE = {'be:reg:02000': 'VLA', 'be:reg:03000': 'WAL', 'be:reg:04000': 'BXL'};
+  var REGION_COLOUR = {VLA: '#f3c95a', WAL: '#e5484d', BXL: '#2f6fd6'};
+  var CARD_FIGURES = 4;
+  var QUICK_PICK = 6;
+
+  var LANG = I18N.initial();
+  var T = function(k, v){ return I18N.t(LANG, k, v); };
+
+  var state = {
+    geographies: {}, municipalities: [], typology: null, byCode: {}, headlines: [],
+    values: {}, sources: {}, manifest: {}, geojson: null, provMap: null, map: null,
+    view: null,
+  };
+
+  /* ---- helpers ---------------------------------------------------------- */
+  function qs(name){
+    var m = new RegExp('[?&]' + name + '=([^&#]*)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  function text(obj){
+    if(!obj) return '';
+    if(typeof obj === 'string') return obj;
+    return obj[LANG] || obj.en || '';
+  }
+  function nameOfGeo(geo){ return geo ? text(geo.name) : ''; }
+  function nameOfCode(code){
+    var r = state.byCode[code];
+    return (r && r.names && (r.names[LANG] || r.names.en)) || code;
+  }
+  function levelOf(geo, level){
+    while(geo && geo.level !== level) geo = state.geographies[geo.parent_geo_id];
+    return geo || null;
+  }
+  function regionCodeOf(geo){
+    var reg = levelOf(geo, 'region');
+    return reg ? REGION_CODE[reg.geo_id] : null;
+  }
+  function byName(a, b){ return nameOfGeo(a).localeCompare(nameOfGeo(b), LANG); }
+  function fmt(v, meta){ return MapUI.formatValue(v, meta.unit, meta.decimals, LANG); }
+  function el(tag, cls, txt){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  function tint(i){
+    return {bg: 'color-mix(in srgb, var(--bp-chart-' + ((i % 8) + 1) + ') 14%, transparent)',
+            ink: 'var(--bp-chart-' + ((i % 8) + 1) + ')'};
+  }
+  var ICONS = [
+    '<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    '<path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/>',
+    '<path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/>',
+    '<rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/>',
+    '<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    '<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>',
+    '<path d="M4 15l4-4 4 3 8-8"/><path d="M4 20h16"/>',
+  ];
+  function icon(i, size){
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>';
+  }
+
+  function applyStrings(){
+    document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent = T(e.dataset.t); });
+    document.querySelectorAll('[data-t-html]').forEach(function(e){ e.innerHTML = T(e.dataset.tHtml); });
+    document.querySelectorAll('[data-t-aria]').forEach(function(e){ e.setAttribute('aria-label', T(e.dataset.tAria)); });
+    document.querySelectorAll('[data-t-placeholder]').forEach(function(e){ e.placeholder = T(e.dataset.tPlaceholder); });
+    var u = document.getElementById('attrUpdated');
+    if(u && state.attrUpdated) u.textContent = state.attrUpdated;
+    document.documentElement.setAttribute('lang', LANG);
+    document.getElementById('langPick').value = LANG;
+  }
+
+  /* ---- the typology, read-only ------------------------------------------ */
+  function typologyOf(nis){
+    var t = state.typology;
+    return (t && t.communes[nis]) || {status: 'unclassified'};
+  }
+  function clusterLabel(code){
+    var c = state.typology && state.typology.clusters[code];
+    return c ? text(c.label) : code;
+  }
+  function familyLabel(id){
+    var f = state.typology && state.typology.families[id];
+    return f ? text(f.label) : id;
+  }
+  function regionName(code){
+    var geoId = Object.keys(REGION_CODE).filter(function(k){ return REGION_CODE[k] === code; })[0];
+    return nameOfGeo(state.geographies[geoId]);
+  }
+
+  /* ---- a commune card ---------------------------------------------------- */
+  function card(geo){
+    var nis = geo.nis_code;
+    var c = el('article', 'ccard');
+    var photo = el('div', 'cphoto');
+    var img = document.createElement('img');
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onerror = function(){ img.remove(); };
+    img.src = PHOTO_URL(nis);
+    photo.appendChild(img);
+    c.appendChild(photo);
+
+    var body = el('div', 'cbody');
+    body.appendChild(el('div', 'cname', nameOfGeo(geo)));
+    var where = el('div', 'cwhere');
+    var reg = levelOf(geo, 'region'), prov = levelOf(geo, 'province');
+    if(reg) where.appendChild(el('span', '', nameOfGeo(reg)));
+    if(prov) where.appendChild(el('span', '', nameOfGeo(prov)));
+    body.appendChild(where);
+
+    var figs = el('div', 'cfigs');
+    state.headlines.slice(0, CARD_FIGURES).forEach(function(code, i){
+      var meta = state.byCode[code];
+      var payload = state.values[code];
+      var cell = payload && payload.communes && payload.communes[nis];
+      var f = el('div', 'cfig');
+      var ic = el('span', 'ficon');
+      var tt = tint(i);
+      ic.style.background = tt.bg; ic.style.color = tt.ink;
+      ic.innerHTML = icon(i, 12);
+      f.appendChild(ic);
+      var b = el('b');
+      if(cell && typeof cell.value === 'number'){
+        b.textContent = fmt(cell.value, meta);
+        f.title = nameOfCode(code) + ' · ' + cell.period;
+      }else{
+        b.textContent = '—';
+        f.title = nameOfCode(code) + ' · ' + (cell && cell.status ? MapUI.text(LANG, 'status_' + cell.status) : T('mapNoData'));
+      }
+      f.appendChild(b);
+      figs.appendChild(f);
+    });
+    body.appendChild(figs);
+
+    var typ = typologyOf(nis);
+    var line = el('div', 'ctype');
+    if(typ.status === 'classified'){
+      var badge = el('span', 'badge', typ.cluster);
+      line.appendChild(badge);
+      line.appendChild(document.createTextNode(clusterLabel(typ.cluster)));
+    }else if(typ.status === 'mixed'){
+      line.appendChild(el('span', 'badge mixed', T('pfMixedBadge')));
+      line.appendChild(document.createTextNode(T('pfFormerly') + ' ' + typ.parts.map(function(p){
+        return text(p.name) + ' (' + p.cluster + ')';
+      }).join(' + ')));
+    }else{
+      line.appendChild(el('span', 'badge none', T('pfUnclassified')));
+    }
+    body.appendChild(line);
+
+    var link = document.createElement('a');
+    link.className = 'clink';
+    link.href = PROFILE_URL(nis);
+    link.innerHTML = '<span></span> →';
+    link.querySelector('span').textContent = T('pfSeeProfile');
+    body.appendChild(link);
+    c.appendChild(body);
+    return c;
+  }
+
+  /* ---- directory: regions and provinces --------------------------------- */
+  function provincesOf(regionGeoId){
+    var seen = {}, out = [];
+    state.municipalities.forEach(function(m){
+      var reg = levelOf(m, 'region');
+      if(!reg || reg.geo_id !== regionGeoId) return;
+      var prov = levelOf(m, 'province');
+      var key = prov ? prov.geo_id : reg.geo_id;
+      if(!seen[key]){ seen[key] = {geo: prov || reg, count: 0, isRegion: !prov}; out.push(seen[key]); }
+      seen[key].count += 1;
+    });
+    return out.sort(function(a, b){ return byName(a.geo, b.geo); });
+  }
+  function renderRegions(){
+    var host = document.getElementById('regions');
+    host.innerHTML = '';
+    Object.keys(REGION_CODE).forEach(function(geoId){
+      var reg = state.geographies[geoId];
+      if(!reg) return;
+      var code = REGION_CODE[geoId];
+      var provinces = provincesOf(geoId);
+      var total = provinces.reduce(function(s, p){ return s + p.count; }, 0);
+      var box = el('div', 'region');
+      box.dataset.region = code;
+      var name = el('div', 'rname');
+      var sw = el('span', 'swatch'); sw.style.background = REGION_COLOUR[code];
+      name.appendChild(sw);
+      name.appendChild(document.createTextNode(nameOfGeo(reg)));
+      box.appendChild(name);
+      box.appendChild(el('div', 'rcount', T('pfCommunesCount', {n: total.toLocaleString(LANG)})));
+      var ul = el('ul');
+      provinces.forEach(function(p){
+        var li = el('li');
+        var a = document.createElement('a');
+        a.href = p.isRegion ? 'profiles.html?region=' + encodeURIComponent(p.geo.geo_id)
+                            : 'profiles.html?province=' + encodeURIComponent(p.geo.geo_id);
+        a.appendChild(el('span', '', nameOfGeo(p.geo)));
+        a.appendChild(el('span', 'n', String(p.count)));
+        a.appendChild(el('span', 'chev', '›'));
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      host.appendChild(box);
+    });
+  }
+
+  /* ---- directory: families and clusters --------------------------------- */
+  function renderFamilies(){
+    var host = document.getElementById('families');
+    host.innerHTML = '';
+    var t = state.typology;
+    document.getElementById('byTypeSub').textContent =
+      t ? T('pfByTypeSub', {n: Object.keys(t.clusters).length}) : T('pfNoTypology');
+    if(!t) return;
+    var i = 0;
+    ['VLA', 'WAL', 'BXL'].forEach(function(region){
+      Object.keys(t.families).forEach(function(fid){
+        var fam = t.families[fid];
+        if(fam.region !== region) return;
+        var box = el('div', 'family');
+        var head = el('div', 'fhead');
+        var ic = el('span', 'ficon');
+        var tt = tint(i);
+        ic.style.background = tt.bg; ic.style.color = tt.ink;
+        ic.innerHTML = icon(i, 16);
+        head.appendChild(ic);
+        var names = el('div');
+        names.appendChild(el('div', 'fname', text(fam.label)));
+        var total = fam.clusters.reduce(function(s, c){ return s + t.clusters[c].members.length; }, 0);
+        names.appendChild(el('div', 'fregion', regionName(region) + ' · ' + T('pfCommunesCount', {n: total})));
+        head.appendChild(names);
+        box.appendChild(head);
+        var ul = el('ul');
+        fam.clusters.forEach(function(code){
+          var li = el('li');
+          var a = document.createElement('a');
+          a.href = 'profiles.html?type=' + encodeURIComponent(code);
+          a.appendChild(el('span', 'code', code));
+          a.appendChild(el('span', '', clusterLabel(code)));
+          a.appendChild(el('span', 'n', String(t.clusters[code].members.length)));
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+        box.appendChild(ul);
+        var more = document.createElement('a');
+        more.className = 'fmore';
+        more.href = 'profiles.html?family=' + encodeURIComponent(fid);
+        more.textContent = T('pfSeeCommunes') + ' →';
+        box.appendChild(more);
+        host.appendChild(box);
+        i += 1;
+      });
+    });
+    var counts = document.getElementById('typoCounts');
+    counts.innerHTML = '';
+    [['classified', 'pfCluster'], ['mixed', 'pfMixedBadge'], ['unclassified', 'pfUnclassified']].forEach(function(pair){
+      var d = el('div');
+      d.appendChild(el('b', '', String(t.counts[pair[0]])));
+      d.appendChild(el('span', '', T(pair[1])));
+      counts.appendChild(d);
+    });
+  }
+
+  /* ---- directory: the pickers -------------------------------------------- */
+  function renderPickers(){
+    var region = document.getElementById('pickRegion');
+    var province = document.getElementById('pickProvince');
+    var type = document.getElementById('pickType');
+    [region, province, type].forEach(function(s){ s.innerHTML = ''; });
+    var o = document.createElement('option'); o.value = ''; o.textContent = T('pfRegion'); region.appendChild(o);
+    o = document.createElement('option'); o.value = ''; o.textContent = T('pfProvince'); province.appendChild(o);
+    o = document.createElement('option'); o.value = ''; o.textContent = T('pfType'); type.appendChild(o);
+    Object.keys(REGION_CODE).forEach(function(geoId){
+      var reg = state.geographies[geoId];
+      if(!reg) return;
+      var opt = document.createElement('option');
+      opt.value = 'region=' + encodeURIComponent(geoId);
+      opt.textContent = nameOfGeo(reg);
+      region.appendChild(opt);
+      provincesOf(geoId).forEach(function(p){
+        if(p.isRegion) return;
+        var po = document.createElement('option');
+        po.value = 'province=' + encodeURIComponent(p.geo.geo_id);
+        po.textContent = nameOfGeo(p.geo);
+        province.appendChild(po);
+      });
+    });
+    var t = state.typology;
+    if(t){
+      ['VLA', 'WAL', 'BXL'].forEach(function(rc){
+        Object.keys(t.families).forEach(function(fid){
+          var fam = t.families[fid];
+          if(fam.region !== rc) return;
+          var group = document.createElement('optgroup');
+          group.label = regionName(rc) + ' — ' + text(fam.label);
+          fam.clusters.forEach(function(code){
+            var co = document.createElement('option');
+            co.value = 'type=' + encodeURIComponent(code);
+            co.textContent = code + ' · ' + clusterLabel(code);
+            group.appendChild(co);
+          });
+          type.appendChild(group);
+        });
+      });
+    }
+    [region, province, type].forEach(function(s){
+      s.onchange = function(){ if(s.value) window.location.search = '?' + s.value; };
+    });
+  }
+
+  /* ---- directory: six communes to start with ----------------------------- */
+  function renderQuickPick(){
+    var host = document.getElementById('quickGrid');
+    host.innerHTML = '';
+    var code = state.headlines[0];
+    var payload = code && state.values[code];
+    var sub = document.getElementById('quickSub');
+    if(!payload || !payload.communes){ sub.textContent = T('mapNoData'); return; }
+    sub.textContent = T('pfQuickPickSub', {indicator: nameOfCode(code)});
+    var ranked = state.municipalities.filter(function(m){
+      var cell = payload.communes[m.nis_code];
+      return cell && typeof cell.value === 'number';
+    }).sort(function(a, b){
+      return payload.communes[b.nis_code].value - payload.communes[a.nis_code].value;
+    }).slice(0, QUICK_PICK);
+    ranked.forEach(function(m){ host.appendChild(card(m)); });
+    if(ranked.length) document.getElementById('exampleLink').href = PROFILE_URL(ranked[0].nis_code);
+  }
+
+  /* ---- directory: the two maps ------------------------------------------- */
+  function renderProvinceMap(){
+    if(!state.geojson) return;
+    if(!state.provMap){
+      state.provMap = new MapUI.CommuneMap({
+        svg: document.getElementById('provSvg'),
+        mapbox: document.getElementById('provBox'),
+        tip: document.getElementById('provTip'),
+      }, {
+        lang: LANG,
+        onSelect: function(nis){
+          var geo = state.municipalities.filter(function(m){ return m.nis_code === nis; })[0];
+          if(!geo) return;
+          var prov = levelOf(geo, 'province'), reg = levelOf(geo, 'region');
+          window.location.search = prov ? '?province=' + encodeURIComponent(prov.geo_id)
+                                        : '?region=' + encodeURIComponent(reg.geo_id);
+        },
+      }).build(state.geojson);
+    }else{
+      state.provMap.setLang(LANG);
+    }
+    var svg = document.getElementById('provSvg');
+    state.municipalities.forEach(function(m){
+      var path = svg.querySelector('path[data-nis="' + m.nis_code + '"]');
+      var code = regionCodeOf(m);
+      if(path && code) path.classList.add('reg-' + code);
+    });
+    var legend = document.getElementById('provLegend');
+    legend.innerHTML = '';
+    Object.keys(REGION_CODE).forEach(function(geoId){
+      var code = REGION_CODE[geoId];
+      var n = provincesOf(geoId).reduce(function(s, p){ return s + p.count; }, 0);
+      var it = el('div', 'it');
+      var sw = el('span', 'swatch'); sw.style.background = REGION_COLOUR[code];
+      it.appendChild(sw);
+      it.appendChild(el('span', '', nameOfGeo(state.geographies[geoId])));
+      it.appendChild(el('b', '', T('pfCommunesCount', {n: n})));
+      legend.appendChild(it);
+    });
+  }
+
+  function renderExploreMap(){
+    var code = state.headlines[0];
+    var meta = state.byCode[code];
+    var payload = code && state.values[code];
+    var cardEl = document.getElementById('mapCard');
+    document.getElementById('exploreTitle').textContent =
+      T('pfExploreOnMapTitle', {n: state.municipalities.length.toLocaleString(LANG)});
+    if(!state.geojson || !meta || !payload){ cardEl.dataset.state = 'unavailable'; return; }
+    if(!state.map){
+      state.map = new MapUI.CommuneMap({
+        svg: document.getElementById('svg'),
+        tip: document.getElementById('tip'),
+        mapbox: document.getElementById('mapbox'),
+        swatches: document.getElementById('swatches'),
+        ticks: document.getElementById('ticks'),
+      }, {
+        lang: LANG,
+        onSelect: function(nis){ window.location.href = PROFILE_URL(nis); },
+      }).build(state.geojson);
+    }else{
+      state.map.setLang(LANG);
+    }
+    cardEl.dataset.state = 'ready';
+    state.map.setData(payload.communes || {}, {unit: meta.unit, decimals: meta.decimals, direction: meta.direction});
+    var bits = [nameOfCode(code)];
+    var src = meta.source ? state.sources[meta.source] : null;
+    if(src) bits.push(src.label ? (src.label[LANG] || src.label.en) : meta.source);
+    if(meta.updated) bits.push(T('retrieved') + ' ' + meta.updated);
+    document.getElementById('mapProvenance').textContent = bits.join(' · ');
+  }
+
+  /* ---- the list view ----------------------------------------------------- */
+  function selection(){
+    var type = qs('type'), family = qs('family'), province = qs('province'), region = qs('region');
+    var t = state.typology;
+    if(type && t && t.clusters[type]){
+      var cl = t.clusters[type];
+      return {
+        kind: 'type', title: type + ' — ' + text(cl.label),
+        sub: familyLabel(cl.family) + ' · ' + regionName(cl.region),
+        note: T('pfTypologyNote'),
+        members: cl.members, mixed: cl.mixed_parts,
+      };
+    }
+    if(family && t && t.families[family]){
+      var fam = t.families[family];
+      var members = [], mixed = [];
+      fam.clusters.forEach(function(c){ members = members.concat(t.clusters[c].members); mixed = mixed.concat(t.clusters[c].mixed_parts); });
+      return {
+        kind: 'family', title: text(fam.label),
+        sub: regionName(fam.region) + ' · ' + T('pfClustersCount', {n: fam.clusters.length}),
+        note: T('pfTypologyNote'),
+        members: members, mixed: mixed.filter(function(n, i){ return mixed.indexOf(n) === i; }),
+      };
+    }
+    if(province && state.geographies[province]){
+      var pg = state.geographies[province];
+      return {
+        kind: 'province', title: nameOfGeo(pg), sub: nameOfGeo(levelOf(pg, 'region')),
+        members: state.municipalities.filter(function(m){ var p = levelOf(m, 'province'); return p && p.geo_id === province; })
+                   .map(function(m){ return m.nis_code; }),
+        mixed: [],
+      };
+    }
+    if(region && state.geographies[region]){
+      var rg = state.geographies[region];
+      return {
+        kind: 'region', title: nameOfGeo(rg), sub: '',
+        members: state.municipalities.filter(function(m){ var r = levelOf(m, 'region'); return r && r.geo_id === region; })
+                   .map(function(m){ return m.nis_code; }),
+        mixed: [],
+      };
+    }
+    return null;
+  }
+
+  function renderList(sel){
+    var byNis = {};
+    state.municipalities.forEach(function(m){ byNis[m.nis_code] = m; });
+    document.getElementById('crumbSep').hidden = false;
+    var crumb = document.getElementById('crumbView');
+    crumb.hidden = false;
+    crumb.textContent = sel.title;
+    document.title = 'BelPulse — ' + T('navCommunes') + ' — ' + sel.title;
+    document.getElementById('listTitle').textContent = sel.title;
+    var members = sel.members.map(function(n){ return byNis[n]; }).filter(Boolean).sort(byName);
+    document.getElementById('listSub').textContent =
+      [sel.sub, T('pfResults', {n: members.length})].filter(Boolean).join(' · ');
+    var note = document.getElementById('listNote');
+    note.hidden = !sel.note;
+    note.textContent = sel.note || '';
+    var grid = document.getElementById('listGrid');
+    grid.innerHTML = '';
+    members.forEach(function(m){ grid.appendChild(card(m)); });
+    var empty = document.getElementById('listEmpty');
+    empty.hidden = members.length > 0;
+    empty.textContent = T('mapNoData');
+    var mixedSection = document.getElementById('mixedSection');
+    var mixed = sel.mixed.map(function(n){ return byNis[n]; }).filter(Boolean).sort(byName);
+    mixedSection.hidden = !mixed.length;
+    var mg = document.getElementById('mixedGrid');
+    mg.innerHTML = '';
+    mixed.forEach(function(m){ mg.appendChild(card(m)); });
+  }
+
+  /* ---- search, counts ---------------------------------------------------- */
+  function renderSearch(){
+    var list = document.getElementById('communeList');
+    list.innerHTML = '';
+    state.municipalities.slice().sort(byName).forEach(function(m){
+      var o = document.createElement('option');
+      o.value = nameOfGeo(m) + ' (' + m.nis_code + ')';
+      list.appendChild(o);
+    });
+    ['communeSearch', 'pfSearch'].forEach(function(id){
+      var input = document.getElementById(id);
+      if(!input || input.dataset.wired) return;
+      input.dataset.wired = '1';
+      input.addEventListener('change', function(){
+        var m = /\((\d{5})\)\s*$/.exec(input.value);
+        if(m) window.location.href = PROFILE_URL(m[1]);
+      });
+    });
+  }
+
+  function renderCounts(){
+    var n = state.municipalities.length;
+    document.getElementById('pfTitle').textContent = T('pfTitle', {n: n.toLocaleString(LANG)});
+    document.getElementById('pfLead').textContent = T('pfLead', {n: n.toLocaleString(LANG)});
+    document.getElementById('ctaTitle').textContent = T('pfCtaTitle', {n: n.toLocaleString(LANG)});
+    var ds = state.manifest.datasets || {};
+    document.getElementById('statCommunes').textContent = (ds.communes || {}).count || n;
+    document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
+  }
+
+  function renderAll(){
+    applyStrings();
+    renderCounts();
+    renderSearch();
+    var sel = selection();
+    document.getElementById('viewDirectory').hidden = !!sel;
+    document.getElementById('viewList').hidden = !sel;
+    if(sel){ renderList(sel); return; }
+    document.title = 'BelPulse — ' + T('navCommunes');
+    renderRegions();
+    renderFamilies();
+    renderPickers();
+    renderQuickPick();
+    renderProvinceMap();
+    renderExploreMap();
+  }
+
+  /* ---- boot -------------------------------------------------------------- */
+  async function init(){
+    document.getElementById('langPick').addEventListener('change', function(e){
+      LANG = e.target.value;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(err){}
+      renderAll();
+    });
+    applyStrings();
+
+    var res = await Promise.all([GEOGRAPHIES_URL, TYPOLOGY_URL, INDEX_URL, SECTIONS_URL, SOURCES_URL, MANIFEST_URL]
+      .map(function(url){ return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); }));
+    var geo = res[0] || {geographies: []};
+    geo.geographies.forEach(function(r){ state.geographies[r.geo_id] = r; });
+    state.municipalities = geo.geographies.filter(function(r){ return r.level === 'municipality'; });
+    state.typology = res[1];
+    var idx = res[2] || {indicators: []};
+    (idx.indicators || []).forEach(function(r){ state.byCode[r.indicator_code] = r; });
+    state.headlines = ((res[3] || {}).headlines || []).filter(function(c){ return state.byCode[c]; });
+    state.sources = (res[4] || {}).sources || {};
+    state.manifest = res[5] || {};
+    var dates = (idx.indicators || []).map(function(r){ return r.updated; }).filter(Boolean).sort();
+    state.attrUpdated = dates[dates.length - 1] || '';
+
+    var codes = state.headlines.slice(0, CARD_FIGURES);
+    var payloads = await Promise.all(codes.map(function(code){
+      return fetch(VALUES_URL(code)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+    }));
+    codes.forEach(function(code, i){ if(payloads[i]) state.values[code] = payloads[i]; });
+
+    renderAll();
+
+    if(selection()) return;              // a list view draws no map
+    var g = await fetch(GEO_URL).catch(function(){ return null; });
+    if(!g || !g.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }
+    state.geojson = await g.json();
+    renderProvinceMap();
+    renderExploreMap();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

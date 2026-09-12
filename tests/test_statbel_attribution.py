@@ -34,6 +34,7 @@ MUNICIPAL_PAGES = [
     "home.html",
     "home2.html",
     "commune.html",
+    "profiles.html",
 ]
 
 
