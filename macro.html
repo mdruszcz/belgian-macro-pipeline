@@ -53,8 +53,10 @@
   (function(){
     try{
       // The reader's saved theme, the same key the block-built pages use.
+      // Light unless they chose otherwise: this page is drawn from a light
+      // design, so the OS preference applies only on an explicit 'auto'.
       var t = localStorage.getItem('belpulse-theme');
-      if(t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
       var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
       if(l) document.documentElement.lang = l;
     }catch(e){}
