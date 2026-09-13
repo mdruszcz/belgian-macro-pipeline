@@ -154,6 +154,42 @@ def test_a_store_that_cannot_load_is_a_failure_not_a_crash(tmp_path):
     assert "Traceback" not in result.stderr
 
 
+def test_a_directory_store_with_nothing_fetched_yet_does_not_fail_export_parses(tmp_path):
+    """A one_csv_per_indicator in_db store with zero files (international
+    pilot PR 1, right after the cutover, before the first daily fetch) must
+    not report "published export missing" -- there is no promised export
+    yet, csv_paths() correctly contributes nothing to check."""
+    store_dir = tmp_path / "international"
+    store_dir.mkdir()
+    registry = tmp_path / "stores.yaml"
+    registry.write_text(
+        yaml.safe_dump(
+            {
+                "stores": {
+                    "international": {
+                        "path": str(store_dir),
+                        "source_id": "eurostat",
+                        "mode": "in_db",
+                        "layout": "one_csv_per_indicator",
+                        "indicators": ["GDP_VOLUME_EUROPE"],
+                        "reference_rows": {"script": "scripts/sync_international.py"},
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    committed = tmp_path / "committed.db"
+    migrate.run(committed, migrations_dir=REPO / "migrations")
+    working = tmp_path / "local" / "working.db"
+    build(source_db=committed, working_db=working, stores_path=registry)
+
+    result = _validate(working, registry)
+
+    assert "export_parses" not in result.stderr, result.stdout + result.stderr
+
+
 def test_the_copy_is_thrown_away_but_its_counts_become_the_baseline(tmp_path):
     """--record-volume writes the consolidated count -- the one tomorrow's
     row_collapse compares against -- into --db, and adds no observation to it."""

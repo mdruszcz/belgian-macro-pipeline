@@ -18,7 +18,13 @@
           "path": {
             "type": "string",
             "minLength": 1,
-            "description": "Repo-relative path to the committed CSV, in the canonical 10-column observations shape."
+            "description": "Repo-relative path. For layout: single_csv (the default), the committed CSV itself, in the canonical 10-column observations shape. For layout: one_csv_per_indicator, the directory holding one such CSV per declared indicator (data/international/{INDICATOR_ID}.csv, never *_observations.csv)."
+          },
+          "layout": {
+            "type": "string",
+            "enum": ["single_csv", "one_csv_per_indicator"],
+            "default": "single_csv",
+            "description": "single_csv: one committed CSV holds every declared indicator's rows (every store before the international pilot). one_csv_per_indicator: `path` is a directory, and each declared indicator has its own {path}/{indicator_id}.csv -- a registry entry per file does not scale to ~100 international indicators. A declared indicator with zero rows in an in_db store of this layout has no file at all (a header-only CSV would make the next assemble load nothing and look identical to 'not fetched yet', which is not the distinction it needs to make)."
           },
           "source_id": {
             "type": "string",

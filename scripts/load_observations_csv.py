@@ -198,10 +198,111 @@ def load(
     return len(rows)
 
 
+def _insert_rows(conn: sqlite3.Connection, rows: list[dict], fetch_run_id: int) -> None:
+    for row in rows:
+        conn.execute(
+            """
+            INSERT INTO observations
+                (indicator_id, geo_id, period, vintage, value, status,
+                 period_start, period_end, is_latest, fetch_run_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                row["indicator_id"],
+                row["geo_id"],
+                row["period"],
+                row["vintage"],
+                float(row["value"]) if row["value"] != "" else None,
+                row["status"],
+                row["period_start"],
+                row["period_end"],
+                int(row["is_latest"]),
+                fetch_run_id,
+                row["created_at"],
+            ),
+        )
+
+
+def load_many(
+    db_path: Path,
+    csv_paths: list[Path] | tuple[Path, ...],
+    *,
+    allow_unverified: bool = True,
+    run_source_id: str,
+    run_adapter: str = "rebuild",
+) -> int:
+    """Load several committed observation CSVs -- a one_csv_per_indicator
+    directory store's per-indicator files -- into `db_path` in ONE process.
+    Returns the total number of rows loaded.
+
+    WHY ONE PROCESS, NOT load() CALLED ONCE PER FILE (docs/features/international.md,
+    "Assemble at scale"): migrations and geography are applied exactly once
+    regardless of how many files there are, and the whole batch gets ONE
+    'rebuild' fetch_runs row, not one per indicator -- a hundred international
+    indicators must not turn into a hundred audit-trail rows for what is a
+    single rebuild event. scripts/build_staging_db.py calls this (via this
+    script's `--csv-dir`) for a one_csv_per_indicator store, the same way it
+    calls `load()` (via `--csv`) for a single_csv one.
+
+    An empty `csv_paths` is valid (an in_db directory store with nothing
+    fetched yet) and loads zero rows without complaint -- unlike `load()`,
+    which refuses a CSV with a header and no rows, there is no file at all
+    here to have an empty body.
+    """
+    all_rows: list[dict] = []
+    for csv_path in csv_paths:
+        if not csv_path.is_file():
+            raise ObservationsCsvError(f"No observations CSV at {csv_path}")
+        with csv_path.open(encoding="utf-8", newline="") as fh:
+            rows = list(csv.DictReader(fh))
+        if not rows:
+            raise ObservationsCsvError(f"{csv_path} has a header but no rows.")
+        all_rows.extend(rows)
+
+    migrate.run(db_path)
+    load_geography.load(db_path, GEOGRAPHY_CONFIG_DIR, allow_unverified=allow_unverified)
+
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("PRAGMA foreign_keys=ON")
+    _ensure_reference_rows(conn, {r["indicator_id"] for r in all_rows})
+
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute(
+        """INSERT INTO fetch_runs (source_id, adapter, started_at, finished_at, status, message)
+           VALUES (?, ?, ?, ?, 'ok', ?)""",
+        (
+            run_source_id,
+            run_adapter,
+            now,
+            now,
+            f"rebuild from {len(csv_paths)} file(s) -- not a real fetch",
+        ),
+    )
+    fetch_run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+    _insert_rows(conn, all_rows, fetch_run_id)
+
+    conn.execute(
+        "UPDATE fetch_runs SET rows_read = ?, rows_written = ? WHERE fetch_run_id = ?",
+        (len(all_rows), len(all_rows), fetch_run_id),
+    )
+    conn.commit()
+    conn.close()
+    return len(all_rows)
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Rebuild a DB from a committed observations CSV")
+    ap = argparse.ArgumentParser(description="Rebuild a DB from committed observations CSV(s)")
     ap.add_argument("--db", required=True, help="Path to the SQLite DB to build")
-    ap.add_argument("--csv", required=True, help="Committed observations CSV to load")
+    group = ap.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--csv", help="A single committed observations CSV to load (layout: single_csv)"
+    )
+    group.add_argument(
+        "--csv-dir",
+        help="A one_csv_per_indicator store's directory -- every *.csv file in it is loaded "
+        "in one process, one 'rebuild' fetch_runs row for the whole batch (load_many()).",
+    )
     ap.add_argument(
         "--run-source-id",
         default="statbel",
@@ -218,12 +319,21 @@ def main() -> None:
     )
     args = ap.parse_args()
     try:
-        n = load(
-            Path(args.db),
-            Path(args.csv),
-            run_source_id=args.run_source_id,
-            run_adapter=args.run_adapter,
-        )
+        if args.csv_dir:
+            csv_paths = sorted(Path(args.csv_dir).glob("*.csv"))
+            n = load_many(
+                Path(args.db),
+                csv_paths,
+                run_source_id=args.run_source_id,
+                run_adapter=args.run_adapter,
+            )
+        else:
+            n = load(
+                Path(args.db),
+                Path(args.csv),
+                run_source_id=args.run_source_id,
+                run_adapter=args.run_adapter,
+            )
     except ObservationsCsvError as exc:
         print(f"\nCANNOT LOAD: {exc}\n", file=sys.stderr)
         raise SystemExit(2) from exc

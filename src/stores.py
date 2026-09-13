@@ -56,16 +56,52 @@ class ReferenceRows:
     args: tuple[str, ...] = ("--reference-rows-only",)
 
 
+LAYOUT_SINGLE_CSV = "single_csv"
+LAYOUT_ONE_CSV_PER_INDICATOR = "one_csv_per_indicator"
+VALID_LAYOUTS = (LAYOUT_SINGLE_CSV, LAYOUT_ONE_CSV_PER_INDICATOR)
+
+
 @dataclass(frozen=True)
 class Store:
     name: str
-    path: Path  # resolved absolute path
+    # Resolved absolute path: a file (single_csv) or a directory (one_csv_per_indicator).
+    path: Path
     source_id: str
     mode: str
     indicators: tuple[str, ...]
     reference_rows: ReferenceRows | None = None
     reference_rows_reason: str | None = None
     raw_path: str = field(default="", repr=False)  # repo-relative, as declared
+    layout: str = LAYOUT_SINGLE_CSV
+
+    def csv_for(self, indicator_id: str) -> Path:
+        """The committed CSV holding `indicator_id`'s rows.
+
+        single_csv: every indicator shares `self.path`. one_csv_per_indicator:
+        `self.path` is a directory and the file is named after the indicator
+        id exactly (never a `*_observations.csv` suffix -- the whole point of
+        this layout is that the file list is the indicator list, not a second
+        thing to keep in sync with it).
+        """
+        if self.layout == LAYOUT_ONE_CSV_PER_INDICATOR:
+            return self.path / f"{indicator_id}.csv"
+        return self.path
+
+    def csv_paths(self) -> tuple[Path, ...]:
+        """Every committed CSV this store actually has ON DISK right now.
+
+        single_csv: `(self.path,)`, always -- load_stores() already refused a
+        missing file for this layout. one_csv_per_indicator: one path per
+        declared indicator THAT HAS A FILE, in declared order -- an in_db
+        store's indicator with zero rows fetched so far has no file yet, and
+        that is tolerated here exactly as verify_indicator_lists() tolerates
+        it (see that function's docstring): callers that iterate csv_paths()
+        to load or validate a store never need their own absent-file
+        special-case.
+        """
+        if self.layout == LAYOUT_ONE_CSV_PER_INDICATOR:
+            return tuple(p for i in self.indicators if (p := self.csv_for(i)).is_file())
+        return (self.path,)
 
 
 def _load_schema() -> dict:
@@ -117,9 +153,20 @@ def load_stores(
             problems.append(f"{name}: unknown mode {mode!r}, expected one of {VALID_MODES}")
             continue
 
+        layout = entry.get("layout", LAYOUT_SINGLE_CSV)
+        if layout not in VALID_LAYOUTS:
+            problems.append(f"{name}: unknown layout {layout!r}, expected one of {VALID_LAYOUTS}")
+            continue
+
         raw_path = entry["path"]
         resolved = (repo_root / raw_path).resolve()
-        if not resolved.is_file():
+        if layout == LAYOUT_ONE_CSV_PER_INDICATOR:
+            if not resolved.is_dir():
+                problems.append(
+                    f"{name}: path {raw_path!r} is not a directory ({resolved}) -- "
+                    "layout: one_csv_per_indicator needs a directory, not a single file"
+                )
+        elif not resolved.is_file():
             problems.append(f"{name}: path {raw_path!r} does not exist ({resolved})")
 
         ref = entry.get("reference_rows")
@@ -151,6 +198,7 @@ def load_stores(
             reference_rows=reference_rows,
             reference_rows_reason=reason,
             raw_path=raw_path,
+            layout=layout,
         )
 
     if problems:
@@ -213,19 +261,26 @@ def _actual_indicator_ids(csv_path: Path) -> set[str]:
 
 def verify_indicator_lists(stores: dict[str, Store]) -> list[str]:
     """For every store, the registry's declared `indicators` must equal the
-    distinct indicator_id values actually present in its CSV -- no more, no
-    less. This is what makes PR2's DB-to-CSV offload safe: an indicator that
-    silently stopped appearing (or a new one that silently started) would
-    otherwise go unnoticed.
+    distinct indicator_id values actually present in its CSV(s) -- no more,
+    no less. This is what makes PR2's DB-to-CSV offload safe: an indicator
+    that silently stopped appearing (or a new one that silently started)
+    would otherwise go unnoticed.
+
+    A one_csv_per_indicator store is checked file by file (Store.csv_paths()):
+    each file's own indicator_id column must equal the file's own indicator
+    (stem == indicator_id is the whole point of the layout -- a CSV whose
+    rows disagree with its own filename is drift too), on top of the same
+    declared-vs-actual check every store gets.
 
     ONE ASYMMETRY, for in_db stores only: a declared indicator may have no
-    rows yet. An in_db store's CSV is a dump of what the daily fetch has
-    delivered so far, and an indicator is configured (and must be declared,
-    or scripts/offload_stores.py refuses to run) before its first successful
-    fetch -- UNEMPLOYMENT_RATE_BIT was exactly that on the day of the
-    cutover. An extra_csv store is loaded by hand in one go, so there a
-    declared-but-absent indicator is still drift. An undeclared indicator
-    in the CSV is drift in both modes.
+    rows yet -- for one_csv_per_indicator that means no file at all
+    (csv_paths() already omits it). An in_db store's CSV is a dump of what
+    the daily fetch has delivered so far, and an indicator is configured (and
+    must be declared, or scripts/offload_stores.py refuses to run) before its
+    first successful fetch -- UNEMPLOYMENT_RATE_BIT was exactly that on the
+    day of the cutover. An extra_csv store is loaded by hand in one go, so
+    there a declared-but-absent indicator is still drift. An undeclared
+    indicator in a CSV is drift in both modes.
 
     Returns a list of human-readable problem strings; empty means clean.
     Does not raise, so a caller can report every store's drift in one pass
@@ -234,7 +289,19 @@ def verify_indicator_lists(stores: dict[str, Store]) -> list[str]:
     """
     problems = []
     for name, store in sorted(stores.items()):
-        actual = _actual_indicator_ids(store.path)
+        if store.layout == LAYOUT_ONE_CSV_PER_INDICATOR:
+            actual: set[str] = set()
+            for path in store.csv_paths():
+                in_file = _actual_indicator_ids(path)
+                stray = sorted(in_file - {path.stem})
+                if stray:
+                    problems.append(
+                        f"{name}: {path.name} carries indicator_id(s) other than its own "
+                        f"filename: {stray}"
+                    )
+                actual |= in_file
+        else:
+            actual = _actual_indicator_ids(store.path)
         declared = set(store.indicators)
         missing = sorted(actual - declared)
         extra = sorted(declared - actual)

@@ -25,6 +25,7 @@ sys.path.insert(0, str(REPO))
 
 from src.stores import (  # noqa: E402
     DEFAULT_STORES_PATH,
+    LAYOUT_ONE_CSV_PER_INDICATOR,
     MODE_EXTRA_CSV,
     MODE_IN_DB,
     VALID_MODES,
@@ -42,21 +43,29 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 9
+    assert len(stores) == 10
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
+    """`.exists()`, not `.is_file()`: a one_csv_per_indicator store's path is
+    a directory (international pilot PR 1)."""
     stores = load_stores(DEFAULT_STORES_PATH)
     for name, store in stores.items():
         assert store.mode in VALID_MODES, f"{name}: unknown mode {store.mode!r}"
-        assert store.path.is_file(), f"{name}: path {store.path} does not exist"
+        assert store.path.exists(), f"{name}: path {store.path} does not exist"
 
 
 def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
-    """The six hand-loaded sources stay extra_csv; the three CI fetches itself
-    and that outgrew the committed database are in_db (docs/decisions/0006)."""
+    """The six hand-loaded sources stay extra_csv; the four CI fetches itself
+    and that outgrew the committed database are in_db (docs/decisions/0006,
+    plus the international pilot's directory store)."""
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert {s.name for s in in_db_stores(stores)} == {"onem", "onem_rates", "walstat"}
+    assert {s.name for s in in_db_stores(stores)} == {
+        "onem",
+        "onem_rates",
+        "walstat",
+        "international",
+    }
     assert len(extra_csv_stores(stores)) == 6
     assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())
 
@@ -291,6 +300,81 @@ def test_indicator_drift_is_detected_both_directions(tmp_path):
     problems = verify_indicator_lists(stores)
     assert len(problems) == 1
     assert "BAR" in problems[0]
+
+
+# ── layout: one_csv_per_indicator (international pilot PR 1) ────────────────
+
+
+def _write_indicator_csv(directory: Path, indicator_id: str) -> None:
+    _make_csv(directory / f"{indicator_id}.csv", [indicator_id])
+
+
+def _dir_registry(tmp_path: Path, store_dir: Path, indicators: list[str], mode: str) -> Path:
+    return _write_registry(
+        tmp_path,
+        {
+            "stores": {
+                "international": {
+                    "path": str(store_dir),
+                    "source_id": "eurostat",
+                    "mode": mode,
+                    "layout": "one_csv_per_indicator",
+                    "indicators": indicators,
+                    "reference_rows": {"script": "scripts/sync_international.py"},
+                }
+            }
+        },
+        tmp_path,
+    )
+
+
+def test_a_directory_store_needs_a_directory_not_a_file(tmp_path):
+    csv_path = tmp_path / "not_a_dir.csv"
+    _make_csv(csv_path, ["FOO"])
+    registry = _dir_registry(tmp_path, csv_path, ["FOO"], MODE_IN_DB)
+    with pytest.raises(StoreConfigError, match="not a directory"):
+        load_stores(registry)
+
+
+def test_csv_paths_omits_a_declared_indicator_with_no_file_yet(tmp_path):
+    """The one_csv_per_indicator asymmetry for in_db stores: a configured
+    indicator not yet fetched has no file, and that is tolerated -- a header
+    -only CSV would make the next assemble load nothing and look identical to
+    'not fetched yet', which is the distinction this is for."""
+    store_dir = tmp_path / "international"
+    store_dir.mkdir()
+    _write_indicator_csv(store_dir, "GDP_VOL_EU")
+    registry = _dir_registry(tmp_path, store_dir, ["GDP_VOL_EU", "NOT_YET_FETCHED"], MODE_IN_DB)
+
+    stores = load_stores(registry)
+    store = stores["international"]
+    assert store.layout == LAYOUT_ONE_CSV_PER_INDICATOR
+    assert store.csv_paths() == (store_dir / "GDP_VOL_EU.csv",)
+    assert store.csv_for("NOT_YET_FETCHED") == store_dir / "NOT_YET_FETCHED.csv"
+    assert verify_indicator_lists(stores) == []
+
+
+def test_a_file_whose_stem_disagrees_with_its_own_rows_is_drift(tmp_path):
+    store_dir = tmp_path / "international"
+    store_dir.mkdir()
+    _make_csv(store_dir / "GDP_VOL_EU.csv", ["WRONG_INDICATOR_ID"])
+    registry = _dir_registry(tmp_path, store_dir, ["GDP_VOL_EU"], MODE_IN_DB)
+
+    stores = load_stores(registry)
+    problems = verify_indicator_lists(stores)
+    assert any("other than its own filename" in p for p in problems)
+
+
+def test_never_a_observations_suffix_filename(tmp_path):
+    """The directory layout's whole point: the file IS named after the
+    indicator, never `*_observations.csv` -- a second name to keep in sync
+    with the indicator id is exactly the drift this layout exists to avoid."""
+    store_dir = tmp_path / "international"
+    store_dir.mkdir()
+    _write_indicator_csv(store_dir, "GDP_VOL_EU")
+    registry = _dir_registry(tmp_path, store_dir, ["GDP_VOL_EU"], MODE_IN_DB)
+    store = load_stores(registry)["international"]
+    assert store.csv_for("GDP_VOL_EU").name == "GDP_VOL_EU.csv"
 
 
 # ── resolve_extra_observations: explicit wins, registry is the fallback ─────

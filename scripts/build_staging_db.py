@@ -46,7 +46,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.stores import DEFAULT_STORES_PATH, in_db_stores, load_stores  # noqa: E402
+from src.stores import (  # noqa: E402
+    DEFAULT_STORES_PATH,
+    LAYOUT_ONE_CSV_PER_INDICATOR,
+    in_db_stores,
+    load_stores,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "belgian_macro.db"
@@ -136,14 +141,18 @@ def build(
         print("No in_db stores declared in the registry -- nothing to load.")
     _refuse_a_source_db_that_still_holds_in_db_rows(working_db, to_load)
     for store in to_load:
+        path_flag = (
+            ["--csv-dir", str(store.path)]
+            if store.layout == LAYOUT_ONE_CSV_PER_INDICATOR
+            else ["--csv", str(store.path)]
+        )
         _run(
             [
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "load_observations_csv.py"),
                 "--db",
                 str(working_db),
-                "--csv",
-                str(store.path),
+                *path_flag,
                 "--run-source-id",
                 store.source_id,
                 "--run-adapter",
