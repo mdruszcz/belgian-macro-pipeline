@@ -1,6 +1,30 @@
 # Feature: international data — all European countries, ~100 indicators
 
-Status: approved for stage 1 (the pilot) by the maintainer, 2026-09-13; transport decided: Eurostat's API directly, DBnomics dropped (open question 4)
+Status: stage 1 (the pilot) implemented in PR 1, awaiting audit and merge. The 14-day measurement
+window (row counts, revision churn, run time, working-database size) starts at merge, not before —
+none of the numbers in "Measured already" below are from the 14-day window itself. Transport
+decided: Eurostat's API directly, DBnomics dropped (open question 4).
+
+Two deviations from this spec, made during implementation and recorded here rather than silently:
+
+- **Missing-country handling.** The Tests section below says "a missing expected geography fails".
+  What PR 1 actually does: an allowlisted country simply absent from one dataset's response on a
+  given day keeps that day's fetch `ok`, naming the missing code(s) in the `fetch_runs` message.
+  A `partial` status, as a literal reading of "fails" would require, is a FAIL in
+  `src/validation/rules.py`'s `fetch_error` check — it would turn every daily run red merely
+  because, say, a small candidate country has no unemployment series published yet. Only a
+  geography that is in *neither* the allowlist nor the exclusion list fails the fetch.
+- **Config shape.** "Proposed approach" below describes the registry recognising an indicator via
+  a `store: international` key written into the indicator's own config. PR 1 does not add that
+  key: `config/stores.yaml`'s `international` entry lists its indicators explicitly, and
+  `is_multi_geo()` (`src/validation/config_schema.py`) discriminates a pilot indicator from a
+  single-country one by its `fetch` shape (`fetch.geographies: allowlist`) instead. The store
+  registry stays the one place that says which indicator belongs to which store, rather than that
+  fact being duplicated into every indicator file.
+
+See `docs/decisions/0008-eurostat-dataset-adapter-and-directory-stores.md` for the adapter and
+store-form decisions PR 1 made to implement this spec.
+
 Issue: (maintainer direction, 2026-09-13 — no issue number yet)
 Branch: feat/international-pilot
 

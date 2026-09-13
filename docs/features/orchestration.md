@@ -116,7 +116,7 @@ downstream of it, which would throw the day away. So:
 | Job | Contains |
 |---|---|
 | `assemble_working_database` | `staging_db` |
-| `fetch_sources` | the seven outcomes the workflow gates auto-merge on: `macro_legacy_fetch`, `canonical_observations`, `statbel_local_units`, `onem_observations`, `onem_rates_observations`, `walstat_observations`, `market_data` |
+| `fetch_sources` | the eight outcomes the workflow gates auto-merge on: `macro_legacy_fetch`, `canonical_observations`, `statbel_local_units`, `onem_observations`, `onem_rates_observations`, `walstat_observations`, `international_observations`, `market_data` |
 | `validate_and_export` | `validated_working_database` and its checks, `volume_history`, `revisions_report`, every derived and website asset. Selects no source, so a red source never blocks it. |
 | `observe_manual_sources` | observations of the hand-loaded stores |
 
@@ -128,12 +128,12 @@ It is a Python program rather than a Make recipe because a recipe stops at the f
    outcome `not_run`;
 2. runs `assemble_working_database`; if it fails, stops with exit 1 and exports nothing (the
    workflow's assemble step has no continue-on-error either);
-3. runs `fetch_sources` and records each of the seven outcomes (`success`, `failed` with the
+3. runs `fetch_sources` and records each of the eight outcomes (`success`, `failed` with the
    error, or `skipped` when an upstream asset failed) from the Dagster run result -- not from
    `fetch_runs`, which `fetch_stocks.py` never writes and which a crash can precede;
 4. always runs `validate_and_export`, passing that manifest's path and run id as the
    configuration of `validated_working_database`;
-5. exits 0 when everything is green; 3 when the exports ran but any of the seven is not a
+5. exits 0 when everything is green; 3 when the exports ran but any of the eight is not a
    success (a failed `sync_to_canonical` counts like a failed source); 1 when nothing is
    publishable -- the assemble or `validate_and_export` failed.
 
@@ -182,7 +182,7 @@ morning; production's record is the workflow log, the job summary and the PR bod
 1. the open-PR check, Python, `pip install -r requirements.txt` plus the `dagster==` pin read from
    `requirements-dagster.txt` (not the web UI);
 2. **one step, `python -m orchestration.daily --github-output "$GITHUB_OUTPUT"`** -- assemble,
-   the seven sources, validation, the revisions report, every export and page. Its environment:
+   the eight sources, validation, the revisions report, every export and page. Its environment:
    `WORKING_DB` (workflow level, unchanged), `BUILD_ID` = the run id, `DAGSTER_HOME` and
    `VALIDATION_SUMMARY` under `$RUNNER_TEMP`, `DAGSTER_DISABLE_TELEMETRY`;
 3. offload, the size guard, the gate, stage, PR, auto-merge and the final red step -- as before.
@@ -201,7 +201,7 @@ Failure semantics, unchanged from the day before step 2:
 The gate. `python -m orchestration.manifest <path>` reads the manifest of this run -- the path the
 coordinator wrote into `$GITHUB_OUTPUT`, never a fixed one -- and prints one output per tracked
 outcome under its old step id (`fetch_macro=success`, ...), `summary`, and `all_ok`. `all_ok` is
-`true` only if the assemble, all seven outcomes and `validate_and_export` succeeded; a missing
+`true` only if the assemble, all eight outcomes and `validate_and_export` succeeded; a missing
 outcome counts as not run, and a missing manifest fails the step (no PR). The PR body and the
 final error message use `summary`.
 
