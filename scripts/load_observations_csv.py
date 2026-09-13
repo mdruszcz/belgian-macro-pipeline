@@ -241,8 +241,10 @@ def load_many(
     'rebuild' fetch_runs row, not one per indicator -- a hundred international
     indicators must not turn into a hundred audit-trail rows for what is a
     single rebuild event. scripts/build_staging_db.py calls this (via this
-    script's `--csv-dir`) for a one_csv_per_indicator store, the same way it
-    calls `load()` (via `--csv`) for a single_csv one.
+    script's `--csv` repeated once per file in the store's own
+    Store.csv_paths() -- never a bare directory for this script to glob
+    itself) for a one_csv_per_indicator store, the same way it calls
+    `load()` (a single `--csv`) for a single_csv one.
 
     An empty `csv_paths` is valid (an in_db directory store with nothing
     fetched yet) and loads zero rows without complaint -- unlike `load()`,
@@ -294,14 +296,16 @@ def load_many(
 def main() -> None:
     ap = argparse.ArgumentParser(description="Rebuild a DB from committed observations CSV(s)")
     ap.add_argument("--db", required=True, help="Path to the SQLite DB to build")
-    group = ap.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "--csv", help="A single committed observations CSV to load (layout: single_csv)"
-    )
-    group.add_argument(
-        "--csv-dir",
-        help="A one_csv_per_indicator store's directory -- every *.csv file in it is loaded "
-        "in one process, one 'rebuild' fetch_runs row for the whole batch (load_many()).",
+    ap.add_argument(
+        "--csv",
+        action="append",
+        required=True,
+        help="A committed observations CSV to load. Repeat for a one_csv_per_indicator "
+        "store's several declared files (load_many(), one process, one 'rebuild' "
+        "fetch_runs row for the whole batch); the caller (scripts/build_staging_db.py) "
+        "passes the store's own Store.csv_paths() explicitly -- never a directory for "
+        "this script to glob itself (audit SHOULD-FIX 6: a glob here would silently load "
+        "a file for an indicator nobody declared).",
     )
     ap.add_argument(
         "--run-source-id",
@@ -319,18 +323,17 @@ def main() -> None:
     )
     args = ap.parse_args()
     try:
-        if args.csv_dir:
-            csv_paths = sorted(Path(args.csv_dir).glob("*.csv"))
-            n = load_many(
+        if len(args.csv) == 1:
+            n = load(
                 Path(args.db),
-                csv_paths,
+                Path(args.csv[0]),
                 run_source_id=args.run_source_id,
                 run_adapter=args.run_adapter,
             )
         else:
-            n = load(
+            n = load_many(
                 Path(args.db),
-                Path(args.csv),
+                [Path(c) for c in args.csv],
                 run_source_id=args.run_source_id,
                 run_adapter=args.run_adapter,
             )

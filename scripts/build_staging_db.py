@@ -46,12 +46,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.stores import (  # noqa: E402
-    DEFAULT_STORES_PATH,
-    LAYOUT_ONE_CSV_PER_INDICATOR,
-    in_db_stores,
-    load_stores,
-)
+from src.stores import DEFAULT_STORES_PATH, in_db_stores, load_stores  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "belgian_macro.db"
@@ -141,18 +136,23 @@ def build(
         print("No in_db stores declared in the registry -- nothing to load.")
     _refuse_a_source_db_that_still_holds_in_db_rows(working_db, to_load)
     for store in to_load:
-        path_flag = (
-            ["--csv-dir", str(store.path)]
-            if store.layout == LAYOUT_ONE_CSV_PER_INDICATOR
-            else ["--csv", str(store.path)]
-        )
+        # store.csv_paths() -- the store's OWN declared-and-present files,
+        # never a bare directory for load_observations_csv.py to glob itself
+        # (audit SHOULD-FIX 6: a glob would silently load a file for an
+        # indicator nobody declared, past the drift check entirely). A
+        # directory store with nothing fetched yet has no files at all --
+        # skip the call rather than invoke the script with no --csv.
+        csv_paths = store.csv_paths()
+        if not csv_paths:
+            print(f"-- {store.name}: no committed file(s) yet, nothing to load")
+            continue
         _run(
             [
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "load_observations_csv.py"),
                 "--db",
                 str(working_db),
-                *path_flag,
+                *[arg for p in csv_paths for arg in ("--csv", str(p))],
                 "--run-source-id",
                 store.source_id,
                 "--run-adapter",

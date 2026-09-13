@@ -270,7 +270,14 @@ def verify_indicator_lists(stores: dict[str, Store]) -> list[str]:
     each file's own indicator_id column must equal the file's own indicator
     (stem == indicator_id is the whole point of the layout -- a CSV whose
     rows disagree with its own filename is drift too), on top of the same
-    declared-vs-actual check every store gets.
+    declared-vs-actual check every store gets. It is ALSO checked against the
+    real directory listing (a plain glob, here only -- never in the loading
+    path, see Store.csv_paths()'s own docstring): csv_paths() iterates
+    `store.indicators`, so a file for an indicator nobody declared is
+    invisible to it by construction. An audit found exactly that gap:
+    removing an indicator from the declared list left its file on disk,
+    still loaded by every assemble, with this check reporting clean because
+    it never looked at the directory itself.
 
     ONE ASYMMETRY, for in_db stores only: a declared indicator may have no
     rows yet -- for one_csv_per_indicator that means no file at all
@@ -290,6 +297,13 @@ def verify_indicator_lists(stores: dict[str, Store]) -> list[str]:
     problems = []
     for name, store in sorted(stores.items()):
         if store.layout == LAYOUT_ONE_CSV_PER_INDICATOR:
+            on_disk = {p.stem for p in store.path.glob("*.csv")}
+            undeclared_files = sorted(on_disk - set(store.indicators))
+            if undeclared_files:
+                problems.append(
+                    f"{name}: {store.path} has file(s) for indicator(s) not declared in "
+                    f"the registry: {undeclared_files}"
+                )
             actual: set[str] = set()
             for path in store.csv_paths():
                 in_file = _actual_indicator_ids(path)

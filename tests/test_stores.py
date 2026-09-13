@@ -365,6 +365,27 @@ def test_a_file_whose_stem_disagrees_with_its_own_rows_is_drift(tmp_path):
     assert any("other than its own filename" in p for p in problems)
 
 
+def test_an_undeclared_file_on_disk_is_drift_even_though_csv_paths_never_sees_it(tmp_path):
+    """Audit SHOULD-FIX 6: Store.csv_paths() iterates `store.indicators`, so
+    a file for an indicator nobody declared is invisible to it BY
+    CONSTRUCTION -- an audit removed an indicator from the declared list and
+    verify_indicator_lists still returned [] while its file stayed on disk
+    and every assemble kept loading it. The check must look at the real
+    directory listing, not just the declared list's own files."""
+    store_dir = tmp_path / "international"
+    store_dir.mkdir()
+    _write_indicator_csv(store_dir, "GDP_VOL_EU")
+    _write_indicator_csv(store_dir, "GOV_DEBT_EUROPE")  # present on disk...
+    # ...but only GDP_VOL_EU is declared: GOV_DEBT_EUROPE was removed.
+    registry = _dir_registry(tmp_path, store_dir, ["GDP_VOL_EU"], MODE_IN_DB)
+
+    stores = load_stores(registry)
+    assert stores["international"].csv_paths() == (store_dir / "GDP_VOL_EU.csv",)
+
+    problems = verify_indicator_lists(stores)
+    assert any("GOV_DEBT_EUROPE" in p and "not declared" in p for p in problems), problems
+
+
 def test_never_a_observations_suffix_filename(tmp_path):
     """The directory layout's whole point: the file IS named after the
     indicator, never `*_observations.csv` -- a second name to keep in sync
