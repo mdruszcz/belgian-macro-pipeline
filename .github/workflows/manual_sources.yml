@@ -128,6 +128,11 @@ jobs:
             --build-id "${{ github.run_id }}" \
             --validation-status unknown
 
+      - name: Export explorer payloads
+        # Keep explorer.html's indicator shards in sync with the published
+        # municipal and national downloads regenerated above.
+        run: python scripts/export_explorer_payloads.py
+
       - name: Generate permanent /local/{nis} pages
         # Block L -- docs/features/comparison.md's "Permanent URLs". Runs
         # AFTER export_site_payloads.py because it renders from those

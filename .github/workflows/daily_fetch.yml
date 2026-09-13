@@ -242,6 +242,12 @@ jobs:
             --build-id "${{ github.run_id }}" \
             --validation-status "${{ steps.validate.outcome == 'success' && 'pass' || 'fail' }}"
 
+      - name: Export explorer payloads
+        # Reads the committed, last-10-years municipal download and the
+        # national export. Keep this after export_site_payloads.py, which
+        # writes the metadata catalogues consumed by the explorer exporter.
+        run: python scripts/export_explorer_payloads.py
+
       - name: Generate permanent /local/{nis} pages
         # Block L -- one statically-rendered page per commune, rendered from
         # the payloads above. Thin pages are refused rather than generated.
