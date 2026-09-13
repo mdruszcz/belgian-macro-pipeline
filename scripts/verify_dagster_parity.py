@@ -142,18 +142,29 @@ def main() -> int:
     trees = {"make": scratch / "make", "dagster": scratch / "dagster"}
     try:
         for tree in trees.values():
-            _git("worktree", "add", "--detach", str(tree), head)
+            # Byte-for-byte what is committed, as CI's Linux runner checks it out.
+            # With core.autocrlf=true (the Windows default) a fresh checkout gets
+            # CRLF migrations, whose checksums no longer match the ones recorded
+            # in the committed database, and the assemble step refuses to run.
+            _git("-c", "core.autocrlf=false", "worktree", "add", "--detach", str(tree), head)
 
         env = {**os.environ, "BUILD_ID": BUILD_ID, "PYTHONIOENCODING": "utf-8"}
         env.pop("WORKING_DB", None)
 
-        print("\n[make] assemble exports")
-        _make(["assemble", "exports"], trees["make"], env)
+        try:
+            print("\n[make] assemble exports")
+            _make(["assemble", "exports"], trees["make"], env)
 
-        print("\n[dagster] assemble_working_database, validate_and_export")
-        home = trees["dagster"] / "data" / "local" / "dagster_home"
-        home.mkdir(parents=True, exist_ok=True)
-        _dagster(trees["dagster"], {**env, "DAGSTER_HOME": str(home)})
+            print("\n[dagster] assemble_working_database, validate_and_export")
+            home = trees["dagster"] / "data" / "local" / "dagster_home"
+            home.mkdir(parents=True, exist_ok=True)
+            _dagster(trees["dagster"], {**env, "DAGSTER_HOME": str(home)})
+        except subprocess.CalledProcessError as exc:
+            # A build that did not finish proves nothing either way: say which
+            # step stopped, and do not compare half-built trees.
+            print(f"\nNot compared: a build step exited with code {exc.returncode}:")
+            print("  " + " ".join(str(a) for a in exc.cmd))
+            return 1
 
         make_files, dagster_files = _tree(trees["make"]), _tree(trees["dagster"])
         only_make = sorted(set(make_files) - set(dagster_files))
