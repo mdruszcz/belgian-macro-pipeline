@@ -762,13 +762,23 @@ def _has_legacy_log(conn: sqlite3.Connection) -> bool:
     )
 
 
-def record_volume_snapshot(conn: sqlite3.Connection, now: datetime | None = None) -> int:
+def record_volume_snapshot(
+    conn: sqlite3.Connection,
+    now: datetime | None = None,
+    counts_conn: sqlite3.Connection | None = None,
+) -> int:
     """Record today's is_latest count per indicator, with the delta against
     the previous snapshot.
 
     Deliberately NOT a rule, and deliberately called only after validation
     passes: recording a collapsed count would make it the baseline, and the
     alarm would silence itself on the very next run.
+
+    `counts_conn`: where today's counts are read, when that is not where the
+    snapshot is kept. scripts/validate_data.py validates a throwaway copy
+    that also holds every hand-loaded store, and must record THOSE counts --
+    the ones row_collapse will be compared against tomorrow -- into the
+    working database the daily run keeps. Defaults to `conn`.
     """
     if not _has_volume_table(conn):
         raise RuntimeError(
@@ -776,7 +786,7 @@ def record_volume_snapshot(conn: sqlite3.Connection, now: datetime | None = None
         )
     taken_at = (now or datetime.now(timezone.utc)).isoformat()
     ctx = Context(conn=conn)
-    current = _current_counts(ctx)
+    current = _current_counts(Context(conn=counts_conn) if counts_conn is not None else ctx)
     previous = _last_snapshot(ctx)
     rows = [
         (

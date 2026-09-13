@@ -2,6 +2,20 @@
 Run the validation rule catalogue against the committed stores -- Block H,
 docs/features/validation.md.
 
+EVERY STORE, NOT ONLY THE DATABASE (pipeline repair part 4). The rules query
+SQLite, and the six hand-loaded stores in config/stores.yaml (`extra_csv`:
+population, fiscal income, census, real estate, police, VAR) are never loaded
+into any database -- they are merged at export time. Until part 4 they got a
+field-count parse check and nothing else: no duplicate-latest check, no
+bounds, no staleness. So this validates a throwaway copy of --db with every
+extra_csv store loaded into it, the same rows the exporters publish. The
+in_db stores (ONEM, WalStat) are already in --db. `--stores ''` validates
+--db alone.
+
+The copy is never kept and never written back, except the volume snapshot:
+`--record-volume` stores the copy's counts in --db, because those are the
+counts tomorrow's row_collapse check is compared with.
+
 Exit codes are the whole point: a `fail` violation exits non-zero, which is
 what stops the daily workflow before the export and commit steps. Validation
 that only logs is decoration; the value is entirely in the blocking.
@@ -13,6 +27,7 @@ problems one build at a time is how people give up on validation.
 import argparse
 import sqlite3
 import sys
+import tempfile
 from pathlib import Path
 
 import yaml
@@ -20,7 +35,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.exporters.provenance import DB_TO_CONFIG_SOURCE_ID  # noqa: E402
-from src.stores import DEFAULT_STORES_PATH, load_stores  # noqa: E402
+from src.stores import DEFAULT_STORES_PATH, extra_csv_stores, load_stores  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     load_and_validate_all,
     load_and_validate_derived,
@@ -30,6 +45,7 @@ from src.validation.rules import (  # noqa: E402
     RULES,
     WARN,
     Context,
+    Violation,
     has_failures,
     record_volume_snapshot,
     run_all,
@@ -68,6 +84,46 @@ def _default_exports() -> tuple[Path, ...]:
     return tuple(exports)
 
 
+def _validation_copy(db_path: Path, stores_path: str, scratch: Path) -> tuple[Path, list]:
+    """A copy of `db_path` with every extra_csv store loaded, and one FAIL
+    violation per store that could not be loaded.
+
+    A store that fails to load is reported like any other violation rather
+    than raising, and the others still load, so one bad file does not hide
+    the rest (this script's own rule: print every violation). The loader is
+    scripts/load_observations_csv.py -- the same one that rebuilds a store --
+    so a CSV this accepts is one the pipeline can actually read.
+    """
+    import load_observations_csv  # noqa: PLC0415 -- scripts/ is on sys.path when run
+
+    copy = scratch / "validation.db"
+    src = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    dst = sqlite3.connect(str(copy))
+    try:
+        src.backup(dst)
+    finally:
+        src.close()
+        dst.close()
+
+    problems = []
+    if not stores_path:
+        return copy, problems
+    for store in extra_csv_stores(load_stores(stores_path)):
+        try:
+            load_observations_csv.load(
+                copy, store.path, run_source_id=store.source_id, run_adapter="rebuild"
+            )
+        except (load_observations_csv.ObservationsCsvError, sqlite3.Error, ValueError) as exc:
+            problems.append(
+                Violation(
+                    "store_loads",
+                    FAIL,
+                    f"{store.name} ({store.raw_path}) cannot be loaded: {exc}",
+                )
+            )
+    return copy, problems
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Validate the committed data stores")
     ap.add_argument(
@@ -75,6 +131,12 @@ def main() -> int:
         default=str(DEFAULT_DB),
         help="Database to validate. Defaults to the assembled working copy "
         "(scripts/build_staging_db.py, `make assemble`).",
+    )
+    ap.add_argument(
+        "--stores",
+        default=str(DEFAULT_STORES_PATH),
+        help="Store registry whose extra_csv stores are loaded into a throwaway copy of "
+        "--db before validating. '' validates --db alone.",
     )
     ap.add_argument("--derived-dir", default=str(DEFAULT_DERIVED_DIR))
     ap.add_argument("--indicators-dir", default=str(DEFAULT_INDICATORS_DIR))
@@ -122,7 +184,15 @@ def main() -> int:
         )
         return 2
 
-    conn = sqlite3.connect(str(args.db))
+    # ignore_cleanup_errors: on Windows a connection the loader failed
+    # half-way through can still hold the file when the directory is removed.
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as scratch:
+        return _validate(args, Path(scratch))
+
+
+def _validate(args, scratch: Path) -> int:
+    validation_db, load_problems = _validation_copy(Path(args.db), args.stores, scratch)
+    conn = sqlite3.connect(str(validation_db))
     conn.execute("PRAGMA foreign_keys=ON")
 
     derived_dir = Path(args.derived_dir)
@@ -134,7 +204,7 @@ def main() -> int:
     )
     exports = tuple(Path(p) for p in args.export) or _default_exports()
 
-    violations = run_all(
+    violations = load_problems + run_all(
         Context(
             conn=conn,
             derived_ids=derived_ids,
@@ -161,8 +231,12 @@ def main() -> int:
     blocked = has_failures(violations) or (args.warnings_as_errors and warns)
 
     if args.record_volume and not blocked:
-        n = record_volume_snapshot(conn)
-        print(f"Recorded volume snapshot for {n} indicator(s).")
+        target = sqlite3.connect(str(args.db))
+        try:
+            n = record_volume_snapshot(target, counts_conn=conn)
+        finally:
+            target.close()
+        print(f"Recorded volume snapshot for {n} indicator(s) in {args.db}.")
     elif args.record_volume:
         print("Volume snapshot NOT recorded: this run failed, so the counts are not a baseline.")
 
