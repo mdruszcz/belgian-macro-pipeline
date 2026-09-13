@@ -168,7 +168,8 @@ make dagster                  # → http://localhost:3000; `make dagster-daily` 
 ```
 
 The Dagster UI shows lineage, validation checks and freshness for runs started on this machine.
-Production still runs on GitHub Actions and does not appear there
+Production runs the same Dagster jobs inside the GitHub Actions runner, whose history is thrown
+away with it, so it does not appear there
 ([docs/features/orchestration.md](docs/features/orchestration.md)).
 
 `belgian_macro_db.py` exits non-zero if any source failed to fetch — check `--history` for details.

@@ -7,8 +7,10 @@ rebuilds every export in each from what is committed -- no network:
                 the Makefile and run through bash where `make` is not installed)
   dagster side  the assemble_working_database job, then validate_and_export
 
-then compares every file of the two trees, byte for byte, with the one field
-that is a wall-clock timestamp (manifest.json's build_date) masked.
+then compares every file of the two trees, byte for byte, with two fields of
+manifest.json masked: build_date, a wall-clock timestamp, and
+validation_status, which `make exports` stamps "unknown" (it validates
+nothing) and the Dagster side derives from the checks it ran ("pass").
 
 Refuses a dirty working tree. Both worktrees are HEAD: uncommitted changes
 would be silently left out of the comparison, so a run before committing would
@@ -110,6 +112,7 @@ def _digest(path: Path) -> str:
         else:
             if isinstance(data, dict):
                 data.pop("build_date", None)
+                data.pop("validation_status", None)
                 return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -184,7 +187,9 @@ def main() -> int:
                     print(f"  {name}")
         if only_make or only_dagster or differ:
             return 1
-        print("Identical: every file matches (manifest.json build_date masked).")
+        print(
+            "Identical: every file matches (manifest.json build_date and validation_status masked)."
+        )
         return 0
     finally:
         for tree in trees.values():

@@ -11,6 +11,10 @@ workflow's validation step does today. WARN rules are reported and never block.
 `store_loads` is not in RULES: it is the violation _validation_copy reports
 when a hand-loaded store cannot be loaded (pipeline repair part 4). It is a
 FAIL there, so it is a blocking check here.
+
+What the workflow's validation step also produced is kept: the ::error:: /
+::warning:: annotation per violation, and validate_data.py's own markdown
+summary when PipelinePaths.validation_summary names a file.
 """
 
 import sqlite3
@@ -22,13 +26,15 @@ from dagster import (
     AssetCheckResult,
     AssetCheckSeverity,
     AssetCheckSpec,
+    AssetKey,
+    DagsterEventType,
     Failure,
     multi_asset_check,
 )
 
 from orchestration.paths import PipelinePaths
 from orchestration.scripts import import_script
-from src.validation.rules import FAIL, RULES, Violation
+from src.validation.rules import FAIL, RULES, WARN, Violation
 
 ASSET = "validated_working_database"
 STORE_LOADS = "store_loads"
@@ -78,6 +84,7 @@ def record_volume(paths: PipelinePaths) -> int:
 )
 def validation_rules(context: AssetCheckExecutionContext, paths: PipelinePaths):
     violations = run_validation(paths)
+    report(paths, violations)
     unknown = sorted({v.rule for v in violations} - set(SEVERITIES))
     if unknown:
         # A rule this module does not know is a schema change in the validator:
@@ -96,3 +103,37 @@ def validation_rules(context: AssetCheckExecutionContext, paths: PipelinePaths):
                 "detail": "\n".join(v.message for v in mine)[:4000] or "none",
             },
         )
+
+
+def report(paths: PipelinePaths, violations: list[Violation]) -> None:
+    """What validate_data.py prints and writes, before any result is yielded --
+    so a failing run still leaves its summary, as the workflow step made sure."""
+    fails = [v for v in violations if v.severity == FAIL]
+    warns = [v for v in violations if v.severity == WARN]
+    for v in violations:
+        print(f"::{'error' if v.severity == FAIL else 'warning'}::{v}", flush=True)
+    print(f"Validation: {len(fails)} failure(s), {len(warns)} warning(s).", flush=True)
+    if paths.validation_summary:
+        import_script("validate_data")._write_summary(Path(paths.validation_summary), fails, warns)
+
+
+def validation_status(instance, run_id: str) -> str:
+    """The manifest's validation_status, from the check evaluations of one run.
+
+    pass     every check ran in this run and no FAIL check failed (warnings
+             do not count, as validate_data.py exits 0 on warnings);
+    fail     a FAIL check failed -- in practice never published, since the
+             checks are blocking and nothing downstream runs;
+    unknown  the checks did not all run in this run (an export materialised
+             on its own), which is what `make exports` reports too.
+    """
+    evaluations = {}
+    for entry in instance.all_logs(run_id, of_type=DagsterEventType.ASSET_CHECK_EVALUATION):
+        evaluation = entry.dagster_event.event_specific_data
+        if evaluation.asset_key == AssetKey(ASSET):
+            evaluations[evaluation.check_name] = evaluation
+    if any(not e.passed and SEVERITIES.get(n) == FAIL for n, e in evaluations.items()):
+        return "fail"
+    if set(evaluations) != set(SEVERITIES):
+        return "unknown"
+    return "pass"

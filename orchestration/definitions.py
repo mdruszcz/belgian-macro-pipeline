@@ -11,7 +11,7 @@ Jobs:
   observe_manual_sources     observations of the hand-loaded stores.
 
 Offload (the only writer of data/belgian_macro.db) and the git/PR steps are not
-in this graph: they stay in daily_fetch.yml.
+in this graph: they stay in daily_fetch.yml, after the coordinator.
 """
 
 import os
@@ -64,7 +64,8 @@ daily_fetch_schedule = ScheduleDefinition(
     cron_schedule=DAILY_CRON,
     execution_timezone="UTC",
     job=fetch_sources,
-    # Declared, never running: GitHub Actions is the scheduler. Only starts if
+    # Declared, never running: GitHub Actions is the scheduler, and starts
+    # orchestration.daily itself. Only starts if
     # someone switches it on in a local UI with a daemon running.
     default_status=DefaultScheduleStatus.STOPPED,
     description=(
@@ -80,6 +81,7 @@ def default_paths() -> PipelinePaths:
     return PipelinePaths(
         working_db=os.environ.get("WORKING_DB", DEFAULT_WORKING_DB),
         build_id=os.environ.get("BUILD_ID", "local"),
+        validation_summary=os.environ.get("VALIDATION_SUMMARY", ""),
     )
 
 

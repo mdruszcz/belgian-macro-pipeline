@@ -1,7 +1,8 @@
 """The Dagster layer (orchestration/, docs/features/orchestration.md).
 
-What these tests hold it to: every asset runs a command the Makefile or
-daily_fetch.yml already runs; the graph has the workflow's dependencies; the
+What these tests hold it to: every asset runs a command the Makefile runs,
+or one daily_fetch.yml ran itself before step 2 handed it to the coordinator;
+the graph has the workflow's dependencies; the
 validation checks are the rule registry; nothing starts by itself; nothing it
 writes is committable; and a failing source still lets the exports run while
 the day ends red -- proven by running the coordinator, not by reading it.
@@ -110,26 +111,66 @@ WORKFLOW_STYLE = {
 }
 
 
+# Until Dagster step 2, daily_fetch.yml ran every command itself (develop at
+# 5c61e356). Three of them have no Makefile twin with the same arguments; these are the lines it ran,
+# frozen, so the coordinator keeps running exactly what production ran.
+RETIRED_WORKFLOW_COMMANDS = {
+    "staging_db": 'python scripts/build_staging_db.py --working-db "$WORKING_DB"',
+    "market_data": "python fetch_stocks.py",
+    "revisions_report": (
+        'python scripts/revisions_report.py --db "$WORKING_DB" --since "$(date -u +%Y-%m-%d)"'
+    ),
+}
+# Every script that workflow ran between assemble and offload, bar the
+# validator (the checks, below).
+RETIRED_WORKFLOW_SCRIPTS = {
+    "scripts/build_staging_db.py",
+    "belgian_macro_db.py",
+    "scripts/sync_to_canonical.py",
+    "scripts/sync_statbel.py",
+    "scripts/sync_onem.py",
+    "scripts/sync_onem_rates.py",
+    "scripts/sync_walstat.py",
+    "fetch_stocks.py",
+    "scripts/revisions_report.py",
+    "scripts/export_canonical_csv.py",
+    "scripts/export_communes_csv.py",
+    "scripts/export_communes_history_csv.py",
+    "scripts/export_communes_table_json.py",
+    "scripts/export_aggregates_csv.py",
+    "src.exporters.metadata",
+    "scripts/export_percentiles_csv.py",
+    "scripts/export_site_payloads.py",
+    "scripts/export_explorer_payloads.py",
+    "scripts/export_local_pages.py",
+}
+# The step ids whose outcomes gated auto-merge in that workflow.
+RETIRED_GATE_IDS = {
+    "fetch_macro",
+    "sync_canonical",
+    "sync_statbel",
+    "sync_onem",
+    "sync_onem_rates",
+    "sync_walstat",
+    "fetch_stocks",
+}
+
+
 @pytest.mark.parametrize("name", sorted(COMMANDS))
-def test_every_command_is_one_the_makefile_or_the_workflow_already_runs(name):
+def test_every_command_is_one_the_makefile_runs_or_production_ran(name):
     argv = COMMANDS[name].argv
     makefile = _flatten((REPO / "Makefile").read_text(encoding="utf-8"))
-    workflow = _flatten(" ".join(step.get("run", "") for step in _steps()))
     as_make = " ".join(["$(PYTHON)", *(t.format(**MAKE_STYLE) for t in argv)])
     as_workflow = " ".join(["python", *(t.format(**WORKFLOW_STYLE) for t in argv)])
-    assert as_make in makefile or as_workflow in workflow, (as_make, as_workflow)
+    assert as_make in makefile or RETIRED_WORKFLOW_COMMANDS.get(name) == as_workflow, (
+        as_make,
+        as_workflow,
+    )
 
 
-def test_every_script_the_workflow_runs_between_assemble_and_offload_is_wrapped():
-    runs = [step.get("run", "") for step in _steps()]
-    start = next(i for i, r in enumerate(runs) if "scripts/build_staging_db.py" in r)
-    end = next(i for i, r in enumerate(runs) if "scripts/offload_stores.py" in r)
+def test_every_script_production_ran_is_wrapped():
     wrapped = {c.argv[1] if c.argv[0] == "-m" else c.argv[0] for c in COMMANDS.values()}
-    for text in runs[start:end]:
-        for script in re.findall(r"python (?:-m )?(\S+)", text):
-            if script == "scripts/validate_data.py":
-                continue  # the checks, below
-            assert script in wrapped, f"{script} runs in daily_fetch.yml but is not an asset"
+    assert RETIRED_WORKFLOW_SCRIPTS <= wrapped, RETIRED_WORKFLOW_SCRIPTS - wrapped
 
 
 # ── Same dependencies as the workflow, never two SQLite writers at once ──────
@@ -186,11 +227,16 @@ def test_the_export_job_selects_no_source():
     assert not selected & {"staging_db", *TRACKED, *manual}
 
 
-def test_the_tracked_outcomes_are_the_ones_the_workflow_gates_auto_merge_on():
-    gate = next(s for s in _steps() if s.get("id") == "sources")
-    workflow_ids = set(re.findall(r"steps\.(\w+)\.outcome", gate["run"]))
-    assert {COMMANDS[n].workflow_step for n in TRACKED} == workflow_ids
+def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
+    assert {COMMANDS[n].workflow_step for n in TRACKED} == RETIRED_GATE_IDS
     assert len(TRACKED) == 7
+    gate = next(s for s in _steps() if s.get("id") == "sources")
+    assert "orchestration.manifest" in gate["run"]
+
+
+def test_the_runner_reads_the_working_database_the_workflow_names():
+    env = _workflow()["env"]
+    assert env["WORKING_DB"] == "data/local/working.db"
 
 
 # ── The checks are the rule registry ─────────────────────────────────────────
@@ -351,10 +397,12 @@ def sandbox(tmp_path, monkeypatch):
         out_root=str(tmp_path / "out"), working_db=str(db), runs_dir=str(tmp_path / "runs")
     )
     calls: list[str] = []
+    values: dict[str, dict] = {}
     failing: set[str] = set()
 
-    def fake_run_script(context, paths, name, extra=()):
+    def fake_run_script(context, paths, name, extra=(), **given):
         calls.append(name)
+        values[name] = given
         if name in failing:
             raise RuntimeError(f"{name} is down")
         return ""
@@ -366,6 +414,7 @@ def sandbox(tmp_path, monkeypatch):
         paths=paths,
         defs=build_defs(paths),
         calls=calls,
+        values=values,
         failing=failing,
         instance=dg.DagsterInstance.ephemeral(),
         runs=tmp_path / "runs",
@@ -389,7 +438,7 @@ EXPORTS = {"national_csv", "communes_csv", "site_payloads", "local_pages", "site
 def test_one_red_source_still_exports_but_the_day_ends_red(sandbox):
     sandbox.failing.add("onem_observations")
 
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_PARTIAL
 
     (state,) = _manifests(sandbox.runs)
     assert state["sources"]["onem_observations"]["status"] == manifest.FAILED
@@ -408,7 +457,7 @@ def test_one_red_source_still_exports_but_the_day_ends_red(sandbox):
 def test_a_failed_canonical_sync_is_red_like_a_failed_source(sandbox):
     sandbox.failing.add("canonical_observations")
 
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_PARTIAL
 
     (state,) = _manifests(sandbox.runs)
     assert state["sources"]["canonical_observations"]["status"] == manifest.FAILED
@@ -420,7 +469,7 @@ def test_a_failed_canonical_sync_is_red_like_a_failed_source(sandbox):
 def test_a_failed_macro_fetch_skips_the_canonical_sync_and_that_counts_as_red(sandbox):
     sandbox.failing.add("macro_legacy_fetch")
 
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_PARTIAL
 
     (state,) = _manifests(sandbox.runs)
     assert state["sources"]["macro_legacy_fetch"]["status"] == manifest.FAILED
@@ -444,8 +493,8 @@ def test_in_a_single_run_a_failed_source_would_block_the_exports(sandbox):
 
 
 def test_all_green_exits_zero_and_each_run_gets_its_own_manifest(sandbox):
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 0
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 0
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_OK
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_OK
 
     states = _manifests(sandbox.runs)
     assert len(states) == 2 and states[0]["run_id"] != states[1]["run_id"]
@@ -455,7 +504,7 @@ def test_all_green_exits_zero_and_each_run_gets_its_own_manifest(sandbox):
 def test_a_failed_assemble_stops_before_any_export(sandbox):
     sandbox.failing.add("staging_db")
 
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_FAILED
 
     (state,) = _manifests(sandbox.runs)
     assert state["assemble"]["status"] == manifest.FAILED
@@ -473,7 +522,7 @@ def test_a_crashed_fetch_job_leaves_every_source_not_run_and_still_exports(sandb
 
     monkeypatch.setattr(daily, "_execute", crashing)
 
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_PARTIAL
 
     (state,) = _manifests(sandbox.runs)
     assert all(state["sources"][n]["status"] == manifest.NOT_RUN for n in TRACKED)
@@ -490,7 +539,7 @@ def test_a_failing_rule_stops_every_export_and_the_volume_baseline(sandbox, monk
     recorded = []
     monkeypatch.setattr(checks, "record_volume", lambda paths: recorded.append(paths) or 0)
 
-    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_FAILED
 
     (state,) = _manifests(sandbox.runs)
     assert manifest.red_sources(state) == []
@@ -512,6 +561,155 @@ def test_a_warning_rule_is_reported_and_blocks_nothing(sandbox, monkeypatch):
     failed = {e.check_name: e for e in result.get_asset_check_evaluations() if not e.passed}
     assert set(failed) == {"staleness"}
     assert failed["staleness"].severity == dg.AssetCheckSeverity.WARN
+
+
+# ── Step 2: what the runner reads -- manifest path, gate, validation status ──
+
+
+def test_the_coordinator_hands_the_runner_its_own_manifest(sandbox, tmp_path):
+    output = tmp_path / "github_output"
+    sandbox.failing.add("onem_observations")
+
+    daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance, github_output=output)
+
+    (state,) = _manifests(sandbox.runs)
+    lines = output.read_text(encoding="utf-8").splitlines()
+    assert lines == [f"manifest={manifest.path_for(sandbox.runs, state['run_id'])}"]
+
+
+def test_a_failed_assemble_still_hands_the_runner_a_manifest(sandbox, tmp_path):
+    output = tmp_path / "github_output"
+    sandbox.failing.add("staging_db")
+
+    daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance, github_output=output)
+
+    path = Path(output.read_text(encoding="utf-8").strip().removeprefix("manifest="))
+    assert manifest.gate(manifest.load(path))["all_ok"] == "false"
+
+
+def _green_manifest() -> dict:
+    state = manifest.initial("20260913T050000Z-0a1b2c3d")
+    state["assemble"]["status"] = manifest.SUCCESS
+    for source in state["sources"].values():
+        source["status"] = manifest.SUCCESS
+    state["validate_and_export"]["status"] = manifest.SUCCESS
+    return state
+
+
+def test_the_gate_opens_only_when_everything_succeeded():
+    state = _green_manifest()
+    outputs = manifest.gate(state)
+    assert outputs["all_ok"] == "true"
+    assert {k for k in outputs if k not in ("all_ok", "summary")} == RETIRED_GATE_IDS
+    assert outputs["summary"] == ", ".join(f"{COMMANDS[n].workflow_step}=success" for n in TRACKED)
+
+    for status in (manifest.FAILED, manifest.SKIPPED, manifest.NOT_RUN):
+        state = _green_manifest()
+        state["sources"]["walstat_observations"]["status"] = status
+        outputs = manifest.gate(state)
+        assert outputs["all_ok"] == "false", status
+        assert outputs["sync_walstat"] == status
+
+    for step in ("assemble", "validate_and_export"):
+        state = _green_manifest()
+        state[step]["status"] = manifest.FAILED
+        assert manifest.gate(state)["all_ok"] == "false", step
+
+    state = _green_manifest()
+    del state["sources"]["market_data"]
+    assert manifest.gate(state)["all_ok"] == "false", "a missing outcome is not a success"
+
+
+def test_the_gate_command_prints_outputs_and_refuses_a_missing_manifest(tmp_path, capsys):
+    path = manifest.path_for(tmp_path, "20260913T050000Z-0a1b2c3d")
+    manifest.write(path, _green_manifest())
+
+    assert manifest.main([str(path)]) == 0
+    printed = dict(line.split("=", 1) for line in capsys.readouterr().out.splitlines())
+    assert printed["all_ok"] == "true" and printed["fetch_macro"] == "success"
+
+    assert manifest.main([str(tmp_path / "missing.json")]) == 2
+    assert manifest.main([""]) == 2
+    assert "all_ok" not in capsys.readouterr().out
+
+
+def test_the_published_validation_status_comes_from_the_checks_of_the_same_run(sandbox):
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_OK
+    assert sandbox.values["site_payloads"] == {"validation_status": "pass"}
+
+
+def test_a_warning_still_publishes_pass(sandbox, monkeypatch):
+    violation = Violation("staleness", WARN, "ONEM is 40 days old")
+    monkeypatch.setattr(checks, "run_validation", lambda paths: [violation])
+
+    sandbox.defs.resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance, raise_on_error=False
+    )
+
+    assert sandbox.values["site_payloads"] == {"validation_status": "pass"}
+
+
+def test_payloads_built_without_the_checks_publish_unknown(sandbox):
+    job = sandbox.defs.resolve_implicit_global_asset_job_def()
+    result = job.execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        asset_selection=[dg.AssetKey("site_payloads")],
+    )
+    assert result.success
+    assert sandbox.values["site_payloads"] == {"validation_status": "unknown"}
+    assert _metadata(result, "site_payloads")["validation_status"].value == "unknown"
+
+
+def test_a_failed_blocking_check_reads_as_fail(sandbox, monkeypatch):
+    violation = Violation("unique_latest", FAIL, "keys with more than one is_latest row", 2)
+    monkeypatch.setattr(checks, "run_validation", lambda paths: [violation])
+
+    result = sandbox.defs.resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance, raise_on_error=False
+    )
+
+    assert checks.validation_status(sandbox.instance, result.run_id) == "fail"
+    assert "site_payloads" not in sandbox.values
+
+
+def test_the_checks_write_validate_data_summary_and_annotations(sandbox, monkeypatch, capsys):
+    summary = sandbox.runs.parent / "validation-summary.md"
+    # A new resource, not model_copy: Dagster rebuilds a resource from the
+    # arguments it was constructed with.
+    paths = PipelinePaths(
+        out_root=sandbox.paths.out_root,
+        working_db=sandbox.paths.working_db,
+        runs_dir=sandbox.paths.runs_dir,
+        validation_summary=str(summary),
+    )
+    violations = [
+        Violation("unique_latest", FAIL, "keys with more than one is_latest row", 2),
+        Violation("staleness", WARN, "ONEM is 40 days old"),
+    ]
+    monkeypatch.setattr(checks, "run_validation", lambda paths: violations)
+
+    build_defs(paths).resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance, raise_on_error=False
+    )
+
+    text = summary.read_text(encoding="utf-8")
+    assert "1 failure(s), 1 warning(s)" in text
+    assert "keys with more than one is_latest row" in text and "ONEM is 40 days old" in text
+    out = capsys.readouterr().out
+    assert "::error::" in out and "::warning::" in out
+
+
+def test_the_runner_environment_reaches_the_paths(monkeypatch):
+    from orchestration.definitions import default_paths
+
+    monkeypatch.setenv("WORKING_DB", "data/local/other.db")
+    monkeypatch.setenv("BUILD_ID", "34764984140")
+    monkeypatch.setenv("VALIDATION_SUMMARY", "/tmp/runner/validation-summary.md")
+    paths = default_paths()
+    assert paths.working_db == "data/local/other.db"
+    assert paths.build_id == "34764984140"
+    assert paths.validation_summary == "/tmp/runner/validation-summary.md"
 
 
 # ── A stale manifest is never attributed to a run ────────────────────────────

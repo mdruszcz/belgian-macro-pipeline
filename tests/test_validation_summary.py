@@ -131,14 +131,21 @@ def test_the_workflow_writes_the_summary_even_when_validation_fails():
     """A `run:` block is bash -e, so a failing validation would abort the step
     before the summary was copied -- losing the report in exactly the case it
     matters most. Asserted on the workflow text because there is no cheap way
-    to run Actions here."""
+    to run Actions here.
+
+    Since Dagster step 2 the validation runs inside the coordinator step
+    (python -m orchestration.daily), which writes the summary through
+    VALIDATION_SUMMARY; tests/test_orchestration.py proves the checks write it
+    on a failing run."""
     workflow = (REPO / ".github" / "workflows" / "daily_fetch.yml").read_text(encoding="utf-8")
-    step = workflow[workflow.index("Validate the data before exporting") :]
+    step = workflow[workflow.index("Assemble, fetch every source, validate and export") :]
     step = step[: step.index("- name:", 10)]
+    assert "VALIDATION_SUMMARY:" in step
     assert "set +e" in step, "a validation failure would abort before the summary is written"
     assert "STATUS=$?" in step
     assert "exit $STATUS" in step, "the real exit code must still propagate"
-    assert 'cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"' in step
+    assert 'cat "$VALIDATION_SUMMARY" >> "$GITHUB_STEP_SUMMARY"' in step
+    assert step.index('cat "$VALIDATION_SUMMARY"') < step.index("exit $STATUS")
     # And the daily PR body carries it, so it arrives as a notification rather
     # than only living on a page someone has to visit.
     assert "$validation_summary" in workflow

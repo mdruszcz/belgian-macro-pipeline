@@ -1,7 +1,11 @@
 """website: the published CSVs, JSON payloads and generated pages, with the
 dependencies `make exports` runs them in."""
 
+from dagster import AssetExecutionContext, MaterializeResult, asset
+
+from orchestration import checks, run
 from orchestration.assets import script_asset
+from orchestration.paths import PipelinePaths
 
 VALIDATED = "validated_working_database"
 
@@ -40,9 +44,11 @@ indicator_metadata_json = script_asset(
     kinds={"json"},
     description="data/metadata/indicators.json (python -m src.exporters.metadata).",
 )
-site_payloads = script_asset(
-    "site_payloads",
-    group="website",
+
+
+@asset(
+    name="site_payloads",
+    group_name="website",
     deps=[
         "communes_history_full_csv",
         "communes_csv",
@@ -52,8 +58,20 @@ site_payloads = script_asset(
         "indicator_metadata_json",
     ],
     kinds={"json"},
-    description="public/data/** and manifest.json (scripts/export_site_payloads.py).",
+    description=(
+        "public/data/** and manifest.json (scripts/export_site_payloads.py). The manifest's "
+        "validation_status is the outcome of the checks in this same run: pass, fail, or "
+        "unknown when they did not run (as with `make exports`)."
+    ),
 )
+def site_payloads(context: AssetExecutionContext, paths: PipelinePaths) -> MaterializeResult:
+    status = checks.validation_status(context.instance, context.run.run_id)
+    run.run_script(context, paths, "site_payloads", validation_status=status)
+    return MaterializeResult(
+        metadata={"validation_status": status, **run.output_metadata(paths, "site_payloads")}
+    )
+
+
 explorer_payloads = script_asset(
     "explorer_payloads",
     group="website",

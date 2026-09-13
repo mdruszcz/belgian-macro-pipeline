@@ -1,8 +1,8 @@
-# Feature: Dagster orchestration layer, step 1 (local)
+# Feature: Dagster orchestration layer
 
-Status: done (step 1)
+Status: step 1 done (local); step 2 built (production runs through Dagster), pending merge
 Issue: none -- requested directly by the maintainer, 2026-09-13
-Branch: feat/dagster-orchestration
+Branch: feat/dagster-orchestration (step 1), feat/dagster-step2-runner (step 2)
 Decision record: [ADR 0007](../decisions/0007-dagster-orchestration-layer.md)
 
 ## Problem
@@ -58,7 +58,7 @@ Manual stores (population, fiscal_income, census2021, realestate,   │
 
 | Condition | Enforced by |
 |---|---|
-| Assets are thin wrappers around the existing scripts | Every asset runs a command from one table, `orchestration/commands.py`. `test_every_command_is_one_the_makefile_or_the_workflow_already_runs` requires each command to appear verbatim in the Makefile or the workflow; the converse test requires every script the workflow runs between assemble and offload to be wrapped. |
+| Assets are thin wrappers around the existing scripts | Every asset runs a command from one table, `orchestration/commands.py`. `test_every_command_is_one_the_makefile_runs_or_production_ran` requires each command to appear verbatim in the Makefile, or to equal the line `daily_fetch.yml` ran itself before step 2 (frozen in the test); the converse test requires every script that workflow ran between assemble and offload to be wrapped. |
 | No formula or data duplicated in Dagster | Assets run the scripts as subprocesses and return metadata only (sizes, row counts, latest period). No I/O manager. |
 | No change to the database or the exports | The only edit to existing code is a pure extraction in `scripts/validate_data.py` (`build_context`, `record_volume`), covered by its existing tests. Parity: `tests/test_orchestration_parity.py` and `scripts/verify_dagster_parity.py`. |
 | Checks call the existing validators | `orchestration/checks.py` calls `_validation_copy`, `build_context` and `run_all` from `validate_data.py`. One check per entry of `RULES` plus `store_loads`; names and severities come from the registry. A parity test compares the check results with the CLI's output on the real data. |
@@ -133,8 +133,9 @@ It is a Python program rather than a Make recipe because a recipe stops at the f
    `fetch_runs`, which `fetch_stocks.py` never writes and which a crash can precede;
 4. always runs `validate_and_export`, passing that manifest's path and run id as the
    configuration of `validated_working_database`;
-5. exits 1 if any of the seven is not a success (a failed `sync_to_canonical` counts like a
-   failed source) or if `validate_and_export` failed; 0 otherwise.
+5. exits 0 when everything is green; 3 when the exports ran but any of the seven is not a
+   success (a failed `sync_to_canonical` counts like a failed source); 1 when nothing is
+   publishable -- the assemble or `validate_and_export` failed.
 
 A blocking check that fails stops every export and the volume baseline, as the workflow's
 validation step does. The coordinator keeps the 30 most recent run directories.
@@ -167,11 +168,57 @@ check -- it concerns the reference period, not when an asset last ran.
 `daily_fetch_sources`, cron `0 5 * * *` UTC (the workflow's), targeting `fetch_sources`, declared
 **stopped**. GitHub Actions remains the scheduler.
 
-## What the local UI shows during step 1
+## What the local UI shows
 
-Only local runs. Production runs on GitHub Actions do not go through Dagster yet and write
-nothing to the local `DAGSTER_HOME`, so the UI shows the maintainer's own trials -- never the
-production fetch of that morning.
+Only local runs. Since step 2 production does run through Dagster, but inside the GitHub runner,
+with its history in the runner's temporary directory, which disappears with the runner. The
+local UI therefore shows the maintainer's own trials, never the production fetch of that
+morning; production's record is the workflow log, the job summary and the PR body.
+
+## Step 2 -- the runner
+
+`daily_fetch.yml` no longer runs the pipeline's scripts itself. Its steps are now:
+
+1. the open-PR check, Python, `pip install -r requirements.txt` plus the `dagster==` pin read from
+   `requirements-dagster.txt` (not the web UI);
+2. **one step, `python -m orchestration.daily --github-output "$GITHUB_OUTPUT"`** -- assemble,
+   the seven sources, validation, the revisions report, every export and page. Its environment:
+   `WORKING_DB` (workflow level, unchanged), `BUILD_ID` = the run id, `DAGSTER_HOME` and
+   `VALIDATION_SUMMARY` under `$RUNNER_TEMP`, `DAGSTER_DISABLE_TELEMETRY`;
+3. offload, the size guard, the gate, stage, PR, auto-merge and the final red step -- as before.
+
+The job's timeout is 30 minutes (was 15): the rehearsal took about 15 minutes end to end, with the
+Dagster install on top in the runner.
+
+Failure semantics, unchanged from the day before step 2:
+
+| Coordinator exit | Meaning | The workflow |
+|---|---|---|
+| 0 | all green | offloads, opens the PR, enables auto-merge |
+| 3 | exported, but a source (or `sync_to_canonical`) was red | offloads, opens the PR, **no** auto-merge, run ends red |
+| 1, or anything else | assemble or validation failed, or a crash | stops before the offload: no committed file changes, no PR |
+
+The gate. `python -m orchestration.manifest <path>` reads the manifest of this run -- the path the
+coordinator wrote into `$GITHUB_OUTPUT`, never a fixed one -- and prints one output per tracked
+outcome under its old step id (`fetch_macro=success`, ...), `summary`, and `all_ok`. `all_ok` is
+`true` only if the assemble, all seven outcomes and `validate_and_export` succeeded; a missing
+outcome counts as not run, and a missing manifest fails the step (no PR). The PR body and the
+final error message use `summary`.
+
+`validation_status` in `public/data/manifest.json`. `site_payloads` reads the check evaluations of
+its own Dagster run: `pass` when every check ran and no FAIL check failed (warnings allowed, as
+`validate_data.py` exits 0 on warnings), `fail` if one did (never published in practice: the
+checks block), `unknown` when the checks did not run in that run -- a payload export materialised
+on its own, the same value `make exports` stamps. `scripts/verify_dagster_parity.py` therefore
+masks this field alongside `build_date`.
+
+The validation report. The checks print the same `::error::` / `::warning::` annotations as
+`validate_data.py` and, when `VALIDATION_SUMMARY` is set, append its markdown summary with its own
+writer; the workflow copies it to the job summary and the PR body, even on a failing run.
+
+What the daily run now also rebuilds: `page_documents`, `site_index`, `commune_adjacency` and
+`commune_typology`, which `make exports` ran but the workflow did not. All four are
+deterministic (rule 35), so they produce a diff only when their inputs changed.
 
 ## Data / schema changes
 
@@ -204,17 +251,23 @@ On Windows without `make`: `.venv/Scripts/python.exe -m dagster dev -m orchestra
   and warning rules, stale / missing / foreign manifests, pruning.
 - `tests/test_orchestration_parity.py` (slow): assembled database byte-identical; check results
   equal to `validate_data.py`'s output on the real data; four exporters byte-identical.
+- Step 2, in `tests/test_orchestration.py`: the coordinator writes its own manifest path to the
+  runner (also when the assemble fails); exit codes 0 / 3 / 1; the gate opens only when
+  everything succeeded, and its command refuses a missing manifest; `validation_status` is
+  `pass` after the checks, `pass` with a warning, `unknown` without the checks, `fail` after a
+  failed blocking check; the checks write `validate_data.py`'s summary and annotations; the
+  runner's environment reaches `PipelinePaths`.
+- Step 2, in `tests/test_pipeline_cutover_wiring.py`: coordinator before offload before gate
+  before PR; no pipeline script run as a step of its own; no `continue-on-error`; only exit 3
+  let through; the gate reads `steps.daily.outputs.manifest` without a pipe; Dagster installed at
+  the pinned version without the UI; history and telemetry kept in the runner.
 - `scripts/verify_dagster_parity.py`: every file of `make assemble exports` versus the Dagster
   jobs, in two worktrees of the committed HEAD; refuses a dirty tree.
 
 ## Next steps (not in this batch)
 
-- **Step 2 -- the runner.** `daily_fetch.yml` runs the coordinator in the runner (an ephemeral
-  Dagster run: GitHub cron → Dagster → fetch, validation, exports → PR → runner off), then
-  offload and the PR steps as today. Needs: installing Dagster in the workflow, deriving
-  `--validation-status` from the check results (the Dagster route passes `unknown` today, as
-  `make exports` does), the auto-merge gate reading the manifest, and updating
-  `tests/test_pipeline_cutover_wiring.py`.
+- **After merging step 2:** watch the first production run (or start it by hand with
+  `workflow_dispatch` on `develop`) -- the runner is the one environment the tests cannot reach.
 - **Step 3.** Offload inside the graph; extract clean functions from the scripts one at a time.
 
 ## Open questions
