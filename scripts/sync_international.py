@@ -245,8 +245,21 @@ def sync(
                 raw = (from_dir / f"{code}.json").read_bytes()
                 geo_rows_fetched = source._parse(raw, dataset=dataset)
             else:
+                # Deliberately no `conn=` here (audit SHOULD-FIX 7): this
+                # loop already opened and will close its own fetch_runs row
+                # per indicator, exactly like
+                # scripts/port_existing_indicators.py's one-off port()
+                # already does for the same reason ("a second, adapter-level
+                # row would describe the same network call from a different
+                # angle and is not needed"). Passing `conn` here made
+                # DataSource.fetch()'s own `finally` block log a SECOND row,
+                # always 'ok' even when this loop's OWN row was later marked
+                # 'error' -- so fetch_error (which reads the highest
+                # fetch_run_id per source) saw the adapter's later 'ok' row
+                # and missed the failure entirely. Ten eurostat rows for five
+                # fetches in the committed db was the symptom.
                 url = EurostatSource.build_url(source_meta["base_url"], dataset, filters, since)
-                geo_rows_fetched = source.fetch(url, cache_key=code, conn=conn, dataset=dataset)
+                geo_rows_fetched = source.fetch(url, cache_key=code, dataset=dataset)
 
             resolved: list[tuple[dict, str]] = []
             seen_codes: set[str] = set()

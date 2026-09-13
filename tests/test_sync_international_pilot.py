@@ -9,6 +9,7 @@ network and exercise the real geography resolution against real codes
 these five real responses).
 """
 
+import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -163,6 +164,86 @@ def test_ea_is_recognized_but_never_written_by_the_pilot(db):
     assert "ea:aggregate" not in geo_ids
     assert "ea21:aggregate" in geo_ids
     assert "eu27_2020:aggregate" in geo_ids
+
+
+class _FakeResponse:
+    def __init__(self, content: bytes, status_code: int = 200):
+        self.content = content
+        self.status_code = status_code
+
+    def raise_for_status(self):
+        pass
+
+
+def _one_real_pilot_indicator(monkeypatch, code: str) -> None:
+    """Restrict sync()'s loop to a single real pilot indicator config, so a
+    test only needs to fake one dataset's response."""
+    from src.validation.config_schema import load_and_validate_all
+
+    indicators, _sources = load_and_validate_all(
+        REPO / "config" / "indicators", REPO / "config" / "sources"
+    )
+    monkeypatch.setattr(si, "pilot_indicators", lambda _cfgs: {code: indicators[code]})
+
+
+def test_exactly_one_fetch_runs_row_per_indicator_via_base_fetch(db, monkeypatch):
+    """Audit SHOULD-FIX 7: sync()'s own loop opens one fetch_runs row per
+    indicator, but used to pass `conn=` into EurostatSource.fetch() too --
+    DataSource.fetch()'s own `finally` block then logged a SECOND row for
+    the same fetch. Exercised through the REAL base.fetch() path
+    (requests.get monkeypatched), not --from-dir, which calls `_parse`
+    directly and would never have seen this bug (the committed db had ten
+    eurostat runs for five real fetches)."""
+    _one_real_pilot_indicator(monkeypatch, "GOV_DEBT_EUROPE")
+    raw = (FIXTURES / "GOV_DEBT_EUROPE.json").read_bytes()
+    monkeypatch.setattr("src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(raw))
+
+    si.sync(db, from_dir=None)
+
+    conn = sqlite3.connect(str(db))
+    try:
+        runs = conn.execute(
+            "SELECT status FROM fetch_runs WHERE source_id = 'eurostat' AND adapter = 'eurostat'"
+        ).fetchall()
+    finally:
+        conn.close()
+    assert runs == [("ok",)], f"expected exactly one 'ok' fetch_runs row, got {runs}"
+
+
+def test_exactly_one_fetch_runs_row_is_marked_error_on_failure_via_base_fetch(db, monkeypatch):
+    """The failure-path twin: an unknown geography raises AFTER
+    EurostatSource.fetch() has already returned successfully and (before the
+    fix) already logged its own 'ok' row with a higher fetch_run_id than
+    sync()'s own row -- so fetch_error, which reads the highest
+    fetch_run_id per source, saw 'ok' even though the fetch genuinely
+    failed. With the fix there is only ever sync()'s own row to read."""
+    _one_real_pilot_indicator(monkeypatch, "GOV_DEBT_EUROPE")
+    cube = json.dumps(
+        {
+            "id": ["unit", "geo", "time"],
+            "size": [1, 2, 1],
+            "dimension": {
+                "unit": {"category": {"index": {"PC_GDP": 0}}},
+                "geo": {"category": {"index": {"BE": 0, "ZZ": 1}}},
+                "time": {"category": {"index": {"2023": 0}}},
+            },
+            "value": {"0": 1.0, "1": 2.0},
+            "status": {},
+        }
+    ).encode()
+    monkeypatch.setattr("src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(cube))
+
+    with pytest.raises(si.SyncInternationalError, match="ZZ"):
+        si.sync(db, from_dir=None)
+
+    conn = sqlite3.connect(str(db))
+    try:
+        runs = conn.execute(
+            "SELECT status FROM fetch_runs WHERE source_id = 'eurostat' AND adapter = 'eurostat'"
+        ).fetchall()
+    finally:
+        conn.close()
+    assert runs == [("error",)], f"expected exactly one 'error' fetch_runs row, got {runs}"
 
 
 def test_pilot_indicators_excludes_the_eight_single_country_configs():
