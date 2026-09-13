@@ -743,8 +743,10 @@ function populatePeriodPicker(){
     option.textContent = period;
     sel.appendChild(option);
   }
-  // Keep the year across an indicator change when the new one also has it --
-  // comparing two indicators for the same year is the whole point of a picker.
+  // A year set by the URL, or by the reader on THIS indicator, survives a
+  // redraw; a year carried over from a different indicator does not --
+  // resetFiltersForNewIndicator clears it before this runs. Falls back to the
+  // latest period the payload actually has.
   state.period = (wanted && periods.includes(wanted)) ? wanted : periods[periods.length - 1] || null;
   sel.value = state.period || '';
   sel.disabled = periods.length < 2;
@@ -1027,7 +1029,38 @@ function pushScopeToUrl(){
   }catch(_){}
 }
 
-async function selectIndicator(code){
+/* Back to defaults -- everything except the palette.
+
+   PICKING A NEW INDICATOR IS STARTING A NEW QUESTION, and carrying the old
+   answer's settings into it is how a reader ends up looking at a map they did
+   not ask for: last indicator's year on an indicator that happens to publish
+   it too, last indicator's province, and class boundaries typed for a scale of
+   euros still cutting a scale of percentages. The colour scheme is the
+   exception because it is a preference about the reader, not about the data --
+   it is also the only one of these kept in localStorage.
+
+   Not called on first load or on a language switch: the URL may carry a year
+   and an area a reader was sent, and switching language is not a new question.
+*/
+function resetFiltersForNewIndicator(){
+  state.period = null;                       // populatePeriodPicker picks the latest
+  state.scope = 'be:country';
+  const classes = document.getElementById('classes');
+  const breaks = document.getElementById('breaks');
+  if(classes) classes.value = 'auto';
+  if(breaks){ breaks.value = ''; breaks.hidden = true; }
+  const hint = document.getElementById('classesHint');
+  if(hint) hint.textContent = '';
+  if(state.map) state.map.setClassification({bins: MapUI.BINS, breaks: null});
+  const search = document.getElementById('search');
+  if(search) search.value = '';
+  const scopeSel = document.getElementById('scope');
+  if(scopeSel) scopeSel.value = state.scope;
+  const scopeHint = document.getElementById('scopeHint');
+  if(scopeHint) scopeHint.textContent = '';
+}
+
+async function selectIndicator(code, {reset = false} = {}){
   const meta = state.index.find(i => i.indicator_code === code);
   if(!meta) return;
 
@@ -1037,8 +1070,12 @@ async function selectIndicator(code){
   const res = await fetch(VALUES_URL(code) + '?t=' + Date.now());
   if(!res.ok){ statusEl.textContent = `Could not load ${code}`; return; }
   state.payload = await res.json();
+  if(reset) resetFiltersForNewIndicator();
   populatePeriodPicker();
   drawPeriod();
+  // After the data is in: applyScope re-reads coverage and re-frames the view,
+  // which only means anything once the map has values.
+  if(reset && state.areas.length) applyScope(state.scope);
 
 
   /* Where this indicator came from and how it was made, beside the map that
@@ -1165,7 +1202,7 @@ async function init(){
       .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
       .sort((a, b) => a.label.localeCompare(b.label));
     populateIndicatorPicker(rows);
-    sel.onchange = () => selectIndicator(sel.value);
+    sel.onchange = () => selectIndicator(sel.value, {reset: true});
 
     // The area picker is optional: if the geography index is unreachable the
     // map still draws all 565, the picker stays empty and says so, rather than
