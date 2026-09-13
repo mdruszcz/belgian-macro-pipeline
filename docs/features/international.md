@@ -204,10 +204,15 @@ only, no share-alike. It needs its own catalogue row (rule 8). See open question
    dataset-level adapter regardless). **Decided 2026-09-13: (b), Eurostat directly, for ALL data
    currently fetched through DBnomics**, not only the pilot: the eight `dbnomics_eurostat`
    indicators move to the new Eurostat source, and nothing new is fetched through DBnomics.
-   **Still open:** the five `dbnomics_ameco` series (`LABOUR_COST_BE/DE/EA/FR/NL`) come from the
-   Commission's AMECO database, which Eurostat does not publish. They need either AMECO fetched from
-   the Commission directly (its own licence and catalogue row) or an equivalent Eurostat series (a
-   different number, so a new indicator, not a silent swap). The maintainer decides before they move.
+   **AMECO, decided 2026-09-13:** the five `dbnomics_ameco` series (`LABOUR_COST_BE/DE/EA/FR/NL`)
+   come from the Commission's AMECO database, which Eurostat does not publish. They are fetched from
+   the **Commission directly** (catalogue row `ameco`), same indicators, not swapped for a Eurostat
+   series. Licence, supplied by the maintainer: AMECO is free of charge under the Commission's reuse
+   policy (Commission Decision of 12 December 2011), and EU-owned content is **CC BY 4.0** unless an
+   individual copyright notice says otherwise -- reuse allowed with appropriate credit **and changes
+   indicated**. All five are rebased (`transform: rebase`), so the "adapted data" notice of point 4
+   above is required for them too. The adapter checks the dataset's own notice for an exception
+   before loading.
 5. **Full history or from 2008?** 108 MB vs 63 MB at 100 indicators. Recommended: from 2008 in the
    pilot, measured both ways.
 6. Revision churn cannot be measured from one download. The pilot's 14 daily runs are the
