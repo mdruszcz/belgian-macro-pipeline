@@ -195,22 +195,13 @@ def _validate(args, scratch: Path) -> int:
     conn = sqlite3.connect(str(validation_db))
     conn.execute("PRAGMA foreign_keys=ON")
 
-    derived_dir = Path(args.derived_dir)
-    indicators_dir = Path(args.indicators_dir)
-    derived_ids = frozenset(
-        load_and_validate_derived(derived_dir, _configured_indicator_ids(indicators_dir))
-        if derived_dir.is_dir()
-        else {}
-    )
-    exports = tuple(Path(p) for p in args.export) or _default_exports()
-
     violations = load_problems + run_all(
-        Context(
-            conn=conn,
-            derived_ids=derived_ids,
-            exports=exports,
-            max_age_days=_staleness_allowances(Path(args.indicators_dir), Path(args.sources_dir)),
-            fetch_window_days=_fetch_windows(Path(args.sources_dir)),
+        build_context(
+            conn,
+            derived_dir=Path(args.derived_dir),
+            indicators_dir=Path(args.indicators_dir),
+            sources_dir=Path(args.sources_dir),
+            exports=tuple(Path(p) for p in args.export),
         )
     )
 
@@ -231,17 +222,52 @@ def _validate(args, scratch: Path) -> int:
     blocked = has_failures(violations) or (args.warnings_as_errors and warns)
 
     if args.record_volume and not blocked:
-        target = sqlite3.connect(str(args.db))
-        try:
-            n = record_volume_snapshot(target, counts_conn=conn)
-        finally:
-            target.close()
+        n = record_volume(Path(args.db), counts_conn=conn)
         print(f"Recorded volume snapshot for {n} indicator(s) in {args.db}.")
     elif args.record_volume:
         print("Volume snapshot NOT recorded: this run failed, so the counts are not a baseline.")
 
     conn.close()
     return 1 if blocked else 0
+
+
+def build_context(
+    conn: sqlite3.Connection,
+    *,
+    derived_dir: Path = DEFAULT_DERIVED_DIR,
+    indicators_dir: Path = DEFAULT_INDICATORS_DIR,
+    sources_dir: Path = DEFAULT_SOURCES_DIR,
+    exports: tuple[Path, ...] = (),
+) -> Context:
+    """The rule context for `conn`, from the same config this script's CLI reads.
+
+    Shared with orchestration/checks.py, so the Dagster checks run the rule
+    catalogue on exactly the context this script builds -- not a second copy
+    of it. `exports` empty means the default list (_default_exports).
+    """
+    derived_ids = frozenset(
+        load_and_validate_derived(derived_dir, _configured_indicator_ids(indicators_dir))
+        if derived_dir.is_dir()
+        else {}
+    )
+    return Context(
+        conn=conn,
+        derived_ids=derived_ids,
+        exports=exports or _default_exports(),
+        max_age_days=_staleness_allowances(indicators_dir, sources_dir),
+        fetch_window_days=_fetch_windows(sources_dir),
+    )
+
+
+def record_volume(db_path: Path, counts_conn: sqlite3.Connection) -> int:
+    """Record the volume snapshot into `db_path`, counted on `counts_conn`
+    (the validation copy, which also holds the extra_csv stores). Only ever
+    called after a passing run -- see --record-volume."""
+    target = sqlite3.connect(str(db_path))
+    try:
+        return record_volume_snapshot(target, counts_conn=counts_conn)
+    finally:
+        target.close()
 
 
 _CONFIG_TO_DB_SOURCE_ID = {v: k for k, v in DB_TO_CONFIG_SOURCE_ID.items()}

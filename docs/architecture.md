@@ -39,6 +39,14 @@ There is no `src/` package, no `config/` directory, and no `docs/data_catalog.md
   when no flags are given).
 - No queue, scheduler, or server process. GitHub Actions cron is the only orchestrator.
 
+> **Update 2026-09-13.** This "As-is" section describes the repository before the rebuild and is
+> kept as history. The daily run is now `daily_fetch.yml`: assemble the working database, every
+> source sync, blocking validation, the exports, then offload (ADR 0006). A Dagster layer wraps
+> those same scripts for local supervision -- lineage, checks, freshness -- without replacing the
+> workflow: GitHub Actions is still the only scheduler, and there is still no permanent server
+> process. See [ADR 0007](decisions/0007-dagster-orchestration-layer.md) and
+> [features/orchestration.md](features/orchestration.md).
+
 ### `belgian_macro_db.py` internals
 
 - `SOURCES`: a module-level `dict` hardcoding ~21 indicators. Each entry carries `name`, `url`,

@@ -39,7 +39,11 @@ DB           ?= data/local/working.db
 # loudly if it cannot (CLAUDE.md rule 13).
 STORES := config/stores.yaml
 
-.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder assemble offload test fetch clean help
+# Dagster's run history for the local UI -- gitignored with the rest of
+# data/local/. Must be absolute.
+DAGSTER_HOME ?= $(CURDIR)/data/local/dagster_home
+
+.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder assemble offload test fetch clean help dagster dagster-daily verify-dagster-parity
 
 ## all: install deps, assemble the working database from what is committed,
 ## validate it, regenerate every published export, and run the tests. No
@@ -214,6 +218,30 @@ fetch:
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
 	$(PYTHON) scripts/sync_onem_rates.py --db $(DB)
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
+
+## dagster: the local Dagster UI at http://localhost:3000 -- the pipeline's
+## assets, lineage, checks and freshness (docs/features/orchestration.md).
+## Shows LOCAL runs only: production still runs on GitHub Actions, outside
+## Dagster. Nothing materialises by itself; the schedule is declared stopped.
+dagster:
+	$(PYTHON) -m pip install -q -r requirements-dagster.txt
+	mkdir -p "$(DAGSTER_HOME)"
+	DAGSTER_HOME="$(DAGSTER_HOME)" $(PYTHON) -m dagster dev -m orchestration
+
+## dagster-daily: the daily sequence through Dagster -- assemble, fetch every
+## source, then validate and export ALWAYS, even when a source failed (as the
+## workflow does), ending non-zero if anything was red. Needs the network.
+## Never writes $(COMMITTED_DB): offload stays a separate step.
+dagster-daily:
+	mkdir -p "$(DAGSTER_HOME)"
+	DAGSTER_HOME="$(DAGSTER_HOME)" $(PYTHON) -m orchestration.daily
+
+## verify-dagster-parity: rebuild every export twice from the committed HEAD,
+## once with `make assemble exports` and once through Dagster, each in its own
+## temporary git worktree, and compare every file. Refuses a dirty tree: commit
+## first, or it would compare two copies of the previous commit.
+verify-dagster-parity:
+	$(PYTHON) scripts/verify_dagster_parity.py
 
 ## clean: remove generated artifacts that are safe to regenerate. Deliberately
 ## does NOT touch data/*.csv or the committed database -- those are committed stores, and
