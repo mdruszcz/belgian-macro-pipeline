@@ -151,6 +151,124 @@ def test_commune_export_matches_whether_source_is_db_or_csv(tmp_path):
     assert from_csv.read_bytes() == from_db.read_bytes()
 
 
+def test_roundtrip_preserves_a_superseded_vintage_chain(tmp_path):
+    """Two vintages of the SAME cell (geo_id, period): an original value later
+    revised. The round trip must keep both rows, with is_latest=0 on the
+    superseded one and =1 on the revision -- not collapse them to one row and
+    not flip which is latest."""
+    db = tmp_path / "a.db"
+    migrate.run(db, migrations_dir=REAL_MIGRATIONS_DIR)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) VALUES (?,?,?,?,?)",
+        ("statbel", "Statbel Bestat API", "Statbel", "statbel", "docs/data_catalog.md#statbel"),
+    )
+    conn.execute(
+        """INSERT INTO indicators
+           (indicator_id, source_id, name_nl, name_fr, name_en, frequency, unit,
+            preferred_direction, is_additive, config_path)
+           VALUES (?, 'statbel', 'Bevolking', 'Population', 'Population', 'A', 'count',
+                   'contextual', 1, 'x')""",
+        (POP,),
+    )
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','statbel','2026-01-01','ok')"
+    )
+    conn.execute(
+        """INSERT INTO geographies (geo_id, nis_code, level, name_nl, name_fr, name_en, valid_from)
+           VALUES ('be:mun:11002','11002','municipality','X','X','X','1830-01-01')"""
+    )
+    # The original observation, superseded -- is_latest=0.
+    conn.execute(
+        """INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES (?, 'be:mun:11002', '2016', 'v1', 500000.0, 'final',
+                   '2016-01-01', '2016-12-31', 0, 1, '2025-01-01T00:00:00+00:00')""",
+        (POP,),
+    )
+    # The revision -- is_latest=1.
+    conn.execute(
+        """INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES (?, 'be:mun:11002', '2016', 'v2', 517042.0, 'revised',
+                   '2016-01-01', '2016-12-31', 1, 1, '2026-01-01T00:00:00+00:00')""",
+        (POP,),
+    )
+    conn.commit()
+    conn.close()
+
+    original = tmp_path / "orig.csv"
+    n = export_observations(db, original, [POP])
+    assert n == 2
+
+    rebuilt_db = tmp_path / "rebuilt.db"
+    n = load(rebuilt_db, original)
+    assert n == 2
+
+    rconn = sqlite3.connect(str(rebuilt_db))
+    rows = rconn.execute(
+        "SELECT vintage, value, status, is_latest FROM observations "
+        "WHERE indicator_id = ? ORDER BY vintage",
+        (POP,),
+    ).fetchall()
+    assert rows == [
+        ("v1", 500000.0, "final", 0),
+        ("v2", 517042.0, "revised", 1),
+    ]
+
+    again = tmp_path / "again.csv"
+    export_observations(rebuilt_db, again, [POP])
+    assert again.read_bytes() == original.read_bytes()
+
+
+def test_load_marks_the_run_as_a_rebuild_not_a_statbel_fetch(tmp_path):
+    """THE FORGED-HEARTBEAT FIX. A rebuild used to hardcode
+    source_id='statbel', adapter='statbel', which would forge Statbel's daily
+    heartbeat every time a local database was rebuilt from this committed CSV
+    -- src.validation.rules.fetch_silence reads MAX(started_at) per source_id
+    and would never again see Statbel go quiet. The default is now
+    adapter='rebuild', and both fetch_silence and fetch_error exclude it
+    (tests/test_validation_rules.py)."""
+    db = tmp_path / "a.db"
+    _db_with_population(db, [("be:mun:11002", "2026", 1.0)])
+    original = tmp_path / "orig.csv"
+    export_observations(db, original, [POP])
+
+    rebuilt_db = tmp_path / "rebuilt.db"
+    load(rebuilt_db, original)
+
+    conn = sqlite3.connect(str(rebuilt_db))
+    adapters = {row[0] for row in conn.execute("SELECT adapter FROM fetch_runs")}
+    assert adapters == {"rebuild"}
+
+
+def test_load_run_source_id_and_adapter_are_overridable(tmp_path):
+    """scripts/build_staging_db.py passes the store's own source_id explicitly
+    (config/stores.yaml) rather than relying on the 'statbel' default, which
+    is only correct for the population store. Uses a real police-sourced
+    indicator (config/indicators/HOUSE_BURGLARIES_PER_10K.yaml declares
+    source_id: police) so _ensure_reference_rows creates the matching `police`
+    row in `sources` and the fetch_runs FK is satisfiable."""
+    csv_path = tmp_path / "police_observations.csv"
+    csv_path.write_text(
+        "indicator_id,geo_id,period,vintage,value,status,period_start,period_end,"
+        "is_latest,created_at\n"
+        "HOUSE_BURGLARIES_PER_10K,be:mun:11002,2020,v1,5.0,final,2020-01-01,2020-12-31,1,"
+        "2026-01-01T00:00:00+00:00\n",
+        encoding="utf-8",
+    )
+
+    rebuilt_db = tmp_path / "rebuilt.db"
+    load(rebuilt_db, csv_path, run_source_id="police", run_adapter="rebuild")
+
+    conn = sqlite3.connect(str(rebuilt_db))
+    row = conn.execute("SELECT source_id, adapter FROM fetch_runs").fetchone()
+    assert row == ("police", "rebuild")
+
+
 def test_extra_observations_file_must_exist(tmp_path):
     """A typo'd path must not silently yield a commune export missing that
     source entirely."""

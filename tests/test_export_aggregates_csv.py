@@ -33,19 +33,16 @@ from export_aggregates_csv import (  # noqa: E402
     export_aggregates_csv,
 )
 
+from src.stores import DEFAULT_STORES_PATH, extra_csv_paths  # noqa: E402
+
 REPO = Path(__file__).resolve().parents[1]
 DB = REPO / "data" / "belgian_macro.db"
-# Every committed manual store, exactly as both workflows pass them via
-# --extra-observations. A store missing here would leave the real derived
-# configs referencing inputs nothing provides, which load_and_validate_derived
-# rightly rejects -- so this list has to stay in step with the workflows.
-STORES = (
-    REPO / "data" / "population_observations.csv",
-    REPO / "data" / "fiscal_income_observations.csv",
-    REPO / "data" / "census2021_observations.csv",
-    REPO / "data" / "realestate_observations.csv",
-    REPO / "data" / "var_unemployment_observations.csv",
-)
+# Every committed extra_csv store, read from the one registry the workflows and
+# the Makefile read (config/stores.yaml). A store missing here would leave the
+# real derived configs referencing inputs nothing provides, which
+# load_and_validate_derived rightly rejects. This used to be a hand-written
+# list of five that had already dropped the police store.
+STORES = tuple(REPO / p for p in extra_csv_paths(DEFAULT_STORES_PATH))
 
 # The commune counts this repo derived and then independently corroborated in
 # Block C: 589 before the 2019 wave, 581 between the waves, 565 after 2025.

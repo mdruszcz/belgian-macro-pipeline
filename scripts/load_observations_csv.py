@@ -103,8 +103,40 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_ids: set[str]) ->
     conn.commit()
 
 
-def load(db_path: Path, csv_path: Path, allow_unverified: bool = True) -> int:
-    """Build `db_path` from `csv_path`. Returns the number of rows loaded."""
+def load(
+    db_path: Path,
+    csv_path: Path,
+    allow_unverified: bool = True,
+    run_source_id: str = "statbel",
+    run_adapter: str = "rebuild",
+) -> int:
+    """Build `db_path` from `csv_path`. Returns the number of rows loaded.
+
+    `run_source_id`/`run_adapter`: THE FORGED-HEARTBEAT FIX. This used to
+    hardcode `source_id='statbel', adapter='statbel', status='ok'` for every
+    rebuild, no matter which store's CSV was actually being loaded --
+    forging Statbel's daily heartbeat every time this ran, which would have
+    permanently defeated src.validation.rules.fetch_silence (it reads
+    `MAX(started_at)` per source_id from fetch_runs) and fetch_error (it
+    reads the MOST RECENT row per source_id), the two rules whose entire
+    purpose is catching a source that has quietly stopped being fetched.
+
+    CHOSEN FIX: adapter='rebuild' by default, not the CSV's own adapter name,
+    and both of those rules now exclude adapter='rebuild' from their
+    queries entirely (src/validation/rules.py) rather than trying to keep
+    started_at honest. The alternative -- setting started_at from the CSV's
+    max created_at -- was rejected: created_at is when the OBSERVATION was
+    written, which for population is a date years in the past for old rows
+    and would make every rebuild look like "last fetched years ago",
+    tripping the very silence rule this is meant to leave alone. Excluding
+    the adapter is unambiguous: a rebuild is definitionally not a fetch, so
+    it should not appear as one under either name.
+
+    `run_source_id` still defaults to 'statbel' (this script's only caller
+    today is the population store, whose source_id is 'statbel') -- callers
+    driven by config/stores.yaml (scripts/build_staging_db.py) pass the
+    store's own `source_id` explicitly instead of relying on the default.
+    """
     if not csv_path.is_file():
         raise ObservationsCsvError(f"No observations CSV at {csv_path}")
 
@@ -125,8 +157,8 @@ def load(db_path: Path, csv_path: Path, allow_unverified: bool = True) -> int:
         """INSERT INTO fetch_runs (source_id, adapter, started_at, finished_at, status, message)
            VALUES (?, ?, ?, ?, 'ok', ?)""",
         (
-            "statbel",
-            "statbel",
+            run_source_id,
+            run_adapter,
             now,
             now,
             f"rebuild from {csv_path.name} -- not a real fetch",
@@ -170,9 +202,28 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Rebuild a DB from a committed observations CSV")
     ap.add_argument("--db", required=True, help="Path to the SQLite DB to build")
     ap.add_argument("--csv", required=True, help="Committed observations CSV to load")
+    ap.add_argument(
+        "--run-source-id",
+        default="statbel",
+        help="sources.source_id to record this rebuild's fetch_runs row under -- pass the "
+        "CSV's real store source (config/stores.yaml). Defaults to 'statbel' for backward "
+        "compatibility with the population store, this script's original only caller.",
+    )
+    ap.add_argument(
+        "--run-adapter",
+        default="rebuild",
+        help="fetch_runs.adapter for this row. 'rebuild' (the default) is excluded from "
+        "the fetch_silence/fetch_error rules -- see load()'s docstring for why this must "
+        "never again be a real adapter name like 'statbel'.",
+    )
     args = ap.parse_args()
     try:
-        n = load(Path(args.db), Path(args.csv))
+        n = load(
+            Path(args.db),
+            Path(args.csv),
+            run_source_id=args.run_source_id,
+            run_adapter=args.run_adapter,
+        )
     except ObservationsCsvError as exc:
         print(f"\nCANNOT LOAD: {exc}\n", file=sys.stderr)
         raise SystemExit(2) from exc

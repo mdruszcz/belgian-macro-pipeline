@@ -80,34 +80,17 @@ jobs:
         run: python scripts/sync_statbel.py --db data/belgian_macro.db
 
       - name: Ensure manual-source reference rows
-        # The fiscal-income OBSERVATIONS live in a committed CSV, but their
-        # name/unit metadata is read from the `indicators` table so there is
-        # exactly one metadata path (export_communes_csv.py). This inserts
-        # only those reference rows; it reads config and needs no network and
-        # no hand-downloaded workbook. Idempotent.
-        run: python scripts/sync_fiscal_income.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure real-estate reference rows
-        # Same pattern: OBSERVATIONS live in a committed CSV, name/unit come
-        # from the indicators table. Config only -- no network, no workbook.
-        run: python scripts/sync_realestate.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure police.be reference rows
-        # Same pattern again: OBSERVATIONS live in data/police_observations.csv,
-        # name/unit come from the indicators table. Config only -- no network,
-        # no source file needed.
-        run: python scripts/sync_police.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure Census 2021 reference rows
-        # Same pattern as the fiscal step above: the OBSERVATIONS live in a
-        # committed CSV, but name/unit come from the `indicators` table so
-        # there is one metadata path. Config only -- no network, no workbook.
-        run: python scripts/sync_census2021.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure Vlaamse Arbeidsrekening reference rows
-        # Observations live in the committed manual store; metadata stays in
-        # the canonical database so every exporter follows one path.
-        run: python scripts/sync_var.py --db data/belgian_macro.db --reference-rows-only
+        # Every store's OBSERVATIONS live in a committed CSV, but name/unit
+        # metadata is read from the `indicators` table so there is exactly
+        # one metadata path (export_communes_csv.py) -- this inserts those
+        # reference rows for every store config/stores.yaml declares, driven
+        # by scripts/ensure_reference_rows.py rather than one hand-written
+        # step per store. Config only: no network, no hand-downloaded
+        # workbook, idempotent. (config/stores.yaml is PR1 of the pipeline
+        # repair -- the one place this list is now spelled out, instead of
+        # independently here, in manual_sources.yml, and in
+        # scripts/validate_data.py, three copies that had drifted apart.)
+        run: python scripts/ensure_reference_rows.py --db data/belgian_macro.db --stores config/stores.yaml
 
       - name: Validate the data before exporting
         # Between sync and export deliberately: a `fail` here stops the run
@@ -159,19 +142,14 @@ jobs:
       - name: Export commune CSV for communes.html
         # Municipal-level sibling of the export above -- communes.html reads
         # this, the same way all_data.html reads belgian_macro_export.csv.
-        # --extra-observations merges the manual-only store, which is a committed
-        # CSV rather than rows in the database -- statbel.fgov.be is unreachable
-        # from CI so population can never be fetched here.
+        # --stores merges every extra_csv store config/stores.yaml declares,
+        # which is a committed CSV rather than rows in the database --
+        # statbel.fgov.be is unreachable from CI so population (and the other
+        # manual sources) can never be fetched here.
         # See docs/decisions/0002-split-committed-stores.md.
         run: |
           python scripts/export_communes_csv.py --db data/belgian_macro.db \
-            --out data/communes_export.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/communes_export.csv --stores config/stores.yaml
 
       - name: Export the full commune time series (internal, gitignored)
         # Sibling to the snapshot export above: every period per (commune,
@@ -190,13 +168,7 @@ jobs:
         # gets committed.
         run: |
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
-            --out data/communes_history_full.csv --all-periods \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/communes_history_full.csv --all-periods --stores config/stores.yaml
 
       - name: Export the committed commune time series (last 10 years)
         # THE FIX ITSELF: the committed data/communes_history.csv repeats
@@ -208,13 +180,7 @@ jobs:
         # --all-periods, same as export_percentiles_csv.py already offers.
         run: |
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
-            --out data/communes_history.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/communes_history.csv --stores config/stores.yaml
 
       - name: Precompute communes.html's table payload
         # communes.html used to fetch communes_history.csv directly and
@@ -240,13 +206,7 @@ jobs:
         # for Limburg 2023 when that is got wrong.
         run: |
           python scripts/export_aggregates_csv.py --db data/belgian_macro.db \
-            --out data/aggregates.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/aggregates.csv --stores config/stores.yaml
 
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
@@ -258,13 +218,7 @@ jobs:
         # researcher who wants the rest.
         run: |
           python scripts/export_percentiles_csv.py --db data/belgian_macro.db \
-            --out data/percentiles.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/percentiles.csv --stores config/stores.yaml
 
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. Reshapes the bulk CSVs

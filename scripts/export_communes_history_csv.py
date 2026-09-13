@@ -49,6 +49,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export_communes_csv import STATUS_TO_LETTER, _ancestor_names  # noqa: E402
 
 from src.analytics.engine import ObservationSet, compute  # noqa: E402
+from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
 from src.validation.config_schema import load_and_validate_derived  # noqa: E402
 
 DEFAULT_DERIVED_DIR = Path(__file__).resolve().parents[1] / "config" / "indicators" / "derived"
@@ -272,7 +273,17 @@ def main() -> None:
         action="append",
         default=[],
         metavar="CSV",
-        help="Manual-only committed observations CSV to merge in (repeatable).",
+        help="Manual-only committed observations CSV to merge in (repeatable). "
+        "Takes priority over --stores when given (see resolve_extra_observations).",
+    )
+    ap.add_argument(
+        "--stores",
+        default=str(DEFAULT_STORES_PATH),
+        metavar="YAML",
+        help=(
+            "config/stores.yaml -- read for its extra_csv stores' paths when no "
+            "--extra-observations is given. Pass '' to merge nothing by default."
+        ),
     )
     ap.add_argument("--derived-dir", type=Path, default=DEFAULT_DERIVED_DIR)
     ap.add_argument(
@@ -293,7 +304,7 @@ def main() -> None:
     n = export_communes_history_csv(
         Path(args.db),
         Path(args.out),
-        tuple(Path(p) for p in args.extra_observations),
+        resolve_extra_observations(args.extra_observations, args.stores),
         args.derived_dir,
         all_periods=args.all_periods,
         recent_years=args.recent_years,

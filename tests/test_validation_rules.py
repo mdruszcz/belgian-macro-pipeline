@@ -627,3 +627,55 @@ def test_silence_is_measured_against_the_log_not_the_wall_clock(tmp_path):
     assert not _fired(
         run_all(_ctx(db, fetch_window_days={"statbel": 7, "onem": 7})), "fetch_silence"
     )
+
+
+# ── adapter='rebuild' is not a fetch ────────────────────────────────────────
+#
+# scripts/load_observations_csv.py opens a fetch_runs row to satisfy a NOT
+# NULL foreign key when it rebuilds a disposable local database from an
+# already-committed CSV -- not a fetch of anything. It used to hardcode
+# source_id='statbel', adapter='statbel', status='ok', which forged
+# Statbel's heartbeat on every rebuild and would have permanently masked a
+# real Statbel fetch failure or silence behind the rebuild's manufactured
+# 'ok'. Both rules below now exclude adapter='rebuild' from their queries.
+
+
+def test_fetch_error_ignores_a_rebuild_run_even_if_the_real_fetch_failed(tmp_path):
+    """The forged-heartbeat bug, reproduced and then closed: a rebuild's
+    'ok' status must not paper over a genuinely failed statbel fetch that
+    happened moments before it."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','statbel','2026-09-06T09:00:00+00:00','error')"
+    )
+    # The rebuild runs after the failed fetch and reports 'ok' -- exactly the
+    # daily sequence that would have hidden the failure before this fix.
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','rebuild','2026-09-06T10:00:00+00:00','ok')"
+    )
+    conn.commit()
+    conn.close()
+    v = run_all(_ctx(db), only=["fetch_error"])
+    assert _fired(v, "fetch_error")
+    assert has_failures(v)
+
+
+def test_fetch_silence_ignores_a_rebuild_run(tmp_path):
+    """A source whose ONLY fetch_runs rows are adapter='rebuild' must be
+    reported as never fetched, not as fetched moments ago -- a rebuild is
+    not evidence the source is still being fetched."""
+    db = _clean_db(tmp_path)
+    conn = sqlite3.connect(str(db))
+    conn.execute("DELETE FROM fetch_runs")
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('statbel','rebuild','2026-09-06T10:00:00+00:00','ok')"
+    )
+    conn.commit()
+    conn.close()
+    fired = _fired(run_all(_ctx(db, fetch_window_days={"statbel": 7})), "fetch_silence")
+    assert len(fired) == 1
+    assert "has no fetch_runs entry at all" in fired[0].message

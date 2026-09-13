@@ -20,6 +20,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.exporters.provenance import DB_TO_CONFIG_SOURCE_ID  # noqa: E402
+from src.stores import DEFAULT_STORES_PATH, extra_csv_stores, load_stores  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     load_and_validate_all,
     load_and_validate_derived,
@@ -38,14 +39,26 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INDICATORS_DIR = REPO_ROOT / "config" / "indicators"
 DEFAULT_SOURCES_DIR = REPO_ROOT / "config" / "sources"
 DEFAULT_DERIVED_DIR = REPO_ROOT / "config" / "indicators" / "derived"
-DEFAULT_EXPORTS = (
-    REPO_ROOT / "data" / "belgian_macro_export.csv",
-    REPO_ROOT / "data" / "communes_export.csv",
-    REPO_ROOT / "data" / "population_observations.csv",
-    REPO_ROOT / "data" / "fiscal_income_observations.csv",
-    REPO_ROOT / "data" / "var_unemployment_observations.csv",
-    REPO_ROOT / "data" / "communes_history.csv",
-)
+
+
+def _default_exports() -> tuple[Path, ...]:
+    """The two national/commune bulk exports, plus every extra_csv store's
+    committed CSV, read from config/stores.yaml (src/stores.py) rather than
+    hand-listed here a fourth time.
+
+    Used to be a hardcoded 6-path tuple naming only 3 of the (then) 6 manual
+    stores -- census2021, realestate and police were missing, so those three
+    were never parse-checked by this script even though they were exported
+    and committed. The registry is now the one place the list is spelled
+    out, so a new store is checked automatically once it is registered.
+    """
+    exports = [
+        REPO_ROOT / "data" / "belgian_macro_export.csv",
+        REPO_ROOT / "data" / "communes_export.csv",
+        REPO_ROOT / "data" / "communes_history.csv",
+    ]
+    exports.extend(s.path for s in extra_csv_stores(load_stores(DEFAULT_STORES_PATH)))
+    return tuple(exports)
 
 
 def main() -> int:
@@ -67,7 +80,8 @@ def main() -> int:
         "--export",
         action="append",
         default=[],
-        help="Published CSV to parse-check. Repeatable; defaults to all three.",
+        help="Published CSV to parse-check. Repeatable; defaults to the two bulk "
+        "exports plus every extra_csv store in config/stores.yaml.",
     )
     ap.add_argument(
         "--summary-file",
@@ -96,7 +110,7 @@ def main() -> int:
         if derived_dir.is_dir()
         else {}
     )
-    exports = tuple(Path(p) for p in args.export) or DEFAULT_EXPORTS
+    exports = tuple(Path(p) for p in args.export) or _default_exports()
 
     violations = run_all(
         Context(

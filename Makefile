@@ -16,15 +16,23 @@
 PYTHON ?= python
 DB     ?= data/belgian_macro.db
 
-# Every manual store, merged into the exports at build time (ADR 0002).
-EXTRA := --extra-observations data/population_observations.csv \
-         --extra-observations data/fiscal_income_observations.csv \
-         --extra-observations data/census2021_observations.csv \
-         --extra-observations data/realestate_observations.csv \
-         --extra-observations data/police_observations.csv \
-         --extra-observations data/var_unemployment_observations.csv
+# The one declaration of every committed observation store (config/stores.yaml,
+# src/stores.py) -- PR1 of the pipeline repair. Replaces the old EXTRA
+# variable, which used to list all six manual stores' --extra-observations
+# flags by hand here, a SECOND TIME in each of the two workflows, and a
+# THIRD, incomplete time in scripts/validate_data.py and
+# tests/test_committed_stores_are_consistent.py.
+#
+# DELIBERATELY A PLAIN STRING, NOT `$(shell ...)`. A $(shell) variable runs at
+# Makefile PARSE time, on every invocation including `make help` -- if Python
+# were missing or the registry failed to load, EXTRA would silently become
+# empty and `make exports` would publish commune files missing six sources
+# with exit code 0. Passing the path instead means each exporter reads and
+# validates the registry itself, at the point it is actually used, and fails
+# loudly if it cannot (CLAUDE.md rule 13).
+STORES := config/stores.yaml
 
-.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder test fetch clean help
+.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder assemble test fetch clean help
 
 ## all: install deps, rebuild the database's own structure, regenerate every
 ## published export, and run the tests. No network. This is the gate target.
@@ -46,13 +54,18 @@ schema:
 ## reference: indicator/source metadata rows for the manual sources. Their
 ## OBSERVATIONS live in committed CSVs, but their name/unit come from the
 ## indicators table, so the exporters need these rows present. Config only:
-## no network, no workbook.
+## no network, no workbook. Driven by $(STORES) (scripts/ensure_reference_rows.py)
+## rather than one hand-written line per store -- this used to be six lines
+## here, again in each workflow, and used to have NO line for population
+## (sync_population.py had no --reference-rows-only flag until this PR).
+##
+## sync_onem_rates.py is run directly rather than through the registry: ONEM
+## is not a committed store in this PR (it is fetched live daily and lives in
+## data/belgian_macro.db, not a CSV -- see daily_fetch.yml), so it has no
+## entry in config/stores.yaml yet. PR2 adds it as an `in_db` store; until
+## then this one line stays here rather than being silently dropped.
 reference:
-	$(PYTHON) scripts/sync_fiscal_income.py --db $(DB) --reference-rows-only
-	$(PYTHON) scripts/sync_realestate.py    --db $(DB) --reference-rows-only
-	$(PYTHON) scripts/sync_census2021.py    --db $(DB) --reference-rows-only
-	$(PYTHON) scripts/sync_police.py        --db $(DB) --reference-rows-only
-	$(PYTHON) scripts/sync_var.py           --db $(DB) --reference-rows-only
+	$(PYTHON) scripts/ensure_reference_rows.py --db $(DB) --stores $(STORES)
 	$(PYTHON) scripts/sync_onem_rates.py    --db $(DB) --reference-rows-only
 
 ## validate: Block H's rules. Fails the build on a data problem, which is the
@@ -64,19 +77,19 @@ validate:
 ## read the bulk CSVs, and the static pages read the site payloads.
 exports:
 	$(PYTHON) scripts/export_canonical_csv.py --db $(DB) --out data/belgian_macro_export.csv
-	$(PYTHON) scripts/export_communes_csv.py --db $(DB) --out data/communes_export.csv $(EXTRA)
+	$(PYTHON) scripts/export_communes_csv.py --db $(DB) --out data/communes_export.csv --stores $(STORES)
 	# Two passes, on purpose. _full feeds the two internal steps below, whose
 	# own contract is the complete history (site_payloads.md); the second
 	# pass, with no --all-periods, is the trimmed last-10-years file that
 	# actually gets committed and offered as a download -- data/communes_history_full.csv
 	# is gitignored so it never reaches the commit-size guard it exists to avoid.
 	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) \
-		--out data/communes_history_full.csv --all-periods $(EXTRA)
-	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) --out data/communes_history.csv $(EXTRA)
+		--out data/communes_history_full.csv --all-periods --stores $(STORES)
+	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) --out data/communes_history.csv --stores $(STORES)
 	$(PYTHON) scripts/export_communes_table_json.py \
 		--communes-history data/communes_history_full.csv --out data/communes_table.json --db $(DB)
-	$(PYTHON) scripts/export_aggregates_csv.py --db $(DB) --out data/aggregates.csv $(EXTRA)
-	$(PYTHON) scripts/export_percentiles_csv.py --db $(DB) --out data/percentiles.csv $(EXTRA)
+	$(PYTHON) scripts/export_aggregates_csv.py --db $(DB) --out data/aggregates.csv --stores $(STORES)
+	$(PYTHON) scripts/export_percentiles_csv.py --db $(DB) --out data/percentiles.csv --stores $(STORES)
 	$(PYTHON) -m src.exporters.metadata --out data/metadata/indicators.json
 	$(PYTHON) scripts/export_site_payloads.py --db $(DB) \
 		--communes-history data/communes_history_full.csv \
@@ -133,6 +146,18 @@ boundaries:
 ## `make exports` first if you have run `make clean`. NOT part of `all`.
 builder:
 	$(PYTHON) scripts/serve_builder.py
+
+## assemble: build the disposable working database at data/local/working.db
+## from the committed data/belgian_macro.db plus every `in_db` store in
+## $(STORES) (scripts/build_staging_db.py). NOT wired into `all`, CI or
+## either workflow -- that cutover is a separate, atomic change (PR2 of the
+## pipeline repair); this target exists so the assembly line can be run and
+## inspected on its own today. In_db stores are empty in this PR (all six
+## existing stores are extra_csv), so this currently just proves the
+## rm -> copy -> migrate -> geography -> reference-rows chain works with
+## nothing to load at the end.
+assemble:
+	$(PYTHON) scripts/build_staging_db.py --source-db $(DB) --stores $(STORES)
 
 ## test: THE EVERYDAY LOOP -- every test that needs neither a browser nor the
 ## generated site. Sub-minute is the target, because a 14-minute default loop
