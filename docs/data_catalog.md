@@ -786,7 +786,7 @@ Block C). Licence terms for the four macro sources are marked TODO pending separ
 | source_id | Agency | Adapter | Base URL | Licence | Cadence |
 |---|---|---|---|---|---|
 | `nbb` | National Bank of Belgium | `nbb` (SDMX) | `nsidisseminate-stat.nbb.be/rest/data/BE2` | TODO | daily |
-| `dbnomics_eurostat` | Eurostat (via DBnomics) | `dbnomics` | `api.db.nomics.world/v22/series/Eurostat` | TODO | daily |
+| `dbnomics_eurostat` | Eurostat (via DBnomics) | `dbnomics` | `api.db.nomics.world/v22/series/Eurostat` | **Eurostat copyright/licence policy** (text supplied by the maintainer, 2026-09-13) — reuse, including commercial dissemination, authorised with Eurostat acknowledged as the source; **not** for commercial redissemination: data not relating to EU, EFTA or official EU acceding/candidate countries, and data originating from sources other than Eurostat; adapted or modified data must say so prominently. Conditions as they apply here are listed under the table | daily |
 | `dbnomics_ameco` | AMECO/EC (via DBnomics) | `dbnomics` | `api.db.nomics.world/v22/series/AMECO` | TODO | daily |
 | `fpb` | Federal Planning Bureau | `fpb` (XLSX) | `plan.be` | TODO | quarterly |
 | `statbel_geography` | Statbel (Directorate-general Statistics) | manual download → `scripts/derive_geography_csv.py` | statbel.fgov.be open-data portal | **CC BY 4.0** — commercial reuse permitted, attribution required | ad hoc (on Belgian administrative reorganizations) |
