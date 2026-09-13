@@ -237,6 +237,16 @@ MapUI.CommuneMap = class CommuneMap {
     this.home = null;
     this.drag = null;
     this.ramp = Array.from({length: MapUI.BINS}, (_, i) => `var(--ramp-${i})`);
+    // HOW MANY CLASSES, AND WHERE THEY CUT. Defaults to the seven the ramp has
+    // colours for and to the component's own choice of where to cut them, so a
+    // caller that says nothing behaves exactly as before. A caller may ask for
+    // a different NUMBER (setClassification({bins})) or dictate the cuts
+    // outright (setClassification({breaks})). colourIndex already spreads
+    // however many bands survive across the whole ramp, so fewer classes need
+    // no second palette.
+    this.bins = options.bins || MapUI.BINS;
+    this.manualBreaks = null;
+    this.breaks = [];
     this._wire();
   }
 
@@ -300,6 +310,16 @@ MapUI.CommuneMap = class CommuneMap {
     return this;
   }
 
+  /* Ask for a different number of classes, or for cuts of your own. Passing
+     {breaks: null} returns to the component's own choice. Repaints, because
+     the question "how many classes" has no answer that is not a picture. */
+  setClassification({bins, breaks} = {}) {
+    if (bins) this.bins = bins;
+    if (breaks !== undefined) this.manualBreaks = breaks && breaks.length ? breaks.slice() : null;
+    this.paint();
+    return this;
+  }
+
   setVisible(nisSet) {
     this.visible = nisSet;
     this.paint();
@@ -325,7 +345,18 @@ MapUI.CommuneMap = class CommuneMap {
     }
     nums.sort((a, b) => a - b);
 
-    const {breaks, method} = MapUI.classify(nums, MapUI.BINS);
+    // Manual cuts are used AS GIVEN -- that is what manual means -- but only
+    // the ones that fall inside the data, because a break above the maximum
+    // would print a class in the legend that no commune can ever be in.
+    let breaks, method;
+    if (this.manualBreaks && this.manualBreaks.length && nums.length) {
+      breaks = this.manualBreaks
+        .filter(v => v > nums[0] && v <= nums[nums.length - 1])
+        .sort((a, b) => a - b);
+      method = 'manual';
+    } else {
+      ({breaks, method} = MapUI.classify(nums, this.bins));
+    }
     const bands = breaks.length + 1;
     const colourFor = band => this.ramp[MapUI.colourIndex(band, bands, this.ramp.length)];
 
@@ -343,6 +374,7 @@ MapUI.CommuneMap = class CommuneMap {
     }
 
     this.method = method;
+    this.breaks = breaks;
     this.withheld = withheld;
     this._drawLegend(breaks, bands, colourFor, nums);
     this._reportCoverage(withValue, shown.length, withheld);
@@ -429,8 +461,10 @@ MapUI.CommuneMap = class CommuneMap {
 
     const exact = v => MapUI.formatValue(v, this.meta.unit, this.meta.decimals, this.lang) +
                        MapUI.unitSuffix(this.meta.unit);
-    const methodNote = MapUI.text(
-      this.lang, this.method === 'equal' ? 'mapMethodEqual' : 'mapMethodQuantile');
+    const methodNote = MapUI.text(this.lang, {
+      equal: 'mapMethodEqual',
+      manual: 'mapMethodManual',
+    }[this.method] || 'mapMethodQuantile');
     // Said out loud because it changes what a colour MEANS: with a filter on,
     // the bands rank the communes shown, not all 565, so the same commune can
     // be dark here and pale on the unfiltered map. A reader comparing two

@@ -124,6 +124,55 @@ width is always ~111 km. It reads `state.map.view` and watches the SVG's `viewBo
 `MutationObserver`, because the component emits no "view changed" event and adding one would be a
 change to a file seven pages share.
 
+## The third pass: a year, and categories
+
+**A year picker, which needed a different payload.** `public/data/indicators/{code}.json` carries one
+figure per commune and no period axis at all, so this page could only ever draw the most recent
+year — and "the most recent year" is 2021 for a Census indicator and 2026 for population, which is
+a comparison nobody asked for. It now reads the Batch 8a explorer payloads, which carry every period
+the pipeline publishes for that indicator, sharded one file per indicator (median 46 KB) and built
+from `data/communes_history.csv`, the file the site offers for download.
+
+**This makes 8b depend on 8a.** The branch is merged on top of it and the PR says so.
+
+The picker lists what the payload actually has, newest first, with step-back and step-forward
+buttons; the year goes into the URL beside the indicator and the area. An indicator with one period
+disables the control and says which period that is, rather than offering a choice that is not one.
+The class boundaries are recomputed per year — stepping 2026 → 2025 moves the lowest band from
+5 462 to 5 457 — because the bands rank the communes in the year on screen.
+
+A suppressed cell is passed through with its status and no value, so the map can say a figure is
+withheld rather than drawing it flat like a commune nobody measured (rule 26).
+
+**The indicator picker is grouped by section.** Sixty-nine indicators in one alphabetical list is a
+list you scroll rather than read. The groups are `metadata/sections.json`'s own sections — the same
+ten the commune profile lays its page out with, with the same trilingual labels — so a section
+renamed in `config/local_sections.yaml` is renamed here and an indicator moved between sections
+moves here. No indicator id appears in the page (rules 2 and 24). An indicator in no section appears
+under a general heading rather than being dropped, which would be the picker quietly deciding some
+published data does not exist.
+
+## Asked and answered: a satellite overlay
+
+The maintainer asked whether satellite imagery could be laid under the choropleth. Recorded here
+because the answer is a design constraint, not a preference.
+
+**Advised against, on four grounds.** The page states in its own footer, in three languages, that it
+makes no third-party requests and loads no map tiles; a satellite basemap is exactly that, refetched
+on every pan and zoom. It is a new external provider, which rule 8 says needs a catalogue row and
+the maintainer's approval first, and the usable services require an API key and impose quotas a
+static site cannot police (rule 30). The projections do not match: these outlines are equirectangular
+with longitude scaled by cos(mean latitude), every tile service is Web Mercator, and overlaying one
+on the other without reprojecting misaligns borders by hundreds of metres, worsening from the coast
+to the Ardennes. And the boundaries are not accurate enough for it — the licence notice says in as
+many words that they are simplified to a 50 m tolerance and "drawn for comparison, never for
+measurement or for locating a boundary on the ground", which is precisely the reading an aerial
+photograph invites.
+
+Cheaper alternatives that stay inside the rules, if the goal is geographic context rather than
+imagery: province or region outlines drawn as a heavier stroke over the communes, labels for the
+largest cities, or a hillshade rendered once at build time and committed as a static image.
+
 ## The licence decision, stated plainly
 
 The page is now one screen with no scroll. The several hundred words of licence text that sat under

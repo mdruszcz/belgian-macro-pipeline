@@ -288,11 +288,22 @@
   .subtitle{color:var(--bp-text-muted); font-size:.8rem; line-height:1.55; margin:0}
   .subtitle code{background:var(--bp-accent-soft); color:var(--bp-accent-ink); padding:1px 5px; border-radius:3px}
   .field{display:flex; flex-direction:column; gap:5px}
+  .periodrow{display:flex; gap:6px; align-items:center}
+  .periodrow select{flex:1}
+  .periodrow button{
+    flex:none; width:32px; height:34px; font:inherit; cursor:pointer;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    background:var(--bp-surface); color:var(--bp-text-muted); line-height:1;
+  }
+  .periodrow button:hover:not(:disabled){border-color:var(--bp-accent); color:var(--bp-accent-ink)}
+  .periodrow button:disabled{opacity:.4; cursor:default}
+  .periodrow button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:1px}
   .flabel{
     font-size:.7rem; text-transform:uppercase; letter-spacing:.06em;
     color:var(--bp-text-faint); font-weight:var(--bp-weight-semibold);
   }
   .fhint{margin:0; font-size:.75rem; color:var(--bp-text-muted); line-height:1.45}
+  #breaks{font-family:"IBM Plex Mono",monospace; font-size:.78rem}
   select,input[type=text]{
     font:inherit; font-size:var(--bp-text-small); padding:8px 10px;
     border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
@@ -411,9 +422,28 @@
     </div>
 
     <div class="field">
+      <label class="flabel" for="period" data-t="mapPeriodLabel">Year</label>
+      <div class="periodrow">
+        <button type="button" id="periodPrev" data-t-aria="mapPeriodPrev" aria-label="Earlier">&larr;</button>
+        <select id="period" data-t-aria="mapPeriodLabel" aria-label="Year"></select>
+        <button type="button" id="periodNext" data-t-aria="mapPeriodNext" aria-label="Later">&rarr;</button>
+      </div>
+      <p class="fhint" id="periodHint"></p>
+    </div>
+
+    <div class="field">
       <label class="flabel" for="scope" data-t="mapScopeLabel">Area of analysis</label>
       <select id="scope" data-t-aria="mapScopeLabel" aria-label="Area of analysis"></select>
       <p class="fhint" id="scopeHint"></p>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="classes" data-t="mapClassesLabel">Classes</label>
+      <select id="classes" data-t-aria="mapClassesLabel" aria-label="Classes"></select>
+      <input id="breaks" type="text" hidden data-t-placeholder="mapBreaksPlaceholder"
+             placeholder="e.g. 5000, 10000, 20000" autocomplete="off"
+             data-t-aria="mapBreaksLabel" aria-label="Class boundaries">
+      <p class="fhint" id="classesHint"></p>
     </div>
 
     <div class="field">
@@ -488,14 +518,22 @@ const GEO_URL      = 'data/geo/communes.geojson';
 const INDEX_URL    = 'public/data/metadata/indicators.json';
 const SECTIONS_URL = 'public/data/metadata/sections.json';
 const SOURCES_URL  = 'public/data/metadata/sources.json';
-const VALUES_URL   = code => `public/data/indicators/${code}.json`;
+// FULL HISTORY, not the latest value. public/data/indicators/{code}.json --
+// what this page read until now -- carries one figure per commune and no
+// period axis at all, so the map could only ever draw the most recent year.
+// The explorer payloads (Batch 8a) carry every period this pipeline publishes
+// for that indicator, sharded one file per indicator: median 46 KB, largest
+// 394 KB, and built from data/communes_history.csv, the same file the site
+// offers for download, so the map cannot show a figure the download lacks.
+const VALUES_URL   = code => `public/data/explorer/municipal/${code}.json`;
 // Region and province membership. The commune payloads carry no geography of
 // their own, so the area picker is built from the published geography index --
 // the same file Block K's search and Block L's comparison picker read, and the
 // same ancestor walk the exporters do. Nothing here knows a NIS code.
 const GEOG_URL     = 'public/data/metadata/geographies.json';
 
-const state = {index: [], map: null, sources: {}, grades: {}, areas: [], members: {}, scope: 'be:country'};
+const state = {index: [], map: null, sources: {}, grades: {}, areas: [], members: {},
+               scope: 'be:country', payload: null, period: null, sections: []};
 
 // The interface language, from the shared module so a choice made on any page
 // carries here and back again (one localStorage key, site-wide).
@@ -538,6 +576,238 @@ function sourceNames(meta){
     })
     .join(', ');
 }
+
+/* ---------------------------------------------------------------------------
+   HOW MANY CLASSES.
+
+   Automatic is what the component has always done: seven bands, cut at the
+   quantiles so each holds roughly the same number of communes, falling back to
+   equal intervals when ties collapse the quantiles into too few. Five is the
+   same rule with a coarser grid -- easier to read, and enough for most
+   indicators. Manual hands the cuts to the reader.
+
+   MANUAL IS A REAL CHOICE AND A REAL RISK, which is why the note under the map
+   names the method. Quantile bands say "where does this commune rank"; cuts a
+   reader picked say whatever that reader wanted them to say, and a screenshot
+   of one does not carry the fact that they were chosen by hand. The input is
+   prefilled with the automatic cuts, so the starting point is the honest one
+   and any departure from it is deliberate.
+--------------------------------------------------------------------------- */
+const CLASS_MODES = ['auto', 'five', 'manual'];
+
+function populateClassPicker(){
+  const sel = document.getElementById('classes');
+  const current = sel.value || 'auto';
+  sel.innerHTML = '';
+  for(const mode of CLASS_MODES){
+    const option = document.createElement('option');
+    option.value = mode;
+    option.textContent = T('mapClasses_' + mode);
+    sel.appendChild(option);
+  }
+  sel.value = current;
+}
+
+function parseBreaks(text){
+  // Whatever separator a reader reaches for -- comma, semicolon, space -- and
+  // both decimal marks, because a French keyboard writes 1,5 and a JSON
+  // payload writes 1.5 and the reader should not have to know which this is.
+  const parts = String(text).split(/[;,\s]+/).filter(Boolean);
+  const numbers = [];
+  for(const part of parts){
+    // Thousands separators out first: Belgian figures are written with a
+    // no-break space (U+00A0) or a narrow one (U+202F), and a reader who
+    // copies a value off the legend pastes it back with them in.
+    const n = Number(part.replace(/[\u00a0\u202f]/g, '').replace(',', '.'));
+    if(!isFinite(n)) return null;
+    numbers.push(n);
+  }
+  return numbers.sort((a, b) => a - b);
+}
+
+function applyClassMode(){
+  const mode = document.getElementById('classes').value;
+  const input = document.getElementById('breaks');
+  const hint = document.getElementById('classesHint');
+  if(!state.map) return;
+
+  if(mode === 'manual'){
+    input.hidden = false;
+    // Prefill with what the map is showing, so manual starts from the honest
+    // cuts rather than from an empty box.
+    // PLAIN NUMBERS, not formatted ones. formatValue groups thousands with a
+    // comma in English -- "6,372" -- and this box splits on commas, so a
+    // prefill that went through it parsed back as 6 and 372: the control
+    // would silently reclassify the map the moment it was opened.
+    if(!input.value && state.map.breaks && state.map.breaks.length){
+      // Rounded to the indicator's own declared precision, because a quantile
+      // lands on values like 6372.000000000001 and nobody wants to edit that.
+      const places = (state.payload && state.payload.decimals != null) ? state.payload.decimals : 2;
+      input.value = state.map.breaks.map(v => String(Number(v.toFixed(places)))).join(', ');
+    }
+    const breaks = parseBreaks(input.value);
+    if(breaks === null){
+      hint.textContent = T('mapBreaksInvalid');
+      return;
+    }
+    state.map.setClassification({breaks: breaks});
+    const used = state.map.breaks.length;
+    hint.textContent = breaks.length && used < breaks.length
+      ? T('mapBreaksOutside', {n: breaks.length - used})
+      : T('mapBreaksHint');
+  } else {
+    input.hidden = true;
+    hint.textContent = '';
+    state.map.setClassification({bins: mode === 'five' ? 5 : MapUI.BINS, breaks: null});
+  }
+  const meta = state.index.find(i => i.indicator_code === document.getElementById('indicator').value);
+  updateLegendChrome(meta);
+}
+
+/* ---------------------------------------------------------------------------
+   THE INDICATOR PICKER, GROUPED.
+
+   Sixty-nine indicators in one flat alphabetical list is a list you scroll
+   rather than read. The groups are config, not a table in this page: they are
+   metadata/sections.json's own sections -- the same ten the commune profile
+   lays its page out with, with the same trilingual labels -- so a section
+   renamed in config/local_sections.yaml is renamed here, and an indicator
+   moved between sections moves here. No indicator id appears in this file
+   (rules 2 and 24).
+
+   An indicator in no section still appears, under a general heading. Dropping
+   it would be the picker quietly deciding some published data does not exist.
+--------------------------------------------------------------------------- */
+function populateIndicatorPicker(rows){
+  const sel = document.getElementById('indicator');
+  const current = sel.value;
+  sel.innerHTML = '';
+
+  const sectionOf = {};
+  for(const section of state.sections){
+    for(const code of section.indicators || []) sectionOf[code] = section.id;
+    if(section.headline) sectionOf[section.headline] = section.id;
+  }
+
+  const groups = new Map();
+  for(const row of rows){
+    const id = sectionOf[row.code] || '_other';
+    if(!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(row);
+  }
+
+  // Config order, so the picker reads in the order the profile page does;
+  // anything unclassified goes last rather than first.
+  const order = state.sections.map(s => s.id).filter(id => groups.has(id));
+  if(groups.has('_other')) order.push('_other');
+
+  for(const id of order){
+    const section = state.sections.find(s => s.id === id);
+    const group = document.createElement('optgroup');
+    group.label = section ? (section.label[LANG] || section.label.en) : T('mapSectionOther');
+    for(const row of groups.get(id)){
+      const option = document.createElement('option');
+      option.value = row.code;
+      option.textContent = row.label;
+      group.appendChild(option);
+    }
+    sel.appendChild(group);
+  }
+  if(current) sel.value = current;
+}
+
+/* ---------------------------------------------------------------------------
+   THE YEAR.
+
+   A choropleth of "the latest figure" answers a question nobody asked when
+   the latest figure is 2021 for one indicator and 2026 for another. The
+   payload carries every period this pipeline publishes for the indicator, so
+   the page draws ONE of them and says which.
+
+   WHAT A PERIOD IS DIFFERS BY INDICATOR and is not normalised here: Census
+   indicators have exactly one (2021), house prices are quarterly (2026-Q1),
+   most are annual. The picker lists what the payload actually has, newest
+   first, and disables itself when there is only one -- a control offering a
+   single choice is furniture, not a control.
+--------------------------------------------------------------------------- */
+function populatePeriodPicker(){
+  const sel = document.getElementById('period');
+  const periods = (state.payload && state.payload.periods) || [];
+  const wanted = state.period;
+  sel.innerHTML = '';
+  // Newest first: a reader opening a map wants today, and scrolling up a list
+  // to reach it is a small tax paid on every visit.
+  for(const period of periods.slice().reverse()){
+    const option = document.createElement('option');
+    option.value = period;
+    option.textContent = period;
+    sel.appendChild(option);
+  }
+  // Keep the year across an indicator change when the new one also has it --
+  // comparing two indicators for the same year is the whole point of a picker.
+  state.period = (wanted && periods.includes(wanted)) ? wanted : periods[periods.length - 1] || null;
+  sel.value = state.period || '';
+  sel.disabled = periods.length < 2;
+  updatePeriodButtons();
+  document.getElementById('periodHint').textContent =
+    periods.length === 1 ? T('mapPeriodOnly', {period: periods[0]}) : '';
+}
+
+function updatePeriodButtons(){
+  const periods = (state.payload && state.payload.periods) || [];
+  const at = periods.indexOf(state.period);
+  document.getElementById('periodPrev').disabled = at <= 0;
+  document.getElementById('periodNext').disabled = at < 0 || at >= periods.length - 1;
+}
+
+function stepPeriod(by){
+  const periods = (state.payload && state.payload.periods) || [];
+  const at = periods.indexOf(state.period);
+  const next = periods[at + by];
+  if(!next) return;
+  state.period = next;
+  document.getElementById('period').value = next;
+  drawPeriod();
+}
+
+/* One period of the payload, reshaped into what the component's setData wants.
+   A cell is [value, status]; a SUPPRESSED cell arrives with a status and no
+   value and must be passed through as exactly that, so the map can say the
+   figure is withheld rather than drawing it flat like a commune nobody
+   measured -- they are different facts (rule 26). */
+function drawPeriod(){
+  if(!state.payload || !state.map) return;
+  const meta = state.index.find(i => i.indicator_code === state.payload.indicator_code) || {};
+  const period = state.period;
+  const values = {};
+  for(const [nis, byPeriod] of Object.entries(state.payload.series || {})){
+    const cell = byPeriod[period];
+    if(!cell) continue;
+    values[nis] = {value: cell[0], period: period, status: MAP_STATUS_LETTERS[cell[1]] || cell[1]};
+  }
+  state.map.setData(values, {
+    unit: state.payload.unit,
+    decimals: state.payload.decimals,
+    direction: state.payload.direction,
+  });
+  // The denominator is what is ON SCREEN, not all 565: with an area picked,
+  // "412 of 565" beside a map of Limburg would answer a question the reader
+  // did not ask. coverage().shown already respects the area filter.
+  const shown = state.map.coverage();
+  document.getElementById('status').textContent =
+    T('communesShown', {n: shown.withValue, total: shown.shown});
+  updateLegendChrome(meta);
+  updatePeriodButtons();
+  pushScopeToUrl();
+}
+
+/* The payload writes the canonical single letters; the component's own
+   vocabulary is the long word. Kept here beside MAP_STATUS_WORDS, which maps
+   the same letters for the tooltip. */
+const MAP_STATUS_LETTERS = {
+  A: 'final', P: 'provisional', R: 'revised',
+  E: 'estimate', S: 'suppressed', N: 'na', derived: 'derived',
+};
 
 /* ---------------------------------------------------------------------------
    PALETTE, LEGEND CARD, SCALE BAR.
@@ -751,6 +1021,8 @@ function pushScopeToUrl(){
     const url = new URL(window.location);
     if(state.scope && state.scope !== 'be:country') url.searchParams.set('area', state.scope);
     else url.searchParams.delete('area');
+    if(state.period) url.searchParams.set('period', state.period);
+    else url.searchParams.delete('period');
     history.replaceState(null, '', url);
   }catch(_){}
 }
@@ -764,20 +1036,10 @@ async function selectIndicator(code){
 
   const res = await fetch(VALUES_URL(code) + '?t=' + Date.now());
   if(!res.ok){ statusEl.textContent = `Could not load ${code}`; return; }
-  const payload = await res.json();
+  state.payload = await res.json();
+  populatePeriodPicker();
+  drawPeriod();
 
-  state.map.setData(payload.communes || {}, {
-    unit: meta.unit,
-    decimals: meta.decimals,
-    direction: meta.direction,
-  });
-
-  // The denominator is what is ON SCREEN, not all 565: with an area picked,
-  // "412 of 565" beside a map of Limburg would be answering a question the
-  // reader did not ask. coverage().shown already respects the area filter.
-  const shown = state.map.coverage();
-  statusEl.textContent = T('communesShown', {n: shown.withValue, total: shown.shown});
-  updateLegendChrome(meta);
 
   /* Where this indicator came from and how it was made, beside the map that
      draws it. Built from the same index row the picker was built from, so a
@@ -882,8 +1144,6 @@ async function init(){
       svg:        document.getElementById('svg'),
       tip:        document.getElementById('tip'),
       mapbox:     document.getElementById('mapbox'),
-      swatches:   document.getElementById('swatches'),
-      ticks:      document.getElementById('ticks'),
       legendNote: document.getElementById('legendNote'),
       legendRows: document.getElementById('legendRows'),
       coverage:   document.getElementById('coverageWarn'),
@@ -900,15 +1160,11 @@ async function init(){
     }
 
     const sel = document.getElementById('indicator');
+    state.sections = sections.sections || [];
     const rows = state.index
       .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
       .sort((a, b) => a.label.localeCompare(b.label));
-    for(const r of rows){
-      const o = document.createElement('option');
-      o.value = r.code;
-      o.textContent = r.label;
-      sel.appendChild(o);
-    }
+    populateIndicatorPicker(rows);
     sel.onchange = () => selectIndicator(sel.value);
 
     // The area picker is optional: if the geography index is unreachable the
@@ -933,6 +1189,18 @@ async function init(){
     populatePalettePicker();
     applyPalette(savedPalette, false);
     paletteSel.onchange = () => applyPalette(paletteSel.value, true);
+
+    populateClassPicker();
+    const classSel = document.getElementById('classes');
+    classSel.onchange = () => { document.getElementById('breaks').value = ''; applyClassMode(); };
+    document.getElementById('breaks').addEventListener('change', applyClassMode);
+
+    const periodSel = document.getElementById('period');
+    periodSel.onchange = () => { state.period = periodSel.value; drawPeriod(); };
+    document.getElementById('periodPrev').onclick = () => stepPeriod(-1);
+    document.getElementById('periodNext').onclick = () => stepPeriod(1);
+    const wantedPeriod = new URLSearchParams(location.search).get('period');
+    if(wantedPeriod) state.period = wantedPeriod;
 
     watchTheView();
 
@@ -970,7 +1238,11 @@ async function init(){
       applyStrings();
       // The picker's labels, the map's legend and the provenance line all
       // hold translated text. Nothing is refetched and the map keeps its view.
-      relabelPicker(sel);
+      const relabelled = state.index
+        .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      populateIndicatorPicker(relabelled);
+      populateClassPicker();
       if(state.areas.length) populateScopePicker();
       populatePalettePicker();
       state.map.setLang(LANG);
