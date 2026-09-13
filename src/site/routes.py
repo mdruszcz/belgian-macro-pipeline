@@ -140,6 +140,16 @@ ROOT_PAGES: tuple[Page, ...] = (
         "canonical route switches; communes.html keeps the data table and its "
         "URL state untouched (rule 31)",
     ),
+    Page(
+        "/explorer.html",
+        False,
+        "the redesigned data explorer (Batch 8a): search/filter/table/chart/map "
+        "modes over every national AND municipal indicator, virtualized for full "
+        "data scale. A noindexed preview beside all_data.html, following the "
+        "same pattern as macro.html beside dashboard.html and micro.html beside "
+        "all_data.html -- all_data.html is left exactly as it is until the "
+        "canonical route switches",
+    ),
 )
 
 #: Routes whose pages must tell crawlers not to index them. The block-built
@@ -149,7 +159,9 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
-NOINDEX_ROUTES = frozenset({"/home2.html", "/macro.html", "/micro.html", "/profiles.html"})
+NOINDEX_ROUTES = frozenset(
+    {"/home2.html", "/macro.html", "/micro.html", "/profiles.html", "/explorer.html"}
+)
 
 
 def is_indexable(route: str) -> bool:

@@ -184,6 +184,53 @@ Built with `sorted()` at both the indicator and geography level rather than `sor
 final `json.dumps` -- the same determinism approach every other payload here uses (rule 35: identical
 inputs, byte-identical output).
 
+### `explorer/index.json` and `explorer/{scope}/{CODE}.json` (added Batch 8a)
+
+The data explorer's own payloads, one small file per indicator, written by
+`scripts/export_explorer_payloads.py`. 87 files in all: 68 municipal, 19 national, 5.4 MB together,
+median 46 KB, largest 394 KB (`MEDIAN_HOUSE_PRICE`, 14,748 observations).
+
+**They are sharded out of the two files this site offers for download, not out of the database.**
+`data/communes_history.csv` for the municipal scope and `data/belgian_macro_export.csv` for the
+national one. That is the whole point of the batch: the roadmap line asks that the explorer "never
+disagree with a download", and the only way to guarantee it is to make the page's figures a reshape
+of the download itself rather than a second query against the same source. Note the municipal input
+is `communes_history.csv`, the trimmed last-ten-years file that is actually committed and offered --
+NOT `communes_history_full.csv`, which is gitignored and which no reader can obtain.
+`tests/test_export_explorer_payloads.py` asserts the correspondence row for row in both directions:
+no payload cell absent from the CSV, no CSV row missing from a payload.
+
+Sharding is what makes the full dataset browsable at all. The municipal history is 178,128 rows and
+35 MB; a browser fetches one indicator, so the median request is 46 KB.
+
+```json
+{
+  "indicator_code": "MEDIAN_HOUSE_PRICE", "scope": "municipal",
+  "names": {"en": "...", "fr": "...", "nl": "..."},
+  "unit": "EUR", "decimals": 0, "direction": "contextual",
+  "grade": "A", "source": "statbel", "updated": "2026-09-06",
+  "periods": ["2010-Q1", "..."],
+  "geographies": ["11001", "..."],
+  "series": {"11001": {"2026-Q1": [445000.0, "P"]}}
+}
+```
+
+A cell is `[value, status]`. The status letters are the canonical six -- `A` final, `P` provisional,
+`R` revised, `E` estimate, `S` suppressed, `N` not applicable -- plus `derived` for a computed
+figure, the same vocabulary `communes.html`'s `statusPill()` uses. A suppressed cell carries its
+status and a null value, never a zero (rule 26).
+
+`index.json` is the catalogue the page loads first: one entry per indicator carrying its names, unit,
+decimals, direction, grade, source, scope, period list and geography list, so every filter on the
+page can be populated without fetching a single payload.
+
+**Batch 8a also changed a published download.** `scripts/export_canonical_csv.py` used to map only
+`final` and `provisional` to letters and send every other status to an empty cell. Nine rows in
+`belgian_macro_export.csv` -- all 2009 annual figures the database records as `revised` -- therefore
+reached readers with no status at all. The exporter's own docstring said the shortcut existed only
+because "the frontend has no dedicated visual for estimate/revised/suppressed/na yet"; this batch
+builds that visual, so the mapping now covers all six.
+
 ### `metadata/micro_sections.json` (added Batch 7)
 
 The micro.html layout, same premise as `metadata/national_sections.json`: a KPI row, a key-indicator

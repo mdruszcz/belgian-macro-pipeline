@@ -345,9 +345,16 @@ load();
 // with a data-theme value it has no rule for.
 (function(){
   var KEY = 'belpulse-theme';
-  var group = document.querySelector('.theme-toggle');
-  if(!group) return;
-  var buttons = group.querySelectorAll('[data-theme-choice]');
+  // Selected by ATTRIBUTE, not by walking into the first .theme-toggle: the
+  // language switcher above carries that same class and comes first in the
+  // document, so querySelector('.theme-toggle') returned the LANGUAGE group
+  // and the NodeList below was empty -- no click handler was ever attached
+  // and the three theme buttons were inert. The saved theme still applied on
+  // load (the pre-paint script at the top of <head> does that), which is why
+  // the page looked fine and the failure went unnoticed. Same shape as
+  // map.html, which has always done it this way. (Batch 8a)
+  var buttons = document.querySelectorAll('[data-theme-choice]');
+  if(!buttons.length) return;
 
   function apply(choice, persist){
     if(choice === 'auto') document.documentElement.removeAttribute('data-theme');

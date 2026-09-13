@@ -1,0 +1,1021 @@
+<!--
+  BelPulse data explorer (Batch 8a, docs/steps L574-577).
+
+  A PREVIEW ROUTE, noindexed, BESIDE all_data.html -- which keeps its own CSV
+  fetch, its own markup and no URL state, untouched, exactly as macro.html
+  sits beside dashboard.html and micro.html beside all_data.html. The cutover
+  is a later, separate step.
+
+  WHAT THIS PAGE IS. all_data.html reads one 149 KB national CSV with no
+  pagination and no map.html-style depth. This page reads EVERY indicator
+  this pipeline publishes, national and municipal, as a table, a chart or a
+  map, built from public/data/explorer/{municipal,national}/{CODE}.json --
+  one small file per indicator (scripts/export_explorer_payloads.py) built
+  straight from data/communes_history.csv and data/belgian_macro_export.csv,
+  the same two files this site offers as downloads, so the page can never
+  show a figure the download disagrees with.
+
+  NO INDICATOR ID AND NO FIGURE IS HARD-CODED HERE. Every indicator, name,
+  unit, value and status comes from public/data/explorer/index.json, an
+  indicator payload, or public/data/metadata/geographies.json -- checked by
+  tests/test_explorer.py the same way tests/test_macro.py checks macro.html.
+
+  VIRTUALIZATION. The richest municipal indicator carries 565 communes x up
+  to ~37 periods -- over 20,000 rows in long format (one row per geography
+  per period, matching the shape of the CSV download itself, which is why
+  the table is long format rather than one-row-per-commune: every table row
+  corresponds to exactly one row of the download). Only the rows scrolled
+  into view are ever in the DOM (see VT.render below); aria-rowcount and
+  aria-rowindex tell assistive tech the row's true position in the full set,
+  and the scroll region is keyboard-operable (arrows/PageUp/PageDown/Home/
+  End) even though most of the table is never in the DOM at once -- see
+  "why this is genuinely accessible, not just fast" below VT.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>BelPulse — Data explorer</title>
+<meta name="description" content="Search, filter and browse every national and municipal indicator this pipeline publishes, as a table, a chart or a map.">
+<script src="assets/i18n.js"></script>
+
+<script>
+  // Apply the saved theme and language BEFORE first paint -- the same
+  // pre-paint script every other page uses, so this page never flashes the
+  // wrong palette or a half-second of English on a French visit.
+  (function(){
+    try{
+      var t = localStorage.getItem('belpulse-theme');
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){ /* localStorage can throw in private mode; light/English is a fine fallback */ }
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/commune_map.css">
+<style>
+  /* Page composition only; anything reusable belongs in components.css. */
+  body{background:var(--bp-bg); color:var(--bp-text); margin:0; font-family:var(--bp-font-ui)}
+  h1,h2,h3{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em; margin:0}
+  code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+  a{color:var(--bp-accent-ink)}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 var(--bp-space-6)}
+
+  /* ---- the trap noted in the Batch 8a handoff: assets/commune_map.css was
+     written for the OLD --surface/--border-strong/--text token system and
+     defines none of them itself. Checked micro.html and profiles.html for
+     an existing alias to copy -- NEITHER actually defines one (verified by
+     grep; both simply link commune_map.css with these custom properties
+     left undefined, which resolves every declaration that reads them to its
+     initial value -- an invisible tooltip and legend on both pages today).
+     Recorded as a finding in this batch's report rather than silently
+     copying a bug forward. This page defines the alias for real: every name
+     commune_map.css reads is enumerated below, once, pointing at its --bp-*
+     equivalent -- and because a custom property is a live reference, one
+     flat block is enough; it re-resolves with the theme automatically. */
+  :root{
+    --surface: var(--bp-surface);
+    --border: var(--bp-border);
+    --border-strong: var(--bp-border);
+    --text: var(--bp-text);
+    --text-muted: var(--bp-text-muted);
+    --text-faint: var(--bp-text-faint);
+    --accent: var(--bp-accent);
+    --accent-ink: var(--bp-accent-ink);
+    --accent-soft: var(--bp-accent-soft);
+    --warn: var(--bp-icon-amber-ink);
+    --warn-soft: var(--bp-icon-amber-bg);
+  }
+
+  /* ---- top bar (macro.html's composition, so the pages read as one site) --- */
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%; max-width:1400px; flex-wrap:wrap}
+  /* The six nav links plus the wordmark and the language picker need about
+     880px of min-content width. Measured at 820px they did not wrap -- they
+     simply ran past the right edge and took the whole page sideways with
+     them. Below 1000px the nav takes its own line and scrolls horizontally
+     inside itself, which is what profiles.html already does at its own
+     breakpoint. */
+  @media (max-width:1000px){
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto; padding-bottom:2px}
+    .bp-nav a{white-space:nowrap}
+    .langpick{margin-left:auto}
+  }
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px; margin-left:auto}
+
+  .pagehead{padding:var(--bp-space-5) 0 var(--bp-space-3)}
+  .pagehead h1{font-size:2rem; line-height:1.1; margin:0 0 var(--bp-space-2)}
+  .pagehead .lead{color:var(--bp-text-muted); margin:0; max-width:78ch; font-size:var(--bp-text-body)}
+
+  /* ---- stats strip -------------------------------------------------------- */
+  .stats{display:flex; flex-wrap:wrap; gap:1px; margin:var(--bp-space-4) 0; background:var(--bp-border);
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); overflow:hidden}
+  /* flex-basis, not min-width: four 110px tiles plus padding do not fit a
+     390px phone, and a min-width on a non-wrapping row pushed the strip
+     past the viewport instead of stacking. */
+  .stat{flex:1 1 140px; background:var(--bp-surface); padding:12px 16px; display:flex; flex-direction:column; gap:2px; min-width:0}
+  .stat .n{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; font-size:1.3rem; font-weight:600}
+  .stat .l{font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-faint)}
+
+  /* ---- toolbar ------------------------------------------------------------- */
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    box-shadow:var(--bp-shadow-card); padding:10px; margin:0 0 var(--bp-space-4);
+  }
+  .toolbar select, .toolbar input[type="text"]{
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); background:var(--bp-surface);
+    color:inherit; font:inherit; font-size:var(--bp-text-small); padding:7px 10px;
+    /* A <select> sizes itself to its LONGEST OPTION, and the indicator names
+       run to sixty characters -- measured at 573px inside a 390px viewport,
+       which pushed the whole page sideways. min-width:0 lets the flex item
+       shrink below that intrinsic width; max-width caps it at the row. */
+    min-width:0; max-width:100%;
+  }
+  .toolbar input[type="text"]{min-width:200px; flex:1 1 200px}
+  .toolbar .sep{width:1px; align-self:stretch; background:var(--bp-border); margin:0 2px}
+  .toolbar a.bp-btn{font-size:var(--bp-text-small); white-space:nowrap}
+  #status{font-size:.82rem; color:var(--bp-text-muted); white-space:nowrap; font-variant-numeric:tabular-nums; margin-left:auto}
+  #status.err{color:var(--bp-red-signal)}
+
+  /* ---- mode segmented control ----------------------------------------------
+     Same visual language as the site's existing Light/Auto/Dark switch
+     (assets/belpulse/layout.css's .bp-theme-toggle), a new class because it
+     is not a theme control and should not read as one to a future editor. */
+  .mode-toggle{display:flex; gap:1px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}
+  .mode-toggle button{
+    border:0; background:var(--bp-surface); color:var(--bp-text-muted); font:inherit;
+    font-size:var(--bp-text-small); padding:7px 12px; cursor:pointer;
+  }
+  .mode-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink); font-weight:600}
+  .mode-toggle button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
+
+  /* ---- table + virtualization ----------------------------------------------
+     ROW_HEIGHT below in JS MUST match this. A spacer row above and below the
+     rendered window, not `position:absolute` rows, so the table keeps a
+     single ordinary column layout at every width -- no per-row width sync. */
+  .table-card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    box-shadow:var(--bp-shadow-card); overflow:hidden}
+  .vt-scroll{height:560px; overflow-y:auto; overflow-x:auto}
+  .vt-scroll:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
+  table.vt{border-collapse:collapse; width:100%; min-width:640px}
+  table.vt thead th{
+    position:sticky; top:0; background:var(--bp-surface); z-index:1;
+    border-bottom:1px solid var(--bp-border); text-align:left; font-size:.72rem;
+    text-transform:uppercase; letter-spacing:.05em; color:var(--bp-text-muted);
+    padding:9px 12px; cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  table.vt thead th:hover{color:var(--bp-text)}
+  table.vt thead th .arrow{opacity:0; margin-left:4px; color:var(--bp-accent)}
+  table.vt thead th.sorted .arrow{opacity:1}
+  table.vt tbody td{
+    height:32px; box-sizing:border-box; padding:0 12px; border-bottom:1px solid var(--bp-border);
+    font-family:"IBM Plex Mono",monospace; font-size:.82rem; white-space:nowrap; vertical-align:middle;
+  }
+  table.vt tbody td.name{font-family:var(--bp-font-ui); font-size:.85rem; white-space:normal; max-width:280px}
+  table.vt tbody td.val{text-align:right; font-variant-numeric:tabular-nums}
+  table.vt tbody tr:nth-child(even) td{background:var(--bp-surface-alt)}
+  table.vt tbody td.spacer{height:auto; padding:0; border:0}
+
+  .pill{display:inline-block; padding:1px 8px; border-radius:999px; font-family:var(--bp-font-ui);
+    font-size:.72rem; font-weight:500; text-transform:capitalize}
+  .pill.final{background:var(--bp-icon-green-bg); color:var(--bp-icon-green-ink)}
+  .pill.prov{background:var(--bp-icon-amber-bg); color:var(--bp-icon-amber-ink)}
+  .pill.suppressed{background:var(--bp-surface-alt); color:var(--bp-text-faint); font-style:italic}
+  .pill.derived{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+  .pill.other{background:var(--bp-surface-alt); color:var(--bp-text-muted)}
+
+  .empty-note{padding:var(--bp-space-6); text-align:center; color:var(--bp-text-muted)}
+
+  /* ---- chart mode ------------------------------------------------------------ */
+  .chart-note{font-size:.82rem; color:var(--bp-text-muted); margin-top:var(--bp-space-3)}
+  .chart-prompt{padding:var(--bp-space-8) var(--bp-space-5); text-align:center; color:var(--bp-text-muted)}
+
+  /* ---- map mode: the frame around assets/commune_map.js's output ------------ */
+  .bp-map-card .provmap-note{padding:0 var(--bp-space-5) var(--bp-space-4); color:var(--bp-text-muted); font-size:.82rem}
+
+  /* ---- attribution / footer -------------------------------------------------- */
+  /* The licence notice carries full URLs, which are single unbreakable words
+     to a layout engine and ran past the right edge on a phone. */
+  .attribution{padding:var(--bp-space-6) 0; font-size:11px; line-height:1.6; color:var(--bp-text-muted); overflow-wrap:anywhere}
+  .attribution strong{color:var(--bp-text)}
+  .site-footer{padding:var(--bp-space-5) 0 var(--bp-space-8); border-top:1px solid var(--bp-border);
+    color:var(--bp-text-faint); font-size:.8rem}
+
+  [hidden]{display:none !important}
+
+  @media (max-width:900px){
+    .toolbar #status{margin-left:0; flex-basis:100%}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 var(--bp-space-4)}
+    .pagehead h1{font-size:1.5rem}
+    .vt-scroll{height:460px}
+    /* The table itself may be wider than the screen -- it lives in its own
+       horizontal scroller, which is the one exception to "the page body must
+       never scroll sideways". Everything else stacks. */
+    .toolbar{padding:8px}
+    .toolbar select{flex:1 1 100%}
+  }
+</style>
+</head>
+<body class="bp-shell explorer">
+
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="home2.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span><span class="bp-wordmark">BelPulse</span></span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home2.html" data-t="navHome">Home</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
+      <a href="micro.html" data-t="navMicro">Micro</a>
+      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+      <a href="map.html" data-t="navMaps">Maps</a>
+      <a href="explorer.html" aria-current="page" data-t="explorerTitle">Data explorer</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+    </nav>
+    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
+      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
+    </select>
+  </div>
+</header>
+
+<nav class="bp-breadcrumb" aria-label="Breadcrumb">
+  <div class="wrap">
+    <a href="home2.html" data-t="navHome">Home</a><span class="sep">/</span>
+    <span data-t="explorerTitle">Data explorer</span>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <div class="pagehead">
+      <h1 data-t="explorerTitle">Data explorer</h1>
+      <p class="lead" data-t-html="explorerLead">Search, filter and browse every indicator this pipeline publishes.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="n" id="statIndicators">—</span><span class="l" data-t="statIndicators">Indicators</span></div>
+      <div class="stat"><span class="n" id="statRows">—</span><span class="l" data-t="statObservations">Observations</span></div>
+      <div class="stat"><span class="n" id="statCommunes">—</span><span class="l" data-t="statCommunes">Communes</span></div>
+      <div class="stat"><span class="n" id="statUpdated">—</span><span class="l" data-t="statUpdated">Last fetched</span></div>
+    </div>
+
+    <div class="toolbar">
+      <select id="scope" data-t-aria="explorerScope" aria-label="Scope">
+        <option value="" data-t="explorerScopeAll">All</option>
+        <option value="municipal" data-t="explorerScopeMunicipal">Municipal</option>
+        <option value="national" data-t="explorerScopeNational">National</option>
+      </select>
+      <select id="indicator" data-t-aria="explorerIndicator" aria-label="Indicator"></select>
+      <span class="sep"></span>
+      <input id="search" type="text" list="geoList" data-t-placeholder="filterPlaceholder" placeholder="Filter by commune name (EN/FR/NL) or NIS code…" autocomplete="off">
+      <datalist id="geoList"></datalist>
+      <select id="region" data-t-aria="pfRegion" aria-label="Region">
+        <option value="" data-t="allRegions">All regions</option>
+      </select>
+      <span class="sep"></span>
+      <select id="fromPeriod" data-t-aria="explorerFrom" aria-label="From" disabled></select>
+      <select id="toPeriod" data-t-aria="explorerTo" aria-label="To" disabled></select>
+      <span class="sep"></span>
+      <div class="mode-toggle" id="modeToggle" role="group" data-t-aria="explorerMode" aria-label="Table, chart or map">
+        <button type="button" data-mode="table" aria-pressed="true" data-t="explorerModeTable">Table</button>
+        <button type="button" data-mode="chart" aria-pressed="false" data-t="explorerModeChart">Chart</button>
+        <button type="button" data-mode="map" aria-pressed="false" data-t="explorerModeMap">Map</button>
+      </div>
+      <a class="bp-btn bp-btn--outline" id="downloadLink" href="data/belgian_macro_export.csv" data-t="explorerDownload">Download the full CSV</a>
+      <span id="status" data-t="loading">Loading…</span>
+    </div>
+
+    <!-- ── table mode ──────────────────────────────────────────────────── -->
+    <section id="viewTable" class="table-card">
+      <div class="vt-scroll" id="vtScroll" tabindex="0" role="region" data-t-aria="explorerScrollRegion" aria-label="Scrollable results table">
+        <table class="vt" id="vtTable">
+          <thead>
+            <tr>
+              <th data-key="geo"><span data-t="explorerColGeography">Geography</span><span class="arrow">↓</span></th>
+              <th data-key="region" id="thRegion"><span data-t="colRegion">Region</span><span class="arrow">↓</span></th>
+              <th data-key="province" id="thProvince"><span data-t="colProvince">Province</span><span class="arrow">↓</span></th>
+              <th data-key="period"><span data-t="colPeriod">Period</span><span class="arrow">↓</span></th>
+              <th data-key="value" class="val"><span data-t="colValue">Value</span><span class="arrow">↓</span></th>
+              <th data-key="status"><span data-t="colStatus">Status</span><span class="arrow">↓</span></th>
+            </tr>
+          </thead>
+          <tbody id="vtBody"></tbody>
+        </table>
+        <div class="empty-note" id="emptyNote" data-t="explorerNoResults" hidden>No rows match the current filters.</div>
+      </div>
+    </section>
+
+    <!-- ── chart mode ──────────────────────────────────────────────────── -->
+    <section id="viewChart" class="bp-chart-card" hidden>
+      <div class="bp-chart-head">
+        <h3 id="chartTitle">—</h3>
+      </div>
+      <div class="bp-chart-canvas-wrap">
+        <canvas id="chartCanvas" height="210"></canvas>
+      </div>
+      <p class="chart-prompt" id="chartPrompt" data-t="explorerChartPickGeography" hidden>Pick a commune to draw its trend.</p>
+      <p class="chart-note" id="chartGapNote" hidden></p>
+    </section>
+
+    <!-- ── map mode ────────────────────────────────────────────────────── -->
+    <section id="viewMap" class="bp-map-card" hidden>
+      <div class="bp-chart-head">
+        <h3 id="mapTitle">—</h3>
+        <select id="mapPeriod" data-t-aria="explorerMapPeriod" aria-label="Period to map"></select>
+      </div>
+      <div id="mapAvailable">
+        <div class="mapbox" id="mapbox">
+          <svg class="map" id="mapSvg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+          <div class="zoom">
+            <button type="button" id="mapZoomIn" data-t-aria="zoomIn" aria-label="Zoom in">+</button>
+            <button type="button" id="mapZoomOut" data-t-aria="zoomOut" aria-label="Zoom out">&minus;</button>
+            <button type="button" id="mapZoomReset" data-t-aria="resetView" aria-label="Reset view">&#8634;</button>
+          </div>
+          <div class="map-tip map-hidden" id="mapTip"></div>
+        </div>
+        <div class="legend">
+          <div class="scale">
+            <div class="swatches" id="mapSwatches"></div>
+            <div class="ticks" id="mapTicks"></div>
+          </div>
+          <div class="nodata-key"><i></i> <span data-t="mapNoData">no data</span></div>
+          <div class="note" id="mapLegendNote"></div>
+        </div>
+        <div class="map-warn map-hidden" id="mapCoverageWarn"></div>
+      </div>
+      <div class="bp-state" data-state="unavailable" id="mapUnavailable" hidden>
+        <div class="bp-state-message">
+          <span class="headline" data-t="explorerModeMap">Map</span>
+          <span class="why" data-t="explorerMapUnavailableNational">The map is not available for a national indicator.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="bp-page-footer">
+      <div class="attribution" id="attribution">
+        <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+             identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+        <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+        <!-- values-attribution:end --></span>
+        <br><br><span data-t-html="varAttribution"><strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.</span>
+      </div>
+    </div>
+
+    <footer class="site-footer" data-t-html="explorerFooter">Read from GitHub Pages.</footer>
+  </div>
+</main>
+
+<script src="assets/commune_map.js"></script>
+<script src="assets/belpulse/charts.js"></script>
+<script>
+/* =============================================================================
+   Data explorer -- page logic.
+
+   STATE lives in one object so a URL round-trip (read on load, written on
+   every change via history.replaceState -- never pushState, matching
+   map.html:346-350) can be the single description of what is on screen.
+============================================================================= */
+const ROW_HEIGHT = 32;     // MUST match table.vt tbody td{height} in <style>
+const OVERSCAN = 8;        // extra rows rendered above/below the viewport
+
+let LANG = I18N.initial();
+const T = (key, vars) => I18N.t(LANG, key, vars);
+
+const state = {
+  index: [],              // index.json's "indicators" array
+  geo: {byNis: {}, regions: [], byGeoId: {}},  // built from metadata/geographies.json
+  sources: {}, grades: {},
+  scope: '', code: null, mode: 'table',
+  payload: null,           // the currently loaded indicator payload
+  rows: [],                // filtered+sorted long-format rows for table/chart
+  sortKey: 'geo', sortDir: 1,
+  map: null,               // MapUI.CommuneMap, built lazily
+  geojsonLoading: null,
+};
+
+function applyStrings(){
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T(el.dataset.t); });
+  document.querySelectorAll('[data-t-html]').forEach(el => { el.innerHTML = T(el.dataset.tHtml); });
+  document.querySelectorAll('[data-t-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.tAria)));
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => { el.placeholder = T(el.dataset.tPlaceholder); });
+  const values = document.getElementById('attrValues');
+  if(values) values.innerHTML = T('attribution');
+  document.documentElement.setAttribute('lang', LANG);
+  document.getElementById('langPick').value = LANG;
+}
+
+/* --- geography index, walked once from metadata/geographies.json's
+   parent_geo_id chain -- the same ancestry export_communes_csv.py's own
+   _ancestor_names() computes server-side, read here rather than re-derived,
+   since this file already publishes it (rule 25: one resolution). --------- */
+function buildGeoIndex(geographies){
+  const byGeoId = {};
+  geographies.forEach(g => { byGeoId[g.geo_id] = g; });
+  const regions = geographies.filter(g => g.level === 'region')
+    .sort((a, b) => a.nis_code.localeCompare(b.nis_code));
+  const byNis = {};
+  geographies.filter(g => g.level === 'municipality').forEach(g => {
+    let region = null, province = null, cur = byGeoId[g.parent_geo_id];
+    while(cur){
+      if(cur.level === 'province') province = cur;
+      if(cur.level === 'region') region = cur;
+      cur = cur.parent_geo_id ? byGeoId[cur.parent_geo_id] : null;
+    }
+    byNis[g.nis_code] = {geo: g, region, province};
+  });
+  return {byNis, regions, byGeoId};
+}
+
+function geoName(nis){
+  const entry = state.geo.byNis[nis];
+  if(!entry) return nis;
+  return MapUI.pickName(entry.geo.name, nis);
+}
+
+/* --- status pill: SAME LETTERS, SAME CLASSES as communes.html's
+   statusPill() (communes.html:483-493), reused deliberately so the two
+   vocabularies cannot diverge (Batch 8a decision). The one departure is the
+   LABEL TEXT, which comes from the shared i18n strings instead of being
+   hardcoded English -- all_data.html's own pills are English-only, a defect
+   this page does not carry forward (see the Batch 8a handoff). ----------- */
+function statusPill(s){
+  if(s === 'A') return `<span class="pill final">${T('pfStatusFinal')}</span>`;
+  if(s === 'P') return `<span class="pill prov">${T('status_provisional')}</span>`;
+  if(s === 'R') return `<span class="pill prov">${T('status_revised')}</span>`;
+  if(s === 'E') return `<span class="pill prov">${T('status_estimate')}</span>`;
+  if(s === 'S') return `<span class="pill suppressed" title="${T('mapWithheld')}">${T('pfSuppressed')}</span>`;
+  if(s === 'N') return `<span class="pill other">${T('explorerStatusNa')}</span>`;
+  if(s === 'derived') return `<span class="pill derived">${T('pfStatusDerived')}</span>`;
+  if(!s) return '';
+  return `<span class="pill other">${s}</span>`;
+}
+
+/* =============================================================================
+   Virtualized table (VT).
+
+   WHY THIS IS GENUINELY ACCESSIBLE, NOT JUST FAST. A windowed table that
+   only ever paints ~30 <tr> elements would normally break two things for a
+   keyboard/screen-reader user: knowing a row's true position, and reaching
+   a row that scrolls the window rather than the page. Both are handled
+   rather than waived:
+     - aria-rowcount on <table> and aria-rowindex on every rendered <tr>
+       (the WAI-ARIA pattern for a virtualized grid) tell assistive tech the
+       row's real 1-based position in the full set, header included, even
+       though most rows are never in the DOM.
+     - #vtScroll is a focusable (tabindex=0) scrollable region; ArrowUp/Down,
+       PageUp/Down and Home/End are handled explicitly (see wireKeyboard
+       below) rather than relying on whatever the browser does with a
+       focused generic <div>, so a keyboard user can reach the first and
+       last row without a mouse.
+   The status line always reports the number of MATCHING rows, never the
+   number currently painted -- decision #7's "N rows match, not N shown". */
+const VT = {
+  spacerTop: null, spacerBottom: null,
+
+  render(){
+    const scroller = document.getElementById('vtScroll');
+    const body = document.getElementById('vtBody');
+    const rows = state.rows;
+    const total = rows.length;
+    const viewportRows = Math.ceil(scroller.clientHeight / ROW_HEIGHT) + 1;
+    const scrollTop = scroller.scrollTop;
+    const first = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN);
+    const last = Math.min(total, first + viewportRows + OVERSCAN * 2);
+
+    document.getElementById('vtTable').setAttribute('aria-rowcount', String(total + 1));
+
+    const cols = state.scope === 'national' ? 4 : 6;
+    let html = '';
+    if(first > 0){
+      html += `<tr><td class="spacer" colspan="${cols}" style="height:${first * ROW_HEIGHT}px"></td></tr>`;
+    }
+    for(let i = first; i < last; i++){
+      const r = rows[i];
+      html += `<tr aria-rowindex="${i + 2}">` +
+        `<td class="name">${escapeHtml(r.geoLabel)}</td>` +
+        (state.scope !== 'national' ? `<td>${escapeHtml(r.regionLabel || '')}</td><td>${escapeHtml(r.provinceLabel || '')}</td>` : '') +
+        `<td>${escapeHtml(r.period)}</td>` +
+        `<td class="val">${r.value === null ? '—' : MapUI.formatValue(r.value, state.payload.unit, state.payload.decimals, LANG) + MapUI.unitSuffix(state.payload.unit)}</td>` +
+        `<td>${statusPill(r.status)}</td>` +
+      `</tr>`;
+    }
+    if(last < total){
+      html += `<tr><td class="spacer" colspan="${cols}" style="height:${(total - last) * ROW_HEIGHT}px"></td></tr>`;
+    }
+    body.innerHTML = html;
+    document.getElementById('emptyNote').hidden = total > 0;
+  },
+
+  wireScroll(){
+    const scroller = document.getElementById('vtScroll');
+    scroller.addEventListener('scroll', () => { if(state.mode === 'table') VT.render(); }, {passive: true});
+    // Re-measure on resize: clientHeight changes, so the number of rows
+    // that must be painted changes with it.
+    new ResizeObserver(() => { if(state.mode === 'table') VT.render(); }).observe(scroller);
+  },
+
+  wireKeyboard(){
+    const scroller = document.getElementById('vtScroll');
+    scroller.addEventListener('keydown', e => {
+      const total = state.rows.length;
+      if(!total) return;
+      const maxScroll = Math.max(0, total * ROW_HEIGHT - scroller.clientHeight);
+      let handled = true;
+      if(e.key === 'ArrowDown') scroller.scrollTop = Math.min(maxScroll, scroller.scrollTop + ROW_HEIGHT);
+      else if(e.key === 'ArrowUp') scroller.scrollTop = Math.max(0, scroller.scrollTop - ROW_HEIGHT);
+      else if(e.key === 'PageDown') scroller.scrollTop = Math.min(maxScroll, scroller.scrollTop + scroller.clientHeight);
+      else if(e.key === 'PageUp') scroller.scrollTop = Math.max(0, scroller.scrollTop - scroller.clientHeight);
+      else if(e.key === 'Home') scroller.scrollTop = 0;
+      else if(e.key === 'End') scroller.scrollTop = maxScroll;
+      else handled = false;
+      if(handled){ e.preventDefault(); VT.render(); }
+    });
+  },
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* =============================================================================
+   Filtering, sorting and the status line.
+============================================================================= */
+function matchesSearchAndRegion(nis, query, regionId){
+  if(regionId){
+    const entry = state.geo.byNis[nis];
+    if(!entry || !entry.region || entry.region.geo_id !== regionId) return false;
+  }
+  if(query){
+    const entry = state.geo.byNis[nis];
+    const names = entry ? Object.values(entry.geo.name || {}).join(' ').toLowerCase() : '';
+    if(!names.includes(query) && nis.toLowerCase() !== query) return false;
+  }
+  return true;
+}
+
+function rebuildRows(){
+  const payload = state.payload;
+  if(!payload){ state.rows = []; return; }
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  const regionId = document.getElementById('region').value;
+  const from = document.getElementById('fromPeriod').value || payload.periods[0];
+  const to = document.getElementById('toPeriod').value || payload.periods[payload.periods.length - 1];
+
+  const rows = [];
+  for(const geo of payload.geographies){
+    if(payload.scope === 'municipal' && !matchesSearchAndRegion(geo, query, regionId)) continue;
+    const entry = payload.scope === 'municipal' ? state.geo.byNis[geo] : null;
+    for(const period of payload.periods){
+      if(period < from || period > to) continue;
+      const cell = payload.series[geo][period];
+      if(!cell) continue; // absent -- no row exists for this (geography, period)
+      rows.push({
+        geo,
+        geoLabel: payload.scope === 'national' ? 'Belgium' : geoName(geo),
+        regionLabel: entry && entry.region ? MapUI.pickName(entry.region.name, '') : '',
+        provinceLabel: entry && entry.province ? MapUI.pickName(entry.province.name, '') : '',
+        period,
+        value: cell[0],
+        status: cell[1],
+      });
+    }
+  }
+
+  const key = state.sortKey, dir = state.sortDir;
+  rows.sort((a, b) => {
+    let av = a[key], bv = b[key];
+    if(key === 'value'){ av = av === null ? -Infinity : av; bv = bv === null ? -Infinity : bv; }
+    if(av < bv) return -1 * dir;
+    if(av > bv) return 1 * dir;
+    return a.geo < b.geo ? -1 : a.geo > b.geo ? 1 : (a.period < b.period ? -1 : a.period > b.period ? 1 : 0);
+  });
+  state.rows = rows;
+}
+
+function updateStatus(){
+  const el = document.getElementById('status');
+  if(!state.payload){ el.textContent = T('loading'); return; }
+  const totalRowsForIndicator = Object.values(state.payload.series)
+    .reduce((n, byPeriod) => n + Object.keys(byPeriod).length, 0);
+  const shown = state.rows.length;
+  el.textContent = shown === totalRowsForIndicator
+    ? T('explorerRowsAll', {n: shown})
+    : T('explorerRowsFiltered', {n: shown, total: totalRowsForIndicator});
+}
+
+/* =============================================================================
+   Chart mode. drawLine only: this view answers "how has ONE geography's
+   figure moved over time", which is what a line answers; a cross-commune
+   comparison (drawBar's usual job) is a different question this page does
+   not attempt (noted in the batch report as a possible follow-up).
+============================================================================= */
+function currentChartGeo(){
+  // The chart draws a SINGLE geography's trend, per rule 27 (never average
+  // across geographies in the browser). National has exactly one; municipal
+  // draws the one the filters have narrowed to, if exactly one remains.
+  if(state.scope === 'national' || (state.payload && state.payload.scope === 'national')) return 'be:country';
+  const nises = new Set(state.rows.map(r => r.geo));
+  return nises.size === 1 ? [...nises][0] : null;
+}
+
+function renderChart(){
+  const payload = state.payload;
+  const prompt = document.getElementById('chartPrompt');
+  const canvas = document.getElementById('chartCanvas');
+  const gapNote = document.getElementById('chartGapNote');
+  if(!payload){ prompt.hidden = false; canvas.hidden = true; gapNote.hidden = true; return; }
+  const geo = currentChartGeo();
+  document.getElementById('chartTitle').textContent =
+    (payload.names && (payload.names[LANG] || payload.names.en)) || payload.indicator_code;
+  if(!geo){
+    prompt.hidden = false; canvas.hidden = true; gapNote.hidden = true;
+    return;
+  }
+  prompt.hidden = true; canvas.hidden = false;
+  const from = document.getElementById('fromPeriod').value || payload.periods[0];
+  const to = document.getElementById('toPeriod').value || payload.periods[payload.periods.length - 1];
+  const byPeriod = payload.series[geo] || {};
+  const allPeriodsInRange = payload.periods.filter(p => p >= from && p <= to && byPeriod[p]);
+  // A withheld or n/a cell is DROPPED from the drawn line, leaving a visible
+  // gap, exactly as site_payloads.md documents for every other chart on this
+  // site -- never bridged, and never drawn as zero (rule 26).
+  const points = allPeriodsInRange
+    .filter(p => byPeriod[p][0] !== null)
+    .map(p => ({period: p, value: byPeriod[p][0]}));
+  const omitted = allPeriodsInRange.length - points.length;
+  if(points.length){
+    BPCharts.drawLine(canvas, [{label: geo, points}], {locale: LANG === 'en' ? 'en-GB' : LANG});
+  }
+  if(omitted > 0){
+    gapNote.hidden = false;
+    gapNote.textContent = T('explorerChartGapNote', {n: omitted});
+  } else {
+    gapNote.hidden = true;
+  }
+}
+
+/* =============================================================================
+   Map mode. Municipal only (rule 29: reuse assets/commune_map.js, never a
+   second implementation); national says why it has none rather than
+   drawing an empty country (decision #6).
+============================================================================= */
+function latestValuedPeriodUpTo(byPeriod, periods, to){
+  const upTo = to ? periods.filter(p => p <= to) : periods;
+  for(let i = upTo.length - 1; i >= 0; i--){
+    const cell = byPeriod[upTo[i]];
+    if(cell && cell[0] !== null) return upTo[i];
+  }
+  return upTo.length ? upTo[upTo.length - 1] : null;
+}
+
+async function ensureMap(){
+  if(state.map) return state.map;
+  if(!state.geojsonLoading){
+    state.geojsonLoading = fetch('data/geo/communes.geojson?t=' + Date.now()).then(r => r.json());
+  }
+  const geojson = await state.geojsonLoading;
+  state.map = new MapUI.CommuneMap({
+    svg: document.getElementById('mapSvg'),
+    tip: document.getElementById('mapTip'),
+    mapbox: document.getElementById('mapbox'),
+    swatches: document.getElementById('mapSwatches'),
+    ticks: document.getElementById('mapTicks'),
+    legendNote: document.getElementById('mapLegendNote'),
+    coverage: document.getElementById('mapCoverageWarn'),
+  }, {
+    lang: LANG,
+    onSelect: nis => { window.location.href = `local/${nis}/`; },
+  }).build(geojson);
+  document.getElementById('mapZoomIn').onclick = () => state.map.zoomBy(1 / 1.4);
+  document.getElementById('mapZoomOut').onclick = () => state.map.zoomBy(1.4);
+  document.getElementById('mapZoomReset').onclick = () => state.map.resetView();
+  return state.map;
+}
+
+const MAP_STATUS_WORDS = {
+  A: 'final', P: 'provisional', R: 'revised', E: 'estimate',
+  S: 'suppressed', N: 'na', derived: 'derived',
+};
+
+async function renderMap(){
+  const payload = state.payload;
+  const available = document.getElementById('mapAvailable');
+  const unavailable = document.getElementById('mapUnavailable');
+  if(!payload || payload.scope === 'national'){
+    available.hidden = true;
+    unavailable.hidden = false;
+    document.getElementById('mapTitle').textContent = payload
+      ? (payload.names && (payload.names[LANG] || payload.names.en)) || payload.indicator_code
+      : '—';
+    return;
+  }
+  unavailable.hidden = true;
+  available.hidden = false;
+  document.getElementById('mapTitle').textContent =
+    (payload.names && (payload.names[LANG] || payload.names.en)) || payload.indicator_code;
+
+  const map = await ensureMap();
+  map.setLang(LANG);
+
+  const periodSel = document.getElementById('mapPeriod');
+  if(periodSel.options.length === 0 || periodSel.dataset.forCode !== payload.indicator_code){
+    periodSel.innerHTML = payload.periods.map(p => `<option value="${p}">${p}</option>`).join('');
+    periodSel.dataset.forCode = payload.indicator_code;
+    const to = document.getElementById('toPeriod').value || payload.periods[payload.periods.length - 1];
+    periodSel.value = latestValuedPeriodUpTo(
+      Object.fromEntries(payload.periods.map(p => [p, null])), payload.periods, to,
+    );
+    // Re-pick using the real per-geography data now that a period list exists:
+    // the loop above only needed period ORDER, this pass needs values, and
+    // "latest with a value ANYWHERE" is a fairer default than any one commune.
+    const anyValue = {};
+    for(const p of payload.periods){
+      anyValue[p] = Object.values(payload.series).some(s => s[p] && s[p][0] !== null) ? [1, 'A'] : [null, 'S'];
+    }
+    periodSel.value = latestValuedPeriodUpTo(anyValue, payload.periods, to) || payload.periods[payload.periods.length - 1];
+  }
+  const period = periodSel.value;
+
+  const values = {};
+  for(const nis of payload.geographies){
+    const cell = payload.series[nis][period];
+    if(!cell) continue;
+    values[nis] = {value: cell[0], period, status: MAP_STATUS_WORDS[cell[1]] || cell[1]};
+  }
+  map.setData(values, {unit: payload.unit, decimals: payload.decimals, direction: payload.direction});
+
+  const regionId = document.getElementById('region').value;
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  const visible = (regionId || query)
+    ? new Set(Object.keys(state.geo.byNis).filter(nis => matchesSearchAndRegion(nis, query, regionId)))
+    : null;
+  map.setVisible(visible);
+}
+
+/* =============================================================================
+   Theme repaint for the chart canvas only. The map needs nothing (its paths
+   fill with var(--ramp-N), recoloured by the browser); the table is plain
+   CSS. Mirrors assets/belpulse/blocks.js:414-422 exactly. ------------------ */
+function repaintOnThemeChange(){
+  if(state.mode === 'chart') renderChart();
+}
+if(window.MutationObserver){
+  new MutationObserver(repaintOnThemeChange).observe(document.documentElement, {
+    attributes: true, attributeFilter: ['data-theme'],
+  });
+}
+if(window.matchMedia){
+  const os = window.matchMedia('(prefers-color-scheme: dark)');
+  if(os.addEventListener) os.addEventListener('change', repaintOnThemeChange);
+}
+
+/* =============================================================================
+   Mode switching and the main render dispatch.
+============================================================================= */
+function setMode(mode){
+  state.mode = mode;
+  document.getElementById('viewTable').hidden = mode !== 'table';
+  document.getElementById('viewChart').hidden = mode !== 'chart';
+  document.getElementById('viewMap').hidden = mode !== 'map';
+  document.querySelectorAll('#modeToggle button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+  renderCurrentMode();
+  pushUrlState();
+}
+
+function renderCurrentMode(){
+  if(state.mode === 'table') VT.render();
+  else if(state.mode === 'chart') renderChart();
+  else if(state.mode === 'map') renderMap();
+}
+
+/* =============================================================================
+   URL state (?scope=&indicator=&geo=&from=&to=&mode=), replaceState only --
+   matches map.html:346-350. Because this page is new and not yet canonical,
+   its parameters cost nothing to add (decision #8). ------------------------ */
+function pushUrlState(){
+  try{
+    const url = new URL(window.location);
+    const set = (k, v) => { if(v) url.searchParams.set(k, v); else url.searchParams.delete(k); };
+    set('scope', document.getElementById('scope').value);
+    set('indicator', state.code);
+    set('geo', document.getElementById('search').value.trim());
+    set('from', document.getElementById('fromPeriod').value);
+    set('to', document.getElementById('toPeriod').value);
+    set('mode', state.mode);
+    history.replaceState(null, '', url);
+  }catch(_){}
+}
+
+/* =============================================================================
+   Loading an indicator.
+============================================================================= */
+function populatePicker(){
+  const sel = document.getElementById('indicator');
+  const scopeFilter = document.getElementById('scope').value;
+  const rows = state.index
+    .filter(r => !scopeFilter || r.scope === scopeFilter)
+    .map(r => ({...r, label: (r.names && (r.names[LANG] || r.names.en)) || r.indicator_code}))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  const municipal = rows.filter(r => r.scope === 'municipal');
+  const national = rows.filter(r => r.scope === 'national');
+  const optgroup = (label, list) => list.length
+    ? `<optgroup label="${escapeHtml(label)}">${list.map(r =>
+        `<option value="${r.scope}:${r.indicator_code}">${escapeHtml(r.label)}</option>`).join('')}</optgroup>`
+    : '';
+  sel.innerHTML = optgroup(T('explorerScopeMunicipal'), municipal) + optgroup(T('explorerScopeNational'), national);
+}
+
+function populateRegionPicker(){
+  const sel = document.getElementById('region');
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${T('allRegions')}</option>` +
+    state.geo.regions.map(r => `<option value="${r.geo_id}">${escapeHtml(MapUI.pickName(r.name, r.geo_id))}</option>`).join('');
+  sel.value = current;
+}
+
+function populatePeriodPickers(){
+  const periods = state.payload.periods;
+  for(const id of ['fromPeriod', 'toPeriod']){
+    const sel = document.getElementById(id);
+    sel.innerHTML = periods.map(p => `<option value="${p}">${p}</option>`).join('');
+    sel.disabled = false;
+  }
+  document.getElementById('fromPeriod').value = periods[0];
+  document.getElementById('toPeriod').value = periods[periods.length - 1];
+}
+
+function updateProvenanceAndAttribution(){
+  const meta = state.index.find(r => r.scope === state.payload.scope && r.indicator_code === state.payload.indicator_code);
+  const updated = document.getElementById('attrUpdated');
+  if(!updated) return;
+  if(state.payload.updated){
+    updated.textContent = state.payload.updated.slice(0, 10);
+  } else if(state.payload.inputs_updated){
+    const names = (state.payload.input_sources || [])
+      .map(id => (state.sources[id] && (state.sources[id].label[LANG] || state.sources[id].label.en)) || id)
+      .join(', ');
+    updated.textContent = T('computedFromShort', {s: names, d: state.payload.inputs_updated});
+  } else {
+    updated.textContent = '—';
+  }
+}
+
+function updateDownloadLink(){
+  const link = document.getElementById('downloadLink');
+  link.href = state.payload && state.payload.scope === 'municipal'
+    ? 'data/communes_history.csv'
+    : 'data/belgian_macro_export.csv';
+}
+
+async function loadIndicator(scope, code){
+  document.getElementById('status').textContent = T('loading');
+  document.getElementById('status').classList.remove('err');
+  try{
+    const res = await fetch(`public/data/explorer/${scope}/${code}.json?t=` + Date.now());
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    state.payload = await res.json();
+    state.scope = scope;
+    state.code = code;
+    document.getElementById('thRegion').hidden = scope === 'national';
+    document.getElementById('thProvince').hidden = scope === 'national';
+    populatePeriodPickers();
+    updateDownloadLink();
+    rebuildRows();
+    updateStatus();
+    renderCurrentMode();
+    updateProvenanceAndAttribution();
+    pushUrlState();
+  }catch(err){
+    const el = document.getElementById('status');
+    el.textContent = 'Could not load ' + code + ': ' + err.message;
+    el.classList.add('err');
+  }
+}
+
+function onFilterChanged(){
+  rebuildRows();
+  updateStatus();
+  renderCurrentMode();
+  pushUrlState();
+}
+
+/* =============================================================================
+   Init.
+============================================================================= */
+async function init(){
+  applyStrings();
+  try{
+    const [idxRes, geoRes, srcRes] = await Promise.all([
+      fetch('public/data/explorer/index.json?t=' + Date.now()),
+      fetch('public/data/metadata/geographies.json?t=' + Date.now()),
+      fetch('public/data/metadata/sources.json?t=' + Date.now()),
+    ]);
+    if(!idxRes.ok) throw new Error('index missing');
+    state.index = (await idxRes.json()).indicators || [];
+    if(geoRes.ok) state.geo = buildGeoIndex((await geoRes.json()).geographies || []);
+    if(srcRes.ok){
+      const registry = await srcRes.json();
+      state.sources = registry.sources || {};
+      state.grades = registry.grades || {};
+    }
+
+    document.getElementById('statIndicators').textContent = state.index.length;
+    document.getElementById('statRows').textContent = state.index.reduce((n, r) => n + r.rows, 0).toLocaleString(LANG);
+    document.getElementById('statCommunes').textContent = Object.keys(state.geo.byNis).length.toLocaleString(LANG);
+    const latest = state.index.reduce((m, r) => (r.updated || '') > m ? r.updated : m, '');
+    document.getElementById('statUpdated').textContent = latest ? latest.slice(0, 10) : '—';
+
+    populateRegionPicker();
+    populatePicker();
+
+    const params = new URLSearchParams(location.search);
+    const wanted = params.get('indicator');
+    const wantedScope = params.get('scope') || '';
+    document.getElementById('scope').value = wantedScope;
+    if(wantedScope) populatePicker();
+    let startScope = null, startCode = null;
+    if(wanted){
+      const hit = state.index.find(r => r.indicator_code === wanted && (!wantedScope || r.scope === wantedScope));
+      if(hit){ startScope = hit.scope; startCode = hit.indicator_code; }
+    }
+    if(!startCode){
+      const first = state.index.filter(r => !wantedScope || r.scope === wantedScope)[0] || state.index[0];
+      if(first){ startScope = first.scope; startCode = first.indicator_code; }
+    }
+
+    if(params.get('geo')) document.getElementById('search').value = params.get('geo');
+    const sel = document.getElementById('indicator');
+    if(startCode) sel.value = `${startScope}:${startCode}`;
+
+    setMode(['table', 'chart', 'map'].includes(params.get('mode')) ? params.get('mode') : 'table');
+    if(startCode) await loadIndicator(startScope, startCode);
+    if(params.get('from')) document.getElementById('fromPeriod').value = params.get('from');
+    if(params.get('to')) document.getElementById('toPeriod').value = params.get('to');
+    onFilterChanged();
+
+    // datalist for the search box, matching map.html's own commune picker.
+    const list = document.getElementById('geoList');
+    list.innerHTML = Object.keys(state.geo.byNis)
+      .map(nis => `<option value="${escapeHtml(geoName(nis))} (${nis})"></option>`).join('');
+
+    VT.wireScroll();
+    VT.wireKeyboard();
+
+    document.getElementById('scope').addEventListener('change', () => { populatePicker(); onIndicatorPicked(); });
+    document.getElementById('indicator').addEventListener('change', onIndicatorPicked);
+    document.getElementById('search').addEventListener('input', onFilterChanged);
+    document.getElementById('region').addEventListener('change', onFilterChanged);
+    document.getElementById('fromPeriod').addEventListener('change', onFilterChanged);
+    document.getElementById('toPeriod').addEventListener('change', onFilterChanged);
+    document.getElementById('mapPeriod').addEventListener('change', () => renderMap());
+    document.querySelectorAll('#modeToggle button').forEach(b =>
+      b.addEventListener('click', () => setMode(b.dataset.mode)));
+    document.querySelectorAll('thead th[data-key]').forEach(th => th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if(state.sortKey === key) state.sortDir *= -1; else { state.sortKey = key; state.sortDir = 1; }
+      document.querySelectorAll('thead th').forEach(t => {
+        t.classList.toggle('sorted', t === th);
+        const arrow = t.querySelector('.arrow');
+        if(t === th) arrow.textContent = state.sortDir === 1 ? '↑' : '↓';
+      });
+      onFilterChanged();
+    }));
+    document.getElementById('langPick').addEventListener('change', e => {
+      LANG = e.target.value;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(_){}
+      applyStrings();
+      populatePicker();
+      populateRegionPicker();
+      if(state.code) document.getElementById('indicator').value = `${state.scope}:${state.code}`;
+      onFilterChanged();
+    });
+  }catch(err){
+    const el = document.getElementById('status');
+    el.textContent = 'Could not load the explorer: ' + err.message;
+    el.classList.add('err');
+  }
+}
+
+function onIndicatorPicked(){
+  const sel = document.getElementById('indicator');
+  const [scope, code] = (sel.value || '').split(':');
+  if(scope && code) loadIndicator(scope, code);
+}
+
+init();
+</script>
+</body>
+</html>

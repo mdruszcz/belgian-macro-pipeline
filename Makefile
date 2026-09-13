@@ -87,6 +87,13 @@ exports:
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
 	$(PYTHON) scripts/export_commune_adjacency.py
 	$(PYTHON) scripts/export_commune_typology.py
+	# Reads the two CSVs written above -- data/communes_history.csv (the
+	# trimmed file that is actually committed and offered for download) and
+	# data/belgian_macro_export.csv -- and shards them one file per
+	# indicator for explorer.html. Deliberately built from the published
+	# downloads rather than from the database, so the page cannot show a
+	# figure the download does not have. Must run AFTER both.
+	$(PYTHON) scripts/export_explorer_payloads.py
 	$(MAKE) pages
 	$(MAKE) page-documents
 	$(MAKE) site-index
