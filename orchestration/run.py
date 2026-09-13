@@ -105,8 +105,12 @@ def source_snapshot(db_path: Path, source_ids: tuple[str, ...]) -> dict:
                 (source_id,),
             ).fetchone()
             run = conn.execute(
+                # Not adapter 'rebuild': that is build_staging_db.py reloading a
+                # committed CSV at assemble time, not a fetch. Counting it would
+                # show a source as fetched today when nothing was fetched.
                 "SELECT status, COALESCE(finished_at, started_at) FROM fetch_runs "
-                "WHERE source_id = ? ORDER BY started_at DESC LIMIT 1",
+                "WHERE source_id = ? AND adapter != 'rebuild' "
+                "ORDER BY started_at DESC LIMIT 1",
                 (source_id,),
             ).fetchone()
             snapshot[f"{source_id} latest rows"] = rows

@@ -567,3 +567,29 @@ def test_old_run_directories_are_pruned_oldest_first(tmp_path):
     manifest.prune(tmp_path, keep=30)
     remaining = sorted(p.name for p in tmp_path.iterdir())
     assert len(remaining) == 30 and remaining[0].startswith("20260806")
+
+
+# ── Source metadata never reports an assemble-time reload as a fetch ─────────
+
+
+def test_the_last_fetch_run_ignores_the_assemble_time_reload(tmp_path):
+    import sqlite3
+
+    db = tmp_path / "working.db"
+    migrate.run(db, migrations_dir=REPO / "migrations")
+    conn = sqlite3.connect(str(db))
+    conn.executemany(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, finished_at, status) "
+        "VALUES (?, ?, ?, ?, ?)",
+        [
+            ("walstat", "walstat", "2026-09-01T05:00:00+00:00", "2026-09-01T05:01:00+00:00", "ok"),
+            # Later, but only build_staging_db.py reloading the committed CSV.
+            ("walstat", "rebuild", "2026-09-13T17:22:33+00:00", None, "ok"),
+        ],
+    )
+    conn.commit()
+    conn.close()
+
+    snapshot = run.source_snapshot(db, ("walstat",))
+
+    assert snapshot["walstat last fetch run"] == "ok at 2026-09-01T05:01:00+00:00"
