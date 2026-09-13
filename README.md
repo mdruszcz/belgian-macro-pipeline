@@ -151,9 +151,7 @@ python scripts/revisions_report.py --db data/belgian_macro.db
 # Exports
 python scripts/export_canonical_csv.py --db data/belgian_macro.db --out data/belgian_macro_export.csv
 python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
-  --out data/communes_history.csv \
-  --extra-observations data/population_observations.csv \
-  --extra-observations data/fiscal_income_observations.csv
+  --out data/communes_history.csv --stores config/stores.yaml
 python scripts/export_site_payloads.py --db data/belgian_macro.db --out-dir public/data
 
 # Then serve the pages locally

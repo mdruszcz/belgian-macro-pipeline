@@ -46,37 +46,17 @@ jobs:
         run: python -m src.db.migrate --db data/belgian_macro.db
 
       - name: Ensure manual-source reference rows
-        # THE STEP THIS WORKFLOW WAS MISSING (run 2026-09-06 failed here).
-        # The fiscal observations live in a committed CSV, but their name and
-        # unit are read from the `indicators` table so there is exactly one
-        # metadata path -- and export_communes_csv.py refuses to guess when a
-        # referenced indicator is absent, by design. daily_fetch.yml has had
-        # this step since the fiscal store landed; this workflow did not, so
-        # it crashed on the first run after that store was added. Reads config
-        # only: no network, no workbook, idempotent.
-        run: python scripts/sync_fiscal_income.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure real-estate reference rows
-        # Same pattern: OBSERVATIONS live in a committed CSV, name/unit come
-        # from the indicators table. Config only -- no network, no workbook.
-        run: python scripts/sync_realestate.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure police.be reference rows
-        # Same pattern again: OBSERVATIONS live in data/police_observations.csv,
-        # name/unit come from the indicators table. Config only -- no network,
-        # no source file needed.
-        run: python scripts/sync_police.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure Census 2021 reference rows
-        # Same pattern as the fiscal step above: the OBSERVATIONS live in a
-        # committed CSV, but name/unit come from the `indicators` table so
-        # there is one metadata path. Config only -- no network, no workbook.
-        run: python scripts/sync_census2021.py --db data/belgian_macro.db --reference-rows-only
-
-      - name: Ensure Vlaamse Arbeidsrekening reference rows
-        # Observations live in the committed manual store; metadata stays in
-        # the canonical database so every exporter follows one path.
-        run: python scripts/sync_var.py --db data/belgian_macro.db --reference-rows-only
+        # THE STEP THIS WORKFLOW WAS ORIGINALLY MISSING (run 2026-09-06 failed
+        # here). Every store's OBSERVATIONS live in a committed CSV, but name
+        # and unit are read from the `indicators` table so there is exactly
+        # one metadata path -- and export_communes_csv.py refuses to guess
+        # when a referenced indicator is absent, by design. Driven by
+        # scripts/ensure_reference_rows.py and config/stores.yaml (PR1 of the
+        # pipeline repair) rather than one hand-written line per store here
+        # and again in daily_fetch.yml -- those two lists, plus a third in
+        # scripts/validate_data.py, had already drifted apart before this.
+        # Reads config only: no network, no workbook, idempotent.
+        run: python scripts/ensure_reference_rows.py --db data/belgian_macro.db --stores config/stores.yaml
 
       - name: Validate the manual store rebuilds cleanly
         # Fails loudly if the committed CSV cannot reconstruct a valid database
@@ -84,7 +64,8 @@ jobs:
         run: |
           python scripts/load_observations_csv.py \
             --db "${RUNNER_TEMP}/manual.db" \
-            --csv data/population_observations.csv
+            --csv data/population_observations.csv \
+            --run-source-id statbel --run-adapter rebuild
           python - <<'PY'
           import os, sqlite3
           conn = sqlite3.connect(os.path.join(os.environ["RUNNER_TEMP"], "manual.db"))
@@ -104,29 +85,11 @@ jobs:
         # is the same fix, mirrored here rather than duplicated in prose.
         run: |
           python scripts/export_communes_csv.py --db data/belgian_macro.db \
-            --out data/communes_export.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/communes_export.csv --stores config/stores.yaml
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
-            --out data/communes_history_full.csv --all-periods \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/communes_history_full.csv --all-periods --stores config/stores.yaml
           python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
-            --out data/communes_history.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/communes_history.csv --stores config/stores.yaml
           python scripts/export_communes_table_json.py \
             --communes-history data/communes_history_full.csv \
             --out data/communes_table.json \
@@ -141,13 +104,7 @@ jobs:
         # for Limburg 2023 when that is got wrong.
         run: |
           python scripts/export_aggregates_csv.py --db data/belgian_macro.db \
-            --out data/aggregates.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/aggregates.csv --stores config/stores.yaml
 
       - name: Export national and regional peer positions
         # Block L -- docs/features/comparison.md. Latest period per indicator
@@ -156,13 +113,7 @@ jobs:
         # researcher who wants the rest.
         run: |
           python scripts/export_percentiles_csv.py --db data/belgian_macro.db \
-            --out data/percentiles.csv \
-            --extra-observations data/population_observations.csv \
-            --extra-observations data/fiscal_income_observations.csv \
-            --extra-observations data/census2021_observations.csv \
-            --extra-observations data/realestate_observations.csv \
-            --extra-observations data/police_observations.csv \
-            --extra-observations data/var_unemployment_observations.csv
+            --out data/percentiles.csv --stores config/stores.yaml
 
       - name: Export per-entity site payloads for /local
         # Block J -- docs/features/site_payloads.md. See daily_fetch.yml for

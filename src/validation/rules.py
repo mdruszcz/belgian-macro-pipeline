@@ -598,12 +598,22 @@ def fetch_error(ctx: Context) -> list[Violation]:
     history; and a code that was tried, failed and abandoned six months ago
     is retired, not failing. Failing on either forever would make this a
     permanent red light nobody reads.
+
+    `adapter = 'rebuild'` ROWS ARE EXCLUDED FROM "MOST RECENT" ENTIRELY, not
+    just given a passing status. scripts/load_observations_csv.py opens one
+    of these to satisfy fetch_run_id's NOT NULL foreign key when it rebuilds
+    a disposable local database from a committed CSV -- it is not a fetch of
+    anything, and always reports 'ok' by construction. Before this exclusion
+    it hardcoded source_id='statbel', adapter='statbel', which forged
+    Statbel's heartbeat on every rebuild and would have permanently masked a
+    real Statbel fetch failure behind the rebuild's manufactured 'ok'.
     """
     violations = []
     runs = ctx.conn.execute(
         "SELECT source_id, status, started_at FROM fetch_runs f "
         "WHERE f.fetch_run_id = (SELECT MAX(f2.fetch_run_id) FROM fetch_runs f2 "
-        "                        WHERE f2.source_id = f.source_id) ORDER BY source_id"
+        "                        WHERE f2.source_id = f.source_id "
+        "                          AND f2.adapter != 'rebuild') ORDER BY source_id"
     ).fetchall()
     for source_id, status, started_at in _still_active(runs):
         if status in ("error", "partial", "schema_changed"):
@@ -667,8 +677,14 @@ def fetch_silence(ctx: Context) -> list[Violation]:
     if not ctx.fetch_window_days:
         return []
 
+    # adapter = 'rebuild' excluded for the same reason fetch_error excludes
+    # it: those rows are scripts/load_observations_csv.py rebuilding a
+    # disposable local database from an already-committed CSV, not a fetch,
+    # and their started_at is "when someone ran the rebuild locally", which
+    # has nothing to do with whether the source is still being fetched.
     rows = ctx.conn.execute(
-        "SELECT source_id, MAX(started_at) FROM fetch_runs GROUP BY source_id"
+        "SELECT source_id, MAX(started_at) FROM fetch_runs WHERE adapter != 'rebuild' "
+        "GROUP BY source_id"
     ).fetchall()
     last_run = {}
     for source_id, when in rows:

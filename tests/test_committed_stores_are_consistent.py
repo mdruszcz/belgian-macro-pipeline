@@ -18,6 +18,7 @@ This closes that hole at PR time instead of at workflow time.
 
 import csv
 import sqlite3
+import sys
 from pathlib import Path
 
 import pytest
@@ -25,13 +26,17 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 DB = REPO / "data" / "belgian_macro.db"
 
-# The manual-only observation stores, exactly as the workflows pass them to
-# the exporters via --extra-observations.
-MANUAL_STORES = [
-    REPO / "data" / "population_observations.csv",
-    REPO / "data" / "fiscal_income_observations.csv",
-    REPO / "data" / "var_unemployment_observations.csv",
-]
+sys.path.insert(0, str(REPO))
+
+from src.stores import DEFAULT_STORES_PATH, extra_csv_stores, load_stores  # noqa: E402
+
+# Every extra_csv store the registry declares (config/stores.yaml), read from
+# the one place that list is now spelled out -- src/stores.py. Used to be a
+# hand-maintained list of 3 of the (then) 6 manual stores, under a comment
+# claiming it matched the workflows; census2021, realestate and police were
+# silently unchecked. All six are extra_csv in this PR (PR1 of the pipeline
+# repair moves no data), so this is every registered store.
+MANUAL_STORES = [s.path for s in extra_csv_stores(load_stores(DEFAULT_STORES_PATH))]
 
 
 def _indicators_in_db() -> set[str]:

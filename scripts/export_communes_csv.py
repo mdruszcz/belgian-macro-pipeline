@@ -18,7 +18,12 @@ into columns client-side from whatever indicator_codes actually appear.
 import argparse
 import csv
 import sqlite3
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
 
 # The five statuses migrations/001_core_schema.sql permits, all mapped, so
 # none can fall through to its raw name in a published column. "S" arrived
@@ -225,12 +230,24 @@ def main() -> None:
         metavar="CSV",
         help=(
             "Committed observations CSV to merge in, for sources that cannot be "
-            "fetched automatically and so are not in the database. Repeatable."
+            "fetched automatically and so are not in the database. Repeatable. "
+            "Takes priority over --stores when given (see resolve_extra_observations)."
+        ),
+    )
+    ap.add_argument(
+        "--stores",
+        default=str(DEFAULT_STORES_PATH),
+        metavar="YAML",
+        help=(
+            "config/stores.yaml -- read for its extra_csv stores' paths when no "
+            "--extra-observations is given. Pass '' to merge nothing by default."
         ),
     )
     args = ap.parse_args()
     n = export_communes_csv(
-        Path(args.db), Path(args.out), tuple(Path(p) for p in args.extra_observations)
+        Path(args.db),
+        Path(args.out),
+        resolve_extra_observations(args.extra_observations, args.stores),
     )
     print(f"Exported {n} rows to {args.out}")
 

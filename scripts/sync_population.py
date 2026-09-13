@@ -105,7 +105,7 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) ->
     conn.commit()
 
 
-def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
+def sync(db_path: Path, pop_dir: Path, reference_rows_only: bool = False) -> tuple[int, int, int]:
     """Returns (rows_read, rows_written, rows_unresolved).
 
     rows_unresolved counts NIS codes read from a file but not present in
@@ -116,12 +116,25 @@ def sync(db_path: Path, pop_dir: Path) -> tuple[int, int, int]:
     is exactly the silent-mismapping risk Block C's own RED audit exists to
     catch, so it is surfaced as a printed warning with the actual codes, not
     swallowed.
+
+    `reference_rows_only`: the hole config/stores.yaml's registry closed
+    (PR1 of the pipeline repair). Every other manual-store sync script has
+    had this flag since its own store was split out (ADR 0002); this one did
+    not, which is why `make reference` had no population line and the
+    POPULATION_* rows in a rebuilt database existed only because
+    data/belgian_macro.db itself was committed. Same pattern as
+    sync_realestate.py: insert the sources/indicators rows from config, then
+    stop before touching data/raw/ -- no network, no hand-downloaded file
+    needed.
     """
     indicator_configs, _ = load_and_validate_all(CONFIG_DIR / "indicators", CONFIG_DIR / "sources")
 
     conn = sqlite3.connect(str(db_path))
     conn.execute("PRAGMA foreign_keys=ON")
     _ensure_reference_rows(conn, indicator_configs)
+    if reference_rows_only:
+        conn.close()
+        return 0, 0, 0
 
     by_year = read_population_by_age_band(pop_dir)
 
@@ -194,9 +207,17 @@ def main() -> None:
     )
     parser.add_argument("--db", required=True, help="Path to the SQLite DB file")
     parser.add_argument("--population-dir", type=Path, default=DEFAULT_POP_DIR)
+    parser.add_argument(
+        "--reference-rows-only",
+        action="store_true",
+        help="Only INSERT OR IGNORE the sources/indicators rows from config; "
+        "do not read data/raw/. No network, no hand-downloaded file needed.",
+    )
     args = parser.parse_args()
     try:
-        rows_read, rows_written, unresolved = sync(Path(args.db), args.population_dir)
+        rows_read, rows_written, unresolved = sync(
+            Path(args.db), args.population_dir, args.reference_rows_only
+        )
     except MissingPopulationData as exc:
         print(f"\nCANNOT RUN -- data missing.\n\n{exc}\n", file=sys.stderr)
         raise SystemExit(2) from exc

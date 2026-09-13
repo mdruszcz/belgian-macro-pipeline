@@ -1,0 +1,123 @@
+# The single declaration of every committed observation store -- PR1 of the
+# pipeline repair (docs/implementation/batches/, "store registry + staging").
+#
+# WHY THIS FILE EXISTS. The same six CSVs were spelled out in six different
+# places, three of which disagreed with each other: Makefile's EXTRA variable
+# (all 6), scripts/validate_data.py's DEFAULT_EXPORTS (3 of 6), and
+# tests/test_committed_stores_are_consistent.py's MANUAL_STORES (3 of 6),
+# under a comment that claimed it matched the workflows. This is now the one
+# place that list is spelled out; everything else reads it via src/stores.py.
+#
+# `mode` IS THE CRUX OF PR2. `in_db` means the store is loaded INTO the
+# disposable working database (scripts/build_staging_db.py) and dumped back
+# out; `extra_csv` means it is passed to the four exporters as
+# --extra-observations and never loaded into any database. A store in BOTH
+# paths would be double-counted: export_communes_history_csv.py takes every
+# is_latest=1 row from the DB and every row from each --extra-observations
+# CSV with no deduplication (lines 90, 96-107, 157). IN THIS PR EVERY STORE IS
+# extra_csv -- this PR moves no data (CLAUDE.md rule 10). PR2 adds ONEM and
+# WalStat as in_db.
+#
+# `indicators` is exactly the distinct indicator_id values present in the
+# CSV today (verified with `tail -n +2 data/X.csv | cut -d, -f1 | sort -u`,
+# not hand-guessed) -- this is what makes PR2's DB-to-CSV offload checkable:
+# an indicator appearing in the CSV but missing from this list would not be
+# caught by the "already in both" double-count check above.
+#
+# `reference_rows` says how to (re)create the store's sources/indicators
+# rows -- required because the observations live in the CSV but their
+# name/unit are read from the `indicators` table (exactly one metadata path;
+# see tests/test_committed_stores_are_consistent.py). All six have a script
+# in this PR: sync_population.py did not have --reference-rows-only before
+# this PR (there was no line for it in `make reference`, and POPULATION_*
+# rows only existed because the database itself was committed) -- it was a
+# small, honest addition, made here rather than left null. The schema still
+# allows `reference_rows: null` with a `reference_rows_reason` for a future
+# store that genuinely has none (e.g. ONEM/WalStat in PR2, until their own
+# sync scripts grow the flag).
+stores:
+  population:
+    path: data/population_observations.csv
+    source_id: statbel
+    mode: extra_csv
+    indicators:
+      - POPULATION_AGE_0_14
+      - POPULATION_AGE_15_64
+      - POPULATION_AGE_65_PLUS
+      - POPULATION_BY_COMMUNE
+    reference_rows:
+      script: scripts/sync_population.py
+      args: ["--reference-rows-only"]
+
+  fiscal_income:
+    path: data/fiscal_income_observations.csv
+    source_id: statbel
+    mode: extra_csv
+    indicators:
+      - FISCAL_NBR_NON_ZERO_INC
+      - FISCAL_TOT_MUNICIP_TAXES
+      - FISCAL_TOT_NET_TAXABLE_INC
+      - FISCAL_TOT_TAXES
+    reference_rows:
+      script: scripts/sync_fiscal_income.py
+      args: ["--reference-rows-only"]
+
+  census2021:
+    path: data/census2021_observations.csv
+    source_id: statbel
+    mode: extra_csv
+    indicators:
+      - CAS_EMPLOYED
+      - CAS_INACTIVE
+      - CAS_LABOUR_FORCE
+      - CAS_UNEMPLOYED
+      - DWELLINGS_IN_SINGLE_UNIT_BUILDING
+      - DWELLINGS_OCCUPIED
+      - DWELLINGS_TOTAL
+      - DWELLINGS_VACANT
+      - FAMILY_NUCLEI
+      - FAMILY_NUCLEI_SINGLE_PARENT
+      - HOUSEHOLDS_PRIVATE
+      - HOUSEHOLDS_SINGLE_PERSON
+      - POP_BORN_ABROAD
+      - POP_FEMALE
+      - POP_FOREIGN_NATIONALS
+      - POP_MARRIED
+      - POP_NON_EU_NATIONALS
+    reference_rows:
+      script: scripts/sync_census2021.py
+      args: ["--reference-rows-only"]
+
+  realestate:
+    path: data/realestate_observations.csv
+    source_id: statbel
+    mode: extra_csv
+    indicators:
+      - HOUSE_SALES_TRANSACTIONS
+      - MEDIAN_HOUSE_PRICE
+    reference_rows:
+      script: scripts/sync_realestate.py
+      args: ["--reference-rows-only"]
+
+  police:
+    path: data/police_observations.csv
+    source_id: police
+    mode: extra_csv
+    indicators:
+      - CAR_THEFT_PER_10K
+      - DOMESTIC_VIOLENCE_PER_10K
+      - HOUSE_BURGLARIES_PER_10K
+      - THEFT_FROM_VEHICLE_PER_10K
+    reference_rows:
+      script: scripts/sync_police.py
+      args: ["--reference-rows-only"]
+
+  var_unemployment:
+    path: data/var_unemployment_observations.csv
+    source_id: steunpunt_werk
+    mode: extra_csv
+    indicators:
+      - ADMIN_UNEMPLOYMENT_RATE_COM
+    reference_rows:
+      script: scripts/sync_var.py
+      args: ["--reference-rows-only"]

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://belgian-macro-pipeline/store_registry.schema.json",
+  "title": "Committed observation store registry",
+  "description": "config/stores.yaml -- the single declaration of every committed observation store (PR1 of the pipeline repair). See src/stores.py for the loader and docs/decisions/0002-split-committed-stores.md for why stores are split by how the data can arrive.",
+  "type": "object",
+  "required": ["stores"],
+  "additionalProperties": false,
+  "properties": {
+    "stores": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path", "source_id", "mode", "indicators"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Repo-relative path to the committed CSV, in the canonical 10-column observations shape."
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The sources.source_id these observations are attributed to -- must match a config/sources/*.yaml source_id."
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["in_db", "extra_csv"],
+            "description": "in_db: loaded INTO the working database and dumped back out. extra_csv: passed to the exporters as --extra-observations and never loaded into the working database. A store may be in exactly one mode -- being in both would double-count it, since export_communes_history_csv.py takes every is_latest row from the DB AND every row from the CSV with no dedup."
+          },
+          "indicators": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1},
+            "uniqueItems": true,
+            "description": "Every distinct indicator_id actually present in this store's CSV. Checked against the file's real contents, not hand-maintained independently of it."
+          },
+          "reference_rows": {
+            "type": ["object", "null"],
+            "description": "How to (re)create this store's sources/indicators rows from config, with no network. null is only valid together with reference_rows_reason.",
+            "additionalProperties": false,
+            "properties": {
+              "script": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Repo-relative path to the script, e.g. scripts/sync_fiscal_income.py"
+              },
+              "args": {
+                "type": "array",
+                "items": {"type": "string"},
+                "default": ["--reference-rows-only"]
+              }
+            },
+            "required": ["script"]
+          },
+          "reference_rows_reason": {
+            "type": ["string", "null"],
+            "description": "Required (non-null) when reference_rows is null -- why no script exists yet."
+          }
+        }
+      }
+    }
+  }
+}

@@ -42,6 +42,7 @@ from export_aggregates_csv import (  # noqa: E402
 
 from src.analytics.aggregate import ancestors_of  # noqa: E402
 from src.analytics.ranking import MIN_PEERS_FOR_PERCENTILE, position  # noqa: E402
+from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
 from src.validation.config_schema import load_and_validate_derived  # noqa: E402
 
 
@@ -214,7 +215,23 @@ def main() -> None:
     )
     ap.add_argument("--db", required=True)
     ap.add_argument("--out", default="data/percentiles.csv")
-    ap.add_argument("--extra-observations", action="append", default=[], metavar="CSV")
+    ap.add_argument(
+        "--extra-observations",
+        action="append",
+        default=[],
+        metavar="CSV",
+        help="Repeatable. Takes priority over --stores when given "
+        "(see src.stores.resolve_extra_observations).",
+    )
+    ap.add_argument(
+        "--stores",
+        default=str(DEFAULT_STORES_PATH),
+        metavar="YAML",
+        help=(
+            "config/stores.yaml -- read for its extra_csv stores' paths when no "
+            "--extra-observations is given. Pass '' to merge nothing by default."
+        ),
+    )
     ap.add_argument("--derived-dir", type=Path, default=DEFAULT_DERIVED_DIR)
     ap.add_argument(
         "--all-periods",
@@ -231,7 +248,7 @@ def main() -> None:
     n = export_percentiles_csv(
         Path(args.db),
         Path(args.out),
-        tuple(Path(p) for p in args.extra_observations),
+        resolve_extra_observations(args.extra_observations, args.stores),
         args.derived_dir,
         args.min_peers,
         latest_only=not args.all_periods,
