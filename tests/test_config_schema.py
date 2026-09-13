@@ -4,6 +4,7 @@ import pytest
 
 from src.validation.config_schema import (
     ConfigValidationError,
+    is_multi_geo,
     load_and_validate_all,
     validate_indicator_config,
     validate_source_config,
@@ -94,3 +95,69 @@ def test_load_and_validate_all_valid(tmp_path):
     indicators, sources = load_and_validate_all(indicators_dir, sources_dir)
     assert "TEST_IND" in indicators
     assert "test_source" in sources
+
+
+# --- fetch: three mutually exclusive shapes (international pilot PR 1) -----
+
+
+def test_fetch_query_shape_is_valid():
+    doc = dict(VALID_INDICATOR, fetch={"query": "/x/Q.FOO.BE?observations=true"})
+    assert validate_indicator_config(doc, Path(__file__)) == []
+    assert is_multi_geo(doc) is False
+
+
+def test_fetch_national_dataset_shape_requires_geo_in_filters():
+    doc = dict(
+        VALID_INDICATOR,
+        fetch={"dataset": "namq_10_gdp", "filters": {"unit": "CLV10_MEUR"}, "since": "2008"},
+    )
+    errors = validate_indicator_config(doc, Path("bad.yaml"))
+    assert errors, "filters without geo must not validate against either dataset shape"
+
+
+def test_fetch_national_dataset_shape_is_valid_with_geo():
+    doc = dict(
+        VALID_INDICATOR,
+        fetch={
+            "dataset": "namq_10_gdp",
+            "filters": {"unit": "CLV10_MEUR", "geo": "BE"},
+            "since": "2008",
+        },
+    )
+    assert validate_indicator_config(doc, Path(__file__)) == []
+    assert is_multi_geo(doc) is False
+
+
+def test_fetch_multi_geo_shape_is_valid_and_forbids_geo_in_filters():
+    doc = dict(
+        VALID_INDICATOR,
+        fetch={
+            "dataset": "namq_10_gdp",
+            "filters": {"unit": "CLV10_MEUR"},
+            "geographies": "allowlist",
+            "since": "2008",
+        },
+    )
+    assert validate_indicator_config(doc, Path(__file__)) == []
+    assert is_multi_geo(doc) is True
+
+    with_geo = dict(VALID_INDICATOR, fetch={**doc["fetch"], "filters": {"geo": "BE"}})
+    errors = validate_indicator_config(with_geo, Path("bad.yaml"))
+    assert errors, "geographies: allowlist must forbid a geo filter"
+
+
+def test_geographies_allowlist_forbids_a_country_field():
+    """A multi-geo fetch describes every country at once; a `country` field
+    would be meaningless -- the root-level allOf/if/then rule."""
+    doc = dict(
+        VALID_INDICATOR,
+        country="EU27_2020",
+        fetch={"dataset": "namq_10_gdp", "geographies": "allowlist"},
+    )
+    errors = validate_indicator_config(doc, Path("bad.yaml"))
+    assert errors, "geographies: allowlist + country must be rejected"
+
+
+def test_is_multi_geo_false_when_no_fetch_is_declared():
+    assert is_multi_geo({}) is False
+    assert is_multi_geo({"fetch": None}) is False
