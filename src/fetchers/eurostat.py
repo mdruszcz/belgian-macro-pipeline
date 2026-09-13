@@ -41,36 +41,56 @@ import json
 
 from src.fetchers.base import FetchError, MultiGeoTimeSeriesSource
 
-#: Eurostat's own OBS_FLAG codelist (SDMX 2.1, ESTAT:OBS_FLAG), restricted to
-#: the letters actually observed on the five pilot datasets' full history
-#: since 2008, every allowlisted country (fetched and inspected 2026-09-13):
-#: gov_10dd_edpt1 carried none; namq_10_gdp carried b/e/p; prc_hicp_manr
-#: carried d; une_rt_m carried b/d. A flag never seen in that scan is
-#: deliberately NOT in this table (CLAUDE.md rule 13): a genuinely new one
-#: must be verified against
-#: https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/codelist/ESTAT/OBS_FLAG
-#: before a value is silently reinterpreted, not guessed at as it arrives.
+#: Eurostat's own OBS_FLAG codelist (SDMX 2.1, ESTAT:OBS_FLAG -- the full,
+#: authoritative list fetched and re-checked 2026-09-14 from
+#: https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/codelist/ESTAT/OBS_FLAG/latest?format=TSV,
+#: not just the letters seen on one scan). That list has NO "revised" entry
+#: and no bare "r" code at all -- Eurostat's compound codes are built from
+#: b(reak)/d(efinition differs)/e(stimated)/f(orecast)/i(mputed)/m(issing)/
+#: n(ot significant)/p(rovisional)/u(nreliable), never an "r". So "revised"
+#: is never produced by this table; see LEAD DECISION below for why "b"/"d"
+#: do not use it either.
 #:
-#: "b" (break in time series) and "d" (definition differs) are both
-#: comparability caveats, not confidence flags -- Eurostat still treats the
-#: figure as its own settled number, just methodologically discontinuous with
-#: the adjoining period. The canonical six-state model has no dedicated
-#: bucket for that. Mapped to "revised" rather than invented a seventh state,
-#: the same read scripts/port_existing_indicators.py's OBS_STATUS_MAP already
-#: gives SDMX's own "break in series" code ("weakest mapping here -- re-verify
-#: if seen" -- this is that re-verification, on a different codelist for the
-#: same underlying concept). Flagged as a deviation from the plan's draft
-#: table in the batch report; not a guess made silently.
+#: LEAD DECISION (audit SHOULD-FIX 4), correcting this table's first version:
+#:   - "b" (break in time series) and "d" (definition differs) map to
+#:     "final", not "revised". They are comparability caveats -- Eurostat
+#:     still treats the figure as its own settled number -- but the
+#:     canonical status enum has no "break" or "definition changed" state,
+#:     and "revised" specifically implies a later vintage superseded an
+#:     earlier one (src/geography/resolve.py and the vintage-comparison
+#:     rules treat "revised" as exactly that kind of comparable supersession,
+#:     which a mere comparability flag is not). "final" is the closest real
+#:     meaning: Eurostat is not withholding or estimating this number.
+#:   - "f" (forecast) is deliberately NOT mapped: a forecast appearing where
+#:     this pipeline expects settled history is a surprise worth failing
+#:     loudly on (CLAUDE.md rule 13), not silently downgrading to "estimate".
+#:   - "c" and "z" are not in Eurostat's real OBS_FLAG list either (there is
+#:     no confidentiality/not-applicable letter in it) but are kept mapped
+#:     to suppressed/na as a defensive no-op: if Eurostat ever attaches
+#:     either through some path this scan has not seen, a genuinely
+#:     suppressed or not-applicable observation still resolves sensibly
+#:     rather than crashing, and neither can fire today.
+#:
+#: A flag not listed here at all is deliberately unrecognized (CLAUDE.md rule
+#: 13): a genuinely new one must be verified against the codelist above
+#: before a value is silently reinterpreted, not guessed at as it arrives.
 FLAG_STATUS = {
     "": "final",
     "p": "provisional",
     "e": "estimate",
-    "f": "estimate",
-    "b": "revised",
-    "d": "revised",
+    "b": "final",
+    "d": "final",
     "c": "suppressed",
     "z": "na",
 }
+
+#: Canonical statuses value=None is legal for (CLAUDE.md: missing/suppressed/
+#: na/zero are five distinct states, never collapsed). A flagged position
+#: with no value and any other status is malformed data, not a fifth state
+#: this adapter should invent -- refused explicitly (audit SHOULD-FIX 8)
+#: rather than left to fail later as a bare sqlite CHECK-constraint error
+#: with no context.
+NULLABLE_STATUSES = frozenset({"suppressed", "na"})
 
 
 def _strides(dims: list[str], sizes: list[int]) -> dict[str, int]:
@@ -152,6 +172,14 @@ class EurostatSource(MultiGeoTimeSeriesSource):
                         "FLAG_STATUS."
                     )
                 obs_status = FLAG_STATUS[flag]
+                if raw_value is None and obs_status not in NULLABLE_STATUSES:
+                    raise FetchError(
+                        f"{dataset!r}: geo={geo_code} period={period} has flag {flag!r} "
+                        f"(-> status {obs_status!r}) but no value. Only "
+                        f"{sorted(NULLABLE_STATUSES)} may have value=None; refusing to "
+                        "write a row that would fail the observations table's own "
+                        "CHECK constraint downstream."
+                    )
                 value = None if raw_value is None else float(raw_value)
                 rows.append(
                     {

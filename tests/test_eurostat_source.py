@@ -117,9 +117,14 @@ def test_a_position_with_no_value_and_no_flag_produces_no_row(tmp_path, monkeypa
         ("", "final", 100.0),
         ("p", "provisional", 100.0),
         ("e", "estimate", 100.0),
-        ("f", "estimate", 100.0),
-        ("b", "revised", 100.0),
-        ("d", "revised", 100.0),
+        # "b" (break in series) and "d" (definition differs) are
+        # comparability caveats, not confidence flags, and the canonical
+        # status enum has no dedicated state for either -- LEAD DECISION
+        # (audit SHOULD-FIX 4): map to "final", not "revised" ("revised"
+        # specifically means a later vintage superseded an earlier one,
+        # which neither flag asserts).
+        ("b", "final", 100.0),
+        ("d", "final", 100.0),
     ],
 )
 def test_flags_with_a_value_map_to_the_right_status(
@@ -140,6 +145,22 @@ def test_flags_with_a_value_map_to_the_right_status(
     ]
 
 
+def test_forecast_flag_is_not_recognized_and_fails_loudly(tmp_path, monkeypatch):
+    """ "f" (forecast) really is a real Eurostat OBS_FLAG code, but this
+    pipeline never expects a forecast where it asked for settled history --
+    LEAD DECISION (audit SHOULD-FIX 4): fail loudly rather than silently
+    treat it as an estimate."""
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 100.0}, status={"0": "f"})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    with pytest.raises(FetchError, match="unrecognized Eurostat OBS_FLAG 'f'"):
+        EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+
 @pytest.mark.parametrize("flag,expected_status", [("c", "suppressed"), ("z", "na")])
 def test_a_flag_with_no_value_still_produces_a_row_in_a_known_state(
     tmp_path, monkeypatch, flag, expected_status
@@ -157,6 +178,23 @@ def test_a_flag_with_no_value_still_produces_a_row_in_a_known_state(
     rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
 
     assert rows == [{"geo": "BE", "period": "2023", "value": None, "obs_status": expected_status}]
+
+
+@pytest.mark.parametrize("flag", ["p", "e", "b", "d"])
+def test_a_flag_with_no_value_and_a_non_nullable_status_refuses(tmp_path, monkeypatch, flag):
+    """Audit SHOULD-FIX 8: only suppressed/na may have value=None. A flag
+    that maps to any other status (provisional/estimate/final) but carries
+    no value is malformed -- refused here with a clear message, not left to
+    surface later as a bare CHECK-constraint IntegrityError with no context."""
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={}, status={"0": flag})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    with pytest.raises(FetchError, match="has flag .* but no value"):
+        EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
 
 
 def test_an_unrecognized_flag_refuses_rather_than_guesses(tmp_path, monkeypatch):
