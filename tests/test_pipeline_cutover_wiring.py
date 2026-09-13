@@ -106,6 +106,15 @@ def test_the_manifest_status_is_derived_not_typed():
     assert "steps.validate.outcome" in payloads
 
 
+def test_explorer_payloads_follow_site_payloads_in_every_exporting_workflow():
+    for workflow in ("daily_fetch.yml", "manual_sources.yml"):
+        steps = _steps(workflow)
+        site_payloads = _index(steps, contains="scripts/export_site_payloads.py")
+        explorer_payloads = _index(steps, contains="scripts/export_explorer_payloads.py")
+        local_pages = _index(steps, contains="scripts/export_local_pages.py")
+        assert site_payloads < explorer_payloads < local_pages, workflow
+
+
 def test_the_police_probe_is_gone():
     text = (WORKFLOWS / "daily_fetch.yml").read_text(encoding="utf-8")
     assert "fetch_police_raw.py" not in text
