@@ -3,10 +3,9 @@
   plus the high-fidelity Namur design supplied 2026-09-07), built on Batch 1's
   tokens and Batch 2's shared components.
 
-  A PREVIEW ROUTE, deliberately not local.html. local.html and the 565 static
-  pages under local/{nis}/ are untouched and still what a visitor gets today;
-  Batch 15's cutover gate decides when a redesigned page replaces the one it
-  is modelled on, never a silent switch. Open as commune.html?nis=92094.
+  The public visual commune profile. Legacy local URLs remain reachable for
+  existing bookmarks; primary navigation uses this view and profiles.html.
+  Open as commune.html?nis=92094.
 
   WHAT THE DESIGN ASKS FOR THAT THIS PIPELINE CANNOT SHOW. Every one of these
   is a missing DATA source, not a layout decision. Each is built at its
@@ -392,7 +391,7 @@
 
 <header class="bp-topbar">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span>
         <span class="bp-wordmark">BelPulse</span>
@@ -400,11 +399,11 @@
       </span>
     </a>
     <nav class="bp-nav" aria-label="Main">
-      <a href="home.html" data-t="navHome">Home</a>
-      <a href="communes.html" aria-current="page" data-t="navCommunes">Commune profiles</a>
-      <a href="all_data.html" data-t="navMacro">Macro</a>
+      <a href="home2.html" data-t="navHome">Home</a>
+      <a href="profiles.html" aria-current="page" data-t="navCommunes">Commune profiles</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
+      <a href="micro.html" data-t="navMicro">Micro</a>
       <a href="map.html" data-t="navMaps">Maps</a>
-      <a href="about.html" data-t="navMethodology">Methodology</a>
     </nav>
     <label class="searchbox">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -419,8 +418,8 @@
 
 <nav class="bp-breadcrumb" aria-label="Breadcrumb">
   <div class="wrap">
-    <a href="home.html" data-t="navHome">Home</a><span class="sep">/</span>
-    <a href="communes.html" data-t="navCommunes">Commune profiles</a><span class="sep">/</span>
+    <a href="home2.html" data-t="navHome">Home</a><span class="sep">/</span>
+    <a href="profiles.html" data-t="navCommunes">Commune profiles</a><span class="sep">/</span>
     <span id="crumbName">—</span>
   </div>
 </nav>
@@ -439,9 +438,9 @@
         </div>
       </div>
       <div class="headactions">
-        <a class="bp-btn bp-btn--outline" href="communes.html" data-t="cpCompare">Compare</a>
+        <a class="bp-btn bp-btn--outline" href="profiles.html" data-t="cpCompare">Compare</a>
         <a class="bp-btn bp-btn--outline" id="shareLink" href="#" data-t="cpShare">Share</a>
-        <a class="bp-btn bp-btn--dark" id="downloadLink" href="communes.html" data-t="cpDownload">Download the profile</a>
+        <a class="bp-btn bp-btn--dark" id="downloadLink" href="profiles.html" data-t="cpDownload">Download the profile</a>
       </div>
     </div>
 
@@ -487,7 +486,7 @@
         <section>
           <div class="sechead">
             <h2 data-t="cpKeyFigures">Key figures and recent trends</h2>
-            <a href="communes.html" data-t="cpMoreIndicators">See more indicators →</a>
+            <a href="profiles.html" data-t="cpMoreIndicators">See more indicators →</a>
           </div>
           <div class="keyrow" id="keyRow"></div>
         </section>
@@ -577,7 +576,7 @@
         <section>
           <div class="sechead">
             <h2 id="comparedTitle">—</h2>
-            <a href="communes.html" data-t="cpMoreIndicators">See more indicators →</a>
+            <a href="profiles.html" data-t="cpMoreIndicators">See more indicators →</a>
           </div>
           <div class="panel" style="padding:var(--bp-space-3) var(--bp-space-4)">
             <div style="overflow-x:auto"><table class="cmp" id="cmpTable"></table></div>
@@ -600,13 +599,13 @@
             <select id="cmpA"></select>
             <select id="cmpB"></select>
           </div>
-          <a class="bp-btn bp-btn--primary" href="communes.html" style="margin-top:var(--bp-space-4); width:100%; justify-content:center" data-t="cpCompare">Compare</a>
+          <a class="bp-btn bp-btn--primary" href="profiles.html" style="margin-top:var(--bp-space-4); width:100%; justify-content:center" data-t="cpCompare">Compare</a>
         </div>
 
         <div class="spanel">
           <div class="shead">
             <h3 id="rankTitle">—</h3>
-            <a href="communes.html" data-t="cpAllRankings">See all rankings</a>
+            <a href="profiles.html" data-t="cpAllRankings">See all rankings</a>
           </div>
           <p class="note" id="rankSub" style="margin-bottom:var(--bp-space-3)">—</p>
           <div id="rankList"></div>
@@ -637,7 +636,7 @@
         <div class="spanel">
           <div class="shead"><h3 data-t="cpLinks">Useful links</h3></div>
           <a class="linkbtn" id="linkMap" href="map.html"><span data-t="cpLinkMap">See on the map</span></a>
-          <a class="linkbtn" id="linkCsv" href="communes.html"><span data-t="cpLinkCsv">Export the data (CSV)</span></a>
+          <a class="linkbtn" id="linkCsv" href="profiles.html"><span data-t="cpLinkCsv">Export the data (CSV)</span></a>
           <a class="linkbtn" href="about.html"><span data-t="cpLinkMethod">Read the methodology</span></a>
         </div>
       </aside>
@@ -651,7 +650,7 @@
         <p data-t="cpCtaLead">Reliable, comparable data to understand your territory better.</p>
       </div>
       <div class="cta-actions">
-        <a class="bp-btn bp-btn--primary" href="communes.html" data-t="cpCtaCompare">Compare another commune</a>
+        <a class="bp-btn bp-btn--primary" href="profiles.html" data-t="cpCtaCompare">Compare another commune</a>
         <a class="bp-btn bp-btn--outline" href="map.html" data-t="homeAllMaps">See the full-page map</a>
       </div>
       <div class="cta-stats">
@@ -664,7 +663,7 @@
 
 <footer class="foot">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
     </a>

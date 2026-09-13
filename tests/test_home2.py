@@ -1,4 +1,4 @@
-"""Static contract for the intentionally unreleased home2 visual test."""
+"""Static contract for the public home2 homepage."""
 
 import re
 from pathlib import Path
@@ -75,10 +75,9 @@ def test_home2_images_are_local_and_ai_disclosure_is_translated():
         assert strings.count(f"{key}:") == 3
 
 
-def test_home2_is_exact_route_noindex_and_absent_from_sitemaps():
+def test_home2_is_the_indexable_canonical_homepage():
     html = _html()
-    assert '<meta name="robots" content="noindex">' in html
-    assert not is_indexable("/home2.html")
-    assert "/home2.html" not in sitemap_routes()
-    for sitemap in ("sitemap.xml", "sitemap-pages.xml", "local/sitemap.xml"):
-        assert "/home2.html" not in (REPO / sitemap).read_text(encoding="utf-8")
+    assert '<meta name="robots" content="noindex">' not in html
+    assert is_indexable("/home2.html")
+    assert "/home2.html" in sitemap_routes()
+    assert "/home2.html" in (REPO / "sitemap-pages.xml").read_text(encoding="utf-8")

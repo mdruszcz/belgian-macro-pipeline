@@ -70,15 +70,23 @@ class Page:
 #: file; only "/" is submitted, because a search engine should not be offered
 #: two URLs for one page.
 ROOT_PAGES: tuple[Page, ...] = (
-    Page("/", True, "the front page"),
+    Page("/", False, "redirects to the canonical /home2.html homepage"),
     Page(
         "/index.html",
         False,
         "the same file as /; submitting both offers one page under two URLs",
     ),
-    Page("/communes.html", True, "the commune table -- a landing page in its own right"),
+    Page(
+        "/communes.html",
+        False,
+        "legacy commune table; kept reachable for bookmarks, replaced in navigation by profiles.html",
+    ),
     Page("/map.html", True, "the choropleth explorer"),
-    Page("/all_data.html", True, "every observation, browsable"),
+    Page(
+        "/all_data.html",
+        False,
+        "legacy data browser; kept reachable for bookmarks, replaced in navigation by macro and micro",
+    ),
     Page(
         "/sources.html",
         True,
@@ -115,23 +123,18 @@ ROOT_PAGES: tuple[Page, ...] = (
     ),
     Page(
         "/home2.html",
-        False,
-        "a temporary, explicitly noindexed visual test of the homepage redesign; "
-        "it is intentionally unreleased and must not enter a sitemap",
+        True,
+        "the canonical public homepage; / and /index.html redirect here",
     ),
     Page(
         "/macro.html",
-        False,
-        "the redesigned macroeconomics page (Batch 6), a noindexed preview beside "
-        "dashboard.html until it is proven equivalent or better and the canonical "
-        "route switches",
+        True,
+        "the public macroeconomic dashboard; dashboard.html remains as a legacy route",
     ),
     Page(
         "/micro.html",
-        False,
-        "the redesigned microeconomics page (Batch 7), a noindexed preview beside "
-        "all_data.html sharing macro.html's analytical shell in its light variant; "
-        "linked from nowhere until it is proven equivalent or better",
+        True,
+        "the public microeconomic dashboard",
     ),
     Page(
         "/commune.html",
@@ -141,12 +144,9 @@ ROOT_PAGES: tuple[Page, ...] = (
     ),
     Page(
         "/profiles.html",
-        False,
-        "the commune-profiles directory: every commune by region, province and "
-        "Belfius socio-economic type, one view per type behind ?type= and "
-        "?family=. A noindexed preview beside communes.html until the "
-        "canonical route switches; communes.html keeps the data table and its "
-        "URL state untouched (rule 31)",
+        True,
+        "the public commune directory: every commune by region, province and "
+        "Belfius socio-economic type, with profile views behind ?nis=",
     ),
     Page(
         "/explorer.html",
@@ -167,9 +167,7 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
-NOINDEX_ROUTES = frozenset(
-    {"/home2.html", "/macro.html", "/micro.html", "/profiles.html", "/explorer.html"}
-)
+NOINDEX_ROUTES = frozenset({"/explorer.html"})
 
 
 def is_indexable(route: str) -> bool:

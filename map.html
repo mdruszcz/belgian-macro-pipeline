@@ -352,16 +352,17 @@
   <div class="wrap">
     <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
-      <span><span class="bp-wordmark">BelPulse</span></span>
+      <span>
+        <span class="bp-wordmark">BelPulse</span>
+        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
+      </span>
     </a>
     <nav class="bp-nav" aria-label="Main">
       <a href="home2.html" data-t="navHome">Home</a>
+      <a href="profiles.html" data-t="navCommunes">Commune profiles</a>
       <a href="macro.html" data-t="navMacro">Macro</a>
       <a href="micro.html" data-t="navMicro">Micro</a>
-      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
       <a href="map.html" aria-current="page" data-t="navMaps">Maps</a>
-      <a href="all_data.html" data-t="navAllData">All data</a>
-      <a href="about.html" data-t="navAbout">About</a>
     </nav>
     <div class="switches">
       <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
@@ -473,9 +474,8 @@
       shaded by <em>rank</em>, so each colour band holds roughly the same number of communes &mdash; that shows
       where a commune sits relative to the rest, which is what a national map can honestly show. Communes the
       source has no figure for are drawn flat, never as zero.
-      See <a href="communes.html">communes.html</a> for the same figures as a table,
-      <a href="all_data.html">all_data.html</a> for national-level data, or
-      <a href="local.html">local.html</a> for a single commune's profile.</p>
+      Browse <a href="profiles.html">commune profiles</a>, explore the
+      <a href="macro.html">national economy</a>, or open a commune directly from this map.</p>
     </div>
   </aside>
 </main>
@@ -1186,7 +1186,7 @@ async function init(){
       coverage:   document.getElementById('coverageWarn'),
     }, {
       lang: LANG,
-      onSelect: nis => { window.location.href = `local/${nis}/`; },
+      onSelect: nis => { window.location.href = `commune.html?nis=${nis}`; },
     }).build(geojson);
 
     const list = document.getElementById('communeList');

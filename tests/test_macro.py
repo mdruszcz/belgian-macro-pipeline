@@ -195,12 +195,12 @@ def test_the_english_stays_in_the_markup():
 # --- routing ------------------------------------------------------------------
 
 
-def test_macro_is_registered_noindex_and_absent_from_every_sitemap():
-    assert '<meta name="robots" content="noindex">' in _html()
+def test_macro_is_registered_indexable_and_in_the_sitemap():
+    assert '<meta name="robots" content="noindex">' not in _html()
     assert "/macro.html" in root_routes()
     assert "/macro.html" in ROUTE_EXACT
-    assert not is_indexable("/macro.html")
-    assert "/macro.html" not in sitemap_routes()
+    assert is_indexable("/macro.html")
+    assert "/macro.html" in sitemap_routes()
 
 
 def test_macro_links_and_scripts_all_resolve():

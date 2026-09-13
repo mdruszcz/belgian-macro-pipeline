@@ -1,14 +1,11 @@
 """The contract between a shell page and a block-built page it frames.
 
-`index.html` is a shell: it loads other pages into an iframe and pushes the
-reader's theme and language in by `postMessage`, waiting first for the frame to
-answer `'dashboard-ready'`. The hand-built about.html implemented all of that.
-When Batch 15d replaced it with a generated page, `src/pages/shell.py` had to
-implement it too -- and NOTHING IN THIS REPOSITORY WOULD HAVE NOTICED IF IT HAD
-NOT. The front page's About tab would have sat frozen in one language and one
-theme, looking entirely fine.
+The former `index.html` shell loaded pages into an iframe and pushed the
+reader's theme and language by `postMessage`, waiting for `'dashboard-ready'`.
+That shell was retired when home2 became the public homepage, but generated
+pages still support the framing contract for embedders and previews.
 
-WHY MOST OF THIS RUNS AGAINST A HARNESS AND NOT AGAINST index.html.
+WHY THIS RUNS AGAINST A HARNESS.
 
 The first version of this file drove the real front page for every assertion
 and was flaky in four different ways -- it failed CI twice and then 9 of 24
@@ -22,19 +19,13 @@ runs under parallel load, each fix moving the failure somewhere new:
   4. A straggling navigation from setup was counted as the reload the
      loop-guard test watches for.
 
-Every one of those is a race in the TEST against index.html's timers, not a
-defect in the shipped page. Chasing them one at a time was the wrong approach:
-the unit under test is the script `src/pages/shell.py` emits, and index.html is
-merely one parent that speaks to it.
+Every one of those was a race in the TEST against the old index.html timers,
+not a defect in the framed page. The unit under test is the script
+`src/pages/shell.py` emits.
 
-So the contract is tested against a HARNESS parent -- no fades, no timers,
-messages sent exactly when asked -- and the real front page gets ONE
-integration test proving it is such a parent. Fewer tests, more coverage, and
-the assertions are about the code this repository actually wrote.
-
-The harness implements the contract as index.html documents it, and the
-integration test is what stops the two drifting: if index.html changed how it
-talks to its frames, that test fails even though every harness test passes.
+The contract is therefore tested against a HARNESS parent -- no fades, no
+timers, messages sent exactly when asked. A separate integration test now
+proves that the legacy front-page URL redirects to home2.
 """
 
 from __future__ import annotations
@@ -335,67 +326,16 @@ def test_the_switcher_is_present_when_the_page_stands_alone(browser, site):
         context.close()
 
 
-# --- and the real front page is one such parent ------------------------------
+# --- the retired front-page shell redirects to the new homepage --------------
 
 
-def test_the_real_front_page_is_such_a_parent(browser, site):
-    """The integration check, and the reason the harness above is not a private
-    protocol I invented.
-
-    IT ASSERTS ONLY ITS OWN CLAIM: that index.html SENDS what the contract
-    says a parent sends. Whether the frame then finishes navigating is the
-    harness's job, and it covers it exhaustively with no timers in the way.
-
-    Earlier versions asserted the whole round trip through this page and were
-    flaky five times over, in five different ways, because index.html is
-    timer-driven -- it fades its iframe for 300 ms, calls loadDashboard(0) from
-    window.onload, and re-syncs on several setTimeouts. Every one of those
-    flakes was a race in the test, never a defect in the shipped page. An
-    assertion that needs four of someone else's timers to line up is not
-    testing what it says it tests.
-
-    The spy is installed with add_init_script, which applies to EVERY frame in
-    the context, so what the About page receives is observable without
-    modifying it.
-    """
+def test_the_real_front_page_redirects_to_home2(browser, site):
+    """Bookmarks for /index.html land on the new canonical homepage."""
     context = browser.new_context(viewport={"width": 1280, "height": 900})
     page = context.new_page()
-    context.add_init_script(
-        "window.__got = [];"
-        "window.addEventListener('message', function (e) { window.__got.push(e.data); });"
-    )
     try:
         page.goto(f"{site}/index.html", wait_until="networkidle")
-        _wait_for(
-            page,
-            "document.getElementById('dashboard-frame').contentWindow"
-            ".location.pathname.endsWith('/dashboard.html')",
-            "index.html to finish initialising",
-        )
-
-        # Sent to the frame it already has. No navigation is involved: the
-        # frame's language matches the parent's, so setLang is a no-op by the
-        # contract's own guard -- which is exactly why this is deterministic.
-        page.evaluate("syncDashboard()")
-        _wait_for(
-            page,
-            "document.getElementById('dashboard-frame').contentWindow.__got"
-            ".filter(function (m) { return m && m.type === 'setLang'; }).length > 0",
-            "index.html to send the contract's messages",
-        )
-        sent = page.evaluate(
-            "document.getElementById('dashboard-frame').contentWindow.__got"
-            ".filter(function (m) { return m && m.type; })"
-        )
-        kinds = {m["type"] for m in sent}
-        assert kinds == {
-            "setTheme",
-            "setLang",
-        }, f"index.html no longer speaks the contract the harness tests: sent {sorted(kinds)}"
-        # The values must be the vocabulary the harness maps, not something new.
-        themes = {m["value"] for m in sent if m["type"] == "setTheme"}
-        assert themes <= set(
-            THEME_EXPECTATIONS
-        ), f"index.html sent a theme the frame has no mapping for: {sorted(themes)}"
+        assert page.url.endswith("/home2.html")
+        assert page.locator(".bp-topbar .bp-logo").is_visible()
     finally:
         context.close()
