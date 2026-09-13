@@ -87,6 +87,7 @@ ROUTE_EXACT = frozenset(
         "/home.html",
         "/home2.html",
         "/macro.html",
+        "/micro.html",
         "/commune.html",
         "/profiles.html",
         # PREVIEW routes, added one at a time as Batch 15 converts a page.

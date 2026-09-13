@@ -71,12 +71,15 @@ column than the compact one; the compact figure is what matters for a client tha
 ```
 public/data/
   national.json                 -- be:country, every indicator, full history
+  aggregates.json               -- Batch 7: province/region/country cross-section, per indicator
   communes/{nis_code}.json      -- one commune, every indicator that has a value for it, full history
   indicators/{indicator_id}.json -- one indicator, every current commune, LATEST value only
   metadata/indicators.json      -- already exists (Block B): categories + indicator display metadata
   metadata/geographies.json     -- NEW: commune list (id, NIS, trilingual name, region/province/
                                     arrondissement) for Block K's search/autocomplete and Block L's
                                     comparison picker
+  metadata/national_sections.json -- Batch 6: the macro.html layout
+  metadata/micro_sections.json  -- Batch 7: the micro.html layout
   manifest.json                 -- build_id, git_commit, build_date, row counts per dataset
 ```
 
@@ -147,6 +150,47 @@ second "latest value" computation — filtered to one indicator and reshaped, th
 `be:country`'s full history across every indicator currently in `belgian_macro_export.csv`, reshaped
 the same way as a commune payload. One file rather than one-per-indicator because there is only one
 national geography — splitting it further would multiply file count for no fetch-size benefit.
+
+### `aggregates.json` (added Batch 7)
+
+The province/region/country cross-section micro.html's territorial comparison and any future
+comparison view read, reshaped from `data/aggregates.csv` (`export_aggregates_csv.py`, Block L) --
+the same file `_read_aggregates()` already folded into commune payloads' `comparison` field, now
+also published on its own so a page can compare GEOGRAPHIES to each other, not only a commune to its
+ancestors.
+
+```json
+{
+  "levels": ["country", "region", "province"],
+  "indicators": {
+    "AVG_NET_TAXABLE_INCOME": {
+      "be:country": {
+        "level": "country", "nis_code": null, "name": {"en": "Belgium", "fr": "Belgique", "nl": "België"},
+        "periods": {"2023": {"value": 27453.1, "coverage": {"n": 565, "of": 565, "pct": 100.0}}}
+      },
+      "be:prov:10000": {"level": "province", "nis_code": "10000", "name": {"...": "..."}, "periods": {"...": "..."}}
+    }
+  }
+}
+```
+
+**Arrondissement is computed in the CSV but deliberately excluded here**, matching
+`COMPARISON_LEVELS` in this module and `docs/features/comparison.md`'s "The comparison set" -- the
+same reason a commune's own comparison field stops at province/region/country. Written whenever an
+aggregates CSV is supplied, independent of whether a micro-style layout exists, since the aggregate
+values are useful on their own.
+
+Built with `sorted()` at both the indicator and geography level rather than `sort_keys=True` on the
+final `json.dumps` -- the same determinism approach every other payload here uses (rule 35: identical
+inputs, byte-identical output).
+
+### `metadata/micro_sections.json` (added Batch 7)
+
+The micro.html layout, same premise as `metadata/national_sections.json`: a KPI row, a key-indicator
+list, a province comparison, a household tile grid, a choropleth map, one history chart and the cards
+the design draws that no series can fill. Built from `config/micro_sections.yaml` and checked against
+the union of `national.json`'s codes and `aggregates.json`'s `be:country` codes -- the two files
+micro.html can actually read from -- so a card can never point at a series neither provides.
 
 ### `metadata/sources.json`
 

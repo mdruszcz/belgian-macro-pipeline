@@ -66,7 +66,7 @@ Full detail lives in `docs/implementation/batches/` as each one starts; this is 
 | 4 | Municipal profile redesign | Batch 2, reference designs (Namur) | done (preview route, commune.html) |
 | 5 | Municipality explorer redesign | Batch 2 | not started, unblocked |
 | 6 | Macroeconomics reproduction | Batch 2, reference designs | not started, unblocked |
-| 7 | Microeconomics page | Batch 6 | not started |
+| 7 | Microeconomics page | Batch 6 | done (preview route, micro.html) |
 | 8 | Data and map explorers | Batch 2 | not started, unblocked |
 | 9 | Page-document schema | Batch 0 | done |
 | 10 | Shared block renderer | Batch 9 | done |
