@@ -21,9 +21,11 @@
       (population, employment rate, fiscal balance, public debt) have no
       national series here. The row shows the six series that exist and a
       line under it says which four do not.
-    * "Comparaison internationale": the five foreign GDP series are configured
-      and empty (a pre-existing DBnomics timeout, recorded under Block H).
-      Built at its designed size in the `unavailable` state, with that reason.
+    * "Comparaison internationale": the foreign GDP series are fetched and,
+      since pipeline repair part 3, stored under their own country; the chart
+      that would draw them is not built yet. Built at its designed size in the
+      `unavailable` state, with that reason. (The reason used to blame a
+      DBnomics timeout; the fetch was fine, the daily sync dropped them.)
     * "Finances publiques (compteurs simulés)": there is no national revenue,
       expenditure, balance or debt series to extrapolate from, and a counter
       ticking up from nothing would be an invention (CLAUDE.md rule 36).

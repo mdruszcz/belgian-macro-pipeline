@@ -14,9 +14,13 @@ No network calls: reads what the fetchers already wrote to
 legacy_observations/legacy_indicators this run (see
 scripts/rename_legacy_tables.py, belgian_macro_db.py's _init_schema).
 
-Scope: same criterion as port_existing_indicators.py -- config `country` is
-"BE" (or absent) and the source's adapter is fetchable (nbb/dbnomics).
-Non-Belgium indicators stay on the legacy tables only.
+Scope: every configured indicator the national fetch delivers (a nbb or
+dbnomics adapter), placed by port_existing_indicators.geography_for_indicator:
+Belgian series under be:country, foreign ones under their own country or
+aggregate (de:country, es:country, fr:country, nl:country, ea:aggregate,
+eu27_2020:aggregate). Until pipeline repair part 3 this kept Belgian series
+only, and ten configured foreign series -- five GDP, EC_CONS_CONF_EU and four
+LABOUR_COST_* -- were fetched daily and never reached `observations`.
 """
 
 import argparse
@@ -25,32 +29,33 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from port_existing_indicators import (
-    BE_COUNTRY_GEO,
     derive_period_bounds,
+    geography_for_indicator,
     map_obs_status,
     source_id_for,
 )
 
 from belgian_macro_db import CONFIG_DIR, SOURCES
 from src.db.vintages import upsert_observation
-from src.validation.config_schema import is_canonical_eligible, load_and_validate_all
+from src.validation.config_schema import load_and_validate_all
 
 
 def _ensure_reference_rows(
     conn: sqlite3.Connection, indicator_configs: dict, source_configs: dict
 ) -> None:
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO geographies
-            (geo_id, nis_code, level, name_nl, name_fr, name_en, parent_geo_id,
-             valid_from, valid_to, successor_geo_id, population, area_km2)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """,
-        tuple(BE_COUNTRY_GEO.values()),
-    )
     for code, meta in SOURCES.items():
-        if not is_canonical_eligible(indicator_configs[code], source_configs):
+        geography = geography_for_indicator(code, indicator_configs[code], source_configs)
+        if geography is None:
             continue
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO geographies
+                (geo_id, nis_code, level, name_nl, name_fr, name_en, parent_geo_id,
+                 valid_from, valid_to, successor_geo_id, population, area_km2)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+            tuple(geography.values()),
+        )
         agency = meta["source_agency"]
         source_id = source_id_for(agency)
         conn.execute(
@@ -128,7 +133,8 @@ def sync(db_path: Path, vintage: str | None = None) -> tuple[int, int]:
     checked = 0
     changed = 0
     for code, meta in SOURCES.items():
-        if not is_canonical_eligible(indicator_configs[code], source_configs):
+        geography = geography_for_indicator(code, indicator_configs[code], source_configs)
+        if geography is None:
             continue
 
         source_id = source_id_for(meta["source_agency"])
@@ -151,7 +157,7 @@ def sync(db_path: Path, vintage: str | None = None) -> tuple[int, int]:
             wrote = upsert_observation(
                 conn,
                 indicator_id=code,
-                geo_id="be:country",
+                geo_id=geography["geo_id"],
                 period=period,
                 period_start=period_start,
                 period_end=period_end,

@@ -307,6 +307,9 @@ It also runs in `ci.yml` against the committed stores, so a bad hand-edited CSV 
 - **Should the legacy fetch path be retired rather than validated?** Reading two logs is a
   workaround for `belgian_macro_db.py` not having moved onto the Block D interface. Retiring it is
   the real fix, but it is a bigger job than this block.
-- **The five country-variant indicators have configs and no data**, because of the DBnomics timeouts
-  above. Fix the fetch, or delete the configs? Leaving them is the one option that keeps the
-  `indicator_disappeared` rule permanently noisy.
+- ~~**The five country-variant indicators have configs and no data**, because of the DBnomics timeouts
+  above.~~ **Answered 2026-09-13 (pipeline repair part 3): the diagnosis was wrong.** The fetch
+  worked every day; `scripts/sync_to_canonical.py` kept Belgian series only and dropped them, along
+  with `EC_CONS_CONF_EU` and four `LABOUR_COST_*`. They now sync under their own country or
+  aggregate, and `tests/test_sync_international.py` checks the real data for any configured series
+  left in the legacy tables only.

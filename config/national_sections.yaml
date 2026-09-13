@@ -72,9 +72,9 @@ unavailable:
   - id: international
     label: {en: International comparison, fr: Comparaison internationale, nl: Internationale vergelijking}
     reason:
-      en: The five foreign GDP series (DE, EA, ES, FR, NL) are configured but hold no observations — the DBnomics fetch has timed out since Block H — and Poland is not configured.
-      fr: Les cinq séries de PIB étrangères (DE, EA, ES, FR, NL) sont configurées mais vides — la récupération DBnomics expire depuis le bloc H — et la Pologne n’est pas configurée.
-      nl: De vijf buitenlandse bbp-reeksen (DE, EA, ES, FR, NL) zijn geconfigureerd maar leeg — de DBnomics-ophaling loopt sinds blok H af — en Polen is niet geconfigureerd.
+      en: The foreign GDP series (DE, EA, ES, FR, NL) are fetched and stored, but the comparison chart that would draw them is not built yet, and Poland is not configured.
+      fr: Les séries de PIB étrangères (DE, EA, ES, FR, NL) sont récupérées et enregistrées, mais le graphique de comparaison qui les afficherait n’est pas encore construit, et la Pologne n’est pas configurée.
+      nl: De buitenlandse bbp-reeksen (DE, EA, ES, FR, NL) worden opgehaald en opgeslagen, maar de vergelijkingsgrafiek die ze zou tonen is nog niet gebouwd, en Polen is niet geconfigureerd.
   - id: public_finance
     label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
     reason:
