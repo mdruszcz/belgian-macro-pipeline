@@ -29,9 +29,10 @@ class PipelinePaths(ConfigurableResource):
     source_db: str = ""
     stores: str = DEFAULT_STORES
     build_id: str = "local"
-    # What `make exports` passes. daily_fetch.yml derives it from its
-    # validation step; the Dagster route does not yet (docs/features/orchestration.md).
-    validation_status: str = "unknown"
+    # Where the validation checks append validate_data.py's markdown summary
+    # (its --summary-file). Empty: no summary. The runner points it at the
+    # job summary page.
+    validation_summary: str = ""
     runs_dir: str = DEFAULT_RUNS_DIR
 
     @property
@@ -63,7 +64,9 @@ class PipelinePaths(ConfigurableResource):
             "public_data": public_data,
             "local": local,
             "build_id": self.build_id,
-            "validation_status": self.validation_status,
+            # What `make exports` passes. site_payloads replaces it with the
+            # outcome of the checks in its own run (checks.validation_status).
+            "validation_status": "unknown",
         }
 
     def render(self, tokens: tuple[str, ...], **extra: str) -> list[str]:

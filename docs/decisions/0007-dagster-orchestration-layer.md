@@ -1,7 +1,7 @@
 # ADR 0007 — Dagster as a supervision layer over the scripts, GitHub Actions stays the scheduler
 
 Date: 2026-09-13
-Status: accepted (step 1)
+Status: accepted (step 1); amended by step 2 (below)
 Revises: `docs/architecture.md`, "Execution model" ("No queue, scheduler, or server process.
 GitHub Actions cron is the only orchestrator.") -- the second sentence still holds.
 
@@ -51,6 +51,25 @@ start locally.
   (commands verbatim in the Makefile/workflow; the workflow's scripts all wrapped; the seven
   tracked outcomes equal the workflow's gate) and by `make verify-dagster-parity`.
 - The dev install grows by about 50 packages.
-- The local UI does not see production runs until step 2.
+- The local UI does not see production runs (still true after step 2: their history dies with
+  the runner).
 - `validation_status` in the manifest is `unknown` on the Dagster route, as with `make exports`;
-  step 2 must derive it from the checks before production switches over.
+  step 2 must derive it from the checks before production switches over. (Done in step 2.)
+
+## Amendment -- step 2 (2026-09-13)
+
+Production now runs through Dagster. `daily_fetch.yml` replaces its assemble, source, validation
+and export steps with one step, `python -m orchestration.daily`, in the runner; offload and the
+git/PR steps stay workflow steps. This revises decisions 2 and 7 above:
+
+- the runner installs the `dagster` pin (read from `requirements-dagster.txt`, never retyped), not
+  the web UI; `DAGSTER_HOME` is the runner's temporary directory and telemetry upload is off;
+- the coordinator's exit code carries the old step semantics: 0 green, 3 exported with a red
+  source (continue, no auto-merge), anything else stops before the offload;
+- the auto-merge gate reads that run's manifest (`python -m orchestration.manifest`), by the path
+  the coordinator reported;
+- the published `validation_status` comes from the check evaluations of the same Dagster run.
+
+Consequence: the Makefile and `commands.py` are now the only statement of each command line; the
+lines the workflow used to run are frozen in `tests/test_orchestration.py` so the change of
+runner cannot silently change a command. See `docs/features/orchestration.md`, "Step 2".

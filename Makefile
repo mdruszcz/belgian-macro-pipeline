@@ -228,9 +228,10 @@ dagster:
 	mkdir -p "$(DAGSTER_HOME)"
 	DAGSTER_HOME="$(DAGSTER_HOME)" $(PYTHON) -m dagster dev -m orchestration
 
-## dagster-daily: the daily sequence through Dagster -- assemble, fetch every
-## source, then validate and export ALWAYS, even when a source failed (as the
-## workflow does), ending non-zero if anything was red. Needs the network.
+## dagster-daily: the daily sequence through Dagster, exactly what
+## daily_fetch.yml runs -- assemble, fetch every source, then validate and
+## export ALWAYS, even when a source failed. Exit 0 all green, 3 exported with a
+## red source, 1 nothing publishable. Needs the network.
 ## Never writes $(COMMITTED_DB): offload stays a separate step.
 dagster-daily:
 	mkdir -p "$(DAGSTER_HOME)"

@@ -20,10 +20,13 @@ from orchestration.paths import PipelinePaths
 TAIL_LINES = 40
 
 
-def run_script(context, paths: PipelinePaths, name: str, extra: tuple[str, ...] = ()) -> str:
+def run_script(
+    context, paths: PipelinePaths, name: str, extra: tuple[str, ...] = (), **values: str
+) -> str:
     """Run COMMANDS[name] exactly as the Makefile does, from the repository
-    root, with this interpreter. Raises Failure on a non-zero exit, so the
-    asset turns red; returns the last lines of output."""
+    root, with this interpreter. `values` fills placeholders only known at run
+    time (site_payloads' validation status). Raises Failure on a non-zero
+    exit, so the asset turns red; returns the last lines of output."""
     command = COMMANDS[name]
     if command.writes_repo_only and not paths.writes_into_repo:
         raise Failure(
@@ -31,7 +34,7 @@ def run_script(context, paths: PipelinePaths, name: str, extra: tuple[str, ...] 
             f"and out_root is {paths.out_root}"
         )
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    argv = [sys.executable, *paths.render(command.argv, today=today), *extra]
+    argv = [sys.executable, *paths.render(command.argv, today=today, **values), *extra]
     context.log.info("$ " + " ".join(argv[1:]))
 
     # UTF-8 for the child's own stdout only: a script printing an em dash must

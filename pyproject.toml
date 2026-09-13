@@ -27,9 +27,9 @@ dev = [
     # written against this version's API (docs/features/orchestration.md).
     "dagster==1.13.22",
 ]
-# The local Dagster UI (`make dagster`). Not needed by the daily workflow, which
-# does not run through Dagster yet. dagster and dagster-webserver must stay on
-# the same exact version.
+# The local Dagster UI (`make dagster`). daily_fetch.yml installs only the
+# dagster pin, from requirements-dagster.txt. dagster and dagster-webserver
+# must stay on the same exact version.
 orchestration = [
     "dagster==1.13.22",
     "dagster-webserver==1.13.22",
