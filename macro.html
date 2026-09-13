@@ -3,9 +3,8 @@
   assets/belpulse/macro page.png), built on Batch 1's tokens and Batch 2's
   shared components, to home2.html's standard.
 
-  A PREVIEW ROUTE, noindexed, beside dashboard.html rather than replacing it.
-  The canonical route switches only when this page is proven equivalent or
-  better (docs/features/page_builder.md, the Batch 15 gate).
+  The public macroeconomic dashboard. The former dashboard route remains
+  reachable for existing bookmarks but is no longer in primary navigation.
 
   WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Every series drawn here is named
   in config/national_sections.yaml and published as
@@ -47,7 +46,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
 <title>BelPulse — Belgian macroeconomy</title>
 <meta name="description" content="The headline indicators of the Belgian economy from official sources, with the date each figure was retrieved and how it was made.">
 
@@ -248,7 +246,7 @@
 
 <header class="bp-topbar">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span>
         <span class="bp-wordmark">BelPulse</span>
@@ -257,11 +255,10 @@
     </a>
     <nav class="bp-nav" aria-label="Main">
       <a href="home2.html" data-t="navHome">Home</a>
+      <a href="profiles.html" data-t="navCommunes">Commune profiles</a>
       <a href="macro.html" aria-current="page" data-t="navMacro">Macro</a>
-      <a href="all_data.html" data-t="navMicro">Micro</a>
-      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+      <a href="micro.html" data-t="navMicro">Micro</a>
       <a href="map.html" data-t="navMaps">Maps</a>
-      <a href="about.html" data-t="navMethodology">Methodology</a>
     </nav>
     <label class="searchbox">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -302,7 +299,7 @@
 
   <main class="macro-main">
     <nav class="bp-breadcrumb" aria-label="Breadcrumb">
-      <a href="index.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
+      <a href="home2.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
     </nav>
 
     <header class="page-head" id="overview">
@@ -392,7 +389,7 @@
 
 <footer class="foot">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
     </a>

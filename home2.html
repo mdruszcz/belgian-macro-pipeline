@@ -2,11 +2,8 @@
   BelPulse homepage redesign -- Batch 3 (docs/design-references/homepage.md),
   built on Batch 1's tokens and Batch 2's shared components.
 
-  A PREVIEW ROUTE, deliberately not index.html. docs/features/page_builder.md's
-  own Batch 15 gate: a redesigned page stays a preview until it is proven
-  equivalent or better against the page it replaces, then the canonical route
-  switches -- never a silent cutover. index.html is untouched and still what
-  a visitor gets today.
+  The public BelPulse homepage. index.html redirects here so this editorial
+  design is the first page a visitor sees.
 
   WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY. Every departure is a
   figure the design shows that this pipeline does not hold. None of them is a
@@ -35,7 +32,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
 <title>BelPulse — Belgium's economic data, updated automatically</title>
 <meta name="description" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
 
@@ -302,9 +298,8 @@
   }
 
   /* ---- home2 high-fidelity composition ---------------------------------
-     This test route keeps home.html untouched. Values and map geometry still
-     come from the same published payloads; only composition and presentation
-     are specialised here. */
+     Values and map geometry come from the published payloads; only
+     composition and presentation are specialised here. */
   .home2 .wrap{max-width:1096px; padding-left:14px; padding-right:14px}
   .home2 .bp-topbar{height:51px; padding:5px 0}
   .home2 .bp-topbar .wrap{gap:22px; flex-wrap:nowrap}
@@ -462,7 +457,7 @@
 
 <header class="bp-topbar">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span>
         <span class="bp-wordmark">BelPulse</span>
@@ -471,11 +466,10 @@
     </a>
     <nav class="bp-nav" aria-label="Main">
       <a href="home2.html" aria-current="page" data-t="navHome">Home</a>
-      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
-      <a href="all_data.html" data-t="navMacro">Macro</a>
-      <a href="all_data.html" data-t="navMicro">Micro</a>
+      <a href="profiles.html" data-t="navCommunes">Commune profiles</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
+      <a href="micro.html" data-t="navMicro">Micro</a>
       <a href="map.html" data-t="navMaps">Maps</a>
-      <a href="about.html" data-t="navMethodology">Methodology</a>
     </nav>
     <label class="searchbox">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -498,7 +492,7 @@
         <h1 data-t="homeTitle">Belgium’s economic data, updated automatically.</h1>
         <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
         <div class="hero-actions">
-          <a class="bp-btn bp-btn--primary" href="communes.html">
+          <a class="bp-btn bp-btn--primary" href="profiles.html">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
             <span data-t="homeExplore">Explore the data</span>
           </a>
@@ -558,7 +552,7 @@
         <p data-t="homeFinanceLead">Live figures (updated daily)</p>
       </div>
       <!-- the four tiles are injected here, each in the `unavailable` state -->
-      <a class="sechead-link" href="all_data.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap" data-t="homeAllIndicators">See all national data →</a>
+      <a class="sechead-link" href="macro.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap" data-t="homeAllIndicators">See all national data →</a>
     </section>
   </div>
 
@@ -568,7 +562,7 @@
       <section>
         <div class="sechead">
           <h2 data-t="homeCommunesTitle">Commune profiles</h2>
-          <a href="communes.html" data-t="homeAllCommunes">Explore every commune →</a>
+          <a href="profiles.html" data-t="homeAllCommunes">Explore every commune →</a>
         </div>
         <p class="secsub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
         <div class="commune-card bp-state" id="featuredCard" data-state="loading">
@@ -577,7 +571,7 @@
             <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur"></div>
             <div class="cc-name" id="featuredName">—</div>
             <div class="cc-region" id="featuredRegion">—</div>
-            <a class="bp-btn bp-btn--outline" id="featuredLink" href="communes.html" style="border-color:var(--bp-accent); color:var(--bp-accent); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
+            <a class="bp-btn bp-btn--outline" id="featuredLink" href="profiles.html" style="border-color:var(--bp-accent); color:var(--bp-accent); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
           </div>
           <div class="cc-stats" id="featuredStats"></div>
         </div>
@@ -600,7 +594,7 @@
   <div class="wrap national-section" style="margin-top:var(--bp-space-10)">
     <div class="sechead">
       <h2 data-t="homeIndicatorsTitle">Key indicators for the Belgian economy</h2>
-      <a href="all_data.html" data-t="homeAllIndicators">See all national data →</a>
+      <a href="macro.html" data-t="homeAllIndicators">See all national data →</a>
     </div>
     <p class="secsub" data-t="homeIndicatorsLead">National series, each with the period it describes.</p>
     <div class="kpirow" id="nationalGrid"></div>
@@ -640,7 +634,7 @@
         <p data-t="homeCtaLead">Every commune this pipeline covers, with its own indicators and its own map.</p>
       </div>
       <div class="cta-actions">
-        <a class="bp-btn bp-btn--primary" href="communes.html" data-t="homeCtaStart">Start exploring</a>
+        <a class="bp-btn bp-btn--primary" href="profiles.html" data-t="homeCtaStart">Start exploring</a>
         <a class="bp-btn bp-btn--outline" href="about.html" data-t="homeCtaAbout">Learn more about BelPulse</a>
       </div>
       <div class="cta-stats">
@@ -655,7 +649,7 @@
 
 <footer class="foot">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
     </a>
@@ -663,7 +657,7 @@
       <a href="about.html" data-t="homeFooterAbout">About</a>
       <a href="about.html" data-t="navMethodology">Methodology</a>
       <a href="about.html" data-t="homeFooterSources">Sources</a>
-      <a href="all_data.html" data-t="homeFooterNews">News</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
       <a href="about.html" data-t="homeFooterContact">Contact</a>
     </nav>
     <span class="foot-script">
@@ -882,7 +876,7 @@
       el.className = 'glass';
       el.innerHTML =
         '<div class="mini-head"><div><h3></h3><div class="sub"></div></div>' +
-        '<a class="seemore" href="all_data.html"></a></div>' +
+        '<a class="seemore" href="macro.html"></a></div>' +
         '<div class="mini-figure"><b></b></div>' +
         '<div class="period sub" style="text-align:right"></div>' +
         '<div class="provenance sub"></div>' +
@@ -1074,7 +1068,7 @@
       (profile.name && (profile.name[LANG] || profile.name.en)) || state.featured.nis;
     document.getElementById('featuredRegion').textContent =
       [profile && profile.province, profile && profile.region].filter(Boolean).join(' · ');
-    document.getElementById('featuredLink').href = 'local/' + state.featured.nis + '/';
+    document.getElementById('featuredLink').href = 'commune.html?nis=' + state.featured.nis;
     document.getElementById('featuredCaption').textContent = T('homeFeaturedConfigured');
 
     var stats = document.getElementById('featuredStats');
@@ -1110,7 +1104,7 @@
     });
     input.addEventListener('change', function(){
       var m = /\((\d{4,5})\)\s*$/.exec(input.value);
-      if(m) window.location.href = 'local/' + m[1] + '/';
+      if(m) window.location.href = 'commune.html?nis=' + m[1];
     });
   }
 
@@ -1193,7 +1187,7 @@
       // legendNote and coverage deliberately omitted -- see the markup.
     }, {
       lang: LANG,
-      onSelect: function(nis){ window.location.href = 'local/' + nis + '/'; },
+      onSelect: function(nis){ window.location.href = 'commune.html?nis=' + nis; },
     }).build(state.geojson);
 
     document.getElementById('zoomIn').onclick = function(){ state.map.zoomBy(1/1.4); };

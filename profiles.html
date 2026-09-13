@@ -3,9 +3,9 @@
   design supplied 2026-09-12), built on Batch 1's tokens and Batch 2's shared
   components, to macro.html's and commune.html's standard.
 
-  A PREVIEW ROUTE, noindexed, BESIDE communes.html: communes.html keeps the
-  data table, its filters, its year selector and its URL state untouched
-  (rule 31; docs/steps' Batch 5 note). Open as profiles.html. A type, family,
+  The public commune directory. The legacy communes.html table remains
+  reachable for existing bookmarks but is no longer part of primary navigation.
+  Open as profiles.html. A type, family,
   province or region view is this same file with ?type=W14, ?family=rural_w,
   ?province=be:prov:90000 or ?region=be:reg:04000. A commune opens in this
   same file with ?nis=11001; commune.html?nis= remains available as the
@@ -43,7 +43,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
 <title>BelPulse — Commune profiles</title>
 <meta name="description" content="Every Belgian commune by region, province and socio-economic type, each with its profile of official indicators.">
 
@@ -331,7 +330,7 @@
 
 <header class="bp-topbar">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span>
         <span class="bp-wordmark">BelPulse</span>
@@ -342,9 +341,8 @@
       <a href="home2.html" data-t="navHome">Home</a>
       <a href="profiles.html" aria-current="page" data-t="navCommunes">Commune profiles</a>
       <a href="macro.html" data-t="navMacro">Macro</a>
-      <a href="all_data.html" data-t="navMicro">Micro</a>
+      <a href="micro.html" data-t="navMicro">Micro</a>
       <a href="map.html" data-t="navMaps">Maps</a>
-      <a href="about.html" data-t="navMethodology">Methodology</a>
     </nav>
     <label class="searchbox">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -383,7 +381,6 @@
         <select id="pickRegion" data-t-aria="pfRegion" aria-label="Region"></select>
         <select id="pickProvince" data-t-aria="pfProvince" aria-label="Province"></select>
         <select id="pickType" data-t-aria="pfType" aria-label="Type of commune"></select>
-        <a class="bp-btn bp-btn--outline" href="communes.html" data-t="cpCompare">Compare</a>
         <a class="bp-btn bp-btn--red" href="map.html" data-t="pfExploreMap">Explore the map</a>
         <a class="bp-btn bp-btn--dark" id="exampleLink" href="commune.html" data-t="pfExampleProfile">See an example profile</a>
       </div>
@@ -428,7 +425,7 @@
       <section style="margin-bottom:var(--bp-space-6)">
         <div class="sechead">
           <div><h2 data-t="pfQuickPick">Six communes to start with</h2><p class="sub" id="quickSub"></p></div>
-          <a href="communes.html"><span data-t="pfSeeAll">See all communes</span> →</a>
+          <a href="profiles.html"><span data-t="pfSeeAll">See all communes</span> →</a>
         </div>
         <div class="communes" id="quickGrid"></div>
       </section>
@@ -516,7 +513,7 @@
         <p data-t="pfCtaLead">Reliable, comparable data to understand the realities of your territory.</p>
       </div>
       <div class="cta-actions">
-        <a class="bp-btn bp-btn--red" href="communes.html"><span data-t="pfCtaStart">Start exploring</span> →</a>
+        <a class="bp-btn bp-btn--red" href="profiles.html"><span data-t="pfCtaStart">Start exploring</span> →</a>
         <a class="bp-btn bp-btn--outline" href="about.html" data-t="pfCtaAbout">Learn more about BelPulse</a>
       </div>
       <div class="cta-stats">
@@ -530,7 +527,7 @@
 
 <footer class="foot">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
     </a>

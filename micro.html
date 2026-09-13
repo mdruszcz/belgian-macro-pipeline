@@ -3,7 +3,7 @@
   built on Batch 6's macro.html shell -- same analytical layout, LIGHT variant
   (docs/features/design_system.md: macro is navy, micro is light).
 
-  A PREVIEW ROUTE, noindexed, beside macro.html rather than replacing anything.
+  The public microeconomic dashboard.
 
   WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Every series drawn here is named
   in config/micro_sections.yaml and published as
@@ -59,7 +59,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
 <title>BelPulse — Belgian microeconomy</title>
 <meta name="description" content="The local indicators of the Belgian economy, commune by commune, from official sources, with the date each figure was retrieved and how it was made.">
 
@@ -293,7 +292,7 @@
 
 <header class="bp-topbar">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span>
         <span class="bp-wordmark">BelPulse</span>
@@ -302,11 +301,10 @@
     </a>
     <nav class="bp-nav" aria-label="Main">
       <a href="home2.html" data-t="navHome">Home</a>
+      <a href="profiles.html" data-t="navCommunes">Commune profiles</a>
       <a href="macro.html" data-t="navMacro">Macro</a>
       <a href="micro.html" aria-current="page" data-t="navMicro">Micro</a>
-      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
       <a href="map.html" data-t="navMaps">Maps</a>
-      <a href="about.html" data-t="navMethodology">Methodology</a>
     </nav>
     <label class="searchbox">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -346,7 +344,7 @@
 
   <main class="micro-main">
     <nav class="bp-breadcrumb" aria-label="Breadcrumb">
-      <a href="index.html" data-t="navHome">Home</a><span data-t="navMicro">Micro</span>
+      <a href="home2.html" data-t="navHome">Home</a><span data-t="navMicro">Micro</span>
     </nav>
 
     <header class="page-head" id="overview">
@@ -468,7 +466,7 @@
         </label>
         <div class="explore-actions">
           <a href="profiles.html"><span data-t="microSeeProfiles">See commune profiles</span> →</a>
-          <a href="communes.html"><span data-t="microSeeAllCommunes">See all communes</span> →</a>
+          <a href="profiles.html"><span data-t="microSeeAllCommunes">See all communes</span> →</a>
         </div>
       </article>
     </section>
@@ -477,7 +475,7 @@
 
 <footer class="foot">
   <div class="wrap">
-    <a class="bp-logo" href="index.html">
+    <a class="bp-logo" href="home2.html">
       <span class="bp-logo-mark"><span></span><span></span><span></span></span>
       <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
     </a>

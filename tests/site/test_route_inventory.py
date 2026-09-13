@@ -221,29 +221,12 @@ def test_every_page_a_script_navigates_to_exists(page):
     assert not broken, f"{page.relative_to(REPO_ROOT)} navigates to {broken}, which do not exist"
 
 
-def test_index_never_asks_for_a_dashboard_it_does_not_have():
-    """The other half of the same defect.
-
-    index.html's nav is positional -- `loadDashboard(2)` indexes an array of
-    filenames -- and `window.onload` called `loadDashboard(2)` because index 2
-    once meant "News". news.html has never existed, so THE FRONT PAGE LOADED A
-    404 INTO ITS OWN IFRAME ON EVERY VISIT, while the nav highlighted a
-    different tab entirely. Removing the dead entries would have turned that
-    into an out-of-range index, which is a quieter version of the same bug.
-
-    A positional index is a footgun; this test is the safety catch.
-    """
-    source = _JS_COMMENT.sub(" ", (REPO_ROOT / "index.html").read_text(encoding="utf-8"))
-    array = re.search(r"const dashboards = \[(.*?)\]", source, re.S)
-    assert array, "index.html no longer declares a `dashboards` array"
-    size = len(_SCRIPT_PAGE.findall(array.group(1)))
-    assert size, "the dashboards array is empty"
-    requested = {int(n) for n in re.findall(r"loadDashboard\((\d+)\)", source)}
-    assert requested, "nothing calls loadDashboard, so the nav is dead"
-    out_of_range = sorted(n for n in requested if n >= size)
-    assert (
-        not out_of_range
-    ), f"index.html calls loadDashboard{out_of_range} but only has {size} dashboards"
+def test_index_redirects_to_the_canonical_homepage():
+    """The old iframe shell is retired, but its two public URLs stay valid."""
+    source = (REPO_ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'content="0; url=home2.html"' in source
+    assert "window.location.replace('home2.html')" in source
+    assert "/belgian-macro-pipeline/home2.html" in source
 
 
 # --- the inventory is complete ----------------------------------------------
@@ -312,7 +295,10 @@ def test_a_submitted_page_is_never_told_not_to_be_indexed(route):
 
 def test_noindex_is_driven_by_the_inventory_not_by_the_route_string():
     assert is_indexable("/about.html")
-    assert not is_indexable("/home2.html")
+    assert is_indexable("/home2.html")
+    assert is_indexable("/profiles.html")
+    assert is_indexable("/macro.html")
+    assert is_indexable("/micro.html")
     assert not is_indexable("/preview/about.html")
     assert not is_indexable("/preview/fr/map.html")
     assert NOINDEX_PREFIXES, "an empty prefix tuple would make every page indexable"
