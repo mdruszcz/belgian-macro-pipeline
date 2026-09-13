@@ -161,7 +161,16 @@ python scripts/export_site_payloads.py --db data/belgian_macro.db --out-dir publ
 
 # Then serve the pages locally
 python -m http.server 8000    # → http://localhost:8000/local.html
+
+# Optional: the Dagster supervision UI over the same scripts (local runs only)
+pip install -r requirements-dagster.txt
+make dagster                  # → http://localhost:3000; `make dagster-daily` for a full run
 ```
+
+The Dagster UI shows lineage, validation checks and freshness for runs started on this machine.
+Production runs the same Dagster jobs inside the GitHub Actions runner, whose history is thrown
+away with it, so it does not appear there
+([docs/features/orchestration.md](docs/features/orchestration.md)).
 
 `belgian_macro_db.py` exits non-zero if any source failed to fetch — check `--history` for details.
 

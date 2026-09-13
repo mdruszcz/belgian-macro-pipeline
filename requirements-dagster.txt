@@ -1,0 +1,10 @@
+# The Dagster layer -- docs/features/orchestration.md. Locally, both lines
+# (`make dagster`, `make dagster-daily`). daily_fetch.yml installs the
+# `dagster==` line alone, read from this file: the runner executes the
+# pipeline through Dagster but never serves the web UI.
+#
+# Not in requirements.txt, which manual_sources.yml also installs and which
+# needs none of it. Both pins must stay on the same exact version (also in
+# pyproject.toml; tests/test_pipeline_cutover_wiring.py checks all three).
+dagster==1.13.22
+dagster-webserver==1.13.22

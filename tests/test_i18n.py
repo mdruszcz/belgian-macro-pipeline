@@ -202,18 +202,17 @@ def test_the_map_component_holds_no_english_of_its_own():
 # --- one language for the whole site ---------------------------------------
 
 
-LEGACY_PAGES = ["index.html", "dashboard.html"]
+LEGACY_PAGES = ["dashboard.html"]
 
 
 @pytest.mark.parametrize("page", LEGACY_PAGES)
 def test_the_older_pages_write_the_canonical_language_key(page):
     """THE BUG THIS FIXES, reproduced in a browser before it was fixed.
 
-    index.html and dashboard.html have had their own translation tables and
-    their own switcher since before the shared module existed, persisting to
-    plain `lang` while local.html used `belpulse-lang`. Two language systems on
-    one site, writing to two different keys: choosing French on the dashboard
-    and clicking through to the commune table gave you English.
+    dashboard.html has its own translation table and switcher from before the
+    shared module existed, persisting to plain `lang` while the redesigned
+    pages use `belpulse-lang`. index.html is no longer listed here: it is a
+    redirect with no language control of its own.
     """
     text = (REPO / page).read_text(encoding="utf-8")
     assert "belpulse-lang" in text, f"{page} does not write the site-wide language key"

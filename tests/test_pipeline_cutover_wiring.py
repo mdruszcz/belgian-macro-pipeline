@@ -8,6 +8,13 @@ holds 1,939 of ~86,000 observations. One file left behind means either
 published pages with ONEM and WalStat silently missing, or a CI run that
 fails every PR -- and, through the open-PR check, a daily run that then stops
 for good.
+
+Since Dagster step 2 (docs/features/orchestration.md) daily_fetch.yml runs
+assemble, every source, validation and every export as one step,
+`python -m orchestration.daily`; what that step runs, and in which order, is
+held by tests/test_orchestration.py. What stays here is what only the workflow
+text can show: the coordinator runs before the offload, nothing can be skipped
+past, and the auto-merge gate reads that run's manifest.
 """
 
 from pathlib import Path
@@ -17,15 +24,19 @@ import yaml
 REPO = Path(__file__).resolve().parents[1]
 WORKFLOWS = REPO / ".github" / "workflows"
 
-SYNC_IDS = [
-    "fetch_macro",
-    "sync_canonical",
-    "sync_statbel",
-    "sync_onem",
-    "sync_onem_rates",
-    "sync_walstat",
-    "fetch_stocks",
-]
+COORDINATOR = "python -m orchestration.daily"
+# Every script the coordinator runs. None may also run as a step of its own:
+# the data would be fetched or exported twice, or around the checks.
+PIPELINE_SCRIPTS = (
+    "scripts/build_staging_db.py",
+    "belgian_macro_db.py",
+    "scripts/sync_",
+    "fetch_stocks.py",
+    "scripts/validate_data.py",
+    "scripts/revisions_report.py",
+    "scripts/export_",
+    "src.exporters.metadata",
+)
 
 
 def _steps(name: str) -> list[dict]:
@@ -43,27 +54,35 @@ def _index(steps: list[dict], *, id: str | None = None, contains: str | None = N
     raise AssertionError(f"no step with id={id!r} contains={contains!r}")
 
 
-def test_daily_fetch_assembles_then_syncs_then_validates_then_exports_then_offloads():
+def test_daily_fetch_runs_the_coordinator_then_offloads_then_gates_then_opens_the_pr():
     steps = _steps("daily_fetch.yml")
-    assemble = _index(steps, contains="scripts/build_staging_db.py")
-    validate = _index(steps, id="validate")
-    first_export = _index(steps, contains="scripts/export_canonical_csv.py")
-    last_export = _index(steps, contains="scripts/export_local_pages.py")
+    daily = _index(steps, id="daily")
+    assert COORDINATOR in steps[daily]["run"]
     offload = _index(steps, contains="scripts/offload_stores.py")
+    sources = _index(steps, id="sources")
     stage = _index(steps, id="stage")
-
-    for sync in SYNC_IDS:
-        assert (
-            assemble < _index(steps, id=sync) < validate
-        ), f"{sync} is not between assemble and validation"
-    assert validate < first_export <= last_export < offload < stage
+    pr = _index(steps, id="pr")
+    assert daily < offload < sources < stage < pr
 
 
-def test_the_assemble_and_offload_steps_cannot_be_skipped_past():
+def test_the_pipeline_runs_only_through_the_coordinator():
     steps = _steps("daily_fetch.yml")
-    for script in ("scripts/build_staging_db.py", "scripts/offload_stores.py"):
-        step = steps[_index(steps, contains=script)]
-        assert not step.get("continue-on-error"), f"{script} must stop the run when it fails"
+    assert sum(COORDINATOR in step.get("run", "") for step in steps) == 1
+    for step in steps:
+        for script in PIPELINE_SCRIPTS:
+            assert script not in step.get("run", ""), f"{step['name']} runs {script} directly"
+
+
+def test_nothing_before_the_pr_can_be_skipped_past():
+    """No continue-on-error anywhere: a red source is absorbed inside the
+    coordinator (exit 3), never by the workflow hiding a failed step."""
+    steps = _steps("daily_fetch.yml")
+    assert [s["name"] for s in steps if s.get("continue-on-error")] == []
+    daily = steps[_index(steps, id="daily")]["run"]
+    # Exactly one exit code is let through; every other one stops the run
+    # before the offload, as a failed assemble or validation step did.
+    assert '[ "$STATUS" -eq 3 ]' in daily
+    assert daily.rstrip().endswith("exit $STATUS")
 
 
 def test_only_the_offload_step_names_the_committed_database():
@@ -86,28 +105,61 @@ def test_every_database_step_reads_the_working_copy():
 def test_partial_data_is_not_auto_merged():
     steps = _steps("daily_fetch.yml")
     sources = _index(steps, id="sources")
-    pr = _index(steps, id="pr")
-    assert sources < pr
+    assert sources < _index(steps, id="pr")
+    # The gate reads the manifest of THIS run, by the path the coordinator
+    # reported -- never a fixed path an older run could have left behind.
     check = steps[sources]["run"]
-    for sync in SYNC_IDS:
-        assert f"steps.{sync}.outcome == 'success'" in check, f"{sync} is not in the all_ok check"
-    # Every continue-on-error step is one a failure can hide behind.
-    hidden = [s.get("id") for s in steps if s.get("continue-on-error")]
-    assert sorted(hidden) == sorted(SYNC_IDS)
+    assert 'python -m orchestration.manifest "${{ steps.daily.outputs.manifest }}"' in check
+    assert '>> "$GITHUB_OUTPUT"' in check
+    # No pipe: the default shell has no pipefail, so `gate | tee` would hide
+    # a refused manifest behind tee's success.
+    assert "|" not in check
 
     automerge = next(s for s in steps if s.get("name") == "Enable auto-merge")
     assert "steps.sources.outputs.all_ok == 'true'" in automerge["if"]
+    last = steps[-1]
+    assert last["name"] == "Fail run if any source failed"
+    assert last["if"] == "steps.sources.outputs.all_ok != 'true'"
 
 
 def test_the_manifest_status_is_derived_not_typed():
+    """site_payloads takes it from the checks of its own Dagster run
+    (tests/test_orchestration.py); the workflow must not type one in."""
+    text = (WORKFLOWS / "daily_fetch.yml").read_text(encoding="utf-8")
+    assert "--validation-status" not in text
+
+
+def test_the_runner_installs_dagster_at_the_pinned_version_without_the_ui():
     steps = _steps("daily_fetch.yml")
-    payloads = steps[_index(steps, contains="scripts/export_site_payloads.py")]["run"]
-    assert "--validation-status pass" not in payloads
-    assert "steps.validate.outcome" in payloads
+    install_at = _index(steps, contains="pip install")
+    install = steps[install_at]["run"]
+    assert "-r requirements.txt" in install
+    assert "\"$(grep '^dagster==' requirements-dagster.txt)\"" in install
+    assert "webserver" not in install
+    assert install_at < _index(steps, id="daily")
+    pins = [
+        line
+        for line in (REPO / "requirements-dagster.txt").read_text(encoding="utf-8").splitlines()
+        if line.startswith("dagster")
+    ]
+    assert len(pins) == 2 and len({line.split("==")[1] for line in pins}) == 1, pins
+    pyproject = (REPO / "pyproject.toml").read_text(encoding="utf-8")
+    for line in pins:
+        assert f'"{line}"' in pyproject, line
+
+
+def test_dagster_history_stays_in_the_runner_and_off_the_network():
+    steps = _steps("daily_fetch.yml")
+    env = steps[_index(steps, id="daily")]["env"]
+    assert env["DAGSTER_HOME"].startswith("${{ runner.temp }}")
+    assert env["DAGSTER_DISABLE_TELEMETRY"]
+    assert env["BUILD_ID"] == "${{ github.run_id }}"
+    assert env["VALIDATION_SUMMARY"].startswith("${{ runner.temp }}")
 
 
 def test_explorer_payloads_follow_site_payloads_in_every_exporting_workflow():
-    for workflow in ("daily_fetch.yml", "manual_sources.yml"):
+    # daily_fetch.yml: the asset graph orders them (tests/test_orchestration.py).
+    for workflow in ("manual_sources.yml",):
         steps = _steps(workflow)
         site_payloads = _index(steps, contains="scripts/export_site_payloads.py")
         explorer_payloads = _index(steps, contains="scripts/export_explorer_payloads.py")
@@ -148,3 +200,28 @@ def test_make_all_assembles_and_never_offloads():
     assert prereqs.index("assemble") < prereqs.index("validate") < prereqs.index("exports")
     assert "offload" not in prereqs
     assert "DB           ?= data/local/working.db" in makefile
+
+
+def test_manual_sources_validates_every_store_and_derives_its_status():
+    """Pipeline repair part 4: the workflow that publishes a hand refresh used
+    to rebuild one store of six and check only its foreign keys, then stamp
+    the manifest "unknown". It now runs the same validation as CI and the
+    daily run, before exporting, and the manifest reports its outcome."""
+    steps = _steps("manual_sources.yml")
+    validate = _index(steps, id="validate")
+    assert "scripts/validate_data.py" in steps[validate]["run"]
+    assert "--record-volume" not in steps[validate]["run"]
+    assert validate < _index(steps, contains="scripts/export_communes_csv.py")
+    text = (WORKFLOWS / "manual_sources.yml").read_text(encoding="utf-8")
+    assert "--validation-status unknown" not in text
+    assert "steps.validate.outcome" in text
+    assert "PRAGMA foreign_key_check" not in text
+
+
+def test_the_daily_job_has_room_for_the_dagster_install_and_run():
+    """30 minutes: a full run measured ~15 minutes on the maintainer's machine
+    once Dagster is installed and every export is rebuilt, so the old 15-minute
+    limit would cut a normal day off mid-export."""
+    doc = yaml.safe_load((WORKFLOWS / "daily_fetch.yml").read_text(encoding="utf-8"))
+    (job,) = doc["jobs"].values()
+    assert job["timeout-minutes"] == 30

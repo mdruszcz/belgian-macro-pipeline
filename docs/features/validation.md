@@ -116,6 +116,25 @@ not structural, not referential.
 
 ---
 
+## What is validated
+
+**Every committed store, as the exporters see it** (pipeline repair part 4, 2026-09-13).
+`scripts/validate_data.py` copies the working database (`data/local/working.db`: the committed
+database plus the `in_db` stores, ONEM and WalStat), loads every `extra_csv` store from
+`config/stores.yaml` into that copy with the same loader that rebuilds a store, and runs the whole
+catalogue on it. The copy is thrown away. Only the volume snapshot is written back, to `--db`,
+because those consolidated counts are what the next run's `row_collapse` compares with.
+
+Until part 4 the six hand-loaded stores (population, fiscal income, census, real estate, police,
+VAR) got a field-count parse check and nothing else: no duplicate-latest check, no bounds, no
+staleness. A store that cannot be loaded at all is reported as a `store_loads` failure naming the
+store, and the others are still checked. `--stores ''` validates `--db` alone.
+
+Measured on the real stores when this landed: the whole run, six stores loaded, takes ~15 s, and
+the result was unchanged at 0 failures and the same 3 staleness warnings. None of the hand-loaded
+data was hiding a violation. The volume snapshot grew from 43 indicators to 68, the hand-loaded
+ones now included, while the working database kept exactly its 85,970 observations.
+
 ## Rule catalogue
 
 ### Referential — severity `fail`

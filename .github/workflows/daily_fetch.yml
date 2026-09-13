@@ -15,7 +15,8 @@ env:
   # repo's own pull_request-triggered workflows (GitHub's recursive-run guard), so ci.yml's
   # required "test" check would never appear on the bot's PR and it would sit BLOCKED forever.
   GH_TOKEN: ${{ secrets.BOT_PAT }}
-  # THE ONE DATABASE EVERY STEP BELOW READS AND WRITES, until the offload step
+  # THE ONE DATABASE EVERY STEP BELOW READS AND WRITES (the Dagster step reads
+  # it through orchestration/definitions.py default_paths), until the offload step
   # at the end (docs/decisions/0006-stores-split-by-volume.md). It is the
   # committed data/belgian_macro.db plus every in_db store's committed CSV
   # (ONEM, ONEM's published rate, WalStat), assembled fresh each run and
@@ -27,7 +28,7 @@ env:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,213 +51,59 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        # Dagster itself, at the exact version requirements-dagster.txt pins,
+        # without its web UI: the runner executes, nobody browses it.
+        run: pip install -r requirements.txt "$(grep '^dagster==' requirements-dagster.txt)"
 
-      - name: Assemble the working database
-        # NO continue-on-error: without the working copy there is nothing
-        # for any later step to read. Copies the committed database, applies
-        # pending migrations (idempotent), loads geography from
-        # config/geography/ (offline), ensures every registered store's
-        # reference rows, and loads every in_db store's CSV with its vintages
-        # and is_latest flags intact -- which is what lets the syncs below
-        # decide "new vintage or unchanged" against the full history rather
-        # than seeing every ONEM and WalStat cell as new.
-        run: python scripts/build_staging_db.py --working-db "$WORKING_DB"
-
-      # ── Every fetch, BEFORE validation ─────────────────────────────────────
-      #
-      # Until the cutover, ONEM, ONEM's rate and WalStat were synced AFTER the
-      # validation and after every export -- 84,031 of 85,970 observations
-      # never validated at all, and each day's new figures reaching the site a
-      # day late. Every sync now runs here, so validation sees everything and
-      # the exports publish what was fetched today.
-      #
-      # continue-on-error on each: a source being down must not throw away
-      # the day's other data. But partial data is no longer auto-merged --
-      # see "Check every source succeeded" below.
-
-      - name: Fetch macro indicators
-        id: fetch_macro
-        continue-on-error: true
-        run: python belgian_macro_db.py --db "$WORKING_DB" --fetch --latest --export csv
-
-      - name: Sync to canonical schema
-        id: sync_canonical
-        continue-on-error: true
-        run: python scripts/sync_to_canonical.py --db "$WORKING_DB"
-
-      - name: Sync Statbel municipal indicators
-        id: sync_statbel
-        continue-on-error: true
-        # Block F -- docs/features/statbel_adapter.md. Resolves geo_ids
-        # against the geography the assemble step loaded.
-        run: python scripts/sync_statbel.py --db "$WORKING_DB"
-
-      - name: Sync ONEM/RVA commune unemployment
-        id: sync_onem
-        continue-on-error: true
-        # The pipeline's first automated municipal source: onem.be is
-        # reachable from these runners, unlike statbel.fgov.be. Fetches the
-        # six .xls files and parses them in one step; ONEM names communes in
-        # French text with no NIS code, resolved against `geographies`.
-        run: python scripts/sync_onem.py --db "$WORKING_DB"
-
-      - name: Sync ONEM/RVA published unemployment rate
-        id: sync_onem_rates
-        continue-on-error: true
-        # ONEM's own CCI-DE over insured persons, taken as published (ADR
-        # 0005). A different host from the step above
-        # (interactivestats.services.rvaonem.fgov.be), so this is also the
-        # live check that the runner reaches it. Resolved by NIS code: the
-        # file's 565 codes must match today's municipalities exactly.
-        run: python scripts/sync_onem_rates.py --db "$WORKING_DB"
-
-      - name: Sync WalStat (IWEPS) municipal finance
-        id: sync_walstat
-        continue-on-error: true
-        # Block O, docs/features/walstat_adapter.md. The keyless IWEPS
-        # open-data API; refuses a partial year, a non-commune row or an
-        # unreadable value rather than loading it (rule 13).
-        run: python scripts/sync_walstat.py --db "$WORKING_DB"
-
-      - name: Fetch market data
-        id: fetch_stocks
-        continue-on-error: true
-        # Writes data/stocks.json only; no database.
-        run: python fetch_stocks.py
-
-      - name: Validate the data before exporting
-        id: validate
-        # AFTER every sync and BEFORE every export: a `fail` here stops the
-        # run before anything is exported, offloaded or committed. Validation
-        # that only logs is decoration -- see docs/features/validation.md.
-        # Warnings print and do not block.
+      - name: Assemble, fetch every source, validate and export (Dagster)
+        id: daily
+        # ONE ephemeral Dagster execution (docs/features/orchestration.md,
+        # step 2): python -m orchestration.daily runs, in this order,
+        #   assemble_working_database  scripts/build_staging_db.py
+        #   fetch_sources              the macro fetch, sync_to_canonical,
+        #                              Statbel, ONEM, ONEM's rate, WalStat and
+        #                              the market data -- each may fail without
+        #                              stopping the others, as continue-on-error
+        #                              did here before
+        #   validate_and_export        the validation rules as blocking checks
+        #                              (a FAIL stops every export and the volume
+        #                              baseline, as --record-volume did), the
+        #                              revisions report, then every export and
+        #                              page, from the working database
+        # Each asset runs the same script with the same arguments these steps
+        # used to; tests/test_orchestration.py holds commands.py to that.
         #
-        # --record-volume writes the is_latest count per indicator ONLY if
-        # this run passed, so tomorrow's row_collapse rule has a baseline.
-        # Recording on a failing run would make the collapsed count the new
-        # normal and silence the alarm on the next run.
+        # Its history lives in $RUNNER_TEMP and dies with the runner. It
+        # writes this run's source manifest under data/local/ (gitignored)
+        # and hands its path to the gate below through $GITHUB_OUTPUT.
         #
-        # --summary-file writes the violations to the run's own summary page.
-        # The ::warning:: annotations alone were not an alert: a green run with
-        # warnings looks identical from the outside to a clean one, and nobody
-        # opens the log of a build that passed. Roadmap Block X: "Sources go
-        # quiet without announcing it. You want to know before a client does."
-        #
-        # THE EXIT CODE IS CAPTURED, NOT PROPAGATED IMMEDIATELY. A `run:` block
-        # is bash -e, so a failing validation would abort the step before the
-        # summary was copied -- losing the report in precisely the case it
-        # matters most. Write it first, then exit with the real code.
+        # EXIT CODES. 0: all green. 3: exported, but a source was red -- carry
+        # on to offload and open the PR, which will NOT auto-merge. Anything
+        # else (1: assemble or validation failed; a crash): stop here, exactly
+        # where the assemble and validation steps used to stop the run, before
+        # anything is offloaded or committed. The summary is copied first, so
+        # a failing validation still shows its report.
+        env:
+          BUILD_ID: ${{ github.run_id }}
+          DAGSTER_HOME: ${{ runner.temp }}/dagster_home
+          DAGSTER_DISABLE_TELEMETRY: '1'
+          VALIDATION_SUMMARY: ${{ runner.temp }}/validation-summary.md
         run: |
-          SUMMARY="$RUNNER_TEMP/validation-summary.md"
           set +e
-          python scripts/validate_data.py --db "$WORKING_DB" --record-volume \
-            --summary-file "$SUMMARY"
+          python -m orchestration.daily --github-output "$GITHUB_OUTPUT"
           STATUS=$?
           set -e
-          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
-          echo "validation_summary=$SUMMARY" >> "$GITHUB_ENV"
+          if [ -f "$VALIDATION_SUMMARY" ]; then
+            cat "$VALIDATION_SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "_Validation did not run: the working database was not assembled or the run crashed._" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "validation_summary=$VALIDATION_SUMMARY" >> "$GITHUB_ENV"
+          if [ "$STATUS" -eq 3 ]; then
+            echo "::warning::At least one source failed; the data that did arrive is exported and will not auto-merge."
+            exit 0
+          fi
           exit $STATUS
-
-      - name: Report today's revisions
-        # Informational only -- does NOT block (docs/features/vintages.md).
-        # A revision is a legitimate event; the pathological case (a source
-        # returning garbage) is already caught by the row_collapse/null_share
-        # validation rules above, which DO block. --since today's date so
-        # this reports only what THIS run changed, not all history.
-        run: python scripts/revisions_report.py --db "$WORKING_DB" --since "$(date -u +%Y-%m-%d)"
-
-      # ── Exports, from the validated working database ───────────────────────
-
-      - name: Export canonical CSV for the dashboard
-        # Overwrites belgian_macro_export.csv (written above from the legacy
-        # schema) with the canonical-schema version the dashboard now reads.
-        # belgian_forecasts.csv, written above too, is untouched -- forecasts
-        # stay on the legacy table, out of scope per docs/decisions/0001.
-        run: python scripts/export_canonical_csv.py --db "$WORKING_DB" --out data/belgian_macro_export.csv
-
-      - name: Export commune CSV for communes.html
-        # --stores merges every extra_csv store config/stores.yaml declares
-        # (the hand-loaded sources, never in any database). The in_db stores
-        # are already inside the working database.
-        run: |
-          python scripts/export_communes_csv.py --db "$WORKING_DB" \
-            --out data/communes_export.csv --stores config/stores.yaml
-
-      - name: Export the full commune time series (internal, gitignored)
-        # Every period per (commune, indicator), plus every configured
-        # derived indicator over the whole history (Block G engine), to
-        # data/communes_history_full.csv -- gitignored, never committed. It
-        # feeds the two steps below, whose contract is the complete series
-        # (site_payloads.md).
-        run: |
-          python scripts/export_communes_history_csv.py --db "$WORKING_DB" \
-            --out data/communes_history_full.csv --all-periods --stores config/stores.yaml
-
-      - name: Export the committed commune time series (last 10 years)
-        # The committed data/communes_history.csv, trimmed to the last 10
-        # calendar years; --all-periods gives a researcher the rest.
-        run: |
-          python scripts/export_communes_history_csv.py --db "$WORKING_DB" \
-            --out data/communes_history.csv --stores config/stores.yaml
-
-      - name: Precompute communes.html's table payload
-        # Reads the FULL (gitignored) history, not the trimmed committed
-        # copy -- communes.html's own year selector spans 2005-2026.
-        run: |
-          python scripts/export_communes_table_json.py \
-            --communes-history data/communes_history_full.csv \
-            --out data/communes_table.json \
-            --db "$WORKING_DB"
-
-      - name: Export province/region/Belgium aggregates
-        # Block L -- docs/features/comparison.md. Reads the UNRESTRICTED
-        # observation set (including communes merged away since) so a
-        # province total is not short by the communes that no longer exist --
-        # measured at -24.4% for Limburg 2023 when that is got wrong.
-        run: |
-          python scripts/export_aggregates_csv.py --db "$WORKING_DB" \
-            --out data/aggregates.csv --stores config/stores.yaml
-
-      - name: Export indicator metadata for the dashboard
-        run: python -m src.exporters.metadata --out data/metadata/indicators.json
-
-      - name: Export national and regional peer positions
-        # Block L -- latest period per indicator only; --all-periods exists
-        # for a researcher who wants the rest.
-        run: |
-          python scripts/export_percentiles_csv.py --db "$WORKING_DB" \
-            --out data/percentiles.csv --stores config/stores.yaml
-
-      - name: Export per-entity site payloads for /local
-        # Block J -- docs/features/site_payloads.md. The manifest's
-        # validation status is DERIVED from the validation step's outcome,
-        # not typed in: it used to be a hardcoded "pass" while most of the
-        # municipal data had never been validated.
-        run: |
-          python scripts/export_site_payloads.py --db "$WORKING_DB" \
-            --communes-history data/communes_history_full.csv \
-            --communes-latest data/communes_export.csv \
-            --national data/belgian_macro_export.csv \
-            --out-dir public/data \
-            --build-id "${{ github.run_id }}" \
-            --validation-status "${{ steps.validate.outcome == 'success' && 'pass' || 'fail' }}"
-
-      - name: Export explorer payloads
-        # Reads the committed, last-10-years municipal download and the
-        # national export. Keep this after export_site_payloads.py, which
-        # writes the metadata catalogues consumed by the explorer exporter.
-        run: python scripts/export_explorer_payloads.py
-
-      - name: Generate permanent /local/{nis} pages
-        # Block L -- one statically-rendered page per commune, rendered from
-        # the payloads above. Thin pages are refused rather than generated.
-        run: |
-          python scripts/export_local_pages.py \
-            --payload-dir public/data \
-            --out-dir local \
-            --db "$WORKING_DB" \
-            --build-id "${{ github.run_id }}"
 
       - name: Offload the in_db stores and write the committed database
         # NO continue-on-error. The only step that writes data/belgian_macro.db.
@@ -298,9 +145,16 @@ jobs:
         # failed merged its partial data by itself and only then went red.
         # The PR is still opened (the data that did arrive is not thrown
         # away), but it only auto-merges when every source succeeded.
+        #
+        # Reads THIS run's source manifest, the path the Dagster step wrote --
+        # never a fixed path, so an older manifest cannot pass for today's.
+        # all_ok is "true" only if the assemble, all seven tracked outcomes
+        # and validate_and_export succeeded (orchestration/manifest.py gate()).
+        # A missing manifest fails this step: no evidence, no PR.
         run: |
-          echo "macro=${{ steps.fetch_macro.outcome }} sync=${{ steps.sync_canonical.outcome }} statbel=${{ steps.sync_statbel.outcome }} onem=${{ steps.sync_onem.outcome }} onem_rates=${{ steps.sync_onem_rates.outcome }} walstat=${{ steps.sync_walstat.outcome }} market=${{ steps.fetch_stocks.outcome }}"
-          echo "all_ok=${{ steps.fetch_macro.outcome == 'success' && steps.sync_canonical.outcome == 'success' && steps.sync_statbel.outcome == 'success' && steps.sync_onem.outcome == 'success' && steps.sync_onem_rates.outcome == 'success' && steps.sync_walstat.outcome == 'success' && steps.fetch_stocks.outcome == 'success' }}" >> "$GITHUB_OUTPUT"
+          python -m orchestration.manifest "${{ steps.daily.outputs.manifest }}" > "$RUNNER_TEMP/gate.txt"
+          cat "$RUNNER_TEMP/gate.txt"
+          cat "$RUNNER_TEMP/gate.txt" >> "$GITHUB_OUTPUT"
 
       - name: Stage data changes
         id: stage
@@ -331,7 +185,7 @@ jobs:
             --body "Automated daily fetch of Belgian macro indicators and market data.
 
           Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, onem_rates=${{ steps.sync_onem_rates.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}
+          Pipeline outcome: ${{ steps.sources.outputs.summary }}
           Auto-merge: ${{ steps.sources.outputs.all_ok == 'true' && 'enabled' || 'NOT enabled -- a source failed; review and merge by hand' }}
 
           $(cat "$validation_summary" 2>/dev/null || echo '_Validation summary unavailable._')")
@@ -349,5 +203,5 @@ jobs:
       - name: Fail run if any source failed
         if: steps.sources.outputs.all_ok != 'true'
         run: |
-          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, onem_rates=${{ steps.sync_onem_rates.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}). The data that did arrive is in ${{ steps.pr.outputs.pr_url || 'no PR (nothing changed)' }}, which was NOT auto-merged. See the run log and fetch_runs/legacy_fetch_log."
+          echo "::error::A pipeline step failed (${{ steps.sources.outputs.summary }}). The data that did arrive is in ${{ steps.pr.outputs.pr_url || 'no PR (nothing changed)' }}, which was NOT auto-merged. See the Dagster step's log and fetch_runs/legacy_fetch_log."
           exit 1

@@ -31,19 +31,35 @@ git cannot delta. See [ADR 0002](../decisions/0002-split-committed-stores.md) fo
 - Committing the raw `TF_SOC_POP_STRUCT_*.txt` files (~1.1 GB). They stay under `data/raw/`, which is
   gitignored.
 
-## The two stores
+## The committed stores
 
-| Store | Holds | Committed | Written by |
-|---|---|---|---|
-| `data/belgian_macro.db` | anything CI can fetch: national macro, `LOCAL_UNITS_BY_COMMUNE` | daily, by the bot | `daily_fetch.yml` |
-| `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | only when refreshed by hand | the procedure below |
-| `public/data/demography/{nis}.json` | Five-year population bands crossed with Statbel's F/M dimension for the commune-profile pyramid | generated when the annual population source is refreshed | `scripts/export_commune_age_sex.py` |
-| `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
-| `data/census2021_observations.csv` | 13 Census 2021 counts: citizenship, birthplace, sex, marital status, households, family nuclei, dwellings | only when refreshed by hand (decennial) | the procedure below |
-| `data/var_unemployment_observations.csv` | `ADMIN_UNEMPLOYMENT_RATE_COM`, annual administrative unemployment rate for ages 15–64 | only when the Tableau crosstab is refreshed by hand | [var_unemployment.md](var_unemployment.md) |
+Every observation store is declared once, in [`config/stores.yaml`](../../config/stores.yaml)
+(loaded by `src/stores.py`). That file is the authority; this table is a reading aid and names no
+indicator the registry does not.
 
-`data/local/` holds the disposable rebuild of the manual store and is gitignored. It must stay
-ignored: `daily_fetch.yml` runs `git add data/`, which would otherwise commit it.
+| Store | Holds | Mode | Committed | Written by |
+|---|---|---|---|---|
+| `data/belgian_macro.db` | national macro, `LOCAL_UNITS_BY_COMMUNE`, geography, indicator metadata, fetch and volume history | — | daily, by the bot | `daily_fetch.yml` (offload step) |
+| `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | `extra_csv` | only when refreshed by hand | the procedure below |
+| `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | `extra_csv` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
+| `data/census2021_observations.csv` | 17 Census 2021 counts: labour force status, citizenship, birthplace, sex, marital status, households, family nuclei, dwellings | `extra_csv` | only when refreshed by hand (decennial) | the procedure below |
+| `data/realestate_observations.csv` | `MEDIAN_HOUSE_PRICE`, `HOUSE_SALES_TRANSACTIONS` | `extra_csv` | only when refreshed by hand | `scripts/sync_realestate.py` |
+| `data/police_observations.csv` | four crime rates per 10,000 inhabitants | `extra_csv` | only when refreshed by hand | `scripts/sync_police.py` |
+| `data/var_unemployment_observations.csv` | `ADMIN_UNEMPLOYMENT_RATE_COM`, annual administrative unemployment rate for ages 15–64 | `extra_csv` | only when the Tableau crosstab is refreshed by hand | [var_unemployment.md](var_unemployment.md) |
+| `data/onem_observations.csv` | seven ONEM/RVA unemployment and benefit series | `in_db` | daily, by the bot | `daily_fetch.yml` (offload step) |
+| `data/onem_rates_observations.csv` | `UNEMPLOYMENT_RATE_INSURED`, `UNEMPLOYMENT_RATE_INSURED_MONTHLY` | `in_db` | daily, by the bot | `daily_fetch.yml` (offload step) |
+| `data/walstat_observations.csv` | ten WalStat (IWEPS) municipal series | `in_db` | daily, by the bot | `daily_fetch.yml` (offload step) |
+
+Not an observation store, listed because it is generated from one:
+`public/data/demography/{nis}.json` (five-year population bands by sex for the commune-profile
+pyramid, written by `scripts/export_commune_age_sex.py` when the population source is refreshed).
+
+`extra_csv` stores are hand-loaded and merged at export time. `in_db` stores are fetched by CI,
+loaded into the working database for the run, and dumped back by `scripts/offload_stores.py`
+([ADR 0006](../decisions/0006-stores-split-by-volume.md)).
+
+`data/local/` holds the disposable working database and is gitignored. It must stay ignored:
+`daily_fetch.yml` runs `git add data/`, which would otherwise commit it.
 
 ## `statbel.fgov.be` reachability, re-checked 2026-09-06
 
