@@ -36,6 +36,7 @@ MUNICIPAL_PAGES = [
     "commune.html",
     "profiles.html",
     "micro.html",
+    "explorer.html",
 ]
 
 

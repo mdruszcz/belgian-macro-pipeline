@@ -18,13 +18,18 @@ REAL_MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
     [
         ("final", "A"),
         ("provisional", "P"),
-        ("estimate", ""),
-        ("revised", ""),
-        ("suppressed", ""),
-        ("na", ""),
+        ("estimate", "E"),
+        ("revised", "R"),
+        ("suppressed", "S"),
+        ("na", "N"),
     ],
 )
 def test_status_to_obs_status(status, expected):
+    """Batch 8a: extended to cover all six schema statuses (matching
+    communes.html's statusPill()/MAP_STATUS_WORDS letters exactly), now that
+    explorer.html gives the frontend a visual for each of them. Previously
+    estimate/revised/suppressed/na all mapped to '' -- see the module
+    docstring."""
     assert status_to_obs_status(status) == expected
 
 

@@ -4,10 +4,18 @@ Export the canonical schema's latest dashboard observations.
 Belgium rows stay visible as ordinary dashboard series; DE/FR/NL GDP rows are
 exported as helper series for dashboard.html's existing INT_GDP_COMP formula.
 
-`status` is mapped back to the single-letter convention the frontend already
-branches on (final->A, provisional->P, everything else->'' -- the frontend
-has no dedicated visual for estimate/revised/suppressed/na yet, so it falls
-through to the existing generic '-' badge rather than a wrong one).
+`status` is mapped back to the single-letter convention the frontend
+branches on: final->A, provisional->P, revised->R, estimate->E,
+suppressed->S, na->N -- the same six letters and the same meanings
+communes.html's statusPill() and MAP_STATUS_WORDS already use for municipal
+data (communes.html:483-493, communes.html:877-880), so the two vocabularies
+cannot diverge (Batch 8a). Until Batch 8a this mapped only final/provisional
+and sent everything else to '' -- the docstring said that was only because
+"the frontend has no dedicated visual for estimate/revised/suppressed/na
+yet". Batch 8a's explorer.html builds that visual, so the precondition is
+gone. This CHANGES a published download: the 9 rows the database has as
+'revised' (all 2009 annual figures, later superseded by a later vintage)
+move from an empty obs_status cell to 'R'.
 
 belgian_forecasts.csv is untouched -- forecasts stay on the legacy table,
 out of scope per docs/decisions/0001-data-model.md.
@@ -21,6 +29,10 @@ from pathlib import Path
 STATUS_TO_LETTER = {
     "final": "A",
     "provisional": "P",
+    "revised": "R",
+    "estimate": "E",
+    "suppressed": "S",
+    "na": "N",
 }
 
 GDP_COMPARISON_HELPERS = (
