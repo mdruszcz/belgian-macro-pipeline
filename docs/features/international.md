@@ -1,6 +1,6 @@
 # Feature: international data — all European countries, ~100 indicators
 
-Status: draft
+Status: approved for stage 1 (the pilot) by the maintainer, 2026-09-13; transport decision open (DBnomics or Eurostat directly, see open question 4)
 Issue: (maintainer direction, 2026-09-13 — no issue number yet)
 Branch: feat/international-pilot
 
@@ -160,8 +160,19 @@ recorded in `docs/data_catalog.md`. What it requires of this feature:
    `src/exporters/provenance.py` already defines such a notice; stage 1 adds a test that it reaches
    the page for every adapted Eurostat series.
 
-DBnomics itself is only the transport. Whether its own terms add anything to Eurostat's has not been
-checked here and is listed below.
+**DBnomics is not only a transport: it has its own licence.** Its aggregated datasets are distributed
+under the **Open Database License (ODbL)** (supplied by the maintainer, 2026-09-13), on top of
+Eurostat's policy. ODbL allows commercial use, but adds two obligations:
+
+5. **Attribution to DBnomics** as well as Eurostat, wherever the data is used publicly.
+6. **Share-alike on derived databases.** A database adapted from DBnomics' data that is publicly used
+   or distributed must itself be offered under ODbL. In this repository that means the committed
+   international CSVs (the repository is public), and later any paid export built from them:
+   a subscriber could redistribute it freely. Charts and pages built from the data ("produced works")
+   are not share-alike, but carry an attribution notice.
+
+The alternative is to fetch Eurostat's own API directly: same data, same agency, Eurostat's policy
+only, no share-alike. It needs its own catalogue row (rule 8). See open question 4.
 
 ## Tests
 
@@ -186,7 +197,12 @@ checked here and is listed below.
    moving to `EA21` when Eurostat switches). Historical compositions (`EU28`, `EA19`, `EA12`) and
    `EEA` are not loaded.
 3. **Consumer confidence's licence. Decided 2026-09-13:** CC0 (see *New data sources*).
-4. **DBnomics' own terms**, if any, on top of Eurostat's. Not yet read.
+4. **DBnomics' own terms: ODbL** (maintainer, 2026-09-13). **Open decision: the transport.**
+   (a) Keep DBnomics: attribution to DBnomics, and everything published from these datasets --
+   committed CSVs, paid exports -- under ODbL share-alike. (b) Fetch Eurostat's API directly: no
+   share-alike, a new catalogue row for the same agency, a new adapter either way (the pilot needs a
+   dataset-level adapter regardless). Recommended: (b), because share-alike reaches the paid exports.
+   The ten foreign series already fetched through DBnomics are covered by the same decision.
 5. **Full history or from 2008?** 108 MB vs 63 MB at 100 indicators. Recommended: from 2008 in the
    pilot, measured both ways.
 6. Revision churn cannot be measured from one download. The pilot's 14 daily runs are the
@@ -200,7 +216,11 @@ checked here and is listed below.
 - Monthly Eurostat releases may revise long stretches of history at once. If a release rewrites
   thousands of rows, the CSV diff is large that day. This is the churn number stage 1 exists to
   measure.
-- The daily workflow's 15-minute timeout. The pilot adds ~6 s of fetch and a few seconds of assemble.
-  At 100 indicators without the one-process assemble, the timeout is at risk.
+- The daily job's timeout is 30 minutes since Dagster step 2; a full run takes ~3 minutes in the
+  runner. The pilot adds ~6 s of fetch and a few seconds of assemble. At 100 indicators without the
+  one-process assemble, the timeout is at risk.
+- The daily run goes through Dagster since step 2 (`docs/features/orchestration.md`): the pilot's
+  fetch is a new asset in `orchestration/commands.py`, and a new tracked outcome only if a failure
+  should block auto-merge -- decided in the handoff.
 - Rollback: remove the store entries and CSVs, the pilot configs and geography rows. No Belgian table,
   export or page changes.
