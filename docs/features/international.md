@@ -1,6 +1,6 @@
 # Feature: international data — all European countries, ~100 indicators
 
-Status: approved for stage 1 (the pilot) by the maintainer, 2026-09-13; transport decision open (DBnomics or Eurostat directly, see open question 4)
+Status: approved for stage 1 (the pilot) by the maintainer, 2026-09-13; transport decided: Eurostat's API directly, DBnomics dropped (open question 4)
 Issue: (maintainer direction, 2026-09-13 — no issue number yet)
 Branch: feat/international-pilot
 
@@ -201,8 +201,13 @@ only, no share-alike. It needs its own catalogue row (rule 8). See open question
    (a) Keep DBnomics: attribution to DBnomics, and everything published from these datasets --
    committed CSVs, paid exports -- under ODbL share-alike. (b) Fetch Eurostat's API directly: no
    share-alike, a new catalogue row for the same agency, a new adapter either way (the pilot needs a
-   dataset-level adapter regardless). Recommended: (b), because share-alike reaches the paid exports.
-   The ten foreign series already fetched through DBnomics are covered by the same decision.
+   dataset-level adapter regardless). **Decided 2026-09-13: (b), Eurostat directly, for ALL data
+   currently fetched through DBnomics**, not only the pilot: the eight `dbnomics_eurostat`
+   indicators move to the new Eurostat source, and nothing new is fetched through DBnomics.
+   **Still open:** the five `dbnomics_ameco` series (`LABOUR_COST_BE/DE/EA/FR/NL`) come from the
+   Commission's AMECO database, which Eurostat does not publish. They need either AMECO fetched from
+   the Commission directly (its own licence and catalogue row) or an equivalent Eurostat series (a
+   different number, so a new indicator, not a silent swap). The maintainer decides before they move.
 5. **Full history or from 2008?** 108 MB vs 63 MB at 100 indicators. Recommended: from 2008 in the
    pilot, measured both ways.
 6. Revision churn cannot be measured from one download. The pilot's 14 daily runs are the
