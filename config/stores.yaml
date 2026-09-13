@@ -172,3 +172,35 @@ stores:
     reference_rows:
       script: scripts/sync_walstat.py
       args: ["--reference-rows-only"]
+
+  # International pilot (docs/features/international.md). One CSV per
+  # indicator, never a store per indicator (~100 candidates in the full
+  # rollout) -- layout: one_csv_per_indicator, src/stores.py's Store.csv_paths()/
+  # csv_for(). Declares BOTH the five new multi-country pilot indicators
+  # (scripts/sync_international.py, fetch.geographies: allowlist) AND the
+  # eight pre-existing single-country Eurostat indicators this same PR moved
+  # off DBnomics onto the same "eurostat" source_id -- one source offloaded
+  # into one store, never two Eurostat sources in parallel (see this store's
+  # reference_rows script's own module docstring for why).
+  international:
+    path: data/international/
+    source_id: eurostat
+    mode: in_db
+    layout: one_csv_per_indicator
+    indicators:
+      - GDP_VOLUME_EUROPE
+      - HICP_ANNUAL_RATE_EUROPE
+      - UNEMPLOYMENT_RATE_EUROPE
+      - GOV_DEBT_EUROPE
+      - CONSUMER_CONFIDENCE_EUROPE
+      - EUROSTAT_GDP_Q_MEUR
+      - EUROSTAT_GDP_Q_MEUR_DE
+      - EUROSTAT_GDP_Q_MEUR_EA
+      - EUROSTAT_GDP_Q_MEUR_ES
+      - EUROSTAT_GDP_Q_MEUR_FR
+      - EUROSTAT_GDP_Q_MEUR_NL
+      - EC_CONS_CONF_BE
+      - EC_CONS_CONF_EU
+    reference_rows:
+      script: scripts/sync_international.py
+      args: ["--reference-rows-only"]
