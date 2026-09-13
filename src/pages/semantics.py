@@ -78,6 +78,7 @@ ROUTE_EXACT = frozenset(
         "/map.html",
         "/local.html",
         "/all_data.html",
+    "/sources.html",
         "/about.html",
         # Batch 3 and 4's rebuilt pages, live and served, and MISSING from this
         # list until Batch 17a -- known-risks.md:41 recorded the gap and nothing

@@ -80,6 +80,14 @@ ROOT_PAGES: tuple[Page, ...] = (
     Page("/map.html", True, "the choropleth explorer"),
     Page("/all_data.html", True, "every observation, browsable"),
     Page(
+        "/sources.html",
+        True,
+        "the full source and licence notice for every dataset. Submitted on purpose: "
+        "it is where map.html and any other page too small to carry the whole notice "
+        "sends a reader, and a licence page that search engines cannot reach is a "
+        "licence page that is harder to find than the figures it covers",
+    ),
+    Page(
         "/about.html",
         True,
         "what this project is -- and the FIRST BLOCK-BUILT page on this site "

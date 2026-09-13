@@ -357,11 +357,12 @@ MapUI.CommuneMap = class CommuneMap {
     // whole legend unless all three were supplied, so a caller that wanted
     // the colour bar without the several-sentence prose note -- a compact
     // card, where that note swamps the card -- silently got no legend at all.
-    const {swatches, ticks, legendNote} = this.el;
-    if (!swatches && !ticks && !legendNote) return;
+    const {swatches, ticks, legendNote, legendRows} = this.el;
+    if (!swatches && !ticks && !legendNote && !legendRows) return;
 
     if (swatches) swatches.innerHTML = '';
     if (ticks) ticks.innerHTML = '';
+    if (legendRows) legendRows.innerHTML = '';
     if (!nums.length) {
       if (legendNote) legendNote.textContent = MapUI.text(this.lang, 'mapNoneCarryValue');
       return;
@@ -372,6 +373,35 @@ MapUI.CommuneMap = class CommuneMap {
         const cell = document.createElement('div');
         cell.style.background = colourFor(i);
         swatches.appendChild(cell);
+      }
+    }
+
+    // THE SAME BANDS, READ DOWN INSTEAD OF ACROSS. A caller that supplies a
+    // `legendRows` element gets one row per band -- swatch plus the range that
+    // band actually covers -- instead of (or as well as) the colour bar. It is
+    // built HERE, from the very `breaks` and `colourFor` that just painted the
+    // map, because the alternative was for a page to re-run MapUI.classify on
+    // its own copy of the numbers: a second implementation of exactly the
+    // thing one shared component exists to prevent, and one that would drift
+    // silently the first time the banding rule changed. Every other caller
+    // passes no such element and is unaffected.
+    if (legendRows) {
+      const edge = v => MapUI.formatValue(v, this.meta.unit, this.meta.decimals, this.lang);
+      for (let i = 0; i < bands; i++) {
+        const row = document.createElement('div');
+        row.className = 'legend-row';
+        const chip = document.createElement('i');
+        chip.style.background = colourFor(i);
+        const label = document.createElement('span');
+        // Half-open upwards, matching MapUI.bandFor, which is inclusive at the
+        // lower edge: a value exactly on a break belongs to the band ABOVE it.
+        if (bands === 1) label.textContent = edge(nums[0]);
+        else if (i === 0) label.textContent = '< ' + edge(breaks[0]);
+        else if (i === bands - 1) label.textContent = '≥ ' + edge(breaks[breaks.length - 1]);
+        else label.textContent = edge(breaks[i - 1]) + ' – < ' + edge(breaks[i]);
+        row.appendChild(chip);
+        row.appendChild(label);
+        legendRows.appendChild(row);
       }
     }
 
