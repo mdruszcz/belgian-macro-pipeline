@@ -38,7 +38,7 @@ SKIP_PREFIXES = ("data/local/",)
 
 def _git(*args: str, cwd: Path = REPO_ROOT) -> str:
     return subprocess.run(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
+        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True, encoding="utf-8"
     ).stdout
 
 
