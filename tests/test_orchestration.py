@@ -1,0 +1,569 @@
+"""The Dagster layer (orchestration/, docs/features/orchestration.md).
+
+What these tests hold it to: every asset runs a command the Makefile or
+daily_fetch.yml already runs; the graph has the workflow's dependencies; the
+validation checks are the rule registry; nothing starts by itself; nothing it
+writes is committable; and a failing source still lets the exports run while
+the day ends red -- proven by running the coordinator, not by reading it.
+
+Sources and exporters are replaced by a recording fake in the scenario tests:
+what is under test is the orchestration, and the real scripts need a network
+and minutes. tests/test_orchestration_parity.py runs the real ones.
+"""
+
+import ast
+import csv
+import re
+import subprocess
+import sys
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+import yaml
+
+dg = pytest.importorskip("dagster")
+
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "scripts"))
+
+from export_observations_csv import COLUMNS  # noqa: E402
+
+from orchestration import checks, daily, manifest, run  # noqa: E402
+from orchestration.assets import sources_manual  # noqa: E402
+from orchestration.commands import COMMANDS, TRACKED  # noqa: E402
+from orchestration.definitions import DAILY_CRON, build_defs  # noqa: E402
+from orchestration.paths import PipelinePaths  # noqa: E402
+from orchestration.policies import fetch_windows, window_days  # noqa: E402
+from src.db import migrate  # noqa: E402
+from src.stores import extra_csv_stores, in_db_stores, load_stores  # noqa: E402
+from src.validation.rules import FAIL, RULES, WARN, Violation  # noqa: E402
+
+GROUPS = {"sources_api", "sources_manual", "reference_data", "canonical", "derived", "website"}
+VALIDATED = "validated_working_database"
+WORKFLOW = REPO / ".github" / "workflows" / "daily_fetch.yml"
+
+
+def _workflow() -> dict:
+    return yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+
+
+def _steps() -> list[dict]:
+    (job,) = _workflow()["jobs"].values()
+    return job["steps"]
+
+
+def _flatten(text: str) -> str:
+    return re.sub(r"\s+", " ", text.replace("\\\n", " "))
+
+
+def _graph():
+    return build_defs().resolve_asset_graph()
+
+
+def _ancestors(graph, name: str) -> set[str]:
+    seen, todo = set(), [dg.AssetKey(name)]
+    while todo:
+        for parent in graph.get(todo.pop()).parent_keys:
+            if parent.to_user_string() not in seen:
+                seen.add(parent.to_user_string())
+                todo.append(parent)
+    return seen
+
+
+def _group(graph, group: str) -> list[str]:
+    return [
+        k.to_user_string() for k in graph.get_all_asset_keys() if graph.get(k).group_name == group
+    ]
+
+
+# ── The definitions load, and every asset is in one of the six groups ─────────
+
+
+def test_definitions_load_and_every_asset_has_a_group():
+    defs = build_defs()
+    dg.Definitions.validate_loadable(defs)
+    graph = defs.resolve_asset_graph()
+    groups = {k.to_user_string(): graph.get(k).group_name for k in graph.get_all_asset_keys()}
+    assert set(groups.values()) == GROUPS, groups
+
+
+# ── No drift from the pipeline it wraps ──────────────────────────────────────
+
+MAKE_STYLE = {
+    "db": "$(DB)",
+    "stores": "$(STORES)",
+    "data": "data",
+    "public_data": "public/data",
+    "local": "local",
+    "build_id": '"$${BUILD_ID:-local}"',
+    "validation_status": "unknown",
+    "today": "-",
+}
+WORKFLOW_STYLE = {
+    **MAKE_STYLE,
+    "db": '"$WORKING_DB"',
+    "stores": "config/stores.yaml",
+    "build_id": '"${{ github.run_id }}"',
+    "today": '"$(date -u +%Y-%m-%d)"',
+}
+
+
+@pytest.mark.parametrize("name", sorted(COMMANDS))
+def test_every_command_is_one_the_makefile_or_the_workflow_already_runs(name):
+    argv = COMMANDS[name].argv
+    makefile = _flatten((REPO / "Makefile").read_text(encoding="utf-8"))
+    workflow = _flatten(" ".join(step.get("run", "") for step in _steps()))
+    as_make = " ".join(["$(PYTHON)", *(t.format(**MAKE_STYLE) for t in argv)])
+    as_workflow = " ".join(["python", *(t.format(**WORKFLOW_STYLE) for t in argv)])
+    assert as_make in makefile or as_workflow in workflow, (as_make, as_workflow)
+
+
+def test_every_script_the_workflow_runs_between_assemble_and_offload_is_wrapped():
+    runs = [step.get("run", "") for step in _steps()]
+    start = next(i for i, r in enumerate(runs) if "scripts/build_staging_db.py" in r)
+    end = next(i for i, r in enumerate(runs) if "scripts/offload_stores.py" in r)
+    wrapped = {c.argv[1] if c.argv[0] == "-m" else c.argv[0] for c in COMMANDS.values()}
+    for text in runs[start:end]:
+        for script in re.findall(r"python (?:-m )?(\S+)", text):
+            if script == "scripts/validate_data.py":
+                continue  # the checks, below
+            assert script in wrapped, f"{script} runs in daily_fetch.yml but is not an asset"
+
+
+# ── Same dependencies as the workflow, never two SQLite writers at once ──────
+
+
+def test_canonical_sync_depends_on_the_macro_fetch_and_nothing_else():
+    graph = _graph()
+    parents = {
+        p.to_user_string() for p in graph.get(dg.AssetKey("canonical_observations")).parent_keys
+    }
+    assert parents == {"staging_db", "macro_legacy_fetch"}
+
+
+def test_every_source_feeds_the_validated_database_and_every_export_hangs_off_it():
+    graph = _graph()
+    assert {"staging_db", *TRACKED} <= _ancestors(graph, VALIDATED)
+    for name in _group(graph, "derived") + _group(graph, "website"):
+        assert VALIDATED in _ancestors(graph, name), name
+    for name in ("local_pages", "explorer_payloads"):
+        assert "site_payloads" in _ancestors(graph, name)
+
+
+def test_every_job_runs_in_process():
+    defs = build_defs()
+    for job in ("assemble_working_database", "fetch_sources", "validate_and_export"):
+        assert defs.resolve_job_def(job).executor_def.name == "in_process"
+
+
+# ── Nothing starts by itself ─────────────────────────────────────────────────
+
+
+def test_the_schedule_is_stopped_and_uses_the_workflow_cron():
+    schedule = build_defs().resolve_schedule_def("daily_fetch_sources")
+    assert schedule.default_status == dg.DefaultScheduleStatus.STOPPED
+    doc = _workflow()
+    triggers = doc.get("on", doc.get(True))  # PyYAML reads a bare `on:` as True
+    assert DAILY_CRON == schedule.cron_schedule == triggers["schedule"][0]["cron"]
+
+
+def test_no_asset_or_check_carries_an_automation_condition():
+    graph = _graph()
+    for key in graph.get_all_asset_keys():
+        assert graph.get(key).automation_condition is None, key
+    for spec in checks.validation_rules.check_specs:
+        assert spec.automation_condition is None, spec.name
+
+
+def test_the_export_job_selects_no_source():
+    selected = {
+        k.to_user_string()
+        for k in build_defs().resolve_job_def("validate_and_export").asset_layer.selected_asset_keys
+    }
+    manual = {s.key.to_user_string() for s in sources_manual.SPECS}
+    assert not selected & {"staging_db", *TRACKED, *manual}
+
+
+def test_the_tracked_outcomes_are_the_ones_the_workflow_gates_auto_merge_on():
+    gate = next(s for s in _steps() if s.get("id") == "sources")
+    workflow_ids = set(re.findall(r"steps\.(\w+)\.outcome", gate["run"]))
+    assert {COMMANDS[n].workflow_step for n in TRACKED} == workflow_ids
+    assert len(TRACKED) == 7
+
+
+# ── The checks are the rule registry ─────────────────────────────────────────
+
+
+def test_one_check_per_rule_blocking_exactly_when_the_rule_fails_the_build():
+    specs = {spec.name: spec for spec in checks.validation_rules.check_specs}
+    assert set(specs) == set(RULES) | {"store_loads"}
+    for name, spec in specs.items():
+        severity = FAIL if name == "store_loads" else RULES[name][0]
+        assert spec.blocking == (severity == FAIL), name
+
+
+# ── Manual sources are observed, never materialised ──────────────────────────
+
+
+def test_one_external_asset_per_hand_loaded_store_and_none_for_in_db_stores():
+    stores = load_stores()
+    names = {spec.key.to_user_string() for spec in sources_manual.manual_source_specs()}
+    assert names == {s.name for s in extra_csv_stores(stores)}
+    assert not names & {s.name for s in in_db_stores(stores)}
+
+
+def test_observing_a_store_reports_its_rows_and_latest_period(tmp_path):
+    path = tmp_path / "store.csv"
+    rows = [("2022", "2022-12-31"), ("2024-Q1", "2024-03-31"), ("2023", "2023-12-31")]
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        for period, end in rows:
+            writer.writerow({**dict.fromkeys(COLUMNS, ""), "period": period, "period_end": end})
+    described = sources_manual.describe_store_csv(path)
+    assert described["rows"] == 3
+    # "2024-Q1" sorts above "2023" as a string too; "2024-Q1" < "2024" would not.
+    assert described["latest period"] == "2024-Q1"
+
+
+# ── Freshness is the config's fetch_window_days ──────────────────────────────
+
+
+def test_freshness_windows_come_from_fetch_window_days():
+    graph = _graph()
+    windows = fetch_windows()
+    walstat = yaml.safe_load((REPO / "config/sources/walstat.yaml").read_text(encoding="utf-8"))
+    assert window_days("walstat_observations", windows) == walstat["fetch_window_days"]
+    for key in graph.get_all_asset_keys():
+        name = key.to_user_string()
+        policy = graph.get(key).freshness_policy
+        expected = window_days(name, windows) if name in COMMANDS else None
+        if expected is None:
+            assert policy is None, name
+        else:
+            assert policy.fail_window.to_timedelta().days == expected, name
+
+
+# ── Nothing it writes can be committed ───────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "data/local/dagster_home/storage/runs.db",
+        "data/local/dagster_runs/20260913T050000Z-0a1b2c3d/sources.json",
+        ".tmp_dagster_home_x1y2/history/runs.db",
+        ".dagster/logs/event.log",
+    ],
+)
+def test_dagster_state_is_gitignored(path):
+    result = subprocess.run(["git", "check-ignore", "-q", path], cwd=REPO)
+    assert result.returncode == 0, f"{path} is not ignored"
+
+
+def _code_strings(path: Path) -> list[str]:
+    """String constants in a module, docstrings excluded."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    docstrings = {
+        id(node.body[0].value)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Module | ast.ClassDef | ast.FunctionDef)
+        and node.body
+        and isinstance(node.body[0], ast.Expr)
+        and isinstance(node.body[0].value, ast.Constant)
+    }
+    return [
+        n.value
+        for n in ast.walk(tree)
+        if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docstrings
+    ]
+
+
+def test_no_orchestration_code_names_the_committed_database_or_the_offload():
+    for module in (REPO / "orchestration").rglob("*.py"):
+        for text in _code_strings(module):
+            assert "belgian_macro.db" not in text, module
+            assert "offload" not in text.lower(), module
+
+
+# ── run_script runs the Makefile's command line, from the repository ─────────
+
+
+class _FakePopen:
+    calls: list[dict] = []
+    exit_code = 0
+
+    def __init__(self, argv, **kwargs):
+        _FakePopen.calls.append({"argv": argv, **kwargs})
+        self.stdout = iter(["line one\n", "line two\n"])
+
+    def wait(self):
+        return _FakePopen.exit_code
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+@pytest.fixture
+def fake_popen(monkeypatch):
+    _FakePopen.calls = []
+    _FakePopen.exit_code = 0
+    monkeypatch.setattr(run.subprocess, "Popen", _FakePopen)
+    return _FakePopen
+
+
+@pytest.mark.parametrize("name", TRACKED)
+def test_a_source_runs_its_workflow_command_from_the_repository_root(fake_popen, name):
+    run.run_script(dg.build_asset_context(), PipelinePaths(), name)
+    (call,) = fake_popen.calls
+    expected = [t.replace("{db}", "data/local/working.db") for t in COMMANDS[name].argv]
+    assert call["argv"] == [sys.executable, *expected]
+    assert Path(call["cwd"]) == REPO
+
+
+def test_a_non_zero_exit_turns_the_asset_red(fake_popen):
+    fake_popen.exit_code = 3
+    with pytest.raises(dg.Failure, match="exited with code 3"):
+        run.run_script(dg.build_asset_context(), PipelinePaths(), "onem_observations")
+
+
+def test_a_repository_only_script_refuses_a_redirected_output(fake_popen, tmp_path):
+    with pytest.raises(dg.Failure, match="can only write into the repository"):
+        run.run_script(
+            dg.build_asset_context(), PipelinePaths(out_root=str(tmp_path)), "page_documents"
+        )
+    assert fake_popen.calls == []
+
+
+# ── The coordinator: a red source still exports, and the day ends red ────────
+
+
+@pytest.fixture
+def sandbox(tmp_path, monkeypatch):
+    db = tmp_path / "working.db"
+    migrate.run(db, migrations_dir=REPO / "migrations")
+    paths = PipelinePaths(
+        out_root=str(tmp_path / "out"), working_db=str(db), runs_dir=str(tmp_path / "runs")
+    )
+    calls: list[str] = []
+    failing: set[str] = set()
+
+    def fake_run_script(context, paths, name, extra=()):
+        calls.append(name)
+        if name in failing:
+            raise RuntimeError(f"{name} is down")
+        return ""
+
+    monkeypatch.setattr(run, "run_script", fake_run_script)
+    monkeypatch.setattr(checks, "run_validation", lambda paths: [])
+    monkeypatch.setattr(checks, "record_volume", lambda paths: 0)
+    return SimpleNamespace(
+        paths=paths,
+        defs=build_defs(paths),
+        calls=calls,
+        failing=failing,
+        instance=dg.DagsterInstance.ephemeral(),
+        runs=tmp_path / "runs",
+    )
+
+
+def _manifests(runs: Path) -> list[dict]:
+    return [manifest.load(p) for p in sorted(runs.glob("*/sources.json"))]
+
+
+def _metadata(result, name: str) -> dict:
+    for event in result.get_asset_materialization_events():
+        if event.asset_key.to_user_string() == name:
+            return event.step_materialization_data.materialization.metadata
+    raise AssertionError(f"{name} was not materialised")
+
+
+EXPORTS = {"national_csv", "communes_csv", "site_payloads", "local_pages", "site_index"}
+
+
+def test_one_red_source_still_exports_but_the_day_ends_red(sandbox):
+    sandbox.failing.add("onem_observations")
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+
+    (state,) = _manifests(sandbox.runs)
+    assert state["sources"]["onem_observations"]["status"] == manifest.FAILED
+    assert "onem_observations is down" in state["sources"]["onem_observations"]["message"]
+    for name in TRACKED:
+        if name != "onem_observations":
+            assert state["sources"][name]["status"] == manifest.SUCCESS, name
+    assert EXPORTS <= set(sandbox.calls)
+    assert state["validate_and_export"]["status"] == manifest.SUCCESS
+    latest = sandbox.instance.get_latest_materialization_event(dg.AssetKey(VALIDATED))
+    metadata = latest.asset_materialization.metadata
+    assert metadata["source_run"].value == state["run_id"]
+    assert metadata["red_sources"].value == 1
+
+
+def test_a_failed_canonical_sync_is_red_like_a_failed_source(sandbox):
+    sandbox.failing.add("canonical_observations")
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+
+    (state,) = _manifests(sandbox.runs)
+    assert state["sources"]["canonical_observations"]["status"] == manifest.FAILED
+    others = [n for n in TRACKED if n != "canonical_observations"]
+    assert all(state["sources"][n]["status"] == manifest.SUCCESS for n in others)
+    assert EXPORTS <= set(sandbox.calls)
+
+
+def test_a_failed_macro_fetch_skips_the_canonical_sync_and_that_counts_as_red(sandbox):
+    sandbox.failing.add("macro_legacy_fetch")
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+
+    (state,) = _manifests(sandbox.runs)
+    assert state["sources"]["macro_legacy_fetch"]["status"] == manifest.FAILED
+    assert state["sources"]["canonical_observations"]["status"] == manifest.SKIPPED
+    assert "canonical_observations" not in sandbox.calls
+    assert manifest.red_sources(state) == ["canonical_observations", "macro_legacy_fetch"]
+    assert EXPORTS <= set(sandbox.calls)
+
+
+def test_in_a_single_run_a_failed_source_would_block_the_exports(sandbox):
+    """The negative control: why the fetch and the exports are two runs."""
+    sandbox.failing.add("onem_observations")
+    job = sandbox.defs.resolve_implicit_global_asset_job_def()
+    result = job.execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        asset_selection=[dg.AssetKey("onem_observations"), dg.AssetKey(VALIDATED)],
+    )
+    materialized = {e.asset_key.to_user_string() for e in result.get_asset_materialization_events()}
+    assert VALIDATED not in materialized
+
+
+def test_all_green_exits_zero_and_each_run_gets_its_own_manifest(sandbox):
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 0
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 0
+
+    states = _manifests(sandbox.runs)
+    assert len(states) == 2 and states[0]["run_id"] != states[1]["run_id"]
+    assert all(manifest.red_sources(s) == [] for s in states)
+
+
+def test_a_failed_assemble_stops_before_any_export(sandbox):
+    sandbox.failing.add("staging_db")
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+
+    (state,) = _manifests(sandbox.runs)
+    assert state["assemble"]["status"] == manifest.FAILED
+    assert state["validate_and_export"]["status"] == manifest.NOT_RUN
+    assert sandbox.calls == ["staging_db"]
+
+
+def test_a_crashed_fetch_job_leaves_every_source_not_run_and_still_exports(sandbox, monkeypatch):
+    real = daily._execute
+
+    def crashing(defs, job_name, instance, **kwargs):
+        if job_name == "fetch_sources":
+            raise RuntimeError("instance went away")
+        return real(defs, job_name, instance, **kwargs)
+
+    monkeypatch.setattr(daily, "_execute", crashing)
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+
+    (state,) = _manifests(sandbox.runs)
+    assert all(state["sources"][n]["status"] == manifest.NOT_RUN for n in TRACKED)
+    assert "instance went away" in state["fetch_crash"]
+    assert EXPORTS <= set(sandbox.calls)
+
+
+# ── Validation still blocks, as the workflow's validation step does ──────────
+
+
+def test_a_failing_rule_stops_every_export_and_the_volume_baseline(sandbox, monkeypatch):
+    violation = Violation("unique_latest", FAIL, "keys with more than one is_latest row", 2)
+    monkeypatch.setattr(checks, "run_validation", lambda paths: [violation])
+    recorded = []
+    monkeypatch.setattr(checks, "record_volume", lambda paths: recorded.append(paths) or 0)
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == 1
+
+    (state,) = _manifests(sandbox.runs)
+    assert manifest.red_sources(state) == []
+    assert state["validate_and_export"]["status"] == manifest.FAILED
+    assert not EXPORTS & set(sandbox.calls)
+    assert recorded == [], "a failing run must never become tomorrow's volume baseline"
+
+
+def test_a_warning_rule_is_reported_and_blocks_nothing(sandbox, monkeypatch):
+    violation = Violation("staleness", WARN, "ONEM is 40 days old")
+    monkeypatch.setattr(checks, "run_validation", lambda paths: [violation])
+
+    result = sandbox.defs.resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance, raise_on_error=False
+    )
+
+    assert result.success
+    assert EXPORTS <= set(sandbox.calls)
+    failed = {e.check_name: e for e in result.get_asset_check_evaluations() if not e.passed}
+    assert set(failed) == {"staleness"}
+    assert failed["staleness"].severity == dg.AssetCheckSeverity.WARN
+
+
+# ── A stale manifest is never attributed to a run ────────────────────────────
+
+
+def test_a_manual_export_run_ignores_old_manifests_on_disk(sandbox):
+    old = manifest.path_for(sandbox.runs, "20260101T000000Z-deadbeef")
+    state = manifest.initial("20260101T000000Z-deadbeef")
+    for source in state["sources"].values():
+        source["status"] = manifest.FAILED
+    manifest.write(old, state)
+    before = old.read_bytes()
+
+    result = sandbox.defs.resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance, raise_on_error=False
+    )
+
+    assert result.success
+    metadata = _metadata(result, VALIDATED)
+    assert metadata["source_run"].value == manifest.NO_SOURCE_RUN
+    assert "red_sources" not in metadata
+    assert old.read_bytes() == before
+
+
+def _with_manifest(path: str, run_id: str) -> dict:
+    return {"ops": {VALIDATED: {"config": {"source_manifest": path, "coordinator_run_id": run_id}}}}
+
+
+def test_a_configured_manifest_that_does_not_exist_fails(sandbox, tmp_path):
+    result = sandbox.defs.resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        run_config=_with_manifest(str(tmp_path / "gone" / "sources.json"), "x"),
+    )
+    assert VALIDATED in result.get_failed_step_keys()
+    assert "site_payloads" not in sandbox.calls
+
+
+def test_a_manifest_from_another_run_is_refused(sandbox):
+    path = manifest.path_for(sandbox.runs, "20260101T000000Z-deadbeef")
+    manifest.write(path, manifest.initial("20260101T000000Z-deadbeef"))
+    result = sandbox.defs.resolve_job_def("validate_and_export").execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        run_config=_with_manifest(str(path), "20260913T050000Z-0a1b2c3d"),
+    )
+    assert VALIDATED in result.get_failed_step_keys()
+
+
+def test_old_run_directories_are_pruned_oldest_first(tmp_path):
+    for day in range(1, 36):
+        manifest.write(manifest.path_for(tmp_path, f"202608{day:02d}T050000Z-00000000"), {})
+    manifest.prune(tmp_path, keep=30)
+    remaining = sorted(p.name for p in tmp_path.iterdir())
+    assert len(remaining) == 30 and remaining[0].startswith("20260806")

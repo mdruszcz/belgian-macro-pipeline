@@ -23,6 +23,16 @@ dev = [
     "pytest>=8.0",
     "pytest-xdist>=3.5",
     "playwright>=1.62",
+    # tests/test_orchestration*.py. Pinned exactly: the orchestration layer is
+    # written against this version's API (docs/features/orchestration.md).
+    "dagster==1.13.22",
+]
+# The local Dagster UI (`make dagster`). Not needed by the daily workflow, which
+# does not run through Dagster yet. dagster and dagster-webserver must stay on
+# the same exact version.
+orchestration = [
+    "dagster==1.13.22",
+    "dagster-webserver==1.13.22",
 ]
 
 [tool.setuptools]

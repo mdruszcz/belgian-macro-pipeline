@@ -20,3 +20,8 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 docs/implementation/batches/*-screenshots/
+# Dagster's own state (docs/features/orchestration.md). `make dagster` keeps it
+# under data/local/ (ignored above); these are where `dagster dev` puts it when
+# DAGSTER_HOME is unset. Run history is never committed.
+.tmp_dagster_home_*/
+.dagster/

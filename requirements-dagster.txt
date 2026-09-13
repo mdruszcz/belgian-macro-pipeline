@@ -1,0 +1,8 @@
+# Only needed for the local Dagster UI and coordinator (`make dagster`,
+# `make dagster-daily`) -- docs/features/orchestration.md.
+#
+# Deliberately not in requirements.txt: the daily workflow does not run through
+# Dagster in this step, so the runner should not install ~50 packages it never
+# imports. Both pins must stay on the same exact version (also in pyproject.toml).
+dagster==1.13.22
+dagster-webserver==1.13.22
