@@ -502,12 +502,23 @@ def test_each_rule_is_individually_silent_on_a_clean_store(tmp_path, name):
 
 
 @pytest.mark.slow
-def test_the_real_committed_stores_pass(working_db):
+def test_the_real_committed_stores_pass(working_db, tmp_path):
     """The baseline the spec claims. If this fails, something regressed in
     the committed data rather than in the rules. Against the assembled
     working database, as CI and the daily run validate it -- the committed
-    file alone no longer holds ONEM or WalStat (docs/decisions/0006)."""
-    conn = sqlite3.connect(str(working_db))
+    file alone no longer holds ONEM or WalStat (docs/decisions/0006).
+
+    With every hand-loaded store loaded, as scripts/validate_data.py does
+    since pipeline repair 4: the daily run's volume baseline counts those
+    stores too, so validating without them reports every one of their
+    indicators as disappeared."""
+    from validate_data import _validation_copy
+
+    copy, load_problems = _validation_copy(
+        working_db, str(REPO / "config" / "stores.yaml"), tmp_path
+    )
+    assert load_problems == []
+    conn = sqlite3.connect(str(copy))
     conn.execute("PRAGMA foreign_keys=ON")
     exports = (
         REPO / "data" / "belgian_macro_export.csv",

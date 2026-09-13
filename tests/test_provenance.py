@@ -116,13 +116,47 @@ def test_a_derived_indicator_is_graded_c_and_names_no_source(lineage):
     assert entry["input_sources"] == ["statbel"]
 
 
+# Every indicator config declaring `transform: rebase`, listed by hand: the two
+# Belgian index_2010 series, and the nine foreign comparators pipeline repair 3
+# brought into the canonical schema (config/indicators/*.yaml).
+REBASED_INDICATORS = {
+    "EUROSTAT_GDP_Q_MEUR",
+    "LABOUR_COST_BE",
+    "EUROSTAT_GDP_Q_MEUR_DE",
+    "EUROSTAT_GDP_Q_MEUR_EA",
+    "EUROSTAT_GDP_Q_MEUR_ES",
+    "EUROSTAT_GDP_Q_MEUR_FR",
+    "EUROSTAT_GDP_Q_MEUR_NL",
+    "LABOUR_COST_DE",
+    "LABOUR_COST_EA",
+    "LABOUR_COST_FR",
+    "LABOUR_COST_NL",
+}
+
+
 def test_a_rescaled_indicator_is_restated_not_official(lineage):
-    """The two loaded index_2010 series are rebased by
-    EurostatFetcher._rebase_to_2010 -- this pipeline changed the number, so it
-    is not the agency's own published figure."""
-    restated = sorted(k for k, v in lineage.items() if v["grade"] == "B")
-    assert restated == ["EUROSTAT_GDP_Q_MEUR", "LABOUR_COST_BE"]
-    assert lineage["LABOUR_COST_BE"]["transform"] == "rebase"
+    """The index_2010 series are rebased by EurostatFetcher._rebase_to_2010 --
+    this pipeline changed the number, so it is not the agency's own published
+    figure.
+
+    Exactly the rebased series present in the database are graded B, and
+    nothing else. The two Belgian ones are always there; the foreign ones only
+    once a daily run has synced them, so the set depends on the committed data
+    and is bounded rather than pinned."""
+    restated = {k for k, v in lineage.items() if v["grade"] == "B"}
+    assert {"EUROSTAT_GDP_Q_MEUR", "LABOUR_COST_BE"} <= restated
+    assert restated == REBASED_INDICATORS & set(lineage)
+    for indicator_id in restated:
+        assert lineage[indicator_id]["transform"] == "rebase", indicator_id
+
+
+def test_the_rebased_list_matches_the_configs():
+    declared = set()
+    for path in (REPO / "config" / "indicators").glob("*.yaml"):
+        cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if cfg.get("transform"):
+            declared.add(cfg["id"])
+    assert declared == REBASED_INDICATORS
 
 
 def test_index_units_the_source_publishes_itself_stay_official(lineage):
