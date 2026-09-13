@@ -728,3 +728,343 @@ def test_coverage_counts_numbers_not_keys(tmp_path):
     )
     assert row["coverage"] == 1, "a withheld commune must not count as covered"
     assert row["suppressed"] == 1
+
+
+# --- aggregates.json (Batch 7) ------------------------------------------------
+
+AGGREGATES_HEADER = (
+    "geo_id,nis_code,level,name_en,name_fr,name_nl,indicator_code,indicator_name,"
+    "unit,period,value,coverage_n,coverage_of,coverage_pct"
+)
+
+
+def _agg_row(geo_id, nis_code, level, name, code, name_ind, unit, period, value, n, of, pct):
+    return (
+        f"{geo_id},{nis_code},{level},{name},{name},{name},{code},{name_ind},{unit},"
+        f"{period},{value},{n},{of},{pct}"
+    )
+
+
+def _base_export_kwargs(tmp_path, db_path, history_csv, latest_csv, national_csv, out_dir):
+    return {
+        "db_path": db_path,
+        "communes_history_csv": history_csv,
+        "communes_latest_csv": latest_csv,
+        "national_csv": national_csv,
+        "out_dir": out_dir,
+        "build_id": "test",
+        "validation_status": "unknown",
+        "sections_config": None,
+    }
+
+
+def test_aggregates_json_has_no_arrondissement(tmp_path):
+    """docs/features/comparison.md's own comparison set stops at province --
+    arrondissement is computed in the CSV (Block L) but was never meant to
+    reach a reader, and micro.html's territorial comparison would otherwise
+    have an extra, undocumented level to handle."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+    history = tmp_path / "history.csv"
+    _write(history, HISTORY_HEADER, [])
+    latest = tmp_path / "latest.csv"
+    _write(latest, LATEST_HEADER, [])
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    aggregates = tmp_path / "aggregates.csv"
+    _write(
+        aggregates,
+        AGGREGATES_HEADER,
+        [
+            _agg_row(
+                "be:country",
+                "01000",
+                "country",
+                "Belgium",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "27000",
+                565,
+                565,
+                100.0,
+            ),
+            _agg_row(
+                "be:reg:02000",
+                "02000",
+                "region",
+                "Flanders",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "28000",
+                300,
+                300,
+                100.0,
+            ),
+            _agg_row(
+                "be:prov:10000",
+                "10000",
+                "province",
+                "Antwerp",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "29000",
+                69,
+                69,
+                100.0,
+            ),
+            _agg_row(
+                "be:arr:11000",
+                "11000",
+                "arrondissement",
+                "Arr Antwerpen",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "30000",
+                28,
+                28,
+                100.0,
+            ),
+        ],
+    )
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        **_base_export_kwargs(tmp_path, db_path, history, latest, national, out_dir),
+        aggregates_csv=aggregates,
+    )
+
+    payload = json.loads((out_dir / "aggregates.json").read_text(encoding="utf-8"))
+    assert payload["levels"] == ["country", "region", "province"]
+    geos = payload["indicators"]["AVG_INC"]
+    assert set(geos) == {"be:country", "be:reg:02000", "be:prov:10000"}
+    assert "be:arr:11000" not in geos
+
+
+def test_aggregates_json_values_and_coverage_match_the_csv_row(tmp_path):
+    """One hand-checked value at each of the three published levels, equal to
+    the CSV row it was reshaped from -- the same "reshape, never recompute"
+    guarantee every other payload in this module gives."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+    history = tmp_path / "history.csv"
+    _write(history, HISTORY_HEADER, [])
+    latest = tmp_path / "latest.csv"
+    _write(latest, LATEST_HEADER, [])
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    aggregates = tmp_path / "aggregates.csv"
+    _write(
+        aggregates,
+        AGGREGATES_HEADER,
+        [
+            _agg_row(
+                "be:country",
+                "01000",
+                "country",
+                "Belgium",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "27453.1",
+                565,
+                565,
+                100.0,
+            ),
+            _agg_row(
+                "be:reg:02000",
+                "02000",
+                "region",
+                "Flanders",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "28901.4",
+                300,
+                300,
+                100.0,
+            ),
+            _agg_row(
+                "be:prov:10000",
+                "10000",
+                "province",
+                "Antwerp",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "29876.2",
+                69,
+                69,
+                100.0,
+            ),
+        ],
+    )
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        **_base_export_kwargs(tmp_path, db_path, history, latest, national, out_dir),
+        aggregates_csv=aggregates,
+    )
+
+    geos = json.loads((out_dir / "aggregates.json").read_text(encoding="utf-8"))["indicators"][
+        "AVG_INC"
+    ]
+    assert geos["be:country"]["periods"]["2023"] == {
+        "value": 27453.1,
+        "coverage": {"n": 565, "of": 565, "pct": 100.0},
+    }
+    assert geos["be:reg:02000"]["periods"]["2023"]["value"] == 28901.4
+    assert geos["be:prov:10000"]["periods"]["2023"]["value"] == 29876.2
+    assert geos["be:prov:10000"]["level"] == "province"
+    assert geos["be:prov:10000"]["nis_code"] == "10000"
+
+
+def test_aggregates_json_is_byte_identical_across_two_runs(tmp_path):
+    """Rule 35: identical inputs must keep producing byte-identical output."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+    history = tmp_path / "history.csv"
+    _write(history, HISTORY_HEADER, [])
+    latest = tmp_path / "latest.csv"
+    _write(latest, LATEST_HEADER, [])
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    aggregates = tmp_path / "aggregates.csv"
+    _write(
+        aggregates,
+        AGGREGATES_HEADER,
+        [
+            _agg_row(
+                "be:country",
+                "01000",
+                "country",
+                "Belgium",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "27453.1",
+                565,
+                565,
+                100.0,
+            ),
+            _agg_row(
+                "be:prov:10000",
+                "10000",
+                "province",
+                "Antwerp",
+                "AVG_INC",
+                "Average income",
+                "EUR",
+                "2023",
+                "29876.2",
+                69,
+                69,
+                100.0,
+            ),
+        ],
+    )
+
+    out_a = tmp_path / "out_a"
+    out_b = tmp_path / "out_b"
+    export_site_payloads(
+        **_base_export_kwargs(tmp_path, db_path, history, latest, national, out_a),
+        aggregates_csv=aggregates,
+    )
+    export_site_payloads(
+        **_base_export_kwargs(tmp_path, db_path, history, latest, national, out_b),
+        aggregates_csv=aggregates,
+    )
+
+    assert (out_a / "aggregates.json").read_bytes() == (out_b / "aggregates.json").read_bytes()
+
+
+# --- _check_micro_sections (Batch 7) ------------------------------------------
+
+
+def test_check_micro_sections_refuses_an_unknown_code():
+    import export_site_payloads as mod
+
+    layout = {
+        "kpis": ["REAL_ONE"],
+        "key_list": [],
+        "tiles": {},
+        "comparison": {"indicators": ["MADE_UP_CODE"]},
+        "map": {},
+        "history": {},
+    }
+    with pytest.raises(ValueError, match="MADE_UP_CODE"):
+        mod._check_micro_sections(layout, {"REAL_ONE"})
+
+
+def test_check_micro_sections_accepts_a_code_from_either_universe():
+    """`known` is the UNION of national.json's codes and aggregates.json's
+    country-level codes -- a layout may freely mix the two, since that is
+    exactly what config/micro_sections.yaml does (e.g. the ONEM-insured
+    unemployment rate from national.json beside AVG_NET_TAXABLE_INCOME from
+    aggregates.json)."""
+    import export_site_payloads as mod
+
+    layout = {
+        "kpis": ["FROM_NATIONAL"],
+        "key_list": ["FROM_AGGREGATES"],
+        "tiles": {"indicators": []},
+        "comparison": {"indicators": []},
+        "map": {"indicators": []},
+        "history": {},
+    }
+    mod._check_micro_sections(layout, {"FROM_NATIONAL", "FROM_AGGREGATES"})  # must not raise
+
+
+def test_aggregates_payload_reshape_is_pure():
+    """Unit-level check of `_aggregates_payload`, independent of the CSV
+    round-trip above: the same (geo, indicator, period) input always produces
+    the same nested shape, sorted at both levels."""
+    import export_site_payloads as mod
+
+    raw = {
+        ("be:prov:20000", "X", "2022"): {
+            "geo_id": "be:prov:20000",
+            "nis_code": "20000",
+            "level": "province",
+            "name": {"en": "B", "fr": "B", "nl": "B"},
+            "value": 2.0,
+            "period": "2022",
+            "coverage": {"n": 1, "of": 1, "pct": 100.0},
+        },
+        ("be:country", "X", "2022"): {
+            "geo_id": "be:country",
+            "nis_code": None,
+            "level": "country",
+            "name": {"en": "Belgium", "fr": "Belgique", "nl": "België"},
+            "value": 1.0,
+            "period": "2022",
+            "coverage": {"n": 2, "of": 2, "pct": 100.0},
+        },
+        ("be:arr:30000", "X", "2022"): {
+            "geo_id": "be:arr:30000",
+            "nis_code": "30000",
+            "level": "arrondissement",
+            "name": {"en": "C", "fr": "C", "nl": "C"},
+            "value": 3.0,
+            "period": "2022",
+            "coverage": {"n": 1, "of": 1, "pct": 100.0},
+        },
+    }
+    payload = mod._aggregates_payload(raw)
+    assert payload["levels"] == ["country", "region", "province"]
+    assert list(payload["indicators"]["X"]) == ["be:country", "be:prov:20000"]
+    assert payload["indicators"]["X"]["be:country"]["periods"]["2022"]["value"] == 1.0

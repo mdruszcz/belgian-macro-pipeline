@@ -482,6 +482,61 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
         )
 
 
+MICRO_SECTIONS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "micro_sections.yaml"
+
+
+def _micro_sections(path: Path = MICRO_SECTIONS_CONFIG) -> dict:
+    """The micro.html layout (Batch 7), same premise as `_national_sections`:
+    the page renders whatever this describes -- a KPI row, a key-indicator
+    list, a province comparison, a household tile grid, a choropleth map, one
+    history chart and the cards the design draws that no series can fill.
+    """
+    if not path.is_file():
+        return {}
+    import yaml
+
+    layout = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {
+        "kpis": layout.get("kpis") or [],
+        "kpis_note": layout.get("kpis_note") or {},
+        "key_list": layout.get("key_list") or [],
+        "comparison": layout.get("comparison") or {},
+        "tiles": layout.get("tiles") or [],
+        "map": layout.get("map") or {},
+        "history": layout.get("history") or {},
+        "unavailable": layout.get("unavailable") or [],
+    }
+
+
+def _check_micro_sections(layout: dict, known: set[str]) -> None:
+    """Every series config/micro_sections.yaml names must exist in the
+    universe micro.html can actually read from -- national.json's series plus
+    whatever carries a `be:country` row in aggregates.json. A card pointing at
+    a series neither file provides would render as an empty box on the one
+    page, invisible to every other test.
+    """
+    comparison = layout.get("comparison") or {}
+    tiles = layout.get("tiles") or {}
+    map_spec = layout.get("map") or {}
+    history = layout.get("history") or {}
+    named = [
+        *(layout.get("kpis") or []),
+        *(layout.get("key_list") or []),
+        *(tiles.get("indicators") or []),
+        *(comparison.get("indicators") or []),
+        *(map_spec.get("indicators") or []),
+        *([history["series"]] if history.get("series") else []),
+    ]
+    unknown = sorted({i for i in named if i not in known})
+    if unknown:
+        raise ValueError(
+            f"config/micro_sections.yaml names indicator(s) neither national.json nor "
+            f"aggregates.json carries at country level: {unknown}. They would render as "
+            "empty cards on micro.html. Remove them from the layout, or load the data "
+            "they need."
+        )
+
+
 #: How far the parts may miss the whole before the layout is refused. The
 #: age bands reproduce the population EXACTLY by construction
 #: (sync_population.py derives the total as the band sum), so any real
@@ -550,6 +605,7 @@ def _read_aggregates(csv_path: Path) -> dict[tuple[str, str, str], dict]:
         for row in csv.DictReader(fh):
             out[(row["geo_id"], row["indicator_code"], row["period"])] = {
                 "geo_id": row["geo_id"],
+                "nis_code": row["nis_code"],
                 "level": row["level"],
                 "name": {"en": row["name_en"], "fr": row["name_fr"], "nl": row["name_nl"]},
                 "value": float(row["value"]),
@@ -561,6 +617,45 @@ def _read_aggregates(csv_path: Path) -> dict[tuple[str, str, str], dict]:
                 },
             }
     return out
+
+
+# Levels published in aggregates.json (Batch 7). Arrondissement is computed in
+# the CSV but deliberately left out here too, for the same reason
+# COMPARISON_LEVELS below excludes it: docs/features/comparison.md, "The
+# comparison set".
+AGGREGATES_JSON_LEVELS = ("country", "region", "province")
+
+
+def _aggregates_payload(aggregates: dict[tuple[str, str, str], dict]) -> dict:
+    """Reshape the flat (geo, indicator, period) aggregate rows into the
+    per-indicator, per-geography document micro.html reads.
+
+    Built with `sorted()` at every level rather than `sort_keys=True` on the
+    final `json.dumps` call, so the determinism holds however the payload is
+    consumed later (a dict re-inserted elsewhere keeps this order too) --
+    matching every other payload in this module.
+    """
+    by_indicator: dict[str, dict[str, dict]] = {}
+    for (geo_id, indicator_code, period), row in aggregates.items():
+        if row["level"] not in AGGREGATES_JSON_LEVELS:
+            continue
+        geo_bucket = by_indicator.setdefault(indicator_code, {}).setdefault(
+            geo_id,
+            {
+                "level": row["level"],
+                "nis_code": row.get("nis_code"),
+                "name": row["name"],
+                "periods": {},
+            },
+        )
+        geo_bucket["periods"][period] = {"value": row["value"], "coverage": row["coverage"]}
+    return {
+        "levels": list(AGGREGATES_JSON_LEVELS),
+        "indicators": {
+            code: {geo_id: by_indicator[code][geo_id] for geo_id in sorted(by_indicator[code])}
+            for code in sorted(by_indicator)
+        },
+    }
 
 
 # Levels shown in the comparison column, nearest first. Arrondissement is
@@ -827,6 +922,11 @@ def export_site_payloads(
     # real national series as missing from that fixture. main() passes the
     # real path, which is the production route.
     national_sections_config: Path | None = None,
+    # Same default-None reasoning as `national_sections_config`: a fixture-scale
+    # caller is exercising the payload reshape, not micro.html's layout, and
+    # the cross-check would rightly reject a real layout against a fixture.
+    # main() passes the real path.
+    micro_sections_config: Path | None = None,
 ) -> dict[str, int]:
     communes = _read_communes_history(communes_history_csv)
     indicators = _read_communes_latest(communes_latest_csv)
@@ -851,10 +951,10 @@ def export_site_payloads(
             entry["additive"] = indicator_id in additive
 
     compared = 0
+    aggregates_raw: dict[tuple[str, str, str], dict] = {}
     if aggregates_csv is not None:
-        compared = _attach_comparisons(
-            communes, _read_aggregates(aggregates_csv), _ancestry(db_path)
-        )
+        aggregates_raw = _read_aggregates(aggregates_csv)
+        compared = _attach_comparisons(communes, aggregates_raw, _ancestry(db_path))
 
     ranked = 0
     if percentiles_csv is not None:
@@ -943,6 +1043,25 @@ def export_site_payloads(
         _check_national_sections(national_layout, set(national))
         _write_json(out_dir / "metadata" / "national_sections.json", national_layout)
 
+    # aggregates.json: the province/region/country payload micro.html (and any
+    # future comparison view) reads. Written whenever an aggregates CSV was
+    # supplied, independent of whether a micro layout exists, since the
+    # aggregate values are useful on their own (docs/features/comparison.md).
+    aggregates_payload: dict | None = None
+    if aggregates_csv is not None:
+        aggregates_payload = _aggregates_payload(aggregates_raw)
+        _write_json(out_dir / "aggregates.json", aggregates_payload)
+
+    micro_layout = _micro_sections(micro_sections_config) if micro_sections_config else {}
+    if micro_layout:
+        aggregate_country_codes = {
+            code
+            for code, geos in (aggregates_payload or {}).get("indicators", {}).items()
+            if "be:country" in geos
+        }
+        _check_micro_sections(micro_layout, set(national) | aggregate_country_codes)
+        _write_json(out_dir / "metadata" / "micro_sections.json", micro_layout)
+
     manifest = {
         "build_id": build_id,
         "git_commit": _git_commit(db_path.resolve().parents[0]),
@@ -1002,6 +1121,7 @@ def main() -> None:
         Path(args.aggregates) if args.aggregates else None,
         Path(args.percentiles) if args.percentiles else None,
         national_sections_config=NATIONAL_SECTIONS_CONFIG,
+        micro_sections_config=MICRO_SECTIONS_CONFIG,
     )
     print(
         f"Exported {counts['communes']} commune payloads, {counts['indicator_files']} "

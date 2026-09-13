@@ -1,0 +1,124 @@
+# Section layout for the microeconomics page, micro.html -- Batch 7.
+#
+# Same premise as config/national_sections.yaml: THIS FILE EXISTS SO
+# micro.html CONTAINS NO INDICATOR ID, so adding or removing a series is a
+# config change, never a code change (the 50% gate's "zero indicator-specific
+# frontend logic"). The exporter checks every id named here against
+# national.json and aggregates.json (the country-level rows) and refuses to
+# publish a layout naming a series neither provides, so a card can never
+# render as an empty box.
+#
+# Every label is trilingual (CLAUDE.md rule 7). Indicator NAMES are not here;
+# they travel with the payload, from the indicators table.
+
+# The KPI row. The design draws six figures (active enterprises, business
+# creations, median income, average gross wage, unemployment, median house
+# price); this pipeline holds a national or country-aggregate series for none
+# of those exact figures, but does hold six adjacent municipal/national
+# figures that are real and dated, so the row shows those instead and
+# `kpis_note` says plainly which of the design's figures have no series here.
+kpis:
+  - LOCAL_UNITS_BY_COMMUNE
+  - AVG_NET_TAXABLE_INCOME
+  - UNEMPLOYMENT_RATE_INSURED
+  - AVERAGE_HOUSEHOLD_SIZE
+  - HOUSE_SALES_TRANSACTIONS
+  - UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE
+kpis_note:
+  en: Enterprise creations, an average gross wage, a true median income (this pipeline holds a mean per tax return, not a median) and a Belgium-level median house price (a median cannot be aggregated from commune medians) have no series in this pipeline; the cards show six real, dated figures instead.
+  fr: Les créations d’entreprises, un salaire brut moyen, un revenu médian véritable (ce pipeline détient une moyenne par déclaration fiscale, pas une médiane) et un prix médian du logement au niveau belge (une médiane ne peut pas s’agréger à partir de médianes communales) n’ont pas de série dans ce pipeline ; les cartes montrent à la place six chiffres réels et datés.
+  nl: Bedrijfsoprichtingen, een gemiddeld brutoloon, een echt mediaan inkomen (dit pipeline houdt een gemiddelde per belastingaangifte bij, geen mediaan) en een mediane woningprijs op Belgisch niveau (een mediaan kan niet worden opgeteld uit gemeentelijke medianen) hebben geen reeks in dit pipeline; de kaarten tonen in plaats daarvan zes reële, gedateerde cijfers.
+
+# "Indicateurs clés" -- the plain list panel: latest value and period for
+# each, at country level (aggregated from the ground up, never averaged --
+# CLAUDE.md's aggregation rule).
+key_list:
+  - AVERAGE_HOUSEHOLD_SIZE
+  - SHARE_SINGLE_PERSON_HOUSEHOLDS
+  - UNEMPLOYMENT_RATE_COM
+  - SHARE_DWELLINGS_UNOCCUPIED
+  - UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE
+  - DEPENDENCY_RATIO
+
+# "Comparaison territoriale" -- horizontal bars, the 10 provinces plus
+# Belgium, latest period common to all rows, Belgium highlighted in the
+# accent colour. A <select> switches ONLY among the indicators configured
+# here (view-time switching within a fixed list -- never an arbitrary
+# indicator, per CLAUDE.md rule 23 and the open question in micro.md).
+comparison:
+  label: {en: Territorial comparison, fr: Comparaison territoriale, nl: Territoriale vergelijking}
+  note:
+    en: The ten provinces and Belgium, at the latest period every one of them shares. Belgium is drawn in the accent colour; a province below 90% coverage for that period is omitted rather than shown short.
+    fr: Les dix provinces et la Belgique, à la dernière période que chacune d’elles partage. La Belgique est dessinée dans la couleur d’accent ; une province sous 90 % de couverture pour cette période est omise plutôt que montrée incomplète.
+    nl: De tien provincies en België, op de laatste periode die ze allemaal delen. België wordt in de accentkleur getekend; een provincie onder 90% dekking voor die periode wordt weggelaten in plaats van onvolledig getoond.
+  indicators:
+    - AVG_NET_TAXABLE_INCOME
+    - UNEMPLOYMENT_RATE_COM
+    - AVERAGE_HOUSEHOLD_SIZE
+    - SHARE_DWELLINGS_UNOCCUPIED
+    - DEPENDENCY_RATIO
+  default: AVG_NET_TAXABLE_INCOME
+
+# "Dynamique des ménages" -- 4 stat tiles in a 2x2 grid, one period each (no
+# delta: these are Census 2021 snapshots, not a time series).
+tiles:
+  label: {en: Household dynamics, fr: Dynamique des ménages, nl: Gezinsdynamiek}
+  indicators:
+    - HOUSEHOLDS_PRIVATE
+    - AVERAGE_HOUSEHOLD_SIZE
+    - SHARE_SINGLE_PERSON_HOUSEHOLDS
+    - SHARE_SINGLE_PARENT_FAMILIES
+
+# "Carte microéconomique de la Belgique" -- the shared choropleth
+# (assets/commune_map.js), indicator picker restricted to this list, so the
+# map only ever draws a series this pipeline actually publishes per commune.
+map:
+  label: {en: Microeconomic map of Belgium, fr: Carte microéconomique de la Belgique, nl: Microeconomische kaart van België}
+  indicators:
+    - AVG_NET_TAXABLE_INCOME
+    - UNEMPLOYMENT_RATE_INSURED
+    - AVERAGE_HOUSEHOLD_SIZE
+    - SHARE_DWELLINGS_UNOCCUPIED
+  default: AVG_NET_TAXABLE_INCOME
+
+# "Marché du logement" -- the design's line chart labelled "Prix d'achat"
+# assumes a price series this pipeline does not hold; the one national
+# housing series that exists is transaction volume, so the label says exactly
+# that rather than implying a price.
+history:
+  series: HOUSE_SALES_TRANSACTIONS
+  chart: bar
+  label: {en: Housing market, fr: Marché du logement, nl: Vastgoedmarkt}
+  note:
+    en: Number of residential sales transactions recorded nationally each year -- a volume of activity, not a price. This pipeline holds no national house-price series.
+    fr: Nombre de transactions de vente de logements enregistrées au niveau national chaque année -- un volume d’activité, pas un prix. Ce pipeline ne détient aucune série nationale de prix du logement.
+    nl: Aantal geregistreerde verkooptransacties van woningen op nationaal niveau per jaar -- een activiteitsvolume, geen prijs. Dit pipeline bevat geen nationale reeks van woningprijzen.
+
+# Sections the design draws that this pipeline cannot fill, built at their
+# designed size with the reason on the card. Each names a real gap, not a
+# style choice.
+unavailable:
+  - id: enterprise_dynamics
+    label: {en: Business fabric, fr: Tissu entrepreneurial, nl: Ondernemingsweefsel}
+    reason:
+      en: LOCAL_UNITS_BY_COMMUNE is a single snapshot (2023-Q4) with no prior period, so no trend, no business-creation count and no bankruptcy count exists in this pipeline -- a chart of three series from one point in time would be an invention.
+      fr: LOCAL_UNITS_BY_COMMUNE est un instantané unique (T4 2023) sans période antérieure, donc ni tendance, ni nombre de créations d’entreprises, ni nombre de faillites n’existent dans ce pipeline -- un graphique de trois séries à partir d’un seul instant serait une invention.
+      nl: LOCAL_UNITS_BY_COMMUNE is een eenmalige momentopname (K4 2023) zonder eerdere periode, dus bestaat er in dit pipeline geen trend, geen aantal bedrijfsoprichtingen en geen aantal faillissementen -- een grafiek van drie reeksen uit één tijdstip zou verzinsel zijn.
+  - id: sectors
+    label: {en: Sectoral structure, fr: Structure sectorielle, nl: Sectorstructuur}
+    reason:
+      en: This pipeline holds no NACE sector breakdown at any geography.
+      fr: Ce pipeline ne détient aucune ventilation sectorielle NACE, à aucune échelle géographique.
+      nl: Dit pipeline bevat geen enkele NACE-sectoruitsplitsing, op geen enkel geografisch niveau.
+  - id: entrepreneurship
+    label: {en: Local entrepreneurship, fr: Entrepreneuriat local, nl: Lokaal ondernemerschap}
+    reason:
+      en: The design's three trend rows need business creations, a business-density trend and a start-up survival rate. Only a one-period local-unit snapshot exists here, so no trend can be shown honestly.
+      fr: Les trois lignes de tendance de la maquette nécessitent des créations d’entreprises, une tendance de densité entrepreneuriale et un taux de survie des jeunes entreprises. Seul un instantané des unités locales sur une période existe ici, donc aucune tendance ne peut être montrée honnêtement.
+      nl: De drie trendrijen van het ontwerp vereisen bedrijfsoprichtingen, een trend in ondernemingsdichtheid en een overlevingsgraad van start-ups. Hier bestaat enkel een momentopname van lokale eenheden voor één periode, dus kan geen enkele trend eerlijk worden getoond.
+  - id: news
+    label: {en: Microeconomic news, fr: Actualités microéconomiques, nl: Microeconomisch nieuws}
+    reason:
+      en: This pipeline holds no article store; nothing here is written by hand.
+      fr: Ce pipeline ne contient aucun fonds d’articles ; rien ici n’est rédigé à la main.
+      nl: Dit pipeline bevat geen artikelbestand; niets hier wordt met de hand geschreven.
