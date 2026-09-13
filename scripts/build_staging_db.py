@@ -3,10 +3,12 @@ Assemble a disposable working database at data/local/working.db --
 the "staging" half of PR1 of the pipeline repair (config/stores.yaml plus
 src/stores.py is the other half).
 
-NOT wired into `make all`, CI, or either workflow yet -- that cutover is PR2's,
-deliberately kept separate so it can be atomic (CLAUDE.md rule 10: this PR
-moves no data and changes no published artefact). `make assemble` runs this
-alone, today, for anyone who wants to see it work.
+Since PR2 (the ONEM/WalStat cutover) this is the first step of `make all`,
+CI's validation job and both workflows: every sync, the validation and every
+export read the working copy, never the committed database. The daily
+workflow then runs scripts/offload_stores.py, which dumps the in_db stores
+back to their CSVs and writes the slim committed database. See
+docs/decisions/0006-stores-split-by-volume.md.
 
 Steps, in order:
   1. rm -f the previous working.db (and its -shm/-wal siblings, in case a
@@ -22,11 +24,12 @@ Steps, in order:
   4. Load geography (idempotent, offline, config/geography/*.csv only).
   5. Ensure every store's reference rows (scripts/ensure_reference_rows.py,
      driven by the same registry).
-  6. Load every `in_db` store's CSV into the working copy.
-     IN THIS PR THAT SET IS EMPTY -- config/stores.yaml declares all six
-     existing stores as `extra_csv` -- so step 6 must be a correct no-op with
-     zero in_db stores. PR2 is what adds ONEM and WalStat here; this PR only
-     has to prove the assembly line runs end to end with nothing on it yet.
+  6. Load every `in_db` store's CSV into the working copy (ONEM, ONEM's
+     published rate, WalStat). Refuses first if the committed database still
+     holds rows for those indicators -- they would collide on the primary key.
+     The loader preserves vintage and is_latest exactly, which is what lets
+     the syncs that follow decide "new vintage or unchanged" against the full
+     history (src/db/vintages.py).
 
 Deterministic and idempotent: run this twice and the second run reaches the
 same state as the first (row-for-row), because every step is either
@@ -36,6 +39,7 @@ starts from the freshly rm'd file (the copy and the CSV loads).
 
 import argparse
 import shutil
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -59,6 +63,31 @@ def _run(cmd: list) -> None:
     result = subprocess.run(cmd, cwd=REPO_ROOT)
     if result.returncode != 0:
         raise StagingBuildError(f"step failed (exit {result.returncode}): {printable}")
+
+
+def _refuse_a_source_db_that_still_holds_in_db_rows(working_db: Path, stores) -> None:
+    """The committed database must not already carry an in_db store's rows --
+    a database from before the cutover, say. Loading the CSV on top would hit
+    the primary key halfway through; this says what is actually wrong first."""
+    indicators = sorted({i for s in stores for i in s.indicators})
+    if not indicators:
+        return
+    conn = sqlite3.connect(f"file:{working_db}?mode=ro", uri=True)
+    try:
+        held = conn.execute(
+            f"SELECT indicator_id, COUNT(*) FROM observations "
+            f"WHERE indicator_id IN ({','.join('?' for _ in indicators)}) "
+            f"GROUP BY indicator_id ORDER BY indicator_id",
+            indicators,
+        ).fetchall()
+    finally:
+        conn.close()
+    if held:
+        raise StagingBuildError(
+            f"the source database already holds rows for in_db store indicators {held[:5]} -- "
+            "those rows belong in their committed CSV, not the database. Is this a database "
+            "from before the ONEM/WalStat cutover?"
+        )
 
 
 def build(
@@ -104,10 +133,8 @@ def build(
     stores = load_stores(stores_path)
     to_load = in_db_stores(stores)
     if not to_load:
-        print(
-            "No in_db stores declared in the registry -- nothing to load into the "
-            "working database (expected in this PR; PR2 adds ONEM and WalStat here)."
-        )
+        print("No in_db stores declared in the registry -- nothing to load.")
+    _refuse_a_source_db_that_still_holds_in_db_rows(working_db, to_load)
     for store in to_load:
         _run(
             [

@@ -15,6 +15,14 @@ env:
   # repo's own pull_request-triggered workflows (GitHub's recursive-run guard), so ci.yml's
   # required "test" check would never appear on the bot's PR and it would sit BLOCKED forever.
   GH_TOKEN: ${{ secrets.BOT_PAT }}
+  # THE ONE DATABASE EVERY STEP BELOW READS AND WRITES, until the offload step
+  # at the end (docs/decisions/0006-stores-split-by-volume.md). It is the
+  # committed data/belgian_macro.db plus every in_db store's committed CSV
+  # (ONEM, ONEM's published rate, WalStat), assembled fresh each run and
+  # gitignored. The committed database is written exactly once, by
+  # scripts/offload_stores.py, after validation and every export -- so a run
+  # that fails anywhere before that changes no committed file at all.
+  WORKING_DB: data/local/working.db
 
 jobs:
   fetch:
@@ -44,59 +52,85 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Apply pending schema migrations
-        # Idempotent by design (schema_migrations tracking table), so it is
-        # safe to run every day. This is what brings migration 003's
-        # indicator_volume table into the committed store; the volume rules
-        # no-op quietly until it exists, so ordering it before the fetch
-        # simply means the first run after this lands starts collecting
-        # history immediately.
-        run: python -m src.db.migrate --db data/belgian_macro.db
+      - name: Assemble the working database
+        # NO continue-on-error: without the working copy there is nothing
+        # for any later step to read. Copies the committed database, applies
+        # pending migrations (idempotent), loads geography from
+        # config/geography/ (offline), ensures every registered store's
+        # reference rows, and loads every in_db store's CSV with its vintages
+        # and is_latest flags intact -- which is what lets the syncs below
+        # decide "new vintage or unchanged" against the full history rather
+        # than seeing every ONEM and WalStat cell as new.
+        run: python scripts/build_staging_db.py --working-db "$WORKING_DB"
+
+      # ── Every fetch, BEFORE validation ─────────────────────────────────────
+      #
+      # Until the cutover, ONEM, ONEM's rate and WalStat were synced AFTER the
+      # validation and after every export -- 84,031 of 85,970 observations
+      # never validated at all, and each day's new figures reaching the site a
+      # day late. Every sync now runs here, so validation sees everything and
+      # the exports publish what was fetched today.
+      #
+      # continue-on-error on each: a source being down must not throw away
+      # the day's other data. But partial data is no longer auto-merged --
+      # see "Check every source succeeded" below.
 
       - name: Fetch macro indicators
         id: fetch_macro
         continue-on-error: true
-        run: python belgian_macro_db.py --fetch --latest --export csv
+        run: python belgian_macro_db.py --db "$WORKING_DB" --fetch --latest --export csv
 
       - name: Sync to canonical schema
         id: sync_canonical
         continue-on-error: true
-        run: python scripts/sync_to_canonical.py --db data/belgian_macro.db
-
-      - name: Load Belgian geography
-        id: load_geography
-        continue-on-error: true
-        # Reads only the committed config/geography/*.csv (no network) -- see
-        # docs/features/geography.md. Idempotent, so safe to run every day;
-        # this is what makes observations.geo_id resolvable for any
-        # municipal-level source (Block F) instead of only 'be:country'.
-        run: python scripts/load_geography.py --db data/belgian_macro.db
+        run: python scripts/sync_to_canonical.py --db "$WORKING_DB"
 
       - name: Sync Statbel municipal indicators
         id: sync_statbel
         continue-on-error: true
-        # Block F -- docs/features/statbel_adapter.md. Depends on the
-        # geography load above for observations.geo_id to resolve.
-        run: python scripts/sync_statbel.py --db data/belgian_macro.db
+        # Block F -- docs/features/statbel_adapter.md. Resolves geo_ids
+        # against the geography the assemble step loaded.
+        run: python scripts/sync_statbel.py --db "$WORKING_DB"
 
-      - name: Ensure manual-source reference rows
-        # Every store's OBSERVATIONS live in a committed CSV, but name/unit
-        # metadata is read from the `indicators` table so there is exactly
-        # one metadata path (export_communes_csv.py) -- this inserts those
-        # reference rows for every store config/stores.yaml declares, driven
-        # by scripts/ensure_reference_rows.py rather than one hand-written
-        # step per store. Config only: no network, no hand-downloaded
-        # workbook, idempotent. (config/stores.yaml is PR1 of the pipeline
-        # repair -- the one place this list is now spelled out, instead of
-        # independently here, in manual_sources.yml, and in
-        # scripts/validate_data.py, three copies that had drifted apart.)
-        run: python scripts/ensure_reference_rows.py --db data/belgian_macro.db --stores config/stores.yaml
+      - name: Sync ONEM/RVA commune unemployment
+        id: sync_onem
+        continue-on-error: true
+        # The pipeline's first automated municipal source: onem.be is
+        # reachable from these runners, unlike statbel.fgov.be. Fetches the
+        # six .xls files and parses them in one step; ONEM names communes in
+        # French text with no NIS code, resolved against `geographies`.
+        run: python scripts/sync_onem.py --db "$WORKING_DB"
+
+      - name: Sync ONEM/RVA published unemployment rate
+        id: sync_onem_rates
+        continue-on-error: true
+        # ONEM's own CCI-DE over insured persons, taken as published (ADR
+        # 0005). A different host from the step above
+        # (interactivestats.services.rvaonem.fgov.be), so this is also the
+        # live check that the runner reaches it. Resolved by NIS code: the
+        # file's 565 codes must match today's municipalities exactly.
+        run: python scripts/sync_onem_rates.py --db "$WORKING_DB"
+
+      - name: Sync WalStat (IWEPS) municipal finance
+        id: sync_walstat
+        continue-on-error: true
+        # Block O, docs/features/walstat_adapter.md. The keyless IWEPS
+        # open-data API; refuses a partial year, a non-commune row or an
+        # unreadable value rather than loading it (rule 13).
+        run: python scripts/sync_walstat.py --db "$WORKING_DB"
+
+      - name: Fetch market data
+        id: fetch_stocks
+        continue-on-error: true
+        # Writes data/stocks.json only; no database.
+        run: python fetch_stocks.py
 
       - name: Validate the data before exporting
-        # Between sync and export deliberately: a `fail` here stops the run
-        # BEFORE anything is written to the published CSVs or committed.
-        # Validation that only logs is decoration -- see
-        # docs/features/validation.md. Warnings print and do not block.
+        id: validate
+        # AFTER every sync and BEFORE every export: a `fail` here stops the
+        # run before anything is exported, offloaded or committed. Validation
+        # that only logs is decoration -- see docs/features/validation.md.
+        # Warnings print and do not block.
         #
         # --record-volume writes the is_latest count per indicator ONLY if
         # this run passed, so tomorrow's row_collapse rule has a baseline.
@@ -116,7 +150,7 @@ jobs:
         run: |
           SUMMARY="$RUNNER_TEMP/validation-summary.md"
           set +e
-          python scripts/validate_data.py --db data/belgian_macro.db --record-volume \
+          python scripts/validate_data.py --db "$WORKING_DB" --record-volume \
             --summary-file "$SUMMARY"
           STATUS=$?
           set -e
@@ -130,257 +164,112 @@ jobs:
         # returning garbage) is already caught by the row_collapse/null_share
         # validation rules above, which DO block. --since today's date so
         # this reports only what THIS run changed, not all history.
-        run: python scripts/revisions_report.py --db data/belgian_macro.db --since "$(date -u +%Y-%m-%d)"
+        run: python scripts/revisions_report.py --db "$WORKING_DB" --since "$(date -u +%Y-%m-%d)"
+
+      # ── Exports, from the validated working database ───────────────────────
 
       - name: Export canonical CSV for the dashboard
         # Overwrites belgian_macro_export.csv (written above from the legacy
         # schema) with the canonical-schema version the dashboard now reads.
         # belgian_forecasts.csv, written above too, is untouched -- forecasts
         # stay on the legacy table, out of scope per docs/decisions/0001.
-        run: python scripts/export_canonical_csv.py --db data/belgian_macro.db --out data/belgian_macro_export.csv
+        run: python scripts/export_canonical_csv.py --db "$WORKING_DB" --out data/belgian_macro_export.csv
 
       - name: Export commune CSV for communes.html
-        # Municipal-level sibling of the export above -- communes.html reads
-        # this, the same way all_data.html reads belgian_macro_export.csv.
-        # --stores merges every extra_csv store config/stores.yaml declares,
-        # which is a committed CSV rather than rows in the database --
-        # statbel.fgov.be is unreachable from CI so population (and the other
-        # manual sources) can never be fetched here.
-        # See docs/decisions/0002-split-committed-stores.md.
+        # --stores merges every extra_csv store config/stores.yaml declares
+        # (the hand-loaded sources, never in any database). The in_db stores
+        # are already inside the working database.
         run: |
-          python scripts/export_communes_csv.py --db data/belgian_macro.db \
+          python scripts/export_communes_csv.py --db "$WORKING_DB" \
             --out data/communes_export.csv --stores config/stores.yaml
 
       - name: Export the full commune time series (internal, gitignored)
-        # Sibling to the snapshot export above: every period per (commune,
-        # indicator), not just the latest, plus every configured derived
-        # indicator computed over the whole history (Block G engine).
-        # docs/features/statbel_adapter.md's "a time-series view is a
-        # different, future feature" note -- this is that feature.
-        #
-        # --all-periods, to data/communes_history_full.csv: THIS copy feeds
-        # the two steps below, whose own contract is the complete series
-        # (site_payloads.md: "communes/{nis}.json ... full history"). It is
-        # gitignored and never committed -- ONEM (32.2 MB) and WalStat
-        # (45.2 MB) each pushed the OLD single committed file past the 40 MB
-        # guard in turn, each time "fixed" by raising the guard rather than
-        # the file. The step after this one writes the copy that actually
-        # gets committed.
+        # Every period per (commune, indicator), plus every configured
+        # derived indicator over the whole history (Block G engine), to
+        # data/communes_history_full.csv -- gitignored, never committed. It
+        # feeds the two steps below, whose contract is the complete series
+        # (site_payloads.md).
         run: |
-          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+          python scripts/export_communes_history_csv.py --db "$WORKING_DB" \
             --out data/communes_history_full.csv --all-periods --stores config/stores.yaml
 
       - name: Export the committed commune time series (last 10 years)
-        # THE FIX ITSELF: the committed data/communes_history.csv repeats
-        # five names, a region, a province and an arrondissement on every
-        # row back to 2005, for a download link nothing else on the site
-        # depends on (communes.html reads communes_table.json below, not
-        # this file). Trimmed to the last 10 calendar years by default; a
-        # researcher who wants the rest runs this same command with
-        # --all-periods, same as export_percentiles_csv.py already offers.
+        # The committed data/communes_history.csv, trimmed to the last 10
+        # calendar years; --all-periods gives a researcher the rest.
         run: |
-          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+          python scripts/export_communes_history_csv.py --db "$WORKING_DB" \
             --out data/communes_history.csv --stores config/stores.yaml
 
       - name: Precompute communes.html's table payload
-        # communes.html used to fetch communes_history.csv directly and
-        # re-derive its own table shape (parseCSV()+pivot()) in every
-        # visitor's browser -- 162,272 rows re-parsed and re-deduplicated on
-        # every page load, for a shape that never changes between visitors.
-        # ONEM pushed that CSV from 22.9 to 32.2 MB, which is what surfaced
-        # this as worth fixing rather than only raising the size guard.
         # Reads the FULL (gitignored) history, not the trimmed committed
-        # copy -- communes.html's own year selector spans 2005-2026 and
-        # would otherwise silently lose everything before the trim window.
+        # copy -- communes.html's own year selector spans 2005-2026.
         run: |
           python scripts/export_communes_table_json.py \
             --communes-history data/communes_history_full.csv \
             --out data/communes_table.json \
-            --db data/belgian_macro.db
+            --db "$WORKING_DB"
 
       - name: Export province/region/Belgium aggregates
-        # Block L -- docs/features/comparison.md. Feeds the comparison column
-        # on every commune page. Reads the UNRESTRICTED observation set
-        # (including communes merged away since) so a province total is not
-        # short by the communes that no longer exist -- measured at -24.4%
-        # for Limburg 2023 when that is got wrong.
+        # Block L -- docs/features/comparison.md. Reads the UNRESTRICTED
+        # observation set (including communes merged away since) so a
+        # province total is not short by the communes that no longer exist --
+        # measured at -24.4% for Limburg 2023 when that is got wrong.
         run: |
-          python scripts/export_aggregates_csv.py --db data/belgian_macro.db \
+          python scripts/export_aggregates_csv.py --db "$WORKING_DB" \
             --out data/aggregates.csv --stores config/stores.yaml
 
       - name: Export indicator metadata for the dashboard
         run: python -m src.exporters.metadata --out data/metadata/indicators.json
 
       - name: Export national and regional peer positions
-        # Block L -- docs/features/comparison.md. Latest period per indicator
-        # only: the full history is 174k rows / 22 MB against a 25 MB commit
-        # guard, for periods no page shows. --all-periods exists for a
-        # researcher who wants the rest.
+        # Block L -- latest period per indicator only; --all-periods exists
+        # for a researcher who wants the rest.
         run: |
-          python scripts/export_percentiles_csv.py --db data/belgian_macro.db \
+          python scripts/export_percentiles_csv.py --db "$WORKING_DB" \
             --out data/percentiles.csv --stores config/stores.yaml
 
       - name: Export per-entity site payloads for /local
-        # Block J -- docs/features/site_payloads.md. Reshapes the bulk CSVs
-        # written above into public/data/{national,communes/*,indicators/*,
-        # metadata/geographies}.json; writes nothing new, computes nothing
-        # new. Runs after validate_data.py above, which already blocked the
-        # job on failure, so validation-status is always "pass" here.
+        # Block J -- docs/features/site_payloads.md. The manifest's
+        # validation status is DERIVED from the validation step's outcome,
+        # not typed in: it used to be a hardcoded "pass" while most of the
+        # municipal data had never been validated.
         run: |
-          python scripts/export_site_payloads.py --db data/belgian_macro.db \
+          python scripts/export_site_payloads.py --db "$WORKING_DB" \
             --communes-history data/communes_history_full.csv \
             --communes-latest data/communes_export.csv \
             --national data/belgian_macro_export.csv \
             --out-dir public/data \
             --build-id "${{ github.run_id }}" \
-            --validation-status pass
+            --validation-status "${{ steps.validate.outcome == 'success' && 'pass' || 'fail' }}"
 
       - name: Generate permanent /local/{nis} pages
-        # Block L -- docs/features/comparison.md's "Permanent URLs". Runs
-        # AFTER export_site_payloads.py because it renders from those
-        # payloads: one statically-rendered, indexable page per commune, with
-        # the figures in the HTML rather than fetched by JavaScript, which is
-        # the whole basis of the SEO position (roadmap Step 49). Thin pages
-        # are refused rather than generated. The indicator route
-        # (/local/{nis}/{indicator}) is deliberately NOT generated -- 8,475
-        # files today and ~113,000 at the 200-indicator target, gated on a
-        # platform-limit check per the spec.
+        # Block L -- one statically-rendered page per commune, rendered from
+        # the payloads above. Thin pages are refused rather than generated.
         run: |
           python scripts/export_local_pages.py \
             --payload-dir public/data \
             --out-dir local \
-            --db data/belgian_macro.db \
+            --db "$WORKING_DB" \
             --build-id "${{ github.run_id }}"
 
-      - name: Fetch market data
-        id: fetch_stocks
-        continue-on-error: true
-        run: python fetch_stocks.py
-
-      - name: Sync ONEM/RVA commune unemployment
-        id: sync_onem
-        continue-on-error: true
-        # THE PIPELINE'S FIRST AUTOMATED MUNICIPAL SOURCE. Every other one is
-        # a hand download because statbel.fgov.be is unreachable from these
-        # runners; onem.be is not (run 34054441348 fetched 6/6, run
-        # 34056982618 put them in an artifact so their columns could actually
-        # be read). So these observations go into the daily database rather
-        # than a committed CSV -- ADR 0002 splits the stores on exactly that
-        # question.
-        #
-        # Fetches and parses in one step: scripts/sync_onem.py calls
-        # fetch_onem_raw.fetch_all() itself, then reads the six .xls files it
-        # cached. Depends on the geography load above, since ONEM names
-        # communes in French text with no NIS code and they are resolved
-        # against `geographies`.
-        #
-        # continue-on-error with the failure gate at the end of this job, the
-        # same shape as sync_statbel: a source being down must not throw away
-        # the day's other data, but must still fail the run visibly.
-        run: python scripts/sync_onem.py --db data/belgian_macro.db
-
-      - name: Sync ONEM/RVA published unemployment rate
-        id: sync_onem_rates
-        continue-on-error: true
-        # THE SECOND ONEM FEED, and the first current commune-level
-        # unemployment rate with a real labour-force denominator: ONEM's own
-        # CCI-DE over persons insured against unemployment, which they compute
-        # from ONEM, ONSS and INAMI registers. We do not divide anything --
-        # the quotient is taken as published (ADR 0005).
-        #
-        # A different host from the step above
-        # (interactivestats.services.rvaonem.fgov.be, not www.onem.be), so
-        # this step is also the live check that the runner reaches it. One
-        # plain GET of a 2 MB CSV, no session and no cookie needed, even
-        # though the page in front of it is a JSF application.
-        #
-        # Resolved by NIS code rather than by name, unlike sync_onem, so it
-        # depends on the geography load for a different reason: the file's 565
-        # codes must match the municipalities in force today exactly, in both
-        # directions, or it refuses.
-        run: python scripts/sync_onem_rates.py --db data/belgian_macro.db
-
-      - name: Sync WalStat (IWEPS) municipal finance
-        id: sync_walstat
-        continue-on-error: true
-        # THE SECOND AUTOMATED MUNICIPAL SOURCE, and the first that publishes
-        # NIS codes directly (Block O, docs/features/walstat_adapter.md).
-        # Nine series of municipal accounts per inhabitant for the Walloon
-        # communes, from the keyless IWEPS open-data API -- the runner reaches
-        # opendata.iweps.be the same way it reaches onem.be; this step is the
-        # first live check of that, not merely a plan.
-        #
-        # LANDS FOR TOMORROW'S EXPORTS, not today's, same as sync_onem right
-        # above it: this step runs after export_site_payloads.py and the
-        # /local page generation, so today's newly-fetched rows enter the
-        # committed database but are not reflected in today's build. Moving
-        # every sync ahead of every export is a bigger, unrelated change to
-        # this workflow's history -- not something to fold into this batch.
-        #
-        # The adapter refuses a partial year, a non-commune row or an
-        # unreadable value rather than loading it (rule 13), so a failure
-        # here is the API changing shape -- visible through the gate below,
-        # without discarding the day's other data. Needs the last-10-years
-        # trim on data/communes_history.csv landing in the same change as
-        # this step: loading these nine series once took that file past the
-        # 40 MB commit guard outright (measured 45.2 MB, 2026-09-11).
-        run: python scripts/sync_walstat.py --db data/belgian_macro.db
-
-      - name: Probe police.be crime statistics (reachability test)
-        id: fetch_police
-        continue-on-error: true
-        # NOT wired into any export yet -- see docs/data_catalog.md's
-        # police.be row and scripts/fetch_police_raw.py's docstring. The
-        # maintainer verified in a browser that this endpoint returns 200 and
-        # application/json with no login of any kind, but this pipeline's own
-        # network context is served an HTTP 403 "Maintenance" page on every
-        # request including the bare front page, and is handed no cookies, so
-        # no session can be started and the response shape cannot be read
-        # here. This step asks whether GitHub Actions' network is treated the
-        # same way -- exactly the question fetch_onem_raw.py answered for
-        # onem.be. If it 403s here too, remove this step and treat police.be
-        # as a manual-download source.
-        run: python scripts/fetch_police_raw.py
-
-      - name: Upload the police.be response as a workflow artifact
-        # Same reason as the ONEM artifact above: nobody has read this JSON's
-        # keys, and rule 13 forbids writing a parser against a guessed shape.
-        # Remove this once a real sync_police.py reads it directly.
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: police-raw-response
-          path: data/raw/police/
-          retention-days: 14
-          if-no-files-found: warn
+      - name: Offload the in_db stores and write the committed database
+        # NO continue-on-error. The only step that writes data/belgian_macro.db.
+        # Dumps every in_db store from the working database to its committed
+        # CSV, strips exactly those rows from a copy, VACUUMs it, verifies it
+        # (nothing offloaded left, no committed CSV row lost, foreign keys and
+        # integrity clean) and only then moves it over the committed file.
+        # Any refusal leaves every committed file as it was. Keeps the
+        # committed database at ~2 MB instead of the 42 MB that stopped this
+        # workflow on 2026-09-13.
+        run: python scripts/offload_stores.py --working-db "$WORKING_DB" --committed-db data/belgian_macro.db
 
       - name: Guard against oversized data files
-        # Raised from 25 MB to 40 MB when ONEM's seven indicators x 565
-        # communes x 10 years took data/communes_history.csv from 22.9 MB to
-        # 32.5 MB. The threshold is a repo-health tripwire, not a technical
-        # limit (GitHub warns at 50 MB), and it did its job: it caught that the
-        # denormalized full-history CSV does not scale -- it repeats every
-        # commune's five names, region, province and arrondissement on all
-        # 163,967 rows, and communes.html fetches the whole thing IN THE
-        # BROWSER. See docs/steps: that file needs the treatment
-        # export_percentiles_csv.py already got (trimmed scope plus an
-        # --all-periods flag for researchers), which is a Block J/K change,
-        # not something to bolt onto a data load.
-        #
-        # SCOPED TO FILES GIT WOULD ACTUALLY COMMIT (2026-09-12). The message
-        # says "refusing to commit", but `find` also matched
-        # data/communes_history_full.csv -- which .gitignore excludes, and
-        # which the step that builds it above calls "gitignored and never
-        # committed". A file that is never committed cannot bloat the
-        # repository, so failing the whole daily run over it threw away every
-        # other source's data for nothing. Measured on run 34699560386 that
-        # file is ~37.5 MB against this 39.06 MB threshold (find's `k` is
-        # 1024 bytes), so it was ~1.5 MB from stopping the pipeline.
-        #
-        # The THRESHOLD IS UNCHANGED and every committed file is still
-        # checked. docs/steps records the decision to fix the next overrun at
-        # the source rather than raise this guard a third time; that still
-        # holds.
+        # A repo-health tripwire, not a technical limit (GitHub warns at
+        # 50 MB). Scoped to files git would actually commit: a gitignored
+        # file (data/communes_history_full.csv, data/local/**) cannot bloat
+        # the repository. THE THRESHOLD IS UNCHANGED -- docs/steps records the
+        # decision to fix the next overrun at the source rather than raise
+        # this guard a third time.
         run: |
           OVERSIZED=""
           while IFS= read -r f; do
@@ -395,6 +284,17 @@ jobs:
             done
             exit 1
           fi
+
+      - name: Check every source succeeded
+        id: sources
+        # BEFORE the PR, not after it. This check used to run last, after the
+        # PR was opened and auto-merge enabled -- so a day on which a source
+        # failed merged its partial data by itself and only then went red.
+        # The PR is still opened (the data that did arrive is not thrown
+        # away), but it only auto-merges when every source succeeded.
+        run: |
+          echo "macro=${{ steps.fetch_macro.outcome }} sync=${{ steps.sync_canonical.outcome }} statbel=${{ steps.sync_statbel.outcome }} onem=${{ steps.sync_onem.outcome }} onem_rates=${{ steps.sync_onem_rates.outcome }} walstat=${{ steps.sync_walstat.outcome }} market=${{ steps.fetch_stocks.outcome }}"
+          echo "all_ok=${{ steps.fetch_macro.outcome == 'success' && steps.sync_canonical.outcome == 'success' && steps.sync_statbel.outcome == 'success' && steps.sync_onem.outcome == 'success' && steps.sync_onem_rates.outcome == 'success' && steps.sync_walstat.outcome == 'success' && steps.fetch_stocks.outcome == 'success' }}" >> "$GITHUB_OUTPUT"
 
       - name: Stage data changes
         id: stage
@@ -425,14 +325,15 @@ jobs:
             --body "Automated daily fetch of Belgian macro indicators and market data.
 
           Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, market=${{ steps.fetch_stocks.outcome }}
+          Pipeline outcome: macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, onem_rates=${{ steps.sync_onem_rates.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}
+          Auto-merge: ${{ steps.sources.outputs.all_ok == 'true' && 'enabled' || 'NOT enabled -- a source failed; review and merge by hand' }}
 
           $(cat "$validation_summary" 2>/dev/null || echo '_Validation summary unavailable._')")
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           echo "Opened $PR_URL"
 
       - name: Enable auto-merge
-        if: steps.stage.outputs.has_changes == 'true'
+        if: steps.stage.outputs.has_changes == 'true' && steps.sources.outputs.all_ok == 'true'
         run: |
           if ! gh pr merge --auto --squash --delete-branch "${{ steps.pr.outputs.pr_url }}"; then
             echo "::error::Could not enable auto-merge on ${{ steps.pr.outputs.pr_url }} — it will NOT merge itself. Check the required 'test' check and merge manually."
@@ -440,7 +341,7 @@ jobs:
           fi
 
       - name: Fail run if any source failed
-        if: steps.fetch_macro.outcome == 'failure' || steps.sync_canonical.outcome == 'failure' || steps.load_geography.outcome == 'failure' || steps.sync_statbel.outcome == 'failure' || steps.sync_onem.outcome == 'failure' || steps.sync_onem_rates.outcome == 'failure' || steps.sync_walstat.outcome == 'failure' || steps.fetch_stocks.outcome == 'failure'
+        if: steps.sources.outputs.all_ok != 'true'
         run: |
-          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, geography=${{ steps.load_geography.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, onem_rates=${{ steps.sync_onem_rates.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}). Partial data was still committed; see the run log and fetch_runs/legacy_fetch_log."
+          echo "::error::A pipeline step failed (macro=${{ steps.fetch_macro.outcome }}, sync=${{ steps.sync_canonical.outcome }}, statbel=${{ steps.sync_statbel.outcome }}, onem=${{ steps.sync_onem.outcome }}, onem_rates=${{ steps.sync_onem_rates.outcome }}, walstat=${{ steps.sync_walstat.outcome }}, market=${{ steps.fetch_stocks.outcome }}). The data that did arrive is in ${{ steps.pr.outputs.pr_url || 'no PR (nothing changed)' }}, which was NOT auto-merged. See the run log and fetch_runs/legacy_fetch_log."
           exit 1

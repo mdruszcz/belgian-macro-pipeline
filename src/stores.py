@@ -218,6 +218,15 @@ def verify_indicator_lists(stores: dict[str, Store]) -> list[str]:
     silently stopped appearing (or a new one that silently started) would
     otherwise go unnoticed.
 
+    ONE ASYMMETRY, for in_db stores only: a declared indicator may have no
+    rows yet. An in_db store's CSV is a dump of what the daily fetch has
+    delivered so far, and an indicator is configured (and must be declared,
+    or scripts/offload_stores.py refuses to run) before its first successful
+    fetch -- UNEMPLOYMENT_RATE_BIT was exactly that on the day of the
+    cutover. An extra_csv store is loaded by hand in one go, so there a
+    declared-but-absent indicator is still drift. An undeclared indicator
+    in the CSV is drift in both modes.
+
     Returns a list of human-readable problem strings; empty means clean.
     Does not raise, so a caller can report every store's drift in one pass
     rather than stopping at the first (CLAUDE.md rule 9's spirit -- see
@@ -231,7 +240,7 @@ def verify_indicator_lists(stores: dict[str, Store]) -> list[str]:
         extra = sorted(declared - actual)
         if missing:
             problems.append(f"{name}: CSV has indicator(s) not declared in the registry: {missing}")
-        if extra:
+        if extra and store.mode == MODE_EXTRA_CSV:
             problems.append(f"{name}: registry declares indicator(s) absent from the CSV: {extra}")
     return problems
 

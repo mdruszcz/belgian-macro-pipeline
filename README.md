@@ -76,19 +76,24 @@ hand-loaded stores, so export generation is identical whichever path produced th
 
 ## The two committed stores
 
-Manual-only sources live in CSV, not in the daily-committed database — see
-[ADR 0002](docs/decisions/0002-split-committed-stores.md) for the measurements behind that split.
+Bulk observations live in committed CSVs, not in the committed database — see
+[ADR 0002](docs/decisions/0002-split-committed-stores.md) and
+[ADR 0006](docs/decisions/0006-stores-split-by-volume.md). Every store is declared once, in
+[`config/stores.yaml`](config/stores.yaml).
 
 | Store | Holds | Re-committed |
 |---|---|---|
-| [`data/belgian_macro.db`](data/belgian_macro.db) | everything CI can fetch: national macro, `LOCAL_UNITS_BY_COMMUNE`, geography, fetch/volume history | daily, by the bot |
+| [`data/belgian_macro.db`](data/belgian_macro.db) | national macro, `LOCAL_UNITS_BY_COMMUNE`, geography, indicator metadata, fetch/volume history | daily, by the bot |
+| `data/onem_observations.csv`, `data/onem_rates_observations.csv`, `data/walstat_observations.csv` | ONEM/RVA unemployment, ONEM's published rate, WalStat municipal finance | daily, by the bot |
 | [`data/population_observations.csv`](data/population_observations.csv) | population by commune + three age bands | only when refreshed by hand |
 | [`data/fiscal_income_observations.csv`](data/fiscal_income_observations.csv) | four fiscal income/tax totals by commune | only when refreshed by hand |
 
 `statbel.fgov.be` is unreachable from CI (connection-level block, confirmed three ways), so those
 files are downloaded by hand. The procedure is in
 [manual_sources.md](docs/features/manual_sources.md); the split is invisible downstream, because
-every exporter reads both stores.
+every exporter reads the assembled working copy, `data/local/working.db` (gitignored), built by
+`python scripts/build_staging_db.py` (`make assemble`) from the database plus the ONEM and WalStat
+CSVs. Never validate or export from `data/belgian_macro.db` on its own: it no longer holds them.
 
 ## Published files
 
@@ -141,12 +146,12 @@ python belgian_macro_db.py --fetch --latest
 python belgian_macro_db.py --export csv       # or json
 python belgian_macro_db.py --history          # fetch log
 
-# Canonical pipeline
-python -m src.db.migrate --db data/belgian_macro.db
-python scripts/sync_to_canonical.py --db data/belgian_macro.db
-python scripts/load_geography.py  --db data/belgian_macro.db
-python scripts/validate_data.py   --db data/belgian_macro.db     # non-zero exit = blocked
-python scripts/revisions_report.py --db data/belgian_macro.db
+# Canonical pipeline -- against the working copy, then offload to commit
+python scripts/build_staging_db.py                                  # data/local/working.db
+python scripts/sync_to_canonical.py --db data/local/working.db
+python scripts/validate_data.py                                     # non-zero exit = blocked
+python scripts/revisions_report.py --db data/local/working.db
+python scripts/offload_stores.py                                    # writes the committed files
 
 # Exports
 python scripts/export_canonical_csv.py --db data/belgian_macro.db --out data/belgian_macro_export.csv
@@ -203,7 +208,8 @@ pytest -q                 # 340 tests
 ruff check .
 black --check .
 python scripts/validate_config.py     # config schema + cross-file references
-python scripts/validate_data.py       # the committed stores
+python scripts/build_staging_db.py    # assemble the working copy first
+python scripts/validate_data.py       # the committed stores, via the working copy
 ```
 
 CI (`ci.yml`) runs all of the above on every PR and on pushes to `develop`/`main`. Never commit

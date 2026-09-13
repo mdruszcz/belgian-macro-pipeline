@@ -14,7 +14,14 @@
 # `make fetch` is what CI runs daily to bring in new data.
 
 PYTHON ?= python
-DB     ?= data/belgian_macro.db
+# Two databases since the ONEM/WalStat cutover (docs/decisions/0006).
+# COMMITTED_DB is the small committed file; nothing in `make all` writes it.
+# DB is the disposable working copy `make assemble` builds from it plus every
+# in_db store's CSV -- what every sync, the validation and every export read.
+# Exporting from the committed file alone would publish pages with ONEM and
+# WalStat silently missing.
+COMMITTED_DB ?= data/belgian_macro.db
+DB           ?= data/local/working.db
 
 # The one declaration of every committed observation store (config/stores.yaml,
 # src/stores.py) -- PR1 of the pipeline repair. Replaces the old EXTRA
@@ -32,11 +39,12 @@ DB     ?= data/belgian_macro.db
 # loudly if it cannot (CLAUDE.md rule 13).
 STORES := config/stores.yaml
 
-.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder assemble test fetch clean help
+.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder assemble offload test fetch clean help
 
-## all: install deps, rebuild the database's own structure, regenerate every
-## published export, and run the tests. No network. This is the gate target.
-all: install schema reference validate exports test-full
+## all: install deps, assemble the working database from what is committed,
+## validate it, regenerate every published export, and run the tests. No
+## network, and the committed database is left untouched. This is the gate target.
+all: install assemble validate exports test-full
 	@echo ""
 	@echo "Rebuilt from committed data and tests pass."
 
@@ -44,9 +52,9 @@ all: install schema reference validate exports test-full
 install:
 	$(PYTHON) -m pip install -q -r requirements.txt
 
-## schema: apply migrations and load the geography reference data. Both are
-## idempotent and offline -- geography comes from config/geography/, not the
-## network.
+## schema: apply migrations and load the geography reference data into $(DB).
+## Both are idempotent and offline -- geography comes from config/geography/,
+## not the network. `assemble` already does this; kept for ad hoc use.
 schema:
 	$(PYTHON) -m src.db.migrate --db $(DB)
 	$(PYTHON) scripts/load_geography.py --db $(DB)
@@ -57,16 +65,13 @@ schema:
 ## no network, no workbook. Driven by $(STORES) (scripts/ensure_reference_rows.py)
 ## rather than one hand-written line per store -- this used to be six lines
 ## here, again in each workflow, and used to have NO line for population
-## (sync_population.py had no --reference-rows-only flag until this PR).
+## (sync_population.py had no --reference-rows-only flag until PR1 of the pipeline repair).
 ##
-## sync_onem_rates.py is run directly rather than through the registry: ONEM
-## is not a committed store in this PR (it is fetched live daily and lives in
-## data/belgian_macro.db, not a CSV -- see daily_fetch.yml), so it has no
-## entry in config/stores.yaml yet. PR2 adds it as an `in_db` store; until
-## then this one line stays here rather than being silently dropped.
+## ONEM, ONEM's rate and WalStat are registry stores too since the cutover,
+## so the one line that used to sit here for sync_onem_rates.py is gone.
+## `assemble` already does this; kept for ad hoc use.
 reference:
 	$(PYTHON) scripts/ensure_reference_rows.py --db $(DB) --stores $(STORES)
-	$(PYTHON) scripts/sync_onem_rates.py    --db $(DB) --reference-rows-only
 
 ## validate: Block H's rules. Fails the build on a data problem, which is the
 ## entire point of it existing (a validation step that only logs is decoration).
@@ -147,17 +152,22 @@ boundaries:
 builder:
 	$(PYTHON) scripts/serve_builder.py
 
-## assemble: build the disposable working database at data/local/working.db
-## from the committed data/belgian_macro.db plus every `in_db` store in
-## $(STORES) (scripts/build_staging_db.py). NOT wired into `all`, CI or
-## either workflow -- that cutover is a separate, atomic change (PR2 of the
-## pipeline repair); this target exists so the assembly line can be run and
-## inspected on its own today. In_db stores are empty in this PR (all six
-## existing stores are extra_csv), so this currently just proves the
-## rm -> copy -> migrate -> geography -> reference-rows chain works with
-## nothing to load at the end.
+## assemble: build the disposable working database at $(DB) from
+## $(COMMITTED_DB) plus every `in_db` store in $(STORES)
+## (scripts/build_staging_db.py): copy, migrate, geography, reference rows,
+## then ONEM, ONEM's rate and WalStat with their vintages intact. Rebuilt from
+## scratch every time, so it is safe to re-run.
 assemble:
-	$(PYTHON) scripts/build_staging_db.py --source-db $(DB) --stores $(STORES)
+	$(PYTHON) scripts/build_staging_db.py --source-db $(COMMITTED_DB) --working-db $(DB) --stores $(STORES)
+
+## offload: the reverse of assemble, and the only target that writes
+## $(COMMITTED_DB). Dumps every in_db store from $(DB) to its committed CSV
+## and writes the committed database without those rows
+## (scripts/offload_stores.py). Refuses, changing nothing, if a committed row
+## would be lost. NOT part of `all` -- only needed after `make fetch`, to
+## commit what was fetched; daily_fetch.yml runs it for CI.
+offload:
+	$(PYTHON) scripts/offload_stores.py --working-db $(DB) --committed-db $(COMMITTED_DB) --stores $(STORES)
 
 ## test: THE EVERYDAY LOOP -- every test that needs neither a browser nor the
 ## generated site. Sub-minute is the target, because a 14-minute default loop
@@ -193,11 +203,12 @@ test-generated-site:
 test-full:
 	$(PYTHON) -m pytest tests/ -q
 
-## fetch: pull new data from the sources CI can reach. NOT part of `all` --
-## needs the network, and the manual sources need hand-downloaded files under
-## data/raw/ that are gitignored. This is what daily_fetch.yml runs.
+## fetch: pull new data from the sources CI can reach, into $(DB). NOT part
+## of `all` -- needs the network, and the manual sources need hand-downloaded
+## files under data/raw/ that are gitignored. This is what daily_fetch.yml
+## runs. Order: `make assemble fetch validate exports offload`.
 fetch:
-	$(PYTHON) belgian_macro_db.py --fetch --latest --export csv
+	$(PYTHON) belgian_macro_db.py --db $(DB) --fetch --latest --export csv
 	$(PYTHON) scripts/sync_to_canonical.py --db $(DB)
 	$(PYTHON) scripts/sync_statbel.py --db $(DB)
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
@@ -205,7 +216,7 @@ fetch:
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
 
 ## clean: remove generated artifacts that are safe to regenerate. Deliberately
-## does NOT touch data/*.csv or the database -- those are committed stores, and
+## does NOT touch data/*.csv or the committed database -- those are committed stores, and
 ## a `clean` that deletes hand-downloaded or committed data would be a trap.
 clean:
 	rm -rf local/ public/data/communes public/data/indicators

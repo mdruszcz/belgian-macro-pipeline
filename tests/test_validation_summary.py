@@ -81,19 +81,34 @@ def test_the_row_count_is_carried_through(tmp_path):
 # --- end to end ------------------------------------------------------------
 
 
-@pytest.mark.skipif(
-    not (REPO / "data" / "belgian_macro.db").is_file(),
-    reason="database not built in this working tree",
-)
+def test_the_cli_refuses_a_missing_database_instead_of_creating_one(tmp_path):
+    """sqlite3.connect creates an empty file for a path that does not exist,
+    and every rule would then run against nothing. Since the working copy
+    became the default (docs/decisions/0006) a missing one is the likely
+    mistake -- it must stop, not fall back to the committed file."""
+    missing = tmp_path / "working.db"
+    result = subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "validate_data.py"), "--db", str(missing)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=REPO,
+        timeout=60,
+    )
+    assert result.returncode == 2
+    assert "make assemble" in result.stderr
+    assert not missing.exists()
+
+
 @pytest.mark.slow
-def test_the_cli_writes_a_summary_against_the_real_store(tmp_path):
+def test_the_cli_writes_a_summary_against_the_real_store(tmp_path, working_db):
     path = tmp_path / "summary.md"
     result = subprocess.run(
         [
             sys.executable,
             str(REPO / "scripts" / "validate_data.py"),
             "--db",
-            str(REPO / "data" / "belgian_macro.db"),
+            str(working_db),
             "--summary-file",
             str(path),
         ],
