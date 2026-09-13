@@ -219,13 +219,23 @@ def _read_national(csv_path: Path) -> dict[str, dict]:
 
 
 def _build_geographies(db_path: Path) -> list[dict]:
-    """Every currently-valid geography with its trilingual name and its
+    """Every currently-valid BELGIAN geography with its trilingual name and its
     region/province/arrondissement ancestry, for Block K's search and Block
-    L's comparison picker."""
+    L's comparison picker.
+
+    BELGIAN ONLY, by the `be:` prefix every Belgian geo_id carries. Since
+    pipeline repair part 3 the geographies table also holds the places the
+    foreign national series belong to (de:country, ea:aggregate, ...), which
+    have no NIS code. `ORDER BY level, nis_code` sorts a NULL nis_code first,
+    so de:country would become the first `country` row -- and map.html and
+    local.html both take the first `country` row as Belgium (map.html's "all
+    of Belgium" scope, local.html's comparison root). Measured, not guessed:
+    without this filter the export's first country was de:country."""
     conn = sqlite3.connect(str(db_path))
     rows = conn.execute("""
         SELECT geo_id, nis_code, level, name_en, name_fr, name_nl, parent_geo_id
-        FROM geographies WHERE valid_to IS NULL ORDER BY level, nis_code
+        FROM geographies WHERE valid_to IS NULL AND geo_id LIKE 'be:%'
+        ORDER BY level, nis_code
         """).fetchall()
     conn.close()
 

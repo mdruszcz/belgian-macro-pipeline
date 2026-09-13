@@ -217,6 +217,47 @@ def test_geographies_metadata_ancestor_walk_resolves_to_a_real_region(tmp_path):
     assert parent["level"] == "region"
 
 
+def test_a_foreign_geography_never_reaches_the_site_or_displaces_belgium(tmp_path):
+    """The foreign national series' places (de:country, eu27_2020:aggregate)
+    share the geographies table since pipeline repair part 3. They have no
+    NIS code, a NULL sorts first, and map.html and local.html both take the
+    first `country` row as Belgium -- measured: without the filter, the real
+    export's first country was de:country."""
+    db_path = tmp_path / "geo.db"
+    _geo_db(db_path)
+    conn = sqlite3.connect(str(db_path))
+    conn.executemany(
+        "INSERT INTO geographies (geo_id, nis_code, level, name_nl, name_fr, name_en, "
+        "parent_geo_id, valid_from) VALUES (?, NULL, ?, ?, ?, ?, NULL, ?)",
+        [
+            ("de:country", "country", "Duitsland", "Allemagne", "Germany", "1990-10-03"),
+            ("eu27_2020:aggregate", "eu_aggregate", "EU27", "UE27", "EU27", "2020-02-01"),
+        ],
+    )
+    conn.commit()
+    conn.close()
+
+    history_csv = tmp_path / "history.csv"
+    _write(history_csv, HISTORY_HEADER, [])
+    latest_csv = tmp_path / "latest.csv"
+    _write(latest_csv, LATEST_HEADER, [])
+    national_csv = tmp_path / "national.csv"
+    national_csv.write_text(
+        "indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at\n",
+        encoding="utf-8",
+    )
+    out_dir = tmp_path / "public"
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
+
+    geos = json.loads((out_dir / "metadata" / "geographies.json").read_text(encoding="utf-8"))[
+        "geographies"
+    ]
+    assert all(g["geo_id"].startswith("be:") for g in geos)
+    assert next(g for g in geos if g["level"] == "country")["geo_id"] == "be:country"
+
+
 def test_manifest_row_counts_match_generated_payload_counts(tmp_path):
     db_path = tmp_path / "db.sqlite"
     _geo_db(db_path)

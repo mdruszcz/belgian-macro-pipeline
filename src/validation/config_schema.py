@@ -165,13 +165,28 @@ def load_and_validate_all(indicators_dir: Path, sources_dir: Path) -> tuple[dict
     return indicators, sources
 
 
+FETCHABLE_NATIONAL_ADAPTERS = ("nbb", "dbnomics")
+
+
+def has_fetchable_national_adapter(indicator: dict, sources: dict) -> bool:
+    """Whether the daily national fetch (belgian_macro_db.py) delivers this
+    indicator into legacy_observations -- the adapters that fetch, whichever
+    country the series describes."""
+    return sources[indicator["source_id"]]["adapter"] in FETCHABLE_NATIONAL_ADAPTERS
+
+
 def is_canonical_eligible(indicator: dict, sources: dict) -> bool:
-    """Whether this indicator belongs in the canonical schema/dashboard
-    pipeline. Deliberately NOT "does it have a display block" -- e.g.
-    EC_CONS_CONF_BE is Belgian data with no dashboard row of its own and is
-    still eligible; EUROSTAT_GDP_Q_MEUR_DE has the same shape but is German
-    data and is not. The real criterion is country + a fetchable adapter."""
+    """Whether this indicator is a BELGIAN national series of the canonical
+    schema/dashboard pipeline, stored under be:country. Deliberately NOT
+    "does it have a display block" -- e.g. EC_CONS_CONF_BE is Belgian data
+    with no dashboard row of its own and is still eligible.
+
+    A foreign series (EUROSTAT_GDP_Q_MEUR_DE, LABOUR_COST_FR, ...) is not
+    eligible HERE, but that no longer means it stays on the legacy tables:
+    scripts/port_existing_indicators.py's geography_for_indicator() places it
+    under its own country or aggregate. Reading "not Belgian" as "not
+    canonical" is what stranded ten configured foreign series in
+    legacy_observations until pipeline repair part 3."""
     if indicator.get("country", "BE") != "BE":
         return False
-    source = sources[indicator["source_id"]]
-    return source["adapter"] in ("nbb", "dbnomics")
+    return has_fetchable_national_adapter(indicator, sources)

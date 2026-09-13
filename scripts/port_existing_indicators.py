@@ -41,7 +41,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from belgian_macro_db import CONFIG_DIR, SOURCES  # noqa: E402
 from src.fetchers.eurostat import EurostatSource  # noqa: E402
 from src.fetchers.nbb import NBBSource  # noqa: E402
-from src.validation.config_schema import is_canonical_eligible, load_and_validate_all  # noqa: E402
+from src.validation.config_schema import (  # noqa: E402
+    has_fetchable_national_adapter,
+    is_canonical_eligible,
+    load_and_validate_all,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s", datefmt="%H:%M:%S"
@@ -135,15 +139,25 @@ COUNTRY_GEOS = {
         "population": None,
         "area_km2": None,
     },
-}
-
-INTERNATIONAL_CANONICAL_INDICATORS = {
-    "EUROSTAT_GDP_Q_MEUR",
-    "EUROSTAT_GDP_Q_MEUR_DE",
-    "EUROSTAT_GDP_Q_MEUR_EA",
-    "EUROSTAT_GDP_Q_MEUR_ES",
-    "EUROSTAT_GDP_Q_MEUR_FR",
-    "EUROSTAT_GDP_Q_MEUR_NL",
+    # Eurostat's EU27_2020: the fixed 27-member composition after the United
+    # Kingdom left on 2020-01-31, which Eurostat back-casts over the whole
+    # series. Named after that composition rather than plain "eu", so a later
+    # enlargement is a different geography, not a silent redefinition of this
+    # one. EC_CONS_CONF_EU's fetch query asks for exactly this code.
+    "EU": {
+        "geo_id": "eu27_2020:aggregate",
+        "nis_code": None,
+        "level": "eu_aggregate",
+        "name_nl": "Europese Unie (EU27)",
+        "name_fr": "Union européenne (UE27)",
+        "name_en": "European Union (EU27)",
+        "parent_geo_id": None,
+        "valid_from": "2020-02-01",
+        "valid_to": None,
+        "successor_geo_id": None,
+        "population": None,
+        "area_km2": None,
+    },
 }
 
 # SDMX CL_OBS_STATUS -> canonical status enum. Any code not listed here is a
@@ -195,13 +209,36 @@ def source_id_for(agency: str) -> str:
     return agency.lower().replace("/", "_").replace(" ", "_")
 
 
+class UnknownCountryError(ValueError):
+    """A fetched indicator declares a country this pipeline has no geography for."""
+
+
 def geography_for_indicator(code: str, indicator: dict, sources: dict) -> dict | None:
+    """The geography a national-fetch indicator's observations belong to, or
+    None when the national fetch does not deliver it at all (a municipal or
+    hand-loaded source).
+
+    Every configured indicator the national fetch delivers gets one: Belgian
+    series be:country, foreign ones their own country or aggregate from
+    COUNTRY_GEOS. This used to be an allowlist of the six GDP series, and the
+    daily sync (scripts/sync_to_canonical.py) did not consult it at all -- so
+    the five foreign GDP series, EC_CONS_CONF_EU and four LABOUR_COST_* series
+    were fetched every day and never reached `observations`.
+
+    A fetched indicator whose country has no geography RAISES rather than
+    being skipped (CLAUDE.md rule 13): skipping quietly is exactly how those
+    ten series went missing."""
+    if not has_fetchable_national_adapter(indicator, sources):
+        return None
     if is_canonical_eligible(indicator, sources):
         return BE_COUNTRY_GEO
-    if code not in INTERNATIONAL_CANONICAL_INDICATORS:
-        return None
-    country = indicator.get("country", "BE")
-    return COUNTRY_GEOS.get(country)
+    country = indicator.get("country")
+    if country not in COUNTRY_GEOS:
+        raise UnknownCountryError(
+            f"{code} declares country {country!r}, which has no geography in "
+            f"COUNTRY_GEOS ({sorted(COUNTRY_GEOS)}). Add one; refusing to drop the series."
+        )
+    return COUNTRY_GEOS[country]
 
 
 def port(db_path: Path, run_date: str | None = None) -> None:

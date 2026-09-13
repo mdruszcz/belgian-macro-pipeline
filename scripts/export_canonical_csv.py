@@ -1,8 +1,18 @@
 """
 Export the canonical schema's latest dashboard observations.
 
-Belgium rows stay visible as ordinary dashboard series; DE/FR/NL GDP rows are
-exported as helper series for dashboard.html's existing INT_GDP_COMP formula.
+Belgium only: every row is a be:country observation. The file has no geography
+column, and everything downstream of it reads each row as Belgian --
+export_explorer_payloads.py writes each code's series under be:country, and
+export_site_payloads.py puts it in national.json.
+
+That is why the DE/FR/NL GDP "helper series" this export used to let through
+for dashboard.html's INT_GDP_COMP formula are gone. They produced no rows for
+as long as the daily sync dropped foreign series; once pipeline repair part 3
+made them arrive, the explorer published Germany's GDP labelled be:country
+(measured on the real data). The foreign series live in `observations` under
+their own geography; a page that compares countries needs a payload that says
+which country each series is, not a Belgian file with guests in it.
 
 `status` is mapped back to the single-letter convention the frontend
 branches on: final->A, provisional->P, revised->R, estimate->E,
@@ -35,12 +45,6 @@ STATUS_TO_LETTER = {
     "na": "N",
 }
 
-GDP_COMPARISON_HELPERS = (
-    "EUROSTAT_GDP_Q_MEUR_DE",
-    "EUROSTAT_GDP_Q_MEUR_FR",
-    "EUROSTAT_GDP_Q_MEUR_NL",
-)
-
 
 def status_to_obs_status(status: str) -> str:
     return STATUS_TO_LETTER.get(status, "")
@@ -48,8 +52,7 @@ def status_to_obs_status(status: str) -> str:
 
 def export_canonical_csv(db_path: Path, out_path: Path) -> int:
     conn = sqlite3.connect(str(db_path))
-    rows = conn.execute(
-        """
+    rows = conn.execute("""
         SELECT o.indicator_id, i.name_en, o.period, o.value, o.status,
                i.unit, s.agency, o.created_at
         FROM observations o
@@ -57,11 +60,9 @@ def export_canonical_csv(db_path: Path, out_path: Path) -> int:
         JOIN sources s ON i.source_id = s.source_id
         JOIN geographies g ON o.geo_id = g.geo_id
         WHERE o.is_latest = 1
-          AND (o.geo_id = 'be:country' OR o.indicator_id IN (?, ?, ?))
+          AND o.geo_id = 'be:country'
         ORDER BY o.indicator_id, o.period
-        """,
-        GDP_COMPARISON_HELPERS,
-    ).fetchall()
+        """).fetchall()
     conn.close()
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

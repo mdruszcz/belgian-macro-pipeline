@@ -104,7 +104,10 @@ def test_export_excludes_non_latest_rows(tmp_path):
     assert "2.0" in lines[1]
 
 
-def test_export_includes_de_fr_nl_gdp_helpers(tmp_path):
+def test_export_keeps_foreign_series_out_of_the_belgian_file(tmp_path):
+    """The file has no geography column and every consumer reads a row as
+    Belgian -- the explorer wrote Germany's GDP under be:country the day the
+    foreign series started arriving. No foreign row, helper or not."""
     db_path = tmp_path / "test.db"
     migrate.run(db_path, migrations_dir=REAL_MIGRATIONS_DIR)
     conn = sqlite3.connect(str(db_path))
@@ -151,9 +154,9 @@ def test_export_includes_de_fr_nl_gdp_helpers(tmp_path):
     out_path = tmp_path / "export.csv"
     n = export_canonical_csv(db_path, out_path)
 
-    assert n == 1
+    assert n == 0
     text = out_path.read_text()
-    assert "EUROSTAT_GDP_Q_MEUR_DE,GDP DE,2024-Q1,100.0,A,index_2010,Eurostat" in text
+    assert "EUROSTAT_GDP_Q_MEUR_DE" not in text
     assert "EUROSTAT_GDP_Q_MEUR_ES" not in text
 
 
