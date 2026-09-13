@@ -11,7 +11,7 @@ still run, and the run ends red. This coordinator reproduces that:
   1. writes a per-run source manifest, every outcome `not_run`;
   2. stops (exit 1, no exports) if the working database cannot be assembled --
      the workflow's assemble step has no continue-on-error either;
-  3. runs fetch_sources and records each of the seven tracked outcomes from
+  3. runs fetch_sources and records each of the eight tracked outcomes from
      the Dagster run result (not from fetch_runs: fetch_stocks.py never
      writes there, and a crash can come before any row is written);
   4. ALWAYS runs validate_and_export, handing it this run's manifest path;

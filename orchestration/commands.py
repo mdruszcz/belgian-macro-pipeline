@@ -18,7 +18,7 @@ class Command:
     # Files or directories the command writes, for the asset's metadata.
     outputs: tuple[str, ...] = ()
     # The step id in daily_fetch.yml whose outcome decides auto-merge today.
-    # Exactly these seven are tracked in the coordinator's source manifest.
+    # Exactly these eight are tracked in the coordinator's source manifest.
     workflow_step: str | None = None
     # fetch_runs source ids; the freshness window comes from their
     # `fetch_window_days` (config/sources/*.yaml).
@@ -71,6 +71,11 @@ COMMANDS: dict[str, Command] = {
         ("scripts/sync_walstat.py", "--db", "{db}"),
         workflow_step="sync_walstat",
         source_ids=("walstat",),
+    ),
+    "international_observations": Command(
+        ("scripts/sync_international.py", "--db", "{db}"),
+        workflow_step="sync_international",
+        source_ids=("eurostat",),
     ),
     "market_data": Command(
         ("fetch_stocks.py",),
@@ -228,6 +233,6 @@ COMMANDS: dict[str, Command] = {
     ),
 }
 
-# The seven outcomes daily_fetch.yml's "Check every source succeeded" step
+# The eight outcomes daily_fetch.yml's "Check every source succeeded" step
 # gates auto-merge on, in the workflow's order.
 TRACKED: tuple[str, ...] = tuple(name for name, c in COMMANDS.items() if c.workflow_step)

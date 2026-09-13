@@ -73,7 +73,7 @@ def gate(manifest: dict) -> dict[str, str]:
     """The auto-merge decision for one run, as the workflow's outputs.
 
     One entry per tracked outcome under its old workflow step id (fetch_macro,
-    sync_canonical, ...), `summary` with all seven on one line, and `all_ok`:
+    sync_canonical, ...), `summary` with all eight on one line, and `all_ok`:
     "true" only when the working database was assembled, every tracked
     outcome is a success and validate_and_export succeeded. Anything missing
     from the file counts as not run, so an incomplete manifest never merges.
