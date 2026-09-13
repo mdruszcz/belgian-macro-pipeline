@@ -119,6 +119,13 @@ ROOT_PAGES: tuple[Page, ...] = (
         "route switches",
     ),
     Page(
+        "/micro.html",
+        False,
+        "the redesigned microeconomics page (Batch 7), a noindexed preview beside "
+        "all_data.html sharing macro.html's analytical shell in its light variant; "
+        "linked from nowhere until it is proven equivalent or better",
+    ),
+    Page(
         "/commune.html",
         False,
         "the unreleased redesign of local.html, and linked from nowhere. Same "
@@ -142,7 +149,7 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
-NOINDEX_ROUTES = frozenset({"/home2.html", "/macro.html", "/profiles.html"})
+NOINDEX_ROUTES = frozenset({"/home2.html", "/macro.html", "/micro.html", "/profiles.html"})
 
 
 def is_indexable(route: str) -> bool:

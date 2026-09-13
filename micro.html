@@ -1,0 +1,1128 @@
+<!--
+  BelPulse microeconomics page -- Batch 7 (docs/design-references/micro.md),
+  built on Batch 6's macro.html shell -- same analytical layout, LIGHT variant
+  (docs/features/design_system.md: macro is navy, micro is light).
+
+  A PREVIEW ROUTE, noindexed, beside macro.html rather than replacing anything.
+
+  WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Every series drawn here is named
+  in config/micro_sections.yaml and published as
+  public/data/metadata/micro_sections.json -- NOT ONE INDICATOR CODE APPEARS
+  IN THIS FILE (tests/test_micro.py). Values, names, units, sources, grades and
+  retrieval dates come from public/data/national.json, public/data/aggregates.json
+  and public/data/metadata/{sources,indicators}.json, never from the markup.
+
+  A code is resolved from TWO universes, not one: national.json (a handful of
+  micro-adjacent series BelPulse happens to hold nationally, e.g. the
+  ONEM-insured unemployment rate) and aggregates.json's `be:country` row
+  (municipal indicators summed/recomputed from the ground up per
+  docs/features/comparison.md -- never averaged, never population-weighted).
+  `buildEntry()` is the one place that knows this; everything downstream reads
+  a plain {names,unit,decimals,direction,periods} shape regardless of which
+  file it came from.
+
+  WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY:
+    * None of the design's six KPI figures exist in this pipeline as stated
+      (active enterprises, a business-creation rate, a household median
+      income, an average gross wage, a national unemployment rate, a national
+      median house price). The row shows six real, dated figures instead --
+      the ONEM-insured unemployment rate, the mean net taxable income per tax
+      return, local business units, household size, home-sales transactions
+      and the working-age claimant rate -- and `kpisNote` says exactly which
+      of the design's figures have no series here.
+    * "Tissu entrepreneurial", "Structure sectorielle", "Entrepreneuriat
+      local" and "Actualités microéconomiques" are built at their designed
+      size, honestly unavailable: this pipeline holds one single-period
+      snapshot of local business units and no NACE breakdown, no
+      business-creation or bankruptcy count, and no article store at all.
+    * "Marché du logement" draws the one national housing series this
+      pipeline holds -- sales TRANSACTION VOLUME, not a price -- and says so;
+      the design's dropdown ("Prix d'achat") assumed a price series that does
+      not exist here.
+    * "Comparaison territoriale" is real: the ten provinces plus Belgium,
+      built from data/aggregates.csv via aggregates.json, aggregated from the
+      ground up over the geographies that existed in that period (never
+      population-weighted, never an average of averages -- CLAUDE.md's
+      aggregation rule). The indicator picker is restricted to the codes
+      config/micro_sections.yaml configures, never an arbitrary indicator.
+    * The map reuses assets/commune_map.js exactly as profiles.html and
+      map.html already do -- no second map implementation (rule 29).
+    * The sidebar lists this page's own sections, not the design's eleven
+      themes; an anchor to a section that does not exist would be a broken
+      promise (tests/test_micro.py).
+    * The design's town-silhouette illustration is a small inline line
+      drawing, matching macro.html's skyline in spirit; nothing here loads a
+      third-party image.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>BelPulse — Belgian microeconomy</title>
+<meta name="description" content="The local indicators of the Belgian economy, commune by commune, from official sources, with the date each figure was retrieved and how it was made.">
+
+<script>
+  (function(){
+    try{
+      // The reader's saved theme, the same key the block-built pages use.
+      // Light unless they chose otherwise: this page is drawn from a light
+      // design, so the OS preference applies only on an explicit 'auto'.
+      var t = localStorage.getItem('belpulse-theme');
+      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
+  })();
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/commune_map.css">
+<style>
+  /* Page composition only -- anything reusable belongs in
+     assets/belpulse/components.css, Batch 2's library. Largely lifted
+     verbatim from macro.html, which this page shares an analytical shell
+     with (docs/design-references/micro.md). */
+  body{background:var(--bp-bg); color:var(--bp-text); margin:0}
+  h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+
+  /* ---- top bar ---- */
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%; max-width:1400px; margin:0 auto; padding:0 var(--bp-space-6)}
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .searchbox{
+    display:flex; align-items:center; gap:8px; flex:1; max-width:330px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:7px 12px; background:var(--bp-bg); margin-left:auto;
+  }
+  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+  .searchbox svg{color:var(--bp-text-faint); flex:none}
+  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
+
+  /* ---- body: navy sidebar, light content ---- */
+  .bp-body--analytical{max-width:1400px; margin:0 auto}
+  .bp-sidebar{position:sticky; top:var(--bp-space-4); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
+  .side-title{display:flex; align-items:center; gap:10px; margin:0 0 var(--bp-space-5)}
+  .side-title h2{font-family:var(--bp-font-display); font-size:1.15rem; text-transform:none; letter-spacing:0; color:var(--bp-navy-text); margin:0; font-weight:600}
+  .side-title .icon{width:22px; height:22px; color:#8fb4ff}
+  .bp-sidebar-nav a[aria-current="page"]{background:rgba(255,255,255,.12); color:var(--bp-navy-text)}
+  .side-update{
+    margin-top:auto; padding:var(--bp-space-4); border:1px solid var(--bp-navy-border); border-radius:var(--bp-radius-control);
+    font-size:12px; color:var(--bp-navy-text-muted);
+  }
+  .side-update .lbl{margin-bottom:6px}
+  .side-update .when{display:flex; align-items:center; gap:8px; color:var(--bp-navy-text); font-weight:var(--bp-weight-medium); font-size:var(--bp-text-small)}
+  .side-update .dot{width:8px; height:8px; border-radius:50%; background:var(--bp-green); flex:none}
+  .side-update[data-status="other"] .dot{background:#e0a92b}
+  .side-update .status{margin-top:4px; font-size:11px}
+  .side-quote{
+    font-family:var(--bp-font-decorative); font-size:1.1rem; color:var(--bp-navy-text-muted);
+    margin:var(--bp-space-5) 0 0; padding-top:var(--bp-space-4); border-top:1px solid var(--bp-navy-border); line-height:1.35;
+  }
+  .side-quote small{display:block; font-family:var(--bp-font-ui); font-size:11px; text-align:right; margin-top:6px; color:var(--bp-navy-text)}
+
+  /* ---- main column ---- */
+  .micro-main{min-width:0; display:flex; flex-direction:column; gap:var(--bp-space-5)}
+  .bp-breadcrumb{font-size:12px; color:var(--bp-text-muted)}
+  .page-head{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.9fr); gap:var(--bp-space-6); align-items:end; margin-bottom:var(--bp-space-2)}
+  .page-head h1{font-size:2.3rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
+  .page-head .lead{color:var(--bp-text-muted); margin:0; max-width:52ch; font-size:var(--bp-text-body)}
+  .skyline{position:relative; min-height:120px; display:flex; align-items:flex-end; justify-content:flex-end}
+  .skyline svg{width:100%; max-width:520px; height:auto; color:var(--bp-blue); opacity:.38}
+  .skyline .script{
+    position:absolute; right:0; top:0; max-width:18ch; text-align:right; transform:rotate(-6deg);
+    font-family:var(--bp-font-decorative); font-size:1.15rem; color:var(--bp-text-muted); line-height:1.25;
+  }
+
+  /* ---- KPI row ---- */
+  .kpi-row{grid-template-columns:repeat(6, minmax(0,1fr))}
+  .micro-kpi{gap:4px; min-width:0}
+  .kpi-top{display:flex; align-items:flex-start; gap:10px}
+  .kpi-top .bp-kpi-icon{margin:0; width:30px; height:30px; border-radius:8px}
+  .kpi-top .bp-kpi-label{line-height:1.25; min-width:0}
+  .kpi-top .bp-kpi-label .name{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; font-weight:var(--bp-weight-medium); color:var(--bp-text); font-size:12px; line-height:1.25}
+  .kpi-top .bp-kpi-label .period{font-size:11px; color:var(--bp-text-faint)}
+  .micro-kpi .bp-value{font-size:1.45rem; margin-top:2px; white-space:nowrap}
+  .micro-kpi .bp-value .unit{font-size:.7rem; color:var(--bp-text-faint); font-weight:var(--bp-weight-regular); margin-left:3px}
+  .micro-kpi .bp-delta{min-height:16px}
+  .mini-canvas{position:relative; margin-top:6px; min-width:0}
+  .mini-canvas canvas{display:block; width:100%}
+  .kpi-note{font-size:12px; color:var(--bp-text-faint); margin:calc(-1 * var(--bp-space-3)) 0 0}
+
+  /* ---- card rows ---- */
+  .row{display:grid; gap:var(--bp-space-5); min-width:0}
+  .row-3{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)}
+  .row-3m{grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)}
+  .row-4{grid-template-columns:repeat(4, minmax(0,1fr))}
+  .bp-chart-card{min-width:0; display:flex; flex-direction:column}
+  .bp-chart-head h3{font-family:var(--bp-font-display); font-size:1.15rem}
+  .bp-chart-head .subtitle{max-width:60ch}
+  .pill{font-size:12px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:5px 10px; color:var(--bp-text-muted); white-space:nowrap}
+  .bp-chart-canvas-wrap{flex:1; position:relative; min-height:240px}
+  .bp-chart-canvas-wrap canvas{position:absolute; inset:0; display:block; width:100%}
+  .provenance{font-size:11px; color:var(--bp-text-faint); margin-top:var(--bp-space-3)}
+  .bp-list-panel li{display:flex; align-items:flex-start; gap:var(--bp-space-3); padding:9px 0; border-bottom:1px solid var(--bp-border)}
+  .bp-list-panel .label small{display:block; color:var(--bp-text-faint); font-size:11px; margin-top:2px}
+  .bp-list-panel .value{text-align:right; white-space:nowrap}
+  .bp-list-panel .value small{display:block; color:var(--bp-text-faint); font-size:11px; font-weight:var(--bp-weight-regular)}
+
+  /* ---- comparison card: select + ranking canvas ---- */
+  .compare-head{display:flex; align-items:center; justify-content:space-between; gap:var(--bp-space-3); flex-wrap:wrap}
+  .compare-head select{font:inherit; font-size:var(--bp-text-small); padding:6px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); background:var(--bp-surface); color:var(--bp-text)}
+  .compare-canvas-wrap{position:relative; min-height:280px; margin-top:var(--bp-space-3)}
+  .compare-canvas-wrap canvas{display:block; width:100%}
+
+  /* ---- household tiles (2x2) ---- */
+  .tile-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:var(--bp-space-3); flex:1}
+  .tile-grid .bp-stat-tile{padding:var(--bp-space-3); border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); align-items:flex-start}
+  .tile-grid .bp-kpi-label{display:flex; flex-direction:column; gap:2px; min-width:0}
+  .tile-grid .bp-kpi-label .name{font-size:11px; color:var(--bp-text-muted); display:block}
+  .tile-grid .bp-kpi-label .bp-value{font-size:1.05rem; font-weight:var(--bp-weight-bold); white-space:nowrap}
+  .tile-grid .bp-kpi-label .bp-value .unit{font-size:.7rem; color:var(--bp-text-faint); font-weight:var(--bp-weight-regular); margin-left:3px}
+  .tile-grid .bp-kpi-label .period{font-size:10px; color:var(--bp-text-faint)}
+
+  /* ---- map card ---- */
+  .map-card{gap:var(--bp-space-3)}
+  .map-card .compare-head select{min-width:220px}
+  .map-card .mapbox{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}
+  .map-card .status{font-size:12px; color:var(--bp-text-faint)}
+
+  /* ---- explore-communes card ---- */
+  .explore-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap; margin-top:var(--bp-space-3)}
+  .explore-actions a{font-size:var(--bp-text-small); font-weight:var(--bp-weight-medium); text-decoration:none; color:var(--bp-accent)}
+  .explore-actions a:hover{text-decoration:underline}
+  .explore-search{margin-top:var(--bp-space-3); display:flex; align-items:center; gap:8px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:7px 12px}
+  .explore-search input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+
+  /* Unavailable cards: designed size, honest state. */
+  .bp-state[data-state="unavailable"] .bp-state-message{padding:0}
+  .bp-state .placeholder{flex:1; min-height:120px; border:1px dashed var(--bp-border); border-radius:var(--bp-radius-control); margin:var(--bp-space-3) 0; background:repeating-linear-gradient(135deg, transparent 0 10px, var(--bp-surface-alt) 10px 11px)}
+  .bp-state .why{font-size:12px}
+  .card-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium); margin-top:var(--bp-space-3); align-self:flex-end}
+  .card-link:hover{text-decoration:underline}
+
+  /* ---- footer ---- */
+  .foot{border-top:1px solid var(--bp-border); background:var(--bp-surface); margin-top:var(--bp-space-6)}
+  .foot .wrap{max-width:1400px; margin:0 auto; padding:var(--bp-space-5) var(--bp-space-6); display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; font-size:12px; color:var(--bp-text-muted)}
+  .foot nav{display:flex; gap:var(--bp-space-4); margin-left:auto}
+  .foot nav a{color:inherit; text-decoration:none}
+  .foot nav a:hover{color:var(--bp-text)}
+  .foot .sources b{color:var(--bp-text); font-weight:var(--bp-weight-medium)}
+
+  /* ---- licence attribution (rule: every page showing Statbel/ONEM/VAR
+     municipal figures carries the full notice -- tests/test_statbel_attribution.py) ---- */
+  .attribution{padding:var(--bp-space-6) var(--bp-space-6); font-size:11px; line-height:1.6; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border)}
+  .attribution strong{color:var(--bp-text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+  .attribution .wrap{max-width:1400px; margin:0 auto}
+
+  @media (max-width:1180px){
+    .kpi-row{grid-template-columns:repeat(3, minmax(0,1fr))}
+    .row-3, .row-3m{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .row-3 .card-wide, .row-3m .card-wide{grid-column:1 / -1}
+    .row-4{grid-template-columns:repeat(2, minmax(0,1fr))}
+  }
+  @media (max-width:1024px){
+    /* Grid-blowout guard: layout.css's own `.bp-body--analytical` sets
+       grid-template-columns:1fr at this breakpoint, but a bare `1fr` track
+       still sizes to its child's MIN-CONTENT -- and a horizontal
+       .bp-sidebar-nav of seven nowrap links ("Territorial comparisons",
+       "Microeconomic map"...) has a min-content width well over 1000px,
+       which blew the whole page out sideways (measured: scrollWidth 905 at
+       an 820 viewport). minmax(0, 1fr) is the standard fix -- it lets the
+       track (and the sidebar inside it) shrink below content size, so the
+       sidebar's own overflow-x:auto below can do its job instead. */
+    .bp-body--analytical{grid-template-columns:minmax(0,1fr)}
+    .bp-sidebar{position:static; min-height:0; min-width:0}
+    .side-update{margin-top:var(--bp-space-4)}
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto; -webkit-overflow-scrolling:touch}
+    .bp-nav a{white-space:nowrap}
+    .searchbox{max-width:none; flex:1 1 220px}
+  }
+  @media (max-width:1024px){
+    .bp-sidebar{flex-direction:row; align-items:center; gap:var(--bp-space-4); overflow-x:auto; padding:var(--bp-space-3) var(--bp-space-4)}
+    .side-title{margin:0; flex:none}
+    .side-title h2{font-size:1rem; white-space:nowrap}
+    .bp-sidebar-nav{flex-direction:row; gap:var(--bp-space-2); flex:1; min-width:0}
+    .bp-sidebar-nav a{white-space:nowrap; padding:6px 10px}
+    .side-update, .side-quote{display:none}
+  }
+  @media (max-width:768px){
+    .bp-body{padding:var(--bp-space-4); gap:var(--bp-space-4)}
+    .page-head{grid-template-columns:1fr}
+    .skyline{display:none}
+    .page-head h1{font-size:1.8rem}
+    .kpi-row{grid-template-columns:repeat(2, minmax(0,1fr))}
+    .row-3, .row-3m, .row-4{grid-template-columns:1fr}
+    .tile-grid{grid-template-columns:1fr}
+    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
+    .bp-nav a{white-space:nowrap}
+    .searchbox{max-width:none; margin-left:0; order:4; flex-basis:100%}
+    /* The comparison/map indicator <select> and the choropleth's 7-band
+       legend both have a natural minimum width (the select's own
+       min-width:220px; the legend's swatches at 64px per band, from the
+       SHARED assets/commune_map.css every map-bearing page relies on) wider
+       than a single narrow column -- measured overflow at 390px otherwise.
+       Stacking the select under the title, and shrinking the swatch width
+       HERE ONLY (page-composition CSS, never editing the shared file), keeps
+       every other page's legend untouched. */
+    .compare-head{flex-direction:column; align-items:stretch}
+    .compare-head select{width:100%; min-width:0}
+    .map-card .swatches div{width:36px}
+    /* The legend's tick LABELS are absolutely positioned by percentage
+       (commune_map.css) and can print a long formatted value ("40 125,7")
+       whose text extends past the shrunk swatch strip above -- clip it here
+       rather than let a stray label edge reopen the horizontal scrollbar;
+       the number itself is still fully legible, only its outermost pixel or
+       two at the card edge is ever at risk. */
+    .map-card .legend, .map-card .ticks{overflow-x:hidden}
+  }
+  @media (max-width:480px){
+    .kpi-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body class="bp-shell micro">
+
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span>
+        <span class="bp-wordmark">BelPulse</span>
+        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
+      </span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home2.html" data-t="navHome">Home</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
+      <a href="micro.html" aria-current="page" data-t="navMicro">Micro</a>
+      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+      <a href="map.html" data-t="navMaps">Maps</a>
+      <a href="about.html" data-t="navMethodology">Methodology</a>
+    </nav>
+    <label class="searchbox">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+      <datalist id="communeList"></datalist>
+    </label>
+    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
+      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
+    </select>
+  </div>
+</header>
+
+<div class="bp-body bp-body--analytical">
+
+  <aside class="bp-sidebar" aria-label="Sections">
+    <div class="side-title">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="14" width="3" height="4"/></svg>
+      <h2 data-t="microSidebarTitle">Microeconomics</h2>
+    </div>
+    <ul class="bp-sidebar-nav" id="sideNav">
+      <li><a href="#overview" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-t="macroNavOverview">Overview</span></a></li>
+      <li><a href="#key"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-t="macroNavKey">Key indicators</span></a></li>
+      <li><a href="#comparison"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/></svg><span data-t="microNavComparison">Territorial comparisons</span></a></li>
+      <li><a href="#households"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span data-t="microNavHouseholds">Households</span></a></li>
+      <li><a href="#map"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span data-t="microNavMap">Microeconomic map</span></a></li>
+      <li><a href="#housing"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-t="microNavHousing">Housing market</span></a></li>
+      <li><a href="#communes"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span data-t="microNavCommunes">Communes</span></a></li>
+    </ul>
+    <div class="side-update" id="sideUpdate" data-status="other">
+      <div class="lbl" data-t="macroLastUpdate">Last data update</div>
+      <div class="when"><span class="dot"></span><span id="updateDate">—</span></div>
+      <div class="status" id="updateStatus"></div>
+      <div class="status" data-t="macroAutoUpdate">Automatic update</div>
+    </div>
+    <p class="side-quote">« <span data-t="microQuote">Local data to understand the real economy.</span> »<small>BelPulse</small></p>
+  </aside>
+
+  <main class="micro-main">
+    <nav class="bp-breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html" data-t="navHome">Home</a><span data-t="navMicro">Micro</span>
+    </nav>
+
+    <header class="page-head" id="overview">
+      <div>
+        <h1 data-t="microTitle">Belgian microeconomics</h1>
+        <p class="lead" data-t="microLead">The local indicators for reading Belgium's economy commune by commune, updated automatically from official sources.</p>
+      </div>
+      <div class="skyline" aria-hidden="true">
+        <span class="script" data-t="microScript">Local data for decisions close to home.</span>
+        <svg viewBox="0 0 520 110" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M0 108h520"/>
+          <path d="M20 108V78h30v30M30 78V64h10v14"/>
+          <path d="M64 108V86h20v22"/>
+          <path d="M96 108V60h16V44l6-10 6 10v16h16v48"/>
+          <path d="M148 108V90h28v18M156 90V80h12v10"/>
+          <path d="M190 108V70h10V54l5-10 5 10v16h10v38"/>
+          <path d="M228 108V84h34v24M238 84V72h14v12"/>
+          <path d="M276 108V66h12V50l6-14 6 14v16h12v42"/>
+          <path d="M320 108V92h24v16"/>
+          <path d="M356 108V72h14V56l5-12 5 12v16h14v36"/>
+          <path d="M404 108V88h26v20M412 88V78h10v10"/>
+          <path d="M444 108V80h12V66l6-10 6 10v14h12v28"/>
+          <path d="M0 108c30-4 60-4 90 0s60 4 90 0 60-4 90 0 60 4 90 0 60-4 90 0 50 4 70 0" opacity=".5"/>
+        </svg>
+      </div>
+    </header>
+
+    <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
+    <p class="kpi-note" id="kpiNote"></p>
+
+    <section class="row row-3">
+      <article class="bp-chart-card card-wide bp-state" id="comparison" data-state="loading">
+        <div class="bp-chart-head compare-head">
+          <div><h3 id="compareTitle">&nbsp;</h3><div class="subtitle" id="compareNote"></div></div>
+          <div style="display:flex; align-items:center; gap:var(--bp-space-3)">
+            <span class="pill" id="comparePeriod"></span>
+            <select id="compareIndicator" data-t-aria="microCompareIndicator" aria-label="Indicator to compare"></select>
+          </div>
+        </div>
+        <div class="compare-canvas-wrap bp-state-body"><canvas id="compareCanvas"></canvas></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="compareProvenance"></div>
+      </article>
+      <article class="bp-chart-card" id="key">
+        <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
+        <ul class="bp-list-panel" id="keyList"></ul>
+      </article>
+      <article class="bp-chart-card bp-state" id="enterprise_dynamics" data-slot="enterprise_dynamics" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+    </section>
+
+    <section class="row row-3m">
+      <article class="bp-chart-card" id="households">
+        <div class="bp-chart-head"><div><h3 id="tilesTitle">&nbsp;</h3></div></div>
+        <div class="tile-grid" id="tileGrid"></div>
+      </article>
+      <article class="bp-chart-card bp-state map-card card-wide" id="map" data-state="loading">
+        <div class="bp-chart-head compare-head">
+          <div><h3 id="mapTitle">&nbsp;</h3></div>
+          <select id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to map"></select>
+        </div>
+        <div class="bp-state-body">
+          <div class="mapbox bp-block--map" id="mapbox">
+            <svg id="microSvg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+            <div class="tip" id="microTip" hidden></div>
+            <div class="zoom">
+              <button type="button" id="microZoomIn" data-t-title="zoomIn" data-t-aria="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+              <button type="button" id="microZoomOut" data-t-title="zoomOut" data-t-aria="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+              <button type="button" id="microZoomReset" data-t-title="resetView" data-t-aria="resetView" title="Reset view" aria-label="Reset view">&#8634;</button>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="swatches" id="microSwatches"></div>
+            <div class="ticks" id="microTicks"></div>
+            <div class="note" id="microLegendNote"></div>
+          </div>
+          <p class="status" id="mapStatus"></p>
+        </div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="mapProvenance"></div>
+      </article>
+      <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+    </section>
+
+    <section class="row row-4">
+      <article class="bp-chart-card bp-state" id="sectors" data-slot="sectors" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+      <article class="bp-chart-card bp-state" id="housing" data-state="loading">
+        <div class="bp-chart-head">
+          <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
+          <span class="pill" data-t="macroSubject">Belgium</span>
+        </div>
+        <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="historyProvenance"></div>
+      </article>
+      <article class="bp-chart-card bp-state" id="entrepreneurship" data-slot="entrepreneurship" data-state="unavailable">
+        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+        <div class="placeholder"></div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+      </article>
+      <article class="bp-chart-card" id="communes">
+        <div class="bp-chart-head"><div><h3 data-t="microExploreTitle">Explore the communes</h3></div></div>
+        <p class="subtitle" data-t="microExploreLead">Search for a commune by name, or browse every commune from its own profile page or the full data table.</p>
+        <label class="explore-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="exploreSearch" list="exploreList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+          <datalist id="exploreList"></datalist>
+        </label>
+        <div class="explore-actions">
+          <a href="profiles.html"><span data-t="microSeeProfiles">See commune profiles</span> →</a>
+          <a href="communes.html"><span data-t="microSeeAllCommunes">See all communes</span> →</a>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="bp-logo" href="index.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
+    </a>
+    <span data-t="macroFooterTagline">Data. Analysis. Territories. Belgium in perspective.</span>
+    <span class="sources"><b data-t="macroSourcesPrefix">Sources:</b> <span id="sourcesLine">—</span> · <span data-t="macroAutoUpdated">data updated automatically</span></span>
+    <nav>
+      <a href="about.html" data-t="homeFooterAbout">About</a>
+      <a href="about.html" data-t="homeFooterSources">Sources</a>
+      <a href="about.html" data-t="homeFooterContact">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- The licence notice. This page renders municipal (Statbel-derived) figures
+     in the KPI row, the key-indicator list, the province comparison, the
+     household tiles and the choropleth map, so it carries the same
+     conditions as communes.html, map.html and profiles.html, and is listed
+     alongside them in tests/test_statbel_attribution.py. English stays in
+     the markup so a reader whose JavaScript never runs still gets the
+     complete notice. Identical to profiles.html's block by construction --
+     one licence notice, never a per-page rewording. -->
+<div class="attribution" id="attribution">
+  <div class="wrap">
+  <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+  (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+  1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+  document already recorded in <code>docs/licences/</code>.
+  <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+  communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+  a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+  longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+  are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+  <br><br>
+  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+  <!-- values-attribution:end --></span>
+  <br><br>
+  <span data-t-html="varAttribution"><strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.</span>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/belpulse/charts.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+/* BelPulse microeconomics page -- Batch 7.
+ *
+ * The layout comes from metadata/micro_sections.json, values from TWO
+ * payloads -- national.json and aggregates.json's `be:country` row -- the
+ * source labels from metadata/sources.json and metadata/indicators.json, the
+ * build date from manifest.json. This script knows about a KPI row, a list
+ * panel, a household tile grid, a province comparison, a choropleth map, one
+ * history chart and unavailable slots -- never about a particular series.
+ */
+(function(){
+  'use strict';
+
+  var LAYOUT_URL       = 'public/data/metadata/micro_sections.json';
+  var SOURCES_URL       = 'public/data/metadata/sources.json';
+  var NATIONAL_URL      = 'public/data/national.json';
+  var AGGREGATES_URL    = 'public/data/aggregates.json';
+  var INDEX_URL         = 'public/data/metadata/indicators.json';
+  var MANIFEST_URL      = 'public/data/manifest.json';
+  var GEOGRAPHIES_URL   = 'public/data/metadata/geographies.json';
+  var GEOJSON_URL       = 'data/geo/communes.geojson';
+  var VALUES_URL        = function(code){ return 'public/data/indicators/' + code + '.json'; };
+
+  var LANG = I18N.initial();
+  var T = function(key, vars){ return I18N.t(LANG, key, vars); };
+
+  // Icon tints by POSITION, the same rule macro.html and home2's finance
+  // strip use: a card's colour says "this is the second card", never "this
+  // is unemployment".
+  var TINTS = ['blue', 'violet', 'amber', 'green', 'blue', 'violet'];
+  var ICONS = [
+    '<path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/>',
+    '<rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/>',
+    '<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    '<path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/>',
+    '<path d="M4 15l4-4 4 3 8-8"/><path d="M4 20h16"/>',
+  ];
+
+  var state = {
+    layout: null, national: {}, aggregates: {indicators: {}}, metaIndex: {},
+    sources: {}, grades: {}, entries: {}, geojson: null, map: null, attrUpdated: '',
+  };
+
+  /* ---- language, the site's existing pattern ---------------------------- */
+  function applyStrings(){
+    document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = T(el.dataset.t); });
+    document.querySelectorAll('[data-t-html]').forEach(function(el){ el.innerHTML = T(el.dataset.tHtml); });
+    document.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
+    document.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
+    document.querySelectorAll('[data-t-title]').forEach(function(el){ el.title = T(el.dataset.tTitle); });
+    document.documentElement.setAttribute('lang', LANG);
+    document.getElementById('langPick').value = LANG;
+    // Held separately from the generic [data-t] sweep: this element's parent
+    // (attrValues) is NOT re-templated by language (English stays in the
+    // markup, matching profiles.html -- see the module docstring), so this is
+    // the one line that keeps the licence's REQUIRED update date populated
+    // (docs/data_catalog.md; tests/test_statbel_attribution.py).
+    var updated = document.getElementById('attrUpdated');
+    if(updated && state.attrUpdated) updated.textContent = state.attrUpdated;
+  }
+
+  function text(obj){
+    if(!obj) return '';
+    if(typeof obj === 'string') return obj;
+    return obj[LANG] || obj.en || '';
+  }
+
+  /* ---- resolving a code from EITHER universe ----------------------------
+   * national.json (a few micro-adjacent national series) or aggregates.json's
+   * be:country row (municipal indicators, summed/recomputed from the ground
+   * up -- never averaged, never population-weighted). Cached, because both
+   * the KPI row and the sources line ask for the same code repeatedly. */
+  function buildEntry(code){
+    if(Object.prototype.hasOwnProperty.call(state.entries, code)) return state.entries[code];
+    var entry = null;
+    if(state.national[code]){
+      entry = state.national[code];
+    }else{
+      var geos = state.aggregates.indicators[code];
+      var country = geos && geos['be:country'];
+      if(country){
+        var meta = state.metaIndex[code] || {};
+        var periods = {};
+        Object.keys(country.periods).forEach(function(p){
+          periods[p] = {value: country.periods[p].value, status: 'final', coverage: country.periods[p].coverage};
+        });
+        entry = {
+          names: meta.names || country.name,
+          unit: meta.unit,
+          decimals: meta.decimals,
+          direction: meta.direction,
+          source: meta.source,
+          grade: meta.grade,
+          updated: meta.updated,
+          inputs_updated: meta.inputs_updated,
+          input_sources: meta.input_sources,
+          periods: periods,
+        };
+      }
+    }
+    state.entries[code] = entry;
+    return entry;
+  }
+
+  function nameOf(code){
+    var entry = buildEntry(code);
+    if(!entry) return code;
+    return (entry.names && (entry.names[LANG] || entry.names.en)) || code;
+  }
+
+  function latestNumeric(entry){
+    if(!entry || !entry.periods) return null;
+    var ps = Object.keys(entry.periods).sort();
+    for(var i = ps.length - 1; i >= 0; i--){
+      var v = entry.periods[ps[i]].value;
+      if(typeof v === 'number') return {period: ps[i], value: v, status: entry.periods[ps[i]].status, index: i, periods: ps};
+    }
+    return null;
+  }
+
+  function previousNumeric(entry, latest){
+    if(!latest) return null;
+    for(var i = latest.index - 1; i >= 0; i--){
+      var v = entry.periods[latest.periods[i]].value;
+      if(typeof v === 'number') return {period: latest.periods[i], value: v};
+    }
+    return null;
+  }
+
+  function fmtPeriod(p){
+    var q = /^(\d{4})-Q([1-4])$/.exec(p);
+    if(q) return ({en: 'Q', fr: 'T', nl: 'K'}[LANG] || 'Q') + q[2] + ' ' + q[1];
+    var m = /^(\d{4})-(\d{2})$/.exec(p);
+    if(m){
+      try{ return new Date(Number(m[1]), Number(m[2]) - 1, 1).toLocaleDateString(LANG, {month: 'short', year: 'numeric'}); }
+      catch(e){ return p; }
+    }
+    return p;
+  }
+
+  function unitHint(unit){
+    var u = (unit || '').toLowerCase();
+    if(u === 'pp_contribution') return 'pp';
+    var idx = /^index_(\d{4})$/.exec(u);
+    if(idx) return idx[1] + '=100';
+    if(u === 'balance') return T('macroBalance');
+    return MapUI.unitSuffix(unit).trim();
+  }
+
+  function fmtValue(v, entry){
+    var d = (typeof entry.decimals === 'number') ? entry.decimals : 1;
+    return MapUI.formatValue(v, entry.unit, d, LANG);
+  }
+
+  function fmtSigned(v, entry){
+    var s = fmtValue(Math.abs(v), entry);
+    return (v > 0 ? '+' : (v < 0 ? '−' : '')) + s;
+  }
+
+  function deltaDirection(delta, direction){
+    if(!delta || !direction) return 'neutral';
+    if(direction === 'higher_is_better') return delta > 0 ? 'favourable' : 'unfavourable';
+    if(direction === 'lower_is_better') return delta < 0 ? 'favourable' : 'unfavourable';
+    return 'neutral';
+  }
+
+  /* The reader's language for each of a derived indicator's input sources
+     (map.html's own helper, reused so the two pages describe the same
+     indicator the same way). */
+  function sourceNames(entry){
+    return (entry.input_sources || []).map(function(id){
+      var s = state.sources[id];
+      return s ? (s.label[LANG] || s.label.en) : id;
+    }).join(', ');
+  }
+
+  function provenance(entry, latest){
+    var bits = [];
+    var source = entry.source ? state.sources[entry.source] : null;
+    bits.push((source && source.label && (source.label[LANG] || source.label.en)) || entry.source_agency || entry.source || '');
+    var grade = state.grades[entry.grade];
+    if(grade) bits.push('(' + entry.grade + ') ' + (grade[LANG] || grade.en));
+    if(entry.updated) bits.push(T('retrieved') + ' ' + entry.updated);
+    else if(entry.inputs_updated) bits.push(T('computedFromShort', {s: sourceNames(entry), d: entry.inputs_updated}));
+    if(latest && latest.status && latest.status !== 'final') bits.push(T('status_' + latest.status));
+    return bits.filter(Boolean).join(' · ');
+  }
+
+  function seriesPoints(entry, limit){
+    var ps = Object.keys(entry.periods || {}).sort().slice(-limit);
+    return ps.map(function(p){ return {period: p, value: (entry.periods[p] || {}).value}; })
+             .filter(function(pt){ return typeof pt.value === 'number'; });
+  }
+
+  /* ---- KPI row ---------------------------------------------------------- */
+  function renderKpis(){
+    var host = document.getElementById('kpiRow');
+    host.innerHTML = '';
+    var draws = [];
+    (state.layout.kpis || []).forEach(function(code, i){
+      var entry = buildEntry(code);
+      if(!entry) return;
+      var latest = latestNumeric(entry);
+      var prev = previousNumeric(entry, latest);
+      var card = document.createElement('article');
+      card.className = 'bp-kpi micro-kpi bp-state';
+      card.dataset.state = latest ? 'ready' : 'missing';
+      var tint = TINTS[i % TINTS.length];
+      card.innerHTML =
+        '<div class="kpi-top">' +
+          '<span class="bp-kpi-icon" style="background:var(--bp-icon-' + tint + '-bg);color:var(--bp-icon-' + tint + '-ink)">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>' +
+          '</span>' +
+          '<div class="bp-kpi-label"><span class="name"></span><span class="period"></span></div>' +
+        '</div>' +
+        '<div class="bp-state-body"><div class="bp-value"><span class="num"></span><span class="unit"></span></div>' +
+        '<div class="bp-delta" data-direction="neutral"></div></div>' +
+        '<div class="bp-state-message"><span class="headline"></span></div>' +
+        '<div class="mini-canvas"><canvas></canvas></div>';
+      card.querySelector('.name').textContent = nameOf(code);
+      card.querySelector('.name').title = nameOf(code);
+      card.querySelector('.period').textContent = latest ? fmtPeriod(latest.period) : '';
+      card.querySelector('.headline').textContent = T('macroUnavailable');
+      if(latest){
+        card.querySelector('.num').textContent = fmtValue(latest.value, entry);
+        var hint = unitHint(entry.unit);
+        if(hint && !/^percent/.test((entry.unit || '').toLowerCase())) card.querySelector('.unit').textContent = hint;
+        if(prev){
+          var delta = latest.value - prev.value;
+          var el = card.querySelector('.bp-delta');
+          el.dataset.direction = deltaDirection(delta, entry.direction);
+          el.textContent = fmtSigned(delta, entry) + ' ' + T('macroVsPrevious', {period: fmtPeriod(prev.period)});
+        }
+      }
+      card.title = provenance(entry, latest);
+      host.appendChild(card);
+      var pts = seriesPoints(entry, 20);
+      if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: nameOf(code), i: i});
+    });
+    // Draw only once every card is in the DOM, so each canvas measures its
+    // real grid width (macro.html found this the hard way).
+    draws.forEach(function(d){
+      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
+        {locale: LANG, height: 52, compact: true});
+    });
+    document.getElementById('kpiNote').textContent = text(state.layout.kpis_note);
+  }
+
+  /* ---- key indicators list --------------------------------------------- */
+  function renderKeyList(){
+    var host = document.getElementById('keyList');
+    host.innerHTML = '';
+    (state.layout.key_list || []).forEach(function(code){
+      var entry = buildEntry(code);
+      if(!entry) return;
+      var latest = latestNumeric(entry);
+      var li = document.createElement('li');
+      li.className = 'bp-state';
+      li.dataset.state = latest ? 'ready' : 'missing';
+      li.innerHTML = '<span class="label"><span class="name"></span><small class="prov"></small></span>' +
+                     '<span class="value"><span class="num"></span><small class="when"></small></span>';
+      li.querySelector('.name').textContent = nameOf(code);
+      li.querySelector('.prov').textContent = provenance(entry, latest);
+      if(latest){
+        var hint = unitHint(entry.unit);
+        li.querySelector('.num').textContent = fmtValue(latest.value, entry) +
+          (hint && !/^percent/.test((entry.unit || '').toLowerCase()) ? ' ' + hint : '');
+        li.querySelector('.when').textContent = fmtPeriod(latest.period);
+      }else{
+        li.querySelector('.num').textContent = '—';
+        li.querySelector('.when').textContent = T('macroUnavailable');
+      }
+      host.appendChild(li);
+    });
+  }
+
+  /* ---- household tiles (2x2), one period each, no delta ----------------- */
+  function renderTiles(){
+    var spec = state.layout.tiles || {};
+    document.getElementById('tilesTitle').textContent = text(spec.label);
+    var host = document.getElementById('tileGrid');
+    host.innerHTML = '';
+    (spec.indicators || []).forEach(function(code, i){
+      var entry = buildEntry(code);
+      var latest = entry ? latestNumeric(entry) : null;
+      var div = document.createElement('div');
+      div.className = 'bp-stat-tile';
+      var tint = TINTS[(i + 2) % TINTS.length];
+      div.innerHTML =
+        '<span class="bp-kpi-icon" style="background:var(--bp-icon-' + tint + '-bg);color:var(--bp-icon-' + tint + '-ink)">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[(i + 3) % ICONS.length] + '</svg>' +
+        '</span>' +
+        '<div class="bp-kpi-label"><span class="name"></span>' +
+        '<span class="bp-value"><span class="num"></span><span class="unit"></span></span>' +
+        '<span class="period"></span></div>';
+      div.querySelector('.name').textContent = entry ? nameOf(code) : code;
+      if(latest){
+        div.querySelector('.num').textContent = fmtValue(latest.value, entry);
+        var hint = unitHint(entry.unit);
+        if(hint && !/^percent/.test((entry.unit || '').toLowerCase())) div.querySelector('.unit').textContent = hint;
+        div.querySelector('.period').textContent = fmtPeriod(latest.period);
+        div.title = provenance(entry, latest);
+      }else{
+        div.querySelector('.num').textContent = '—';
+        div.querySelector('.period').textContent = T('macroUnavailable');
+      }
+      host.appendChild(div);
+    });
+  }
+
+  /* ---- territorial comparison: provinces + Belgium ----------------------
+   * Read straight from aggregates.json rather than through buildEntry(),
+   * because this card needs every geography's OWN value at one shared
+   * period, not just the country row buildEntry() extracts. Belgium is
+   * always included and always highlighted; a province missing a value at
+   * the chosen period is left out rather than shown as zero -- the same
+   * "aggregate below 90% coverage is absent, not a number with a footnote"
+   * rule the CSV export already enforces upstream. */
+  function comparisonRows(code){
+    var geos = state.aggregates.indicators[code];
+    var country = geos && geos['be:country'];
+    if(!country) return null;
+    var periods = Object.keys(country.periods);
+    if(!periods.length) return null;
+    var period = periods.sort().slice(-1)[0];
+    var rows = [];
+    Object.keys(geos).forEach(function(geoId){
+      var g = geos[geoId];
+      if(g.level !== 'province' && geoId !== 'be:country') return;
+      var cell = g.periods[period];
+      if(!cell || typeof cell.value !== 'number') return;
+      rows.push({
+        geoId: geoId,
+        label: (g.name && (g.name[LANG] || g.name.en)) || geoId,
+        value: cell.value,
+        coverage: cell.coverage,
+        highlight: geoId === 'be:country',
+      });
+    });
+    rows.sort(function(a, b){
+      if(a.highlight !== b.highlight) return a.highlight ? -1 : 1;
+      return a.label.localeCompare(b.label, LANG);
+    });
+    return {period: period, rows: rows};
+  }
+
+  function drawComparison(){
+    var card = document.getElementById('comparison');
+    var sel = document.getElementById('compareIndicator');
+    var code = sel.value;
+    var entry = code ? buildEntry(code) : null;
+    var data = code ? comparisonRows(code) : null;
+    if(!data || !data.rows.length){ card.dataset.state = code ? 'missing' : 'unavailable'; return; }
+    card.dataset.state = 'ready';
+    document.getElementById('comparePeriod').textContent = fmtPeriod(data.period);
+    var items = data.rows.map(function(r){ return {label: r.label, value: r.value, highlight: r.highlight}; });
+    var canvas = document.getElementById('compareCanvas');
+    BPCharts.drawRanking(canvas, items, {locale: LANG});
+    document.getElementById('compareProvenance').textContent = entry ? provenance(entry, null) : '';
+  }
+
+  function renderComparison(){
+    var spec = state.layout.comparison || {};
+    document.getElementById('compareTitle').textContent = text(spec.label);
+    document.getElementById('compareNote').textContent = text(spec.note);
+    var sel = document.getElementById('compareIndicator');
+    if(!sel.options.length){
+      (spec.indicators || []).forEach(function(code){
+        var opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = nameOf(code);
+        sel.appendChild(opt);
+      });
+      sel.value = spec.default || (spec.indicators || [])[0] || '';
+      sel.addEventListener('change', drawComparison);
+    }else{
+      Array.prototype.forEach.call(sel.options, function(opt){ opt.textContent = nameOf(opt.value); });
+    }
+    drawComparison();
+  }
+
+  /* ---- choropleth map ----------------------------------------------------
+   * Reuses assets/commune_map.js exactly as map.html and profiles.html do
+   * (CLAUDE.md rule 29) -- the indicator picker is restricted to
+   * config/micro_sections.yaml's `map.indicators`, never the full site index. */
+  function populateMapSelect(){
+    var sel = document.getElementById('mapIndicator');
+    var spec = state.layout.map || {};
+    if(!sel.options.length){
+      (spec.indicators || []).forEach(function(code){
+        var opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = nameOf(code);
+        sel.appendChild(opt);
+      });
+      sel.value = spec.default || (spec.indicators || [])[0] || '';
+      sel.addEventListener('change', function(){ selectMapIndicator(sel.value); });
+    }else{
+      Array.prototype.forEach.call(sel.options, function(opt){ opt.textContent = nameOf(opt.value); });
+    }
+  }
+
+  async function selectMapIndicator(code){
+    var card = document.getElementById('map');
+    var row = state.metaIndex[code];
+    if(!code || !row || !state.geojson){ card.dataset.state = 'unavailable'; return; }
+    var res = await fetch(VALUES_URL(code));
+    if(!res.ok){ card.dataset.state = 'missing'; return; }
+    var payload = await res.json();
+    if(!state.map){
+      state.map = new MapUI.CommuneMap({
+        svg: document.getElementById('microSvg'),
+        tip: document.getElementById('microTip'),
+        mapbox: document.getElementById('mapbox'),
+        swatches: document.getElementById('microSwatches'),
+        ticks: document.getElementById('microTicks'),
+        legendNote: document.getElementById('microLegendNote'),
+      }, {
+        lang: LANG,
+        onSelect: function(nis){ window.location.href = 'commune.html?nis=' + nis; },
+      }).build(state.geojson);
+    }else{
+      state.map.setLang(LANG);
+    }
+    card.dataset.state = 'ready';
+    state.map.setData(payload.communes || {}, {unit: row.unit, decimals: row.decimals, direction: row.direction});
+    var shown = state.map.coverage();
+    document.getElementById('mapStatus').textContent = T('communesShown', {n: shown.withValue, total: shown.total});
+    document.getElementById('mapProvenance').textContent = buildEntry(code) ? provenance(buildEntry(code), null) : '';
+  }
+
+  function renderMap(){
+    document.getElementById('mapTitle').textContent = text((state.layout.map || {}).label);
+    if(!state.geojson){ document.getElementById('map').dataset.state = 'unavailable'; return; }
+    populateMapSelect();
+    var sel = document.getElementById('mapIndicator');
+    if(sel.value) selectMapIndicator(sel.value);
+  }
+
+  /* ---- housing market history -------------------------------------------- */
+  function renderHistory(){
+    var card = document.getElementById('housing');
+    var spec = state.layout.history || {};
+    var entry = spec.series ? buildEntry(spec.series) : null;
+    document.getElementById('historyTitle').textContent = text(spec.label) || (entry ? nameOf(spec.series) : '');
+    document.getElementById('historyNote').textContent = text(spec.note);
+    if(!entry){ card.dataset.state = 'unavailable'; return; }
+    var pts = seriesPoints(entry, 10000);
+    if(!pts.length){ card.dataset.state = 'missing'; return; }
+    card.dataset.state = 'ready';
+    var items = pts.map(function(pt){ return {label: pt.period, value: pt.value}; });
+    var canvas = document.getElementById('historyCanvas');
+    var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
+    BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 2});
+    document.getElementById('historyProvenance').textContent = provenance(entry, latestNumeric(entry));
+  }
+
+  /* ---- unavailable slots: designed size, honest state -------------------- */
+  function renderUnavailable(){
+    var byId = {};
+    (state.layout.unavailable || []).forEach(function(u){ byId[u.id] = u; });
+    document.querySelectorAll('[data-slot]').forEach(function(card){
+      var u = byId[card.dataset.slot];
+      card.dataset.state = 'unavailable';
+      card.querySelector('.slot-title').textContent = u ? text(u.label) : '';
+      card.querySelector('.slot-reason').textContent = u ? text(u.reason) : T('macroUnavailable');
+    });
+  }
+
+  /* ---- sidebar: build date, sources line --------------------------------- */
+  function renderManifest(manifest){
+    var box = document.getElementById('sideUpdate');
+    var when = document.getElementById('updateDate');
+    var status = document.getElementById('updateStatus');
+    if(!manifest){ when.textContent = '—'; return; }
+    try{
+      when.textContent = new Date(manifest.build_date).toLocaleString(LANG, {dateStyle: 'medium', timeStyle: 'short'});
+    }catch(e){ when.textContent = manifest.build_date || '—'; }
+    var pass = manifest.validation_status === 'pass';
+    box.dataset.status = pass ? 'pass' : 'other';
+    status.textContent = pass ? T('macroValidationPass') : T('macroValidationOther', {status: manifest.validation_status || '—'});
+  }
+
+  function renderSources(){
+    var codes = [].concat(
+      state.layout.kpis || [],
+      state.layout.key_list || [],
+      (state.layout.tiles || {}).indicators || [],
+      (state.layout.comparison || {}).indicators || [],
+      (state.layout.map || {}).indicators || [],
+      state.layout.history && state.layout.history.series ? [state.layout.history.series] : []
+    );
+    var shown = {};
+    codes.forEach(function(code){ var e = buildEntry(code); if(e && e.source) shown[e.source] = true; });
+    var labels = Object.keys(shown).map(function(id){
+      var s = state.sources[id];
+      return (s && s.label && (s.label[LANG] || s.label.en)) || id;
+    }).sort();
+    document.getElementById('sourcesLine').textContent = labels.length ? labels.join(', ') : '—';
+  }
+
+  /* ---- search: the commune list, both the top bar and the explore card --- */
+  async function loadSearch(){
+    try{
+      var res = await fetch(GEOGRAPHIES_URL);
+      if(!res.ok) return;
+      var geo = await res.json();
+      var muni = (geo.geographies || []).filter(function(g){ return g.level === 'municipality' && g.nis; });
+      ['communeList', 'exploreList'].forEach(function(listId){
+        var list = document.getElementById(listId);
+        if(!list) return;
+        list.innerHTML = '';
+        muni.forEach(function(g){
+          var o = document.createElement('option');
+          o.value = (g.names && (g.names[LANG] || g.names.en)) || g.nis;
+          o.dataset.nis = g.nis;
+          list.appendChild(o);
+        });
+      });
+      function wire(inputId, listId){
+        var input = document.getElementById(inputId);
+        var list = document.getElementById(listId);
+        if(!input || !list || input.dataset.wired) return;
+        input.dataset.wired = '1';
+        input.addEventListener('change', function(){
+          var opt = Array.prototype.filter.call(list.options, function(o){ return o.value === input.value; })[0];
+          if(opt) location.href = 'commune.html?nis=' + opt.dataset.nis;
+        });
+      }
+      wire('communeSearch', 'communeList');
+      wire('exploreSearch', 'exploreList');
+    }catch(e){}
+  }
+
+  /* ---- boot ---------------------------------------------------------------- */
+  function renderAll(){
+    applyStrings();
+    if(!state.layout) return;
+    renderKpis();
+    renderKeyList();
+    renderTiles();
+    renderComparison();
+    renderMap();
+    renderHistory();
+    renderUnavailable();
+    renderSources();
+    // Both the comparison ranking bars and the housing bar chart are sized by
+    // the row they land in, which is only known once every card in that row
+    // has rendered -- so each is drawn a second time, at the size it
+    // actually got (macro.html's own history chart needed the same fix).
+    requestAnimationFrame(function(){ renderHistory(); drawComparison(); });
+  }
+
+  async function boot(){
+    applyStrings();
+    document.getElementById('langPick').addEventListener('change', function(){
+      LANG = this.value;
+      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(e){}
+      renderAll();
+      if(state.manifest) renderManifest(state.manifest);
+    });
+    document.getElementById('microZoomIn').addEventListener('click', function(){ if(state.map) state.map.zoomBy(1 / 1.4); });
+    document.getElementById('microZoomOut').addEventListener('click', function(){ if(state.map) state.map.zoomBy(1.4); });
+    document.getElementById('microZoomReset').addEventListener('click', function(){ if(state.map) state.map.resetView(); });
+
+    var urls = [LAYOUT_URL, NATIONAL_URL, AGGREGATES_URL, INDEX_URL, SOURCES_URL, MANIFEST_URL, GEOJSON_URL];
+    var results = await Promise.all(urls.map(function(url){
+      return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+    }));
+    state.layout = results[0];
+    state.national = (results[1] && results[1].indicators) || {};
+    state.aggregates = results[2] || {indicators: {}};
+    (results[3] && results[3].indicators || []).forEach(function(row){ state.metaIndex[row.indicator_code] = row; });
+    state.sources = (results[4] && results[4].sources) || {};
+    state.grades = (results[4] && results[4].grades) || {};
+    state.manifest = results[5];
+    state.geojson = results[6];
+
+    // The freshest retrieval date across every series this page can show --
+    // the Statbel 2015 licence's required "date of last update"
+    // (docs/data_catalog.md), read from the data rather than typed in.
+    var idxDates = Object.keys(state.metaIndex).map(function(c){ return state.metaIndex[c].updated; }).filter(Boolean);
+    var natDates = Object.keys(state.national).map(function(c){ return state.national[c].updated; }).filter(Boolean);
+    var dates = idxDates.concat(natDates).sort();
+    state.attrUpdated = dates[dates.length - 1] || '';
+
+    if(!state.layout){
+      document.querySelectorAll('.bp-state').forEach(function(el){ el.dataset.state = 'error'; });
+      return;
+    }
+    renderAll();
+    renderManifest(state.manifest);
+    loadSearch();
+    var redraw;
+    window.addEventListener('resize', function(){ clearTimeout(redraw); redraw = setTimeout(renderAll, 150); });
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
