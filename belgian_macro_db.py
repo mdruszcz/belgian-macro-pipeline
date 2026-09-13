@@ -27,6 +27,7 @@ from src.fetchers.eurostat import EurostatSource, singleton_geo  # noqa: E402
 from src.fetchers.fpb import FPB_XLSX_URL, FPBSource  # noqa: E402
 from src.fetchers.nbb import NBBSource  # noqa: E402
 from src.fetchers.rebase import rebase_to_2010  # noqa: E402
+from src.fetchers.sdmx_status import sdmx_for_status  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     has_fetchable_national_adapter,
     load_and_validate_all,
@@ -398,6 +399,16 @@ def fetch_all(db: MacroDatabase) -> bool:
                 rows = singleton_geo(geo_rows)
                 if meta.get("unit") == "index_2010":
                     rows = rebase_to_2010(rows)
+                # BLOCKER 1 (audit): singleton_geo's rows carry CANONICAL
+                # status words (src/fetchers/eurostat.py's own OBS_FLAG
+                # mapping), but db.upsert_observations below writes into
+                # legacy_observations.obs_status, which
+                # scripts/sync_to_canonical.py reads back through
+                # map_obs_status() expecting an SDMX letter -- exactly like
+                # every NBB/DBnomics row already does. Converting here keeps
+                # legacy_observations SDMX-lettered for every adapter, with
+                # no adapter-specific case downstream.
+                rows = [{**r, "obs_status": sdmx_for_status(r["obs_status"])} for r in rows]
             elif meta.get("type") == "dbnomics":
                 source = DBnomicsSource(source_id=source_id)
                 rows = source.fetch(

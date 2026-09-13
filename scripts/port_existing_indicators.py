@@ -43,6 +43,7 @@ from src.fetchers.dbnomics import DBnomicsSource  # noqa: E402
 from src.fetchers.eurostat import EurostatSource, singleton_geo  # noqa: E402
 from src.fetchers.nbb import NBBSource  # noqa: E402
 from src.fetchers.rebase import rebase_to_2010  # noqa: E402
+from src.fetchers.sdmx_status import map_obs_status  # noqa: E402
 from src.geography.international import load_country_geos  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     has_fetchable_national_adapter,
@@ -79,27 +80,9 @@ BE_COUNTRY_GEO = {
 # port() below insert it positionally.
 COUNTRY_GEOS = load_country_geos()
 
-# SDMX CL_OBS_STATUS -> canonical status enum. Any code not listed here is a
-# hard error, never a silent default (CLAUDE.md rule 13: fail loudly).
-OBS_STATUS_MAP = {
-    "A": "final",  # Normal value
-    "P": "provisional",  # Provisional value
-    "E": "estimate",  # Estimated value
-    "B": "revised",  # Break in series -- weakest mapping here; re-verify if seen
-    "M": "na",  # Missing value
-    "S": "suppressed",  # Statistical disclosure control, if ever encountered
-}
-
-
-def map_obs_status(raw: str) -> str:
-    raw = (raw or "").strip()
-    if raw not in OBS_STATUS_MAP:
-        raise ValueError(
-            f"Unrecognized SDMX OBS_STATUS code {raw!r}. Refusing to guess "
-            "(CLAUDE.md rule 13: fail loudly, never silently coerce). "
-            "Add it to OBS_STATUS_MAP after confirming its meaning."
-        )
-    return OBS_STATUS_MAP[raw]
+# OBS_STATUS_MAP and map_obs_status now live in src/fetchers/sdmx_status.py
+# (imported above), shared with belgian_macro_db.py's inverse use of the same
+# table -- see that module's docstring for why one table, not two.
 
 
 def derive_period_bounds(period: str, frequency: str) -> tuple[str, str]:
