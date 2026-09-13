@@ -1,0 +1,44 @@
+eurostat_code,geo_id,level,name_nl,name_fr,name_en,valid_from,basis,scope,listed_on
+BE,be:country,country,België,Belgique,Belgium,1830-01-01,eu,pilot,2026-09-13
+DE,de:country,country,Duitsland,Allemagne,Germany,1990-10-03,eu,pilot,2026-09-13
+ES,es:country,country,Spanje,Espagne,Spain,1978-12-29,eu,pilot,2026-09-13
+FR,fr:country,country,Frankrijk,France,France,1958-10-04,eu,pilot,2026-09-13
+NL,nl:country,country,Nederland,Pays-Bas,Netherlands,1815-03-16,eu,pilot,2026-09-13
+AT,at:country,country,Oostenrijk,Autriche,Austria,1995-01-01,eu,pilot,2026-09-13
+BG,bg:country,country,Bulgarije,Bulgarie,Bulgaria,2007-01-01,eu,pilot,2026-09-13
+HR,hr:country,country,Kroatië,Croatie,Croatia,2013-07-01,eu,pilot,2026-09-13
+CY,cy:country,country,Cyprus,Chypre,Cyprus,2004-05-01,eu,pilot,2026-09-13
+CZ,cz:country,country,Tsjechië,Tchéquie,Czechia,2004-05-01,eu,pilot,2026-09-13
+DK,dk:country,country,Denemarken,Danemark,Denmark,1973-01-01,eu,pilot,2026-09-13
+EE,ee:country,country,Estland,Estonie,Estonia,2004-05-01,eu,pilot,2026-09-13
+FI,fi:country,country,Finland,Finlande,Finland,1995-01-01,eu,pilot,2026-09-13
+EL,el:country,country,Griekenland,Grèce,Greece,1981-01-01,eu,pilot,2026-09-13
+HU,hu:country,country,Hongarije,Hongrie,Hungary,2004-05-01,eu,pilot,2026-09-13
+IE,ie:country,country,Ierland,Irlande,Ireland,1973-01-01,eu,pilot,2026-09-13
+IT,it:country,country,Italië,Italie,Italy,1958-01-01,eu,pilot,2026-09-13
+LV,lv:country,country,Letland,Lettonie,Latvia,2004-05-01,eu,pilot,2026-09-13
+LT,lt:country,country,Litouwen,Lituanie,Lithuania,2004-05-01,eu,pilot,2026-09-13
+LU,lu:country,country,Luxemburg,Luxembourg,Luxembourg,1958-01-01,eu,pilot,2026-09-13
+MT,mt:country,country,Malta,Malte,Malta,2004-05-01,eu,pilot,2026-09-13
+PL,pl:country,country,Polen,Pologne,Poland,2004-05-01,eu,pilot,2026-09-13
+PT,pt:country,country,Portugal,Portugal,Portugal,1986-01-01,eu,pilot,2026-09-13
+RO,ro:country,country,Roemenië,Roumanie,Romania,2007-01-01,eu,pilot,2026-09-13
+SK,sk:country,country,Slowakije,Slovaquie,Slovakia,2004-05-01,eu,pilot,2026-09-13
+SI,si:country,country,Slovenië,Slovénie,Slovenia,2004-05-01,eu,pilot,2026-09-13
+SE,se:country,country,Zweden,Suède,Sweden,1995-01-01,eu,pilot,2026-09-13
+CH,ch:country,country,Zwitserland,Suisse,Switzerland,1960-05-03,efta,pilot,2026-09-13
+IS,is:country,country,IJsland,Islande,Iceland,1970-03-01,efta,pilot,2026-09-13
+LI,li:country,country,Liechtenstein,Liechtenstein,Liechtenstein,1991-05-01,efta,pilot,2026-09-13
+NO,no:country,country,Noorwegen,Norvège,Norway,1960-05-03,efta,pilot,2026-09-13
+AL,al:country,country,Albanië,Albanie,Albania,2014-06-01,candidate,pilot,2026-09-13
+BA,ba:country,country,Bosnië en Herzegovina,Bosnie-Herzégovine,Bosnia and Herzegovina,2022-12-01,candidate,pilot,2026-09-13
+GE,ge:country,country,Georgië,Géorgie,Georgia,2023-12-01,candidate,pilot,2026-09-13
+MD,md:country,country,Moldavië,Moldavie,Moldova,2022-06-01,candidate,pilot,2026-09-13
+ME,me:country,country,Montenegro,Monténégro,Montenegro,2010-12-01,candidate,pilot,2026-09-13
+MK,mk:country,country,Noord-Macedonië,Macédoine du Nord,North Macedonia,2005-12-01,candidate,pilot,2026-09-13
+RS,rs:country,country,Servië,Serbie,Serbia,2012-03-01,candidate,pilot,2026-09-13
+TR,tr:country,country,Turkije,Turquie,Türkiye,1999-12-01,candidate,pilot,2026-09-13
+UA,ua:country,country,Oekraïne,Ukraine,Ukraine,2022-06-01,candidate,pilot,2026-09-13
+EU27_2020,eu27_2020:aggregate,eu_aggregate,Europese Unie (EU27),Union européenne (UE27),European Union (EU27),2020-02-01,aggregate,pilot,2026-09-13
+EA21,ea21:aggregate,eu_aggregate,Eurozone (21 landen),Zone euro (21 pays),Euro area (21 countries),2026-01-01,aggregate,pilot,2026-09-13
+EA,ea:aggregate,eu_aggregate,Eurozone,Zone euro,Euro area,1999-01-01,aggregate,legacy,2026-09-13
