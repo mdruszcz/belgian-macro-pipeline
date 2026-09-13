@@ -56,7 +56,7 @@ all geographies of a dataset. The current fetcher asks one series per country in
 | HICP, annual rate | `prc_hicp_manr` | M | 45 | 14,231 | 9,267 | 1.0 s, 434 KB |
 | Unemployment rate, SA | `une_rt_m` | M | 39 | 14,884 | 8,141 | 3.1 s, 463 KB |
 | Government debt, % of GDP | `gov_10dd_edpt1` | A | 30 | 890 | 510 | 0.6 s, 43 KB |
-| Consumer confidence, SA (withdrawn, see *New data sources*) | `ei_bssi_m_r2` | M | 34 | 12,300 | 7,075 | 0.8 s, 371 KB |
+| Consumer confidence, SA | `ei_bssi_m_r2` | M | 34 | 12,300 | 7,075 | 0.8 s, 371 KB |
 | **Total** | | | | **47,573** | **27,953** | **~6 s** |
 
 **File size.** In the committed 10-column CSV shape: **113 bytes per row**. The five pilot
@@ -113,6 +113,7 @@ scale. Gitignored and rebuilt each run, so it never reaches git. It does need ru
   hardcoded `COUNTRY_GEOS` dict in `scripts/port_existing_indicators.py`, which has six entries. A
   geography the response carries but the allowlist does not name **fails the load**. Silently
   dropping or silently adding a country are both wrong numbers.
+- **Only two aggregates**, decided by the maintainer: `EU27_2020` and the current euro area.
 - **Aggregates are named after their composition** (`eu27_2020:aggregate`, established in part 3),
   because Eurostat publishes several at once and they change: the probe returned `EA`, `EA12`,
   `EA19`, `EA20`, `EA21` (Bulgaria's accession), `EU`, `EU28`, `EEA`, `EU27_2020`.
@@ -147,13 +148,13 @@ recorded in `docs/data_catalog.md`. What it requires of this feature:
    acceding and candidate countries.** That list is taken from the European Commission's official
    enlargement page on the day the allowlist is written, dated in the config, and not typed from
    memory. It changes: a country gaining or losing candidate status changes what may be published.
-3. **Only data originating from Eurostat.** A Eurostat dataset can carry another producer's figures,
-   and those may not be redisseminated commercially. Each pilot dataset's origin is checked on its
-   Eurostat metadata page before it is loaded. **Consumer confidence (`ei_bssi_m_r2`) is withdrawn
-   from the pilot** until that check is done: the EU business and consumer surveys are run by the
-   Commission's DG ECFIN, and Eurostat disseminates them. Whether that makes them "sources other
-   than Eurostat" is for the maintainer to decide, not to guess. The same question applies to the
-   `EC_CONS_CONF_BE`/`_EU` series already in the pipeline.
+3. **Only data originating from Eurostat, or under its own open licence.** A Eurostat dataset can
+   carry another producer's figures, and those may not be redisseminated commercially under
+   Eurostat's policy. Each pilot dataset's origin is checked on its Eurostat metadata page before it
+   is loaded. The one pilot dataset that is not Eurostat's own, consumer confidence
+   (`ei_bssi_m_r2`, the EU business and consumer surveys run by the Commission's DG ECFIN), is
+   **CC0**, confirmed by the maintainer on 2026-09-13 and recorded in `docs/data_catalog.md`. It stays
+   in the pilot, and the same answer covers the `EC_CONS_CONF_BE`/`_EU` series already published.
 4. **Adapted data says so, prominently.** A series this pipeline changes — the `index_2010` rebase
    (`transform: rebase`) — must carry that statement on every page that shows it.
    `src/exporters/provenance.py` already defines such a notice; stage 1 adds a test that it reaches
@@ -177,15 +178,14 @@ checked here and is listed below.
 
 ## Assumptions and open questions
 
-1. **Which countries?** Now set by the licence: EU27 + EFTA + official EU acceding and candidate
+1. **Which countries?** Set by the licence: EU27 + EFTA + official EU acceding and candidate
    countries, from the Commission's list on the day of loading. The United Kingdom is excluded;
    if the maintainer wants it, it needs a source whose terms allow it (e.g. the ONS), with its own
    catalogue row.
-2. **Which aggregates?** Recommended: `EU27_2020` and the current euro area only (`EA20`, moving to
-   `EA21` when Eurostat switches). Historical compositions (`EU28`, `EA19`, `EA12`) are not loaded.
-3. **The fifth pilot indicator.** Consumer confidence is withdrawn pending the origin question
-   (DG ECFIN vs Eurostat). Replacement: a monthly series Eurostat produces itself, probed the same
-   way before it is chosen.
+2. **Which aggregates? Decided 2026-09-13:** `EU27_2020` and the current euro area only (`EA20`,
+   moving to `EA21` when Eurostat switches). Historical compositions (`EU28`, `EA19`, `EA12`) and
+   `EEA` are not loaded.
+3. **Consumer confidence's licence. Decided 2026-09-13:** CC0 (see *New data sources*).
 4. **DBnomics' own terms**, if any, on top of Eurostat's. Not yet read.
 5. **Full history or from 2008?** 108 MB vs 63 MB at 100 indicators. Recommended: from 2008 in the
    pilot, measured both ways.
