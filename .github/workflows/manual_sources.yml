@@ -56,23 +56,27 @@ jobs:
         # there is no offload step, and the last step before the PR checks it.
         run: python scripts/build_staging_db.py --working-db "$WORKING_DB"
 
-      - name: Validate the manual store rebuilds cleanly
-        # Fails loudly if the committed CSV cannot reconstruct a valid database
-        # -- a corrupted or hand-edited store must not reach the exports.
+      - name: Validate every store before exporting
+        id: validate
+        # The same validation daily_fetch.yml and CI run: every rule over the
+        # working database plus every hand-loaded store (scripts/validate_data.py
+        # loads them into a throwaway copy). This used to rebuild
+        # population_observations.csv alone and check its foreign keys -- one
+        # store of six, and no rule beyond the keys, in the one workflow whose
+        # whole job is publishing a hand refresh. No --record-volume: this
+        # workflow commits no database, so it has no baseline to keep.
+        #
+        # Exit code captured, not propagated immediately, for the reason
+        # daily_fetch.yml gives: the summary must reach the run page in exactly
+        # the case that matters.
         run: |
-          python scripts/load_observations_csv.py \
-            --db "${RUNNER_TEMP}/manual.db" \
-            --csv data/population_observations.csv \
-            --run-source-id statbel --run-adapter rebuild
-          python - <<'PY'
-          import os, sqlite3
-          conn = sqlite3.connect(os.path.join(os.environ["RUNNER_TEMP"], "manual.db"))
-          violations = conn.execute("PRAGMA foreign_key_check").fetchall()
-          if violations:
-              raise SystemExit(f"::error::Rebuilt manual store has FK violations: {violations}")
-          rows = conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
-          print(f"Manual store rebuilt cleanly: {rows} observations, 0 FK violations.")
-          PY
+          SUMMARY="$RUNNER_TEMP/validation-summary.md"
+          set +e
+          python scripts/validate_data.py --db "$WORKING_DB" --summary-file "$SUMMARY"
+          STATUS=$?
+          set -e
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+          exit $STATUS
 
       - name: Regenerate exports
         # The history export runs twice: --all-periods to the gitignored
@@ -114,11 +118,9 @@ jobs:
             --out data/percentiles.csv --stores config/stores.yaml
 
       - name: Export per-entity site payloads for /local
-        # Block J -- docs/features/site_payloads.md. See daily_fetch.yml for
-        # the full rationale; this workflow does not run validate_data.py
-        # against the main DB (only the manual-store round-trip check
-        # above), so the manifest records that honestly rather than
-        # claiming a check that did not happen.
+        # Block J -- docs/features/site_payloads.md. The validation status is
+        # derived from the step above, which now validates every store; it
+        # used to be "unknown" because nothing here ran the rules.
         run: |
           python scripts/export_site_payloads.py --db "$WORKING_DB" \
             --communes-history data/communes_history_full.csv \
@@ -126,7 +128,7 @@ jobs:
             --national data/belgian_macro_export.csv \
             --out-dir public/data \
             --build-id "${{ github.run_id }}" \
-            --validation-status unknown
+            --validation-status "${{ steps.validate.outcome == 'success' && 'pass' || 'fail' }}"
 
       - name: Export explorer payloads
         # Keep explorer.html's indicator shards in sync with the published

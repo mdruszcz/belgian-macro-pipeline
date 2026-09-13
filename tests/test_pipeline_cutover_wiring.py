@@ -148,3 +148,19 @@ def test_make_all_assembles_and_never_offloads():
     assert prereqs.index("assemble") < prereqs.index("validate") < prereqs.index("exports")
     assert "offload" not in prereqs
     assert "DB           ?= data/local/working.db" in makefile
+
+
+def test_manual_sources_validates_every_store_and_derives_its_status():
+    """Pipeline repair part 4: the workflow that publishes a hand refresh used
+    to rebuild one store of six and check only its foreign keys, then stamp
+    the manifest "unknown". It now runs the same validation as CI and the
+    daily run, before exporting, and the manifest reports its outcome."""
+    steps = _steps("manual_sources.yml")
+    validate = _index(steps, id="validate")
+    assert "scripts/validate_data.py" in steps[validate]["run"]
+    assert "--record-volume" not in steps[validate]["run"]
+    assert validate < _index(steps, contains="scripts/export_communes_csv.py")
+    text = (WORKFLOWS / "manual_sources.yml").read_text(encoding="utf-8")
+    assert "--validation-status unknown" not in text
+    assert "steps.validate.outcome" in text
+    assert "PRAGMA foreign_key_check" not in text
