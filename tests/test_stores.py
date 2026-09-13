@@ -42,7 +42,7 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 6
+    assert len(stores) == 9
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
@@ -52,13 +52,67 @@ def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
         assert store.path.is_file(), f"{name}: path {store.path} does not exist"
 
 
-def test_every_store_is_extra_csv_in_this_pr():
-    """PR1 moves no data (CLAUDE.md rule 10) -- every store declared today
-    must be extra_csv. PR2 is what introduces the first in_db store."""
+def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
+    """The six hand-loaded sources stay extra_csv; the three CI fetches itself
+    and that outgrew the committed database are in_db (docs/decisions/0006)."""
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert all(s.mode == MODE_EXTRA_CSV for s in stores.values())
-    assert in_db_stores(stores) == ()
+    assert {s.name for s in in_db_stores(stores)} == {"onem", "onem_rates", "walstat"}
     assert len(extra_csv_stores(stores)) == 6
+    assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())
+
+
+def _configured_indicators_by_source() -> dict[str, set[str]]:
+    by_source: dict[str, set[str]] = {}
+    for path in (REPO / "config" / "indicators").glob("*.yaml"):
+        cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        by_source.setdefault(cfg.get("source_id"), set()).add(cfg["id"])
+    return by_source
+
+
+def test_in_db_stores_declare_every_indicator_their_sources_configure():
+    """The offload's row set is the declared list. An ONEM or WalStat indicator
+    configured but not declared would make scripts/offload_stores.py refuse
+    to run on the first day it is fetched -- caught here, at PR time, instead."""
+    stores = load_stores(DEFAULT_STORES_PATH)
+    configured = _configured_indicators_by_source()
+    declared: dict[str, set[str]] = {}
+    for store in in_db_stores(stores):
+        declared.setdefault(store.source_id, set()).update(store.indicators)
+    for source_id, ids in declared.items():
+        assert ids == configured[source_id], (
+            f"source {source_id}: configured but undeclared "
+            f"{sorted(configured[source_id] - ids)}, declared but unconfigured "
+            f"{sorted(ids - configured[source_id])}"
+        )
+
+
+def test_no_indicator_is_declared_by_two_stores():
+    seen: dict[str, str] = {}
+    for name, store in load_stores(DEFAULT_STORES_PATH).items():
+        for indicator in store.indicators:
+            assert indicator not in seen, f"{indicator} declared by {seen[indicator]} and {name}"
+            seen[indicator] = name
+
+
+def test_no_in_db_indicator_is_left_in_the_committed_database():
+    """The whole point of the cutover: the committed file carries none of the
+    offloaded rows. A merge that reintroduced them would also make every
+    assemble refuse (scripts/build_staging_db.py)."""
+    import sqlite3
+
+    db = REPO / "data" / "belgian_macro.db"
+    if not db.is_file():
+        pytest.skip("committed database not present")
+    ids = sorted({i for s in in_db_stores(load_stores(DEFAULT_STORES_PATH)) for i in s.indicators})
+    conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        held = conn.execute(
+            f"SELECT COUNT(*) FROM observations WHERE indicator_id IN ({','.join('?' * len(ids))})",
+            ids,
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert held == 0
 
 
 def test_registry_indicators_match_each_csvs_real_contents():
@@ -71,8 +125,8 @@ def test_registry_indicators_match_each_csvs_real_contents():
 
 
 def test_every_store_declares_how_to_rebuild_its_reference_rows():
-    """All six stores in this PR have a reference_rows script -- sync_population.py
-    gained --reference-rows-only in this PR specifically to close that hole."""
+    """Every store has a reference_rows script -- sync_population.py gained
+    --reference-rows-only in PR1 of the pipeline repair to close that hole."""
     stores = load_stores(DEFAULT_STORES_PATH)
     for name, store in stores.items():
         assert (
@@ -242,6 +296,39 @@ def test_indicator_drift_is_detected_both_directions(tmp_path):
 # ── resolve_extra_observations: explicit wins, registry is the fallback ─────
 
 
+def test_an_in_db_store_may_declare_an_indicator_not_fetched_yet(tmp_path):
+    """UNEMPLOYMENT_RATE_BIT was configured, and so had to be declared, before
+    WalStat had delivered a single row of it. For an in_db store that is not
+    drift; an undeclared indicator in its CSV still is."""
+    csv_path = tmp_path / "w_observations.csv"
+    _make_csv(csv_path, ["FOO"])
+    base = {
+        "path": str(csv_path),
+        "source_id": "walstat",
+        "reference_rows": {"script": "scripts/sync_walstat.py"},
+    }
+    in_db = _write_registry(
+        tmp_path,
+        {"stores": {"w": {**base, "mode": "in_db", "indicators": ["FOO", "NOT_YET"]}}},
+        tmp_path,
+    )
+    assert verify_indicator_lists(load_stores(in_db)) == []
+
+    extra = _write_registry(
+        tmp_path,
+        {"stores": {"w": {**base, "mode": "extra_csv", "indicators": ["FOO", "NOT_YET"]}}},
+        tmp_path,
+    )
+    assert verify_indicator_lists(load_stores(extra))
+
+    undeclared = _write_registry(
+        tmp_path,
+        {"stores": {"w": {**base, "mode": "in_db", "indicators": ["NOT_YET"]}}},
+        tmp_path,
+    )
+    assert verify_indicator_lists(load_stores(undeclared))
+
+
 def test_explicit_extra_observations_wins_outright():
     """Prevents the double-count bug: if both an explicit list and the
     registry default were merged, the CLI test in
@@ -285,6 +372,9 @@ def test_empty_stores_path_disables_the_fallback():
 SCANNED_FOR_HARDCODED_STORE_LIST = [
     REPO / "Makefile",
     REPO / ".github" / "workflows" / "daily_fetch.yml",
+    REPO / ".github" / "workflows" / "ci.yml",
+    REPO / "scripts" / "offload_stores.py",
+    REPO / "scripts" / "build_staging_db.py",
     REPO / "scripts" / "validate_data.py",
     REPO / "tests" / "test_committed_stores_are_consistent.py",
     REPO / "tests" / "test_export_aggregates_csv.py",

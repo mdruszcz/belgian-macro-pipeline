@@ -8,33 +8,36 @@
 # under a comment that claimed it matched the workflows. This is now the one
 # place that list is spelled out; everything else reads it via src/stores.py.
 #
-# `mode` IS THE CRUX OF PR2. `in_db` means the store is loaded INTO the
-# disposable working database (scripts/build_staging_db.py) and dumped back
-# out; `extra_csv` means it is passed to the four exporters as
-# --extra-observations and never loaded into any database. A store in BOTH
-# paths would be double-counted: export_communes_history_csv.py takes every
-# is_latest=1 row from the DB and every row from each --extra-observations
-# CSV with no deduplication (lines 90, 96-107, 157). IN THIS PR EVERY STORE IS
-# extra_csv -- this PR moves no data (CLAUDE.md rule 10). PR2 adds ONEM and
-# WalStat as in_db.
+# `mode` IS THE CRUX. `in_db` means the store is loaded INTO the disposable
+# working database (scripts/build_staging_db.py), synced into there by the
+# daily run, and dumped back out by scripts/offload_stores.py -- the sources
+# CI fetches itself and that are too big to keep in a committed binary
+# (ONEM, ONEM's published rate, WalStat; docs/decisions/0006). `extra_csv`
+# means it is passed to the four exporters as --extra-observations and never
+# loaded into any database -- the hand-loaded sources, whose CSV is written
+# by their own sync script. A store in BOTH paths would be double-counted:
+# export_communes_history_csv.py takes every is_latest=1 row from the DB and
+# every row from each --extra-observations CSV with no deduplication.
 #
 # `indicators` is exactly the distinct indicator_id values present in the
-# CSV today (verified with `tail -n +2 data/X.csv | cut -d, -f1 | sort -u`,
-# not hand-guessed) -- this is what makes PR2's DB-to-CSV offload checkable:
-# an indicator appearing in the CSV but missing from this list would not be
-# caught by the "already in both" double-count check above.
+# CSV (verified with `tail -n +2 data/X.csv | cut -d, -f1 | sort -u`, not
+# hand-guessed). For an in_db store it is ALSO the offload's row set: exactly
+# these indicators are dumped to the CSV and deleted from the committed
+# database, so it must name every indicator its sync script writes --
+# including one configured but not yet fetched (UNEMPLOYMENT_RATE_BIT on the
+# day of the cutover), the one case src/stores.py tolerates as absent from
+# the CSV.
 #
 # `reference_rows` says how to (re)create the store's sources/indicators
 # rows -- required because the observations live in the CSV but their
 # name/unit are read from the `indicators` table (exactly one metadata path;
-# see tests/test_committed_stores_are_consistent.py). All six have a script
-# in this PR: sync_population.py did not have --reference-rows-only before
-# this PR (there was no line for it in `make reference`, and POPULATION_*
+# see tests/test_committed_stores_are_consistent.py). Every store has a script
+# (sync_population.py did not have --reference-rows-only before PR1 of the
+# pipeline repair -- there was no line for it in `make reference`, and POPULATION_*
 # rows only existed because the database itself was committed) -- it was a
 # small, honest addition, made here rather than left null. The schema still
 # allows `reference_rows: null` with a `reference_rows_reason` for a future
-# store that genuinely has none (e.g. ONEM/WalStat in PR2, until their own
-# sync scripts grow the flag).
+# store that genuinely has none.
 stores:
   population:
     path: data/population_observations.csv
@@ -120,4 +123,52 @@ stores:
       - ADMIN_UNEMPLOYMENT_RATE_COM
     reference_rows:
       script: scripts/sync_var.py
+      args: ["--reference-rows-only"]
+
+  # ── in_db: fetched by CI into the working database, dumped back here ──
+
+  onem:
+    path: data/onem_observations.csv
+    source_id: onem
+    mode: in_db
+    indicators:
+      - ACTIVATION_MEASURES_PAID
+      - PART_TIME_BENEFIT_RECIPIENTS
+      - TEMP_UNEMPLOYED
+      - TEMP_UNEMPLOYMENT_BENEFIT_PAID
+      - UNEMPLOYED_JOBSEEKERS
+      - UNEMPLOYMENT_BENEFIT_PAID
+      - UNEMPLOYMENT_BENEFIT_RECIPIENTS
+    reference_rows:
+      script: scripts/sync_onem.py
+      args: ["--reference-rows-only"]
+
+  onem_rates:
+    path: data/onem_rates_observations.csv
+    source_id: onem
+    mode: in_db
+    indicators:
+      - UNEMPLOYMENT_RATE_INSURED
+      - UNEMPLOYMENT_RATE_INSURED_MONTHLY
+    reference_rows:
+      script: scripts/sync_onem_rates.py
+      args: ["--reference-rows-only"]
+
+  walstat:
+    path: data/walstat_observations.csv
+    source_id: walstat
+    mode: in_db
+    indicators:
+      - MUN_DEBT_LONG_TERM_PER_CAPITA
+      - MUN_DEBT_SHORT_TERM_PER_CAPITA
+      - MUN_DEBT_TOTAL_PER_CAPITA
+      - MUN_EXPENDITURE_EXTRAORDINARY_PER_CAPITA
+      - MUN_EXPENDITURE_ORDINARY_PER_CAPITA
+      - MUN_EXPENDITURE_TOTAL_PER_CAPITA
+      - MUN_REVENUE_EXTRAORDINARY_PER_CAPITA
+      - MUN_REVENUE_ORDINARY_PER_CAPITA
+      - MUN_REVENUE_TOTAL_PER_CAPITA
+      - UNEMPLOYMENT_RATE_BIT
+    reference_rows:
+      script: scripts/sync_walstat.py
       args: ["--reference-rows-only"]

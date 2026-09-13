@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://belgian-macro-pipeline/store_registry.schema.json",
   "title": "Committed observation store registry",
-  "description": "config/stores.yaml -- the single declaration of every committed observation store (PR1 of the pipeline repair). See src/stores.py for the loader and docs/decisions/0002-split-committed-stores.md for why stores are split by how the data can arrive.",
+  "description": "config/stores.yaml -- the single declaration of every committed observation store (PR1 of the pipeline repair). See src/stores.py for the loader, and docs/decisions/0002-split-committed-stores.md and docs/decisions/0006-stores-split-by-volume.md for why stores are split as they are.",
   "type": "object",
   "required": ["stores"],
   "additionalProperties": false,
@@ -35,7 +35,7 @@
             "minItems": 1,
             "items": {"type": "string", "minLength": 1},
             "uniqueItems": true,
-            "description": "Every distinct indicator_id actually present in this store's CSV. Checked against the file's real contents, not hand-maintained independently of it."
+            "description": "Every distinct indicator_id actually present in this store's CSV, checked against the file's real contents. For an in_db store this is also the offload's row set (scripts/offload_stores.py), so it must name every indicator its sync writes -- including one configured but not fetched yet, the one case tolerated as absent from the CSV."
           },
           "reference_rows": {
             "type": ["object", "null"],

@@ -47,10 +47,20 @@ jobs:
       - name: Validate indicator/source config
         run: python scripts/validate_config.py
 
+      - name: Assemble the working database
+        # The committed database plus every in_db store's committed CSV, at
+        # the gitignored data/local/working.db -- the same database the daily
+        # workflow validates. Validating data/belgian_macro.db on its own
+        # would fail every PR: since the ONEM/WalStat cutover it holds 1,939
+        # of ~86,000 observations, and indicator_disappeared would fire on
+        # eighteen indicators (docs/decisions/0006).
+        run: python scripts/build_staging_db.py
+
       - name: Validate the committed data stores
         # Catches a bad hand-edited store at PR time rather than after it is
         # merged and published. The daily workflow runs the same rules before
-        # its export step. See docs/features/validation.md.
+        # its export step. See docs/features/validation.md. Reads the working
+        # database assembled above, and refuses to run if it is absent.
         run: python scripts/validate_data.py
 
       - name: Tests (fast tier)

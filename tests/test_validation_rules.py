@@ -502,10 +502,12 @@ def test_each_rule_is_individually_silent_on_a_clean_store(tmp_path, name):
 
 
 @pytest.mark.slow
-def test_the_real_committed_stores_pass(tmp_path):
+def test_the_real_committed_stores_pass(working_db):
     """The baseline the spec claims. If this fails, something regressed in
-    the committed data rather than in the rules."""
-    conn = sqlite3.connect(str(REPO / "data" / "belgian_macro.db"))
+    the committed data rather than in the rules. Against the assembled
+    working database, as CI and the daily run validate it -- the committed
+    file alone no longer holds ONEM or WalStat (docs/decisions/0006)."""
+    conn = sqlite3.connect(str(working_db))
     conn.execute("PRAGMA foreign_keys=ON")
     exports = (
         REPO / "data" / "belgian_macro_export.csv",

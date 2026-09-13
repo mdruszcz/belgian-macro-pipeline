@@ -20,7 +20,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.exporters.provenance import DB_TO_CONFIG_SOURCE_ID  # noqa: E402
-from src.stores import DEFAULT_STORES_PATH, extra_csv_stores, load_stores  # noqa: E402
+from src.stores import DEFAULT_STORES_PATH, load_stores  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     load_and_validate_all,
     load_and_validate_derived,
@@ -36,15 +36,22 @@ from src.validation.rules import (  # noqa: E402
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# THE WORKING COPY, NOT THE COMMITTED FILE (PR2 of the pipeline repair). Since
+# ONEM and WalStat moved to committed CSVs, data/belgian_macro.db alone holds
+# 1,939 of the ~86,000 observations; validating it would fire
+# indicator_disappeared on eighteen indicators and fail every CI run. There is
+# deliberately NO fallback to the committed file when the working copy is
+# absent -- that would turn a hard failure into an intermittent one.
+DEFAULT_DB = REPO_ROOT / "data" / "local" / "working.db"
 DEFAULT_INDICATORS_DIR = REPO_ROOT / "config" / "indicators"
 DEFAULT_SOURCES_DIR = REPO_ROOT / "config" / "sources"
 DEFAULT_DERIVED_DIR = REPO_ROOT / "config" / "indicators" / "derived"
 
 
 def _default_exports() -> tuple[Path, ...]:
-    """The two national/commune bulk exports, plus every extra_csv store's
-    committed CSV, read from config/stores.yaml (src/stores.py) rather than
-    hand-listed here a fourth time.
+    """The national/commune bulk exports, plus every registered store's
+    committed CSV (extra_csv and in_db alike), read from config/stores.yaml
+    (src/stores.py) rather than hand-listed here a fourth time.
 
     Used to be a hardcoded 6-path tuple naming only 3 of the (then) 6 manual
     stores -- census2021, realestate and police were missing, so those three
@@ -57,13 +64,18 @@ def _default_exports() -> tuple[Path, ...]:
         REPO_ROOT / "data" / "communes_export.csv",
         REPO_ROOT / "data" / "communes_history.csv",
     ]
-    exports.extend(s.path for s in extra_csv_stores(load_stores(DEFAULT_STORES_PATH)))
+    exports.extend(s.path for _, s in sorted(load_stores(DEFAULT_STORES_PATH).items()))
     return tuple(exports)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Validate the committed data stores")
-    ap.add_argument("--db", default=str(REPO_ROOT / "data" / "belgian_macro.db"))
+    ap.add_argument(
+        "--db",
+        default=str(DEFAULT_DB),
+        help="Database to validate. Defaults to the assembled working copy "
+        "(scripts/build_staging_db.py, `make assemble`).",
+    )
     ap.add_argument("--derived-dir", default=str(DEFAULT_DERIVED_DIR))
     ap.add_argument("--indicators-dir", default=str(DEFAULT_INDICATORS_DIR))
     ap.add_argument("--sources-dir", default=str(DEFAULT_SOURCES_DIR))
@@ -80,8 +92,8 @@ def main() -> int:
         "--export",
         action="append",
         default=[],
-        help="Published CSV to parse-check. Repeatable; defaults to the two bulk "
-        "exports plus every extra_csv store in config/stores.yaml.",
+        help="Published CSV to parse-check. Repeatable; defaults to the bulk "
+        "exports plus every store in config/stores.yaml.",
     )
     ap.add_argument(
         "--summary-file",
@@ -99,6 +111,16 @@ def main() -> int:
         help="Treat warn as fail. Off by default -- see the severity rationale in the spec.",
     )
     args = ap.parse_args()
+
+    if not Path(args.db).is_file():
+        # sqlite3.connect would silently create an empty file and every rule
+        # would then "pass" or fail for the wrong reason.
+        print(
+            f"No database at {args.db}. Run `make assemble` "
+            "(python scripts/build_staging_db.py) first.",
+            file=sys.stderr,
+        )
+        return 2
 
     conn = sqlite3.connect(str(args.db))
     conn.execute("PRAGMA foreign_keys=ON")

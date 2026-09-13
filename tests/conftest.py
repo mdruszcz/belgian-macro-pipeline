@@ -81,3 +81,27 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "chromium" in getattr(item, "fixturenames", ()):
             item.add_marker(pytest.mark.browser)
+
+
+@pytest.fixture(scope="session")
+def working_db(tmp_path_factory):
+    """The assembled working database -- the committed data/belgian_macro.db
+    plus every in_db store's committed CSV -- built once per session.
+
+    Since the ONEM/WalStat cutover (docs/decisions/0006) the committed file
+    alone holds 1,939 of ~86,000 observations, so any test that means "the
+    real data" reads this instead. Built with the same code CI and the daily
+    workflow use (scripts/build_staging_db.py), never a hand-rolled copy."""
+    import sys
+    from pathlib import Path
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    sys.path.insert(0, str(scripts))
+    from build_staging_db import StagingBuildError, build
+
+    path = tmp_path_factory.mktemp("working") / "working.db"
+    try:
+        build(working_db=path)
+    except StagingBuildError as exc:
+        pytest.fail(f"could not assemble the working database: {exc}")
+    return path

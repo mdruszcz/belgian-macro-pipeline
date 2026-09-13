@@ -20,6 +20,7 @@ permissions:
 
 env:
   GH_TOKEN: ${{ secrets.BOT_PAT }}
+  WORKING_DB: data/local/working.db
 
 jobs:
   regenerate:
@@ -38,25 +39,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Apply pending schema migrations
-        # Same idempotent step daily_fetch.yml runs. This workflow regenerates
-        # the same exports from the same database, so it needs the same schema
-        # guarantees; without it, a fresh migration would only ever reach the
-        # committed store on a daily run.
-        run: python -m src.db.migrate --db data/belgian_macro.db
-
-      - name: Ensure manual-source reference rows
-        # THE STEP THIS WORKFLOW WAS ORIGINALLY MISSING (run 2026-09-06 failed
-        # here). Every store's OBSERVATIONS live in a committed CSV, but name
-        # and unit are read from the `indicators` table so there is exactly
-        # one metadata path -- and export_communes_csv.py refuses to guess
-        # when a referenced indicator is absent, by design. Driven by
-        # scripts/ensure_reference_rows.py and config/stores.yaml (PR1 of the
-        # pipeline repair) rather than one hand-written line per store here
-        # and again in daily_fetch.yml -- those two lists, plus a third in
-        # scripts/validate_data.py, had already drifted apart before this.
-        # Reads config only: no network, no workbook, idempotent.
-        run: python scripts/ensure_reference_rows.py --db data/belgian_macro.db --stores config/stores.yaml
+      - name: Assemble the working database
+        # The same step daily_fetch.yml and CI run: the committed database
+        # plus every in_db store's committed CSV (ONEM, ONEM's rate, WalStat),
+        # migrated, with geography and every store's reference rows, at the
+        # gitignored data/local/working.db. Every export below reads it.
+        #
+        # WHY THIS MATTERS HERE MORE THAN ANYWHERE. Since the ONEM/WalStat
+        # cutover (docs/decisions/0006) the committed database alone holds
+        # none of those eighteen indicators. Exporting from it, as this
+        # workflow used to, would publish every commune page, aggregate and
+        # payload with ONEM and WalStat silently missing -- and the size guard
+        # would not notice, because every file gets smaller.
+        #
+        # This workflow never writes data/belgian_macro.db or an in_db CSV:
+        # there is no offload step, and the last step before the PR checks it.
+        run: python scripts/build_staging_db.py --working-db "$WORKING_DB"
 
       - name: Validate the manual store rebuilds cleanly
         # Fails loudly if the committed CSV cannot reconstruct a valid database
@@ -84,16 +82,16 @@ jobs:
         # that actually gets committed. See daily_fetch.yml for why -- this
         # is the same fix, mirrored here rather than duplicated in prose.
         run: |
-          python scripts/export_communes_csv.py --db data/belgian_macro.db \
+          python scripts/export_communes_csv.py --db "$WORKING_DB" \
             --out data/communes_export.csv --stores config/stores.yaml
-          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+          python scripts/export_communes_history_csv.py --db "$WORKING_DB" \
             --out data/communes_history_full.csv --all-periods --stores config/stores.yaml
-          python scripts/export_communes_history_csv.py --db data/belgian_macro.db \
+          python scripts/export_communes_history_csv.py --db "$WORKING_DB" \
             --out data/communes_history.csv --stores config/stores.yaml
           python scripts/export_communes_table_json.py \
             --communes-history data/communes_history_full.csv \
             --out data/communes_table.json \
-            --db data/belgian_macro.db
+            --db "$WORKING_DB"
           python -m src.exporters.metadata --out data/metadata/indicators.json
 
       - name: Export province/region/Belgium aggregates
@@ -103,7 +101,7 @@ jobs:
         # short by the communes that no longer exist -- measured at -24.4%
         # for Limburg 2023 when that is got wrong.
         run: |
-          python scripts/export_aggregates_csv.py --db data/belgian_macro.db \
+          python scripts/export_aggregates_csv.py --db "$WORKING_DB" \
             --out data/aggregates.csv --stores config/stores.yaml
 
       - name: Export national and regional peer positions
@@ -112,7 +110,7 @@ jobs:
         # guard, for periods no page shows. --all-periods exists for a
         # researcher who wants the rest.
         run: |
-          python scripts/export_percentiles_csv.py --db data/belgian_macro.db \
+          python scripts/export_percentiles_csv.py --db "$WORKING_DB" \
             --out data/percentiles.csv --stores config/stores.yaml
 
       - name: Export per-entity site payloads for /local
@@ -122,7 +120,7 @@ jobs:
         # above), so the manifest records that honestly rather than
         # claiming a check that did not happen.
         run: |
-          python scripts/export_site_payloads.py --db data/belgian_macro.db \
+          python scripts/export_site_payloads.py --db "$WORKING_DB" \
             --communes-history data/communes_history_full.csv \
             --communes-latest data/communes_export.csv \
             --national data/belgian_macro_export.csv \
@@ -144,7 +142,7 @@ jobs:
           python scripts/export_local_pages.py \
             --payload-dir public/data \
             --out-dir local \
-            --db data/belgian_macro.db \
+            --db "$WORKING_DB" \
             --build-id "${{ github.run_id }}"
 
       - name: Guard against oversized data files
@@ -188,6 +186,12 @@ jobs:
             done
             exit 1
           fi
+
+      - name: Refuse if the committed database was written
+        # Belt and braces for the comment on the assemble step: this workflow
+        # has no business changing the committed database, and a bot PR that
+        # did would bypass the daily run's offload checks entirely.
+        run: git diff --exit-code --stat -- data/belgian_macro.db
 
       - name: Open PR if the exports changed
         run: |
