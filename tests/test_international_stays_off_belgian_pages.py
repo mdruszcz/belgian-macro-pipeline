@@ -6,6 +6,7 @@ this guards (docs' own account: "the explorer published Germany's GDP
 labelled be:country") was found on real data, not a unit test.
 """
 
+import csv
 import sqlite3
 import sys
 from pathlib import Path
@@ -17,9 +18,18 @@ sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from export_canonical_csv import export_canonical_csv  # noqa: E402
-from export_site_payloads import _build_geographies  # noqa: E402
+from export_site_payloads import _build_geographies, _read_national  # noqa: E402
 
 from src.geography.international import load_international_rows  # noqa: E402
+from src.validation.config_schema import is_multi_geo, load_and_validate_all  # noqa: E402
+
+PILOT_INDICATORS = (
+    "GDP_VOLUME_EUROPE",
+    "HICP_ANNUAL_RATE_EUROPE",
+    "UNEMPLOYMENT_RATE_EUROPE",
+    "GOV_DEBT_EUROPE",
+    "CONSUMER_CONFIDENCE_EUROPE",
+)
 
 
 def test_the_allowlist_actually_loaded_into_the_real_working_db(working_db):
@@ -46,43 +56,52 @@ def test_the_allowlist_actually_loaded_into_the_real_working_db(working_db):
     assert n_foreign > 0
 
 
-def test_the_canonical_csv_export_carries_only_belgian_rows(tmp_path, working_db):
+def test_every_configured_pilot_indicator_is_multi_geo():
+    """Precondition for the two tests below: if PILOT_INDICATORS drifted from
+    what is_multi_geo() actually flags, they would pass for the wrong reason."""
+    indicators, _sources = load_and_validate_all(
+        REPO / "config" / "indicators", REPO / "config" / "sources"
+    )
+    for indicator_id in PILOT_INDICATORS:
+        assert is_multi_geo(indicators[indicator_id]), indicator_id
+
+
+def test_the_canonical_csv_export_carries_no_multi_geo_indicator(tmp_path, working_db):
+    """BLOCKER 2 (audit): a multi-geo pilot indicator's own be:country row
+    (Belgium is one of the countries it fetches) used to leak into this
+    Belgium-only export beside the pre-existing national indicator for the
+    same concept -- 755 extra rows, e.g. two different consumer-confidence
+    figures for the same month. Reads the REAL exported file (not just the
+    database) so a regression in export_canonical_csv.py's own query, not
+    only in the database, would be caught here."""
     out = tmp_path / "canonical.csv"
     n = export_canonical_csv(working_db, out)
     assert n > 0
 
-    # The export's own query hardcodes geo_id = 'be:country'; the regression
-    # this guards is a foreign row slipping through mislabeled AS be:country,
-    # which a value diff (not the query) would have to catch -- so verify
-    # directly against the database that be:country's own row set for the
-    # eight migrated Eurostat indicators is exactly what is_latest gives it,
-    # and that no other geography's rows for those indicators were folded in.
-    conn = sqlite3.connect(f"file:{working_db}?mode=ro", uri=True)
-    try:
-        for indicator_id, only_geo in (
-            ("EUROSTAT_GDP_Q_MEUR_DE", "de:country"),
-            ("EUROSTAT_GDP_Q_MEUR_EA", "ea:aggregate"),
-            ("EC_CONS_CONF_EU", "eu27_2020:aggregate"),
-        ):
-            geos = {
-                row[0]
-                for row in conn.execute(
-                    "SELECT DISTINCT geo_id FROM observations WHERE indicator_id = ?",
-                    (indicator_id,),
-                )
-            }
-            assert geos == {only_geo}, (indicator_id, geos)
-        # And the pilot's own multi-country indicator: Belgium's row is
-        # be:country, Germany's is de:country, never swapped or merged.
-        pilot_geos = {
-            row[0]
-            for row in conn.execute(
-                "SELECT DISTINCT geo_id FROM observations WHERE indicator_id = 'GDP_VOLUME_EUROPE'"
-            )
-        }
-        assert {"be:country", "de:country"} <= pilot_geos
-    finally:
-        conn.close()
+    with out.open(encoding="utf-8", newline="") as fh:
+        exported_ids = {row["indicator_code"] for row in csv.DictReader(fh)}
+
+    leaked = exported_ids & set(PILOT_INDICATORS)
+    assert leaked == set(), f"multi-geo indicator(s) leaked into the Belgian export: {leaked}"
+
+    # And the eight migrated single-country indicators are still there --
+    # this must exclude the pilot, not every Eurostat-sourced indicator.
+    assert "EUROSTAT_GDP_Q_MEUR" in exported_ids
+    assert "EC_CONS_CONF_BE" in exported_ids
+
+
+def test_national_json_carries_no_multi_geo_indicator(tmp_path, working_db):
+    """The same guard one layer up: export_site_payloads.py's national.json
+    is built by re-reading the exported CSV (_read_national), so this proves
+    the fix reaches the actually-published payload, not just the CSV."""
+    out = tmp_path / "canonical.csv"
+    export_canonical_csv(working_db, out)
+
+    national = _read_national(out)
+
+    leaked = set(national) & set(PILOT_INDICATORS)
+    assert leaked == set(), f"multi-geo indicator(s) leaked into national.json: {leaked}"
+    assert "EUROSTAT_GDP_Q_MEUR" in national
 
 
 def test_geographies_json_carries_no_foreign_geography(working_db):
