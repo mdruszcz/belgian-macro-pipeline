@@ -30,7 +30,7 @@ REPO = Path(__file__).resolve().parents[1]
 MUNICIPAL_PAGES = [
     "communes.html",
     "local.html",
-    "map.html",
+    "sources.html",
     "home.html",
     "home2.html",
     "commune.html",
@@ -38,6 +38,24 @@ MUNICIPAL_PAGES = [
     "micro.html",
     "explorer.html",
 ]
+
+# Pages that show municipal figures but are too small to carry the whole notice
+# and DELEGATE it, instead of holding a copy. map.html became one of these when
+# it was rebuilt as a single screen with no scroll (Batch 8b): a header, a map
+# and a footer, with several hundred words of licence text that no longer fit
+# under it.
+#
+# WHAT THEY OWE IS NOT LESS, IT IS ARRANGED DIFFERENTLY, and the three tests
+# below say so: the source must be named and linked in the page's own markup,
+# not assembled by script, so a reader without JavaScript still gets a credit;
+# the licence must be named there too; and the page must link to the full text
+# by name. The full text itself is on sources.html, which is in MUNICIPAL_PAGES
+# above and therefore held to every obligation in this file, unabbreviated.
+#
+# This is a change of POLICY, not a relaxation that crept in: before it, every
+# page showing a Statbel figure carried the complete notice in its own markup.
+DELEGATING_PAGES = ["map.html"]
+FULL_NOTICE_PAGE = "sources.html"
 
 
 def _rendered_strings() -> str:
@@ -314,7 +332,7 @@ def _canonical_attribution() -> str:
 # Pages that carry the notice in their own MARKUP. local.html is deliberately
 # absent: it is a JavaScript application, and its no-JavaScript story is the 565
 # static /local/{nis} pages, which lift this same markup from communes.html.
-HTML_ATTRIBUTION_PAGES = ["communes.html", "map.html"]
+HTML_ATTRIBUTION_PAGES = ["communes.html", FULL_NOTICE_PAGE]
 
 
 @pytest.mark.parametrize("page", HTML_ATTRIBUTION_PAGES)
@@ -419,3 +437,51 @@ def test_the_commune_app_renders_the_notice_from_the_shared_module():
     # And keeps no copy of its own.
     assert "attribution: '" not in text, "local.html still carries its own copy of the notice"
     assert "Licentie open data" not in text, "licence prose is still inlined in local.html"
+
+
+# ── delegated attribution ───────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize("page", DELEGATING_PAGES)
+def test_a_delegating_page_still_credits_a_source_in_its_own_markup(page):
+    """Without JavaScript there is no script to assemble a credit, and a
+    licence condition that depends on a script running is a licence condition
+    that is not always met."""
+    text = _page(page)
+    footer = re.search(r'<footer class="mapfoot">(.*?)</footer>', text, re.DOTALL)
+    assert footer, f"{page} has no credit footer"
+    assert "statbel.fgov.be" in footer.group(1), f"{page} names no source in its markup"
+    assert re.search(
+        r"<a[^>]+href=\"https://statbel\.fgov\.be/", footer.group(1)
+    ), f"{page} does not LINK the source it names"
+
+
+@pytest.mark.parametrize("page", DELEGATING_PAGES)
+def test_a_delegating_page_names_the_licence(page):
+    text = _page(page)
+    footer = re.search(r'<footer class="mapfoot">(.*?)</footer>', text, re.DOTALL)
+    assert "CC BY 4.0" in footer.group(1), f"{page} names no licence"
+    assert "creativecommons.org/licenses/by/4.0" in footer.group(
+        1
+    ), f"{page} does not link the licence it names"
+
+
+@pytest.mark.parametrize("page", DELEGATING_PAGES)
+def test_a_delegating_page_links_the_full_notice(page):
+    """The complete text has to be reachable from the page that shows the
+    figures, by a link a reader can recognise as being about sources."""
+    text = _page(page)
+    assert re.search(
+        rf'href="{FULL_NOTICE_PAGE}"', text
+    ), f"{page} does not link {FULL_NOTICE_PAGE}"
+    assert (REPO / FULL_NOTICE_PAGE).is_file(), f"{FULL_NOTICE_PAGE} does not exist"
+
+
+def test_the_full_notice_page_is_reachable_and_indexable():
+    """A licence page search engines cannot reach is harder to find than the
+    figures it covers."""
+    from src.site.routes import ROOT_PAGES, is_indexable
+
+    routes = {entry.route for entry in ROOT_PAGES}
+    assert f"/{FULL_NOTICE_PAGE}" in routes
+    assert is_indexable(f"/{FULL_NOTICE_PAGE}")

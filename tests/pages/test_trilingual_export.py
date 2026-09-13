@@ -337,6 +337,11 @@ def test_the_committed_pages_match_a_fresh_build():
 
 
 def test_the_hand_built_page_that_is_still_hand_built_is_untouched():
+    """Working tree against HEAD, so what it forbids is an UNCOMMITTED edit
+    made while working on the trilingual export -- not change as such. Batch 8b
+    restyled map.html deliberately, in its own commit. See the fuller note on
+    the twin of this test in tests/pages/test_map_conversion.py.
+    """
     result = subprocess.run(
         # map.html ONLY. about.html was cut over in Batch 15d and is generated
         # now; tests/pages/test_about_conversion.py guards its frozen copy

@@ -253,9 +253,17 @@ def test_the_boundary_file_is_fetched_through_the_asset_prefix():
 
 
 def test_the_hand_built_map_is_untouched():
-    """map.html stays live and byte-identical: the block version ships beside
-    it, and nothing about this conversion is allowed to change the page readers
-    are using today."""
+    """map.html stays live, and no conversion work may leave an uncommitted
+    edit in it: the block version ships beside the page readers use today.
+
+    What this compares is the WORKING TREE against HEAD, so what it forbids is
+    an unrecorded change made while working on the conversion -- not change as
+    such. Batch 8b restyled map.html deliberately, as its own batch and its own
+    commit, onto the design-system tokens. The block-built /preview/map.html is
+    therefore expected to differ from it in page chrome until that page is
+    restyled too; the markup contract the component depends on, asserted above,
+    is what has to stay identical between them, and does.
+    """
     result = subprocess.run(
         ["git", "diff", "--stat", "--", "map.html"],
         capture_output=True,

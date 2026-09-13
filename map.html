@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commune Map</title>
 <meta name="description" content="Every municipal indicator in this pipeline, drawn on the 565 Belgian communes.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
 <link rel="stylesheet" href="assets/commune_map.css">
 <script>
   /* Before the first paint: light unless the reader chose otherwise. A
@@ -15,155 +18,376 @@
     try{
       var t = localStorage.getItem('belpulse-theme');
       if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      // Before first paint, so the map never flashes one palette and recolours.
+      var pal = localStorage.getItem('belpulse-map-palette') || 'bluered';
+      if(pal !== 'default') document.documentElement.setAttribute('data-palette', pal);
     }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
   })();
 </script>
 <script src="assets/i18n.js"></script>
 <style>
+  /* THE ALIAS BLOCK. This page now takes its palette from
+     assets/belpulse/tokens.css like every other redesigned page, but
+     assets/commune_map.css -- the shared choropleth stylesheet, used by seven
+     pages -- was written against the OLD names and defines none of them
+     itself. Every name it reads is enumerated here once, pointing at its
+     --bp-* equivalent. A custom property is a live reference, so one flat
+     block is enough: it re-resolves when the theme changes, and
+     commune_map.css does not need to be touched (it is shared; a change
+     there is a change to communes.html, home.html, home2.html, commune.html,
+     micro.html, profiles.html and three preview builds at once). (Batch 8b) */
   :root{
-    --bg:#f7f5f0; --surface:#ffffff; --border:#e3ddd0; --border-strong:#d3caB6;
-    --text:#241f18; --text-muted:#6e6558; --text-faint:#948a76;
-    --accent:#a8722f; --accent-soft:#f0e2cf; --accent-ink:#5c3d18;
-    --good:#3f7d5c; --good-soft:#e2efe7;
-    --warn:#b9762a; --warn-soft:#f6e9d6;
-    --row-alt: #fbfaf6;
-    --focus-ring: #a8722f;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
-      --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
-      --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
-      --good:#6fbf94; --good-soft:#1f2f26;
-      --warn:#e0a355; --warn-soft:#332818;
-      --row-alt:#1f1d18;
-      --focus-ring:#d6994f;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#1a1815; --surface:#221f1a; --border:#3a352c; --border-strong:#4a4536;
-    --text:#ece6d8; --text-muted:#a79d89; --text-faint:#786f5d;
-    --accent:#d6994f; --accent-soft:#3a2f1e; --accent-ink:#f0d4a8;
-    --good:#6fbf94; --good-soft:#1f2f26;
-    --warn:#e0a355; --warn-soft:#332818;
-    --row-alt:#1f1d18;
-    --focus-ring:#d6994f;
+    --bg: var(--bp-bg);
+    --surface: var(--bp-surface);
+    --border: var(--bp-border);
+    --border-strong: var(--bp-border);
+    --text: var(--bp-text);
+    --text-muted: var(--bp-text-muted);
+    --text-faint: var(--bp-text-faint);
+    --accent: var(--bp-accent);
+    --accent-soft: var(--bp-accent-soft);
+    --accent-ink: var(--bp-accent-ink);
+    --good: var(--bp-icon-green-ink, var(--bp-accent-ink));
+    --good-soft: var(--bp-icon-green-bg, var(--bp-accent-soft));
+    --warn: var(--bp-icon-amber-ink);
+    --warn-soft: var(--bp-icon-amber-bg);
+    --row-alt: var(--bp-surface-alt);
+    --focus-ring: var(--bp-accent);
   }
 
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
   body{
-    background:var(--bg); color:var(--text);
-    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
-    font-size:14px; line-height:1.5;
+    background:var(--bp-bg); color:var(--bp-text); margin:0;
+    font-family:var(--bp-font-ui); line-height:1.55;
   }
-  ::selection{background:var(--accent-soft)}
+  ::selection{background:var(--bp-accent-soft)}
+  h1,h2{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em; margin:0}
+  a{color:var(--bp-accent-ink)}
+  code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 var(--bp-space-6)}
 
-  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
-  header{margin-bottom:28px}
-  h1{
-    font-family:"Spectral",Georgia,serif; font-weight:600;
-    font-size:2rem; margin:0 0 6px; color:var(--text);
-    text-wrap:balance; letter-spacing:-.01em;
+  /* ---- top bar: the nav every shell-built page already links to this page
+     WITH, which this page itself never had. shell.py:109-110 is the source of
+     the link list; it is repeated here rather than generated because map.html
+     is hand-built and stays hand-built this batch. ------------------------- */
+  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface); border-bottom:1px solid var(--bp-border)}
+  /* layout.css makes .bp-topbar itself the flex row, so this centring .wrap
+     is a FLEX ITEM -- and a flex item's base size is its max-content width,
+     measured here at 602px inside a 390px screen, which took the whole page
+     sideways. flex:1 plus min-width:0 lets it shrink to the viewport; the
+     nav and the switches then wrap inside it. */
+  .bp-topbar{padding-left:0; padding-right:0}
+  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; flex:1; min-width:0}
+  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  .switches{display:flex; gap:8px; margin-left:auto}
+  .theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-control); overflow:hidden; background:var(--bp-surface)}
+  .theme-toggle button{
+    border:0; background:transparent; color:var(--bp-text-muted); cursor:pointer;
+    font:inherit; font-size:.78rem; padding:5px 9px; line-height:1.3;
   }
-  .subtitle{color:var(--text-muted); font-size:.95rem; max-width:70ch}
+  .theme-toggle button:hover{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
+  .theme-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink); font-weight:600}
+  .theme-toggle button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
+  /* Six nav links plus the wordmark and two segmented controls need more
+     min-content width than a tablet has. Below 1000px the nav takes its own
+     line and scrolls inside itself -- profiles.html's convention. */
+  @media (max-width:1000px){
+    .bp-nav{order:3; flex-basis:100%; overflow-x:auto; padding-bottom:2px}
+    .bp-nav a{white-space:nowrap}
+  }
+
+  header.pagehead{padding:var(--bp-space-5) 0 var(--bp-space-3)}
+  h1{font-size:2rem; line-height:1.1; margin:0 0 var(--bp-space-2)}
+  .subtitle{color:var(--bp-text-muted); font-size:var(--bp-text-body); max-width:78ch; margin:0}
   .subtitle code{
-    font-family:"IBM Plex Mono",monospace; font-size:.85em;
-    background:var(--accent-soft); color:var(--accent-ink);
+    background:var(--bp-accent-soft); color:var(--bp-accent-ink);
     padding:1px 5px; border-radius:3px;
   }
-  a{color:var(--accent-ink)} a:hover{color:var(--accent)}
-  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:var(--accent)}}
-  :root[data-theme="dark"] a{color:var(--accent)}
 
-  .switches{float:right;display:flex;gap:8px}
-  .theme-toggle{display:flex;gap:2px;border:1px solid var(--border);
-    border-radius:5px;overflow:hidden;background:var(--surface)}
-  .theme-toggle button{
-    border:0;background:transparent;color:var(--text-muted);cursor:pointer;
-    font:inherit;font-size:.78rem;padding:4px 9px;
-  }
-  .theme-toggle button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+  /* ---- the viewport split ------------------------------------------------
+     The top bar and the explorer row are one flex column exactly one viewport
+     tall, so the map gets "the rest of the screen" without anyone hardcoding
+     the top bar's height. dvh, not vh: on a phone the browser chrome is part
+     of the viewport until you scroll, and vh would put the bottom of the map
+     under it. */
+  /* The top bar and the explorer are ONE column of exactly one viewport, so
+     the map gets "the rest of the screen" with no hardcoded bar height. The
+     licence notice and the footer sit AFTER this box in normal flow; putting
+     them inside it made the column taller than the viewport, which left the
+     explorer no free space to grow into and collapsed the map to 150px on a
+     laptop -- measured, not guessed. dvh, not vh: on a phone the browser
+     chrome counts as viewport until you scroll, and vh would push the bottom
+     of the map underneath it. */
+  /* ---- choropleth palettes ------------------------------------------------
+     The component paints with `var(--ramp-0..6)`, which is a LIVE reference:
+     redefining those seven names repaints the map with no redraw and no
+     refetch. commune_map.css owns the default and is shared by seven pages,
+     so the alternatives are declared here, scoped to a data-palette attribute
+     on the root, and the default is simply the absence of one.
 
-  .toolbar{
-    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
-    margin:22px 0 14px;
+     Each palette is given twice. commune_map.css inverts its own ramp in the
+     dark theme -- pale means MORE there, because a dark map reads inverted --
+     and an alternative that did not follow that convention would flip the
+     meaning of colour when the reader switched theme. */
+  /* THE DEFAULT. Blue through pale yellow to red, seven classes: BLUE IS THE
+     LOW END and red the high one, so the map reads the way a temperature
+     scale does -- hotter means more of whatever is being counted.
+
+     DELIBERATELY THE SAME IN BOTH THEMES, unlike the sequential ramps below
+     it, which commune_map.css inverts in the dark theme because pale reads as
+     "more" on a dark ground. A diverging scale cannot be inverted that way:
+     flipping it would swap blue and red, and with them the meaning of every
+     colour on the map.
+
+     ONE THING TO KNOW ABOUT IT. A blue-to-red scale reads as a VERDICT as
+     well as a quantity -- red looks like bad news. The pipeline's own
+     metadata disagrees for most indicators: preferred_direction is
+     `contextual` for things like population or household size, where high is
+     neither good nor bad, and `lower_is_better` for unemployment, where the
+     red end is indeed the bad one but only by coincidence of this palette.
+     The note the component writes beside the controls says which of the three
+     a given indicator is, in words -- that sentence is doing more work with
+     this palette than it did with the amber one. */
+  :root[data-palette="bluered"]{
+    --ramp-0:#4575b4; --ramp-1:#91bfdb; --ramp-2:#e0f3f8; --ramp-3:#ffffbf;
+    --ramp-4:#fee090; --ramp-5:#fc8d59; --ramp-6:#d73027;
   }
+  :root[data-palette="blues"]{
+    --ramp-0:#f7fcf0; --ramp-1:#d9f0d3; --ramp-2:#a8ddb5; --ramp-3:#69c5be;
+    --ramp-4:#41a5c4; --ramp-5:#2b74b4; --ramp-6:#173a8c;
+  }
+  :root[data-palette="purples"]{
+    --ramp-0:#fdf2f8; --ramp-1:#f3d7ea; --ramp-2:#e3b3d8; --ramp-3:#cd8cc4;
+    --ramp-4:#ab66ac; --ramp-5:#7f4691; --ramp-6:#4a2a63;
+  }
+  :root[data-palette="teal"]{
+    --ramp-0:#f2f8f4; --ramp-1:#cfe8dc; --ramp-2:#a5d5c4; --ramp-3:#73bcae;
+    --ramp-4:#489d9b; --ramp-5:#2c7681; --ramp-6:#194a5a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"])[data-palette="blues"]{
+      --ramp-0:#173a8c; --ramp-1:#2b74b4; --ramp-2:#41a5c4; --ramp-3:#69c5be;
+      --ramp-4:#a8ddb5; --ramp-5:#d9f0d3; --ramp-6:#f7fcf0;
+    }
+    :root:not([data-theme="light"])[data-palette="purples"]{
+      --ramp-0:#4a2a63; --ramp-1:#7f4691; --ramp-2:#ab66ac; --ramp-3:#cd8cc4;
+      --ramp-4:#e3b3d8; --ramp-5:#f3d7ea; --ramp-6:#fdf2f8;
+    }
+    :root:not([data-theme="light"])[data-palette="teal"]{
+      --ramp-0:#194a5a; --ramp-1:#2c7681; --ramp-2:#489d9b; --ramp-3:#73bcae;
+      --ramp-4:#a5d5c4; --ramp-5:#cfe8dc; --ramp-6:#f2f8f4;
+    }
+  }
+  :root[data-theme="dark"][data-palette="blues"]{
+    --ramp-0:#173a8c; --ramp-1:#2b74b4; --ramp-2:#41a5c4; --ramp-3:#69c5be;
+    --ramp-4:#a8ddb5; --ramp-5:#d9f0d3; --ramp-6:#f7fcf0;
+  }
+  :root[data-theme="dark"][data-palette="purples"]{
+    --ramp-0:#4a2a63; --ramp-1:#7f4691; --ramp-2:#ab66ac; --ramp-3:#cd8cc4;
+    --ramp-4:#e3b3d8; --ramp-5:#f3d7ea; --ramp-6:#fdf2f8;
+  }
+  :root[data-theme="dark"][data-palette="teal"]{
+    --ramp-0:#194a5a; --ramp-1:#2c7681; --ramp-2:#489d9b; --ramp-3:#73bcae;
+    --ramp-4:#a5d5c4; --ramp-5:#cfe8dc; --ramp-6:#f2f8f4;
+  }
+
+  .viewport{height:100dvh; display:flex; flex-direction:column; overflow:hidden}
+  /* No scroll: the page IS the screen. Anything that would not fit -- the
+     several hundred words of licence text that used to sit under the map --
+     lives on sources.html and is linked from the footer, credited by name. */
+  .explorer{
+    flex:1 1 auto; min-height:0;
+    display:grid; grid-template-columns:minmax(0,1fr) 360px;
+  }
+  .mapcol{min-width:0; min-height:0; padding:var(--bp-space-4); display:flex}
+  .mapbox{
+    flex:1; min-height:0; position:relative;
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card);
+    overflow:hidden;
+  }
+  /* The engine sets the SVG's aspect-ratio inline from the geometry's own
+     bounding box. Telling it to fill a box of a different shape would stretch
+     Belgium, so it is centred inside the box at its own ratio instead. */
+  .mapbox svg.map{width:100%; height:100%; display:block}
+
+  /* ---- the legend, as an overlay card ------------------------------------ */
+  /* ---- the legend, a compact card that fits its own contents -------------
+     READ DOWN, NOT ACROSS. The engine's colour bar is 7 x 64 = 448px wide by
+     construction and its ticks are placed inline in pixels, so it can only
+     ever be as wide as that, whatever the card is. One row per class instead:
+     the swatch beside the range it actually covers. The rows come from the
+     component (its `legendRows` element), built from the very breaks that
+     painted the map, so the card cannot disagree with the colours. */
+  .legend{
+    position:absolute; left:14px; bottom:14px; z-index:4;
+    width:max-content; max-width:min(300px, calc(100% - 28px));
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card);
+    padding:12px 14px; margin:0;
+  }
+  .legend-head{display:flex; align-items:baseline; gap:var(--bp-space-4); margin-bottom:8px}
+  .legend-title{font-weight:var(--bp-weight-semibold); font-size:.85rem}
+  .legend-count{margin-left:auto; font-size:.72rem; color:var(--bp-text-faint); white-space:nowrap}
+  .legend-rows{display:flex; flex-direction:column; gap:3px}
+  .legend-row{display:flex; align-items:center; gap:8px; font-size:.76rem; font-variant-numeric:tabular-nums}
+  .legend-row i{width:22px; height:12px; border-radius:2px; flex:none; display:block}
+  .legend .nodata-key{margin-top:7px; font-size:.74rem}
+  .legend-scope{margin-top:8px; padding-top:7px; border-top:1px solid var(--bp-border);
+    font-size:.72rem; color:var(--bp-text-muted); font-variant-numeric:tabular-nums}
+  .controls .note{
+    margin:0; font-size:.75rem; line-height:1.5; color:var(--bp-text-muted);
+  }
+
+  /* ---- distance scale ----------------------------------------------------
+     The projection is equirectangular with longitude scaled by cos(mean
+     latitude), so one viewBox unit of WIDTH is one degree of latitude's worth
+     of ground -- the cos factors cancel -- and 1 degree is 111.32 km. That is
+     why this needs no projection maths of its own: it reads the view the
+     component is already showing and converts one number. */
+  .scalebar{
+    position:absolute; right:14px; bottom:14px; z-index:4;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:color-mix(in srgb, var(--bp-surface) 88%, transparent);
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:5px 8px; font-size:.72rem; color:var(--bp-text-muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .scalebar::after{
+    content:''; display:block; height:5px; width:var(--scale-w, 60px);
+    border:1px solid var(--bp-text-muted); border-top:0;
+  }
+
+  /* ---- the map footer ----------------------------------------------------- */
+  .mapfoot{
+    flex:none; border-top:1px solid var(--bp-border); background:var(--bp-surface);
+    font-size:.76rem; color:var(--bp-text-muted);
+  }
+  .mapfoot .wrap{
+    display:flex; align-items:center; gap:var(--bp-space-4); flex-wrap:wrap;
+    padding-top:9px; padding-bottom:9px; max-width:none;
+  }
+  .mapfoot a{color:var(--bp-accent-ink)}
+  /* THE LEGEND IS 448px WIDE AND CANNOT BE NARROWED IN CSS: MapUI.SWATCH_PX is
+     64, ticks are placed at multiples of it, and ticks.style.width is written
+     inline by the engine -- restyling .swatches div here would slide every
+     colour band away from its own tick. It scrolls inside itself instead,
+     which is what communes.html already does. Page-local on purpose:
+     commune_map.css is shared by seven pages. */
+
+  /* ---- the control panel -------------------------------------------------- */
+  .controls{
+    min-height:0; overflow-y:auto;
+    border-left:1px solid var(--bp-border); background:var(--bp-surface);
+    padding:var(--bp-space-5) var(--bp-space-5) var(--bp-space-6);
+    display:flex; flex-direction:column; gap:var(--bp-space-4);
+  }
+  .controls .pagehead{padding:0}
+  h1{font-size:1.35rem; line-height:1.15; margin:0 0 var(--bp-space-2)}
+  .lead{border-top:1px solid var(--bp-border); padding-top:var(--bp-space-4); margin-top:auto}
+  .subtitle{color:var(--bp-text-muted); font-size:.8rem; line-height:1.55; margin:0}
+  .subtitle code{background:var(--bp-accent-soft); color:var(--bp-accent-ink); padding:1px 5px; border-radius:3px}
+  .field{display:flex; flex-direction:column; gap:5px}
+  .periodrow{display:flex; gap:6px; align-items:center}
+  .periodrow select{flex:1}
+  .periodrow button{
+    flex:none; width:32px; height:34px; font:inherit; cursor:pointer;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    background:var(--bp-surface); color:var(--bp-text-muted); line-height:1;
+  }
+  .periodrow button:hover:not(:disabled){border-color:var(--bp-accent); color:var(--bp-accent-ink)}
+  .periodrow button:disabled{opacity:.4; cursor:default}
+  .periodrow button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:1px}
+  .flabel{
+    font-size:.7rem; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--bp-text-faint); font-weight:var(--bp-weight-semibold);
+  }
+  .fhint{margin:0; font-size:.75rem; color:var(--bp-text-muted); line-height:1.45}
+  #breaks{font-family:"IBM Plex Mono",monospace; font-size:.78rem}
   select,input[type=text]{
-    font:inherit;padding:7px 10px;border:1px solid var(--border-strong);
-    border-radius:5px;background:var(--surface);color:var(--text);
+    font:inherit; font-size:var(--bp-text-small); padding:8px 10px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    background:var(--bp-surface); color:inherit;
+    /* A <select> sizes itself to its longest OPTION and an indicator name runs
+       to sixty characters; without these it widens the panel and takes the
+       page sideways. */
+    min-width:0; max-width:100%; width:100%;
   }
-  select:focus,input:focus{outline:2px solid var(--focus-ring);outline-offset:1px}
-  #indicator{min-width:340px;max-width:100%}
-  #search{min-width:230px}
-  .status{color:var(--text-faint);font-size:.85rem}
-  .provenance{color:var(--text-muted);font-size:.8rem;flex-basis:100%}
-  .provenance a{color:inherit;text-decoration:underline;text-decoration-thickness:1px}
+  select:focus,input:focus{outline:2px solid var(--bp-accent); outline-offset:1px}
+  .status{color:var(--bp-text-faint); font-size:.8rem; margin:0}
+  .provenance{color:var(--bp-text-muted); font-size:.78rem; margin:0; line-height:1.5}
+  .provenance a{color:inherit; text-decoration:underline; text-decoration-thickness:1px}
   /* One neutral colour for every grade: A is not "good" and C is not "bad" --
      a derived figure is a different kind of figure, not a worse one. */
   .grade{
-    display:inline-block;min-width:1.15em;text-align:center;
-    font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:600;
-    padding:0 3px;border-radius:3px;cursor:help;
-    background:var(--accent-soft);color:var(--accent-ink);
+    display:inline-block; min-width:1.15em; text-align:center;
+    font-family:"IBM Plex Mono",monospace; font-size:.7rem; font-weight:600;
+    padding:0 3px; border-radius:3px; cursor:help;
+    background:var(--bp-accent-soft); color:var(--bp-accent-ink);
   }
+  .map-warn{margin:0}
 
-  .panel{
-    border:1px solid var(--border);border-radius:8px;background:var(--surface);
-    overflow:hidden;
-  }
 
-  .attribution{
-    margin-top:26px;padding:14px 16px;border:1px solid var(--border);
-    border-radius:8px;background:var(--row-alt);
-    font-size:.82rem;color:var(--text-muted);line-height:1.6;
+  /* Below 900px there is no room for two columns, so the split stops being a
+     split: the map takes a fixed slice of the screen and the controls follow
+     it in normal flow. A 100dvh two-pane on a phone gives both panes too
+     little to be usable. */
+  @media (max-width:900px){
+    .viewport{height:auto}
+    .explorer{display:block}
+    .mapcol{height:56dvh; min-height:320px; padding:var(--bp-space-3)}
+    .controls{border-left:0; border-top:1px solid var(--bp-border); overflow:visible}
   }
-  .attribution strong{color:var(--text)}
-  .attribution code{font-family:"IBM Plex Mono",monospace;font-size:.9em}
-  footer{margin-top:22px;color:var(--text-faint);font-size:.8rem;line-height:1.6}
-  .warn-box{
-    margin-top:14px;padding:10px 14px;border-left:3px solid var(--warn);
-    background:var(--warn-soft);color:var(--accent-ink);font-size:.85rem;border-radius:0 5px 5px 0;
+  @media (max-width:640px){
+    /* Two segmented controls side by side need ~300px; with the wordmark
+       beside them the bar ran 212px past a 390px screen. Own line instead. */
+    .switches{margin-left:0; flex-basis:100%; flex-wrap:wrap}
   }
-  :root[data-theme="dark"] .warn-box{color:var(--text)}
-  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .warn-box{color:var(--text)}}
 </style>
 </head>
-<body>
-<div class="wrap">
-<div class="switches">
-  <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
-    <button type="button" data-lang="en" aria-pressed="false">EN</button>
-    <button type="button" data-lang="fr" aria-pressed="false">FR</button>
-    <button type="button" data-lang="nl" aria-pressed="false">NL</button>
-  </div>
-  <div class="theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
-    <button type="button" data-theme-choice="light" aria-pressed="false" data-t-title="themeLight">&#9728; <span data-t="themeLight">Light</span></button>
-    <button type="button" data-theme-choice="auto" aria-pressed="false" data-t-title="themeAuto"><span data-t="themeAuto">Auto</span></button>
-    <button type="button" data-theme-choice="dark" aria-pressed="false" data-t-title="themeDark">&#9790; <span data-t="themeDark">Dark</span></button>
-  </div>
-</div>
-  <header>
-    <h1 data-t="mapTitle">Commune Map</h1>
-    <p class="subtitle" data-t-html="mapLead">Every municipal indicator this pipeline holds, drawn on the 565 Belgian communes.
-    Pick an indicator; hover a commune for its value; click it to open its own profile page. Communes are
-    shaded by <em>rank</em>, so each colour band holds roughly the same number of communes &mdash; that shows
-    where a commune sits relative to the rest, which is what a national map can honestly show. Communes the
-    source has no figure for are drawn flat, never as zero.
-    See <a href="communes.html">communes.html</a> for the same figures as a table,
-    <a href="all_data.html">all_data.html</a> for national-level data, or
-    <a href="local.html">local.html</a> for a single commune's profile.</p>
-  </header>
+<body class="bp-shell">
 
-  <div class="toolbar">
-    <select id="indicator" data-t-aria="indicatorToMap" aria-label="Indicator to map"></select>
-    <input id="search" type="text" data-t-placeholder="findCommune" placeholder="Find a commune (name or NIS code)…" autocomplete="off" list="communeList">
-    <datalist id="communeList"></datalist>
-    <span class="status" id="status" data-t="loading">Loading…</span>
-    <span class="provenance" id="provenance"></span>
+<div class="viewport">
+<header class="bp-topbar">
+  <div class="wrap">
+    <a class="bp-logo" href="home2.html">
+      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
+      <span><span class="bp-wordmark">BelPulse</span></span>
+    </a>
+    <nav class="bp-nav" aria-label="Main">
+      <a href="home2.html" data-t="navHome">Home</a>
+      <a href="macro.html" data-t="navMacro">Macro</a>
+      <a href="micro.html" data-t="navMicro">Micro</a>
+      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
+      <a href="map.html" aria-current="page" data-t="navMaps">Maps</a>
+      <a href="all_data.html" data-t="navAllData">All data</a>
+      <a href="about.html" data-t="navAbout">About</a>
+    </nav>
+    <div class="switches">
+      <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+        <button type="button" data-lang="nl" aria-pressed="false">NL</button>
+      </div>
+      <div class="theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
+        <button type="button" data-theme-choice="light" aria-pressed="false" data-t-title="themeLight">&#9728; <span data-t="themeLight">Light</span></button>
+        <button type="button" data-theme-choice="auto" aria-pressed="false" data-t-title="themeAuto"><span data-t="themeAuto">Auto</span></button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false" data-t-title="themeDark">&#9790; <span data-t="themeDark">Dark</span></button>
+      </div>
+    </div>
   </div>
+</header>
 
-  <div class="panel">
+<main class="explorer">
+  <!-- THE MAP FILLS THE VIEWPORT AND THE CONTROLS SIT BESIDE IT. Before this
+       the map was a full-width panel in the normal document flow, so on a
+       laptop it ran past the fold and the legend under it was below the
+       screen. The section is exactly one viewport tall (the top bar and this
+       row are a flex column of 100dvh, so there is no magic number to keep in
+       step with the bar's height) and the legend is an overlay card on the
+       map rather than a block beneath it. Everything that is prose -- the
+       licence notice and the footer -- stays in normal flow underneath. -->
+  <div class="mapcol">
     <div class="mapbox" id="mapbox">
       <svg class="map" id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
       <div class="zoom">
@@ -172,42 +396,111 @@
         <button type="button" id="zoomReset" data-t-title="resetView" data-t-aria="resetView" title="Reset view" aria-label="Reset view">&#8634;</button>
       </div>
       <div class="map-tip map-hidden" id="tip"></div>
-    </div>
-    <div class="legend">
-      <div class="scale">
-        <div class="swatches" id="swatches"></div>
-        <div class="ticks" id="ticks"></div>
+      <div class="legend">
+        <div class="legend-head">
+          <span class="legend-title" id="legendTitle"></span>
+          <span class="legend-count" id="legendCount"></span>
+        </div>
+        <div class="legend-rows" id="legendRows"></div>
+        <div class="nodata-key"><i></i> <span data-t="mapNoData">no data</span></div>
+        <div class="legend-scope" id="legendScope"></div>
       </div>
-      <div class="nodata-key"><i></i> <span data-t="mapNoData">no data</span></div>
-      <div class="note" id="legendNote"></div>
+      <div class="scalebar" id="scaleBar" data-t-aria="mapScaleAria" aria-label="Distance scale">
+        <span id="scaleLabel"></span>
+      </div>
     </div>
   </div>
 
-  <div class="map-warn map-hidden" id="coverageWarn"></div>
+  <aside class="controls" aria-label="Map controls">
+    <header class="pagehead">
+      <h1 data-t="mapTitle">Commune Map</h1>
+    </header>
 
-  <div class="attribution" id="attribution">
-    <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
-    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
-    1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
-    document already recorded in <code>docs/licences/</code>.
-    <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
-    communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
-    a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
-    longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
-    are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
-    <br><br>
-    <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
-         identical to it by test_statbel_attribution.py. Reword on both or neither. -->
-    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
-    <!-- values-attribution:end --></span>
-    <br><br><span data-t-html="varAttribution"><strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.</span>
+    <div class="field">
+      <label class="flabel" for="indicator" data-t="mapIndicatorLabel">Indicator</label>
+      <select id="indicator" data-t-aria="indicatorToMap" aria-label="Indicator to map"></select>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="period" data-t="mapPeriodLabel">Year</label>
+      <div class="periodrow">
+        <button type="button" id="periodPrev" data-t-aria="mapPeriodPrev" aria-label="Earlier">&larr;</button>
+        <select id="period" data-t-aria="mapPeriodLabel" aria-label="Year"></select>
+        <button type="button" id="periodNext" data-t-aria="mapPeriodNext" aria-label="Later">&rarr;</button>
+      </div>
+      <p class="fhint" id="periodHint"></p>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="scope" data-t="mapScopeLabel">Area of analysis</label>
+      <select id="scope" data-t-aria="mapScopeLabel" aria-label="Area of analysis"></select>
+      <p class="fhint" id="scopeHint"></p>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="classes" data-t="mapClassesLabel">Classes</label>
+      <select id="classes" data-t-aria="mapClassesLabel" aria-label="Classes"></select>
+      <input id="breaks" type="text" hidden data-t-placeholder="mapBreaksPlaceholder"
+             placeholder="e.g. 5000, 10000, 20000" autocomplete="off"
+             data-t-aria="mapBreaksLabel" aria-label="Class boundaries">
+      <p class="fhint" id="classesHint"></p>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="palette" data-t="mapPaletteLabel">Colours</label>
+      <select id="palette" data-t-aria="mapPaletteLabel" aria-label="Colours"></select>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="search" data-t="mapFindLabel">Find a commune</label>
+      <input id="search" type="text" data-t-placeholder="findCommune" placeholder="Find a commune (name or NIS code)&hellip;" autocomplete="off" list="communeList">
+      <datalist id="communeList"></datalist>
+    </div>
+
+    <!-- The component writes several sentences here: how the bands were cut,
+         whether they were cut over the whole country or the chosen area, and
+         whether this indicator has a better or worse direction at all. In the
+         legend card that note swamped a compact card and had to be clipped;
+         beside the controls it has the room to be read. -->
+    <p class="note" id="legendNote"></p>
+    <p class="status" id="status" data-t="loading">Loading&hellip;</p>
+    <p class="provenance" id="provenance"></p>
+    <div class="map-warn map-hidden" id="coverageWarn"></div>
+
+    <div class="lead">
+      <p class="subtitle" data-t-html="mapLead">Every municipal indicator this pipeline holds, drawn on the 565 Belgian communes.
+      Pick an indicator; hover a commune for its value; click it to open its own profile page. Communes are
+      shaded by <em>rank</em>, so each colour band holds roughly the same number of communes &mdash; that shows
+      where a commune sits relative to the rest, which is what a national map can honestly show. Communes the
+      source has no figure for are drawn flat, never as zero.
+      See <a href="communes.html">communes.html</a> for the same figures as a table,
+      <a href="all_data.html">all_data.html</a> for national-level data, or
+      <a href="local.html">local.html</a> for a single commune's profile.</p>
+    </div>
+  </aside>
+</main>
+<footer class="mapfoot">
+  <div class="wrap">
+    <!-- THE CREDIT IS VISIBLE ON THE MAP ITSELF; the full notice is one click
+         away on sources.html and is not abbreviated there. A licence that asks
+         to be credited is credited here, by name, beside the figures it
+         covers; a licence that asks for the date of last update and the list
+         of changes gets those in full on the page this links to. -->
+    <!-- WRITTEN OUT IN THE MARKUP, not assembled by script. A reader whose
+         JavaScript never runs still gets a credit and a licence, because that
+         is a condition of publishing these figures at all; the script below
+         replaces the source NAME with whichever source the indicator on screen
+         actually came from, which is a refinement of this line and not a
+         substitute for it. -->
+    <span class="credit">Source:
+      <a href="https://statbel.fgov.be/" rel="noopener"><span id="mapCredit">Statbel</span></a>
+      &middot; <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>
+    </span>
+    <a href="sources.html" data-t="mapSourcesLink">Sources and licences</a>
   </div>
-
-  <footer data-t-html="mapFooter">Reads <code>data/geo/communes.geojson</code> and <code>public/data/indicators/{id}.json</code> from
-  GitHub Pages &mdash; no server, no map tiles, no third-party requests. The indicator list is read from
-  <code>public/data/metadata/indicators.json</code>, so a new municipal dataset appears in the picker on its
-  own with no change to this page.</footer>
+</footer>
 </div>
+
 
 <script src="assets/commune_map.js"></script>
 <script>
@@ -225,9 +518,22 @@ const GEO_URL      = 'data/geo/communes.geojson';
 const INDEX_URL    = 'public/data/metadata/indicators.json';
 const SECTIONS_URL = 'public/data/metadata/sections.json';
 const SOURCES_URL  = 'public/data/metadata/sources.json';
-const VALUES_URL   = code => `public/data/indicators/${code}.json`;
+// FULL HISTORY, not the latest value. public/data/indicators/{code}.json --
+// what this page read until now -- carries one figure per commune and no
+// period axis at all, so the map could only ever draw the most recent year.
+// The explorer payloads (Batch 8a) carry every period this pipeline publishes
+// for that indicator, sharded one file per indicator: median 46 KB, largest
+// 394 KB, and built from data/communes_history.csv, the same file the site
+// offers for download, so the map cannot show a figure the download lacks.
+const VALUES_URL   = code => `public/data/explorer/municipal/${code}.json`;
+// Region and province membership. The commune payloads carry no geography of
+// their own, so the area picker is built from the published geography index --
+// the same file Block K's search and Block L's comparison picker read, and the
+// same ancestor walk the exporters do. Nothing here knows a NIS code.
+const GEOG_URL     = 'public/data/metadata/geographies.json';
 
-const state = {index: [], map: null, sources: {}, grades: {}};
+const state = {index: [], map: null, sources: {}, grades: {}, areas: [], members: {},
+               scope: 'be:country', payload: null, period: null, sections: []};
 
 // The interface language, from the shared module so a choice made on any page
 // carries here and back again (one localStorage key, site-wide).
@@ -271,7 +577,490 @@ function sourceNames(meta){
     .join(', ');
 }
 
-async function selectIndicator(code){
+/* ---------------------------------------------------------------------------
+   HOW MANY CLASSES.
+
+   Automatic is what the component has always done: seven bands, cut at the
+   quantiles so each holds roughly the same number of communes, falling back to
+   equal intervals when ties collapse the quantiles into too few. Five is the
+   same rule with a coarser grid -- easier to read, and enough for most
+   indicators. Manual hands the cuts to the reader.
+
+   MANUAL IS A REAL CHOICE AND A REAL RISK, which is why the note under the map
+   names the method. Quantile bands say "where does this commune rank"; cuts a
+   reader picked say whatever that reader wanted them to say, and a screenshot
+   of one does not carry the fact that they were chosen by hand. The input is
+   prefilled with the automatic cuts, so the starting point is the honest one
+   and any departure from it is deliberate.
+--------------------------------------------------------------------------- */
+const CLASS_MODES = ['auto', 'five', 'manual'];
+
+function populateClassPicker(){
+  const sel = document.getElementById('classes');
+  const current = sel.value || 'auto';
+  sel.innerHTML = '';
+  for(const mode of CLASS_MODES){
+    const option = document.createElement('option');
+    option.value = mode;
+    option.textContent = T('mapClasses_' + mode);
+    sel.appendChild(option);
+  }
+  sel.value = current;
+}
+
+function parseBreaks(text){
+  // Whatever separator a reader reaches for -- comma, semicolon, space -- and
+  // both decimal marks, because a French keyboard writes 1,5 and a JSON
+  // payload writes 1.5 and the reader should not have to know which this is.
+  const parts = String(text).split(/[;,\s]+/).filter(Boolean);
+  const numbers = [];
+  for(const part of parts){
+    // Thousands separators out first: Belgian figures are written with a
+    // no-break space (U+00A0) or a narrow one (U+202F), and a reader who
+    // copies a value off the legend pastes it back with them in.
+    const n = Number(part.replace(/[\u00a0\u202f]/g, '').replace(',', '.'));
+    if(!isFinite(n)) return null;
+    numbers.push(n);
+  }
+  return numbers.sort((a, b) => a - b);
+}
+
+function applyClassMode(){
+  const mode = document.getElementById('classes').value;
+  const input = document.getElementById('breaks');
+  const hint = document.getElementById('classesHint');
+  if(!state.map) return;
+
+  if(mode === 'manual'){
+    input.hidden = false;
+    // Prefill with what the map is showing, so manual starts from the honest
+    // cuts rather than from an empty box.
+    // PLAIN NUMBERS, not formatted ones. formatValue groups thousands with a
+    // comma in English -- "6,372" -- and this box splits on commas, so a
+    // prefill that went through it parsed back as 6 and 372: the control
+    // would silently reclassify the map the moment it was opened.
+    if(!input.value && state.map.breaks && state.map.breaks.length){
+      // Rounded to the indicator's own declared precision, because a quantile
+      // lands on values like 6372.000000000001 and nobody wants to edit that.
+      const places = (state.payload && state.payload.decimals != null) ? state.payload.decimals : 2;
+      input.value = state.map.breaks.map(v => String(Number(v.toFixed(places)))).join(', ');
+    }
+    const breaks = parseBreaks(input.value);
+    if(breaks === null){
+      hint.textContent = T('mapBreaksInvalid');
+      return;
+    }
+    state.map.setClassification({breaks: breaks});
+    const used = state.map.breaks.length;
+    hint.textContent = breaks.length && used < breaks.length
+      ? T('mapBreaksOutside', {n: breaks.length - used})
+      : T('mapBreaksHint');
+  } else {
+    input.hidden = true;
+    hint.textContent = '';
+    state.map.setClassification({bins: mode === 'five' ? 5 : MapUI.BINS, breaks: null});
+  }
+  const meta = state.index.find(i => i.indicator_code === document.getElementById('indicator').value);
+  updateLegendChrome(meta);
+}
+
+/* ---------------------------------------------------------------------------
+   THE INDICATOR PICKER, GROUPED.
+
+   Sixty-nine indicators in one flat alphabetical list is a list you scroll
+   rather than read. The groups are config, not a table in this page: they are
+   metadata/sections.json's own sections -- the same ten the commune profile
+   lays its page out with, with the same trilingual labels -- so a section
+   renamed in config/local_sections.yaml is renamed here, and an indicator
+   moved between sections moves here. No indicator id appears in this file
+   (rules 2 and 24).
+
+   An indicator in no section still appears, under a general heading. Dropping
+   it would be the picker quietly deciding some published data does not exist.
+--------------------------------------------------------------------------- */
+function populateIndicatorPicker(rows){
+  const sel = document.getElementById('indicator');
+  const current = sel.value;
+  sel.innerHTML = '';
+
+  const sectionOf = {};
+  for(const section of state.sections){
+    for(const code of section.indicators || []) sectionOf[code] = section.id;
+    if(section.headline) sectionOf[section.headline] = section.id;
+  }
+
+  const groups = new Map();
+  for(const row of rows){
+    const id = sectionOf[row.code] || '_other';
+    if(!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(row);
+  }
+
+  // Config order, so the picker reads in the order the profile page does;
+  // anything unclassified goes last rather than first.
+  const order = state.sections.map(s => s.id).filter(id => groups.has(id));
+  if(groups.has('_other')) order.push('_other');
+
+  for(const id of order){
+    const section = state.sections.find(s => s.id === id);
+    const group = document.createElement('optgroup');
+    group.label = section ? (section.label[LANG] || section.label.en) : T('mapSectionOther');
+    for(const row of groups.get(id)){
+      const option = document.createElement('option');
+      option.value = row.code;
+      option.textContent = row.label;
+      group.appendChild(option);
+    }
+    sel.appendChild(group);
+  }
+  if(current) sel.value = current;
+}
+
+/* ---------------------------------------------------------------------------
+   THE YEAR.
+
+   A choropleth of "the latest figure" answers a question nobody asked when
+   the latest figure is 2021 for one indicator and 2026 for another. The
+   payload carries every period this pipeline publishes for the indicator, so
+   the page draws ONE of them and says which.
+
+   WHAT A PERIOD IS DIFFERS BY INDICATOR and is not normalised here: Census
+   indicators have exactly one (2021), house prices are quarterly (2026-Q1),
+   most are annual. The picker lists what the payload actually has, newest
+   first, and disables itself when there is only one -- a control offering a
+   single choice is furniture, not a control.
+--------------------------------------------------------------------------- */
+function populatePeriodPicker(){
+  const sel = document.getElementById('period');
+  const periods = (state.payload && state.payload.periods) || [];
+  const wanted = state.period;
+  sel.innerHTML = '';
+  // Newest first: a reader opening a map wants today, and scrolling up a list
+  // to reach it is a small tax paid on every visit.
+  for(const period of periods.slice().reverse()){
+    const option = document.createElement('option');
+    option.value = period;
+    option.textContent = period;
+    sel.appendChild(option);
+  }
+  // A year set by the URL, or by the reader on THIS indicator, survives a
+  // redraw; a year carried over from a different indicator does not --
+  // resetFiltersForNewIndicator clears it before this runs. Falls back to the
+  // latest period the payload actually has.
+  state.period = (wanted && periods.includes(wanted)) ? wanted : periods[periods.length - 1] || null;
+  sel.value = state.period || '';
+  sel.disabled = periods.length < 2;
+  updatePeriodButtons();
+  document.getElementById('periodHint').textContent =
+    periods.length === 1 ? T('mapPeriodOnly', {period: periods[0]}) : '';
+}
+
+function updatePeriodButtons(){
+  const periods = (state.payload && state.payload.periods) || [];
+  const at = periods.indexOf(state.period);
+  document.getElementById('periodPrev').disabled = at <= 0;
+  document.getElementById('periodNext').disabled = at < 0 || at >= periods.length - 1;
+}
+
+function stepPeriod(by){
+  const periods = (state.payload && state.payload.periods) || [];
+  const at = periods.indexOf(state.period);
+  const next = periods[at + by];
+  if(!next) return;
+  state.period = next;
+  document.getElementById('period').value = next;
+  drawPeriod();
+}
+
+/* One period of the payload, reshaped into what the component's setData wants.
+   A cell is [value, status]; a SUPPRESSED cell arrives with a status and no
+   value and must be passed through as exactly that, so the map can say the
+   figure is withheld rather than drawing it flat like a commune nobody
+   measured -- they are different facts (rule 26). */
+function drawPeriod(){
+  if(!state.payload || !state.map) return;
+  const meta = state.index.find(i => i.indicator_code === state.payload.indicator_code) || {};
+  const period = state.period;
+  const values = {};
+  for(const [nis, byPeriod] of Object.entries(state.payload.series || {})){
+    const cell = byPeriod[period];
+    if(!cell) continue;
+    values[nis] = {value: cell[0], period: period, status: MAP_STATUS_LETTERS[cell[1]] || cell[1]};
+  }
+  state.map.setData(values, {
+    unit: state.payload.unit,
+    decimals: state.payload.decimals,
+    direction: state.payload.direction,
+  });
+  // The denominator is what is ON SCREEN, not all 565: with an area picked,
+  // "412 of 565" beside a map of Limburg would answer a question the reader
+  // did not ask. coverage().shown already respects the area filter.
+  const shown = state.map.coverage();
+  document.getElementById('status').textContent =
+    T('communesShown', {n: shown.withValue, total: shown.shown});
+  updateLegendChrome(meta);
+  updatePeriodButtons();
+  pushScopeToUrl();
+}
+
+/* The payload writes the canonical single letters; the component's own
+   vocabulary is the long word. Kept here beside MAP_STATUS_WORDS, which maps
+   the same letters for the tooltip. */
+const MAP_STATUS_LETTERS = {
+  A: 'final', P: 'provisional', R: 'revised',
+  E: 'estimate', S: 'suppressed', N: 'na', derived: 'derived',
+};
+
+/* ---------------------------------------------------------------------------
+   PALETTE, LEGEND CARD, SCALE BAR.
+
+   None of the three touches the map component. The palette redefines the seven
+   --ramp-* names the component paints WITH, which are live references, so the
+   map recolours with no redraw. The legend card's rows are written by the
+   component itself into #legendRows, from the same breaks that painted the
+   map. The scale bar reads the view the component is already showing.
+--------------------------------------------------------------------------- */
+// bluered first and used as the fallback: it is the default this page ships
+// with, so an unset or unrecognised stored choice lands on it rather than on
+// the amber ramp commune_map.css defines for the other six pages.
+const PALETTES = ['bluered', 'default', 'blues', 'teal', 'purples'];
+const DEFAULT_PALETTE = 'bluered';
+const PALETTE_KEY = 'belpulse-map-palette';
+
+function applyPalette(name, persist){
+  const chosen = PALETTES.includes(name) ? name : DEFAULT_PALETTE;
+  // 'default' means "the ramp commune_map.css already defines", which is the
+  // absence of the attribute rather than a value of its own.
+  if(chosen === 'default') document.documentElement.removeAttribute('data-palette');
+  else document.documentElement.setAttribute('data-palette', chosen);
+  if(persist){ try{ localStorage.setItem(PALETTE_KEY, chosen); }catch(_){} }
+  // The swatches in the legend card are inline styles the component wrote, so
+  // they carry var(--ramp-N) and re-resolve on their own. Nothing to repaint.
+}
+
+function populatePalettePicker(){
+  const sel = document.getElementById('palette');
+  const current = sel.value || DEFAULT_PALETTE;
+  sel.innerHTML = '';
+  for(const name of PALETTES){
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = T('mapPalette_' + name);
+    sel.appendChild(option);
+  }
+  sel.value = current;
+}
+
+/* The legend card's own chrome: what is being measured, how many classes, and
+   how many communes the card is describing. The rows and the note are the
+   component's; these three are the page's, because they are about the SELECTION
+   rather than about the banding. */
+function updateLegendChrome(meta){
+  const rows = document.getElementById('legendRows').children.length;
+  const shown = state.map ? state.map.coverage() : null;
+  // THE INDICATOR'S NAME, NOT ITS UNIT. Most municipal indicators are declared
+  // with unit `count`, which is a storage type and not a word a reader wants
+  // at the top of a legend -- it printed literally as "count". The name is
+  // always meaningful and is already trilingual in the index.
+  const name = meta ? ((meta.names && (meta.names[LANG] || meta.names.en)) || meta.indicator_code) : '';
+  document.getElementById('legendTitle').textContent = name;
+  document.getElementById('legendCount').textContent = rows ? T('mapLegendClasses', {n: rows}) : '';
+  const area = state.areas.find(a => a.geo_id === state.scope);
+  const where = area ? areaLabel(area) : '';
+  document.getElementById('legendScope').textContent = shown
+    ? T('mapLegendScope', {n: shown.withValue, total: shown.shown}) + (where ? ' · ' + where : '')
+    : '';
+}
+
+/* One viewBox unit of WIDTH is one degree of latitude's worth of ground: x is
+   longitude times cos(meanLat) and a degree of longitude is 111.32*cos(lat) km,
+   so the two cosines cancel and the horizontal scale is a constant. Distances
+   read off a 50 m-simplified outline are indicative, which is what the licence
+   notice says too -- this is a sense of size, not a measuring tape. */
+const KM_PER_DEGREE = 111.32;
+const NICE_KM = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500];
+
+function updateScaleBar(){
+  const bar = document.getElementById('scaleBar');
+  const box = document.getElementById('mapbox');
+  if(!bar || !state.map || !state.map.view || !box) return;
+  const pxPerUnit = box.clientWidth / state.map.view.w;
+  const pxPerKm = pxPerUnit / KM_PER_DEGREE;
+  if(!isFinite(pxPerKm) || pxPerKm <= 0){ bar.hidden = true; return; }
+  // The widest "nice" distance that still fits a ~110px bar.
+  const km = NICE_KM.filter(n => n * pxPerKm <= 110).pop() || NICE_KM[0];
+  bar.hidden = false;
+  bar.style.setProperty('--scale-w', Math.round(km * pxPerKm) + 'px');
+  document.getElementById('scaleLabel').textContent = km + ' km';
+}
+
+/* The component has no "the view changed" event, and adding one would be a
+   change to a file seven pages share. The viewBox attribute IS that event. */
+function watchTheView(){
+  const svg = document.getElementById('svg');
+  if(!svg) return;
+  new MutationObserver(updateScaleBar)
+    .observe(svg, {attributes: true, attributeFilter: ['viewBox']});
+  if(window.ResizeObserver){
+    new ResizeObserver(updateScaleBar).observe(document.getElementById('mapbox'));
+  }
+  updateScaleBar();
+}
+
+/* ---------------------------------------------------------------------------
+   AREA OF ANALYSIS -- Belgium, one of the three regions, or one of the ten
+   provinces.
+
+   THE ENGINE ALREADY DOES THIS; nothing here re-implements filtering or
+   zooming. setVisible(Set) greys everything outside the area and frame(list)
+   moves the viewBox to hold it. What matters is what happens to the LEGEND:
+   paint() re-bands from the visible subset only, so picking Limburg re-ranks
+   the communes WITHIN Limburg rather than keeping the national bands. That is
+   the honest reading of "area of analysis" -- the question becomes "where does
+   this commune sit among its neighbours", and the coverage line under the map
+   recounts against the area too. A picker that kept the national bands would
+   be showing a national answer while claiming to show a local one.
+
+   Membership is the ancestor walk, not a NIS prefix: a commune's parent is an
+   arrondissement, whose parent is a province, whose parent is a region. Rule 3
+   and rule 25 -- the geography index is the one authority on that, and this
+   page reads it rather than deriving anything from the code itself.
+--------------------------------------------------------------------------- */
+function buildAreas(rows){
+  const byId = {};
+  for(const row of rows) byId[row.geo_id] = row;
+
+  const ancestors = geoId => {
+    const out = [];
+    let cur = byId[geoId];
+    while(cur && cur.parent_geo_id){
+      out.push(cur.parent_geo_id);
+      cur = byId[cur.parent_geo_id];
+    }
+    return out;
+  };
+
+  state.members = {};
+  for(const row of rows){
+    if(row.level !== 'municipality') continue;
+    for(const id of ancestors(row.geo_id)){
+      (state.members[id] = state.members[id] || []).push(row.nis_code);
+    }
+  }
+
+  const named = level => rows
+    .filter(row => row.level === level && (state.members[row.geo_id] || []).length)
+    .map(row => ({geo_id: row.geo_id, level: row.level, name: row.name}))
+    .sort((a, b) => MapUI.pickName(a.name, '').localeCompare(MapUI.pickName(b.name, '')));
+
+  const country = rows.find(row => row.level === 'country');
+  state.areas = [
+    ...(country ? [{geo_id: country.geo_id, level: 'country', name: country.name}] : []),
+    ...named('region'),
+    ...named('province'),
+  ];
+}
+
+function areaLabel(area){
+  // Belgium's own row is named ROYAUME / HET RIJK in the source, which is the
+  // legal style and not what a reader picking an area expects to read; the
+  // interface string is used for the country entry and the source's own names
+  // for everything below it.
+  return area.level === 'country' ? T('mapScopeAll') : (area.name[LANG] || area.name.en);
+}
+
+function populateScopePicker(){
+  const sel = document.getElementById('scope');
+  sel.innerHTML = '';
+  const groups = {
+    country: null,
+    region:  document.createElement('optgroup'),
+    province: document.createElement('optgroup'),
+  };
+  groups.region.label   = T('mapScopeRegions');
+  groups.province.label = T('mapScopeProvinces');
+  for(const area of state.areas){
+    const option = document.createElement('option');
+    option.value = area.geo_id;
+    option.textContent = areaLabel(area);
+    if(area.level === 'country') sel.appendChild(option);
+    else groups[area.level].appendChild(option);
+  }
+  sel.appendChild(groups.region);
+  sel.appendChild(groups.province);
+  sel.value = state.scope;
+}
+
+function applyScope(geoId, {refit = true} = {}){
+  const area = state.areas.find(a => a.geo_id === geoId) || state.areas[0];
+  if(!area || !state.map) return;
+  state.scope = area.geo_id;
+
+  if(area.level === 'country'){
+    state.map.setVisible(null);
+    if(refit) state.map.resetView();
+  } else {
+    const members = state.members[area.geo_id] || [];
+    state.map.setVisible(new Set(members));
+    if(refit) state.map.frame(members);
+  }
+
+  const shown = state.map.coverage();
+  document.getElementById('status').textContent =
+    T('communesShown', {n: shown.withValue, total: shown.shown});
+  document.getElementById('scopeHint').textContent =
+    area.level === 'country' ? '' : T('mapScopeRebanded');
+  updateLegendChrome(state.index.find(i => i.indicator_code === document.getElementById('indicator').value));
+  updateScaleBar();
+  pushScopeToUrl();
+}
+
+function pushScopeToUrl(){
+  // replaceState, never pushState -- the back button belongs to the reader's
+  // own navigation, not to every twiddle of a picker. Same rule the indicator
+  // parameter already follows.
+  try{
+    const url = new URL(window.location);
+    if(state.scope && state.scope !== 'be:country') url.searchParams.set('area', state.scope);
+    else url.searchParams.delete('area');
+    if(state.period) url.searchParams.set('period', state.period);
+    else url.searchParams.delete('period');
+    history.replaceState(null, '', url);
+  }catch(_){}
+}
+
+/* Back to defaults -- everything except the palette.
+
+   PICKING A NEW INDICATOR IS STARTING A NEW QUESTION, and carrying the old
+   answer's settings into it is how a reader ends up looking at a map they did
+   not ask for: last indicator's year on an indicator that happens to publish
+   it too, last indicator's province, and class boundaries typed for a scale of
+   euros still cutting a scale of percentages. The colour scheme is the
+   exception because it is a preference about the reader, not about the data --
+   it is also the only one of these kept in localStorage.
+
+   Not called on first load or on a language switch: the URL may carry a year
+   and an area a reader was sent, and switching language is not a new question.
+*/
+function resetFiltersForNewIndicator(){
+  state.period = null;                       // populatePeriodPicker picks the latest
+  state.scope = 'be:country';
+  const classes = document.getElementById('classes');
+  const breaks = document.getElementById('breaks');
+  if(classes) classes.value = 'auto';
+  if(breaks){ breaks.value = ''; breaks.hidden = true; }
+  const hint = document.getElementById('classesHint');
+  if(hint) hint.textContent = '';
+  if(state.map) state.map.setClassification({bins: MapUI.BINS, breaks: null});
+  const search = document.getElementById('search');
+  if(search) search.value = '';
+  const scopeSel = document.getElementById('scope');
+  if(scopeSel) scopeSel.value = state.scope;
+  const scopeHint = document.getElementById('scopeHint');
+  if(scopeHint) scopeHint.textContent = '';
+}
+
+async function selectIndicator(code, {reset = false} = {}){
   const meta = state.index.find(i => i.indicator_code === code);
   if(!meta) return;
 
@@ -280,22 +1069,27 @@ async function selectIndicator(code){
 
   const res = await fetch(VALUES_URL(code) + '?t=' + Date.now());
   if(!res.ok){ statusEl.textContent = `Could not load ${code}`; return; }
-  const payload = await res.json();
+  state.payload = await res.json();
+  if(reset) resetFiltersForNewIndicator();
+  populatePeriodPicker();
+  drawPeriod();
+  // After the data is in: applyScope re-reads coverage and re-frames the view,
+  // which only means anything once the map has values.
+  if(reset && state.areas.length) applyScope(state.scope);
 
-  state.map.setData(payload.communes || {}, {
-    unit: meta.unit,
-    decimals: meta.decimals,
-    direction: meta.direction,
-  });
-
-  const shown = state.map.coverage();
-  statusEl.textContent = T('communesShown', {n: shown.withValue, total: shown.total});
 
   /* Where this indicator came from and how it was made, beside the map that
      draws it. Built from the same index row the picker was built from, so a
      new indicator arrives with its badge already correct. */
   const source = meta.source ? (state.sources[meta.source] || null) : null;
   const label = source ? (source.label[LANG] || source.label.en) : null;
+  // The footer credits the source of the indicator ACTUALLY ON SCREEN, by
+  // name, beside the figures it covers. The full notice -- licence, date of
+  // last update, list of changes -- is on sources.html, linked next to it.
+  const credit = document.getElementById('mapCredit');
+  if(credit && label) credit.textContent = label;
+  const creditLink = credit && credit.closest('a');
+  if(creditLink && source && source.homepage) creditLink.href = source.homepage;
   const grade = state.grades[meta.grade] || null;
   const bits = [];
   if(source){
@@ -363,11 +1157,12 @@ function relabelPicker(sel){
 
 async function init(){
   try{
-    const [geoRes, idxRes, secRes, srcRes] = await Promise.all([
+    const [geoRes, idxRes, secRes, srcRes, geogRes] = await Promise.all([
       fetch(GEO_URL + '?t=' + Date.now()),
       fetch(INDEX_URL + '?t=' + Date.now()),
       fetch(SECTIONS_URL + '?t=' + Date.now()),
       fetch(SOURCES_URL + '?t=' + Date.now()),
+      fetch(GEOG_URL + '?t=' + Date.now()),
     ]);
     if(!geoRes.ok) throw new Error('boundaries missing');
     if(!idxRes.ok) throw new Error('indicator index missing');
@@ -386,9 +1181,8 @@ async function init(){
       svg:        document.getElementById('svg'),
       tip:        document.getElementById('tip'),
       mapbox:     document.getElementById('mapbox'),
-      swatches:   document.getElementById('swatches'),
-      ticks:      document.getElementById('ticks'),
       legendNote: document.getElementById('legendNote'),
+      legendRows: document.getElementById('legendRows'),
       coverage:   document.getElementById('coverageWarn'),
     }, {
       lang: LANG,
@@ -403,16 +1197,49 @@ async function init(){
     }
 
     const sel = document.getElementById('indicator');
+    state.sections = sections.sections || [];
     const rows = state.index
       .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
       .sort((a, b) => a.label.localeCompare(b.label));
-    for(const r of rows){
-      const o = document.createElement('option');
-      o.value = r.code;
-      o.textContent = r.label;
-      sel.appendChild(o);
+    populateIndicatorPicker(rows);
+    sel.onchange = () => selectIndicator(sel.value, {reset: true});
+
+    // The area picker is optional: if the geography index is unreachable the
+    // map still draws all 565, the picker stays empty and says so, rather than
+    // the whole page failing over a control.
+    const scopeSel = document.getElementById('scope');
+    if(geogRes.ok){
+      buildAreas((await geogRes.json()).geographies || []);
+      const wanted = new URLSearchParams(location.search).get('area');
+      if(wanted && state.areas.some(a => a.geo_id === wanted)) state.scope = wanted;
+      populateScopePicker();
+      scopeSel.onchange = () => applyScope(scopeSel.value);
+    } else {
+      scopeSel.disabled = true;
+      document.getElementById('scopeHint').textContent = T('mapScopeUnavailable');
     }
-    sel.onchange = () => selectIndicator(sel.value);
+
+    let savedPalette = DEFAULT_PALETTE;
+    try{ savedPalette = localStorage.getItem(PALETTE_KEY) || DEFAULT_PALETTE; }catch(_){}
+    const paletteSel = document.getElementById('palette');
+    paletteSel.value = savedPalette;
+    populatePalettePicker();
+    applyPalette(savedPalette, false);
+    paletteSel.onchange = () => applyPalette(paletteSel.value, true);
+
+    populateClassPicker();
+    const classSel = document.getElementById('classes');
+    classSel.onchange = () => { document.getElementById('breaks').value = ''; applyClassMode(); };
+    document.getElementById('breaks').addEventListener('change', applyClassMode);
+
+    const periodSel = document.getElementById('period');
+    periodSel.onchange = () => { state.period = periodSel.value; drawPeriod(); };
+    document.getElementById('periodPrev').onclick = () => stepPeriod(-1);
+    document.getElementById('periodNext').onclick = () => stepPeriod(1);
+    const wantedPeriod = new URLSearchParams(location.search).get('period');
+    if(wantedPeriod) state.period = wantedPeriod;
+
+    watchTheView();
 
     document.getElementById('zoomIn').onclick    = () => state.map.zoomBy(1/1.4);
     document.getElementById('zoomOut').onclick   = () => state.map.zoomBy(1.4);
@@ -438,6 +1265,9 @@ async function init(){
     }
     sel.value = start;
     await selectIndicator(start);
+    // After the values are in: applyScope re-reads coverage, which only means
+    // anything once the map has data.
+    if(state.areas.length) applyScope(state.scope);
 
     document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
       LANG = b.dataset.lang;
@@ -445,7 +1275,13 @@ async function init(){
       applyStrings();
       // The picker's labels, the map's legend and the provenance line all
       // hold translated text. Nothing is refetched and the map keeps its view.
-      relabelPicker(sel);
+      const relabelled = state.index
+        .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      populateIndicatorPicker(relabelled);
+      populateClassPicker();
+      if(state.areas.length) populateScopePicker();
+      populatePalettePicker();
       state.map.setLang(LANG);
       selectIndicator(sel.value);
     }));

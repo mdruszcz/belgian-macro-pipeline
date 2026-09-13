@@ -237,6 +237,16 @@ MapUI.CommuneMap = class CommuneMap {
     this.home = null;
     this.drag = null;
     this.ramp = Array.from({length: MapUI.BINS}, (_, i) => `var(--ramp-${i})`);
+    // HOW MANY CLASSES, AND WHERE THEY CUT. Defaults to the seven the ramp has
+    // colours for and to the component's own choice of where to cut them, so a
+    // caller that says nothing behaves exactly as before. A caller may ask for
+    // a different NUMBER (setClassification({bins})) or dictate the cuts
+    // outright (setClassification({breaks})). colourIndex already spreads
+    // however many bands survive across the whole ramp, so fewer classes need
+    // no second palette.
+    this.bins = options.bins || MapUI.BINS;
+    this.manualBreaks = null;
+    this.breaks = [];
     this._wire();
   }
 
@@ -300,6 +310,16 @@ MapUI.CommuneMap = class CommuneMap {
     return this;
   }
 
+  /* Ask for a different number of classes, or for cuts of your own. Passing
+     {breaks: null} returns to the component's own choice. Repaints, because
+     the question "how many classes" has no answer that is not a picture. */
+  setClassification({bins, breaks} = {}) {
+    if (bins) this.bins = bins;
+    if (breaks !== undefined) this.manualBreaks = breaks && breaks.length ? breaks.slice() : null;
+    this.paint();
+    return this;
+  }
+
   setVisible(nisSet) {
     this.visible = nisSet;
     this.paint();
@@ -325,7 +345,18 @@ MapUI.CommuneMap = class CommuneMap {
     }
     nums.sort((a, b) => a - b);
 
-    const {breaks, method} = MapUI.classify(nums, MapUI.BINS);
+    // Manual cuts are used AS GIVEN -- that is what manual means -- but only
+    // the ones that fall inside the data, because a break above the maximum
+    // would print a class in the legend that no commune can ever be in.
+    let breaks, method;
+    if (this.manualBreaks && this.manualBreaks.length && nums.length) {
+      breaks = this.manualBreaks
+        .filter(v => v > nums[0] && v <= nums[nums.length - 1])
+        .sort((a, b) => a - b);
+      method = 'manual';
+    } else {
+      ({breaks, method} = MapUI.classify(nums, this.bins));
+    }
     const bands = breaks.length + 1;
     const colourFor = band => this.ramp[MapUI.colourIndex(band, bands, this.ramp.length)];
 
@@ -343,6 +374,7 @@ MapUI.CommuneMap = class CommuneMap {
     }
 
     this.method = method;
+    this.breaks = breaks;
     this.withheld = withheld;
     this._drawLegend(breaks, bands, colourFor, nums);
     this._reportCoverage(withValue, shown.length, withheld);
@@ -357,11 +389,12 @@ MapUI.CommuneMap = class CommuneMap {
     // whole legend unless all three were supplied, so a caller that wanted
     // the colour bar without the several-sentence prose note -- a compact
     // card, where that note swamps the card -- silently got no legend at all.
-    const {swatches, ticks, legendNote} = this.el;
-    if (!swatches && !ticks && !legendNote) return;
+    const {swatches, ticks, legendNote, legendRows} = this.el;
+    if (!swatches && !ticks && !legendNote && !legendRows) return;
 
     if (swatches) swatches.innerHTML = '';
     if (ticks) ticks.innerHTML = '';
+    if (legendRows) legendRows.innerHTML = '';
     if (!nums.length) {
       if (legendNote) legendNote.textContent = MapUI.text(this.lang, 'mapNoneCarryValue');
       return;
@@ -372,6 +405,35 @@ MapUI.CommuneMap = class CommuneMap {
         const cell = document.createElement('div');
         cell.style.background = colourFor(i);
         swatches.appendChild(cell);
+      }
+    }
+
+    // THE SAME BANDS, READ DOWN INSTEAD OF ACROSS. A caller that supplies a
+    // `legendRows` element gets one row per band -- swatch plus the range that
+    // band actually covers -- instead of (or as well as) the colour bar. It is
+    // built HERE, from the very `breaks` and `colourFor` that just painted the
+    // map, because the alternative was for a page to re-run MapUI.classify on
+    // its own copy of the numbers: a second implementation of exactly the
+    // thing one shared component exists to prevent, and one that would drift
+    // silently the first time the banding rule changed. Every other caller
+    // passes no such element and is unaffected.
+    if (legendRows) {
+      const edge = v => MapUI.formatValue(v, this.meta.unit, this.meta.decimals, this.lang);
+      for (let i = 0; i < bands; i++) {
+        const row = document.createElement('div');
+        row.className = 'legend-row';
+        const chip = document.createElement('i');
+        chip.style.background = colourFor(i);
+        const label = document.createElement('span');
+        // Half-open upwards, matching MapUI.bandFor, which is inclusive at the
+        // lower edge: a value exactly on a break belongs to the band ABOVE it.
+        if (bands === 1) label.textContent = edge(nums[0]);
+        else if (i === 0) label.textContent = '< ' + edge(breaks[0]);
+        else if (i === bands - 1) label.textContent = '≥ ' + edge(breaks[breaks.length - 1]);
+        else label.textContent = edge(breaks[i - 1]) + ' – < ' + edge(breaks[i]);
+        row.appendChild(chip);
+        row.appendChild(label);
+        legendRows.appendChild(row);
       }
     }
 
@@ -399,8 +461,10 @@ MapUI.CommuneMap = class CommuneMap {
 
     const exact = v => MapUI.formatValue(v, this.meta.unit, this.meta.decimals, this.lang) +
                        MapUI.unitSuffix(this.meta.unit);
-    const methodNote = MapUI.text(
-      this.lang, this.method === 'equal' ? 'mapMethodEqual' : 'mapMethodQuantile');
+    const methodNote = MapUI.text(this.lang, {
+      equal: 'mapMethodEqual',
+      manual: 'mapMethodManual',
+    }[this.method] || 'mapMethodQuantile');
     // Said out loud because it changes what a colour MEANS: with a filter on,
     // the bands rank the communes shown, not all 565, so the same commune can
     // be dark here and pale on the unfiltered map. A reader comparing two
