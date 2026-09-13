@@ -76,14 +76,27 @@ def test_every_municipal_source_carries_a_trilingual_label_and_licence_note():
 
 
 def test_a_source_without_a_translated_label_still_has_a_usable_one():
-    """The three national sources have no short label yet. They fall back to
-    the agency name rather than rendering blank, so adding a source never
+    """Two national sources have no short label yet. They fall back to the
+    agency name rather than rendering blank, so adding a source never
     requires translation work before it can be attributed."""
     registry = source_registry()
-    for source_id in ("nbb", "eurostat", "ameco_ec"):
+    for source_id in ("nbb", "ameco_ec"):
         entry = registry[source_id]
         for lang in LANGS:
             assert entry["label"][lang] == entry["agency"]
+
+
+def test_eurostat_carries_a_trilingual_label_and_licence_note():
+    """Unlike nbb/ameco_ec, config/sources/eurostat.yaml (international pilot
+    PR 1) declares its own label and licence_note -- Eurostat's reuse policy
+    is more specific than "not for commercial redissemination" and deserves
+    its own words, not the bare agency name."""
+    registry = source_registry()
+    entry = registry["eurostat"]
+    for lang in LANGS:
+        assert entry["label"].get(lang), f"eurostat has no {lang} label"
+        assert entry["licence_note"].get(lang), f"eurostat has no {lang} licence note"
+    assert entry["homepage"], "eurostat has no homepage to attribute to"
 
 
 # --- the grade rules -------------------------------------------------------

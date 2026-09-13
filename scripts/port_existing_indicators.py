@@ -39,8 +39,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from belgian_macro_db import CONFIG_DIR, SOURCES  # noqa: E402
-from src.fetchers.eurostat import EurostatSource  # noqa: E402
+from src.fetchers.dbnomics import DBnomicsSource  # noqa: E402
+from src.fetchers.eurostat import EurostatSource, singleton_geo  # noqa: E402
 from src.fetchers.nbb import NBBSource  # noqa: E402
+from src.fetchers.rebase import rebase_to_2010  # noqa: E402
+from src.geography.international import load_country_geos  # noqa: E402
 from src.validation.config_schema import (  # noqa: E402
     has_fetchable_national_adapter,
     is_canonical_eligible,
@@ -67,98 +70,14 @@ BE_COUNTRY_GEO = {
     "area_km2": None,
 }
 
-COUNTRY_GEOS = {
-    "BE": BE_COUNTRY_GEO,
-    "DE": {
-        "geo_id": "de:country",
-        "nis_code": None,
-        "level": "country",
-        "name_nl": "Duitsland",
-        "name_fr": "Allemagne",
-        "name_en": "Germany",
-        "parent_geo_id": None,
-        "valid_from": "1990-10-03",
-        "valid_to": None,
-        "successor_geo_id": None,
-        "population": None,
-        "area_km2": None,
-    },
-    "ES": {
-        "geo_id": "es:country",
-        "nis_code": None,
-        "level": "country",
-        "name_nl": "Spanje",
-        "name_fr": "Espagne",
-        "name_en": "Spain",
-        "parent_geo_id": None,
-        "valid_from": "1978-12-29",
-        "valid_to": None,
-        "successor_geo_id": None,
-        "population": None,
-        "area_km2": None,
-    },
-    "FR": {
-        "geo_id": "fr:country",
-        "nis_code": None,
-        "level": "country",
-        "name_nl": "Frankrijk",
-        "name_fr": "France",
-        "name_en": "France",
-        "parent_geo_id": None,
-        "valid_from": "1958-10-04",
-        "valid_to": None,
-        "successor_geo_id": None,
-        "population": None,
-        "area_km2": None,
-    },
-    "NL": {
-        "geo_id": "nl:country",
-        "nis_code": None,
-        "level": "country",
-        "name_nl": "Nederland",
-        "name_fr": "Pays-Bas",
-        "name_en": "Netherlands",
-        "parent_geo_id": None,
-        "valid_from": "1815-03-16",
-        "valid_to": None,
-        "successor_geo_id": None,
-        "population": None,
-        "area_km2": None,
-    },
-    "EA": {
-        "geo_id": "ea:aggregate",
-        "nis_code": None,
-        "level": "eu_aggregate",
-        "name_nl": "Eurozone",
-        "name_fr": "Zone euro",
-        "name_en": "Euro area",
-        "parent_geo_id": None,
-        "valid_from": "1999-01-01",
-        "valid_to": None,
-        "successor_geo_id": None,
-        "population": None,
-        "area_km2": None,
-    },
-    # Eurostat's EU27_2020: the fixed 27-member composition after the United
-    # Kingdom left on 2020-01-31, which Eurostat back-casts over the whole
-    # series. Named after that composition rather than plain "eu", so a later
-    # enlargement is a different geography, not a silent redefinition of this
-    # one. EC_CONS_CONF_EU's fetch query asks for exactly this code.
-    "EU": {
-        "geo_id": "eu27_2020:aggregate",
-        "nis_code": None,
-        "level": "eu_aggregate",
-        "name_nl": "Europese Unie (EU27)",
-        "name_fr": "Union européenne (UE27)",
-        "name_en": "European Union (EU27)",
-        "parent_geo_id": None,
-        "valid_from": "2020-02-01",
-        "valid_to": None,
-        "successor_geo_id": None,
-        "population": None,
-        "area_km2": None,
-    },
-}
+# Loaded from config/geography/international.csv (international pilot PR 1)
+# rather than hardcoded here: the same allowlist scripts/sync_international.py
+# uses for the five multi-country pilot indicators is the one place a Eurostat
+# geography code resolves to a geo_id, so a country added for the pilot is
+# also usable by this national/legacy path with no second edit. Same 12-key
+# shape and key order as BE_COUNTRY_GEO -- geography_for_indicator() and
+# port() below insert it positionally.
+COUNTRY_GEOS = load_country_geos()
 
 # SDMX CL_OBS_STATUS -> canonical status enum. Any code not listed here is a
 # hard error, never a silent default (CLAUDE.md rule 13: fail loudly).
@@ -333,11 +252,22 @@ def port(db_path: Path, run_date: str | None = None) -> None:
         if meta["type"] == "nbb":
             rows = NBBSource().fetch(meta["url"], cache_key=code)
             mapped = [(r["period"], r["value"], map_obs_status(r["obs_status"])) for r in rows]
+        elif meta["type"] == "eurostat":
+            geo_rows = EurostatSource().fetch(
+                meta["url"], cache_key=code, dataset=meta.get("dataset", "")
+            )
+            rows = singleton_geo(geo_rows)
+            if meta.get("unit") == "index_2010":
+                rows = rebase_to_2010(rows)
+            # A real Eurostat OBS_FLAG, already mapped to the canonical
+            # status enum by EurostatSource itself -- unlike the old
+            # DBnomics path, there is no separate SDMX code to re-map here.
+            mapped = [(r["period"], r["value"], r["obs_status"]) for r in rows]
         else:
-            rows = EurostatSource(source_id=source_id_for(meta["source_agency"])).fetch(
+            rows = DBnomicsSource(source_id=source_id_for(meta["source_agency"])).fetch(
                 meta["url"], cache_key=code, unit=meta.get("unit", "")
             )
-            # EurostatSource hardcodes obs_status="A" for every row -- there
+            # DBnomicsSource hardcodes obs_status="A" for every row -- there
             # is no real per-row status from this source today. Carried
             # forward as 'final': an inherited simplification, not a new
             # claim asserted by this migration.

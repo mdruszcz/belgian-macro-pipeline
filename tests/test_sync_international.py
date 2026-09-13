@@ -80,7 +80,7 @@ def test_a_belgian_series_goes_to_be_country():
         ("FR", "fr:country", "country"),
         ("NL", "nl:country", "country"),
         ("EA", "ea:aggregate", "eu_aggregate"),
-        ("EU", "eu27_2020:aggregate", "eu_aggregate"),
+        ("EU27_2020", "eu27_2020:aggregate", "eu_aggregate"),
     ],
 )
 def test_a_foreign_series_goes_to_its_own_geography(country, geo_id, level):
@@ -92,8 +92,11 @@ def test_a_foreign_series_goes_to_its_own_geography(country, geo_id, level):
 
 
 def test_a_fetched_series_with_an_unknown_country_raises_rather_than_vanishing():
-    with pytest.raises(port_mod.UnknownCountryError, match="PL"):
-        port_mod.geography_for_indicator("GDP_PL", _indicator("GDP_PL", "PL"), SOURCES)
+    """UK is a real Eurostat code, but the international pilot's allowlist
+    (config/geography/international_excluded.csv) deliberately excludes it --
+    so it is still unknown to COUNTRY_GEOS, exactly like a typo would be."""
+    with pytest.raises(port_mod.UnknownCountryError, match="UK"):
+        port_mod.geography_for_indicator("GDP_UK", _indicator("GDP_UK", "UK"), SOURCES)
 
 
 def test_a_series_the_national_fetch_does_not_deliver_has_no_geography():
@@ -136,7 +139,7 @@ def foreign_db(tmp_path, monkeypatch):
     (config_dir / "sources").mkdir(parents=True)
     (config_dir / "sources" / "dbnomics_eurostat.yaml").write_text(yaml.dump(SOURCE_DBNOMICS))
     fake_sources = {}
-    for code, country in (("GDP_BE", None), ("GDP_DE", "DE"), ("CONF_EU", "EU")):
+    for code, country in (("GDP_BE", None), ("GDP_DE", "DE"), ("CONF_EU", "EU27_2020")):
         (config_dir / "indicators" / f"{code}.yaml").write_text(
             yaml.dump(_indicator(code, country))
         )

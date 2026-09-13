@@ -1,0 +1,24 @@
+id: UNEMPLOYMENT_RATE_EUROPE
+name:
+  en: Unemployment rate
+  fr: Taux de chômage
+  nl: Werkloosheidsgraad
+unit: percent
+frequency: M
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: Unemployment rate, seasonally adjusted, total, percentage of active population,
+    every allowlisted European country -- the international pilot (docs/features/international.md).
+fetch:
+  dataset: une_rt_m
+  filters:
+    s_adj: SA
+    age: TOTAL
+    sex: T
+    unit: PC_ACT
+  geographies: allowlist
+  since: "2008"
+display: null

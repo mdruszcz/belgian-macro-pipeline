@@ -165,13 +165,36 @@ def load_and_validate_all(indicators_dir: Path, sources_dir: Path) -> tuple[dict
     return indicators, sources
 
 
-FETCHABLE_NATIONAL_ADAPTERS = ("nbb", "dbnomics")
+FETCHABLE_NATIONAL_ADAPTERS = ("nbb", "dbnomics", "eurostat")
+
+
+def is_multi_geo(indicator: dict) -> bool:
+    """Whether this indicator's `fetch` describes a direct-Eurostat,
+    every-country-at-once pilot fetch (fetch.geographies: allowlist) rather
+    than a single already-known geography.
+
+    The explicit discriminator, not a guess from `dataset` or `country`
+    being absent: docs/features/indicator_config.schema.json's `fetch` oneOf
+    already enforces that `geographies: allowlist` never coexists with a
+    `filters.geo` or a `country` field, so this is a plain read of the one
+    field that means it, not a re-derivation of the schema's own rule.
+    """
+    return (indicator.get("fetch") or {}).get("geographies") == "allowlist"
 
 
 def has_fetchable_national_adapter(indicator: dict, sources: dict) -> bool:
     """Whether the daily national fetch (belgian_macro_db.py) delivers this
-    indicator into legacy_observations -- the adapters that fetch, whichever
-    country the series describes."""
+    indicator into legacy_observations -- the adapters that fetch ONE already
+    -known geography, whichever country the series describes.
+
+    A multi-geo pilot indicator (fetch.geographies: allowlist) uses the
+    "eurostat" adapter too, but belgian_macro_db._load_sources() cannot build
+    it a single `url` (there is no one geography to pin), so it is excluded
+    here even though its adapter is fetchable in general -- it is delivered by
+    scripts/sync_international.py instead, not the national fetch/legacy path.
+    """
+    if is_multi_geo(indicator):
+        return False
     return sources[indicator["source_id"]]["adapter"] in FETCHABLE_NATIONAL_ADAPTERS
 
 

@@ -83,30 +83,37 @@ GRADES = {
     },
 }
 
-# THE CONFIG AND THE DATABASE DISAGREE ABOUT TWO SOURCE IDENTIFIERS, and the
-# join here would silently find nothing for them. Verified rather than guessed:
-#
-#   config/indicators/EUROSTAT_GDP_Q_MEUR.yaml declares source_id
-#   `dbnomics_eurostat`; the indicators table row for that same indicator says
-#   `eurostat`. Same source (Eurostat via DBnomics), two ids.
+# THE CONFIG AND THE DATABASE DISAGREE ABOUT ONE REMAINING SOURCE IDENTIFIER,
+# and the join here would silently find nothing for it. Verified rather than
+# guessed:
 #
 #   config/indicators/LABOUR_COST_BE.yaml declares `dbnomics_ameco`; its
-#   indicators row says `ameco_ec`. Same source (AMECO via DBnomics).
+#   indicators row says `ameco_ec`. Same source (AMECO via DBnomics, until
+#   PR 2 builds a direct AMECO adapter).
+#
+# The `eurostat`/`dbnomics_eurostat` alias this table used to carry is GONE
+# (international pilot PR 1): the eight former dbnomics_eurostat indicators
+# now declare `source_id: eurostat` directly, matching config/sources/eurostat.yaml's
+# own source_id, which is also what scripts/port_existing_indicators.py has
+# always written into the `indicators` table for them (source_id_for("Eurostat")
+# == "eurostat"). No alias needed where the config and the database already
+# agree.
 #
 # Aliased here rather than renamed either side, because renaming a source_id
 # touches the observations that reference it and is a migration, not an export
 # change. resolve() below REFUSES on an unresolvable id, so a third mismatch
-# cannot hide the way these two did.
+# cannot hide the way this one did.
 DB_TO_CONFIG_SOURCE_ID = {
-    "eurostat": "dbnomics_eurostat",
     "ameco_ec": "dbnomics_ameco",
 }
 
-# The unit EurostatFetcher.fetch rebases on, by that exact string
-# (src/fetchers/eurostat.py:51). Any indicator carrying it has had its numbers
-# changed by us and is grade B; one that carries it WITHOUT declaring the
-# transform is a config that would grade itself as the agency's own figure, so
-# the export refuses rather than publish that.
+# The unit DBnomicsSource._parse rebases on, by that exact string
+# (src/fetchers/dbnomics.py), applied the same way by the new direct-Eurostat
+# national path (belgian_macro_db.py's fetch_all, via src/fetchers/rebase.py).
+# Any indicator carrying it has had its numbers changed by us and is grade B;
+# one that carries it WITHOUT declaring the transform is a config that would
+# grade itself as the agency's own figure, so the export refuses rather than
+# publish that.
 REBASED_UNIT = "index_2010"
 
 
@@ -204,9 +211,11 @@ def indicator_lineage(
         # number this pipeline rescaled. Refuse rather than publish that.
         if cfg.get("unit") == REBASED_UNIT and not transform:
             raise ValueError(
-                f"{indicator_id} has unit {REBASED_UNIT!r}, which the fetcher rebases "
-                "(src/fetchers/eurostat.py), but declares no `transform:` block. It would "
-                "be graded A as the agency's own figure. Declare the transform."
+                f"{indicator_id} has unit {REBASED_UNIT!r}, which is rebased "
+                "(src/fetchers/rebase.py, applied by src/fetchers/dbnomics.py and the "
+                "national path in belgian_macro_db.py), but declares no `transform:` "
+                "block. It would be graded A as the agency's own figure. Declare the "
+                "transform."
             )
 
         if source_id is not None and source_id not in registry:
