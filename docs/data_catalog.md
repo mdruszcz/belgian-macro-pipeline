@@ -776,6 +776,91 @@ and category), which is clean and correct but does not fit the municipal product
 indicator labelled explicitly "grants recorded in the federal subsidy register", with absence
 stated to mean "none recorded". Neither was judged worth the misreading risk.
 
+## Eurostat regional (NUTS 2) — APPROVED by the maintainer 2026-09-14
+
+Three Eurostat datasets, one geometry source and one JS library for a NUTS 2 choropleth on the
+Europe panel (`docs/features/europe_nuts2.md`, batch B1). **Approved by the maintainer
+2026-09-14**, exactly as the spec's seven "Decisions needed" recommended — all three datasets,
+the Nuts2json 2024 vintage, vendoring `eurostat-map` 4.11.3, NUTS 2 as its own approval separate
+from the international pilot's stage 1, the Brussels `BE10` alias as a lookup-table entry, and
+the compound-`OBS_FLAG` adapter fix as its own PR first. **One exception, not yet decided**: the
+mapping of the single flag `u` ("unreliable") — see the Unemployment rate row below. Kept out of
+the "Approved sources" table below, the same way the Belfius and Vlaamse Arbeidsrekening
+approvals are recorded in their own sections rather than added there. Every figure was measured
+2026-09-14 by `scripts/report_nuts2_coverage.py` (read-only, no `data/raw/**` write, no
+`fetch_runs` row); see the spec for the full coverage tables this summarizes.
+
+### GDP per capita, PPS — `nama_10r_2gdp` (APPROVED by the maintainer 2026-09-14)
+
+| Field | Value |
+|---|---|
+| Publisher | Eurostat — regional economic accounts |
+| What | GDP per capita in purchasing power standards, EU27 (from 2020) basis, per inhabitant. Filter used: `unit=PPS_EU27_2020_HAB` — **not** `PPS_HAB_EU27_2020`, which is "in % of the EU27 average", a different series, confirmed from the response's own dimension labels |
+| Periods at source | Annual, 2000–2024 (25 years) |
+| Coverage | 285 real NUTS 2 regions across the response (0 pseudo-region codes); 276 with a value in the latest year (2024). After the pilot's own country-prefix licence filter: 285 kept, 0 dropped, 0 unresolved. No Swiss, Icelandic or Liechtenstein regions at all — Eurostat does not publish this dataset for EFTA; genuinely partial, not a filtering artefact |
+| Geography | NUTS 2, verified against Nuts2json's 2024 vintage geometry (recommended vintage — see spec) |
+| Acquisition | `EurostatSource` (`src/fetchers/eurostat.py`), same adapter and transport as the approved `eurostat` row below — **parses cleanly today**, no adapter change needed for this one dataset |
+| Source page | `ec.europa.eu/eurostat/databrowser/product/view/nama_10r_2gdp` |
+| Required credit | Per the existing `eurostat` source's licence note (below) |
+| Licence caveat | Same as the `eurostat` row: reuse including commercial authorised with Eurostat credited; not for commercial redissemination of non-EU/EFTA/candidate data — the pilot's country allowlist already enforces exactly this |
+
+### Unemployment rate — `lfst_r_lfu3rt` (APPROVED by the maintainer 2026-09-14, blocked on an adapter gap)
+
+| Field | Value |
+|---|---|
+| Publisher | Eurostat — regional labour force survey |
+| What | Unemployment rate, ages 15–74, total (both sexes), all education levels. Filters: `isced11=TOTAL&sex=T&age=Y15-74&unit=PC` |
+| Periods at source | Annual, 1999–2025 (27 years) |
+| Coverage | 352 real NUTS 2 regions (0 pseudo-region codes); 290 with a value in the latest year (2025). After licence filter: 306 kept, 44 dropped (all UK), 1 **unresolved** — `EA21`, an aggregate code that structurally resembles a NUTS 2 code and must be caught by an explicit exclusion list, not a country-prefix check alone |
+| Geography | NUTS 2, 2024 vintage recommended |
+| Acquisition | **Blocked, adapter fix approved as its own PR first (2026-09-14)**: `EurostatSource._parse` refuses this response outright — compound `OBS_FLAG` values it has never seen (`bu`, `bd`, `du`, `bdu`, 233 cells combined) and even the plain `u` ("unreliable") flag alone (361 cells) are not in its `FLAG_STATUS` table. **The mapping for plain `u` is not yet decided by the maintainer** — the fix PR implements `u` → `estimate` under a stated assumption, pending confirmation (see spec, decision 7) |
+| Source page | `ec.europa.eu/eurostat/databrowser/product/view/lfst_r_lfu3rt` |
+| Required credit | Same as the `eurostat` row below |
+| Licence caveat | Same as the `eurostat` row |
+
+### Population — `demo_r_pjanaggr3` (APPROVED by the maintainer 2026-09-14, blocked on the same adapter gap)
+
+| Field | Value |
+|---|---|
+| Publisher | Eurostat — regional demographic statistics (a NUTS 3 dataset that also carries NUTS 0–2 rows in the same response) |
+| What | Population on 1 January, total, both sexes, all ages. Filters: `sex=T&age=TOTAL&unit=NR` |
+| Periods at source | Annual, 1990–2025 (36 years) |
+| Coverage | 361 NUTS-2-shaped codes, of which 4 are pseudo-regions (`ALXX`, `FRXX`, `HUXX`, `MKXX` — Eurostat's "Not regionalised/Unknown NUTS 2" label, a different convention from national accounts' `ZZ` extra-regio) → 357 real regions; 296 with a value in the latest year (2025). After licence filter: 314 kept, 41 dropped (40 UK + `EU28`), 1 **unresolved** — `EFTA`, the same aggregate-code hazard as `EA21` above |
+| Geography | NUTS 2, 2024 vintage recommended |
+| Acquisition | **Blocked, same fix PR as the unemployment rate**: compound flags `be`/`bep`/`ep` (1,198 cells combined) not in `FLAG_STATUS`. The single-letter flags `b`/`e`/`p` this dataset also carries already map correctly today |
+| Source page | `ec.europa.eu/eurostat/databrowser/product/view/demo_r_pjanaggr3` |
+| Required credit | Same as the `eurostat` row below |
+| Licence caveat | Same as the `eurostat` row |
+
+### Nuts2json — NUTS 2 boundary geometry (APPROVED by the maintainer 2026-09-14)
+
+| Field | Value |
+|---|---|
+| Publisher | Eurostat/GISCO, distributed via the `eurostat/Nuts2json` GitHub project |
+| What | TopoJSON NUTS boundaries, per level (0–3), per NUTS version year, per projection/resolution. Proposed: level 2, projection 3035, resolution 20M, **2024 vintage** — 292 regions, 574,331 bytes measured |
+| Periods at source | Multiple NUTS version years published (2010, 2013, 2016, 2021, 2024 confirmed present); this proposal uses 2024 only |
+| Coverage | 292 of the ~300+ real NUTS 2 regions across all candidate datasets; matches each dataset's latest year with 10–23 code mismatches (vs. 46–65 under the 2021 vintage) — see the spec's full match table. Some overseas/candidate-country codes (`FRY1`–`FRY5`, `PT20`, `PT30`) present in Eurostat data have no match under either vintage, unresolved, not guessed |
+| Geography | NUTS 2, self-hosted under `public/data/geo/nuts2/` if approved — never fetched from GitHub/ec.europa.eu at runtime |
+| Acquisition | Static file download, `pub/v2/{year}/3035/20M/2.json`, no adapter, no fetch_runs row |
+| Source page | `github.com/eurostat/Nuts2json` |
+| Required credit | **Verbatim from the library's own default map footnote**: "Administrative boundaries: ©EuroGeographics ©OpenStreetMap" |
+| Licence caveat | Nuts2json itself is EUPL-1.2 (its own `LICENSE`, confirmed). Its README's Copyright section states the underlying Eurostat NUTS dataset "is copyrighted... subject to [Eurostat-GISCO's] acceptance" of the specific provisions at `ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units` |
+
+### `eurostat-map` — JavaScript charting library (APPROVED by the maintainer 2026-09-14)
+
+| Field | Value |
+|---|---|
+| Publisher | Eurostat/GISCO (`eurostat/eurostat-map.js` on GitHub, published to npm as `eurostat-map`) |
+| What | A D3-based choropleth/proportional-symbol map renderer built specifically for Eurostat statistics and Nuts2json geometry |
+| Version | 4.11.3, published 2026-08-18 (npm `dist-tags.latest`, confirmed 2026-09-14) |
+| Format | One self-contained webpack UMD bundle, `build/eurostatmap.min.js`, downloaded and measured: **1,219,896 bytes (1.16 MiB)** minified. Bundles its own `d3-*`, `proj4`, `topojson-client`, `idb-keyval`, `jsonstat-toolkit`, `simple-statistics` — no companion `<script>` tags needed |
+| Coverage | Not applicable (a library, not a dataset) |
+| Geography | Not applicable — consumes whatever geometry it is pointed at |
+| Acquisition | Proposed: vendored under `assets/vendor/eurostat-map/`, never loaded from a CDN (rule 30: the public site stays static and self-contained) |
+| Source page | `github.com/eurostat/eurostat-map.js`, `npmjs.com/package/eurostat-map` |
+| Required credit | Its own `LICENSE` file requirement (EUPL-1.2 notice retained alongside the vendored file) |
+| Licence caveat | **EUPL-1.2**, confirmed from the downloaded `LICENSE` file. Fetches Eurostat statistics, Nuts2json geometry, a GISCO basemap and GISCO place-name labels from `ec.europa.eu`/`raw.githubusercontent.com` **by default at runtime** — grepped from the bundle, listed in full in the spec. Two confirmed-present options (`.nuts2jsonBaseURL(...)`, `.statData().setData(...)`) can redirect geometry to a self-hosted path and inject data in memory instead, which the spec proposes using so no page ever calls Eurostat or GitHub directly — **not yet verified end-to-end in a browser trace**, spec-stage only |
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new
