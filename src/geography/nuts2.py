@@ -52,6 +52,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 GEOGRAPHY_CONFIG_DIR = REPO_ROOT / "config" / "geography"
 NUTS2_CSV = GEOGRAPHY_CONFIG_DIR / "nuts2.csv"
 NUTS2_EXCLUDED_CSV = GEOGRAPHY_CONFIG_DIR / "nuts2_excluded.csv"
+GEOGRAPHIES_CSV = GEOGRAPHY_CONFIG_DIR / "geographies.csv"
+
+#: BE10's alias, read by geo_id (not by geographies.csv's `nuts` column --
+#: Brussels has no province row to carry a NUTS 2 tag there; see this
+#: module's own docstring and ADR 0009's amendment).
+_BRUSSELS_REGION_GEO_ID = "be:reg:04000"
+_BRUSSELS_NUTS1_CODE = "BE1"
 
 #: Exact key order the `geographies` table's INSERT statements use elsewhere
 #: (scripts/load_geography.py's UPSERT_SQL, src/geography/international.py's
@@ -172,9 +179,79 @@ def load_excluded(csv_path: Path = NUTS2_EXCLUDED_CSV) -> dict[str, str]:
     return {row["code"]: row["reason"] for row in _read_csv(csv_path)}
 
 
+def check_belgian_cross_references(
+    nuts2_rows: dict[str, dict], geographies_path: Path = GEOGRAPHIES_CSV
+) -> list[str]:
+    """Every Belgian nuts2.csv row's `belgian_geo_id` must resolve to a
+    real, correctly-typed row in geographies.csv -- checked HERE, at load
+    time (scripts/sync_nuts2.py calls this every real run), not only by
+    tests/test_nuts2_geography.py at PR time (PR #174 audit, SHOULD-FIX 4:
+    a test alone would not catch geographies.csv drifting -- a boundary
+    change, a merger -- between the PR that added nuts2.csv and a later one
+    that touches Belgian geography; the loader itself must not silently
+    keep publishing a stale cross-reference).
+
+    BE21-BE25/BE31-BE35 (the 10 provinces) must match geographies.csv's own
+    `nuts` column exactly, at a `province`-level row. BE10 (Brussels, which
+    has no province row to carry a NUTS 2 tag) must point at
+    'be:reg:04000', and that row's OWN `nuts` column must still read 'BE1'
+    -- the sanity check that the maintainer-approved alias still describes
+    the row it was written against.
+
+    Returns problem strings; empty means clean. Never raises itself --
+    callers (scripts/sync_nuts2.py) turn a non-empty result into a loud
+    refusal; check_allowlist_integrity() folds it into the PR-time guard.
+    """
+    problems: list[str] = []
+    if not geographies_path.is_file():
+        return [f"Missing {geographies_path}"]
+    with geographies_path.open(encoding="utf-8", newline="") as fh:
+        by_nuts = {row["nuts"]: row for row in csv.DictReader(fh) if row["nuts"]}
+        fh.seek(0)
+        by_geo_id = {row["geo_id"]: row for row in csv.DictReader(fh)}
+
+    for code, row in nuts2_rows.items():
+        if not code.startswith("BE"):
+            continue
+        belgian_geo_id = row["belgian_geo_id"]
+        if code == "BE10":
+            if belgian_geo_id != _BRUSSELS_REGION_GEO_ID:
+                problems.append(
+                    f"BE10: belgian_geo_id is {belgian_geo_id!r}, expected "
+                    f"{_BRUSSELS_REGION_GEO_ID!r}"
+                )
+            brussels = by_geo_id.get(_BRUSSELS_REGION_GEO_ID)
+            if brussels is None:
+                problems.append(
+                    f"BE10: {_BRUSSELS_REGION_GEO_ID!r} is not a row in {geographies_path}"
+                )
+            elif brussels["nuts"] != _BRUSSELS_NUTS1_CODE:
+                problems.append(
+                    f"BE10: {_BRUSSELS_REGION_GEO_ID!r}'s own nuts column is "
+                    f"{brussels['nuts']!r}, expected {_BRUSSELS_NUTS1_CODE!r} -- the "
+                    "BE10 alias no longer describes the row it was written against"
+                )
+            continue
+        province = by_nuts.get(code)
+        if province is None:
+            problems.append(f"{code}: no geographies.csv row has nuts={code!r} to cross-reference")
+        elif province["level"] != "province":
+            problems.append(
+                f"{code}: geographies.csv's {code!r} row is level "
+                f"{province['level']!r}, expected 'province'"
+            )
+        elif belgian_geo_id != province["geo_id"]:
+            problems.append(
+                f"{code}: belgian_geo_id is {belgian_geo_id!r}, but geographies.csv's own "
+                f"nuts={code!r} row has geo_id {province['geo_id']!r}"
+            )
+    return problems
+
+
 def check_allowlist_integrity(
     nuts2_path: Path = NUTS2_CSV,
     excluded_path: Path = NUTS2_EXCLUDED_CSV,
+    geographies_path: Path = GEOGRAPHIES_CSV,
 ) -> list[str]:
     """PR-time guard (tests/test_nuts2_geography.py): every property the
     NUTS 2 allowlist must hold, checked in one place. Returns problem
@@ -182,6 +259,7 @@ def check_allowlist_integrity(
     problems: list[str] = []
     rows = load_nuts2_rows(nuts2_path)
     excluded = load_excluded(excluded_path)
+    problems.extend(check_belgian_cross_references(rows, geographies_path))
 
     overlap = sorted(set(rows) & set(excluded))
     if overlap:

@@ -17,6 +17,7 @@ from src.geography.nuts2 import (
     PSEUDO_REGION,
     Nuts2GeographyError,
     check_allowlist_integrity,
+    check_belgian_cross_references,
     classify_nuts2_code,
     is_nuts2_code,
     is_pseudo_region,
@@ -112,6 +113,58 @@ def test_non_belgian_rows_have_no_belgian_geo_id():
     for code, row in rows.items():
         if not code.startswith("BE"):
             assert row["belgian_geo_id"] is None, code
+
+
+def test_check_belgian_cross_references_is_clean_on_the_real_files():
+    """The loader (scripts/sync_nuts2.py) calls this at every real run, not
+    only here at PR time (PR #174 audit, SHOULD-FIX 4) -- proving it is
+    clean on the committed files today is the load-bearing check; the
+    corruption-detection tests below prove it actually WOULD catch a
+    problem, using a copy so the real committed file is never touched."""
+    assert check_belgian_cross_references(load_nuts2_rows()) == []
+
+
+def test_check_belgian_cross_references_catches_a_wrong_province_geo_id(tmp_path):
+    geo_csv = tmp_path / "geographies.csv"
+    geo_csv.write_text(
+        "geo_id,nis_code,level,name_nl,name_fr,name_en,parent_geo_id,valid_from,valid_to,"
+        "successor_geo_id,nuts\n"
+        "be:prov:10000,10000,province,Antwerpen,Anvers,Antwerp,,2025-01-01,,,BE21\n",
+        encoding="utf-8",
+    )
+    rows = {"BE21": {"belgian_geo_id": "be:prov:WRONG"}}
+    problems = check_belgian_cross_references(rows, geographies_path=geo_csv)
+    assert len(problems) == 1
+    assert "BE21" in problems[0] and "be:prov:WRONG" in problems[0]
+
+
+def test_check_belgian_cross_references_catches_a_missing_province_row(tmp_path):
+    geo_csv = tmp_path / "geographies.csv"
+    geo_csv.write_text(
+        "geo_id,nis_code,level,name_nl,name_fr,name_en,parent_geo_id,valid_from,valid_to,"
+        "successor_geo_id,nuts\n",  # BE21's province row is simply absent
+        encoding="utf-8",
+    )
+    rows = {"BE21": {"belgian_geo_id": "be:prov:10000"}}
+    problems = check_belgian_cross_references(rows, geographies_path=geo_csv)
+    assert len(problems) == 1 and "BE21" in problems[0]
+
+
+def test_check_belgian_cross_references_catches_a_stale_be10_alias(tmp_path):
+    """If geographies.csv's own Brussels row ever stopped carrying nuts=BE1
+    (a schema change, a re-tag), the BE10 alias's own sanity check must
+    fail loudly rather than keep pointing at a row that no longer means
+    what the alias assumes it means."""
+    geo_csv = tmp_path / "geographies.csv"
+    geo_csv.write_text(
+        "geo_id,nis_code,level,name_nl,name_fr,name_en,parent_geo_id,valid_from,valid_to,"
+        "successor_geo_id,nuts\n"
+        "be:reg:04000,04000,region,Brussels,Bruxelles,Brussels,,1977-01-01,,,BE99\n",
+        encoding="utf-8",
+    )
+    rows = {"BE10": {"belgian_geo_id": "be:reg:04000"}}
+    problems = check_belgian_cross_references(rows, geographies_path=geo_csv)
+    assert len(problems) == 1 and "BE10" in problems[0] and "BE99" in problems[0]
 
 
 def test_geographies_csv_was_not_modified_by_this_batch():

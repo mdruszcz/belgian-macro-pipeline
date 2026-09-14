@@ -87,38 +87,41 @@ class TestRealExport:
         assert index["attribution"]
         ids_and_status = {row["id"]: row["status"] for row in index["indicators"]}
         assert ids_and_status["GDP_PC_PPS_NUTS2"] == "loaded"
-        assert ids_and_status["POPULATION_NUTS2"] == "blocked"
+        assert ids_and_status["POPULATION_NUTS2"] == "loaded"
         assert ids_and_status["UNEMPLOYMENT_RATE_NUTS2"] == "blocked"
 
-    def test_blocked_indicators_are_not_omitted_and_carry_a_reason(self):
-        for indicator_id in ("POPULATION_NUTS2", "UNEMPLOYMENT_RATE_NUTS2"):
-            payload = self._load(indicator_id)
-            assert payload["status"] == "blocked"
-            assert payload["blocked_reason"]
-            assert payload["years"] == []
-            assert payload["values"] == {}
+    def test_blocked_indicator_is_not_omitted_and_carries_a_reason(self):
+        payload = self._load("UNEMPLOYMENT_RATE_NUTS2")
+        assert payload["status"] == "blocked"
+        assert payload["blocked_reason"]
+        assert payload["years"] == []
+        assert payload["values"] == {}
+        assert payload["no_outline"] == {}  # same type as a loaded payload's, just empty
 
-    def test_five_states_never_collapse_in_the_loaded_indicator(self):
-        payload = self._load("GDP_PC_PPS_NUTS2")
+    @pytest.mark.parametrize("indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"])
+    def test_five_states_never_collapse_in_a_loaded_indicator(self, indicator_id):
+        payload = self._load(indicator_id)
         states_seen = set()
         for year_values in payload["values"].values():
             for cell in year_values.values():
                 states_seen.add(cell["s"])
         assert states_seen <= ALL_CANONICAL_AND_SYNTHETIC_STATES
-        assert "missing" in states_seen  # a real, known gap (e.g. CH01) must appear
+        assert "missing" in states_seen  # a real, known gap must appear
 
-    def test_missing_state_never_carries_a_value(self):
-        payload = self._load("GDP_PC_PPS_NUTS2")
+    @pytest.mark.parametrize("indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"])
+    def test_missing_state_never_carries_a_value(self, indicator_id):
+        payload = self._load(indicator_id)
         for year_values in payload["values"].values():
             for code, cell in year_values.items():
                 if cell["s"] == "missing":
                     assert cell["v"] is None, f"{code} is 'missing' but has a value"
 
-    def test_a_real_value_is_never_a_bare_zero_standing_in_for_missing(self):
+    @pytest.mark.parametrize("indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"])
+    def test_a_real_value_is_never_a_bare_zero_standing_in_for_missing(self, indicator_id):
         """Every 'missing' cell's value is null (checked above); this is the
         complementary direction -- a real, present region never gets v=0 as
         a placeholder instead of a real number or an explicit missing/null."""
-        payload = self._load("GDP_PC_PPS_NUTS2")
+        payload = self._load(indicator_id)
         for year_values in payload["values"].values():
             for cell in year_values.values():
                 if cell["s"] != "missing" and cell["v"] is None:
@@ -129,25 +132,36 @@ class TestRealExport:
         assert payload["latest_year"] == "2024"
         assert any(cell["v"] is not None for cell in payload["values"]["2024"].values())
 
-    def test_class_breaks_present_for_every_year_with_at_least_two_distinct_values(self):
-        payload = self._load("GDP_PC_PPS_NUTS2")
+    def test_population_latest_year_is_2025_and_has_at_least_one_real_value(self):
+        payload = self._load("POPULATION_NUTS2")
+        assert payload["latest_year"] == "2025"
+        assert any(cell["v"] is not None for cell in payload["values"]["2025"].values())
+
+    @pytest.mark.parametrize("indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"])
+    def test_class_breaks_present_for_every_year_with_at_least_two_distinct_values(
+        self, indicator_id
+    ):
+        payload = self._load(indicator_id)
         for year in payload["years"]:
             breaks = payload["class_breaks"][year]
             assert breaks == [] or len(breaks) == 4
             assert breaks == sorted(breaks)
 
-    def test_geometry_ids_and_no_outline_codes_account_for_every_value_key(self):
+    @pytest.mark.parametrize("indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"])
+    def test_geometry_ids_and_no_outline_codes_account_for_every_value_key(self, indicator_id):
         """Every key in `values` is either a real 2024 geometry id or one of
         the documented no-outline codes -- the cross-check this exporter is
         required to make (docs/features/europe_nuts2.md, decision 8)."""
-        payload = self._load("GDP_PC_PPS_NUTS2")
+        payload = self._load(indicator_id)
         geometry_ids = ex._geometry_ids()
+        no_outline_codes = set(ex.KNOWN_NO_OUTLINE) | set(ex.SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE)
         for year_values in payload["values"].values():
             for code in year_values:
-                assert code in geometry_ids or code in ex.KNOWN_NO_OUTLINE, code
+                assert code in geometry_ids or code in no_outline_codes, code
 
-    def test_excluded_by_licence_regions_never_appear_in_values(self):
-        payload = self._load("GDP_PC_PPS_NUTS2")
+    @pytest.mark.parametrize("indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"])
+    def test_excluded_by_licence_regions_never_appear_in_values(self, indicator_id):
+        payload = self._load(indicator_id)
         excluded = set(payload["excluded_by_licence"])
         assert excluded  # XK00 at minimum
         for year_values in payload["values"].values():

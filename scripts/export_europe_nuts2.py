@@ -29,12 +29,15 @@ Eurostat published it and this pipeline chooses not to redistribute it).
 
 GEOMETRY CROSS-CHECK (CLAUDE.md rule 13, the spec's own requirement): every
 NUTS code this indicator has an observation row for must be either (a) in
-the 2024 geometry, or (b) one of the documented no-outline codes (FRY1-FRY5,
-PT20, PT30 -- see public/data/geo/nuts2/ATTRIBUTION.md for where Nuts2json
-actually publishes their outlines, found while building this batch). ANY
-OTHER data code with no geometry match FAILS THE EXPORT outright -- the
-known case is documented, the unknown case is refused, never silently
-dropped or silently kept.
+the 2024 geometry, or (b) one of two documented no-outline lists: KNOWN_NO_OUTLINE
+(FRY1-FRY5, PT20, PT30 -- see public/data/geo/nuts2/ATTRIBUTION.md for where
+Nuts2json actually publishes their outlines, found while building this batch)
+or SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE (codes real in a long-history dataset
+but retired from the 2024 NUTS classification entirely -- found while
+unblocking POPULATION_NUTS2; see that constant's own comment for the
+measured evidence). ANY OTHER data code with no geometry match FAILS THE
+EXPORT outright -- the known cases are documented, the unknown case is
+refused, never silently dropped or silently kept.
 
 CLASS BREAKS are a display classification, computed once here (5-quantile,
 deterministic), not a statistic and not recomputed per render -- see
@@ -93,6 +96,40 @@ KNOWN_NO_OUTLINE = {
     "PT30": "Madeira -- published by Nuts2json as a separate map inset (GEO=PT30), not in the level-2 continental file",
 }
 
+#: A SECOND, separately-evidenced no-outline category, found while unblocking
+#: POPULATION_NUTS2 (2026-09-14): demo_r_pjanaggr3's `since: "1990"` fetch
+#: reaches back far enough that Eurostat's own retroactive backfill runs out
+#: for these codes -- each one's committed rows stop at a real transition
+#: year (checked against the working database, not assumed): EL11-EL25 (a
+#: single 2011 row each -- a one-off historical entry under the pre-2016
+#: Greek NUTS 2 classification), HR04 (rows through 2016; Croatia's own
+#: successor codes HR02/HR03/HR05/HR06 carry data from 2001-2013 onward,
+#: i.e. Eurostat re-backfilled the split under the NEW codes), NL31/NL33
+#: (rows through 2023; NL35/NL36 -- the Dutch reclassification the B1
+#: coverage report already found, docs/features/europe_nuts2.md -- carry
+#: data from 2014 onward), NO01/NO03-05 (rows through 2016; NO08-NO0B carry
+#: data from 2010 onward), PT16-PT18 (rows through 2023; PT19/PT1A-PT1D --
+#: the Portuguese reclassification the B1 report also already found --
+#: carry data from 2014 onward). Unlike KNOWN_NO_OUTLINE, this is not
+#: because Nuts2json publishes the outline somewhere else; it is because
+#: the region, under this exact code, no longer exists in the 2024
+#: classification at all -- the 2024 geometry legitimately has no outline
+#: for it under any URL. A later batch that wants these years reachable
+#: under their CURRENT codes needs a NUTS-vintage crosswalk, out of scope
+#: here.
+_SUPERSEDED_NUTS_VINTAGE_CODES = (
+    "EL11", "EL12", "EL13", "EL14", "EL21", "EL22", "EL23", "EL24", "EL25",
+    "HR04", "NL31", "NL33", "NO01", "NO03", "NO04", "NO05", "PT16", "PT17", "PT18",
+)  # fmt: skip
+_SUPERSEDED_NUTS_VINTAGE_REASON = (
+    "Pre-2024 NUTS 2 classification code with real historical observations; the 2024 "
+    "geometry has no outline for it under any code (see export_europe_nuts2.py's own "
+    "comment on SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE for the measured evidence)."
+)
+SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE = dict.fromkeys(
+    _SUPERSEDED_NUTS_VINTAGE_CODES, _SUPERSEDED_NUTS_VINTAGE_REASON
+)
+
 #: Why a configured indicator has no data yet -- see
 #: scripts/sync_nuts2.py's own module docstring for the full story. Keyed by
 #: indicator_id; an indicator not in this dict is assumed loaded (its CSV
@@ -101,15 +138,12 @@ KNOWN_NO_OUTLINE = {
 BLOCKED_REASONS = {
     "UNEMPLOYMENT_RATE_NUTS2": (
         "Not loaded: a minority of cells in lfst_r_lfu3rt carry an Eurostat OBS_FLAG with no "
-        'value at all (e.g. geo=DE22, period=2020, flag "bu"), which the production adapter '
-        "(src/fetchers/eurostat.py) refuses outright per CLAUDE.md rule 13. This is a new "
-        "adapter gap, out of this batch's scope. See docs/features/europe_nuts2.md, Coverage."
-    ),
-    "POPULATION_NUTS2": (
-        'Not loaded: one cell in demo_r_pjanaggr3 (geo=PL912, period=2010, flag "b") carries '
-        "an Eurostat OBS_FLAG with no value at all, which the production adapter "
-        "(src/fetchers/eurostat.py) refuses outright per CLAUDE.md rule 13. This is a new "
-        "adapter gap, out of this batch's scope. See docs/features/europe_nuts2.md, Coverage."
+        'value at all (e.g. geo=DE22, period=2020, flag "bu") -- and, unlike '
+        "POPULATION_NUTS2's single bad cell (a NUTS 3 code the adapter's geo_filter already "
+        "skips), these are themselves 4-character NUTS-2-shaped codes, so the production "
+        "adapter (src/fetchers/eurostat.py) still refuses the fetch outright per CLAUDE.md "
+        'rule 13. How to label these cells (flag u/bu, "unreliable") is the maintainer\'s '
+        "decision, pending as of this batch. See docs/features/europe_nuts2.md, Coverage."
     ),
 }
 
@@ -264,7 +298,7 @@ def _build_indicator_payload(
             "values": {},
             "class_breaks": {},
             "excluded_by_licence": sorted(excluded_by_licence),
-            "no_outline": [],
+            "no_outline": {},  # same type as a loaded payload's (code -> reason), just empty
         }
 
     by_year: dict[str, dict[str, dict]] = {}
@@ -280,14 +314,18 @@ def _build_indicator_payload(
         value = None if row["value"] == "" else float(row["value"])
         by_year.setdefault(row["period"], {})[code] = {"v": value, "s": row["status"]}
 
+    no_outline_reasons = {**KNOWN_NO_OUTLINE, **SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE}
     no_outline_here = data_codes - geometry_ids_allowed - excluded_by_licence
-    unknown_no_outline = no_outline_here - set(KNOWN_NO_OUTLINE)
+    unknown_no_outline = no_outline_here - set(no_outline_reasons)
     if unknown_no_outline:
         raise ExportError(
             f"{indicator_id}: {sorted(unknown_no_outline)} have committed observations but no "
-            "geometry match and are not in the documented no-outline list "
-            f"({sorted(KNOWN_NO_OUTLINE)}). This is a genuine surprise (CLAUDE.md rule 13) -- "
-            "verify against Nuts2json before adding it to KNOWN_NO_OUTLINE."
+            "geometry match and are not in either documented no-outline list "
+            f"(KNOWN_NO_OUTLINE: {sorted(KNOWN_NO_OUTLINE)}; "
+            f"SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE: {sorted(SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE)}). "
+            "This is a genuine surprise (CLAUDE.md rule 13) -- verify against Nuts2json and the "
+            "code's own period history (SELECT MIN/MAX(period) ... WHERE geo_id=...) before "
+            "adding it to either list."
         )
 
     # The universe every year's `values` covers: every licence-allowed
@@ -332,7 +370,7 @@ def _build_indicator_payload(
         "values": values_out,
         "class_breaks": class_breaks,
         "excluded_by_licence": sorted(excluded_by_licence),
-        "no_outline": {code: KNOWN_NO_OUTLINE[code] for code in sorted(no_outline_here)},
+        "no_outline": {code: no_outline_reasons[code] for code in sorted(no_outline_here)},
     }
 
 

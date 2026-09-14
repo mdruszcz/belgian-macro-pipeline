@@ -62,20 +62,48 @@ def test_no_nuts2_geo_id_appears_in_geographies_csv():
     assert all(g.endswith(":nuts2") for g in nuts2_geo_ids)
 
 
-def test_nuts2_payloads_live_under_their_own_directory_not_a_belgian_one():
-    """Structural check: the Europe NUTS 2 payloads are published under
-    public/data/europe/nuts2/, never under any of the directories a Belgian
-    page reads (public/data/communes/, indicators/, national.json,
-    aggregates.json, metadata/geographies.json)."""
-    europe_dir = REPO / "public" / "data" / "europe" / "nuts2"
-    belgian_dirs = [
+def test_exporter_writes_only_under_its_own_directory_and_touches_no_belgian_file(tmp_path):
+    """Behavioural, not just a path-string check (PR #174 audit, NIT: the
+    previous version of this test only compared Path objects and would have
+    passed even if the exporter wrote nothing at all). Runs the REAL
+    exporter at a throwaway --out-dir, and separately hashes every real
+    Belgian payload file before and after to prove none of them moved."""
+    import hashlib
+
+    sys.path.insert(0, str(REPO / "scripts"))
+    import export_europe_nuts2 as ex
+
+    belgian_paths = (
+        [
+            p
+            for p in (
+                REPO / "public" / "data" / "national.json",
+                REPO / "public" / "data" / "aggregates.json",
+            )
+            if p.is_file()
+        ]
+        + list((REPO / "public" / "data" / "communes").glob("*.json"))[:5]
+        + list((REPO / "public" / "data" / "indicators").glob("*.json"))[:5]
+    )
+    assert belgian_paths, "no real Belgian payload files found to check -- test would be vacuous"
+    before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in belgian_paths}
+
+    out_dir = tmp_path / "nuts2_out"
+    written = ex.export(out_dir)
+
+    after = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in belgian_paths}
+    assert before == after, "the exporter touched a real Belgian payload file"
+
+    # And it really did write real content, only under the throwaway dir.
+    on_disk = sorted(p.name for p in out_dir.glob("*.json"))
+    assert on_disk == sorted([f"{i}.json" for i in written] + ["index.json"])
+    for name in on_disk:
+        assert (out_dir / name).stat().st_size > 0
+    for belgian_dir in (
         REPO / "public" / "data" / "communes",
         REPO / "public" / "data" / "indicators",
-        REPO / "public" / "data" / "metadata",
-    ]
-    assert europe_dir.parts[-3:] == ("data", "europe", "nuts2")
-    for d in belgian_dirs:
-        assert d not in europe_dir.parents and d != europe_dir
+    ):
+        assert not any((belgian_dir / name).exists() for name in on_disk)
 
 
 def test_stores_yaml_keeps_nuts2_as_its_own_store_not_merged_into_international():

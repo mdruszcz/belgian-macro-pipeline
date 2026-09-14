@@ -1,3 +1,4 @@
+-- migration-mode: recreate-with-foreign-keys-off
 -- Add 'nuts2' to geographies.level's CHECK constraint -- Europe NUTS 2 batch
 -- B2 (docs/features/europe_nuts2.md), ADR 0009 decision 1: "`level: nuts2`
 -- is a new `geographies.level` value distinct from
@@ -15,21 +16,22 @@
 -- constraint failed" even though PRAGMA foreign_key_check reports zero
 -- violations both before and after the DROP+RENAME -- a real SQLite
 -- limitation of that pragma for a table-recreation, not a bug in the SQL
--- below. PRAGMA foreign_keys=OFF is the documented fix, but it is ALSO a
--- documented no-op once a transaction is already open -- and
--- src/db/migrate.py's runner always opens one before executing a migration
--- file's statements. This file's first statement (`PRAGMA foreign_keys =
--- OFF`, exactly this text) is a signal run() reads (src/db/migrate.py,
--- _is_self_managed_transaction()) to run this ONE file's statements in
--- autocommit mode instead, so the PRAGMA takes effect; the file manages its
--- own BEGIN/COMMIT around the actual schema change and restores
--- `foreign_keys = ON` at the end. run() verifies PRAGMA foreign_key_check
--- is clean immediately afterwards before recording this migration as
--- applied.
-PRAGMA foreign_keys = OFF;
-
-BEGIN TRANSACTION;
-
+-- below.
+--
+-- THE FIRST LINE OF THIS FILE (verbatim, checked against the raw file, not
+-- the comment-stripped statements) is a marker src/db/migrate.py's runner
+-- reads to apply this file in "recreate mode": PRAGMA foreign_keys=OFF,
+-- the runner's OWN BEGIN/COMMIT around every statement below, PRAGMA
+-- foreign_key_check inside that transaction before COMMIT, and PRAGMA
+-- foreign_keys=ON restored afterwards unconditionally -- all four owned by
+-- the runner, never by this file (PR #174 audit, SHOULD-FIX 1: a version of
+-- this file used to manage BEGIN/COMMIT/PRAGMA foreign_keys itself, and
+-- three ways that could go wrong on a future migration were proved on temp-
+-- database probes -- see src/db/migrate.py's _apply_recreate_mode()
+-- docstring and tests/test_migrations.py for the reproductions). This file
+-- must therefore contain ONLY the schema-change statements themselves --
+-- no BEGIN, COMMIT, ROLLBACK or PRAGMA foreign_keys of its own; the runner
+-- refuses the file outright if it finds one.
 CREATE TABLE geographies_new (
     geo_id           TEXT PRIMARY KEY,
     nis_code         TEXT,
@@ -62,7 +64,3 @@ ALTER TABLE geographies_new RENAME TO geographies;
 -- DROP TABLE removed these along with the old table (migrations/002_indexes.sql).
 CREATE INDEX IF NOT EXISTS idx_geo_nis_period ON geographies(nis_code, valid_from, valid_to);
 CREATE INDEX IF NOT EXISTS idx_geo_level ON geographies(level);
-
-COMMIT;
-
-PRAGMA foreign_keys = ON;

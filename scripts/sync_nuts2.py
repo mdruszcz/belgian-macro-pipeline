@@ -93,6 +93,7 @@ from src.geography.nuts2 import (  # noqa: E402
     NON_REGION_AGGREGATE,
     PSEUDO_REGION,
     Nuts2GeographyError,
+    check_belgian_cross_references,
     classify_nuts2_code,
     is_nuts2_code,
     load_nuts2_rows,
@@ -159,6 +160,23 @@ def _ensure_source_row(conn: sqlite3.Connection, source: dict) -> None:
     )
 
 
+#: Whether summing this indicator across regions is a defensible operation,
+#: independent of whether anything currently DOES that sum -- a structural
+#: fact about the indicator, per CLAUDE.md's own aggregate rules (additive
+#: counts/totals: SUMMED; a ratio/average: recomputed, never averaged;
+#: neither: no defensible aggregate). A population count is additive;
+#: GDP-per-capita and a rate/percentage are not. Nothing aggregates NUTS 2
+#: geographies today (no config/no exporter reads geo_levels: nuts2 for a
+#: province/region/country-style rollup), so this is inert either way, but
+#: it should still say what is actually true about the indicator rather
+#: than a blanket placeholder (PR #174 audit, NIT).
+IS_ADDITIVE = {
+    "GDP_PC_PPS_NUTS2": 0,
+    "POPULATION_NUTS2": 1,
+    "UNEMPLOYMENT_RATE_NUTS2": 0,
+}
+
+
 def _ensure_indicator_rows(conn: sqlite3.Connection, indicators: dict[str, dict]) -> None:
     for code, ind in indicators.items():
         conn.execute(
@@ -168,14 +186,15 @@ def _ensure_indicator_rows(conn: sqlite3.Connection, indicators: dict[str, dict]
                  description_nl, description_fr, description_en,
                  frequency, unit, preferred_direction, aggregation_method,
                  is_additive, decimals, config_path, is_active)
-            VALUES (?, 'eurostat', ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'not_applicable', 0, ?, ?, 1)
+            VALUES (?, 'eurostat', ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'not_applicable', ?, ?, ?, 1)
             ON CONFLICT(indicator_id) DO UPDATE SET
                 name_nl = excluded.name_nl,
                 name_fr = excluded.name_fr,
                 name_en = excluded.name_en,
                 description_en = excluded.description_en,
                 unit = excluded.unit,
-                preferred_direction = excluded.preferred_direction
+                preferred_direction = excluded.preferred_direction,
+                is_additive = excluded.is_additive
             """,
             (
                 code,
@@ -186,6 +205,7 @@ def _ensure_indicator_rows(conn: sqlite3.Connection, indicators: dict[str, dict]
                 ind["frequency"],
                 ind["unit"],
                 ind["preferred_direction"],
+                IS_ADDITIVE[code],
                 DECIMALS,
                 f"config/indicators/{code}.yaml",
             ),
@@ -233,6 +253,17 @@ def sync(
     source_meta = source_configs["eurostat"]
     indicators = nuts2_indicators(indicator_configs)
     nuts2_rows = load_nuts2_rows()
+    # The loader itself checks the Belgian belgian_geo_id cross-references
+    # (not only tests/test_nuts2_geography.py at PR time) -- a boundary
+    # change to geographies.csv that silently broke one would otherwise only
+    # be caught on the next PR that happens to touch this file, not on the
+    # next real sync (PR #174 audit, SHOULD-FIX 4).
+    cross_ref_problems = check_belgian_cross_references(nuts2_rows)
+    if cross_ref_problems:
+        raise Nuts2GeographyError(
+            "nuts2.csv's Belgian belgian_geo_id cross-references no longer match "
+            f"geographies.csv: {cross_ref_problems}"
+        )
     nuts2_excluded = load_nuts2_excluded()
     international_allowed_prefixes = {
         code
@@ -264,12 +295,21 @@ def sync(
         fetch_run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
         try:
+            # geo_filter=is_nuts2_code: this loader only ever wants 4-character
+            # NUTS 2-shaped codes, so a cell for a NUTS 0/1/3 geography this
+            # fetch never asked for (e.g. demo_r_pjanaggr3's PL912, a NUTS 3
+            # code) is never even flag/value-validated -- see
+            # EurostatSource._parse's own docstring. A cell for a geography
+            # THIS loader does want is still validated exactly as before,
+            # including refusing loudly on a flag with no value.
             if from_dir is not None:
                 raw = (from_dir / f"{code}.json").read_bytes()
-                geo_rows_fetched = source._parse(raw, dataset=dataset)
+                geo_rows_fetched = source._parse(raw, dataset=dataset, geo_filter=is_nuts2_code)
             else:
                 url = EurostatSource.build_url(source_meta["base_url"], dataset, filters, since)
-                geo_rows_fetched = source.fetch(url, cache_key=code, dataset=dataset)
+                geo_rows_fetched = source.fetch(
+                    url, cache_key=code, dataset=dataset, geo_filter=is_nuts2_code
+                )
 
             resolved: list[tuple[dict, str]] = []
             seen_codes: set[str] = set()

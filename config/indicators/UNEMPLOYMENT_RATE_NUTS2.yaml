@@ -13,12 +13,14 @@ description:
   en: Unemployment rate, ages 15-74, total, percentage of the labour force --
     NUTS 2 region, every region whose country is on the international pilot's
     licence allowlist (docs/features/europe_nuts2.md, batch B2). NOT loaded as
-    of this batch -- see the feature doc's "Coverage" section -- a genuine minority
-    of cells in this dataset carry an OBS_FLAG with no value at all (e.g. DE22,
-    2020, flag "bu"), which EurostatSource._parse refuses outright (CLAUDE.md
-    rule 13); this is a new adapter gap, distinct from the compound-flag/`u`
-    mapping fix already in place, and out of this batch's scope (src/fetchers/
-    is not touched here).
+    of this batch -- unlike POPULATION_NUTS2's single bad cell, a genuine
+    minority of this dataset's cells carrying an OBS_FLAG with no value at all
+    (e.g. DE22, 2020, flag "bu") are themselves 4-character NUTS-2-shaped
+    codes, so the adapter's geo_filter (scripts/sync_nuts2.py's is_nuts2_code)
+    does not skip them -- EurostatSource._parse still refuses outright
+    (CLAUDE.md rule 13). How to label these cells (they carry flag `u`/`bu`,
+    "unreliable"/"break+unreliable") is the maintainer's decision, pending as
+    of this batch; see the feature doc's "Coverage" section.
 fetch:
   dataset: lfst_r_lfu3rt
   filters:
