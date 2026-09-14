@@ -1302,7 +1302,13 @@ How: Collect the maintainer's notes on home2.html and macro.html against the moc
 one batch and recapture with scripts/capture_review_screenshots.py.
 Why: The maintainer judged the pilots good enough to continue but not finished; the polish must not be
 lost once the rest of the site moves on.
- [BUILD] A4 -- finish
+ ✅ [BUILD] A4 -- finish (2026-09-14, PR #189: Macro commune search reads the right geography fields;
+Belgium labelled from interface strings instead of REFNIS's "ROYAUME"/"HET RIJK" on the explorer, the
+commune data table and the page-builder resolver; trilingual institution names in config/sources for
+the Sources page; Eurostat's count includes the three NUTS 2 datasets; age-pyramid tooltips via
+BPCharts.showTip; home2's dead "Voir la vidéo" button removed; commune.html's all-data view as a
+compact table (Namur about 14,000px -> 3,585px); routes.py's stale note on /commune.html corrected.
+Legacy home.html keeps the same dead button, off the public path)
 How: Close out remaining Livraison A items against docs/features/site_unification.md's own test
 list (allowed links, tooltip accuracy, no overflow, theme/language/rubrique persistence).
 Why: The maintainer's own acceptance list for Livraison A, run once as a whole rather than
