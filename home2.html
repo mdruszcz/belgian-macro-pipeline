@@ -63,13 +63,6 @@
   .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
   .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%}
   .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
-  .searchbox{
-    display:flex; align-items:center; gap:8px; flex:1; max-width:330px;
-    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-    padding:7px 12px; background:var(--bp-bg); margin-left:auto;
-  }
-  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
-  .searchbox svg{color:var(--bp-text-faint); flex:none}
   .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
 
   /* ---- hero ---- */
@@ -138,6 +131,12 @@
      .bp-shell--navy already means elsewhere in layout.css. */
   .hero-map .swatches div{border-color:rgba(255,255,255,.2)}
   .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage{color:rgba(255,255,255,.6)}
+  .hero-map .map-tip{
+    background:var(--bp-navy-surface); border-color:var(--bp-navy-border);
+    color:var(--bp-navy-text); box-shadow:0 8px 24px rgba(0,0,0,.32);
+  }
+  .hero-map .map-tip .v{color:var(--bp-navy-text)}
+  .hero-map .map-tip .m{color:var(--bp-navy-text-muted)}
   .zoombtns{display:flex; flex-direction:column; gap:4px; position:absolute; top:var(--bp-space-4); right:var(--bp-space-4); z-index:2}
   .zoombtns button{
     width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
@@ -285,7 +284,6 @@
        inner .wrap, so the same rule has to reach that. */
     .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
     .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
-    .searchbox{max-width:none; margin-left:0; order:2; flex:1}
   }
   @media (max-width:680px){
     .hero h1{font-size:2rem}
@@ -301,15 +299,14 @@
   /* ---- home2 high-fidelity composition ---------------------------------
      Values and map geometry come from the published payloads; only
      composition and presentation are specialised here. */
-  .home2 .wrap{max-width:1096px; padding-left:14px; padding-right:14px}
-  .home2 .bp-topbar{height:51px; padding:5px 0}
+  .home2 .wrap{max-width:1400px; padding-left:14px; padding-right:14px}
+  .home2 .bp-topbar{min-height:64px; padding:10px 0}
   .home2 .bp-topbar .wrap{gap:22px; flex-wrap:nowrap}
   .home2 .bp-logo-mark{width:24px; height:28px}
   .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
-  .home2 .bp-tagline{font-size:8px; line-height:1.1}
-  .home2 .bp-nav{gap:21px; font-size:10px}
-  .home2 .searchbox{max-width:310px; padding:6px 10px}
-  .home2 .searchbox input,.home2 .langpick{font-size:10px}
+  .home2 .bp-tagline{font-size:11px; line-height:1.2}
+  .home2 .bp-nav{gap:var(--bp-space-5); font-size:var(--bp-text-small)}
+  .home2 .langpick{margin-left:auto; font-size:var(--bp-text-small)}
 
   .home2 .hero{
     min-height:390px;
@@ -440,7 +437,6 @@
   @media (max-width:768px){
     .home2 .bp-topbar .wrap{flex-wrap:wrap}
     .home2 .bp-nav{order:3; flex-basis:100%}
-    .home2 .searchbox{order:2; max-width:none; margin-left:auto}
   }
   @media (max-width:640px){
     .home2 .hero h1{font-size:2rem}
@@ -473,11 +469,6 @@
       <a href="micro.html" data-t="navMicro">Micro</a>
       <a href="map.html" data-t="navMaps">Maps</a>
     </nav>
-    <label class="searchbox">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
-      <datalist id="communeList"></datalist>
-    </label>
     <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
       <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
     </select>
@@ -1106,23 +1097,6 @@
     });
   }
 
-  /* ---- commune search --------------------------------------------------- */
-  function wireSearch(){
-    var input = document.getElementById('communeSearch');
-    var list = document.getElementById('communeList');
-    if(!state.map) return;
-    list.innerHTML = '';
-    state.map.features.forEach(function(f){
-      var o = document.createElement('option');
-      o.value = f.name + ' (' + f.nis + ')';
-      list.appendChild(o);
-    });
-    input.addEventListener('change', function(){
-      var m = /\((\d{4,5})\)\s*$/.exec(input.value);
-      if(m) window.location.href = 'commune.html?nis=' + m[1];
-    });
-  }
-
   /* ---- boot ------------------------------------------------------------- */
   async function init(){
     document.getElementById('langPick').addEventListener('change', function(e){
@@ -1209,7 +1183,6 @@
     document.getElementById('zoomOut').onclick = function(){ state.map.zoomBy(1.4); };
     document.getElementById('mapIndicator').addEventListener('change', function(e){ drawIndicator(e.target.value); });
 
-    wireSearch();
     renderThumbs();
 
     var opening = (state.sections.headlines || [])[0];
