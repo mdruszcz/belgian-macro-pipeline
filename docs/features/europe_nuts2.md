@@ -1,12 +1,98 @@
 # Feature: Europe panel — NUTS 2 choropleth (GDP per capita PPS, unemployment, population)
 
-Status: **implemented, batch B2** (2026-09-14) — all three indicators (GDP per capita PPS,
-population, unemployment rate) loaded and published. Unemployment was blocked in PR #174; a
-maintainer decision the same day (empty low-reliability cells are `suppressed`) unblocked it in a
-follow-up PR — see "Unemployment unblocked, 2026-09-14" below.
+Status: **implemented, batch B3** (2026-09-14) — the NUTS 2 map itself, in Macro's Europe
+panel, all three indicators live: GDP per capita PPS, population and unemployment rate (the
+last unblocked by a maintainer decision the same day, `suppressed` for a withheld reading —
+see "Unemployment unblocked" below) all render as one choropleth, switchable from the
+indicator select. Nothing is disabled today; the indicator-select-disables-a-blocked-entry
+code path is still there (CLAUDE.md rule 13 — a future gap must still be shown, not hidden)
+but has no real case to exercise it at the moment. PR: this one. B2 (payloads/geometry) plus
+its unemployment follow-up are unchanged by B3 — see "Measured at load, batch B3" below for
+what B3 itself added.
 Issue: none yet (this document is what the maintainer approved before one is opened)
-Branch: feat/europe-nuts2-spec (B1, spec) → feat/europe-nuts2-pipeline (B2, implementation, PR
-#174) → feat/europe-nuts2-unemployment (unemployment follow-up)
+Branch: feat/europe-nuts2-spec (B1, spec) → feat/europe-nuts2-pipeline (B2, payloads, PR #174)
+→ feat/europe-nuts2-unemployment (unemployment follow-up) → feat/europe-nuts2-map (B3, the map)
+
+## Measured at load, batch B3 (2026-09-14)
+
+**Library options that stop every default remote request** (assets/belpulse/europe_map.js,
+verified against the vendored bundle's own code, not assumed — see that file's own comments
+for the exact grepped evidence):
+
+| Default request the bundle makes | What stops it |
+|---|---|
+| GISCO/Nuts2json geometry (`ec.europa.eu`/`raw.githubusercontent.com`) | `nuts2jsonBaseURL` set to a uniquely-tagged sentinel string, answered by a narrow, temporary `window.fetch` shim from the SAME `public/data/geo/nuts2/2024/2.json` this file already fetched itself (for region names) — one real network read, not two |
+| GISCO world-basemap (`world-topo-2024-60M-4326.json`, `WORLD_4326.json`) | never reached: gated behind `geo === 'WORLD'` in the bundle, and `geo` is always `'EUR'` here |
+| GISCO euronym place-name labels | never reached: gated behind a `placenames_` flag this file never sets |
+| Eurostat statistics API | never reached: `.stat({customData: …})` only, never `{eurostatDatasetCode: …}` — the only thing that triggers the library's own remote-stats call |
+| Per-territory inset maps (Canaries, Guadeloupe, Azores, …) | `insets: false` — those regions are exactly the batch's own `no_outline` list and are never fetched |
+
+Verified empirically too, not just by config: `tests/test_europe_panel.py`'s
+`test_opening_the_panel_requests_only_same_origin_or_fonts` records every network request a
+real browser makes after opening the panel and fails on anything outside this origin or
+`fonts.googleapis.com`/`fonts.gstatic.com` — passing, with the real vendored bundle and the
+real committed payloads, not a mock.
+
+**Two library bugs found and worked around, not fixed upstream (EUPL-1.2, vendored file never
+patched — CLAUDE.md's "do not patch the minified bundle" rule):**
+1. The built `<svg>` carries no `viewBox` for this `geo:'EUR'`/`"choropleth"` combination, only
+   fixed pixel `width`/`height` attributes. Europe's own responsive CSS (`width:100%;
+   height:auto`, for the 390px requirement) then resizes the SVG's box without remapping the
+   coordinate space the regions are drawn in, so every region renders far outside the visible,
+   clipped box — measured directly (a region's `getBoundingClientRect()` landing hundreds of
+   pixels below the SVG's own box, overlapping the legend enough to make it un-clickable in a
+   real browser, not just visually wrong). `europe_map.js` sets the `viewBox` itself, once,
+   from the exact width/height just configured.
+2. `.build()` is asynchronous — its own `onBuild` callback is the real "the map is finished"
+   signal, not `.build()` returning. Attaching click/hover/keyboard handlers (or reading
+   `.svg_`/`.__zoomBehavior` for the zoom buttons) right after the `.build()` call, rather than
+   inside `onBuild`, attaches them to nothing: measured with a real click landing on a
+   freshly-drawn but not-yet-wired region and doing nothing at all.
+
+**Zoom and keyboard:** the library ships zero keyboard handling (grepped: no `keydown` or
+`tabindex` anywhere in the bundle) and its own zoom buttons are plain SVG `<g>` elements, not
+real `<button>`s. `zoomButtons: false` turns those off; three real, focusable `<button>`
+elements call the exact same internal d3-zoom behaviour (`map.svg_`/`map.__zoomBehavior`,
+read off the map instance itself — undocumented property names, but the same ones the
+library's own (removed) buttons used, verified by reading the vendored bundle's own source,
+pinned to this exact vendored version) so keyboard and mouse zoom always agree. Reset replays
+the identity transform captured right after the first successful build, before any
+interaction — no reconstruction of a d3 "zoom identity" object attempted.
+
+**Measured, a local static server (no real network latency to Eurostat/GISCO — see caveat
+below):**
+
+| | |
+|---|---|
+| Vendored bundle size | 1,219,896 bytes (1.16 MiB), `eurostatmap.min.js`; `323.eurostatmap.min.js` (13,589 bytes) vendored too but never requested in practice — see `assets/vendor/eurostat-map/VERSION` |
+| Panel click → fully rendered map (legend populated, regions coloured and wired) | ~600 ms, this machine, localhost |
+| SVG region count | 292 (matches the committed geometry's own `nutsrg` object exactly) |
+
+The panel-open timing is real elapsed time in a real Chromium instance, but over `127.0.0.1`
+with no TLS handshake and no real network round-trip for the 1.16 MiB bundle — a first-time
+reader on a real connection will see the bundle's OWN download time added on top of this
+(GitHub Pages, not measured here). It is never fetched more than once per page load (cached by
+the browser after that), and never at all for a reader who never opens the Europe panel.
+
+**Classification:** `classificationMethod: 'threshold'` with `thresholds` set to the payload's
+own precomputed `class_breaks[year]` (never recomputed in the browser) — identical bands in
+every theme; only the `colors` array (read from `--ramp-0..6` at render time, spread across
+however many classes this year's breaks produce via the same `MapUI.colourIndex` spreading
+formula `assets/commune_map.js` already uses for the commune map) changes with theme, so a
+theme switch changes colour without ever changing which band a region is in.
+
+**States rendered, matching what the real committed payloads actually carry** (not the full
+five-state vocabulary the spec's own worked example showed — `unavailable`/`na` do not appear
+in any of the three loaded payloads today): a real number in its own `class_breaks` band;
+`missing` (no row this year — the library's own no-data bucket, `noDataFillStyle` read from
+`--nodata`); `suppressed` (payload `s: "suppressed"` — real in `UNEMPLOYMENT_RATE_NUTS2` since
+its own unblocking, e.g. `DE22` in 2020/2022/2023, per "Unemployment unblocked" below — painted
+its own colour from the existing `--bp-chart-8` token, with its own legend row shown only when
+at least one region actually carries it this year); licence-excluded (`excluded_by_licence`,
+painted from the existing `--bp-border` token, its own legend row shown whenever the list is
+non-empty — currently always `["XK00"]`). `no_outline` regions (7 for GDP, 26 for population,
+23 for unemployment) have no geometry at all and are listed by code in a line under the map
+instead of a fill.
 
 ## Measured at load, 2026-09-14 (batch B2)
 

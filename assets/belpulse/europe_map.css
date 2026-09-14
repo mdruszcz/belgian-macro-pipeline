@@ -1,0 +1,156 @@
+/* Europe panel: NUTS 2 regional map (Batch B3, docs/features/europe_nuts2.md).
+ *
+ * Layout only -- no indicator id, no figure, no colour invented here. The
+ * choropleth ramp itself is assets/commune_map.css's `--ramp-*`/`--nodata`
+ * tokens (linked from macro.html alongside this file), so the Europe map
+ * and the commune map can never drift onto two different palettes; this
+ * file adds two more EXISTING-token reuses for the two categories the
+ * commune ramp has no concept of (`--bp-chart-8`, a neutral grey already in
+ * assets/belpulse/tokens.css, for "suppressed by the source"; `--bp-border`
+ * for "excluded by licence") rather than inventing new hex values.
+ *
+ * eurostat-map (assets/vendor/eurostat-map/) injects its own CSS for the
+ * SVG's internal drawing (region fill, hover cursor, zoom-button chrome) --
+ * this file never repeats or overrides that, only the page chrome around it.
+ */
+
+/* This panel's own choropleth ramp -- scoped to .bp-europe-map, so
+   assets/commune_map.css's own :root-level --ramp-*/--nodata (used by
+   map.html/communes.html) is completely untouched outside it. The seven
+   hex values are copied VERBATIM from that file's own `[data-theme="paper"]`
+   block, not invented (CLAUDE.md rule 36): per lead review of the WIP
+   screenshot, this panel is part of the unification redesign and reads as
+   the mockup's cream-to-blue ramp in every theme, unlike the older amber
+   commune map. Dark simply runs the SAME seven values back to front (the
+   same "pale = more on a dark ground" convention commune_map.css's own
+   amber ramp already uses for its dark theme) -- no colour invented for
+   dark either, only reordered. */
+.bp-europe-map{
+  --ramp-0:#eef2f7; --ramp-1:#d3dff0; --ramp-2:#aec4e3; --ramp-3:#82a3d2;
+  --ramp-4:#5a80bd; --ramp-5:#3c60a0; --ramp-6:#233f74;
+  --nodata:#e7ded0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bp-europe-map{
+    --ramp-0:#233f74; --ramp-1:#3c60a0; --ramp-2:#5a80bd; --ramp-3:#82a3d2;
+    --ramp-4:#aec4e3; --ramp-5:#d3dff0; --ramp-6:#eef2f7;
+    --nodata:#2a3550;
+  }
+}
+:root[data-theme="dark"] .bp-europe-map{
+  --ramp-0:#233f74; --ramp-1:#3c60a0; --ramp-2:#5a80bd; --ramp-3:#82a3d2;
+  --ramp-4:#aec4e3; --ramp-5:#d3dff0; --ramp-6:#eef2f7;
+  --nodata:#2a3550;
+}
+
+.bp-europe-map{
+  display:grid; grid-template-columns:minmax(0,7fr) minmax(240px,3fr);
+  gap:var(--bp-space-5); margin:var(--bp-space-5) 0 var(--bp-space-6);
+}
+@media (max-width:900px){
+  .bp-europe-map{grid-template-columns:1fr}
+}
+
+.bp-europe-map__main{
+  min-width:0; background:var(--bp-surface); border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-card); padding:var(--bp-space-5);
+}
+
+.bp-europe-map__controls{
+  display:flex; flex-wrap:wrap; gap:var(--bp-space-3); align-items:flex-end;
+  margin-bottom:var(--bp-space-4);
+}
+.bp-europe-map__field{display:flex; flex-direction:column; gap:4px; min-width:0}
+.bp-europe-map__field label{font-size:12px; color:var(--bp-text-muted)}
+.bp-europe-map__field select{
+  font:inherit; font-size:var(--bp-text-small,13px); padding:7px 10px;
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  background:var(--bp-surface); color:var(--bp-text); max-width:100%;
+}
+.bp-europe-map__field select:disabled{opacity:.55; cursor:not-allowed}
+.bp-europe-map__blocked-reason{
+  flex:1 1 220px; font-size:12px; color:var(--bp-text-muted); align-self:center;
+}
+
+.bp-europe-map__stage{position:relative; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden; background:var(--bp-surface-alt)}
+.bp-europe-map__stage svg{display:block; width:100%; height:auto}
+/* The library's own default sea/background-country fills (#fff / #e1e1e1,
+   its own bundled CSS, injected as a <style> tag at runtime) are fixed
+   colours with no theme awareness at all -- left alone, the water and the
+   non-NUTS backdrop stay paper-white even in the dark theme, a stark
+   rectangle against the rest of the panel. Reusing existing tokens here
+   (never a new hand-picked hex) keeps that backdrop in the same theme as
+   everything around it; !important is needed because the vendor stylesheet
+   is inserted into <head> at runtime, after this file, so equal-specificity
+   rules would otherwise win by source order. */
+.bp-europe-map__stage .em-sea{fill:var(--bp-surface-alt) !important}
+.bp-europe-map__stage #em-cntrg path{fill:var(--bp-surface-alt) !important}
+/* Every path the library draws gets a real hover/focus affordance -- the
+   keyboard equivalent to a mouse hover this batch's own brief requires.
+   eurostat-map ships no tabindex/keydown handling at all (grepped from the
+   vendored bundle: zero matches for keydown/tabindex), so both are added
+   here, in JS (europe_map.js) and CSS respectively. */
+.bp-europe-map__stage path[id^="em-nutsrg-"]{outline:none}
+.bp-europe-map__stage path[id^="em-nutsrg-"]:focus-visible{
+  stroke:var(--bp-accent); stroke-width:1.6px;
+}
+
+.bp-europe-map__zoom{
+  position:absolute; top:var(--bp-space-3); right:var(--bp-space-3);
+  display:flex; flex-direction:column; gap:1px; z-index:2;
+}
+.bp-europe-map__zoom button{
+  width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+  font:inherit; font-size:16px; line-height:1; border:1px solid var(--bp-border);
+  background:var(--bp-surface); color:var(--bp-text); cursor:pointer; padding:0;
+}
+.bp-europe-map__zoom button:hover{background:var(--bp-surface-alt)}
+.bp-europe-map__zoom button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
+
+.bp-europe-map__tooltip{
+  position:fixed; z-index:20; pointer-events:none; max-width:240px;
+  background:var(--bp-navy-bg); color:var(--bp-navy-text); border-radius:var(--bp-radius-control);
+  padding:7px 10px; font-size:12px; line-height:1.4; box-shadow:var(--bp-shadow-card);
+}
+.bp-europe-map__tooltip[hidden]{display:none}
+.bp-europe-map__tooltip .name{font-weight:600}
+/* Belt-and-suspenders alongside the empty textFunction (europe_map.js's
+   own `tooltip` config): the library's own tooltip <div> (id
+   "em-tooltip-{containerId}") is created unconditionally at build time,
+   before it ever knows its content will be empty -- this stops it from
+   ever being visible even for one frame, on top of never having text. */
+[id^="em-tooltip-"]{display:none !important}
+
+.bp-europe-map__legend{
+  display:flex; flex-wrap:wrap; gap:var(--bp-space-4); align-items:flex-start;
+  margin-top:var(--bp-space-4); padding-top:var(--bp-space-4); border-top:1px solid var(--bp-border);
+}
+.bp-europe-map__legend-scale{display:flex; flex-wrap:wrap; gap:2px; align-items:flex-end}
+.bp-europe-map__legend-row{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--bp-text-muted)}
+.bp-europe-map__legend-swatch{width:16px; height:16px; border-radius:3px; flex:none; border:1px solid var(--bp-border)}
+/* The licence-excluded swatch, hatched the same way the map's own fill for
+   those regions is (a real SVG <pattern>, europe_map.js's own
+   ensureHatchPattern) -- a CSS approximation since a legend swatch is a
+   plain <span>, not SVG, but the same diagonal-stripe read either way, so
+   "excluded" never looks like a slightly-darker "missing" at a glance. */
+.bp-europe-map__legend-swatch--hatched{
+  background-image:repeating-linear-gradient(45deg, var(--bp-text-faint) 0, var(--bp-text-faint) 1px, transparent 1px, transparent 4px);
+  background-color:var(--bp-surface-alt);
+}
+.bp-europe-map__meta{flex:1 1 220px; font-size:12px; color:var(--bp-text-muted); line-height:1.5}
+.bp-europe-map__no-outline{margin-top:var(--bp-space-2); font-size:11px; color:var(--bp-text-faint)}
+
+.bp-europe-map__side{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  padding:var(--bp-space-5); min-width:0; align-self:start;
+}
+.bp-europe-map__side h3{margin:0 0 2px; font-size:1rem}
+.bp-europe-map__side .code{font-size:12px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4)}
+.bp-europe-map__side .value{font-size:1.6rem; font-weight:600; font-family:var(--bp-font-display); margin:0}
+.bp-europe-map__side .value-meta{font-size:12px; color:var(--bp-text-muted); margin:2px 0 var(--bp-space-4)}
+.bp-europe-map__side .hist-label{font-size:12px; color:var(--bp-text-muted); margin:0 0 6px}
+.bp-europe-map__side canvas{width:100%; display:block}
+.bp-europe-map__side .about{font-size:12px; color:var(--bp-text-muted); margin-top:var(--bp-space-4); line-height:1.5}
+.bp-europe-map__side .prompt{font-size:13px; color:var(--bp-text-muted)}
+
+.bp-europe-map__region-select{margin-top:var(--bp-space-3)}

@@ -111,10 +111,18 @@ MapUI.tickLabel = function(num, unit, compactAxis, lang){
   return body;
 };
 
-MapUI.unitSuffix = function(unit){
+MapUI.unitSuffix = function(unit, lang){
   const u = (unit || '').toLowerCase();
   if(!u || u === 'count' || u === 'eur' || u === 'eur_per_inhabitant' || u.startsWith('percent')) return '';
-  return ' ' + unit.replace(/_/g, ' ');
+  // Delegates the actual wording to unitLabel() below -- ONE unit
+  // vocabulary, not two, and a trilingual one now that a caller (the
+  // Europe NUTS 2 map, Batch B3) needs "pps_per_inhabitant"/"persons"
+  // read in the reader's own language rather than the raw English code
+  // with underscores turned to spaces. `lang` is optional and defaults
+  // through unitLabel/I18N.t to English, so every existing call site that
+  // never passed one keeps behaving exactly as before.
+  const label = MapUI.unitLabel(unit, lang);
+  return label ? ' ' + label : '';
 };
 
 /* A unit AS ITS OWN WORD, independent of any number beside it -- "%", "pp",
@@ -140,6 +148,13 @@ MapUI.unitLabel = function(unit, lang){
   if(u === 'eur') return '€';
   if(u === 'eur_per_inhabitant') return '€ / hab.';
   if(u.startsWith('percent')) return '%';
+  // Batch B3 (docs/features/europe_nuts2.md): the two Eurostat NUTS 2
+  // units with no earlier entry here. Trilingual per CLAUDE.md rule 7,
+  // added HERE (the shared vocabulary) rather than in the Europe map's
+  // own file, so a second map reading the same unit code never has to
+  // duplicate the wording.
+  if(u === 'pps_per_inhabitant') return MapUI.text(lang, 'unitPpsPerInhabitant');
+  if(u === 'persons') return MapUI.text(lang, 'unitPersons');
   return unit.replace(/_/g, ' ');
 };
 
