@@ -471,6 +471,10 @@ def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
         # only validates the series below carry data.
         "panels": layout.get("panels") or [],
         "extra_lists": layout.get("extra_lists") or [],
+        # Batch A1.4b: one real history chart above each of the Prix/Emploi/
+        # Conjoncture list cards -- same {id, label, series} shape as
+        # extra_lists, validated the same way below.
+        "panel_charts": layout.get("panel_charts") or [],
         # Batch A1.3: the two indicator ids home2.html's hero draws, so that
         # page carries no indicator id of its own either (rule 2/24).
         "hero": layout.get("hero") or [],
@@ -488,6 +492,9 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
     extra_series: list[str] = []
     for item in layout.get("extra_lists") or []:
         extra_series.extend(item.get("series") or [])
+    panel_chart_series: list[str] = []
+    for item in layout.get("panel_charts") or []:
+        panel_chart_series.extend(item.get("series") or [])
     named = [
         *(layout.get("kpis") or []),
         *([history["series"]] if history.get("series") else []),
@@ -495,6 +502,7 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
         *([contributions["whole"]] if contributions.get("whole") else []),
         *(contributions.get("parts") or []),
         *extra_series,
+        *panel_chart_series,
         *(layout.get("hero") or []),
     ]
     unknown = sorted({i for i in named if i not in known})

@@ -132,7 +132,76 @@ def test_every_series_the_layout_names_exists_in_the_national_payload():
     named.add(layout["contributions"]["whole"])
     for item in layout.get("extra_lists") or []:
         named |= set(item["series"])
+    for item in layout.get("panel_charts") or []:
+        named |= set(item["series"])
     assert named <= published, f"layout names series the payload lacks: {sorted(named - published)}"
+
+
+# --- BATCH A1.4b: history charts inside Prix/Emploi/Conjoncture ---------------
+
+
+def test_every_panel_chart_series_exists_in_the_national_payload():
+    """Same guarantee as extra_lists, checked on its own: a panel chart
+    naming a series nothing provides would render as an empty canvas, not
+    caught by the combined check above if that one were ever loosened."""
+    national = REPO / "public" / "data" / "national.json"
+    if not national.exists():
+        pytest.skip("site payloads not built")
+    published = set(json.loads(national.read_text(encoding="utf-8"))["indicators"])
+    layout = _layout()
+    charts = layout.get("panel_charts") or []
+    assert charts, "no panel_charts declared"
+    for item in charts:
+        assert item["series"], f"panel chart {item['id']!r} names no series"
+        missing = set(item["series"]) - published
+        assert (
+            not missing
+        ), f"panel chart {item['id']!r} names series the payload lacks: {sorted(missing)}"
+
+
+def test_panel_chart_labels_are_trilingual():
+    for item in _layout().get("panel_charts") or []:
+        assert set(item["label"]) == set(LANGS), item
+        assert all(str(item["label"][lang]).strip() for lang in LANGS), item
+
+
+def test_every_panel_chart_id_is_used_by_exactly_one_panel_card():
+    layout = _layout()
+    chart_ids = {item["id"] for item in layout.get("panel_charts") or []}
+    card_ids: set[str] = set()
+    for panel in layout["panels"]:
+        card_ids |= set(panel["cards"])
+    missing = chart_ids - card_ids
+    assert not missing, f"panel_charts with no panel card: {missing}"
+
+
+def test_every_panel_chart_has_a_canvas_in_its_own_article_in_macro_html():
+    """Each `panel_charts[].id` must both exist as its own `<article>` and
+    carry a `<canvas>` -- the chart could not otherwise draw at all."""
+    html = _html()
+    for item in _layout().get("panel_charts") or []:
+        assert f'id="{item["id"]}"' in html, f"no element for panel chart {item['id']!r}"
+        m = re.search(
+            r'<article\b[^>]*id="' + re.escape(item["id"]) + r'"[^>]*>([\s\S]*?)</article>', html
+        )
+        assert m, f"no <article id={item['id']!r}> in macro.html"
+        assert "<canvas" in m.group(1), f"panel chart {item['id']!r} has no <canvas>"
+
+
+def test_panel_charts_sit_above_their_matching_list_card():
+    """The brief: the history chart goes ABOVE the existing list, the list
+    stays -- checked by markup order inside each of the three panels this
+    batch touches, not just presence of both."""
+    html = _html()
+    pairs = {
+        "prices-chart": "prices",
+        "employment-chart": "employment",
+        "business-cycle-chart": "business-cycle",
+    }
+    for chart_id, list_id in pairs.items():
+        chart_pos = html.index(f'id="{chart_id}"')
+        list_pos = html.index(f'id="{list_id}"')
+        assert chart_pos < list_pos, f"{chart_id} does not sit above {list_id}"
 
 
 # --- BATCH A1.4: the seven selectable panels ----------------------------------

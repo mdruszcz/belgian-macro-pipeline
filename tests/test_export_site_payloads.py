@@ -243,6 +243,34 @@ def test_national_sections_layout_passes_through_the_declared_hero_series(tmp_pa
         _check_national_sections(layout, known={"A"})
 
 
+def test_national_sections_layout_passes_through_and_checks_panel_charts(tmp_path):
+    """Batch A1.4b: macro.html's Prix/Emploi/Conjoncture history charts pick
+    their series from `panel_charts:` in config/national_sections.yaml, same
+    shape and same guarantee as `extra_lists` -- a series nothing publishes
+    must be refused before a reader can discover an empty canvas."""
+    layout_path = tmp_path / "national_sections.yaml"
+    layout_path.write_text(
+        "kpis: [A]\n"
+        "panel_charts:\n"
+        "  - id: a-chart\n"
+        "    label: {en: A, fr: A, nl: A}\n"
+        "    series: [A]\n"
+        "  - id: ab-chart\n"
+        "    label: {en: AB, fr: AB, nl: AB}\n"
+        "    series: [A, B]\n",
+        encoding="utf-8",
+    )
+    layout = _national_sections(layout_path)
+    assert layout["panel_charts"] == [
+        {"id": "a-chart", "label": {"en": "A", "fr": "A", "nl": "A"}, "series": ["A"]},
+        {"id": "ab-chart", "label": {"en": "AB", "fr": "AB", "nl": "AB"}, "series": ["A", "B"]},
+    ]
+
+    _check_national_sections(layout, known={"A", "B"})
+    with pytest.raises(ValueError, match=r"\['B'\]"):
+        _check_national_sections(layout, known={"A"})
+
+
 def test_geographies_metadata_ancestor_walk_resolves_to_a_real_region(tmp_path):
     db_path = tmp_path / "db.sqlite"
     _geo_db(db_path)

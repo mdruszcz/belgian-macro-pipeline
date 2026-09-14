@@ -13,11 +13,13 @@ from __future__ import annotations
 
 import functools
 import http.server
+import json
 import socketserver
 import threading
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -67,6 +69,20 @@ def browser(chromium):
     """The session's Chromium (tests/conftest.py); each test opens its own
     context so nothing but the process is shared between tests."""
     return chromium
+
+
+def _national() -> dict:
+    return json.loads(
+        (REPO_ROOT / "public" / "data" / "national.json").read_text(encoding="utf-8")
+    )["indicators"]
+
+
+def _panel_chart(chart_id: str) -> dict:
+    layout = yaml.safe_load(
+        (REPO_ROOT / "config" / "national_sections.yaml").read_text(encoding="utf-8")
+    )
+    charts = {item["id"]: item for item in layout.get("panel_charts") or []}
+    return charts[chart_id]
 
 
 def test_a_legacy_anchor_resolves_to_its_panel_and_rewrites_the_url(browser, site):
@@ -250,5 +266,138 @@ def test_loading_the_page_fresh_does_not_move_focus(browser, site):
         page.wait_for_selector("#apercu:not([hidden])")
         focused_tag = page.evaluate("document.activeElement && document.activeElement.tagName")
         assert focused_tag != "H2", "the default panel's heading stole focus on load"
+    finally:
+        context.close()
+
+
+# --- BATCH A1.4b: history charts inside Prix/Emploi/Conjoncture ---------------
+
+#: {panel id: (chart card id, canvas id)}, matching macro.html's camelId() of
+#: each config/national_sections.yaml `panel_charts[].id`.
+PANEL_CHARTS = {
+    "prix": ("prices-chart", "pricesChartCanvas"),
+    "emploi": ("employment-chart", "employmentChartCanvas"),
+    "conjoncture": ("business-cycle-chart", "businessCycleChartCanvas"),
+}
+
+
+def _open_panel_chart(browser, site, panel_id, canvas_id, lang=None):
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    if lang:
+        # Pinned rather than left to the browser's own locale, the same way
+        # tests/test_charts_tooltip.py pins home2.html's -- the value this
+        # test independently recomputes below has to be in the SAME language
+        # the page actually rendered, on every machine this runs on.
+        context.add_init_script(
+            f"try{{localStorage.setItem('belpulse-lang', '{lang}');}}catch(e){{}}"
+        )
+    page = context.new_page()
+    page.goto(f"{site}/macro.html", wait_until="load")
+    page.wait_for_selector("#apercu:not([hidden])")
+    page.click(f'.bp-sidebar-nav a[href="#{panel_id}"]')
+    page.wait_for_selector(f"#{panel_id}:not([hidden])")
+    page.wait_for_function(f"document.getElementById('{canvas_id}').width > 0")
+    # Same "wait for the real rendered width, not just a non-zero one" as the
+    # GDP-history canvas test above -- the stale-300px-fallback bug would
+    # also produce an early non-zero width.
+    page.wait_for_function(
+        "(function(){"
+        f"var c = document.getElementById('{canvas_id}');"
+        "var wrap = c.parentElement;"
+        "return c.getBoundingClientRect().width >= wrap.clientWidth * 0.9;"
+        "})()"
+    )
+    return context, page
+
+
+@pytest.mark.parametrize("panel_id", ["prix", "emploi", "conjoncture"])
+def test_a_panel_charts_canvas_fills_its_cards_inner_width(browser, site, panel_id):
+    chart_id, canvas_id = PANEL_CHARTS[panel_id]
+    context, page = _open_panel_chart(browser, site, panel_id, canvas_id)
+    try:
+        canvas_width = page.evaluate(
+            f"document.getElementById('{canvas_id}').getBoundingClientRect().width"
+        )
+        wrap_width = page.evaluate(
+            f"document.getElementById('{canvas_id}').parentElement.clientWidth"
+        )
+        assert (
+            canvas_width >= wrap_width * 0.9
+        ), f"{chart_id}'s canvas is {canvas_width}px wide inside a {wrap_width}px wrapper"
+    finally:
+        context.close()
+
+
+def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, site):
+    chart_id, canvas_id = PANEL_CHARTS["prix"]
+    series = _panel_chart(chart_id)["series"]
+    assert series == ["HICP"], series
+    entry = _national()["HICP"]
+    periods = sorted(entry["periods"].keys())
+    last_period = periods[-1]
+    last_value = entry["periods"][last_period]["value"]
+    assert last_value is not None, "fixture assumption broken: HICP's last period has no value"
+
+    context, page = _open_panel_chart(browser, site, "prix", canvas_id, lang="en")
+    try:
+        canvas = page.locator(f"#{canvas_id}")
+        box = canvas.bounding_box()
+        assert box, "HICP canvas has no layout box"
+        page.mouse.move(box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
+        page.wait_for_function(
+            "document.querySelector('.bp-chart-tip') && "
+            "!document.querySelector('.bp-chart-tip').hidden",
+            timeout=5000,
+        )
+        tip_text = page.locator(".bp-chart-tip").inner_text()
+        assert last_period in tip_text, f"tooltip missing period: {tip_text!r}"
+
+        # Independently formatted in the SAME runtime/locale the tooltip
+        # uses (pinned to 'en' above), the same way MapUI.formatValue does
+        # it (assets/commune_map.js): a DECLARED decimals count is a
+        # minimum as well as a maximum, and HICP's unit is "percent_yy" --
+        # a trailing "%" MapUI adds, not a raw unit code (rule 7).
+        decimals = entry.get("decimals", 1)
+        expected_value_text = (
+            page.evaluate(
+                "([v, d]) => v.toLocaleString('en', {minimumFractionDigits: d, maximumFractionDigits: d})",
+                [last_value, decimals],
+            )
+            + "%"
+        )
+        assert (
+            expected_value_text in tip_text
+        ), f"tooltip missing value {expected_value_text!r}: {tip_text!r}"
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("panel_id", ["prix", "emploi", "conjoncture"])
+def test_a_panel_charts_data_table_lists_every_drawn_period(browser, site, panel_id):
+    chart_id, canvas_id = PANEL_CHARTS[panel_id]
+    series = _panel_chart(chart_id)["series"]
+    national = _national()
+    # All the periods any drawn series carries -- BPCharts aligns every
+    # series on the UNION of their periods, so a period only one of the two
+    # Conjoncture series has still gets a row (the other becomes a gap).
+    all_periods: set[str] = set()
+    for code in series:
+        all_periods |= set(national[code]["periods"].keys())
+    assert all_periods, f"{chart_id}: no periods to check against"
+
+    context, page = _open_panel_chart(browser, site, panel_id, canvas_id)
+    try:
+        card = page.locator(f"#{chart_id}")
+        details = card.locator("details.bp-chart-data")
+        assert details.count() == 1, f"no data table for {chart_id}"
+        rows = details.locator("tbody tr")
+        expected_rows = len(all_periods) * len(series)
+        assert rows.count() == expected_rows, (
+            f"{chart_id}: table has {rows.count()} rows, expected {expected_rows} "
+            f"({len(series)} series x {len(all_periods)} aligned periods)"
+        )
+        table_text = details.locator("table").text_content()
+        for period in all_periods:
+            assert period in table_text, f"{chart_id}: period {period} missing from its data table"
     finally:
         context.close()
