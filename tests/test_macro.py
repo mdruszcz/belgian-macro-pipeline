@@ -130,7 +130,153 @@ def test_every_series_the_layout_names_exists_in_the_national_payload():
     named = set(layout["kpis"]) | set(layout["key_list"]) | set(layout["contributions"]["parts"])
     named.add(layout["history"]["series"])
     named.add(layout["contributions"]["whole"])
+    for item in layout.get("extra_lists") or []:
+        named |= set(item["series"])
     assert named <= published, f"layout names series the payload lacks: {sorted(named - published)}"
+
+
+# --- BATCH A1.4: the seven selectable panels ----------------------------------
+
+#: The anchors macro.html exposed before this batch -- every one of them must
+#: still resolve, via some panel's `legacy_anchors` (CLAUDE.md rule 31).
+OLD_ANCHORS = {
+    "overview",
+    "growth",
+    "key",
+    "drivers",
+    "international",
+    "public-finance",
+    "map",
+    "news",
+}
+
+
+_SECTION_TAG = re.compile(r"<section\b|</section>")
+
+
+def _panel_sections(html: str) -> dict[str, str]:
+    """Maps each `panels[].id` to the HTML of its `[data-panel]` section, so
+    a test can check containment without a real DOM parser. Finds the
+    MATCHING `</section>` with a real depth count over every `<section`/
+    `</section>` in between -- a panel nests a `<section class="row ...">`
+    (sometimes more than one, as siblings), so the first `</section>` found
+    after the panel opens is not reliably its own."""
+    sections: dict[str, str] = {}
+    for m in re.finditer(r'<section class="bp-panel" id="([^"]+)"[^>]*>', html):
+        start = m.end()
+        depth = 1
+        end = None
+        for tm in _SECTION_TAG.finditer(html, start):
+            if tm.group() == "</section>":
+                depth -= 1
+                if depth == 0:
+                    end = tm.start()
+                    break
+            else:
+                depth += 1
+        assert end is not None, f"unclosed <section> for panel {m.group(1)!r}"
+        sections[m.group(1)] = html[start:end]
+    return sections
+
+
+def test_every_panel_has_a_data_panel_section_in_macro_html():
+    html = _html()
+    sections = _panel_sections(html)
+    ids = [p["id"] for p in _layout()["panels"]]
+    assert ids, "no panels declared"
+    missing = [pid for pid in ids if pid not in sections]
+    assert not missing, f"panels with no <section data-panel> in macro.html: {missing}"
+
+
+def test_every_card_the_layout_lists_exists_inside_its_own_panel():
+    html = _html()
+    sections = _panel_sections(html)
+    for panel in _layout()["panels"]:
+        for card_id in panel["cards"]:
+            assert (
+                f'id="{card_id}"' in sections[panel["id"]]
+            ), f"card {card_id!r} is not inside panel {panel['id']!r}"
+
+
+def test_no_article_sits_outside_a_panel():
+    """Every card the page draws belongs to exactly one panel -- a card left
+    outside every `[data-panel]` section would always be visible, defeating
+    "exactly one panel is visible"."""
+    html = _html()
+    sections = _panel_sections(html)
+    inside = "".join(sections.values())
+    total_articles = len(re.findall(r"<article\b", html))
+    inside_articles = len(re.findall(r"<article\b", inside))
+    assert (
+        total_articles == inside_articles
+    ), f"{total_articles - inside_articles} <article> element(s) sit outside every panel"
+
+
+def test_every_old_anchor_is_covered_by_some_panels_legacy_anchors():
+    layout = _layout()
+    covered: set[str] = set()
+    for panel in layout["panels"]:
+        covered |= set(panel.get("legacy_anchors") or [])
+    missing = OLD_ANCHORS - covered
+    assert not missing, f"anchors from before this batch resolve nowhere: {sorted(missing)}"
+
+
+def test_the_sidebar_anchors_are_exactly_the_panel_ids():
+    html = _html()
+    nav_html = re.search(r'<ul class="bp-sidebar-nav"[^>]*>([\s\S]*?)</ul>', html).group(1)
+    anchors = set(re.findall(r'href="#([^"]+)"', nav_html))
+    ids = {p["id"] for p in _layout()["panels"]}
+    assert anchors == ids, (anchors, ids)
+
+
+def test_panel_labels_are_trilingual():
+    for panel in _layout()["panels"]:
+        assert set(panel["label"]) == set(LANGS), panel
+        assert all(str(panel["label"][lang]).strip() for lang in LANGS), panel
+
+
+def test_panel_empty_reasons_are_trilingual_where_present():
+    for panel in _layout()["panels"]:
+        reason = panel.get("empty_reason")
+        if reason is None:
+            continue
+        assert set(reason) == set(LANGS), panel
+        assert all(str(reason[lang]).strip() for lang in LANGS), panel
+
+
+def test_the_europe_panel_declares_an_empty_reason():
+    """The maintainer brief: Europe keeps its existing unavailable card and
+    additionally says, factually, that the regional map is planned."""
+    panels = {p["id"]: p for p in _layout()["panels"]}
+    assert "empty_reason" in panels["europe"], "europe has no empty_reason"
+
+
+def test_extra_list_labels_are_trilingual():
+    for item in _layout().get("extra_lists") or []:
+        assert set(item["label"]) == set(LANGS), item
+        assert all(str(item["label"][lang]).strip() for lang in LANGS), item
+
+
+def test_every_extra_list_id_is_used_by_exactly_one_panel_card():
+    layout = _layout()
+    extra_ids = {item["id"] for item in layout.get("extra_lists") or []}
+    card_ids: set[str] = set()
+    for panel in layout["panels"]:
+        card_ids |= set(panel["cards"])
+    missing = extra_ids - card_ids
+    assert not missing, f"extra_lists with no panel card: {missing}"
+
+
+def test_panels_js_is_loaded_and_carries_no_indicator_id():
+    html = _html()
+    assert 'src="assets/belpulse/panels.js"' in html
+    panels_js = (REPO / "assets" / "belpulse" / "panels.js").read_text(encoding="utf-8")
+    national = REPO / "public" / "data" / "national.json"
+    if not national.exists():
+        pytest.skip("site payloads not built")
+    codes = set(json.loads(national.read_text(encoding="utf-8"))["indicators"])
+    named = sorted(code for code in codes if code in panels_js)
+    assert not named, f"panels.js names indicators directly: {named}"
 
 
 def test_the_page_renders_a_slot_for_every_unavailable_section():
