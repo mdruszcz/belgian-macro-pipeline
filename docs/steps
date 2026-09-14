@@ -1278,7 +1278,12 @@ How: Review Home2 and Macro at 390/768/1122px across every language x theme comb
 real payload data.
 Why: The maintainer's own delivery order gates the other five pages on the pilots looking right
 first, not on the code merely running.
- [BUILD] A3.1 -- the other five pages + Micro panels + Sources page
+ ✅ [BUILD] A3.1 -- the other five pages + Micro panels + Sources page (2026-09-14: PR #176 the Sources
+page driven by metadata/sources.json and explorer periods; PR #179 the shared header and footer on
+profiles, commune, map and micro, no-JavaScript links and 44px targets tested; PR #184 Micro as seven
+panels from config/micro_sections.yaml, Belgium row labelled from the interface strings rather than
+REFNIS's "ROYAUME"; PR #181 history charts in Macro's Prix, Emploi and Conjoncture panels; PR #185 a
+race in the Macro data-table test fixed)
 How: Apply the verified shared components (header/footer, themes, BPCharts tooltips) to Profils,
 Commune, Micro, Cartes and Sources; build Micro's seven rubriques the same way as Macro's.
 Why: The pattern proven on two pilots now has to cover the whole public site, not stay a two-page
