@@ -1394,7 +1394,7 @@ UNEMPLOYMENT_RATE_INSURED,"Unemployment rate (ONEM definition, annual average)",
 UNEMPLOYMENT_RATE_INSURED,"Unemployment rate (ONEM definition, annual average)",2023,6.62,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
 UNEMPLOYMENT_RATE_INSURED,"Unemployment rate (ONEM definition, annual average)",2024,6.25,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
 UNEMPLOYMENT_RATE_INSURED,"Unemployment rate (ONEM definition, annual average)",2025,6.74,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
-UNEMPLOYMENT_RATE_INSURED,"Unemployment rate (ONEM definition, annual average)",2026,5.28,P,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
+UNEMPLOYMENT_RATE_INSURED,"Unemployment rate (ONEM definition, annual average)",2026,5.05,P,percent,ONEM / RVA,2026-09-14T12:20:12.880627+00:00
 UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2025-01,6.71,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
 UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2025-02,6.74,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
 UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2025-03,6.93,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
@@ -1413,3 +1413,4 @@ UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)"
 UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2026-04,4.41,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
 UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2026-05,4.58,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
 UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2026-06,4.48,A,percent,ONEM / RVA,2026-09-12T19:12:26.779518+00:00
+UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",2026-07,3.63,A,percent,ONEM / RVA,2026-09-14T12:20:12.880627+00:00
