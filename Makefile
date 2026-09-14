@@ -164,12 +164,12 @@ builder:
 assemble:
 	$(PYTHON) scripts/build_staging_db.py --source-db $(COMMITTED_DB) --working-db $(DB) --stores $(STORES)
 
-## offload: the reverse of assemble, and the only target that writes
-## $(COMMITTED_DB). Dumps every in_db store from $(DB) to its committed CSV
-## and writes the committed database without those rows
+## offload: the reverse of assemble. Dumps every in_db store from $(DB) to its
+## committed CSV and writes $(COMMITTED_DB) without those rows
 ## (scripts/offload_stores.py). Refuses, changing nothing, if a committed row
 ## would be lost. NOT part of `all` -- only needed after `make fetch`, to
-## commit what was fetched; daily_fetch.yml runs it for CI.
+## commit what was fetched. The daily run (and `make dagster-daily`) calls the
+## same offload() as the last asset of its Dagster run, committed_stores.
 offload:
 	$(PYTHON) scripts/offload_stores.py --working-db $(DB) --committed-db $(COMMITTED_DB) --stores $(STORES)
 
@@ -230,17 +230,19 @@ dagster:
 	DAGSTER_HOME="$(DAGSTER_HOME)" $(PYTHON) -m dagster dev -m orchestration
 
 ## dagster-daily: the daily sequence through Dagster, exactly what
-## daily_fetch.yml runs -- assemble, fetch every source, then validate and
-## export ALWAYS, even when a source failed. Exit 0 all green, 3 exported with a
-## red source, 1 nothing publishable. Needs the network.
-## Never writes $(COMMITTED_DB): offload stays a separate step.
+## daily_fetch.yml runs -- assemble, fetch every source, then validate, export
+## and offload ALWAYS, even when a source failed. It WRITES $(COMMITTED_DB) and
+## the in_db CSVs, like production: the offload is its last asset. Exit 0 all
+## green, 3 offloaded with a red source, 1 nothing publishable. Needs the
+## network (`$(PYTHON) -m orchestration.daily --without-fetch` does not).
 dagster-daily:
 	mkdir -p "$(DAGSTER_HOME)"
 	DAGSTER_HOME="$(DAGSTER_HOME)" $(PYTHON) -m orchestration.daily
 
-## verify-dagster-parity: rebuild every export twice from the committed HEAD,
-## once with `make assemble exports` and once through Dagster, each in its own
-## temporary git worktree, and compare every file. Refuses a dirty tree: commit
+## verify-dagster-parity: rebuild every export and the offload twice from the
+## committed HEAD, once with `make assemble exports offload` and once through
+## the Dagster coordinator without the fetch, each in its own temporary git
+## worktree, and compare every file. Refuses a dirty tree: commit
 ## first, or it would compare two copies of the previous commit.
 verify-dagster-parity:
 	$(PYTHON) scripts/verify_dagster_parity.py

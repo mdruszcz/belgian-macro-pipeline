@@ -1,7 +1,7 @@
 # ADR 0007 — Dagster as a supervision layer over the scripts, GitHub Actions stays the scheduler
 
 Date: 2026-09-13
-Status: accepted (step 1); amended by step 2 (below)
+Status: accepted (step 1); amended by steps 2 and 3 (below)
 Revises: `docs/architecture.md`, "Execution model" ("No queue, scheduler, or server process.
 GitHub Actions cron is the only orchestrator.") -- the second sentence still holds.
 
@@ -73,3 +73,26 @@ git/PR steps stay workflow steps. This revises decisions 2 and 7 above:
 Consequence: the Makefile and `commands.py` are now the only statement of each command line; the
 lines the workflow used to run are frozen in `tests/test_orchestration.py` so the change of
 runner cannot silently change a command. See `docs/features/orchestration.md`, "Step 2".
+
+## Amendment -- step 3 (2026-09-14)
+
+The offload joins the graph, and an asset may call a script's own function in process. This
+revises decisions 1 and 6 above. ADR 0006's decision 4 -- the committed database is written once,
+last, by one script -- holds in substance.
+
+- **Decision 6 is replaced.** The committed database and the in_db CSVs are written by one asset,
+  `committed_stores`, which calls `offload()` from `scripts/offload_stores.py`. It runs last, in the
+  same Dagster run as validation and every export (`validate_export_and_offload`), so a failed
+  export or blocking check skips it. It writes only when the coordinator's run config allows it,
+  for that coordinator run; from the UI or `dagster job execute` it refuses. It still refuses
+  rather than guesses, with the script's own checks.
+- **Decision 1 is widened.** An asset may call a script's function instead of running its command
+  line (`Command.function`). The command line stays in `commands.py` as the reference the drift and
+  parity tests hold the call to. No formula, rule or data moves into `orchestration/`.
+- The exit-code contract is kept: 0 green, 3 published with a red source, anything else stops
+  before anything is committed -- which now includes a failed offload.
+
+Consequence: a refused offload changes no file, but an error while `offload()` replaces its files
+one by one can leave the checkout it ran in with some of them new. The run is red and nothing is
+committed; the asset names the files concerned individually, from the registry. Restoring them
+automatically is not implemented. See `docs/features/orchestration.md`, "Step 3".

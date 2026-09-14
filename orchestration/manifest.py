@@ -1,4 +1,5 @@
-"""The per-run source manifest: what the fetch half of a coordinator run did.
+"""The per-run manifest: what one coordinator run did -- the assemble, each
+source, validate_and_export and the offload.
 
 One file per run, data/local/dagster_runs/{run_id}/sources.json, never a fixed
 path: a manifest left behind by an earlier run must never be mistaken for the
@@ -49,6 +50,7 @@ def initial(run_id: str, now: datetime | None = None) -> dict:
             for name in TRACKED
         },
         "validate_and_export": {"status": NOT_RUN},
+        "offload": {"status": NOT_RUN},
     }
 
 
@@ -75,8 +77,10 @@ def gate(manifest: dict) -> dict[str, str]:
     One entry per tracked outcome under its old workflow step id (fetch_macro,
     sync_canonical, ...), `summary` with all eight on one line, and `all_ok`:
     "true" only when the working database was assembled, every tracked
-    outcome is a success and validate_and_export succeeded. Anything missing
-    from the file counts as not run, so an incomplete manifest never merges.
+    outcome is a success, validate_and_export succeeded and the offload wrote
+    the committed files. Anything missing from the file counts as not run, so
+    an incomplete manifest -- or one written before the offload was tracked --
+    never merges.
     """
     sources = manifest.get("sources", {})
     statuses = {
@@ -87,6 +91,7 @@ def gate(manifest: dict) -> dict[str, str]:
         manifest.get("assemble", {}).get("status") == SUCCESS
         and all(status == SUCCESS for status in statuses.values())
         and manifest.get("validate_and_export", {}).get("status") == SUCCESS
+        and manifest.get("offload", {}).get("status") == SUCCESS
     )
     return {
         **statuses,

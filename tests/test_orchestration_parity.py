@@ -10,9 +10,9 @@ different working directory, so a path that only resolves from the repository
 root shows up here. The offload is compared on tests/test_offload_stores.py's
 small committed database, never the real one: with the repository's own paths
 it would write the committed files. The full comparison -- every file
-`make assemble exports` writes, including the pages and the scripts that can
-only write into the repository -- is scripts/verify_dagster_parity.py, run on
-a committed HEAD.
+`make assemble exports offload` writes, including the pages, the scripts that
+can only write into the repository and the committed database -- is
+scripts/verify_dagster_parity.py, run on a committed HEAD.
 
 Marked slow: real subprocesses against the real assembled data.
 """

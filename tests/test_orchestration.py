@@ -127,9 +127,11 @@ RETIRED_WORKFLOW_COMMANDS = {
         'python scripts/revisions_report.py --db "$WORKING_DB" --since "$(date -u +%Y-%m-%d)"'
     ),
 }
-# Every script that workflow ran between assemble and offload, bar the
-# validator (the checks, below).
+# Every script that workflow ran from assemble to the offload, bar the
+# validator (the checks, below). The offload was a workflow step of its own
+# until Dagster step 3.
 RETIRED_WORKFLOW_SCRIPTS = {
+    "scripts/offload_stores.py",
     "scripts/build_staging_db.py",
     "belgian_macro_db.py",
     "scripts/sync_to_canonical.py",
@@ -613,6 +615,7 @@ def test_one_red_source_still_exports_but_the_day_ends_red(sandbox):
             assert state["sources"][name]["status"] == manifest.SUCCESS, name
     assert EXPORTS <= set(sandbox.calls)
     assert state["validate_and_export"]["status"] == manifest.SUCCESS
+    assert state["offload"]["status"] == manifest.SUCCESS, "a red source still offloads"
     latest = sandbox.instance.get_latest_materialization_event(dg.AssetKey(VALIDATED))
     metadata = latest.asset_materialization.metadata
     assert metadata["source_run"].value == state["run_id"]
@@ -664,6 +667,8 @@ def test_all_green_exits_zero_and_each_run_gets_its_own_manifest(sandbox):
     states = _manifests(sandbox.runs)
     assert len(states) == 2 and states[0]["run_id"] != states[1]["run_id"]
     assert all(manifest.red_sources(s) == [] for s in states)
+    assert all(s["offload"]["status"] == manifest.SUCCESS for s in states)
+    assert all(manifest.gate(s)["all_ok"] == "true" for s in states)
 
 
 def test_a_failed_assemble_stops_before_any_export(sandbox):
@@ -674,6 +679,7 @@ def test_a_failed_assemble_stops_before_any_export(sandbox):
     (state,) = _manifests(sandbox.runs)
     assert state["assemble"]["status"] == manifest.FAILED
     assert state["validate_and_export"]["status"] == manifest.NOT_RUN
+    assert state["offload"]["status"] == manifest.NOT_RUN
     assert sandbox.calls == ["staging_db"]
 
 
@@ -693,6 +699,54 @@ def test_a_crashed_fetch_job_leaves_every_source_not_run_and_still_exports(sandb
     assert all(state["sources"][n]["status"] == manifest.NOT_RUN for n in TRACKED)
     assert "instance went away" in state["fetch_crash"]
     assert EXPORTS <= set(sandbox.calls)
+    assert state["offload"]["status"] == manifest.SUCCESS
+
+
+def test_a_failed_export_skips_the_offload_in_the_same_run(sandbox):
+    sandbox.failing.add("site_payloads")
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_FAILED
+
+    (state,) = _manifests(sandbox.runs)
+    assert state["validate_and_export"]["status"] == manifest.FAILED
+    assert "site_payloads is down" in state["validate_and_export"]["message"]
+    assert state["offload"]["status"] == manifest.SKIPPED
+    assert "committed_stores" not in sandbox.calls
+    assert manifest.gate(state)["all_ok"] == "false"
+
+
+def test_a_failed_offload_leaves_nothing_publishable(sandbox):
+    sandbox.failing.add("committed_stores")
+
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_FAILED
+
+    (state,) = _manifests(sandbox.runs)
+    assert manifest.red_sources(state) == []
+    assert state["validate_and_export"]["status"] == manifest.SUCCESS
+    assert state["offload"]["status"] == manifest.FAILED
+    assert "committed_stores is down" in state["offload"]["message"]
+    assert EXPORTS <= set(sandbox.calls)
+    assert manifest.gate(state)["all_ok"] == "false"
+
+
+def test_the_coordinator_allows_the_offload_for_its_own_run_and_runs_it_last(sandbox):
+    assert daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance) == daily.EXIT_OK
+
+    (state,) = _manifests(sandbox.runs)
+    latest = sandbox.instance.get_latest_materialization_event(dg.AssetKey("committed_stores"))
+    assert latest.asset_materialization.metadata["source_run"].value == state["run_id"]
+    assert sandbox.calls[-1] == "committed_stores"
+
+
+def test_without_fetch_runs_no_source_and_still_offloads(sandbox):
+    exit_code = daily.run_daily(sandbox.defs, sandbox.paths, sandbox.instance, fetch=False)
+
+    assert exit_code == daily.EXIT_PARTIAL
+    (state,) = _manifests(sandbox.runs)
+    assert all(state["sources"][n]["status"] == manifest.NOT_RUN for n in TRACKED)
+    assert not set(TRACKED) & set(sandbox.calls)
+    assert state["offload"]["status"] == manifest.SUCCESS
+    assert manifest.gate(state)["all_ok"] == "false"
 
 
 # ── Validation still blocks, as the workflow's validation step does ──────────
@@ -710,6 +764,8 @@ def test_a_failing_rule_stops_every_export_and_the_volume_baseline(sandbox, monk
     assert manifest.red_sources(state) == []
     assert state["validate_and_export"]["status"] == manifest.FAILED
     assert not EXPORTS & set(sandbox.calls)
+    assert state["offload"]["status"] == manifest.SKIPPED
+    assert "committed_stores" not in sandbox.calls
     assert recorded == [], "a failing run must never become tomorrow's volume baseline"
 
 
@@ -911,6 +967,7 @@ def _green_manifest() -> dict:
     for source in state["sources"].values():
         source["status"] = manifest.SUCCESS
     state["validate_and_export"]["status"] = manifest.SUCCESS
+    state["offload"]["status"] = manifest.SUCCESS
     return state
 
 
@@ -928,7 +985,7 @@ def test_the_gate_opens_only_when_everything_succeeded():
         assert outputs["all_ok"] == "false", status
         assert outputs["sync_walstat"] == status
 
-    for step in ("assemble", "validate_and_export"):
+    for step in ("assemble", "validate_and_export", "offload"):
         state = _green_manifest()
         state[step]["status"] = manifest.FAILED
         assert manifest.gate(state)["all_ok"] == "false", step
@@ -936,6 +993,10 @@ def test_the_gate_opens_only_when_everything_succeeded():
     state = _green_manifest()
     del state["sources"]["market_data"]
     assert manifest.gate(state)["all_ok"] == "false", "a missing outcome is not a success"
+
+    state = _green_manifest()
+    del state["offload"]
+    assert manifest.gate(state)["all_ok"] == "false", "no offload recorded, no merge"
 
 
 def test_the_gate_command_prints_outputs_and_refuses_a_missing_manifest(tmp_path, capsys):
