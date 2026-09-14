@@ -142,3 +142,44 @@ independent from any NUTS 2 pipeline work.
   produces (`final`, `provisional`, `estimate`, `suppressed`, `na`) appears
   in `STATUS_PRECEDENCE`, plus `revised` for completeness even though no
   flag maps to it today.
+
+## Amendment 2026-09-14 -- an EMPTY `u`-flagged cell is `suppressed`
+
+Loading `UNEMPLOYMENT_RATE_NUTS2` for real (Europe NUTS 2 batch B2, PR #174) found 149 cells in
+`lfst_r_lfu3rt` whose `OBS_FLAG` carries no value at all (`u`: 116, `bu`: 33 -- e.g.
+`geo=DE22, period=2020, flag=bu`). Decision 4 above (an empty cell must pair only with
+`suppressed`/`na`, or be refused) blocked the whole fetch on the first such cell -- the `u` ->
+`estimate` mapping from decision 1 only governs a cell that HAS a value; it never addressed a `u`
+flag on an empty one, because no dataset with that combination had been measured yet when this ADR
+was first accepted.
+
+**Decision, confirmed by the maintainer 2026-09-14:** an empty cell (no value published at all)
+whose flag's letters include `u` is `suppressed`, not refused. Eurostat has a reading for the cell
+-- it flagged it "low reliability" -- but chose not to publish the number; that is exactly what
+`suppressed` already means elsewhere in this pipeline (a source withholding a figure it has), not
+`missing` (no row at all) and not `na` (not applicable). This is narrower than it might look:
+
+- It applies ONLY when the cell has no value. A cell that DOES carry a value and a `u` flag keeps
+  decision 1's existing mapping to `estimate`, unchanged.
+- It applies ONLY to `u` (bare or within a compound, e.g. `bu`, `ub` -- letter order and repeats
+  already do not matter, per decision 2). An empty cell flagged `b`, `e`, `d`, `p`, or any compound
+  without a `u` in it, is still refused exactly as decision 4 already specified -- this amendment
+  does not touch that rule for any other letter.
+- It applies AFTER flag recognition, not instead of it: an empty cell whose flag contains an
+  unrecognized letter alongside a `u` (e.g. a hypothetical `xu`) still fails at the unrecognized-
+  flag stage (decision 2) before this rule is ever reached -- `u`'s presence never excuses an
+  unknown letter.
+
+Implemented as one override, immediately after the existing `_status_for_flag` call and before the
+existing nullable-status check, in `src/fetchers/eurostat.py`: `if raw_value is None and "u" in
+set(flag): obs_status = "suppressed"`. `STATUS_PRECEDENCE`'s ordering is unaffected -- this is not
+a compound-resolution rule, it is a distinct override for the no-value case specifically, so it
+sits beside `_status_for_flag`'s call rather than inside it.
+
+**Consequences:** `UNEMPLOYMENT_RATE_NUTS2` now loads (see `docs/features/europe_nuts2.md`,
+"Measured at load", and the unemployment catalogue row in `docs/data_catalog.md`, both updated the
+same day). Its 149 previously-blocking cells publish as `{"v": null, "s": "suppressed"}` -- never
+`0`, never `missing`. `demo_r_pjanaggr3`'s own single empty-flag cell (`PL912`/2010, flag `b`, no
+`u`) is unaffected by this amendment; it was already resolved earlier by filtering `PL912` out
+before validation (a NUTS 3 code `POPULATION_NUTS2`'s loader never wanted -- `geo_filter`, see
+that batch's own PR), not by this rule.
