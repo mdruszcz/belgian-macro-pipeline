@@ -117,6 +117,32 @@ MapUI.unitSuffix = function(unit){
   return ' ' + unit.replace(/_/g, ' ');
 };
 
+/* A unit AS ITS OWN WORD, independent of any number beside it -- "%", "pp",
+   "2021=100", the translated word for a balance, or (for anything with no
+   shorter reading) the raw code with its underscores turned to spaces, so a
+   reader never sees an internal unit code like "percent_yy" (claude.md rule
+   7). Batch A1.3 (docs/features/site_unification.md): moved out of
+   macro.html's own unitHint(), which duplicated this for its KPI-card
+   hints -- ONE unit vocabulary, used both there and by a chart tooltip/
+   subtitle that has no number to hang the symbol on.
+
+   Distinct from unitSuffix() above, which is a suffix APPENDED AFTER an
+   already-formatted number and stays silent for percent/eur/count because
+   formatValue() already put their symbol ON the number -- showing "%" again
+   here, standing alone, is not that redundancy. */
+MapUI.unitLabel = function(unit, lang){
+  const u = (unit || '').toLowerCase();
+  if(!u || u === 'count') return '';
+  if(u === 'pp_contribution') return 'pp';
+  const idx = /^index_(\d{4})$/.exec(u);
+  if(idx) return idx[1] + '=100';
+  if(u === 'balance') return MapUI.text(lang, 'macroBalance');
+  if(u === 'eur') return '€';
+  if(u === 'eur_per_inhabitant') return '€ / hab.';
+  if(u.startsWith('percent')) return '%';
+  return unit.replace(/_/g, ' ');
+};
+
 MapUI.pickName = function(names, fallback){
   if(!names) return fallback || '';
   return names.en || names.fr || names.nl || fallback || '';

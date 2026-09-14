@@ -165,3 +165,19 @@ extra_lists:
   - id: business-cycle
     label: {en: Business and consumer sentiment, fr: Conjoncture et confiance, nl: Conjunctuur en vertrouwen}
     series: [BUSINESS_CONFIDENCE, CONSUMER_CONFIDENCE, EC_CONS_CONF_BE, INDUSTRIAL_PROD]
+
+# ---------------------------------------------------------------------------
+# Batch A1.3 (docs/features/site_unification.md, "Home2 : corriger la
+# composition") -- home2.html's hero picks its two mini-charts from here
+# instead of sorting national.json client-side at render time (the previous
+# `nationalOrder()` heuristic in home2.html: rate-shaped series first, then
+# alphabetical). Declaring the two ids here means home2.html contains no
+# indicator id of its own (rule 2/24), and a future change to which two
+# series lead the homepage is a one-line config edit, not a page edit.
+# These are the two ids `nationalOrder()` already lands on today (quarterly
+# real GDP growth year-on-year, and HICP inflation year-on-year) -- verified
+# by running that exact logic against the published national.json before
+# writing this list, not guessed.
+hero:
+  - GDP_QUARTERLY_YY
+  - HICP

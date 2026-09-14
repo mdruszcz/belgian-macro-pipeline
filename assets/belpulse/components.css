@@ -249,3 +249,61 @@
 }
 .bp-map-card .bp-chart-head{padding:var(--bp-space-5) var(--bp-space-5) 0}
 .bp-map-card .mapbox{padding:0 var(--bp-space-5) var(--bp-space-5)}
+
+/* ---- chart tooltip / data table -- Batch A1.3, assets/belpulse/charts.js
+   BPCharts.attachTooltip()/dataTable(). One shared tooltip per page,
+   positioned in JS over the nearest data point; token colours only, text at
+   least 12px, and generous hit padding so a touch tap lands on it. -------- */
+.bp-chart-tip{
+  /* Position (left/top) is computed and set in JS (BPCharts.attachTooltip's
+     showAt()), already measured against the viewport -- no CSS transform
+     offset here, or the JS's own edge-flip/clamp math would be fighting a
+     percentage shift it cannot see. */
+  position:absolute; z-index:60;
+  display:flex; flex-direction:column; gap:2px; pointer-events:none;
+  background:var(--bp-text); color:var(--bp-surface); border-radius:var(--bp-radius-control);
+  box-shadow:var(--bp-shadow-card); padding:6px 10px; font-size:12px; line-height:1.4;
+  /* min-width so a short value ("2,2%") never renders as a one-word sliver,
+     and so a series name wraps AT MOST once instead of one word per line --
+     found by hovering the real hero charts, where a card near the
+     viewport's right edge left the tip only as wide as CSS's shrink-to-fit
+     algorithm allows between its `left` and that edge, several words short
+     of its own max-width cap. */
+  min-width:140px; max-width:min(80vw, 280px);
+}
+.bp-chart-tip[hidden]{display:none}
+.bp-chart-tip span:first-child{font-weight:var(--bp-weight-semibold)}
+.bp-chart-tip span:last-child:not(:first-child){opacity:.85}
+.bp-chart-tip-value{white-space:nowrap}
+
+/* Visually-hidden live region attachTooltip() places after the canvas --
+   the same "clip to 1px" pattern used elsewhere (e.g. home2's
+   .featured-meta), so a screen reader announces a point change without a
+   sighted reader ever seeing a second copy of the tooltip's text. */
+.bp-sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+.bp-chart-canvas-wrap canvas:focus-visible,
+.mini-canvas canvas:focus-visible{
+  outline:2px solid var(--bp-accent); outline-offset:2px; border-radius:4px;
+}
+
+/* Data table: every value a tooltip could show, readable without hovering
+   anything -- rule 36's "no statistical claim depends only on a tooltip". */
+details.bp-chart-data{margin-top:var(--bp-space-2); font-size:12px; color:var(--bp-text-muted)}
+details.bp-chart-data > summary{
+  cursor:pointer; font-size:12px; color:var(--bp-text-muted); font-weight:var(--bp-weight-medium);
+  padding:4px 0; list-style:revert;
+}
+details.bp-chart-data > summary:hover{color:var(--bp-text)}
+details.bp-chart-data table{
+  width:100%; border-collapse:collapse; margin-top:4px; font-size:12px;
+}
+details.bp-chart-data th,
+details.bp-chart-data td{
+  text-align:left; padding:4px 8px; border-bottom:1px solid var(--bp-border);
+}
+details.bp-chart-data th{color:var(--bp-text-faint); font-weight:var(--bp-weight-medium); white-space:nowrap}
+details.bp-chart-data td{color:var(--bp-text)}
