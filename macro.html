@@ -142,7 +142,13 @@
   /* ---- card rows ---- */
   .row{display:grid; gap:var(--bp-space-5); min-width:0}
   .row-3{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)}
-  .row-2{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+  /* BATCH A1.4: row-2's one remaining user is the croissance panel (GDP
+     chart + growth drivers). It used to sit 2fr/1fr against a shorter list
+     panel elsewhere; the drivers card's component names ("Dépenses de
+     consommation des APU", "FBCF — Administrations publiques") need real
+     width of their own, so this is now an even split rather than a
+     leftover column. */
+  .row-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .row-2r{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
   .bp-chart-card{min-width:0; display:flex; flex-direction:column}
   .bp-chart-head h3{font-family:var(--bp-font-display); font-size:1.15rem}
@@ -162,9 +168,15 @@
 
   /* Contributions: a signed bar per part, drawn in HTML so a negative
      contribution reads to the left of a shared zero line. */
-  .contrib{list-style:none; margin:var(--bp-space-2) 0 0; padding:0; display:flex; flex-direction:column; gap:7px}
-  .contrib li{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) 64px; align-items:center; gap:var(--bp-space-3); font-size:var(--bp-text-small)}
-  .contrib .name{color:var(--bp-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .contrib{list-style:none; margin:var(--bp-space-2) 0 0; padding:0; display:flex; flex-direction:column; gap:9px}
+  /* BATCH A1.4: a component's full name wraps rather than truncates -- a
+     statistical label losing its ending ("Dépenses de consommation...") is
+     not a legible label. align-items:start (not center) because a wrapped
+     two-line name and a one-line bar/value no longer share a vertical
+     centre worth aligning to. */
+  .contrib li{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 60px; align-items:start; gap:var(--bp-space-3); font-size:var(--bp-text-small)}
+  .contrib .name{color:var(--bp-text-muted); overflow-wrap:break-word; white-space:normal; line-height:1.3}
+  .contrib .bar, .contrib .val{margin-top:2px}
   .contrib .bar{position:relative; height:12px; background:var(--bp-surface-alt); border-radius:3px}
   .contrib .bar::before{content:''; position:absolute; left:50%; top:-3px; bottom:-3px; width:1px; background:var(--bp-text-faint)}
   .contrib .bar span{position:absolute; top:0; bottom:0; border-radius:3px; background:var(--bp-chart-1)}
@@ -671,8 +683,26 @@
       return {label: pt.period, value: pt.value, highlight: pt.value < 0};
     });
     var canvas = document.getElementById('historyCanvas');
-    var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
-    BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 0});
+    // BATCH A1.4: `growth` lives inside the croissance panel, hidden until a
+    // reader picks it. assets/belpulse/charts.js's sizeCanvas() measures
+    // the CANVAS's own box, not its container's, and then writes that
+    // measurement back as the canvas's inline style.width -- so a draw
+    // taken while the panel (and therefore the canvas) has no box at all
+    // falls back to a hardcoded 300px AND PERMANENTLY PINS the canvas
+    // there: every later draw re-measures that same stale inline style
+    // instead of the container, because there is no signal left that says
+    // "this 300 was never real". Skip the draw entirely while hidden
+    // (`offsetParent` is null for any `display:none` ancestor, which is
+    // what the `hidden` attribute sets by default), and clear any inline
+    // size a previous draw left behind before drawing for real, so the
+    // measurement below always starts from components.css's own
+    // `width:100%` rule against the NOW-visible, laid-out container.
+    if(canvas.offsetParent !== null){
+      canvas.style.width = '';
+      canvas.style.height = '';
+      var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
+      BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 0});
+    }
     document.getElementById('historyProvenance').textContent = provenance(entry, latestNumeric(entry));
   }
 

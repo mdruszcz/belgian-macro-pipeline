@@ -103,13 +103,23 @@
           heading.focus();
         }
       }
-      onShow(panelEl, id);
       try {
         global.dispatchEvent(new CustomEvent('bp:panel-shown', { detail: id }));
       } catch (e) {
         // A browser with no CustomEvent constructor gets no event, not a
         // thrown error mid-navigation.
       }
+      // Deferred one frame, not called inline: `hidden` was just cleared on
+      // this same synchronous turn, and a host page that measures a canvas
+      // (or anything else layout-dependent) the INSTANT it stops being
+      // `hidden` can still catch the browser mid-layout in some engines.
+      // One requestAnimationFrame is the same "wait for a real layout pass"
+      // pattern macro.html's own boot-time redraw already uses -- this is
+      // panels.js's copy of it, not a second one counted against that
+      // page's own single-rAF budget (tests/test_macro.py).
+      global.requestAnimationFrame(function () {
+        onShow(panelEl, id);
+      });
     }
 
     function navigate(id, focusHeading) {

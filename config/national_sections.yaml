@@ -139,11 +139,14 @@ panels:
     # Europe keeps its existing "international" unavailable card (the foreign
     # GDP comparison, see `unavailable` above) and gets this extra note: the
     # regional map the design shows is a real, planned gap, not a rephrasing
-    # of the card's own reason. No date is promised (none is known).
+    # of the card's own reason. No date is promised (none is known). Does
+    # NOT say the card below "shows" the international comparison -- that
+    # card is itself unavailable (its own `reason`, in `unavailable` above),
+    # so this must not promise a comparison the reader will not actually see.
     empty_reason:
-      en: A European regional comparison map is planned but not built yet. Belgium's own international GDP comparison is below.
-      fr: Une carte de comparaison régionale européenne est prévue mais pas encore construite. La comparaison internationale du PIB belge se trouve ci-dessous.
-      nl: Een Europese regionale vergelijkingskaart is gepland maar nog niet gebouwd. De internationale bbp-vergelijking van België staat hieronder.
+      en: A European regional comparison map is planned. The international GDP comparison is not built yet either.
+      fr: Une carte de comparaison régionale européenne est prévue. La comparaison internationale du PIB n'est pas non plus construite pour l'instant.
+      nl: Een Europese regionale vergelijkingskaart is gepland. De internationale bbp-vergelijking is evenmin al gebouwd.
 
 # New thematic cards (Prix, Emploi, Conjoncture) that did not exist as
 # sections before this batch. Each entry's `id` is the layout id used both by
