@@ -14,6 +14,7 @@ and minutes. tests/test_orchestration_parity.py runs the real ones.
 
 import ast
 import csv
+import inspect
 import re
 import subprocess
 import sys
@@ -32,13 +33,18 @@ sys.path.insert(0, str(REPO / "scripts"))
 from export_observations_csv import COLUMNS  # noqa: E402
 
 from orchestration import checks, daily, manifest, run  # noqa: E402
-from orchestration.assets import sources_manual  # noqa: E402
-from orchestration.commands import COMMANDS, TRACKED  # noqa: E402
+from orchestration.assets import exporter_arguments, sources_manual  # noqa: E402
+from orchestration.commands import COMMANDS, TRACKED, Command  # noqa: E402
 from orchestration.definitions import DAILY_CRON, build_defs  # noqa: E402
 from orchestration.paths import PipelinePaths  # noqa: E402
 from orchestration.policies import fetch_windows, window_days  # noqa: E402
 from src.db import migrate  # noqa: E402
-from src.stores import extra_csv_stores, in_db_stores, load_stores  # noqa: E402
+from src.stores import (  # noqa: E402
+    extra_csv_stores,
+    in_db_stores,
+    load_stores,
+    resolve_extra_observations,
+)
 from src.validation.rules import FAIL, RULES, WARN, Violation  # noqa: E402
 
 GROUPS = {"sources_api", "sources_manual", "reference_data", "canonical", "derived", "website"}
@@ -387,6 +393,123 @@ def test_a_repository_only_script_refuses_a_redirected_output(fake_popen, tmp_pa
     assert fake_popen.calls == []
 
 
+# ── call_function: a script's own function, called in this process ───────────
+
+
+class _Refusal(Exception):
+    pass
+
+
+@pytest.fixture
+def fake_script(monkeypatch):
+    """Declares COMMANDS["fake"] as a function of a stand-in scripts/ module."""
+
+    def declare(work, refusal: str | None = None) -> None:
+        module = SimpleNamespace(__name__="fake_script", work=work, _Refusal=_Refusal)
+        monkeypatch.setattr(run, "import_script", lambda name: module)
+        command = Command(("scripts/fake.py",), function="fake_script:work", refusal=refusal)
+        monkeypatch.setitem(COMMANDS, "fake", command)
+
+    return declare
+
+
+def test_call_function_turns_the_declared_refusal_into_a_failure(fake_script):
+    def refuses(**kwargs):
+        raise _Refusal("a committed row would be lost")
+
+    fake_script(refuses, refusal="_Refusal")
+    with pytest.raises(
+        dg.Failure, match="fake: fake_script refused: a committed row would be lost"
+    ):
+        run.call_function(dg.build_asset_context(), "fake", working_db=Path("w.db"))
+
+
+def test_call_function_lets_any_other_exception_through_even_with_a_refusal_declared(fake_script):
+    def crashes(**kwargs):
+        raise KeyError("indicator_id")
+
+    fake_script(crashes, refusal="_Refusal")
+    with pytest.raises(KeyError, match="indicator_id"):
+        run.call_function(dg.build_asset_context(), "fake")
+
+
+def test_call_function_without_a_refusal_class_masks_nothing(fake_script):
+    """The exporters' case: no refusal declared, so no except clause at all --
+    neither an empty one nor a broad one."""
+
+    def crashes(**kwargs):
+        raise ValueError("period 2024-13 is not a month")
+
+    fake_script(crashes)
+    with pytest.raises(ValueError, match="2024-13"):
+        run.call_function(dg.build_asset_context(), "fake")
+
+    def refuses_undeclared(**kwargs):
+        raise _Refusal("undeclared")
+
+    fake_script(refuses_undeclared)
+    with pytest.raises(_Refusal):
+        run.call_function(dg.build_asset_context(), "fake")
+
+    fake_script(lambda **kwargs: kwargs)
+    returned = run.call_function(dg.build_asset_context(), "fake", db_path=Path("a.db"))
+    assert returned == {"db_path": Path("a.db")}
+
+
+def test_every_declared_function_resolves_and_every_script_error_class_is_declared():
+    """A script that defines its own exception class raises it on purpose; an
+    entry that forgets refusal= would show that refusal as a bare traceback."""
+    for name, command in COMMANDS.items():
+        if not command.function:
+            continue
+        module, function = run.script_function(name)
+        assert callable(function), name
+        own = [
+            n
+            for n, value in vars(module).items()
+            if isinstance(value, type)
+            and issubclass(value, Exception)
+            and value.__module__ == module.__name__
+        ]
+        if command.refusal:
+            assert issubclass(getattr(module, command.refusal), Exception), name
+        else:
+            assert own == [], f"{name}: {module.__name__} defines {own}; declare refusal="
+
+
+EXPORTERS_BY_FUNCTION = ["national_csv", "communes_csv", "aggregates_csv", "percentiles_csv"]
+
+
+@pytest.mark.parametrize("name", EXPORTERS_BY_FUNCTION)
+def test_an_exporters_arguments_are_its_command_lines_paths(name, tmp_path):
+    argv = COMMANDS[name].argv
+    for paths in (
+        PipelinePaths(out_root=str(tmp_path / "out"), working_db=str(tmp_path / "working.db")),
+        PipelinePaths(),
+    ):
+        arguments = exporter_arguments(name, paths)
+        assert arguments["db_path"] == paths.resolve(paths.working_db)
+        assert arguments["out_path"] == paths.output(COMMANDS[name].outputs[0])
+        assert arguments["db_path"].is_absolute() and arguments["out_path"].is_absolute()
+        if "--stores" in argv:
+            registry = str(REPO / "config" / "stores.yaml")
+            assert arguments["extra_observations"] == resolve_extra_observations([], registry)
+            assert arguments["extra_observations"], "the registry declares extra_csv stores"
+        else:
+            assert "extra_observations" not in arguments
+    if COMMANDS[name].function:
+        _, function = run.script_function(name)
+        signature = inspect.signature(function)
+        signature.bind(**arguments)
+        assert ("extra_observations" in signature.parameters) == ("--stores" in argv), name
+
+
+@pytest.mark.parametrize("name", ["communes_history_full_csv", "site_payloads", "local_pages"])
+def test_a_command_line_with_other_flags_is_refused_not_half_translated(name):
+    with pytest.raises(ValueError, match=name):
+        exporter_arguments(name, PipelinePaths())
+
+
 # ── The coordinator: a red source still exports, and the day ends red ────────
 
 
@@ -408,7 +531,15 @@ def sandbox(tmp_path, monkeypatch):
             raise RuntimeError(f"{name} is down")
         return ""
 
+    def fake_call_function(context, name, **given):
+        calls.append(name)
+        values[name] = given
+        if name in failing:
+            raise RuntimeError(f"{name} is down")
+        return 0
+
     monkeypatch.setattr(run, "run_script", fake_run_script)
+    monkeypatch.setattr(run, "call_function", fake_call_function)
     monkeypatch.setattr(checks, "run_validation", lambda paths: [])
     monkeypatch.setattr(checks, "record_volume", lambda paths: 0)
     return SimpleNamespace(

@@ -69,6 +69,11 @@ class PipelinePaths(ConfigurableResource):
             "validation_status": "unknown",
         }
 
+    def output(self, template: str) -> Path:
+        """An output as a command line names it, made absolute. An in-process
+        call needs this form: unlike a script, it does not run from `repo_root`."""
+        return self.resolve(template.format(**self.placeholders()))
+
     def render(self, tokens: tuple[str, ...], **extra: str) -> list[str]:
         values = {**self.placeholders(), **extra}
         return [token.format(**values) for token in tokens]
