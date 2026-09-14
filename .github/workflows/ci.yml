@@ -44,6 +44,14 @@ jobs:
       - name: Format check
         run: black --check .
 
+      - name: Shared header/footer in sync (Batch A1.1)
+        # home2.html and macro.html carry a rendered copy of src/pages/shell.py's
+        # render_header()/render_footer() inside delimited zones -- this fails
+        # the PR the moment shell.py changes and nobody re-ran the sync, rather
+        # than shipping two pages whose chrome silently drifted from the rest
+        # of the site.
+        run: python scripts/sync_site_shell.py --check
+
       - name: Validate indicator/source config
         run: python scripts/validate_config.py
 

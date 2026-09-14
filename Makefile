@@ -43,7 +43,7 @@ STORES := config/stores.yaml
 # data/local/. Must be absolute.
 DAGSTER_HOME ?= $(CURDIR)/data/local/dagster_home
 
-.PHONY: all install schema reference validate exports pages page-documents site-index boundaries builder assemble offload test fetch clean help dagster dagster-daily verify-dagster-parity
+.PHONY: all install schema reference validate exports pages shell-sync page-documents site-index boundaries builder assemble offload test fetch clean help dagster dagster-daily verify-dagster-parity
 
 ## all: install deps, assemble the working database from what is committed,
 ## validate it, regenerate every published export, and run the tests. No
@@ -117,6 +117,7 @@ exports:
 	# figure the download does not have. Must run AFTER both.
 	$(PYTHON) scripts/export_explorer_payloads.py
 	$(MAKE) pages
+	$(MAKE) shell-sync
 	$(MAKE) page-documents
 	$(MAKE) site-index
 
@@ -125,6 +126,15 @@ exports:
 pages:
 	$(PYTHON) scripts/export_local_pages.py --db $(DB) \
 		--payload-dir public/data --out-dir local --build-id "$${BUILD_ID:-local}"
+
+## shell-sync: write the shared header/footer/bootstrap (src/pages/shell.py)
+## into home2.html's and macro.html's delimited bp-shell zones (Batch A1.1,
+## docs/features/site_unification.md). Runs BEFORE page-documents: both read
+## the same src.pages.shell module, so if that module changed, the two
+## hand-edited pilots and every generated page pick up the change in the same
+## `make exports` run rather than one of them silently lagging.
+shell-sync:
+	$(PYTHON) scripts/sync_site_shell.py
 
 ## page-documents: build every config/pages/*/published.json into its route,
 ## in all three languages -- en at the declared route, fr and nl one directory

@@ -35,11 +35,16 @@
 <title>BelPulse — Belgium's economic data, updated automatically</title>
 <meta name="description" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
 
+<!-- bp-shell:bootstrap:start -->
+<script>(function(){try{var KEY='belpulse-theme',LEGACY_KEY='theme',LEGACY={day:'light',soft:'light',night:'dark'};var v=localStorage.getItem(KEY);if(v===null){var legacy=localStorage.getItem(LEGACY_KEY);if(legacy&&Object.prototype.hasOwnProperty.call(LEGACY,legacy))v=LEGACY[legacy];}if(v==='auto'){v=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';try{localStorage.setItem(KEY,v);}catch(e){}}if(v!=='light'&&v!=='dark')v='light';document.documentElement.setAttribute('data-theme',v);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<!-- bp-shell:bootstrap:end -->
 <script>
   (function(){
     try{
-      // This visual test targets the supplied light editorial design.
-      document.documentElement.setAttribute('data-theme', 'light');
+      // The reader's saved language, read before paint so the <html lang>
+      // attribute (and any CSS that keys off it) is right from the first
+      // frame -- the shared shell bootstrap above only concerns itself with
+      // the theme.
       var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
       if(l) document.documentElement.lang = l;
     }catch(e){}
@@ -59,18 +64,19 @@
 
   h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
 
-  /* ---- top bar ---- */
-  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface)}
-  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); width:100%}
-  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
+  /* ---- top bar ----
+     The bar itself (height, centred width, the menus) is now shared --
+     assets/belpulse/layout.css's `.bp-topbar`/`.bp-topbar .wrap`, filled by
+     src/pages/shell.py's render_header() through scripts/sync_site_shell.py.
+     Batch A1.1: this page no longer overrides it locally. */
+  .home2-search-row{padding-top:var(--bp-space-4)}
   .searchbox{
-    display:flex; align-items:center; gap:8px; flex:1; max-width:330px;
+    display:flex; align-items:center; gap:8px; max-width:330px;
     border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-    padding:7px 12px; background:var(--bp-bg); margin-left:auto;
+    padding:7px 12px; background:var(--bp-bg);
   }
   .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
   .searchbox svg{color:var(--bp-text-faint); flex:none}
-  .langpick{border:0; background:transparent; font:inherit; font-size:var(--bp-text-small); color:inherit; cursor:pointer; padding:6px}
 
   /* ---- hero ---- */
   .hero{
@@ -279,12 +285,13 @@
     .features{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
     .cta .wrap{grid-template-columns:minmax(0,1fr)}
   }
-  @media (max-width:768px){
-    /* layout.css wraps .bp-topbar itself; this page puts its flex row in an
-       inner .wrap, so the same rule has to reach that. */
-    .bp-topbar .wrap{flex-wrap:wrap; gap:var(--bp-space-3)}
-    .bp-nav{order:3; flex-basis:100%; overflow-x:auto}
-    .searchbox{max-width:none; margin-left:0; order:2; flex:1}
+  /* The top bar's own mobile behaviour (the nav collapsing behind
+     .bp-nav-toggle) is shared now -- assets/belpulse/layout.css's own
+     @media(max-width:768px) block, reached through render_header(). The
+     search box moved out of the header (see the comment above <main>) so it
+     needs no header-specific mobile rule of its own any more. */
+  @media (max-width:680px){
+    .searchbox{max-width:none}
   }
   @media (max-width:680px){
     .hero h1{font-size:2rem}
@@ -301,14 +308,15 @@
      Values and map geometry come from the published payloads; only
      composition and presentation are specialised here. */
   .home2 .wrap{max-width:1096px; padding-left:14px; padding-right:14px}
-  .home2 .bp-topbar{height:51px; padding:5px 0}
-  .home2 .bp-topbar .wrap{gap:22px; flex-wrap:nowrap}
+  /* The top bar's own height and width are shared now (--bp-topbar-h,
+     --bp-content-max in assets/belpulse/tokens.css) -- this page no longer
+     forces its own 51px. Batch A1.1 removed the override that conflicted
+     with the maquette's 56px bar. */
   .home2 .bp-logo-mark{width:24px; height:28px}
   .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
-  .home2 .bp-tagline{font-size:8px; line-height:1.1}
   .home2 .bp-nav{gap:21px; font-size:10px}
   .home2 .searchbox{max-width:310px; padding:6px 10px}
-  .home2 .searchbox input,.home2 .langpick{font-size:10px}
+  .home2 .searchbox input{font-size:10px}
 
   .home2 .hero{
     min-height:339px;
@@ -424,7 +432,6 @@
   .home2 .attribution{font-size:9px; padding:14px 0}
 
   @media (max-width:1024px){
-    .home2 .bp-topbar{height:auto; min-height:51px}
     .home2 .hero .wrap{grid-template-columns:minmax(0,1fr)}
     .home2 .hero-cards{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
     .home2 .hero-mini{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -434,11 +441,6 @@
     .home2 .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
     .home2 .features{grid-template-columns:repeat(2,minmax(0,1fr))}
     .home2 .cta .wrap{grid-template-columns:minmax(0,1fr)}
-  }
-  @media (max-width:768px){
-    .home2 .bp-topbar .wrap{flex-wrap:wrap}
-    .home2 .bp-nav{order:3; flex-basis:100%}
-    .home2 .searchbox{order:2; max-width:none; margin-left:auto}
   }
   @media (max-width:640px){
     .home2 .hero h1{font-size:2rem}
@@ -455,34 +457,24 @@
 </head>
 <body class="bp-shell home2">
 
-<header class="bp-topbar">
-  <div class="wrap">
-    <a class="bp-logo" href="home2.html">
-      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
-      <span>
-        <span class="bp-wordmark">BelPulse</span>
-        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
-      </span>
-    </a>
-    <nav class="bp-nav" aria-label="Main">
-      <a href="home2.html" aria-current="page" data-t="navHome">Home</a>
-      <a href="profiles.html" data-t="navCommunes">Commune profiles</a>
-      <a href="macro.html" data-t="navMacro">Macro</a>
-      <a href="micro.html" data-t="navMicro">Micro</a>
-      <a href="map.html" data-t="navMaps">Maps</a>
-    </nav>
+<!-- bp-shell:header:start page="home2.html" -->
+<a class="bp-skip-link" href="#bp-main" data-t="skipToContent">Skip to content</a><header class="bp-topbar"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" id="bp-nav" aria-label="Main navigation"><a href="home2.html" aria-current="page" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><div class="bp-topbar-actions"><div class="bp-menu bp-theme-menu" data-menu="theme"><button type="button" class="bp-menu-btn" id="bp-theme-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-theme-menu-panel" aria-label="Colour theme" data-t-aria="theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-menu-panel bp-theme-switch" id="bp-theme-menu-panel" role="menu" aria-label="Colour theme" data-t-aria="theme" hidden><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="light" aria-checked="false" data-t="themeLight">Light</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="dark" aria-checked="false" data-t="themeDark">Dark</button></div></div><div class="bp-menu bp-lang-menu" data-menu="lang"><button type="button" class="bp-menu-btn" id="bp-lang-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-lang-menu-panel" aria-label="Language" data-t-aria="language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="bp-menu-current">EN</span><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-lang-switch" id="bp-lang-menu-panel" role="menu" aria-label="Language" data-t-aria="language" hidden><button type="button" role="menuitemradio" data-lang="en" aria-checked="false">English</button><button type="button" role="menuitemradio" data-lang="fr" aria-checked="false">Français</button><button type="button" role="menuitemradio" data-lang="nl" aria-checked="false">Nederlands</button></div></div><button type="button" class="bp-nav-toggle" aria-expanded="false" aria-controls="bp-nav" aria-label="Menu" data-t-aria="navMenu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div></header>
+<!-- bp-shell:header:end -->
+
+<main id="bp-main">
+
+  <!-- The commune/indicator search. NOT part of the shared header (Batch
+       A1.1's maquette shows only the logo, nav and the two menus there --
+       docs/features/site_unification.md section 2) -- moved here rather than
+       dropped, since it is a real feature (wireSearch(), below) and nothing
+       about its behaviour is tied to sitting inside the top bar. -->
+  <div class="wrap home2-search-row">
     <label class="searchbox">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
       <datalist id="communeList"></datalist>
     </label>
-    <select class="langpick" id="langPick" data-t-aria="language" aria-label="Language">
-      <option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>
-    </select>
   </div>
-</header>
-
-<main>
 
   <!-- ── hero ────────────────────────────────────────────────────────────── -->
   <section class="hero">
@@ -647,26 +639,18 @@
 
 </main>
 
-<footer class="foot">
-  <div class="wrap">
-    <a class="bp-logo" href="home2.html">
-      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
-      <span class="bp-wordmark" style="font-size:1.05rem">BelPulse</span>
-    </a>
-    <nav>
-      <a href="about.html" data-t="homeFooterAbout">About</a>
-      <a href="about.html" data-t="navMethodology">Methodology</a>
-      <a href="about.html" data-t="homeFooterSources">Sources</a>
-      <a href="macro.html" data-t="navMacro">Macro</a>
-      <a href="about.html" data-t="homeFooterContact">Contact</a>
-    </nav>
-    <span class="foot-script">
-      <span class="flagbar"><i></i><i></i><i></i></span>
-      <span data-t="homeFooterScript">Data shared for a stronger Belgium.</span>
-      <small class="ai-image-note" data-t="homeAiImageNote">Temporary AI-generated illustrative imagery — not documentary photography.</small>
-    </span>
-  </div>
-</footer>
+<!-- The AI-generated-imagery disclosure. Not part of the shared footer
+     (docs/features/site_unification.md section 2: logo, the six links, the
+     credit line -- nothing else), so Batch A1.1 moved it here rather than
+     dropping it: the hero and commune-card images it discloses are real
+     features of this page and the note is a real disclosure requirement (see
+     the file header), not decoration that belongs in generic chrome. -->
+<p class="wrap ai-image-note" data-t="homeAiImageNote">Temporary AI-generated illustrative imagery — not documentary photography.</p>
+
+<!-- bp-shell:footer:start -->
+
+<footer class="foot"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" aria-label="Footer navigation"><a href="home2.html" aria-current="page" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><p class="bp-footer-credit" data-t="footerCredit">Sources: Statbel, the National Bank, Eurostat and other official publishers — see Sources.</p></div></footer>
+<!-- bp-shell:footer:end -->
 
 <!-- The licence notice. This page publishes municipal (Statbel-derived)
      figures through the choropleth, so it carries the same conditions as
@@ -693,6 +677,7 @@
 </div>
 
 <script src="assets/i18n.js"></script>
+<script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
 <script src="assets/belpulse/components.js"></script>
 <script src="assets/commune_map.js"></script>
@@ -749,7 +734,9 @@
     var updated = document.getElementById('attrUpdated');
     if(updated && state.attrUpdated) updated.textContent = state.attrUpdated;
     document.documentElement.setAttribute('lang', LANG);
-    document.getElementById('langPick').value = LANG;
+    // The language menu itself (assets/belpulse/shell.js) keeps its own
+    // displayed code and aria-checked state in step -- nothing here needs to
+    // reach into it, the way the old #langPick <select> did.
   }
 
   function nameOf(code){
@@ -1110,9 +1097,14 @@
 
   /* ---- boot ------------------------------------------------------------- */
   async function init(){
-    document.getElementById('langPick').addEventListener('change', function(e){
-      LANG = e.target.value;
-      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(err){}
+    // The shared header's language menu (assets/belpulse/shell.js) is what a
+    // reader actually clicks now -- it already writes I18N.STORAGE_KEY and
+    // re-translates every [data-t*] element itself, and dispatches 'bp:lang'
+    // for exactly this: everything on the page that is NOT a plain
+    // translated string (the map, the finance strip, the search list) and
+    // has to be rebuilt from fresh data in the new language.
+    document.addEventListener('bp:lang', function(e){
+      LANG = e.detail.lang;
       applyStrings();
       renderFinance(); renderHeroMini(); renderNational();
       renderThemes(); renderThumbs(); renderFeatured();

@@ -241,10 +241,16 @@ def test_the_frame_shows_no_language_switcher_of_its_own(framed):
     the click had already written `belpulse-lang: fr`, so the page said English
     and storage said French. The parent owns the language when it owns the
     frame.
+
+    UPDATED FOR BATCH A1.1: queries `.bp-lang-menu`, the button-plus-panel
+    wrapper the maquette's language menu renders as -- hiding only the inner
+    `.bp-lang-switch` panel would still leave the globe/"EN" button itself
+    visible and clickable inside the frame, which is the same regression this
+    test exists to catch.
     """
     display = framed.evaluate(
         "(function(){var f=document.getElementById('f');"
-        "var n=f.contentDocument.querySelector('.bp-lang-switch');"
+        "var n=f.contentDocument.querySelector('.bp-lang-menu');"
         "return n ? f.contentWindow.getComputedStyle(n).display : 'absent';})()"
     )
     assert display in ("none", "absent"), f"the framed page still offers a switcher ({display})"
@@ -254,10 +260,17 @@ def test_the_frame_shows_no_theme_switch_of_its_own(framed):
     """Same fight, same resolution. index.html pushes `setTheme` in on every
     frame load, so a reader choosing Light inside the frame would watch it snap
     back to the parent's choice a moment later -- and the click has already
-    been written to storage by then."""
+    been written to storage by then.
+
+    UPDATED FOR BATCH A1.1: queries `.bp-theme-menu`, the wrapper the maquette's
+    theme menu renders as (src/pages/shell.py, `render_header`) -- the old
+    `.bp-theme-toggle` segmented control this test used to query does not
+    appear on a page this batch covers any more, so that selector would have
+    passed here vacuously (element absent, not element hidden) rather than
+    proving the framed-hide CSS rule actually fires."""
     display = framed.evaluate(
         "(function(){var f=document.getElementById('f');"
-        "var n=f.contentDocument.querySelector('.bp-theme-toggle');"
+        "var n=f.contentDocument.querySelector('.bp-theme-menu');"
         "return n ? f.contentWindow.getComputedStyle(n).display : 'absent';})()"
     )
     assert display in ("none", "absent"), f"the framed page still offers a theme switch ({display})"
@@ -272,54 +285,84 @@ def test_a_dark_machine_can_still_be_shown_the_light_design(browser, site):
     Run in a context that reports a dark operating system, because that is the
     case where the design has to win.
 
-    The first fix gave the page a switch. It was not enough: a reader who had
-    never touched the switch still fell through to prefers-color-scheme, so
-    the FIRST view of every page on a dark machine was still dark. Light is
-    now the default and `auto` is an explicit choice, which is what the rest
-    of this test walks through.
+    UPDATED FOR BATCH A1.1 (docs/features/site_unification.md): the three-button
+    segmented `.bp-theme-toggle` is gone, replaced by the maquette's theme MENU
+    (a button that opens a small panel), and the menu deliberately drops the
+    `Auto` choice from its UI -- `THEME_CHOICES` in src/pages/shell.py is now
+    Light/Dark only, with a comment recording that A1.2 appends Papier to the
+    same tuple. This is an intended narrowing of the control surface, not a
+    weakening of the underlying guarantee: `SHELL_BOOTSTRAP` still reads and
+    honours a reader's PRE-EXISTING `auto` choice (resolving it against
+    prefers-color-scheme and overwriting storage with the explicit result), so
+    the assertion below about that upgrade path stays, just driven by seeding
+    localStorage directly rather than by clicking a control that no longer
+    exists. What survives from the original test: light is still the default
+    on a dark machine with no saved choice, the reader's explicit choice
+    persists across a reload, and the control shows what was chosen.
     """
     context = browser.new_context(color_scheme="dark")
     page = context.new_page()
     try:
         page.goto(f"{site}/about.html", wait_until="load")
-        assert page.locator(".bp-theme-toggle button").count() == 3
+        assert page.locator(".bp-theme-menu [data-theme-choice]").count() == 2
         # Nothing chosen yet, and the machine says dark: the page is light
         # anyway, because that is the design it was drawn in.
         assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
 
-        page.click('.bp-theme-toggle button[data-theme-choice="light"]')
-        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
+        page.click(".bp-theme-menu .bp-menu-btn")
+        page.click('.bp-theme-menu [data-theme-choice="dark"]')
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark"
         # The key every other page on this site already reads, so one choice
         # holds across the hand-built pages too.
+        assert page.evaluate("localStorage.getItem('belpulse-theme')") == "dark"
+
+        page.click(".bp-theme-menu .bp-menu-btn")
+        page.click('.bp-theme-menu [data-theme-choice="light"]')
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
         assert page.evaluate("localStorage.getItem('belpulse-theme')") == "light"
 
         # And it survives a reload -- which is the whole point of storing it,
-        # and needs the pre-paint script in the head to avoid a dark flash.
+        # and needs the pre-paint script (SHELL_BOOTSTRAP) in the head to
+        # avoid a dark flash.
         page.reload(wait_until="load")
         assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
-        pressed = page.eval_on_selector_all(
-            ".bp-theme-toggle button",
-            "els => els.filter(e => e.getAttribute('aria-pressed') === 'true')"
+        checked = page.eval_on_selector_all(
+            ".bp-theme-menu [data-theme-choice]",
+            "els => els.filter(e => e.getAttribute('aria-checked') === 'true')"
             ".map(e => e.getAttribute('data-theme-choice'))",
         )
-        assert pressed == ["light"], "the control does not show what the reader chose"
+        assert checked == ["light"], "the control does not show what the reader chose"
 
-        # Auto gives the page back to the operating system, which is the only
-        # way back once a reader has chosen.
-        page.click('.bp-theme-toggle button[data-theme-choice="auto"]')
-        assert page.evaluate("document.documentElement.getAttribute('data-theme')") is None
+        # The UI no longer offers Auto, but a reader's OLD choice of it is
+        # still honoured -- resolved against the OS preference and upgraded
+        # to an explicit value in storage, never applied as a fourth live
+        # theme. Seeded directly since no control writes 'auto' any more.
+        page.evaluate("localStorage.setItem('belpulse-theme', 'auto')")
+        page.reload(wait_until="load")
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark"
+        assert page.evaluate("localStorage.getItem('belpulse-theme')") == "dark"
     finally:
         context.close()
 
 
 def test_the_switcher_is_present_when_the_page_stands_alone(browser, site):
     """The other half: hidden only when framed. Opened directly, the page is
-    the only place a reader can change language, and three real links are how
-    it works without JavaScript."""
+    the only place a reader can change language.
+
+    UPDATED FOR BATCH A1.1: the switcher is no longer an always-visible row of
+    three links -- it is the panel a language-menu button opens (the maquette's
+    globe icon + current code). The three real links behind it are unchanged
+    (`.bp-lang-switch` keeps its `data-lang`/`aria-current` contract, still
+    pinned by tests/pages/test_trilingual_export.py), so it still works with
+    scripting off; this test now opens the menu first, the one step a reader
+    driving a mouse or a keyboard also has to take.
+    """
     context = browser.new_context()
     page = context.new_page()
     try:
         page.goto(f"{site}/about.html", wait_until="load")
+        assert page.locator(".bp-lang-menu .bp-menu-btn").is_visible()
+        page.click(".bp-lang-menu .bp-menu-btn")
         assert page.locator(".bp-lang-switch").is_visible()
         assert page.locator(".bp-lang-switch a").count() == 3
     finally:

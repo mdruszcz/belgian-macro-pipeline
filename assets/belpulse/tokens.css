@@ -198,6 +198,13 @@
      block_contract.md: 12 columns desktop, 8 tablet, 4 mobile. */
   --bp-breakpoint-tablet: 1024px;
   --bp-breakpoint-mobile: 640px;
+
+  /* ---- the shared shell (Batch A1.1, docs/features/site_unification.md) --
+     Measured off the maquette
+     (docs/design-references/maquettes-unification-v1/01-accueil.png): a 56px
+     header and a centred 1120px column, both pages of the reference set. */
+  --bp-topbar-h: 56px;
+  --bp-content-max: 1120px;
 }
 
 /* Reader's OS preference, no explicit choice made -- the editorial shell's

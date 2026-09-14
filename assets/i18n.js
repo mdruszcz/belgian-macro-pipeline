@@ -132,11 +132,30 @@ I18N.STRINGS = {
        see the homepage's own note in homepage.md. */
     navHome: 'Home',
     navCommunes: 'Commune profiles',
+    /* Same destination as navCommunes, under the key the unified shell
+       (Batch A1.1, docs/features/site_unification.md) uses for its shared
+       header and footer -- kept as its own key rather than a rename of
+       navCommunes because several unconverted pages (profiles.html,
+       commune.html, micro.html, map.html, home.html, explorer.html) still
+       read navCommunes and are out of this batch's scope. */
+    navProfiles: 'Commune profiles',
     navMacro: 'Macro',
     navMicro: 'Micro',
     navMaps: 'Maps',
     navMethodology: 'Methodology',
     navAllData: 'All data',
+    /* The unified shell's skip link (Batch A1.1) -- the first focusable
+       element on every page it covers, so a keyboard or screen-reader
+       reader can bypass the header and nav menus. */
+    skipToContent: 'Skip to content',
+    /* The mobile nav-toggle button's accessible name (Batch A1.1). Identical
+       across all three languages, same as "Auto" or "Macro" already are --
+       short interface words are allowed to match (see
+       test_no_prose_string_is_left_untranslated). */
+    navMenu: 'Menu',
+    /* The unified shell's footer credit line. Names the publishers this
+       pipeline actually reads from, never an indicator (claude.md rule 2). */
+    footerCredit: 'Sources: Statbel, the National Bank, Eurostat and other official publishers — see Sources.',
     mapIndicatorLabel: 'Indicator',
     mapScopeLabel: 'Area of analysis',
     mapFindLabel: 'Find a commune',
@@ -556,11 +575,15 @@ I18N.STRINGS = {
     /* ---- page d'accueil (lot 3) ---- */
     navHome: 'Accueil',
     navCommunes: 'Profils communaux',
+    navProfiles: 'Profils communaux',
     navMacro: 'Macro',
     navMicro: 'Micro',
     navMaps: 'Cartes',
     navMethodology: 'Méthodologie',
     navAllData: 'Toutes les données',
+    skipToContent: 'Aller au contenu',
+    navMenu: 'Menu',
+    footerCredit: 'Sources : Statbel, la Banque nationale, Eurostat et d’autres publicateurs officiels — voir Sources.',
     mapIndicatorLabel: 'Indicateur',
     mapScopeLabel: 'Zone d’analyse',
     mapFindLabel: 'Rechercher une commune',
@@ -979,11 +1002,15 @@ I18N.STRINGS = {
     /* ---- startpagina (batch 3) ---- */
     navHome: 'Start',
     navCommunes: 'Gemeenteprofielen',
+    navProfiles: 'Gemeenteprofielen',
     navMacro: 'Macro',
     navMicro: 'Micro',
     navMaps: 'Kaarten',
     navMethodology: 'Methodologie',
     navAllData: 'Alle data',
+    skipToContent: 'Naar de inhoud',
+    navMenu: 'Menu',
+    footerCredit: 'Bronnen: Statbel, de Nationale Bank, Eurostat en andere officiële uitgevers — zie Bronnen.',
     mapIndicatorLabel: 'Indicator',
     mapScopeLabel: 'Analysegebied',
     mapFindLabel: 'Zoek een gemeente',
@@ -1340,6 +1367,28 @@ I18N.initial = function(storage, navigatorLanguage){
   const nav = (navigatorLanguage !== undefined ? navigatorLanguage
               : (typeof navigator !== 'undefined' ? navigator.language : '')) || '';
   return I18N.LANGS.find(l => nav.toLowerCase().startsWith(l)) || I18N.DEFAULT_LANG;
+};
+
+/* Swap every `data-t*` element under `root` into `lang` -- the pattern
+   home2.html, macro.html, communes.html and the rest each used to keep their
+   own private copy of (Batch A1.1 pulled it out into one place so
+   assets/belpulse/shell.js's language menu has one function to call rather
+   than depending on a page's own local `applyStrings`, which a page is still
+   free to keep for whatever ELSE it re-renders on a language change --
+   `document.dispatchEvent(new CustomEvent('bp:lang'))`, which this function
+   does not fire, is how shell.js hands that back). Scoped to `root` (default
+   `document`) only so a future caller COULD limit it to one subtree; every
+   call this batch makes passes the whole document, same as every page's own
+   version always did. */
+I18N.applyStrings = function(lang, root){
+  root = root || document;
+  const T = function(key){ return I18N.t(lang, key); };
+  root.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = T(el.dataset.t); });
+  root.querySelectorAll('[data-t-html]').forEach(function(el){ el.innerHTML = T(el.dataset.tHtml); });
+  root.querySelectorAll('[data-t-title]').forEach(function(el){ el.title = T(el.dataset.tTitle); });
+  root.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
+  root.querySelectorAll('[data-t-alt]').forEach(function(el){ el.alt = T(el.dataset.tAlt); });
+  root.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
 };
 
 if (typeof module !== 'undefined') module.exports = I18N;
