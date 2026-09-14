@@ -183,6 +183,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/communes_export.csv",),
+        function="export_communes_csv:export_communes_csv",
     ),
     "communes_history_full_csv": Command(
         (
