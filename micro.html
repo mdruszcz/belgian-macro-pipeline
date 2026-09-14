@@ -104,7 +104,7 @@
 
   /* ---- body: navy sidebar, light content ---- */
   .bp-body--analytical{max-width:1400px; margin:0 auto}
-  .bp-sidebar{position:sticky; top:var(--bp-space-4); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
+  .bp-sidebar{position:sticky; top:var(--bp-topbar-h, 56px); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
   .side-title{display:flex; align-items:center; gap:10px; margin:0 0 var(--bp-space-5)}
   .side-title h2{font-family:var(--bp-font-display); font-size:1.15rem; text-transform:none; letter-spacing:0; color:var(--bp-navy-text); margin:0; font-weight:600}
   .side-title .icon{width:22px; height:22px; color:#8fb4ff}
@@ -158,6 +158,12 @@
   .row-3{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)}
   .row-3m{grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)}
   .row-4{grid-template-columns:repeat(4, minmax(0,1fr))}
+  /* BATCH A3.1c: two-column rows for the panels this batch adds (apercu's
+     key+news, population's households+demographics, logement's KPI/table
+     pairs) -- macro.html's own row-2/row-2r, reused here rather than
+     reinvented. */
+  .row-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .row-2r{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
   .bp-chart-card{min-width:0; display:flex; flex-direction:column}
   .bp-chart-head h3{font-family:var(--bp-font-display); font-size:1.15rem}
   .bp-chart-head .subtitle{max-width:60ch}
@@ -205,9 +211,47 @@
   .card-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium); margin-top:var(--bp-space-3); align-self:flex-end}
   .card-link:hover{text-decoration:underline}
 
+  /* ---- Logement panel's region table ---- */
+  .region-table-wrap{overflow-x:auto}
+  .region-table{width:100%; border-collapse:collapse; font-size:var(--bp-text-small)}
+  /* No `white-space:nowrap`: at narrow widths ("Transactions de vente" over
+     a ~140px column) the header wraps to two lines instead of forcing a
+     horizontal scroll a 2-column table gains nothing from. The formatted
+     numbers stay on one line regardless -- toLocaleString's own thousands
+     separator (a non-breaking space in fr/nl) never wraps mid-number. */
+  .region-table th, .region-table td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--bp-border)}
+  .region-table td:last-child, .region-table th:last-child{text-align:right; font-variant-numeric:tabular-nums}
+  .region-table tr.highlight td{font-weight:var(--bp-weight-semibold); color:var(--bp-text)}
+
+  /* =========================================================================
+     BATCH A3.1c -- in-page panels (docs/features/site_unification.md,
+     "Macro/Micro : panneaux thématiques"), reusing macro.html's Batch A1.4
+     mechanism exactly (assets/belpulse/panels.js): exactly one `.bp-panel`
+     is visible at a time. Own block, so a parallel batch touching the
+     header/footer/theme (A3.1b) has nothing to merge here. ================= */
+  .bp-panel h2{font-family:var(--bp-font-display); font-size:1.6rem; margin:0 0 var(--bp-space-4); line-height:1.15}
+  .bp-panel h2:focus{outline:2px solid var(--bp-accent); outline-offset:3px; border-radius:2px}
+  .bp-panel .row{margin-top:var(--bp-space-5)}
+  .bp-panel .row:first-of-type{margin-top:0}
+  .bp-panel > .bp-chart-card, .bp-panel > .region-table-card{margin-top:var(--bp-space-5)}
+  .bp-panel > .bp-chart-card:first-of-type, .bp-panel > .region-table-card:first-of-type{margin-top:0}
+  .panel-note{
+    font-size:var(--bp-text-small); color:var(--bp-text-muted); max-width:70ch;
+    margin:0 0 var(--bp-space-4); padding:var(--bp-space-3) var(--bp-space-4);
+    background:var(--bp-surface-alt); border-radius:var(--bp-radius-control);
+  }
+  /* Mobile panel picker: hidden on desktop, where the sidebar itself does
+     this job. */
+  .bp-panel-select-wrap{display:none}
+  .bp-panel-select-wrap select{
+    width:100%; font:inherit; font-size:var(--bp-text-body); padding:10px 12px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    background:var(--bp-surface); color:var(--bp-text);
+  }
+
   /* ---- footer ----
      Shared now too -- assets/belpulse/layout.css's `.foot`/`.foot .wrap`,
-     filled by render_footer() the same way the header is. */
+     filled by render_footer() the same way the header is (Batch A3.1b). */
 
   /* ---- licence attribution (rule: every page showing Statbel/ONEM/VAR
      municipal figures carries the full notice -- tests/test_statbel_attribution.py) ---- */
@@ -250,12 +294,21 @@
     .side-update, .side-quote{display:none}
   }
   @media (max-width:768px){
+    /* BATCH A3.1c: below the sidebar's own horizontal-strip breakpoint, the
+       strip becomes a wall of seven links above the fold -- the same
+       "navy sidebar filled the entire first screen" problem macro.html's own
+       comment records for its (never-supplied) mobile mockup. Replaced here
+       by the #panelPick <select> already declared for the desktop-select
+       case; both markups are real, so a reader whose JavaScript never runs
+       still sees the full sidebar list rather than nothing. */
+    .bp-sidebar{display:none}
+    .bp-panel-select-wrap{display:block; margin-bottom:var(--bp-space-4)}
     .bp-body{padding:var(--bp-space-4); gap:var(--bp-space-4)}
     .page-head{grid-template-columns:1fr}
     .skyline{display:none}
     .page-head h1{font-size:1.8rem}
     .kpi-row{grid-template-columns:repeat(2, minmax(0,1fr))}
-    .row-3, .row-3m, .row-4{grid-template-columns:1fr}
+    .row-3, .row-3m, .row-4, .row-2, .row-2r{grid-template-columns:1fr}
     .tile-grid{grid-template-columns:1fr}
     /* The comparison/map indicator <select> and the choropleth's 7-band
        legend both have a natural minimum width (the select's own
@@ -294,14 +347,18 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="14" width="3" height="4"/></svg>
       <h2 data-t="microSidebarTitle">Microeconomics</h2>
     </div>
+    <!-- BATCH A3.1c: seven panels, mirroring macro.html's Batch A1.4 markup
+         exactly. English text is real markup (a no-JS reader still gets it);
+         the translated label from config/micro_sections.yaml `panels[].label`
+         is applied over it at init, the same way `kpis_note` already is. -->
     <ul class="bp-sidebar-nav" id="sideNav">
-      <li><a href="#overview" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-t="macroNavOverview">Overview</span></a></li>
-      <li><a href="#key"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-t="macroNavKey">Key indicators</span></a></li>
-      <li><a href="#comparison"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/></svg><span data-t="microNavComparison">Territorial comparisons</span></a></li>
-      <li><a href="#households"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span data-t="microNavHouseholds">Households</span></a></li>
-      <li><a href="#map"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span data-t="microNavMap">Microeconomic map</span></a></li>
-      <li><a href="#housing"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-t="microNavHousing">Housing market</span></a></li>
-      <li><a href="#communes"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span data-t="microNavCommunes">Communes</span></a></li>
+      <li><a href="#apercu" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-panel-label="apercu">Overview</span></a></li>
+      <li><a href="#population"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span data-panel-label="population">Population</span></a></li>
+      <li><a href="#revenus"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5 2.2 3.3 5 3.5c2.8.2 5 1.6 5 3.5s-2.2 3.5-5 3.5-5-1.6-5-3.5"/></svg><span data-panel-label="revenus">Income</span></a></li>
+      <li><a href="#emploi"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 21v-1.5A6.5 6.5 0 0 1 11.5 13h1A6.5 6.5 0 0 1 19 19.5V21"/></svg><span data-panel-label="emploi">Employment</span></a></li>
+      <li><a href="#logement"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-panel-label="logement">Housing</span></a></li>
+      <li><a href="#entreprises"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/></svg><span data-panel-label="entreprises">Businesses</span></a></li>
+      <li><a href="#comparaisons"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/></svg><span data-panel-label="comparaisons">Territorial comparisons</span></a></li>
     </ul>
     <div class="side-update" id="sideUpdate" data-status="other">
       <div class="lbl" data-t="macroLastUpdate">Last data update</div>
@@ -325,35 +382,169 @@
       <a href="home2.html" data-t="navHome">Home</a><span data-t="navMicro">Micro</span>
     </nav>
 
-    <header class="page-head" id="overview">
-      <div>
-        <h1 data-t="microTitle">Belgian microeconomics</h1>
-        <p class="lead" data-t="microLead">The local indicators for reading Belgium's economy commune by commune, updated automatically from official sources.</p>
-      </div>
-      <div class="skyline" aria-hidden="true">
-        <span class="script" data-t="microScript">Local data for decisions close to home.</span>
-        <svg viewBox="0 0 520 110" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
-          <path d="M0 108h520"/>
-          <path d="M20 108V78h30v30M30 78V64h10v14"/>
-          <path d="M64 108V86h20v22"/>
-          <path d="M96 108V60h16V44l6-10 6 10v16h16v48"/>
-          <path d="M148 108V90h28v18M156 90V80h12v10"/>
-          <path d="M190 108V70h10V54l5-10 5 10v16h10v38"/>
-          <path d="M228 108V84h34v24M238 84V72h14v12"/>
-          <path d="M276 108V66h12V50l6-14 6 14v16h12v42"/>
-          <path d="M320 108V92h24v16"/>
-          <path d="M356 108V72h14V56l5-12 5 12v16h14v36"/>
-          <path d="M404 108V88h26v20M412 88V78h10v10"/>
-          <path d="M444 108V80h12V66l6-10 6 10v14h12v28"/>
-          <path d="M0 108c30-4 60-4 90 0s60 4 90 0 60-4 90 0 60 4 90 0 60-4 90 0 50 4 70 0" opacity=".5"/>
-        </svg>
-      </div>
-    </header>
+    <!-- BATCH A3.1c: mobile panel picker, shown only under the sidebar
+         breakpoint (this page's own <style>, @media max-width:768px). -->
+    <div class="bp-panel-select-wrap">
+      <select id="panelPick" data-t-aria="macroPanelPickLabel" aria-label="Section">
+        <option value="apercu">Overview</option>
+        <option value="population">Population</option>
+        <option value="revenus">Income</option>
+        <option value="emploi">Employment</option>
+        <option value="logement">Housing</option>
+        <option value="entreprises">Businesses</option>
+        <option value="comparaisons">Territorial comparisons</option>
+      </select>
+    </div>
 
-    <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
-    <p class="kpi-note" id="kpiNote"></p>
+    <!-- ==================== panel: apercu (overview, key, news) ==================== -->
+    <section class="bp-panel" id="apercu" data-panel>
+      <h2 data-panel-label="apercu">Overview</h2>
+      <header class="page-head" id="overview">
+        <div>
+          <h1 data-t="microTitle">Belgian microeconomics</h1>
+          <p class="lead" data-t="microLead">The local indicators for reading Belgium's economy commune by commune, updated automatically from official sources.</p>
+        </div>
+        <div class="skyline" aria-hidden="true">
+          <span class="script" data-t="microScript">Local data for decisions close to home.</span>
+          <svg viewBox="0 0 520 110" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M0 108h520"/>
+            <path d="M20 108V78h30v30M30 78V64h10v14"/>
+            <path d="M64 108V86h20v22"/>
+            <path d="M96 108V60h16V44l6-10 6 10v16h16v48"/>
+            <path d="M148 108V90h28v18M156 90V80h12v10"/>
+            <path d="M190 108V70h10V54l5-10 5 10v16h10v38"/>
+            <path d="M228 108V84h34v24M238 84V72h14v12"/>
+            <path d="M276 108V66h12V50l6-14 6 14v16h12v42"/>
+            <path d="M320 108V92h24v16"/>
+            <path d="M356 108V72h14V56l5-12 5 12v16h14v36"/>
+            <path d="M404 108V88h26v20M412 88V78h10v10"/>
+            <path d="M444 108V80h12V66l6-10 6 10v14h12v28"/>
+            <path d="M0 108c30-4 60-4 90 0s60 4 90 0 60-4 90 0 60 4 90 0 60-4 90 0 50 4 70 0" opacity=".5"/>
+          </svg>
+        </div>
+      </header>
 
-    <section class="row row-3">
+      <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
+      <p class="kpi-note" id="kpiNote"></p>
+
+      <section class="row row-2">
+        <article class="bp-chart-card" id="key">
+          <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
+          <ul class="bp-list-panel" id="keyList"></ul>
+        </article>
+        <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ==================== panel: population (households, demographics) ==================== -->
+    <section class="bp-panel" id="population" data-panel hidden>
+      <h2 data-panel-label="population">Population</h2>
+      <section class="row row-2">
+        <article class="bp-chart-card" id="households">
+          <div class="bp-chart-head"><div><h3 id="tilesTitle">&nbsp;</h3></div></div>
+          <div class="tile-grid" id="tileGrid"></div>
+        </article>
+        <article class="bp-chart-card bp-state" id="demographics" data-state="loading">
+          <div class="bp-chart-head"><div><h3 id="demographicsTitle">&nbsp;</h3></div></div>
+          <ul class="bp-list-panel bp-state-body" id="demographicsList"></ul>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ==================== panel: revenus (NEW card: income and taxation) ==================== -->
+    <section class="bp-panel" id="revenus" data-panel hidden>
+      <h2 data-panel-label="revenus">Income</h2>
+      <article class="bp-chart-card bp-state" id="income" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="incomeTitle">&nbsp;</h3></div></div>
+        <ul class="bp-list-panel bp-state-body" id="incomeList"></ul>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+      </article>
+    </section>
+
+    <!-- ==================== panel: emploi (NEW card: unemployment) ==================== -->
+    <section class="bp-panel" id="emploi" data-panel hidden>
+      <h2 data-panel-label="emploi">Employment</h2>
+      <article class="bp-chart-card bp-state" id="employment" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="employmentTitle">&nbsp;</h3></div></div>
+        <ul class="bp-list-panel bp-state-body" id="employmentList"></ul>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+      </article>
+    </section>
+
+    <!-- ==================== panel: logement (housing stock, apartment price, sales history, region table) ==================== -->
+    <section class="bp-panel" id="logement" data-panel hidden>
+      <h2 data-panel-label="logement">Housing</h2>
+      <section class="row row-2">
+        <article class="bp-chart-card bp-state" id="housing-stock" data-state="loading">
+          <div class="bp-chart-head"><div><h3 id="housingStockTitle">&nbsp;</h3></div></div>
+          <ul class="bp-list-panel bp-state-body" id="housingStockList"></ul>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+          <a class="card-link" href="#comparaisons"><span data-t="microSeeHousingMap">See median house price by commune on the map</span> →</a>
+        </article>
+        <article class="bp-chart-card bp-state" id="apartment_price" data-slot="apartment_price" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        </article>
+      </section>
+      <section class="row row-2">
+        <article class="bp-chart-card bp-state" id="housing" data-state="loading">
+          <div class="bp-chart-head">
+            <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
+            <span class="pill" data-t="macroSubject">Belgium</span>
+          </div>
+          <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+          <div class="provenance" id="historyProvenance"></div>
+        </article>
+        <article class="bp-chart-card region-table-card bp-state" id="housing-region" data-state="loading">
+          <div class="bp-chart-head"><div><h3 id="regionalHousingTitle">&nbsp;</h3></div><span class="pill" id="regionalHousingPeriod"></span></div>
+          <div class="bp-state-body">
+            <div class="region-table-wrap">
+              <table class="region-table">
+                <thead><tr><th data-t="microRegionColumn">Region</th><th data-t="microTransactionsColumn">Sales transactions</th></tr></thead>
+                <tbody id="regionalHousingBody"></tbody>
+              </table>
+            </div>
+            <p class="panel-note" id="regionalHousingPriceNote"></p>
+          </div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+          <div class="provenance" id="regionalHousingProvenance"></div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ==================== panel: entreprises (all three unavailable, per-card reasons plus one panel-level note) ==================== -->
+    <section class="bp-panel" id="entreprises" data-panel hidden>
+      <h2 data-panel-label="entreprises">Businesses</h2>
+      <p class="panel-note" id="entreprisesNote" hidden></p>
+      <section class="row row-3">
+        <article class="bp-chart-card bp-state" id="enterprise_dynamics" data-slot="enterprise_dynamics" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        </article>
+        <article class="bp-chart-card bp-state" id="sectors" data-slot="sectors" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        </article>
+        <article class="bp-chart-card bp-state" id="entrepreneurship" data-slot="entrepreneurship" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ==================== panel: comparaisons (comparison, map, communes) ==================== -->
+    <section class="bp-panel" id="comparaisons" data-panel hidden>
+      <h2 data-panel-label="comparaisons">Territorial comparisons</h2>
       <article class="bp-chart-card card-wide bp-state" id="comparison" data-state="loading">
         <div class="bp-chart-head compare-head">
           <div><h3 id="compareTitle">&nbsp;</h3><div class="subtitle" id="compareNote"></div></div>
@@ -366,87 +557,46 @@
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
         <div class="provenance" id="compareProvenance"></div>
       </article>
-      <article class="bp-chart-card" id="key">
-        <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
-        <ul class="bp-list-panel" id="keyList"></ul>
-      </article>
-      <article class="bp-chart-card bp-state" id="enterprise_dynamics" data-slot="enterprise_dynamics" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
-      </article>
-    </section>
-
-    <section class="row row-3m">
-      <article class="bp-chart-card" id="households">
-        <div class="bp-chart-head"><div><h3 id="tilesTitle">&nbsp;</h3></div></div>
-        <div class="tile-grid" id="tileGrid"></div>
-      </article>
-      <article class="bp-chart-card bp-state map-card card-wide" id="map" data-state="loading">
-        <div class="bp-chart-head compare-head">
-          <div><h3 id="mapTitle">&nbsp;</h3></div>
-          <select id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to map"></select>
-        </div>
-        <div class="bp-state-body">
-          <div class="mapbox bp-block--map" id="mapbox">
-            <svg id="microSvg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
-            <div class="tip" id="microTip" hidden></div>
-            <div class="zoom">
-              <button type="button" id="microZoomIn" data-t-title="zoomIn" data-t-aria="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
-              <button type="button" id="microZoomOut" data-t-title="zoomOut" data-t-aria="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
-              <button type="button" id="microZoomReset" data-t-title="resetView" data-t-aria="resetView" title="Reset view" aria-label="Reset view">&#8634;</button>
+      <section class="row row-2r">
+        <article class="bp-chart-card" id="communes">
+          <div class="bp-chart-head"><div><h3 data-t="microExploreTitle">Explore the communes</h3></div></div>
+          <p class="subtitle" data-t="microExploreLead">Search for a commune by name, or browse every commune from its own profile page or the full data table.</p>
+          <label class="explore-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input id="exploreSearch" list="exploreList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+            <datalist id="exploreList"></datalist>
+          </label>
+          <div class="explore-actions">
+            <a href="profiles.html"><span data-t="microSeeProfiles">See commune profiles</span> →</a>
+            <a href="profiles.html"><span data-t="microSeeAllCommunes">See all communes</span> →</a>
+          </div>
+        </article>
+        <article class="bp-chart-card bp-state map-card card-wide" id="map" data-state="loading">
+          <div class="bp-chart-head compare-head">
+            <div><h3 id="mapTitle">&nbsp;</h3></div>
+            <select id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to map"></select>
+          </div>
+          <div class="bp-state-body">
+            <div class="mapbox bp-block--map" id="mapbox">
+              <svg id="microSvg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+              <div class="tip" id="microTip" hidden></div>
+              <div class="zoom">
+                <button type="button" id="microZoomIn" data-t-title="zoomIn" data-t-aria="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+                <button type="button" id="microZoomOut" data-t-title="zoomOut" data-t-aria="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
+                <button type="button" id="microZoomReset" data-t-title="resetView" data-t-aria="resetView" title="Reset view" aria-label="Reset view">&#8634;</button>
+              </div>
             </div>
+            <div class="legend">
+              <div class="swatches" id="microSwatches"></div>
+              <div class="ticks" id="microTicks"></div>
+              <div class="note" id="microLegendNote"></div>
+            </div>
+            <p class="status" id="mapStatus"></p>
           </div>
-          <div class="legend">
-            <div class="swatches" id="microSwatches"></div>
-            <div class="ticks" id="microTicks"></div>
-            <div class="note" id="microLegendNote"></div>
-          </div>
-          <p class="status" id="mapStatus"></p>
-        </div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
-        <div class="provenance" id="mapProvenance"></div>
-      </article>
-      <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
-      </article>
-    </section>
-
-    <section class="row row-4">
-      <article class="bp-chart-card bp-state" id="sectors" data-slot="sectors" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
-      </article>
-      <article class="bp-chart-card bp-state" id="housing" data-state="loading">
-        <div class="bp-chart-head">
-          <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
-          <span class="pill" data-t="macroSubject">Belgium</span>
-        </div>
-        <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
-        <div class="provenance" id="historyProvenance"></div>
-      </article>
-      <article class="bp-chart-card bp-state" id="entrepreneurship" data-slot="entrepreneurship" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
-      </article>
-      <article class="bp-chart-card" id="communes">
-        <div class="bp-chart-head"><div><h3 data-t="microExploreTitle">Explore the communes</h3></div></div>
-        <p class="subtitle" data-t="microExploreLead">Search for a commune by name, or browse every commune from its own profile page or the full data table.</p>
-        <label class="explore-search">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-          <input id="exploreSearch" list="exploreList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
-          <datalist id="exploreList"></datalist>
-        </label>
-        <div class="explore-actions">
-          <a href="profiles.html"><span data-t="microSeeProfiles">See commune profiles</span> →</a>
-          <a href="profiles.html"><span data-t="microSeeAllCommunes">See all communes</span> →</a>
-        </div>
-      </article>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+          <div class="provenance" id="mapProvenance"></div>
+        </article>
+      </section>
     </section>
   </main>
 </div>
@@ -488,6 +638,7 @@
 <script src="assets/i18n.js"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
+<script src="assets/belpulse/panels.js"></script>
 <script src="assets/commune_map.js"></script>
 <script>
 /* BelPulse microeconomics page -- Batch 7.
@@ -598,6 +749,14 @@
 
   function nameOf(code){
     var entry = buildEntry(code);
+    // BATCH A3.1c: a map-only indicator (one with no national or aggregate
+    // figure, only a per-commune one -- see config/micro_sections.yaml's
+    // `map:` comment) resolves to nothing through buildEntry(), which never
+    // reads the per-commune universe. Falling back to the raw CODE would
+    // print an indicator id in the map's own <select>, which is exactly what
+    // rule 24 forbids; metaIndex (metadata/indicators.json) carries the same
+    // trilingual name every other map indicator already gets it from.
+    if(!entry) entry = state.metaIndex[code];
     if(!entry) return code;
     return (entry.names && (entry.names[LANG] || entry.names.en)) || code;
   }
@@ -740,13 +899,24 @@
     document.getElementById('kpiNote').textContent = text(state.layout.kpis_note);
   }
 
-  /* ---- key indicators list --------------------------------------------- */
-  function renderKeyList(){
-    var host = document.getElementById('keyList');
+  /* ---- key indicators list(s) -------------------------------------------
+   * Generic: takes a HOST ELEMENT ID and a list of codes, never an
+   * indicator id of its own (rule 24). Reused for the original #keyList
+   * (config `key_list`) and for the BATCH A3.1c panel-specific cards
+   * (config `extra_lists`), so "a list of the latest values" is one
+   * implementation, not one per panel -- macro.html's own Batch A1.4
+   * pattern, reused rather than reinvented. Returns whether it drew
+   * anything, so the caller can mark an empty card unavailable rather than
+   * blank. */
+  function renderListInto(hostId, codes){
+    var host = document.getElementById(hostId);
+    if(!host) return false;
     host.innerHTML = '';
-    (state.layout.key_list || []).forEach(function(code){
+    var any = false;
+    (codes || []).forEach(function(code){
       var entry = buildEntry(code);
       if(!entry) return;
+      any = true;
       var latest = latestNumeric(entry);
       var li = document.createElement('li');
       li.className = 'bp-state';
@@ -766,6 +936,123 @@
       }
       host.appendChild(li);
     });
+    return any;
+  }
+
+  function renderKeyList(){
+    renderListInto('keyList', state.layout.key_list);
+  }
+
+  /* ---- BATCH A3.1c: the panel-specific NEW list cards (Population's
+   * "demographics", Revenus' "income", Emploi's "employment", Logement's
+   * "housing-stock") -- config `extra_lists`, each {id, label, series}. `id`
+   * is a layout id ("income", "housing-stock"), never an indicator id: it
+   * names the card element and, camel-cased, its title and list element
+   * ("housing-stock" -> #housingStockTitle/#housingStockList). A list with
+   * nothing real marks its card unavailable rather than empty (CLAUDE.md
+   * rule 36) -- none does today (every series below is verified against
+   * national.json/aggregates.json by the exporter), but the config could one
+   * day name a series that stops publishing. */
+  function camelId(id){
+    return id.replace(/-([a-z0-9])/g, function(_, c){ return c.toUpperCase(); });
+  }
+
+  function renderExtraLists(){
+    (state.layout.extra_lists || []).forEach(function(item){
+      var base = camelId(item.id);
+      var titleEl = document.getElementById(base + 'Title');
+      if(titleEl) titleEl.textContent = text(item.label);
+      var any = renderListInto(base + 'List', item.series);
+      var card = document.getElementById(item.id);
+      if(card && card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';
+    });
+  }
+
+  /* ---- BATCH A3.1c: sidebar / select / panel-heading text, and the
+   * Entreprises panel's extra note -- all from config `panels[].label` /
+   * `empty_reason`, applied the same way `kpis_note` already is. Never
+   * re-registers panels.js (language change must not reset which panel is
+   * showing), so this is called from renderAll but BPPanels.init is not. */
+  function renderPanelChrome(){
+    (state.layout.panels || []).forEach(function(p){
+      var t = text(p.label);
+      document.querySelectorAll('[data-panel-label="' + p.id + '"]').forEach(function(el){ el.textContent = t; });
+      var opt = document.querySelector('#panelPick option[value="' + p.id + '"]');
+      if(opt) opt.textContent = t;
+      var note = document.getElementById(p.id + 'Note');
+      if(note){
+        var hasNote = !!(p.empty_reason && text(p.empty_reason));
+        note.textContent = hasNote ? text(p.empty_reason) : '';
+        note.hidden = !hasNote;
+      }
+    });
+  }
+
+  /* ---- Logement panel: home sales by region (Belgium + its three regions)
+   * ------------------------------------------------------------------------
+   * Read straight from aggregates.json rather than through buildEntry(),
+   * because this table needs every region's OWN value at one shared period,
+   * not just the country row buildEntry() extracts -- the same reasoning
+   * `comparisonRows()` above already follows for provinces. Filtered by
+   * LEVEL ("region"), never a hardcoded be:reg:* id, so this table needs no
+   * geography id of its own (rule 25 alongside rule 24: no indicator id
+   * either). A region below 90% coverage for the period is left out rather
+   * than shown short (CLAUDE.md's aggregate-coverage rule) -- moot for the
+   * configured series today (every region and Belgium sit at 100% coverage
+   * at their latest shared period), but checked regardless, since this
+   * function has no way to know that stays true. */
+  function regionalHousingRows(code){
+    var geos = state.aggregates.indicators[code];
+    var country = geos && geos['be:country'];
+    if(!country) return null;
+    var periods = Object.keys(country.periods);
+    if(!periods.length) return null;
+    var period = periods.sort().slice(-1)[0];
+    var rows = [];
+    Object.keys(geos).forEach(function(geoId){
+      var g = geos[geoId];
+      if(g.level !== 'region' && geoId !== 'be:country') return;
+      var cell = g.periods[period];
+      if(!cell || typeof cell.value !== 'number') return;
+      if(cell.coverage && typeof cell.coverage.pct === 'number' && cell.coverage.pct < 90) return;
+      rows.push({
+        geoId: geoId,
+        label: geoId === 'be:country' ? I18N.t(LANG, 'cpColCountry') : ((g.name && (g.name[LANG] || g.name.en)) || geoId),
+        value: cell.value,
+        highlight: geoId === 'be:country',
+      });
+    });
+    rows.sort(function(a, b){
+      if(a.highlight !== b.highlight) return a.highlight ? -1 : 1;
+      return a.label.localeCompare(b.label, LANG);
+    });
+    return {period: period, rows: rows};
+  }
+
+  function renderRegionalHousing(){
+    var card = document.getElementById('housing-region');
+    var spec = state.layout.regional_housing || {};
+    document.getElementById('regionalHousingTitle').textContent = text(spec.label);
+    document.getElementById('regionalHousingPriceNote').textContent = text(spec.price_note);
+    var entry = spec.series ? buildEntry(spec.series) : null;
+    var data = spec.series ? regionalHousingRows(spec.series) : null;
+    if(!data || !data.rows.length){ card.dataset.state = spec.series ? 'missing' : 'unavailable'; return; }
+    card.dataset.state = 'ready';
+    document.getElementById('regionalHousingPeriod').textContent = fmtPeriod(data.period);
+    var host = document.getElementById('regionalHousingBody');
+    host.innerHTML = '';
+    data.rows.forEach(function(r){
+      var tr = document.createElement('tr');
+      if(r.highlight) tr.className = 'highlight';
+      var tdLabel = document.createElement('td');
+      tdLabel.textContent = r.label;
+      var tdValue = document.createElement('td');
+      tdValue.textContent = fmtValue(r.value, entry);
+      tr.appendChild(tdLabel);
+      tr.appendChild(tdValue);
+      host.appendChild(tr);
+    });
+    document.getElementById('regionalHousingProvenance').textContent = entry ? provenance(entry, null) : '';
   }
 
   /* ---- household tiles (2x2), one period each, no delta ----------------- */
@@ -825,7 +1112,7 @@
       if(!cell || typeof cell.value !== 'number') return;
       rows.push({
         geoId: geoId,
-        label: (g.name && (g.name[LANG] || g.name.en)) || geoId,
+        label: geoId === 'be:country' ? I18N.t(LANG, 'cpColCountry') : ((g.name && (g.name[LANG] || g.name.en)) || geoId),
         value: cell.value,
         coverage: cell.coverage,
         highlight: geoId === 'be:country',
@@ -849,7 +1136,20 @@
     document.getElementById('comparePeriod').textContent = fmtPeriod(data.period);
     var items = data.rows.map(function(r){ return {label: r.label, value: r.value, highlight: r.highlight}; });
     var canvas = document.getElementById('compareCanvas');
-    BPCharts.drawRanking(canvas, items, {locale: LANG});
+    // BATCH A3.1c: `comparison` now lives inside the comparaisons panel,
+    // hidden until a reader picks it. assets/belpulse/charts.js's
+    // sizeCanvas() measures the CANVAS's own box, not its container's, and
+    // writes that measurement back as the canvas's inline style.width -- so
+    // a draw taken while the panel (and therefore the canvas) has no box at
+    // all falls back to a hardcoded 300px AND PERMANENTLY PINS the canvas
+    // there (macro.html's own PR #170 lesson, reused here). Skip the draw
+    // entirely while hidden and let the panel-shown redraw (below) do it for
+    // real once the container is actually laid out.
+    if(canvas.offsetParent !== null){
+      canvas.style.width = '';
+      canvas.style.height = '';
+      BPCharts.drawRanking(canvas, items, {locale: LANG});
+    }
     document.getElementById('compareProvenance').textContent = entry ? provenance(entry, null) : '';
   }
 
@@ -920,7 +1220,15 @@
     state.map.setData(payload.communes || {}, {unit: row.unit, decimals: row.decimals, direction: row.direction});
     var shown = state.map.coverage();
     document.getElementById('mapStatus').textContent = T('communesShown', {n: shown.withValue, total: shown.total});
-    document.getElementById('mapProvenance').textContent = buildEntry(code) ? provenance(buildEntry(code), null) : '';
+    // BATCH A3.1c: a map-only indicator (one with no national or aggregate
+    // figure at all -- see config/micro_sections.yaml's `map:` comment and
+    // `_check_micro_sections`'s separate commune-level check for it)
+    // resolves to nothing through buildEntry(), which only reads national.json
+    // and aggregates.json's country row. `row` (metadata/indicators.json) has
+    // the same source/grade/date fields, so it is the fallback -- never a
+    // blank provenance line for a real, sourced indicator.
+    var mapEntry = buildEntry(code) || row;
+    document.getElementById('mapProvenance').textContent = mapEntry ? provenance(mapEntry, null) : '';
   }
 
   function renderMap(){
@@ -944,8 +1252,18 @@
     card.dataset.state = 'ready';
     var items = pts.map(function(pt){ return {label: pt.period, value: pt.value}; });
     var canvas = document.getElementById('historyCanvas');
-    var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
-    BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 2});
+    // BATCH A3.1c: `housing` now lives inside the logement panel, hidden
+    // until a reader picks it -- the same stale-300px-pin risk macro.html's
+    // PR #170 found and drawComparison() above now also guards against.
+    // Skip the draw while hidden; clear any inline size a previous draw left
+    // behind before drawing for real, so the measurement always starts from
+    // the CSS's own `width:100%` rule against the NOW-visible container.
+    if(canvas.offsetParent !== null){
+      canvas.style.width = '';
+      canvas.style.height = '';
+      var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
+      BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 2});
+    }
     document.getElementById('historyProvenance').textContent = provenance(entry, latestNumeric(entry));
   }
 
@@ -981,15 +1299,22 @@
     // (docs/features/site_unification.md section 2: logo, the six nav links,
     // one generic credit line -- nothing page-specific). The element is gone,
     // so this is now a no-op; kept as a function (same as macro.html) rather
-    // than deleted along with its one caller.
+    // than deleted along with its one caller. BATCH A3.1c still extends the
+    // (now unreachable) body below with its own new series, on the same
+    // A3.1b reasoning: kept in place rather than trimmed, so a future
+    // restoration of #sourcesLine finds this list already complete.
     if(!document.getElementById('sourcesLine')) return;
+    var extraSeries = [];
+    (state.layout.extra_lists || []).forEach(function(item){ extraSeries = extraSeries.concat(item.series || []); });
     var codes = [].concat(
       state.layout.kpis || [],
       state.layout.key_list || [],
       (state.layout.tiles || {}).indicators || [],
       (state.layout.comparison || {}).indicators || [],
       (state.layout.map || {}).indicators || [],
-      state.layout.history && state.layout.history.series ? [state.layout.history.series] : []
+      state.layout.history && state.layout.history.series ? [state.layout.history.series] : [],
+      extraSeries,
+      (state.layout.regional_housing || {}).series ? [state.layout.regional_housing.series] : []
     );
     var shown = {};
     codes.forEach(function(code){ var e = buildEntry(code); if(e && e.source) shown[e.source] = true; });
@@ -1034,31 +1359,52 @@
   }
 
   /* ---- boot ---------------------------------------------------------------- */
+  /* ---- BATCH A3.1c: redraw only the currently-visible panel's canvas(es).
+   * A canvas measured while its `[data-panel]` ancestor carries `hidden` has
+   * width 0 (assets/belpulse/charts.js's sizeCanvas falls back to a default
+   * rather than drawing nothing), so drawing into a hidden panel is wasted
+   * work a later switch has to redo anyway -- this is called both after
+   * every render and, from panels.js's `onShow`, the moment a panel actually
+   * becomes visible. macro.html's Batch A1.4 copy of the same idea. */
+  function redrawVisiblePanelCharts(){
+    var visible = document.querySelector('[data-panel]:not([hidden])');
+    if(visible){
+      if(visible.id === 'apercu') renderKpis();
+      if(visible.id === 'logement') renderHistory();
+      if(visible.id === 'comparaisons') drawComparison();
+    }
+  }
+
   function renderAll(){
     applyStrings();
     if(!state.layout) return;
     renderKpis();
     renderKeyList();
+    renderExtraLists();
     renderTiles();
     renderComparison();
     renderMap();
     renderHistory();
+    renderRegionalHousing();
     renderUnavailable();
     renderSources();
-    // Both the comparison ranking bars and the housing bar chart are sized by
-    // the row they land in, which is only known once every card in that row
-    // has rendered -- so each is drawn a second time, at the size it
-    // actually got (macro.html's own history chart needed the same fix).
-    requestAnimationFrame(function(){ renderHistory(); drawComparison(); });
+    renderPanelChrome();
+    // The comparison ranking bars and the housing bar chart are sized by the
+    // row they land in, which is only known once every card in that row has
+    // rendered -- so the currently-visible panel's chart(s) are drawn a
+    // second time, at the size they actually got (macro.html's own history
+    // chart needed the same fix).
+    requestAnimationFrame(redrawVisiblePanelCharts);
   }
 
   async function boot(){
     applyStrings();
     // The shared header's language menu (assets/belpulse/shell.js) is what a
-    // reader actually clicks now; it writes I18N.STORAGE_KEY and re-translates
-    // every [data-t*] element itself, then dispatches 'bp:lang' for the rest
-    // of this page -- the KPIs, the charts, the sidebar -- which has to be
-    // rebuilt from fetched data in the new language, not just re-labelled.
+    // reader actually clicks now (Batch A3.1b); it writes I18N.STORAGE_KEY
+    // and re-translates every [data-t*] element itself, then dispatches
+    // 'bp:lang' for the rest of this page -- the KPIs, the charts, the
+    // sidebar -- which has to be rebuilt from fetched data in the new
+    // language, not just re-labelled.
     document.addEventListener('bp:lang', function(e){
       LANG = e.detail.lang;
       renderAll();
@@ -1096,6 +1442,20 @@
     renderAll();
     renderManifest(state.manifest);
     loadSearch();
+    // BPPanels owns which panel is visible from here on -- initialised ONCE,
+    // never inside renderAll, so a language change (which calls renderAll
+    // again) cannot reset the reader's panel or double-register its
+    // click/popstate/hashchange listeners (macro.html's own Batch A1.4
+    // reasoning).
+    if(window.BPPanels){
+      BPPanels.init({
+        panels: (state.layout.panels || []).map(function(p){
+          return {id: p.id, legacyAnchors: p.legacy_anchors || []};
+        }),
+        storageKey: 'bp-micro-panel',
+        onShow: redrawVisiblePanelCharts,
+      });
+    }
     var redraw;
     window.addEventListener('resize', function(){ clearTimeout(redraw); redraw = setTimeout(renderAll, 150); });
   }

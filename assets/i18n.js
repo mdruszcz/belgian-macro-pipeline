@@ -556,6 +556,13 @@ I18N.STRINGS = {
     sourcesCadenceAnnualAdHoc: 'annual (manual, ad hoc)',
     sourcesCadenceAnnualTableau: 'annual (manual Tableau export)',
     sourcesCadenceAnnualIweps: 'annual accounts, published by IWEPS around March (catalogue refreshed twice yearly); fetched daily',
+    // A3.1c: micro.html's Logement panel region table. Column headers only --
+    // the panel labels, card titles and every reason are trilingual in
+    // config/micro_sections.yaml, applied the same way macro.html's panel
+    // chrome already is.
+    microRegionColumn: 'Region',
+    microTransactionsColumn: 'Sales transactions',
+    microSeeHousingMap: 'See median house price by commune on the map',
   },
   fr: {
     language: 'Langue',
@@ -1034,6 +1041,10 @@ I18N.STRINGS = {
     sourcesCadenceAnnualAdHoc: 'annuelle (manuelle, au cas par cas)',
     sourcesCadenceAnnualTableau: 'annuelle (export Tableau manuel)',
     sourcesCadenceAnnualIweps: 'comptes annuels, publiés par l’IWEPS vers le mois de mars (catalogue actualisé deux fois par an) ; récupérés quotidiennement',
+    // A3.1c: tableau régional du panneau Logement de micro.html.
+    microRegionColumn: 'Région',
+    microTransactionsColumn: 'Transactions de vente',
+    microSeeHousingMap: 'Voir le prix médian des maisons par commune sur la carte',
   },
   nl: {
     language: 'Taal',
@@ -1512,6 +1523,10 @@ I18N.STRINGS = {
     sourcesCadenceAnnualAdHoc: 'jaarlijks (handmatig, ad hoc)',
     sourcesCadenceAnnualTableau: 'jaarlijks (handmatige Tableau-export)',
     sourcesCadenceAnnualIweps: 'jaarrekeningen, gepubliceerd door IWEPS rond maart (catalogus tweemaal per jaar bijgewerkt); dagelijks opgehaald',
+    // A3.1c: regiotabel van micro.html's paneel Logement.
+    microRegionColumn: 'Regio',
+    microTransactionsColumn: 'Verkooptransacties',
+    microSeeHousingMap: 'Bekijk de mediane huizenprijs per gemeente op de kaart',
   },
 };
 

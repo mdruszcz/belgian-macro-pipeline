@@ -79,6 +79,17 @@ map:
     - UNEMPLOYMENT_RATE_INSURED
     - AVERAGE_HOUSEHOLD_SIZE
     - SHARE_DWELLINGS_UNOCCUPIED
+    # BATCH A3.1c: MEDIAN_HOUSE_PRICE has no Belgium, region or province value
+    # (a median cannot be aggregated from commune medians -- see `unavailable:
+    # apartment_price` and `regional_housing.price_note` below), so it can
+    # never appear in `kpis`/`key_list`/`comparison`, which all read from the
+    # national/aggregate universe. The map is different: it reads each
+    # commune's OWN value straight from public/data/indicators/<code>.json,
+    # never a national or aggregate figure, so a commune-only series belongs
+    # here and only here. `_check_micro_sections` in
+    # scripts/export_site_payloads.py checks this list against that separate,
+    # per-commune universe for exactly this reason.
+    - MEDIAN_HOUSE_PRICE
   default: AVG_NET_TAXABLE_INCOME
 
 # "Marché du logement" -- the design's line chart labelled "Prix d'achat"
@@ -90,9 +101,9 @@ history:
   chart: bar
   label: {en: Housing market, fr: Marché du logement, nl: Vastgoedmarkt}
   note:
-    en: Number of residential sales transactions recorded nationally each year -- a volume of activity, not a price. This pipeline holds no national house-price series.
-    fr: Nombre de transactions de vente de logements enregistrées au niveau national chaque année -- un volume d’activité, pas un prix. Ce pipeline ne détient aucune série nationale de prix du logement.
-    nl: Aantal geregistreerde verkooptransacties van woningen op nationaal niveau per jaar -- een activiteitsvolume, geen prijs. Dit pipeline bevat geen nationale reeks van woningprijzen.
+    en: Number of residential sales transactions recorded nationally each year — a volume of activity, not a price. This pipeline holds no national house-price series.
+    fr: Nombre de transactions de vente de logements enregistrées au niveau national chaque année — un volume d’activité, pas un prix. Ce pipeline ne détient aucune série nationale de prix du logement.
+    nl: Aantal geregistreerde verkooptransacties van woningen op nationaal niveau per jaar — een activiteitsvolume, geen prijs. Dit pipeline bevat geen nationale reeks van woningprijzen.
 
 # Sections the design draws that this pipeline cannot fill, built at their
 # designed size with the reason on the card. Each names a real gap, not a
@@ -101,9 +112,9 @@ unavailable:
   - id: enterprise_dynamics
     label: {en: Business fabric, fr: Tissu entrepreneurial, nl: Ondernemingsweefsel}
     reason:
-      en: LOCAL_UNITS_BY_COMMUNE is a single snapshot (2023-Q4) with no prior period, so no trend, no business-creation count and no bankruptcy count exists in this pipeline -- a chart of three series from one point in time would be an invention.
-      fr: LOCAL_UNITS_BY_COMMUNE est un instantané unique (T4 2023) sans période antérieure, donc ni tendance, ni nombre de créations d’entreprises, ni nombre de faillites n’existent dans ce pipeline -- un graphique de trois séries à partir d’un seul instant serait une invention.
-      nl: LOCAL_UNITS_BY_COMMUNE is een eenmalige momentopname (K4 2023) zonder eerdere periode, dus bestaat er in dit pipeline geen trend, geen aantal bedrijfsoprichtingen en geen aantal faillissementen -- een grafiek van drie reeksen uit één tijdstip zou verzinsel zijn.
+      en: The count of local business units per commune is a single snapshot (2023-Q4) with no prior period, so no trend, no business-creation count and no bankruptcy count exists in this pipeline — a chart of three series from one point in time would be an invention.
+      fr: Le nombre d’unités locales par commune est un instantané unique (T4 2023) sans période antérieure, donc ni tendance, ni nombre de créations d’entreprises, ni nombre de faillites n’existent dans ce pipeline — un graphique de trois séries à partir d’un seul instant serait une invention.
+      nl: Het aantal lokale vestigingseenheden per gemeente is een eenmalige momentopname (K4 2023) zonder eerdere periode, dus bestaat er in dit pipeline geen trend, geen aantal bedrijfsoprichtingen en geen aantal faillissementen — een grafiek van drie reeksen uit één tijdstip zou verzinsel zijn.
   - id: sectors
     label: {en: Sectoral structure, fr: Structure sectorielle, nl: Sectorstructuur}
     reason:
@@ -122,3 +133,96 @@ unavailable:
       en: This pipeline holds no article store; nothing here is written by hand.
       fr: Ce pipeline ne contient aucun fonds d’articles ; rien ici n’est rédigé à la main.
       nl: Dit pipeline bevat geen artikelbestand; niets hier wordt met de hand geschreven.
+  - id: apartment_price
+    label: {en: Median apartment price, fr: Prix médian des appartements, nl: Mediane prijs van appartementen}
+    reason:
+      en: This pipeline does not fetch or store an apartment-price series at any geography, commune included — unlike the median house price, which exists per commune (see the map) but still has no Belgium, region or province figure.
+      fr: Ce pipeline ne récupère ni ne conserve de série de prix des appartements, à aucune échelle géographique, commune comprise — contrairement au prix médian des maisons, qui existe par commune (voir la carte) mais n’a toujours aucun chiffre au niveau belge, régional ou provincial.
+      nl: Dit pipeline haalt geen enkele appartementsprijsreeks op en bewaart er ook geen, op geen enkel geografisch niveau, gemeenten inbegrepen — in tegenstelling tot de mediane huizenprijs, die wel per gemeente bestaat (zie de kaart) maar nog steeds geen cijfer op Belgisch, regionaal of provinciaal niveau heeft.
+
+# =============================================================================
+# BATCH A3.1c -- in-page panels (docs/features/site_unification.md, "Macro/
+# Micro : panneaux thématiques"), reusing macro.html's Batch A1.4 mechanism
+# (assets/belpulse/panels.js) and its config shape: `panels[].cards` names
+# EXISTING ELEMENT IDS IN micro.html (never an indicator id -- rule 24),
+# `legacy_anchors` lists every anchor micro.html exposed for that content
+# before this batch so an old bookmark still resolves (rule 31).
+# =============================================================================
+panels:
+  - id: apercu
+    label: {en: Overview, fr: Vue d'ensemble, nl: Overzicht}
+    cards: [overview, kpiRow, key, news]
+    legacy_anchors: [overview, key]
+  - id: population
+    label: {en: Population, fr: Population, nl: Bevolking}
+    cards: [households, demographics]
+    legacy_anchors: [households]
+  - id: revenus
+    label: {en: Income, fr: Revenus, nl: Inkomen}
+    cards: [income]
+    legacy_anchors: []
+  - id: emploi
+    label: {en: Employment, fr: Emploi, nl: Werkgelegenheid}
+    cards: [employment]
+    legacy_anchors: []
+  - id: logement
+    label: {en: Housing, fr: Logement, nl: Huisvesting}
+    cards: [housing-stock, apartment_price, housing, housing-region]
+    legacy_anchors: [housing]
+  - id: entreprises
+    label: {en: Businesses, fr: Entreprises, nl: Ondernemingen}
+    cards: [enterprise_dynamics, sectors, entrepreneurship]
+    legacy_anchors: []
+    # Every card in this panel is unavailable (CLAUDE.md rule 36: this
+    # pipeline holds one single-period business-unit snapshot, no NACE
+    # breakdown and no creation/survival trend) -- the same situation
+    # macro.html's "europe" panel is in, given the same treatment: an extra,
+    # panel-level sentence on top of each card's own reason.
+    empty_reason:
+      en: This pipeline holds one single-period snapshot of local business units (shown in the overview KPI row), no NACE sector breakdown and no business-creation or start-up survival trend — so no card in this panel can be filled honestly yet.
+      fr: Ce pipeline détient un seul instantané des unités locales à une période donnée (montré dans la ligne d'indicateurs clés de la vue d'ensemble), aucune ventilation sectorielle NACE et aucune tendance de créations d'entreprises ou de survie des jeunes entreprises — aucune carte de ce panneau ne peut donc être remplie honnêtement pour l'instant.
+      nl: Dit pipeline bevat één momentopname van lokale ondernemingseenheden voor één periode (getoond in de KPI-rij van het overzicht), geen NACE-sectoruitsplitsing en geen trend van bedrijfsoprichtingen of start-upoverleving — geen enkele kaart in dit paneel kan dus momenteel eerlijk worden ingevuld.
+  - id: comparaisons
+    label: {en: Territorial comparisons, fr: Comparaisons territoriales, nl: Territoriale vergelijkingen}
+    cards: [comparison, map, communes]
+    legacy_anchors: [comparison, map, communes]
+
+# New thematic list cards this batch introduces (Population, Revenus, Emploi,
+# Logement each get one), same premise as national_sections.yaml's
+# `extra_lists`: `id` is the layout id used both by a `panels[].cards` entry
+# above and by the matching element in micro.html; `series` uses the page's
+# existing generic list renderer (latest value + period per row). Every code
+# is verified against national.json/aggregates.json by
+# `_check_micro_sections`, so a card here can never render as an empty box.
+extra_lists:
+  - id: demographics
+    label: {en: Population by age group, fr: Population par groupe d'âge, nl: Bevolking naar leeftijdsgroep}
+    series: [POPULATION_BY_COMMUNE, POPULATION_AGE_0_14, POPULATION_AGE_15_64, POPULATION_AGE_65_PLUS]
+  - id: income
+    label: {en: Income and taxation, fr: Revenus et fiscalité, nl: Inkomen en fiscaliteit}
+    series: [AVG_NET_TAXABLE_INCOME, FISCAL_TOT_NET_TAXABLE_INC, FISCAL_NBR_NON_ZERO_INC, FISCAL_TOT_TAXES, FISCAL_TOT_MUNICIP_TAXES]
+  - id: employment
+    label: {en: Unemployment, fr: Chômage, nl: Werkloosheid}
+    series: [UNEMPLOYMENT_RATE_INSURED, UNEMPLOYMENT_RATE_INSURED_MONTHLY, UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE, UNEMPLOYMENT_RATE_COM]
+  - id: housing-stock
+    label: {en: Housing stock, fr: Parc de logements, nl: Woningvoorraad}
+    series: [DWELLINGS_TOTAL, DWELLINGS_OCCUPIED, DWELLINGS_VACANT, SHARE_DWELLINGS_UNOCCUPIED]
+
+# The Logement panel's small region table: HOUSE_SALES_TRANSACTIONS (annual,
+# aggregatable) for Belgium and its three regions, from public/data/
+# aggregates.json -- built from the ground up, never population-weighted
+# (CLAUDE.md's aggregation rule). No median-price column: MEDIAN_HOUSE_PRICE
+# is quarterly and municipal only, and a median cannot be summed or averaged
+# into a regional or national figure -- `price_note` says so, in the reader's
+# own language, instead of a blank or a dash typed in as if it were a value.
+regional_housing:
+  label: {en: Home sales by region, fr: Ventes de logements par région, nl: Woningverkopen per regio}
+  series: HOUSE_SALES_TRANSACTIONS
+  note:
+    en: Residential sales transactions recorded each year, Belgium and its three regions, at the latest period every one of them shares.
+    fr: Transactions de vente de logements enregistrées chaque année, la Belgique et ses trois régions, à la dernière période que chacune d’elles partage.
+    nl: Geregistreerde verkooptransacties van woningen per jaar, België en zijn drie gewesten, op de laatste periode die ze allemaal delen.
+  price_note:
+    en: "No median house price column: a median cannot be summed or averaged from commune medians into a regional or national figure. The one honest view of it is commune by commune, on the microeconomic map."
+    fr: "Aucune colonne de prix médian des maisons : une médiane ne peut être ni additionnée ni moyennée à partir de médianes communales pour obtenir un chiffre régional ou national. Sa seule vue honnête est commune par commune, sur la carte microéconomique."
+    nl: "Geen kolom met de mediane huizenprijs: een mediaan kan niet worden opgeteld of gemiddeld uit gemeentelijke medianen tot een regionaal of nationaal cijfer. De enige eerlijke weergave ervan is gemeente per gemeente, op de microeconomische kaart."
