@@ -89,7 +89,9 @@ def _assert_nav_links_are_actually_usable(page_obj, links, *, viewport_width: in
         )
 
 
-@pytest.mark.parametrize("page", ["home2.html", "macro.html"])
+@pytest.mark.parametrize(
+    "page", ["home2.html", "macro.html", "profiles.html", "commune.html", "micro.html", "map.html"]
+)
 def test_no_js_390px_the_six_nav_links_are_reachable(chromium, site, page):
     """Client-mode pages: scripting off, a phone width, the primary nav has
     no toggle to press (`.bp-nav-toggle` stays `display:none` without
@@ -169,7 +171,9 @@ def _min_side(box) -> float:
     return min(box["width"], box["height"])
 
 
-@pytest.mark.parametrize("page", ["home2.html", "macro.html"])
+@pytest.mark.parametrize(
+    "page", ["home2.html", "macro.html", "profiles.html", "commune.html", "micro.html", "map.html"]
+)
 def test_390px_touch_targets_are_at_least_44px(chromium, site, page):
     context = chromium.new_context(viewport={"width": MOBILE_WIDTH, "height": 800})
     try:

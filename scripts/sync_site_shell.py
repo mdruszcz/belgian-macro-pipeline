@@ -1,10 +1,12 @@
 """Sync the shared header/footer/bootstrap into the hand-edited pilot pages.
 
-Batch A1.1 (docs/features/site_unification.md). Two pages -- home2.html and
-macro.html -- are still hand-edited HTML, not generated from a page document,
-so the shared header and footer `src/pages/shell.py` renders for every other
-public page cannot simply be written over them once: a maintainer's next edit
-to either page would drift the moment this script stops running.
+Batch A1.1 (docs/features/site_unification.md) started this with two pages,
+home2.html and macro.html; Batch A3.1b adds the four remaining hand-built
+public pages -- profiles.html, commune.html, micro.html and map.html. None of
+the six is generated from a page document, so the shared header and footer
+`src/pages/shell.py` renders for every other public page cannot simply be
+written over them once: a maintainer's next edit to any of them would drift
+the moment this script stops running.
 
 Instead each page carries three delimited zones, written once by hand and
 never touched again except by this script:
@@ -43,13 +45,24 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.pages.shell import SHELL_BOOTSTRAP, ShellError, render_footer, render_header  # noqa: E402
 from src.pages.strings import DEFAULT_LANG  # noqa: E402
 
-#: (file, its own NAV entry) -- src.pages.shell.NAV. Both pilots live at the
-#: repository root, so `asset_prefix` is always "" here; a page synced from a
-#: subdirectory in a later batch would need one, same as a generated page's
-#: does (scripts/export_page_documents.py's `asset_prefix_for`).
+#: (file, its own NAV entry) -- src.pages.shell.NAV. Every synced page lives
+#: at the repository root, so `asset_prefix` is always "" here; a page synced
+#: from a subdirectory in a later batch would need one, same as a generated
+#: page's does (scripts/export_page_documents.py's `asset_prefix_for`).
+#:
+#: Batch A3.1b adds the four remaining hand-built public pages. commune.html
+#: is not itself a NAV entry -- "profiles.html" stands in for the commune
+#: profile in NAV (src/pages/shell.py) -- so its own `current` is
+#: "profiles.html", the same value `_current_nav_page` derives for a
+#: generated commune-profile document, and the same one
+#: tests/test_primary_navigation.py's PAGES dict already expects.
 SHELL_PAGES = (
     ("home2.html", "home2.html"),
     ("macro.html", "macro.html"),
+    ("profiles.html", "profiles.html"),
+    ("commune.html", "profiles.html"),
+    ("micro.html", "micro.html"),
+    ("map.html", "map.html"),
     ("sources.html", "sources.html"),
 )
 

@@ -15,19 +15,16 @@ PAGES = {
     "map.html": "map.html",
     "sources.html": "sources.html",
 }
-#: Batch A1.1 (docs/features/site_unification.md) rebuilds the header/footer
-#: for home2.html and macro.html, through scripts/sync_site_shell.py -- these
-#: carry the SIX destinations (Sources added). Batch A3.1a adds sources.html
-#: itself to the same synced set (it is both a SHELL_PAGES entry and one of
-#: the six destinations the others link to). The remaining four hand pages
-#: (profiles.html, commune.html, micro.html, map.html) are unconverted until
-#: a later batch and still carry the five this repo shipped with before
-#: Batch A1.1; they keep the old assertion below rather than being silently
-#: exempted, so a regression on them still fails loudly.
-SYNCED_PAGES = ("home2.html", "macro.html", "sources.html")
-UNSYNCED_PAGES = tuple(p for p in PAGES if p not in SYNCED_PAGES)
-LINKS = ["home2.html", "profiles.html", "macro.html", "micro.html", "map.html"]
-LINKS_SIX = LINKS + ["sources.html"]
+#: Batch A1.1 (docs/features/site_unification.md) rebuilt the header/footer
+#: for home2.html and macro.html through scripts/sync_site_shell.py; Batch
+#: A3.1b moved the other four hand pages (profiles.html, commune.html,
+#: micro.html, map.html) onto the same shared shell, and Batch A3.1a added sources.html. All seven PAGES entries
+#: are synced now, so the old five-link contract (LINKS) that used to
+#: guard the unconverted pages has nothing left to guard -- removed rather
+#: than kept as a vacuous parametrize over an empty tuple, which would have
+#: silently stopped testing anything the moment the last page was converted.
+SYNCED_PAGES = tuple(PAGES)
+LINKS_SIX = ["home2.html", "profiles.html", "macro.html", "micro.html", "map.html", "sources.html"]
 LEGACY = {"index.html", "home.html", "communes.html", "all_data.html", "local.html"}
 
 
@@ -51,22 +48,10 @@ def _footer_nav(page: str) -> str:
 
 @pytest.mark.parametrize("page", SYNCED_PAGES)
 def test_the_synced_pages_offer_all_six_destinations(page):
-    """home2.html and macro.html: Batch A1.1's shared header, six links
-    including Sources -- docs/features/site_unification.md section 2."""
+    """Every public page: the shared header, six links including Sources --
+    docs/features/site_unification.md section 2."""
     links = re.findall(r'href="([^"]+)"', _primary_nav(page))
     assert links == LINKS_SIX, f"{page} has a different primary navigation: {links}"
-    assert not (set(links) & LEGACY)
-
-
-@pytest.mark.parametrize("page", UNSYNCED_PAGES)
-def test_the_unsynced_pages_still_offer_the_old_five_destinations(page):
-    """profiles.html, commune.html, micro.html, map.html: not touched by
-    Batch A1.1 (explicit exclusion) -- Batch A3.1 moves these to the same six
-    links and markers the pilots now carry. This assertion is the old
-    five-link contract, kept exactly so a regression on an unconverted page
-    still fails here rather than being silently exempted."""
-    links = re.findall(r'href="([^"]+)"', _primary_nav(page))
-    assert links == LINKS, f"{page} has a different primary navigation: {links}"
     assert not (set(links) & LEGACY)
 
 
