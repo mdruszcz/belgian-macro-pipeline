@@ -181,10 +181,10 @@ extra_lists:
 # re-derived by macro.html at render time.
 panel_charts:
   - id: prices-chart
-    label: {en: "HICP, month by month", fr: "IPCH, mois par mois", nl: "GICP, maand na maand"}
+    label: {en: "HICP inflation, annual rate by month", fr: "Inflation IPCH, taux annuel par mois", nl: "HICP-inflatie, jaarritme per maand"}
     series: [HICP]
   - id: employment-chart
-    label: {en: "Unemployment rate, month by month", fr: "Taux de chômage, mois par mois", nl: "Werkloosheidsgraad, maand na maand"}
+    label: {en: "Unemployment rate over time", fr: "Évolution du taux de chômage", nl: "Evolutie van de werkloosheidsgraad"}
     series: [UNEMPLOYMENT_RATE]
   - id: business-cycle-chart
     label: {en: Business and consumer confidence, fr: Confiance des entreprises et des consommateurs, nl: Ondernemers- en consumentenvertrouwen}
