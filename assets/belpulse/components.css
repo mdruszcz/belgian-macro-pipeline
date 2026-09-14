@@ -255,15 +255,26 @@
    positioned in JS over the nearest data point; token colours only, text at
    least 12px, and generous hit padding so a touch tap lands on it. -------- */
 .bp-chart-tip{
-  position:absolute; z-index:60; transform:translate(-50%, -100%) translateY(-10px);
+  /* Position (left/top) is computed and set in JS (BPCharts.attachTooltip's
+     showAt()), already measured against the viewport -- no CSS transform
+     offset here, or the JS's own edge-flip/clamp math would be fighting a
+     percentage shift it cannot see. */
+  position:absolute; z-index:60;
   display:flex; flex-direction:column; gap:2px; pointer-events:none;
   background:var(--bp-text); color:var(--bp-surface); border-radius:var(--bp-radius-control);
   box-shadow:var(--bp-shadow-card); padding:6px 10px; font-size:12px; line-height:1.4;
-  max-width:min(80vw, 280px);
+  /* min-width so a short value ("2,2%") never renders as a one-word sliver,
+     and so a series name wraps AT MOST once instead of one word per line --
+     found by hovering the real hero charts, where a card near the
+     viewport's right edge left the tip only as wide as CSS's shrink-to-fit
+     algorithm allows between its `left` and that edge, several words short
+     of its own max-width cap. */
+  min-width:140px; max-width:min(80vw, 280px);
 }
 .bp-chart-tip[hidden]{display:none}
 .bp-chart-tip span:first-child{font-weight:var(--bp-weight-semibold)}
 .bp-chart-tip span:last-child:not(:first-child){opacity:.85}
+.bp-chart-tip-value{white-space:nowrap}
 
 /* Visually-hidden live region attachTooltip() places after the canvas --
    the same "clip to 1px" pattern used elsewhere (e.g. home2's

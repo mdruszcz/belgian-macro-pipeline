@@ -564,14 +564,17 @@
   }
 
   /* Unit hints that are about the UNIT, not the series: a percentage-point
-     contribution, an index and its base year. Anything else falls back to
-     the shared formatter's own suffix. */
+     contribution, an index and its base year, a balance. Those three now
+     live once, in MapUI.unitLabel (Batch A1.3, shared with home2.html's
+     chart tooltip/subtitle) -- everything else stays exactly what it was:
+     the shared formatter's own SUFFIX, silent for percent/eur/count because
+     fmtValue() already put their symbol on the number itself, so a hint chip
+     beside it would repeat it. */
   function unitHint(unit){
     var u = (unit || '').toLowerCase();
-    if(u === 'pp_contribution') return 'pp';
-    var idx = /^index_(\d{4})$/.exec(u);
-    if(idx) return idx[1] + '=100';
-    if(u === 'balance') return T('macroBalance');
+    if(u === 'pp_contribution' || u === 'balance' || /^index_\d{4}$/.test(u)){
+      return MapUI.unitLabel(unit, LANG);
+    }
     return MapUI.unitSuffix(unit).trim();
   }
 

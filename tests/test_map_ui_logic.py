@@ -240,6 +240,45 @@ def test_units_are_formatted_the_way_communes_html_formats_them():
     assert out["suffix_count"] == ""
 
 
+def test_unit_label_never_leaks_an_internal_unit_code():
+    """MapUI.unitLabel is the standalone-word reading of a unit -- a chart
+    subtitle or a tooltip's value column, where there is no number for a
+    unitSuffix() to trail after. Batch A1.3 (docs/features/
+    site_unification.md): a reader must never see 'percent_yy' (rule 7)."""
+    out = _run_node("""
+        console.log(JSON.stringify({
+          percent_yy: MapUI.unitLabel('percent_yy', 'en'),
+          percent:    MapUI.unitLabel('percent', 'en'),
+          pp:         MapUI.unitLabel('pp_contribution', 'en'),
+          index:      MapUI.unitLabel('index_2021', 'en'),
+          eur:        MapUI.unitLabel('eur', 'en'),
+          eur_hab:    MapUI.unitLabel('eur_per_inhabitant', 'en'),
+          count:      MapUI.unitLabel('count', 'en'),
+          balance_en: MapUI.unitLabel('balance', 'en'),
+          balance_fr: MapUI.unitLabel('balance', 'fr'),
+          balance_nl: MapUI.unitLabel('balance', 'nl'),
+          fallback:   MapUI.unitLabel('per_10000_cars', 'en'),
+          empty:      MapUI.unitLabel('', 'en'),
+        }));
+        """)
+    assert out["percent_yy"] == "%"
+    assert out["percent"] == "%"
+    assert out["pp"] == "pp"
+    assert out["index"] == "2021=100"
+    assert out["eur"] == "€"
+    assert out["eur_hab"].startswith("€")
+    assert out["count"] == ""
+    assert out["balance_en"] == "balance"
+    assert out["balance_fr"] == "solde"
+    assert out["balance_nl"] == "saldo"
+    assert out["fallback"] == "per 10000 cars"
+    assert out["empty"] == ""
+    # No result may contain a bare underscore -- the whole point of this
+    # function existing is that a raw unit CODE never reaches a reader.
+    for value in out.values():
+        assert "_" not in value, f"unit label leaked an internal code: {value!r}"
+
+
 def test_projection_keeps_belgium_from_stretching_sideways():
     """Longitude must be scaled by cos(latitude); without it the country is
     drawn about 1.6x too wide."""

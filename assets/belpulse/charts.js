@@ -691,6 +691,15 @@
    * opts.locale) and a missing/non-final value never prints as 0 -- it prints
    * the caller-supplied word for its status, or an em dash if none was
    * given. */
+  /**
+   * `opts.formatValue`, when the caller supplies one, is a full
+   * `(value, unit, decimals, locale) -> string` formatter -- e.g.
+   * `MapUI.formatValue`, which already turns "percent_yy" into "2,2%" and
+   * "eur" into "€1 234" the same way every other number on the site is
+   * shown. Without one, charts.js falls back to appending the RAW unit
+   * string after the number -- correct for a page that never loads MapUI,
+   * but a caller that has it (every page on this site does) should always
+   * pass it, or a reader sees an internal unit code (rule 7). */
   function fmtTipValue(point, opts) {
     opts = opts || {};
     if (point.value == null) {
@@ -698,6 +707,9 @@
       return vocab[point.status] || opts.missingLabel || vocab.missing || '—';
     }
     var decimals = opts.decimals != null ? opts.decimals : 1;
+    if (typeof opts.formatValue === 'function') {
+      return opts.formatValue(point.value, point.unit, decimals, opts.locale);
+    }
     var txt = point.value.toLocaleString(opts.locale || 'en-GB', { maximumFractionDigits: decimals });
     if (point.unit) txt += ' ' + point.unit;
     return txt;
@@ -709,27 +721,36 @@
     return vocab[status] || status;
   }
 
-  function tipParts(point, opts) {
-    var parts = [];
+  function tipFields(point, opts) {
     var name = point.series || point.territory || point.label;
-    if (name) parts.push(String(name));
-    if (point.period) parts.push(String(point.period));
-    parts.push(fmtTipValue(point, opts));
-    var statusWord = fmtStatusWord(point.status, opts);
-    if (statusWord) parts.push(statusWord);
-    return parts;
+    return {
+      name: name ? String(name) : '',
+      period: point.period != null ? String(point.period) : '',
+      // Always ONE string -- fmtTipValue() already combines the number and
+      // its unit (via opts.formatValue when the caller gave one), so this
+      // never needs to be split across two spans/lines.
+      value: fmtTipValue(point, opts),
+      status: fmtStatusWord(point.status, opts),
+    };
   }
 
+  /** `.bp-chart-tip-value` gets `white-space:nowrap` in components.css --
+   * short by construction ("2,2%"), it should never wrap. The series/
+   * territory NAME is the one line long enough to legitimately wrap, and
+   * components.css gives the tooltip a min-width so it wraps at most once. */
   function renderTipHTML(point, opts) {
-    return tipParts(point, opts)
-      .map(function (p) {
-        return '<span>' + escapeHtml(p) + '</span>';
-      })
-      .join('');
+    var f = tipFields(point, opts);
+    var rows = [];
+    if (f.name) rows.push('<span>' + escapeHtml(f.name) + '</span>');
+    if (f.period) rows.push('<span>' + escapeHtml(f.period) + '</span>');
+    rows.push('<span class="bp-chart-tip-value">' + escapeHtml(f.value) + '</span>');
+    if (f.status) rows.push('<span>' + escapeHtml(f.status) + '</span>');
+    return rows.join('');
   }
 
   function renderTipText(point, opts) {
-    return tipParts(point, opts).join(', ');
+    var f = tipFields(point, opts);
+    return [f.name, f.period, f.value, f.status].filter(Boolean).join(', ');
   }
 
   /**
@@ -770,8 +791,27 @@
       tip.innerHTML = renderTipHTML(hit.point, opts);
       tip.hidden = false;
       var rect = canvas.getBoundingClientRect();
-      tip.style.left = rect.left + window.scrollX + hit.x + 'px';
-      tip.style.top = rect.top + window.scrollY + hit.y + 'px';
+      var pointX = rect.left + hit.x,
+        pointY = rect.top + hit.y;
+      // Measure the tip's OWN natural size first, at a throwaway position
+      // that cannot itself constrain that width (see the note below), then
+      // place it from that real size -- centred above the point by default,
+      // but flipped/clamped to stay inside the viewport near an edge.
+      tip.style.left = '0px';
+      tip.style.top = '0px';
+      var tw = tip.offsetWidth,
+        th = tip.offsetHeight;
+      var margin = 8,
+        vw = document.documentElement.clientWidth,
+        vh = document.documentElement.clientHeight;
+      var left = pointX - tw / 2;
+      if (left + tw > vw - margin) left = pointX - tw - 10; // flip to the point's LEFT near the right edge
+      if (left < margin) left = Math.min(margin, vw - tw - margin);
+      var top = pointY - th - 10;
+      if (top < margin) top = pointY + 14; // flip below near the viewport's top edge
+      if (top + th > vh - margin) top = Math.max(margin, vh - th - margin);
+      tip.style.left = left + window.scrollX + 'px';
+      tip.style.top = top + window.scrollY + 'px';
       live.textContent = renderTipText(hit.point, opts);
     }
 
