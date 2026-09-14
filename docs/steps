@@ -1331,7 +1331,12 @@ unemployment cells are `suppressed`, by maintainer decision)
 How: Extend the existing connector for any dataset the coverage report found missing; publish
 dedicated regional payload files under public/data/ for the browser to consume.
 Why: Rule 20/21 -- no browser-side Eurostat fetch and no raw source file reaches a public page.
- [BUILD] B3 -- Europe panel UI
+ ✅ [BUILD] B3 -- Europe panel UI (2026-09-14, PR #187: NUTS 2 choropleth in macro.html's Europe panel with
+the vendored eurostat-map 4.11.3 (EUPL-1.2), indicator/year/region selection, one tooltip, side card with
+value, unit, status, history and source, licence-excluded regions hatched, class breaks from the payload.
+Lead check in Chromium: library, geometry and payloads load only when the panel opens; the only external
+hosts are Google Fonts; switching theme recolours the map; no page errors. Only tests/test_europe_panel.py
+ran locally, by the maintainer's instruction; independent audit skipped for speed at his request)
 How: A NUTS 2 map in Macro's Europe rubrique using eurostat-map, reusing the existing commune map
 engine's conventions; indicator/year pickers, legend, zoom, absent-data state, source/unit/geo-
 vintage displayed; loads only when the panel opens.
