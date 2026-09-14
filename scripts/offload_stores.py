@@ -22,6 +22,12 @@ indicators>)`. The same list drives the dump and the delete, so a row can never
 be deleted from the database without first being written to a CSV. Checks,
 each of which refuses rather than guesses (rule 13):
 
+  0. No -wal or -shm file sits beside the committed database. One means a
+     program has it open in WAL mode (a DB viewer), or one that crashed left
+     it; replacing the database under it would pair the new file with the old
+     one's journal. A check made before any write, NOT a lock: a program that
+     opens the database after it is not detected. Those files are never
+     deleted here.
   1. Every indicator in the working db whose SOURCE is offloaded (onem,
      walstat) is declared by some in_db store. A newly configured ONEM
      indicator that nobody registered would otherwise stay in the committed
@@ -36,15 +42,43 @@ each of which refuses rather than guesses (rule 13):
   4. After the delete: zero offloaded rows remain, no rebuild fetch_runs row
      remains, PRAGMA foreign_key_check is empty, PRAGMA integrity_check is ok,
      and the remaining observation count is exactly total - offloaded.
+
+PUBLISHING IS ONE os.replace PER FILE -- each in_db CSV, then the database --
+and a filesystem offers no rename that covers several files at once. So,
+before the first one, every committed file about to be replaced is copied into
+a backup directory of this run's own, under the working database's directory
+(data/local/offload_backup/<time>-<pid>/, gitignored; never beside the
+committed files, where `git add data/` would stage a leftover), with a
+manifest.txt naming the committed file each backup belongs to.
+
+  * An exception while publishing puts every file already replaced back from
+    its backup -- copied to a temporary file beside it, then moved over it, so
+    the backup survives an interrupted restore and the file is never left
+    truncated -- and a file that did not exist before is removed again. The
+    original exception is then raised unchanged, and this run's backups are
+    deleted.
+  * If a file cannot be put back, PartialPublication is raised from the
+    original exception, naming the files still new, and the backup directory
+    is KEPT for a restore by hand.
+  * A publish that completes deletes this run's backups.
+
+What this does NOT cover: a power cut or a killed process in the middle of
+publishing runs no code at all, so nothing is put back. What is left then is
+this run's backup directory and its manifest, from which the files can be
+restored by hand. Backup directories of earlier runs are never deleted
+automatically: one of them may be the only copy from an earlier incident.
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import logging
 import os
+import shutil
 import sqlite3
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -70,9 +104,46 @@ PK = ("indicator_id", "geo_id", "period", "vintage")
 #: pseudo-key stands in for "the whole store" rather than "one indicator".
 _WHOLE_STORE = "__all__"
 
+#: Beside the working database: one directory per run, never reused, never
+#: cleared by another run.
+BACKUP_DIR_NAME = "offload_backup"
+BACKUP_MANIFEST = "manifest.txt"
+#: The temporary file a restore copies a backup into, beside the committed file.
+RESTORE_SUFFIX = ".restore.tmp"
+#: What SQLite keeps beside a database open in WAL mode.
+SIDECAR_SUFFIXES = ("-wal", "-shm")
+_ABSENT = "(absent)"
+
+# No handler configured here: the command line gets warnings on stderr from
+# logging's last-resort handler, and the Dagster process keeps its own logging.
+log = logging.getLogger("offload_stores")
+
 
 class OffloadError(Exception):
     pass
+
+
+class PartialPublication(Exception):
+    """offload() stopped while replacing the committed files and could not put
+    every one of them back. Not a refusal: files WERE changed. `left_new` still
+    hold this run's version; `restored` hold their previous one again; the
+    previous version of each is in `backup_dir`, listed in its manifest.txt."""
+
+    def __init__(self, restored: list[Path], left_new: list[Path], backup_dir: Path) -> None:
+        self.restored = tuple(restored)
+        self.left_new = tuple(left_new)
+        self.backup_dir = backup_dir
+        still_new = "\n".join(f"  {p}" for p in self.left_new)
+        put_back = "\n".join(f"  {p}" for p in self.restored) or "  (none)"
+        super().__init__(
+            "the offload stopped while publishing and could not put every committed file "
+            f"back.\nStill this run's version:\n{still_new}\nPut back:\n{put_back}\n"
+            f"The previous version of each file is kept in {backup_dir}; {BACKUP_MANIFEST} "
+            f"there names the committed file each backup belongs to ({_ABSENT}: the file did "
+            "not exist before, so remove it). Nothing in that directory is deleted "
+            "automatically. Restore each file still new, one at a time -- from that directory, "
+            "or with `git checkout -- <file>` -- never a whole directory."
+        )
 
 
 def _placeholders(n: int) -> str:
@@ -94,6 +165,20 @@ def _committed_keys_for_store(store) -> set[tuple[str, ...]]:
     for path in store.csv_paths():
         keys |= _committed_keys(path)
     return keys
+
+
+def _refuse_an_open_committed_database(committed_db: Path) -> None:
+    """Check 0 of the module docstring. Made before any write; not a lock."""
+    sidecars = [committed_db.with_name(committed_db.name + s) for s in SIDECAR_SUFFIXES]
+    present = [p for p in sidecars if p.exists()]
+    if present:
+        raise OffloadError(
+            f"{' and '.join(p.name for p in present)} beside {committed_db}: a program has the "
+            "committed database open (close the DB viewer, or whatever else is reading it), or "
+            "one that crashed left them. Close it, then run the offload again. If nothing has "
+            "it open any more, opening and closing the database once with sqlite3 removes "
+            "them. They are never deleted automatically."
+        )
 
 
 def _check_every_offloaded_source_indicator_is_declared(
@@ -141,6 +226,87 @@ def _check_no_committed_row_is_lost(conn: sqlite3.Connection, store) -> None:
         )
 
 
+def _remove_backups(backup_dir: Path) -> None:
+    """This run's backups, once they are no longer needed. A failure to remove
+    them is reported, never raised: the committed files are already right."""
+    shutil.rmtree(backup_dir, ignore_errors=True)
+    if backup_dir.exists():
+        log.warning("could not remove the offload backups in %s; remove them by hand", backup_dir)
+
+
+def _back_up(destinations: list[Path], scratch: Path) -> tuple[Path, dict[Path, Path | None]]:
+    """Copy every committed file about to be replaced into a new directory of
+    this run's own. Returns it and {committed file: its backup, or None for a
+    file that does not exist yet}. If backing up fails, nothing has been
+    published: the incomplete directory is removed and the error raised."""
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    backup_dir = scratch / BACKUP_DIR_NAME / f"{stamp}-{os.getpid()}"
+    backup_dir.mkdir(parents=True)
+    backups: dict[Path, Path | None] = {}
+    try:
+        for i, dest in enumerate(destinations):
+            if dest.is_file():
+                backups[dest] = backup_dir / f"{i:03d}_{dest.name}"
+                shutil.copy2(dest, backups[dest])
+            else:
+                backups[dest] = None
+        lines = [
+            f"# offload backup, {stamp}: the previous version of each committed file, in the",
+            f"# order they are published. {_ABSENT}: the file did not exist before.",
+            *(f"{b.name if b else _ABSENT}\t{dest}" for dest, b in backups.items()),
+        ]
+        (backup_dir / BACKUP_MANIFEST).write_text("\n".join(lines) + "\n", encoding="utf-8")
+    except BaseException:
+        shutil.rmtree(backup_dir, ignore_errors=True)
+        raise
+    return backup_dir, backups
+
+
+def _restore(replaced: list[Path], backups: dict[Path, Path | None]) -> tuple[list, list]:
+    """Put back every file in `replaced`, last replaced first, without consuming
+    its backup. Returns (restored, left_new). Keeps going past a file it cannot
+    put back, so as few as possible stay new."""
+    restored: list[Path] = []
+    left_new: list[Path] = []
+    for dest in reversed(replaced):
+        backup = backups[dest]
+        try:
+            if backup is None:
+                dest.unlink(missing_ok=True)
+            else:
+                restoring = dest.with_name(dest.name + RESTORE_SUFFIX)
+                shutil.copy2(backup, restoring)
+                os.replace(restoring, dest)
+            restored.append(dest)
+        except Exception as exc:  # noqa: BLE001 -- reported below, never swallowed
+            log.error("could not put %s back: %s: %s", dest, type(exc).__name__, exc)
+            left_new.append(dest)
+    return restored, left_new
+
+
+def _publish_or_restore(
+    publish: list[tuple[Path, Path]], backup_dir: Path, backups: dict[Path, Path | None]
+) -> None:
+    replaced: list[Path] = []
+    try:
+        for tmp_path, dest in publish:
+            os.replace(tmp_path, dest)
+            replaced.append(dest)
+    except BaseException as exc:
+        restored, left_new = _restore(replaced, backups)
+        if left_new:
+            raise PartialPublication(restored, left_new, backup_dir) from exc
+        log.warning(
+            "the offload stopped while publishing (%s: %s); every committed file it had "
+            "replaced was put back: %s",
+            type(exc).__name__,
+            exc,
+            ", ".join(str(p) for p in restored) or "none had been replaced yet",
+        )
+        _remove_backups(backup_dir)
+        raise
+
+
 def offload(
     working_db: Path = DEFAULT_WORKING_DB,
     committed_db: Path = DEFAULT_COMMITTED_DB,
@@ -149,6 +315,7 @@ def offload(
     """Returns {store name: rows written to its CSV}."""
     if not working_db.is_file():
         raise OffloadError(f"No working database at {working_db} -- run build_staging_db.py first")
+    _refuse_an_open_committed_database(committed_db)
 
     stores = in_db_stores(load_stores(stores_path))
     if not stores:
@@ -177,6 +344,7 @@ def offload(
         for s in stores
     }
     written: dict[str, int] = {}
+    publish: list[tuple[Path, Path]] = []
 
     try:
         conn = sqlite3.connect(f"file:{working_db}?mode=ro", uri=True)
@@ -274,22 +442,30 @@ def offload(
 
         # Publish. CSVs first: if the process dies between the two, the old
         # committed database (which holds none of these rows either) plus the
-        # new CSVs is still a consistent pair for the next assemble.
+        # new CSVs is still a consistent pair for the next assemble. Backed up
+        # first, and put back on an exception (module docstring).
         for store in stores:
             for key, tmp_path in tmp_csvs[store.name].items():
                 if not tmp_path.is_file():
                     continue  # a zero-row indicator: nothing to publish
                 dest = store.path if key == _WHOLE_STORE else store.csv_for(key)
-                os.replace(tmp_path, dest)
-        os.replace(tmp_db, committed_db)
-        print(
-            f"Offloaded {offloaded} observations to {len(stores)} store(s); "
-            f"{committed_db} keeps {remaining}."
-        )
-        return written
+                publish.append((tmp_path, dest))
+        publish.append((tmp_db, committed_db))
+        backup_dir, backups = _back_up([dest for _, dest in publish], scratch)
+        _publish_or_restore(publish, backup_dir, backups)
+        _remove_backups(backup_dir)
     finally:
         for path in [tmp_db, *(p for d in tmp_csvs.values() for p in d.values())]:
             path.unlink(missing_ok=True)
+        for _, dest in publish:
+            dest.with_name(dest.name + RESTORE_SUFFIX).unlink(missing_ok=True)
+
+    # Outside the publish: nothing below may undo a publish that completed.
+    print(
+        f"Offloaded {offloaded} observations to {len(stores)} store(s); "
+        f"{committed_db} keeps {remaining}."
+    )
+    return written
 
 
 def main() -> int:

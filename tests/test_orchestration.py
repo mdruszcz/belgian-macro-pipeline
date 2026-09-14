@@ -1009,24 +1009,49 @@ def test_a_crash_in_the_offload_stays_that_crash(sandbox, monkeypatch):
     result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
 
     assert "PermissionError" in {e.cls_name for e in _errors(result, "committed_stores")}
+    logged = " ".join(e.user_message for e in sandbox.instance.all_logs(result.run_id))
+    # Neutral: an error after a completed publish (the final print) must not be
+    # reported as "nothing changed", nor as "everything was put back".
+    assert "did not report a partial publication" in logged
+    assert "git status" in logged
 
 
-def test_the_partial_publication_notice_names_single_files_from_the_registry(sandbox):
-    files = canonical.committed_files(sandbox.paths)
-    names = [Path(f).name for f in files]
-    assert names[0] == "belgian_macro.db"
-    assert sorted(names[1:]) == ["GDP_A.csv", "HICP_A.csv", "walstat.csv"]
-    notice = canonical.partial_publication_notice(sandbox.paths)
-    assert all(f in notice for f in files)
-    assert notice.count("git checkout") == 1 and "git checkout -- <file>" in notice
+def test_a_partial_publication_names_only_the_files_left_new_and_the_backups(sandbox, monkeypatch):
+    module, _ = run.script_function("committed_stores")
+    stores = Path(sandbox.paths.stores).parent
+    left_new = [stores / "international" / "GDP_A.csv"]
+    backups = Path(sandbox.paths.working_db).parent / "offload_backup" / "20260914T050000Z-1"
 
-    repository = canonical.committed_files(PipelinePaths())
-    assert repository[0] == "data/belgian_macro.db"
-    per_store = [
-        dict.fromkeys(s.csv_for(i) for i in s.indicators) for s in in_db_stores(load_stores())
-    ]
-    assert len(repository) == 1 + sum(len(files) for files in per_store)
-    assert not any((REPO / f).is_dir() for f in repository), "a directory is never restored"
+    def partial(context, name, **given):
+        try:
+            raise OSError("disk full while publishing belgian_macro.db")
+        except OSError as exc:
+            raise module.PartialPublication([stores / "walstat.csv"], left_new, backups) from exc
+
+    monkeypatch.setattr(run, "call_function", partial)
+    result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
+
+    assert "PartialPublication" in {e.cls_name for e in _errors(result, "committed_stores")}
+    logged = [e.user_message for e in sandbox.instance.all_logs(result.run_id)]
+    (notice,) = [m for m in logged if m.startswith(canonical.PARTIAL_NOTICE_OPENING)]
+    assert f"  {left_new[0]}\n" in notice
+    assert "walstat.csv" not in notice, "only the files still new"
+    assert str(backups) in notice
+
+
+def test_the_partial_publication_notice_names_single_files_as_git_names_them(tmp_path):
+    inside = [REPO / "data" / "belgian_macro.db", REPO / "data" / "international" / "GDP_A.csv"]
+    outside = tmp_path / "walstat.csv"
+    notice = canonical.partial_publication_notice(
+        PipelinePaths(), [*inside, outside], tmp_path / "backup"
+    )
+    assert notice.startswith(canonical.PARTIAL_NOTICE_OPENING)
+    assert "  data/belgian_macro.db\n" in notice
+    assert "  data/international/GDP_A.csv\n" in notice
+    assert f"  {outside}\n" in notice
+    assert str(tmp_path / "backup") in notice
+    assert notice.count("git checkout -- <file>") == 1
+    assert "Never restore a whole directory" in notice
 
 
 # ── Step 2: what the runner reads -- manifest path, gate, validation status ──

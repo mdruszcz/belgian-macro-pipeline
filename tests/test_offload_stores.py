@@ -9,14 +9,27 @@ What must hold, each tested against a real assembled database:
     comes back byte-identical and the committed observations unchanged;
   * a sync's new vintage between the two lands in the CSV beside the old one;
   * every refusal leaves every committed file byte-identical and no scratch
-    file behind.
+    file behind -- including the refusal while a -wal or -shm file sits beside
+    the committed database, which also leaves that file where it is;
+  * an exception while publishing puts back every file already replaced, from
+    a backup it never consumes, and removes a file that did not exist before;
+  * a file that cannot be put back raises PartialPublication naming it, and
+    the run's backups are kept -- also through a later retry.
+
+Every rollback test first adds a new vintage, so the offload really changes
+the CSV: build_pipeline alone is a fixed point, and a rollback on it would
+prove nothing.
 
 Marked slow for the same reason as tests/test_build_staging_db.py.
 """
 
 import csv
 import hashlib
+import logging
+import os
+import shutil
 import sqlite3
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,7 +42,14 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 from build_staging_db import build  # noqa: E402
 from export_observations_csv import COLUMNS  # noqa: E402
-from offload_stores import OffloadError, offload  # noqa: E402
+from offload_stores import (  # noqa: E402
+    BACKUP_DIR_NAME,
+    BACKUP_MANIFEST,
+    RESTORE_SUFFIX,
+    OffloadError,
+    PartialPublication,
+    offload,
+)
 
 from src.db import migrate  # noqa: E402
 from src.db.vintages import upsert_observation  # noqa: E402
@@ -176,10 +196,40 @@ def _observations(db: Path, indicator: str | None = None) -> list[tuple]:
         conn.close()
 
 
+def _add_a_new_vintage(pipeline) -> bool:
+    """What a sync does between assemble and offload: one revised 2024 value."""
+    conn = sqlite3.connect(pipeline["working"])
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('walstat', 'walstat', '2026-09-14T05:00:00+00:00', 'ok')"
+    )
+    run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    changed = upsert_observation(
+        conn,
+        indicator_id=INDICATOR,
+        geo_id=GEO,
+        period="2024",
+        vintage="2026-09-14T05:00:00+00:00",
+        value=3160.0,
+        status="revised",
+        period_start="2024-01-01",
+        period_end="2024-12-31",
+        fetch_run_id=run_id,
+    )
+    conn.commit()
+    conn.close()
+    return changed
+
+
+def _offload(pipeline):
+    return offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+
+
 def test_offload_dumps_exactly_the_store_and_strips_exactly_the_same_rows(pipeline):
     working_rows = _observations(pipeline["working"], INDICATOR)
 
-    counts = offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+    counts = _offload(pipeline)
 
     assert counts == {"walstat": 3}
     with pipeline["csv"].open(encoding="utf-8", newline="") as fh:
@@ -212,7 +262,7 @@ def test_offload_dumps_exactly_the_store_and_strips_exactly_the_same_rows(pipeli
 def test_assemble_then_offload_is_a_fixed_point(pipeline, tmp_path):
     """No sync in between: the CSV is byte-identical and the committed
     observations unchanged, on the first round and on the second."""
-    offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+    _offload(pipeline)
     first_csv = _sha(pipeline["csv"])
     first_rows = _observations(pipeline["committed_db"])
 
@@ -221,7 +271,7 @@ def test_assemble_then_offload_is_a_fixed_point(pipeline, tmp_path):
         working_db=pipeline["working"],
         stores_path=pipeline["registry"],
     )
-    offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+    _offload(pipeline)
 
     assert _sha(pipeline["csv"]) == first_csv
     assert _observations(pipeline["committed_db"]) == first_rows
@@ -230,30 +280,9 @@ def test_assemble_then_offload_is_a_fixed_point(pipeline, tmp_path):
 
 
 def test_a_new_vintage_from_a_sync_lands_in_the_csv_beside_the_old_one(pipeline):
-    conn = sqlite3.connect(pipeline["working"])
-    conn.execute("PRAGMA foreign_keys=ON")
-    conn.execute(
-        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
-        "VALUES ('walstat', 'walstat', '2026-09-14T05:00:00+00:00', 'ok')"
-    )
-    run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-    changed = upsert_observation(
-        conn,
-        indicator_id=INDICATOR,
-        geo_id=GEO,
-        period="2024",
-        vintage="2026-09-14T05:00:00+00:00",
-        value=3160.0,
-        status="revised",
-        period_start="2024-01-01",
-        period_end="2024-12-31",
-        fetch_run_id=run_id,
-    )
-    conn.commit()
-    conn.close()
-    assert changed
+    assert _add_a_new_vintage(pipeline)
 
-    offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+    _offload(pipeline)
 
     with pipeline["csv"].open(encoding="utf-8", newline="") as fh:
         rows_2024 = [
@@ -277,11 +306,18 @@ def test_a_new_vintage_from_a_sync_lands_in_the_csv_beside_the_old_one(pipeline)
         conn.close()
 
 
+def _backup_dirs(pipeline) -> list[Path]:
+    root = pipeline["working"].parent / BACKUP_DIR_NAME
+    return sorted(root.iterdir()) if root.is_dir() else []
+
+
 def _assert_nothing_changed(pipeline, before: dict, scratch: Path) -> None:
     assert _sha(pipeline["csv"]) == before["csv"]
     assert _sha(pipeline["committed_db"]) == before["db"]
     leftovers = [p.name for p in scratch.iterdir() if p.suffix == ".tmp"]
     assert leftovers == []
+    assert _backup_dirs(pipeline) == [], "this run left a backup directory behind"
+    assert not list(pipeline["csv"].parent.glob("*" + RESTORE_SUFFIX))
 
 
 def _snapshot(pipeline) -> dict:
@@ -310,7 +346,7 @@ def test_refuses_an_undeclared_indicator_of_an_offloaded_source(pipeline):
     before = _snapshot(pipeline)
 
     with pytest.raises(OffloadError, match="MUN_SOMETHING_NEW"):
-        offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+        _offload(pipeline)
 
     _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
 
@@ -327,7 +363,7 @@ def test_refuses_a_working_db_that_lost_committed_rows(pipeline):
     before = _snapshot(pipeline)
 
     with pytest.raises(OffloadError, match="absent from the working database"):
-        offload(pipeline["working"], pipeline["committed_db"], pipeline["registry"])
+        _offload(pipeline)
 
     _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
 
@@ -337,3 +373,262 @@ def test_refuses_a_missing_working_db(pipeline, tmp_path):
     with pytest.raises(OffloadError, match="No working database"):
         offload(tmp_path / "nope.db", pipeline["committed_db"], pipeline["registry"])
     _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
+
+
+@pytest.mark.parametrize("suffix", ["-wal", "-shm"])
+def test_refuses_while_a_wal_or_shm_file_sits_beside_the_committed_database(pipeline, suffix):
+    """A program holding the committed database open in WAL mode. The same
+    function serves `make offload` and the Dagster asset, so both refuse; the
+    command line is checked too. The file is never deleted."""
+    assert _add_a_new_vintage(pipeline)
+    sidecar = pipeline["committed_db"].with_name(pipeline["committed_db"].name + suffix)
+    sidecar.write_bytes(b"")
+    before = _snapshot(pipeline)
+
+    with pytest.raises(OffloadError, match="close the DB viewer"):
+        _offload(pipeline)
+    _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
+    assert sidecar.is_file() and sidecar.read_bytes() == b""
+
+    argv = [sys.executable, "scripts/offload_stores.py", "--working-db", str(pipeline["working"])]
+    argv += ["--committed-db", str(pipeline["committed_db"]), "--stores", str(pipeline["registry"])]
+    cli = subprocess.run(argv, cwd=REPO, capture_output=True, text=True, encoding="utf-8")
+    assert cli.returncode == 1
+    assert "OFFLOAD REFUSED" in cli.stderr and "close the DB viewer" in cli.stderr
+    _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
+    assert sidecar.is_file()
+
+
+# ── An exception while publishing ────────────────────────────────────────────
+
+
+def _fail_publish(monkeypatch, *, on: int) -> list[Path]:
+    """os.replace raising on the `on`-th publish -- never on a restore's own
+    replace. Returns the destinations of every publish attempted."""
+    real = os.replace
+    attempts: list[Path] = []
+
+    def replace(src, dst):
+        if not str(src).endswith(RESTORE_SUFFIX):
+            attempts.append(Path(dst))
+            if len(attempts) == on:
+                raise OSError(f"disk full while publishing {Path(dst).name}")
+        return real(src, dst)
+
+    monkeypatch.setattr(os, "replace", replace)
+    return attempts
+
+
+def _lock_restores(monkeypatch) -> None:
+    """A restore's copy fails: the committed file cannot be put back."""
+    real = shutil.copy2
+
+    def copy2(src, dst, **kwargs):
+        if str(dst).endswith(RESTORE_SUFFIX):
+            raise PermissionError(f"{Path(dst).name} is locked by another process")
+        return real(src, dst, **kwargs)
+
+    monkeypatch.setattr(shutil, "copy2", copy2)
+
+
+@pytest.mark.parametrize(
+    "fail_on, replaced_first",
+    [(1, None), (2, "walstat_observations.csv")],
+    ids=["the first csv", "the database, after every csv was published"],
+)
+def test_a_failed_replace_puts_every_published_file_back(
+    pipeline, monkeypatch, caplog, fail_on, replaced_first
+):
+    assert _add_a_new_vintage(pipeline)
+    before = _snapshot(pipeline)
+
+    with monkeypatch.context() as patch:
+        attempts = _fail_publish(patch, on=fail_on)
+        with caplog.at_level(logging.WARNING, logger="offload_stores"):
+            with pytest.raises(OSError, match="disk full") as raised:
+                _offload(pipeline)
+
+    assert type(raised.value) is OSError, "the original exception, unchanged"
+    assert [p.name for p in attempts][-1] == (
+        "belgian_macro.db" if fail_on == 2 else "walstat_observations.csv"
+    )
+    _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
+    warning = " ".join(r.getMessage() for r in caplog.records)
+    assert "was put back" in warning
+    assert (replaced_first or "none had been replaced yet") in warning
+
+    # Nothing was left behind that stops the next run, and that run does
+    # change the files: the rollback above undid a real change.
+    assert _offload(pipeline) == {"walstat": 4}
+    assert _sha(pipeline["csv"]) != before["csv"]
+    assert _backup_dirs(pipeline) == []
+
+
+def test_a_restore_copies_beside_the_file_and_never_consumes_the_backup(pipeline, monkeypatch):
+    assert _add_a_new_vintage(pipeline)
+    before = _snapshot(pipeline)
+    real = os.replace
+    publishes: list[Path] = []
+    during_restore: list[tuple[Path, Path, list[str]]] = []
+
+    def replace(src, dst):
+        src, dst = Path(src), Path(dst)
+        if src.name.endswith(RESTORE_SUFFIX):
+            (backup_dir,) = _backup_dirs(pipeline)
+            during_restore.append((src, dst, sorted(p.name for p in backup_dir.iterdir())))
+        else:
+            publishes.append(dst)
+            if len(publishes) == 2:
+                raise OSError("disk full while publishing the database")
+        return real(src, dst)
+
+    monkeypatch.setattr(os, "replace", replace)
+    with pytest.raises(OSError, match="disk full"):
+        _offload(pipeline)
+    monkeypatch.undo()
+
+    ((src, dst, backups),) = during_restore
+    assert dst.resolve() == pipeline["csv"].resolve()
+    assert src.parent == dst.parent, "the restore copy sits beside the committed file"
+    assert BACKUP_MANIFEST in backups and any(
+        n.endswith("walstat_observations.csv") for n in backups
+    )
+    _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
+
+
+def test_an_interrupted_restore_never_truncates_the_file_and_keeps_the_backup(
+    pipeline, monkeypatch
+):
+    assert _add_a_new_vintage(pipeline)
+    committed_csv = pipeline["csv"].read_bytes()
+    real = shutil.copy2
+
+    def copy2(src, dst, **kwargs):
+        if str(dst).endswith(RESTORE_SUFFIX):
+            Path(dst).write_bytes(Path(src).read_bytes()[:20])
+            raise OSError("the disk filled up halfway through the copy")
+        return real(src, dst, **kwargs)
+
+    with monkeypatch.context() as patch:
+        _fail_publish(patch, on=2)
+        patch.setattr(shutil, "copy2", copy2)
+        with pytest.raises(PartialPublication) as raised:
+            _offload(pipeline)
+
+    new_csv = pipeline["csv"].read_bytes()
+    assert new_csv != committed_csv and len(new_csv) > len(committed_csv)
+    with pipeline["csv"].open(encoding="utf-8", newline="") as fh:
+        assert len(list(csv.DictReader(fh))) == 4, "this run's whole file, not a truncated one"
+    assert not list(pipeline["csv"].parent.glob("*" + RESTORE_SUFFIX))
+    (backup_dir,) = _backup_dirs(pipeline)
+    assert raised.value.backup_dir == backup_dir
+    (csv_backup,) = backup_dir.glob("*_walstat_observations.csv")
+    assert csv_backup.read_bytes() == committed_csv
+
+
+def test_a_file_that_cannot_be_put_back_raises_partial_publication_and_keeps_the_backups(
+    pipeline, monkeypatch
+):
+    assert _add_a_new_vintage(pipeline)
+    before = _snapshot(pipeline)
+    committed_csv = pipeline["csv"].read_bytes()
+
+    with monkeypatch.context() as patch:
+        _fail_publish(patch, on=2)
+        _lock_restores(patch)
+        with pytest.raises(PartialPublication) as raised:
+            _offload(pipeline)
+
+    error = raised.value
+    assert type(error.__cause__) is OSError and "disk full" in str(error.__cause__)
+    assert [p.resolve() for p in error.left_new] == [pipeline["csv"].resolve()]
+    assert error.restored == ()
+    assert _sha(pipeline["csv"]) != before["csv"], "still this run's version"
+    assert _sha(pipeline["committed_db"]) == before["db"], "the database was never replaced"
+
+    (backup_dir,) = _backup_dirs(pipeline)
+    assert error.backup_dir == backup_dir
+    assert str(backup_dir) in str(error) and str(error.left_new[0]) in str(error)
+    manifest = (backup_dir / BACKUP_MANIFEST).read_text(encoding="utf-8").splitlines()
+    entries = dict(reversed(line.split("\t")) for line in manifest if not line.startswith("#"))
+    csv_backup = backup_dir / entries[str(error.left_new[0])]
+    assert csv_backup.read_bytes() == committed_csv
+    assert set(entries) == {str(error.left_new[0]), str(pipeline["committed_db"])}
+
+
+def test_a_retry_keeps_the_backups_of_a_run_that_could_not_be_put_back(pipeline, monkeypatch):
+    assert _add_a_new_vintage(pipeline)
+    with monkeypatch.context() as patch:
+        _fail_publish(patch, on=2)
+        _lock_restores(patch)
+        with pytest.raises(PartialPublication):
+            _offload(pipeline)
+    (earlier,) = _backup_dirs(pipeline)
+    kept = {p.name: p.read_bytes() for p in earlier.iterdir()}
+
+    assert _offload(pipeline) == {"walstat": 4}
+
+    assert _backup_dirs(pipeline) == [earlier], "the retry removed only its own backups"
+    assert {p.name: p.read_bytes() for p in earlier.iterdir()} == kept
+
+
+def test_a_successful_offload_leaves_no_backup_of_its_own(pipeline):
+    assert _add_a_new_vintage(pipeline)
+    _offload(pipeline)
+    assert _backup_dirs(pipeline) == []
+    assert not list(pipeline["csv"].parent.glob("*" + RESTORE_SUFFIX))
+
+
+def test_a_rollback_removes_an_indicator_file_that_did_not_exist_before(pipeline, monkeypatch):
+    """A directory store has one file per indicator, and an indicator's first
+    rows create its file. That file has no previous version: putting it back
+    means removing it, while a file that did exist gets its bytes back."""
+    store_dir = pipeline["registry"].parent / "walstat_dir"
+    store_dir.mkdir()
+    existing = store_dir / f"{INDICATOR}.csv"
+    _write_csv(existing, COMMITTED_ROWS)
+    created = store_dir / f"{OTHER_WALSTAT}.csv"
+    registry = yaml.safe_load(pipeline["registry"].read_text(encoding="utf-8"))
+    registry["stores"]["walstat"].update(path=str(store_dir), layout="one_csv_per_indicator")
+    pipeline["registry"].write_text(yaml.safe_dump(registry, sort_keys=False), encoding="utf-8")
+    build(
+        source_db=pipeline["committed_db"],
+        working_db=pipeline["working"],
+        stores_path=pipeline["registry"],
+    )
+    conn = sqlite3.connect(pipeline["working"])
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('walstat', 'walstat', '2026-09-14T05:00:00+00:00', 'ok')"
+    )
+    run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    assert upsert_observation(
+        conn,
+        indicator_id=OTHER_WALSTAT,
+        geo_id=GEO,
+        period="2024",
+        vintage="2026-09-14T05:00:00+00:00",
+        value=1200.0,
+        status="final",
+        period_start="2024-01-01",
+        period_end="2024-12-31",
+        fetch_run_id=run_id,
+    )
+    conn.commit()
+    conn.close()
+    existing_before = _sha(existing)
+    db_before = _sha(pipeline["committed_db"])
+    assert not created.exists()
+
+    with monkeypatch.context() as patch:
+        attempts = _fail_publish(patch, on=3)
+        with pytest.raises(OSError, match="disk full"):
+            _offload(pipeline)
+
+    assert [p.name for p in attempts] == [existing.name, created.name, "belgian_macro.db"]
+    assert not created.exists(), "a file this run created is removed again"
+    assert _sha(existing) == existing_before
+    assert _sha(pipeline["committed_db"]) == db_before
+    assert _backup_dirs(pipeline) == []
+    assert not list(store_dir.glob("*" + RESTORE_SUFFIX))

@@ -238,3 +238,4 @@ def test_the_offload_writes_identical_committed_files(tmp_path, monkeypatch):
     assert a["csv"].read_bytes() == b["csv"].read_bytes()
     for side in (a, b):
         assert [p.name for p in side["working"].parent.iterdir() if p.suffix == ".tmp"] == []
+        assert not any((side["working"].parent / "offload_backup").glob("*")), "no backup left"
