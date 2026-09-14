@@ -5,12 +5,17 @@ name:
   nl: Consumentenvertrouwensindicator, België
 unit: balance
 frequency: M
-source_id: dbnomics_eurostat
+source_id: eurostat
 geo_levels:
 - national
 preferred_direction: higher_is_better
 description:
   en: BE Consumer Confidence Indicator
 fetch:
-  query: /ei_bssi_m_r2/M.BS-CSMCI-BAL.SA.BE?observations=true
+  dataset: ei_bssi_m_r2
+  filters:
+    indic: BS-CSMCI-BAL
+    s_adj: SA
+    geo: BE
+  since: "2008"
 display: null

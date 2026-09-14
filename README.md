@@ -6,7 +6,7 @@ result, and publishes both bulk downloads and per-commune payloads — daily, on
 free.
 
 ```
-NBB · Eurostat/DBnomics · FPB · Statbel
+NBB · Eurostat · AMECO/DBnomics · FPB · Statbel
         │
         ├─ adapters ──→ canonical SQLite schema ──→ validation (blocking) ──→ exports
         │                (+ committed CSV stores      ↑                        ├─ bulk CSV/JSON
@@ -61,7 +61,8 @@ of leaving a blank.
 `.github/workflows/daily_fetch.yml`, 06:00 CET:
 
 1. **Migrate** — apply pending numbered SQL migrations (idempotent, tracked in `schema_migrations`)
-2. **Fetch** — NBB SDMX, Eurostat via DBnomics, FPB XLSX; raw responses cached under `data/raw/`
+2. **Fetch** — NBB SDMX, Eurostat's own dissemination API directly, AMECO via DBnomics, FPB XLSX;
+   raw responses cached under `data/raw/`
 3. **Sync** — normalize into the canonical schema; new values insert a new `vintage` rather than
    overwriting, so revisions are preserved
 4. **Load geography** — offline, from committed `config/geography/*.csv`
@@ -264,7 +265,8 @@ are specified in [docs/roadmap.md](docs/roadmap.md) and not started.
 
 - [NBB SDMX Dissemination API](https://nsidisseminate-stat.nbb.be/) — dataflow `DF_QNA_DISS`
   (Quarterly National Accounts)
-- [DBnomics](https://db.nomics.world/) — Eurostat series
+- [Eurostat dissemination API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data) — GDP, HICP, unemployment, government debt, consumer confidence, and the international pilot's European comparisons
+- [DBnomics](https://db.nomics.world/) — AMECO series (until a direct AMECO adapter replaces it)
 - [Federal Planning Bureau](https://www.plan.be/) — economic forecasts
 - [Statbel](https://statbel.fgov.be/) — geography (REFNIS), population, fiscal income, business units
 

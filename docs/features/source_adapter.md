@@ -228,3 +228,64 @@ None introduced by this block.
   via `rows_read`/`rows_written` — a good outcome, but means `fetch_runs` may show a "problem"
   that was already present and simply unmeasured before. Not a regression; worth stating so it
   isn't mistaken for one.
+
+## Amendment — international pilot PR 1 (2026-09-13): a fourth contract, and a rename
+
+`EurostatSource` above (the class this document proposed as the `DBnomicsFetcher` rename) is
+renamed again, to `DBnomicsSource` (`src/fetchers/dbnomics.py`), because the international pilot
+needed the name `EurostatSource` for a genuinely different adapter. `DBnomicsSource` keeps
+`_parse`'s DBnomics-JSON body unchanged — the `< "2008"` filter and the `index_2010` rebase (now
+`src/fetchers/rebase.py::rebase_to_2010`, called by both adapters that need it) — and still takes
+`source_id` as an `__init__` parameter, since it serves `ameco_ec` today and served
+`dbnomics_eurostat` until this pilot moved that source off it.
+
+**`EurostatSource` (`src/fetchers/eurostat.py`)** fetches Eurostat's own JSON-stat 2.0 dissemination
+API directly — one request per **dataset**, returning every country/aggregate Eurostat publishes
+for it, not one request per already-known geography. This is not a loop over `DBnomicsSource`: the
+old adapter (and the class this document used to call `EurostatSource`) keeps `series.docs[0]`
+only, so pointed at a multi-country query it would silently keep one country and drop the rest.
+The new adapter walks every `(geo, time)` cell of the returned cube explicitly and raises
+`FetchError` rather than guess when a dimension it did not expect to vary (anything but `geo` and
+`time`) turns out to carry more than one code.
+
+A fourth adapter contract, `MultiGeoTimeSeriesSource` (`src/fetchers/base.py`), covers it:
+`_parse` returns `list[dict]` of exactly `{"geo": str, "period": str, "value": float | None,
+"obs_status": str}` — one row per cube cell that actually carries a value or a status flag. A cell
+with neither contributes no row at all (nothing to report — not a zero, not `na`); a cell with a
+flag but no value still produces one row, `value=None`, when the flag maps to `suppressed` or
+`na` — the two states a missing number can still be a *known* state rather than a gap. Eurostat's own `OBS_FLAG` table maps to four canonical non-`final` states — `provisional`,
+`estimate`, `suppressed`, `na` (`FLAG_STATUS` in `eurostat.py`). `revised` is never produced by this
+table: `b` (break in series) and `d` (definition differs) map to `final`, not `revised` — checked
+against Eurostat's full published `OBS_FLAG` codelist (2026-09-14), which has no `revised`/`r` code
+at all, and `revised` specifically means a later vintage superseded an earlier one, which neither
+flag asserts. `f` (forecast) is deliberately absent from the table, so it raises rather than being
+read as `estimate`. An unrecognized flag raises `FetchError` rather than being silently
+reinterpreted (CLAUDE.md rule 13), same discipline as the retry/4xx distinction above. A flagged
+cell with no value raises unless the mapped status is `suppressed`/`na` — the two states that may
+carry `value=None`.
+
+`singleton_geo(rows)` (`src/fetchers/eurostat.py`) reshapes a `MultiGeoTimeSeriesSource` response
+down to the plain `TimeSeriesSource` shape (`{period, value, obs_status}`) for the pre-existing
+single-country indicators whose config pins `geo` in `fetch.filters` — it raises `FetchError`
+rather than silently keeping the first geography if the response does not, in fact, come back as
+exactly one.
+
+**Dispatch.** `belgian_macro_db.py`'s `fetch_all()` and `scripts/port_existing_indicators.py`'s
+`port()` both gained an explicit three-way dispatch on adapter — `nbb` / `dbnomics` / `eurostat` —
+raising for anything else, rather than the two-way `if meta["type"] == "nbb"` this document
+originally described. The `eurostat` branch calls `singleton_geo()` on the fetch result, then
+`rebase_to_2010()` when the indicator's unit is `index_2010`, exactly the trigger `DBnomicsSource`
+used to apply internally.
+
+**Contract test.** `tests/test_source_contract.py` now parametrizes the existing
+`TimeSeriesSource` contract over `NBBSource` and `DBnomicsSource` (`WalStatSource`'s
+`MunicipalTimeSeriesSource` contract runs alongside it, unchanged), and adds a separate
+`MultiGeoTimeSeriesSource` case for `EurostatSource`: a fixture cube with two geographies parses to
+two rows of exactly `{geo, period, value, obs_status}`, with `value` allowed to be `None`.
+`tests/test_eurostat_source.py` covers the adapter itself — every geography in a fixture cube
+parsed, a non-singleton non-geo/time dimension refused, an unrecognized `OBS_FLAG` refused,
+`singleton_geo` on a genuine multi-geography result refused.
+
+None of this changes what `FPBSource`/`ForecastSource` or `WalStatSource`/`MunicipalTimeSeriesSource`
+do; see docs/decisions/0008-eurostat-dataset-adapter-and-directory-stores.md for why a dataset-level
+adapter was chosen over a loop, and docs/features/international.md for the pilot this unblocks.

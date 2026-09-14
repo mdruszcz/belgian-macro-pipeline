@@ -231,6 +231,23 @@ class ForecastSource(DataSource):
     """
 
 
+class MultiGeoTimeSeriesSource(DataSource):
+    """Contract: `_parse` returns list[dict] of exactly
+    {"geo": str, "period": str, "value": float, "obs_status": str} -- one row
+    per (geography, period) cell the response actually carries a value for.
+    EurostatSource (src/fetchers/eurostat.py) implements this: one request
+    returns every country in a dataset at once, unlike TimeSeriesSource's
+    single fetch for one already-known geography.
+
+    A cube position with neither a value nor a status flag contributes no
+    row at all (there is nothing to report -- not a zero, not 'na'); a
+    position with a status flag but no value still produces one, with
+    value=None, when the flag maps to 'suppressed' or 'na' -- the two states
+    a missing number can still be a KNOWN state rather than a gap. See
+    docs/features/source_adapter.md.
+    """
+
+
 class MunicipalTimeSeriesSource(DataSource):
     """Contract: `_parse` returns list[dict] of exactly
     {"geo_id": str, "period": str, "value": float, "status": str}.

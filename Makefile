@@ -218,6 +218,7 @@ fetch:
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
 	$(PYTHON) scripts/sync_onem_rates.py --db $(DB)
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
+	$(PYTHON) scripts/sync_international.py --db $(DB)
 
 ## dagster: the local Dagster UI at http://localhost:3000 -- the pipeline's
 ## assets, lineage, checks and freshness (docs/features/orchestration.md).

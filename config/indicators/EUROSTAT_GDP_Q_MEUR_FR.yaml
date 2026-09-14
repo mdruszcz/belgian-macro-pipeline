@@ -9,10 +9,16 @@ transform:
   method: rebase
   base: 2010
 frequency: Q
-source_id: dbnomics_eurostat
+source_id: eurostat
 geo_levels:
 - national
 preferred_direction: neutral
 fetch:
-  query: /namq_10_gdp/Q.CLV10_MEUR.SCA.B1GQ.FR?observations=true
+  dataset: namq_10_gdp
+  filters:
+    unit: CLV10_MEUR
+    s_adj: SCA
+    na_item: B1GQ
+    geo: FR
+  since: "2008"
 display: null

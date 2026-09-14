@@ -66,7 +66,7 @@ DEFAULT_DERIVED_DIR = REPO_ROOT / "config" / "indicators" / "derived"
 
 def _default_exports() -> tuple[Path, ...]:
     """The national/commune bulk exports, plus every registered store's
-    committed CSV (extra_csv and in_db alike), read from config/stores.yaml
+    committed CSV(s) (extra_csv and in_db alike), read from config/stores.yaml
     (src/stores.py) rather than hand-listed here a fourth time.
 
     Used to be a hardcoded 6-path tuple naming only 3 of the (then) 6 manual
@@ -74,13 +74,22 @@ def _default_exports() -> tuple[Path, ...]:
     were never parse-checked by this script even though they were exported
     and committed. The registry is now the one place the list is spelled
     out, so a new store is checked automatically once it is registered.
+
+    A store's own Store.csv_paths(), NOT store.path directly: a
+    one_csv_per_indicator store's `path` is a DIRECTORY (international pilot
+    PR 1), which export_parses' `path.is_file()` check would otherwise
+    report as "missing" on every single run. csv_paths() already expands
+    that to the files that actually exist -- zero of them for a fresh in_db
+    directory store with nothing fetched yet, which correctly parse-checks
+    nothing rather than failing on an export that was never promised.
     """
     exports = [
         REPO_ROOT / "data" / "belgian_macro_export.csv",
         REPO_ROOT / "data" / "communes_export.csv",
         REPO_ROOT / "data" / "communes_history.csv",
     ]
-    exports.extend(s.path for _, s in sorted(load_stores(DEFAULT_STORES_PATH).items()))
+    for _, store in sorted(load_stores(DEFAULT_STORES_PATH).items()):
+        exports.extend(store.csv_paths())
     return tuple(exports)
 
 

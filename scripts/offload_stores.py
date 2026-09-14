@@ -52,13 +52,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from export_observations_csv import export_observations  # noqa: E402
 
-from src.stores import DEFAULT_STORES_PATH, in_db_stores, load_stores  # noqa: E402
+from src.stores import (  # noqa: E402
+    DEFAULT_STORES_PATH,
+    LAYOUT_ONE_CSV_PER_INDICATOR,
+    in_db_stores,
+    load_stores,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_WORKING_DB = REPO_ROOT / "data" / "local" / "working.db"
 DEFAULT_COMMITTED_DB = REPO_ROOT / "data" / "belgian_macro.db"
 
 PK = ("indicator_id", "geo_id", "period", "vintage")
+
+#: The one_csv_per_indicator dump key for a store's whole indicator list
+#: (single_csv layout, unaffected by this pilot): there is one file, so one
+#: pseudo-key stands in for "the whole store" rather than "one indicator".
+_WHOLE_STORE = "__all__"
 
 
 class OffloadError(Exception):
@@ -74,6 +84,16 @@ def _committed_keys(csv_path: Path) -> set[tuple[str, ...]]:
         return set()
     with csv_path.open(encoding="utf-8", newline="") as fh:
         return {tuple(row[k] for k in PK) for row in csv.DictReader(fh)}
+
+
+def _committed_keys_for_store(store) -> set[tuple[str, ...]]:
+    """Every row already committed for `store`, across every file it has --
+    one_csv_per_indicator stores have one file per indicator, some possibly
+    absent (an in_db indicator with zero rows yet, tolerated by Store.csv_paths())."""
+    keys: set[tuple[str, ...]] = set()
+    for path in store.csv_paths():
+        keys |= _committed_keys(path)
+    return keys
 
 
 def _check_every_offloaded_source_indicator_is_declared(
@@ -99,7 +119,7 @@ def _check_every_offloaded_source_indicator_is_declared(
 
 
 def _check_no_committed_row_is_lost(conn: sqlite3.Connection, store) -> None:
-    committed = _committed_keys(store.path)
+    committed = _committed_keys_for_store(store)
     if not committed:
         return
     working = {
@@ -144,7 +164,18 @@ def offload(
 
     scratch = working_db.parent
     tmp_db = scratch / "committed.db.tmp"
-    tmp_csvs = {s.name: scratch / f"{s.path.name}.tmp" for s in stores}
+    # {store.name: {key: tmp_path}} -- key is an indicator_id for a
+    # one_csv_per_indicator store (one dump per file) or _WHOLE_STORE for a
+    # single_csv one (one dump for the whole indicator list, unchanged from
+    # before this pilot).
+    tmp_csvs: dict[str, dict[str, Path]] = {
+        s.name: (
+            {i: scratch / f"{s.name}__{i}.csv.tmp" for i in s.indicators}
+            if s.layout == LAYOUT_ONE_CSV_PER_INDICATOR
+            else {_WHOLE_STORE: scratch / f"{s.path.name}.tmp"}
+        )
+        for s in stores
+    }
     written: dict[str, int] = {}
 
     try:
@@ -165,15 +196,25 @@ def offload(
         finally:
             conn.close()
 
-        # Dump.
+        # Dump. A one_csv_per_indicator store dumps one file per indicator
+        # and, for an in_db store, writes NO file at all for an indicator
+        # with zero rows -- a header-only CSV would make tomorrow's assemble
+        # load nothing and look identical to "never fetched", which is not
+        # the distinction that absence is for (Store.csv_paths()' own doc).
         for store in stores:
-            n = export_observations(working_db, tmp_csvs[store.name], list(store.indicators))
-            if n != expected[store.name]:
+            store_total = 0
+            for key, tmp_path in tmp_csvs[store.name].items():
+                indicators = list(store.indicators) if key == _WHOLE_STORE else [key]
+                n = export_observations(working_db, tmp_path, indicators)
+                if key != _WHOLE_STORE and n == 0:
+                    tmp_path.unlink(missing_ok=True)
+                store_total += n
+            if store_total != expected[store.name]:
                 raise OffloadError(
-                    f"{store.name}: dumped {n} rows but the working database counts "
+                    f"{store.name}: dumped {store_total} rows but the working database counts "
                     f"{expected[store.name]} for the same indicators"
                 )
-            written[store.name] = n
+            written[store.name] = store_total
 
         # Strip a copy. The backup API rather than a file copy, so a working db
         # left in WAL mode by a sync is copied as its real current state.
@@ -235,7 +276,11 @@ def offload(
         # committed database (which holds none of these rows either) plus the
         # new CSVs is still a consistent pair for the next assemble.
         for store in stores:
-            os.replace(tmp_csvs[store.name], store.path)
+            for key, tmp_path in tmp_csvs[store.name].items():
+                if not tmp_path.is_file():
+                    continue  # a zero-row indicator: nothing to publish
+                dest = store.path if key == _WHOLE_STORE else store.csv_for(key)
+                os.replace(tmp_path, dest)
         os.replace(tmp_db, committed_db)
         print(
             f"Offloaded {offloaded} observations to {len(stores)} store(s); "
@@ -243,7 +288,7 @@ def offload(
         )
         return written
     finally:
-        for path in [tmp_db, *tmp_csvs.values()]:
+        for path in [tmp_db, *(p for d in tmp_csvs.values() for p in d.values())]:
             path.unlink(missing_ok=True)
 
 

@@ -152,6 +152,7 @@ RETIRED_GATE_IDS = {
     "sync_onem",
     "sync_onem_rates",
     "sync_walstat",
+    "sync_international",
     "fetch_stocks",
 }
 
@@ -229,7 +230,7 @@ def test_the_export_job_selects_no_source():
 
 def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
     assert {COMMANDS[n].workflow_step for n in TRACKED} == RETIRED_GATE_IDS
-    assert len(TRACKED) == 7
+    assert len(TRACKED) == 8
     gate = next(s for s in _steps() if s.get("id") == "sources")
     assert "orchestration.manifest" in gate["run"]
 

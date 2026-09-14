@@ -110,6 +110,60 @@ def _row(period: str, vintage: str, value: str, is_latest: str, status: str = "f
     }
 
 
+def _write_indicator_csv(directory: Path, indicator_id: str, rows: list[dict]) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    with (directory / f"{indicator_id}.csv").open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def test_assemble_never_loads_an_undeclared_file_in_a_directory_store(tmp_path):
+    """Audit SHOULD-FIX 6: a one_csv_per_indicator store must load only its
+    DECLARED files (Store.csv_paths()), never every *.csv a glob over the
+    directory would find -- an undeclared file sitting beside the declared
+    ones (an indicator removed from the registry without deleting its old
+    file) must stay unloaded."""
+    source = _fresh_source_db(tmp_path / "source.db")
+    working = tmp_path / "local" / "working.db"
+    store_dir = tmp_path / "international"
+    row = _row("2023", "2026-01-01T00:00:00+00:00", "100.5", "1")
+    row["indicator_id"] = "GDP_VOLUME_EUROPE"
+    _write_indicator_csv(store_dir, "GDP_VOLUME_EUROPE", [row])
+    undeclared_row = dict(row, indicator_id="GOV_DEBT_EUROPE")
+    _write_indicator_csv(store_dir, "GOV_DEBT_EUROPE", [undeclared_row])  # present, not declared
+
+    registry = _registry(
+        tmp_path,
+        {
+            "international": {
+                "path": str(store_dir),
+                "source_id": "eurostat",
+                "mode": "in_db",
+                "layout": "one_csv_per_indicator",
+                "indicators": ["GDP_VOLUME_EUROPE"],  # GOV_DEBT_EUROPE NOT declared
+                "reference_rows": {"script": "scripts/sync_international.py"},
+            }
+        },
+    )
+
+    build(source_db=source, working_db=working, stores_path=registry)
+
+    conn = sqlite3.connect(str(working))
+    try:
+        counts = dict(
+            conn.execute(
+                "SELECT indicator_id, COUNT(*) FROM observations "
+                "WHERE indicator_id IN ('GDP_VOLUME_EUROPE', 'GOV_DEBT_EUROPE') GROUP BY 1"
+            )
+        )
+    finally:
+        conn.close()
+    assert counts == {
+        "GDP_VOLUME_EUROPE": 1
+    }, "GOV_DEBT_EUROPE's file exists on disk but is not declared -- it must not be loaded"
+
+
 def test_assemble_succeeds_with_zero_in_db_stores(tmp_path):
     """A registry with nothing to load must still complete rather than
     erroring on an empty list."""

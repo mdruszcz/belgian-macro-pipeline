@@ -31,12 +31,21 @@ sys.path.insert(0, str(REPO))
 
 from src.stores import DEFAULT_STORES_PATH, extra_csv_stores, load_stores  # noqa: E402
 
-# Every store the registry declares (config/stores.yaml), read from the one
-# place that list is spelled out -- src/stores.py. Used to be a hand-maintained
+# Every store's CSV FILE(S) (config/stores.yaml), read from the one place
+# that list is spelled out -- src/stores.py. Used to be a hand-maintained
 # list of 3 of the (then) 6 manual stores, under a comment claiming it matched
 # the workflows. in_db stores are included: their reference rows live in the
 # committed database exactly like the extra_csv stores'.
-MANUAL_STORES = [s.path for _, s in sorted(load_stores(DEFAULT_STORES_PATH).items())]
+#
+# store.csv_paths(), NOT store.path: a one_csv_per_indicator store's `path`
+# is a DIRECTORY (international pilot PR 1), which is never a file, so
+# building this list from bare `.path` would make every test below silently
+# `pytest.skip` the whole store on its `is_file()` guard -- exactly the kind
+# of quiet gap this file exists to close. csv_paths() expands it to the
+# individual per-indicator files that actually exist.
+MANUAL_STORES = [
+    path for _, s in sorted(load_stores(DEFAULT_STORES_PATH).items()) for path in s.csv_paths()
+]
 EXTRA_CSV_STORES = [s.path for s in extra_csv_stores(load_stores(DEFAULT_STORES_PATH))]
 
 

@@ -22,10 +22,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 from rename_legacy_tables import rename_legacy_tables  # noqa: E402
 
 from src.db.migrate import run as run_migrations  # noqa: E402
-from src.fetchers.eurostat import EurostatSource  # noqa: E402
+from src.fetchers.dbnomics import DBnomicsSource  # noqa: E402
+from src.fetchers.eurostat import EurostatSource, singleton_geo  # noqa: E402
 from src.fetchers.fpb import FPB_XLSX_URL, FPBSource  # noqa: E402
 from src.fetchers.nbb import NBBSource  # noqa: E402
-from src.validation.config_schema import load_and_validate_all  # noqa: E402
+from src.fetchers.rebase import rebase_to_2010  # noqa: E402
+from src.fetchers.sdmx_status import sdmx_for_status  # noqa: E402
+from src.validation.config_schema import (  # noqa: E402
+    has_fetchable_national_adapter,
+    load_and_validate_all,
+)
 
 # ─── Configuration ────────────────────────────────────────────────
 
@@ -47,23 +53,42 @@ def _load_sources() -> dict:
     """Rebuild the SOURCES-dict shape fetch_all()/upsert_indicator() expect,
     from config/indicators/*.yaml + config/sources/*.yaml, per
     docs/features/indicator_config.md. Indicators whose source's adapter is
-    not "nbb"/"dbnomics" (i.e. adapter "fpb", the forecast pseudo-indicators)
-    are excluded -- forecasts are fetched by FPBSource directly, exactly as
-    before, and never belonged in this dict."""
+    not "nbb"/"dbnomics"/"eurostat" (i.e. adapter "fpb", the forecast
+    pseudo-indicators) are excluded -- forecasts are fetched by FPBSource
+    directly, exactly as before, and never belonged in this dict.
+
+    A multi-geo pilot indicator (fetch.geographies: allowlist) is ALSO
+    excluded even though its adapter is "eurostat": has_fetchable_national_adapter
+    already returns False for it (there is no single `url` to build -- every
+    country's data comes back from one dataset-level request), and it is
+    delivered by scripts/sync_international.py instead. Importing
+    fetch["query"] unconditionally used to crash at import time on exactly
+    this shape; has_fetchable_national_adapter is what keeps that from
+    happening again."""
     indicators, sources = load_and_validate_all(CONFIG_DIR / "indicators", CONFIG_DIR / "sources")
     out = {}
     for code, ind in indicators.items():
         source = sources[ind["source_id"]]
-        if source["adapter"] not in ("nbb", "dbnomics"):
+        if not has_fetchable_national_adapter(ind, sources):
             continue
+        if source["adapter"] == "eurostat":
+            url = EurostatSource.build_url(
+                source["base_url"],
+                ind["fetch"]["dataset"],
+                ind["fetch"]["filters"],
+                ind["fetch"].get("since", "2008"),
+            )
+        else:
+            url = source["base_url"] + ind["fetch"]["query"]
         out[code] = {
             "name": ind["name"]["en"],
-            "url": source["base_url"] + ind["fetch"]["query"],
+            "url": url,
             "frequency": ind["frequency"],
             "unit": ind["unit"],
             "source_agency": source["agency"],
             "description": ind.get("description", {}).get("en", ""),
             "type": source["adapter"],
+            "dataset": ind["fetch"].get("dataset", ""),
         }
     return out
 
@@ -343,11 +368,20 @@ def fetch_all(db: MacroDatabase) -> bool:
 
     source_id for fetch_runs is derived via source_id_for(agency), matching
     what scripts/sync_to_canonical.py already put in the canonical `sources`
-    table ("eurostat", "ameco_ec") -- NOT the source_id used in
-    config/sources/*.yaml ("dbnomics_eurostat", "dbnomics_ameco"). Those two
-    registries disagree; this uses whichever one is actually populated today,
-    rather than silently reconciling a pre-existing inconsistency that is out
-    of scope for this refactor. See docs/features/source_adapter.md.
+    table ("ameco_ec" for the AMECO series still on DBnomics; the eight
+    former "eurostat"/dbnomics_eurostat series now fetch through the
+    "eurostat" adapter directly, so source_id_for("Eurostat") == "eurostat"
+    matches config/sources/eurostat.yaml's own source_id with no alias
+    needed -- see src/exporters/provenance.py, DB_TO_CONFIG_SOURCE_ID).
+
+    Dispatch is explicit per adapter, not "nbb or anything else": "eurostat"
+    fetches every geography in the dataset, keeps the one this national path
+    pinned via `fetch.filters.geo` (singleton_geo -- FetchError if the
+    response ever carried more than one, rather than silently keeping the
+    first), and rebases it to 2010 itself when the config's unit asks for
+    that (the same `unit == "index_2010"` trigger DBnomicsSource used to
+    apply inside `_parse`; here the caller applies it, since the new
+    adapter's own contract has no `unit` parameter to hand it).
     """
     all_ok = True
     for code, meta in SOURCES.items():
@@ -357,11 +391,31 @@ def fetch_all(db: MacroDatabase) -> bool:
             if meta.get("type") == "nbb":
                 source = NBBSource()
                 rows = source.fetch(meta["url"], cache_key=code, conn=db.conn)
-            else:
-                source = EurostatSource(source_id=source_id)
+            elif meta.get("type") == "eurostat":
+                source = EurostatSource()
+                geo_rows = source.fetch(
+                    meta["url"], cache_key=code, conn=db.conn, dataset=meta.get("dataset", "")
+                )
+                rows = singleton_geo(geo_rows)
+                if meta.get("unit") == "index_2010":
+                    rows = rebase_to_2010(rows)
+                # BLOCKER 1 (audit): singleton_geo's rows carry CANONICAL
+                # status words (src/fetchers/eurostat.py's own OBS_FLAG
+                # mapping), but db.upsert_observations below writes into
+                # legacy_observations.obs_status, which
+                # scripts/sync_to_canonical.py reads back through
+                # map_obs_status() expecting an SDMX letter -- exactly like
+                # every NBB/DBnomics row already does. Converting here keeps
+                # legacy_observations SDMX-lettered for every adapter, with
+                # no adapter-specific case downstream.
+                rows = [{**r, "obs_status": sdmx_for_status(r["obs_status"])} for r in rows]
+            elif meta.get("type") == "dbnomics":
+                source = DBnomicsSource(source_id=source_id)
                 rows = source.fetch(
                     meta["url"], cache_key=code, conn=db.conn, unit=meta.get("unit", "")
                 )
+            else:
+                raise ValueError(f"{code}: unhandled adapter {meta.get('type')!r}")
             n = db.upsert_observations(code, rows)
             db.log_fetch(code, n, "OK")
             log.info(f"  OK {code}: {n} rows")

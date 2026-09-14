@@ -1,0 +1,38 @@
+source_id: eurostat
+name: Eurostat
+agency: Eurostat
+adapter: eurostat
+base_url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data
+licence: >-
+  Eurostat copyright/licence policy: reuse, including commercial dissemination,
+  authorised with Eurostat acknowledged as the source; not for commercial
+  redissemination of data not relating to EU, EFTA or official EU acceding/
+  candidate countries, or data originating from sources other than Eurostat
+  (adapted or modified data must say so prominently). Exception: the EU
+  business and consumer surveys (DG ECFIN, disseminated by Eurostat --
+  ei_bssi_m_r2, behind EC_CONS_CONF_BE/_EU and the pilot's consumer-confidence
+  indicator) are CC0. Approved by the maintainer 2026-09-13 as the replacement
+  for every dbnomics_eurostat fetch (no DBnomics ODbL share-alike on top) and
+  the source of the international pilot -- docs/features/international.md.
+catalog_ref: docs/data_catalog.md#eurostat
+cadence: daily
+fetch_window_days: 7
+is_active: true
+homepage: https://ec.europa.eu/eurostat
+label:
+  en: Eurostat
+  fr: Eurostat
+  nl: Eurostat
+licence_note:
+  en: >-
+    Source: Eurostat. Reuse, including commercial use, is authorised with
+    Eurostat acknowledged as the source. Eurostat is not responsible for any
+    conclusion drawn from its data.
+  fr: >-
+    Source : Eurostat. La réutilisation, y compris commerciale, est autorisée
+    à condition de mentionner Eurostat comme source. Eurostat n'est pas
+    responsable des conclusions tirées de ses données.
+  nl: >-
+    Bron: Eurostat. Hergebruik, ook commercieel, is toegestaan mits Eurostat
+    als bron wordt vermeld. Eurostat is niet verantwoordelijk voor conclusies
+    die uit de gegevens worden getrokken.

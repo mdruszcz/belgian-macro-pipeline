@@ -3,7 +3,7 @@
 Jobs:
   assemble_working_database  staging_db alone. The coordinator stops if it fails,
                              as the workflow does (no continue-on-error there).
-  fetch_sources              the seven outcomes the workflow gates auto-merge on.
+  fetch_sources              the eight outcomes the workflow gates auto-merge on.
                              One failing does not stop the others.
   validate_and_export        the validated database, its checks, and everything
                              built from it. Selects no source, so a red source

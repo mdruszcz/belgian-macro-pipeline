@@ -145,7 +145,7 @@ def test_port_includes_configured_international_gdp_indicators(monkeypatch, tmp_
         ],
     )
     monkeypatch.setattr(
-        port_mod.EurostatSource,
+        port_mod.DBnomicsSource,
         "fetch",
         lambda self, url, *, cache_key, conn=None, unit="": [
             {"period": "2024-Q1", "value": 100.0, "obs_status": "A"}
@@ -183,7 +183,7 @@ def test_dbnomics_rows_mapped_to_final(monkeypatch, tmp_path, migrated_db):
     monkeypatch.setattr(port_mod, "SOURCES", fake_sources)
     monkeypatch.setattr(port_mod, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(
-        port_mod.EurostatSource,
+        port_mod.DBnomicsSource,
         "fetch",
         lambda self, url, *, cache_key, conn=None, unit="": [
             {"period": "2024-Q1", "value": 100.0, "obs_status": "A"}

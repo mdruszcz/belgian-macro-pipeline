@@ -14,6 +14,30 @@
     "display"
   ],
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "fetch": {
+            "required": [
+              "geographies"
+            ]
+          }
+        },
+        "required": [
+          "fetch"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "country"
+          ]
+        }
+      },
+      "description": "A multi-geo pilot fetch (fetch.geographies: allowlist) describes every country at once, so a single `country` field would be meaningless -- see is_multi_geo() in src/validation/config_schema.py."
+    }
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -103,17 +127,83 @@
       "description": "Country/aggregate this series describes (informational, not a strict ISO code -- 'EA' etc. are allowed). Omit for Belgium; the loader defaults to 'BE'. This is what determines canonical-schema/dashboard eligibility, not whether `display` is null -- e.g. EC_CONS_CONF_BE is Belgian data with no dashboard row of its own, and is still eligible."
     },
     "fetch": {
-      "type": "object",
-      "required": [
-        "query"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "query": {
-          "type": "string",
-          "minLength": 1
+      "description": "Three mutually exclusive shapes. `{query}`: the legacy national query-string fetch (nbb/dbnomics adapters). `{dataset, filters, since?}` with `filters.geo` set: a direct-Eurostat national fetch pinned to one country (the eight migrated dbnomics_eurostat indicators). `{dataset, filters?, geographies: \"allowlist\", since?}` with no `filters.geo`: a direct-Eurostat multi-country pilot fetch -- see is_multi_geo() in src/validation/config_schema.py, which reads this discriminator rather than guessing from `dataset` alone.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "dataset",
+            "filters"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "filters": {
+              "type": "object",
+              "required": [
+                "geo"
+              ],
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "since": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "dataset",
+            "geographies"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "filters": {
+              "type": "object",
+              "not": {
+                "required": [
+                  "geo"
+                ]
+              },
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "geographies": {
+              "const": "allowlist"
+            },
+            "since": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            }
+          }
         }
-      }
+      ]
     },
     "display": {
       "oneOf": [

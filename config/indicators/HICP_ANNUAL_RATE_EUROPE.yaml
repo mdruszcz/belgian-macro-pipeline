@@ -1,0 +1,21 @@
+id: HICP_ANNUAL_RATE_EUROPE
+name:
+  en: HICP, annual rate of change
+  fr: IPCH, taux de variation annuel
+  nl: GICP, jaarlijkse veranderingspercentage
+unit: percent_yy
+frequency: M
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: Harmonised Index of Consumer Prices, all items, annual rate of change, every
+    allowlisted European country -- the international pilot (docs/features/international.md).
+fetch:
+  dataset: prc_hicp_manr
+  filters:
+    coicop: CP00
+  geographies: allowlist
+  since: "2008"
+display: null

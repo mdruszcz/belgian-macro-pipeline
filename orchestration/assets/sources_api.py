@@ -25,6 +25,7 @@ _DESCRIPTIONS = {
     "walstat_observations": "WalStat (IWEPS) municipal finance (scripts/sync_walstat.py).",
     "market_data": "BEL 20, EUR/USD and spreads to data/stocks.json (fetch_stocks.py). No database.",
     "canonical_observations": "Legacy macro tables synced into the canonical schema (scripts/sync_to_canonical.py).",
+    "international_observations": "International pilot: five direct-Eurostat, every-country indicators (scripts/sync_international.py).",
 }
 
 
@@ -60,6 +61,9 @@ onem_rates_observations = _source_asset(
 walstat_observations = _source_asset(
     "walstat_observations", group="sources_api", deps=["staging_db"]
 )
+international_observations = _source_asset(
+    "international_observations", group="sources_api", deps=["staging_db"]
+)
 market_data = _source_asset("market_data", group="sources_api", deps=[])
 
 ASSETS = [
@@ -69,5 +73,6 @@ ASSETS = [
     onem_observations,
     onem_rates_observations,
     walstat_observations,
+    international_observations,
     market_data,
 ]

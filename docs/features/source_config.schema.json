@@ -29,6 +29,7 @@
       "enum": [
         "nbb",
         "dbnomics",
+        "eurostat",
         "fpb",
         "statbel",
         "onem",

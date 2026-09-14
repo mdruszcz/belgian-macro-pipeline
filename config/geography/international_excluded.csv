@@ -1,0 +1,11 @@
+code,reason
+UK,United Kingdom -- left the EU; not EU/EFTA/an official candidate. Eurostat's licence forbids commercial redissemination of data for countries outside that set (docs/features/international.md).
+XK,Kosovo -- a potential candidate, not yet granted candidate status (https://european-union.europa.eu/principles-countries-history/eu-enlargement_en, read 2026-09-13). Excluded on the same licence ground as UK/US/JP.
+US,United States -- not EU/EFTA/an official candidate.
+JP,Japan -- not EU/EFTA/an official candidate.
+EA12,Superseded euro-area composition (12 countries); ambiguous which vintage a plain "euro area" figure means. The pilot's fixed euro-area aggregate is EA21.
+EA19,Superseded euro-area composition (19 countries, 2015-2022). See EA21.
+EA20,Superseded euro-area composition (20 countries, 2023-2025). See EA21.
+EU,Eurostat's dynamic "current EU" code, composition not fixed by the code itself. The pilot's fixed EU aggregate is EU27_2020.
+EU28,Pre-Brexit EU composition (28 countries), no longer current. See EU27_2020.
+EEA,European Economic Area -- a distinct grouping (EU + EFTA minus Switzerland) from either pilot aggregate; not one of the two aggregates the maintainer decided on.

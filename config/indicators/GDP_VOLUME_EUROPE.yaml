@@ -1,0 +1,24 @@
+id: GDP_VOLUME_EUROPE
+name:
+  en: GDP, chain-linked volume
+  fr: PIB, volume chaîné
+  nl: Bbp, kettingvolume
+unit: meur_clv2010
+frequency: Q
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: Gross domestic product at chain-linked volumes (2010 reference year), seasonally
+    and calendar adjusted, every allowlisted European country -- the international
+    pilot (docs/features/international.md).
+fetch:
+  dataset: namq_10_gdp
+  filters:
+    unit: CLV10_MEUR
+    s_adj: SCA
+    na_item: B1GQ
+  geographies: allowlist
+  since: "2008"
+display: null

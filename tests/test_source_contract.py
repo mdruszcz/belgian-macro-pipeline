@@ -1,7 +1,11 @@
 """
 Contract test for TimeSeriesSource adapters (Block D). Parametrized over
-NBBSource and EurostatSource -- not FPBSource, which deliberately keeps its
-own shape; see docs/features/source_adapter.md, Non-goals.
+NBBSource and DBnomicsSource -- not FPBSource, which deliberately keeps its
+own shape; see docs/features/source_adapter.md, Non-goals. EurostatSource
+(the direct-Eurostat adapter, international pilot PR 1) implements a third,
+different shape, MultiGeoTimeSeriesSource, checked separately below -- it
+returns many geographies from one fetch, so period/value/obs_status alone is
+not its contract.
 
 Turns "every time-series adapter returns the same shape" from an aspiration
 into a regression test: a future adapter that returns the wrong types fails
@@ -15,6 +19,7 @@ from pathlib import Path
 
 import pytest
 
+from src.fetchers.dbnomics import DBnomicsSource
 from src.fetchers.eurostat import EurostatSource
 from src.fetchers.nbb import NBBSource
 from src.fetchers.walstat import WalStatSource
@@ -38,7 +43,7 @@ class _FakeResponse:
 
 ADAPTERS = [
     pytest.param(lambda: NBBSource(), SDMX_CSV.encode(), id="nbb"),
-    pytest.param(lambda: EurostatSource(source_id="eurostat"), DBNOMICS_JSON, id="eurostat"),
+    pytest.param(lambda: DBnomicsSource(source_id="ameco_ec"), DBNOMICS_JSON, id="dbnomics"),
 ]
 
 
@@ -56,6 +61,43 @@ def test_time_series_contract(tmp_path, monkeypatch, make_source, fixture_bytes)
         assert set(row.keys()) == {"period", "value", "obs_status"}
         assert isinstance(row["period"], str)
         assert isinstance(row["value"], float)
+        assert isinstance(row["obs_status"], str)
+
+
+# --- the multi-geo contract ----------------------------------------------------
+#
+# A fourth shape (docs/features/source_adapter.md): one fetch returns every
+# geography a dataset carries, not one already-known geography.
+
+EUROSTAT_JSON = json.dumps(
+    {
+        "id": ["unit", "geo", "time"],
+        "size": [1, 2, 1],
+        "dimension": {
+            "unit": {"category": {"index": {"PC_GDP": 0}}},
+            "geo": {"category": {"index": {"BE": 0, "DE": 1}}},
+            "time": {"category": {"index": {"2023": 0}}},
+        },
+        "value": {"0": 100.0, "1": 90.0},
+        "status": {},
+    }
+).encode()
+
+
+def test_multi_geo_time_series_contract_eurostat(tmp_path, monkeypatch):
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(EUROSTAT_JSON)
+    )
+
+    rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+    assert rows, "fixture must produce at least one row to be a meaningful contract check"
+    for row in rows:
+        assert set(row.keys()) == {"geo", "period", "value", "obs_status"}
+        assert isinstance(row["geo"], str)
+        assert isinstance(row["period"], str)
+        assert row["value"] is None or isinstance(row["value"], float)
         assert isinstance(row["obs_status"], str)
 
 
