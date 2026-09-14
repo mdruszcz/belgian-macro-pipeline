@@ -113,13 +113,12 @@
   .glass h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
   .glass .sub{font-size:11px; color:rgba(255,255,255,.55)}
   .hero-mini{display:flex; flex-direction:column; gap:var(--bp-space-4)}
-  .hero-mini .glass{padding:var(--bp-space-4); display:flex; flex-direction:column; min-height:0}
+  .hero-mini .glass{padding:var(--bp-space-4); display:flex; flex-direction:column; min-height:0; overflow:hidden}
   .mini-head{display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
-  .seemore{font-size:11px; color:#8fb4ff; text-decoration:none; white-space:nowrap}
-  .seemore:hover{text-decoration:underline}
-  .mini-figure{display:flex; align-items:baseline; justify-content:flex-end; gap:8px; margin-top:2px}
-  .mini-figure b{font-size:1.5rem; font-weight:var(--bp-weight-bold)}
-  .mini-delta{font-size:11px}
+  .mini-label{min-width:0; padding-right:4px}
+  .mini-reading{flex:none; text-align:right; line-height:1}
+  .mini-reading b{display:block; font-size:1.5rem; font-weight:var(--bp-weight-bold)}
+  .mini-reading .period{display:block; margin-top:5px}
   /* A canvas with no CSS width keeps its 300px intrinsic size, so
      sizeCanvas() measures 300 and the drawing spills straight out of a
      narrower card into its neighbours. components.css only stretches
@@ -127,6 +126,8 @@
      page's own smaller chart slot. */
   .mini-canvas{position:relative; margin-top:4px; min-width:0}
   .mini-canvas canvas{display:block; width:100%}
+  .hero-mini .mini-canvas{margin-top:auto; padding-top:6px}
+  .hero-mini .provenance{margin-top:2px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
   .hero-map{padding:var(--bp-space-4); position:relative}
   .hero-map .maphead{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--bp-space-3); gap:8px}
@@ -311,14 +312,14 @@
   .home2 .searchbox input,.home2 .langpick{font-size:10px}
 
   .home2 .hero{
-    min-height:339px;
+    min-height:390px;
     background-image:
       linear-gradient(90deg,rgba(5,22,45,.97) 0%,rgba(7,28,55,.89) 42%,rgba(8,31,57,.78) 72%,rgba(6,25,48,.66) 100%),
       url('assets/belpulse/home2/home2-hero-brussels.png');
     background-size:cover; background-position:center right;
   }
   .home2 .hero .wrap{
-    grid-template-columns:minmax(0,1.25fr) minmax(0,1.05fr) minmax(0,.8fr);
+    grid-template-columns:minmax(0,1.18fr) minmax(0,.98fr) minmax(0,.94fr);
     gap:14px; padding-top:11px; padding-bottom:11px; align-items:stretch;
   }
   .home2 .hero-cards{display:contents}
@@ -345,10 +346,11 @@
   .home2 .hero-mini{gap:9px; min-width:0}
   .home2 .hero-mini .glass{padding:10px; min-height:0; flex:1}
   .home2 .hero-mini .glass h3{font-size:10px; line-height:1.2}
-  .home2 .hero-mini .sub,.home2 .seemore{font-size:8px}
+  .home2 .hero-mini .sub{font-size:8px}
   .home2 .hero-mini .provenance,.home2 .national-provenance{font-size:7px; line-height:1.25; color:rgba(255,255,255,.58)}
-  .home2 .mini-figure b{font-size:1.1rem}
+  .home2 .mini-reading b{font-size:1.45rem}
   .home2 .mini-canvas{margin-top:0}
+  .home2 .hero-mini .mini-canvas{margin-top:auto; padding-top:5px}
 
   .home2 .finance{
     min-height:88px; margin-top:10px; padding:10px 12px;
@@ -810,6 +812,22 @@
     return bits.join(' · ');
   }
 
+  /* Hero cards keep the reference design's compact source footer. The full
+     retrieval date and provisional status remain on the national cards. */
+  function nationalSourceLine(entry){
+    var bits = [];
+    var source = entry.source ? state.sources[entry.source] : null;
+    bits.push((source && source.label && (source.label[LANG] || source.label.en)) || entry.source_agency || entry.source || T('unavailable'));
+    var grade = state.grades[entry.grade];
+    if(grade) bits.push('(' + entry.grade + ') ' + (grade[LANG] || grade.en));
+    return bits.join(' · ');
+  }
+
+  function compactNationalUnit(entry){
+    var unit = entry.unit || '';
+    return unit.indexOf('percent') === 0 ? '%' : unit.replace(/_/g, ' ');
+  }
+
   var valuesCache = {};
   async function loadValues(code){
     if(valuesCache[code]) return valuesCache[code];
@@ -875,19 +893,16 @@
       var el = document.createElement('div');
       el.className = 'glass';
       el.innerHTML =
-        '<div class="mini-head"><div><h3></h3><div class="sub"></div></div>' +
-        '<a class="seemore" href="macro.html"></a></div>' +
-        '<div class="mini-figure"><b></b></div>' +
-        '<div class="period sub" style="text-align:right"></div>' +
-        '<div class="provenance sub"></div>' +
-        '<div class="mini-canvas"><canvas></canvas></div>';
+        '<div class="mini-head"><div class="mini-label"><h3></h3><div class="sub"></div></div>' +
+        '<div class="mini-reading"><b></b><span class="period sub"></span></div></div>' +
+        '<div class="mini-canvas"><canvas></canvas></div>' +
+        '<div class="provenance sub"></div>';
       el.querySelector('h3').textContent = entry.name || code;
-      el.querySelector('.sub').textContent = entry.unit || '';
-      el.querySelector('.seemore').textContent = T('homeSeeMore');
-      el.querySelector('.mini-figure b').textContent =
+      el.querySelector('.sub').textContent = compactNationalUnit(entry);
+      el.querySelector('.mini-reading b').textContent =
         latest ? MapUI.formatValue(latest.value, entry.unit, 1, LANG) : '—';
       el.querySelector('.period').textContent = latest ? latest.period : '';
-      el.querySelector('.provenance').textContent = nationalProvenance(entry, latest);
+      el.querySelector('.provenance').textContent = nationalSourceLine(entry);
       host.appendChild(el);
       var pts = seriesPoints(entry, 24);
       if(pts.length > 1) draws.push({canvas: el.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
@@ -897,7 +912,7 @@
     // bakes in the wrong width (found the hard way in this batch's first pass).
     draws.forEach(function(d){
       BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: 104});
+        {locale: LANG, height: 128});
     });
   }
 
