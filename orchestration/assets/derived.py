@@ -15,12 +15,15 @@ aggregates_csv = function_asset(
         "scripts/export_aggregates_csv.py, called in process."
     ),
 )
-percentiles_csv = script_asset(
+percentiles_csv = function_asset(
     "percentiles_csv",
     group="derived",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="National and regional peer positions (scripts/export_percentiles_csv.py).",
+    description=(
+        "National and regional peer positions: export_percentiles_csv() from "
+        "scripts/export_percentiles_csv.py, called in process."
+    ),
 )
 communes_table_json = script_asset(
     "communes_table_json",

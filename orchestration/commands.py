@@ -160,6 +160,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/percentiles.csv",),
+        function="export_percentiles_csv:export_percentiles_csv",
     ),
     # ── website ────────────────────────────────────────────────────────────
     "national_csv": Command(
