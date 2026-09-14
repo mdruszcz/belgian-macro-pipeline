@@ -1234,17 +1234,22 @@ scripts/export_local_pages.py's three HTML/XML writers now pass newline="\n", an
 time too. `git add --renormalize .` touched only text files whose diff is empty under
 `--ignore-cr-at-eol`; re-running the page-document exporter now leaves the nine previously-drifting
 pages untouched in `git status`. docs/features/site_unification.md committed from the maintainer's
-brief, with the two mockup text files (prompts.md, index.html); the nine mockup PNGs stay local
-pending a binary-commit decision (rule 12))
+brief, with the two mockup text files (prompts.md, index.html) and the nine mockup PNGs, committed
+with the maintainer's approval on 2026-09-14 (rule 12))
 How: Force LF on every generated-page write and pin it with .gitattributes; commit the spec.
 Why: A Windows checkout was rewriting nine published pages on every export with no content change
 -- pure noise in every future diff, and a real risk of masking an actual content regression inside
 it.
- [BUILD] A1.1 -- shared header/footer fragments + sync command
+ ✅ [BUILD] A1.1 -- shared header/footer fragments + sync command (2026-09-14, PR #171: render_header/
+render_footer in src/pages/shell.py, six destinations, scripts/sync_site_shell.py with --check in CI,
+assets/belpulse/shell.js; home2.html, macro.html and every block-generated page converted. Audited:
+no blockers; the no-JavaScript nav and language links and the 44px touch targets were fixed before merge)
 How: Centralize header/footer markup into fragments rendered at generation time; add a
 deterministic command that syncs only the delimited zones in hand-edited HTML pages.
 Why: Seven pages hand-maintaining the same nav drift out of sync one edit at a time.
- [BUILD] A1.2 -- themes Clair/Sombre/Papier + menus
+ ✅ [BUILD] A1.2 -- themes Clair/Sombre/Papier + menus (2026-09-14, PR #169: Papier tokens, background
+grid and map ramp, contrast-tested in all three themes; PR #171: the sun menu offers Clair/Sombre/Papier,
+applied before first paint, an old "auto" preference migrated to an explicit choice)
 How: One shared module for theme and language menus, applied before first paint, with the Papier
 palette as a shared token set.
 Why: The maintainer approved three themes and icon menus as the baseline look for every page, not
@@ -1268,7 +1273,10 @@ How: Apply the verified shared components (header/footer, themes, BPCharts toolt
 Commune, Micro, Cartes and Sources; build Micro's seven rubriques the same way as Macro's.
 Why: The pattern proven on two pilots now has to cover the whole public site, not stay a two-page
 demo.
- [BUILD] A3.2 -- the commune journey + link audit
+ ✅ [BUILD] A3.2 -- the commune journey + link audit (2026-09-14, PR #173: every commune link opens
+commune.html?nis=; profiles.html?nis= redirects before render; the every-indicator table moved into
+commune.html as #allData; the breadcrumb returns to the filtered directory. export_commune_age_sex.py
+stays out of make exports because its input is hand-downloaded and not committed)
 How: Every commune selection in Profils opens commune.html?nis=xxxxx; profiles.html?nis=xxxxx
 redirects there; remove the redundant commune view from Profils once parity is verified; audit
 every static and dynamically-created link, including search.
