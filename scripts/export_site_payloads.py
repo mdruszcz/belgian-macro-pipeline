@@ -471,6 +471,9 @@ def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
         # only validates the series below carry data.
         "panels": layout.get("panels") or [],
         "extra_lists": layout.get("extra_lists") or [],
+        # Batch A1.3: the two indicator ids home2.html's hero draws, so that
+        # page carries no indicator id of its own either (rule 2/24).
+        "hero": layout.get("hero") or [],
     }
 
 
@@ -492,6 +495,7 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
         *([contributions["whole"]] if contributions.get("whole") else []),
         *(contributions.get("parts") or []),
         *extra_series,
+        *(layout.get("hero") or []),
     ]
     unknown = sorted({i for i in named if i not in known})
     if unknown:

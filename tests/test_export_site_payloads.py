@@ -17,7 +17,11 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from export_site_payloads import export_site_payloads  # noqa: E402
+from export_site_payloads import (  # noqa: E402
+    _check_national_sections,
+    _national_sections,
+    export_site_payloads,
+)
 
 from src.db import migrate  # noqa: E402
 
@@ -184,6 +188,59 @@ def test_indicator_payload_contains_only_current_communes(tmp_path):
     payload = json.loads((out_dir / "indicators" / "POP.json").read_text())
     assert set(payload["communes"]) == {"11001", "11002"}
     assert "99999" not in payload["communes"]
+
+
+def test_national_json_carries_trilingual_names_alongside_the_legacy_name(tmp_path):
+    """Batch A1.3 (docs/features/site_unification.md): home2.html's hero and
+    national cards read a national indicator's `names{en,fr,nl}`, the same
+    field every commune payload already carries -- national.json was the one
+    payload left monolingual. `name` must still be present and unchanged so
+    nothing already reading it breaks (rule: additive, not a replacement)."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history_csv = tmp_path / "history.csv"
+    _write(history_csv, HISTORY_HEADER, [])
+    latest_csv = tmp_path / "latest.csv"
+    _write(latest_csv, LATEST_HEADER, [])
+    national_csv = tmp_path / "national.csv"
+    national_csv.write_text(
+        "indicator_code,name,period,value,obs_status,unit,source_agency,fetched_at\n"
+        "GDP_TEST,GDP volume,2020-Q1,100.0,A,index,NBB,\n",
+        encoding="utf-8",
+    )
+    out_dir = tmp_path / "public"
+    export_site_payloads(
+        db_path, history_csv, latest_csv, national_csv, out_dir, "b1", "pass", sections_config=None
+    )
+
+    national = json.loads((out_dir / "national.json").read_text())["indicators"]
+    entry = national["GDP_TEST"]
+    assert entry["name"] == "GDP volume"
+    assert entry["names"]["en"] == "GDP volume"
+
+
+def test_national_sections_layout_passes_through_the_declared_hero_series(tmp_path):
+    """Batch A1.3: home2.html's hero picks its two mini-charts from
+    `hero:` in config/national_sections.yaml rather than sorting national.json
+    itself, so home2.html can hold no indicator id (rule 2/24). The exporter
+    must both carry the key through and refuse a hero id nothing publishes,
+    the same guarantee `_check_national_sections` already gives `kpis` etc."""
+    layout_path = tmp_path / "national_sections.yaml"
+    layout_path.write_text(
+        "kpis: [A]\nhero: [A, B]\n",
+        encoding="utf-8",
+    )
+    layout = _national_sections(layout_path)
+    assert layout["hero"] == ["A", "B"]
+
+    # Every hero id must exist in the published national payload, exactly
+    # like every other list this function checks -- an id nothing provides
+    # would render home2's hero card as an empty box, invisible to every
+    # other test.
+    _check_national_sections(layout, known={"A", "B"})
+    with pytest.raises(ValueError, match=r"\['B'\]"):
+        _check_national_sections(layout, known={"A"})
 
 
 def test_geographies_metadata_ancestor_walk_resolves_to_a_real_region(tmp_path):

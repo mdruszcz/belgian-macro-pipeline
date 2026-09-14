@@ -134,16 +134,23 @@
   .mini-canvas{position:relative; margin-top:4px; min-width:0}
   .mini-canvas canvas{display:block; width:100%}
 
-  .hero-map{padding:var(--bp-space-4); position:relative}
+  .hero-map{padding:var(--bp-space-4); position:relative; display:flex; flex-direction:column}
+  /* Zone 1: title + indicator picker, its own row. */
   .hero-map .maphead{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--bp-space-3); gap:8px}
-  .hero-map .mapbox{position:relative; min-height:210px}
-  .hero-map .legend{overflow-x:auto; margin-top:var(--bp-space-3)}
+  /* Zone 2: the map, with the zoom controls confined to it (mapbox is the
+     positioning context for .zoombtns, not the card) so they can never
+     overlap the picker in zone 1. */
+  .hero-map .mapzone{position:relative; flex:1 1 auto; min-height:0}
+  .hero-map .mapbox{position:relative; min-height:210px; height:100%}
+  /* Zone 3: legend + source. */
+  .hero-map .mapfoot{margin-top:var(--bp-space-3)}
+  .hero-map .legend{overflow-x:auto}
   /* The shared map component styles its own legend/tooltip for a light card;
      inside the dark hero those need the dark treatment, which is what
      .bp-shell--navy already means elsewhere in layout.css. */
   .hero-map .swatches div{border-color:rgba(255,255,255,.2)}
   .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage{color:rgba(255,255,255,.6)}
-  .zoombtns{display:flex; flex-direction:column; gap:4px; position:absolute; top:var(--bp-space-4); right:var(--bp-space-4); z-index:2}
+  .zoombtns{display:flex; flex-direction:column; gap:4px; position:absolute; top:8px; right:8px; z-index:2}
   .zoombtns button{
     width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
     background:rgba(11,23,48,.75); color:#fff; font:inherit; font-size:14px; line-height:1; cursor:pointer;
@@ -352,9 +359,11 @@
     --nodata:#dbe5e8; --map-stroke:rgba(255,255,255,.75);
   }
   .home2 .hero-map .maphead{margin-bottom:4px}
-  .home2 .hero-map .mapbox{height:auto; min-height:240px; flex:1 1 auto; background:transparent}
+  .home2 .hero-map .mapzone{min-height:240px}
+  .home2 .hero-map .mapbox{height:100%; background:transparent}
   .home2 .hero-map .mapbox > svg{width:100%; height:100%}
-  .home2 .hero-map .legend{margin-top:4px; overflow:hidden}
+  .home2 .hero-map .mapfoot{margin-top:4px}
+  .home2 .hero-map .legend{overflow:hidden}
   .home2 .hero-map .ticks{width:100%!important; overflow:hidden}
   .home2 .hero-map .swatches div{height:8px; width:35px}
   .home2 .hero-map .ticks{font-size:8px}
@@ -441,9 +450,7 @@
   .home2 .attribution{font-size:9px; padding:14px 0}
 
   @media (max-width:1024px){
-    .home2 .hero .wrap{grid-template-columns:minmax(0,1fr)}
-    .home2 .hero-cards{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
-    .home2 .hero-mini{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+    .home2 .bp-topbar{height:auto; min-height:51px}
     .home2 .finance{grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:12px}
     .home2 .finance-title,.home2 .finance .sechead-link{grid-column:1/-1}
     .home2 .duo{grid-template-columns:minmax(0,1fr)}
@@ -451,9 +458,26 @@
     .home2 .features{grid-template-columns:repeat(2,minmax(0,1fr))}
     .home2 .cta .wrap{grid-template-columns:minmax(0,1fr)}
   }
-  @media (max-width:640px){
+  /* Hero composition (docs/features/site_unification.md, "Home2 : corriger
+     la composition"): the text column stacks above the visual cluster, and
+     the map stacks above the two charts -- .home2 .hero-cards is
+     `display:contents` (see the base rule above), so with `.wrap` down to
+     one column its children (the map card, then #heroMini) simply take
+     that column in DOM order; no extra override is needed to put the map
+     first, only to keep the two charts themselves side by side here. */
+  @media (max-width:900px){
+    .home2 .hero .wrap{grid-template-columns:minmax(0,1fr)}
+    .home2 .hero-mini{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (max-width:768px){
+    .home2 .bp-topbar .wrap{flex-wrap:wrap}
+    .home2 .bp-nav{order:3; flex-basis:100%}
+    .home2 .searchbox{order:2; max-width:none; margin-left:auto}
+  }
+  /* Everything becomes one column, including the two hero charts. */
+  @media (max-width:600px){
     .home2 .hero h1{font-size:2rem}
-    .home2 .hero-cards,.home2 .hero-mini{grid-template-columns:minmax(0,1fr)}
+    .home2 .hero-mini{grid-template-columns:minmax(0,1fr)}
     .home2 .finance{grid-template-columns:minmax(0,1fr)}
     .home2 .commune-card{grid-template-columns:minmax(0,1fr)}
     .home2 .cc-photo img{height:160px}
@@ -509,6 +533,13 @@
       </div>
 
       <div class="hero-cards">
+        <!-- Three materially separate zones (docs/features/site_unification.md,
+             "Home2 : corriger la composition"): (1) maphead -- title + the
+             indicator picker, its own row so the picker never sits under the
+             zoom buttons; (2) mapzone -- the map itself, with the zoom
+             controls confined to THIS zone (position:relative on mapbox, not
+             on the whole card) so they can never overlap the picker in zone
+             1 regardless of viewport width; (3) mapfoot -- legend + source. -->
         <div class="glass hero-map bp-state" id="mapCard" data-state="loading">
           <div class="maphead">
             <div>
@@ -517,13 +548,15 @@
             </div>
             <select class="bp-chart-select" id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map" style="background:rgba(11,23,48,.8); color:#fff; border-color:rgba(255,255,255,.22); max-width:120px"></select>
           </div>
-          <div class="zoombtns">
-            <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
-            <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
-          </div>
-          <div class="mapbox" id="mapbox">
-            <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
-            <div class="map-tip map-hidden" id="tip"></div>
+          <div class="mapzone">
+            <div class="mapbox" id="mapbox">
+              <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+              <div class="map-tip map-hidden" id="tip"></div>
+              <div class="zoombtns">
+                <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
+                <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
+              </div>
+            </div>
           </div>
           <!-- Swatches and ticks only. The shared component also writes a
                full prose explanation of its own classification (how the bands
@@ -533,11 +566,13 @@
                swamps a hero card. Those elements are deliberately not passed
                to the component here; map.html, one click away and linked
                below, carries the full explanation. -->
-          <div class="legend">
-            <div class="swatches" id="swatches"></div>
-            <div class="ticks" id="ticks"></div>
+          <div class="mapfoot">
+            <div class="legend">
+              <div class="swatches" id="swatches"></div>
+              <div class="ticks" id="ticks"></div>
+            </div>
+            <div class="sub" id="mapProvenance" style="margin-top:6px"></div>
           </div>
-          <div class="sub" id="mapProvenance" style="margin-top:6px"></div>
         </div>
 
         <div class="hero-mini" id="heroMini"></div>
@@ -708,6 +743,11 @@
   var SECTIONS_URL= 'public/data/metadata/sections.json';
   var SOURCES_URL = 'public/data/metadata/sources.json';
   var NATIONAL_URL= 'public/data/national.json';
+  // The hero's two mini-charts, and no other indicator id, come from
+  // config/national_sections.yaml's `hero:` list (Batch A1.3) -- the same
+  // premise as macro.html's own national_sections.json, so this page holds
+  // no indicator id of its own either (rule 2/24).
+  var NATIONAL_SECTIONS_URL = 'public/data/metadata/national_sections.json';
   var MANIFEST_URL= 'public/data/manifest.json';
   var FEATURED_CONFIG_URL = 'config/pages/commune-profile/published.json';
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
@@ -727,6 +767,7 @@
     sources: {}, grades: {}, national: {}, map: null, geojson: null,
     activeTheme: null, thumbs: [], drawnIndicator: null,
     featuredNis: null, featuredCodes: [], featured: null,
+    heroCodes: [],
   };
 
   /* ---- language, the site's existing pattern ---------------------------- */
@@ -837,15 +878,22 @@
   }
 
   /* ---- the two hero mini-charts and the six national cards --------------
-     Both read national.json. Series are chosen by a DATA PROPERTY, never a
-     list of codes: rate-shaped series first (a reader can read a percentage
+     Both read national.json. The hero's two charts come from `hero:` in
+     config/national_sections.yaml (state.heroCodes, populated in init()),
+     so home2.html holds no indicator id of its own (rule 2/24). The six-card
+     grid below still picks its series by a DATA PROPERTY, never a list of
+     codes: rate-shaped series first (a reader can read a percentage
      year-on-year without knowing a base), then the rest, so the row fills
      with real series and grows on its own when a national series is added.
 
-     Their labels come from the payload (claude.md rule 2). national.json
-     publishes a single monolingual `name`, so these read English in all
-     three languages -- a real gap in the national exporter, recorded in the
-     batch report rather than papered over by typing translations here. */
+     Labels come from the payload's `names{en,fr,nl}` (claude.md rule 2/7) --
+     national.json was the one monolingual payload on the site; the exporter
+     now carries the other two languages the same way every commune payload
+     already does (docs/features/site_unification.md, Batch A1.3). */
+  function nationalName(entry, code){
+    return (entry.names && (entry.names[LANG] || entry.names.en)) || entry.name || code;
+  }
+
   function nationalOrder(){
     var codes = Object.keys(state.national);
     var rate = codes.filter(function(c){ return (state.national[c].unit || '').indexOf('percent') === 0; }).sort();
@@ -855,29 +903,49 @@
     });
   }
 
-  function seriesPoints(entry, limit){
-    var ps = Object.keys(entry.periods || {}).sort().slice(-limit);
-    return ps.map(function(p){ return {period: p, value: (entry.periods[p] || {}).value}; })
-             .filter(function(pt){ return typeof pt.value === 'number'; });
+  function heroOrder(){
+    var declared = (state.heroCodes || []).filter(function(c){
+      return state.national[c] && latestNumeric(state.national[c]) !== null;
+    });
+    // Falls back only if the config fetch itself failed (offline preview,
+    // stale build) -- the exporter already refuses to publish a `hero` id
+    // nothing provides, so an empty `declared` on a real build means the
+    // fetch failed, not that the config was wrong.
+    return declared.length ? declared : nationalOrder().slice(0, 2);
   }
 
+  function seriesPoints(entry, limit){
+    var ps = Object.keys(entry.periods || {}).sort().slice(-limit);
+    return ps.map(function(p){
+      var cell = entry.periods[p] || {};
+      return {period: p, value: cell.value, status: cell.status};
+    });
+  }
+
+  var heroUnregister = [];
   function renderHeroMini(){
+    heroUnregister.forEach(function(unregister){ unregister(); });
+    heroUnregister = [];
     var host = document.getElementById('heroMini');
     host.innerHTML = '';
     var draws = [];
-    nationalOrder().slice(0, 2).forEach(function(code, i){
+    heroOrder().slice(0, 2).forEach(function(code, i){
       var entry = state.national[code];
+      var name = nationalName(entry, code);
       var latest = latestNumeric(entry);
       var el = document.createElement('div');
       el.className = 'glass';
+      // Order matches every chart card on the site: full title, latest
+      // value + period, the plot, then its source -- the plot never sits
+      // above the figure it illustrates.
       el.innerHTML =
         '<div class="mini-head"><div><h3></h3><div class="sub"></div></div>' +
         '<a class="seemore" href="macro.html"></a></div>' +
         '<div class="mini-figure"><b></b></div>' +
         '<div class="period sub" style="text-align:right"></div>' +
-        '<div class="provenance sub"></div>' +
-        '<div class="mini-canvas"><canvas></canvas></div>';
-      el.querySelector('h3').textContent = entry.name || code;
+        '<div class="mini-canvas"><canvas></canvas></div>' +
+        '<div class="provenance sub"></div>';
+      el.querySelector('h3').textContent = name;
       el.querySelector('.sub').textContent = entry.unit || '';
       el.querySelector('.seemore').textContent = T('homeSeeMore');
       el.querySelector('.mini-figure b').textContent =
@@ -886,14 +954,37 @@
       el.querySelector('.provenance').textContent = nationalProvenance(entry, latest);
       host.appendChild(el);
       var pts = seriesPoints(entry, 24);
-      if(pts.length > 1) draws.push({canvas: el.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
+      if(pts.filter(function(p){ return typeof p.value === 'number'; }).length > 1){
+        draws.push({canvas: el.querySelector('canvas'), card: el, points: pts, label: name, unit: entry.unit, i: i});
+      }
     });
     // Draw only once every card is in the DOM: .hero-mini is a flex column
     // whose children size against the grid, and a canvas measured mid-append
     // bakes in the wrong width (found the hard way in this batch's first pass).
+    var statusLabels = {
+      provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
+    };
     draws.forEach(function(d){
-      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
+      var model = BPCharts.drawLine(d.canvas, [{label: d.label, unit: d.unit, points: d.points, colourIndex: d.i}],
         {locale: LANG, height: 104});
+      var tipOpts = {locale: LANG, unit: d.unit, statusLabels: statusLabels, ariaLabel: d.label};
+      BPCharts.attachTooltip(d.canvas, model, tipOpts);
+      // Column headers ("Period"/"Value"/"Status") and the <summary> word
+      // "Data table" are charts.js's own built-in English fallbacks --
+      // BPCharts carries no i18n table of its own (see the file header) and
+      // this batch does not touch assets/i18n.js to add page-scoped keys
+      // for them. Everything that IS real data here (the title, the value,
+      // the period, the status word, the source line) is already trilingual
+      // via T()/nationalName(); only these four structural column labels
+      // read English regardless of LANG -- a disclosed follow-up, not a
+      // silent gap.
+      BPCharts.dataTable(d.card, model, Object.assign({summary: T('homeSeeMore') + ' — ' + d.label, seriesColumn: false}, tipOpts));
+      var redraw = function(){
+        var next = BPCharts.drawLine(d.canvas, [{label: d.label, unit: d.unit, points: d.points, colourIndex: d.i}],
+          {locale: LANG, height: 104});
+        model.hits = next.hits;
+      };
+      heroUnregister.push(BPCharts.register(d.canvas, redraw));
     });
   }
 
@@ -903,6 +994,7 @@
     var draws = [];
     nationalOrder().slice(0, 6).forEach(function(code, i){
       var entry = state.national[code];
+      var name = nationalName(entry, code);
       var latest = latestNumeric(entry);
       var card = document.createElement('div');
       card.className = 'kpicard';
@@ -911,15 +1003,15 @@
         '<div class="mini-canvas"><canvas></canvas></div>' +
         '<div class="figure"><b></b></div><div class="period"></div>' +
         '<div class="national-provenance"></div>';
-      card.querySelector('h3').textContent = entry.name || code;
+      card.querySelector('h3').textContent = name;
       card.querySelector('.unitline').textContent = entry.unit || '';
       card.querySelector('.figure b').textContent =
         latest ? MapUI.formatValue(latest.value, entry.unit, 1, LANG) : '—';
       card.querySelector('.period').textContent = latest ? latest.period : '';
       card.querySelector('.national-provenance').textContent = nationalProvenance(entry, latest);
       host.appendChild(card);
-      var pts = seriesPoints(entry, 20);
-      if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: entry.name || code, i: i});
+      var pts = seriesPoints(entry, 20).filter(function(p){ return typeof p.value === 'number'; });
+      if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: name, i: i});
     });
     draws.forEach(function(d){
       // A sparkline: at this card size an axis would be unreadable, and the
@@ -1126,6 +1218,7 @@
     var responses = await Promise.all([
       fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
       fetch(NATIONAL_URL), fetch(MANIFEST_URL), fetch(FEATURED_CONFIG_URL).catch(function(){ return null; }),
+      fetch(NATIONAL_SECTIONS_URL).catch(function(){ return null; }),
     ]);
     var indexJson = responses[0].ok ? await responses[0].json() : {indicators: []};
     state.index = indexJson.indicators || [];
@@ -1140,6 +1233,10 @@
       var ds = (await responses[4].json()).datasets || {};
       document.getElementById('statCommunes').textContent = (ds.communes || {}).count || '—';
       document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
+    }
+    if(responses[6] && responses[6].ok){
+      var nationalLayout = await responses[6].json();
+      state.heroCodes = nationalLayout.hero || [];
     }
     if(responses[5] && responses[5].ok){
       try{
