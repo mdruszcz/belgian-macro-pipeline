@@ -137,7 +137,7 @@
   .macro-kpi .bp-delta{min-height:16px}
   .mini-canvas{position:relative; margin-top:6px; min-width:0}
   .mini-canvas canvas{display:block; width:100%}
-  .kpi-note{font-size:12px; color:var(--bp-text-faint); margin:calc(-1 * var(--bp-space-3)) 0 0}
+  .kpi-note{font-size:12px; color:var(--bp-text-faint); margin:var(--bp-space-3) 0 0}
 
   /* ---- card rows ---- */
   .row{display:grid; gap:var(--bp-space-5); min-width:0}
@@ -355,7 +355,7 @@
 
     <!-- ==================== panel: apercu (overview, key, map, news) ==================== -->
     <section class="bp-panel" id="apercu" data-panel>
-      <h2 data-panel-label="apercu">Overview</h2>
+      <h2 class="bp-sr-only" data-panel-label="apercu">Overview</h2>
       <header class="page-head" id="overview">
         <div>
           <h1 data-t="macroTitle">The Belgian macroeconomy</h1>
