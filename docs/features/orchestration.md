@@ -1,10 +1,10 @@
 # Feature: Dagster orchestration layer
 
-Status: steps 1 and 2 done (production runs through Dagster); step 3 built (the offload in the
-graph, the first in-process assets), pending merge
+Status: steps 1 to 3 done and verified in production; step 4 built (four more in-process assets,
+an offload that puts its files back), pending merge
 Issue: none -- requested directly by the maintainer, 2026-09-13
 Branch: feat/dagster-orchestration (step 1), feat/dagster-step2-runner (step 2),
-feat/dagster-step3-offload (step 3)
+feat/dagster-step3-offload (step 3), feat/dagster-step4-extractions-rollback (step 4)
 Decision record: [ADR 0007](../decisions/0007-dagster-orchestration-layer.md)
 
 ## Problem
@@ -277,16 +277,12 @@ the coordinator as before. `python -m orchestration.daily --without-fetch` skips
   verification, no working database) comes before `offload()` replaces anything. The asset is red
   with the script's message and "No committed file was changed."
 - **Any other error** propagates unchanged, with its traceback. `offload()` publishes with one
-  `os.replace` per file -- each in_db CSV, then the database -- so an error, or a killed process,
-  between two of them can leave some of those files new and the rest old in the checkout it ran in.
-  The run is red and nothing is committed; in the runner that checkout is thrown away. The asset
-  logs the files concerned, one by one, read from the registry: the committed database and each
-  in_db CSV, one per indicator for a directory store. To put them back locally, run `git status`
-  and restore only the files from that list it shows as modified, one at a time, with
-  `git checkout -- <file>`. Never restore a directory: `data/` also holds files this run did not
-  write, such as a hand-loaded store refreshed in the same checkout.
-- Restoring the previous files automatically is not part of this step
-  (`docs/implementation/known-risks.md`, 2026-09-14).
+  `os.replace` per file -- each in_db CSV, then the database -- so in step 3 an error, or a killed
+  process, between two of them could leave some of those files new and the rest old in the
+  checkout it ran in. The run is red and nothing is committed; in the runner that checkout is
+  thrown away.
+- Step 4 puts the files back on an exception and keeps backups for what it cannot put back; see
+  "Step 4", "What a failed offload leaves behind now", for what is and is not covered.
 
 ### Extracting clean functions, one at a time
 
@@ -317,14 +313,66 @@ Still subprocesses, and why:
   raises `SystemExit` inside `sync()`.
 - `fetch_stocks.py` and `belgian_macro_db.py` call `logging.basicConfig` when imported, which would
   reconfigure the Dagster process's own logging.
-- `export_communes_history_csv.py` (its `--all-periods` needs its own translation),
-  `export_communes_table_json.py`, `revisions_report.py` and the repository-only exporters: the
-  next candidates.
+- the repository-only exporters: the next candidates. (`export_communes_history_csv.py`,
+  `export_communes_table_json.py` and `revisions_report.py` were converted in step 4.)
 
 ### Local behaviour that changes
 
 `make dagster-daily` now ends with the offload, like production: it writes `data/belgian_macro.db`
 and the in_db CSVs of the checkout it runs in. `--without-fetch` does the same without the network.
+
+## Step 4 -- four more in-process assets, and an offload that puts its files back
+
+### The extractions
+
+| Asset | Function called | What its command line needed |
+|---|---|---|
+| `communes_history_full_csv` | `export_communes_history_csv()` | the bare `--all-periods` switch, `all_periods=True` |
+| `communes_history_csv` | `export_communes_history_csv()` | nothing new |
+| `communes_table_json` | `export_communes_table_json()`, extracted from `main()` | `--communes-history`, `csv_path`; the names and provenance are read from the database inside the function, so a call cannot leave them out |
+| `revisions_report` | `report_revisions()`, extracted from `main()` | `--since {today}`, the UTC date from `run.today()`, which the subprocess route now uses too |
+
+`assets.exporter_arguments` is a table of known flags (`--db`, `--out`, `--communes-history`,
+`--stores`) and switches (`--all-periods`). It still refuses any other flag, a flag without its
+value, a switch followed by a value, a flag given twice, and a line without `--db` and `--out`.
+The revisions report has its own reader, `canonical.revisions_arguments`, which accepts `--db` and
+`--since` and nothing else, and its asset logs the report line by line, as the subprocess route
+did. No command line changed, and `main()` of both extracted scripts calls the new function.
+
+Still subprocesses: `export_site_payloads.py`, the sync scripts, `fetch_stocks.py` and
+`belgian_macro_db.py`, for the reasons given in step 3, and the repository-only exporters.
+
+### What a failed offload leaves behind now
+
+This is `offload()` itself, so it holds for `make offload` and for `committed_stores` alike.
+
+| What happens | What is left |
+|---|---|
+| A refusal (`OffloadError`), including a `-wal` or `-shm` file beside the committed database | Nothing changed. A sidecar file is never deleted. |
+| An exception while taking the backups, before anything is replaced | Nothing changed; the incomplete backup directory is removed. |
+| An exception while publishing, and every file already replaced is put back | Every committed file as before; the original exception, unchanged; a warning naming the files put back; this run's backups removed. |
+| An exception while publishing, and a file cannot be put back | `PartialPublication`, raised from the original exception, naming the files still new; the backup directory kept. The asset logs those files as git names them, and where their backups are. |
+| An error after publishing completed, such as the final print | The new committed files in place. The asset's message claims no outcome and points to `git status`. |
+| A killed process or a power cut while publishing | Nothing is put back, since no code runs. This run's backup directory and its manifest remain, for a restore by hand. |
+
+**Backups.** Before the first replace, every committed file about to be replaced is copied to
+`data/local/offload_backup/<UTC time>-<pid>/`: beside the working database, so gitignored, and
+outside the repository in a redirected run. Its `manifest.txt` names the committed file each
+backup belongs to, or `(absent)` for a file that did not exist yet. A restore copies the backup to
+`<file>.restore.tmp` beside the committed file and moves that over it, so an interrupted restore
+keeps the backup and never leaves the file truncated. A run removes only its own directory, and
+only after a complete publish or a complete restore. Directories of earlier runs are never removed
+automatically: one may be the only copy from an earlier incident.
+
+**The `-wal`/`-shm` refusal.** A check made before any write, not a lock: a program that opens the
+committed database after the check is not detected. On the maintainer's Windows machine, running
+`tests/test_stores.py` leaves both files, empty, beside `data/belgian_macro.db`; the offload then
+refuses until they are gone. In the runner nothing opens the committed database before the offload
+(the assemble copies it), and PR #161 carried neither file.
+
+**Restoring by hand**, after `PartialPublication` or a killed process: for each line of the
+backup's `manifest.txt`, copy the backup over the file it names, one file at a time, or run
+`git checkout -- <file>`; remove a file marked `(absent)`. Never restore a directory.
 
 ## Data / schema changes
 
@@ -386,15 +434,32 @@ On Windows without `make`: `.venv/Scripts/python.exe -m dagster dev -m orchestra
   committed database, and none passes `--without-fetch`.
 - Step 3, in `tests/test_orchestration_parity.py` (slow): each converted exporter by both routes,
   from a different working directory; the offload by both routes, byte-identical.
+- Step 4, in `tests/test_orchestration.py`: both communes history calls, the second with
+  `all_periods`; the communes table gets the full history, its output and the working database;
+  malformed exporter command lines refused (a switch with a value, a flag without one, a flag
+  given twice, no `--db` or `--out`); the revisions report gets the absolute working database and
+  today, refuses another command line, and reaches the run log and the metadata; a partial
+  publication's notice names only the files left new and the backup directory; any other offload
+  error gets a message that claims no outcome.
+- Step 4, in `tests/test_offload_stores.py` (slow): a replace that fails on the first CSV, or on
+  the database after every CSV was published, puts every file back and re-raises the original
+  error; a restore copies beside the file and never consumes the backup; an interrupted restore
+  never truncates the file; a file that cannot be put back raises `PartialPublication` with its
+  backups kept; a retry keeps an earlier run's backups; a successful offload leaves none of its
+  own; a rollback removes an indicator file that did not exist; a `-wal` or `-shm` file is refused
+  by the function and by the command line, changing and deleting nothing.
+- Step 4, in `tests/test_export_communes_table_json.py` and `tests/test_revisions_report.py`: each
+  extracted function writes or prints exactly what its script's `main()` does.
+- Step 4, in `tests/test_orchestration_parity.py` (slow): both communes history files and the
+  communes table byte-identical by both routes; the revisions report's text equal to the command
+  line's output on the real data; the offload leaves no backup behind.
 
 ## Next steps (not in this batch)
 
-- **After merging step 3:** watch the first production run (or start it by hand with
-  `workflow_dispatch` on `develop`): no workflow step runs `offload_stores.py`, the size guard and
-  the gate pass, and the PR carries the committed database and CSVs as before.
-- **Step 4.** The next extractions (`communes_history_full_csv` and `communes_history_csv`, whose
-  `--all-periods` needs a translation of its own; `communes_table_json`; `revisions_report`), and
-  an offload that backs up and restores its files when it fails part-way.
+- **After merging step 4:** watch the first production run: the four converted assets and the
+  offload succeed, the offload leaves no `offload_backup/` directory in the runner's scratch, and
+  the PR carries the same kinds of files as before.
+- The repository-only exporters, the next candidates for an in-process call.
 
 ## Open questions
 
