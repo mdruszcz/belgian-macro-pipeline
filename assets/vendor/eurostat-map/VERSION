@@ -1,0 +1,33 @@
+eurostat-map 4.11.3
+
+Source: https://registry.npmjs.org/eurostat-map/-/eurostat-map-4.11.3.tgz
+  (package/build/eurostatmap.min.js and package/build/323.eurostatmap.min.js,
+  extracted unmodified; package/LICENSE copied verbatim as LICENSE.txt)
+Also published at: https://www.npmjs.com/package/eurostat-map/v/4.11.3
+Licence: EUPL-1.2 (see LICENSE.txt, package.json "license" field)
+Vendored: 2026-09-14 (batch B3, docs/features/europe_nuts2.md)
+
+sha256 (eurostatmap.min.js): dbda6208c4c6a086bb904f119203f02aa34437f9ceb7065c82fca2505877e8bf
+sha256 (323.eurostatmap.min.js): d1a10549fe2c274fc1b8551ce4fe9497d1d95c317a2b73feacf735fc670c6d51
+Size (eurostatmap.min.js): 1,219,896 bytes (1.16 MiB) minified
+Size (323.eurostatmap.min.js): 13,589 bytes
+
+Verification: downloaded the published npm tarball directly (registry.npmjs.org)
+during this batch and diffed package/build/eurostatmap.min.js against the file
+vendored here -- byte-for-byte identical (same sha256). The 1,219,896-byte size
+also matches the figure batch B1 recorded in docs/features/europe_nuts2.md
+after downloading the same file independently on 2026-09-14.
+
+323.eurostatmap.min.js is a webpack split chunk containing ONLY the Web Worker
+script for the library's "dorling" cartogram map type (grepped from
+eurostatmap.min.js: `new Worker(new URL(__webpack_require__.p +
+__webpack_require__.u(323), __webpack_require__.b), ...)`, gated behind
+`dorlingSettings_.worker`). BelPulse's Europe panel only ever builds a
+"choropleth" map (assets/belpulse/europe_map.js never sets a dorling map
+type), so this chunk is never requested in practice -- vendored anyway, at
+negligible size, so a same-origin 404 can never happen if a future change
+enables that feature by mistake.
+
+No other file from the npm package (README, TypeScript .d.ts files, the
+unminified eurostatmap.js dev build, other split chunks used only by other
+map types) is vendored: BelPulse ships the production UMD bundle only.

@@ -67,6 +67,11 @@
 <link rel="stylesheet" href="assets/belpulse/tokens.css">
 <link rel="stylesheet" href="assets/belpulse/layout.css">
 <link rel="stylesheet" href="assets/belpulse/components.css">
+<!-- Europe panel (Batch B3): the choropleth ramp tokens (--ramp-*/--nodata)
+     assets/commune_map.css already defines, reused rather than duplicated
+     (docs/features/europe_nuts2.md). europe_map.css is page chrome only. -->
+<link rel="stylesheet" href="assets/commune_map.css">
+<link rel="stylesheet" href="assets/belpulse/europe_map.css">
 <style>
   /* Page composition only. Anything reusable belongs in
      assets/belpulse/components.css -- Batch 2 owns the library. */
@@ -502,6 +507,11 @@
     <section class="bp-panel" id="europe" data-panel hidden>
       <h2 data-panel-label="europe">Europe</h2>
       <p class="panel-note" id="europeNote" hidden></p>
+      <!-- Batch B3 (docs/features/europe_nuts2.md): europe_map.js fills
+           this in only once the panel actually opens -- no indicator id,
+           no figure, no vendor script reference belongs in this markup
+           (CLAUDE.md rules 2/24/30). -->
+      <div id="europeMapRoot" class="bp-europe-map" hidden></div>
       <article class="bp-chart-card bp-state" id="international" data-slot="international" data-state="unavailable">
         <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
         <div class="placeholder"></div>
@@ -521,6 +531,9 @@
 <script src="assets/belpulse/charts.js"></script>
 <script src="assets/belpulse/panels.js"></script>
 <script src="assets/commune_map.js"></script>
+<!-- Europe panel (Batch B3): loads its own vendored map library lazily,
+     only once the panel opens -- never at page load (CLAUDE.md rule 30). -->
+<script src="assets/belpulse/europe_map.js"></script>
 <script>
 /* BelPulse macroeconomics page -- Batch 6.
  *
