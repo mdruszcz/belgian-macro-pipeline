@@ -1,7 +1,7 @@
 # ADR 0009 — A separate, allowlisted NUTS 2 geography table, never merged into the Belgian NIS table
 
 Date: 2026-09-14
-Status: Proposed
+Status: Accepted (2026-09-14, maintainer)
 Revises: none directly; extends [ADR 0008](0008-eurostat-dataset-adapter-and-directory-stores.md)'s
 allowlist pattern one geographic level down, from country to NUTS 2 region.
 

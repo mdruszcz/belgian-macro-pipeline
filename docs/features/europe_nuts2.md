@@ -1,12 +1,13 @@
 # Feature: Europe panel — NUTS 2 choropleth (GDP per capita PPS, unemployment, population)
 
-Status: draft — coverage report and spec only (batch B1), awaiting maintainer approval
-Issue: none yet (this document is what the maintainer approves before one is opened)
+Status: approved 2026-09-14 (maintainer) — all seven "Decisions needed" answered yes as
+recommended, one exception noted under decision 7
+Issue: none yet (this document is what the maintainer approved before one is opened)
 Branch: feat/europe-nuts2-spec
 
 This batch produced no code that touches `config/indicators/*.yaml`, `config/geography/*`,
 `config/stores.yaml`, adapter code, or any file under `data/` / `public/data/`. It is the
-coverage report, this spec, a draft ADR and PROPOSED catalogue rows — all measured today
+coverage report, this spec, a draft ADR and (now approved) catalogue rows — all measured today
 (2026-09-14, ~15:45–15:53 UTC) with `scripts/report_nuts2_coverage.py`, a read-only probe.
 Nothing downstream starts until the maintainer approves the decisions listed at the end.
 
@@ -359,26 +360,38 @@ failing the export rather than shipping an unstyled region silently.
    (unemployment rate), `demo_r_pjanaggr3` (population) — as PROPOSED catalogue rows. My
    recommendation: yes, all three; the unit codes and coverage are confirmed and the licence
    filter behaves identically to the already-approved pilot's.
+   **Answer (2026-09-14): approved as recommended.**
 2. **Approve the Nuts2json geometry source and the 2024 vintage.** My recommendation: yes to
    both — self-hosting is confirmed possible, licence is EUPL-1.2 with a one-line attribution
    requirement, and the 2024 vintage measurably fits all three datasets better while removing UK
    for free.
+   **Answer (2026-09-14): approved as recommended.**
 3. **Approve vendoring `eurostat-map` 4.11.3 (1.16 MiB, EUPL-1.2).** My recommendation: yes, with
    the two self-hosting options (`nuts2jsonBaseURL`, `statData().setData`) both wired before this
    ships, verified in a browser trace as part of the implementation batch, not assumed from the
    bundle grep alone.
+   **Answer (2026-09-14): approved as recommended.**
 4. **Approve NUTS 2 outside the international pilot's stage-1 approval.** The pilot
    (`docs/features/international.md`) approved five *national* indicators pending a 14-day
    measurement; NUTS 2 is sub-national and was never in that approval. My recommendation: treat
    this as its own approval, not an extension of stage 1 — the failure modes (compound flags, a
    second allowlist file, an aggregate code slipping through) are different enough to want a
    separate sign-off.
+   **Answer (2026-09-14): approved as recommended.**
 5. **The NUTS vintage choice** — see the geometry section: recommend 2024.
+   **Answer (2026-09-14): approved as recommended (2024).**
 6. **How to handle Brussels' missing `BE10` tag** — add the alias, or ship with Brussels
    rendering `missing` until it's resolved. My recommendation: add the alias (a lookup-table
    entry, not a `geographies.csv` change) — Brussels being blank on a Belgian company's own
    Europe map is the kind of gap a client would notice immediately.
+   **Answer (2026-09-14): approved as recommended — the BE10 alias is a lookup-table entry, not
+   a `geographies.csv` change.**
 7. **Whether the compound-`OBS_FLAG` adapter fix is its own PR before this panel, or part of the
    panel's implementation batch.** My recommendation: its own small PR first — it is a general
    adapter correctness fix (today's national-accounts indicators could hit the same wall the
    moment Eurostat starts compounding a flag on one of them), not NUTS-2-specific.
+   **Answer (2026-09-14): approved as recommended — its own PR first.** One part of this is
+   **not yet decided**: the mapping of the single flag `u` ("unreliable") to a canonical status.
+   The flag-fix PR implements `u` → `estimate` under a stated assumption, pending the
+   maintainer's confirmation — it is not to be read as settled just because the PR itself is
+   approved to go first.
