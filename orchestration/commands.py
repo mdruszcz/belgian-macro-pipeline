@@ -147,6 +147,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/aggregates.csv",),
+        function="export_aggregates_csv:export_aggregates_csv",
     ),
     "percentiles_csv": Command(
         (
