@@ -100,31 +100,104 @@ def test_the_measured_tokens_document_and_the_css_agree(tokens):
         assert name in doc, f"{name} is in tokens.css but not named in tokens-measured.md"
 
 
-def test_light_and_dark_editorial_surfaces_both_define_the_same_tokens(css):
-    """assets/commune_map.css's own pattern: :root, the prefers-color-scheme
-    block, and the explicit data-theme="dark" block must define the same set
-    of tokens, or a reader in one theme silently loses a variable the other
-    theme has."""
-    root_block = re.search(r":root\{(.*?)\n\}", css, re.DOTALL).group(1)
-    root_names = set(re.findall(r"(--bp-[\w-]+):", root_block))
+@pytest.fixture(scope="module")
+def root_block(css) -> str:
+    return re.search(r":root\{(.*?)\n\}", css, re.DOTALL).group(1)
 
-    dark_blocks = re.findall(
-        r'(?:prefers-color-scheme:\s*dark\s*\)\s*\{\s*:root:not\(\[data-theme="light"\]\)|'
-        r':root\[data-theme="dark"\])\{(.*?)\n\}',
+
+@pytest.fixture(scope="module")
+def dark_media_block(css) -> str:
+    """The prefers-color-scheme mechanism's inner :root:not([data-theme="light"])
+    block. Its closing brace is indented two spaces (nested inside the media
+    query), unlike the other theme blocks below, which sit at the top level."""
+    match = re.search(
+        r'prefers-color-scheme:\s*dark\s*\)\s*\{\s*:root:not\(\[data-theme="light"\]\)\{(.*?)\n  \}',
         css,
         re.DOTALL,
     )
-    assert (
-        len(dark_blocks) == 2
-    ), "expected exactly one prefers-color-scheme block and one explicit data-theme block"
-    for block in dark_blocks:
-        dark_names = set(re.findall(r"(--bp-[\w-]+):", block))
-        assert dark_names, "a dark block defines no tokens at all"
-        # Every dark override must be redefining something :root already declared --
-        # a token that exists ONLY in the dark block would be undefined in light mode.
-        assert (
-            dark_names <= root_names
-        ), f"dark-only tokens with no light default: {dark_names - root_names}"
+    assert match, "could not find the prefers-color-scheme dark block"
+    return match.group(1)
+
+
+@pytest.fixture(scope="module")
+def dark_explicit_block(css) -> str:
+    match = re.search(r':root\[data-theme="dark"\]\{(.*?)\n\}', css, re.DOTALL)
+    assert match, 'could not find the :root[data-theme="dark"] block'
+    return match.group(1)
+
+
+@pytest.fixture(scope="module")
+def paper_block(css) -> str:
+    match = re.search(r':root\[data-theme="paper"\]\{(.*?)\n\}', css, re.DOTALL)
+    assert match, 'could not find the :root[data-theme="paper"] block'
+    return match.group(1)
+
+
+@pytest.fixture(scope="module")
+def paper_tokens(tokens, paper_block) -> dict:
+    """Root tokens overridden by whatever paper's own block redefines --
+    the same effective-value merge the browser itself performs when
+    :root[data-theme="paper"] is more specific than :root for a shared name."""
+    merged = dict(tokens)
+    for match in re.finditer(r"--bp-([\w-]+):\s*(#[0-9a-fA-F]{6})\b", paper_block):
+        merged[f"--bp-{match.group(1)}"] = match.group(2)
+    return merged
+
+
+# --- theme parity: light, dark (both mechanisms) and paper ------------------
+
+
+@pytest.mark.parametrize(
+    "label,block_fixture",
+    [
+        ("prefers-color-scheme dark", "dark_media_block"),
+        ('data-theme="dark"', "dark_explicit_block"),
+        ('data-theme="paper"', "paper_block"),
+    ],
+)
+def test_every_theme_block_only_redefines_tokens_root_declares(
+    request, root_block, label, block_fixture
+):
+    """assets/commune_map.css's own pattern, now with a third theme:
+    :root is the base, and every override block -- both dark mechanisms and
+    paper -- must be a subset of what :root declares, or a reader in that
+    theme silently loses (or gains, undefined elsewhere) a variable."""
+    root_names = set(re.findall(r"(--bp-[\w-]+):", root_block))
+    block = request.getfixturevalue(block_fixture)
+    names = set(re.findall(r"(--bp-[\w-]+):", block))
+    assert names, f"{label} defines no tokens at all"
+    assert names <= root_names, f"{label}: tokens with no light default: {names - root_names}"
+
+
+def test_paper_theme_defines_the_full_set_the_dark_theme_redefines(
+    dark_explicit_block, paper_block
+):
+    """Paper is a third full theme, not a partial patch on top of light or
+    dark. Every token the dark theme bothers to override (surface, icon
+    tints, accent-ink...) is one a page actually depends on differing per
+    theme -- plus paper additionally redefines the navy-analytical and chart
+    tokens neither dark block touches, so macro's shell and any multi-series
+    chart don't fall through to light or dark colours under paper."""
+    dark_names = set(re.findall(r"(--bp-[\w-]+):", dark_explicit_block))
+    paper_names = set(re.findall(r"(--bp-[\w-]+):", paper_block))
+    missing = dark_names - paper_names
+    assert not missing, f"paper is missing tokens the dark theme redefines: {missing}"
+
+
+def test_grid_line_token_exists_in_all_three_themes(
+    root_block, dark_media_block, dark_explicit_block, paper_block
+):
+    """--bp-grid-line (Batch A1.2) paints layout.css's background grid under
+    Papier and nothing anywhere else -- but it still has to be an explicit,
+    defined token in all three theme blocks, transparent or not, or a reader
+    switching theme could hit an undefined custom property."""
+    for label, block in (
+        ("light (:root)", root_block),
+        ("prefers-color-scheme dark", dark_media_block),
+        ('data-theme="dark"', dark_explicit_block),
+        ('data-theme="paper"', paper_block),
+    ):
+        assert "--bp-grid-line:" in block, f"{label} does not define --bp-grid-line"
 
 
 # --- contrast ---------------------------------------------------------------
@@ -185,6 +258,53 @@ def test_every_chart_series_colour_is_visible_on_the_light_background(tokens):
         if ratio < 3.0:
             weak.append(f"{name} ({hexval}) = {ratio:.2f}:1")
     assert not weak, f"chart colours too faint against the background: {weak}"
+
+
+@pytest.mark.parametrize("fg_name,bg_name,minimum,purpose", CONTRAST_PAIRS)
+def test_paper_theme_contrast_meets_its_wcag_floor(
+    paper_tokens, fg_name, bg_name, minimum, purpose
+):
+    """Same CONTRAST_PAIRS, same floors, graded against paper's effective
+    values -- including --bp-accent and --bp-accent-soft-adjacent pairs that
+    paper does NOT redefine and therefore inherit --bp-bg's new (darker,
+    cream) background rather than light's near-white one; a pair that passed
+    against #f6f8fb is not guaranteed to pass against #f4efe3."""
+    fg, bg = paper_tokens[fg_name], paper_tokens[bg_name]
+    ratio = contrast_ratio(fg, bg)
+    assert ratio >= minimum, (
+        f"paper: {fg_name} ({fg}) on {bg_name} ({bg}) = {ratio:.2f}:1, "
+        f"below the {minimum}:1 floor for {purpose}"
+    )
+
+
+def test_every_chart_series_colour_is_visible_on_the_paper_background(paper_tokens):
+    """Paper redefines all 8 chart tokens (unlike dark, which leaves them
+    alone) -- checked the same way the light-mode chart colours are."""
+    chart_tokens = {
+        name: hexval for name, hexval in paper_tokens.items() if name.startswith("--bp-chart-")
+    }
+    assert len(chart_tokens) == 8, f"expected 8 chart series tokens, found {len(chart_tokens)}"
+    bg = paper_tokens["--bp-bg"]
+    weak = []
+    for name, hexval in chart_tokens.items():
+        ratio = contrast_ratio(hexval, bg)
+        if ratio < 3.0:
+            weak.append(f"{name} ({hexval}) = {ratio:.2f}:1")
+    assert not weak, f"paper chart colours too faint against the background: {weak}"
+
+
+def test_accent_ink_is_readable_under_paper(paper_block):
+    """The dark-mode equivalent of this check (below) exists because the
+    first pass of dark mode forgot to override --bp-accent-ink at all. Paper
+    does override it (tokens.css) -- this pins that the override is actually
+    present and actually passes, rather than assuming a designed value is
+    automatically a legible one."""
+    match = re.search(r"--bp-accent-ink:\s*(#[0-9a-fA-F]{6})", paper_block)
+    assert match, "paper block does not override --bp-accent-ink"
+    bg_match = re.search(r"--bp-bg:\s*(#[0-9a-fA-F]{6})", paper_block)
+    assert bg_match, "paper block does not override --bp-bg"
+    ratio = contrast_ratio(match.group(1), bg_match.group(1))
+    assert ratio >= 4.5, f"paper: accent-ink on paper bg = {ratio:.2f}:1, below AA"
 
 
 def test_dark_mode_editorial_surface_also_meets_contrast(css):

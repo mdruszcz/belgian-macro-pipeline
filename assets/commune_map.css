@@ -32,6 +32,38 @@
   --ramp-4:#b08745; --ramp-5:#d0a75f; --ramp-6:#eccb8d;
   --nodata:#38332a; --map-stroke:#1a1815;
 }
+/* Papier: a pastel sequential ramp, same seven-step count and the same
+   "dark = more" convention as the default (light) ramp above -- paper is a
+   light-family theme, not an inversion of it the way data-theme="dark" is.
+   Blue-toned rather than the default's amber, so a reader can tell the two
+   light themes' choropleths apart at a glance; classification (the breaks
+   themselves) is unchanged, only colour is. Designed against the mood in
+   docs/design-references/maquettes-unification-v1/09-themes.png, not
+   measured -- see docs/design-references/tokens-measured.md. */
+:root[data-theme="paper"]{
+  --ramp-0:#eef2f7; --ramp-1:#d3dff0; --ramp-2:#aec4e3; --ramp-3:#82a3d2;
+  --ramp-4:#5a80bd; --ramp-5:#3c60a0; --ramp-6:#233f74;
+  --nodata:#e7ded0; --map-stroke:#faf7ef;
+}
+/* map.html's own alternative-palette rules (:root[data-palette="…"], further
+   down in map.html's <style>) are EQUAL specificity to the block above and
+   come later in source order, so they would otherwise win -- and they
+   apply even with nobody touching the (now-hidden) picker, because
+   map.html's pre-paint script defaults belpulse-map-palette to 'bluered',
+   not 'default'. Repeating the same values under one extra attribute
+   clause outranks every :root[data-palette="…"] rule regardless of which
+   one is set (a live choice, a stale one from a previous theme, or the
+   'bluered' default), so hiding the picker under paper actually means what
+   it looks like it means: one ramp, the paper one, chosen by this
+   stylesheet and not overridable by a control the reader can no longer see.
+   Keep these six lines identical to the block above if the paper ramp ever
+   changes -- the same "given twice" duplication map.html's own palettes
+   already use, not a second source of truth. */
+:root[data-theme="paper"][data-palette]{
+  --ramp-0:#eef2f7; --ramp-1:#d3dff0; --ramp-2:#aec4e3; --ramp-3:#82a3d2;
+  --ramp-4:#5a80bd; --ramp-5:#3c60a0; --ramp-6:#233f74;
+  --nodata:#e7ded0; --map-stroke:#faf7ef;
+}
 
 .mapbox{position:relative;background:var(--surface)}
 svg.map{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
@@ -95,3 +127,13 @@ svg.map path.filtered-out{opacity:.18}
 :root[data-theme="dark"] .map-warn{color:var(--text)}
 
 .map-hidden{display:none}
+
+/* map.html's own alternative-palette picker (its #palette <select>, in the
+   .field div alongside its <label for="palette">) lets a reader swap the
+   choropleth's colours independently of the site theme. Under Papier the
+   ramp above is already the deliberate paper palette, so the picker is
+   hidden rather than left to offer four more combinations nobody designed
+   against this theme. A rule here, not an edit to map.html, so the two
+   pages sharing this stylesheet (map.html, communes.html) don't need their
+   own copy of the same exception. */
+:root[data-theme="paper"] .field:has(#palette){display:none}

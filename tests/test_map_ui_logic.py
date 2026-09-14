@@ -325,3 +325,49 @@ def test_the_ramp_has_exactly_as_many_colours_as_bands():
     bins = int(re.search(r"MapUI\.BINS\s*=\s*(\d+)", js).group(1))
     defined = {int(m) for m in re.findall(r"--ramp-(\d+):", css)}
     assert defined == set(range(bins)), f"ramp tokens {sorted(defined)} for {bins} bands"
+
+
+def test_the_paper_ramp_has_the_same_number_of_steps_as_the_light_ramp():
+    """The Papier theme (Batch A1.2) recolours the choropleth, it doesn't
+    reclassify it -- a paper ramp with a different step count than the
+    default light ramp would mean either a class with no colour (a hole in
+    the map) or a colour no class ever reaches."""
+    css = COMPONENT_CSS.read_text(encoding="utf-8")
+    light_block = re.search(r":root\{(.*?)\n\}", css, re.DOTALL).group(1)
+    paper_block = re.search(r':root\[data-theme="paper"\]\{(.*?)\n\}', css, re.DOTALL).group(1)
+    light_steps = {int(m) for m in re.findall(r"--ramp-(\d+):", light_block)}
+    paper_steps = {int(m) for m in re.findall(r"--ramp-(\d+):", paper_block)}
+    assert paper_steps, "no --ramp-N tokens found in the paper theme block"
+    assert (
+        paper_steps == light_steps
+    ), f"paper ramp has steps {sorted(paper_steps)}, light has {sorted(light_steps)}"
+
+
+def test_the_paper_ramp_still_wins_over_a_saved_map_palette_choice():
+    """map.html's own alternative palettes (:root[data-palette="blues"] etc.)
+    are the SAME specificity as :root[data-theme="paper"] and come later in
+    source order, so without a second, more specific paper rule they would
+    silently win -- and map.html's pre-paint script defaults
+    belpulse-map-palette to 'bluered' rather than 'default', so this isn't
+    an edge case, it's what a first-time visitor gets. Pins that the second
+    rule (:root[data-theme="paper"][data-palette]) exists and stays in sync
+    with the plain paper block rather than drifting into a second, silently
+    different ramp."""
+    css = COMPONENT_CSS.read_text(encoding="utf-8")
+    plain = re.search(r':root\[data-theme="paper"\]\{(.*?)\n\}', css, re.DOTALL)
+    guarded = re.search(r':root\[data-theme="paper"\]\[data-palette\]\{(.*?)\n\}', css, re.DOTALL)
+    assert plain, 'missing :root[data-theme="paper"] block'
+    assert guarded, (
+        'missing :root[data-theme="paper"][data-palette] block -- a saved map '
+        "palette choice would override paper's ramp even with the picker hidden"
+    )
+
+    def ramp_values(block: str) -> dict:
+        return dict(re.findall(r"(--ramp-\d+|--nodata|--map-stroke):\s*(#[0-9a-fA-F]{6})", block))
+
+    plain_values, guarded_values = ramp_values(plain.group(1)), ramp_values(guarded.group(1))
+    assert plain_values, "paper ramp block defines no colours"
+    assert plain_values == guarded_values, (
+        "the picker-hidden paper ramp has drifted from the plain paper ramp: "
+        f"{plain_values} != {guarded_values}"
+    )
