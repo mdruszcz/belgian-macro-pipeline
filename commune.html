@@ -7,6 +7,16 @@
   existing bookmarks; primary navigation uses this view and profiles.html.
   Open as commune.html?nis=92094.
 
+  A3.2 (2026-09-14): every commune selection site-wide opens THIS page now --
+  profiles.html's old ?nis= query redirects here rather than rendering its
+  own view. <details id="allData"> carries the every-indicator-every-period
+  table that used to live there, ported outright (same renderer, same
+  communes/{nis}.json payload, same metadata this page already fetched).
+  The breadcrumb's "Commune profiles" link (#crumbDirectory) returns to the
+  directory query a `from=` param names, once parseFrom() and
+  resolveBreadcrumbBack() have revalidated it against real geography and
+  typology metadata -- never trusted from the URL as-is.
+
   WHAT THE DESIGN ASKS FOR THAT THIS PIPELINE CANNOT SHOW. Every one of these
   is a missing DATA source, not a layout decision. Each is built at its
   designed size and position and then rendered in the component library's
