@@ -88,7 +88,7 @@
 
   /* ---- body: navy sidebar, light content (the supplied PNG) ---- */
   .bp-body--analytical{max-width:1400px; margin:0 auto}
-  .bp-sidebar{position:sticky; top:var(--bp-space-4); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
+  .bp-sidebar{position:sticky; top:var(--bp-topbar-h, 56px); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
   .side-title{display:flex; align-items:center; gap:10px; margin:0 0 var(--bp-space-5)}
   .side-title h2{font-family:var(--bp-font-display); font-size:1.15rem; text-transform:none; letter-spacing:0; color:var(--bp-navy-text); margin:0; font-weight:600}
   .side-title .icon{width:22px; height:22px; color:#8fb4ff}
@@ -188,6 +188,34 @@
      Shared now too -- assets/belpulse/layout.css's `.foot`/`.foot .wrap`,
      filled by render_footer() the same way the header is. */
 
+  /* =========================================================================
+     BATCH A1.4 -- in-page panels (docs/features/site_unification.md,
+     "Macro/Micro : panneaux thématiques"). Own block: exactly one
+     `.bp-panel` is visible at a time, switched by assets/belpulse/panels.js.
+     Nothing here is shared with the topbar/footer/theme batches. ========= */
+  .bp-panel h2{font-family:var(--bp-font-display); font-size:1.6rem; margin:0 0 var(--bp-space-4); line-height:1.15}
+  .bp-panel h2:focus{outline:2px solid var(--bp-accent); outline-offset:3px; border-radius:2px}
+  .bp-panel .row{margin-top:var(--bp-space-5)}
+  .bp-panel .row:first-of-type{margin-top:0}
+  .panel-note{
+    font-size:var(--bp-text-small); color:var(--bp-text-muted); max-width:70ch;
+    margin:0 0 var(--bp-space-4); padding:var(--bp-space-3) var(--bp-space-4);
+    background:var(--bp-surface-alt); border-radius:var(--bp-radius-control);
+  }
+  /* Mobile panel picker: hidden on desktop and on the tablet strip, where the
+     sidebar itself already does this job (see the @media block below that
+     turns the sidebar into a horizontal strip at 1024px). */
+  .bp-panel-select-wrap{display:none}
+  .bp-panel-select-wrap select{
+    width:100%; font:inherit; font-size:var(--bp-text-body); padding:10px 12px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    background:var(--bp-surface); color:var(--bp-text);
+  }
+  @media (max-width:768px){
+    .bp-sidebar{display:none}
+    .bp-panel-select-wrap{display:block; margin-bottom:var(--bp-space-4)}
+  }
+
   @media (max-width:1180px){
     .kpi-row{grid-template-columns:repeat(3, minmax(0,1fr))}
     .row-3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -242,15 +270,18 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M5 16l4-6 4 3 6-8"/></svg>
       <h2 data-t="macroSidebarTitle">Macroeconomics</h2>
     </div>
+    <!-- BATCH A1.4: seven panels, French anchors per docs/features/site_unification.md.
+         English text is real markup (a no-JS reader still gets it); the
+         translated label from config/national_sections.yaml `panels[].label`
+         is applied over it at init, the same way `kpis_note` already is. -->
     <ul class="bp-sidebar-nav" id="sideNav">
-      <li><a href="#overview" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-t="macroNavOverview">Overview</span></a></li>
-      <li><a href="#growth"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-t="macroNavGrowth">Growth &amp; GDP</span></a></li>
-      <li><a href="#key"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-t="macroNavKey">Key indicators</span></a></li>
-      <li><a href="#drivers"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span data-t="macroNavDrivers">Drivers of growth</span></a></li>
-      <li><a href="#international"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="macroNavInternational">International comparison</span></a></li>
-      <li><a href="#public-finance"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/></svg><span data-t="macroNavPublicFinance">Public finances</span></a></li>
-      <li><a href="#map"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span data-t="macroNavMap">Economic map</span></a></li>
-      <li><a href="#news"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg><span data-t="macroNavNews">Economic news</span></a></li>
+      <li><a href="#apercu" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-panel-label="apercu">Overview</span></a></li>
+      <li><a href="#croissance"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-panel-label="croissance">Growth</span></a></li>
+      <li><a href="#prix"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9h4.5a2 2 0 1 1 0 4H9m0 0h5m-5 0v2m2-8v2"/></svg><span data-panel-label="prix">Prices</span></a></li>
+      <li><a href="#emploi"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 21v-1.5A6.5 6.5 0 0 1 11.5 13h1A6.5 6.5 0 0 1 19 19.5V21"/></svg><span data-panel-label="emploi">Employment</span></a></li>
+      <li><a href="#conjoncture"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2.5 7L13 5l2 7h6"/></svg><span data-panel-label="conjoncture">Business cycle</span></a></li>
+      <li><a href="#finances-publiques"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/></svg><span data-panel-label="finances-publiques">Public finances</span></a></li>
+      <li><a href="#europe"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-panel-label="europe">Europe</span></a></li>
     </ul>
     <div class="side-update" id="sideUpdate" data-status="other">
       <div class="lbl" data-t="macroLastUpdate">Last data update</div>
@@ -275,68 +306,131 @@
       <a href="home2.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
     </nav>
 
-    <header class="page-head" id="overview">
-      <div>
-        <h1 data-t="macroTitle">The Belgian macroeconomy</h1>
-        <p class="lead" data-t="macroLead">The headline indicators for reading Belgium's economic situation, updated automatically from official sources.</p>
-      </div>
-      <div class="skyline" aria-hidden="true">
-        <span class="script" data-t="macroScript">Today's data for tomorrow's decisions.</span>
-        <svg viewBox="0 0 520 110" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
-          <path d="M0 108h520"/>
-          <path d="M14 108V70h18v38M22 70V58l5-8 5 8v12"/>
-          <path d="M48 108V84h26v24M56 84V72h10v12"/>
-          <path d="M90 108V62h12V48l6-10 6 10v14h12v46"/>
-          <path d="M136 108V88h34v20M146 88V76h14v12"/>
-          <path d="M186 108V56h8V40l4-14 4 14v16h8v52M198 40v-8"/>
-          <path d="M222 108V80h40v28M232 80V66h20v14M240 66v-8"/>
-          <path d="M278 108V64h10V44l7-18 7 18v20h10v44"/>
-          <path d="M328 108V86h30v22M338 86V74h10v12"/>
-          <path d="M372 108V70h14V54l5-12 5 12v16h14v38"/>
-          <path d="M424 108V88h26v20M432 88V78h10v10"/>
-          <path d="M464 108V74h12V60l6-10 6 10v14h12v34"/>
-          <path d="M0 108c30-4 60-4 90 0s60 4 90 0 60-4 90 0 60 4 90 0 60-4 90 0 50 4 70 0" opacity=".5"/>
-        </svg>
-      </div>
-    </header>
+    <!-- BATCH A1.4: mobile panel picker, shown only under the sidebar
+         breakpoint (macro.html's own <style>, @media max-width:768px). -->
+    <div class="bp-panel-select-wrap">
+      <select id="panelPick" data-t-aria="macroPanelPickLabel" aria-label="Section">
+        <option value="apercu">Overview</option>
+        <option value="croissance">Growth</option>
+        <option value="prix">Prices</option>
+        <option value="emploi">Employment</option>
+        <option value="conjoncture">Business cycle</option>
+        <option value="finances-publiques">Public finances</option>
+        <option value="europe">Europe</option>
+      </select>
+    </div>
 
-    <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
-    <p class="kpi-note" id="kpiNote"></p>
-
-    <section class="row row-3">
-      <article class="bp-chart-card card-wide bp-state" id="growth" data-state="loading">
-        <div class="bp-chart-head">
-          <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
-          <span class="pill" data-t="macroSubject">Belgium</span>
+    <!-- ==================== panel: apercu (overview, key, map, news) ==================== -->
+    <section class="bp-panel" id="apercu" data-panel>
+      <h2 data-panel-label="apercu">Overview</h2>
+      <header class="page-head" id="overview">
+        <div>
+          <h1 data-t="macroTitle">The Belgian macroeconomy</h1>
+          <p class="lead" data-t="macroLead">The headline indicators for reading Belgium's economic situation, updated automatically from official sources.</p>
         </div>
-        <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
+        <div class="skyline" aria-hidden="true">
+          <span class="script" data-t="macroScript">Today's data for tomorrow's decisions.</span>
+          <svg viewBox="0 0 520 110" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M0 108h520"/>
+            <path d="M14 108V70h18v38M22 70V58l5-8 5 8v12"/>
+            <path d="M48 108V84h26v24M56 84V72h10v12"/>
+            <path d="M90 108V62h12V48l6-10 6 10v14h12v46"/>
+            <path d="M136 108V88h34v20M146 88V76h14v12"/>
+            <path d="M186 108V56h8V40l4-14 4 14v16h8v52M198 40v-8"/>
+            <path d="M222 108V80h40v28M232 80V66h20v14M240 66v-8"/>
+            <path d="M278 108V64h10V44l7-18 7 18v20h10v44"/>
+            <path d="M328 108V86h30v22M338 86V74h10v12"/>
+            <path d="M372 108V70h14V54l5-12 5 12v16h14v38"/>
+            <path d="M424 108V88h26v20M432 88V78h10v10"/>
+            <path d="M464 108V74h12V60l6-10 6 10v14h12v34"/>
+            <path d="M0 108c30-4 60-4 90 0s60 4 90 0 60-4 90 0 60 4 90 0 60-4 90 0 50 4 70 0" opacity=".5"/>
+          </svg>
+        </div>
+      </header>
+
+      <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
+      <p class="kpi-note" id="kpiNote"></p>
+
+      <section class="row row-3">
+        <article class="bp-chart-card" id="key">
+          <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
+          <ul class="bp-list-panel" id="keyList"></ul>
+        </article>
+        <article class="bp-chart-card bp-state" id="map" data-slot="economic_map" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+          <a class="card-link slot-link" hidden><span data-t="macroSeeMap">See the interactive map</span> →</a>
+        </article>
+        <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
+          <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
+          <div class="placeholder"></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ==================== panel: croissance (growth, drivers) ==================== -->
+    <section class="bp-panel" id="croissance" data-panel hidden>
+      <h2 data-panel-label="croissance">Growth</h2>
+      <section class="row row-2">
+        <article class="bp-chart-card card-wide bp-state" id="growth" data-state="loading">
+          <div class="bp-chart-head">
+            <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
+            <span class="pill" data-t="macroSubject">Belgium</span>
+          </div>
+          <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+          <div class="provenance" id="historyProvenance"></div>
+        </article>
+        <article class="bp-chart-card card-wide bp-state" id="drivers" data-state="loading">
+          <div class="bp-chart-head">
+            <div><h3 id="contribTitle">&nbsp;</h3><div class="subtitle" id="contribNote"></div></div>
+            <span class="pill" id="contribPeriod"></span>
+          </div>
+          <div class="bp-state-body">
+            <ol class="contrib" id="contribList"></ol>
+            <div class="contrib-total" id="contribTotal"></div>
+          </div>
+          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+          <div class="provenance" id="contribProvenance"></div>
+        </article>
+      </section>
+    </section>
+
+    <!-- ==================== panel: prix (NEW card: consumer prices) ==================== -->
+    <section class="bp-panel" id="prix" data-panel hidden>
+      <h2 data-panel-label="prix">Prices</h2>
+      <article class="bp-chart-card bp-state" id="prices" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="pricesTitle">&nbsp;</h3></div></div>
+        <ul class="bp-list-panel bp-state-body" id="pricesList"></ul>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
-        <div class="provenance" id="historyProvenance"></div>
-      </article>
-      <article class="bp-chart-card" id="key">
-        <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
-        <ul class="bp-list-panel" id="keyList"></ul>
-      </article>
-      <article class="bp-chart-card bp-state" id="international" data-slot="international" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
       </article>
     </section>
 
-    <section class="row row-2">
-      <article class="bp-chart-card card-wide bp-state" id="drivers" data-state="loading">
-        <div class="bp-chart-head">
-          <div><h3 id="contribTitle">&nbsp;</h3><div class="subtitle" id="contribNote"></div></div>
-          <span class="pill" id="contribPeriod"></span>
-        </div>
-        <div class="bp-state-body">
-          <ol class="contrib" id="contribList"></ol>
-          <div class="contrib-total" id="contribTotal"></div>
-        </div>
+    <!-- ==================== panel: emploi (NEW card: employment & labour cost) ==================== -->
+    <section class="bp-panel" id="emploi" data-panel hidden>
+      <h2 data-panel-label="emploi">Employment</h2>
+      <article class="bp-chart-card bp-state" id="employment" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="employmentTitle">&nbsp;</h3></div></div>
+        <ul class="bp-list-panel bp-state-body" id="employmentList"></ul>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
-        <div class="provenance" id="contribProvenance"></div>
       </article>
+    </section>
+
+    <!-- ==================== panel: conjoncture (NEW card: business & consumer sentiment) ==================== -->
+    <section class="bp-panel" id="conjoncture" data-panel hidden>
+      <h2 data-panel-label="conjoncture">Business cycle</h2>
+      <article class="bp-chart-card bp-state" id="business-cycle" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="businessCycleTitle">&nbsp;</h3></div></div>
+        <ul class="bp-list-panel bp-state-body" id="businessCycleList"></ul>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+      </article>
+    </section>
+
+    <!-- ==================== panel: finances-publiques ==================== -->
+    <section class="bp-panel" id="finances-publiques" data-panel hidden>
+      <h2 data-panel-label="finances-publiques">Public finances</h2>
       <article class="bp-chart-card bp-state" id="public-finance" data-slot="public_finance" data-state="unavailable">
         <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
         <div class="placeholder"></div>
@@ -344,14 +438,11 @@
       </article>
     </section>
 
-    <section class="row row-2r">
-      <article class="bp-chart-card bp-state" id="map" data-slot="economic_map" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
-        <a class="card-link slot-link" hidden><span data-t="macroSeeMap">See the interactive map</span> →</a>
-      </article>
-      <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
+    <!-- ==================== panel: europe ==================== -->
+    <section class="bp-panel" id="europe" data-panel hidden>
+      <h2 data-panel-label="europe">Europe</h2>
+      <p class="panel-note" id="europeNote" hidden></p>
+      <article class="bp-chart-card bp-state" id="international" data-slot="international" data-state="unavailable">
         <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
         <div class="placeholder"></div>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
@@ -368,6 +459,7 @@
 <script src="assets/i18n.js"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
+<script src="assets/belpulse/panels.js"></script>
 <script src="assets/commune_map.js"></script>
 <script>
 /* BelPulse macroeconomics page -- Batch 6.
@@ -584,13 +676,22 @@
     document.getElementById('historyProvenance').textContent = provenance(entry, latestNumeric(entry));
   }
 
-  /* ---- key indicators list --------------------------------------------- */
-  function renderKeyList(){
-    var host = document.getElementById('keyList');
+  /* ---- key indicators list(s) -------------------------------------------
+   * Generic: takes a HOST ELEMENT ID and a list of codes, never an
+   * indicator id of its own (rule 24). Reused for the original #keyList
+   * (config `key_list`) and for the panel-specific cards Batch A1.4 adds
+   * (config `extra_lists`), so a "list of the latest values" is one
+   * implementation, not one per panel. Returns whether it drew anything,
+   * so the caller can mark an empty card unavailable rather than blank. */
+  function renderListInto(hostId, codes){
+    var host = document.getElementById(hostId);
+    if(!host) return false;
     host.innerHTML = '';
-    (state.layout.key_list || []).forEach(function(code){
+    var any = false;
+    (codes || []).forEach(function(code){
       var entry = state.national[code];
       if(!entry) return;
+      any = true;
       var latest = latestNumeric(entry);
       var li = document.createElement('li');
       li.className = 'bp-state';
@@ -609,6 +710,55 @@
         li.querySelector('.when').textContent = T('macroUnavailable');
       }
       host.appendChild(li);
+    });
+    return any;
+  }
+
+  function renderKeyList(){
+    renderListInto('keyList', state.layout.key_list);
+  }
+
+  /* ---- BATCH A1.4: the panel-specific NEW cards (Prix, Emploi,
+   * Conjoncture) -- config `extra_lists`, each {id, label, series}. `id` is
+   * a layout id ("prices", "employment", "business-cycle"), never an
+   * indicator id: it names the card element and, camel-cased, its title and
+   * list element ("business-cycle" -> #businessCycleTitle/#businessCycleList).
+   * A list with nothing real marks its card unavailable rather than empty
+   * (CLAUDE.md rule 36 / builder rule 26) -- none does today (every series
+   * below is verified against public/data/national.json), but the config
+   * could one day name a series that stops publishing. */
+  function camelId(id){
+    return id.replace(/-([a-z0-9])/g, function(_, c){ return c.toUpperCase(); });
+  }
+
+  function renderExtraLists(){
+    (state.layout.extra_lists || []).forEach(function(item){
+      var base = camelId(item.id);
+      var titleEl = document.getElementById(base + 'Title');
+      if(titleEl) titleEl.textContent = text(item.label);
+      var any = renderListInto(base + 'List', item.series);
+      var card = document.getElementById(item.id);
+      if(card && card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';
+    });
+  }
+
+  /* ---- BATCH A1.4: sidebar / select / panel-heading text, and the
+   * Europe panel's extra note -- all from config `panels[].label` /
+   * `empty_reason`, applied the same way `kpis_note` already is. Never
+   * re-registers panels.js (language change must not reset which panel is
+   * showing), so this is called from renderAll but BPPanels.init is not. */
+  function renderPanelChrome(){
+    (state.layout.panels || []).forEach(function(p){
+      var t = text(p.label);
+      document.querySelectorAll('[data-panel-label="' + p.id + '"]').forEach(function(el){ el.textContent = t; });
+      var opt = document.querySelector('#panelPick option[value="' + p.id + '"]');
+      if(opt) opt.textContent = t;
+      var note = document.getElementById(p.id + 'Note');
+      if(note){
+        var hasNote = !!(p.empty_reason && text(p.empty_reason));
+        note.textContent = hasNote ? text(p.empty_reason) : '';
+        note.hidden = !hasNote;
+      }
     });
   }
 
@@ -723,6 +873,23 @@
     }catch(e){}
   }
 
+  /* ---- BATCH A1.4: redraw only the currently-visible panel's canvas(es).
+   * A canvas measured while its `[data-panel]` ancestor carries `hidden`
+   * has width 0 (assets/belpulse/charts.js's sizeCanvas falls back to a
+   * default rather than drawing nothing), so drawing into a hidden panel is
+   * wasted work that a later switch has to redo anyway -- this is called
+   * both after every render and, from panels.js's `onShow`, the moment a
+   * panel actually becomes visible. Also nudges the tooltip batch's redraw,
+   * if that script has loaded. */
+  function redrawVisiblePanelCharts(){
+    var visible = document.querySelector('[data-panel]:not([hidden])');
+    if(visible){
+      if(visible.id === 'apercu') renderKpis();
+      if(visible.id === 'croissance') renderHistory();
+    }
+    if(window.BPCharts && typeof BPCharts.redrawAll === 'function') BPCharts.redrawAll();
+  }
+
   /* ---- boot ------------------------------------------------------------- */
   function renderAll(){
     applyStrings();
@@ -730,12 +897,15 @@
     renderKpis();
     renderHistory();
     renderKeyList();
+    renderExtraLists();
     renderContributions();
     renderUnavailable();
-    // The chart's card is as tall as the list panel beside it, and that height
-    // is only known once every card in the row has rendered -- so the history
-    // chart is drawn a second time, at the height it actually got.
-    requestAnimationFrame(renderHistory);
+    renderPanelChrome();
+    // The chart's card is as tall as the list panel beside it, and that
+    // height is only known once every card in the row has rendered -- so
+    // the currently-visible panel's chart(s) are drawn a second time, at
+    // the height they actually got.
+    requestAnimationFrame(redrawVisiblePanelCharts);
   }
 
   async function boot(){
@@ -765,6 +935,19 @@
     renderAll();
     renderManifest(state.manifest);
     loadSearch();
+    // BPPanels owns which panel is visible from here on -- initialised
+    // ONCE, never inside renderAll, so a language change (which calls
+    // renderAll again) cannot reset the reader's panel or double-register
+    // its click/popstate/hashchange listeners.
+    if(window.BPPanels){
+      BPPanels.init({
+        panels: (state.layout.panels || []).map(function(p){
+          return {id: p.id, legacyAnchors: p.legacy_anchors || []};
+        }),
+        storageKey: 'bp-macro-panel',
+        onShow: redrawVisiblePanelCharts,
+      });
+    }
     var redraw;
     window.addEventListener('resize', function(){ clearTimeout(redraw); redraw = setTimeout(renderAll, 150); });
   }

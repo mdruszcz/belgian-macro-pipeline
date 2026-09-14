@@ -465,6 +465,12 @@ def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
         "key_list": layout.get("key_list") or [],
         "contributions": layout.get("contributions") or {},
         "unavailable": layout.get("unavailable") or [],
+        # Batch A1.4: the seven selectable panels and the NEW thematic cards
+        # (Prix, Emploi, Conjoncture) they introduce. Passed through as-is --
+        # macro.html's own renderer is what interprets them, this exporter
+        # only validates the series below carry data.
+        "panels": layout.get("panels") or [],
+        "extra_lists": layout.get("extra_lists") or [],
     }
 
 
@@ -476,12 +482,16 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
     """
     history = layout.get("history") or {}
     contributions = layout.get("contributions") or {}
+    extra_series: list[str] = []
+    for item in layout.get("extra_lists") or []:
+        extra_series.extend(item.get("series") or [])
     named = [
         *(layout.get("kpis") or []),
         *([history["series"]] if history.get("series") else []),
         *(layout.get("key_list") or []),
         *([contributions["whole"]] if contributions.get("whole") else []),
         *(contributions.get("parts") or []),
+        *extra_series,
     ]
     unknown = sorted({i for i in named if i not in known})
     if unknown:

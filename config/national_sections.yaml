@@ -94,3 +94,71 @@ unavailable:
       en: This pipeline holds no article store; nothing here is written by hand.
       fr: Ce pipeline ne contient aucun fonds d’articles ; rien ici n’est rédigé à la main.
       nl: Dit pipeline bevat geen artikelbestand; niets hier wordt met de hand geschreven.
+
+# =============================================================================
+# BATCH A1.4 -- in-page panels (docs/features/site_unification.md, "Macro/
+# Micro : panneaux thématiques"). Own block, so a parallel batch touching the
+# rest of this file (header/footer, the chart-tooltip `hero:` block at the
+# end) has nothing to merge here.
+#
+# Seven selectable panels, French anchors decided by the maintainer. Every
+# `cards` entry names an EXISTING ELEMENT ID IN macro.html (a layout id, e.g.
+# "growth" or "key") -- never an indicator id (rule 24). `legacy_anchors`
+# lists every anchor the page exposed for that content before this batch, so
+# an old bookmark or external link still lands on the right panel (rule 31).
+# =============================================================================
+panels:
+  - id: apercu
+    label: {en: Overview, fr: Vue d'ensemble, nl: Overzicht}
+    cards: [overview, kpiRow, key, map, news]
+    legacy_anchors: [overview, key, map, news]
+  - id: croissance
+    label: {en: Growth, fr: Croissance, nl: Groei}
+    cards: [growth, drivers]
+    legacy_anchors: [growth, drivers]
+  - id: prix
+    label: {en: Prices, fr: Prix, nl: Prijzen}
+    cards: [prices]
+    legacy_anchors: []
+  - id: emploi
+    label: {en: Employment, fr: Emploi, nl: Werkgelegenheid}
+    cards: [employment]
+    legacy_anchors: []
+  - id: conjoncture
+    label: {en: Business cycle, fr: Conjoncture, nl: Conjunctuur}
+    cards: [business-cycle]
+    legacy_anchors: []
+  - id: finances-publiques
+    label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
+    cards: [public-finance]
+    legacy_anchors: [public-finance]
+  - id: europe
+    label: {en: Europe, fr: Europe, nl: Europa}
+    cards: [international]
+    legacy_anchors: [international]
+    # Europe keeps its existing "international" unavailable card (the foreign
+    # GDP comparison, see `unavailable` above) and gets this extra note: the
+    # regional map the design shows is a real, planned gap, not a rephrasing
+    # of the card's own reason. No date is promised (none is known).
+    empty_reason:
+      en: A European regional comparison map is planned but not built yet. Belgium's own international GDP comparison is below.
+      fr: Une carte de comparaison régionale européenne est prévue mais pas encore construite. La comparaison internationale du PIB belge se trouve ci-dessous.
+      nl: Een Europese regionale vergelijkingskaart is gepland maar nog niet gebouwd. De internationale bbp-vergelijking van België staat hieronder.
+
+# New thematic cards (Prix, Emploi, Conjoncture) that did not exist as
+# sections before this batch. Each entry's `id` is the layout id used both by
+# a `panels[].cards` entry above and by the matching <article> in macro.html;
+# `series` uses the page's existing key-list card (latest value + period per
+# row) -- every code here is verified against public/data/national.json to
+# carry real data, the same guarantee `kpis`/`key_list` already have, and the
+# exporter refuses to publish otherwise (see `_check_national_sections`).
+extra_lists:
+  - id: prices
+    label: {en: Consumer prices, fr: Prix à la consommation, nl: Consumentenprijzen}
+    series: [HICP]
+  - id: employment
+    label: {en: Employment and labour costs, fr: Emploi et coût du travail, nl: Werkgelegenheid en arbeidskosten}
+    series: [UNEMPLOYMENT_RATE, UNEMPLOYMENT_RATE_INSURED, UNEMPLOYMENT_RATE_INSURED_MONTHLY, LABOUR_COST_BE]
+  - id: business-cycle
+    label: {en: Business and consumer sentiment, fr: Conjoncture et confiance, nl: Conjunctuur en vertrouwen}
+    series: [BUSINESS_CONFIDENCE, CONSUMER_CONFIDENCE, EC_CONS_CONF_BE, INDUSTRIAL_PROD]

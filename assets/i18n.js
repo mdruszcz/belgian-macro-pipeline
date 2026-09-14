@@ -420,6 +420,7 @@ I18N.STRINGS = {
     // indicator name comes from the payload.
     varAttribution: '<strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.',
     macroSidebarTitle: 'Macroeconomics',
+    macroPanelPickLabel: 'Section',
     macroNavOverview: 'Overview',
     macroNavGrowth: 'Growth & GDP',
     macroNavKey: 'Key indicators',
@@ -852,6 +853,7 @@ I18N.STRINGS = {
     // indicator name comes from the payload.
     varAttribution: '<strong>Source :</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening sur la base de DWH AM&amp;SB - KSZ, BISA, pour le taux de chômage administratif des 15–64 ans. La mention de source obligatoire figure ici. La page source permet l’export et la diffusion avec attribution mais n’indique aucune licence ouverte standard ; <em>non</em> sous la licence CC BY 4.0 de Statbel. Les valeurs utilisent la grille actuelle de 565 communes de la source. Les cellules fondées sur moins de quatre personnes sont indiquées comme supprimées, jamais comme zéro.',
     macroSidebarTitle: 'Macroéconomie',
+    macroPanelPickLabel: 'Section',
     macroNavOverview: 'Vue d’ensemble',
     macroNavGrowth: 'Croissance & PIB',
     macroNavKey: 'Indicateurs clés',
@@ -1283,6 +1285,7 @@ I18N.STRINGS = {
     // indicator name comes from the payload.
     varAttribution: '<strong>Bron:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening o.b.v. DWH AM&amp;SB - KSZ, BISA, voor de administratieve werkloosheidsgraad van 15–64-jarigen. De verplichte bronvermelding staat hier. De bronpagina biedt export en verspreiding met bronvermelding aan, maar vermeldt geen standaard open-datalicentie; <em>niet</em> onder Statbels CC BY 4.0. De waarden gebruiken het huidige raster van 565 gemeenten van de bron. Cellen gebaseerd op minder dan vier personen worden als onderdrukt weergegeven, nooit als nul.',
     macroSidebarTitle: 'Macro-economie',
+    macroPanelPickLabel: 'Sectie',
     macroNavOverview: 'Overzicht',
     macroNavGrowth: 'Groei & bbp',
     macroNavKey: 'Kernindicatoren',
