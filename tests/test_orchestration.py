@@ -479,6 +479,7 @@ EXPORTERS_BY_FUNCTION = [
     "percentiles_csv",
     "communes_history_full_csv",
     "communes_history_csv",
+    "communes_table_json",
 ]
 
 
@@ -516,6 +517,58 @@ def test_the_full_history_is_the_same_call_with_all_periods():
     assert full.pop("out_path").name == "communes_history_full.csv"
     assert trimmed.pop("out_path").name == "communes_history.csv"
     assert full == trimmed
+
+
+def test_the_communes_table_reads_the_full_history_and_the_working_database(tmp_path):
+    """Without db_path the table would silently lose its provenance and its
+    French and Dutch names: the command line's --db must reach the call."""
+    paths = PipelinePaths(out_root=str(tmp_path / "out"), working_db=str(tmp_path / "w.db"))
+    arguments = exporter_arguments("communes_table_json", paths)
+    assert arguments == {
+        "csv_path": paths.output(COMMANDS["communes_history_full_csv"].outputs[0]),
+        "out_path": paths.output(COMMANDS["communes_table_json"].outputs[0]),
+        "db_path": paths.resolve(paths.working_db),
+    }
+
+
+def test_the_revisions_report_is_called_with_the_command_lines_db_and_today(tmp_path):
+    paths = PipelinePaths(working_db=str(tmp_path / "w.db"))
+    arguments = canonical.revisions_arguments(paths)
+    assert arguments == {"db_path": paths.resolve(paths.working_db), "since": run.today()}
+    assert arguments["db_path"].is_absolute()
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", arguments["since"])
+    _, function = run.script_function("revisions_report")
+    inspect.signature(function).bind(**arguments)
+
+
+def test_the_revisions_report_refuses_a_command_line_it_cannot_translate(monkeypatch):
+    argv = ("scripts/revisions_report.py", "--db", "{db}", "--since", "{today}", "--all")
+    monkeypatch.setitem(COMMANDS, "revisions_report", Command(argv))
+    with pytest.raises(ValueError, match="revisions_report"):
+        canonical.revisions_arguments(PipelinePaths())
+
+
+def test_the_revisions_report_reaches_the_run_log_and_the_metadata(sandbox, monkeypatch):
+    report = "2 revision(s) since 2026-09-14:\n  GDP/be:country/2026: 1.0 -> 2.0\n  POP/be/2026: x"
+
+    def reports(context, name, **given):
+        sandbox.values[name] = given
+        return [{}, {}], report
+
+    monkeypatch.setattr(run, "call_function", reports)
+    result = sandbox.defs.resolve_implicit_global_asset_job_def().execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        asset_selection=[dg.AssetKey("revisions_report")],
+    )
+
+    assert result.success
+    assert sandbox.values["revisions_report"]["db_path"] == Path(sandbox.paths.working_db)
+    metadata = _metadata(result, "revisions_report")
+    assert metadata["revisions"].value == 2
+    assert "GDP/be:country/2026: 1.0 -> 2.0" in metadata["report"].value
+    logged = [e.user_message for e in sandbox.instance.all_logs(result.run_id)]
+    assert all(line in logged for line in report.splitlines())
 
 
 @pytest.mark.parametrize("name", ["staging_db", "site_payloads", "local_pages"])
@@ -608,6 +661,8 @@ def sandbox(tmp_path, monkeypatch):
         values[name] = given
         if name in failing:
             raise RuntimeError(f"{name} is down")
+        if name == "revisions_report":
+            return [], "No revisions."
         return {} if name == "committed_stores" else 0
 
     monkeypatch.setattr(run, "run_script", fake_run_script)

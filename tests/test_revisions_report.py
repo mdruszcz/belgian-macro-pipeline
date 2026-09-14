@@ -1,6 +1,7 @@
 """Tests for scripts/revisions_report.py -- Block I, docs/features/vintages.md."""
 
 import sqlite3
+import subprocess
 import sys
 from pathlib import Path
 
@@ -8,13 +9,37 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from revisions_report import _parse_since, find_revisions  # noqa: E402
+from revisions_report import _parse_since, find_revisions, report_revisions  # noqa: E402
 
 from src.db import migrate  # noqa: E402
 from src.db.vintages import upsert_observation  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 REAL_MIGRATIONS_DIR = REPO / "migrations"
+SCRIPT = REPO / "scripts" / "revisions_report.py"
+
+
+@pytest.mark.parametrize("since", [None, "2026-03-01", "2027-01-01"])
+def test_the_report_function_is_exactly_what_main_prints(conn, tmp_path, since):
+    """The Dagster asset calls report_revisions() and logs its text; the command
+    line prints it. Same revisions, same lines, same order."""
+    _write(conn, "GDP", 100.0, "2026-01-01T00:00:00+00:00")
+    _write(conn, "GDP", 105.0, "2026-06-01T00:00:00+00:00")
+    _write(conn, "POP", 50.0, "2026-01-01T00:00:00+00:00")
+    _write(conn, "POP", None, "2026-06-01T00:00:00+00:00", status="suppressed")
+    conn.commit()
+    db = tmp_path / "test.db"
+
+    revisions, report = report_revisions(db, since)
+
+    argv = [sys.executable, str(SCRIPT), "--db", str(db)] + (["--since", since] if since else [])
+    printed = subprocess.run(
+        argv, cwd=REPO, check=True, capture_output=True, text=True, encoding="utf-8"
+    ).stdout
+    assert printed == report + "\n"
+    expected = 0 if since == "2027-01-01" else 2
+    assert len(revisions) == expected
+    assert report.startswith("No revisions" if expected == 0 else "2 revision(s)")
 
 
 @pytest.fixture

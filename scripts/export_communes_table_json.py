@@ -159,6 +159,27 @@ def write_table(
     return len(table["communes"])
 
 
+def export_communes_table_json(csv_path: Path, out_path: Path, db_path: Path | None = None) -> int:
+    """What `main()` does with its arguments: with a database, the table's
+    `meta` carries each indicator's provenance and its en/fr/nl names;
+    without one, neither. The Dagster asset calls this rather than write_table,
+    so it cannot forget the database and silently drop both."""
+    lineage = None
+    names = None
+    if db_path is not None:
+        from src.exporters.provenance import indicator_lineage
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from export_site_payloads import _indicator_names
+
+        lineage = indicator_lineage(db_path)
+        # The same helper the site payloads use, so the table's headings and
+        # the commune pages' labels cannot disagree about an indicator's name.
+        names = _indicator_names(db_path)
+
+    return write_table(csv_path, out_path, lineage, names)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="Precompute communes.html's table payload from communes_history.csv"
@@ -171,20 +192,7 @@ def main() -> None:
     ap.add_argument("--db", type=Path, default=None)
     args = ap.parse_args()
 
-    lineage = None
-    names = None
-    if args.db is not None:
-        from src.exporters.provenance import indicator_lineage
-
-        sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from export_site_payloads import _indicator_names
-
-        lineage = indicator_lineage(args.db)
-        # The same helper the site payloads use, so the table's headings and
-        # the commune pages' labels cannot disagree about an indicator's name.
-        names = _indicator_names(args.db)
-
-    n = write_table(args.communes_history, args.out, lineage, names)
+    n = export_communes_table_json(args.communes_history, args.out, args.db)
     size_mb = args.out.stat().st_size / 1e6
     print(f"Wrote {n} commune entries to {args.out} ({size_mb:.2f} MB)")
 

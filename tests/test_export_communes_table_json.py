@@ -12,12 +12,24 @@ parity has a fast local signal instead of only a slow end-to-end one.
 """
 
 import csv
+import json
+import sqlite3
+import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+REPO = Path(__file__).resolve().parents[1]
+SCRIPT = REPO / "scripts" / "export_communes_table_json.py"
+sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "scripts"))
 
-from export_communes_table_json import build_table, year_of  # noqa: E402
+from export_communes_table_json import (  # noqa: E402
+    build_table,
+    export_communes_table_json,
+    year_of,
+)
+
+from src.db import migrate  # noqa: E402
 
 
 def _write_csv(path: Path, rows: list[dict]) -> None:
@@ -277,3 +289,48 @@ def test_provenance_travels_in_the_meta_block(tmp_path):
     assert meta["AVG_NET_TAXABLE_INCOME"]["source"] is None
     assert meta["AVG_NET_TAXABLE_INCOME"]["grade"] == "C"
     assert meta["AVG_NET_TAXABLE_INCOME"]["inputSources"] == ["statbel"]
+
+
+def _database_naming_population(db_path: Path) -> None:
+    migrate.run(db_path, migrations_dir=REPO / "migrations")
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        "INSERT INTO sources (source_id, name, agency, adapter, catalog_ref) "
+        "VALUES ('statbel', 'Statbel', 'Statbel', 'statbel', 'x')"
+    )
+    conn.execute(
+        "INSERT INTO indicators (indicator_id, source_id, name_nl, name_fr, name_en, "
+        "frequency, unit, preferred_direction, is_additive, config_path) "
+        "VALUES ('POPULATION_BY_COMMUNE', 'statbel', 'Bevolking', 'Population (fr)', "
+        "'Population', 'A', 'count', 'neutral', 1, 'x')"
+    )
+    conn.commit()
+    conn.close()
+
+
+def test_the_function_writes_what_main_writes_with_and_without_a_database(tmp_path):
+    """The Dagster asset calls export_communes_table_json(), not main(). The two
+    must write the same bytes, and only the database route carries the French
+    and Dutch names and the provenance."""
+    csv_path = tmp_path / "history.csv"
+    _write_csv(csv_path, [{**BASE_ROW, "period": "2024", "value": "14832.0", "status": "final"}])
+    db = tmp_path / "names.db"
+    _database_naming_population(db)
+
+    for label, db_path in (("with", db), ("without", None)):
+        by_function = tmp_path / f"function-{label}.json"
+        by_main = tmp_path / f"main-{label}.json"
+        assert export_communes_table_json(csv_path, by_function, db_path) == 1
+        argv = [sys.executable, str(SCRIPT), "--communes-history", str(csv_path)]
+        argv += ["--out", str(by_main)] + (["--db", str(db_path)] if db_path else [])
+        subprocess.run(argv, cwd=REPO, check=True, capture_output=True)
+        assert by_function.read_bytes() == by_main.read_bytes(), label
+
+    def meta(label: str) -> dict:
+        table = json.loads((tmp_path / f"function-{label}.json").read_text(encoding="utf-8"))
+        return table["meta"]["POPULATION_BY_COMMUNE"]
+
+    assert meta("with")["names"] == {"en": "Population", "fr": "Population (fr)", "nl": "Bevolking"}
+    assert meta("with")["source"] == "statbel"
+    assert meta("without")["names"] == {"en": "Population"}
+    assert meta("without")["source"] is None

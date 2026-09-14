@@ -22,6 +22,12 @@ from orchestration.scripts import import_script
 TAIL_LINES = 40
 
 
+def today() -> str:
+    """{today} in a command line: the UTC date, as daily_fetch.yml's
+    `date -u +%Y-%m-%d` gave the revisions report before step 2."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
 def run_script(
     context, paths: PipelinePaths, name: str, extra: tuple[str, ...] = (), **values: str
 ) -> str:

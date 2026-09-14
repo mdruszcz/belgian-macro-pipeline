@@ -113,6 +113,24 @@ def _format(r: dict) -> str:
     )
 
 
+def report_revisions(db_path: Path, since: str | None = None) -> tuple[list[dict], str]:
+    """What `main()` prints, and the revisions it lists. `since` is --since as
+    given (a date or a timestamp; None for all history). The text has no final
+    newline; main() prints it as it is. The Dagster asset calls this and logs
+    the text line by line."""
+    conn = sqlite3.connect(db_path)
+    try:
+        revisions = find_revisions(conn, _parse_since(since) if since else None)
+    finally:
+        conn.close()
+
+    scope = f" since {since}" if since else ""
+    if not revisions:
+        return revisions, f"No revisions{scope}."
+    lines = [f"{len(revisions)} revision(s){scope}:", *("  " + _format(r) for r in revisions)]
+    return revisions, "\n".join(lines)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="List every revised observation cell")
     ap.add_argument("--db", required=True, help="Path to the SQLite DB file")
@@ -123,18 +141,8 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    conn = sqlite3.connect(args.db)
-    since = _parse_since(args.since) if args.since else None
-    revisions = find_revisions(conn, since)
-    conn.close()
-
-    if not revisions:
-        print("No revisions" + (f" since {args.since}" if args.since else "") + ".")
-        return 0
-
-    print(f"{len(revisions)} revision(s)" + (f" since {args.since}" if args.since else "") + ":")
-    for r in revisions:
-        print("  " + _format(r))
+    _, report = report_revisions(Path(args.db), args.since)
+    print(report)
     return 0
 
 

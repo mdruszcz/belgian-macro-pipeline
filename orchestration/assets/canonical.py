@@ -17,7 +17,7 @@ from pathlib import Path
 from dagster import AssetExecutionContext, Config, Failure, MaterializeResult, MetadataValue, asset
 
 from orchestration import checks, manifest, run
-from orchestration.assets import derived, reference_data, script_asset, website
+from orchestration.assets import derived, reference_data, website
 from orchestration.assets.sources_manual import SPECS as MANUAL_SPECS
 from orchestration.commands import COMMANDS, TRACKED
 from orchestration.paths import PipelinePaths
@@ -95,12 +95,40 @@ def volume_history(context: AssetExecutionContext, paths: PipelinePaths) -> Mate
     return MaterializeResult(metadata={"indicators recorded": n})
 
 
-revisions_report = script_asset(
-    "revisions_report",
-    group="canonical",
+REPORT_LINES_IN_METADATA = 100
+
+
+def revisions_arguments(paths: PipelinePaths) -> dict:
+    """report_revisions()'s arguments, read off the command line production ran
+    (--db and --since, {today} being today's UTC date), every path absolute. Any
+    other shape is refused rather than half-translated."""
+    script, *tokens = paths.render(COMMANDS["revisions_report"].argv, today=run.today())
+    flags = dict(zip(tokens[::2], tokens[1::2], strict=False))
+    if len(tokens) != 4 or set(flags) != {"--db", "--since"}:
+        raise ValueError(f"revisions_report: `{script} {' '.join(tokens)}` is not --db/--since")
+    return {"db_path": paths.resolve(flags["--db"]), "since": flags["--since"]}
+
+
+@asset(
+    group_name="canonical",
     deps=["validated_working_database"],
-    description="Values revised today (scripts/revisions_report.py). Prints; writes no file.",
+    description=(
+        "Values revised today: report_revisions() from scripts/revisions_report.py, called in "
+        "process with --since today (UTC). Logs the report; writes no file."
+    ),
 )
+def revisions_report(context: AssetExecutionContext, paths: PipelinePaths) -> MaterializeResult:
+    revisions, report = run.call_function(context, "revisions_report", **revisions_arguments(paths))
+    lines = report.splitlines()
+    for line in lines:
+        context.log.info(line)
+    shown = "\n".join(lines[:REPORT_LINES_IN_METADATA])
+    if len(lines) > REPORT_LINES_IN_METADATA:
+        shown += f"\n... {len(lines) - REPORT_LINES_IN_METADATA} more line(s) in the run log"
+    return MaterializeResult(
+        metadata={"revisions": len(revisions), "report": MetadataValue.md(f"```\n{shown}\n```")}
+    )
+
 
 # Everything validate_and_export builds. committed_stores depends on all of it;
 # tests/test_orchestration.py holds this list to that job's selection.
