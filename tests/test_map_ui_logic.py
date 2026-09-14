@@ -338,9 +338,9 @@ def test_the_paper_ramp_has_the_same_number_of_steps_as_the_light_ramp():
     light_steps = {int(m) for m in re.findall(r"--ramp-(\d+):", light_block)}
     paper_steps = {int(m) for m in re.findall(r"--ramp-(\d+):", paper_block)}
     assert paper_steps, "no --ramp-N tokens found in the paper theme block"
-    assert paper_steps == light_steps, (
-        f"paper ramp has steps {sorted(paper_steps)}, light has {sorted(light_steps)}"
-    )
+    assert (
+        paper_steps == light_steps
+    ), f"paper ramp has steps {sorted(paper_steps)}, light has {sorted(light_steps)}"
 
 
 def test_the_paper_ramp_still_wins_over_a_saved_map_palette_choice():
@@ -357,8 +357,10 @@ def test_the_paper_ramp_still_wins_over_a_saved_map_palette_choice():
     plain = re.search(r':root\[data-theme="paper"\]\{(.*?)\n\}', css, re.DOTALL)
     guarded = re.search(r':root\[data-theme="paper"\]\[data-palette\]\{(.*?)\n\}', css, re.DOTALL)
     assert plain, 'missing :root[data-theme="paper"] block'
-    assert guarded, 'missing :root[data-theme="paper"][data-palette] block -- a saved map ' \
+    assert guarded, (
+        'missing :root[data-theme="paper"][data-palette] block -- a saved map '
         "palette choice would override paper's ramp even with the picker hidden"
+    )
 
     def ramp_values(block: str) -> dict:
         return dict(re.findall(r"(--ramp-\d+|--nodata|--map-stroke):\s*(#[0-9a-fA-F]{6})", block))

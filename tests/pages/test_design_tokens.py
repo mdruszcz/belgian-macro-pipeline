@@ -155,7 +155,9 @@ def paper_tokens(tokens, paper_block) -> dict:
         ('data-theme="paper"', "paper_block"),
     ],
 )
-def test_every_theme_block_only_redefines_tokens_root_declares(request, root_block, label, block_fixture):
+def test_every_theme_block_only_redefines_tokens_root_declares(
+    request, root_block, label, block_fixture
+):
     """assets/commune_map.css's own pattern, now with a third theme:
     :root is the base, and every override block -- both dark mechanisms and
     paper -- must be a subset of what :root declares, or a reader in that
@@ -167,7 +169,9 @@ def test_every_theme_block_only_redefines_tokens_root_declares(request, root_blo
     assert names <= root_names, f"{label}: tokens with no light default: {names - root_names}"
 
 
-def test_paper_theme_defines_the_full_set_the_dark_theme_redefines(dark_explicit_block, paper_block):
+def test_paper_theme_defines_the_full_set_the_dark_theme_redefines(
+    dark_explicit_block, paper_block
+):
     """Paper is a third full theme, not a partial patch on top of light or
     dark. Every token the dark theme bothers to override (surface, icon
     tints, accent-ink...) is one a page actually depends on differing per
@@ -180,7 +184,9 @@ def test_paper_theme_defines_the_full_set_the_dark_theme_redefines(dark_explicit
     assert not missing, f"paper is missing tokens the dark theme redefines: {missing}"
 
 
-def test_grid_line_token_exists_in_all_three_themes(root_block, dark_media_block, dark_explicit_block, paper_block):
+def test_grid_line_token_exists_in_all_three_themes(
+    root_block, dark_media_block, dark_explicit_block, paper_block
+):
     """--bp-grid-line (Batch A1.2) paints layout.css's background grid under
     Papier and nothing anywhere else -- but it still has to be an explicit,
     defined token in all three theme blocks, transparent or not, or a reader
@@ -255,7 +261,9 @@ def test_every_chart_series_colour_is_visible_on_the_light_background(tokens):
 
 
 @pytest.mark.parametrize("fg_name,bg_name,minimum,purpose", CONTRAST_PAIRS)
-def test_paper_theme_contrast_meets_its_wcag_floor(paper_tokens, fg_name, bg_name, minimum, purpose):
+def test_paper_theme_contrast_meets_its_wcag_floor(
+    paper_tokens, fg_name, bg_name, minimum, purpose
+):
     """Same CONTRAST_PAIRS, same floors, graded against paper's effective
     values -- including --bp-accent and --bp-accent-soft-adjacent pairs that
     paper does NOT redefine and therefore inherit --bp-bg's new (darker,
