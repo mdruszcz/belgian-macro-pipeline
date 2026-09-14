@@ -473,7 +473,7 @@ def main(argv=None) -> int:
                     changed.append(target.relative_to(REPO_ROOT))
                 if not args.check:
                     target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(html, encoding="utf-8")
+                    target.write_text(html, encoding="utf-8", newline="\n")
                     written += 1
                 if not templated:
                     print(f"  {page_dir.name:20} {lang}  -> {target.relative_to(REPO_ROOT)}")

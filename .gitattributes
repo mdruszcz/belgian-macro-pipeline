@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+# Binary types present in this repository -- never subject to line-ending
+# normalization, whatever their content looks like.
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.db binary
+
+# scripts/plot_population_continuity.py writes this file with csv.writer's
+# own default \r\n line terminator (newline="" is already passed, so nothing
+# platform-specific is happening -- the CRLF comes from the CSV dialect
+# itself, on every OS). Nothing regenerates and byte-compares this file
+# today, but normalizing it to LF here would make the committed blob stop
+# matching what the generator actually produces the next time someone reruns
+# it, silently reintroducing the exact churn this batch removes elsewhere.
+# Left untouched rather than "fixed" because that script is outside this
+# batch's scope (see docs/steps, Batch A0).
+data/exports/population_continuity.csv -text
