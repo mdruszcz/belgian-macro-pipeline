@@ -1,67 +1,179 @@
 <!--
-  Sources and licences, in full.
+  Sources and updates -- Batch A3.1a (docs/features/site_unification.md).
 
-  THIS PAGE EXISTS BECAUSE THE MAP HAS TO FIT ON ONE SCREEN. map.html is a
-  header, a map and a footer with no scroll, so the several hundred words of
-  licence text that used to sit under the map could not stay there. It is not
-  abbreviated anywhere: the complete notice for every source lives here, and
-  every page that shows these figures links to it by name and credits the
-  source visibly in its own footer.
+  Rebuilt on the shared shell (src/pages/shell.py, scripts/sync_site_shell.py)
+  to the same standard as home2.html and macro.html: one header, one footer,
+  the shared theme and language menus, no page-local switcher of its own.
 
-  THE VALUES NOTICE IS HELD BYTE-IDENTICAL to communes.html's and to
-  I18N.STRINGS.en.attribution by tests/test_statbel_attribution.py, using the
-  values-attribution:start/end markers below as its lookup key. Reword it on
-  every copy or on none.
+  WHAT THIS PAGE IS. A catalogue of the nine registered sources
+  (public/data/metadata/sources.json), each row built from the indicators that
+  actually carry that source (public/data/explorer/index.json) -- never a
+  hand-typed source name, dataset name, period or date (CLAUDE.md rules 28,
+  36). The mockup (docs/design-references/maquettes-unification-v1/08-sources.png)
+  supplied the LAYOUT only; its source list, counts and licence wording are
+  invented placeholders per prompts.md and are not reproduced here.
+
+  WHERE THE PERIOD AND RETRIEVAL DATA COME FROM. Rather than extend
+  scripts/export_site_payloads.py to add period bounds to metadata/indicators.json
+  (that file indexes MUNICIPAL indicators only, and several registered sources
+  -- AMECO, FPB, the NBB -- publish only national series), this page reads
+  public/data/explorer/index.json instead. scripts/export_explorer_payloads.py
+  already builds that index, for BOTH scopes, with a deterministic
+  `period_min`/`period_max` per indicator (sorted() over the observations) and
+  the indicator's own `source` id -- exactly what this page needs, already
+  published, already tested (tests/test_export_explorer_payloads.py). Reusing
+  it avoids a second, redundant period computation and keeps
+  metadata/indicators.json's shape untouched.
+
+  CATEGORY FILTER. config/indicators/*.yaml's `display.category` field is not
+  exported to any public payload, and inventing a taxonomy for this page alone
+  would be a hand-typed fact the data does not carry. The filter instead uses
+  `scope` (municipal / national), which every explorer/index.json row already
+  states -- a real distinction (a source can publish either, or both) rather
+  than a duplicate of the Source column itself (agency).
+
+  A NOTE ON "fpb". The Federal Planning Bureau is a registered source
+  (sources.json) with zero published indicators in this repository right now
+  -- no municipal or national series carries source: "fpb" yet. Its row shows
+  that honestly (zero datasets, no period) rather than inventing one.
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sources and licences</title>
-<meta name="description" content="Every source behind these figures, with its licence, the date of the data used, and the changes made to it.">
+<title>BelPulse — Sources and updates</title>
+<meta name="description" content="Every source behind these figures: what it publishes, the period it covers, when it was last fetched and its reuse conditions.">
+
+<!-- bp-shell:bootstrap:start -->
+<script>(function(){try{var KEY='belpulse-theme',LEGACY_KEY='theme',LEGACY={day:'light',soft:'light',night:'dark'};var v=localStorage.getItem(KEY);if(v===null){var legacy=localStorage.getItem(LEGACY_KEY);if(legacy&&Object.prototype.hasOwnProperty.call(LEGACY,legacy))v=LEGACY[legacy];}if(v==='auto'){v=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';try{localStorage.setItem(KEY,v);}catch(e){}}if(v!=='light'&&v!=='dark'&&v!=='paper')v='light';document.documentElement.setAttribute('data-theme',v);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<!-- bp-shell:bootstrap:end -->
 <script>
-  /* Before the first paint: light unless the reader chose otherwise. A
-     linked file cannot promise to run before the stylesheets apply, so
-     this one is inline, like every other page's. */
   (function(){
     try{
-      var t = localStorage.getItem('belpulse-theme');
-      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
-    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+      // The reader's saved language, read before paint -- the shared shell
+      // bootstrap above only concerns itself with the theme.
+      var l = localStorage.getItem('belpulse-lang') || localStorage.getItem('lang');
+      if(l) document.documentElement.lang = l;
+    }catch(e){}
   })();
 </script>
-<script src="assets/i18n.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/belpulse/tokens.css">
 <link rel="stylesheet" href="assets/belpulse/layout.css">
 <link rel="stylesheet" href="assets/belpulse/components.css">
 <style>
-  body{background:var(--bp-bg); color:var(--bp-text); margin:0;
-    font-family:var(--bp-font-ui); line-height:1.55}
-  h1{font-family:var(--bp-font-display); font-size:2rem; font-weight:600;
-    letter-spacing:-.01em; margin:0 0 var(--bp-space-2)}
-  a{color:var(--bp-accent-ink)}
-  code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
-  .wrap{max-width:920px; margin:0 auto; padding:0 var(--bp-space-6)}
-  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding-left:0; padding-right:0}
-  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; flex:1; min-width:0; max-width:1280px}
-  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
-  .switches{display:flex; gap:8px; margin-left:auto}
-  .theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border);
-    border-radius:var(--bp-radius-control); overflow:hidden; background:var(--bp-surface)}
-  .theme-toggle button{border:0; background:transparent; color:var(--bp-text-muted); cursor:pointer;
-    font:inherit; font-size:.78rem; padding:5px 9px; line-height:1.3}
-  .theme-toggle button:hover{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
-  .theme-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink); font-weight:600}
-  .theme-toggle button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
-  @media (max-width:1000px){
-    .bp-nav{order:3; flex-basis:100%; overflow-x:auto; padding-bottom:2px}
-    .bp-nav a{white-space:nowrap}
+  /* Page composition only -- assets/belpulse/components.css owns anything
+     reusable. The top bar, breadcrumb and footer are shared now
+     (src/pages/shell.py via scripts/sync_site_shell.py). */
+  body{background:var(--bp-bg); color:var(--bp-text); margin:0}
+  h1,h2,h3{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0}
+
+  /* assets/belpulse/layout.css's generic `.wrap` (max-width + centring only)
+     carries no side padding of its own -- only `.bp-topbar .wrap`/`.foot .wrap`
+     get one, from their own rules. Every hand-edited page that puts BODY
+     content straight in a `.wrap` (home2.html included) adds this padding
+     locally for exactly that reason; without it, this page's own content sat
+     flush against the viewport edge while the header above it did not
+     (found on a real 1122px screenshot). Same --bp-space-6 the header uses,
+     so the heading's left edge lines up with the logo's above it. */
+  main.wrap{padding:0 var(--bp-space-6)}
+
+  .pagehead{padding:var(--bp-space-6) 0 0; max-width:70ch}
+  .pagehead h1{font-size:2rem; margin:0 0 var(--bp-space-2)}
+  .pagehead .lead{color:var(--bp-text-muted); margin:0; font-size:var(--bp-text-body)}
+
+  /* ---- search + category filter ---- */
+  .src-toolbar{display:flex; gap:var(--bp-space-3); margin:var(--bp-space-5) 0 0; flex-wrap:wrap}
+  .src-search{flex:1; min-width:220px; display:flex; align-items:center; gap:8px;
+    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:9px 14px; background:var(--bp-surface)}
+  .src-search input{border:0; background:transparent; outline:0; font:inherit;
+    font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
+  .src-search svg{color:var(--bp-text-faint); flex:none}
+  #categoryFilter{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    padding:9px 14px; background:var(--bp-surface); color:inherit; font:inherit;
+    font-size:var(--bp-text-small); min-width:200px}
+  @media (max-width:640px){
+    .src-toolbar{flex-direction:column}
+    #categoryFilter{min-width:0; width:100%}
   }
-  @media (max-width:640px){ .switches{margin-left:0; flex-basis:100%; flex-wrap:wrap} }
-  .pagehead{padding:var(--bp-space-6) 0 var(--bp-space-4)}
-  .pagehead p{color:var(--bp-text-muted); margin:0; max-width:70ch}
+
+  /* ---- three summary cards ---- */
+  .src-cards{display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:var(--bp-space-4); margin:var(--bp-space-5) 0 0}
+  .src-card{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    background:var(--bp-surface); padding:var(--bp-space-4) var(--bp-space-5);
+    box-shadow:var(--bp-shadow-card)}
+  .src-card-icon{display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:9px; background:var(--bp-accent-soft);
+    color:var(--bp-accent-ink); margin-bottom:10px}
+  .src-card h3{margin:0 0 4px; font-size:var(--bp-text-body); font-weight:var(--bp-weight-semibold)}
+  .src-card p{margin:0; font-size:12px; color:var(--bp-text-muted); line-height:1.5}
+  @media (max-width:768px){ .src-cards{grid-template-columns:1fr} }
+
+  /* ---- catalogue table ---- */
+  .src-catalog{margin-top:var(--bp-space-8)}
+  .src-catalog h2{font-size:1.4rem; margin:0 0 4px}
+  .src-catalog .secsub{margin:0 0 var(--bp-space-4); color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+  .src-table-wrap{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    background:var(--bp-surface); overflow:hidden}
+  .src-table{width:100%; border-collapse:collapse; font-size:var(--bp-text-small)}
+  .src-table th, .src-table td{padding:12px 16px; text-align:left; border-bottom:1px solid var(--bp-border); vertical-align:top}
+  .src-table tbody tr.src-row:last-child td{border-bottom:0}
+  .src-table thead th{color:var(--bp-text-muted); font-weight:var(--bp-weight-medium);
+    font-size:11px; text-transform:uppercase; letter-spacing:.03em; background:var(--bp-surface-alt)}
+  .src-toggle{display:flex; align-items:flex-start; gap:8px; border:0; background:transparent;
+    padding:0; font:inherit; color:inherit; cursor:pointer; text-align:left; width:100%}
+  .src-toggle:focus-visible{outline:2px solid var(--bp-accent); outline-offset:2px}
+  .src-chev{flex:none; margin-top:3px; transition:transform .15s ease; color:var(--bp-text-faint)}
+  .src-toggle[aria-expanded="true"] .src-chev{transform:rotate(90deg)}
+  .src-name{display:block; font-weight:var(--bp-weight-semibold)}
+  .src-agency{display:block; font-size:11px; color:var(--bp-text-faint); margin-top:2px}
+  .src-detail-row td{background:var(--bp-surface-alt); padding:var(--bp-space-4) 16px}
+  .src-detail-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:var(--bp-space-4)}
+  .src-detail-grid h4{margin:0 0 6px; font-size:11px; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--bp-text-muted); font-weight:var(--bp-weight-medium)}
+  .src-detail-grid p{margin:0 0 6px; font-size:var(--bp-text-small); color:var(--bp-text)}
+  .src-detail-grid a{color:var(--bp-accent-ink)}
+  .src-item-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+  .src-item-name{display:block; font-size:var(--bp-text-small)}
+  .src-item-meta{display:block; font-size:11px; color:var(--bp-text-faint)}
+  .src-not-stated{color:var(--bp-text-faint); font-style:italic}
+  .src-empty{padding:var(--bp-space-5); text-align:center; color:var(--bp-text-muted); font-size:var(--bp-text-small)}
+
+  @media (max-width:640px){
+    .src-table thead{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)}
+    .src-table, .src-table tbody, .src-table tr{display:block; width:100%}
+    /* `.src-table tr{display:block}` above has higher specificity than the
+       UA stylesheet's `[hidden]{display:none}` (a class+type selector beats
+       a bare attribute selector), so without this rule a collapsed detail
+       row renders open the moment the table becomes block-stacked -- found
+       on a real 390px screenshot, not by reading the cascade rules. */
+    .src-table tr[hidden]{display:none}
+    .src-table td{display:block; width:auto; border:0; padding:6px 14px}
+    .src-table tr.src-row{border-bottom:1px solid var(--bp-border); padding:10px 0}
+    .src-table td[data-th]::before{content:attr(data-th); display:block; font-size:10px;
+      text-transform:uppercase; letter-spacing:.03em; color:var(--bp-text-faint); margin-bottom:3px}
+    .src-table td.src-cell-source::before{display:none}
+    .src-detail-row td{padding:var(--bp-space-3) 14px var(--bp-space-4)}
+  }
+
+  /* ---- the two explanatory panels ---- */
+  .src-panels{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-4); margin:var(--bp-space-6) 0}
+  .src-panel{display:flex; gap:var(--bp-space-3); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-card); background:var(--bp-surface); padding:var(--bp-space-4) var(--bp-space-5)}
+  .src-panel-icon{flex:none; color:var(--bp-accent); margin-top:2px}
+  .src-panel h3{margin:0 0 4px; font-size:var(--bp-text-body); font-weight:var(--bp-weight-semibold)}
+  .src-panel p{margin:0; font-size:12px; color:var(--bp-text-muted); line-height:1.5}
+  @media (max-width:768px){ .src-panels{grid-template-columns:1fr} }
+
+  /* ---- licences (unchanged content, moved under the table) ---- */
+  .src-licences{margin-top:var(--bp-space-8); padding-bottom:var(--bp-space-8)}
+  .src-licences h2{font-size:1.2rem; margin:0 0 var(--bp-space-3)}
   .attribution{
     padding:18px 20px; border:1px solid var(--bp-border);
     border-radius:var(--bp-radius-card); background:var(--bp-surface);
@@ -70,144 +182,462 @@
   }
   .attribution strong{color:var(--bp-text)}
   .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
-  footer{margin-top:var(--bp-space-5); padding-bottom:var(--bp-space-8);
-    color:var(--bp-text-faint); font-size:.8rem; line-height:1.6}
+  .src-licences-foot{margin-top:var(--bp-space-3); font-size:.8rem; color:var(--bp-text-faint); line-height:1.6}
 </style>
 </head>
-<body class="bp-shell">
+<body class="bp-shell sources">
 
-<header class="bp-topbar">
-  <div class="wrap">
-    <a class="bp-logo" href="home2.html">
-      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
-      <span><span class="bp-wordmark">BelPulse</span></span>
-    </a>
-    <nav class="bp-nav" aria-label="Main">
-      <a href="home2.html" data-t="navHome">Home</a>
-      <a href="macro.html" data-t="navMacro">Macro</a>
-      <a href="micro.html" data-t="navMicro">Micro</a>
-      <a href="communes.html" data-t="navCommunes">Commune profiles</a>
-      <a href="map.html" data-t="navMaps">Maps</a>
-      <a href="all_data.html" data-t="navAllData">All data</a>
-      <a href="about.html" data-t="navAbout">About</a>
-    </nav>
-    <div class="switches">
-      <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
-        <button type="button" data-lang="en" aria-pressed="false">EN</button>
-        <button type="button" data-lang="fr" aria-pressed="false">FR</button>
-        <button type="button" data-lang="nl" aria-pressed="false">NL</button>
-      </div>
-      <div class="theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
-        <button type="button" data-theme-choice="light" aria-pressed="false" data-t-title="themeLight">&#9728; <span data-t="themeLight">Light</span></button>
-        <button type="button" data-theme-choice="auto" aria-pressed="false" data-t-title="themeAuto"><span data-t="themeAuto">Auto</span></button>
-        <button type="button" data-theme-choice="dark" aria-pressed="false" data-t-title="themeDark">&#9790; <span data-t="themeDark">Dark</span></button>
+<!-- bp-shell:header:start page="sources.html" -->
+<a class="bp-skip-link" href="#bp-main" data-t="skipToContent">Skip to content</a><header class="bp-topbar"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" id="bp-nav" aria-label="Main navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" aria-current="page" data-t="navSources">Sources</a></nav><div class="bp-topbar-actions"><div class="bp-menu bp-theme-menu" data-menu="theme"><button type="button" class="bp-menu-btn" id="bp-theme-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-theme-menu-panel" aria-label="Colour theme" data-t-aria="theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-menu-panel bp-theme-switch" id="bp-theme-menu-panel" role="menu" aria-label="Colour theme" data-t-aria="theme"><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="light" aria-checked="false" data-t="themeLight">Light</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="dark" aria-checked="false" data-t="themeDark">Dark</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="paper" aria-checked="false" data-t="themePaper">Paper</button></div></div><div class="bp-menu bp-lang-menu" data-menu="lang"><button type="button" class="bp-menu-btn" id="bp-lang-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-lang-menu-panel" aria-label="Language" data-t-aria="language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="bp-menu-current">EN</span><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-lang-switch" id="bp-lang-menu-panel" role="menu" aria-label="Language" data-t-aria="language"><button type="button" role="menuitemradio" data-lang="en" aria-checked="false">English</button><button type="button" role="menuitemradio" data-lang="fr" aria-checked="false">Français</button><button type="button" role="menuitemradio" data-lang="nl" aria-checked="false">Nederlands</button></div></div><button type="button" class="bp-nav-toggle" aria-expanded="false" aria-controls="bp-nav" aria-label="Menu" data-t-aria="navMenu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div></header>
+<!-- bp-shell:header:end -->
+
+<main class="wrap" id="bp-main">
+  <nav class="bp-breadcrumb" aria-label="Breadcrumb">
+    <a href="home2.html" data-t="navHome">Home</a><span data-t="navSources">Sources</span>
+  </nav>
+
+  <header class="pagehead">
+    <h1 data-t="sourcesTitle">Sources and updates</h1>
+    <p class="lead" data-t="sourcesLead">The origin of the data, its period, and its conditions of reuse.</p>
+  </header>
+
+  <div class="src-toolbar">
+    <label class="src-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="sourceSearch" type="search" data-t-placeholder="sourcesSearchPlaceholder" placeholder="Search a source or a dataset…" autocomplete="off">
+    </label>
+    <select id="categoryFilter" data-t-aria="sourcesCategoryFilterAria" aria-label="Category">
+      <option value="" data-t="sourcesCategoryAll">All categories</option>
+      <option value="municipal" data-t="sourcesCategoryMunicipal">Municipal data</option>
+      <option value="national" data-t="sourcesCategoryNational">National data</option>
+    </select>
+  </div>
+
+  <section class="src-cards" aria-label="About this page">
+    <div class="src-card">
+      <span class="src-card-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+      <h3 data-t="sourcesCard1Title">Official sources</h3>
+      <p data-t="sourcesCard1Body">Every figure comes from a public statistical agency or an international institution, never from an estimate typed in by hand.</p>
+    </div>
+    <div class="src-card">
+      <span class="src-card-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6v20h12V6z"/><path d="M14 2v4h4"/><path d="M9 13h6M9 17h6"/></svg></span>
+      <h3 data-t="sourcesCard2Title">Traceability</h3>
+      <p data-t="sourcesCard2Body">Each source links back to where it publishes its own data, so a figure here can always be checked against the original.</p>
+    </div>
+    <div class="src-card">
+      <span class="src-card-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span>
+      <h3 data-t="sourcesCard3Title">Updates</h3>
+      <p data-t="sourcesCard3Body">The period a source covers and the date this pipeline last fetched it are both shown, and the two are never the same thing.</p>
+    </div>
+  </section>
+
+  <section class="src-catalog">
+    <h2 data-t="sourcesCatalogTitle">Source catalogue</h2>
+    <p class="secsub" data-t="sourcesCatalogLead">Every source behind the figures on this site, with what it publishes, the period it covers and its reuse conditions.</p>
+
+    <div class="src-table-wrap">
+      <table class="src-table">
+        <caption class="sr-only" data-t="sourcesCatalogTitle">Source catalogue</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-t="sourcesColSource">Source</th>
+            <th scope="col" data-t="sourcesColData">Data</th>
+            <th scope="col" data-t="sourcesColPeriod">Period published</th>
+            <th scope="col" data-t="sourcesColConditions">Conditions</th>
+          </tr>
+        </thead>
+        <tbody id="srcTableBody"></tbody>
+      </table>
+      <p class="src-empty" id="srcEmpty" data-t="sourcesNoResults" hidden>No source matches your search.</p>
+    </div>
+  </section>
+
+  <section class="src-panels">
+    <div class="src-panel">
+      <span class="src-panel-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+      <div>
+        <h3 data-t="sourcesPanel1Title">Data period</h3>
+        <p data-t="sourcesPanel1Body">The period published is the year, quarter or month the figures themselves describe. It depends on what the source has measured, not on when we last checked.</p>
       </div>
     </div>
-  </div>
-</header>
+    <div class="src-panel">
+      <span class="src-panel-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
+      <div>
+        <h3 data-t="sourcesPanel2Title">Last retrieval</h3>
+        <p data-t="sourcesPanel2Body">The last-retrieved date is when this pipeline last fetched the source. It can be more recent than the data period, if the source has not published anything newer yet.</p>
+      </div>
+    </div>
+  </section>
 
-<main class="wrap">
-  <div class="pagehead">
-    <h1 data-t="sourcesTitle">Sources and licences</h1>
-    <p data-t="sourcesLead">Every source behind the figures on this site, with its licence, the date of the data used, and the changes made to it. Each page that shows these figures credits its source in its own footer and links here for the full text.</p>
-  </div>
-
-  <div class="attribution" id="attribution">
-    <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
-    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
-    1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
-    document already recorded in <code>docs/licences/</code>.
-    <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
-    communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
-    a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
-    longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
-    are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
-    <br><br>
-    <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
-         identical to it by test_statbel_attribution.py. Reword on both or neither. -->
-    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
-    <!-- values-attribution:end --></span>
-    <br><br><span data-t-html="varAttribution"><strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.</span>
-  </div>
-
-  <footer data-t-html="sourcesFooter">The source registry these names come from is published at
-  <code>public/data/metadata/sources.json</code>, and every indicator records which source it came
-  from. Nothing on this page is typed by hand twice: the notice below the map and the notice here
-  are the same text, checked against each other by the test suite.</footer>
+  <section class="src-licences">
+    <h2 data-t="sourcesLicencesHeading">Licences and notices</h2>
+    <!-- The licence notice. Byte-identical to communes.html and to
+         I18N.STRINGS.*.attribution -- tests/test_statbel_attribution.py checks
+         the values-attribution:start/end span against that string. Reword on
+         every copy or on none. -->
+    <div class="attribution" id="attribution">
+      <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+      (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+      1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+      document already recorded in <code>docs/licences/</code>.
+      <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+      communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+      a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+      longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+      are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+      <br><br>
+      <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+           identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+      <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+      <!-- values-attribution:end --></span>
+      <br><br><span data-t-html="varAttribution"><strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.</span>
+    </div>
+    <p class="src-licences-foot" data-t-html="sourcesFooter">The source registry these names come from is published at
+    <code>public/data/metadata/sources.json</code>, and every indicator records which source it came
+    from. Nothing on this page is typed by hand twice: the notice below the map and the notice here
+    are the same text, checked against each other by the test suite.</p>
+  </section>
 </main>
 
-<script>
-/* The licence asks for the DATE OF LAST UPDATE beside the notice, so the slot
-   in the values block has to be filled here as it is on every other page that
-   carries it. This page is not about one indicator, so the date shown is the
-   most recent update across the published indicators -- the newest thing any
-   figure on this site rests on. If the index cannot be reached the slot says
-   so rather than showing a dash that reads like "no date". */
-(function(){
-  var LANG = I18N.initial();
-  var updated = '';
-  function stampDate(){
-    var el = document.getElementById('attrUpdated');
-    if(el) el.textContent = updated || I18N.t(LANG, 'sourcesDateUnknown');
-  }
-  function applyStrings(){
-    document.documentElement.lang = LANG;
-    document.querySelectorAll('[data-t]').forEach(function(el){
-      el.textContent = I18N.t(LANG, el.getAttribute('data-t'));
-    });
-    document.querySelectorAll('[data-t-html]').forEach(function(el){
-      el.innerHTML = I18N.t(LANG, el.getAttribute('data-t-html'));
-    });
-    document.querySelectorAll('[data-t-aria]').forEach(function(el){
-      el.setAttribute('aria-label', I18N.t(LANG, el.getAttribute('data-t-aria')));
-    });
-    document.querySelectorAll('[data-t-title]').forEach(function(el){
-      el.setAttribute('title', I18N.t(LANG, el.getAttribute('data-t-title')));
-    });
-    document.querySelectorAll('#langSeg button').forEach(function(b){
-      b.setAttribute('aria-pressed', String(b.dataset.lang === LANG));
-    });
-    stampDate();
-  }
-  fetch('public/data/metadata/indicators.json?t=' + Date.now())
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){
-      if(!d) return;
-      var dates = (d.indicators || [])
-        .map(function(i){ return i.inputs_updated || i.updated; })
-        .filter(Boolean).sort();
-      updated = dates.length ? dates[dates.length - 1] : '';
-      stampDate();
-    })
-    .catch(function(){ stampDate(); });
-  document.querySelectorAll('#langSeg button').forEach(function(b){
-    b.addEventListener('click', function(){
-      LANG = b.dataset.lang;
-      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(e){}
-      applyStrings();
-    });
-  });
-  applyStrings();
-})();
-</script>
+<!-- bp-shell:footer:start -->
 
+<footer class="foot"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" aria-label="Footer navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" aria-current="page" data-t="navSources">Sources</a></nav><p class="bp-footer-credit" data-t="footerCredit">Official public sources — see Sources.</p></div></footer>
+<!-- bp-shell:footer:end -->
+
+<script src="assets/i18n.js"></script>
+<script src="assets/commune_map.js"></script>
+<script src="assets/belpulse/shell.js"></script>
 <script>
-// Theme switch. Shared localStorage key across the pages, so a choice made on
-// one carries to the others.
+/* BelPulse sources catalogue -- Batch A3.1a.
+ *
+ * Two payloads: public/data/metadata/sources.json (the nine registered
+ * sources -- label, agency, homepage, licence note, cadence) and
+ * public/data/explorer/index.json (one row per published indicator, municipal
+ * and national, each carrying its own `source` id, `period_min`/`period_max`
+ * and `updated`/`inputs_updated`). Every source's row is BUILT from the
+ * indicators that name it -- never a hand-typed count or date.
+ */
 (function(){
-  const KEY = 'belpulse-theme';
-  const apply = choice => {
-    if(choice === 'auto') document.documentElement.removeAttribute('data-theme');
-    else document.documentElement.setAttribute('data-theme', choice);
-    document.querySelectorAll('[data-theme-choice]').forEach(b =>
-      b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)));
+  'use strict';
+
+  var SOURCES_URL = 'public/data/metadata/sources.json';
+  var INDEX_URL = 'public/data/explorer/index.json';
+
+  var LANG = I18N.initial();
+  var T = function(key, vars){ return I18N.t(LANG, key, vars); };
+
+  var state = {
+    sources: {},
+    indicators: [],
+    bySource: {},
+    category: '',
+    query: ''
   };
-  let saved = 'light';
-  try{ saved = localStorage.getItem(KEY) || 'light'; }catch(_){}
-  apply(saved);
-  document.querySelectorAll('[data-theme-choice]').forEach(b => b.onclick = () => {
-    apply(b.dataset.themeChoice);
-    try{ localStorage.setItem(KEY, b.dataset.themeChoice); }catch(_){}
+
+  function text(obj){
+    if(!obj) return '';
+    if(typeof obj === 'string') return obj;
+    return obj[LANG] || obj.en || '';
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* A period as a reader writes it -- same rule macro.html's fmtPeriod uses,
+     so a period reads identically wherever this site shows one. */
+  function fmtPeriod(p){
+    if(!p) return '';
+    var q = /^(\d{4})-Q([1-4])$/.exec(p);
+    if(q) return ({en: 'Q', fr: 'T', nl: 'K'}[LANG] || 'Q') + q[2] + ' ' + q[1];
+    var m = /^(\d{4})-(\d{2})$/.exec(p);
+    if(m){
+      try{ return new Date(Number(m[1]), Number(m[2]) - 1, 1).toLocaleDateString(LANG, {month: 'short', year: 'numeric'}); }
+      catch(e){ return p; }
+    }
+    return p;
+  }
+
+  /* Unit hints, reused verbatim from macro.html's own unitHint(unit) --
+     PR #172 (open, not yet merged as this was written) is expected to move
+     this to a shared MapUI.unitLabel; until it does, copying macro's exact
+     logic here is the "no second vocabulary" choice rather than inventing a
+     different one for this page. `assets/commune_map.js` is loaded above for
+     `MapUI.unitSuffix`, the same fallback macro.html falls back to.
+     unitSuffix() itself returns '' for eur/count/percent* (units it expects
+     to already be embedded in a formatted NUMBER, which this page never
+     shows) -- for those the raw code is shown as-is rather than a blank
+     cell, which is still real, still honest, and reads fine standalone
+     ("EUR", "percent"). */
+  function unitHint(unit){
+    var u = (unit || '').toLowerCase();
+    if(u === 'pp_contribution') return 'pp';
+    var idx = /^index_(\d{4})$/.exec(u);
+    if(idx) return idx[1] + '=100';
+    if(u === 'balance') return T('macroBalance');
+    var suffix = (typeof MapUI !== 'undefined' ? MapUI.unitSuffix(unit) : '').trim();
+    return suffix || unit || '';
+  }
+
+  /* Cadence is a real sources.json field (rule 28), not interface text -- but
+     showing its English sentence unrelabelled on the FR/NL page reads as a
+     foreign product. Keyed on today's six distinct values; a cadence this
+     table has never seen falls back to the raw string instead of breaking. */
+  var CADENCE_KEYS = {
+    'daily': 'sourcesCadenceDaily',
+    'quarterly': 'sourcesCadenceQuarterly',
+    'monthly': 'sourcesCadenceMonthly',
+    'annual (manual, ad hoc)': 'sourcesCadenceAnnualAdHoc',
+    'annual (manual Tableau export)': 'sourcesCadenceAnnualTableau',
+    'annual accounts, published by IWEPS around March (catalogue refreshed twice yearly); fetched daily': 'sourcesCadenceAnnualIweps'
+  };
+  function cadenceLabel(cadence){
+    if(!cadence) return '';
+    var key = CADENCE_KEYS[cadence];
+    return key ? T(key) : cadence;
+  }
+
+  /* The secondary line under a source's name. Showing `agency` again when it
+     is IDENTICAL to the name just shown above it (several sources register
+     the same short code as both their label and their agency) is noise, not
+     information -- and for a source whose label is a bare abbreviation, that
+     redundant repeat used to be the ONLY other text on the row. `name`
+     (sources.json) is a more descriptive string for exactly those cases; it
+     has no French/Dutch translation in the registry today; shown as-is
+     rather than invented (CLAUDE.md rule 36) -- flagged in the PR so the
+     registry can grow a trilingual full name later. */
+  function subtitleFor(info, primaryLabel){
+    var agency = info.agency || '';
+    if(agency && agency !== primaryLabel) return agency;
+    var name = info.name || '';
+    if(name && name !== primaryLabel && name !== agency) return name;
+    return '';
+  }
+
+  /* Periods come in mixed grains (a plain year, "YYYY-Qn", "YYYY-MM") even
+     within one source, so ordering by the leading year first and the full
+     string second sorts correctly across grains without pretending they are
+     all the same shape. */
+  function yearOf(p){ var m = /^(\d{4})/.exec(p || ''); return m ? m[1] : ''; }
+  function periodCmp(a, b){
+    var ya = yearOf(a), yb = yearOf(b);
+    if(ya !== yb) return ya < yb ? -1 : 1;
+    return a < b ? -1 : (a > b ? 1 : 0);
+  }
+
+  function buildBySource(){
+    var by = {};
+    Object.keys(state.sources).forEach(function(id){
+      by[id] = {info: state.sources[id], items: []};
+    });
+    state.indicators.forEach(function(ind){
+      if(ind.source && by[ind.source]) by[ind.source].items.push(ind);
+    });
+    state.bySource = by;
+  }
+
+  /* The earliest period_min and the latest period_max across every indicator
+     this source carries -- never one indicator's own range read as if it
+     were the source's. null when the source has no published indicator yet
+     (fpb, today), a real state and not an error. */
+  function overallPeriod(items){
+    var mins = items.map(function(i){ return i.period_min; }).filter(Boolean);
+    var maxs = items.map(function(i){ return i.period_max; }).filter(Boolean);
+    if(!mins.length || !maxs.length) return null;
+    mins.sort(periodCmp);
+    maxs.sort(periodCmp);
+    return {first: mins[0], last: maxs[maxs.length - 1]};
+  }
+
+  /* The most recent retrieval date across this source's indicators. A derived
+     indicator's OWN `updated` is absent (docs/features/provenance.md); its
+     `inputs_updated` is what stands in for it here, same rule the licence
+     notice above uses for the same reason. */
+  function lastRetrieved(items){
+    var dates = items.map(function(i){ return i.inputs_updated || i.updated; }).filter(Boolean);
+    if(!dates.length) return null;
+    dates.sort();
+    return dates[dates.length - 1];
+  }
+
+  function scopesOf(items){
+    var s = {};
+    items.forEach(function(i){ if(i.scope) s[i.scope] = true; });
+    return s;
+  }
+
+  function matchesCategory(agg){
+    if(!state.category) return true;
+    return !!scopesOf(agg.items)[state.category];
+  }
+
+  function matchesSearch(agg){
+    if(!state.query) return true;
+    var q = state.query;
+    var label = text(agg.info.label).toLowerCase();
+    var agency = (agg.info.agency || '').toLowerCase();
+    if(label.indexOf(q) >= 0 || agency.indexOf(q) >= 0) return true;
+    return agg.items.some(function(i){ return text(i.names).toLowerCase().indexOf(q) >= 0; });
+  }
+
+  function sortedItems(items){
+    return items.slice().sort(function(a, b){
+      var na = text(a.names), nb = text(b.names);
+      return na < nb ? -1 : (na > nb ? 1 : 0);
+    });
+  }
+
+  function dataSummary(agg){
+    var n = agg.items.length;
+    if(!n) return T('sourcesNoIndicatorsYet');
+    var shown = sortedItems(agg.items).slice(0, 2).map(function(i){ return text(i.names); });
+    var extra = n - shown.length;
+    var countKey = n === 1 ? 'sourcesDataCountOne' : 'sourcesDataCount';
+    var summary = T(countKey, {n: n}) + ' — ' + shown.join(', ');
+    if(extra > 0) summary += ' ' + T('sourcesDataMore', {n: extra});
+    return summary;
+  }
+
+  /* The summary column shows YEARS ONLY, even though period_min/period_max
+     can be a plain year, a quarter or a month. A source publishing both a
+     monthly series and a quarterly one has no single grain to summarise it
+     in -- mixing a month name and a quarter code on one line reads as a
+     typo, not as two real endpoints. The full-precision period for EACH
+     indicator is still shown in the expanded row (itemPeriod below); this
+     is only the source-level headline. */
+  function periodCell(agg){
+    var p = overallPeriod(agg.items);
+    if(!p) return '—';
+    var first = yearOf(p.first), last = yearOf(p.last);
+    return first === last ? first : first + '–' + last;
+  }
+
+  function itemPeriod(item){
+    if(!item.period_min || !item.period_max) return '—';
+    if(item.period_min === item.period_max) return fmtPeriod(item.period_min);
+    return fmtPeriod(item.period_min) + '–' + fmtPeriod(item.period_max);
+  }
+
+  function renderDetail(agg){
+    var info = agg.info;
+    var rows = sortedItems(agg.items).map(function(i){
+      return '<li><span class="src-item-name">' + escapeHtml(text(i.names)) + '</span>'
+        + '<span class="src-item-meta">' + escapeHtml(unitHint(i.unit)) + ' · ' + escapeHtml(itemPeriod(i)) + '</span></li>';
+    }).join('');
+    var datasetHtml = rows
+      ? '<ul class="src-item-list">' + rows + '</ul>'
+      : '<p class="src-not-stated">' + escapeHtml(T('sourcesNoIndicatorsYet')) + '</p>';
+
+    var licence = text(info.licence_note);
+    var licenceHtml = licence
+      ? '<p>' + escapeHtml(licence) + '</p>'
+      : '<p class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</p>';
+    var homepageHtml = info.homepage
+      ? '<p><a href="' + escapeHtml(info.homepage) + '" rel="noopener" target="_blank">' + escapeHtml(T('sourcesHomepageLink')) + '</a></p>'
+      : '';
+
+    var last = lastRetrieved(agg.items);
+    var lastHtml = last ? escapeHtml(last) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
+    var cadenceHtml = info.cadence ? escapeHtml(cadenceLabel(info.cadence)) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
+
+    return ''
+      + '<div class="src-detail-grid">'
+      + '<div><h4>' + escapeHtml(T('sourcesDetailDataset')) + '</h4>' + datasetHtml + '</div>'
+      + '<div><h4>' + escapeHtml(T('sourcesDetailConditions')) + '</h4>' + licenceHtml + homepageHtml + '</div>'
+      + '<div><h4>' + escapeHtml(T('sourcesDetailCadence')) + '</h4><p>' + cadenceHtml + '</p></div>'
+      + '<div><h4>' + escapeHtml(T('sourcesDetailLastRetrieved')) + '</h4><p>' + lastHtml + '</p></div>'
+      + '</div>';
+  }
+
+  function wireToggle(btn){
+    btn.addEventListener('click', function(){
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      var detail = document.getElementById(btn.getAttribute('aria-controls'));
+      if(detail) detail.hidden = expanded;
+    });
+  }
+
+  function renderTable(){
+    var body = document.getElementById('srcTableBody');
+    if(!body) return;
+    var ids = Object.keys(state.bySource).sort();
+    var html = '';
+    var visible = 0;
+    ids.forEach(function(id){
+      var agg = state.bySource[id];
+      if(!agg || !(matchesCategory(agg) && matchesSearch(agg))) return;
+      visible++;
+      var detailId = 'src-detail-' + id;
+      var licence = text(agg.info.licence_note);
+      var conditionsLabel = licence ? T('sourcesSeeConditions') : T('sourcesLicenceNotStated');
+      var conditionsClass = licence ? '' : ' class="src-not-stated"';
+      var primaryLabel = text(agg.info.label);
+      var subtitle = subtitleFor(agg.info, primaryLabel);
+      html += ''
+        + '<tr class="src-row">'
+        + '<td class="src-cell-source" data-th="' + escapeHtml(T('sourcesColSource')) + '">'
+        + '<button type="button" class="src-toggle" aria-expanded="false" aria-controls="' + detailId + '">'
+        + '<svg class="src-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'
+        + '<span><span class="src-name">' + escapeHtml(primaryLabel) + '</span>'
+        + (subtitle ? '<span class="src-agency">' + escapeHtml(subtitle) + '</span>' : '') + '</span>'
+        + '</button></td>'
+        + '<td data-th="' + escapeHtml(T('sourcesColData')) + '">' + escapeHtml(dataSummary(agg)) + '</td>'
+        + '<td data-th="' + escapeHtml(T('sourcesColPeriod')) + '">' + escapeHtml(periodCell(agg)) + '</td>'
+        + '<td data-th="' + escapeHtml(T('sourcesColConditions')) + '"' + conditionsClass + '>' + escapeHtml(conditionsLabel) + '</td>'
+        + '</tr>'
+        + '<tr class="src-detail-row" id="' + detailId + '" hidden><td colspan="4">' + renderDetail(agg) + '</td></tr>';
+    });
+    body.innerHTML = html;
+    var empty = document.getElementById('srcEmpty');
+    if(empty) empty.hidden = visible > 0;
+    body.querySelectorAll('.src-toggle').forEach(wireToggle);
+  }
+
+  function stampAttrUpdated(){
+    var dates = state.indicators
+      .map(function(i){ return i.inputs_updated || i.updated; })
+      .filter(Boolean)
+      .sort();
+    var el = document.getElementById('attrUpdated');
+    if(el) el.textContent = dates.length ? dates[dates.length - 1] : T('sourcesDateUnknown');
+  }
+
+  // The shared header's language menu (assets/belpulse/shell.js) re-translates
+  // every [data-t*] element itself and dispatches 'bp:lang' for the rest of
+  // this page -- the table has to be rebuilt in the new language, not just
+  // relabelled, since every cell is text built from fetched data.
+  document.addEventListener('bp:lang', function(e){
+    LANG = e.detail.lang;
+    renderTable();
+    stampAttrUpdated();
+  });
+
+  var searchInput = document.getElementById('sourceSearch');
+  if(searchInput){
+    searchInput.addEventListener('input', function(e){
+      state.query = e.target.value.trim().toLowerCase();
+      renderTable();
+    });
+  }
+  var categorySelect = document.getElementById('categoryFilter');
+  if(categorySelect){
+    categorySelect.addEventListener('change', function(e){
+      state.category = e.target.value;
+      renderTable();
+    });
+  }
+
+  Promise.all([SOURCES_URL, INDEX_URL].map(function(url){
+    return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+  })).then(function(results){
+    state.sources = (results[0] && results[0].sources) || {};
+    state.indicators = (results[1] && results[1].indicators) || [];
+    buildBySource();
+    renderTable();
+    stampAttrUpdated();
   });
 })();
 </script>

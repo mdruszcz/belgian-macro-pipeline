@@ -50,6 +50,7 @@ from src.pages.strings import DEFAULT_LANG  # noqa: E402
 SHELL_PAGES = (
     ("home2.html", "home2.html"),
     ("macro.html", "macro.html"),
+    ("sources.html", "sources.html"),
 )
 
 #: Every zone this script owns, and the fragment each one is filled with.
