@@ -388,22 +388,36 @@ def test_recreate_mode_widens_a_check_constraint_and_restores_foreign_keys_on(tm
     conn.close()
 
 
-def test_recreate_mode_refuses_a_file_that_manages_its_own_pragma_or_transaction(tmp_path):
-    """A file that tries to own PRAGMA foreign_keys/BEGIN/COMMIT itself is
-    refused outright -- exactly the trust the audit proved unsafe -- rather
-    than silently allowed to race the runner's own control of the same
-    connection."""
+@pytest.mark.parametrize(
+    "forbidden_statement,match",
+    [
+        ("PRAGMA foreign_keys = OFF;", "PRAGMA"),
+        ("BEGIN;", "BEGIN"),
+        ("COMMIT;", "COMMIT"),
+        ("END;", "END"),
+        ("ROLLBACK;", "ROLLBACK"),
+    ],
+)
+def test_recreate_mode_refuses_a_file_that_manages_its_own_transaction_control(
+    tmp_path, forbidden_statement, match
+):
+    """A file that tries to own PRAGMA foreign_keys/BEGIN/COMMIT/END/ROLLBACK
+    itself is refused outright -- exactly the trust the audit proved unsafe
+    -- rather than silently allowed to race the runner's own control of the
+    same connection. PR #174 second audit, NIT 2: the original version of
+    this test only covered PRAGMA; parametrised over every forbidden
+    keyword."""
     migdir = tmp_path / "migrations"
     migdir.mkdir()
     db_path = _seed_parent_child(migdir, tmp_path)
 
     (migdir / "002_bad.sql").write_text(
         f"{_RECREATE_MARKER}\n"
-        "PRAGMA foreign_keys = OFF;\n"
+        f"{forbidden_statement}\n"
         "CREATE TABLE parent_new (id TEXT PRIMARY KEY, level TEXT NOT NULL CHECK (level IN ('a','b','c')));\n"
     )
 
-    with pytest.raises(migrate.MigrationError, match="PRAGMA"):
+    with pytest.raises(migrate.MigrationError, match=match):
         migrate.run(db_path, migrations_dir=migdir)
 
     conn = sqlite3.connect(str(db_path))
@@ -411,6 +425,7 @@ def test_recreate_mode_refuses_a_file_that_manages_its_own_pragma_or_transaction
         0,
     )
     assert "parent_new" not in _tables(conn)
+    assert conn.execute("PRAGMA foreign_keys").fetchone() == (0,)  # fresh connection default
     conn.close()
 
 
@@ -485,6 +500,156 @@ def test_recreate_mode_fk_violation_is_caught_before_commit_and_not_recorded(tmp
     conn = sqlite3.connect(str(db_path))
     # Rolled back: the original row is still there, untouched.
     assert conn.execute("SELECT id, level FROM parent").fetchall() == [("p1", "a")]
+    assert conn.execute("SELECT COUNT(*) FROM schema_migrations WHERE version = 2").fetchone() == (
+        0,
+    )
+    conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Second audit (PR #174): the text-based refusal above checks only the
+# leading word of each split statement, after only whole-LINE comments were
+# stripped -- bypassable. Each of the three reproductions below is a
+# disguise the auditor demonstrated on temp databases; each must now be
+# refused BEFORE any statement executes (via _strict_statements_for_check),
+# so "nothing applied, nothing recorded, foreign_keys on" holds exactly, not
+# approximately.
+# ---------------------------------------------------------------------------
+
+
+def _assert_bypass_was_refused_cleanly(db_path):
+    conn = sqlite3.connect(str(db_path))
+    try:
+        assert "parent_new" not in _tables(conn)
+        assert conn.execute("SELECT id, level FROM parent").fetchall() == [("p1", "a")]
+        assert conn.execute(
+            "SELECT COUNT(*) FROM schema_migrations WHERE version = 2"
+        ).fetchone() == (0,)
+        assert conn.execute("PRAGMA foreign_keys").fetchone() == (0,)  # fresh connection default
+    finally:
+        conn.close()
+
+
+def test_recreate_mode_refuses_end_as_a_hidden_commit(tmp_path):
+    """SQLite's other spelling of COMMIT -- not in the original forbidden
+    list at all."""
+    migdir = tmp_path / "migrations"
+    migdir.mkdir()
+    db_path = _seed_parent_child(migdir, tmp_path)
+    (migdir / "002_bad.sql").write_text(
+        f"{_RECREATE_MARKER}\n"
+        "CREATE TABLE parent_new (id TEXT PRIMARY KEY, level TEXT NOT NULL CHECK (level IN ('a','b','c')));\n"
+        "INSERT INTO parent_new (id, level) SELECT id, level FROM parent;\n"
+        "END;\n"
+        "DROP TABLE parent;\n"
+        "ALTER TABLE parent_new RENAME TO parent;\n"
+    )
+
+    with pytest.raises(migrate.MigrationError, match="END"):
+        migrate.run(db_path, migrations_dir=migdir)
+
+    _assert_bypass_was_refused_cleanly(db_path)
+
+
+def test_recreate_mode_refuses_commit_hidden_behind_a_block_comment(tmp_path):
+    migdir = tmp_path / "migrations"
+    migdir.mkdir()
+    db_path = _seed_parent_child(migdir, tmp_path)
+    (migdir / "002_bad.sql").write_text(
+        f"{_RECREATE_MARKER}\n"
+        "CREATE TABLE parent_new (id TEXT PRIMARY KEY, level TEXT NOT NULL CHECK (level IN ('a','b','c')));\n"
+        "INSERT INTO parent_new (id, level) SELECT id, level FROM parent;\n"
+        "/* flush */ COMMIT;\n"
+        "DROP TABLE parent;\n"
+        "ALTER TABLE parent_new RENAME TO parent;\n"
+    )
+
+    with pytest.raises(migrate.MigrationError, match="COMMIT"):
+        migrate.run(db_path, migrations_dir=migdir)
+
+    _assert_bypass_was_refused_cleanly(db_path)
+
+
+def test_recreate_mode_refuses_commit_hidden_by_a_trailing_line_comment(tmp_path):
+    """The previous statement's trailing `-- note` is only stripped by
+    _split_statements when the WHOLE line is a comment -- a real statement
+    followed by `-- note` on the same line leaves that comment text
+    attached to the START of the next split fragment, hiding COMMIT's
+    leading word from a naive text check."""
+    migdir = tmp_path / "migrations"
+    migdir.mkdir()
+    db_path = _seed_parent_child(migdir, tmp_path)
+    (migdir / "002_bad.sql").write_text(
+        f"{_RECREATE_MARKER}\n"
+        "CREATE TABLE parent_new (id TEXT PRIMARY KEY, level TEXT NOT NULL CHECK (level IN ('a','b','c')));\n"
+        "INSERT INTO parent_new (id, level) SELECT id, level FROM parent; -- note\n"
+        "COMMIT;\n"
+        "DROP TABLE parent;\n"
+        "ALTER TABLE parent_new RENAME TO parent;\n"
+    )
+
+    with pytest.raises(migrate.MigrationError, match="COMMIT"):
+        migrate.run(db_path, migrations_dir=migdir)
+
+    _assert_bypass_was_refused_cleanly(db_path)
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "﻿",  # a bare UTF-8 BOM before the marker
+        "\n",  # a single blank line before the marker
+        "﻿\n",  # both at once
+    ],
+)
+def test_recreate_mode_marker_detected_despite_bom_or_leading_blank_line(tmp_path, prefix):
+    """PR #174 second audit, NIT 1: the original version compared only
+    `splitlines()[0]` verbatim, so a leading BOM or blank line made
+    detection silently fall back to normal mode -- a migration meant to run
+    with foreign_keys off would then run with it left ON. Both must still
+    be recognized as recreate mode."""
+    migdir = tmp_path / "migrations"
+    migdir.mkdir()
+    db_path = _seed_parent_child(migdir, tmp_path)
+    (migdir / "002_widen.sql").write_text(
+        f"{prefix}{_RECREATE_MARKER}\n"
+        "CREATE TABLE parent_new (id TEXT PRIMARY KEY, level TEXT NOT NULL CHECK (level IN ('a','b','c')));\n"
+        "INSERT INTO parent_new (id, level) SELECT id, level FROM parent;\n"
+        "DROP TABLE parent;\n"
+        "ALTER TABLE parent_new RENAME TO parent;\n",
+        encoding="utf-8",  # the BOM case needs a real encoding, not the platform default
+    )
+
+    migrate.run(db_path, migrations_dir=migdir)
+
+    conn = sqlite3.connect(str(db_path))
+    # The widened CHECK took effect -- proof this actually ran in recreate
+    # mode, not that it silently succeeded some other way.
+    conn.execute("INSERT INTO parent (id, level) VALUES ('p2', 'c')")
+    assert conn.execute("SELECT COUNT(*) FROM schema_migrations WHERE version = 2").fetchone() == (
+        1,
+    )
+    conn.close()
+
+
+def test_recreate_mode_marker_elsewhere_in_the_file_fails_loudly(tmp_path):
+    """The marker text present but NOT as the first non-blank line must
+    fail loudly, not silently run as a normal-mode migration (which would
+    execute this file's CREATE TABLE ... REFERENCES statements with
+    foreign_keys enforcement still on, defeating the whole point)."""
+    migdir = tmp_path / "migrations"
+    migdir.mkdir()
+    db_path = _seed_parent_child(migdir, tmp_path)
+    (migdir / "002_misplaced.sql").write_text(
+        "-- some other leading comment\n"
+        f"{_RECREATE_MARKER}\n"
+        "CREATE TABLE parent_new (id TEXT PRIMARY KEY, level TEXT NOT NULL CHECK (level IN ('a','b','c')));\n"
+    )
+
+    with pytest.raises(migrate.MigrationError, match="first non-blank line"):
+        migrate.run(db_path, migrations_dir=migdir)
+
+    conn = sqlite3.connect(str(db_path))
     assert conn.execute("SELECT COUNT(*) FROM schema_migrations WHERE version = 2").fetchone() == (
         0,
     )

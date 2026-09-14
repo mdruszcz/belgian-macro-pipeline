@@ -35,9 +35,25 @@ RECREATE_MODE_MARKER = "-- migration-mode: recreate-with-foreign-keys-off"
 #: even when its FK check ran after its own COMMIT and so could not be
 #: rolled back). Matched case-insensitively against each split statement's
 #: own first word(s).
+#:
+#: THIS IS A FRIENDLY EARLY REFUSAL ONLY, not the real enforcement (PR #174
+#: second audit, SHOULD-FIX: checking only the first word of each split
+#: statement, after only whole-LINE comments were stripped, is bypassable --
+#: demonstrated on temp databases with `END;` (SQLite's other spelling of
+#: COMMIT, not in this list before), `/* x */ COMMIT;` (a block comment
+#: hides the first word from a line-oriented check), and
+#: `CREATE TABLE t4(a); -- note` followed by `COMMIT;` on the next line
+#: (_split_statements's per-LINE comment stripping never removes a trailing
+#: `-- note` on a line that has real SQL before it, so the next split
+#: fragment starts with that leftover comment text, not the word `COMMIT`).
+#: The REAL enforcement is structural: _apply_recreate_mode checks
+#: `conn.in_transaction` after every statement and aborts if it has gone
+#: False, which catches a hidden COMMIT/END however it is spelled or
+#: disguised, without needing to recognize its text at all.
 _FORBIDDEN_IN_RECREATE_MODE = (
     re.compile(r"^BEGIN\b", re.IGNORECASE),
     re.compile(r"^COMMIT\b", re.IGNORECASE),
+    re.compile(r"^END\b", re.IGNORECASE),
     re.compile(r"^ROLLBACK\b", re.IGNORECASE),
     re.compile(r"^PRAGMA\s+FOREIGN_KEYS\b", re.IGNORECASE),
 )
@@ -101,22 +117,90 @@ def _split_statements(sql: str) -> list[str]:
     return [s.strip() for s in cleaned.split(";") if s.strip()]
 
 
+#: Matches a /* ... */ block comment, across lines -- used only by
+#: _strict_statements_for_check, never by _split_statements (whose own
+#: comment handling stays exactly as it was; changing what actually gets
+#: EXECUTED is not this fix's job -- SQLite's own parser already handles
+#: both comment styles correctly inside conn.execute(), which is exactly
+#: why a bare text check can be fooled without changing execution at all).
+_BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+
+
+def _strict_statements_for_check(raw_text: str) -> list[str]:
+    """A STRICTER statement split than _split_statements, used ONLY by
+    _refuse_forbidden_statements's text-based early refusal (PR #174 second
+    audit, SHOULD-FIX). _split_statements only strips a line that is
+    ENTIRELY a comment; that is fine for execution (SQLite parses comments
+    correctly on its own) but let a disguised BEGIN/COMMIT/END/ROLLBACK/
+    PRAGMA foreign_keys hide from the leading-word text check three ways:
+    a `/* ... */` block comment before it on the same line, a trailing
+    `-- comment` left on the PREVIOUS statement's line (so the next split
+    fragment starts with that leftover comment text, not the real
+    keyword), or SQLite's `END` spelling of COMMIT (now also in
+    _FORBIDDEN_IN_RECREATE_MODE, but still needs its keyword actually
+    visible to be matched). This strips block comments first, then a
+    trailing `-- ...` from EVERY line (not only a whole-comment line),
+    before splitting -- so the same no-string-literal-with-comment-markers
+    assumption _split_statements already documents, applied more
+    thoroughly.
+
+    This is still only a best-effort, early refusal -- _apply_recreate_mode's
+    `conn.in_transaction` check after every executed statement is the real,
+    structural guarantee, regardless of whether this text check recognizes
+    a given disguise.
+    """
+    text = _BLOCK_COMMENT_RE.sub(" ", raw_text)
+    lines = [line.split("--", 1)[0] for line in text.splitlines()]
+    cleaned = "\n".join(lines)
+    return [s.strip() for s in cleaned.split(";") if s.strip()]
+
+
 def _is_recreate_mode(raw_text: str) -> bool:
-    """True iff `raw_text`'s first line is exactly RECREATE_MODE_MARKER.
-    Checked against the RAW file, before comment-stripping -- a marker
-    appearing later, inside a descriptive comment, must never opt a file in
-    by accident."""
-    first_line = raw_text.splitlines()[0].strip() if raw_text.strip() else ""
-    return first_line == RECREATE_MODE_MARKER
+    """True iff RECREATE_MODE_MARKER is the file's first NON-BLANK line
+    (a leading UTF-8 BOM is tolerated -- some editors add one, and it is a
+    harmless encoding artifact, not content). Checked against the RAW file,
+    before comment-stripping -- a marker appearing later, inside a
+    descriptive comment, must never opt a file in by accident.
+
+    Raises MigrationError if the marker text appears ANYWHERE in the file
+    but not as that first non-blank line (PR #174 second audit, NIT 1: the
+    original version compared only `splitlines()[0]` verbatim, so a leading
+    BOM or a blank line before the marker made detection silently fall back
+    to normal mode -- a migration meant to run with foreign_keys off would
+    then run with it left ON, against a table other tables reference,
+    exactly the risk this whole mode exists to avoid). A marker in the
+    wrong place is a real authoring mistake and must fail loudly, never be
+    silently ignored.
+    """
+    text = raw_text.lstrip("﻿")
+    lines = text.splitlines()
+    first_non_blank = next((line.strip() for line in lines if line.strip()), None)
+    if first_non_blank == RECREATE_MODE_MARKER:
+        return True
+    if any(line.strip() == RECREATE_MODE_MARKER for line in lines):
+        raise MigrationError(
+            f"{RECREATE_MODE_MARKER!r} appears in this file but not as its first "
+            "non-blank line -- move it there, or remove it if this file is not meant "
+            "to run in recreate mode. A marker in the wrong place must fail loudly, "
+            "not silently fall back to normal mode."
+        )
+    return False
 
 
-def _refuse_forbidden_statements(path: Path, statements: list[str]) -> None:
+def _refuse_forbidden_statements(path: Path, raw_text: str) -> None:
     """A recreate-mode file must contain ONLY the schema-change statements
-    themselves -- no BEGIN/COMMIT/ROLLBACK/PRAGMA foreign_keys of its own.
-    The runner owns all four; a file that tries to manage them itself is
-    refused outright (CLAUDE.md rule 13) rather than silently trusted, which
-    is exactly the trust the PR #174 audit proved unsafe."""
-    for statement in statements:
+    themselves -- no BEGIN/COMMIT/END/ROLLBACK/PRAGMA foreign_keys of its
+    own. The runner owns all of those; a file that tries to manage them
+    itself is refused outright (CLAUDE.md rule 13) rather than silently
+    trusted, which is exactly the trust the PR #174 audit proved unsafe.
+
+    Scans `_strict_statements_for_check(raw_text)` -- a stricter,
+    comment-blind split than the one actually executed -- so a disguise
+    (a block comment, a trailing line comment hiding the next statement's
+    real first word) does not defeat this early refusal. Still only a
+    best-effort check; `_apply_recreate_mode`'s `conn.in_transaction` test
+    after every executed statement is what actually guarantees safety."""
+    for statement in _strict_statements_for_check(raw_text):
         for pattern in _FORBIDDEN_IN_RECREATE_MODE:
             if pattern.match(statement):
                 raise MigrationError(
@@ -128,7 +212,12 @@ def _refuse_forbidden_statements(path: Path, statements: list[str]) -> None:
 
 
 def _apply_recreate_mode(
-    conn: sqlite3.Connection, path: Path, version: int, checksum: str, statements: list[str]
+    conn: sqlite3.Connection,
+    path: Path,
+    version: int,
+    checksum: str,
+    raw_text: str,
+    statements: list[str],
 ) -> None:
     """Runner-owned application of a 'recreate-with-foreign-keys-off'
     migration -- one that recreates a table other tables' foreign keys
@@ -156,13 +245,36 @@ def _apply_recreate_mode(
     All three probes this fixes must end in the same state: nothing applied,
     nothing recorded in schema_migrations, foreign_keys back ON. See
     tests/test_migrations.py for the reproductions.
+
+    A SECOND layer, structural rather than text-based (PR #174 second audit,
+    SHOULD-FIX): after EVERY statement, `conn.in_transaction` must still be
+    True. `_refuse_forbidden_statements` is only a best-effort early refusal
+    -- it inspects each split statement's leading word, and was shown to
+    miss a hidden COMMIT spelled `END`, hidden behind a `/* block comment */`,
+    or left as the leftover text of a line whose real SQL came before a
+    trailing `-- comment` (`_split_statements` only strips a line that is
+    ENTIRELY a comment, so `CREATE TABLE t(a); -- note` keeps the `-- note`
+    attached to the NEXT split fragment, hiding the following `COMMIT`'s
+    leading word from a text check). Whatever slips past the text check
+    still, unavoidably, ends the connection's transaction when SQLite
+    executes it -- so checking `conn.in_transaction` after each statement
+    catches every spelling and every disguise without needing to recognize
+    any of them.
     """
-    _refuse_forbidden_statements(path, statements)
+    _refuse_forbidden_statements(path, raw_text)
     conn.execute("PRAGMA foreign_keys = OFF")
     try:
         conn.execute("BEGIN")
         for statement in statements:
             conn.execute(statement)
+            if not conn.in_transaction:
+                raise MigrationError(
+                    f"{path.name}: statement {statement[:80]!r} ended the transaction "
+                    "(a hidden COMMIT/END, however spelled or disguised as a comment) -- "
+                    "a recreate-with-foreign-keys-off migration may not end its own "
+                    "transaction; the runner does that itself, after PRAGMA "
+                    "foreign_key_check succeeds."
+                )
         violations = conn.execute("PRAGMA foreign_key_check").fetchall()
         if violations:
             raise MigrationError(
@@ -236,11 +348,17 @@ def run(db_path: Path, migrations_dir: Path = MIGRATIONS_DIR) -> None:
                 log.info(f"skip    {path.name} (already applied)")
                 continue
             log.info(f"apply   {path.name}")
-            raw_text = path.read_text()
+            # utf-8-sig: strips a leading UTF-8 BOM automatically (and
+            # decodes correctly regardless, unlike the platform-default
+            # encoding read_text() would otherwise use -- cp1252 on a
+            # Belgian Windows machine, which cannot even represent some
+            # bytes a BOM-prefixed UTF-8 file contains). _is_recreate_mode's
+            # own `.lstrip("﻿")` stays as a harmless second layer.
+            raw_text = path.read_text(encoding="utf-8-sig")
             statements = _split_statements(raw_text)
             try:
                 if _is_recreate_mode(raw_text):
-                    _apply_recreate_mode(conn, path, version, checksum, statements)
+                    _apply_recreate_mode(conn, path, version, checksum, raw_text, statements)
                 else:
                     _apply_normal_mode(conn, path, version, checksum, statements)
             except Exception:
