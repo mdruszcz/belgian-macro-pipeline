@@ -1269,7 +1269,11 @@ Conjoncture follow in their own PR)
 How: HTML panels (no iframe) for Macro's seven rubriques, sticky menu on desktop, anchor per
 panel, old English anchors redirected to the French ones.
 Why: Macro is the dashboard-with-sidebar pilot; Micro and the rest reuse whatever this proves out.
- [BUILD] A2 -- visual gate on the pilots
+ ✅ [BUILD] A2 -- visual gate on the pilots (2026-09-14: 108 review screenshots of home2.html and
+macro.html's Vue d'ensemble, Croissance and Europe panels, 3 themes x 3 languages x 390/768/1122px,
+taken with scripts/capture_review_screenshots.py (PR #182). No console errors, no horizontal overflow.
+One overlap bug found and fixed in PR #181. The maintainer accepted the pilots as good enough to
+continue, "not really perfect"; visual polish is deferred to its own step below)
 How: Review Home2 and Macro at 390/768/1122px across every language x theme combination, against
 real payload data.
 Why: The maintainer's own delivery order gates the other five pages on the pilots looking right
@@ -1288,6 +1292,11 @@ redirects there; remove the redundant commune view from Profils once parity is v
 every static and dynamically-created link, including search.
 Why: Two competing commune views confuse a reader and split SEO signal across two URLs for the
 same page.
+ [BUILD] A2b -- visual polish of the pilots (deferred by the maintainer, 2026-09-14)
+How: Collect the maintainer's notes on home2.html and macro.html against the mockups, then fix them in
+one batch and recapture with scripts/capture_review_screenshots.py.
+Why: The maintainer judged the pilots good enough to continue but not finished; the polish must not be
+lost once the rest of the site moves on.
  [BUILD] A4 -- finish
 How: Close out remaining Livraison A items against docs/features/site_unification.md's own test
 list (allowed links, tooltip accuracy, no overflow, theme/language/rubrique persistence).
