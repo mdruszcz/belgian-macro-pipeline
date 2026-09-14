@@ -118,15 +118,15 @@ panels:
     legacy_anchors: [growth, drivers]
   - id: prix
     label: {en: Prices, fr: Prix, nl: Prijzen}
-    cards: [prices]
+    cards: [prices-chart, prices]
     legacy_anchors: []
   - id: emploi
     label: {en: Employment, fr: Emploi, nl: Werkgelegenheid}
-    cards: [employment]
+    cards: [employment-chart, employment]
     legacy_anchors: []
   - id: conjoncture
     label: {en: Business cycle, fr: Conjoncture, nl: Conjunctuur}
-    cards: [business-cycle]
+    cards: [business-cycle-chart, business-cycle]
     legacy_anchors: []
   - id: finances-publiques
     label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
@@ -165,6 +165,30 @@ extra_lists:
   - id: business-cycle
     label: {en: Business and consumer sentiment, fr: Conjoncture et confiance, nl: Conjunctuur en vertrouwen}
     series: [BUSINESS_CONFIDENCE, CONSUMER_CONFIDENCE, EC_CONS_CONF_BE, INDUSTRIAL_PROD]
+
+# =============================================================================
+# BATCH A1.4b -- one real history chart above each of the three list cards
+# above (docs/features/site_unification.md, "Graphiques"), so Prix/Emploi/
+# Conjoncture stop being a key-value list alone. Same `{id, label, series}`
+# shape as `extra_lists` above, and the same guarantee: the exporter checks
+# every series named here against public/data/national.json and refuses to
+# publish a chart nothing can draw. `id` is a layout id, camel-cased by
+# macro.html into its element ids ("prices-chart" -> #pricesChartCanvas),
+# never an indicator id (rule 24). Charting more than one series (Conjoncture
+# only) requires the maintainer's brief's own condition: the series must
+# share a unit, or the second stays in the list instead -- verified here
+# (BUSINESS_CONFIDENCE and CONSUMER_CONFIDENCE are both `balance`), not
+# re-derived by macro.html at render time.
+panel_charts:
+  - id: prices-chart
+    label: {en: "HICP, month by month", fr: "IPCH, mois par mois", nl: "GICP, maand na maand"}
+    series: [HICP]
+  - id: employment-chart
+    label: {en: "Unemployment rate, month by month", fr: "Taux de chômage, mois par mois", nl: "Werkloosheidsgraad, maand na maand"}
+    series: [UNEMPLOYMENT_RATE]
+  - id: business-cycle-chart
+    label: {en: Business and consumer confidence, fr: Confiance des entreprises et des consommateurs, nl: Ondernemers- en consumentenvertrouwen}
+    series: [BUSINESS_CONFIDENCE, CONSUMER_CONFIDENCE]
 
 # ---------------------------------------------------------------------------
 # Batch A1.3 (docs/features/site_unification.md, "Home2 : corriger la

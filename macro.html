@@ -189,6 +189,27 @@
   }
   .contrib-total b{color:var(--bp-text)}
 
+  /* ---- BATCH A1.4b: the Prix/Emploi/Conjoncture history charts ----
+     One card per panel, stacked above its existing list card (the brief:
+     "the list stays below the chart"). `.panel-chart-figure` holds one chip
+     per drawn series -- one for Prix/Emploi, two for Conjoncture, whose
+     business/consumer-confidence lines share a canvas -- so a reader gets
+     the latest value+period without hovering, exactly like every other
+     chart card on the site (the hero cards' own ordering: title, latest
+     figure, plot, source). */
+  .panel-chart-figure{display:flex; flex-wrap:wrap; gap:var(--bp-space-4); margin:0 0 var(--bp-space-3)}
+  .panel-chart-figure .chip{display:flex; align-items:baseline; gap:7px; min-width:0}
+  .panel-chart-figure .chip .dot{width:9px; height:9px; border-radius:50%; flex:none; align-self:center}
+  .panel-chart-figure .chip .name{font-size:var(--bp-text-small); color:var(--bp-text-muted)}
+  .panel-chart-figure .chip .num{font-size:1.2rem; font-weight:var(--bp-weight-semibold); color:var(--bp-text)}
+  .panel-chart-figure .chip .period{font-size:11px; color:var(--bp-text-faint)}
+  /* This card is not in a two-up row like the Croissance/drivers pair, so
+     its chart does not need to grow and match a sibling's height (that pair
+     uses `.bp-chart-canvas-wrap` as its OWN `.bp-state-body`, flex:1 against
+     the row) -- it draws at the shared component's own min-height instead,
+     "a plot with its own height" per the brief. */
+  .panel-chart .bp-chart-canvas-wrap{height:240px}
+
   /* Unavailable cards: designed size, honest state. */
   .bp-state[data-state="unavailable"] .bp-state-message{padding:0}
   .bp-state .placeholder{flex:1; min-height:120px; border:1px dashed var(--bp-border); border-radius:var(--bp-radius-control); margin:var(--bp-space-3) 0; background:repeating-linear-gradient(135deg, transparent 0 10px, var(--bp-surface-alt) 10px 11px)}
@@ -410,9 +431,18 @@
       </section>
     </section>
 
-    <!-- ==================== panel: prix (NEW card: consumer prices) ==================== -->
+    <!-- ==================== panel: prix (NEW: inflation history chart + consumer prices list) ==================== -->
     <section class="bp-panel" id="prix" data-panel hidden>
       <h2 data-panel-label="prix">Prices</h2>
+      <article class="bp-chart-card panel-chart bp-state" id="prices-chart" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="pricesChartTitle">&nbsp;</h3></div></div>
+        <div class="bp-state-body">
+          <div class="panel-chart-figure" id="pricesChartFigure"></div>
+          <div class="bp-chart-canvas-wrap"><canvas id="pricesChartCanvas"></canvas></div>
+        </div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="pricesChartProvenance"></div>
+      </article>
       <article class="bp-chart-card bp-state" id="prices" data-state="loading">
         <div class="bp-chart-head"><div><h3 id="pricesTitle">&nbsp;</h3></div></div>
         <ul class="bp-list-panel bp-state-body" id="pricesList"></ul>
@@ -420,9 +450,18 @@
       </article>
     </section>
 
-    <!-- ==================== panel: emploi (NEW card: employment & labour cost) ==================== -->
+    <!-- ==================== panel: emploi (NEW: unemployment-rate history chart + employment & labour cost list) ==================== -->
     <section class="bp-panel" id="emploi" data-panel hidden>
       <h2 data-panel-label="emploi">Employment</h2>
+      <article class="bp-chart-card panel-chart bp-state" id="employment-chart" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="employmentChartTitle">&nbsp;</h3></div></div>
+        <div class="bp-state-body">
+          <div class="panel-chart-figure" id="employmentChartFigure"></div>
+          <div class="bp-chart-canvas-wrap"><canvas id="employmentChartCanvas"></canvas></div>
+        </div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="employmentChartProvenance"></div>
+      </article>
       <article class="bp-chart-card bp-state" id="employment" data-state="loading">
         <div class="bp-chart-head"><div><h3 id="employmentTitle">&nbsp;</h3></div></div>
         <ul class="bp-list-panel bp-state-body" id="employmentList"></ul>
@@ -430,9 +469,18 @@
       </article>
     </section>
 
-    <!-- ==================== panel: conjoncture (NEW card: business & consumer sentiment) ==================== -->
+    <!-- ==================== panel: conjoncture (NEW: business/consumer confidence chart + sentiment list) ==================== -->
     <section class="bp-panel" id="conjoncture" data-panel hidden>
       <h2 data-panel-label="conjoncture">Business cycle</h2>
+      <article class="bp-chart-card panel-chart bp-state" id="business-cycle-chart" data-state="loading">
+        <div class="bp-chart-head"><div><h3 id="businessCycleChartTitle">&nbsp;</h3></div></div>
+        <div class="bp-state-body">
+          <div class="panel-chart-figure" id="businessCycleChartFigure"></div>
+          <div class="bp-chart-canvas-wrap"><canvas id="businessCycleChartCanvas"></canvas></div>
+        </div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="businessCycleChartProvenance"></div>
+      </article>
       <article class="bp-chart-card bp-state" id="business-cycle" data-state="loading">
         <div class="bp-chart-head"><div><h3 id="businessCycleTitle">&nbsp;</h3></div></div>
         <ul class="bp-list-panel bp-state-body" id="businessCycleList"></ul>
@@ -775,6 +823,118 @@
     });
   }
 
+  /* ---- BATCH A1.4b: points for the panel charts below, carrying STATUS ---
+   * The page's original seriesPoints() (used by the KPI sparklines and the
+   * GDP history above) drops every non-numeric point -- fine for those,
+   * which never had a tooltip to explain a gap. A panel chart's tooltip has
+   * to tell a suppressed/estimated cell from a period the series simply
+   * does not cover (builder rule 26), so this keeps every period's status
+   * and lets BPCharts.computeLineLayout turn an absent value into a real
+   * gap in the line, never a point silently dropped from the axis --
+   * the same shape home2.html's hero mini-charts already use (Batch A1.3). */
+  function panelSeriesPoints(entry, limit){
+    var ps = Object.keys(entry.periods || {}).sort().slice(-limit);
+    return ps.map(function(p){
+      var cell = entry.periods[p] || {};
+      return {period: p, value: cell.value, status: cell.status};
+    });
+  }
+
+  /* ---- BATCH A1.4b: the Prix/Emploi/Conjoncture history charts -----------
+   * config `panel_charts`, each {id, label, series} -- same shape as
+   * `extra_lists` above, `id` a layout id ("prices-chart"), never an
+   * indicator id (rule 24). Charting two series in one canvas (Conjoncture)
+   * is just a longer `series` array; BPCharts.drawLine already aligns
+   * multiple series on their shared period union.
+   *
+   * Tooltip/data-table/redraw-on-resize are attached ONCE per canvas (a
+   * `bpBound` marker on the element), because unlike home2's hero cards --
+   * rebuilt from scratch on every render -- these canvases are static
+   * markup that persists across a language switch; re-running
+   * attachTooltip on the same <canvas> would stack a second set of pointer/
+   * keyboard listeners. `panelChartState[base]` is the one mutable object
+   * both the bound draw() closure and every later render share, so a
+   * redraw triggered by ResizeObserver or a language change always reads
+   * the CURRENT series/labels, never whatever LANG was at first paint.
+   *
+   * The hidden-panel lesson from the GDP history chart above (renderHistory,
+   * and its long comment): a canvas measured while its `[data-panel]`
+   * ancestor is `hidden` gets permanently pinned to charts.js's 300px
+   * fallback, because that fallback is written back as the canvas's own
+   * inline style and nothing afterwards can tell it apart from a real
+   * measurement. draw() below skips entirely while `canvas.offsetParent`
+   * is null and clears any stale inline size first, exactly like
+   * renderHistory does. */
+  var panelChartState = {};
+  function renderPanelCharts(){
+    var statusLabels = {
+      provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
+    };
+    (state.layout.panel_charts || []).forEach(function(item){
+      var base = camelId(item.id);
+      var card = document.getElementById(item.id);
+      var titleEl = document.getElementById(base + 'Title');
+      if(titleEl) titleEl.textContent = text(item.label);
+
+      var series = (item.series || [])
+        .map(function(code){ return {code: code, entry: state.national[code]}; })
+        .filter(function(s){ return s.entry; });
+      if(!series.length){
+        if(card) card.dataset.state = 'unavailable';
+        return;
+      }
+      if(card) card.dataset.state = 'ready';
+
+      var figure = document.getElementById(base + 'Figure');
+      if(figure){
+        figure.innerHTML = '';
+        series.forEach(function(s, i){
+          var latest = latestNumeric(s.entry);
+          var chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.innerHTML = '<span class="dot" style="background:var(--bp-chart-' + ((i % 8) + 1) + ')"></span>' +
+            '<span class="name"></span><span class="num"></span><span class="period"></span>';
+          chip.querySelector('.name').textContent = nameOf(s.code);
+          chip.querySelector('.num').textContent = latest ? fmtValue(latest.value, s.entry) : T('macroUnavailable');
+          chip.querySelector('.period').textContent = latest ? fmtPeriod(latest.period) : '';
+          figure.appendChild(chip);
+        });
+      }
+
+      var canvas = document.getElementById(base + 'Canvas');
+      if(!canvas) return;
+      var st = panelChartState[base] || (panelChartState[base] = {model: {hits: []}, tipOpts: {}});
+      st.seriesArr = series.map(function(s, i){
+        return {label: nameOf(s.code), unit: s.entry.unit, points: panelSeriesPoints(s.entry, 10000), colourIndex: i};
+      });
+      Object.assign(st.tipOpts, {
+        locale: LANG, decimals: series[0].entry.decimals != null ? series[0].entry.decimals : 1,
+        statusLabels: statusLabels, ariaLabel: text(item.label), formatValue: MapUI.formatValue,
+      });
+
+      function draw(){
+        if(canvas.offsetParent === null) return;
+        canvas.style.width = '';
+        canvas.style.height = '';
+        var height = Math.max(220, Math.round(canvas.parentElement.clientHeight) || 0);
+        var next = BPCharts.drawLine(canvas, st.seriesArr, {locale: LANG, height: height});
+        st.model.hits = next.hits;
+      }
+      draw();
+
+      if(!canvas.dataset.bpBound){
+        canvas.dataset.bpBound = '1';
+        BPCharts.attachTooltip(canvas, st.model, st.tipOpts);
+        BPCharts.register(canvas, draw);
+      }
+      BPCharts.dataTable(card, st.model,
+        Object.assign({summary: T('chartDataTable'), seriesColumn: series.length > 1}, st.tipOpts));
+
+      var prov = document.getElementById(base + 'Provenance');
+      if(prov) prov.textContent = provenance(series[0].entry, latestNumeric(series[0].entry));
+    });
+  }
+
   /* ---- BATCH A1.4: sidebar / select / panel-heading text, and the
    * Europe panel's extra note -- all from config `panels[].label` /
    * `empty_reason`, applied the same way `kpis_note` already is. Never
@@ -919,6 +1079,7 @@
     if(visible){
       if(visible.id === 'apercu') renderKpis();
       if(visible.id === 'croissance') renderHistory();
+      if(visible.id === 'prix' || visible.id === 'emploi' || visible.id === 'conjoncture') renderPanelCharts();
     }
     if(window.BPCharts && typeof BPCharts.redrawAll === 'function') BPCharts.redrawAll();
   }
@@ -931,6 +1092,7 @@
     renderHistory();
     renderKeyList();
     renderExtraLists();
+    renderPanelCharts();
     renderContributions();
     renderUnavailable();
     renderPanelChrome();
