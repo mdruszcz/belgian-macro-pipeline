@@ -130,7 +130,9 @@ def test_a_shown_panels_first_canvas_has_real_width(browser, site):
         canvas_width = page.evaluate(
             "document.getElementById('historyCanvas').getBoundingClientRect().width"
         )
-        wrap_width = page.evaluate("document.getElementById('historyCanvas').parentElement.clientWidth")
+        wrap_width = page.evaluate(
+            "document.getElementById('historyCanvas').parentElement.clientWidth"
+        )
         assert canvas_width >= wrap_width * 0.9, (
             f"the GDP history canvas is {canvas_width}px wide inside a {wrap_width}px card "
             "-- looks like the stale-300px-fallback bug, not a real fit"
