@@ -8,3 +8,8 @@ catalog_ref: null
 cadence: quarterly
 fetch_window_days: 7
 is_active: true
+homepage: https://www.plan.be/
+label:
+  en: Federal Planning Bureau
+  fr: Bureau fédéral du Plan
+  nl: Federaal Planbureau

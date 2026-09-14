@@ -591,6 +591,22 @@ I18N.STRINGS = {
     // NUTS 2 units that vocabulary had no entry for yet.
     unitPpsPerInhabitant: 'PPS per inhabitant',
     unitPersons: 'people',
+
+    // ---- Unification A4 finishing fixes ----
+    // #allData's compact table (commune.html): an indicator with no published
+    // period at all, distinct from a suppressed or a merely-missing cell
+    // (CLAUDE.md rule 26 -- five states, never collapsed into each other).
+    pfNoPeriods: 'No period published',
+    // sources.html: the technical/API name (sources.json's `name`, English
+    // only in the registry today) now shows only in the expanded row,
+    // explicitly labelled -- it used to leak onto the row itself as an
+    // unlabelled, untranslated subtitle.
+    sourcesDetailTechnicalName: 'Technical / API name',
+    // commune.html's age pyramid: the accessible name of ONE bar (one age
+    // band, one sex), now that each bar is its own hoverable/focusable
+    // tooltip target rather than only the whole row carrying a combined
+    // male+female label (cpPyramidRow, kept for the row itself).
+    cpPyramidBar: 'Age {age}, {sex}: {count}',
   },
   fr: {
     language: 'Langue',
@@ -1101,6 +1117,11 @@ I18N.STRINGS = {
     // NUTS 2 d'Eurostat qui n'avaient pas encore d'entrée dans ce vocabulaire.
     unitPpsPerInhabitant: 'SPA par habitant',
     unitPersons: 'personnes',
+
+    // ---- Unification A4 finishing fixes ----
+    pfNoPeriods: 'Aucune période publiée',
+    sourcesDetailTechnicalName: 'Nom technique / API',
+    cpPyramidBar: 'Âge {age}, {sex} : {count}',
   },
   nl: {
     language: 'Taal',
@@ -1611,6 +1632,11 @@ I18N.STRINGS = {
     // 2-eenheden van Eurostat die nog geen ingang hadden in dit vocabularium.
     unitPpsPerInhabitant: 'KKS per inwoner',
     unitPersons: 'personen',
+
+    // ---- Unification A4 finishing fixes ----
+    pfNoPeriods: 'Geen periode gepubliceerd',
+    sourcesDetailTechnicalName: 'Technische naam / API',
+    cpPyramidBar: 'Leeftijd {age}, {sex}: {count}',
   },
 };
 

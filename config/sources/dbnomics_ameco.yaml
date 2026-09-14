@@ -8,3 +8,8 @@ catalog_ref: null
 cadence: daily
 fetch_window_days: 7
 is_active: true
+homepage: https://ec.europa.eu/economy_finance/db_indicators/ameco/
+label:
+  en: AMECO (European Commission)
+  fr: AMECO (Commission européenne)
+  nl: AMECO (Europese Commissie)

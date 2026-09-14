@@ -8,3 +8,8 @@ catalog_ref: null
 cadence: daily
 fetch_window_days: 7
 is_active: true
+homepage: https://www.nbb.be/
+label:
+  en: National Bank of Belgium
+  fr: Banque nationale de Belgique
+  nl: Nationale Bank van België

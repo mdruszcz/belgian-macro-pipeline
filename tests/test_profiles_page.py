@@ -41,7 +41,11 @@ def test_full_profile_renders_the_payload_not_a_fixed_indicator_list():
     assert "entry.periods" in page
     assert "entry.comparison" in page
     assert "entry.percentile" in page
-    assert "allDataIndicatorCard(code, indicators[code])" in page
+    # A3.9/A4: the per-indicator card grid became a compact table
+    # (allDataIndicatorCard -> allDataIndicatorRows), but the contract this
+    # assertion protects is unchanged -- one row built per real payload key,
+    # not a hardcoded list.
+    assert "allDataIndicatorRows(code, indicators[code])" in page
     assert 'id="allData"' in page
     assert 'id="allDataSections"' in page
 

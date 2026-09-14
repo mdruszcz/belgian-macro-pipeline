@@ -388,6 +388,42 @@ def test_390px_the_heading_keeps_a_real_side_gutter(chromium, site):
         context.close()
 
 
+NUTS2_INDEX_JSON = REPO / "public" / "data" / "europe" / "nuts2" / "index.json"
+
+
+def test_eurostat_dataset_count_includes_nuts2_indicators(page):
+    """Unification A4: explorer/index.json only indexes the municipal/
+    national pipeline, so Eurostat's row used to miss the NUTS2 regional
+    indicators published separately under public/data/europe/nuts2/ -- the
+    row undercounted a real source's own datasets. Every field the page adds
+    for them still comes from that published payload (CLAUDE.md rule 36),
+    never typed in here or in sources.html."""
+    explorer_eurostat = [r for r in _explorer_index() if r.get("source") == "eurostat"]
+    nuts2_index = json.loads(NUTS2_INDEX_JSON.read_text(encoding="utf-8"))
+    loaded_nuts2 = [e for e in nuts2_index["indicators"] if e.get("status") == "loaded"]
+    assert loaded_nuts2, "fixture drift: no loaded NUTS2 indicator to test with"
+    expected_total = len(explorer_eurostat) + len(loaded_nuts2)
+
+    row = _row_for_agency(page, "Eurostat")
+    data_cell_text = (row.locator("td").nth(1).text_content() or "").lower()
+    assert str(expected_total) in data_cell_text, (
+        f"Eurostat's Data cell {data_cell_text!r} does not show the combined "
+        f"count {expected_total} (explorer: {len(explorer_eurostat)}, "
+        f"NUTS2: {len(loaded_nuts2)})"
+    )
+
+    row.locator(".src-toggle").click()
+    detail_id = row.locator(".src-toggle").get_attribute("aria-controls")
+    detail_text = (page.locator(f"#{detail_id}").text_content() or "").lower()
+    for entry_path in (e["payload"] for e in loaded_nuts2):
+        payload = json.loads((NUTS2_INDEX_JSON.parent / entry_path).read_text(encoding="utf-8"))
+        name = (payload.get("names") or {}).get("en", "").lower()
+        assert name and name in detail_text, (
+            f"NUTS2 indicator {entry_path!r} ({name!r}) is not listed in Eurostat's "
+            "expanded dataset list"
+        )
+
+
 def test_390px_detail_rows_stay_collapsed_by_default(chromium, site):
     """Regression: the stacked-table media query sets `tr{display:block}` on
     every row, which has higher CSS specificity than the UA stylesheet's

@@ -29,9 +29,11 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping
+from functools import lru_cache
 from pathlib import Path
 
 from src.pages.schema import PageDocumentError
+from src.pages.strings import interface_strings
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -353,6 +355,35 @@ def _label(value, lang: str) -> str:
     return "" if value is None else str(value)
 
 
+@lru_cache(maxsize=1)
+def _cached_interface_strings() -> dict:
+    """assets/i18n.js's STRINGS table, read once per process -- mirrors
+    src/pages/shell.py's own `_strings()`. `resolve_document` runs once per
+    published commune (up to 565 times in one export run), so this must not
+    shell out to node on every call."""
+    return interface_strings()
+
+
+def _country_label(lang: str) -> str:
+    """Belgium's own geography row carries Statbel REFNIS's official country
+    label ('ROYAUME' / 'HET RIJK') -- the legal style, not what a reader
+    comparing a commune to its country expects. The interface string is used
+    instead, the same one commune.html's comparison table header
+    (`cpColCountry`) and map.html's area picker (`areaLabel`) already show,
+    never the raw name out of the geographies/comparison payload (claude.md
+    rule 1 -- the source data is not edited, only how it is displayed here).
+    """
+    fallback = {"en": "Belgium", "fr": "Belgique", "nl": "België"}
+    try:
+        table = _cached_interface_strings()
+    except SystemExit:
+        # node unavailable (e.g. a stripped-down preview environment): fall
+        # back to the same literal value rather than failing resolution, or
+        # showing the raw REFNIS label.
+        table = {}
+    return (table.get(lang) or {}).get("cpColCountry") or fallback.get(lang, fallback["en"])
+
+
 def resolve_document(
     doc: Mapping,
     *,
@@ -639,7 +670,9 @@ def _resolve_comparison(entry: Mapping, meta: Mapping, payload: Mapping, lang: s
             continue
         coverage = row.get("coverage") or {}
         pct = coverage.get("pct")
-        label = _label(row.get("name"), lang) or scope
+        label = (
+            _country_label(lang) if scope == "country" else (_label(row.get("name"), lang) or scope)
+        )
         if isinstance(pct, (int, float)) and pct < 100:
             # Said on the row, not in a footnote nobody reads.
             label = f"{label} ({coverage.get('n')} of {coverage.get('of')})"

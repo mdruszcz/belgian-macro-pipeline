@@ -83,10 +83,15 @@
      assets/belpulse/layout.css's `.bp-topbar`/`.bp-topbar .wrap`, filled by
      src/pages/shell.py's render_header() through scripts/sync_site_shell.py.
      Batch A1.1: this page no longer overrides it locally. */
+  /* A4: search sits beside the breadcrumb in one head row, not stranded
+     above it on its own (docs review pass, #171 follow-up) -- the same row
+     home2.html and profiles.html put their own commune search in relative to
+     their page's title/breadcrumb. */
+  .macro-head-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--bp-space-3)}
   .macro-search{
-    display:flex; align-items:center; gap:8px; max-width:330px;
+    display:flex; align-items:center; gap:8px; max-width:330px; flex:1 1 240px;
     border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-    padding:7px 12px; background:var(--bp-bg); margin:var(--bp-space-4) 0 0;
+    padding:7px 12px; background:var(--bp-bg); margin:0;
   }
   .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
   .searchbox svg{color:var(--bp-text-faint); flex:none}
@@ -266,6 +271,7 @@
        .bp-nav-toggle under 768px) is shared now -- assets/belpulse/layout.css.
        This page's search box moved out of the header (see the comment above
        <main>), so it needs no header-specific mobile rule of its own. */
+    .macro-head-row{flex-direction:column; align-items:stretch}
     .macro-search{max-width:none}
   }
   /* No mobile mockup was ever supplied (tokens-measured.md). On a phone the
@@ -334,15 +340,21 @@
     <!-- The commune/indicator search. NOT part of the shared header any more
          (Batch A1.1's maquette shows only the logo, nav and the two menus
          there -- docs/features/site_unification.md section 2) -- moved here,
-         same as home2.html, rather than dropped. -->
-    <label class="searchbox macro-search">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
-      <datalist id="communeList"></datalist>
-    </label>
-    <nav class="bp-breadcrumb" aria-label="Breadcrumb">
-      <a href="home2.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
-    </nav>
+         same as home2.html, rather than dropped. A4: placed in the same row
+         as the breadcrumb (was floating alone above it, looking stranded --
+         docs review pass, #171 follow-up), consistent with where home2.html
+         and profiles.html put their own commune search relative to the
+         page's own head. -->
+    <div class="macro-head-row">
+      <nav class="bp-breadcrumb" aria-label="Breadcrumb">
+        <a href="home2.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
+      </nav>
+      <label class="searchbox macro-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
+        <datalist id="communeList"></datalist>
+      </label>
+    </div>
 
     <!-- BATCH A1.4: mobile panel picker, shown only under the sidebar
          breakpoint (macro.html's own <style>, @media max-width:768px). -->
@@ -1066,10 +1078,10 @@
       var geo = await res.json();
       var list = document.getElementById('communeList');
       list.innerHTML = '';
-      (geo.geographies || []).filter(function(g){ return g.level === 'municipality' && g.nis; }).forEach(function(g){
+      (geo.geographies || []).filter(function(g){ return g.level === 'municipality' && g.nis_code; }).forEach(function(g){
         var o = document.createElement('option');
-        o.value = (g.names && (g.names[LANG] || g.names.en)) || g.nis;
-        o.dataset.nis = g.nis;
+        o.value = (g.name && (g.name[LANG] || g.name.en)) || g.nis_code;
+        o.dataset.nis = g.nis_code;
         list.appendChild(o);
       });
       document.getElementById('communeSearch').addEventListener('change', function(){

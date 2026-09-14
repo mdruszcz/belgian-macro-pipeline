@@ -583,7 +583,13 @@ function rebuildRows(){
       if(!cell) continue; // absent -- no row exists for this (geography, period)
       rows.push({
         geo,
-        geoLabel: payload.scope === 'national' ? 'Belgium' : geoName(geo),
+        // Belgium's own geography row carries Statbel REFNIS's legal-style
+        // country label in the source, not what a reader of a national row
+        // expects -- the interface string is used instead,
+        // the same one commune.html's comparison column (`cpColCountry`) and
+        // map.html's area picker already show, in the reader's own language
+        // rather than hardcoded English.
+        geoLabel: payload.scope === 'national' ? T('cpColCountry') : geoName(geo),
         regionLabel: entry && entry.region ? MapUI.pickName(entry.region.name, '') : '',
         provinceLabel: entry && entry.province ? MapUI.pickName(entry.province.name, '') : '',
         period,
