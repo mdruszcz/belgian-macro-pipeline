@@ -1,0 +1,5 @@
+code,reason
+EA20,"Eurostat aggregate: euro area (20 countries, 2023-2025 composition), not a NUTS 2 region. Structurally 4 characters and passes a naive NUTS2 shape check."
+EA21,"Eurostat aggregate: euro area (21 countries, current composition), not a NUTS 2 region. Structurally 4 characters and passes a naive NUTS2 shape check; found in the unemployment and population dataset responses (2026-09-14)."
+EFTA,"Eurostat aggregate: European Free Trade Association grouping, not a NUTS 2 region. Structurally 4 characters and passes a naive NUTS2 shape check; found in the population dataset response (2026-09-14)."
+EU28,"Eurostat aggregate: pre-Brexit EU composition (28 countries), not a NUTS 2 region. Structurally 4 characters and passes a naive NUTS2 shape check."

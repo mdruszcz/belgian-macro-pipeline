@@ -1,0 +1,29 @@
+id: POPULATION_NUTS2
+name:
+  en: Population
+  fr: Population
+  nl: Bevolking
+unit: persons
+frequency: A
+source_id: eurostat
+geo_levels:
+- nuts2
+preferred_direction: neutral
+description:
+  en: Population on 1 January, total, both sexes, all ages -- NUTS 2 region,
+    every region whose country is on the international pilot's licence allowlist
+    (docs/features/europe_nuts2.md, batch B2). NOT loaded as of this batch --
+    see the feature doc's "Coverage" section -- one cell in this dataset (PL912,
+    2010, flag "b") carries an OBS_FLAG with no value at all, which
+    EurostatSource._parse refuses outright (CLAUDE.md rule 13); this is a new
+    adapter gap, distinct from the compound-flag/`u` mapping fix already in
+    place, and out of this batch's scope (src/fetchers/ is not touched here).
+fetch:
+  dataset: demo_r_pjanaggr3
+  filters:
+    sex: T
+    age: TOTAL
+    unit: NR
+  geographies: allowlist
+  since: "1990"
+display: null

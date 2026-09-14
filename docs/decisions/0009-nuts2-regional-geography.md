@@ -100,3 +100,48 @@ province level to carry a NUTS 2 tag the way the other ten provinces do.
 - Adding the ~300-region `nuts2.csv` table and the compound-`OBS_FLAG` adapter fix
   (`docs/features/europe_nuts2.md`, "Assumptions") are each their own PR; this ADR covers only
   the geography-table shape decision, not the fetch or adapter work.
+
+## Amendment 2026-09-14 (batch B2, the implementation batch)
+
+Decisions 2 and 3 above are **superseded**. Building the real `nuts2.csv` against live Eurostat
+data surfaced a reason not visible from the coverage report alone: **`BE10` (Brussels-Capital) is
+not a synthetic alias at all — it is a real code Eurostat's own `geo` dimension returns**, with its
+own real observations, for every one of the three candidate datasets (confirmed 2026-09-14 against
+`nama_10r_2gdp`, `lfst_r_lfu3rt`, `demo_r_pjanaggr3`). Brussels has no *province*-level row in
+`geographies.csv` to carry a NUTS 2 tag (decision 3's own point stands), but that gap is about
+`geographies.csv`'s shape, not about whether `BE10` is a real region — it is, exactly as real as
+`BE21`.
+
+Given that, dual-registering Belgium's 10 provinces by reference (decision 2) while aliasing
+Brussels separately (decision 3) would have treated one real, live-data-bearing NUTS 2 region
+(`BE10`) differently from the other ten for no reason connected to the data itself — and would
+still have left a live risk decision 2 accepted on purpose for the country pilot (`BE` sharing one
+`geo_id` between two Eurostat granularities) but that this batch's own risk list (`docs/features/
+europe_nuts2.md`, "Rollout / risks") flags as exactly the kind of mixing rule 3/25 exist to
+prevent: a NUTS-built regional figure landing under the same `geo_id` a NIS-built Belgian province
+aggregate uses.
+
+**Revised decision, this batch:**
+
+1. **Every NUTS 2 region gets its own `:nuts2` geo_id in `config/geography/nuts2.csv` — Belgium's
+   11 included.** `nuts2.csv` gains a `belgian_geo_id` column, filled **only** for the 11 Belgian
+   rows, as a pure cross-reference for tooling and humans — **never** consulted by the loader
+   (`scripts/sync_nuts2.py`) to choose an observation's `geo_id`. BE21–BE25/BE31–BE35 resolve
+   `belgian_geo_id` by reading `geographies.csv`'s existing `nuts` column (a lookup, never
+   hand-typed); `BE10` resolves it to `be:reg:04000` (the Brussels region row) by `geo_id`, with a
+   sanity check that row's own `nuts` column still reads `BE1` (NUTS 1) — if that ever stops being
+   true, the loader's reference-row generation is expected to fail loudly rather than silently
+   keep a stale cross-reference.
+2. **`geographies.csv` is unchanged by this revision too** — decision 1's rule ("never touch
+   Belgium's NIS-keyed table") still holds; the only change is that the 10 provinces' rows are no
+   longer *reused* for NUTS 2 observations, they are *referenced* by a separate `nuts2.csv` row
+   that has its own `:nuts2` geo_id.
+3. **Decision 4 (the non-region aggregate exclusion list) and decision 5 (the 2024 geometry
+   vintage) are unchanged**, and are exactly as effective against a `nuts2.csv` that includes
+   Belgium as against one that does not.
+
+This removes the "Belgium's provinces are dual-registered by reference" risk from Consequences
+above entirely for the 10 provinces (there is no second `geo_id` pointing at the same row any
+more — `be21:nuts2` and `be:prov:10000` are two independent, if correlated, geographies) and
+answers `docs/features/europe_nuts2.md`'s decision 6 (the Brussels alias) with what the live data
+showed: no alias was needed, only a catalogue row like any other region's.

@@ -1,0 +1,31 @@
+id: UNEMPLOYMENT_RATE_NUTS2
+name:
+  en: Unemployment rate
+  fr: Taux de chômage
+  nl: Werkloosheidsgraad
+unit: percent
+frequency: A
+source_id: eurostat
+geo_levels:
+- nuts2
+preferred_direction: lower_is_better
+description:
+  en: Unemployment rate, ages 15-74, total, percentage of the labour force --
+    NUTS 2 region, every region whose country is on the international pilot's
+    licence allowlist (docs/features/europe_nuts2.md, batch B2). NOT loaded as
+    of this batch -- see the feature doc's "Coverage" section -- a genuine minority
+    of cells in this dataset carry an OBS_FLAG with no value at all (e.g. DE22,
+    2020, flag "bu"), which EurostatSource._parse refuses outright (CLAUDE.md
+    rule 13); this is a new adapter gap, distinct from the compound-flag/`u`
+    mapping fix already in place, and out of this batch's scope (src/fetchers/
+    is not touched here).
+fetch:
+  dataset: lfst_r_lfu3rt
+  filters:
+    isced11: TOTAL
+    sex: T
+    age: Y15-74
+    unit: PC
+  geographies: allowlist
+  since: "1999"
+display: null

@@ -1,9 +1,71 @@
 # Feature: Europe panel — NUTS 2 choropleth (GDP per capita PPS, unemployment, population)
 
-Status: approved 2026-09-14 (maintainer) — all seven "Decisions needed" answered yes as
-recommended, one exception noted under decision 7
+Status: **implemented, batch B2** (2026-09-14) — GDP per capita PPS loaded and published;
+unemployment rate and population configured but blocked on a newly found adapter gap, see
+"Measured at load, 2026-09-14" below. PR: europe-nuts2-pipeline (B2).
 Issue: none yet (this document is what the maintainer approved before one is opened)
-Branch: feat/europe-nuts2-spec
+Branch: feat/europe-nuts2-spec (B1, spec) → feat/europe-nuts2-pipeline (B2, implementation)
+
+## Measured at load, 2026-09-14 (batch B2)
+
+Real sync against live Eurostat data, the committed 2024 Nuts2json geometry, and the real
+published payloads — see the batch's PR body for the full run log; the headline numbers:
+
+| | GDP per capita, PPS | Unemployment rate | Population |
+|---|---|---|---|
+| Dataset | `nama_10r_2gdp` | `lfst_r_lfu3rt` | `demo_r_pjanaggr3` |
+| Fetch time / response size | 0.25 s / 164,149 B | 0.24 s / 191,129 B | 0.40 s / 960,975 B |
+| Loaded? | **Yes** | **No — blocked** | **No — blocked** |
+| Rows written | 6,896 (285 regions × up to 25 years, 2000–2024) | 0 | 0 |
+| Regions with a value, latest year (2024/2025) | 276 (146 provisional / 96 final / 34 estimate — matches the B1 coverage report's own flag census exactly) | — | — |
+| Committed CSV | `data/nuts2/GDP_PC_PPS_NUTS2.csv`, 947,284 B | none | none |
+
+**Why unemployment and population are still blocked.** The compound-`OBS_FLAG` adapter fix
+(#168, merged) and the `u` → `estimate` mapping (confirmed by the maintainer 2026-09-14,
+`docs/decisions/0010-eurostat-compound-observation-flags.md`) resolved the gap the B1 coverage
+report found. Running the real sync for this batch found a **different, previously unseen**
+gap: a genuine minority of cells carry an `OBS_FLAG` with **no value published at all** —
+`lfst_r_lfu3rt` has 149 such cells (`u`: 116, `bu`: 33; e.g. `geo=DE22, period=2020, flag=bu`),
+`demo_r_pjanaggr3` has 1 (`geo=PL912, period=2010, flag=b`). `EurostatSource._parse` refuses
+these outright: the resolved canonical status (`estimate`/`final`) is not one of the two
+statuses (`suppressed`/`na`) the `observations` table's own CHECK constraint allows to pair with
+`value = NULL`. Fixing this is real adapter work (`src/fetchers/eurostat.py`), out of this
+batch's scope per its handoff (rule 19; no ADR covers it) — `UNEMPLOYMENT_RATE_NUTS2` and
+`POPULATION_NUTS2` are fully configured (`config/indicators/*.yaml`, approved by the maintainer)
+and their `public/data/europe/nuts2/*.json` payload exists with `"status": "blocked"` and a
+`blocked_reason`, never silently omitted.
+
+**Geography.** `config/geography/nuts2.csv`: 320 regions, built from the union of all three
+datasets' own `geo` dimension listings (real Eurostat codes + labels, not hand-typed), licence-
+filtered by 2-letter country prefix against `international.csv`/`international_excluded.csv` —
+45 codes dropped (all `UK*`), 0 unresolved after excluding the 4 known non-region aggregate codes
+(`EA20`, `EA21`, `EFTA`, `EU28`) and 20 pseudo-region codes (`*ZZ`/`*XX`). **Brussels' `BE10` needed
+no alias**: it is a real code with real observations in all three live responses — see ADR 0009's
+2026-09-14 amendment, which supersedes the original alias proposal once this was found. All 11
+Belgian NUTS 2 codes (`BE10`, `BE21`–`BE25`, `BE31`–`BE35`) cross-reference their real
+`geographies.csv` row via `belgian_geo_id` (read from that table's `nuts` column for the 10
+provinces, and by `geo_id` for Brussels, never hand-typed) but resolve to their own, separate
+`:nuts2` geo_id for every observation.
+
+**`FRY1`–`FRY5`/`PT20`/`PT30` (decision 8, resolved):** Nuts2json's own README ("Overseas
+territories – map insets" section, confirmed 2026-09-14) publishes these as separate per-territory
+files at `.../<YEAR>/<GEO>/<PROJECTION>/<SCALE>/<LEVEL>.json` (`GEO` = `GP`, `MQ`, `GF`, `RE`,
+`YT`, `PT20`, `PT30`) — not in the level-2 continental file this batch committed. Not fetched
+(out of scope, B3 builds the map); their values are published in `GDP_PC_PPS_NUTS2.json` under
+`no_outline` with this reason. The exporter (`scripts/export_europe_nuts2.py`) fails loudly on
+any *other* data-vs-geometry mismatch — verified: none occurred once the check is based on the
+real committed CSV rather than the full `nuts2.csv` catalogue (some catalogued codes, e.g.
+Greece's pre-2016 `EL11`–`EL25`, appear in the datasets' `geo` dimension *labels* but carry zero
+actual observations in any of the three datasets, so they never reach this check at all).
+
+**Geometry.** `public/data/geo/nuts2/2024/2.json`, downloaded unchanged, 574,331 bytes (matches
+the B1 report exactly), sha256 in `public/data/geo/nuts2/ATTRIBUTION.md`. 292 regions; 291 pass
+the licence filter, 1 (`XK00`, Kosovo) is licence-excluded and listed in every payload's
+`excluded_by_licence`.
+
+**Belgian pages:** confirmed byte-identical before/after this batch's changes — see the PR body's
+test run for `tests/test_nuts2_stays_off_belgian_pages.py` and the unmodified `git status` of
+every `public/data/{national.json,aggregates.json,communes,indicators}` path.
 
 This batch produced no code that touches `config/indicators/*.yaml`, `config/geography/*`,
 `config/stores.yaml`, adapter code, or any file under `data/` / `public/data/`. It is the
@@ -390,8 +452,7 @@ failing the export rather than shipping an unstyled region silently.
    panel's implementation batch.** My recommendation: its own small PR first — it is a general
    adapter correctness fix (today's national-accounts indicators could hit the same wall the
    moment Eurostat starts compounding a flag on one of them), not NUTS-2-specific.
-   **Answer (2026-09-14): approved as recommended — its own PR first.** One part of this is
-   **not yet decided**: the mapping of the single flag `u` ("unreliable") to a canonical status.
-   The flag-fix PR implements `u` → `estimate` under a stated assumption, pending the
-   maintainer's confirmation — it is not to be read as settled just because the PR itself is
-   approved to go first.
+   **Answer (2026-09-14): approved as recommended — its own PR first.** The mapping of the
+   single flag `u` ("unreliable") to a canonical status was proposed as a stated assumption in
+   that PR (`u` → `estimate`) and **confirmed by the maintainer the same day** (docs/decisions/
+   0010-eurostat-compound-observation-flags.md).

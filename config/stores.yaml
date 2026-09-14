@@ -204,3 +204,26 @@ stores:
     reference_rows:
       script: scripts/sync_international.py
       args: ["--reference-rows-only"]
+
+  # Europe NUTS 2 batch B2 (docs/features/europe_nuts2.md). Same
+  # one_csv_per_indicator mechanism as `international`, a SEPARATE store
+  # because its geo_ids resolve through config/geography/nuts2.csv, not
+  # international.csv (see src/geography/nuts2.py's module docstring for
+  # why a NUTS 2 region never shares a geo_id with the country/province
+  # tables). NOT wired into the daily run or Dagster this batch -- `make
+  # sync-nuts2` runs scripts/sync_nuts2.py by hand; see that script's
+  # module docstring for the two indicators (UNEMPLOYMENT_RATE_NUTS2,
+  # POPULATION_NUTS2) configured but not yet loaded, pending a
+  # src/fetchers/eurostat.py gap this batch does not fix.
+  nuts2:
+    path: data/nuts2/
+    source_id: eurostat
+    mode: in_db
+    layout: one_csv_per_indicator
+    indicators:
+      - GDP_PC_PPS_NUTS2
+      - POPULATION_NUTS2
+      - UNEMPLOYMENT_RATE_NUTS2
+    reference_rows:
+      script: scripts/sync_nuts2.py
+      args: ["--reference-rows-only"]

@@ -79,11 +79,30 @@ class SyncInternationalError(Exception):
 
 def pilot_indicators(indicator_configs: dict) -> dict[str, dict]:
     """The configs this script owns: `source_id: eurostat` and a multi-geo
-    fetch -- the five pilot indicators, never the eight single-country ones."""
+    fetch -- the five country-level pilot indicators, never the eight
+    single-country ones.
+
+    ALSO never a NUTS 2 indicator (Europe batch B2,
+    docs/features/europe_nuts2.md): a `*_NUTS2` config uses the identical
+    `fetch.geographies: allowlist` shape (is_multi_geo() reads only that
+    discriminator) so it fetches every country's regions in one request
+    exactly like the five pilot indicators do -- but its geo codes
+    ('BE10', 'FR10', ...) resolve through config/geography/nuts2.csv
+    (src/geography/nuts2.py), not international.csv. Without this
+    exclusion, this script would sweep a NUTS 2 config into its own loop
+    and fail every such code as "neither allowlisted nor excluded" the
+    moment scripts/sync_nuts2.py's own config/geography/nuts2.csv (this
+    script never reads it) came into existence. `geo_levels: [nuts2]` is
+    the one field that already means "this is a NUTS 2 indicator" (see
+    scripts/sync_nuts2.py's own nuts2_indicators()) -- read here, not
+    re-derived from `id` or `dataset`.
+    """
     return {
         code: cfg
         for code, cfg in sorted(indicator_configs.items())
-        if cfg.get("source_id") == "eurostat" and is_multi_geo(cfg)
+        if cfg.get("source_id") == "eurostat"
+        and is_multi_geo(cfg)
+        and "nuts2" not in (cfg.get("geo_levels") or [])
     }
 
 

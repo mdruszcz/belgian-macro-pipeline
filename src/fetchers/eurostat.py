@@ -82,11 +82,10 @@ FLAG_STATUS = {
     "d": "final",
     "c": "suppressed",
     "z": "na",
-    # ASSUMPTION, PENDING MAINTAINER CONFIRMATION (docs/decisions/0010-eurostat-
+    # CONFIRMED BY THE MAINTAINER (2026-09-14, docs/decisions/0010-eurostat-
     # compound-observation-flags.md): "u" (low reliability) -> "estimate". Not
     # "provisional" -- a low-reliability figure is a confidence caveat on a
-    # settled number, closer to "estimate" than to "this will be revised". A
-    # single-entry mapping so it is trivial to flip if the maintainer disagrees.
+    # settled number, closer to "estimate" than to "this will be revised".
     "u": "estimate",
 }
 

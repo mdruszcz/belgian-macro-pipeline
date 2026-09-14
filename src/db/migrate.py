@@ -73,6 +73,25 @@ def _split_statements(sql: str) -> list[str]:
     return [s.strip() for s in cleaned.split(";") if s.strip()]
 
 
+def _is_self_managed_transaction(statements: list[str]) -> bool:
+    """True for a migration that must run in autocommit mode rather than
+    inside this runner's usual outer BEGIN/COMMIT -- i.e. one whose first
+    statement is exactly `PRAGMA foreign_keys = OFF`. Recreating a table
+    that other tables' foreign keys target (SQLite has no ALTER TABLE ...
+    ALTER CONSTRAINT) needs that PRAGMA around the whole change, and it is a
+    documented no-op once a transaction is already open -- see
+    migrations/004_nuts2_geography_level.sql's own comment for the full
+    story, including why PRAGMA defer_foreign_keys does not substitute for
+    it. Such a file owns its own BEGIN/COMMIT and restores `foreign_keys =
+    ON` itself; this runner only decides whether to wrap it in a
+    transaction of its own, and checks PRAGMA foreign_key_check afterwards
+    either way is clean before recording the migration as applied.
+    """
+    if not statements:
+        return False
+    return " ".join(statements[0].split()).upper() == "PRAGMA FOREIGN_KEYS = OFF"
+
+
 def discover_migrations(migrations_dir: Path) -> list[tuple[int, Path]]:
     found = []
     for p in sorted(migrations_dir.glob("*.sql")):
@@ -110,9 +129,30 @@ def run(db_path: Path, migrations_dir: Path = MIGRATIONS_DIR) -> None:
             log.info(f"apply   {path.name}")
             statements = _split_statements(path.read_text())
             try:
-                conn.execute("BEGIN")
-                for statement in statements:
-                    conn.execute(statement)
+                if _is_self_managed_transaction(statements):
+                    # See migrations/004_nuts2_geography_level.sql's own
+                    # comment for the full story: recreating a table other
+                    # tables' foreign keys target needs PRAGMA
+                    # foreign_keys=OFF around the whole change (SQLite's own
+                    # documented recipe), and that pragma is a no-op once a
+                    # transaction is already open -- so this file's
+                    # statements run directly in autocommit mode, and the
+                    # file itself owns the BEGIN/COMMIT around its schema
+                    # change (and restores foreign_keys=ON at the end).
+                    for statement in statements:
+                        conn.execute(statement)
+                    violations = conn.execute("PRAGMA foreign_key_check").fetchall()
+                    if violations:
+                        raise RuntimeError(
+                            f"{path.name}: PRAGMA foreign_key_check found "
+                            f"{len(violations)} violation(s) after a self-managed "
+                            f"migration -- refusing to record it as applied: "
+                            f"{violations[:5]}"
+                        )
+                else:
+                    conn.execute("BEGIN")
+                    for statement in statements:
+                        conn.execute(statement)
                 conn.execute(
                     "INSERT INTO schema_migrations (version, filename, applied_at, checksum) "
                     "VALUES (?, ?, ?, ?)",

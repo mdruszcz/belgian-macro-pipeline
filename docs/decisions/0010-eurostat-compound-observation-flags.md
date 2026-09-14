@@ -1,9 +1,9 @@
 # 10. Eurostat adapter: read compound observation flags
 
 Status: Accepted 2026-09-14 (maintainer approved the fix). The `u` -> `estimate`
-mapping introduced here is an ASSUMPTION, pending maintainer confirmation
-(see "Decision" below) -- it is deliberately a one-entry table change so it
-is trivial to flip if the maintainer disagrees.
+mapping introduced here was confirmed by the maintainer the same day (see
+"Decision" below) -- it is deliberately a one-entry table change so it would
+have been trivial to flip had the maintainer disagreed.
 
 ## Context
 
@@ -44,9 +44,10 @@ independent from any NUTS 2 pipeline work.
    settled number. `estimate` is the closest canonical status: the figure is
    not confirmed to the same standard as an unflagged one, but "provisional"
    specifically implies Eurostat expects to revise it, which `u` does not
-   assert. **This is a stated assumption, not a confirmed mapping** --
-   flagged here and in the PR for the maintainer's confirmation. Kept to a
-   single dict entry precisely so it is a one-line change to reverse.
+   assert. **Confirmed by the maintainer, 2026-09-14** -- proposed here as a
+   stated assumption pending confirmation, and confirmed the same day. Kept
+   to a single dict entry regardless, so it stays a one-line change if a
+   future series ever needs a different reading.
 
 2. Split a compound OBS_FLAG (two or more letters, e.g. `bu`, `bdu`) into its
    individual letters. Every letter must already be a key of `FLAG_STATUS`;
