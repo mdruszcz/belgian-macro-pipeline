@@ -82,10 +82,65 @@
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
+  /* The blue sequential ramp europe_map.css declares scoped to
+     `.bp-europe-map` (the same seven hex values assets/commune_map.css
+     already ships for its own [data-theme="paper"], copied verbatim, never
+     invented -- CLAUDE.md rule 36) did not win the cascade against that
+     file's :root-level amber declaration in a real page the way an
+     isolated repro of the same rules said it should -- measured, not
+     guessed, and not worth chasing further under this batch's time budget.
+     Setting the same values as an INLINE style here sidesteps the mystery
+     entirely (inline always wins over any stylesheet rule), and this
+     function is re-run on every `bp:theme` change so it keeps tracking
+     the reader's actual theme rather than freezing the first one seen. */
+  var RAMP_LIGHT = { 0: '#eef2f7', 1: '#d3dff0', 2: '#aec4e3', 3: '#82a3d2', 4: '#5a80bd', 5: '#3c60a0', 6: '#233f74', nodata: '#e7ded0' };
+  var RAMP_DARK = { 0: '#233f74', 1: '#3c60a0', 2: '#5a80bd', 3: '#82a3d2', 4: '#aec4e3', 5: '#d3dff0', 6: '#eef2f7', nodata: '#2a3550' };
+  function currentThemeIsDark() {
+    var explicit = document.documentElement.getAttribute('data-theme');
+    if (explicit === 'dark') return true;
+    if (explicit === 'light' || explicit === 'paper') return false;
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function applyRampTokens() {
+    if (!state.root) return;
+    var ramp = currentThemeIsDark() ? RAMP_DARK : RAMP_LIGHT;
+    for (var i = 0; i <= 6; i++) state.root.style.setProperty('--ramp-' + i, ramp[i]);
+    state.root.style.setProperty('--nodata', ramp.nodata);
+  }
+
   function cssVar(name, fallback) {
-    var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+    // Read from the panel's own root, not documentElement: the Europe
+    // ramp tokens below are scoped to `.bp-europe-map` (europe_map.css),
+    // so a plain :root read would miss that override entirely.
+    var scopeEl = state.root || document.documentElement;
+    var v = getComputedStyle(scopeEl).getPropertyValue(name);
     v = (v || '').trim();
     return v || fallback;
+  }
+
+  /* Crops the viewBox to the bounding box of the NUTS regions actually
+     drawn (the `.em-nutsrg` group), not the library's own nominal width/
+     height -- eurostat-map's default "EUR" extent reserves a lot of empty
+     sea/margin for far corners (Iceland, Turkey, the Canaries) that this
+     panel never draws data for (insets:false, no Turkish data). Falls back
+     to the nominal box if the group is ever empty or not yet laid out,
+     rather than throwing. */
+  function fitViewBoxToRegions(svgEl, fallbackWidth, fallbackHeight) {
+    var pad = 8;
+    try {
+      var group = svgEl.querySelector('.em-nutsrg');
+      var box = group && group.getBBox();
+      if (box && box.width > 0 && box.height > 0) {
+        svgEl.setAttribute(
+          'viewBox',
+          box.x - pad + ' ' + (box.y - pad) + ' ' + (box.width + 2 * pad) + ' ' + (box.height + 2 * pad)
+        );
+        return;
+      }
+    } catch (e) {
+      /* getBBox can throw on a not-yet-rendered element in some engines */
+    }
+    svgEl.setAttribute('viewBox', '0 0 ' + fallbackWidth + ' ' + fallbackHeight);
   }
 
   /* ---- lazy script loading -------------------------------------------- */
@@ -172,6 +227,7 @@
     clear(state.root);
     state.root.removeAttribute('hidden');
     state.root.className = 'bp-europe-map';
+    applyRampTokens();
 
     var indicatorSelect = el('select', { id: 'europeIndicatorSelect' });
     var yearSelect = el('select', { id: 'europeYearSelect' });
@@ -271,6 +327,7 @@
     zoomReset.addEventListener('click', resetZoom);
 
     window.addEventListener('bp:theme', function () {
+      applyRampTokens();
       if (state.currentIndicatorId) render();
     });
     document.addEventListener('bp:lang', function (ev) {
@@ -397,7 +454,10 @@
     }
     var nodataColor = cssVar('--nodata', '#bcbcbc');
     var suppressedColor = cssVar('--bp-chart-8', '#75797f');
-    var excludedColor = cssVar('--bp-border', '#cccccc');
+    // A clearly darker grey than --nodata's own pale swatch (the two read
+    // as near-identical otherwise -- per lead review of the WIP screenshot):
+    // an existing token, not an invented shade.
+    var excludedColor = cssVar('--bp-text-faint', '#8e98ad');
 
     var customData = {};
     Object.keys(yearValues).forEach(function (code) {
@@ -430,8 +490,9 @@
         Object.keys(yearValues).forEach(function (code) {
           if (yearValues[code].s === 'suppressed') paintRegion(code, suppressedColor);
         });
+        var hatchFill = ensureHatchPattern(excludedColor);
         (payload.excluded_by_licence || []).forEach(function (code) {
-          paintRegion(code, excludedColor);
+          paintRegion(code, hatchFill);
         });
 
         renderLegend(payload, breaks, colors, nodataColor, suppressedColor, excludedColor, yearValues);
@@ -443,6 +504,37 @@
         if (state.selectedRegion) selectRegion(state.selectedRegion);
       },
     });
+  }
+
+  var HATCH_ID = 'bpEuropeLicenceHatch';
+  /* A diagonal-stripe SVG pattern for licence-excluded regions, so their
+     fill reads as visibly different from a plain "missing" region on the
+     map itself, not just a slightly darker flat grey (per lead review of
+     the WIP screenshot: "use the same styling on the map itself" as the
+     legend's own hatched swatch, europe_map.css). Injected once per build
+     into the svg's own <defs>; returns the `url(#id)` fill value to use. */
+  function ensureHatchPattern(strokeColor) {
+    var svgEl = document.getElementById(SVG_ID);
+    if (!svgEl) return strokeColor;
+    var defs = svgEl.querySelector('defs') || svgEl.insertBefore(document.createElementNS('http://www.w3.org/2000/svg', 'defs'), svgEl.firstChild);
+    var existing = document.getElementById(HATCH_ID);
+    if (existing) existing.parentNode.removeChild(existing);
+    var pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+    pattern.setAttribute('id', HATCH_ID);
+    pattern.setAttribute('width', '4');
+    pattern.setAttribute('height', '4');
+    pattern.setAttribute('patternTransform', 'rotate(45)');
+    pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '0');
+    line.setAttribute('y1', '0');
+    line.setAttribute('x2', '0');
+    line.setAttribute('y2', '4');
+    line.setAttribute('stroke', strokeColor);
+    line.setAttribute('stroke-width', '2');
+    pattern.appendChild(line);
+    defs.appendChild(pattern);
+    return 'url(#' + HATCH_ID + ')';
   }
 
   function paintRegion(code, color) {
@@ -506,6 +598,21 @@
       // shim below, which would otherwise 404 against the real network.
       insets: false,
       legend: false,
+      // The library draws its OWN tooltip by default (a default
+      // textFunction reads the bound stat value straight off the region) --
+      // left alone, a hover shows both that one and this file's own
+      // (`#europeTooltip`), stacked on top of each other. Its `mouseover`
+      // only becomes visible when the text it is given is truthy, so a
+      // textFunction that always returns '' keeps the library's tooltip
+      // permanently empty/invisible without touching any private property.
+      tooltip: { textFunction: function () { return ''; } },
+      // The default in-map credit line (`defaultFootnote_`, verbatim the
+      // same "Administrative boundaries: ©EuroGeographics ©OpenStreetMap"
+      // text `renderMeta` below already prints, once, in the source block)
+      // renders unconditionally unless turned off -- left on, the same
+      // sentence appeared twice, tiny and overlapping in a bottom corner
+      // of the map itself.
+      footnote: false,
       // The library's own zoom buttons are plain SVG <g> elements with no
       // tabindex or keyboard handling at all (grepped from the vendored
       // bundle: zero matches for keydown/tabindex anywhere in it) -- kept
@@ -533,7 +640,7 @@
       // exist yet at that point).
       onBuild: function () {
         var builtSvg = document.getElementById(SVG_ID);
-        if (builtSvg) builtSvg.setAttribute('viewBox', '0 0 ' + config.width + ' ' + config.height);
+        if (builtSvg) fitViewBoxToRegions(builtSvg, config.width, config.height);
         try {
           var node = map && map.svg_ && map.svg_.node && map.svg_.node();
           if (node && node.__zoom) state.zoomBaseline = node.__zoom;
@@ -646,7 +753,10 @@
     if ((payload.excluded_by_licence || []).length) {
       scale.appendChild(
         el('div', { class: 'bp-europe-map__legend-row' }, [
-          el('span', { class: 'bp-europe-map__legend-swatch', style: 'background:' + excludedColor }),
+          el('span', {
+            class: 'bp-europe-map__legend-swatch bp-europe-map__legend-swatch--hatched',
+            style: 'background:' + excludedColor,
+          }),
           el('span', { text: T('europeLegendExcluded') }),
         ])
       );
@@ -654,7 +764,7 @@
   }
 
   function renderMeta(payload, year) {
-    var unitSuffix = MapUI.unitSuffix(payload.unit);
+    var unitSuffix = MapUI.unitSuffix(payload.unit, LANG);
     var lines = [];
     lines.push((payload.names[LANG] || payload.names.en) + (unitSuffix ? ' (' + unitSuffix.trim() + ')' : '') + ' — ' + year);
     if (payload.source && payload.source.retrieved) {
@@ -746,7 +856,7 @@
     var name = state.regionNames[code] || code;
     var valueText =
       cell && typeof cell.v === 'number'
-        ? MapUI.formatValue(cell.v, payload.unit, null, LANG) + MapUI.unitSuffix(payload.unit)
+        ? MapUI.formatValue(cell.v, payload.unit, null, LANG) + MapUI.unitSuffix(payload.unit, LANG)
         : T('status_' + ((cell && cell.s) || 'missing'));
     clear(tip);
     tip.appendChild(el('div', { class: 'name', text: name + ' (' + code + ')' }));
@@ -779,7 +889,7 @@
 
     var valueText =
       cell && typeof cell.v === 'number'
-        ? MapUI.formatValue(cell.v, payload.unit, null, LANG) + MapUI.unitSuffix(payload.unit)
+        ? MapUI.formatValue(cell.v, payload.unit, null, LANG) + MapUI.unitSuffix(payload.unit, LANG)
         : T('status_' + ((cell && cell.s) || 'missing'));
     side.appendChild(el('p', { class: 'value', text: valueText }));
     var sw = cell && statusWord(cell.s);

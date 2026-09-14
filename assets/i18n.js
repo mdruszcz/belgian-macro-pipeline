@@ -587,6 +587,10 @@ I18N.STRINGS = {
     status_missing: 'no data',
     status_suppressed: 'not published by the source',
     status_na: 'not applicable',
+    // MapUI.unitLabel/unitSuffix (assets/commune_map.js): the two Eurostat
+    // NUTS 2 units that vocabulary had no entry for yet.
+    unitPpsPerInhabitant: 'PPS per inhabitant',
+    unitPersons: 'people',
   },
   fr: {
     language: 'Langue',
@@ -1093,6 +1097,10 @@ I18N.STRINGS = {
     status_missing: 'pas de donnée',
     status_suppressed: 'non publié par la source',
     status_na: 'sans objet',
+    // MapUI.unitLabel/unitSuffix (assets/commune_map.js) : les deux unités
+    // NUTS 2 d'Eurostat qui n'avaient pas encore d'entrée dans ce vocabulaire.
+    unitPpsPerInhabitant: 'SPA par habitant',
+    unitPersons: 'personnes',
   },
   nl: {
     language: 'Taal',
@@ -1599,6 +1607,10 @@ I18N.STRINGS = {
     status_missing: 'geen gegevens',
     status_suppressed: 'niet gepubliceerd door de bron',
     status_na: 'niet van toepassing',
+    // MapUI.unitLabel/unitSuffix (assets/commune_map.js): de twee NUTS
+    // 2-eenheden van Eurostat die nog geen ingang hadden in dit vocabularium.
+    unitPpsPerInhabitant: 'KKS per inwoner',
+    unitPersons: 'personen',
   },
 };
 

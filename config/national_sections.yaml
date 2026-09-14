@@ -136,19 +136,17 @@ panels:
     label: {en: Europe, fr: Europe, nl: Europa}
     cards: [international]
     legacy_anchors: [international]
-    # Europe keeps its existing "international" unavailable card (the foreign
-    # GDP comparison, see `unavailable` above) below the regional map Batch
-    # B3 built (docs/features/europe_nuts2.md). This note is now about the
-    # TWO remaining, real gaps only, never restated as if the map itself
-    # were still missing: one of the map's own three indicators
-    # (unemployment) has no data loaded yet -- see the map's own indicator
-    # list and reason text, not repeated here as an indicator id (rule 24)
-    # -- and the international GDP comparison card below is separately not
-    # built at all. No date is promised for either (none is known).
+    # Europe keeps its existing "international" unavailable card (the
+    # foreign GDP comparison, see `unavailable` above) below the regional
+    # map Batch B3 built (docs/features/europe_nuts2.md). All three of the
+    # map's own indicators are loaded today (its own indicator select has
+    # nothing disabled), so this note is about that ONE remaining, real
+    # gap only -- never restated as if the map itself were still missing
+    # or partial. No date is promised (none is known).
     empty_reason:
-      en: One of the map's three regional indicators is not loaded yet (see its own note above). The international GDP comparison below is not built yet either.
-      fr: L'un des trois indicateurs régionaux de la carte n'est pas encore chargé (voir sa propre note ci-dessus). La comparaison internationale du PIB ci-dessous n'est pas non plus construite pour l'instant.
-      nl: Een van de drie regionale indicatoren van de kaart is nog niet geladen (zie de bijhorende melding hierboven). De internationale bbp-vergelijking hieronder is evenmin al gebouwd.
+      en: The international GDP comparison below is not built yet.
+      fr: La comparaison internationale du PIB ci-dessous n'est pas encore construite.
+      nl: De internationale bbp-vergelijking hieronder is nog niet gebouwd.
 
 # New thematic cards (Prix, Emploi, Conjoncture) that did not exist as
 # sections before this batch. Each entry's `id` is the layout id used both by
