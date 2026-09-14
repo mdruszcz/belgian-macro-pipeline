@@ -5,8 +5,9 @@ tests/test_orchestration.py renders each entry the way the Makefile and the
 workflow spell it and requires the result to appear there verbatim, so this
 table cannot drift from the pipeline it wraps.
 
-Placeholders (orchestration/paths.py): {db} {stores} {data} {public_data}
-{local} {build_id} {validation_status}, plus {today} for the revisions report.
+Placeholders (orchestration/paths.py): {db} {stores} {committed_db} {data}
+{public_data} {local} {build_id} {validation_status}, plus {today} for the
+revisions report.
 
 Two routes. An entry without `function` runs its command line as a
 subprocess (run.run_script). An entry with `function` is called in this
@@ -104,6 +105,23 @@ COMMANDS: dict[str, Command] = {
     ),
     "revisions_report": Command(
         ("scripts/revisions_report.py", "--db", "{db}", "--since", "{today}"),
+    ),
+    # The offload, `make offload`'s line. Its outputs are the committed database
+    # and every in_db CSV config/stores.yaml names; only the database is listed
+    # here, so the registry stays the one list of store files.
+    "committed_stores": Command(
+        (
+            "scripts/offload_stores.py",
+            "--working-db",
+            "{db}",
+            "--committed-db",
+            "{committed_db}",
+            "--stores",
+            "{stores}",
+        ),
+        outputs=("{committed_db}",),
+        function="offload_stores:offload",
+        refusal="OffloadError",
     ),
     # ── derived ────────────────────────────────────────────────────────────
     "communes_table_json": Command(

@@ -2,7 +2,7 @@
 
 The defaults are the repository's own layout, the paths the Makefile and
 daily_fetch.yml use. Tests point `out_root`, `working_db` and `runs_dir` at a
-temporary directory instead.
+temporary directory instead -- and, for the offload, `committed_db` and `stores`.
 """
 
 from pathlib import Path
@@ -12,6 +12,7 @@ from dagster import ConfigurableResource
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_WORKING_DB = "data/local/working.db"
 DEFAULT_STORES = "config/stores.yaml"
+DEFAULT_COMMITTED_DB = "data/belgian_macro.db"
 DEFAULT_RUNS_DIR = "data/local/dagster_runs"
 
 
@@ -28,6 +29,8 @@ class PipelinePaths(ConfigurableResource):
     # Empty means build_staging_db.py's own default: the committed database.
     source_db: str = ""
     stores: str = DEFAULT_STORES
+    # What committed_stores writes, together with the in_db CSVs `stores` names.
+    committed_db: str = DEFAULT_COMMITTED_DB
     build_id: str = "local"
     # Where the validation checks append validate_data.py's markdown summary
     # (its --summary-file). Empty: no summary. The runner points it at the
@@ -47,6 +50,20 @@ class PipelinePaths(ConfigurableResource):
     def writes_into_repo(self) -> bool:
         return not self.out_root or Path(self.out_root).resolve() == self.root.resolve()
 
+    @property
+    def targets_repository_committed_files(self) -> bool:
+        """Whether an offload with these paths writes the repository's own
+        committed files: its committed database, or its in_db CSVs, which the
+        default registry names (a store path resolves against the repository)."""
+
+        def is_default(value: str, default: str) -> bool:
+            here = self.resolve(value).resolve()
+            return here in {(self.root / default).resolve(), (REPO_ROOT / default).resolve()}
+
+        return is_default(self.committed_db, DEFAULT_COMMITTED_DB) or is_default(
+            self.stores, DEFAULT_STORES
+        )
+
     def placeholders(self) -> dict[str, str]:
         if self.writes_into_repo:
             data, public_data, local = "data", "public/data", "local"
@@ -60,6 +77,7 @@ class PipelinePaths(ConfigurableResource):
         return {
             "db": self.working_db,
             "stores": self.stores,
+            "committed_db": self.committed_db,
             "data": data,
             "public_data": public_data,
             "local": local,

@@ -12,7 +12,6 @@ what is under test is the orchestration, and the real scripts need a network
 and minutes. tests/test_orchestration_parity.py runs the real ones.
 """
 
-import ast
 import csv
 import inspect
 import re
@@ -33,7 +32,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 from export_observations_csv import COLUMNS  # noqa: E402
 
 from orchestration import checks, daily, manifest, run  # noqa: E402
-from orchestration.assets import exporter_arguments, sources_manual  # noqa: E402
+from orchestration.assets import canonical, exporter_arguments, sources_manual  # noqa: E402
 from orchestration.commands import COMMANDS, TRACKED, Command  # noqa: E402
 from orchestration.definitions import DAILY_CRON, build_defs  # noqa: E402
 from orchestration.paths import PipelinePaths  # noqa: E402
@@ -101,6 +100,7 @@ def test_definitions_load_and_every_asset_has_a_group():
 MAKE_STYLE = {
     "db": "$(DB)",
     "stores": "$(STORES)",
+    "committed_db": "$(COMMITTED_DB)",
     "data": "data",
     "public_data": "public/data",
     "local": "local",
@@ -202,7 +202,12 @@ def test_every_source_feeds_the_validated_database_and_every_export_hangs_off_it
 
 def test_every_job_runs_in_process():
     defs = build_defs()
-    for job in ("assemble_working_database", "fetch_sources", "validate_and_export"):
+    for job in (
+        "assemble_working_database",
+        "fetch_sources",
+        "validate_and_export",
+        "validate_export_and_offload",
+    ):
         assert defs.resolve_job_def(job).executor_def.name == "in_process"
 
 
@@ -225,13 +230,26 @@ def test_no_asset_or_check_carries_an_automation_condition():
         assert spec.automation_condition is None, spec.name
 
 
+def _selected(job: str) -> set[str]:
+    keys = build_defs().resolve_job_def(job).asset_layer.selected_asset_keys
+    return {k.to_user_string() for k in keys}
+
+
 def test_the_export_job_selects_no_source():
-    selected = {
-        k.to_user_string()
-        for k in build_defs().resolve_job_def("validate_and_export").asset_layer.selected_asset_keys
-    }
     manual = {s.key.to_user_string() for s in sources_manual.SPECS}
-    assert not selected & {"staging_db", *TRACKED, *manual}
+    for job in ("validate_and_export", "validate_export_and_offload"):
+        assert not _selected(job) & {"staging_db", *TRACKED, *manual}, job
+
+
+def test_the_production_job_is_the_export_job_plus_the_offload():
+    """One run: a failed export or blocking check skips committed_stores in that
+    same run. validate_and_export, what the UI offers, writes no committed file."""
+    exports = _selected("validate_and_export")
+    assert "committed_stores" not in exports
+    assert _selected("validate_export_and_offload") == exports | {"committed_stores"}
+    assert "committed_stores" not in _selected("fetch_sources")
+    parents = _graph().get(dg.AssetKey("committed_stores")).parent_keys
+    assert {p.to_user_string() for p in parents} == exports
 
 
 def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
@@ -314,31 +332,6 @@ def test_freshness_windows_come_from_fetch_window_days():
 def test_dagster_state_is_gitignored(path):
     result = subprocess.run(["git", "check-ignore", "-q", path], cwd=REPO)
     assert result.returncode == 0, f"{path} is not ignored"
-
-
-def _code_strings(path: Path) -> list[str]:
-    """String constants in a module, docstrings excluded."""
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    docstrings = {
-        id(node.body[0].value)
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Module | ast.ClassDef | ast.FunctionDef)
-        and node.body
-        and isinstance(node.body[0], ast.Expr)
-        and isinstance(node.body[0].value, ast.Constant)
-    }
-    return [
-        n.value
-        for n in ast.walk(tree)
-        if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docstrings
-    ]
-
-
-def test_no_orchestration_code_names_the_committed_database_or_the_offload():
-    for module in (REPO / "orchestration").rglob("*.py"):
-        for text in _code_strings(module):
-            assert "belgian_macro.db" not in text, module
-            assert "offload" not in text.lower(), module
 
 
 # ── run_script runs the Makefile's command line, from the repository ─────────
@@ -513,12 +506,52 @@ def test_a_command_line_with_other_flags_is_refused_not_half_translated(name):
 # ── The coordinator: a red source still exports, and the day ends red ────────
 
 
+def _sandbox_registry(root: Path) -> Path:
+    """The repository's registry in miniature: its first extra_csv store as it
+    is, plus an in_db CSV and an in_db directory, both under `root`."""
+    (root / "international").mkdir(parents=True, exist_ok=True)
+    (root / "walstat.csv").write_text(",".join(COLUMNS) + "\n", encoding="utf-8")
+    extra = next(iter(extra_csv_stores(load_stores())))
+    rows = {"script": "scripts/sync_walstat.py", "args": ["--reference-rows-only"]}
+    stores = {
+        extra.name: {
+            "path": extra.raw_path,
+            "source_id": extra.source_id,
+            "mode": "extra_csv",
+            "indicators": list(extra.indicators),
+            "reference_rows": rows,
+        },
+        "walstat": {
+            "path": str(root / "walstat.csv"),
+            "source_id": "walstat",
+            "mode": "in_db",
+            "indicators": ["MUN_DEBT_TOTAL_PER_CAPITA"],
+            "reference_rows": rows,
+        },
+        "international": {
+            "path": str(root / "international"),
+            "layout": "one_csv_per_indicator",
+            "source_id": "eurostat",
+            "mode": "in_db",
+            "indicators": ["GDP_A", "HICP_A"],
+            "reference_rows": rows,
+        },
+    }
+    path = root / "stores.yaml"
+    path.write_text(yaml.safe_dump({"stores": stores}, sort_keys=False), encoding="utf-8")
+    return path
+
+
 @pytest.fixture
 def sandbox(tmp_path, monkeypatch):
     db = tmp_path / "working.db"
     migrate.run(db, migrations_dir=REPO / "migrations")
     paths = PipelinePaths(
-        out_root=str(tmp_path / "out"), working_db=str(db), runs_dir=str(tmp_path / "runs")
+        out_root=str(tmp_path / "out"),
+        working_db=str(db),
+        runs_dir=str(tmp_path / "runs"),
+        committed_db=str(tmp_path / "committed" / "belgian_macro.db"),
+        stores=str(_sandbox_registry(tmp_path / "stores")),
     )
     calls: list[str] = []
     values: dict[str, dict] = {}
@@ -536,7 +569,7 @@ def sandbox(tmp_path, monkeypatch):
         values[name] = given
         if name in failing:
             raise RuntimeError(f"{name} is down")
-        return 0
+        return {} if name == "committed_stores" else 0
 
     monkeypatch.setattr(run, "run_script", fake_run_script)
     monkeypatch.setattr(run, "call_function", fake_call_function)
@@ -693,6 +726,159 @@ def test_a_warning_rule_is_reported_and_blocks_nothing(sandbox, monkeypatch):
     failed = {e.check_name: e for e in result.get_asset_check_evaluations() if not e.passed}
     assert set(failed) == {"staleness"}
     assert failed["staleness"].severity == dg.AssetCheckSeverity.WARN
+
+
+# ── The offload: last, in the export run, and only for the coordinator ───────
+
+RUN_ID = "20260914T050000Z-0a1b2c3d"
+
+
+def _coordinator_manifest(sandbox, run_id: str = RUN_ID, assemble: str = manifest.SUCCESS) -> Path:
+    path = manifest.path_for(sandbox.runs, run_id)
+    state = manifest.initial(run_id)
+    state["assemble"]["status"] = assemble
+    manifest.write(path, state)
+    return path
+
+
+def _allow(path: Path | str, run_id: str = RUN_ID) -> dict:
+    config = {
+        "allow_committed_writes": True,
+        "source_manifest": str(path),
+        "coordinator_run_id": run_id,
+    }
+    return {"ops": {"committed_stores": {"config": config}}}
+
+
+def _offload(sandbox, run_config: dict | None, paths: PipelinePaths | None = None):
+    defs = build_defs(paths) if paths else sandbox.defs
+    return defs.resolve_implicit_global_asset_job_def().execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        asset_selection=[dg.AssetKey("committed_stores")],
+        run_config=run_config,
+    )
+
+
+def _errors(result, step: str) -> list:
+    """The step's error and every error it was raised from."""
+    (event,) = [e for e in result.get_step_failure_events() if e.step_key == step]
+    error, chain = event.event_specific_data.error, []
+    while error is not None:
+        chain.append(error)
+        error = error.cause
+    return chain
+
+
+def test_the_offload_refuses_without_the_coordinators_permission(sandbox):
+    """Materialise from the UI or `dagster job execute`: no committed write."""
+    result = _offload(sandbox, None)
+    assert any("only by the coordinator" in e.message for e in _errors(result, "committed_stores"))
+    assert "committed_stores" not in sandbox.calls
+
+
+@pytest.mark.parametrize(
+    "case", ["no run id", "missing manifest", "another run's manifest", "assemble not a success"]
+)
+def test_the_offload_refuses_a_permission_it_cannot_tie_to_a_good_run(sandbox, case):
+    config = _allow(_coordinator_manifest(sandbox))["ops"]["committed_stores"]["config"]
+    if case == "no run id":
+        config["coordinator_run_id"] = ""
+    elif case == "missing manifest":
+        config["source_manifest"] = str(sandbox.runs / "gone" / "sources.json")
+    elif case == "another run's manifest":
+        config["coordinator_run_id"] = "20260101T000000Z-deadbeef"
+    else:
+        other = "20260914T060000Z-00000000"
+        failed = _coordinator_manifest(sandbox, other, manifest.FAILED)
+        config.update(source_manifest=str(failed), coordinator_run_id=other)
+
+    result = _offload(sandbox, {"ops": {"committed_stores": {"config": config}}})
+
+    assert "committed_stores" in result.get_failed_step_keys()
+    assert "committed_stores" not in sandbox.calls
+
+
+def test_the_offload_hands_offload_absolute_paths_and_names_its_run(sandbox):
+    result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
+
+    assert result.success
+    given = sandbox.values["committed_stores"]
+    assert given == {
+        "working_db": Path(sandbox.paths.working_db),
+        "committed_db": Path(sandbox.paths.committed_db),
+        "stores_path": Path(sandbox.paths.stores),
+    }
+    assert all(path.is_absolute() for path in given.values())
+    _, offload = run.script_function("committed_stores")
+    inspect.signature(offload).bind(**given)
+    assert _metadata(result, "committed_stores")["source_run"].value == RUN_ID
+
+
+@pytest.mark.parametrize("redirected", ["committed_db only", "stores only", "both"])
+def test_a_redirected_run_never_offloads_into_the_repository(sandbox, redirected):
+    """The registry's store paths resolve against the repository, so a redirected
+    committed database with the default registry would still overwrite the
+    repository's CSVs."""
+    defaults = PipelinePaths()
+    paths = PipelinePaths(
+        out_root=sandbox.paths.out_root,
+        working_db=sandbox.paths.working_db,
+        runs_dir=sandbox.paths.runs_dir,
+        committed_db=(
+            defaults.committed_db if redirected == "stores only" else sandbox.paths.committed_db
+        ),
+        stores=defaults.stores if redirected == "committed_db only" else sandbox.paths.stores,
+    )
+
+    result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)), paths)
+
+    if redirected == "both":
+        assert result.success and "committed_stores" in sandbox.calls
+    else:
+        messages = [e.message for e in _errors(result, "committed_stores")]
+        assert any("must not write the committed files" in m for m in messages)
+        assert "committed_stores" not in sandbox.calls
+
+
+def test_a_refused_offload_says_nothing_was_changed(sandbox, monkeypatch):
+    def refuses(context, name, **given):
+        raise dg.Failure("committed_stores: offload_stores refused: a committed row would be lost")
+
+    monkeypatch.setattr(run, "call_function", refuses)
+    result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
+
+    messages = " ".join(e.message for e in _errors(result, "committed_stores"))
+    assert "a committed row would be lost" in messages
+    assert "No committed file was changed." in messages
+
+
+def test_a_crash_in_the_offload_stays_that_crash(sandbox, monkeypatch):
+    def crashes(context, name, **given):
+        raise PermissionError("GDP_A.csv is open in another process")
+
+    monkeypatch.setattr(run, "call_function", crashes)
+    result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
+
+    assert "PermissionError" in {e.cls_name for e in _errors(result, "committed_stores")}
+
+
+def test_the_partial_publication_notice_names_single_files_from_the_registry(sandbox):
+    files = canonical.committed_files(sandbox.paths)
+    names = [Path(f).name for f in files]
+    assert names[0] == "belgian_macro.db"
+    assert sorted(names[1:]) == ["GDP_A.csv", "HICP_A.csv", "walstat.csv"]
+    notice = canonical.partial_publication_notice(sandbox.paths)
+    assert all(f in notice for f in files)
+    assert notice.count("git checkout") == 1 and "git checkout -- <file>" in notice
+
+    repository = canonical.committed_files(PipelinePaths())
+    assert repository[0] == "data/belgian_macro.db"
+    per_store = [
+        dict.fromkeys(s.csv_for(i) for i in s.indicators) for s in in_db_stores(load_stores())
+    ]
+    assert len(repository) == 1 + sum(len(files) for files in per_store)
+    assert not any((REPO / f).is_dir() for f in repository), "a directory is never restored"
 
 
 # ── Step 2: what the runner reads -- manifest path, gate, validation status ──
