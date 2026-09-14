@@ -117,9 +117,16 @@ KNOWN_NO_OUTLINE = {
 #: for it under any URL. A later batch that wants these years reachable
 #: under their CURRENT codes needs a NUTS-vintage crosswalk, out of scope
 #: here.
+#:
+#: Extended again unblocking UNEMPLOYMENT_RATE_NUTS2 (2026-09-14, same
+#: evidence method -- rows stop at a transition year, a successor's rows
+#: start there): HU10 (rows through 2012; HU11/HU12 from 2013), IE01/IE02
+#: (rows through 2011; IE04/IE05/IE06 from 2012), LT00 (rows through 2012;
+#: LT01/LT02 from 2013), SI01/SI02 (rows through 2009; SI03/SI04 from 2010).
 _SUPERSEDED_NUTS_VINTAGE_CODES = (
     "EL11", "EL12", "EL13", "EL14", "EL21", "EL22", "EL23", "EL24", "EL25",
     "HR04", "NL31", "NL33", "NO01", "NO03", "NO04", "NO05", "PT16", "PT17", "PT18",
+    "HU10", "IE01", "IE02", "LT00", "SI01", "SI02",
 )  # fmt: skip
 _SUPERSEDED_NUTS_VINTAGE_REASON = (
     "Pre-2024 NUTS 2 classification code with real historical observations; the 2024 "
@@ -134,18 +141,13 @@ SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE = dict.fromkeys(
 #: scripts/sync_nuts2.py's own module docstring for the full story. Keyed by
 #: indicator_id; an indicator not in this dict is assumed loaded (its CSV
 #: file existing or not is the actual, authoritative signal -- this text is
-#: shown to a human, not used as a decision).
-BLOCKED_REASONS = {
-    "UNEMPLOYMENT_RATE_NUTS2": (
-        "Not loaded: a minority of cells in lfst_r_lfu3rt carry an Eurostat OBS_FLAG with no "
-        'value at all (e.g. geo=DE22, period=2020, flag "bu") -- and, unlike '
-        "POPULATION_NUTS2's single bad cell (a NUTS 3 code the adapter's geo_filter already "
-        "skips), these are themselves 4-character NUTS-2-shaped codes, so the production "
-        "adapter (src/fetchers/eurostat.py) still refuses the fetch outright per CLAUDE.md "
-        'rule 13. How to label these cells (flag u/bu, "unreliable") is the maintainer\'s '
-        "decision, pending as of this batch. See docs/features/europe_nuts2.md, Coverage."
-    ),
-}
+#: shown to a human, not used as a decision). Empty as of 2026-09-14: all
+#: three configured indicators are now loaded -- UNEMPLOYMENT_RATE_NUTS2's
+#: former entry here is gone, not merely stale, now that the maintainer's
+#: empty-u-is-suppressed decision unblocked it (docs/decisions/0010-...md,
+#: amendment). Kept as a dict, not removed outright, so a FUTURE indicator
+#: that genuinely can't load yet has an obvious place to explain why.
+BLOCKED_REASONS: dict[str, str] = {}
 
 
 class ExportError(Exception):

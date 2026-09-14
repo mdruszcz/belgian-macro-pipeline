@@ -290,12 +290,20 @@ def test_a_flag_with_no_value_still_produces_a_row_in_a_known_state(
     assert rows == [{"geo": "BE", "period": "2023", "value": None, "obs_status": expected_status}]
 
 
-@pytest.mark.parametrize("flag", ["p", "e", "b", "d", "u"])
+@pytest.mark.parametrize("flag", ["p", "e", "b", "d"])
 def test_a_flag_with_no_value_and_a_non_nullable_status_refuses(tmp_path, monkeypatch, flag):
     """Audit SHOULD-FIX 8: only suppressed/na may have value=None. A flag
     that maps to any other status (provisional/estimate/final) but carries
     no value is malformed -- refused here with a clear message, not left to
-    surface later as a bare CHECK-constraint IntegrityError with no context."""
+    surface later as a bare CHECK-constraint IntegrityError with no context.
+
+    "u" is deliberately NOT parametrized here any more -- see the
+    dedicated empty-`u`-is-suppressed tests below (maintainer decision,
+    2026-09-14): an empty cell whose flag contains "u" is no longer
+    refused, it resolves to `suppressed`. Every OTHER letter that maps to
+    a non-nullable status (including "u" combined with an unknown letter,
+    which still fails at the flag-recognition stage before this rule is
+    ever reached) is unaffected and still refuses exactly as before."""
     cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={}, status={"0": flag})
     monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
     monkeypatch.setattr(
@@ -305,6 +313,46 @@ def test_a_flag_with_no_value_and_a_non_nullable_status_refuses(tmp_path, monkey
 
     with pytest.raises(FetchError, match="has flag .* but no value"):
         EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+
+# ---------------------------------------------------------------------------
+# Maintainer decision, 2026-09-14 (docs/decisions/0010-eurostat-compound-
+# observation-flags.md, amendment): an EMPTY cell (no value at all) whose
+# flag's letters include "u" ("low reliability") is `suppressed` -- the
+# source has a reading and withholds it. A VALUED cell with "u" keeps the
+# existing mapping to `estimate` (FLAG_STATUS["u"], unchanged). Hand-computed
+# expectations, per the follow-up PR's own spec.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("flag", ["u", "bu", "ub"])
+def test_empty_cell_with_u_in_its_flag_is_suppressed_not_refused(tmp_path, monkeypatch, flag):
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={}, status={"0": flag})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+    assert rows == [{"geo": "BE", "period": "2023", "value": None, "obs_status": "suppressed"}]
+
+
+def test_valued_cell_with_u_flag_still_maps_to_estimate(tmp_path, monkeypatch):
+    """The override above is scoped to EMPTY cells only -- a real value
+    with a "u" flag is unaffected, exactly the pre-existing FLAG_STATUS["u"]
+    mapping."""
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 12.3}, status={"0": "u"})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+    assert rows == [{"geo": "BE", "period": "2023", "value": 12.3, "obs_status": "estimate"}]
 
 
 def test_an_unrecognized_flag_refuses_rather_than_guesses(tmp_path, monkeypatch):
@@ -403,9 +451,12 @@ def test_singleton_geo_refuses_zero_geographies():
 def test_geo_filter_none_validates_every_geo_unchanged():
     """The default: identical to today's behaviour for every existing
     caller (the five country-level pilot indicators, the eight
-    single-country ones) -- a bad cell for ANY geo still refuses."""
+    single-country ones) -- a bad cell for ANY geo still refuses. Uses "b"
+    (still refuses when empty), not "u" -- an empty "u" cell is `suppressed`
+    since the maintainer's 2026-09-14 decision, not a refusal any more; see
+    test_empty_cell_with_u_in_its_flag_is_suppressed_not_refused."""
     cube = _cube(
-        ["geo", "time"], [2, 1], ["BE", "ZZ"], ["2023"], values={"0": 1.0}, status={"1": "u"}
+        ["geo", "time"], [2, 1], ["BE", "ZZ"], ["2023"], values={"0": 1.0}, status={"1": "b"}
     )
     with pytest.raises(FetchError, match="has flag .* but no value"):
         EurostatSource()._parse(json.dumps(cube).encode(), dataset="x")
@@ -430,9 +481,11 @@ def test_geo_filter_skips_validation_for_a_rejected_geo():
 
 def test_geo_filter_still_refuses_loudly_for_an_accepted_geo():
     """Narrowing what gets checked must not weaken the check itself: a bad
-    cell for a geo geo_filter DOES accept still refuses exactly as before."""
+    cell for a geo geo_filter DOES accept still refuses exactly as before.
+    Uses "b" (still refuses when empty), not "bu" -- see
+    test_geo_filter_none_validates_every_geo_unchanged's own note."""
     cube = _cube(
-        ["geo", "time"], [2, 1], ["BE21", "DE22"], ["2023"], values={"0": 1.0}, status={"1": "bu"}
+        ["geo", "time"], [2, 1], ["BE21", "DE22"], ["2023"], values={"0": 1.0}, status={"1": "b"}
     )
     with pytest.raises(FetchError, match="geo=DE22"):
         EurostatSource()._parse(

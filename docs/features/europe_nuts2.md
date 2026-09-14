@@ -1,10 +1,12 @@
 # Feature: Europe panel — NUTS 2 choropleth (GDP per capita PPS, unemployment, population)
 
-Status: **implemented, batch B2** (2026-09-14) — GDP per capita PPS and population loaded and
-published; unemployment rate configured but blocked, pending a maintainer decision, see
-"Measured at load, 2026-09-14" below. PR: #174.
+Status: **implemented, batch B2** (2026-09-14) — all three indicators (GDP per capita PPS,
+population, unemployment rate) loaded and published. Unemployment was blocked in PR #174; a
+maintainer decision the same day (empty low-reliability cells are `suppressed`) unblocked it in a
+follow-up PR — see "Unemployment unblocked, 2026-09-14" below.
 Issue: none yet (this document is what the maintainer approved before one is opened)
-Branch: feat/europe-nuts2-spec (B1, spec) → feat/europe-nuts2-pipeline (B2, implementation)
+Branch: feat/europe-nuts2-spec (B1, spec) → feat/europe-nuts2-pipeline (B2, implementation, PR
+#174) → feat/europe-nuts2-unemployment (unemployment follow-up)
 
 ## Measured at load, 2026-09-14 (batch B2)
 
@@ -15,39 +17,55 @@ published payloads — see the batch's PR body for the full run log; the headlin
 |---|---|---|---|
 | Dataset | `nama_10r_2gdp` | `lfst_r_lfu3rt` | `demo_r_pjanaggr3` |
 | Fetch time / response size | 0.25 s / 164,149 B | 0.24 s / 191,129 B | 0.40 s / 960,975 B |
-| Loaded? | **Yes** | **No — blocked** | **Yes** |
-| Rows written | 6,896 (285 regions × up to 25 years, 2000–2024) | 0 | 8,326 (314 regions × up to 36 years, 1990–2025) |
-| Regions with a value, latest year | 276 in 2024 (146 provisional / 96 final / 34 estimate — matches the B1 coverage report's own flag census exactly) | — | 295 in 2025 (260 final / 27 provisional / 8 estimate) |
-| Committed CSV | `data/nuts2/GDP_PC_PPS_NUTS2.csv`, 947,284 B | none | `data/nuts2/POPULATION_NUTS2.csv`, 1,156,234 B |
+| Loaded? | **Yes** | **Yes** (see below) | **Yes** |
+| Rows written | 6,896 (285 regions × up to 25 years, 2000–2024) | 7,272 (306 regions × up to 27 years, 1999–2025) | 8,326 (314 regions × up to 36 years, 1990–2025) |
+| Regions with a value, latest year | 276 in 2024 (146 provisional / 96 final / 34 estimate — matches the B1 coverage report's own flag census exactly) | 286 in 2025 (269 final / 17 estimate); 3 more suppressed the same year | 295 in 2025 (260 final / 27 provisional / 8 estimate) |
+| Committed CSV | `data/nuts2/GDP_PC_PPS_NUTS2.csv`, 947,284 B | `data/nuts2/UNEMPLOYMENT_RATE_NUTS2.csv` | `data/nuts2/POPULATION_NUTS2.csv`, 1,156,234 B |
 
-**Why unemployment is still blocked, and how population got unblocked.** The compound-`OBS_FLAG`
-adapter fix (#168, merged) and the `u` → `estimate` mapping (confirmed by the maintainer
-2026-09-14, `docs/decisions/0010-eurostat-compound-observation-flags.md`) resolved the gap the B1
-coverage report found. Running the real sync for this batch found a **different, previously
-unseen** gap: a genuine minority of cells carry an `OBS_FLAG` with **no value published at
-all** — `lfst_r_lfu3rt` has 149 such cells (`u`: 116, `bu`: 33; e.g. `geo=DE22, period=2020,
-flag=bu`), `demo_r_pjanaggr3` has 1 (`geo=PL912, period=2010, flag=b`). `EurostatSource._parse`
-refuses these outright: the resolved canonical status (`estimate`/`final`) is not one of the two
-statuses (`suppressed`/`na`) the `observations` table's own CHECK constraint allows to pair with
-`value = NULL`.
+**How population got unblocked (PR #174).** The compound-`OBS_FLAG` adapter fix (#168, merged)
+and the `u` → `estimate` mapping (confirmed by the maintainer 2026-09-14, `docs/decisions/0010-
+eurostat-compound-observation-flags.md`) resolved the gap the B1 coverage report found. The real
+sync then found a **different, previously unseen** gap: a genuine minority of cells carry an
+`OBS_FLAG` with **no value published at all** — `lfst_r_lfu3rt` had 149 such cells (`u`: 116,
+`bu`: 33; e.g. `geo=DE22, period=2020, flag=bu`), `demo_r_pjanaggr3` had 1 (`geo=PL912,
+period=2010, flag=b`). `EurostatSource._parse` refused these outright: the resolved canonical
+status (`estimate`/`final`) was not one of the two statuses (`suppressed`/`na`) the `observations`
+table's own CHECK constraint allows to pair with `value = NULL`.
 
 `PL912` turned out to be a 5-character NUTS 3 code — not a NUTS 2 region this loader ever wanted
 in the first place. `EurostatSource._parse` (`src/fetchers/eurostat.py`) gained an optional
 `geo_filter` parameter: a geo code it rejects is skipped entirely, for every period, before its
 flag/value are ever read — so a bad cell for a geography nobody asked for cannot block a fetch
-nobody asked it not to. `scripts/sync_nuts2.py` passes `geo_filter=is_nuts2_code`, which filters
-`PL912` out and unblocks `POPULATION_NUTS2` cleanly, without touching the `u`/flag-status mapping
+nobody asked it not to. `scripts/sync_nuts2.py` passes `geo_filter=is_nuts2_code`, which filtered
+`PL912` out and unblocked `POPULATION_NUTS2` cleanly, without touching the `u`/flag-status mapping
 at all. `geo_filter=None` (every pre-existing caller — the five country-level pilot indicators,
-the eight single-country ones) preserves the exact previous behaviour, proved by the existing
-fixture-replay tests passing unchanged plus new unit tests in `tests/test_eurostat_source.py`.
+the eight single-country ones) preserves the exact previous behaviour.
+
+## Unemployment unblocked, 2026-09-14 (follow-up to PR #174)
+
 `lfst_r_lfu3rt`'s 149 bad cells include genuine 4-character NUTS 2 codes (`DE22` among them), so
-the same filter does not help unemployment — those cells ARE the geographies this fetch wants,
-and are still validated, and still refuse. How to label them is the maintainer's decision,
-explicitly deferred, not attempted here. `UNEMPLOYMENT_RATE_NUTS2` is fully configured
-(`config/indicators/UNEMPLOYMENT_RATE_NUTS2.yaml`, approved by the maintainer) and its
-`public/data/europe/nuts2/UNEMPLOYMENT_RATE_NUTS2.json` payload exists with `"status": "blocked"`
-and a `blocked_reason`, never silently omitted. See ADR 0009's 2026-09-14 amendment, item 8, for
-the full mechanism.
+`geo_filter` did not help unemployment the way it helped population — those cells ARE the
+geographies the fetch wants, and were still validated, and still refused. **The maintainer
+decided (2026-09-14): an empty cell (no value at all) whose flag's letters include `u` is
+`suppressed`** — Eurostat has a reading and withholds it, not a gap and not an estimate. See
+`docs/decisions/0010-eurostat-compound-observation-flags.md`'s amendment for the full decision,
+its narrow scope (a VALUED `u` cell still maps to `estimate`, unchanged; an empty cell without
+`u` — `b`, `e`, `d`, `p` alone or in any `u`-free compound — is still refused exactly as before),
+and the one-line implementation in `src/fetchers/eurostat.py`.
+
+With that in place, the real sync loaded `UNEMPLOYMENT_RATE_NUTS2` cleanly: 7,272 rows, 306
+regions, 1999–2025. Latest year 2025: 286 regions with a real value (269 final, 17 estimate) and
+3 suppressed (`{"v": null, "s": "suppressed"}` — never `0`, never `missing`). `DE22`, the cell
+that first surfaced this gap, is a clean illustration across years: final through 2019, then
+`suppressed` for 2020, `estimate` for 2021, `suppressed` again for 2022 and 2023, `estimate` for
+2024–2025.
+
+Publishing the real payload surfaced 6 more codes needing the same
+`SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE` treatment already used for population (see below): `HU10`
+(rows through 2012; successors `HU11`/`HU12` from 2013), `IE01`/`IE02` (through 2011; `IE04`/
+`IE05`/`IE06` from 2012), `LT00` (through 2012; `LT01`/`LT02` from 2013), `SI01`/`SI02` (through
+2009; `SI03`/`SI04` from 2010) — each verified the same way, by period history in the working
+database, not assumed.
 
 **Geography.** `config/geography/nuts2.csv`: 320 regions, built from the union of all three
 datasets' own `geo` dimension listings (real Eurostat codes + labels, not hand-typed), licence-

@@ -248,6 +248,22 @@ class EurostatSource(MultiGeoTimeSeriesSource):
                 if raw_value is None and flag == "":
                     continue  # position absent from the cube -- no row, not a state
                 obs_status = _status_for_flag(flag, dataset, geo_code, period)
+                if raw_value is None and "u" in set(flag):
+                    # MAINTAINER DECISION (2026-09-14, docs/decisions/0010-
+                    # eurostat-compound-observation-flags.md, amendment): an
+                    # EMPTY cell (no value published at all) whose flag's
+                    # letters include "u" ("low reliability") is
+                    # `suppressed`, not the "estimate" a VALUED `u` cell
+                    # maps to (FLAG_STATUS["u"], unchanged) -- the source
+                    # has a reading but withholds it, the same meaning
+                    # `suppressed` already carries for a confidentiality
+                    # flag. Deliberately narrow: this overrides the
+                    # resolved status ONLY when there is no value at all;
+                    # an empty cell whose flag does NOT contain "u" (e.g. a
+                    # bare "b" or "e") is still refused by the check right
+                    # below, exactly as before (CLAUDE.md rule 13) -- this
+                    # override names "u" specifically and no other letter.
+                    obs_status = "suppressed"
                 if raw_value is None and obs_status not in NULLABLE_STATUSES:
                     raise FetchError(
                         f"{dataset!r}: geo={geo_code} period={period} has flag {flag!r} "

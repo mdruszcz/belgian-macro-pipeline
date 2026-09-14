@@ -207,3 +207,9 @@ open, each backed by what the real load measured, not guessed:**
    `tests/test_eurostat_source.py` exercising the skip-then-validate ordering directly. How to label
    unemployment's remaining cells (flags `u`/`bu`, "unreliable") is a separate, pending maintainer
    decision — this narrowing does not touch that mapping.
+
+   **Follow-up, 2026-09-14 (same day):** the maintainer decided how to label those cells --
+   `docs/decisions/0010-eurostat-compound-observation-flags.md`'s own amendment covers the decision
+   itself (an empty cell whose flag contains `u` is `suppressed`); `UNEMPLOYMENT_RATE_NUTS2` loads
+   as a result, in a follow-up PR to the one this ADR amendment describes. `POPULATION_NUTS2` was
+   already loaded above and is unaffected by this follow-up.
