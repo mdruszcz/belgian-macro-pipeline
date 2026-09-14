@@ -243,6 +243,18 @@ def test_building_twice_produces_identical_bytes():
     assert first == second
 
 
+def test_the_generated_page_is_lf_only(built):
+    """Rule 35's byte-identical guarantee also depends on the platform not
+    silently rewriting line endings. Python's text-mode write turns every
+    "\\n" into "\\r\\n" on Windows unless newline="\\n" is passed; this test
+    only catches a regression on a Windows runner -- on Linux/macOS text mode
+    never touches the newline, so it cannot fail there even if the fix were
+    reverted. `built` above already ran the real exporter and wrote the real
+    about.html this assertion reads.
+    """
+    assert b"\r" not in BUILT.read_bytes()
+
+
 def test_a_page_carrying_municipal_data_without_attribution_is_refused():
     """Statbel's licence terminates automatically on non-compliance, and this
     project has published municipal figures without attribution once already.

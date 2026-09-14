@@ -757,7 +757,7 @@ def export_local_pages(
             relative = _route(commune["nis_code"], page_lang).strip("/").split("/", 1)[1]
             target = out_dir / relative / "index.html"
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(page, encoding="utf-8")
+            target.write_text(page, encoding="utf-8", newline="\n")
             written += 1
 
     _write_sitemap(out_dir, base_url, payload_dir)
@@ -829,6 +829,7 @@ def _write_sitemap(out_dir: Path, base_url: str, payload_dir: Path) -> None:
         + "\n".join(entries)
         + "\n</urlset>\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 

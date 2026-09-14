@@ -1227,6 +1227,76 @@ silently, then ask them to find a source, compare two communes, and download dat
 Why: Nobody else can do this one, and it is the check most likely to catch what every
 automated audit misses.
 
+Block UNIFY — one coherent public interface (spec docs/features/site_unification.md)
+ ✅ [BUILD] A0 -- line endings and the spec (2026-09-14: scripts/export_page_documents.py and
+scripts/export_local_pages.py's three HTML/XML writers now pass newline="\n", and .gitattributes
+(`* text=auto eol=lf` plus explicit `binary` lines for webp/png/jpg/jpeg/pdf/db) pins it at commit
+time too. `git add --renormalize .` touched only text files whose diff is empty under
+`--ignore-cr-at-eol`; re-running the page-document exporter now leaves the nine previously-drifting
+pages untouched in `git status`. docs/features/site_unification.md committed from the maintainer's
+brief, with the two mockup text files (prompts.md, index.html); the nine mockup PNGs stay local
+pending a binary-commit decision (rule 12))
+How: Force LF on every generated-page write and pin it with .gitattributes; commit the spec.
+Why: A Windows checkout was rewriting nine published pages on every export with no content change
+-- pure noise in every future diff, and a real risk of masking an actual content regression inside
+it.
+ [BUILD] A1.1 -- shared header/footer fragments + sync command
+How: Centralize header/footer markup into fragments rendered at generation time; add a
+deterministic command that syncs only the delimited zones in hand-edited HTML pages.
+Why: Seven pages hand-maintaining the same nav drift out of sync one edit at a time.
+ [BUILD] A1.2 -- themes Clair/Sombre/Papier + menus
+How: One shared module for theme and language menus, applied before first paint, with the Papier
+palette as a shared token set.
+Why: The maintainer approved three themes and icon menus as the baseline look for every page, not
+just the pilots.
+ [BUILD] A1.3 -- BPCharts tooltips + Home2 composition
+How: Extend BPCharts with shared interactive points/tooltips (hover, touch, keyboard); separate
+Home2's map into title/indicator, map/zoom and legend/source zones.
+Why: Home2 and Macro are the pilots the maintainer wants verified before the pattern spreads to
+five more pages.
+ [BUILD] A1.4 -- Macro panels
+How: HTML panels (no iframe) for Macro's seven rubriques, sticky menu on desktop, anchor per
+panel, old English anchors redirected to the French ones.
+Why: Macro is the dashboard-with-sidebar pilot; Micro and the rest reuse whatever this proves out.
+ [BUILD] A2 -- visual gate on the pilots
+How: Review Home2 and Macro at 390/768/1122px across every language x theme combination, against
+real payload data.
+Why: The maintainer's own delivery order gates the other five pages on the pilots looking right
+first, not on the code merely running.
+ [BUILD] A3.1 -- the other five pages + Micro panels + Sources page
+How: Apply the verified shared components (header/footer, themes, BPCharts tooltips) to Profils,
+Commune, Micro, Cartes and Sources; build Micro's seven rubriques the same way as Macro's.
+Why: The pattern proven on two pilots now has to cover the whole public site, not stay a two-page
+demo.
+ [BUILD] A3.2 -- the commune journey + link audit
+How: Every commune selection in Profils opens commune.html?nis=xxxxx; profiles.html?nis=xxxxx
+redirects there; remove the redundant commune view from Profils once parity is verified; audit
+every static and dynamically-created link, including search.
+Why: Two competing commune views confuse a reader and split SEO signal across two URLs for the
+same page.
+ [BUILD] A4 -- finish
+How: Close out remaining Livraison A items against docs/features/site_unification.md's own test
+list (allowed links, tooltip accuracy, no overflow, theme/language/rubrique persistence).
+Why: The maintainer's own acceptance list for Livraison A, run once as a whole rather than
+piecemeal.
+ [BUILD] B1 -- NUTS 2 coverage report + spec + catalogue rows for approval
+How: Before writing any interface code, report GDP-per-capita, unemployment and population's
+exact dimensions (unit, years, regions, NUTS version) from the existing Eurostat/DBnomics
+connector; propose docs/data_catalog.md rows for maintainer approval (rule 8).
+Why: The maintainer's brief is explicit that B3 (the map) must not start before the data is
+verified and approved -- guessing at NUTS 2 coverage is how a map ends up showing values against
+the wrong vintage of region boundaries.
+ [BUILD] B2 -- pipeline and payloads
+How: Extend the existing connector for any dataset the coverage report found missing; publish
+dedicated regional payload files under public/data/ for the browser to consume.
+Why: Rule 20/21 -- no browser-side Eurostat fetch and no raw source file reaches a public page.
+ [BUILD] B3 -- Europe panel UI
+How: A NUTS 2 map in Macro's Europe rubrique using eurostat-map, reusing the existing commune map
+engine's conventions; indicator/year pickers, legend, zoom, absent-data state, source/unit/geo-
+vintage displayed; loads only when the panel opens.
+Why: The maintainer's stated closing piece of the unification work, explicitly gated on A's
+pilots being stable and B1/B2's data being approved first.
+
 🚦 GATE 50%
  🛑 [BLOCKED] Any commune returns >= 50 standardized indicators (2026-09-06: MEASURED, and it passes for 552 of 565 communes but not all -- median 52, max 52, and the roadmap's own How: (pick five at random and count) passes cleanly, all five between 51 and 52. The 13 that fail carry 17 each and are EXACTLY the 2025 merger successors plus Bastogne (which merged 2024-12-02): Pajottegem, Wingene, Tielt, Nazareth-De Pinte, Lochristi, Merelbeke-Melle, Lokeren, Beveren-Kruibeke-Zwijndrecht, Tessenderlo-Ham, Hasselt, Bilzen-Hoeselt, Tongeren-Borgloon, Bastogne. The reason is structural and already documented across this file: every historical source predates them -- fiscal income stops at the 2019 map, Census 2021 is a 2021 snapshot, police.be and ONEM backcast a pre-2025 grid -- so a commune created in 2025 only carries the sources expressed on the current map. Marking this gate item done at "five random ones passed" would be exactly the averages-hide-gaps failure the 80% gate warns about, and the weakest page is what a sceptical prospect opens. NOT a data-loading bug and not fixable by loading more of the same sources; it needs either a source that covers the new communes, or an explicit decision to show a merger successor its predecessors' history with the discontinuity labelled)
 How: Pick five at random and count.

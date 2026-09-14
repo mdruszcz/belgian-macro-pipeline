@@ -191,6 +191,22 @@ def test_the_sitemap_is_byte_identical_across_two_rebuilds(payload_dir, tmp_path
     assert (tmp_path / "local" / "sitemap.xml").read_text(encoding="utf-8") == first
 
 
+def test_generated_pages_and_sitemap_are_lf_only(payload_dir, tmp_path, db, attribution_file):
+    """Rule 35: identical inputs must keep producing byte-identical output --
+    which a platform-dependent line ending breaks on its own, independent of
+    content. Python's text-mode write translates every "\\n" to "\\r\\n" on
+    Windows unless the write passes newline="\\n"; this test only catches a
+    regression on a Windows runner, since on Linux/macOS text mode never
+    rewrites the newline in the first place. It caught export_local_pages.py
+    silently CRLF-ing every commune page and the sitemap on this machine.
+    """
+    _run(payload_dir, tmp_path, db, attribution_file)
+    page = (tmp_path / "local" / "11001" / "index.html").read_bytes()
+    assert b"\r" not in page
+    sitemap = (tmp_path / "local" / "sitemap.xml").read_bytes()
+    assert b"\r" not in sitemap
+
+
 def test_lastmod_is_the_data_s_date_and_not_the_build_s(payload_dir, tmp_path, db):
     """`lastmod` means "this page changed". A build date claims all 1,695
     changed today, every day -- a false statement to a crawler, and one that
