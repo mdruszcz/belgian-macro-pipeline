@@ -4,24 +4,30 @@ dependencies `make exports` runs them in."""
 from dagster import AssetExecutionContext, MaterializeResult, asset
 
 from orchestration import checks, run
-from orchestration.assets import script_asset
+from orchestration.assets import function_asset, script_asset
 from orchestration.paths import PipelinePaths
 
 VALIDATED = "validated_working_database"
 
-national_csv = script_asset(
+national_csv = function_asset(
     "national_csv",
     group="website",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="data/belgian_macro_export.csv, canonical schema (scripts/export_canonical_csv.py).",
+    description=(
+        "data/belgian_macro_export.csv, canonical schema: export_canonical_csv() from "
+        "scripts/export_canonical_csv.py, called in process."
+    ),
 )
-communes_csv = script_asset(
+communes_csv = function_asset(
     "communes_csv",
     group="website",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="data/communes_export.csv (scripts/export_communes_csv.py).",
+    description=(
+        "data/communes_export.csv: export_communes_csv() from scripts/export_communes_csv.py, "
+        "called in process."
+    ),
 )
 communes_history_full_csv = script_asset(
     "communes_history_full_csv",

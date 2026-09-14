@@ -39,16 +39,16 @@ indicator the registry does not.
 
 | Store | Holds | Mode | Committed | Written by |
 |---|---|---|---|---|
-| `data/belgian_macro.db` | national macro, `LOCAL_UNITS_BY_COMMUNE`, geography, indicator metadata, fetch and volume history | — | daily, by the bot | `daily_fetch.yml` (offload step) |
+| `data/belgian_macro.db` | national macro, `LOCAL_UNITS_BY_COMMUNE`, geography, indicator metadata, fetch and volume history | — | daily, by the bot | the daily run's offload (`committed_stores`) |
 | `data/population_observations.csv` | `POPULATION_BY_COMMUNE`, `POPULATION_AGE_0_14/_15_64/_65_PLUS` | `extra_csv` | only when refreshed by hand | the procedure below |
 | `data/fiscal_income_observations.csv` | `FISCAL_TOT_NET_TAXABLE_INC`, `FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES` | `extra_csv` | only when refreshed by hand | [fiscal_income.md](fiscal_income.md) |
 | `data/census2021_observations.csv` | 17 Census 2021 counts: labour force status, citizenship, birthplace, sex, marital status, households, family nuclei, dwellings | `extra_csv` | only when refreshed by hand (decennial) | the procedure below |
 | `data/realestate_observations.csv` | `MEDIAN_HOUSE_PRICE`, `HOUSE_SALES_TRANSACTIONS` | `extra_csv` | only when refreshed by hand | `scripts/sync_realestate.py` |
 | `data/police_observations.csv` | four crime rates per 10,000 inhabitants | `extra_csv` | only when refreshed by hand | `scripts/sync_police.py` |
 | `data/var_unemployment_observations.csv` | `ADMIN_UNEMPLOYMENT_RATE_COM`, annual administrative unemployment rate for ages 15–64 | `extra_csv` | only when the Tableau crosstab is refreshed by hand | [var_unemployment.md](var_unemployment.md) |
-| `data/onem_observations.csv` | seven ONEM/RVA unemployment and benefit series | `in_db` | daily, by the bot | `daily_fetch.yml` (offload step) |
-| `data/onem_rates_observations.csv` | `UNEMPLOYMENT_RATE_INSURED`, `UNEMPLOYMENT_RATE_INSURED_MONTHLY` | `in_db` | daily, by the bot | `daily_fetch.yml` (offload step) |
-| `data/walstat_observations.csv` | ten WalStat (IWEPS) municipal series | `in_db` | daily, by the bot | `daily_fetch.yml` (offload step) |
+| `data/onem_observations.csv` | seven ONEM/RVA unemployment and benefit series | `in_db` | daily, by the bot | the daily run's offload (`committed_stores`) |
+| `data/onem_rates_observations.csv` | `UNEMPLOYMENT_RATE_INSURED`, `UNEMPLOYMENT_RATE_INSURED_MONTHLY` | `in_db` | daily, by the bot | the daily run's offload (`committed_stores`) |
+| `data/walstat_observations.csv` | ten WalStat (IWEPS) municipal series | `in_db` | daily, by the bot | the daily run's offload (`committed_stores`) |
 
 Not an observation store, listed because it is generated from one:
 `public/data/demography/{nis}.json` (five-year population bands by sex for the commune-profile

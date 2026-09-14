@@ -8,10 +8,16 @@ Jobs:
   validate_and_export        the validated database, its checks, and everything
                              built from it. Selects no source, so a red source
                              never blocks it -- the workflow's continue-on-error.
+                             Writes no committed file: what the UI offers.
+  validate_export_and_offload
+                             the same, plus committed_stores (the offload), in ONE
+                             run: a failed export or blocking check skips it in
+                             that run. What the coordinator runs; committed_stores
+                             refuses without the coordinator's run config.
   observe_manual_sources     observations of the hand-loaded stores.
 
-Offload (the only writer of data/belgian_macro.db) and the git/PR steps are not
-in this graph: they stay in daily_fetch.yml, after the coordinator.
+The git/PR steps are not in this graph: they stay in daily_fetch.yml, after the
+coordinator.
 """
 
 import os
@@ -47,16 +53,18 @@ assemble_working_database = define_asset_job(
     "assemble_working_database", selection=AssetSelection.assets("staging_db")
 )
 fetch_sources = define_asset_job("fetch_sources", selection=AssetSelection.assets(*TRACKED))
-validate_and_export = define_asset_job(
-    "validate_and_export",
-    selection=AssetSelection.assets(
-        "validated_working_database",
-        "volume_history",
-        "revisions_report",
-        "commune_adjacency",
-        "commune_typology",
-    )
-    | AssetSelection.groups("derived", "website"),
+EXPORT_SELECTION = AssetSelection.assets(
+    "validated_working_database",
+    "volume_history",
+    "revisions_report",
+    "commune_adjacency",
+    "commune_typology",
+) | AssetSelection.groups("derived", "website")
+
+validate_and_export = define_asset_job("validate_and_export", selection=EXPORT_SELECTION)
+validate_export_and_offload = define_asset_job(
+    "validate_export_and_offload",
+    selection=EXPORT_SELECTION | AssetSelection.assets("committed_stores"),
 )
 
 daily_fetch_schedule = ScheduleDefinition(
@@ -74,7 +82,13 @@ daily_fetch_schedule = ScheduleDefinition(
     ),
 )
 
-JOBS = [assemble_working_database, fetch_sources, validate_and_export, observe_manual_sources]
+JOBS = [
+    assemble_working_database,
+    fetch_sources,
+    validate_and_export,
+    validate_export_and_offload,
+    observe_manual_sources,
+]
 
 
 def default_paths() -> PipelinePaths:

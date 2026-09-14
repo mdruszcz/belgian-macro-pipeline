@@ -12,9 +12,11 @@ for good.
 Since Dagster step 2 (docs/features/orchestration.md) daily_fetch.yml runs
 assemble, every source, validation and every export as one step,
 `python -m orchestration.daily`; what that step runs, and in which order, is
-held by tests/test_orchestration.py. What stays here is what only the workflow
-text can show: the coordinator runs before the offload, nothing can be skipped
-past, and the auto-merge gate reads that run's manifest.
+held by tests/test_orchestration.py -- since Dagster step 3 that includes the
+offload, the coordinator's last asset. What stays here is what only the
+workflow text can show: the coordinator runs before the gate and the PR, no
+step offloads or names the committed database by itself, nothing can be
+skipped past, and the auto-merge gate reads that run's manifest.
 """
 
 from pathlib import Path
@@ -36,6 +38,7 @@ PIPELINE_SCRIPTS = (
     "scripts/revisions_report.py",
     "scripts/export_",
     "src.exporters.metadata",
+    "scripts/offload_stores.py",
 )
 
 
@@ -54,15 +57,23 @@ def _index(steps: list[dict], *, id: str | None = None, contains: str | None = N
     raise AssertionError(f"no step with id={id!r} contains={contains!r}")
 
 
-def test_daily_fetch_runs_the_coordinator_then_offloads_then_gates_then_opens_the_pr():
+def test_daily_fetch_runs_the_coordinator_then_gates_then_opens_the_pr():
     steps = _steps("daily_fetch.yml")
     daily = _index(steps, id="daily")
     assert COORDINATOR in steps[daily]["run"]
-    offload = _index(steps, contains="scripts/offload_stores.py")
     sources = _index(steps, id="sources")
     stage = _index(steps, id="stage")
     pr = _index(steps, id="pr")
-    assert daily < offload < sources < stage < pr
+    assert daily < sources < stage < pr
+    # The offload is the coordinator's last asset now, not a step of its own.
+    assert not any("offload_stores" in step.get("run", "") for step in steps)
+
+
+def test_production_never_skips_the_fetch():
+    """--without-fetch is for local trials and the parity script. In the runner
+    it would offload a day on which no source ran."""
+    text = (WORKFLOWS / "daily_fetch.yml").read_text(encoding="utf-8")
+    assert "--without-fetch" not in text
 
 
 def test_the_pipeline_runs_only_through_the_coordinator():
@@ -80,16 +91,15 @@ def test_nothing_before_the_pr_can_be_skipped_past():
     assert [s["name"] for s in steps if s.get("continue-on-error")] == []
     daily = steps[_index(steps, id="daily")]["run"]
     # Exactly one exit code is let through; every other one stops the run
-    # before the offload, as a failed assemble or validation step did.
+    # before anything is committed, as a failed assemble or validation step did.
     assert '[ "$STATUS" -eq 3 ]' in daily
     assert daily.rstrip().endswith("exit $STATUS")
 
 
-def test_only_the_offload_step_names_the_committed_database():
+def test_no_step_names_the_committed_database():
+    """Its one writer is committed_stores, inside the coordinator's run."""
     for step in _steps("daily_fetch.yml"):
-        run = step.get("run", "")
-        if "data/belgian_macro.db" in run:
-            assert "scripts/offload_stores.py" in run, step["name"]
+        assert "belgian_macro.db" not in step.get("run", ""), step["name"]
 
 
 def test_every_database_step_reads_the_working_copy():

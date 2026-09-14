@@ -74,18 +74,19 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-@pytest.fixture
-def pipeline(tmp_path):
+def build_pipeline(root: Path) -> dict:
     """A committed database with one national-style row that must stay, a
     committed in_db CSV, a registry naming it, and the working database
     assembled from those two -- the state the daily run is in right after
-    `Assemble the working database`."""
-    committed_db = tmp_path / "belgian_macro.db"
+    `Assemble the working database`. tests/test_orchestration_parity.py builds
+    it too, to offload the same state by both routes."""
+    root.mkdir(parents=True, exist_ok=True)
+    committed_db = root / "belgian_macro.db"
     migrate.run(committed_db, migrations_dir=REPO / "migrations")
 
-    store_csv = tmp_path / "walstat_observations.csv"
+    store_csv = root / "walstat_observations.csv"
     _write_csv(store_csv, COMMITTED_ROWS)
-    registry = tmp_path / "stores.yaml"
+    registry = root / "stores.yaml"
     registry.write_text(
         yaml.safe_dump(
             {
@@ -122,7 +123,7 @@ def pipeline(tmp_path):
         encoding="utf-8",
     )
 
-    working = tmp_path / "local" / "working.db"
+    working = root / "local" / "working.db"
     build(source_db=committed_db, working_db=working, stores_path=registry)
 
     # A row that belongs in the committed database: a real fetch run, a
@@ -155,6 +156,11 @@ def pipeline(tmp_path):
         "registry": registry,
         "working": working,
     }
+
+
+@pytest.fixture
+def pipeline(tmp_path):
+    return build_pipeline(tmp_path)
 
 
 def _observations(db: Path, indicator: str | None = None) -> list[tuple]:

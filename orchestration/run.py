@@ -1,7 +1,8 @@
 """Running an existing script, and describing what it left behind.
 
-Everything here is plumbing: a subprocess and file/database metadata for the
-UI. Nothing computes, transforms or stores a figure.
+Everything here is plumbing: a subprocess, an in-process call to a script's
+own function, and file/database metadata for the UI. Nothing computes,
+transforms or stores a figure.
 """
 
 import os
@@ -16,6 +17,7 @@ from dagster import Failure, MetadataValue
 
 from orchestration.commands import COMMANDS
 from orchestration.paths import PipelinePaths
+from orchestration.scripts import import_script
 
 TAIL_LINES = 40
 
@@ -66,11 +68,42 @@ def run_script(
     return output
 
 
+def script_function(name: str):
+    """(module, function) for COMMANDS[name].function, imported when called --
+    never while the definitions load."""
+    command = COMMANDS[name]
+    if not command.function:
+        raise ValueError(f"{name}: orchestration/commands.py declares no function")
+    module_name, _, attribute = command.function.partition(":")
+    module = import_script(module_name)
+    return module, getattr(module, attribute)
+
+
+def call_function(context, name: str, **kwargs):
+    """Call COMMANDS[name].function in this process, by keyword. Every path in
+    `kwargs` must be absolute: unlike run_script's subprocess, this process
+    does not run from the repository root.
+
+    Only the script's declared refusal becomes a Failure, a red asset carrying
+    the script's own message. With no refusal declared nothing is caught at
+    all: an exporter's crash stays a crash, with its traceback."""
+    command = COMMANDS[name]
+    module, function = script_function(name)
+    context.log.info(f"{command.function}({', '.join(f'{k}={v}' for k, v in kwargs.items())})")
+    if command.refusal is None:
+        return function(**kwargs)
+    refusal = getattr(module, command.refusal)
+    try:
+        return function(**kwargs)
+    except refusal as exc:
+        raise Failure(f"{name}: {module.__name__} refused: {exc}") from exc
+
+
 def output_metadata(paths: PipelinePaths, name: str) -> dict:
     """Size and row count of each declared output -- for the UI only."""
     metadata = {}
     for template in COMMANDS[name].outputs:
-        target = paths.resolve(template.format(**paths.placeholders()))
+        target = paths.output(template)
         label = template.format(**paths.placeholders())
         if target.is_dir():
             metadata[f"{label} files"] = sum(1 for p in target.rglob("*") if p.is_file())

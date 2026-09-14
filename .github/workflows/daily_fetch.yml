@@ -15,14 +15,16 @@ env:
   # repo's own pull_request-triggered workflows (GitHub's recursive-run guard), so ci.yml's
   # required "test" check would never appear on the bot's PR and it would sit BLOCKED forever.
   GH_TOKEN: ${{ secrets.BOT_PAT }}
-  # THE ONE DATABASE EVERY STEP BELOW READS AND WRITES (the Dagster step reads
-  # it through orchestration/definitions.py default_paths), until the offload step
-  # at the end (docs/decisions/0006-stores-split-by-volume.md). It is the
-  # committed data/belgian_macro.db plus every in_db store's committed CSV
-  # (ONEM, ONEM's published rate, WalStat), assembled fresh each run and
-  # gitignored. The committed database is written exactly once, by
-  # scripts/offload_stores.py, after validation and every export -- so a run
-  # that fails anywhere before that changes no committed file at all.
+  # THE ONE DATABASE THE DAGSTER STEP READS AND WRITES (through
+  # orchestration/definitions.py default_paths), until its last asset
+  # (docs/decisions/0006-stores-split-by-volume.md). It is the committed
+  # data/belgian_macro.db plus every in_db store's committed CSV (ONEM, ONEM's
+  # published rate, WalStat, the international series), assembled fresh each
+  # run and gitignored. The committed database is written exactly once, by
+  # committed_stores -- offload() from scripts/offload_stores.py -- as the last
+  # asset of the same Dagster run as validation and every export: a failed
+  # check or export skips it, and a run that fails before it changes no
+  # committed file at all.
   WORKING_DB: data/local/working.db
 
 jobs:
@@ -58,31 +60,39 @@ jobs:
       - name: Assemble, fetch every source, validate and export (Dagster)
         id: daily
         # ONE ephemeral Dagster execution (docs/features/orchestration.md,
-        # step 2): python -m orchestration.daily runs, in this order,
-        #   assemble_working_database  scripts/build_staging_db.py
-        #   fetch_sources              the macro fetch, sync_to_canonical,
-        #                              Statbel, ONEM, ONEM's rate, WalStat and
-        #                              the market data -- each may fail without
-        #                              stopping the others, as continue-on-error
-        #                              did here before
-        #   validate_and_export        the validation rules as blocking checks
-        #                              (a FAIL stops every export and the volume
-        #                              baseline, as --record-volume did), the
-        #                              revisions report, then every export and
-        #                              page, from the working database
+        # steps 2 and 3): python -m orchestration.daily runs, in this order,
+        #   assemble_working_database    scripts/build_staging_db.py
+        #   fetch_sources                the macro fetch, sync_to_canonical,
+        #                                Statbel, ONEM, ONEM's rate, WalStat,
+        #                                the international series and the
+        #                                market data -- each may fail without
+        #                                stopping the others, as
+        #                                continue-on-error did here before
+        #   validate_export_and_offload  the validation rules as blocking checks
+        #                                (a FAIL stops every export and the
+        #                                volume baseline, as --record-volume
+        #                                did), the revisions report, every
+        #                                export and page, then committed_stores:
+        #                                the offload, the only writer of
+        #                                data/belgian_macro.db and the in_db
+        #                                CSVs, skipped in that same run if an
+        #                                export or a blocking check failed
         # Each asset runs the same script with the same arguments these steps
-        # used to; tests/test_orchestration.py holds commands.py to that.
+        # used to, or calls that script's own function with them;
+        # tests/test_orchestration.py holds commands.py to that.
         #
         # Its history lives in $RUNNER_TEMP and dies with the runner. It
-        # writes this run's source manifest under data/local/ (gitignored)
-        # and hands its path to the gate below through $GITHUB_OUTPUT.
+        # writes this run's manifest under data/local/ (gitignored) and hands
+        # its path to the gate below through $GITHUB_OUTPUT.
         #
-        # EXIT CODES. 0: all green. 3: exported, but a source was red -- carry
-        # on to offload and open the PR, which will NOT auto-merge. Anything
-        # else (1: assemble or validation failed; a crash): stop here, exactly
-        # where the assemble and validation steps used to stop the run, before
-        # anything is offloaded or committed. The summary is copied first, so
-        # a failing validation still shows its report.
+        # EXIT CODES. 0: all green, offloaded. 3: exported and offloaded, but a
+        # source was red -- carry on and open the PR, which will NOT
+        # auto-merge. Anything else (1: assemble, validation, an export or the
+        # offload failed; a crash): stop here, before anything is committed. A
+        # refused offload changed no file; one that crashed while replacing its
+        # files may have replaced some in this runner's checkout, which is
+        # thrown away with it. The summary is copied first, so a failing
+        # validation still shows its report.
         env:
           BUILD_ID: ${{ github.run_id }}
           DAGSTER_HOME: ${{ runner.temp }}/dagster_home
@@ -104,17 +114,6 @@ jobs:
             exit 0
           fi
           exit $STATUS
-
-      - name: Offload the in_db stores and write the committed database
-        # NO continue-on-error. The only step that writes data/belgian_macro.db.
-        # Dumps every in_db store from the working database to its committed
-        # CSV, strips exactly those rows from a copy, VACUUMs it, verifies it
-        # (nothing offloaded left, no committed CSV row lost, foreign keys and
-        # integrity clean) and only then moves it over the committed file.
-        # Any refusal leaves every committed file as it was. Keeps the
-        # committed database at ~2 MB instead of the 42 MB that stopped this
-        # workflow on 2026-09-13.
-        run: python scripts/offload_stores.py --working-db "$WORKING_DB" --committed-db data/belgian_macro.db
 
       - name: Guard against oversized data files
         # A repo-health tripwire, not a technical limit (GitHub warns at
@@ -148,8 +147,9 @@ jobs:
         #
         # Reads THIS run's source manifest, the path the Dagster step wrote --
         # never a fixed path, so an older manifest cannot pass for today's.
-        # all_ok is "true" only if the assemble, all eight tracked outcomes
-        # and validate_and_export succeeded (orchestration/manifest.py gate()).
+        # all_ok is "true" only if the assemble, all eight tracked outcomes,
+        # validate_and_export and the offload succeeded
+        # (orchestration/manifest.py gate()).
         # A missing manifest fails this step: no evidence, no PR.
         run: |
           python -m orchestration.manifest "${{ steps.daily.outputs.manifest }}" > "$RUNNER_TEMP/gate.txt"

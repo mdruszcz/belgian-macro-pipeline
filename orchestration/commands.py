@@ -5,8 +5,16 @@ tests/test_orchestration.py renders each entry the way the Makefile and the
 workflow spell it and requires the result to appear there verbatim, so this
 table cannot drift from the pipeline it wraps.
 
-Placeholders (orchestration/paths.py): {db} {stores} {data} {public_data}
-{local} {build_id} {validation_status}, plus {today} for the revisions report.
+Placeholders (orchestration/paths.py): {db} {stores} {committed_db} {data}
+{public_data} {local} {build_id} {validation_status}, plus {today} for the
+revisions report.
+
+Two routes. An entry without `function` runs its command line as a
+subprocess (run.run_script). An entry with `function` is called in this
+process instead (run.call_function): the script's own function, given the
+arguments its command line names. The command line stays the reference either
+way: the drift tests pin it to the Makefile, and tests/test_orchestration_parity.py
+runs it beside the asset and compares the files byte for byte.
 """
 
 from dataclasses import dataclass
@@ -26,6 +34,13 @@ class Command:
     # The script has no output-path option and always writes into the
     # repository, so it refuses to run when PipelinePaths.out_root points elsewhere.
     writes_repo_only: bool = False
+    # "module:callable" in scripts/. The asset calls that function in process
+    # (run.call_function) instead of running argv.
+    function: str | None = None
+    # The script's own exception class for a designed refusal. call_function
+    # turns exactly that class into a red asset carrying the script's message;
+    # anything else propagates with its traceback. None: nothing is caught.
+    refusal: str | None = None
 
 
 COMMANDS: dict[str, Command] = {
@@ -91,6 +106,23 @@ COMMANDS: dict[str, Command] = {
     "revisions_report": Command(
         ("scripts/revisions_report.py", "--db", "{db}", "--since", "{today}"),
     ),
+    # The offload, `make offload`'s line. Its outputs are the committed database
+    # and every in_db CSV config/stores.yaml names; only the database is listed
+    # here, so the registry stays the one list of store files.
+    "committed_stores": Command(
+        (
+            "scripts/offload_stores.py",
+            "--working-db",
+            "{db}",
+            "--committed-db",
+            "{committed_db}",
+            "--stores",
+            "{stores}",
+        ),
+        outputs=("{committed_db}",),
+        function="offload_stores:offload",
+        refusal="OffloadError",
+    ),
     # ── derived ────────────────────────────────────────────────────────────
     "communes_table_json": Command(
         (
@@ -115,6 +147,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/aggregates.csv",),
+        function="export_aggregates_csv:export_aggregates_csv",
     ),
     "percentiles_csv": Command(
         (
@@ -127,6 +160,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/percentiles.csv",),
+        function="export_percentiles_csv:export_percentiles_csv",
     ),
     # ── website ────────────────────────────────────────────────────────────
     "national_csv": Command(
@@ -138,6 +172,7 @@ COMMANDS: dict[str, Command] = {
             "{data}/belgian_macro_export.csv",
         ),
         outputs=("{data}/belgian_macro_export.csv",),
+        function="export_canonical_csv:export_canonical_csv",
     ),
     "communes_csv": Command(
         (
@@ -150,6 +185,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/communes_export.csv",),
+        function="export_communes_csv:export_communes_csv",
     ),
     "communes_history_full_csv": Command(
         (

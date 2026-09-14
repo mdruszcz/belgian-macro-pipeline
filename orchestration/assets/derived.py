@@ -1,23 +1,29 @@
 """derived: aggregates, peer positions and the communes table -- computed by
 the existing exporters, under the aggregation rules they already implement."""
 
-from orchestration.assets import script_asset
+from orchestration.assets import function_asset, script_asset
 
 VALIDATED = "validated_working_database"
 
-aggregates_csv = script_asset(
+aggregates_csv = function_asset(
     "aggregates_csv",
     group="derived",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="Province/region/Belgium aggregates (scripts/export_aggregates_csv.py).",
+    description=(
+        "Province/region/Belgium aggregates: export_aggregates_csv() from "
+        "scripts/export_aggregates_csv.py, called in process."
+    ),
 )
-percentiles_csv = script_asset(
+percentiles_csv = function_asset(
     "percentiles_csv",
     group="derived",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="National and regional peer positions (scripts/export_percentiles_csv.py).",
+    description=(
+        "National and regional peer positions: export_percentiles_csv() from "
+        "scripts/export_percentiles_csv.py, called in process."
+    ),
 )
 communes_table_json = script_asset(
     "communes_table_json",
