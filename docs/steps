@@ -1254,12 +1254,18 @@ How: One shared module for theme and language menus, applied before first paint,
 palette as a shared token set.
 Why: The maintainer approved three themes and icon menus as the baseline look for every page, not
 just the pilots.
- [BUILD] A1.3 -- BPCharts tooltips + Home2 composition
+ ✅ [BUILD] A1.3 -- BPCharts tooltips + Home2 composition (2026-09-14, PR #172: shared tooltip, keyboard
+and touch layer plus a data-table fallback in assets/belpulse/charts.js; readable unit labels via
+MapUI.unitLabel instead of raw unit codes; home2's hero map split into title/map/legend zones and its two
+hero series declared in config/national_sections.yaml instead of picked by sort order)
 How: Extend BPCharts with shared interactive points/tooltips (hover, touch, keyboard); separate
 Home2's map into title/indicator, map/zoom and legend/source zones.
 Why: Home2 and Macro are the pilots the maintainer wants verified before the pattern spreads to
 five more pages.
- [BUILD] A1.4 -- Macro panels
+ ✅ [BUILD] A1.4 -- Macro panels (2026-09-14, PR #170: seven in-page panels driven by
+config/national_sections.yaml `panels`, generic assets/belpulse/panels.js with French anchors, old English
+anchors redirected, back/forward and a redraw after a panel is shown. History charts for Prix, Emploi and
+Conjoncture follow in their own PR)
 How: HTML panels (no iframe) for Macro's seven rubriques, sticky menu on desktop, anchor per
 panel, old English anchors redirected to the French ones.
 Why: Macro is the dashboard-with-sidebar pilot; Micro and the rest reuse whatever this proves out.
@@ -1302,7 +1308,12 @@ canonical status among them; add the previously-unmapped single flag `u`.
 Why: A NUTS 2 dataset (and, longer term, any national-accounts series) can carry a compound flag
 EurostatSource._parse had never seen, refusing the whole fetch -- a general adapter correctness
 fix, not NUTS-2-specific, approved to land ahead of the NUTS 2 pipeline batch.
- [BUILD] B2 -- pipeline and payloads
+ ✅ [BUILD] B2 -- pipeline and payloads (2026-09-14, PRs #174 and #178: GDP per inhabitant in PPS,
+population and unemployment rate by NUTS 2 region in store data/nuts2/, public/data/europe/nuts2/*.json
+with per-year values and statuses, class breaks and licence exclusions, 2024 Nuts2json geometry
+self-hosted with EuroGeographics attribution. Migration 004 adds geographies.level `nuts2`; every Belgian
+row and observation verified identical. Two audits; the migration runner hardened. Empty low-reliability
+unemployment cells are `suppressed`, by maintainer decision)
 How: Extend the existing connector for any dataset the coverage report found missing; publish
 dedicated regional payload files under public/data/ for the browser to consume.
 Why: Rule 20/21 -- no browser-side Eurostat fetch and no raw source file reaches a public page.
