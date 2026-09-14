@@ -59,19 +59,26 @@ LANGUAGE_NAMES = {"en": "English", "fr": "Fran\u00e7ais", "nl": "Nederlands"}
 #: own reference is drawn in, on the very page built to match it.
 #:
 #: `auto` is DELIBERATELY NOT in this tuple -- the maquette's theme menu shows
-#: only Clair/Sombre, and A1.2 appends a third entry (`papier`) to this same
-#: tuple rather than inventing a second menu. `auto` is not gone, though: a
-#: reader's OLD stored choice of `auto` is still read and honoured by
-#: `SHELL_BOOTSTRAP` below, which resolves it to an explicit light/dark and
-#: overwrites the stored value -- an upgrade, not a loss.
+#: only Clair/Sombre/Papier, and `auto` is not gone even so: a reader's OLD
+#: stored choice of `auto` is still read and honoured by `SHELL_BOOTSTRAP`
+#: below, which resolves it to an explicit light/dark and overwrites the
+#: stored value -- an upgrade, not a loss.
 #:
 #: Each entry is (stored value, the assets/i18n.js key for its menu label) --
 #: labels live in the one interface-strings table so the browser
 #: (assets/belpulse/shell.js) and the generator read the same word, never a
 #: second hand-typed copy (claude.md rule 2 extended to the builder, rule 24).
+#:
+#: `paper` (Batch A1.2, docs/features/site_unification.md) is the third
+#: deliberate look -- assets/belpulse/tokens.css's `:root[data-theme="paper"]`
+#: block, which Batch A1.2 built independently on its own branch. Appended as
+#: a THIRD entry rather than replacing either existing one, exactly as this
+#: comment originally planned; `SHELL_BOOTSTRAP` below accepts the stored
+#: value `"paper"` for the same reason it already accepts `"light"`/`"dark"`.
 THEME_CHOICES = (
     ("light", "themeLight"),
     ("dark", "themeDark"),
+    ("paper", "themePaper"),
 )
 
 #: Read BEFORE THE FIRST PAINT, so a reader who chose light does not watch a
@@ -90,9 +97,10 @@ THEME_CHOICES = (
 #: (the menu no longer offers it, but a reader's storage may still hold it from
 #: before this batch) is resolved against prefers-color-scheme and the
 #: EXPLICIT result is written back to storage, so this branch fires at most
-#: once per reader. Anything else unrecognised becomes `light`, never applied
-#: raw -- the same reasoning as the iframe contract's `data-theme="soft"`
-#: failure mode below.
+#: once per reader. Anything else unrecognised -- including a stored value
+#: from BEFORE Batch A1.2 added `paper`, which this branch could not have
+#: written -- becomes `light`, never applied raw -- the same reasoning as the
+#: iframe contract's `data-theme="soft"` failure mode below.
 #:
 #: NOT written into communes.html, all_data.html or local.html -- those keep
 #: their own older switcher and reading the legacy `theme` key there is exactly
@@ -112,7 +120,7 @@ SHELL_BOOTSTRAP = (
     "?'dark':'light';"
     "try{localStorage.setItem(KEY,v);}catch(e){}"
     "}"
-    "if(v!=='light'&&v!=='dark')v='light';"
+    "if(v!=='light'&&v!=='dark'&&v!=='paper')v='light';"
     "document.documentElement.setAttribute('data-theme',v);"
     "}catch(e){document.documentElement.setAttribute('data-theme','light');}"
     "})();</script>"
@@ -496,7 +504,7 @@ def render_header(
         f'aria-label="{theme_label}"{aria_t("theme")}>'
         f"{_ICON_SUN}{_ICON_CARET}</button>"
         '<div class="bp-menu-panel bp-theme-switch" id="bp-theme-menu-panel" role="menu" '
-        f'aria-label="{theme_label}"{aria_t("theme")} hidden>{theme_items}</div>'
+        f'aria-label="{theme_label}"{aria_t("theme")}>{theme_items}</div>'
         "</div>"
     )
 
@@ -526,7 +534,7 @@ def render_header(
         f'{_ICON_GLOBE}<span class="bp-menu-current">{escape(lang.upper())}</span>'
         f"{_ICON_CARET}</button>"
         f'<{lang_panel_tag} class="bp-lang-switch" id="bp-lang-menu-panel" role="menu" '
-        f'aria-label="{lang_label}"{aria_t("language")} hidden>{lang_items}</{lang_panel_tag}>'
+        f'aria-label="{lang_label}"{aria_t("language")}>{lang_items}</{lang_panel_tag}>'
         "</div>"
     )
 

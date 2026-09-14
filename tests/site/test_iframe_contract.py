@@ -288,23 +288,27 @@ def test_a_dark_machine_can_still_be_shown_the_light_design(browser, site):
     UPDATED FOR BATCH A1.1 (docs/features/site_unification.md): the three-button
     segmented `.bp-theme-toggle` is gone, replaced by the maquette's theme MENU
     (a button that opens a small panel), and the menu deliberately drops the
-    `Auto` choice from its UI -- `THEME_CHOICES` in src/pages/shell.py is now
-    Light/Dark only, with a comment recording that A1.2 appends Papier to the
-    same tuple. This is an intended narrowing of the control surface, not a
-    weakening of the underlying guarantee: `SHELL_BOOTSTRAP` still reads and
-    honours a reader's PRE-EXISTING `auto` choice (resolving it against
-    prefers-color-scheme and overwriting storage with the explicit result), so
-    the assertion below about that upgrade path stays, just driven by seeding
-    localStorage directly rather than by clicking a control that no longer
-    exists. What survives from the original test: light is still the default
-    on a dark machine with no saved choice, the reader's explicit choice
-    persists across a reload, and the control shows what was chosen.
+    `Auto` choice from its UI -- `THEME_CHOICES` in src/pages/shell.py started
+    this batch Light/Dark only. This is an intended narrowing of the control
+    surface, not a weakening of the underlying guarantee: `SHELL_BOOTSTRAP`
+    still reads and honours a reader's PRE-EXISTING `auto` choice (resolving
+    it against prefers-color-scheme and overwriting storage with the explicit
+    result), so the assertion below about that upgrade path stays, just
+    driven by seeding localStorage directly rather than by clicking a control
+    that no longer exists. What survives from the original test: light is
+    still the default on a dark machine with no saved choice, the reader's
+    explicit choice persists across a reload, and the control shows what was
+    chosen.
+
+    UPDATED AGAIN FOR BATCH A1.2: Papier is now a third entry in the same
+    tuple (`test_choosing_paper_persists_and_survives_reload_before_paint`,
+    below, covers picking it) -- the count here becomes 3.
     """
     context = browser.new_context(color_scheme="dark")
     page = context.new_page()
     try:
         page.goto(f"{site}/about.html", wait_until="load")
-        assert page.locator(".bp-theme-menu [data-theme-choice]").count() == 2
+        assert page.locator(".bp-theme-menu [data-theme-choice]").count() == 3
         # Nothing chosen yet, and the machine says dark: the page is light
         # anyway, because that is the design it was drawn in.
         assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
@@ -341,6 +345,39 @@ def test_a_dark_machine_can_still_be_shown_the_light_design(browser, site):
         page.reload(wait_until="load")
         assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark"
         assert page.evaluate("localStorage.getItem('belpulse-theme')") == "dark"
+    finally:
+        context.close()
+
+
+def test_choosing_paper_persists_and_survives_reload_before_paint(browser, site):
+    """Batch A1.2's third theme choice, added to the SAME menu -- THEME_CHOICES
+    in src/pages/shell.py now has three entries, and SHELL_BOOTSTRAP (the
+    pre-paint script every page this batch covers inlines or syncs verbatim)
+    accepts the stored value `"paper"` explicitly rather than folding it into
+    the `light` fallback the way an unrecognised value still does."""
+    context = browser.new_context()
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/about.html", wait_until="load")
+        assert page.locator('.bp-theme-menu [data-theme-choice="paper"]').count() == 1
+
+        page.click(".bp-theme-menu .bp-menu-btn")
+        page.click('.bp-theme-menu [data-theme-choice="paper"]')
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "paper"
+        assert page.evaluate("localStorage.getItem('belpulse-theme')") == "paper"
+
+        # Survives a reload -- and BEFORE paint specifically, since that is
+        # what SHELL_BOOTSTRAP (inlined in <head>) is for: a page that only
+        # picked "paper" up after its own body script ran would flash the
+        # wrong theme first.
+        page.reload(wait_until="load")
+        assert page.evaluate("document.documentElement.getAttribute('data-theme')") == "paper"
+        checked = page.eval_on_selector_all(
+            ".bp-theme-menu [data-theme-choice]",
+            "els => els.filter(e => e.getAttribute('aria-checked') === 'true')"
+            ".map(e => e.getAttribute('data-theme-choice'))",
+        )
+        assert checked == ["paper"], "the control does not show what the reader chose"
     finally:
         context.close()
 

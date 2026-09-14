@@ -65,6 +65,44 @@ def test_a_page_with_two_start_markers_is_refused():
         synced(stub, page="stub.html", current="stub.html")
 
 
+def _stub_with_header_page(declared: str | None) -> str:
+    header_start = (
+        f'<!-- bp-shell:header:start page="{declared}" -->'
+        if declared is not None
+        else "<!-- bp-shell:header:start -->"
+    )
+    return (
+        "<!-- bp-shell:bootstrap:start -->x<!-- bp-shell:bootstrap:end -->"
+        f"{header_start}x<!-- bp-shell:header:end -->"
+        "<!-- bp-shell:footer:start -->x<!-- bp-shell:footer:end -->"
+    )
+
+
+def test_a_header_marker_naming_the_wrong_page_is_refused():
+    """Fixed post-audit: the sync used to render the header without ever
+    checking the marker's own `page="..."` agreed with SHELL_PAGES -- a
+    copy-pasted marker (macro.html carrying home2.html's, say) would have
+    silently marked the WRONG nav item `aria-current="page"` on every sync,
+    forever, with nothing to say so."""
+    stub = _stub_with_header_page("macro.html")
+    with pytest.raises(SyncError, match="declares page=.macro.html."):
+        synced(stub, page="home2.html", current="home2.html")
+
+
+def test_a_header_marker_with_no_page_attribute_is_refused():
+    stub = _stub_with_header_page(None)
+    with pytest.raises(SyncError, match='declares page="None"'):
+        synced(stub, page="home2.html", current="home2.html")
+
+
+@pytest.mark.parametrize("page, current", SHELL_PAGES)
+def test_the_committed_header_marker_names_its_own_page(page, current):
+    html = _read(page)
+    match = re.search(r'<!-- bp-shell:header:start page="([^"]*)"', html)
+    assert match, f"{page}'s header marker carries no page attribute"
+    assert match.group(1) == page
+
+
 # --- determinism and idempotency (claude.md rule 35) --------------------------
 
 

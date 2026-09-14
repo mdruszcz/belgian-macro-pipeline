@@ -27,6 +27,18 @@
 (function () {
   'use strict';
 
+  // PROGRESSIVE ENHANCEMENT (fixed post-audit). The theme menu, the language
+  // menu and the mobile nav toggle all render, in their raw HTML, as a plain
+  // in-flow list of real controls with no `hidden` attribute anywhere -- a
+  // reader with scripting off gets every link and every choice, visible,
+  // with no click needed. This class is the FIRST thing this script does,
+  // before wiring anything: assets/belpulse/layout.css keys the collapsed
+  // dropdown/toggle behaviour on `:root.bp-js`, so none of that behaviour
+  // exists until this line has actually run. If this script never loads (or
+  // errors before reaching here), the class never appears and the page stays
+  // in its reachable, no-JS shape.
+  document.documentElement.classList.add('bp-js');
+
   var THEME_KEY = 'belpulse-theme';
   var LANG_KEY = 'belpulse-lang';
 
@@ -71,6 +83,12 @@
     var btn = wrap.querySelector('.bp-menu-btn');
     var panel = wrap.querySelector('.bp-menu-panel, .bp-theme-switch, .bp-lang-switch');
     if (!btn || !panel) return;
+
+    // The panel arrives in the HTML WITHOUT `hidden` (see the `bp-js` class
+    // above) -- it is this script's job, not the server's, to close it once
+    // it is actually going to behave like a dropdown.
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
 
     btn.addEventListener('click', function () {
       if (panel.hidden) openMenu(wrap);
@@ -191,6 +209,18 @@
       });
       var code = wrap.querySelector('.bp-menu-current');
       if (code) code.textContent = lang.toUpperCase();
+      // FIRES AT BOOT TOO (see the call at the bottom of this function), and
+      // that first firing happens WHILE THIS SCRIPT IS STILL RUNNING --
+      // before a client-mode page's own `<script>` (further down the body)
+      // has even executed, let alone attached its own 'bp:lang' listener. A
+      // page cannot rely on that boot-time dispatch to drive its first
+      // render; it is only ever useful for a CHANGE after the page has
+      // finished loading. Every page in this batch already does the right
+      // thing independently -- home2.html and macro.html both read
+      // `I18N.initial()` themselves at the top of their own script and use
+      // it for their first render, the same value this function is about to
+      // recompute -- but a future client-mode page must do the same rather
+      // than waiting on this event to fire once at the start.
       document.dispatchEvent(new CustomEvent('bp:lang', { detail: { lang: lang } }));
     }
 

@@ -65,6 +65,16 @@ class SyncError(ShellError):
     shell, which is exactly the drift this script exists to prevent."""
 
 
+#: The header start marker's own `page="..."` attribute -- the only zone
+#: attribute this script reads back. Group 1 is None if the attribute is
+#: missing entirely, which is refused just like a mismatched value (fixed
+#: post-audit: the sync used to render the START marker's page attribute
+#: without ever checking it agreed with SHELL_PAGES, so a copy-pasted or
+#: hand-edited marker could silently render as the WRONG page's `current`
+#: nav item -- wrong link marked `aria-current="page"`, nothing to say so).
+_HEADER_START = re.compile(r'<!-- bp-shell:header:start(?:\s+page="([^"]*)")?\s*-->')
+
+
 def _zone_pattern(zone: str) -> re.Pattern:
     """Matches a whole zone, START MARKER THROUGH END MARKER inclusive, so a
     replacement can put the markers straight back around the new content.
@@ -116,6 +126,15 @@ def synced(text: str, *, page: str, current: str) -> str:
         pattern = _zone_pattern(zone)
         if not pattern.search(text):
             raise SyncError(f"{page}: bp-shell:{zone} start/end markers do not pair up")
+        if zone == "header":
+            declared = _HEADER_START.search(text)
+            declared_page = declared.group(1) if declared else None
+            if declared_page != page:
+                raise SyncError(
+                    f'{page}: bp-shell:header:start declares page="{declared_page}", '
+                    f'expected "{page}" -- SHELL_PAGES and the marker have drifted, '
+                    "refusing to guess which one is right"
+                )
         fragment = _fragment_for(zone, page=page, current=current)
         # `frag=fragment` binds THIS iteration's value into the lambda's own
         # default-argument scope -- without it every lambda created across

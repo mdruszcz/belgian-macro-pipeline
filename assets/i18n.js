@@ -45,6 +45,9 @@ I18N.STRINGS = {
     themeLight: 'Light',
     themeAuto: 'Auto',
     themeDark: 'Dark',
+    /* The third theme choice (Batch A1.2) -- assets/belpulse/tokens.css's
+       :root[data-theme="paper"]. */
+    themePaper: 'Paper',
     loading: 'Loading…',
     communesTitle: 'Commune data',
     communesLead: 'Every municipal-level observation this pipeline holds — every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. Or press <strong>Show map</strong> to draw the column you are sorting by, in the year you have picked. See <a href="map.html">map.html</a> for a full-page map of the latest figures, <a href="all_data.html">all_data.html</a> for national-level data, or <a href="local.html">local.html</a> for a single commune’s own profile page.',
@@ -153,9 +156,14 @@ I18N.STRINGS = {
        short interface words are allowed to match (see
        test_no_prose_string_is_left_untranslated). */
     navMenu: 'Menu',
-    /* The unified shell's footer credit line. Names the publishers this
-       pipeline actually reads from, never an indicator (claude.md rule 2). */
-    footerCredit: 'Sources: Statbel, the National Bank, Eurostat and other official publishers — see Sources.',
+    /* The unified shell's footer credit line. Generic on purpose (fixed
+       post-audit): it appears on every page this batch covers, including
+       ones that use none of Statbel/NBB/Eurostat, so naming specific
+       publishers here would misstate a page's own sources. A page that
+       wants to credit ITS sources by name does so in its own content (see
+       macro.html's kpi cards, each carrying its own source label from
+       public/data/metadata/sources.json) -- never here. */
+    footerCredit: 'Official public sources — see Sources.',
     mapIndicatorLabel: 'Indicator',
     mapScopeLabel: 'Area of analysis',
     mapFindLabel: 'Find a commune',
@@ -492,6 +500,7 @@ I18N.STRINGS = {
     themeLight: 'Clair',
     themeAuto: 'Auto',
     themeDark: 'Sombre',
+    themePaper: 'Papier',
     loading: 'Chargement…',
     communesTitle: 'Données communales',
     communesLead: 'Toutes les observations communales de ce pipeline — chaque année enregistrée, une ligne par commune. Choisissez une année ci-dessous ; survolez une valeur pour voir tout son historique. Les lignes sous-jacentes complètes se trouvent dans <code>data/communes_history.csv</code>, pour qui veut tout d’un coup. Ou cliquez sur <strong>Afficher la carte</strong> pour cartographier la colonne selon laquelle vous triez, pour l’année choisie. Voir <a href="map.html">map.html</a> pour une carte plein écran des derniers chiffres, <a href="all_data.html">all_data.html</a> pour les données nationales, ou <a href="local.html">local.html</a> pour la fiche d’une commune.',
@@ -919,6 +928,7 @@ I18N.STRINGS = {
     themeLight: 'Licht',
     themeAuto: 'Auto',
     themeDark: 'Donker',
+    themePaper: 'Papier',
     loading: 'Laden…',
     communesTitle: 'Gemeentegegevens',
     communesLead: 'Alle gemeentelijke observaties in deze pipeline — elk vastgelegd jaar, één rij per gemeente. Kies hieronder een jaar; beweeg over een waarde voor de volledige geschiedenis. De volledige onderliggende rijen staan in <code>data/communes_history.csv</code>, voor wie alles in één keer wil. Of klik op <strong>Kaart weergeven</strong> om de kolom waarop u sorteert te karteren, voor het gekozen jaar. Zie <a href="map.html">map.html</a> voor een kaart op volledige pagina van de meest recente cijfers, <a href="all_data.html">all_data.html</a> voor nationale gegevens, of <a href="local.html">local.html</a> voor de fiche van één gemeente.',
