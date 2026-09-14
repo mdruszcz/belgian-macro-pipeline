@@ -2,7 +2,7 @@
 
 Status: **implemented, batch B2** (2026-09-14) — GDP per capita PPS loaded and published;
 unemployment rate and population configured but blocked on a newly found adapter gap, see
-"Measured at load, 2026-09-14" below. PR: europe-nuts2-pipeline (B2).
+"Measured at load, 2026-09-14" below. PR: #174.
 Issue: none yet (this document is what the maintainer approved before one is opened)
 Branch: feat/europe-nuts2-spec (B1, spec) → feat/europe-nuts2-pipeline (B2, implementation)
 
