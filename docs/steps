@@ -1228,7 +1228,7 @@ Why: Nobody else can do this one, and it is the check most likely to catch what 
 automated audit misses.
 
 Block UNIFY — one coherent public interface (spec docs/features/site_unification.md)
- ✅ [BUILD] A0 -- line endings and the spec (2026-09-14: scripts/export_page_documents.py and
+ ✅ [BUILD] A0 -- line endings and the spec (2026-09-14, PR #167: scripts/export_page_documents.py and
 scripts/export_local_pages.py's three HTML/XML writers now pass newline="\n", and .gitattributes
 (`* text=auto eol=lf` plus explicit `binary` lines for webp/png/jpg/jpeg/pdf/db) pins it at commit
 time too. `git add --renormalize .` touched only text files whose diff is empty under
