@@ -466,6 +466,9 @@ I18N.STRINGS = {
     explorerFooter: 'Read from GitHub Pages — no server, no filtering applied before it reaches your browser. Built from the same <code>data/communes_history.csv</code> and <code>data/belgian_macro_export.csv</code> offered as downloads below, one JSON file per indicator, so the explorer and the download always agree.',
     explorerScrollRegion: 'Scrollable results table. Arrow keys move one row, Page Up or Page Down move one page, Home and End jump to the first or last row.',
     explorerStatusNa: 'n/a',
+    // A3.2: the every-indicator-every-period table ported from profiles.html's
+    // ?nis= view into commune.html's <details id="allData">.
+    cpAllDataSummary: 'All data for this commune',
   },
   fr: {
     language: 'Langue',
@@ -889,6 +892,9 @@ I18N.STRINGS = {
     explorerFooter: 'Lu depuis GitHub Pages — sans serveur, sans filtrage avant d’atteindre votre navigateur. Construit à partir des mêmes fichiers <code>data/communes_history.csv</code> et <code>data/belgian_macro_export.csv</code> proposés en téléchargement ci-dessous, un fichier JSON par indicateur, afin que l’explorateur et le téléchargement soient toujours d’accord.',
     explorerScrollRegion: 'Tableau de résultats déroulant. Les flèches déplacent d’une ligne, Page précédente/suivante d’une page, Origine et Fin vont à la première ou à la dernière ligne.',
     explorerStatusNa: 's.o.',
+    // A3.2: le tableau tous-indicateurs-toutes-périodes, transféré de la vue
+    // ?nis= de profiles.html vers <details id="allData"> de commune.html.
+    cpAllDataSummary: 'Toutes les données de cette commune',
   },
   nl: {
     language: 'Taal',
@@ -1312,6 +1318,9 @@ I18N.STRINGS = {
     explorerFooter: 'Gelezen vanaf GitHub Pages — geen server, geen filtering voordat het uw browser bereikt. Opgebouwd uit dezelfde bestanden <code>data/communes_history.csv</code> en <code>data/belgian_macro_export.csv</code> die hieronder als download worden aangeboden, één JSON-bestand per indicator, zodat de verkenner en de download altijd overeenstemmen.',
     explorerScrollRegion: 'Schuifbare resultatentabel. Pijltjestoetsen verplaatsen één rij, Page Up of Page Down één pagina, Home en End springen naar de eerste of laatste rij.',
     explorerStatusNa: 'n.v.t.',
+    // A3.2: de tabel met elke indicator en elke periode, verplaatst van
+    // profiles.html's ?nis=-weergave naar commune.html's <details id="allData">.
+    cpAllDataSummary: 'Alle gegevens voor deze gemeente',
   },
 };
 

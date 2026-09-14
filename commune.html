@@ -385,6 +385,49 @@
     .cta-stats{flex-wrap:wrap; gap:var(--bp-space-5)}
   }
   @media (max-width:520px){ .keyrow{grid-template-columns:minmax(0,1fr)} }
+
+  /* ---- all data: every indicator, every published period (A3.2, ported
+     from profiles.html's retired ?nis= view) ------------------------------ */
+  #allData{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); background:var(--bp-surface); box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4) var(--bp-space-5)}
+  #allData summary{cursor:pointer; font-family:var(--bp-font-display); font-size:1.2rem; font-weight:600; list-style-position:inside}
+  #allData[open] summary{margin-bottom:var(--bp-space-4)}
+  .alldata-lead{color:var(--bp-text-muted); font-size:var(--bp-text-small); margin:0 0 var(--bp-space-4); max-width:80ch}
+  .profile-counts{display:flex; flex-wrap:wrap; gap:var(--bp-space-5); margin-bottom:var(--bp-space-4)}
+  .profile-counts b{display:block; font-family:var(--bp-font-display); font-size:1.3rem}
+  .profile-counts span{display:block; color:var(--bp-text-muted); font-size:11px}
+  .profile-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:var(--bp-space-4)}
+  .profile-tools .searchbox{margin:0; max-width:360px; flex:1 1 280px}
+  .profile-tools .shown{font-size:12px; color:var(--bp-text-muted); margin-right:auto}
+  .indicator-group{margin-bottom:var(--bp-space-6)}
+  .indicator-group[hidden]{display:none}
+  .indicator-group-head{margin-bottom:var(--bp-space-3)}
+  .indicator-group-head h3{font-size:1.1rem; margin:0 0 2px}
+  .indicator-group-head p{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0; max-width:80ch}
+  .indicator-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
+  .indicator-card{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); background:var(--bp-surface-alt); padding:var(--bp-space-4); min-width:0}
+  .indicator-card[hidden]{display:none}
+  .indicator-card h4{font-family:var(--bp-font-body); font-size:var(--bp-text-small); line-height:1.35; margin:0; font-weight:var(--bp-weight-semibold)}
+  .indicator-code{font:10px/1.3 "IBM Plex Mono",monospace; color:var(--bp-text-faint); overflow-wrap:anywhere; margin-top:2px}
+  .indicator-latest{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--bp-space-3); margin:var(--bp-space-4) 0 var(--bp-space-2)}
+  .indicator-value{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
+  .indicator-period{font-size:11px; color:var(--bp-text-muted); text-align:right}
+  .indicator-meta{font-size:11px; color:var(--bp-text-muted); line-height:1.45; min-height:1.45em}
+  .indicator-ranks{display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px}
+  .indicator-rank{font-size:11px; color:var(--bp-accent-ink)}
+  .indicator-card details{border-top:1px solid var(--bp-border); margin-top:var(--bp-space-3); padding-top:var(--bp-space-2)}
+  .indicator-card summary{cursor:pointer; color:var(--bp-accent); font-size:11px; list-style-position:inside}
+  .indicator-history{max-height:220px; overflow:auto; margin-top:6px}
+  .indicator-history-row{display:grid; grid-template-columns:minmax(70px,.7fr) minmax(0,1fr) auto; gap:8px; padding:4px 0; border-top:1px solid var(--bp-border); font-size:11px; font-variant-numeric:tabular-nums}
+  .indicator-history-row:first-child{border-top:0}
+  .indicator-history-row .hv{text-align:right; font-weight:var(--bp-weight-medium)}
+  .indicator-history-row .hs{color:var(--bp-text-faint); text-align:right}
+  .indicator-comparison-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:5px 0; border-top:1px solid var(--bp-border); font-size:11px}
+  .indicator-comparison-row:first-child{border-top:0}
+  .indicator-comparison-row b{font-variant-numeric:tabular-nums; text-align:right}
+  .indicator-comparison-row small{display:block; color:var(--bp-text-faint); margin-top:1px}
+  .alldata-error{padding:var(--bp-space-6); text-align:center; color:var(--bp-text-muted)}
+  @media (max-width:1080px){ .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media (max-width:480px){ .indicator-grid{grid-template-columns:minmax(0,1fr)} .profile-tools .searchbox{max-width:none} }
 </style>
 </head>
 <body class="bp-shell">
@@ -419,7 +462,7 @@
 <nav class="bp-breadcrumb" aria-label="Breadcrumb">
   <div class="wrap">
     <a href="home2.html" data-t="navHome">Home</a><span class="sep">/</span>
-    <a href="profiles.html" data-t="navCommunes">Commune profiles</a><span class="sep">/</span>
+    <a href="profiles.html" data-t="navCommunes" id="crumbDirectory">Commune profiles</a><span class="sep">/</span>
     <span id="crumbName">—</span>
   </div>
 </nav>
@@ -486,7 +529,7 @@
         <section>
           <div class="sechead">
             <h2 data-t="cpKeyFigures">Key figures and recent trends</h2>
-            <a href="profiles.html" data-t="cpMoreIndicators">See more indicators →</a>
+            <a href="#allData" class="jump-alldata" data-t="cpMoreIndicators">See more indicators →</a>
           </div>
           <div class="keyrow" id="keyRow"></div>
         </section>
@@ -576,7 +619,7 @@
         <section>
           <div class="sechead">
             <h2 id="comparedTitle">—</h2>
-            <a href="profiles.html" data-t="cpMoreIndicators">See more indicators →</a>
+            <a href="#allData" class="jump-alldata" data-t="cpMoreIndicators">See more indicators →</a>
           </div>
           <div class="panel" style="padding:var(--bp-space-3) var(--bp-space-4)">
             <div style="overflow-x:auto"><table class="cmp" id="cmpTable"></table></div>
@@ -586,6 +629,29 @@
         <section>
           <h2 class="sec" data-t="cpFocus">Thematic focus</h2>
           <div class="focus" id="focusGrid"></div>
+        </section>
+
+        <!-- ── every indicator, every published period (A3.2, ported from
+             profiles.html's retired ?nis= view) ──────────────────────────── -->
+        <section>
+          <details id="allData">
+            <summary data-t="cpAllDataSummary">All data for this commune</summary>
+            <p class="alldata-lead" data-t="pfAllDataLead">Every indicator in this commune's published payload, including unavailable and source-suppressed cells. Open an indicator to inspect its full history.</p>
+            <div class="profile-counts">
+              <div><b id="allDataIndicatorCount">—</b><span data-t="pfAvailableIndicators">available indicators</span></div>
+              <div><b id="allDataPeriodCount">—</b><span data-t="pfPublishedPeriods">published observations</span></div>
+              <div><b id="allDataSourceCount">—</b><span data-t="pfDataSources">data sources</span></div>
+            </div>
+            <div class="profile-tools">
+              <label class="searchbox">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input id="allDataSearch" type="search" data-t-placeholder="pfIndicatorSearch" placeholder="Filter by indicator, source or code…" autocomplete="off">
+              </label>
+              <span class="shown" id="allDataShown"></span>
+            </div>
+            <div id="allDataSections"></div>
+            <p class="alldata-error" id="allDataError" hidden></p>
+          </details>
         </section>
 
       </div>
@@ -1372,6 +1438,254 @@
     });
   }
 
+  /* ---- all data: every indicator and every published period -------------
+     Ported outright from profiles.html's retired ?nis= view (A3.2) --
+     state.profile is the same communes/{nis}.json payload, state.sections
+     and state.byCode are the same metadata, fetched by this page's own
+     init() already, so nothing here re-fetches anything profiles.html did
+     not also fetch once. Renders EVERY indicator and EVERY published period
+     found in the payload -- no indicator code is named in this file. */
+  function mlText(obj){
+    if(!obj) return '';
+    if(typeof obj === 'string') return obj;
+    return obj[LANG] || obj.en || '';
+  }
+  function dom(tag, cls, txt){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  function allDataLatestPeriod(entry){
+    var periods = Object.keys((entry && entry.periods) || {}).sort();
+    return periods.length ? periods[periods.length - 1] : null;
+  }
+  function allDataStatusLabel(status){
+    if(!status) return '';
+    if(status === 'final') return T('pfStatusFinal');
+    if(status === 'derived') return T('pfStatusDerived');
+    if(status === 'suppressed') return T('pfSuppressed');
+    var translated = MapUI.text(LANG, 'status_' + status);
+    return translated && translated !== 'status_' + status ? translated : status;
+  }
+  function allDataSourceLabels(meta){
+    var ids = [];
+    if(meta && meta.source) ids.push(meta.source);
+    (meta && meta.input_sources || []).forEach(function(id){ if(ids.indexOf(id) < 0) ids.push(id); });
+    return ids.map(function(id){
+      var source = state.sources[id];
+      return source && source.label ? mlText(source.label) : id;
+    }).filter(Boolean);
+  }
+  function allDataIndicatorCard(code, entry){
+    var meta = state.byCode[code] || {unit: entry.unit, decimals: null};
+    var cardEl = dom('article', 'indicator-card');
+    cardEl.dataset.search = [nameOf(code), code, meta.unit || entry.unit]
+      .concat(allDataSourceLabels(meta)).join(' ').toLocaleLowerCase(LANG);
+    cardEl.appendChild(dom('h4', '', nameOf(code)));
+    cardEl.appendChild(dom('div', 'indicator-code', code));
+
+    var period = allDataLatestPeriod(entry);
+    var cell = period ? entry.periods[period] : null;
+    var latest = dom('div', 'indicator-latest');
+    var value = dom('div', 'indicator-value');
+    if(cell && typeof cell.value === 'number'){
+      value.textContent = fmt(cell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals});
+    }else if(cell && cell.status === 'suppressed'){
+      value.textContent = T('pfSuppressed');
+    }else{
+      value.textContent = '—';
+    }
+    latest.appendChild(value);
+    var when = dom('div', 'indicator-period');
+    when.textContent = [period, cell && allDataStatusLabel(cell.status)].filter(Boolean).join(' · ');
+    latest.appendChild(when);
+    cardEl.appendChild(latest);
+
+    var provenance = allDataSourceLabels(meta);
+    if(meta.grade) provenance.push(meta.grade);
+    if(meta.updated || meta.inputs_updated) provenance.push(meta.updated || meta.inputs_updated);
+    cardEl.appendChild(dom('div', 'indicator-meta', provenance.join(' · ')));
+
+    var percentiles = entry.percentile || {};
+    var ranks = dom('div', 'indicator-ranks');
+    if(percentiles.national && percentiles.national.rank && percentiles.national.peers){
+      ranks.appendChild(dom('span', 'indicator-rank', T('pfNationalRank', {
+        rank: percentiles.national.rank, peers: percentiles.national.peers
+      })));
+    }
+    if(percentiles.regional && percentiles.regional.rank && percentiles.regional.peers){
+      ranks.appendChild(dom('span', 'indicator-rank', T('pfRegionalRank', {
+        rank: percentiles.regional.rank, peers: percentiles.regional.peers
+      })));
+    }
+    if(ranks.children.length) cardEl.appendChild(ranks);
+
+    var comparisonKeys = ['province', 'region', 'country'].filter(function(scope){
+      return entry.comparison && entry.comparison[scope];
+    });
+    if(comparisonKeys.length){
+      var comparisons = document.createElement('details');
+      var comparisonsSummary = document.createElement('summary');
+      comparisonsSummary.textContent = T('pfComparisons', {n: comparisonKeys.length});
+      comparisons.appendChild(comparisonsSummary);
+      var comparisonsBody = dom('div', 'indicator-comparisons');
+      comparisonKeys.forEach(function(scope){
+        var comparison = entry.comparison[scope];
+        var comparisonRow = dom('div', 'indicator-comparison-row');
+        var comparisonLabel = dom('span', '', mlText(comparison.name) || scope);
+        if(comparison.coverage && comparison.coverage.of){
+          comparisonLabel.appendChild(dom('small', '', T('pfCoverage', {
+            n: comparison.coverage.n, of: comparison.coverage.of
+          })));
+        }
+        comparisonRow.appendChild(comparisonLabel);
+        var comparisonValue = typeof comparison.value === 'number'
+          ? fmt(comparison.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
+          : '—';
+        comparisonRow.appendChild(dom('b', '', [comparisonValue, comparison.period].filter(Boolean).join(' · ')));
+        comparisonsBody.appendChild(comparisonRow);
+      });
+      comparisons.appendChild(comparisonsBody);
+      cardEl.appendChild(comparisons);
+    }
+
+    var periods = Object.keys(entry.periods || {}).sort().reverse();
+    var details = document.createElement('details');
+    var summary = document.createElement('summary');
+    summary.textContent = T('pfHistory', {n: periods.length});
+    details.appendChild(summary);
+    var history = dom('div', 'indicator-history');
+    periods.forEach(function(p){
+      var historyCell = entry.periods[p];
+      var row = dom('div', 'indicator-history-row');
+      row.appendChild(dom('span', '', p));
+      var historyValue = typeof historyCell.value === 'number'
+        ? fmt(historyCell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
+        : (historyCell.status === 'suppressed' ? T('pfSuppressed') : '—');
+      row.appendChild(dom('span', 'hv', historyValue));
+      row.appendChild(dom('span', 'hs', allDataStatusLabel(historyCell.status)));
+      history.appendChild(row);
+    });
+    details.appendChild(history);
+    cardEl.appendChild(details);
+    return cardEl;
+  }
+  function allDataGroups(indicators){
+    var remaining = {};
+    Object.keys(indicators || {}).forEach(function(code){ remaining[code] = true; });
+    var groups = [];
+    (state.sections.sections || []).forEach(function(section){
+      if(section.unavailable) return;
+      var declared = [section.headline].concat(section.indicators || []).filter(Boolean);
+      var codes = [];
+      declared.forEach(function(code){
+        if(remaining[code] && codes.indexOf(code) < 0){ codes.push(code); delete remaining[code]; }
+      });
+      if(codes.length) groups.push({label: section.label, blurb: section.blurb, codes: codes});
+    });
+    var other = Object.keys(remaining).sort(function(a, b){
+      return nameOf(a).localeCompare(nameOf(b), LANG);
+    });
+    if(other.length) groups.push({label: T('pfOtherData'), blurb: null, codes: other});
+    return groups;
+  }
+  function filterAllData(){
+    var input = document.getElementById('allDataSearch');
+    if(!input) return;
+    var query = (input.value || '').trim().toLocaleLowerCase(LANG);
+    var shown = 0;
+    document.querySelectorAll('#allDataSections .indicator-card').forEach(function(cardEl){
+      cardEl.hidden = !!query && cardEl.dataset.search.indexOf(query) < 0;
+      if(!cardEl.hidden) shown += 1;
+    });
+    document.querySelectorAll('#allDataSections .indicator-group').forEach(function(group){
+      group.hidden = !group.querySelector('.indicator-card:not([hidden])');
+    });
+    var shownEl = document.getElementById('allDataShown');
+    if(shownEl) shownEl.textContent = T('pfIndicatorsShown', {n: shown});
+  }
+  function renderAllData(){
+    var host = document.getElementById('allDataSections');
+    var error = document.getElementById('allDataError');
+    if(!host) return;
+    var payload = state.profile;
+    if(!payload){
+      if(error){ error.hidden = false; error.textContent = T('pfProfileUnavailable'); }
+      return;
+    }
+    if(error) error.hidden = true;
+    var indicators = payload.indicators || {};
+    var codes = Object.keys(indicators);
+    var periods = codes.reduce(function(total, code){
+      return total + Object.keys(indicators[code].periods || {}).length;
+    }, 0);
+    var sources = {};
+    codes.forEach(function(code){
+      var meta = state.byCode[code] || {};
+      if(meta.source) sources[meta.source] = true;
+      (meta.input_sources || []).forEach(function(id){ sources[id] = true; });
+    });
+    document.getElementById('allDataIndicatorCount').textContent = codes.length.toLocaleString(LANG);
+    document.getElementById('allDataPeriodCount').textContent = periods.toLocaleString(LANG);
+    document.getElementById('allDataSourceCount').textContent = Object.keys(sources).length.toLocaleString(LANG);
+
+    host.innerHTML = '';
+    allDataGroups(indicators).forEach(function(group){
+      var section = dom('section', 'indicator-group');
+      var head = dom('div', 'indicator-group-head');
+      head.appendChild(dom('h3', '', mlText(group.label)));
+      if(group.blurb) head.appendChild(dom('p', '', mlText(group.blurb)));
+      section.appendChild(head);
+      var grid = dom('div', 'indicator-grid');
+      group.codes.forEach(function(code){
+        grid.appendChild(allDataIndicatorCard(code, indicators[code]));
+      });
+      section.appendChild(grid);
+      host.appendChild(section);
+    });
+    filterAllData();
+  }
+
+  /* ---- breadcrumb "from": the directory query to return to ---------------
+     Revalidated against real metadata rather than trusted from the URL --
+     never echoed into HTML. Pure parsing kept in its own function so
+     tests/test_commune_destinations.py can exercise it under Node with no
+     DOM. --parseFromStart-- */
+  function parseFrom(raw){
+    if(!raw) return null;
+    var pairs = raw.split('&');
+    if(pairs.length !== 1) return null;
+    var m = /^(type|family|province|region)=([^&]+)$/.exec(pairs[0]);
+    return m ? {key: m[1], value: m[2]} : null;
+  }
+  /* --parseFromEnd-- */
+  function hasOwn(obj, key){ return !!obj && Object.prototype.hasOwnProperty.call(obj, key); }
+  var TYPOLOGY_URL = 'public/data/metadata/typology.json';
+  var typologyPromise = null;
+  function fetchTypologyOnce(){
+    if(!typologyPromise){
+      typologyPromise = fetch(TYPOLOGY_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+    }
+    return typologyPromise;
+  }
+  async function resolveBreadcrumbBack(){
+    var parsed = parseFrom(qs('from'));
+    if(!parsed) return;
+    var valid = false;
+    if(parsed.key === 'province' || parsed.key === 'region'){
+      var row = hasOwn(state.geographies, parsed.value) ? state.geographies[parsed.value] : null;
+      valid = !!row && row.level === parsed.key;
+    }else{
+      var typ = await fetchTypologyOnce();
+      if(!typ) return;
+      valid = parsed.key === 'type' ? hasOwn(typ.clusters, parsed.value) : hasOwn(typ.families, parsed.value);
+    }
+    if(!valid) return;
+    var link = document.getElementById('crumbDirectory');
+    if(link) link.href = 'profiles.html?' + parsed.key + '=' + encodeURIComponent(parsed.value);
+  }
+
   /* ---- maps -------------------------------------------------------------- */
   // Outline this commune without zooming to it. The component's own focus()
   // does both, and framing one commune is wrong for a map whose whole job is
@@ -1594,6 +1908,7 @@
     renderComparison();
     renderRanks();
     renderFocus();
+    renderAllData();
     renderTabs();
     renderCompareSelects();
     var ds = state.manifest.datasets || {};
@@ -1611,6 +1926,14 @@
       renderAll();
       if(state.map) state.map.setLang(LANG);
       if(state.locator) state.locator.setLang(LANG);
+    });
+    var allDataSearchInput = document.getElementById('allDataSearch');
+    if(allDataSearchInput) allDataSearchInput.addEventListener('input', filterAllData);
+    document.querySelectorAll('a[href="#allData"]').forEach(function(a){
+      a.addEventListener('click', function(){
+        var d = document.getElementById('allData');
+        if(d) d.open = true;
+      });
     });
     applyStrings();
 
@@ -1654,6 +1977,7 @@
     if(u && state.attrUpdated) u.textContent = state.attrUpdated;
 
     renderAll();
+    resolveBreadcrumbBack();
 
     var boundaries = await fetch(GEO_URL);
     if(!boundaries.ok){ document.getElementById('mapCard').dataset.state = 'error'; return; }

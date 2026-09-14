@@ -1,7 +1,7 @@
 """Generate one permanent, statically-rendered page per commune -- Block L's
 "Permanent URLs" step, docs/features/comparison.md.
 
-WHY STATIC AND NOT JUST local.html?nis=11002. local.html is a JavaScript
+WHY STATIC AND NOT JUST local.html with a ?nis= query string. local.html is a JavaScript
 application: it fetches a payload and renders in the browser. A crawler that
 does not execute JavaScript sees an empty shell, so the entire SEO position
 the roadmap depends on ("thousands of genuinely useful pages") does not
@@ -683,7 +683,7 @@ def _render_page(
   <p class="ancestry">{esc(_t(strings, lang, "nis"))} {esc(nis)} · {esc(ancestry)}</p>
   <p class="lede">{esc(description)}</p>
 
-  <a class="interactive" href="{root}/local.html?nis={esc(nis)}">{esc(_t(strings, lang, "openInteractive"))}</a>
+  <a class="interactive" href="{root}/commune.html?nis={esc(nis)}">{esc(_t(strings, lang, "openInteractive"))}</a>
 
   {"".join(body)}
 
