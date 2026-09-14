@@ -537,35 +537,65 @@ def _micro_sections(path: Path = MICRO_SECTIONS_CONFIG) -> dict:
         "map": layout.get("map") or {},
         "history": layout.get("history") or {},
         "unavailable": layout.get("unavailable") or [],
+        # BATCH A3.1c: the seven selectable panels and the new thematic list
+        # cards (Population, Revenus, Emploi, Logement) they introduce, plus
+        # the Logement panel's region table. Passed through as-is --
+        # micro.html's own renderer interprets them, this exporter only
+        # validates the series below carry data.
+        "panels": layout.get("panels") or [],
+        "extra_lists": layout.get("extra_lists") or [],
+        "regional_housing": layout.get("regional_housing") or {},
     }
 
 
-def _check_micro_sections(layout: dict, known: set[str]) -> None:
+def _check_micro_sections(
+    layout: dict, known: set[str], commune_known: set[str] | None = None
+) -> None:
     """Every series config/micro_sections.yaml names must exist in the
     universe micro.html can actually read from -- national.json's series plus
     whatever carries a `be:country` row in aggregates.json. A card pointing at
     a series neither file provides would render as an empty box on the one
     page, invisible to every other test.
+
+    `map.indicators` is checked separately, against `commune_known` (BATCH
+    A3.1c): the choropleth reads each commune's OWN value straight from
+    public/data/indicators/<code>.json (micro.html's `selectMapIndicator`),
+    never national.json or aggregates.json's country row -- so a series with
+    no national/aggregate figure at all (MEDIAN_HOUSE_PRICE: a median cannot
+    be aggregated from commune medians, CLAUDE.md's aggregation rule) can
+    still be a legitimate map indicator, and the `known` universe the rest of
+    this layout is held to would wrongly refuse it. `commune_known` defaults
+    to `known` (still stricter than reality, never looser) so a caller that
+    has not computed the true per-commune universe gets the old behaviour
+    rather than an unchecked list.
     """
     comparison = layout.get("comparison") or {}
     tiles = layout.get("tiles") or {}
     map_spec = layout.get("map") or {}
     history = layout.get("history") or {}
+    extra_series: list[str] = []
+    for item in layout.get("extra_lists") or []:
+        extra_series.extend(item.get("series") or [])
+    regional_housing = layout.get("regional_housing") or {}
     named = [
         *(layout.get("kpis") or []),
         *(layout.get("key_list") or []),
         *(tiles.get("indicators") or []),
         *(comparison.get("indicators") or []),
-        *(map_spec.get("indicators") or []),
         *([history["series"]] if history.get("series") else []),
+        *extra_series,
+        *([regional_housing["series"]] if regional_housing.get("series") else []),
     ]
     unknown = sorted({i for i in named if i not in known})
-    if unknown:
+    map_universe = known | (commune_known if commune_known is not None else set())
+    unknown_map = sorted({i for i in (map_spec.get("indicators") or []) if i not in map_universe})
+    if unknown or unknown_map:
+        problems = sorted(set(unknown) | set(unknown_map))
         raise ValueError(
-            f"config/micro_sections.yaml names indicator(s) neither national.json nor "
-            f"aggregates.json carries at country level: {unknown}. They would render as "
-            "empty cards on micro.html. Remove them from the layout, or load the data "
-            "they need."
+            f"config/micro_sections.yaml names indicator(s) neither national.json, "
+            f"aggregates.json's country level, nor (for the map) any per-commune "
+            f"payload carries: {problems}. They would render as empty cards on "
+            "micro.html. Remove them from the layout, or load the data they need."
         )
 
 
@@ -1091,7 +1121,11 @@ def export_site_payloads(
             for code, geos in (aggregates_payload or {}).get("indicators", {}).items()
             if "be:country" in geos
         }
-        _check_micro_sections(micro_layout, set(national) | aggregate_country_codes)
+        _check_micro_sections(
+            micro_layout,
+            set(national) | aggregate_country_codes,
+            commune_known=set(indicators),
+        )
         _write_json(out_dir / "metadata" / "micro_sections.json", micro_layout)
 
     manifest = {

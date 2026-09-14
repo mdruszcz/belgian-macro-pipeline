@@ -1155,6 +1155,91 @@ def test_check_micro_sections_accepts_a_code_from_either_universe():
     mod._check_micro_sections(layout, {"FROM_NATIONAL", "FROM_AGGREGATES"})  # must not raise
 
 
+# --- _check_micro_sections: the map's separate per-commune universe (A3.1c) --
+
+
+def test_check_micro_sections_refuses_a_map_code_with_no_commune_payload_either():
+    """With no `commune_known` passed, a map indicator is held to the same
+    national/aggregate universe as everything else -- the pre-A3.1c
+    behaviour, never loosened by omission."""
+    import export_site_payloads as mod
+
+    layout = {
+        "kpis": [],
+        "key_list": [],
+        "tiles": {},
+        "comparison": {},
+        "map": {"indicators": ["MADE_UP_CODE"]},
+        "history": {},
+    }
+    with pytest.raises(ValueError, match="MADE_UP_CODE"):
+        mod._check_micro_sections(layout, {"REAL_ONE"})
+
+
+def test_check_micro_sections_accepts_a_map_only_code_from_the_commune_universe():
+    """MEDIAN_HOUSE_PRICE has no national or aggregate figure at all (a
+    median cannot be aggregated from commune medians), but the map reads
+    each commune's own value straight from its per-commune payload -- so a
+    map indicator with no entry in `known` must still be accepted when it is
+    in `commune_known`."""
+    import export_site_payloads as mod
+
+    layout = {
+        "kpis": ["REAL_ONE"],
+        "key_list": [],
+        "tiles": {"indicators": []},
+        "comparison": {"indicators": []},
+        "map": {"indicators": ["COMMUNE_ONLY_CODE"]},
+        "history": {},
+    }
+    mod._check_micro_sections(
+        layout, {"REAL_ONE"}, commune_known={"COMMUNE_ONLY_CODE"}
+    )  # must not raise
+
+
+def test_check_micro_sections_still_refuses_a_map_code_in_neither_universe():
+    import export_site_payloads as mod
+
+    layout = {
+        "kpis": [],
+        "key_list": [],
+        "tiles": {},
+        "comparison": {},
+        "map": {"indicators": ["MADE_UP_CODE"]},
+        "history": {},
+    }
+    with pytest.raises(ValueError, match="MADE_UP_CODE"):
+        mod._check_micro_sections(layout, {"REAL_ONE"}, commune_known={"SOME_OTHER_CODE"})
+
+
+def test_check_micro_sections_checks_extra_lists_and_regional_housing_series():
+    import export_site_payloads as mod
+
+    layout = {
+        "kpis": [],
+        "key_list": [],
+        "tiles": {},
+        "comparison": {},
+        "map": {},
+        "history": {},
+        "extra_lists": [{"id": "x", "series": ["MADE_UP_EXTRA"]}],
+    }
+    with pytest.raises(ValueError, match="MADE_UP_EXTRA"):
+        mod._check_micro_sections(layout, {"REAL_ONE"})
+
+    layout2 = {
+        "kpis": [],
+        "key_list": [],
+        "tiles": {},
+        "comparison": {},
+        "map": {},
+        "history": {},
+        "regional_housing": {"series": "MADE_UP_REGIONAL"},
+    }
+    with pytest.raises(ValueError, match="MADE_UP_REGIONAL"):
+        mod._check_micro_sections(layout2, {"REAL_ONE"})
+
+
 def test_aggregates_payload_reshape_is_pure():
     """Unit-level check of `_aggregates_payload`, independent of the CSV
     round-trip above: the same (geo, indicator, period) input always produces
