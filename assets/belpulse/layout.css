@@ -24,13 +24,27 @@
 /* ---- top bar ------------------------------------------------------------
    One markup shape, two looks: the editorial top bar (light only) and the
    analytical one (light for micro, navy for macro -- .bp-shell--navy on the
-   ancestor recolours it, nothing here hardcodes a theme). */
+   ancestor recolours it, nothing here hardcodes a theme).
+
+   Batch A1.1 (docs/features/site_unification.md): the bar itself spans the
+   full viewport, coloured edge to edge like the maquette
+   (docs/design-references/maquettes-unification-v1/01-accueil.png), and its
+   CONTENT -- logo, nav, menus -- sits in a centred `.wrap` no wider than
+   `--bp-content-max`, exactly the pattern the footer below already uses and
+   the two hand-edited pilots' own page-local `.wrap` already established for
+   their body content. `render_header()` (src/pages/shell.py) emits this
+   `.wrap` for both a client-mode and a static-mode page. */
 .bp-topbar{
-  display:flex; align-items:center; gap:var(--bp-space-6);
-  padding:var(--bp-space-4) var(--bp-space-6);
+  position:relative;
   background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
 }
 .bp-shell--navy .bp-topbar{background:var(--bp-navy-bg); border-color:var(--bp-navy-border)}
+.bp-topbar .wrap{
+  display:flex; align-items:center; gap:var(--bp-space-6);
+  min-height:var(--bp-topbar-h);
+  max-width:var(--bp-content-max); margin:0 auto; width:100%;
+  padding:0 var(--bp-space-6);
+}
 
 .bp-logo{display:flex; align-items:center; gap:var(--bp-space-3); text-decoration:none; color:inherit}
 /* Three ascending bars, Belgian tricolour -- a placeholder standing in for
@@ -76,6 +90,154 @@
 .bp-lang-select{
   border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
   padding:5px 10px; font:inherit; font-size:var(--bp-text-small); background:var(--bp-surface); color:inherit;
+}
+
+/* ---- skip link (Batch A1.1) -----------------------------------------------
+   The first focusable thing on every page this shell covers -- off-screen
+   until it receives focus, so a sighted mouse user never sees it and a
+   keyboard or screen-reader reader can jump straight to `#bp-main`, past the
+   header and its two menus. */
+.bp-skip-link{
+  position:absolute; left:var(--bp-space-3); top:-999px; z-index:1000;
+  background:var(--bp-accent); color:var(--bp-on-accent); text-decoration:none;
+  padding:var(--bp-space-2) var(--bp-space-4); border-radius:var(--bp-radius-control);
+  font-size:var(--bp-text-small); font-weight:var(--bp-weight-medium);
+}
+.bp-skip-link:focus{top:var(--bp-space-3)}
+
+/* ---- the shell's own menus: theme and language (Batch A1.1) ---------------
+   One shape for both -- a button that opens a small panel of choices --
+   reused by assets/belpulse/shell.js rather than hand-rolled per menu.
+   `.bp-lang-switch` is that panel for the language menu specifically: it
+   pre-dates this batch (the plain always-visible switcher a block-built page
+   offered before it had a menu to sit in) and keeps its name and its
+   `role="menu"`/`data-lang`/`aria-current` contract exactly --
+   tests/pages/test_trilingual_export.py and tests/site/test_iframe_contract.py
+   both still look for it.
+
+   PROGRESSIVE ENHANCEMENT, NOT JS-REQUIRED (fixed post-audit). The panels
+   render WITHOUT a `hidden` attribute -- render_header()/render_footer()
+   never emit one -- so a reader with scripting off gets a plain in-flow list
+   of real controls: on a static-mode page the language panel is three real
+   links, reachable and visible with no click needed at all, exactly what
+   develop's flat always-visible switcher offered before this batch. Only
+   once `assets/belpulse/shell.js` has actually run -- its very first act is
+   `document.documentElement.classList.add('bp-js')`, then it closes every
+   menu with `hidden` -- do the rules below turn this into the collapsed
+   dropdown a button opens. `.bp-js` absent (or shell.js never loading) means
+   this block never triggers at all, and the panel just stays part of the
+   page. Min touch target 44x44 throughout (also fixed post-audit; a phone
+   press, not a mouse click, is the primary way this menu opens). */
+.bp-menu{position:relative}
+.bp-menu-btn{
+  display:flex; align-items:center; gap:4px; cursor:pointer;
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  background:var(--bp-surface); color:var(--bp-text-muted);
+  min-height:44px; padding:8px 12px; font:inherit; font-size:var(--bp-text-small);
+}
+.bp-shell--navy .bp-menu-btn{
+  background:var(--bp-navy-surface); border-color:var(--bp-navy-border); color:var(--bp-navy-text-muted);
+}
+.bp-menu-btn:hover{color:var(--bp-text)}
+.bp-shell--navy .bp-menu-btn:hover{color:var(--bp-navy-text)}
+.bp-menu-btn[aria-expanded="true"]{color:var(--bp-accent-ink); border-color:var(--bp-accent)}
+.bp-menu-current{font-weight:var(--bp-weight-semibold)}
+.bp-menu-caret{transition:transform .15s ease}
+.bp-menu-btn[aria-expanded="true"] .bp-menu-caret{transform:rotate(180deg)}
+
+.bp-menu-panel, .bp-theme-switch, .bp-lang-switch{
+  display:flex; flex-direction:column; gap:1px; min-width:170px;
+  background:var(--bp-surface); color:var(--bp-text);
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  margin:var(--bp-space-2) 0 0; padding:var(--bp-space-2);
+}
+:root.bp-js .bp-menu-panel, :root.bp-js .bp-theme-switch, :root.bp-js .bp-lang-switch{
+  position:absolute; right:0; top:calc(100% + var(--bp-space-2)); z-index:30;
+  box-shadow:var(--bp-shadow-card); margin:0;
+}
+/* `hidden` is only ever SET once shell.js has run (it starts every menu
+   closed as part of wiring it), so this rule never fires in the no-JS
+   case -- there is no `hidden` attribute in the static markup to match. */
+.bp-menu-panel[hidden], .bp-theme-switch[hidden], .bp-lang-switch[hidden]{display:none}
+.bp-menu-item, .bp-theme-switch button,
+.bp-lang-switch a, .bp-lang-switch button{
+  display:flex; align-items:center; width:100%; min-height:44px; text-align:left;
+  text-decoration:none; cursor:pointer;
+  border:0; border-radius:var(--bp-radius-control); background:none;
+  color:var(--bp-text); font:inherit; font-size:var(--bp-text-small);
+  padding:var(--bp-space-2) var(--bp-space-3);
+}
+.bp-menu-item:hover, .bp-theme-switch button:hover,
+.bp-lang-switch a:hover, .bp-lang-switch button:hover{
+  background:var(--bp-surface-alt);
+}
+.bp-menu-item[aria-checked="true"], .bp-theme-switch button[aria-checked="true"],
+.bp-lang-switch a[aria-current="page"], .bp-lang-switch button[aria-checked="true"]{
+  background:var(--bp-accent-soft); color:var(--bp-accent-ink);
+}
+.bp-menu-item:focus-visible, .bp-theme-switch button:focus-visible,
+.bp-lang-switch a:focus-visible, .bp-lang-switch button:focus-visible{
+  outline:2px solid var(--bp-accent); outline-offset:-2px;
+}
+/* Inside someone else's frame, the FRAME owns theme and language --
+   index.html pushes both in by postMessage on every load, so a reader's
+   click on either menu here would be visibly undone a moment later. Same
+   fight `.bp-theme-toggle`/the old flat `.bp-lang-switch` were already
+   hidden for below; hiding the WRAPPER hides the button too, not only the
+   panel it opens. A framed page always runs shell.js (it is never the no-JS
+   case this section exists for), so gating this on `.bp-js` is unnecessary --
+   it is simplest to hide the wrapper unconditionally when framed. */
+:root[data-framed] .bp-theme-menu,
+:root[data-framed] .bp-lang-menu{display:none}
+
+/* ---- mobile nav toggle (Batch A1.1) ---------------------------------------
+   Hidden at desktop widths and, same progressive-enhancement reasoning as the
+   two menus above, hidden without JS at any width too: a button that opens a
+   nav a reader without scripting cannot close again is worse than no button
+   at all, so `#bp-nav` below is reachable directly (it just wraps in place)
+   until `.bp-js` says otherwise. */
+.bp-nav-toggle{
+  display:none; cursor:pointer;
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  background:var(--bp-surface); color:var(--bp-text);
+  min-height:44px; min-width:44px; align-items:center; justify-content:center;
+}
+.bp-shell--navy .bp-nav-toggle{
+  background:var(--bp-navy-surface); border-color:var(--bp-navy-border); color:var(--bp-navy-text);
+}
+@media (max-width:768px){
+  /* No-JS default: the nav simply wraps onto its own line in the topbar,
+     every link always visible -- the same reachability develop's inline nav
+     already had at this width, just wrapped instead of scrolled.
+
+     `.bp-topbar .wrap` must ALSO be allowed to wrap for this to do anything:
+     without it, logo + nav + the two now-always-visible menu panels' worth
+     of width all fight for ONE unwrapped row, and `#bp-nav` -- last in
+     source order among flex-shrinkable siblings -- gets squeezed down to a
+     sliver a few pixels wide with every link's text clipped off past the
+     viewport edge. Caught post-audit: `#bp-nav a` was still technically
+     "visible" (positive size, not display:none) at that width, which is why
+     a bounding-box check is what actually catches it, not a visibility
+     check alone. `flex-basis:100%` then puts the nav on its own full-width
+     line once it wraps, so its OWN children get the whole row to wrap
+     across rather than a leftover sliver. */
+  .bp-topbar .wrap{flex-wrap:wrap}
+  #bp-nav{flex-wrap:wrap; flex-basis:100%; row-gap:var(--bp-space-2)}
+  :root.bp-js .bp-nav-toggle{display:inline-flex}
+  :root.bp-js #bp-nav{
+    display:none; flex-direction:column; align-items:stretch; gap:0;
+    position:absolute; left:0; right:0; top:100%; z-index:30;
+    background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
+    padding:var(--bp-space-2) var(--bp-space-6);
+  }
+  :root.bp-js .bp-shell--navy #bp-nav{background:var(--bp-navy-bg); border-color:var(--bp-navy-border)}
+  :root.bp-js[data-nav-open="1"] #bp-nav{display:flex}
+  :root.bp-js #bp-nav a{
+    display:flex; align-items:center; min-height:44px;
+    padding:0; border-bottom:1px solid var(--bp-border);
+  }
+  :root.bp-js .bp-shell--navy #bp-nav a{border-color:var(--bp-navy-border)}
+  :root.bp-js #bp-nav a:last-child{border-bottom:0}
 }
 
 /* ---- breadcrumb (editorial shell) ---------------------------------------- */
@@ -202,30 +364,14 @@
 .bp-theme-toggle button{border:0; background:var(--bp-surface); color:var(--bp-text-muted); font:inherit; font-size:11px; padding:5px 10px; cursor:pointer}
 .bp-theme-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
 
-/* ---- language switcher (block-built pages) ---------------------------------
-   Three LINKS, not three buttons: a block-built page exists at three real
-   URLs, so switching is navigation and belongs in the markup a reader can use
-   with scripting off. The hand-built pages cannot do this -- they have one URL
-   and swap text in the browser -- and the generated commune pages offer no
-   switcher at all. Styled to match .bp-theme-toggle, which is the segmented
-   control every existing page already uses, so it reads as the same site. */
-.bp-lang-switch{
-  display:flex; gap:1px; overflow:hidden; width:max-content; margin:0 0 var(--bp-space-4);
-  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-}
-.bp-lang-switch a{
-  background:var(--bp-surface); color:var(--bp-text-muted); text-decoration:none;
-  font-size:var(--bp-text-eyebrow); padding:5px 10px;
-}
-.bp-lang-switch a:hover{background:var(--bp-surface-alt); color:var(--bp-text)}
-/* The current language is marked for a screen reader by aria-current; this is
-   the same fact stated visually, so the two cannot disagree. */
-.bp-lang-switch a[aria-current="page"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
-.bp-lang-switch a:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
-/* Inside someone else's frame, the FRAME owns the language: index.html has its
-   own EN/FR/NL control and pushes the choice in. Showing a second control here
-   is not a duplicate, it is a fight -- the parent re-asserts its language on
-   every frame load, so a click here is visibly undone. */
+/* ---- language switcher, legacy framed-hide only ----------------------------
+   The switcher's own box/row styling moved to the ".bp-menu" family above in
+   Batch A1.1 -- `.bp-lang-switch` is now the MENU'S PANEL (still three links
+   for a static/generated page, still `data-lang`/`aria-current`), not an
+   always-visible row. This rule survives on its own because it is still
+   correct for that panel: inside someone else's frame the FRAME owns the
+   language (index.html pushes it in by postMessage), so hiding the switcher
+   here is a fight this page must not have, panel or row alike. */
 :root[data-framed] .bp-lang-switch{display:none}
 /* And the THEME for the same reason, exactly: index.html pushes setTheme in
    on every frame load, so a reader's click here would snap back to the
@@ -254,25 +400,12 @@
   font-family:var(--bp-font-display); font-size:var(--bp-text-h1);
   font-weight:var(--bp-weight-bold); margin:var(--bp-space-2) 0 0;
 }
-.bp-site-footer{
-  max-width:1180px; margin:var(--bp-space-8) auto 0;
-  padding:var(--bp-space-5); border-top:1px solid var(--bp-border);
-  display:flex; flex-wrap:wrap; gap:var(--bp-space-4);
-  align-items:center; justify-content:space-between;
-  font-size:var(--bp-text-small); color:var(--bp-text-muted);
-}
-.bp-site-footer nav{display:flex; flex-wrap:wrap; gap:var(--bp-space-4)}
-.bp-site-footer a{color:var(--bp-text-muted); text-decoration:none}
-.bp-site-footer a:hover{color:var(--bp-accent-ink); text-decoration:underline}
+/* .bp-site-footer (the block-built page's old inline nav-footer div) is gone:
+   Batch A1.1's `render_footer()` (src/pages/shell.py) emits `<footer
+   class="foot">` instead -- see "the shared footer" below, shared with the
+   two hand-edited pilots rather than a second implementation just for
+   generated pages. */
 
-/* The language switcher sits in the top bar now, not floating above the page,
-   so it should not also carry the bottom margin it needed when it stood alone. */
-.bp-topbar .bp-lang-switch{margin:0 0 0 auto}
-/* The theme switch sits beside the language switcher, and the pair are
-   pushed right together -- .bp-topbar-actions already carries the
-   margin-left:auto that did, so the language control inside it must stop
-   claiming the space for itself. */
-.bp-topbar-actions .bp-lang-switch{margin:0}
 .bp-topbar-actions{flex-wrap:wrap; justify-content:flex-end}
 @media (max-width: 640px){
   /* On a phone the two segmented controls do not fit beside the nav; the
@@ -286,9 +419,40 @@
 .bp-breadcrumb{display:flex; align-items:center; gap:var(--bp-space-2)}
 .bp-breadcrumb > * + *::before{content:"/"; margin-right:var(--bp-space-2); color:var(--bp-text-faint)}
 
-/* The wordmark and its tagline are two lines, not one run of text. */
+/* The wordmark and its tagline are two lines, not one run of text -- only
+   still true of a logo that HAS a tagline span; Batch A1.1's header and
+   footer logo (render_header/render_footer, src/pages/shell.py) is the mark
+   plus the bare wordmark, no tagline, matching the maquette. */
 .bp-logo > span:last-child{display:flex; flex-direction:column; line-height:1.2}
 .bp-tagline{display:block}
+
+/* ---- the shared footer (Batch A1.1) ---------------------------------------
+   `render_footer()` (src/pages/shell.py) emits this on every page the batch
+   covers: the logo, the same six NAV destinations the header offers, and a
+   short credit line -- no About, no Contact, no legacy link
+   (docs/features/site_unification.md section 2). `.foot` is the class name
+   the two hand-edited pilots already used for their own (until now
+   page-local) footer, kept rather than renamed so their existing page-scoped
+   overrides (home2.html's `.home2 .foot`, macro.html's `.foot .wrap`) still
+   apply once those pages carry this shared markup instead of their own. */
+.foot{
+  background:var(--bp-surface); border-top:1px solid var(--bp-border);
+}
+.bp-shell--navy .foot{background:var(--bp-navy-bg); border-color:var(--bp-navy-border)}
+.foot .wrap{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--bp-space-5);
+  max-width:var(--bp-content-max); margin:0 auto; width:100%;
+  padding:var(--bp-space-5) var(--bp-space-6);
+}
+.foot .bp-nav{flex-wrap:wrap}
+.bp-footer-credit{
+  margin:0 0 0 auto; font-size:var(--bp-text-small); color:var(--bp-text-muted);
+  max-width:48ch;
+}
+.bp-shell--navy .bp-footer-credit{color:var(--bp-navy-text-muted)}
+@media (max-width:640px){
+  .bp-footer-credit{margin-left:0}
+}
 
 /* ============================================================================
    Batch A1.2 -- the Papier theme's background grid. Kept in its own block at
