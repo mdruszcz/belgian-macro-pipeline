@@ -10,18 +10,18 @@
 <link rel="stylesheet" href="assets/belpulse/layout.css">
 <link rel="stylesheet" href="assets/belpulse/components.css">
 <link rel="stylesheet" href="assets/commune_map.css">
+<!-- bp-shell:bootstrap:start -->
+<script>(function(){try{var KEY='belpulse-theme',LEGACY_KEY='theme',LEGACY={day:'light',soft:'light',night:'dark'};var v=localStorage.getItem(KEY);if(v===null){var legacy=localStorage.getItem(LEGACY_KEY);if(legacy&&Object.prototype.hasOwnProperty.call(LEGACY,legacy))v=LEGACY[legacy];}if(v==='auto'){v=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';try{localStorage.setItem(KEY,v);}catch(e){}}if(v!=='light'&&v!=='dark'&&v!=='paper')v='light';document.documentElement.setAttribute('data-theme',v);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<!-- bp-shell:bootstrap:end -->
 <script>
-  /* Before the first paint: light unless the reader chose otherwise. A
-     linked file cannot promise to run before the stylesheets apply, so
-     this one is inline, like every other page's. */
+  /* Before the first paint, so the map never flashes one palette and
+     recolours. A linked file cannot promise to run before the stylesheets
+     apply, so this one is inline, like the shared theme bootstrap above. */
   (function(){
     try{
-      var t = localStorage.getItem('belpulse-theme');
-      if(t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
-      // Before first paint, so the map never flashes one palette and recolours.
       var pal = localStorage.getItem('belpulse-map-palette') || 'bluered';
       if(pal !== 'default') document.documentElement.setAttribute('data-palette', pal);
-    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+    }catch(e){}
   })();
 </script>
 <script src="assets/i18n.js"></script>
@@ -65,36 +65,15 @@
   code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
   .wrap{max-width:1280px; margin:0 auto; padding:0 var(--bp-space-6)}
 
-  /* ---- top bar: the nav every shell-built page already links to this page
-     WITH, which this page itself never had. shell.py:109-110 is the source of
-     the link list; it is repeated here rather than generated because map.html
-     is hand-built and stays hand-built this batch. ------------------------- */
-  .bp-topbar{padding:var(--bp-space-3) 0; background:var(--bp-surface); border-bottom:1px solid var(--bp-border)}
-  /* layout.css makes .bp-topbar itself the flex row, so this centring .wrap
-     is a FLEX ITEM -- and a flex item's base size is its max-content width,
-     measured here at 602px inside a 390px screen, which took the whole page
-     sideways. flex:1 plus min-width:0 lets it shrink to the viewport; the
-     nav and the switches then wrap inside it. */
-  .bp-topbar{padding-left:0; padding-right:0}
-  .bp-topbar .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; flex:1; min-width:0}
-  .bp-wordmark{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:700}
-  .switches{display:flex; gap:8px; margin-left:auto}
-  .theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border);
-    border-radius:var(--bp-radius-control); overflow:hidden; background:var(--bp-surface)}
-  .theme-toggle button{
-    border:0; background:transparent; color:var(--bp-text-muted); cursor:pointer;
-    font:inherit; font-size:.78rem; padding:5px 9px; line-height:1.3;
-  }
-  .theme-toggle button:hover{background:var(--bp-accent-soft); color:var(--bp-accent-ink)}
-  .theme-toggle button[aria-pressed="true"]{background:var(--bp-accent-soft); color:var(--bp-accent-ink); font-weight:600}
-  .theme-toggle button:focus-visible{outline:2px solid var(--bp-accent); outline-offset:-2px}
-  /* Six nav links plus the wordmark and two segmented controls need more
-     min-content width than a tablet has. Below 1000px the nav takes its own
-     line and scrolls inside itself -- profiles.html's convention. */
-  @media (max-width:1000px){
-    .bp-nav{order:3; flex-basis:100%; overflow-x:auto; padding-bottom:2px}
-    .bp-nav a{white-space:nowrap}
-  }
+  /* ---- top bar ----
+     Batch A3.1b: the bar itself (height, centred width, the nav, the theme
+     and language menus) is shared now -- assets/belpulse/layout.css's
+     `.bp-topbar`/`.bp-topbar .wrap`, filled by src/pages/shell.py's
+     render_header() through scripts/sync_site_shell.py. This page no longer
+     overrides it locally, and the old `.switches`/`.theme-toggle` segmented
+     controls (language EN/FR/NL, theme Light/Auto/Dark) are gone along with
+     the header markup they styled -- replaced by the shared theme and
+     language menus every other converted page uses. */
 
   header.pagehead{padding:var(--bp-space-5) 0 var(--bp-space-3)}
   h1{font-size:2rem; line-height:1.1; margin:0 0 var(--bp-space-2)}
@@ -338,48 +317,20 @@
     .mapcol{height:56dvh; min-height:320px; padding:var(--bp-space-3)}
     .controls{border-left:0; border-top:1px solid var(--bp-border); overflow:visible}
   }
-  @media (max-width:640px){
-    /* Two segmented controls side by side need ~300px; with the wordmark
-       beside them the bar ran 212px past a 390px screen. Own line instead. */
-    .switches{margin-left:0; flex-basis:100%; flex-wrap:wrap}
-  }
+  /* The old .switches media rule (the two segmented language/theme controls
+     ran past a 390px screen) is gone with the controls themselves -- the
+     shared top bar's own mobile behaviour (assets/belpulse/layout.css)
+     covers the header now. */
 </style>
 </head>
 <body class="bp-shell">
 
 <div class="viewport">
-<header class="bp-topbar">
-  <div class="wrap">
-    <a class="bp-logo" href="home2.html">
-      <span class="bp-logo-mark"><span></span><span></span><span></span></span>
-      <span>
-        <span class="bp-wordmark">BelPulse</span>
-        <span class="bp-tagline" data-t="homeLogoTagline">The data moving Belgium forward</span>
-      </span>
-    </a>
-    <nav class="bp-nav" aria-label="Main">
-      <a href="home2.html" data-t="navHome">Home</a>
-      <a href="profiles.html" data-t="navCommunes">Commune profiles</a>
-      <a href="macro.html" data-t="navMacro">Macro</a>
-      <a href="micro.html" data-t="navMicro">Micro</a>
-      <a href="map.html" aria-current="page" data-t="navMaps">Maps</a>
-    </nav>
-    <div class="switches">
-      <div class="theme-toggle" id="langSeg" role="group" data-t-aria="language" aria-label="Language">
-        <button type="button" data-lang="en" aria-pressed="false">EN</button>
-        <button type="button" data-lang="fr" aria-pressed="false">FR</button>
-        <button type="button" data-lang="nl" aria-pressed="false">NL</button>
-      </div>
-      <div class="theme-toggle" role="group" data-t-aria="theme" aria-label="Colour theme">
-        <button type="button" data-theme-choice="light" aria-pressed="false" data-t-title="themeLight">&#9728; <span data-t="themeLight">Light</span></button>
-        <button type="button" data-theme-choice="auto" aria-pressed="false" data-t-title="themeAuto"><span data-t="themeAuto">Auto</span></button>
-        <button type="button" data-theme-choice="dark" aria-pressed="false" data-t-title="themeDark">&#9790; <span data-t="themeDark">Dark</span></button>
-      </div>
-    </div>
-  </div>
-</header>
+<!-- bp-shell:header:start page="map.html" -->
+<a class="bp-skip-link" href="#bp-main" data-t="skipToContent">Skip to content</a><header class="bp-topbar"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" id="bp-nav" aria-label="Main navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" aria-current="page" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><div class="bp-topbar-actions"><div class="bp-menu bp-theme-menu" data-menu="theme"><button type="button" class="bp-menu-btn" id="bp-theme-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-theme-menu-panel" aria-label="Colour theme" data-t-aria="theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-menu-panel bp-theme-switch" id="bp-theme-menu-panel" role="menu" aria-label="Colour theme" data-t-aria="theme"><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="light" aria-checked="false" data-t="themeLight">Light</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="dark" aria-checked="false" data-t="themeDark">Dark</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="paper" aria-checked="false" data-t="themePaper">Paper</button></div></div><div class="bp-menu bp-lang-menu" data-menu="lang"><button type="button" class="bp-menu-btn" id="bp-lang-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-lang-menu-panel" aria-label="Language" data-t-aria="language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="bp-menu-current">EN</span><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-lang-switch" id="bp-lang-menu-panel" role="menu" aria-label="Language" data-t-aria="language"><button type="button" role="menuitemradio" data-lang="en" aria-checked="false">English</button><button type="button" role="menuitemradio" data-lang="fr" aria-checked="false">Français</button><button type="button" role="menuitemradio" data-lang="nl" aria-checked="false">Nederlands</button></div></div><button type="button" class="bp-nav-toggle" aria-expanded="false" aria-controls="bp-nav" aria-label="Menu" data-t-aria="navMenu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div></header>
+<!-- bp-shell:header:end -->
 
-<main class="explorer">
+<main class="explorer" id="bp-main">
   <!-- THE MAP FILLS THE VIEWPORT AND THE CONTROLS SIT BESIDE IT. Before this
        the map was a full-width panel in the normal document flow, so on a
        laptop it ran past the fold and the legend under it was below the
@@ -501,8 +452,19 @@
 </footer>
 </div>
 
+<!-- The shared site footer (the six nav destinations and the generic credit
+     line) sits OUTSIDE .viewport, in normal document flow below the one-
+     screen map -- the map's own licence footer above (class="mapfoot") is
+     what a reader sees without scrolling and stays exactly as it was; this
+     is Batch A3.1b's addition, reachable the same way it is on every other
+     converted page. -->
+<!-- bp-shell:footer:start -->
+
+<footer class="foot"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" aria-label="Footer navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" aria-current="page" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><p class="bp-footer-credit" data-t="footerCredit">Official public sources — see Sources.</p></div></footer>
+<!-- bp-shell:footer:end -->
 
 <script src="assets/commune_map.js"></script>
+<script src="assets/belpulse/shell.js"></script>
 <script>
 /* ---------------------------------------------------------------------------
    THIS PAGE NAMES NO INDICATOR. Everything in the picker comes from
@@ -563,8 +525,9 @@ function applyStrings(){
   const updated = document.getElementById('attrUpdated');
   if(updated && ATTR_UPDATED) updated.textContent = ATTR_UPDATED;
   document.documentElement.setAttribute('lang', LANG);
-  document.querySelectorAll('#langSeg button').forEach(b =>
-    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  // The shared header's language menu (assets/belpulse/shell.js) keeps its
+  // own displayed code and aria-checked state in step -- nothing here needs
+  // to reach into it, the way the old #langSeg buttons did.
 }
 
 // The reader's language for each of a derived indicator's input sources.
@@ -1269,12 +1232,14 @@ async function init(){
     // anything once the map has data.
     if(state.areas.length) applyScope(state.scope);
 
-    document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
-      LANG = b.dataset.lang;
-      try{ localStorage.setItem(I18N.STORAGE_KEY, LANG); }catch(_){}
+    // The shared header's language menu (assets/belpulse/shell.js) is what a
+    // reader actually clicks now; it writes I18N.STORAGE_KEY and re-translates
+    // every [data-t*] element itself, then dispatches 'bp:lang' for the rest
+    // of this page -- the picker's labels, the map's legend, the provenance
+    // line. Nothing is refetched and the map keeps its view.
+    document.addEventListener('bp:lang', e => {
+      LANG = e.detail.lang;
       applyStrings();
-      // The picker's labels, the map's legend and the provenance line all
-      // hold translated text. Nothing is refetched and the map keeps its view.
       const relabelled = state.index
         .map(i => ({code: i.indicator_code, label: (i.names && (i.names[LANG] || i.names.en)) || i.indicator_code}))
         .sort((a, b) => a.label.localeCompare(b.label));
@@ -1284,7 +1249,7 @@ async function init(){
       populatePalettePicker();
       state.map.setLang(LANG);
       selectIndicator(sel.value);
-    }));
+    });
   }catch(err){
     document.getElementById('status').textContent =
       'Could not load the map: ' + err.message;
@@ -1293,26 +1258,9 @@ async function init(){
 
 init();
 </script>
-
-<script>
-// Theme switch. Shared localStorage key across the pages, so a choice made on
-// one carries to the others.
-(function(){
-  const KEY = 'belpulse-theme';
-  const apply = choice => {
-    if(choice === 'auto') document.documentElement.removeAttribute('data-theme');
-    else document.documentElement.setAttribute('data-theme', choice);
-    document.querySelectorAll('[data-theme-choice]').forEach(b =>
-      b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)));
-  };
-  let saved = 'light';
-  try{ saved = localStorage.getItem(KEY) || 'light'; }catch(_){}
-  apply(saved);
-  document.querySelectorAll('[data-theme-choice]').forEach(b => b.onclick = () => {
-    apply(b.dataset.themeChoice);
-    try{ localStorage.setItem(KEY, b.dataset.themeChoice); }catch(_){}
-  });
-})();
-</script>
+<!-- The old per-page theme-switch script (the #switches Light/Auto/Dark
+     buttons) is gone with the markup it wired -- assets/belpulse/shell.js's
+     theme menu (the shared .bp-theme-menu in the header above) replaces it,
+     applying `data-theme` and persisting to the same 'belpulse-theme' key. -->
 </body>
 </html>

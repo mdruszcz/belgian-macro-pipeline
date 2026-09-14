@@ -18,8 +18,13 @@ REPO = Path(__file__).resolve().parents[1]
 I18N_JS = REPO / "assets" / "i18n.js"
 COMPONENT_JS = REPO / "assets" / "commune_map.js"
 
-# Pages that carry the language switcher and read the shared strings.
-TRANSLATED_PAGES = ["communes.html", "map.html", "local.html"]
+# Pages that still carry the OLD #langSeg switcher and read the shared
+# strings. map.html moved to the shared client-mode header in Batch A3.1b
+# (docs/features/site_unification.md) -- its language menu is
+# assets/belpulse/shell.js's `.bp-lang-switch`, the same component home2.html
+# and macro.html already use, not the legacy #langSeg these two still have.
+LANGSEG_PAGES = ["communes.html", "local.html"]
+TRANSLATED_PAGES = LANGSEG_PAGES + ["map.html"]
 
 LANGS = ("en", "fr", "nl")
 
@@ -149,7 +154,10 @@ def test_substitution_and_fallback():
 def test_a_translated_page_loads_the_shared_strings(page):
     text = (REPO / page).read_text(encoding="utf-8")
     assert 'src="assets/i18n.js"' in text, f"{page} does not load the shared strings"
-    assert 'id="langSeg"' in text, f"{page} has no language switcher"
+    if page in LANGSEG_PAGES:
+        assert 'id="langSeg"' in text, f"{page} has no language switcher"
+    else:
+        assert 'class="bp-lang-switch"' in text, f"{page} has no language switcher"
     for lang in LANGS:
         assert f'data-lang="{lang}"' in text, f"{page} cannot switch to {lang}"
 
