@@ -20,6 +20,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from playwright.sync_api import expect
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -392,10 +393,18 @@ def test_a_panel_charts_data_table_lists_every_drawn_period(browser, site, panel
         assert details.count() == 1, f"no data table for {chart_id}"
         rows = details.locator("tbody tr")
         expected_rows = len(all_periods) * len(series)
-        assert rows.count() == expected_rows, (
-            f"{chart_id}: table has {rows.count()} rows, expected {expected_rows} "
-            f"({len(series)} series x {len(all_periods)} aligned periods)"
-        )
+        # The table is rebuilt whenever BPCharts redraws the chart (resize,
+        # theme, language, panel shown), so a single count() can land in the
+        # instant between clearing and refilling it: CI once read 0 rows and
+        # then 192 while formatting the failure message. Wait for the settled
+        # count instead of sampling it once.
+        try:
+            expect(rows).to_have_count(expected_rows, timeout=10_000)
+        except AssertionError as exc:
+            raise AssertionError(
+                f"{chart_id}: table has {rows.count()} rows, expected {expected_rows} "
+                f"({len(series)} series x {len(all_periods)} aligned periods)"
+            ) from exc
         table_text = details.locator("table").text_content()
         for period in all_periods:
             assert period in table_text, f"{chart_id}: period {period} missing from its data table"
