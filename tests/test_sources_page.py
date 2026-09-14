@@ -191,13 +191,18 @@ def test_every_source_has_exactly_one_row(page):
         seen.add(name)
 
 
-def _row_for_agency(page, agency_substring: str):
+def _row_for_agency(page, substring: str):
+    """A row whose visible text (name AND, where present, the secondary
+    line) contains `substring`. Not scoped to `.src-agency` alone: that span
+    is omitted entirely when a source's agency and name both match its
+    label (see sources.html's subtitleFor()), so a locator scoped to it
+    would wait forever for an element that row never renders."""
     rows = page.locator("#srcTableBody tr.src-row")
     for i in range(rows.count()):
         row = rows.nth(i)
-        if agency_substring in (row.locator(".src-agency").text_content() or ""):
+        if substring in (row.text_content() or ""):
             return row
-    raise AssertionError(f"no row found for agency containing {agency_substring!r}")
+    raise AssertionError(f"no row found containing {substring!r}")
 
 
 def test_a_null_licence_note_renders_the_not_stated_state(page):
@@ -290,12 +295,15 @@ def test_the_category_filter_narrows_by_scope(page):
     total = page.locator("#srcTableBody tr.src-row").count()
     assert total == len(_sources_registry())
 
+    # `.src-name`, not `.src-agency`: the latter is omitted entirely for a
+    # source whose agency and name both match its label (see sources.html's
+    # subtitleFor()), so it does not exist for every row.
     page.select_option("#categoryFilter", "national")
     page.wait_for_function(
         "(n) => document.querySelectorAll('#srcTableBody tr.src-row').length < n", arg=total
     )
     national_names = {
-        page.locator("#srcTableBody tr.src-row .src-agency").nth(i).text_content()
+        page.locator("#srcTableBody tr.src-row .src-name").nth(i).text_content()
         for i in range(page.locator("#srcTableBody tr.src-row").count())
     }
     assert "FPB" not in national_names
@@ -303,7 +311,7 @@ def test_the_category_filter_narrows_by_scope(page):
     page.select_option("#categoryFilter", "municipal")
     page.wait_for_timeout(50)
     municipal_names = {
-        page.locator("#srcTableBody tr.src-row .src-agency").nth(i).text_content()
+        page.locator("#srcTableBody tr.src-row .src-name").nth(i).text_content()
         for i in range(page.locator("#srcTableBody tr.src-row").count())
     }
     assert "FPB" not in municipal_names
@@ -331,6 +339,26 @@ def test_switching_to_nl_relabels_the_table_headers(page):
     assert "nog geen" in (fpb_row.text_content() or "").lower()
 
 
+def test_1122px_the_heading_lines_up_with_the_header_logo(page):
+    """Regression: the generic `.wrap` in assets/belpulse/layout.css carries
+    no side padding of its own (only `.bp-topbar .wrap`/`.foot .wrap` get
+    one) -- without a page-local padding rule, the heading, cards, table and
+    licence block sat flush against the viewport edge while the header
+    above them, padded separately, did not. Pinned by comparing the h1's
+    left edge to the header logo's -- the two should align exactly, the way
+    a page's own heading always lines up under its site's wordmark."""
+    h1_box = page.locator(".pagehead h1").bounding_box()
+    # `.bp-logo` matches twice (header and footer both carry the wordmark) --
+    # scoped to the header specifically, the one the heading should line up
+    # under.
+    logo_box = page.locator(".bp-topbar .bp-logo").bounding_box()
+    assert h1_box is not None and logo_box is not None
+    assert abs(h1_box["x"] - logo_box["x"]) <= 2, (
+        f"h1 left edge ({h1_box['x']}) does not line up with the logo's "
+        f"({logo_box['x']}) at 1122px"
+    )
+
+
 def test_390px_no_horizontal_scroll(chromium, site):
     context = chromium.new_context(viewport={"width": MOBILE_WIDTH, "height": 800})
     try:
@@ -343,6 +371,19 @@ def test_390px_no_horizontal_scroll(chromium, site):
             f"sources.html scrolls horizontally at 390px: scrollWidth={scroll_width}, "
             f"clientWidth={client_width}"
         )
+    finally:
+        context.close()
+
+
+def test_390px_the_heading_keeps_a_real_side_gutter(chromium, site):
+    context = chromium.new_context(viewport={"width": MOBILE_WIDTH, "height": 800})
+    try:
+        p = context.new_page()
+        p.goto(f"{site}/sources.html", wait_until="load")
+        p.wait_for_selector("#srcTableBody tr.src-row")
+        h1_box = p.locator(".pagehead h1").bounding_box()
+        assert h1_box is not None
+        assert h1_box["x"] >= 16, f"h1 sits only {h1_box['x']}px from the left edge at 390px"
     finally:
         context.close()
 

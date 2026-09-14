@@ -72,6 +72,16 @@
   .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
     clip:rect(0,0,0,0); white-space:nowrap; border:0}
 
+  /* assets/belpulse/layout.css's generic `.wrap` (max-width + centring only)
+     carries no side padding of its own -- only `.bp-topbar .wrap`/`.foot .wrap`
+     get one, from their own rules. Every hand-edited page that puts BODY
+     content straight in a `.wrap` (home2.html included) adds this padding
+     locally for exactly that reason; without it, this page's own content sat
+     flush against the viewport edge while the header above it did not
+     (found on a real 1122px screenshot). Same --bp-space-6 the header uses,
+     so the heading's left edge lines up with the logo's above it. */
+  main.wrap{padding:0 var(--bp-space-6)}
+
   .pagehead{padding:var(--bp-space-6) 0 0; max-width:70ch}
   .pagehead h1{font-size:2rem; margin:0 0 var(--bp-space-2)}
   .pagehead .lead{color:var(--bp-text-muted); margin:0; font-size:var(--bp-text-body)}
@@ -295,6 +305,7 @@
 <!-- bp-shell:footer:end -->
 
 <script src="assets/i18n.js"></script>
+<script src="assets/commune_map.js"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script>
 /* BelPulse sources catalogue -- Batch A3.1a.
@@ -347,6 +358,62 @@
       catch(e){ return p; }
     }
     return p;
+  }
+
+  /* Unit hints, reused verbatim from macro.html's own unitHint(unit) --
+     PR #172 (open, not yet merged as this was written) is expected to move
+     this to a shared MapUI.unitLabel; until it does, copying macro's exact
+     logic here is the "no second vocabulary" choice rather than inventing a
+     different one for this page. `assets/commune_map.js` is loaded above for
+     `MapUI.unitSuffix`, the same fallback macro.html falls back to.
+     unitSuffix() itself returns '' for eur/count/percent* (units it expects
+     to already be embedded in a formatted NUMBER, which this page never
+     shows) -- for those the raw code is shown as-is rather than a blank
+     cell, which is still real, still honest, and reads fine standalone
+     ("EUR", "percent"). */
+  function unitHint(unit){
+    var u = (unit || '').toLowerCase();
+    if(u === 'pp_contribution') return 'pp';
+    var idx = /^index_(\d{4})$/.exec(u);
+    if(idx) return idx[1] + '=100';
+    if(u === 'balance') return T('macroBalance');
+    var suffix = (typeof MapUI !== 'undefined' ? MapUI.unitSuffix(unit) : '').trim();
+    return suffix || unit || '';
+  }
+
+  /* Cadence is a real sources.json field (rule 28), not interface text -- but
+     showing its English sentence unrelabelled on the FR/NL page reads as a
+     foreign product. Keyed on today's six distinct values; a cadence this
+     table has never seen falls back to the raw string instead of breaking. */
+  var CADENCE_KEYS = {
+    'daily': 'sourcesCadenceDaily',
+    'quarterly': 'sourcesCadenceQuarterly',
+    'monthly': 'sourcesCadenceMonthly',
+    'annual (manual, ad hoc)': 'sourcesCadenceAnnualAdHoc',
+    'annual (manual Tableau export)': 'sourcesCadenceAnnualTableau',
+    'annual accounts, published by IWEPS around March (catalogue refreshed twice yearly); fetched daily': 'sourcesCadenceAnnualIweps'
+  };
+  function cadenceLabel(cadence){
+    if(!cadence) return '';
+    var key = CADENCE_KEYS[cadence];
+    return key ? T(key) : cadence;
+  }
+
+  /* The secondary line under a source's name. Showing `agency` again when it
+     is IDENTICAL to the name just shown above it (several sources register
+     the same short code as both their label and their agency) is noise, not
+     information -- and for a source whose label is a bare abbreviation, that
+     redundant repeat used to be the ONLY other text on the row. `name`
+     (sources.json) is a more descriptive string for exactly those cases; it
+     has no French/Dutch translation in the registry today; shown as-is
+     rather than invented (CLAUDE.md rule 36) -- flagged in the PR so the
+     registry can grow a trilingual full name later. */
+  function subtitleFor(info, primaryLabel){
+    var agency = info.agency || '';
+    if(agency && agency !== primaryLabel) return agency;
+    var name = info.name || '';
+    if(name && name !== primaryLabel && name !== agency) return name;
+    return '';
   }
 
   /* Periods come in mixed grains (a plain year, "YYYY-Qn", "YYYY-MM") even
@@ -427,7 +494,8 @@
     if(!n) return T('sourcesNoIndicatorsYet');
     var shown = sortedItems(agg.items).slice(0, 2).map(function(i){ return text(i.names); });
     var extra = n - shown.length;
-    var summary = T('sourcesDataCount', {n: n}) + ' — ' + shown.join(', ');
+    var countKey = n === 1 ? 'sourcesDataCountOne' : 'sourcesDataCount';
+    var summary = T(countKey, {n: n}) + ' — ' + shown.join(', ');
     if(extra > 0) summary += ' ' + T('sourcesDataMore', {n: extra});
     return summary;
   }
@@ -456,7 +524,7 @@
     var info = agg.info;
     var rows = sortedItems(agg.items).map(function(i){
       return '<li><span class="src-item-name">' + escapeHtml(text(i.names)) + '</span>'
-        + '<span class="src-item-meta">' + escapeHtml(i.unit || '') + ' · ' + escapeHtml(itemPeriod(i)) + '</span></li>';
+        + '<span class="src-item-meta">' + escapeHtml(unitHint(i.unit)) + ' · ' + escapeHtml(itemPeriod(i)) + '</span></li>';
     }).join('');
     var datasetHtml = rows
       ? '<ul class="src-item-list">' + rows + '</ul>'
@@ -472,7 +540,7 @@
 
     var last = lastRetrieved(agg.items);
     var lastHtml = last ? escapeHtml(last) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
-    var cadenceHtml = info.cadence ? escapeHtml(info.cadence) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
+    var cadenceHtml = info.cadence ? escapeHtml(cadenceLabel(info.cadence)) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
 
     return ''
       + '<div class="src-detail-grid">'
@@ -506,13 +574,15 @@
       var licence = text(agg.info.licence_note);
       var conditionsLabel = licence ? T('sourcesSeeConditions') : T('sourcesLicenceNotStated');
       var conditionsClass = licence ? '' : ' class="src-not-stated"';
+      var primaryLabel = text(agg.info.label);
+      var subtitle = subtitleFor(agg.info, primaryLabel);
       html += ''
         + '<tr class="src-row">'
         + '<td class="src-cell-source" data-th="' + escapeHtml(T('sourcesColSource')) + '">'
         + '<button type="button" class="src-toggle" aria-expanded="false" aria-controls="' + detailId + '">'
         + '<svg class="src-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'
-        + '<span><span class="src-name">' + escapeHtml(text(agg.info.label)) + '</span>'
-        + '<span class="src-agency">' + escapeHtml(agg.info.agency || '') + '</span></span>'
+        + '<span><span class="src-name">' + escapeHtml(primaryLabel) + '</span>'
+        + (subtitle ? '<span class="src-agency">' + escapeHtml(subtitle) + '</span>' : '') + '</span>'
         + '</button></td>'
         + '<td data-th="' + escapeHtml(T('sourcesColData')) + '">' + escapeHtml(dataSummary(agg)) + '</td>'
         + '<td data-th="' + escapeHtml(T('sourcesColPeriod')) + '">' + escapeHtml(periodCell(agg)) + '</td>'

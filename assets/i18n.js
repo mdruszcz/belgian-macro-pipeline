@@ -539,6 +539,19 @@ I18N.STRINGS = {
     sourcesPanel2Body: 'The last-retrieved date is when this pipeline last fetched the source. It can be more recent than the data period, if the source has not published anything newer yet.',
     sourcesLicencesHeading: 'Licences and notices',
     sourcesFooter: 'The source registry these names come from is published at <code>public/data/metadata/sources.json</code>, and every indicator records which source it came from. The licence notice above is read from the same interface-strings file every other page reads it from, so it cannot drift between pages — checked by the test suite.',
+    // Post-review fixes (coordinator pass on PR #176): "1 indicators" needed
+    // a singular form, and sources.json's cadence values (real metadata, not
+    // interface text) needed a translation table keyed on today's six
+    // distinct values -- unmatched values fall back to the raw string rather
+    // than breaking, so a new cadence added to the registry degrades to
+    // English instead of throwing.
+    sourcesDataCountOne: '{n} indicator',
+    sourcesCadenceDaily: 'daily',
+    sourcesCadenceQuarterly: 'quarterly',
+    sourcesCadenceMonthly: 'monthly',
+    sourcesCadenceAnnualAdHoc: 'annual (manual, ad hoc)',
+    sourcesCadenceAnnualTableau: 'annual (manual Tableau export)',
+    sourcesCadenceAnnualIweps: 'annual accounts, published by IWEPS around March (catalogue refreshed twice yearly); fetched daily',
   },
   fr: {
     language: 'Langue',
@@ -1009,6 +1022,13 @@ I18N.STRINGS = {
     sourcesPanel2Body: 'La date de dernière récupération est celle à laquelle ce pipeline a récupéré la source pour la dernière fois. Elle peut être plus récente que la période des données, si la source n’a rien publié de plus récent.',
     sourcesLicencesHeading: 'Licences et mentions',
     sourcesFooter: 'Le registre des sources d’où proviennent ces noms est publié dans <code>public/data/metadata/sources.json</code>, et chaque indicateur enregistre de quelle source il provient. La mention de licence ci-dessus est lue depuis le même fichier de textes d’interface que chaque autre page : elle ne peut donc pas diverger d’une page à l’autre — vérifié par la suite de tests.',
+    sourcesDataCountOne: '{n} indicateur',
+    sourcesCadenceDaily: 'quotidienne',
+    sourcesCadenceQuarterly: 'trimestrielle',
+    sourcesCadenceMonthly: 'mensuelle',
+    sourcesCadenceAnnualAdHoc: 'annuelle (manuelle, au cas par cas)',
+    sourcesCadenceAnnualTableau: 'annuelle (export Tableau manuel)',
+    sourcesCadenceAnnualIweps: 'comptes annuels, publiés par l’IWEPS vers le mois de mars (catalogue actualisé deux fois par an) ; récupérés quotidiennement',
   },
   nl: {
     language: 'Taal',
@@ -1479,6 +1499,13 @@ I18N.STRINGS = {
     sourcesPanel2Body: 'De datum van laatste ophaling is wanneer deze pipeline de bron voor het laatst heeft opgehaald. Die datum kan recenter zijn dan de periode van de gegevens, als de bron nog niets nieuwers heeft gepubliceerd.',
     sourcesLicencesHeading: 'Licenties en vermeldingen',
     sourcesFooter: 'Het bronregister waaruit deze namen komen, wordt gepubliceerd in <code>public/data/metadata/sources.json</code>, en elke indicator registreert van welke bron ze afkomstig is. De licentievermelding hierboven wordt gelezen uit hetzelfde bestand met interfaceteksten als elke andere pagina, zodat ze nooit tussen pagina’s kan afwijken — gecontroleerd door de testsuite.',
+    sourcesDataCountOne: '{n} indicator',
+    sourcesCadenceDaily: 'dagelijks',
+    sourcesCadenceQuarterly: 'per kwartaal',
+    sourcesCadenceMonthly: 'maandelijks',
+    sourcesCadenceAnnualAdHoc: 'jaarlijks (handmatig, ad hoc)',
+    sourcesCadenceAnnualTableau: 'jaarlijks (handmatige Tableau-export)',
+    sourcesCadenceAnnualIweps: 'jaarrekeningen, gepubliceerd door IWEPS rond maart (catalogus tweemaal per jaar bijgewerkt); dagelijks opgehaald',
   },
 };
 
