@@ -96,3 +96,23 @@ Consequence: a refused offload changes no file, but an error while `offload()` r
 one by one can leave the checkout it ran in with some of them new. The run is red and nothing is
 committed; the asset names the files concerned individually, from the registry. Restoring them
 automatically is not implemented. See `docs/features/orchestration.md`, "Step 3".
+
+## Amendment -- step 4 (2026-09-14)
+
+Four more assets call a script's function (`communes_history_full_csv`, `communes_history_csv`,
+`communes_table_json`, `revisions_report`), under decision 1 as widened by step 3. Two functions
+were extracted from their scripts' `main()`, which now calls them; no command line changed.
+
+The offload puts its files back, inside `offload()`, so the command line and the asset share it:
+
+- before replacing anything it copies every committed file it will replace into a backup directory
+  of that run's own, and refuses while a `-wal` or `-shm` file sits beside the committed database;
+- an exception while publishing restores every file already replaced and is re-raised unchanged;
+- a file that cannot be put back raises `PartialPublication`, which is deliberately **not** a
+  declared refusal: files were changed, so the asset must not report "nothing changed". The backup
+  directory is kept.
+
+What this does not change: a killed process or a power cut in the middle of publishing restores
+nothing, and the sidecar check is not a lock. The consequence of step 3 is therefore narrowed, not
+removed: the backup directory is what a restore by hand now starts from. See
+`docs/features/orchestration.md`, "Step 4".

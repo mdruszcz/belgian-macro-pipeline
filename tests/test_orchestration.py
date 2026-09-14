@@ -472,7 +472,15 @@ def test_every_declared_function_resolves_and_every_script_error_class_is_declar
             assert own == [], f"{name}: {module.__name__} defines {own}; declare refusal="
 
 
-EXPORTERS_BY_FUNCTION = ["national_csv", "communes_csv", "aggregates_csv", "percentiles_csv"]
+EXPORTERS_BY_FUNCTION = [
+    "national_csv",
+    "communes_csv",
+    "aggregates_csv",
+    "percentiles_csv",
+    "communes_history_full_csv",
+    "communes_history_csv",
+    "communes_table_json",
+]
 
 
 @pytest.mark.parametrize("name", EXPORTERS_BY_FUNCTION)
@@ -499,10 +507,92 @@ def test_an_exporters_arguments_are_its_command_lines_paths(name, tmp_path):
         assert ("extra_observations" in signature.parameters) == ("--stores" in argv), name
 
 
-@pytest.mark.parametrize("name", ["communes_history_full_csv", "site_payloads", "local_pages"])
+def test_the_full_history_is_the_same_call_with_all_periods():
+    """The Makefile's two passes over one script: --all-periods is the only
+    difference besides the output file, and it must reach the function."""
+    full = exporter_arguments("communes_history_full_csv", PipelinePaths())
+    trimmed = exporter_arguments("communes_history_csv", PipelinePaths())
+    assert full.pop("all_periods") is True
+    assert "all_periods" not in trimmed
+    assert full.pop("out_path").name == "communes_history_full.csv"
+    assert trimmed.pop("out_path").name == "communes_history.csv"
+    assert full == trimmed
+
+
+def test_the_communes_table_reads_the_full_history_and_the_working_database(tmp_path):
+    """Without db_path the table would silently lose its provenance and its
+    French and Dutch names: the command line's --db must reach the call."""
+    paths = PipelinePaths(out_root=str(tmp_path / "out"), working_db=str(tmp_path / "w.db"))
+    arguments = exporter_arguments("communes_table_json", paths)
+    assert arguments == {
+        "csv_path": paths.output(COMMANDS["communes_history_full_csv"].outputs[0]),
+        "out_path": paths.output(COMMANDS["communes_table_json"].outputs[0]),
+        "db_path": paths.resolve(paths.working_db),
+    }
+
+
+def test_the_revisions_report_is_called_with_the_command_lines_db_and_today(tmp_path):
+    paths = PipelinePaths(working_db=str(tmp_path / "w.db"))
+    arguments = canonical.revisions_arguments(paths)
+    assert arguments == {"db_path": paths.resolve(paths.working_db), "since": run.today()}
+    assert arguments["db_path"].is_absolute()
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", arguments["since"])
+    _, function = run.script_function("revisions_report")
+    inspect.signature(function).bind(**arguments)
+
+
+def test_the_revisions_report_refuses_a_command_line_it_cannot_translate(monkeypatch):
+    argv = ("scripts/revisions_report.py", "--db", "{db}", "--since", "{today}", "--all")
+    monkeypatch.setitem(COMMANDS, "revisions_report", Command(argv))
+    with pytest.raises(ValueError, match="revisions_report"):
+        canonical.revisions_arguments(PipelinePaths())
+
+
+def test_the_revisions_report_reaches_the_run_log_and_the_metadata(sandbox, monkeypatch):
+    report = "2 revision(s) since 2026-09-14:\n  GDP/be:country/2026: 1.0 -> 2.0\n  POP/be/2026: x"
+
+    def reports(context, name, **given):
+        sandbox.values[name] = given
+        return [{}, {}], report
+
+    monkeypatch.setattr(run, "call_function", reports)
+    result = sandbox.defs.resolve_implicit_global_asset_job_def().execute_in_process(
+        instance=sandbox.instance,
+        raise_on_error=False,
+        asset_selection=[dg.AssetKey("revisions_report")],
+    )
+
+    assert result.success
+    assert sandbox.values["revisions_report"]["db_path"] == Path(sandbox.paths.working_db)
+    metadata = _metadata(result, "revisions_report")
+    assert metadata["revisions"].value == 2
+    assert "GDP/be:country/2026: 1.0 -> 2.0" in metadata["report"].value
+    logged = [e.user_message for e in sandbox.instance.all_logs(result.run_id)]
+    assert all(line in logged for line in report.splitlines())
+
+
+@pytest.mark.parametrize("name", ["staging_db", "site_payloads", "local_pages"])
 def test_a_command_line_with_other_flags_is_refused_not_half_translated(name):
     with pytest.raises(ValueError, match=name):
         exporter_arguments(name, PipelinePaths())
+
+
+@pytest.mark.parametrize(
+    "tokens",
+    [
+        ("--db", "{db}", "--out", "a.csv", "--all-periods", "yes"),  # a switch with a value
+        ("--db", "{db}", "--out"),  # a flag without its value
+        ("--db", "{db}", "--out", "--all-periods"),  # a flag whose value is a flag
+        ("--db", "{db}", "--out", "a.csv", "--out", "b.csv"),  # a flag given twice
+        ("--db", "{db}", "--out", "a.csv", "--all-periods", "--all-periods"),
+        ("--out", "a.csv"),  # no --db
+        ("--db", "{db}", "--communes-history", "h.csv"),  # no --out
+    ],
+)
+def test_a_malformed_exporter_command_line_is_refused(monkeypatch, tokens):
+    monkeypatch.setitem(COMMANDS, "fake", Command(("scripts/fake.py", *tokens)))
+    with pytest.raises(ValueError, match="fake"):
+        exporter_arguments("fake", PipelinePaths())
 
 
 # ── The coordinator: a red source still exports, and the day ends red ────────
@@ -571,6 +661,8 @@ def sandbox(tmp_path, monkeypatch):
         values[name] = given
         if name in failing:
             raise RuntimeError(f"{name} is down")
+        if name == "revisions_report":
+            return [], "No revisions."
         return {} if name == "committed_stores" else 0
 
     monkeypatch.setattr(run, "run_script", fake_run_script)
@@ -917,24 +1009,49 @@ def test_a_crash_in_the_offload_stays_that_crash(sandbox, monkeypatch):
     result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
 
     assert "PermissionError" in {e.cls_name for e in _errors(result, "committed_stores")}
+    logged = " ".join(e.user_message for e in sandbox.instance.all_logs(result.run_id))
+    # Neutral: an error after a completed publish (the final print) must not be
+    # reported as "nothing changed", nor as "everything was put back".
+    assert "did not report a partial publication" in logged
+    assert "git status" in logged
 
 
-def test_the_partial_publication_notice_names_single_files_from_the_registry(sandbox):
-    files = canonical.committed_files(sandbox.paths)
-    names = [Path(f).name for f in files]
-    assert names[0] == "belgian_macro.db"
-    assert sorted(names[1:]) == ["GDP_A.csv", "HICP_A.csv", "walstat.csv"]
-    notice = canonical.partial_publication_notice(sandbox.paths)
-    assert all(f in notice for f in files)
-    assert notice.count("git checkout") == 1 and "git checkout -- <file>" in notice
+def test_a_partial_publication_names_only_the_files_left_new_and_the_backups(sandbox, monkeypatch):
+    module, _ = run.script_function("committed_stores")
+    stores = Path(sandbox.paths.stores).parent
+    left_new = [stores / "international" / "GDP_A.csv"]
+    backups = Path(sandbox.paths.working_db).parent / "offload_backup" / "20260914T050000Z-1"
 
-    repository = canonical.committed_files(PipelinePaths())
-    assert repository[0] == "data/belgian_macro.db"
-    per_store = [
-        dict.fromkeys(s.csv_for(i) for i in s.indicators) for s in in_db_stores(load_stores())
-    ]
-    assert len(repository) == 1 + sum(len(files) for files in per_store)
-    assert not any((REPO / f).is_dir() for f in repository), "a directory is never restored"
+    def partial(context, name, **given):
+        try:
+            raise OSError("disk full while publishing belgian_macro.db")
+        except OSError as exc:
+            raise module.PartialPublication([stores / "walstat.csv"], left_new, backups) from exc
+
+    monkeypatch.setattr(run, "call_function", partial)
+    result = _offload(sandbox, _allow(_coordinator_manifest(sandbox)))
+
+    assert "PartialPublication" in {e.cls_name for e in _errors(result, "committed_stores")}
+    logged = [e.user_message for e in sandbox.instance.all_logs(result.run_id)]
+    (notice,) = [m for m in logged if m.startswith(canonical.PARTIAL_NOTICE_OPENING)]
+    assert f"  {left_new[0]}\n" in notice
+    assert "walstat.csv" not in notice, "only the files still new"
+    assert str(backups) in notice
+
+
+def test_the_partial_publication_notice_names_single_files_as_git_names_them(tmp_path):
+    inside = [REPO / "data" / "belgian_macro.db", REPO / "data" / "international" / "GDP_A.csv"]
+    outside = tmp_path / "walstat.csv"
+    notice = canonical.partial_publication_notice(
+        PipelinePaths(), [*inside, outside], tmp_path / "backup"
+    )
+    assert notice.startswith(canonical.PARTIAL_NOTICE_OPENING)
+    assert "  data/belgian_macro.db\n" in notice
+    assert "  data/international/GDP_A.csv\n" in notice
+    assert f"  {outside}\n" in notice
+    assert str(tmp_path / "backup") in notice
+    assert notice.count("git checkout -- <file>") == 1
+    assert "Never restore a whole directory" in notice
 
 
 # ── Step 2: what the runner reads -- manifest path, gate, validation status ──

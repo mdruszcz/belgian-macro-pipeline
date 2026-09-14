@@ -17,6 +17,7 @@ scripts/verify_dagster_parity.py, run on a committed HEAD.
 Marked slow: real subprocesses against the real assembled data.
 """
 
+import os
 import re
 import shutil
 import subprocess
@@ -34,10 +35,11 @@ sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from build_staging_db import build  # noqa: E402
+from revisions_report import report_revisions  # noqa: E402
 from test_build_staging_db import _extra_csv_only, _fresh_source_db  # noqa: E402
 from test_offload_stores import build_pipeline  # noqa: E402
 
-from orchestration import checks, manifest  # noqa: E402
+from orchestration import checks, manifest, run  # noqa: E402
 from orchestration.commands import COMMANDS  # noqa: E402
 from orchestration.definitions import build_defs  # noqa: E402
 from orchestration.paths import PipelinePaths  # noqa: E402
@@ -100,7 +102,14 @@ def test_the_checks_report_exactly_what_validate_data_reports(working_db):
     assert len(result.get_asset_check_evaluations()) == len(checks.SEVERITIES)
 
 
-EXPORTERS = ["national_csv", "communes_csv", "aggregates_csv", "percentiles_csv"]
+EXPORTERS = [
+    "national_csv",
+    "communes_csv",
+    "aggregates_csv",
+    "percentiles_csv",
+    "communes_history_full_csv",
+    "communes_history_csv",
+]
 
 
 @pytest.mark.parametrize("name", EXPORTERS)
@@ -119,6 +128,62 @@ def test_the_exporters_write_identical_files(working_db, tmp_path, monkeypatch, 
     assert len(written) == 1
     for relative in written:
         assert (tmp_path / "a" / relative).read_bytes() == (tmp_path / "b" / relative).read_bytes()
+
+
+def test_the_communes_table_is_identical_by_both_routes(working_db, tmp_path, monkeypatch):
+    """communes_table_json reads the full history communes_history_full_csv
+    writes, and its database-derived names and provenance: both routes build
+    that input first, in their own output root."""
+    chain = ["communes_history_full_csv", "communes_table_json"]
+    by_script = PipelinePaths(working_db=str(working_db), out_root=str(tmp_path / "a"))
+    for name in chain:
+        argv = by_script.render(COMMANDS[name].argv)
+        subprocess.run([sys.executable, *argv], cwd=REPO, check=True)
+
+    by_dagster = PipelinePaths(working_db=str(working_db), out_root=str(tmp_path / "b"))
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    result = _materialize(by_dagster, chain)
+    assert result.success
+
+    written = sorted(p.relative_to(tmp_path / "a") for p in (tmp_path / "a").rglob("*.json"))
+    assert len(written) == 1
+    table = written[0]
+    assert (tmp_path / "a" / table).read_bytes() == (tmp_path / "b" / table).read_bytes()
+    assert b'"fr"' in (tmp_path / "b" / table).read_bytes(), "the names came from the database"
+
+
+def test_the_revisions_report_says_what_the_command_line_prints(working_db, tmp_path, monkeypatch):
+    """No file to compare: the command line's output against the text the asset
+    logs, on the real assembled data. --since from well before today, so the
+    report is not trivially empty; then the asset itself, with today's date."""
+    since = "2026-01-01"
+    argv = [sys.executable, "scripts/revisions_report.py", "--db", str(working_db)]
+    printed = subprocess.run(
+        [*argv, "--since", since],
+        cwd=REPO,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+    ).stdout
+    revisions, report = report_revisions(working_db, since)
+    assert revisions, "the real data has revisions since 2026-01-01"
+    assert printed == report + "\n"
+
+    monkeypatch.chdir(tmp_path)
+    result = _materialize(PipelinePaths(working_db=str(working_db)), ["revisions_report"])
+    assert result.success
+    today = report_revisions(working_db, run.today())[0]
+    (event,) = [
+        e
+        for e in result.get_asset_materialization_events()
+        if e.asset_key.to_user_string() == "revisions_report"
+    ]
+    metadata = event.step_materialization_data.materialization.metadata
+    assert metadata["revisions"].value == len(today)
 
 
 def test_the_offload_writes_identical_committed_files(tmp_path, monkeypatch):
@@ -173,3 +238,4 @@ def test_the_offload_writes_identical_committed_files(tmp_path, monkeypatch):
     assert a["csv"].read_bytes() == b["csv"].read_bytes()
     for side in (a, b):
         assert [p.name for p in side["working"].parent.iterdir() if p.suffix == ".tmp"] == []
+        assert not any((side["working"].parent / "offload_backup").glob("*")), "no backup left"

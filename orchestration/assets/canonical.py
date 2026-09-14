@@ -12,16 +12,16 @@ export job builds, in that same run, and only when the coordinator allows it.
 """
 
 import json
+import sys
 from pathlib import Path
 
 from dagster import AssetExecutionContext, Config, Failure, MaterializeResult, MetadataValue, asset
 
 from orchestration import checks, manifest, run
-from orchestration.assets import derived, reference_data, script_asset, website
+from orchestration.assets import derived, reference_data, website
 from orchestration.assets.sources_manual import SPECS as MANUAL_SPECS
 from orchestration.commands import COMMANDS, TRACKED
 from orchestration.paths import PipelinePaths
-from src.stores import in_db_stores, load_stores
 
 
 class SourceRunConfig(Config):
@@ -95,12 +95,40 @@ def volume_history(context: AssetExecutionContext, paths: PipelinePaths) -> Mate
     return MaterializeResult(metadata={"indicators recorded": n})
 
 
-revisions_report = script_asset(
-    "revisions_report",
-    group="canonical",
+REPORT_LINES_IN_METADATA = 100
+
+
+def revisions_arguments(paths: PipelinePaths) -> dict:
+    """report_revisions()'s arguments, read off the command line production ran
+    (--db and --since, {today} being today's UTC date), every path absolute. Any
+    other shape is refused rather than half-translated."""
+    script, *tokens = paths.render(COMMANDS["revisions_report"].argv, today=run.today())
+    flags = dict(zip(tokens[::2], tokens[1::2], strict=False))
+    if len(tokens) != 4 or set(flags) != {"--db", "--since"}:
+        raise ValueError(f"revisions_report: `{script} {' '.join(tokens)}` is not --db/--since")
+    return {"db_path": paths.resolve(flags["--db"]), "since": flags["--since"]}
+
+
+@asset(
+    group_name="canonical",
     deps=["validated_working_database"],
-    description="Values revised today (scripts/revisions_report.py). Prints; writes no file.",
+    description=(
+        "Values revised today: report_revisions() from scripts/revisions_report.py, called in "
+        "process with --since today (UTC). Logs the report; writes no file."
+    ),
 )
+def revisions_report(context: AssetExecutionContext, paths: PipelinePaths) -> MaterializeResult:
+    revisions, report = run.call_function(context, "revisions_report", **revisions_arguments(paths))
+    lines = report.splitlines()
+    for line in lines:
+        context.log.info(line)
+    shown = "\n".join(lines[:REPORT_LINES_IN_METADATA])
+    if len(lines) > REPORT_LINES_IN_METADATA:
+        shown += f"\n... {len(lines) - REPORT_LINES_IN_METADATA} more line(s) in the run log"
+    return MaterializeResult(
+        metadata={"revisions": len(revisions), "report": MetadataValue.md(f"```\n{shown}\n```")}
+    )
+
 
 # Everything validate_and_export builds. committed_stores depends on all of it;
 # tests/test_orchestration.py holds this list to that job's selection.
@@ -131,31 +159,35 @@ def _as_git_names_it(paths: PipelinePaths, path: Path) -> str:
         return str(path)
 
 
-def committed_files(paths: PipelinePaths) -> list[str]:
-    """Every FILE the offload replaces, as git names it: the committed database,
-    then each in_db store's CSV -- one per declared indicator for a directory
-    store. Read from the registry, never typed in, and never a directory."""
-    files = [paths.resolve(paths.committed_db)]
-    for store in in_db_stores(load_stores(paths.resolve(paths.stores))):
-        files.extend(dict.fromkeys(store.csv_for(indicator) for indicator in store.indicators))
-    return [_as_git_names_it(paths, f) for f in files]
+PARTIAL_NOTICE_OPENING = "committed_stores could not put every committed file back."
+
+# For any error offload() raised that is neither a refusal nor a partial
+# publication. Deliberately claims no outcome: the error may have come before
+# publishing (nothing changed), during it (rolled back), or after it (the new
+# files are in place).
+UNREPORTED_ERROR_NOTICE = (
+    "committed_stores stopped with {error}. offload() did not report a partial publication "
+    "(a publish that stops part-way and cannot be put back raises PartialPublication and "
+    "names its files). An error before publishing changed nothing; an error while publishing "
+    "was rolled back from this run's backups; an error after publishing leaves the new "
+    "committed files in place. Nothing was committed and the run is red; `git status` shows "
+    "which of these happened."
+)
 
 
-def partial_publication_notice(paths: PipelinePaths) -> str:
-    """What to do when offload() stopped on an error that is not one of its
-    refusals: it replaces its files one after another, so it may have stopped
-    between two of them."""
-    try:
-        files = "\n".join(f"  {f}" for f in committed_files(paths))
-    except Exception as exc:  # noqa: BLE001 -- the registry itself may be what broke
-        files = f"  {paths.committed_db}\n  each in_db CSV named in {paths.stores} ({exc})"
+def partial_publication_notice(paths: PipelinePaths, left_new, backup_dir: Path) -> str:
+    """What to do after offload() raised PartialPublication: exactly the files
+    still holding this run's version, one per line as git names them, and where
+    their previous versions are kept. Single files only, never a directory."""
+    files = "".join(f"  {_as_git_names_it(paths, Path(f))}\n" for f in left_new)
     return (
-        "committed_stores stopped part-way. offload() replaces these files one after "
-        "another, so some of them may already hold the new version:\n"
-        f"{files}\n"
-        "Nothing was committed and the run is red. To put the committed state back, run "
-        "`git status` and restore only the files from this list that it shows as modified, "
-        "one at a time: git checkout -- <file>. Never restore a whole directory: it also "
+        f"{PARTIAL_NOTICE_OPENING} offload() stopped while publishing, put back every file "
+        "it could, and these still hold this run's version:\n"
+        f"{files}"
+        f"The previous version of each is kept in {backup_dir}, whose manifest names the file "
+        "each backup belongs to; nothing there is deleted automatically. Nothing was "
+        "committed and the run is red. Restore each file above, one at a time, from that "
+        "directory or with git checkout -- <file>. Never restore a whole directory: it also "
         "holds files this run did not write."
     )
 
@@ -168,10 +200,12 @@ def partial_publication_notice(paths: PipelinePaths) -> str:
         "data/belgian_macro.db and every in_db store's CSV (config/stores.yaml), written "
         "last by offload() from scripts/offload_stores.py, the function `make offload` runs. "
         "Only the coordinator (python -m orchestration.daily) allows it; materialised from "
-        "here it refuses. A refusal changes nothing. A crash while it "
-        "replaces those files one after another can leave some of them new: the run is red, "
-        "nothing is committed, and only the files git status lists among them are restored, "
-        "by name."
+        "here it refuses. A refusal changes nothing, including the refusal while a -wal or "
+        "-shm file sits beside the committed database (a check before writing, not a lock). "
+        "An exception while it replaces its files puts back every one already replaced, from "
+        "backups taken first; a file it cannot put back is named, with the backup directory, "
+        "which is kept. A killed process or a power cut mid-publish restores nothing: that "
+        "run's backup directory is what remains, for a restore by hand."
     ),
 )
 def committed_stores(
@@ -214,10 +248,15 @@ def committed_stores(
     except Failure as refusal:
         # offload()'s own refusals all come before its first os.replace.
         raise Failure(f"{refusal.description} No committed file was changed.") from refusal
-    except Exception:
-        # Anything else may have stopped between two of its replacements. Say
-        # which files that can concern, and let the error through unchanged.
-        context.log.error(partial_publication_notice(paths))
+    except Exception as exc:
+        # Let the error through unchanged, saying what it can mean. The script's
+        # module is the one call_function already imported; never imported here.
+        module = sys.modules.get(COMMANDS["committed_stores"].function.partition(":")[0])
+        partial = getattr(module, "PartialPublication", None)
+        if partial is not None and isinstance(exc, partial):
+            context.log.error(partial_publication_notice(paths, exc.left_new, exc.backup_dir))
+        else:
+            context.log.error(UNREPORTED_ERROR_NOTICE.format(error=type(exc).__name__))
         raise
     return MaterializeResult(
         metadata={

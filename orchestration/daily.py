@@ -26,8 +26,9 @@ run, and the run ends red. This coordinator does that:
           auto-merge;
        1  nothing publishable: assemble, a blocking check, an export or the
           offload failed -- the workflow stops before committing anything. A
-          refused offload changed no file; one that crashed while replacing
-          its files may have replaced some of them (see committed_stores).
+          refused offload changed no file; one that raised while replacing
+          its files put them back, or names those it could not and keeps
+          their backups (see committed_stores).
 
 With --github-output FILE (the runner's $GITHUB_OUTPUT) it appends
 `manifest=<path>` as soon as the manifest exists, so the auto-merge gate

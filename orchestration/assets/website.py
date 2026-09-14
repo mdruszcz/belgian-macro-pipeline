@@ -29,19 +29,25 @@ communes_csv = function_asset(
         "called in process."
     ),
 )
-communes_history_full_csv = script_asset(
+communes_history_full_csv = function_asset(
     "communes_history_full_csv",
     group="website",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="Full commune history, gitignored intermediate (export_communes_history_csv.py --all-periods).",
+    description=(
+        "Full commune history, gitignored intermediate: export_communes_history_csv() from "
+        "scripts/export_communes_history_csv.py with all_periods=True, called in process."
+    ),
 )
-communes_history_csv = script_asset(
+communes_history_csv = function_asset(
     "communes_history_csv",
     group="website",
     deps=[VALIDATED],
     kinds={"csv"},
-    description="Committed commune history, last 10 years (scripts/export_communes_history_csv.py).",
+    description=(
+        "Committed commune history, last 10 years: export_communes_history_csv() from "
+        "scripts/export_communes_history_csv.py, called in process."
+    ),
 )
 indicator_metadata_json = script_asset(
     "indicator_metadata_json",

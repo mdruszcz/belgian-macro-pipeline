@@ -105,6 +105,7 @@ COMMANDS: dict[str, Command] = {
     ),
     "revisions_report": Command(
         ("scripts/revisions_report.py", "--db", "{db}", "--since", "{today}"),
+        function="revisions_report:report_revisions",
     ),
     # The offload, `make offload`'s line. Its outputs are the committed database
     # and every in_db CSV config/stores.yaml names; only the database is listed
@@ -135,6 +136,7 @@ COMMANDS: dict[str, Command] = {
             "{db}",
         ),
         outputs=("{data}/communes_table.json",),
+        function="export_communes_table_json:export_communes_table_json",
     ),
     "aggregates_csv": Command(
         (
@@ -199,6 +201,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/communes_history_full.csv",),
+        function="export_communes_history_csv:export_communes_history_csv",
     ),
     "communes_history_csv": Command(
         (
@@ -211,6 +214,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/communes_history.csv",),
+        function="export_communes_history_csv:export_communes_history_csv",
     ),
     "indicator_metadata_json": Command(
         ("-m", "src.exporters.metadata", "--out", "{data}/metadata/indicators.json"),
