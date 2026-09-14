@@ -125,6 +125,9 @@ def test_a_position_with_no_value_and_no_flag_produces_no_row(tmp_path, monkeypa
         # which neither flag asserts).
         ("b", "final", 100.0),
         ("d", "final", 100.0),
+        # "u" (low reliability) -> "estimate": ASSUMPTION, pending maintainer
+        # confirmation (docs/decisions/0010-eurostat-compound-observation-flags.md).
+        ("u", "estimate", 100.0),
     ],
 )
 def test_flags_with_a_value_map_to_the_right_status(
@@ -143,6 +146,113 @@ def test_flags_with_a_value_map_to_the_right_status(
     assert rows == [
         {"geo": "BE", "period": "2023", "value": expected_value, "obs_status": expected_status}
     ]
+
+
+# --- compound OBS_FLAG values (docs/decisions/0010) ------------------------
+#
+# Real flag censuses that motivated this (docs/features/europe_nuts2.md,
+# "The adapter gap: compound OBS_FLAG values", PR #166):
+#   lfst_r_lfu3rt (unemployment): b 2008, u 361, d 226, bu 117, bd 106,
+#     du 6, bdu 4.
+#   demo_r_pjanaggr3 (population): be 13, e 1196, b 1370, bep 3, ep 199,
+#     p 631.
+# Expected statuses below are hand-computed from each letter's own
+# FLAG_STATUS entry (b/d/p -> final/final/provisional, e/u -> estimate),
+# NOT derived from STATUS_PRECEDENCE -- CLAUDE.md rule 5.
+
+
+@pytest.mark.parametrize(
+    "flag,expected_status",
+    [
+        ("bu", "estimate"),  # b=final, u=estimate -> estimate is more cautious
+        ("bd", "final"),  # b=final, d=final -> final
+        ("du", "estimate"),  # d=final, u=estimate -> estimate
+        ("bdu", "estimate"),  # final, final, estimate -> estimate
+        ("be", "estimate"),  # b=final, e=estimate -> estimate
+        ("bep", "estimate"),  # final, estimate, provisional -> estimate is most cautious
+        ("ep", "estimate"),  # e=estimate, p=provisional -> estimate
+        ("u", "estimate"),  # single-letter "compound" case, same table
+    ],
+)
+def test_compound_flags_resolve_to_the_most_cautious_status(
+    tmp_path, monkeypatch, flag, expected_status
+):
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 100.0}, status={"0": flag})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+    assert rows == [{"geo": "BE", "period": "2023", "value": 100.0, "obs_status": expected_status}]
+
+
+def test_compound_flag_letter_order_does_not_matter(tmp_path, monkeypatch):
+    """ "ub" and "bu" are the same set of letters and must resolve identically
+    -- Eurostat does not guarantee a canonical letter order within a compound."""
+    results = {}
+    for flag in ("bu", "ub"):
+        cube = _cube(
+            ["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 100.0}, status={"0": flag}
+        )
+        monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+        monkeypatch.setattr(
+            "src.fetchers.base.requests.get",
+            lambda *a, cube=cube, **k: _FakeResponse(json.dumps(cube).encode()),
+        )
+        rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+        results[flag] = rows[0]["obs_status"]
+
+    assert results["bu"] == results["ub"] == "estimate"
+
+
+def test_a_repeated_letter_in_a_flag_behaves_like_the_single_letter(tmp_path, monkeypatch):
+    """ "bb" is not a real Eurostat code, but the resolver must not treat a
+    repeat as anything other than "b" once deduplicated -- it should behave
+    exactly like the plain "b" case (-> final), not fail and not escalate."""
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 100.0}, status={"0": "bb"})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+    assert rows == [{"geo": "BE", "period": "2023", "value": 100.0, "obs_status": "final"}]
+
+
+def test_an_empty_flag_keeps_todays_behavior(tmp_path, monkeypatch):
+    """No status entry at all for a position still means "final", exactly as
+    before this change -- the compound-splitting path must not touch the
+    empty-flag case."""
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 100.0}, status={})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    rows = EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
+
+    assert rows == [{"geo": "BE", "period": "2023", "value": 100.0, "obs_status": "final"}]
+
+
+def test_a_compound_flag_with_an_unknown_letter_is_refused_entirely(tmp_path, monkeypatch):
+    """ "bx" has one real letter ("b") and one that is not in Eurostat's
+    OBS_FLAG codelist at all -- the whole cell is refused, no partial
+    acceptance of the known letter (CLAUDE.md rule 13)."""
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 100.0}, status={"0": "bx"})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
+    )
+
+    with pytest.raises(FetchError, match="unrecognized Eurostat OBS_FLAG 'x'"):
+        EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
 
 
 def test_forecast_flag_is_not_recognized_and_fails_loudly(tmp_path, monkeypatch):
@@ -180,7 +290,7 @@ def test_a_flag_with_no_value_still_produces_a_row_in_a_known_state(
     assert rows == [{"geo": "BE", "period": "2023", "value": None, "obs_status": expected_status}]
 
 
-@pytest.mark.parametrize("flag", ["p", "e", "b", "d"])
+@pytest.mark.parametrize("flag", ["p", "e", "b", "d", "u"])
 def test_a_flag_with_no_value_and_a_non_nullable_status_refuses(tmp_path, monkeypatch, flag):
     """Audit SHOULD-FIX 8: only suppressed/na may have value=None. A flag
     that maps to any other status (provisional/estimate/final) but carries
@@ -198,14 +308,17 @@ def test_a_flag_with_no_value_and_a_non_nullable_status_refuses(tmp_path, monkey
 
 
 def test_an_unrecognized_flag_refuses_rather_than_guesses(tmp_path, monkeypatch):
-    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 1.0}, status={"0": "u"})
+    # "x" is not a real Eurostat OBS_FLAG letter at all (unlike "u", which
+    # this adapter now recognizes as "low reliability" -> see the compound
+    # flag tests below).
+    cube = _cube(["geo", "time"], [1, 1], ["BE"], ["2023"], values={"0": 1.0}, status={"0": "x"})
     monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
     monkeypatch.setattr(
         "src.fetchers.base.requests.get",
         lambda *a, **k: _FakeResponse(json.dumps(cube).encode()),
     )
 
-    with pytest.raises(FetchError, match="unrecognized Eurostat OBS_FLAG 'u'"):
+    with pytest.raises(FetchError, match="unrecognized Eurostat OBS_FLAG 'x'"):
         EurostatSource().fetch("https://example.test/x", cache_key="X", dataset="x")
 
 

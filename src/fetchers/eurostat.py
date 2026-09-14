@@ -82,7 +82,22 @@ FLAG_STATUS = {
     "d": "final",
     "c": "suppressed",
     "z": "na",
+    # ASSUMPTION, PENDING MAINTAINER CONFIRMATION (docs/decisions/0010-eurostat-
+    # compound-observation-flags.md): "u" (low reliability) -> "estimate". Not
+    # "provisional" -- a low-reliability figure is a confidence caveat on a
+    # settled number, closer to "estimate" than to "this will be revised". A
+    # single-entry mapping so it is trivial to flip if the maintainer disagrees.
+    "u": "estimate",
 }
+
+#: Precedence for resolving a COMPOUND OBS_FLAG (two or more letters, e.g.
+#: "bu", "bdu") to one canonical status: the canonical status of a compound
+#: cell is the MOST CAUTIOUS of its letters' individual statuses, read
+#: left-to-right here from most to least cautious. Documented once, used only
+#: by `_status_for_flag`. "revised" is included for completeness even though
+#: FLAG_STATUS never currently produces it (see the module docstring: no
+#: Eurostat OBS_FLAG letter maps to "revised" today).
+STATUS_PRECEDENCE = ("suppressed", "na", "estimate", "provisional", "revised", "final")
 
 #: Canonical statuses value=None is legal for (CLAUDE.md: missing/suppressed/
 #: na/zero are five distinct states, never collapsed). A flagged position
@@ -91,6 +106,40 @@ FLAG_STATUS = {
 #: rather than left to fail later as a bare sqlite CHECK-constraint error
 #: with no context.
 NULLABLE_STATUSES = frozenset({"suppressed", "na"})
+
+
+def _status_for_flag(flag: str, dataset: str, geo_code: str, period: str) -> str:
+    """Resolve one cell's OBS_FLAG string (possibly a compound of several
+    letters, e.g. "bu") to one canonical status.
+
+    Split into individual letters (order irrelevant, repeats collapse: "bu",
+    "ub" and "bbu" all resolve the same way); every letter must already be a
+    key of FLAG_STATUS or the whole cell is refused (no partial acceptance --
+    CLAUDE.md rule 13), same loud error as an unrecognized single-letter flag
+    always has been. Among the (possibly several) canonical statuses the
+    letters map to, return the most cautious one per STATUS_PRECEDENCE.
+    """
+    if flag == "":
+        return FLAG_STATUS[""]
+    letters = set(flag)
+    unknown = sorted(letters - FLAG_STATUS.keys())
+    if unknown:
+        bad = unknown[0]
+        detail = f" (within compound flag {flag!r})" if len(flag) > 1 else ""
+        raise FetchError(
+            f"{dataset!r}: unrecognized Eurostat OBS_FLAG {bad!r}{detail} at "
+            f"geo={geo_code} period={period}. Refusing to guess (CLAUDE.md "
+            "rule 13); verify it against https://ec.europa.eu/eurostat/api/"
+            "dissemination/sdmx/2.1/codelist/ESTAT/OBS_FLAG and add it to "
+            "FLAG_STATUS."
+        )
+    statuses = {FLAG_STATUS[letter] for letter in letters}
+    for status in STATUS_PRECEDENCE:
+        if status in statuses:
+            return status
+    raise AssertionError(  # pragma: no cover -- STATUS_PRECEDENCE is exhaustive over FLAG_STATUS's values
+        f"{dataset!r}: no entry in STATUS_PRECEDENCE matched {statuses!r} for flag {flag!r}"
+    )
 
 
 def _strides(dims: list[str], sizes: list[int]) -> dict[str, int]:
@@ -163,15 +212,7 @@ class EurostatSource(MultiGeoTimeSeriesSource):
                 flag = status.get(offset, "")
                 if raw_value is None and flag == "":
                     continue  # position absent from the cube -- no row, not a state
-                if flag not in FLAG_STATUS:
-                    raise FetchError(
-                        f"{dataset!r}: unrecognized Eurostat OBS_FLAG {flag!r} at "
-                        f"geo={geo_code} period={period}. Refusing to guess (CLAUDE.md "
-                        "rule 13); verify it against https://ec.europa.eu/eurostat/api/"
-                        "dissemination/sdmx/2.1/codelist/ESTAT/OBS_FLAG and add it to "
-                        "FLAG_STATUS."
-                    )
-                obs_status = FLAG_STATUS[flag]
+                obs_status = _status_for_flag(flag, dataset, geo_code, period)
                 if raw_value is None and obs_status not in NULLABLE_STATUSES:
                     raise FetchError(
                         f"{dataset!r}: geo={geo_code} period={period} has flag {flag!r} "
