@@ -152,6 +152,7 @@ COMMANDS: dict[str, Command] = {
             "{data}/belgian_macro_export.csv",
         ),
         outputs=("{data}/belgian_macro_export.csv",),
+        function="export_canonical_csv:export_canonical_csv",
     ),
     "communes_csv": Command(
         (

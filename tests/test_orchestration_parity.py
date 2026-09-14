@@ -3,7 +3,11 @@ check that fits in the test suite.
 
 Everything writes to temporary directories; the worktree is never touched.
 Three parts: the assembled working database, the validation results, and the
-exporters that accept an output path. The full comparison -- every file
+exporters that accept an output path. An exporter whose asset calls the
+script's function in process (Command.function) is held to the same test: its
+command line as a subprocess on one side, the asset on the other, from a
+different working directory, so a path that only resolves from the repository
+root shows up here. The full comparison -- every file
 `make assemble exports` writes, including the pages and the scripts that can
 only write into the repository -- is scripts/verify_dagster_parity.py, run on
 a committed HEAD.
@@ -94,18 +98,19 @@ def test_the_checks_report_exactly_what_validate_data_reports(working_db):
 EXPORTERS = ["national_csv", "communes_csv", "aggregates_csv", "percentiles_csv"]
 
 
-def test_the_exporters_write_identical_files(working_db, tmp_path):
+@pytest.mark.parametrize("name", EXPORTERS)
+def test_the_exporters_write_identical_files(working_db, tmp_path, monkeypatch, name):
     by_script = PipelinePaths(working_db=str(working_db), out_root=str(tmp_path / "a"))
-    for name in EXPORTERS:
-        subprocess.run(
-            [sys.executable, *by_script.render(COMMANDS[name].argv)], cwd=REPO, check=True
-        )
+    subprocess.run([sys.executable, *by_script.render(COMMANDS[name].argv)], cwd=REPO, check=True)
 
     by_dagster = PipelinePaths(working_db=str(working_db), out_root=str(tmp_path / "b"))
-    result = _materialize(by_dagster, EXPORTERS)
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    result = _materialize(by_dagster, [name])
     assert result.success
 
     written = sorted(p.relative_to(tmp_path / "a") for p in (tmp_path / "a").rglob("*.csv"))
-    assert len(written) == len(EXPORTERS)
+    assert len(written) == 1
     for relative in written:
         assert (tmp_path / "a" / relative).read_bytes() == (tmp_path / "b" / relative).read_bytes()
