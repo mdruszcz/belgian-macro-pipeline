@@ -43,7 +43,7 @@ STORES := config/stores.yaml
 # data/local/. Must be absolute.
 DAGSTER_HOME ?= $(CURDIR)/data/local/dagster_home
 
-.PHONY: all install schema reference validate exports pages shell-sync page-documents site-index boundaries builder assemble offload test fetch clean help dagster dagster-daily verify-dagster-parity
+.PHONY: all install schema reference validate exports pages shell-sync page-documents site-index boundaries builder assemble offload test fetch sync-nuts2 clean help dagster dagster-daily verify-dagster-parity
 
 ## all: install deps, assemble the working database from what is committed,
 ## validate it, regenerate every published export, and run the tests. No
@@ -116,6 +116,12 @@ exports:
 	# downloads rather than from the database, so the page cannot show a
 	# figure the download does not have. Must run AFTER both.
 	$(PYTHON) scripts/export_explorer_payloads.py
+	# Europe NUTS 2 (batch B2). Reads only the committed data/nuts2/*.csv
+	# store, config/geography/nuts2.csv and the committed geometry -- no
+	# $(DB) involved, so it is safe here regardless of whether sync-nuts2
+	# has ever been run (a not-yet-loaded indicator publishes as "blocked",
+	# not missing silently).
+	$(PYTHON) scripts/export_europe_nuts2.py
 	$(MAKE) pages
 	$(MAKE) shell-sync
 	$(MAKE) page-documents
@@ -229,6 +235,18 @@ fetch:
 	$(PYTHON) scripts/sync_onem_rates.py --db $(DB)
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
 	$(PYTHON) scripts/sync_international.py --db $(DB)
+
+## sync-nuts2: fetch the Europe NUTS 2 batch's three regional Eurostat
+## indicators into $(DB) (scripts/sync_nuts2.py). NOT part of `fetch` or
+## `all` -- Europe NUTS 2 (batch B2, docs/features/europe_nuts2.md) is
+## deliberately not wired into the daily run yet (a follow-up). Run by hand,
+## then dump the new rows to their committed CSV and commit it yourself,
+## e.g.:
+##   make sync-nuts2
+##   $(PYTHON) scripts/export_observations_csv.py --db $(DB) \
+##       --out data/nuts2/GDP_PC_PPS_NUTS2.csv --indicators GDP_PC_PPS_NUTS2
+sync-nuts2:
+	$(PYTHON) scripts/sync_nuts2.py --db $(DB)
 
 ## dagster: the local Dagster UI at http://localhost:3000 -- the pipeline's
 ## assets, lineage, checks and freshness (docs/features/orchestration.md).

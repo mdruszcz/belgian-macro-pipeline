@@ -804,7 +804,7 @@ approvals are recorded in their own sections rather than added there. Every figu
 | Required credit | Per the existing `eurostat` source's licence note (below) |
 | Licence caveat | Same as the `eurostat` row: reuse including commercial authorised with Eurostat credited; not for commercial redissemination of non-EU/EFTA/candidate data — the pilot's country allowlist already enforces exactly this |
 
-### Unemployment rate — `lfst_r_lfu3rt` (APPROVED by the maintainer 2026-09-14, blocked on an adapter gap)
+### Unemployment rate — `lfst_r_lfu3rt` (APPROVED by the maintainer 2026-09-14; not loaded — see Acquisition)
 
 | Field | Value |
 |---|---|
@@ -813,21 +813,21 @@ approvals are recorded in their own sections rather than added there. Every figu
 | Periods at source | Annual, 1999–2025 (27 years) |
 | Coverage | 352 real NUTS 2 regions (0 pseudo-region codes); 290 with a value in the latest year (2025). After licence filter: 306 kept, 44 dropped (all UK), 1 **unresolved** — `EA21`, an aggregate code that structurally resembles a NUTS 2 code and must be caught by an explicit exclusion list, not a country-prefix check alone |
 | Geography | NUTS 2, 2024 vintage recommended |
-| Acquisition | **Blocked, adapter fix approved as its own PR first (2026-09-14)**: `EurostatSource._parse` refuses this response outright — compound `OBS_FLAG` values it has never seen (`bu`, `bd`, `du`, `bdu`, 233 cells combined) and even the plain `u` ("unreliable") flag alone (361 cells) are not in its `FLAG_STATUS` table. **The mapping for plain `u` is not yet decided by the maintainer** — the fix PR implements `u` → `estimate` under a stated assumption, pending confirmation (see spec, decision 7) |
+| Acquisition | **Still blocked, but not by the compound-flag gap any more.** The compound/`u`-flag adapter fix (#168, `u` → `estimate` confirmed by the maintainer 2026-09-14) is merged and this response's `bu`/`bd`/`du`/`bdu`/`u` cells all now resolve. Batch B2's real load (2026-09-14) found a DIFFERENT, previously-unseen gap: 149 cells carry an `OBS_FLAG` with no value at all (e.g. geo=DE22, period=2020, flag `bu`) — `EurostatSource._parse` still refuses these, because the resolved status (`estimate`/`final`) is not one of the two statuses (`suppressed`/`na`) the observations table allows to be `NULL`. `src/fetchers/eurostat.py` DID gain a `geo_filter` parameter this batch (to unblock POPULATION_NUTS2's own single, NUTS-3-shaped bad cell — see the Population row above) but that filter does not help here: DE22 and the other 4-character bad cells ARE the NUTS 2 geographies this fetch wants, so they are still validated and still refuse. How to label them (flags `u`/`bu`, "unreliable") is the maintainer's decision, pending as of this batch; see `docs/features/europe_nuts2.md`, "Coverage" |
 | Source page | `ec.europa.eu/eurostat/databrowser/product/view/lfst_r_lfu3rt` |
 | Required credit | Same as the `eurostat` row below |
 | Licence caveat | Same as the `eurostat` row |
 
-### Population — `demo_r_pjanaggr3` (APPROVED by the maintainer 2026-09-14, blocked on the same adapter gap)
+### Population — `demo_r_pjanaggr3` (APPROVED by the maintainer 2026-09-14; loaded)
 
 | Field | Value |
 |---|---|
 | Publisher | Eurostat — regional demographic statistics (a NUTS 3 dataset that also carries NUTS 0–2 rows in the same response) |
 | What | Population on 1 January, total, both sexes, all ages. Filters: `sex=T&age=TOTAL&unit=NR` |
 | Periods at source | Annual, 1990–2025 (36 years) |
-| Coverage | 361 NUTS-2-shaped codes, of which 4 are pseudo-regions (`ALXX`, `FRXX`, `HUXX`, `MKXX` — Eurostat's "Not regionalised/Unknown NUTS 2" label, a different convention from national accounts' `ZZ` extra-regio) → 357 real regions; 296 with a value in the latest year (2025). After licence filter: 314 kept, 41 dropped (40 UK + `EU28`), 1 **unresolved** — `EFTA`, the same aggregate-code hazard as `EA21` above |
+| Coverage | 361 NUTS-2-shaped codes, of which 4 are pseudo-regions (`ALXX`, `FRXX`, `HUXX`, `MKXX` — Eurostat's "Not regionalised/Unknown NUTS 2" label, a different convention from national accounts' `ZZ` extra-regio) → 357 real regions; 296 with a value in the latest year (2025). After licence filter: 314 kept, 41 dropped (40 UK + `EU28`), 1 **unresolved** — `EFTA`, the same aggregate-code hazard as `EA21` above. **Loaded**: 314 regions, 8,326 rows, 1990–2025; 295 with a value in 2025 |
 | Geography | NUTS 2, 2024 vintage recommended |
-| Acquisition | **Blocked, same fix PR as the unemployment rate**: compound flags `be`/`bep`/`ep` (1,198 cells combined) not in `FLAG_STATUS`. The single-letter flags `b`/`e`/`p` this dataset also carries already map correctly today |
+| Acquisition | **Loaded (2026-09-14).** The compound-flag adapter fix (#168) resolved this response's `be`/`bep`/`ep` cells. Its one remaining flag-with-no-value cell (geo=PL912, period=2010, flag `b`) is a 5-character NUTS 3 code this loader never wanted — `EurostatSource._parse` gained an optional `geo_filter` parameter (src/fetchers/eurostat.py) that skips a rejected geography entirely, before its flag/value are ever validated; `scripts/sync_nuts2.py` passes `geo_filter=is_nuts2_code`, which filters PL912 out without touching the `u`/flag-status mapping. See docs/features/europe_nuts2.md, "Coverage", and ADR 0009's 2026-09-14 amendment, item 8 |
 | Source page | `ec.europa.eu/eurostat/databrowser/product/view/demo_r_pjanaggr3` |
 | Required credit | Same as the `eurostat` row below |
 | Licence caveat | Same as the `eurostat` row |

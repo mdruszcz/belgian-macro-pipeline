@@ -100,3 +100,110 @@ province level to carry a NUTS 2 tag the way the other ten provinces do.
 - Adding the ~300-region `nuts2.csv` table and the compound-`OBS_FLAG` adapter fix
   (`docs/features/europe_nuts2.md`, "Assumptions") are each their own PR; this ADR covers only
   the geography-table shape decision, not the fetch or adapter work.
+
+## Amendment 2026-09-14 (batch B2, the implementation batch)
+
+Decisions 2 and 3 above are **superseded**. Building the real `nuts2.csv` against live Eurostat
+data surfaced a reason not visible from the coverage report alone: **`BE10` (Brussels-Capital) is
+not a synthetic alias at all — it is a real code Eurostat's own `geo` dimension returns**, with its
+own real observations, for every one of the three candidate datasets (confirmed 2026-09-14 against
+`nama_10r_2gdp`, `lfst_r_lfu3rt`, `demo_r_pjanaggr3`). Brussels has no *province*-level row in
+`geographies.csv` to carry a NUTS 2 tag (decision 3's own point stands), but that gap is about
+`geographies.csv`'s shape, not about whether `BE10` is a real region — it is, exactly as real as
+`BE21`.
+
+Given that, dual-registering Belgium's 10 provinces by reference (decision 2) while aliasing
+Brussels separately (decision 3) would have treated one real, live-data-bearing NUTS 2 region
+(`BE10`) differently from the other ten for no reason connected to the data itself — and would
+still have left a live risk decision 2 accepted on purpose for the country pilot (`BE` sharing one
+`geo_id` between two Eurostat granularities) but that this batch's own risk list (`docs/features/
+europe_nuts2.md`, "Rollout / risks") flags as exactly the kind of mixing rule 3/25 exist to
+prevent: a NUTS-built regional figure landing under the same `geo_id` a NIS-built Belgian province
+aggregate uses.
+
+**Revised decision, this batch:**
+
+1. **Every NUTS 2 region gets its own `:nuts2` geo_id in `config/geography/nuts2.csv` — Belgium's
+   11 included.** `nuts2.csv` gains a `belgian_geo_id` column, filled **only** for the 11 Belgian
+   rows, as a pure cross-reference for tooling and humans — **never** consulted by the loader
+   (`scripts/sync_nuts2.py`) to choose an observation's `geo_id`. BE21–BE25/BE31–BE35 resolve
+   `belgian_geo_id` by reading `geographies.csv`'s existing `nuts` column (a lookup, never
+   hand-typed); `BE10` resolves it to `be:reg:04000` (the Brussels region row) by `geo_id`, with a
+   sanity check that row's own `nuts` column still reads `BE1` (NUTS 1). **Enforced at load time,
+   not only by a test** (PR #174 audit, SHOULD-FIX 4): `src/geography/nuts2.py`'s
+   `check_belgian_cross_references()` re-derives every Belgian `belgian_geo_id` from
+   `geographies.csv` itself and compares; `scripts/sync_nuts2.py` calls it on every real run and
+   refuses loudly (`Nuts2GeographyError`) the moment `geographies.csv` drifts (a boundary change,
+   a merger) out from under a stale cross-reference — `tests/test_nuts2_geography.py` proves this
+   same function catches three concrete corruptions (a wrong province `geo_id`, a missing province
+   row, a stale `BE10` alias) on synthetic copies, and separately proves it is clean on the real
+   committed files today.
+2. **`geographies.csv` is unchanged by this revision too** — decision 1's rule ("never touch
+   Belgium's NIS-keyed table") still holds; the only change is that the 10 provinces' rows are no
+   longer *reused* for NUTS 2 observations, they are *referenced* by a separate `nuts2.csv` row
+   that has its own `:nuts2` geo_id.
+3. **Decision 4 (the non-region aggregate exclusion list) and decision 5 (the 2024 geometry
+   vintage) are unchanged**, and are exactly as effective against a `nuts2.csv` that includes
+   Belgium as against one that does not.
+
+This removes the "Belgium's provinces are dual-registered by reference" risk from Consequences
+above entirely for the 10 provinces (there is no second `geo_id` pointing at the same row any
+more — `be21:nuts2` and `be:prov:10000` are two independent, if correlated, geographies) and
+answers `docs/features/europe_nuts2.md`'s decision 6 (the Brussels alias) with what the live data
+showed: no alias was needed, only a catalogue row like any other region's.
+
+**The rest of this amendment records the implementation decisions ADR 0009's original text left
+open, each backed by what the real load measured, not guessed:**
+
+4. **The loader is a parallel script, `scripts/sync_nuts2.py`, not a change to
+   `scripts/sync_international.py`'s own fetch loop.** The pluggable-resolver alternative the spec
+   named (teaching `sync_international.py` a second allowlist file, keyed by `geo_levels`) would
+   have threaded NUTS 2 code shape and a second geography module through code five already-shipped
+   indicators depend on, for a loader that (at the time of this batch) serves two. The ONE change
+   actually made to `sync_international.py` is `pilot_indicators()` excluding
+   `geo_levels: [nuts2]` configs, so the two scripts' indicator sets never overlap — proved by
+   `tests/test_sync_nuts2.py::test_pilot_indicators_still_returns_exactly_the_five_country_level_indicators`
+   and a full targeted regression run (274 tests) rather than asserted.
+5. **`name_nl` falls back to the English label; `name_fr` does not.** Eurostat's SDMX metadata API
+   (`.../codelist/ESTAT/GEO/latest?format=TSV&lang=<L>`) serves `EN` and `FR` but returned
+   `INVALID_URL_LANG` for `lang=NL` (confirmed 2026-09-14, a live request, not an assumption) —
+   only English and French working languages of the Commission are served for this codelist. So
+   `name_fr` is a REAL, official Eurostat label (fetched, not invented); `name_nl` reuses the
+   English one because no genuine official Dutch region label exists to read, exactly the fallback
+   `docs/features/europe_nuts2.md`'s decision on names already anticipated ("if no official fr/nl
+   label exists, reuse the same official label").
+6. **Class breaks are 5-quantile, computed once in Python at export time
+   (`scripts/export_europe_nuts2.py::_quantile_breaks`), not per-render.** A display
+   classification, not a statistic (CLAUDE.md rules 4/5 govern computed indicators, not a map
+   legend's bucketing) — stated as an assumption a later batch may revisit (Jenks natural breaks
+   is the likely alternative `eurostat-map` also supports).
+7. **`FRY1`–`FRY5`/`PT20`/`PT30` (the geometry gap ADR 0009's original text left as "needs a
+   direct check") are resolved: Nuts2json's own README publishes them as separate per-territory
+   "map inset" files** (`.../<YEAR>/<GEO>/<PROJECTION>/<SCALE>/<LEVEL>.json`, `GEO` = `GP`, `MQ`,
+   `GF`, `RE`, `YT`, `PT20`, `PT30`), not the level-2 continental file this batch committed. Not
+   fetched (out of scope, B3 builds the map); their values are still published, under `no_outline`
+   with this reason, and the exporter fails loudly on any *other* data-vs-geometry mismatch.
+   Building the real payload surfaced a SECOND, separately-evidenced no-outline category —
+   `SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE` in `scripts/export_europe_nuts2.py` — for codes whose
+   committed rows stop at a real transition year and whose successor code's rows start around it
+   (checked against the working database, not assumed: e.g. `NL31`/`NL33` run through 2023, `NL35`/
+   `NL36` — the Dutch reclassification this document's own coverage report already found — run
+   from 2014; nineteen codes total). Unlike the FRY/PT insets, the 2024 geometry has no outline for
+   these codes under ANY URL — the region no longer exists under that exact code.
+8. **`POPULATION_NUTS2` is loaded; `UNEMPLOYMENT_RATE_NUTS2` stays blocked, and neither needed the
+   `u`/compound-flag mapping touched.** The real fetch found a THIRD adapter-shaped gap, distinct
+   from the compound-flag fix (#168) this ADR's Context section already covered: a genuine minority
+   of cells carry an `OBS_FLAG` with no value at all (not a recognition gap — the flag IS
+   recognized, there is simply no number to validate against it). `demo_r_pjanaggr3`'s one such
+   cell, `PL912`/2010, is a 5-character NUTS 3 code this loader never wanted in the first place;
+   `lfst_r_lfu3rt`'s 149 such cells include genuine 4-character NUTS 2 codes (e.g. `DE22`/2020).
+   `EurostatSource._parse` (`src/fetchers/eurostat.py`) gained an optional `geo_filter` parameter —
+   a code it rejects is skipped entirely, before its flag/value are ever validated, so a cell for a
+   geography this loader never wanted cannot block a fetch that never wanted it.
+   `scripts/sync_nuts2.py` passes `geo_filter=is_nuts2_code`, which filters `PL912` out (unblocking
+   population) but passes `DE22` through (unemployment's 4-character bad cells are still validated,
+   and still refuse). `geo_filter=None` (every pre-existing caller) preserves prior behaviour
+   exactly — proved by the existing fixture-replay tests passing unchanged, plus new unit tests in
+   `tests/test_eurostat_source.py` exercising the skip-then-validate ordering directly. How to label
+   unemployment's remaining cells (flags `u`/`bu`, "unreliable") is a separate, pending maintainer
+   decision — this narrowing does not touch that mapping.

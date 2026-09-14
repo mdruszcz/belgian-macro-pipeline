@@ -43,7 +43,7 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 10
+    assert len(stores) == 11
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
@@ -58,13 +58,17 @@ def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
 def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
     """The six hand-loaded sources stay extra_csv; the four CI fetches itself
     and that outgrew the committed database are in_db (docs/decisions/0006,
-    plus the international pilot's directory store)."""
+    plus the international pilot's directory store), plus the Europe NUTS 2
+    batch's directory store (also in_db, same registry mechanism -- see
+    config/stores.yaml's own comment on the `nuts2` entry for why it is not
+    wired into the daily fetch despite being in_db)."""
     stores = load_stores(DEFAULT_STORES_PATH)
     assert {s.name for s in in_db_stores(stores)} == {
         "onem",
         "onem_rates",
         "walstat",
         "international",
+        "nuts2",
     }
     assert len(extra_csv_stores(stores)) == 6
     assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())

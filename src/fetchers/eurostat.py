@@ -38,6 +38,7 @@ response.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 
 from src.fetchers.base import FetchError, MultiGeoTimeSeriesSource
 
@@ -82,11 +83,10 @@ FLAG_STATUS = {
     "d": "final",
     "c": "suppressed",
     "z": "na",
-    # ASSUMPTION, PENDING MAINTAINER CONFIRMATION (docs/decisions/0010-eurostat-
+    # CONFIRMED BY THE MAINTAINER (2026-09-14, docs/decisions/0010-eurostat-
     # compound-observation-flags.md): "u" (low reliability) -> "estimate". Not
     # "provisional" -- a low-reliability figure is a confidence caveat on a
-    # settled number, closer to "estimate" than to "this will be revised". A
-    # single-entry mapping so it is trivial to flip if the maintainer disagrees.
+    # settled number, closer to "estimate" than to "this will be revised".
     "u": "estimate",
 }
 
@@ -168,7 +168,40 @@ class EurostatSource(MultiGeoTimeSeriesSource):
         query = f"format=JSON&lang=EN&{params}" if params else "format=JSON&lang=EN"
         return f"{base_url}/{dataset}?{query}&sinceTimePeriod={since}"
 
-    def _parse(self, raw: bytes, *, dataset: str = "", **kwargs) -> list[dict]:
+    def _parse(
+        self,
+        raw: bytes,
+        *,
+        dataset: str = "",
+        geo_filter: Callable[[str], bool] | None = None,
+        **kwargs,
+    ) -> list[dict]:
+        """`geo_filter`, when given, decides WHICH geo codes this parse even
+        looks at -- a code it rejects is skipped entirely, for every period,
+        before its OBS_FLAG/value are ever read. This is a narrowing filter
+        for the caller's OWN geography shape (e.g. "is this 4-character and
+        NUTS-2-shaped", scripts/sync_nuts2.py's is_nuts2_code), never a
+        licence or allowlist decision -- those still happen exactly as
+        before, one layer up, once this method has returned its rows (a
+        code that passes `geo_filter` but is not actually recognized by the
+        caller's own allowlist still fails loudly there, unchanged).
+
+        WHY THIS EXISTS (Europe NUTS 2 batch B2 audit, 2026-09-14): these
+        regional datasets mix every NUTS level (0-3) into one `geo`
+        dimension, and a handful of cells for levels a caller does not even
+        want (e.g. demo_r_pjanaggr3's PL912, a NUTS 3 code) carry an
+        OBS_FLAG with no value at all -- which used to refuse the WHOLE
+        response outright, before a NUTS 2 caller ever got the chance to
+        say it never wanted a NUTS 3 row in the first place. Filtering
+        before validation, not after, means a cell nobody asked for cannot
+        block a fetch nobody asked it not to. A cell for a WANTED geography
+        is validated exactly as before, including refusing loudly on a flag
+        with no value -- this narrows what gets checked, it does not weaken
+        the check itself. `geo_filter=None` (every existing caller: the
+        five country-level pilot indicators, the eight single-country ones)
+        preserves the exact previous behaviour -- every geo code is
+        validated, nothing is skipped.
+        """
         try:
             data = json.loads(raw)
             dims: list[str] = data["id"]
@@ -206,6 +239,8 @@ class EurostatSource(MultiGeoTimeSeriesSource):
 
         rows: list[dict] = []
         for geo_code, geo_pos in sorted(geo_index.items(), key=lambda kv: kv[1]):
+            if geo_filter is not None and not geo_filter(geo_code):
+                continue  # not a geography this caller wants -- never validated, never a row
             for period, time_pos in sorted(time_index.items(), key=lambda kv: kv[1]):
                 offset = str(geo_pos * geo_stride + time_pos * time_stride)
                 raw_value = values.get(offset)

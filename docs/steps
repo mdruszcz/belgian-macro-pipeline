@@ -1279,13 +1279,21 @@ How: Close out remaining Livraison A items against docs/features/site_unificatio
 list (allowed links, tooltip accuracy, no overflow, theme/language/rubrique persistence).
 Why: The maintainer's own acceptance list for Livraison A, run once as a whole rather than
 piecemeal.
- [BUILD] B1 -- NUTS 2 coverage report + spec + catalogue rows for approval
+ ✅ [BUILD] B1 -- NUTS 2 coverage report + spec + catalogue rows for approval (2026-09-14, PR #166,
+approved by the maintainer and merged)
 How: Before writing any interface code, report GDP-per-capita, unemployment and population's
 exact dimensions (unit, years, regions, NUTS version) from the existing Eurostat/DBnomics
 connector; propose docs/data_catalog.md rows for maintainer approval (rule 8).
 Why: The maintainer's brief is explicit that B3 (the map) must not start before the data is
 verified and approved -- guessing at NUTS 2 coverage is how a map ends up showing values against
 the wrong vintage of region boundaries.
+ ✅ [BUILD] Eurostat adapter reads compound observation flags (2026-09-14, PR #168, ADR 0010; u ->
+estimate confirmed by the maintainer)
+How: Split a compound OBS_FLAG into its individual letters, resolve to the most cautious
+canonical status among them; add the previously-unmapped single flag `u`.
+Why: A NUTS 2 dataset (and, longer term, any national-accounts series) can carry a compound flag
+EurostatSource._parse had never seen, refusing the whole fetch -- a general adapter correctness
+fix, not NUTS-2-specific, approved to land ahead of the NUTS 2 pipeline batch.
  [BUILD] B2 -- pipeline and payloads
 How: Extend the existing connector for any dataset the coverage report found missing; publish
 dedicated regional payload files under public/data/ for the browser to consume.

@@ -1,0 +1,30 @@
+id: POPULATION_NUTS2
+name:
+  en: Population
+  fr: Population
+  nl: Bevolking
+unit: persons
+frequency: A
+source_id: eurostat
+geo_levels:
+- nuts2
+preferred_direction: neutral
+description:
+  en: Population on 1 January, total, both sexes, all ages -- NUTS 2 region,
+    every region whose country is on the international pilot's licence allowlist
+    (docs/features/europe_nuts2.md, batch B2). One cell in the raw dataset
+    (PL912, 2010, flag "b") carries an OBS_FLAG with no value at all, which
+    EurostatSource._parse refuses outright (CLAUDE.md rule 13) -- but PL912 is
+    a 5-character NUTS 3 code this fetch never wanted, so the adapter's
+    geo_filter (scripts/sync_nuts2.py's is_nuts2_code) skips it before
+    validation ever sees it. Loaded cleanly as a result; see the feature doc's
+    "Coverage" section for the measured numbers.
+fetch:
+  dataset: demo_r_pjanaggr3
+  filters:
+    sex: T
+    age: TOTAL
+    unit: NR
+  geographies: allowlist
+  since: "1990"
+display: null

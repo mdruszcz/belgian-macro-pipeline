@@ -389,3 +389,65 @@ def test_singleton_geo_refuses_more_than_one_geography():
 def test_singleton_geo_refuses_zero_geographies():
     with pytest.raises(FetchError):
         singleton_geo([])
+
+
+# ---------------------------------------------------------------------------
+# geo_filter (Europe NUTS 2 batch B2, PR #174 audit "UNBLOCK POPULATION"):
+# a code geo_filter rejects is skipped entirely, before its flag/value are
+# ever read -- so a bad cell for a geography nobody asked for cannot block a
+# fetch that never wanted it. A code geo_filter accepts (or geo_filter=None,
+# every pre-existing caller) is validated exactly as before.
+# ---------------------------------------------------------------------------
+
+
+def test_geo_filter_none_validates_every_geo_unchanged():
+    """The default: identical to today's behaviour for every existing
+    caller (the five country-level pilot indicators, the eight
+    single-country ones) -- a bad cell for ANY geo still refuses."""
+    cube = _cube(
+        ["geo", "time"], [2, 1], ["BE", "ZZ"], ["2023"], values={"0": 1.0}, status={"1": "u"}
+    )
+    with pytest.raises(FetchError, match="has flag .* but no value"):
+        EurostatSource()._parse(json.dumps(cube).encode(), dataset="x")
+
+
+def test_geo_filter_skips_validation_for_a_rejected_geo():
+    """A bad cell (flag with no value, would normally refuse the whole
+    fetch) for a geo geo_filter rejects is never even looked at."""
+    cube = _cube(
+        ["geo", "time"],
+        [2, 1],
+        ["BE21", "PL912"],
+        ["2023"],
+        values={"0": 1.0},
+        status={"1": "b"},  # PL912/2023: flag with no value -- would refuse without the filter
+    )
+    rows = EurostatSource()._parse(
+        json.dumps(cube).encode(), dataset="x", geo_filter=lambda g: len(g) == 4
+    )
+    assert rows == [{"geo": "BE21", "period": "2023", "value": 1.0, "obs_status": "final"}]
+
+
+def test_geo_filter_still_refuses_loudly_for_an_accepted_geo():
+    """Narrowing what gets checked must not weaken the check itself: a bad
+    cell for a geo geo_filter DOES accept still refuses exactly as before."""
+    cube = _cube(
+        ["geo", "time"], [2, 1], ["BE21", "DE22"], ["2023"], values={"0": 1.0}, status={"1": "bu"}
+    )
+    with pytest.raises(FetchError, match="geo=DE22"):
+        EurostatSource()._parse(
+            json.dumps(cube).encode(), dataset="x", geo_filter=lambda g: len(g) == 4
+        )
+
+
+def test_geo_filter_rejected_geo_contributes_no_row_even_with_a_real_value():
+    """Not just bad cells -- a rejected geo is skipped for every period,
+    including ones with a perfectly good value, because it was never
+    wanted at all (e.g. a NUTS 0/1/3 code mixed into a NUTS 2 fetch)."""
+    cube = _cube(
+        ["geo", "time"], [2, 1], ["BE21", "DE"], ["2023"], values={"0": 1.0, "1": 2.0}, status={}
+    )
+    rows = EurostatSource()._parse(
+        json.dumps(cube).encode(), dataset="x", geo_filter=lambda g: len(g) == 4
+    )
+    assert rows == [{"geo": "BE21", "period": "2023", "value": 1.0, "obs_status": "final"}]
