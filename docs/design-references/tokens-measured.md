@@ -126,3 +126,49 @@ the icon's own name, so a block author picks a picture and never a colour.
 Every contrast pair in `tests/pages/test_design_tokens.py` still passes on the new values, and the
 two deliberate Batch 1 darkenings (`--bp-text-muted`, `--bp-green`) are preserved for the same
 reason they were made.
+
+## Papier — designed, not measured (2026-09-14)
+
+Unlike every value above, no screenshot or reference file exists to sample for the Papier theme.
+`docs/design-references/maquettes-unification-v1/09-themes.png` (third column) is an AI-generated
+mockup, per `docs/features/site_unification.md`: it supplies a mood (cream ground, faint square
+grid, pastel accents, dark ink, crisp warm strokes), not pixel values worth reading with
+`getImageData` the way `homepage.png` was above. Every value below was therefore chosen directly
+against the WCAG floors in `tests/pages/test_design_tokens.py` and tuned until it cleared them with
+real margin — the same discipline this file applies whenever a *measured* value fails contrast
+(`--bp-green`, `--bp-chart-4`, above), just starting from a design goal instead of a sample.
+`--bp-grid-line` is background-only: it never carries text, so it isn't a contrast pair at all and
+is transparent in the other two themes so this rule paints nothing there (`assets/belpulse/
+layout.css`'s Batch A1.2 block).
+
+| Token | Shipped value | Contrast pair checked | Confidence |
+|---|---|---|---|
+| `--bp-bg` | `#f4efe3` | -- (background reference for the pairs below) | designed |
+| `--bp-surface` | `#fbf8f1` | -- (card background; not itself a text colour) | designed |
+| `--bp-surface-alt` | `#ece2cb` | -- (decorative row/card-within-card tint) | designed |
+| `--bp-border` | `#d6c7a1` | -- (not text; a crisp warm hairline) | designed |
+| `--bp-text` | `#2b2418` | on `--bp-bg` = 13.38:1, on `--bp-surface` = 14.47:1 | designed |
+| `--bp-text-muted` | `#5c5240` | on `--bp-bg` = 6.69:1, on `--bp-surface` = 7.24:1 | designed |
+| `--bp-text-faint` | `#a89878` | below AA on purpose, same convention as light/dark | designed |
+| `--bp-grid-line` | `rgba(139,115,68,.16)` | background-only, not a contrast pair | designed |
+| `--bp-accent-ink` | `#9c1f29` | on `--bp-bg` = 6.93:1 | designed (equals the light theme's value) |
+| `--bp-accent-soft` | `#f6dfdd` | -- (a filled chip's background, not text) | designed |
+| `--bp-icon-*-bg` / `-ink` | see `tokens.css` | not contrast-tested (no CONTRAST_PAIRS entry, same as light/dark) | designed |
+| `--bp-navy-bg` | `#ece0c4` | -- (macro's shell, reflavoured paper-toned rather than navy) | designed |
+| `--bp-navy-surface` | `#f2e8d2` | -- | designed |
+| `--bp-navy-border` | `#d8c69e` | -- | designed |
+| `--bp-navy-text` | `#2b2418` | on `--bp-navy-bg` = 11.71:1 | designed |
+| `--bp-navy-text-muted` | `#6b5c44` | on `--bp-navy-bg` = 4.95:1 | designed |
+| `--bp-chart-1` (blue) | `#3d6fd1` | on `--bp-bg` = 4.17:1 | designed |
+| `--bp-chart-2` (coral) | `#c1512f` | on `--bp-bg` = 4.08:1 | designed |
+| `--bp-chart-3` (green) | `#3f8a58` | on `--bp-bg` = 3.67:1 | designed |
+| `--bp-chart-4` (amber) | `#a8761f` | on `--bp-bg` = 3.47:1 — the tightest of the eight, still with margin over the 3:1 floor | designed |
+| `--bp-chart-5` (violet) | `#7156c4` | on `--bp-bg` = 4.78:1 | designed |
+| `--bp-chart-6` (teal) | `#227478` | on `--bp-bg` = 4.77:1 | designed |
+| `--bp-chart-7` (rose) | `#b45a80` | on `--bp-bg` = 3.88:1 | designed |
+| `--bp-chart-8` (grey) | `#6d6353` | on `--bp-bg` = 5.14:1 | designed |
+
+The choropleth ramp (`assets/commune_map.css`, `:root[data-theme="paper"]`) follows the same
+approach: a pastel blue seven-step sequential ramp, same step count and "dark = more" convention
+as the default light ramp, distinguishable from it at a glance rather than lifted from the
+mockup swatch by swatch.

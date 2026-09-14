@@ -66,7 +66,12 @@
                                     (a unit caption already restated elsewhere, a watermark-style
                                     label), never for text that is the only carrier of a fact */
 
-
+  /* ---- background grid (Papier theme only) ------------------------------
+     Transparent everywhere except :root[data-theme="paper"] below -- layout.css
+     paints it onto <body> as two repeating linear-gradients. Declared here, on
+     :root, so light and dark mode never need their own no-op override to keep
+     the same-token-set tests happy; only paper gives it a real colour. */
+  --bp-grid-line: transparent;
 
   /* ---- icon tints ------------------------------------------------------
      THE REFERENCE GIVES EVERY FIGURE A TINTED SQUARE, and not all the same
@@ -209,6 +214,7 @@
     --bp-text:        #eeecf3;
     --bp-text-muted:  #a7a3b5;
     --bp-text-faint:  #78748a;
+    --bp-grid-line:   transparent;
     /* The icon tints, dark. Same names, so nothing goes undefined in one
        theme -- a pale square with dark ink on a dark card is the light
        version leaking through, which is exactly what this prevents. */
@@ -232,6 +238,7 @@
   --bp-text:        #eeecf3;
   --bp-text-muted:  #a7a3b5;
   --bp-text-faint:  #78748a;
+  --bp-grid-line:   transparent;
     /* The icon tints, dark. Same names, so nothing goes undefined in one
        theme -- a pale square with dark ink on a dark card is the light
        version leaking through, which is exactly what this prevents. */
@@ -245,4 +252,77 @@
     --bp-icon-amber-ink: #e0b264;
   --bp-accent-soft: #3a2420;
   --bp-accent-ink:  #e8836f;
+}
+
+/* ---- paper / "Papier" surface -----------------------------------------
+   The third deliberate theme (docs/features/site_unification.md, "Thèmes"):
+   a cream ground with a faint square grid, pastel accents, dark graphite
+   ink and crisp warm strokes -- see
+   docs/design-references/maquettes-unification-v1/09-themes.png, third
+   column, for the mood (an AI mockup: taken for tone, not exact values).
+
+   DESIGNED, NOT MEASURED. No reference asset exists to sample the way
+   2026-09-10's homepage.png was sampled pixel-by-pixel for the cool light
+   palette above -- every value below was chosen directly against the WCAG
+   floors in tests/pages/test_design_tokens.py and tuned until it cleared
+   them with real margin, the same discipline this file already applies
+   when a *measured* value fails contrast (see --bp-green, --bp-chart-4
+   above). Full rationale and the exact ratios: docs/design-references/
+   tokens-measured.md, "Papier -- designed, not measured".
+
+   Defines the FULL set --bp-navy-* and --bp-chart-* too, even though
+   neither is redefined by the dark theme above: without that, any page
+   using the navy analytical shell (macro.html) or a multi-series chart
+   would silently fall through to the light or dark values under paper,
+   which is exactly the kind of "one theme quietly wins" bug the
+   same-token-set test below exists to catch. */
+:root[data-theme="paper"]{
+  --bp-bg:          #f4efe3;
+  --bp-surface:     #fbf8f1;
+  --bp-surface-alt: #ece2cb;
+  --bp-border:      #d6c7a1;
+  --bp-text:        #2b2418;
+  --bp-text-muted:  #5c5240;  /* 6.69:1 on --bp-bg, 7.24:1 on --bp-surface -- comfortably over
+                                  the 4.5:1 floor, not sitting on it like the measured light value */
+  --bp-text-faint:  #a89878;  /* below AA on purpose, same convention as the other two themes */
+  --bp-grid-line:   rgba(139,115,68,.16);  /* the one place this theme is louder than a flat
+                                               token: a low-alpha warm line so layout.css's grid
+                                               reads as texture on the page background, never as
+                                               a stroke that could compete with a card or a chart */
+
+  /* Icon tints: same pastel family as the light theme, warmed to sit on
+     cream instead of near-white. */
+  --bp-icon-blue-bg:   #e2eaf7;
+  --bp-icon-blue-ink:  #2b57c9;
+  --bp-icon-green-bg:  #e5f0df;
+  --bp-icon-green-ink: #1f7a44;
+  --bp-icon-violet-bg: #ece5f5;
+  --bp-icon-violet-ink:#6a4fc4;
+  --bp-icon-amber-bg:  #f8ecd3;
+  --bp-icon-amber-ink: #8a5a12;
+  --bp-accent-soft: #f6dfdd;
+  --bp-accent-ink:  #9c1f29;  /* 6.93:1 on --bp-bg -- happens to equal the light theme's own
+                                  value; restated explicitly (not inherited) so paper's own block
+                                  carries the full token set the dark theme redefines. */
+
+  /* The macro page's dark "navy-analytical" shell, reflavoured: paper-toned
+     rather than navy, per docs/features/site_unification.md -- a deeper warm
+     tan panel with dark ink, not a dark-mode surface with light ink. */
+  --bp-navy-bg:         #ece0c4;
+  --bp-navy-surface:    #f2e8d2;
+  --bp-navy-border:     #d8c69e;
+  --bp-navy-text:       #2b2418;  /* 11.71:1 on --bp-navy-bg */
+  --bp-navy-text-muted: #6b5c44;  /* 4.95:1 on --bp-navy-bg */
+
+  /* Pastel but legible: every series still clears the 3:1 non-text floor
+     against --bp-bg with margin (3.47:1 to 5.14:1) -- blue and coral lead,
+     matching the mockup's own two most prominent chart colours. */
+  --bp-chart-1: #3d6fd1;  /* blue   -- 4.17:1 */
+  --bp-chart-2: #c1512f;  /* coral  -- 4.08:1 */
+  --bp-chart-3: #3f8a58;  /* green  -- 3.67:1 */
+  --bp-chart-4: #a8761f;  /* amber  -- 3.47:1, the tightest of the eight, still with margin */
+  --bp-chart-5: #7156c4;  /* violet -- 4.78:1 */
+  --bp-chart-6: #227478;  /* teal   -- 4.77:1 */
+  --bp-chart-7: #b45a80;  /* rose   -- 3.88:1 */
+  --bp-chart-8: #6d6353;  /* grey   -- 5.14:1 */
 }

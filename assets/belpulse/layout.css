@@ -289,3 +289,26 @@
 /* The wordmark and its tagline are two lines, not one run of text. */
 .bp-logo > span:last-child{display:flex; flex-direction:column; line-height:1.2}
 .bp-tagline{display:block}
+
+/* ============================================================================
+   Batch A1.2 -- the Papier theme's background grid. Kept in its own block at
+   the end of the file so this addition stays a trivial merge alongside the
+   shared-header/footer work landing on other branches in this file.
+
+   --bp-grid-line is transparent in light and dark (assets/belpulse/tokens.css)
+   so this rule paints nothing there; only :root[data-theme="paper"] gives it a
+   colour. Every card, chart container and map panel already sets its own
+   background:var(--bp-surface) (assets/belpulse/components.css, blocks.css,
+   assets/commune_map.css's .mapbox) -- an opaque colour under paper, same as
+   the other two themes -- so the grid stays behind those surfaces and never
+   shows through a chart or a map. Canvases stay transparent on purpose: a
+   chart element with no visible background paints on top of whatever the grid
+   already drew, which is what "the grid stays in the background" means. */
+:root[data-theme="paper"] body{
+  background-color: var(--bp-bg);
+  background-image:
+    linear-gradient(var(--bp-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+/* ============================================================================ */
