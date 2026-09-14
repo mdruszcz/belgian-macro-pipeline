@@ -1017,7 +1017,7 @@
       if(cell.coverage && typeof cell.coverage.pct === 'number' && cell.coverage.pct < 90) return;
       rows.push({
         geoId: geoId,
-        label: (g.name && (g.name[LANG] || g.name.en)) || geoId,
+        label: geoId === 'be:country' ? I18N.t(LANG, 'cpColCountry') : ((g.name && (g.name[LANG] || g.name.en)) || geoId),
         value: cell.value,
         highlight: geoId === 'be:country',
       });
@@ -1112,7 +1112,7 @@
       if(!cell || typeof cell.value !== 'number') return;
       rows.push({
         geoId: geoId,
-        label: (g.name && (g.name[LANG] || g.name.en)) || geoId,
+        label: geoId === 'be:country' ? I18N.t(LANG, 'cpColCountry') : ((g.name && (g.name[LANG] || g.name.en)) || geoId),
         value: cell.value,
         coverage: cell.coverage,
         highlight: geoId === 'be:country',

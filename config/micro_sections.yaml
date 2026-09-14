@@ -101,9 +101,9 @@ history:
   chart: bar
   label: {en: Housing market, fr: Marché du logement, nl: Vastgoedmarkt}
   note:
-    en: Number of residential sales transactions recorded nationally each year -- a volume of activity, not a price. This pipeline holds no national house-price series.
-    fr: Nombre de transactions de vente de logements enregistrées au niveau national chaque année -- un volume d’activité, pas un prix. Ce pipeline ne détient aucune série nationale de prix du logement.
-    nl: Aantal geregistreerde verkooptransacties van woningen op nationaal niveau per jaar -- een activiteitsvolume, geen prijs. Dit pipeline bevat geen nationale reeks van woningprijzen.
+    en: Number of residential sales transactions recorded nationally each year — a volume of activity, not a price. This pipeline holds no national house-price series.
+    fr: Nombre de transactions de vente de logements enregistrées au niveau national chaque année — un volume d’activité, pas un prix. Ce pipeline ne détient aucune série nationale de prix du logement.
+    nl: Aantal geregistreerde verkooptransacties van woningen op nationaal niveau per jaar — een activiteitsvolume, geen prijs. Dit pipeline bevat geen nationale reeks van woningprijzen.
 
 # Sections the design draws that this pipeline cannot fill, built at their
 # designed size with the reason on the card. Each names a real gap, not a
@@ -112,9 +112,9 @@ unavailable:
   - id: enterprise_dynamics
     label: {en: Business fabric, fr: Tissu entrepreneurial, nl: Ondernemingsweefsel}
     reason:
-      en: LOCAL_UNITS_BY_COMMUNE is a single snapshot (2023-Q4) with no prior period, so no trend, no business-creation count and no bankruptcy count exists in this pipeline -- a chart of three series from one point in time would be an invention.
-      fr: LOCAL_UNITS_BY_COMMUNE est un instantané unique (T4 2023) sans période antérieure, donc ni tendance, ni nombre de créations d’entreprises, ni nombre de faillites n’existent dans ce pipeline -- un graphique de trois séries à partir d’un seul instant serait une invention.
-      nl: LOCAL_UNITS_BY_COMMUNE is een eenmalige momentopname (K4 2023) zonder eerdere periode, dus bestaat er in dit pipeline geen trend, geen aantal bedrijfsoprichtingen en geen aantal faillissementen -- een grafiek van drie reeksen uit één tijdstip zou verzinsel zijn.
+      en: The count of local business units per commune is a single snapshot (2023-Q4) with no prior period, so no trend, no business-creation count and no bankruptcy count exists in this pipeline — a chart of three series from one point in time would be an invention.
+      fr: Le nombre d’unités locales par commune est un instantané unique (T4 2023) sans période antérieure, donc ni tendance, ni nombre de créations d’entreprises, ni nombre de faillites n’existent dans ce pipeline — un graphique de trois séries à partir d’un seul instant serait une invention.
+      nl: Het aantal lokale vestigingseenheden per gemeente is een eenmalige momentopname (K4 2023) zonder eerdere periode, dus bestaat er in dit pipeline geen trend, geen aantal bedrijfsoprichtingen en geen aantal faillissementen — een grafiek van drie reeksen uit één tijdstip zou verzinsel zijn.
   - id: sectors
     label: {en: Sectoral structure, fr: Structure sectorielle, nl: Sectorstructuur}
     reason:
@@ -136,9 +136,9 @@ unavailable:
   - id: apartment_price
     label: {en: Median apartment price, fr: Prix médian des appartements, nl: Mediane prijs van appartementen}
     reason:
-      en: This pipeline does not fetch or store an apartment-price series at any geography, commune included -- unlike the median HOUSE price, which exists per commune (see the map) but still has no Belgium, region or province figure.
-      fr: Ce pipeline ne récupère ni ne conserve de série de prix des appartements, à aucune échelle géographique, commune comprise -- contrairement au prix médian des maisons, qui existe par commune (voir la carte) mais n’a toujours aucun chiffre au niveau belge, régional ou provincial.
-      nl: Dit pipeline haalt geen enkele appartementsprijsreeks op en bewaart er ook geen, op geen enkel geografisch niveau, gemeenten inbegrepen -- in tegenstelling tot de mediane HUIZENprijs, die wel per gemeente bestaat (zie de kaart) maar nog steeds geen cijfer op Belgisch, regionaal of provinciaal niveau heeft.
+      en: This pipeline does not fetch or store an apartment-price series at any geography, commune included — unlike the median house price, which exists per commune (see the map) but still has no Belgium, region or province figure.
+      fr: Ce pipeline ne récupère ni ne conserve de série de prix des appartements, à aucune échelle géographique, commune comprise — contrairement au prix médian des maisons, qui existe par commune (voir la carte) mais n’a toujours aucun chiffre au niveau belge, régional ou provincial.
+      nl: Dit pipeline haalt geen enkele appartementsprijsreeks op en bewaart er ook geen, op geen enkel geografisch niveau, gemeenten inbegrepen — in tegenstelling tot de mediane huizenprijs, die wel per gemeente bestaat (zie de kaart) maar nog steeds geen cijfer op Belgisch, regionaal of provinciaal niveau heeft.
 
 # =============================================================================
 # BATCH A3.1c -- in-page panels (docs/features/site_unification.md, "Macro/
@@ -179,9 +179,9 @@ panels:
     # macro.html's "europe" panel is in, given the same treatment: an extra,
     # panel-level sentence on top of each card's own reason.
     empty_reason:
-      en: This pipeline holds one single-period snapshot of local business units (shown in the overview KPI row), no NACE sector breakdown and no business-creation or start-up survival trend -- so no card in this panel can be filled honestly yet.
-      fr: Ce pipeline détient un seul instantané des unités locales à une période donnée (montré dans la ligne d'indicateurs clés de la vue d'ensemble), aucune ventilation sectorielle NACE et aucune tendance de créations d'entreprises ou de survie des jeunes entreprises -- aucune carte de ce panneau ne peut donc être remplie honnêtement pour l'instant.
-      nl: Dit pipeline bevat één momentopname van lokale ondernemingseenheden voor één periode (getoond in de KPI-rij van het overzicht), geen NACE-sectoruitsplitsing en geen trend van bedrijfsoprichtingen of start-upoverleving -- geen enkele kaart in dit paneel kan dus momenteel eerlijk worden ingevuld.
+      en: This pipeline holds one single-period snapshot of local business units (shown in the overview KPI row), no NACE sector breakdown and no business-creation or start-up survival trend — so no card in this panel can be filled honestly yet.
+      fr: Ce pipeline détient un seul instantané des unités locales à une période donnée (montré dans la ligne d'indicateurs clés de la vue d'ensemble), aucune ventilation sectorielle NACE et aucune tendance de créations d'entreprises ou de survie des jeunes entreprises — aucune carte de ce panneau ne peut donc être remplie honnêtement pour l'instant.
+      nl: Dit pipeline bevat één momentopname van lokale ondernemingseenheden voor één periode (getoond in de KPI-rij van het overzicht), geen NACE-sectoruitsplitsing en geen trend van bedrijfsoprichtingen of start-upoverleving — geen enkele kaart in dit paneel kan dus momenteel eerlijk worden ingevuld.
   - id: comparaisons
     label: {en: Territorial comparisons, fr: Comparaisons territoriales, nl: Territoriale vergelijkingen}
     cards: [comparison, map, communes]
