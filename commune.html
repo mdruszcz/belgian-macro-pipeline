@@ -404,36 +404,60 @@
   .profile-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:var(--bp-space-4)}
   .profile-tools .searchbox{margin:0; max-width:360px; flex:1 1 280px}
   .profile-tools .shown{font-size:12px; color:var(--bp-text-muted); margin-right:auto}
-  .indicator-group{margin-bottom:var(--bp-space-6)}
+  .indicator-group{margin-bottom:var(--bp-space-4)}
   .indicator-group[hidden]{display:none}
   .indicator-group-head{margin-bottom:var(--bp-space-3)}
   .indicator-group-head h3{font-size:1.1rem; margin:0 0 2px}
   .indicator-group-head p{font-size:var(--bp-text-small); color:var(--bp-text-muted); margin:0; max-width:80ch}
-  .indicator-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--bp-space-3)}
-  .indicator-card{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); background:var(--bp-surface-alt); padding:var(--bp-space-4); min-width:0}
-  .indicator-card[hidden]{display:none}
-  .indicator-card h4{font-family:var(--bp-font-body); font-size:var(--bp-text-small); line-height:1.35; margin:0; font-weight:var(--bp-weight-semibold)}
-  .indicator-code{font:10px/1.3 "IBM Plex Mono",monospace; color:var(--bp-text-faint); overflow-wrap:anywhere; margin-top:2px}
-  .indicator-latest{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--bp-space-3); margin:var(--bp-space-4) 0 var(--bp-space-2)}
-  .indicator-value{font-family:var(--bp-font-display); font-size:1.3rem; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
-  .indicator-period{font-size:11px; color:var(--bp-text-muted); text-align:right}
-  .indicator-meta{font-size:11px; color:var(--bp-text-muted); line-height:1.45; min-height:1.45em}
-  .indicator-ranks{display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px}
+  /* A3.9: one compact row per indicator, not a card -- the card grid put this
+     commune's ~70 indicators at roughly 14,000px tall, most of it whitespace
+     around numbers a table shows in a tenth the space. Every period beyond
+     the latest stays reachable through the row's own "show history" toggle
+     (a second <tr>, not a nested <details>, since a <details> cannot wrap a
+     table row). */
+  .indicator-table-wrap{overflow-x:auto; border:1px solid var(--bp-border); border-radius:var(--bp-radius-card)}
+  /* Fixed layout + explicit widths on every column but the first: without
+     this, the browser gives the name column only whatever the OTHER five
+     columns leave over, which for this table's longer published names
+     ("Extraordinary (investment) share of municipal expenditure") was too
+     little to fit on one line -- a wrap the ellipsis below can only prevent
+     once the column's own width is no longer at the mercy of its neighbours. */
+  .indicator-table{width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed}
+  .indicator-table th{text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:var(--bp-text-muted); background:var(--bp-surface-alt); padding:7px 10px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:0}
+  .indicator-table td{padding:5px 10px; border-bottom:1px solid var(--bp-border); vertical-align:middle; overflow:hidden}
+  .indicator-table tbody tr:last-child td{border-bottom:0}
+  .indicator-table th:nth-child(2),.indicator-table td:nth-child(2){width:100px}
+  .indicator-table th:nth-child(3),.indicator-table td:nth-child(3){width:80px}
+  .indicator-table th:nth-child(4),.indicator-table td:nth-child(4){width:80px}
+  .indicator-table th:nth-child(5),.indicator-table td:nth-child(5){width:140px}
+  .indicator-table th:nth-child(6),.indicator-table td:nth-child(6){width:120px}
+  .indicator-table td:nth-child(6){overflow:visible}
+  .ind-name-wrap{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+  .indicator-table .ind-name{font-weight:var(--bp-weight-semibold)}
+  .indicator-code{font:10px/1.3 "IBM Plex Mono",monospace; color:var(--bp-text-faint); margin-left:6px}
+  .indicator-table td.ind-value{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; font-weight:var(--bp-weight-medium); text-overflow:clip}
+  .indicator-table td.ind-period,.indicator-table td.ind-status{white-space:nowrap; color:var(--bp-text-muted)}
+  .indicator-table td.ind-source{color:var(--bp-text-muted); white-space:nowrap; text-overflow:ellipsis}
+  .indicator-table [data-state="suppressed"],.indicator-table [data-state="unavailable"],.indicator-table [data-state="missing"]{color:var(--bp-text-faint); font-style:italic}
+  .indicator-row[hidden]{display:none}
+  .history-toggle{font-size:11px; color:var(--bp-accent); background:none; border:1px solid var(--bp-border); border-radius:999px; padding:3px 10px; cursor:pointer; white-space:nowrap}
+  .history-toggle[aria-expanded="true"]{background:var(--bp-surface-alt)}
+  .indicator-history-row td{background:var(--bp-surface-alt); padding:0}
+  .indicator-history-row[hidden]{display:none}
+  .indicator-history{padding:8px 14px; max-height:260px; overflow:auto}
+  .indicator-ranks{display:flex; flex-wrap:wrap; gap:4px 12px; margin-bottom:4px}
   .indicator-rank{font-size:11px; color:var(--bp-accent-ink)}
-  .indicator-card details{border-top:1px solid var(--bp-border); margin-top:var(--bp-space-3); padding-top:var(--bp-space-2)}
-  .indicator-card summary{cursor:pointer; color:var(--bp-accent); font-size:11px; list-style-position:inside}
-  .indicator-history{max-height:220px; overflow:auto; margin-top:6px}
-  .indicator-history-row{display:grid; grid-template-columns:minmax(70px,.7fr) minmax(0,1fr) auto; gap:8px; padding:4px 0; border-top:1px solid var(--bp-border); font-size:11px; font-variant-numeric:tabular-nums}
-  .indicator-history-row:first-child{border-top:0}
-  .indicator-history-row .hv{text-align:right; font-weight:var(--bp-weight-medium)}
-  .indicator-history-row .hs{color:var(--bp-text-faint); text-align:right}
+  .indicator-history-line{display:grid; grid-template-columns:minmax(70px,.6fr) minmax(0,1fr) auto; gap:8px; padding:4px 0; border-top:1px solid var(--bp-border); font-size:11px; font-variant-numeric:tabular-nums}
+  .indicator-history-line:first-child{border-top:0}
+  .indicator-history-line .hv{text-align:right; font-weight:var(--bp-weight-medium)}
+  .indicator-history-line .hs{color:var(--bp-text-faint); text-align:right}
+  .indicator-comparisons{margin:6px 0 10px; padding-top:6px; border-top:1px dashed var(--bp-border)}
   .indicator-comparison-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:5px 0; border-top:1px solid var(--bp-border); font-size:11px}
   .indicator-comparison-row:first-child{border-top:0}
   .indicator-comparison-row b{font-variant-numeric:tabular-nums; text-align:right}
   .indicator-comparison-row small{display:block; color:var(--bp-text-faint); margin-top:1px}
   .alldata-error{padding:var(--bp-space-6); text-align:center; color:var(--bp-text-muted)}
-  @media (max-width:1080px){ .indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
-  @media (max-width:480px){ .indicator-grid{grid-template-columns:minmax(0,1fr)} .profile-tools .searchbox{max-width:none} }
+  @media (max-width:480px){ .profile-tools .searchbox{max-width:none} }
 </style>
 </head>
 <body class="bp-shell">
@@ -1161,9 +1185,37 @@
     axis.querySelector('.right').textContent = T('cpPyramidFemale');
     chart.appendChild(axis);
 
+    // The reference date is read once here (rather than hand-typed) so every
+    // bar's tooltip can carry the exact date this population count is as-of,
+    // from the payload -- not the page's build date or today's date.
+    var reference = payload.reference_date || payload.period;
+    var referenceLabel = calendarDate(reference);
+
+    // A bar is a hover/keyboard-operable data point, wired to the same
+    // shared tooltip every chart on this site uses (assets/belpulse/charts.js
+    // -- BPCharts.showTip/hideTip), not a second tooltip implementation. It
+    // needs its own tabindex because the `<i>` element charts.js's
+    // showTip/hideTip anchor to is otherwise inert markup: a <div> is not
+    // reachable by keyboard and gets no accessible name on its own.
+    function wireBar(el, sexLabel, count){
+      el.tabIndex = 0;
+      el.setAttribute('role', 'img');
+      el.setAttribute('aria-label', T('cpPyramidBar', {
+        age: age, sex: sexLabel, count: count.toLocaleString(LANG),
+      }));
+      var point = {label: age + ' · ' + sexLabel, period: referenceLabel, value: count};
+      function show(){ BPCharts.showTip(el, point, {locale: LANG, decimals: 0}); }
+      function hide(){ BPCharts.hideTip(); }
+      el.addEventListener('mouseenter', show);
+      el.addEventListener('mouseleave', hide);
+      el.addEventListener('focus', show);
+      el.addEventListener('blur', hide);
+    }
+
+    var age;
     payload.bands.slice().reverse().forEach(function(band){
       var male = band.male || 0, female = band.female || 0;
-      var age = band.to === null ? band.from + '+' : band.from + '–' + band.to;
+      age = band.to === null ? band.from + '+' : band.from + '–' + band.to;
       var row = document.createElement('div');
       row.className = 'pyramid-row';
       row.setAttribute('aria-label', T('cpPyramidRow', {
@@ -1180,14 +1232,17 @@
       row.querySelector('.pyramid-value.left').textContent = male.toLocaleString(LANG);
       row.querySelector('.pyramid-value.right').textContent = female.toLocaleString(LANG);
       row.querySelector('.pyramid-age').textContent = age;
-      row.querySelector('.pyramid-track.left i').style.width = (male / max * 100).toFixed(2) + '%';
-      row.querySelector('.pyramid-track.right i').style.width = (female / max * 100).toFixed(2) + '%';
+      var leftBar = row.querySelector('.pyramid-track.left i');
+      var rightBar = row.querySelector('.pyramid-track.right i');
+      leftBar.style.width = (male / max * 100).toFixed(2) + '%';
+      rightBar.style.width = (female / max * 100).toFixed(2) + '%';
+      wireBar(leftBar, T('cpPyramidMale'), male);
+      wireBar(rightBar, T('cpPyramidFemale'), female);
       chart.appendChild(row);
     });
 
-    var reference = payload.reference_date || payload.period;
     document.getElementById('pyramidSub').textContent = T('cpPyramidSub', {
-      date: calendarDate(reference),
+      date: referenceLabel,
       updated: calendarDate(payload.source_updated),
     });
     panel.dataset.state = 'ready';
@@ -1462,35 +1517,104 @@
       return source && source.label ? mlText(source.label) : id;
     }).filter(Boolean);
   }
-  function allDataIndicatorCard(code, entry){
+  /* Country's own row in a `comparison` block carries Statbel REFNIS's own
+     legal-style label for Belgium, not a name a reader expects -- claude.md
+     rule 1 forbids editing that source data, so the interface string already
+     used for the comparison table's column head (`cpColCountry`) stands in
+     for it here too. */
+  function comparisonScopeLabel(scope, comparison){
+    if(scope === 'country') return T('cpColCountry');
+    return mlText(comparison.name) || scope;
+  }
+  function allDataRowId(code, suffix){
+    return 'ad-' + suffix + '-' + code.replace(/[^A-Za-z0-9_-]/g, '_');
+  }
+  function allDataIndicatorRows(code, entry){
     var meta = state.byCode[code] || {unit: entry.unit, decimals: null};
-    var cardEl = dom('article', 'indicator-card');
-    cardEl.dataset.search = [nameOf(code), code, meta.unit || entry.unit]
-      .concat(allDataSourceLabels(meta)).join(' ').toLocaleLowerCase(LANG);
-    cardEl.appendChild(dom('h4', '', nameOf(code)));
-    cardEl.appendChild(dom('div', 'indicator-code', code));
-
     var period = allDataLatestPeriod(entry);
     var cell = period ? entry.periods[period] : null;
-    var latest = dom('div', 'indicator-latest');
-    var value = dom('div', 'indicator-value');
-    if(cell && typeof cell.value === 'number'){
-      value.textContent = fmt(cell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals});
-    }else if(cell && cell.status === 'suppressed'){
-      value.textContent = T('pfSuppressed');
-    }else{
-      value.textContent = '—';
-    }
-    latest.appendChild(value);
-    var when = dom('div', 'indicator-period');
-    when.textContent = [period, cell && allDataStatusLabel(cell.status)].filter(Boolean).join(' · ');
-    latest.appendChild(when);
-    cardEl.appendChild(latest);
 
-    var provenance = allDataSourceLabels(meta);
-    if(meta.grade) provenance.push(meta.grade);
-    if(meta.updated || meta.inputs_updated) provenance.push(meta.updated || meta.inputs_updated);
-    cardEl.appendChild(dom('div', 'indicator-meta', provenance.join(' · ')));
+    var row = document.createElement('tr');
+    row.className = 'indicator-row';
+    row.dataset.search = [nameOf(code), code, meta.unit || entry.unit]
+      .concat(allDataSourceLabels(meta)).join(' ').toLocaleLowerCase(LANG);
+
+    // Name and code sit on ONE line, truncated with an ellipsis rather than
+    // wrapped -- the longest published names ("Extraordinary (investment)
+    // share of municipal expenditure") wrapped to 2-3 lines in the name
+    // column's own share of a fixed-layout table, which is most of why 70
+    // rows plus 9 group heads still overshot the 4,000px budget. The full
+    // name is never lost: it is the `title` (a native hover tooltip) and, in
+    // full, the row's own search text (filterAllData already matches it).
+    var nameCell = dom('td', '');
+    var nameWrap = dom('div', 'ind-name-wrap');
+    nameWrap.title = nameOf(code) + ' (' + code + ')';
+    nameWrap.appendChild(dom('span', 'ind-name', nameOf(code)));
+    nameWrap.appendChild(dom('span', 'indicator-code', code));
+    nameCell.appendChild(nameWrap);
+    row.appendChild(nameCell);
+
+    var valueCell = dom('td', 'ind-value');
+    var periodCell = dom('td', 'ind-period');
+    var statusCell = dom('td', 'ind-status');
+    // FIVE STATES, NEVER COLLAPSED (rule 26): a real number (zero included --
+    // typeof 0 === 'number' takes the same branch as any other value, so a
+    // true zero is never mistaken for missing), a source-withheld figure
+    // (status "suppressed"), and an indicator this commune's payload has no
+    // period for at all (no comparable "unavailable"/"na" status appears in
+    // this pipeline's per-period cells today -- only the aggregate resolver
+    // in src/pages/resolve.py emits those -- but the case is still handled
+    // distinctly rather than folded into "suppressed").
+    if(cell && typeof cell.value === 'number'){
+      valueCell.textContent = fmt(cell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals});
+      periodCell.textContent = period || '—';
+      statusCell.textContent = allDataStatusLabel(cell.status);
+    }else if(cell && cell.status === 'suppressed'){
+      valueCell.textContent = T('pfSuppressed');
+      valueCell.dataset.state = 'suppressed';
+      periodCell.textContent = period || '—';
+      statusCell.textContent = allDataStatusLabel(cell.status);
+      statusCell.dataset.state = 'suppressed';
+    }else if(cell){
+      // A period is published, but its cell carries neither a number nor a
+      // "suppressed" status -- a genuine MISSING value, distinct from an
+      // indicator this commune has no period for at all (below).
+      valueCell.textContent = '—';
+      valueCell.dataset.state = 'missing';
+      periodCell.textContent = period || '—';
+      statusCell.textContent = allDataStatusLabel(cell.status) || '—';
+      statusCell.dataset.state = 'missing';
+    }else{
+      valueCell.textContent = T('pfNoPeriods');
+      valueCell.dataset.state = 'unavailable';
+      periodCell.textContent = '—';
+      statusCell.textContent = '—';
+      statusCell.dataset.state = 'unavailable';
+    }
+    row.appendChild(valueCell);
+    row.appendChild(periodCell);
+    row.appendChild(statusCell);
+    row.appendChild(dom('td', 'ind-source', allDataSourceLabels(meta).join(' · ') || '—'));
+
+    var periods = Object.keys(entry.periods || {}).sort().reverse();
+    var toggleCell = document.createElement('td');
+    var histId = allDataRowId(code, 'hist');
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'history-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', histId);
+    toggle.textContent = T('pfHistory', {n: periods.length});
+    toggleCell.appendChild(toggle);
+    row.appendChild(toggleCell);
+
+    var historyRow = document.createElement('tr');
+    historyRow.className = 'indicator-history-row';
+    historyRow.id = histId;
+    historyRow.hidden = true;
+    var historyTd = document.createElement('td');
+    historyTd.colSpan = 6;
+    var historyBody = dom('div', 'indicator-history');
 
     var percentiles = entry.percentile || {};
     var ranks = dom('div', 'indicator-ranks');
@@ -1504,21 +1628,17 @@
         rank: percentiles.regional.rank, peers: percentiles.regional.peers
       })));
     }
-    if(ranks.children.length) cardEl.appendChild(ranks);
+    if(ranks.children.length) historyBody.appendChild(ranks);
 
     var comparisonKeys = ['province', 'region', 'country'].filter(function(scope){
       return entry.comparison && entry.comparison[scope];
     });
     if(comparisonKeys.length){
-      var comparisons = document.createElement('details');
-      var comparisonsSummary = document.createElement('summary');
-      comparisonsSummary.textContent = T('pfComparisons', {n: comparisonKeys.length});
-      comparisons.appendChild(comparisonsSummary);
-      var comparisonsBody = dom('div', 'indicator-comparisons');
+      var comparisons = dom('div', 'indicator-comparisons');
       comparisonKeys.forEach(function(scope){
         var comparison = entry.comparison[scope];
         var comparisonRow = dom('div', 'indicator-comparison-row');
-        var comparisonLabel = dom('span', '', mlText(comparison.name) || scope);
+        var comparisonLabel = dom('span', '', comparisonScopeLabel(scope, comparison));
         if(comparison.coverage && comparison.coverage.of){
           comparisonLabel.appendChild(dom('small', '', T('pfCoverage', {
             n: comparison.coverage.n, of: comparison.coverage.of
@@ -1529,32 +1649,32 @@
           ? fmt(comparison.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
           : '—';
         comparisonRow.appendChild(dom('b', '', [comparisonValue, comparison.period].filter(Boolean).join(' · ')));
-        comparisonsBody.appendChild(comparisonRow);
+        comparisons.appendChild(comparisonRow);
       });
-      comparisons.appendChild(comparisonsBody);
-      cardEl.appendChild(comparisons);
+      historyBody.appendChild(comparisons);
     }
 
-    var periods = Object.keys(entry.periods || {}).sort().reverse();
-    var details = document.createElement('details');
-    var summary = document.createElement('summary');
-    summary.textContent = T('pfHistory', {n: periods.length});
-    details.appendChild(summary);
-    var history = dom('div', 'indicator-history');
     periods.forEach(function(p){
       var historyCell = entry.periods[p];
-      var row = dom('div', 'indicator-history-row');
-      row.appendChild(dom('span', '', p));
+      var line = dom('div', 'indicator-history-line');
+      line.appendChild(dom('span', '', p));
       var historyValue = typeof historyCell.value === 'number'
         ? fmt(historyCell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
         : (historyCell.status === 'suppressed' ? T('pfSuppressed') : '—');
-      row.appendChild(dom('span', 'hv', historyValue));
-      row.appendChild(dom('span', 'hs', allDataStatusLabel(historyCell.status)));
-      history.appendChild(row);
+      line.appendChild(dom('span', 'hv', historyValue));
+      line.appendChild(dom('span', 'hs', allDataStatusLabel(historyCell.status)));
+      historyBody.appendChild(line);
     });
-    details.appendChild(history);
-    cardEl.appendChild(details);
-    return cardEl;
+    historyTd.appendChild(historyBody);
+    historyRow.appendChild(historyTd);
+
+    toggle.addEventListener('click', function(){
+      var open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+      historyRow.hidden = open;
+    });
+
+    return [row, historyRow];
   }
   function allDataGroups(indicators){
     var remaining = {};
@@ -1580,12 +1700,17 @@
     if(!input) return;
     var query = (input.value || '').trim().toLocaleLowerCase(LANG);
     var shown = 0;
-    document.querySelectorAll('#allDataSections .indicator-card').forEach(function(cardEl){
-      cardEl.hidden = !!query && cardEl.dataset.search.indexOf(query) < 0;
-      if(!cardEl.hidden) shown += 1;
+    document.querySelectorAll('#allDataSections .indicator-row').forEach(function(rowEl){
+      var hide = !!query && rowEl.dataset.search.indexOf(query) < 0;
+      rowEl.hidden = hide;
+      // A hidden indicator's history row (if it was left open) hides with it,
+      // so a filtered-out row never leaves an orphaned expanded panel behind.
+      var hist = document.getElementById(rowEl.querySelector('.history-toggle').getAttribute('aria-controls'));
+      if(hide && hist) hist.hidden = true;
+      if(!hide) shown += 1;
     });
     document.querySelectorAll('#allDataSections .indicator-group').forEach(function(group){
-      group.hidden = !group.querySelector('.indicator-card:not([hidden])');
+      group.hidden = !group.querySelector('.indicator-row:not([hidden])');
     });
     var shownEl = document.getElementById('allDataShown');
     if(shownEl) shownEl.textContent = T('pfIndicatorsShown', {n: shown});
@@ -1622,11 +1747,22 @@
       head.appendChild(dom('h3', '', mlText(group.label)));
       if(group.blurb) head.appendChild(dom('p', '', mlText(group.blurb)));
       section.appendChild(head);
-      var grid = dom('div', 'indicator-grid');
+      var wrap = dom('div', 'indicator-table-wrap');
+      var table = document.createElement('table');
+      table.className = 'indicator-table';
+      var thead = document.createElement('thead');
+      var headRow = document.createElement('tr');
+      [T('cpColIndicator'), T('colValue'), T('colPeriod'), T('colStatus'), T('colSource'), '']
+        .forEach(function(label){ headRow.appendChild(dom('th', '', label)); });
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+      var tbody = document.createElement('tbody');
       group.codes.forEach(function(code){
-        grid.appendChild(allDataIndicatorCard(code, indicators[code]));
+        allDataIndicatorRows(code, indicators[code]).forEach(function(tr){ tbody.appendChild(tr); });
       });
-      section.appendChild(grid);
+      table.appendChild(tbody);
+      wrap.appendChild(table);
+      section.appendChild(wrap);
       host.appendChild(section);
     });
     filterAllData();

@@ -322,6 +322,15 @@
 
   var SOURCES_URL = 'public/data/metadata/sources.json';
   var INDEX_URL = 'public/data/explorer/index.json';
+  // A4: explorer/index.json only indexes the municipal/national pipeline --
+  // the NUTS2 regional indicators (map.html's Europe panel) are published
+  // separately, under public/data/europe/nuts2/, and were invisible to this
+  // page's per-source count and dataset list until now. No indicator carries
+  // "international pilot" data under public/data/** yet (checked -- there is
+  // no public/data/international/ or similar directory), so there is nothing
+  // else to add today.
+  var NUTS2_DIR = 'public/data/europe/nuts2/';
+  var NUTS2_INDEX_URL = NUTS2_DIR + 'index.json';
 
   var LANG = I18N.initial();
   var T = function(key, vars){ return I18N.t(LANG, key, vars); };
@@ -399,21 +408,22 @@
     return key ? T(key) : cadence;
   }
 
-  /* The secondary line under a source's name. Showing `agency` again when it
-     is IDENTICAL to the name just shown above it (several sources register
-     the same short code as both their label and their agency) is noise, not
-     information -- and for a source whose label is a bare abbreviation, that
-     redundant repeat used to be the ONLY other text on the row. `name`
-     (sources.json) is a more descriptive string for exactly those cases; it
-     has no French/Dutch translation in the registry today; shown as-is
-     rather than invented (CLAUDE.md rule 36) -- flagged in the PR so the
-     registry can grow a trilingual full name later. */
+  /* The secondary line under a source's name -- the short agency code, when
+     it says something the trilingual `label` above it does not (several
+     sources register the same short code as both their label and their
+     agency, and repeating it is noise, not information).
+
+     `name` (sources.json) is NEVER shown here. It is a technical/API string,
+     English only, naming the endpoint or dataset a source's adapter reads --
+     and every source used to fall back to it as this row's subtitle whenever
+     `agency` matched the label -- which put untranslated
+     technical strings on the French and Dutch pages (Unification A4). It is
+     still shown, but only inside the expanded row, explicitly labelled as
+     the technical name (`renderDetail` below) -- never standing in for a
+     reader-facing name. */
   function subtitleFor(info, primaryLabel){
     var agency = info.agency || '';
-    if(agency && agency !== primaryLabel) return agency;
-    var name = info.name || '';
-    if(name && name !== primaryLabel && name !== agency) return name;
-    return '';
+    return agency && agency !== primaryLabel ? agency : '';
   }
 
   /* Periods come in mixed grains (a plain year, "YYYY-Qn", "YYYY-MM") even
@@ -541,6 +551,13 @@
     var last = lastRetrieved(agg.items);
     var lastHtml = last ? escapeHtml(last) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
     var cadenceHtml = info.cadence ? escapeHtml(cadenceLabel(info.cadence)) : '<span class="src-not-stated">' + escapeHtml(T('sourcesLicenceNotStated')) + '</span>';
+    // The technical/API name (sources.json's `name`) -- English-only in the
+    // registry today -- shown here, explicitly labelled as the technical
+    // name, and nowhere else on the page (see subtitleFor above).
+    var technicalName = info.name || '';
+    var technicalHtml = technicalName
+      ? '<div><h4>' + escapeHtml(T('sourcesDetailTechnicalName')) + '</h4><p>' + escapeHtml(technicalName) + '</p></div>'
+      : '';
 
     return ''
       + '<div class="src-detail-grid">'
@@ -548,6 +565,7 @@
       + '<div><h4>' + escapeHtml(T('sourcesDetailConditions')) + '</h4>' + licenceHtml + homepageHtml + '</div>'
       + '<div><h4>' + escapeHtml(T('sourcesDetailCadence')) + '</h4><p>' + cadenceHtml + '</p></div>'
       + '<div><h4>' + escapeHtml(T('sourcesDetailLastRetrieved')) + '</h4><p>' + lastHtml + '</p></div>'
+      + technicalHtml
       + '</div>';
   }
 
@@ -630,11 +648,51 @@
     });
   }
 
-  Promise.all([SOURCES_URL, INDEX_URL].map(function(url){
-    return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
-  })).then(function(results){
+  /* The NUTS2 regional indicators, reshaped into the same row shape
+     explorer/index.json rows already have (names, unit, period_min/max,
+     updated, source, scope) so buildBySource/dataSummary/periodCell need no
+     special case for them. Every field is read from the published payload --
+     never hand-typed (CLAUDE.md rule 36); a fetch failure degrades to no
+     rows added, the same way the two other fetches already do. */
+  function loadNuts2Indicators(){
+    return fetch(NUTS2_INDEX_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+      .then(function(index){
+        var entries = ((index && index.indicators) || []).filter(function(e){
+          return e && e.status === 'loaded' && e.payload;
+        });
+        return Promise.all(entries.map(function(e){
+          return fetch(NUTS2_DIR + e.payload).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+        }));
+      }).then(function(payloads){
+        return payloads.filter(Boolean).map(function(p){
+          var years = p.years || [];
+          return {
+            indicator_code: p.indicator_id,
+            names: p.names,
+            unit: p.unit,
+            period_min: years[0] || null,
+            period_max: years[years.length - 1] || null,
+            updated: (p.source && p.source.retrieved) || null,
+            inputs_updated: null,
+            source: (p.source && p.source.source_id) || null,
+            // Regional (NUTS2) -- neither of the category filter's two
+            // options (municipal/national) describes it, so it correctly
+            // shows only under "All categories", never invented into one of
+            // them.
+            scope: 'regional',
+            rows: null
+          };
+        });
+      });
+  }
+
+  Promise.all([
+    fetch(SOURCES_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    fetch(INDEX_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    loadNuts2Indicators()
+  ]).then(function(results){
     state.sources = (results[0] && results[0].sources) || {};
-    state.indicators = (results[1] && results[1].indicators) || [];
+    state.indicators = ((results[1] && results[1].indicators) || []).concat(results[2] || []);
     buildBySource();
     renderTable();
     stampAttrUpdated();

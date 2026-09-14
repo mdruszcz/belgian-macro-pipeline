@@ -75,15 +75,56 @@ def test_every_municipal_source_carries_a_trilingual_label_and_licence_note():
     assert "commercial" in registry["statbel"]["licence_note"]["en"].lower()
 
 
-def test_a_source_without_a_translated_label_still_has_a_usable_one():
-    """Two national sources have no short label yet. They fall back to the
-    agency name rather than rendering blank, so adding a source never
-    requires translation work before it can be attributed."""
+def test_a_source_without_a_translated_label_still_has_a_usable_one(tmp_path):
+    """A source declaring no `label` in its config falls back to the bare
+    `agency` code in every language, rather than rendering blank, so adding a
+    source never requires translation work before it can be attributed.
+
+    Exercised here against a synthetic config, not a real one: until
+    Unification A4 this was pinned to nbb/ameco_ec, but both (and fpb) now
+    have their own proper labels (see the test below), so no real source in
+    config/sources/*.yaml still takes this fallback path."""
+    (tmp_path / "untranslated.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "source_id": "untranslated",
+                "name": "Untranslated Source Technical Feed",
+                "agency": "UNTR",
+                "adapter": "untranslated",
+                "is_active": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+    registry = source_registry(sources_dir=tmp_path)
+    entry = registry["untranslated"]
+    for lang in LANGS:
+        assert entry["label"][lang] == entry["agency"] == "UNTR"
+
+
+def test_nbb_fpb_and_ameco_carry_proper_trilingual_labels():
+    """Unification A4: these three national sources used to show a bare
+    abbreviation ('NBB', 'FPB', 'AMECO/EC') as their display name on every
+    language, with sources.html falling back to the English-only technical
+    `name` field as a subtitle. Each now has its own official name per
+    language (CLAUDE.md rule 7), no longer merely the agency code repeated
+    three times."""
     registry = source_registry()
-    for source_id in ("nbb", "ameco_ec"):
+    for source_id in ("nbb", "fpb", "ameco_ec"):
         entry = registry[source_id]
         for lang in LANGS:
-            assert entry["label"][lang] == entry["agency"]
+            label = entry["label"][lang]
+            assert label, f"{source_id} has no {lang} label"
+            assert (
+                label != entry["agency"]
+            ), f"{source_id}'s {lang} label is still just its bare agency code"
+        # A genuinely different name per language, not one English string
+        # copied into fr/nl (rule 7) -- except where the institution's own
+        # name IS the same word in every language, which none of these three
+        # is: they are distinct in at least one pair of languages.
+        assert (
+            len({entry["label"][lang] for lang in LANGS}) > 1
+        ), f"{source_id}'s label reads identically in en/fr/nl"
 
 
 def test_eurostat_carries_a_trilingual_label_and_licence_note():

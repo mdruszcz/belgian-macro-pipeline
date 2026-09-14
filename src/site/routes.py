@@ -139,8 +139,12 @@ ROOT_PAGES: tuple[Page, ...] = (
     Page(
         "/commune.html",
         False,
-        "the unreleased redesign of local.html, and linked from nowhere. Same "
-        "reason as /home.html",
+        "a JavaScript app shell -- commune.html?nis=NNNNN. Linked from every "
+        "commune's own static page (local/{nis}/index.html, via #173) as the "
+        "'open interactive' link, so 'linked from nowhere' stopped being true "
+        "once #173 shipped -- but the indexable form of a commune is still "
+        "/local/{nis}/, which local/sitemap.xml already submits, and "
+        "commune.html's own bare URL carries no NIS for a crawler to index",
     ),
     Page(
         "/profiles.html",

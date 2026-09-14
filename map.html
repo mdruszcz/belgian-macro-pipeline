@@ -925,8 +925,8 @@ function buildAreas(rows){
 }
 
 function areaLabel(area){
-  // Belgium's own row is named ROYAUME / HET RIJK in the source, which is the
-  // legal style and not what a reader picking an area expects to read; the
+  // Belgium's own row carries Statbel REFNIS's legal-style country label in
+  // the source, not what a reader picking an area expects to read; the
   // interface string is used for the country entry and the source's own names
   // for everything below it.
   return area.level === 'country' ? T('mapScopeAll') : (area.name[LANG] || area.name.en);

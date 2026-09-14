@@ -535,10 +535,13 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
             <span data-t="homeExplore">Explore the data</span>
           </a>
-          <a class="bp-btn bp-btn--outline" href="about.html">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            <span data-t="homeWatchVideo">Watch the video</span>
-          </a>
+          <!-- A4: the "Watch the video" button removed here (docs review pass)
+               linked to about.html, the methodology page -- there is no video,
+               and about.html is already reachable from the Methodology nav
+               link. A button pointing nowhere useful is worse than no button
+               (home.html still has the identical, still-unfixed button --
+               out of this batch's scope, flagged in the PR). homeWatchVideo
+               stays in assets/i18n.js: home.html still reads it. -->
         </div>
         <div class="hero-script">
           <span data-t="homePullQuote">A better-informed Belgium</span>
