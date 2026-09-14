@@ -472,7 +472,14 @@ def test_every_declared_function_resolves_and_every_script_error_class_is_declar
             assert own == [], f"{name}: {module.__name__} defines {own}; declare refusal="
 
 
-EXPORTERS_BY_FUNCTION = ["national_csv", "communes_csv", "aggregates_csv", "percentiles_csv"]
+EXPORTERS_BY_FUNCTION = [
+    "national_csv",
+    "communes_csv",
+    "aggregates_csv",
+    "percentiles_csv",
+    "communes_history_full_csv",
+    "communes_history_csv",
+]
 
 
 @pytest.mark.parametrize("name", EXPORTERS_BY_FUNCTION)
@@ -499,10 +506,40 @@ def test_an_exporters_arguments_are_its_command_lines_paths(name, tmp_path):
         assert ("extra_observations" in signature.parameters) == ("--stores" in argv), name
 
 
-@pytest.mark.parametrize("name", ["communes_history_full_csv", "site_payloads", "local_pages"])
+def test_the_full_history_is_the_same_call_with_all_periods():
+    """The Makefile's two passes over one script: --all-periods is the only
+    difference besides the output file, and it must reach the function."""
+    full = exporter_arguments("communes_history_full_csv", PipelinePaths())
+    trimmed = exporter_arguments("communes_history_csv", PipelinePaths())
+    assert full.pop("all_periods") is True
+    assert "all_periods" not in trimmed
+    assert full.pop("out_path").name == "communes_history_full.csv"
+    assert trimmed.pop("out_path").name == "communes_history.csv"
+    assert full == trimmed
+
+
+@pytest.mark.parametrize("name", ["staging_db", "site_payloads", "local_pages"])
 def test_a_command_line_with_other_flags_is_refused_not_half_translated(name):
     with pytest.raises(ValueError, match=name):
         exporter_arguments(name, PipelinePaths())
+
+
+@pytest.mark.parametrize(
+    "tokens",
+    [
+        ("--db", "{db}", "--out", "a.csv", "--all-periods", "yes"),  # a switch with a value
+        ("--db", "{db}", "--out"),  # a flag without its value
+        ("--db", "{db}", "--out", "--all-periods"),  # a flag whose value is a flag
+        ("--db", "{db}", "--out", "a.csv", "--out", "b.csv"),  # a flag given twice
+        ("--db", "{db}", "--out", "a.csv", "--all-periods", "--all-periods"),
+        ("--out", "a.csv"),  # no --db
+        ("--db", "{db}", "--communes-history", "h.csv"),  # no --out
+    ],
+)
+def test_a_malformed_exporter_command_line_is_refused(monkeypatch, tokens):
+    monkeypatch.setitem(COMMANDS, "fake", Command(("scripts/fake.py", *tokens)))
+    with pytest.raises(ValueError, match="fake"):
+        exporter_arguments("fake", PipelinePaths())
 
 
 # ── The coordinator: a red source still exports, and the day ends red ────────

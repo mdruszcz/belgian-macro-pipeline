@@ -27,7 +27,15 @@ def script_asset(name: str, *, group: str, deps: list, description: str, **kwarg
     return _asset
 
 
-EXPORTER_FLAGS = ("--db", "--out", "--stores")
+# Every flag an exporter's command line may carry, and what it becomes in the
+# call to its function. A flag in none of these has no translation.
+EXPORTER_PATHS = {
+    "--db": "db_path",
+    "--out": "out_path",
+    "--communes-history": "csv_path",
+}
+EXPORTER_STORES = "--stores"
+EXPORTER_SWITCHES = {"--all-periods": "all_periods"}
 
 
 def exporter_arguments(name: str, paths: PipelinePaths) -> dict:
@@ -35,29 +43,52 @@ def exporter_arguments(name: str, paths: PipelinePaths) -> dict:
     in orchestration/commands.py, so the call cannot drift from what the
     Makefile runs:
 
-        --db X      db_path=X
-        --out X     out_path=X
-        --stores X  extra_observations=resolve_extra_observations([], X)
+        --db X                db_path=X
+        --out X               out_path=X
+        --communes-history X  csv_path=X
+        --stores X            extra_observations=resolve_extra_observations([], X)
+        --all-periods         all_periods=True
 
     every path made absolute. Every other parameter keeps its default, which
-    is the script's argparse default. A command line with any other flag is
-    refused rather than half-translated: it needs a translation of its own."""
+    is the script's argparse default. A command line with any other flag, a
+    flag without its value, a switch followed by a value, a flag given twice,
+    or no --db and --out is refused rather than half-translated: it needs a
+    translation of its own."""
     script, *tokens = paths.render(COMMANDS[name].argv)
-    flags = dict(zip(tokens[::2], tokens[1::2], strict=False))
-    if (
-        len(tokens) != 2 * len(flags)
-        or set(flags) - set(EXPORTER_FLAGS)
-        or any(value.startswith("--") for value in flags.values())
-        or not {"--db", "--out"} <= set(flags)
-    ):
-        raise ValueError(f"{name}: `{script} {' '.join(tokens)}` is not --db/--out[/--stores]")
-    arguments = {
-        "db_path": paths.resolve(flags["--db"]),
-        "out_path": paths.resolve(flags["--out"]),
+    refused = ValueError(f"{name}: `{script} {' '.join(tokens)}` has no exporter translation")
+    values: dict[str, str] = {}
+    switches: set[str] = set()
+    i = 0
+    while i < len(tokens):
+        flag = tokens[i]
+        takes_value = flag in EXPORTER_PATHS or flag == EXPORTER_STORES
+        if flag in EXPORTER_SWITCHES and flag not in switches:
+            switches.add(flag)
+            i += 1
+        elif (
+            takes_value
+            and flag not in values
+            and i + 1 < len(tokens)
+            and not tokens[i + 1].startswith("--")
+        ):
+            values[flag] = tokens[i + 1]
+            i += 2
+        else:
+            raise refused
+    if not {"--db", "--out"} <= set(values):
+        raise refused
+
+    arguments: dict = {
+        EXPORTER_PATHS[flag]: paths.resolve(value)
+        for flag, value in values.items()
+        if flag in EXPORTER_PATHS
     }
-    if "--stores" in flags:
-        registry = str(paths.resolve(flags["--stores"])) if flags["--stores"] else ""
+    if EXPORTER_STORES in values:
+        given = values[EXPORTER_STORES]
+        registry = str(paths.resolve(given)) if given else ""
         arguments["extra_observations"] = resolve_extra_observations([], registry)
+    for switch in sorted(switches):
+        arguments[EXPORTER_SWITCHES[switch]] = True
     return arguments
 
 

@@ -100,7 +100,14 @@ def test_the_checks_report_exactly_what_validate_data_reports(working_db):
     assert len(result.get_asset_check_evaluations()) == len(checks.SEVERITIES)
 
 
-EXPORTERS = ["national_csv", "communes_csv", "aggregates_csv", "percentiles_csv"]
+EXPORTERS = [
+    "national_csv",
+    "communes_csv",
+    "aggregates_csv",
+    "percentiles_csv",
+    "communes_history_full_csv",
+    "communes_history_csv",
+]
 
 
 @pytest.mark.parametrize("name", EXPORTERS)

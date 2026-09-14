@@ -199,6 +199,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/communes_history_full.csv",),
+        function="export_communes_history_csv:export_communes_history_csv",
     ),
     "communes_history_csv": Command(
         (
@@ -211,6 +212,7 @@ COMMANDS: dict[str, Command] = {
             "{stores}",
         ),
         outputs=("{data}/communes_history.csv",),
+        function="export_communes_history_csv:export_communes_history_csv",
     ),
     "indicator_metadata_json": Command(
         ("-m", "src.exporters.metadata", "--out", "{data}/metadata/indicators.json"),
