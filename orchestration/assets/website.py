@@ -91,6 +91,31 @@ explorer_payloads = script_asset(
     kinds={"json"},
     description="explorer.html's per-indicator shards (scripts/export_explorer_payloads.py).",
 )
+# Europe countries batch (docs/features/europe_countries.md): the macro.html
+# Europe panel's country map + "Comparaison internationale" payloads
+# (scripts/export_europe_countries.py). Reads only the committed
+# data/international/*.csv store and the committed NUTS 0 geometry -- no
+# $(DB) dependency, same as export_site_payloads.py's own sibling exporters
+# above -- so its only real dependency is the international sync itself
+# (international_observations, orchestration/assets/sources_api.py) having
+# written that store, not `validated_working_database` or `site_payloads`.
+europe_countries_payloads = script_asset(
+    "europe_countries_payloads",
+    group="website",
+    # Both deps are real: international_observations because the exporter
+    # reads data/international/*.csv, and VALIDATED because every website/
+    # derived asset must hang off the validated database (see
+    # tests/test_orchestration.py's own
+    # test_every_source_feeds_the_validated_database_and_every_export_hangs_off_it)
+    # so a blocking validation check still gates this export even though the
+    # exporter's own file reads do not touch {db} at all.
+    deps=["international_observations", VALIDATED],
+    kinds={"json"},
+    description=(
+        "public/data/europe/countries/** -- the Europe panel's country choropleth and "
+        "comparison charts (scripts/export_europe_countries.py)."
+    ),
+)
 local_pages = script_asset(
     "local_pages",
     group="website",
@@ -121,6 +146,7 @@ ASSETS = [
     indicator_metadata_json,
     site_payloads,
     explorer_payloads,
+    europe_countries_payloads,
     local_pages,
     page_documents,
     site_index,

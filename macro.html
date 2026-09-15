@@ -524,11 +524,17 @@
            no figure, no vendor script reference belongs in this markup
            (CLAUDE.md rules 2/24/30). -->
       <div id="europeMapRoot" class="bp-europe-map" hidden></div>
-      <article class="bp-chart-card bp-state" id="international" data-slot="international" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
-      </article>
+      <!-- Europe countries batch (docs/features/europe_countries.md):
+           europe_map.js's buildCompareChrome()/renderComparisonCharts()
+           fill this in once the panel opens -- the international pilot's
+           unavailable state is gone now that this card is built (no
+           indicator id, no figure, belongs in this markup: rules 2/24/30).
+           id="international" is kept only so the legacy #international
+           anchor (config/national_sections.yaml's europe panel
+           legacy_anchors, rule 31) has a stable landing element; panels.js
+           actually resolves that anchor to the whole #europe panel, not to
+           this element specifically. -->
+      <div class="bp-europe-compare" id="international" hidden></div>
     </section>
   </main>
 </div>

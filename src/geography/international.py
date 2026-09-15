@@ -16,7 +16,9 @@ country. See docs/features/international.md, "Geography".
 `scope` on an international.csv row is the difference between the two
 consumers of this same file:
   * "pilot" rows are the ones scripts/sync_international.py actually writes
-    to `observations` for the five multi-country pilot indicators.
+    to `observations` for the multi-country pilot indicators (five original,
+    plus GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY added by the Europe countries
+    batch, docs/features/europe_countries.md).
   * "legacy" rows (today: only EA, Eurostat's dynamic "current euro area"
     code) exist so the ONE Eurostat national indicator whose config still
     names this code as its `country` field (EUROSTAT_GDP_Q_MEUR_EA) keeps
@@ -28,12 +30,56 @@ consumers of this same file:
 from __future__ import annotations
 
 import csv
+import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GEOGRAPHY_CONFIG_DIR = REPO_ROOT / "config" / "geography"
 INTERNATIONAL_CSV = GEOGRAPHY_CONFIG_DIR / "international.csv"
 INTERNATIONAL_EXCLUDED_CSV = GEOGRAPHY_CONFIG_DIR / "international_excluded.csv"
+
+#: A NUTS 1/2/3 regional subdivision code, Eurostat's shape: the 2-letter
+#: country prefix immediately followed by 1-3 more letters/digits with NO
+#: separator (BE1, BE10, BE100). Matches src/geography/nuts2.py's own
+#: is_nuts2_code() one level up (any subdivision depth, not only NUTS 2).
+_NUTS_SUBDIVISION_RE = re.compile(r"^[A-Z]{2}[A-Z0-9]{1,3}$")
+
+
+def is_country_level_code(code: str) -> bool:
+    """True for a real NUTS 0 (whole-country) code or an underscore-joined
+    EU/EFTA aggregate spelling (EU27_2020, EU27_2007) -- False for a NUTS
+    1/2/3 regional subdivision code.
+
+    Used as EurostatSource._parse's `geo_filter` for the two Europe
+    countries batch indicators (GDP_PC_PPS_COUNTRY, POPULATION_COUNTRY;
+    docs/features/europe_countries.md) whose datasets (nama_10r_2gdp,
+    demo_r_pjanaggr3) are the SAME ones the NUTS 2 batch reads and mix every
+    NUTS level into one `geo` dimension, exactly the problem
+    src/geography/nuts2.py's is_nuts2_code() solves for the NUTS 2 loader.
+
+    A country code is always exactly 2 letters (BE, DE, TR, UK -- no
+    trailing digit or letter). Every aggregate code these two datasets
+    carry uses an underscore (EU27_2020, EU27_2007) -- confirmed against a
+    live fetch of both datasets (2026-09-15): no genuine NUTS subdivision
+    code contains one. A shape that happens to also match a NUTS-subdivision
+    pattern (EU28 -> "EU"+"28", EFTA -> "EF"+"TA") is filtered out here the
+    same as a real region would be -- harmless, since neither is a country
+    this pipeline would ever publish anyway (international_excluded.csv
+    already excludes EU28 for other datasets, and EFTA is not a country).
+    A code that reaches the allow/exclude decision one layer up
+    (scripts/sync_international.py's _resolve_geo) unresolved -- as
+    EU27_2007 and DE_TOT do, both real live findings -- still fails loudly
+    exactly as before (CLAUDE.md rule 13); this filter narrows what gets
+    checked, it does not weaken the check.
+
+    Deliberately NOT applied to the five original pilot indicators: their
+    aggregate code is EA21 ("EA"+"21"), which DOES match the NUTS-
+    subdivision shape -- applying this filter there would silently drop the
+    euro-area reference row from all five. Those datasets never mix NUTS
+    levels in the first place, so no filter is needed for them.
+    """
+    return not _NUTS_SUBDIVISION_RE.match(code)
+
 
 #: Exact key order the `geographies` table's INSERT statements use elsewhere
 #: (scripts/load_geography.py's UPSERT_SQL, port_existing_indicators.py's

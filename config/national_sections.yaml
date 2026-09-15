@@ -69,12 +69,14 @@ contributions:
 # designed size with the reason on the card. Each names a real gap, not a
 # style choice. `link` is an optional page the card points the reader to.
 unavailable:
-  - id: international
-    label: {en: International comparison, fr: Comparaison internationale, nl: Internationale vergelijking}
-    reason:
-      en: The foreign GDP series (DE, EA, ES, FR, NL) are fetched and stored, but the comparison chart that would draw them is not built yet, and Poland is not configured.
-      fr: Les séries de PIB étrangères (DE, EA, ES, FR, NL) sont récupérées et enregistrées, mais le graphique de comparaison qui les afficherait n’est pas encore construit, et la Pologne n’est pas configurée.
-      nl: De buitenlandse bbp-reeksen (DE, EA, ES, FR, NL) worden opgehaald en opgeslagen, maar de vergelijkingsgrafiek die ze zou tonen is nog niet gebouwd, en Polen is niet geconfigureerd.
+  # `international` (the foreign GDP comparison card on the Europe panel)
+  # lived here from the international pilot until the Europe countries
+  # batch (docs/features/europe_countries.md, 2026-09-15): the "Comparaison
+  # internationale" card is now built for real (assets/belpulse/europe_map.js
+  # renderComparisonCharts()), so this entry -- and the europe panel's own
+  # `empty_reason` below -- are gone. #international stays a valid anchor
+  # (rule 31): panels.js resolves it via the europe panel's own
+  # `legacy_anchors`, unrelated to this list.
   - id: public_finance
     label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
     reason:
@@ -136,17 +138,12 @@ panels:
     label: {en: Europe, fr: Europe, nl: Europa}
     cards: [international]
     legacy_anchors: [international]
-    # Europe keeps its existing "international" unavailable card (the
-    # foreign GDP comparison, see `unavailable` above) below the regional
-    # map Batch B3 built (docs/features/europe_nuts2.md). All three of the
-    # map's own indicators are loaded today (its own indicator select has
-    # nothing disabled), so this note is about that ONE remaining, real
-    # gap only -- never restated as if the map itself were still missing
-    # or partial. No date is promised (none is known).
-    empty_reason:
-      en: The international GDP comparison below is not built yet.
-      fr: La comparaison internationale du PIB ci-dessous n'est pas encore construite.
-      nl: De internationale bbp-vergelijking hieronder is nog niet gebouwd.
+    # Europe countries batch (docs/features/europe_countries.md): the panel
+    # now holds BOTH map modes (Batch B3's regional NUTS 2 choropleth, and
+    # this batch's country NUTS 0 choropleth + picker, toggled in
+    # assets/belpulse/europe_map.js) and the "Comparaison internationale"
+    # small multiples below them -- no `empty_reason` left to show; nothing
+    # here is still a known gap.
 
 # New thematic cards (Prix, Emploi, Conjoncture) that did not exist as
 # sections before this batch. Each entry's `id` is the layout id used both by

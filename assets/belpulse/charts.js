@@ -249,7 +249,13 @@
    * instead of drawing N separate canvases.
    *
    * @param canvas   <canvas> element
-   * @param series   [{label, unit?, points:[{period, value, status?}], colourIndex?}]
+   * @param series   [{label, unit?, points:[{period, value, status?}], colourIndex?,
+   *                   colour?, dash?, isReference?}]  `colour` (a CSS colour string)
+   *                   overrides the palette cycle; `dash` is a canvas setLineDash
+   *                   pattern; `isReference` skips the area fill and point markers.
+   *                   All three exist for a reference-average line (e.g. an EU27
+   *                   average alongside up to 8 real, palette-coloured series) and
+   *                   default to the plain palette-cycled behaviour otherwise.
    * @param opts     {locale}
    */
   /**
@@ -335,9 +341,22 @@
     ctx.textAlign = 'center';
 
     series.forEach(function (s, si) {
-      var colour = chartColour(s.colourIndex != null ? s.colourIndex : si);
+      // `s.colour` (an explicit CSS colour string) overrides the palette
+      // cycle entirely -- the Europe countries comparison charts
+      // (docs/features/europe_countries.md) use it for the EU27/euro-area
+      // reference lines, which must stay visually distinct from up to 8
+      // real country series that already use every --bp-chart-1..8 slot.
+      // `s.dash` (a canvas setLineDash pattern) is how those same
+      // reference lines read as "not a country" at a glance without a
+      // ninth palette colour; both default to the existing plain-solid,
+      // palette-cycled behaviour for every caller that does not set them.
+      var colour = s.colour || chartColour(s.colourIndex != null ? s.colourIndex : si);
       var rows = aligned[si];
-      var isLastSeries = si === series.length - 1;
+      // A reference-line series is never area-filled even when it happens
+      // to be last in the array (it is appended after the real series) --
+      // the fill is a "this is the subject" cue that a EU/euro-area
+      // average must not borrow.
+      var isLastSeries = si === series.length - 1 && !s.isReference;
       var runs = numericRuns(rows);
 
       if (isLastSeries) {
@@ -369,21 +388,28 @@
         ctx.lineWidth = 2.2;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
+        if (s.dash) ctx.setLineDash(s.dash);
         ctx.stroke();
+        if (s.dash) ctx.setLineDash([]);
       });
 
-      var lastRealIdx = -1;
-      rows.forEach(function (r, i) {
-        if (r.value != null) lastRealIdx = i;
-      });
-      rows.forEach(function (r, i) {
-        if (r.value == null) return;
-        var isLast = i === lastRealIdx;
-        ctx.beginPath();
-        ctx.arc(xOf(i), yOf(r.value), isLast ? 4.5 : 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = colour;
-        ctx.fill();
-      });
+      // A reference-line series draws no point markers -- the dashed line
+      // itself is the cue, and a dot at every period would read as an
+      // extra country among the real, marker-bearing series.
+      if (!s.isReference) {
+        var lastRealIdx = -1;
+        rows.forEach(function (r, i) {
+          if (r.value != null) lastRealIdx = i;
+        });
+        rows.forEach(function (r, i) {
+          if (r.value == null) return;
+          var isLast = i === lastRealIdx;
+          ctx.beginPath();
+          ctx.arc(xOf(i), yOf(r.value), isLast ? 4.5 : 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = colour;
+          ctx.fill();
+        });
+      }
     });
 
     return { hits: layout.hits };

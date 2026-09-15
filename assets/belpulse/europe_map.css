@@ -154,3 +154,104 @@
 .bp-europe-map__side .prompt{font-size:13px; color:var(--bp-text-muted)}
 
 .bp-europe-map__region-select{margin-top:var(--bp-space-3)}
+
+/* Europe countries batch (docs/features/europe_countries.md): the "Régions
+   / Pays" toggle hides the whole region OR country UI as one wrapper
+   (europe_map.js's regionWrap/countryWrap, each holding that mode's own
+   .bp-europe-map__main + .bp-europe-map__side). `display:contents` makes
+   the wrapper itself invisible to layout -- its two children become direct
+   grid children of .bp-europe-map again, so the grid-template-columns rule
+   above still applies to them exactly as it did before this batch, with no
+   copy of that rule needed here. The `[hidden]` rule re-asserts real
+   hiding: a class selector alone cannot out-rank it (equal specificity,
+   source order would otherwise make `display:contents` win over the UA
+   stylesheet's `[hidden]{display:none}` and leave a "hidden" section still
+   visible), so the attribute+class selector is written explicitly. */
+.bp-europe-map__mode-section{display:contents}
+.bp-europe-map__mode-section[hidden]{display:none}
+
+/* ---- mode toggle ---------------------------------------------------------
+   "Régions / Pays" -- a real toggle group, not a <select>, so both options
+   are always visible and one keypress/click switches between them. */
+/* A real grid item too (it is a direct child of `#europeMapRoot`, a sibling
+   of the region/country `display:contents` wrappers, not inside either) --
+   `grid-column:1/-1` puts it on its OWN full-width row so it never competes
+   for the grid's two content columns; without this it became the grid's
+   first (column 1, row 1) item and every child of `display:contents`
+   region/country wrapper had to fit around it, and grid's default
+   `align-items:stretch` made the toggle buttons themselves stretch to the
+   FULL HEIGHT of that row -- measured on a real page, not a guess: two
+   giant vertical colour bars instead of a small pill toggle. */
+.bp-europe-mode{display:flex; gap:2px; margin-bottom:var(--bp-space-4); grid-column:1 / -1}
+.bp-europe-mode__btn{
+  font:inherit; font-size:var(--bp-text-small,13px); padding:7px 16px;
+  border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text-muted);
+  cursor:pointer;
+}
+.bp-europe-mode__btn:first-child{border-radius:var(--bp-radius-control) 0 0 var(--bp-radius-control)}
+.bp-europe-mode__btn:last-child{border-radius:0 var(--bp-radius-control) var(--bp-radius-control) 0; margin-left:-1px}
+.bp-europe-mode__btn[aria-pressed="true"]{background:var(--bp-accent); border-color:var(--bp-accent); color:var(--bp-navy-text); font-weight:600}
+.bp-europe-mode__btn:focus-visible{outline:2px solid var(--bp-accent); outline-offset:1px; z-index:1; position:relative}
+
+.bp-europe-map__note{font-size:12px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); line-height:1.5}
+
+/* ---- country picker -------------------------------------------------------
+   A chip list with a search filter, not a plain <select> -- every
+   allowlisted country must stay reachable and pickable regardless of how
+   little screen the map itself gets (spec requirement: "the picker holds
+   every allowlisted country regardless of map size"). */
+.bp-europe-picker{margin-bottom:var(--bp-space-4)}
+.bp-europe-picker > label{display:block; font-size:12px; color:var(--bp-text-muted); margin-bottom:4px}
+.bp-europe-picker input[type="search"]{
+  font:inherit; font-size:var(--bp-text-small,13px); padding:6px 10px; width:100%; max-width:280px;
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  background:var(--bp-surface); color:var(--bp-text); margin-bottom:var(--bp-space-2);
+}
+.bp-europe-picker__list{display:flex; flex-wrap:wrap; gap:6px; max-height:140px; overflow-y:auto; padding:2px}
+.bp-europe-picker__chip{
+  display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:4px 10px;
+  border:1px solid var(--bp-border); border-radius:999px; background:var(--bp-surface); color:var(--bp-text);
+  cursor:pointer; user-select:none;
+}
+.bp-europe-picker__chip input{margin:0}
+.bp-europe-picker__chip[data-checked="true"]{background:var(--bp-accent); border-color:var(--bp-accent); color:var(--bp-navy-text); font-weight:600}
+.bp-europe-picker__chip[data-disabled="true"]{opacity:.4; cursor:not-allowed}
+.bp-europe-picker__chip[hidden]{display:none}
+.bp-europe-picker__cap{font-size:12px; color:var(--bp-text-muted); margin:var(--bp-space-2) 0 0}
+
+/* ---- country outline on the map: a selected country's polygon gets a
+   visible, thicker stroke -- the map-click equivalent of a checked picker
+   chip, so a reader can tell what is selected without opening the picker. */
+.bp-europe-map__stage path[data-selected="true"]{stroke:var(--bp-accent); stroke-width:2px}
+
+/* ---- "Comparaison internationale" small multiples -------------------------
+   Replaces the old unavailable-slot card (config/national_sections.yaml no
+   longer lists `international`) -- built entirely by europe_map.js, no
+   indicator id or figure in macro.html itself (rules 2/24). */
+.bp-europe-compare{
+  background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+  padding:var(--bp-space-5); margin:var(--bp-space-5) 0;
+}
+.bp-europe-compare h3{margin:0 0 4px}
+.bp-europe-compare__desc{font-size:13px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-3)}
+.bp-europe-compare__refs{display:flex; gap:var(--bp-space-4); flex-wrap:wrap; font-size:12px; color:var(--bp-text-muted); margin-bottom:var(--bp-space-4)}
+.bp-europe-compare__refs label{display:inline-flex; align-items:center; gap:5px; cursor:pointer}
+.bp-europe-compare__empty{font-size:13px; color:var(--bp-text-muted)}
+.bp-europe-compare__grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:var(--bp-space-4);
+}
+.bp-europe-compare__card{
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:var(--bp-space-4); min-width:0;
+}
+.bp-europe-compare__card h4{margin:0 0 6px; font-size:.9rem}
+.bp-europe-compare__card canvas{width:100%; display:block}
+.bp-europe-compare__legend{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px}
+.bp-europe-compare__legend .chip{display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--bp-text-muted)}
+.bp-europe-compare__legend .dot{width:8px; height:8px; border-radius:50%; flex:none}
+.bp-europe-compare__meta{font-size:11px; color:var(--bp-text-muted); margin:6px 0 0; line-height:1.5}
+.bp-europe-compare__adapted{font-size:11px; color:var(--bp-text-faint); margin:4px 0 0; line-height:1.5}
+.bp-europe-compare__blocked{font-size:12px; color:var(--bp-text-muted)}
+
+@media (max-width:480px){
+  .bp-europe-compare__grid{grid-template-columns:1fr}
+}

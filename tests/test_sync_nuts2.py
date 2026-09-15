@@ -170,10 +170,14 @@ def test_a_licence_excluded_geography_is_skipped_not_written(db, tmp_path, monke
     assert not any(g.startswith("uk") for g in geo_ids)
 
 
-def test_pilot_indicators_still_returns_exactly_the_five_country_level_indicators():
+def test_pilot_indicators_returns_exactly_the_country_level_indicators():
     """The one change made to sync_international.py for this batch --
     pilot_indicators() excluding geo_levels: [nuts2] configs -- must not
-    change its result for the five existing pilot indicators."""
+    change its result for the country-level indicators: the five pilot
+    ones, plus GDP_PC_PPS_COUNTRY and POPULATION_COUNTRY added by the Europe
+    countries batch (docs/features/europe_countries.md). Those two read the
+    same datasets as the NUTS 2 configs but are country-level, so they
+    belong here and never in nuts2_indicators()."""
     sys.path.insert(0, str(REPO / "scripts"))
     import sync_international as si
 
@@ -189,6 +193,8 @@ def test_pilot_indicators_still_returns_exactly_the_five_country_level_indicator
         "UNEMPLOYMENT_RATE_EUROPE",
         "GOV_DEBT_EUROPE",
         "CONSUMER_CONFIDENCE_EUROPE",
+        "GDP_PC_PPS_COUNTRY",
+        "POPULATION_COUNTRY",
     }
 
 

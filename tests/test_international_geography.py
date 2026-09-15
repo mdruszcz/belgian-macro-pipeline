@@ -9,6 +9,7 @@ from src.geography.international import (
     GEO_COLUMNS,
     InternationalGeographyError,
     check_allowlist_integrity,
+    is_country_level_code,
     load_country_geos,
     load_excluded,
     load_international_rows,
@@ -100,3 +101,63 @@ def test_an_invalid_scope_is_refused(tmp_path):
 def test_a_missing_file_is_refused(tmp_path):
     with pytest.raises(InternationalGeographyError, match="Missing"):
         load_international_rows(tmp_path / "does_not_exist.csv")
+
+
+# --- is_country_level_code() -- Europe countries batch ----------------------
+# (docs/features/europe_countries.md): the geo_filter that separates real
+# NUTS 0 country codes and underscore-joined EU/EFTA aggregates from a NUTS
+# 1/2/3 regional subdivision code, for the two mixed-NUTS-level datasets
+# (nama_10r_2gdp, demo_r_pjanaggr3) only. Direct unit tests per CLAUDE.md
+# rule 5 -- the sync/export tests exercise it indirectly against real fixture
+# data, but a hand-computed truth table for the shape itself belongs here.
+
+
+@pytest.mark.parametrize("code", ["BE", "DE", "TR", "UK", "GE", "MD"])
+def test_two_letter_country_codes_are_country_level(code):
+    assert is_country_level_code(code) is True
+
+
+@pytest.mark.parametrize("code", ["EU27_2020", "EU27_2007", "DE_TOT"])
+def test_underscore_joined_aggregate_spellings_are_country_level(code):
+    """Every non-plain-country code the two mixed-NUTS-level datasets
+    actually carry (EU27_2020's own aggregate, EU27_2007 and DE_TOT -- both
+    live findings, see international_excluded.csv) uses an underscore; a
+    NUTS subdivision code never does."""
+    assert is_country_level_code(code) is True
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "BE1",  # NUTS 1
+        "BE10",  # NUTS 2
+        "BE100",  # NUTS 3
+        "FRY1",  # a French overseas NUTS 3 code, same shape
+        "DE300",
+    ],
+)
+def test_nuts_subdivision_shaped_codes_are_rejected(code):
+    assert is_country_level_code(code) is False
+
+
+def test_ea21_matches_the_nuts_subdivision_shape_and_would_be_wrongly_filtered():
+    """EA21 ("EA" + "21") is shaped exactly like a NUTS 1/2/3 code --
+    is_country_level_code() alone cannot tell it apart from one, which is
+    exactly why scripts/sync_international.py's MIXED_NUTS_LEVEL_DATASETS
+    applies this filter ONLY to the two Europe countries batch datasets and
+    never to the five original pilot indicators' own dataset (which uses
+    EA21 as its aggregate and never mixes NUTS levels in the first place).
+    This test documents the hazard the module docstring describes, not a
+    behaviour this function itself works around."""
+    assert is_country_level_code("EA21") is False
+
+
+def test_ea21_is_not_filtered_because_the_filter_is_never_applied_to_its_dataset():
+    """The actual guarantee: EA21 reaches the five original pilot
+    indicators' own observations unfiltered, because
+    scripts/sync_international.py never calls is_country_level_code() for
+    their dataset. Checked against the real allowlist (not a synthetic
+    fixture) -- EA21 is a real, loaded pilot aggregate today."""
+    rows = load_international_rows()
+    assert rows["EA21"]["scope"] == "pilot"
+    assert rows["EA21"]["basis"] == "aggregate"

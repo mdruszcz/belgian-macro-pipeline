@@ -1,0 +1,28 @@
+id: POPULATION_COUNTRY
+name:
+  en: Population
+  fr: Population
+  nl: Bevolking
+unit: persons
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: neutral
+description:
+  en: Population on 1 January, total, both sexes, all ages -- Eurostat's own
+    country-level figure, NOT summed from the NUTS 2 regional series (CLAUDE.md
+    aggregation rules) -- every allowlisted country plus the EU27_2020
+    aggregate, the Europe countries batch (docs/features/europe_countries.md).
+    Same dataset/filter as POPULATION_NUTS2 (docs/features/europe_nuts2.md);
+    this config reads only the NUTS 0 (whole-country) cells of that same
+    dataset response.
+fetch:
+  dataset: demo_r_pjanaggr3
+  filters:
+    sex: T
+    age: TOTAL
+    unit: NR
+  geographies: allowlist
+  since: "1990"
+display: null

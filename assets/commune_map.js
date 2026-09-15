@@ -97,7 +97,12 @@ MapUI.formatValue = function(num, unit, decimals, lang){
      it can never be read as a total: Namur's 2 319,7 is what the commune
      raises per resident, not its budget. Mirrored in src/pages/resolve.py. */
   if(u === 'eur_per_inhabitant') return '\u20ac' + body + '\u202f/\u202fhab.';
-  if(u.startsWith('percent')) return body + '%';
+  // pct_of_gdp (Europe countries batch, docs/features/europe_countries.md,
+  // GOV_DEBT_EUROPE): deliberately not spelled "percent*" in the indicator
+  // config (percent_bounded validation fails above 100, and several
+  // countries' debt ratios exceed it), but it is still a percentage for
+  // display purposes -- same "%" appended to the number.
+  if(u.startsWith('percent') || u === 'pct_of_gdp') return body + '%';
   return body;
 };
 
@@ -142,7 +147,13 @@ MapUI.unitLabel = function(unit, lang){
   const u = (unit || '').toLowerCase();
   if(!u || u === 'count') return '';
   if(u === 'pp_contribution') return 'pp';
-  const idx = /^index_(\d{4})$/.exec(u);
+  // The Europe countries batch's GDP_VOLUME_EUROPE index carries an
+  // explicit base VALUE in its unit code too ("index_2015_100", always
+  // rebased to 100 -- see export_europe_countries.py's
+  // _rebase_to_2015_index), not just the base year every earlier
+  // "index_YYYY" unit used -- the trailing "_100" is optional so both
+  // spellings read the same way.
+  const idx = /^index_(\d{4})(?:_100)?$/.exec(u);
   if(idx) return idx[1] + '=100';
   if(u === 'balance') return MapUI.text(lang, 'macroBalance');
   if(u === 'eur') return '€';
@@ -155,6 +166,13 @@ MapUI.unitLabel = function(unit, lang){
   // duplicate the wording.
   if(u === 'pps_per_inhabitant') return MapUI.text(lang, 'unitPpsPerInhabitant');
   if(u === 'persons') return MapUI.text(lang, 'unitPersons');
+  // Europe countries batch (docs/features/europe_countries.md):
+  // GOV_DEBT_EUROPE's "pct_of_gdp" (see formatValue's own comment for why
+  // it cannot be spelled "percent*"). unitSuffix() does not special-case
+  // it, so this word appears once, in the meta line ("... (% of GDP) --
+  // 2023"), while formatValue keeps printing a plain "%" on the number
+  // itself -- no double percent sign.
+  if(u === 'pct_of_gdp') return MapUI.text(lang, 'unitPctOfGdp');
   return unit.replace(/_/g, ' ');
 };
 

@@ -31,6 +31,17 @@
   var STAGE_ID = 'bpEuropeStage';
   var SVG_ID = 'bpEuropeSvg';
 
+  // Europe countries batch (docs/features/europe_countries.md): same shape
+  // one NUTS level up, served through the same fetch shim mechanism -- no
+  // new remote host, same same-origin-only invariant the region map above
+  // already guarantees.
+  var COUNTRY_INDEX_URL = 'public/data/europe/countries/index.json';
+  var COUNTRY_PAYLOAD_DIR = 'public/data/europe/countries/';
+  var COUNTRY_STAGE_ID = 'bpEuropeCountryStage';
+  var COUNTRY_SVG_ID = 'bpEuropeCountrySvg';
+  var MAX_SELECTED_COUNTRIES = 8;
+  var DEFAULT_SELECTED_COUNTRIES = ['BE'];
+
   /* eurostat-map always requests
      `${nuts2jsonBaseURL}/${nutsYear}/${proj}/${scale}/${nutsLevel}.json`
      (grepped from the vendored bundle's own URL-builder) -- a shape our
@@ -61,6 +72,30 @@
     zoomBaseline: null,
     root: null,
     els: {},
+    // Europe countries batch (docs/features/europe_countries.md): the
+    // "Régions / Pays" toggle. Region mode above is entirely unchanged;
+    // everything country-shaped lives in this one sub-object so it can
+    // never be confused with a region-mode field of the same short name
+    // (e.g. `currentIndicatorId`, `mapInstance`) by a later edit.
+    mode: 'region',
+    country: {
+      inited: false,
+      index: null,
+      geometryTopo: null,
+      geometryPromise: null,
+      countryNames: {}, // code -> {en, fr, nl}
+      payloads: {},
+      allPayloadsPromise: null,
+      currentIndicatorId: null,
+      currentPeriod: null,
+      // Up to 8 codes, default Belgium (spec requirement) -- shared by the
+      // map's click-to-toggle selection AND the "Comparaison
+      // internationale" charts below it; switching map mode never clears
+      // it.
+      selected: ['BE'],
+      mapInstance: null,
+      zoomBaseline: null,
+    },
   };
 
   /* ---- tiny DOM helpers --------------------------------------------- */
@@ -287,10 +322,18 @@
       el('p', { class: 'prompt', text: T('europeSelectPrompt') }),
     ]);
 
-    state.root.appendChild(main);
-    state.root.appendChild(side);
+    // Wrapped in its own section (Europe countries batch,
+    // docs/features/europe_countries.md) so the "Régions / Pays" toggle
+    // (built by buildModeToggle(), a sibling of this wrapper directly under
+    // state.root) can hide the whole region UI in one step when country
+    // mode is active, without touching any id or class inside it -- every
+    // existing selector (#bpEuropeStage, #europeIndicatorSelect, ...) still
+    // resolves exactly where it did before this batch.
+    var regionWrap = el('div', { class: 'bp-europe-map__mode-section', id: 'europeRegionWrap' }, [main, side]);
+    state.root.appendChild(regionWrap);
 
     state.els = {
+      regionWrap: regionWrap,
       indicatorSelect: indicatorSelect,
       yearSelect: yearSelect,
       blockedReason: blockedReason,
@@ -490,7 +533,7 @@
         Object.keys(yearValues).forEach(function (code) {
           if (yearValues[code].s === 'suppressed') paintRegion(code, suppressedColor);
         });
-        var hatchFill = ensureHatchPattern(excludedColor);
+        var hatchFill = ensureHatchPattern(SVG_ID, HATCH_ID, excludedColor);
         (payload.excluded_by_licence || []).forEach(function (code) {
           paintRegion(code, hatchFill);
         });
@@ -507,20 +550,26 @@
   }
 
   var HATCH_ID = 'bpEuropeLicenceHatch';
+  var COUNTRY_HATCH_ID = 'bpEuropeCountryLicenceHatch';
   /* A diagonal-stripe SVG pattern for licence-excluded regions, so their
      fill reads as visibly different from a plain "missing" region on the
      map itself, not just a slightly darker flat grey (per lead review of
      the WIP screenshot: "use the same styling on the map itself" as the
      legend's own hatched swatch, europe_map.css). Injected once per build
-     into the svg's own <defs>; returns the `url(#id)` fill value to use. */
-  function ensureHatchPattern(strokeColor) {
-    var svgEl = document.getElementById(SVG_ID);
+     into the svg's own <defs>; returns the `url(#id)` fill value to use.
+     Generalised (Europe countries batch) over which svg/pattern id: the
+     region and country svgs BOTH exist in the DOM at once (one hidden via
+     the mode toggle, never removed), so a single shared HATCH_ID would
+     look up whichever svg `document.getElementById` happened to return the
+     <defs> from -- almost always the wrong one for at least one mode. */
+  function ensureHatchPattern(svgId, hatchId, strokeColor) {
+    var svgEl = document.getElementById(svgId);
     if (!svgEl) return strokeColor;
     var defs = svgEl.querySelector('defs') || svgEl.insertBefore(document.createElementNS('http://www.w3.org/2000/svg', 'defs'), svgEl.firstChild);
-    var existing = document.getElementById(HATCH_ID);
+    var existing = document.getElementById(hatchId);
     if (existing) existing.parentNode.removeChild(existing);
     var pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-    pattern.setAttribute('id', HATCH_ID);
+    pattern.setAttribute('id', hatchId);
     pattern.setAttribute('width', '4');
     pattern.setAttribute('height', '4');
     pattern.setAttribute('patternTransform', 'rotate(45)');
@@ -534,7 +583,7 @@
     line.setAttribute('stroke-width', '2');
     pattern.appendChild(line);
     defs.appendChild(pattern);
-    return 'url(#' + HATCH_ID + ')';
+    return 'url(#' + hatchId + ')';
   }
 
   function paintRegion(code, color) {
@@ -566,30 +615,47 @@
          `.build()`, so restoring window.fetch right after `.build()`
          returns is too early and the real request would 404 against a URL
          that only ever existed as this shim's sentinel). */
-  function buildMap(opts) {
+  /* Generalised (Europe countries batch, docs/features/europe_countries.md)
+     over WHICH map is being built -- region's top-level `state` (nutsLevel
+     2, unchanged behaviour) or `state.country` (nutsLevel 0, the new
+     country choropleth) -- so the country map reuses every one of the
+     network-suppression and async-timing comments above instead of a
+     second, silently-drifting copy of them.
+     @param cfg {target, stageId, svgId, stageEl, nutsLevel, nutsYear,
+       geometryTopo, thresholds, numClasses, colors, nodataColor,
+       customData, onReady} */
+  function buildChoropleth(cfg) {
     if (!window.eurostatmap) return;
     // Only the OLD svg is removed here, never the whole stage: the stage
     // also holds the keyboard-accessible zoom buttons built once in
-    // buildChrome(), and clearing the stage on every indicator/year/theme
-    // re-render used to silently delete them along with the old drawing.
-    var oldSvg = document.getElementById(SVG_ID);
+    // buildChrome()/buildCountryChrome(), and clearing the stage on every
+    // indicator/period/theme re-render used to silently delete them along
+    // with the old drawing.
+    var oldSvg = document.getElementById(cfg.svgId);
     if (oldSvg && oldSvg.parentNode) oldSvg.parentNode.removeChild(oldSvg);
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('id', SVG_ID);
-    state.els.stage.insertBefore(svg, state.els.stage.firstChild);
+    svg.setAttribute('id', cfg.svgId);
+    cfg.stageEl.insertBefore(svg, cfg.stageEl.firstChild);
+
+    // Unique per map instance (region vs country build side by side across
+    // a mode switch) but still recognised by exactly the narrow check
+    // below -- appending the target svgId keeps the sentinel's own
+    // uniqueness guarantee intact rather than reusing one global constant
+    // for two independent map instances.
+    var sentinel = GEOMETRY_SENTINEL + ':' + cfg.svgId;
 
     var config = {
-      containerId: STAGE_ID,
-      svgId: SVG_ID,
+      containerId: cfg.stageId,
+      svgId: cfg.svgId,
       width: 760,
       height: 780,
       title: '',
       geo: 'EUR',
       proj: '3035',
       scale: '20M',
-      nutsLevel: 2,
-      nutsYear: (state.index && state.index.nuts_version) || '2024',
-      nuts2jsonBaseURL: GEOMETRY_SENTINEL,
+      nutsLevel: cfg.nutsLevel,
+      nutsYear: cfg.nutsYear,
+      nuts2jsonBaseURL: sentinel,
       // FRY1-FRY5/PT20/PT30 (Guadeloupe, Martinique, Guyane, Réunion,
       // Mayotte, Azores, Madeira) are published under separate per-
       // territory URLs this batch never fetches (payload `no_outline`,
@@ -601,17 +667,18 @@
       // The library draws its OWN tooltip by default (a default
       // textFunction reads the bound stat value straight off the region) --
       // left alone, a hover shows both that one and this file's own
-      // (`#europeTooltip`), stacked on top of each other. Its `mouseover`
-      // only becomes visible when the text it is given is truthy, so a
-      // textFunction that always returns '' keeps the library's tooltip
-      // permanently empty/invisible without touching any private property.
+      // (`#europeTooltip`/`#europeCountryTooltip`), stacked on top of each
+      // other. Its `mouseover` only becomes visible when the text it is
+      // given is truthy, so a textFunction that always returns '' keeps the
+      // library's tooltip permanently empty/invisible without touching any
+      // private property.
       tooltip: { textFunction: function () { return ''; } },
       // The default in-map credit line (`defaultFootnote_`, verbatim the
       // same "Administrative boundaries: ©EuroGeographics ©OpenStreetMap"
-      // text `renderMeta` below already prints, once, in the source block)
-      // renders unconditionally unless turned off -- left on, the same
-      // sentence appeared twice, tiny and overlapping in a bottom corner
-      // of the map itself.
+      // text `renderMeta`/`renderCountryMeta` below already print, once, in
+      // the source block) renders unconditionally unless turned off -- left
+      // on, the same sentence appeared twice, tiny and overlapping in a
+      // bottom corner of the map itself.
       footnote: false,
       // The library's own zoom buttons are plain SVG <g> elements with no
       // tabindex or keyboard handling at all (grepped from the vendored
@@ -624,30 +691,30 @@
       zoomButtons: false,
       zoomExtent: [1, 8],
       classificationMethod: 'threshold',
-      thresholds: opts.thresholds,
-      numberOfClasses: opts.numClasses,
-      colors: opts.colors,
-      noDataFillStyle: opts.nodataColor,
+      thresholds: cfg.thresholds,
+      numberOfClasses: cfg.numClasses,
+      colors: cfg.colors,
+      noDataFillStyle: cfg.nodataColor,
       noDataText: T('status_missing'),
-      stat: { customData: opts.customData },
+      stat: { customData: cfg.customData },
       // `.build()` is asynchronous (it fetches geometry, even though that
       // fetch is answered from memory here) -- onBuild is the library's own
       // "the map is actually finished" callback, and everything that reads
-      // back the rendered SVG (the viewBox fix, the zoom baseline, and
-      // render()'s own onReady -- suppressed/excluded colour overrides,
-      // legend, region handlers) waits for it rather than for `.build()`
-      // to merely RETURN (measured: those region <path> elements do not
-      // exist yet at that point).
+      // back the rendered SVG (the viewBox fix, the zoom baseline, and the
+      // caller's own onReady -- suppressed/excluded colour overrides,
+      // legend, region/country handlers) waits for it rather than for
+      // `.build()` to merely RETURN (measured: those region <path> elements
+      // do not exist yet at that point).
       onBuild: function () {
-        var builtSvg = document.getElementById(SVG_ID);
+        var builtSvg = document.getElementById(cfg.svgId);
         if (builtSvg) fitViewBoxToRegions(builtSvg, config.width, config.height);
         try {
           var node = map && map.svg_ && map.svg_.node && map.svg_.node();
-          if (node && node.__zoom) state.zoomBaseline = node.__zoom;
+          if (node && node.__zoom) cfg.target.zoomBaseline = node.__zoom;
         } catch (e) {
           /* zoom buttons degrade to no-ops below if this ever fails */
         }
-        if (opts.onReady) opts.onReady();
+        if (cfg.onReady) cfg.onReady();
       },
     };
 
@@ -661,11 +728,11 @@
     // leaving it installed a little longer than strictly necessary is safe:
     // every other fetch() call on the page passes straight through
     // untouched in the meantime.
-    var topo = state.geometryTopo;
+    var topo = cfg.geometryTopo;
     var nativeFetch = window.fetch;
     window.fetch = function (input) {
       var url = typeof input === 'string' ? input : (input && input.url) || '';
-      if (url.indexOf(GEOMETRY_SENTINEL) !== -1) {
+      if (url.indexOf(sentinel) !== -1) {
         window.fetch = nativeFetch;
         return Promise.resolve(
           new Response(JSON.stringify(topo), { status: 200, headers: { 'Content-Type': 'application/json' } })
@@ -673,9 +740,9 @@
       }
       return nativeFetch.apply(window, arguments);
     };
-    state.zoomBaseline = null;
+    cfg.target.zoomBaseline = null;
     var map = window.eurostatmap.map('choropleth', config);
-    state.mapInstance = map;
+    cfg.target.mapInstance = map;
     map.build();
     // The viewBox fix (measured: the library does NOT reliably add its own
     // for this "choropleth"/geo:'EUR' combination, so CSS's `width:100%;
@@ -685,6 +752,28 @@
     // inside `config.onBuild` above, once the drawing actually exists.
   }
 
+  /* Region mode's own thin call into buildChoropleth() -- same signature
+     render() already calls, so this batch's refactor of the old buildMap()
+     into the shared buildChoropleth() above touches nothing at render()'s
+     own call site. */
+  function buildMap(opts) {
+    buildChoropleth({
+      target: state,
+      stageId: STAGE_ID,
+      svgId: SVG_ID,
+      stageEl: state.els.stage,
+      nutsLevel: 2,
+      nutsYear: (state.index && state.index.nuts_version) || '2024',
+      geometryTopo: state.geometryTopo,
+      thresholds: opts.thresholds,
+      numClasses: opts.numClasses,
+      colors: opts.colors,
+      nodataColor: opts.nodataColor,
+      customData: opts.customData,
+      onReady: opts.onReady,
+    });
+  }
+
   /* ---- zoom / reset -------------------------------------------------------
      eurostat-map ships its own mouse-wheel/drag zoom (d3-zoom, bound
      internally) but no keyboard equivalent and no real <button> for it
@@ -692,9 +781,13 @@
      tabindex). These three real, focusable <button> elements call the SAME
      d3-zoom behaviour the library's own (mouse-only) buttons use, so
      keyboard and mouse zoom always agree. */
-  function zoomBy(factor) {
+  /* Generalised over WHICH map (region's top-level state, or
+     state.country -- Europe countries batch) so the country map's own
+     zoom buttons drive the SAME underlying d3-zoom behaviour without a
+     second copy of this try/catch. */
+  function zoomByGeneric(target, factor) {
     try {
-      var map = state.mapInstance;
+      var map = target.mapInstance;
       if (map && map.svg_ && map.__zoomBehavior) {
         map.svg_.transition().call(map.__zoomBehavior.scaleBy, factor);
       }
@@ -702,15 +795,21 @@
       /* no-op: zoom becomes unavailable rather than throwing */
     }
   }
-  function resetZoom() {
+  function resetZoomGeneric(target) {
     try {
-      var map = state.mapInstance;
-      if (map && map.svg_ && map.__zoomBehavior && state.zoomBaseline) {
-        map.svg_.transition().call(map.__zoomBehavior.transform, state.zoomBaseline);
+      var map = target.mapInstance;
+      if (map && map.svg_ && map.__zoomBehavior && target.zoomBaseline) {
+        map.svg_.transition().call(map.__zoomBehavior.transform, target.zoomBaseline);
       }
     } catch (e) {
       /* no-op */
     }
+  }
+  function zoomBy(factor) {
+    zoomByGeneric(state, factor);
+  }
+  function resetZoom() {
+    resetZoomGeneric(state);
   }
 
   /* ---- legend -------------------------------------------------------------- */
@@ -936,8 +1035,903 @@
     }
   }
 
-  /* ---- wire-up ------------------------------------------------------------ */
+  /* =====================================================================
+   * Europe countries batch (docs/features/europe_countries.md): the
+   * "Régions / Pays" map toggle, the country choropleth (NUTS 0), the
+   * accessible country picker, and the "Comparaison internationale" small
+   * multiples. Region mode above is completely unchanged -- everything
+   * here is additive, sharing only the generic helpers (el/clear/cssVar,
+   * buildChoropleth, zoomByGeneric/resetZoomGeneric, ensureHatchPattern,
+   * paintRegion, statusWord, loadVendorScript, readJSON,
+   * pickDefaultIndicator, fitViewBoxToRegions) already used above.
+   * ===================================================================== */
+
+  function initCountry() {
+    if (state.country.inited) return;
+    state.country.inited = true;
+    if (!state.root) state.root = document.getElementById('europeMapRoot');
+    if (!state.root) return;
+
+    buildModeToggle();
+    buildCountryChrome();
+    buildCompareChrome();
+
+    var indexPromise = fetch(COUNTRY_INDEX_URL).then(readJSON);
+    state.country.allPayloadsPromise = indexPromise
+      .then(function (index) {
+        state.country.index = index;
+        index.countries.forEach(function (c) {
+          state.country.countryNames[c.code] = c.names;
+        });
+        buildCountryPicker(index);
+
+        return Promise.all(
+          index.indicators.map(function (i) {
+            return fetchCountryPayload(i.id);
+          })
+        ).then(function () {
+          var mapIndicators = index.indicators.filter(function (i) {
+            return i.map;
+          });
+          var defaultId = pickDefaultIndicator(mapIndicators.length ? mapIndicators : index.indicators);
+          state.country.currentIndicatorId = defaultId;
+          var defaultPayload = state.country.payloads[defaultId];
+          state.country.currentPeriod = defaultPayload.latest_period;
+          populateCountryIndicatorSelect(mapIndicators, defaultId);
+          populateCountryPeriodSelect(defaultPayload);
+          renderComparisonCharts();
+          if (state.mode === 'country') {
+            return ensureCountryGeometryAndVendor().then(renderCountryMap);
+          }
+        });
+      })
+      .catch(function (err) {
+        showCountryError(err);
+      });
+  }
+
+  /* ---- mode toggle: "Régions / Pays" ------------------------------------- */
+  function buildModeToggle() {
+    var regionBtn = el('button', {
+      type: 'button',
+      id: 'europeModeRegion',
+      class: 'bp-europe-mode__btn',
+      'aria-pressed': 'true',
+      text: T('europeModeRegion'),
+    });
+    var countryBtn = el('button', {
+      type: 'button',
+      id: 'europeModeCountry',
+      class: 'bp-europe-mode__btn',
+      'aria-pressed': 'false',
+      text: T('europeModeCountry'),
+    });
+    var bar = el('div', { class: 'bp-europe-mode', role: 'group', 'aria-label': T('europeModeGroupLabel') }, [
+      regionBtn,
+      countryBtn,
+    ]);
+    // Ahead of everything buildChrome() already put in state.root (the
+    // region wrapper) -- the toggle reads as the first thing in the panel,
+    // above whichever mode's UI is currently visible.
+    state.root.insertBefore(bar, state.root.firstChild);
+    state.els.modeRegionBtn = regionBtn;
+    state.els.modeCountryBtn = countryBtn;
+    regionBtn.addEventListener('click', function () {
+      setMode('region');
+    });
+    countryBtn.addEventListener('click', function () {
+      setMode('country');
+    });
+
+    window.addEventListener('bp:theme', function () {
+      if (state.mode === 'country' && state.country.currentIndicatorId) renderCountryMap();
+      renderComparisonCharts();
+    });
+    document.addEventListener('bp:lang', function (ev) {
+      LANG = (ev.detail && ev.detail.lang) || LANG;
+      relabelCountryChrome();
+      relabelCompareChrome();
+      if (state.country.index) relabelCountryPicker();
+      if (state.mode === 'country' && state.country.currentIndicatorId) renderCountryMap();
+      renderComparisonCharts();
+    });
+  }
+
+  function setMode(mode) {
+    if (state.mode === mode) return;
+    state.mode = mode;
+    state.els.modeRegionBtn.setAttribute('aria-pressed', String(mode === 'region'));
+    state.els.modeCountryBtn.setAttribute('aria-pressed', String(mode === 'country'));
+    state.els.regionWrap.hidden = mode !== 'region';
+    state.els.country.wrap.hidden = mode !== 'country';
+    if (mode === 'country' && state.country.index && state.country.currentIndicatorId) {
+      ensureCountryGeometryAndVendor().then(renderCountryMap);
+    }
+  }
+
+  /* ---- country map chrome ------------------------------------------------- */
+  function buildCountryChrome() {
+    var indicatorSelect = el('select', { id: 'europeCountryIndicatorSelect' });
+    var periodSelect = el('select', { id: 'europeCountryPeriodSelect' });
+    var blockedReason = el('span', { class: 'bp-europe-map__blocked-reason', id: 'europeCountryBlockedReason' });
+    blockedReason.hidden = true;
+    var controls = el('div', { class: 'bp-europe-map__controls' }, [
+      el('div', { class: 'bp-europe-map__field' }, [
+        el('label', { for: 'europeCountryIndicatorSelect', text: T('europeIndicatorLabel') }),
+        indicatorSelect,
+      ]),
+      el('div', { class: 'bp-europe-map__field' }, [
+        el('label', { for: 'europeCountryPeriodSelect', text: T('europePeriodLabel') }),
+        periodSelect,
+      ]),
+      blockedReason,
+    ]);
+
+    // "Region and country unemployment are different Eurostat series"
+    // (spec requirement) -- a persistent, generic clarification rather
+    // than one gated on which single indicator happens to be selected,
+    // which would mean this generic renderer naming one specific
+    // indicator id (rules 2/24).
+    var note = el('p', { class: 'bp-europe-map__note', id: 'europeUnemploymentNote', text: T('europeUnemploymentNote') });
+
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('id', COUNTRY_SVG_ID);
+    var stage = el('div', { class: 'bp-europe-map__stage', id: COUNTRY_STAGE_ID }, []);
+    stage.appendChild(svg);
+
+    var zoomIn = el('button', { type: 'button', 'aria-label': T('europeZoomIn'), id: 'europeCountryZoomIn', text: '+' });
+    var zoomOut = el('button', { type: 'button', 'aria-label': T('europeZoomOut'), id: 'europeCountryZoomOut', text: '−' });
+    var zoomReset = el('button', { type: 'button', 'aria-label': T('europeResetView'), id: 'europeCountryZoomReset', text: '□' });
+    stage.appendChild(el('div', { class: 'bp-europe-map__zoom' }, [zoomIn, zoomOut, zoomReset]));
+
+    var tooltip = el('div', { class: 'bp-europe-map__tooltip', id: 'europeCountryTooltip', hidden: 'hidden' });
+
+    var pickerSearch = el('input', {
+      type: 'search',
+      id: 'europeCountryPickerSearch',
+      'aria-label': T('europeCountryPickerSearchLabel'),
+      placeholder: T('europeCountryPickerSearchLabel'),
+    });
+    var pickerList = el('div', {
+      class: 'bp-europe-picker__list',
+      id: 'europeCountryPickerList',
+      role: 'group',
+      'aria-label': T('europeCountryPickerLabel'),
+    });
+    var capMsg = el('p', { class: 'bp-europe-picker__cap', id: 'europeCountryCapMsg', text: T('europeCountryCapMsg') });
+    capMsg.hidden = true;
+    var picker = el('div', { class: 'bp-europe-picker' }, [
+      el('label', { for: 'europeCountryPickerSearch', text: T('europeCountryPickerLabel') }),
+      pickerSearch,
+      pickerList,
+      capMsg,
+    ]);
+
+    var legendScale = el('div', { class: 'bp-europe-map__legend-scale', id: 'europeCountryLegendScale' });
+    var legendExtra = el('div', { id: 'europeCountryLegendExtra' });
+    var meta = el('div', { class: 'bp-europe-map__meta', id: 'europeCountryMeta' });
+    var noOutline = el('p', { class: 'bp-europe-map__no-outline', id: 'europeCountryNoOutline' });
+    noOutline.hidden = true;
+    var legend = el('div', { class: 'bp-europe-map__legend' }, [legendScale, legendExtra, meta]);
+
+    var main = el('div', { class: 'bp-europe-map__main' }, [controls, note, picker, stage, tooltip, legend, noOutline]);
+    var side = el('div', { class: 'bp-europe-map__side', id: 'europeCountrySideCard' }, [
+      el('p', { class: 'prompt', text: T('europeCountrySelectPrompt') }),
+    ]);
+
+    var wrap = el('div', { class: 'bp-europe-map__mode-section', id: 'europeCountryWrap' }, [main, side]);
+    wrap.hidden = true; // region is the default mode
+    state.root.appendChild(wrap);
+
+    state.els.country = {
+      wrap: wrap,
+      indicatorSelect: indicatorSelect,
+      periodSelect: periodSelect,
+      blockedReason: blockedReason,
+      note: note,
+      stage: stage,
+      svg: svg,
+      tooltip: tooltip,
+      pickerSearch: pickerSearch,
+      pickerList: pickerList,
+      capMsg: capMsg,
+      legendScale: legendScale,
+      legendExtra: legendExtra,
+      meta: meta,
+      noOutline: noOutline,
+      side: side,
+      zoomIn: zoomIn,
+      zoomOut: zoomOut,
+      zoomReset: zoomReset,
+    };
+
+    indicatorSelect.addEventListener('change', function () {
+      loadCountryIndicator(indicatorSelect.value);
+    });
+    periodSelect.addEventListener('change', function () {
+      state.country.currentPeriod = periodSelect.value;
+      renderCountryMap();
+    });
+    zoomIn.addEventListener('click', function () {
+      zoomByGeneric(state.country, 2);
+    });
+    zoomOut.addEventListener('click', function () {
+      zoomByGeneric(state.country, 0.5);
+    });
+    zoomReset.addEventListener('click', function () {
+      resetZoomGeneric(state.country);
+    });
+    pickerSearch.addEventListener('input', function () {
+      filterCountryPicker(pickerSearch.value);
+    });
+  }
+
+  function relabelCountryChrome() {
+    var c = state.els.country;
+    if (!c) return;
+    state.root.querySelector('label[for="europeCountryIndicatorSelect"]').textContent = T('europeIndicatorLabel');
+    state.root.querySelector('label[for="europeCountryPeriodSelect"]').textContent = T('europePeriodLabel');
+    state.root.querySelector('label[for="europeCountryPickerSearch"]').textContent = T('europeCountryPickerLabel');
+    c.note.textContent = T('europeUnemploymentNote');
+    c.pickerSearch.setAttribute('placeholder', T('europeCountryPickerSearchLabel'));
+    c.pickerSearch.setAttribute('aria-label', T('europeCountryPickerSearchLabel'));
+    c.pickerList.setAttribute('aria-label', T('europeCountryPickerLabel'));
+    c.capMsg.textContent = T('europeCountryCapMsg');
+    c.zoomIn.setAttribute('aria-label', T('europeZoomIn'));
+    c.zoomOut.setAttribute('aria-label', T('europeZoomOut'));
+    c.zoomReset.setAttribute('aria-label', T('europeResetView'));
+    var prompt = c.side.querySelector('.prompt');
+    if (prompt) prompt.textContent = T('europeCountrySelectPrompt');
+    state.els.modeRegionBtn.textContent = T('europeModeRegion');
+    state.els.modeCountryBtn.textContent = T('europeModeCountry');
+    if (state.country.index) {
+      var mapIndicators = state.country.index.indicators.filter(function (i) {
+        return i.map;
+      });
+      populateCountryIndicatorSelect(mapIndicators, state.country.currentIndicatorId);
+    }
+  }
+
+  function showCountryError(err) {
+    if (state.els.country && state.els.country.meta) {
+      clear(state.els.country.meta);
+      state.els.country.meta.appendChild(el('p', { text: T('europeLoadError') }));
+    }
+    if (window.console) console.error('[europe_map:country]', err);
+  }
+
+  /* ---- lazy geometry + vendor script (only once country mode is actually
+     shown -- the region map's own vendor script is already cached by
+     loadVendorScript()'s promise, so switching modes after region has
+     already opened costs only the ~294 KB NUTS 0 geometry fetch). --------- */
+  function ensureCountryGeometryAndVendor() {
+    if (state.country.geometryPromise) return state.country.geometryPromise;
+    state.country.geometryPromise = fetch('public/data/' + state.country.index.geometry)
+      .then(readJSON)
+      .then(function (topo) {
+        state.country.geometryTopo = topo;
+        return Promise.all([topo, loadVendorScript()]);
+      });
+    return state.country.geometryPromise;
+  }
+
+  /* ---- indicator / period ------------------------------------------------- */
+  function fetchCountryPayload(id) {
+    if (state.country.payloads[id]) return Promise.resolve(state.country.payloads[id]);
+    var meta = state.country.index.indicators.filter(function (i) {
+      return i.id === id;
+    })[0];
+    return fetch(COUNTRY_PAYLOAD_DIR + meta.payload)
+      .then(readJSON)
+      .then(function (payload) {
+        state.country.payloads[id] = payload;
+        return payload;
+      });
+  }
+
+  function populateCountryIndicatorSelect(mapIndicators, selectedId) {
+    var select = state.els.country.indicatorSelect;
+    clear(select);
+    mapIndicators.forEach(function (ind) {
+      var payload = state.country.payloads[ind.id];
+      var label = (payload && payload.names && (payload.names[LANG] || payload.names.en)) || ind.id;
+      var opt = el('option', { value: ind.id, text: label });
+      if (ind.status !== 'loaded') opt.disabled = true;
+      if (ind.id === selectedId) opt.selected = true;
+      select.appendChild(opt);
+    });
+    var current = mapIndicators.filter(function (i) {
+      return i.id === selectedId;
+    })[0];
+    var currentPayload = current && state.country.payloads[current.id];
+    if (current && current.status !== 'loaded') {
+      state.els.country.blockedReason.hidden = false;
+      state.els.country.blockedReason.textContent = (currentPayload && currentPayload.blocked_reason) || T('europeLoadError');
+    } else {
+      state.els.country.blockedReason.hidden = true;
+    }
+  }
+
+  function populateCountryPeriodSelect(payload) {
+    var select = state.els.country.periodSelect;
+    clear(select);
+    (payload.periods || []).forEach(function (p) {
+      var opt = el('option', { value: p, text: p });
+      if (p === state.country.currentPeriod) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.disabled = !(payload.periods && payload.periods.length);
+  }
+
+  function loadCountryIndicator(id) {
+    state.country.currentIndicatorId = id;
+    var payload = state.country.payloads[id];
+    if (!payload) return;
+    state.country.currentPeriod = payload.latest_period;
+    var mapIndicators = state.country.index.indicators.filter(function (i) {
+      return i.map;
+    });
+    populateCountryIndicatorSelect(mapIndicators, id);
+    populateCountryPeriodSelect(payload);
+    if (payload.status !== 'loaded' || !payload.map) {
+      renderCountryBlocked(payload);
+      return;
+    }
+    ensureCountryGeometryAndVendor().then(renderCountryMap);
+  }
+
+  function renderCountryBlocked(payload) {
+    clear(state.els.country.stage);
+    state.els.country.legendScale.innerHTML = '';
+    state.els.country.legendExtra.innerHTML = '';
+    state.els.country.meta.textContent = (payload && payload.blocked_reason) || '';
+    state.els.country.noOutline.hidden = true;
+  }
+
+  /* ---- the country render pass -- same shape as render() above (theme,
+     period and language changes all funnel back through here). ------------ */
+  function renderCountryMap() {
+    var payload = state.country.payloads[state.country.currentIndicatorId];
+    if (!payload || !state.country.geometryTopo) return;
+    if (payload.status !== 'loaded' || !payload.map) {
+      renderCountryBlocked(payload);
+      return;
+    }
+    var period = state.country.currentPeriod;
+    var periodValues = payload.values[period] || {};
+    var breaks = payload.class_breaks[period] || [];
+    var numClasses = Math.max(1, breaks.length + 1);
+
+    var colors = [];
+    for (var i = 0; i < numClasses; i++) {
+      var rampIndex = MapUI.colourIndex(i, numClasses, MapUI.BINS);
+      colors.push(cssVar('--ramp-' + rampIndex, '#999999'));
+    }
+    var nodataColor = cssVar('--nodata', '#bcbcbc');
+    var suppressedColor = cssVar('--bp-chart-8', '#75797f');
+    var excludedColor = cssVar('--bp-text-faint', '#8e98ad');
+
+    var customData = {};
+    Object.keys(periodValues).forEach(function (code) {
+      var v = periodValues[code].v;
+      if (typeof v === 'number') customData[code] = v;
+    });
+
+    buildChoropleth({
+      target: state.country,
+      stageId: COUNTRY_STAGE_ID,
+      svgId: COUNTRY_SVG_ID,
+      stageEl: state.els.country.stage,
+      nutsLevel: 0,
+      nutsYear: (state.country.index && state.country.index.geo_vintage) || '2024',
+      geometryTopo: state.country.geometryTopo,
+      thresholds: breaks,
+      numClasses: numClasses,
+      colors: colors,
+      nodataColor: nodataColor,
+      customData: customData,
+      onReady: function () {
+        Object.keys(periodValues).forEach(function (code) {
+          if (periodValues[code].s === 'suppressed') paintRegion(code, suppressedColor);
+        });
+        var hatchFill = ensureHatchPattern(COUNTRY_SVG_ID, COUNTRY_HATCH_ID, excludedColor);
+        (payload.excluded_by_licence || []).forEach(function (code) {
+          paintRegion(code, hatchFill);
+        });
+
+        renderCountryLegend(payload, breaks, colors, nodataColor, suppressedColor, excludedColor, periodValues);
+        renderCountryMeta(payload, period);
+        renderCountryNoOutline(payload);
+        attachCountryHandlers(payload, periodValues);
+        renderCountrySelectionOutline();
+      },
+    });
+  }
+
+  function renderCountryLegend(payload, breaks, colors, nodataColor, suppressedColor, excludedColor, periodValues) {
+    var scale = state.els.country.legendScale;
+    clear(scale);
+    var edges = [null].concat(breaks).concat([null]);
+    for (var i = 0; i < colors.length; i++) {
+      var lo = edges[i],
+        hi = edges[i + 1];
+      var label;
+      if (lo === null && hi === null) label = '';
+      else if (lo === null) label = '< ' + MapUI.formatValue(hi, payload.unit, null, LANG);
+      else if (hi === null) label = '≥ ' + MapUI.formatValue(lo, payload.unit, null, LANG);
+      else label = MapUI.formatValue(lo, payload.unit, null, LANG) + '–' + MapUI.formatValue(hi, payload.unit, null, LANG);
+      scale.appendChild(
+        el('div', { class: 'bp-europe-map__legend-row' }, [
+          el('span', { class: 'bp-europe-map__legend-swatch', style: 'background:' + colors[i] }),
+          el('span', { text: label }),
+        ])
+      );
+    }
+    scale.appendChild(
+      el('div', { class: 'bp-europe-map__legend-row' }, [
+        el('span', { class: 'bp-europe-map__legend-swatch', style: 'background:' + nodataColor }),
+        el('span', { text: T('europeLegendMissing') }),
+      ])
+    );
+    var hasSuppressed = Object.keys(periodValues).some(function (c) {
+      return periodValues[c].s === 'suppressed';
+    });
+    if (hasSuppressed) {
+      scale.appendChild(
+        el('div', { class: 'bp-europe-map__legend-row' }, [
+          el('span', { class: 'bp-europe-map__legend-swatch', style: 'background:' + suppressedColor }),
+          el('span', { text: T('europeLegendSuppressed') }),
+        ])
+      );
+    }
+    if ((payload.excluded_by_licence || []).length) {
+      scale.appendChild(
+        el('div', { class: 'bp-europe-map__legend-row' }, [
+          el('span', {
+            class: 'bp-europe-map__legend-swatch bp-europe-map__legend-swatch--hatched',
+            style: 'background:' + excludedColor,
+          }),
+          el('span', { text: T('europeLegendExcluded') }),
+        ])
+      );
+    }
+  }
+
+  function renderCountryMeta(payload, period) {
+    var unitSuffix = MapUI.unitSuffix(payload.unit, LANG);
+    var lines = [];
+    lines.push((payload.names[LANG] || payload.names.en) + (unitSuffix ? ' (' + unitSuffix.trim() + ')' : '') + ' — ' + period);
+    if (payload.source && payload.source.retrieved) {
+      lines.push(T('europeSourceLabel') + ': Eurostat (' + payload.source.dataset + '), ' + T('europeRetrievedLabel', { date: payload.source.retrieved }));
+    }
+    lines.push(T('europeVintageLabel', { version: payload.geo_vintage }));
+    if (state.country.index && state.country.index.attribution) lines.push(state.country.index.attribution);
+    var meta = state.els.country.meta;
+    clear(meta);
+    lines.forEach(function (line) {
+      meta.appendChild(el('div', { text: line }));
+    });
+  }
+
+  function renderCountryNoOutline(payload) {
+    var codes = Object.keys(payload.no_outline || {});
+    var node = state.els.country.noOutline;
+    if (!codes.length) {
+      node.hidden = true;
+      return;
+    }
+    node.hidden = false;
+    node.textContent = T('europeNoOutlineNote', { n: codes.length, codes: codes.join(', ') });
+  }
+
+  /* ---- country selection: click/keyboard on the map toggles the SAME
+     `state.country.selected` array the picker checkboxes and the
+     comparison charts below read -- one selection model, three ways to
+     change it. -------------------------------------------------------- */
+  function attachCountryHandlers(payload, periodValues) {
+    Object.keys(periodValues).forEach(function (code) {
+      var pathEl = document.getElementById('em-nutsrg-' + code);
+      if (!pathEl) return;
+      pathEl.setAttribute('tabindex', '0');
+      pathEl.setAttribute('role', 'button');
+      pathEl.setAttribute('aria-pressed', String(state.country.selected.indexOf(code) !== -1));
+      pathEl.setAttribute('aria-label', (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code);
+      pathEl.addEventListener('click', function () {
+        toggleCountrySelection(code);
+        selectCountryDetail(code);
+      });
+      pathEl.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          toggleCountrySelection(code);
+          selectCountryDetail(code);
+        }
+      });
+      var showTip = function (ev) {
+        showCountryTooltip(code, payload, periodValues[code], ev);
+      };
+      var showTipAtElement = function () {
+        var r = pathEl.getBoundingClientRect();
+        showCountryTooltip(code, payload, periodValues[code], { clientX: r.left + r.width / 2, clientY: r.top });
+      };
+      pathEl.addEventListener('mouseover', showTip);
+      pathEl.addEventListener('mousemove', showTip);
+      pathEl.addEventListener('focus', showTipAtElement);
+      pathEl.addEventListener('mouseout', hideCountryTooltip);
+      pathEl.addEventListener('blur', hideCountryTooltip);
+    });
+  }
+
+  function showCountryTooltip(code, payload, cell, ev) {
+    var tip = state.els.country.tooltip;
+    var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
+    var valueText =
+      cell && typeof cell.v === 'number'
+        ? MapUI.formatValue(cell.v, payload.unit, null, LANG) + MapUI.unitSuffix(payload.unit, LANG)
+        : T('status_' + ((cell && cell.s) || 'missing'));
+    clear(tip);
+    tip.appendChild(el('div', { class: 'name', text: name + ' (' + code + ')' }));
+    tip.appendChild(el('div', { text: valueText + ' · ' + state.country.currentPeriod }));
+    var sw = cell && statusWord(cell.s);
+    if (sw) tip.appendChild(el('div', { text: sw }));
+    tip.hidden = false;
+    var x = (ev && ev.clientX) || 0,
+      y = (ev && ev.clientY) || 0;
+    tip.style.left = x + 14 + 'px';
+    tip.style.top = y + 14 + 'px';
+  }
+  function hideCountryTooltip() {
+    state.els.country.tooltip.hidden = true;
+  }
+
+  function selectCountryDetail(code) {
+    var payload = state.country.payloads[state.country.currentIndicatorId];
+    if (!payload) return;
+    var periodValues = payload.values[state.country.currentPeriod] || {};
+    var cell = periodValues[code];
+    var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
+
+    var side = state.els.country.side;
+    clear(side);
+    side.appendChild(el('h3', { text: name }));
+    side.appendChild(el('p', { class: 'code', text: code }));
+
+    var valueText =
+      cell && typeof cell.v === 'number'
+        ? MapUI.formatValue(cell.v, payload.unit, null, LANG) + MapUI.unitSuffix(payload.unit, LANG)
+        : T('status_' + ((cell && cell.s) || 'missing'));
+    side.appendChild(el('p', { class: 'value', text: valueText }));
+    var sw = cell && statusWord(cell.s);
+    side.appendChild(
+      el('p', {
+        class: 'value-meta',
+        text: (payload.names[LANG] || payload.names.en) + ', ' + state.country.currentPeriod + (sw ? ' · ' + sw : ''),
+      })
+    );
+
+    var points = payload.periods
+      .filter(function (p) {
+        var c = payload.values[p] && payload.values[p][code];
+        return c && typeof c.v === 'number';
+      })
+      .map(function (p) {
+        return { period: p, value: payload.values[p][code].v };
+      });
+    if (points.length > 1 && window.BPCharts) {
+      side.appendChild(el('p', { class: 'hist-label', text: T('europeHistoryLabel') }));
+      var canvas = document.createElement('canvas');
+      side.appendChild(canvas);
+      window.BPCharts.drawLine(canvas, [{ label: name, points: points }], { locale: LANG, height: 120, compact: false });
+    }
+
+    if (payload.source) {
+      side.appendChild(
+        el('p', {
+          class: 'about',
+          text:
+            T('europeSourceLabel') +
+            ': Eurostat (' +
+            payload.source.dataset +
+            ')' +
+            (payload.source.retrieved ? ', ' + T('europeRetrievedLabel', { date: payload.source.retrieved }) : '') +
+            ' · ' +
+            T('europeVintageLabel', { version: payload.geo_vintage }),
+        })
+      );
+    }
+  }
+
+  /* ---- picker: every allowlisted country, a search filter, and the cap
+     message -- keyboard-usable (real <label>/<input type=checkbox> pairs,
+     not a div with a click handler). ---------------------------------- */
+  function buildCountryPicker(index) {
+    var list = state.els.country.pickerList;
+    clear(list);
+    index.countries.forEach(function (c) {
+      var checkbox = el('input', { type: 'checkbox' });
+      var nameSpan = el('span', { class: 'name' });
+      var chip = el('label', { class: 'bp-europe-picker__chip', 'data-code': c.code }, [checkbox, nameSpan]);
+      list.appendChild(chip);
+      checkbox.addEventListener('change', function () {
+        toggleCountrySelection(c.code);
+      });
+    });
+    relabelCountryPicker();
+    syncCountrySelectionUI();
+  }
+
+  function relabelCountryPicker() {
+    var index = state.country.index;
+    if (!index) return;
+    var list = state.els.country.pickerList;
+    Array.prototype.forEach.call(list.children, function (chip) {
+      var code = chip.getAttribute('data-code');
+      var c = index.countries.filter(function (x) {
+        return x.code === code;
+      })[0];
+      if (!c) return;
+      var name = (c.names && (c.names[LANG] || c.names.en)) || code;
+      chip.querySelector('.name').textContent = name + ' (' + code + ')';
+    });
+  }
+
+  function filterCountryPicker(query) {
+    var q = (query || '').trim().toLowerCase();
+    var list = state.els.country.pickerList;
+    Array.prototype.forEach.call(list.children, function (chip) {
+      var text = chip.textContent.toLowerCase();
+      chip.hidden = q.length > 0 && text.indexOf(q) === -1;
+    });
+  }
+
+  function toggleCountrySelection(code) {
+    var selected = state.country.selected;
+    var idx = selected.indexOf(code);
+    if (idx !== -1) {
+      selected.splice(idx, 1);
+    } else {
+      if (selected.length >= MAX_SELECTED_COUNTRIES) {
+        syncCountrySelectionUI(); // reverts a checkbox the user just ticked past the cap
+        return;
+      }
+      selected.push(code);
+    }
+    syncCountrySelectionUI();
+    renderCountrySelectionOutline();
+    renderComparisonCharts();
+  }
+
+  /* Reflects `state.country.selected` onto the picker chips (checked
+     state, and every unchecked chip disabled once the cap is hit -- the
+     spec's "plain message when hit", both as text and as a real
+     keyboard-reachable disabled state) and the map's own outline. Called
+     after every selection change and every picker (re)build. */
+  function syncCountrySelectionUI() {
+    var c = state.els.country;
+    if (!c || !c.pickerList) return;
+    var selected = state.country.selected;
+    var atCap = selected.length >= MAX_SELECTED_COUNTRIES;
+    Array.prototype.forEach.call(c.pickerList.children, function (chip) {
+      var code = chip.getAttribute('data-code');
+      var checkbox = chip.querySelector('input');
+      var isChecked = selected.indexOf(code) !== -1;
+      checkbox.checked = isChecked;
+      chip.dataset.checked = String(isChecked);
+      var disable = !isChecked && atCap;
+      checkbox.disabled = disable;
+      chip.dataset.disabled = String(disable);
+    });
+    c.capMsg.hidden = !atCap;
+  }
+
+  function renderCountrySelectionOutline() {
+    var stage = state.els.country && state.els.country.stage;
+    if (!stage) return;
+    var selected = state.country.selected;
+    var paths = stage.querySelectorAll('path[id^="em-nutsrg-"]');
+    Array.prototype.forEach.call(paths, function (p) {
+      var code = p.id.replace('em-nutsrg-', '');
+      var isSelected = selected.indexOf(code) !== -1;
+      if (isSelected) p.setAttribute('data-selected', 'true');
+      else p.removeAttribute('data-selected');
+      p.setAttribute('aria-pressed', String(isSelected));
+    });
+  }
+
+  /* ---- "Comparaison internationale": one small-multiple line chart per
+     country indicator (7: the six map indicators plus the GDP volume
+     index), one line per selected country, EU27/euro-area as optional
+     dashed reference lines. Reuses BPCharts.drawLine/attachTooltip --
+     assets/belpulse/charts.js -- no second chart library (rule 29's own
+     spirit extended to charts). ---------------------------------------- */
+  function buildCompareChrome() {
+    var root = document.getElementById('international');
+    if (!root) return;
+    clear(root);
+    root.hidden = false;
+
+    var heading = el('h3', { text: T('europeCompareTitle') });
+    var desc = el('p', { class: 'bp-europe-compare__desc', text: T('europeCompareDesc') });
+
+    var refEU = el('input', { type: 'checkbox', id: 'europeRefEU27' });
+    var refEULabelText = document.createTextNode(' ' + T('europeRefEU27'));
+    var refEULabel = el('label', {}, [refEU]);
+    refEULabel.appendChild(refEULabelText);
+
+    var refEA = el('input', { type: 'checkbox', id: 'europeRefEA21' });
+    var refEALabelText = document.createTextNode(' ' + T('europeRefEA21'));
+    var refEALabel = el('label', {}, [refEA]);
+    refEALabel.appendChild(refEALabelText);
+
+    var refRow = el('div', { class: 'bp-europe-compare__refs' }, [refEULabel, refEALabel]);
+    var grid = el('div', { class: 'bp-europe-compare__grid', id: 'europeCompareGrid' });
+    var empty = el('p', { class: 'bp-europe-compare__empty', id: 'europeCompareEmpty' });
+    empty.hidden = true;
+
+    root.appendChild(heading);
+    root.appendChild(desc);
+    root.appendChild(refRow);
+    root.appendChild(grid);
+    root.appendChild(empty);
+
+    state.els.compare = {
+      heading: heading,
+      desc: desc,
+      refEU: refEU,
+      refEULabelText: refEULabelText,
+      refEA: refEA,
+      refEALabelText: refEALabelText,
+      grid: grid,
+      empty: empty,
+      chartState: {}, // indicator_id -> {series, model, tipOpts} for register()'s resize redraw
+    };
+    refEU.addEventListener('change', renderComparisonCharts);
+    refEA.addEventListener('change', renderComparisonCharts);
+  }
+
+  function relabelCompareChrome() {
+    var c = state.els.compare;
+    if (!c) return;
+    c.heading.textContent = T('europeCompareTitle');
+    c.desc.textContent = T('europeCompareDesc');
+    c.refEULabelText.textContent = ' ' + T('europeRefEU27');
+    c.refEALabelText.textContent = ' ' + T('europeRefEA21');
+  }
+
+  function hasAnyReference(referenceLines, code) {
+    return Object.keys(referenceLines || {}).some(function (p) {
+      return referenceLines[p] && referenceLines[p][code];
+    });
+  }
+
+  function referenceSeries(payload, code, label, colour, dash) {
+    var points = payload.periods.map(function (p) {
+      var cell = payload.reference_lines[p] && payload.reference_lines[p][code];
+      return { period: p, value: cell && typeof cell.v === 'number' ? cell.v : null, status: cell ? cell.s : 'missing' };
+    });
+    return { label: label, unit: payload.unit, colour: colour, dash: dash, isReference: true, points: points };
+  }
+
+  function renderComparisonCharts() {
+    var c = state.els.compare;
+    if (!c || !state.country.index) return;
+    clear(c.grid);
+    var selected = state.country.selected;
+    if (!selected.length) {
+      c.empty.hidden = false;
+      c.empty.textContent = T('europeComparePickPrompt');
+      return;
+    }
+    c.empty.hidden = true;
+    var showEU27 = c.refEU.checked;
+    var showEA21 = c.refEA.checked;
+    var statusLabels = {
+      suppressed: T('status_suppressed'),
+      na: T('status_na'),
+      missing: T('status_missing'),
+      provisional: T('status_provisional'),
+      estimate: T('status_estimate'),
+      revised: T('status_revised'),
+    };
+
+    state.country.index.indicators.forEach(function (indMeta) {
+      var payload = state.country.payloads[indMeta.id];
+      var card = el('div', { class: 'bp-europe-compare__card' });
+      var title = (payload && payload.names && (payload.names[LANG] || payload.names.en)) || indMeta.id;
+      card.appendChild(el('h4', { text: title }));
+
+      if (!payload || payload.status !== 'loaded') {
+        card.appendChild(
+          el('p', { class: 'bp-europe-compare__blocked', text: (payload && payload.blocked_reason) || T('europeLoadError') })
+        );
+        c.grid.appendChild(card);
+        return;
+      }
+
+      var legend = el('div', { class: 'bp-europe-compare__legend' });
+      selected.forEach(function (code, i) {
+        var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
+        // `data-code` (never a rendered indicator id, just the ISO-shaped
+        // geography code the selection itself is keyed on) lets a test or a
+        // future feature find "the Belgium chip" without depending on
+        // which language happens to be active.
+        legend.appendChild(
+          el('span', { class: 'chip', 'data-code': code }, [
+            el('span', { class: 'dot', style: 'background:var(--bp-chart-' + ((i % 8) + 1) + ')' }),
+            el('span', { text: name }),
+          ])
+        );
+      });
+      card.appendChild(legend);
+
+      var canvas = document.createElement('canvas');
+      card.appendChild(canvas);
+
+      var series = selected.map(function (code, i) {
+        var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
+        var points = payload.periods.map(function (p) {
+          var cell = payload.values[p] && payload.values[p][code];
+          return { period: p, value: cell && typeof cell.v === 'number' ? cell.v : null, status: cell ? cell.s : 'missing' };
+        });
+        return { label: name, unit: payload.unit, colourIndex: i, points: points };
+      });
+      if (showEU27 && hasAnyReference(payload.reference_lines, 'EU27_2020')) {
+        series.push(referenceSeries(payload, 'EU27_2020', T('europeRefEU27'), cssVar('--bp-text-faint', '#8e98ad'), [6, 3]));
+      }
+      if (showEA21 && hasAnyReference(payload.reference_lines, 'EA21')) {
+        series.push(referenceSeries(payload, 'EA21', T('europeRefEA21'), cssVar('--bp-border', '#c8cdd8'), [2, 2]));
+      }
+
+      var st = c.chartState[indMeta.id] || (c.chartState[indMeta.id] = { model: { hits: [] } });
+      st.series = series;
+      st.tipOpts = {
+        locale: LANG,
+        unit: payload.unit,
+        statusLabels: statusLabels,
+        missingLabel: T('status_missing'),
+        ariaLabel: title,
+        formatValue: MapUI.formatValue,
+      };
+
+      function draw() {
+        if (canvas.offsetParent === null) return;
+        canvas.style.width = '';
+        canvas.style.height = '';
+        var next = window.BPCharts.drawLine(canvas, st.series, { locale: LANG, height: 180 });
+        st.model.hits = next.hits;
+      }
+      draw();
+      window.BPCharts.attachTooltip(canvas, st.model, st.tipOpts);
+      window.BPCharts.register(canvas, draw);
+
+      var metaLines = [];
+      var unitSuffix = MapUI.unitSuffix(payload.unit, LANG);
+      if (unitSuffix) metaLines.push(unitSuffix.trim());
+      if (payload.source && payload.source.retrieved) {
+        metaLines.push(T('europeSourceLabel') + ': Eurostat (' + payload.source.dataset + '), ' + T('europeRetrievedLabel', { date: payload.source.retrieved }));
+      }
+      if (metaLines.length) card.appendChild(el('p', { class: 'bp-europe-compare__meta', text: metaLines.join(' · ') }));
+
+      if (payload.adapted && payload.adapted.notice) {
+        var noticeText = payload.adapted.notice[LANG] || payload.adapted.notice.en;
+        card.appendChild(el('p', { class: 'bp-europe-compare__adapted', text: T('europeAdaptedLabel') + ': ' + noticeText }));
+      }
+
+      c.grid.appendChild(card);
+    });
+  }
+
+  /* ---- wire-up ------------------------------------------------------------
+     Both init() (region, unchanged) and initCountry() (Europe countries
+     batch) run synchronously here: init() builds the region chrome and
+     THEN starts its own async fetches, so by the time initCountry() runs
+     immediately after, state.root already holds the region wrapper and
+     mode-toggle/country/compare chrome can be appended after it without
+     racing buildChrome()'s own `clear(state.root)`. */
   window.addEventListener('bp:panel-shown', function (ev) {
-    if (ev.detail === 'europe') init();
+    if (ev.detail === 'europe') {
+      init();
+      initCountry();
+    }
   });
 })();
