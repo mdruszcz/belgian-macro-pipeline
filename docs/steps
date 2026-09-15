@@ -1354,6 +1354,29 @@ engine's conventions; indicator/year pickers, legend, zoom, absent-data state, s
 vintage displayed; loads only when the panel opens.
 Why: The maintainer's stated closing piece of the unification work, explicitly gated on A's
 pilots being stable and B1/B2's data being approved first.
+ ✅ [BUILD] Europe countries -- country map, picker, comparison charts (2026-09-15, PR #194:
+GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY added to the international store with a new
+is_country_level_code() geo filter; self-hosted NUTS 0 geometry; scripts/export_europe_countries.py
+publishes public/data/europe/countries/** (7 indicators). macro.html's Europe panel gained a
+"Régions / Pays" toggle -- country mode paints a NUTS 0 choropleth, click/keyboard toggles a
+country into a shared, 8-capped selection (default Belgium), checked in an accessible searchable
+picker and outlined on the map. The "Comparaison internationale" card is real: one small-multiple
+chart per country indicator (7), one line per selected country, EU27/euro-area as optional dashed
+reference lines (charts.js's drawLine gained additive colour/dash/isReference series options).
+config/national_sections.yaml's international unavailable entry and the europe panel's
+empty_reason are gone. Dagster: europe_countries_payloads asset added downstream of
+international_observations + the validated database, so the daily run refreshes these payloads too
+(added mid-task, lead's correction -- initially wired into `make exports` only). Browser-verified:
+263 targeted tests passed (region mode fully unchanged, country mode's own new tests, no
+indicator id in the generic renderer, same-origin-only network, orchestration/Makefile parity);
+screenshots in screenshots-review/europe-countries/ show no console/page errors and no horizontal
+overflow at 390px)
+How: A NUTS 0 country choropleth beside the existing NUTS 2 regional one, one shared selection
+model driving both the map outline and the comparison charts, reusing eurostat-map and BPCharts
+rather than a second engine.
+Why: The maintainer's 2026-09-15 direction: lift the international pilot's five indicators out of
+the unavailable state and let a reader compare Belgium against its neighbours, not just regions
+within Belgium.
 
 🚦 GATE 50%
  🛑 [BLOCKED] Any commune returns >= 50 standardized indicators (2026-09-06: MEASURED, and it passes for 552 of 565 communes but not all -- median 52, max 52, and the roadmap's own How: (pick five at random and count) passes cleanly, all five between 51 and 52. The 13 that fail carry 17 each and are EXACTLY the 2025 merger successors plus Bastogne (which merged 2024-12-02): Pajottegem, Wingene, Tielt, Nazareth-De Pinte, Lochristi, Merelbeke-Melle, Lokeren, Beveren-Kruibeke-Zwijndrecht, Tessenderlo-Ham, Hasselt, Bilzen-Hoeselt, Tongeren-Borgloon, Bastogne. The reason is structural and already documented across this file: every historical source predates them -- fiscal income stops at the 2019 map, Census 2021 is a 2021 snapshot, police.be and ONEM backcast a pre-2025 grid -- so a commune created in 2025 only carries the sources expressed on the current map. Marking this gate item done at "five random ones passed" would be exactly the averages-hide-gaps failure the 80% gate warns about, and the weakest page is what a sceptical prospect opens. NOT a data-loading bug and not fixable by loading more of the same sources; it needs either a source that covers the new communes, or an explicit decision to show a merger successor its predecessors' history with the discontinuity labelled)
