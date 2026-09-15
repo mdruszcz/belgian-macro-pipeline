@@ -531,6 +531,7 @@ def test_country_picker_search_filters_by_code(browser, site):
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
+        page.click("#europeCountryPickerMenu summary")
         page.wait_for_selector("#europeCountryPickerList .bp-europe-picker__chip")
         page.fill("#europeCountryPickerSearch", "(DE)")
         page.wait_for_timeout(100)
@@ -557,6 +558,7 @@ def test_selecting_more_than_eight_countries_hits_the_cap(browser, site):
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
+        page.click("#europeCountryPickerMenu summary")
         page.wait_for_selector("#europeCountryPickerList .bp-europe-picker__chip")
         codes = page.eval_on_selector_all(
             "#europeCountryPickerList .bp-europe-picker__chip",
@@ -578,9 +580,9 @@ def test_selecting_more_than_eight_countries_hits_the_cap(browser, site):
         assert len(cap_text) > 5
         # And the comparison charts drew exactly 8 lines' worth of legend chips
         # per card, never more.
-        page.wait_for_selector("#international .bp-europe-compare__card canvas")
+        page.wait_for_selector("#europe .bp-europe-compare__card canvas")
         legend_chip_count = page.eval_on_selector(
-            "#international .bp-europe-compare__legend",
+            "#europe .bp-europe-compare__legend",
             "el => el.querySelectorAll('.chip').length",
         )
         assert legend_chip_count == 8, legend_chip_count
@@ -601,10 +603,8 @@ def test_default_belgium_selection_renders_seven_comparison_charts(browser, site
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
-        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
-        count = page.eval_on_selector_all(
-            "#international .bp-europe-compare__card", "els => els.length"
-        )
+        page.wait_for_selector("#europe .bp-europe-compare__card canvas", timeout=15000)
+        count = page.eval_on_selector_all("#europe .bp-europe-compare__card", "els => els.length")
         # The card's indicator filter (2026-09-15) starts on the index's own
         # `compare_default` set -- the original seven -- not on every country
         # indicator (24 once the additional domains were wired in). Read the
@@ -621,9 +621,10 @@ def test_default_belgium_selection_renders_seven_comparison_charts(browser, site
             "#europeCompareFilterList .bp-europe-compare__filter-chip", "els => els.length"
         )
         assert chip_count == len(index_rows)
+        page.click("#europeCompareFilterMenu summary")
         page.click("#europeCompareFilterAll")
         page.wait_for_function(
-            "(n) => document.querySelectorAll('#international .bp-europe-compare__card').length === n",
+            "(n) => document.querySelectorAll('#europe .bp-europe-compare__card').length === n",
             arg=len(index_rows),
         )
         first_chip = page.eval_on_selector(
@@ -631,13 +632,13 @@ def test_default_belgium_selection_renders_seven_comparison_charts(browser, site
         )
         page.uncheck(f'#europeCompareFilterList label[data-indicator="{first_chip}"] input')
         page.wait_for_function(
-            "(n) => document.querySelectorAll('#international .bp-europe-compare__card').length === n",
+            "(n) => document.querySelectorAll('#europe .bp-europe-compare__card').length === n",
             arg=len(index_rows) - 1,
         )
         # data-code, not the (language-dependent) chip text -- the site's
         # default locale here is French ("Belgique"), not English.
         legend_codes = page.eval_on_selector_all(
-            "#international .bp-europe-compare__legend .chip", "els => els.map(e => e.dataset.code)"
+            "#europe .bp-europe-compare__legend .chip", "els => els.map(e => e.dataset.code)"
         )
         assert "BE" in legend_codes, legend_codes
         empty_hidden = page.eval_on_selector("#europeCompareEmpty", "el => el.hidden")
@@ -811,9 +812,9 @@ def test_region_selection_renders_comparison_charts_and_survives_a_mode_switch(b
         page.click(f"#em-nutsrg-{code2}")
         page.wait_for_selector(f'#em-nutsrg-{code2}[data-selected="true"]')
 
-        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+        page.wait_for_selector("#europe .bp-europe-compare__card canvas", timeout=15000)
         card_count = page.eval_on_selector_all(
-            "#international .bp-europe-compare__card", "els => els.length"
+            "#europe .bp-europe-compare__card", "els => els.length"
         )
         # One card per NUTS2 indicator the store actually publishes -- not a
         # fixed number: the Eurostat additional domains batch
@@ -831,7 +832,7 @@ def test_region_selection_renders_comparison_charts_and_survives_a_mode_switch(b
             card_count == expected_count
         ), f"expected {expected_count} region-level comparison cards (one per nuts2 store indicator), got {card_count}"
         legend_codes = page.eval_on_selector_all(
-            "#international .bp-europe-compare__legend .chip", "els => els.map(e => e.dataset.code)"
+            "#europe .bp-europe-compare__legend .chip", "els => els.map(e => e.dataset.code)"
         )
         assert code1 in legend_codes and code2 in legend_codes, legend_codes
         # No EU27/euro-area reference checkboxes in region mode -- they do
@@ -888,9 +889,9 @@ def test_growth_toggle_swaps_an_eligible_chart_to_percent_and_leaves_others_alon
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
-        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+        page.wait_for_selector("#europe .bp-europe-compare__card canvas", timeout=15000)
 
-        find_card_js = """(names) => Array.from(document.querySelectorAll('#international .bp-europe-compare__card'))
+        find_card_js = """(names) => Array.from(document.querySelectorAll('#europe .bp-europe-compare__card'))
             .find(c => names.indexOf(c.querySelector('h4').textContent.trim()) !== -1)"""
 
         has_toggle = page.evaluate(
@@ -950,7 +951,7 @@ def test_comparison_charts_draw_no_per_point_markers(browser, site):
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
-        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+        page.wait_for_selector("#europe .bp-europe-compare__card canvas", timeout=15000)
         # A single-country detail chart (markers:true, unaffected by this
         # batch) still draws its usual per-point dots -- proves the spy
         # itself is wired correctly, not silently inert.
@@ -994,5 +995,155 @@ def test_palette_picker_repaints_both_map_modes_with_its_own_storage_key(browser
         # (map.html's 'belpulse-map-palette') -- deliberate, not a bug.
         commune_stored = page.evaluate("() => localStorage.getItem('belpulse-map-palette')")
         assert commune_stored is None
+    finally:
+        context.close()
+
+
+# --- 2026-09-15 layout (docs/features/europe_countries.md, "Amendment
+# 2026-09-15 (layout)"): map left, every control right, pickers as closed
+# menus, legend and source inside the map, frozen header, pinned menu. ------
+
+
+def _box(page, selector):
+    box = page.locator(selector).first.bounding_box()
+    assert box is not None, f"{selector} has no box"
+    return box
+
+
+def _inside(inner, outer, slack=1):
+    return (
+        inner["x"] >= outer["x"] - slack
+        and inner["y"] >= outer["y"] - slack
+        and inner["x"] + inner["width"] <= outer["x"] + outer["width"] + slack
+        and inner["y"] + inner["height"] <= outer["y"] + outer["height"] + slack
+    )
+
+
+def test_map_sits_left_and_every_control_sits_in_the_rail_beside_it(browser, site):
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector("#europeLegendScale .bp-europe-map__legend-row", timeout=15000)
+        mapcol = _box(page, ".bp-europe-map__mapcol")
+        rail = _box(page, ".bp-europe-map__rail")
+        assert rail["x"] >= mapcol["x"] + mapcol["width"], (mapcol, rail)
+        assert abs(rail["y"] - mapcol["y"]) <= 2, (mapcol, rail)
+        assert 0.55 < mapcol["width"] / (mapcol["width"] + rail["width"]) < 0.72
+        # Nothing of the panel sits above the map: no breadcrumb, no search
+        # box, no visible panel title.
+        assert page.locator(".bp-breadcrumb").count() == 0
+        assert page.locator("#communeSearch").count() == 0
+        heading = _box(page, "#europe h2")
+        assert heading["width"] <= 1 and heading["height"] <= 1
+        for selector in (
+            "#europeModeRegion",
+            "#europePaletteSelect",
+            "#europeIndicatorSelect",
+            "#europeYearSelect",
+            "#europeRegionPickerMenu summary",
+            "#europeCompareFilterMenu summary",
+        ):
+            assert _inside(_box(page, selector), rail), selector
+        # Both pickers are closed menus until clicked.
+        assert page.eval_on_selector("#europeRegionPickerMenu", "el => el.open") is False
+        assert page.eval_on_selector("#europeCompareFilterMenu", "el => el.open") is False
+        page.click("#europeRegionPickerMenu summary")
+        assert page.is_visible("#europeRegionPickerSearch")
+        page.keyboard.press("Escape")
+        assert page.eval_on_selector("#europeRegionPickerMenu", "el => el.open") is False
+        # The legend is a small box in the map's bottom-left corner, the
+        # source a short link in its bottom-right corner.
+        legend = _box(page, "#europeRegionMapWrap .bp-europe-map__legend")
+        assert _inside(legend, mapcol)
+        assert legend["x"] - mapcol["x"] < 40
+        assert (mapcol["y"] + mapcol["height"]) - (legend["y"] + legend["height"]) < 40
+        assert legend["width"] < mapcol["width"] / 3
+        assert _inside(_box(page, "#europeMeta a"), mapcol)
+        source = _box(page, "#europeMeta")
+        assert _inside(source, mapcol)
+        assert (mapcol["x"] + mapcol["width"]) - (source["x"] + source["width"]) < 300
+        assert "Eurostat" in page.inner_text("#europeMeta a")
+        assert page.get_attribute("#europeMeta a", "href").startswith(
+            "https://ec.europa.eu/eurostat/databrowser/view/"
+        )
+    finally:
+        context.close()
+
+
+def test_first_three_charts_sit_in_the_rail_and_the_rest_below_the_map(browser, site):
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        _switch_to_country_mode(page)
+        page.wait_for_selector("#europeCompareTop .bp-europe-compare__card canvas", timeout=15000)
+        expected = len([i for i in _country_index()["indicators"] if i.get("compare_default")])
+        top = page.eval_on_selector_all(
+            "#europeCompareTop .bp-europe-compare__card", "els => els.length"
+        )
+        below = page.eval_on_selector_all(
+            "#international .bp-europe-compare__card", "els => els.length"
+        )
+        assert top == 3
+        assert below == expected - 3
+        mapcol = _box(page, ".bp-europe-map__mapcol")
+        assert _box(page, "#international")["y"] >= mapcol["y"] + mapcol["height"]
+        # A taller rail scrolls inside itself; it never stretches the page past
+        # the footer (the charts' screen-reader text once did).
+        code, _ = _a_country_with_a_value(
+            _country_payload(_first_loaded_map_country_indicator_id())
+        )
+        page.click(f"#em-nutsrg-{code}")
+        page.wait_for_selector("#europeCountrySideCard canvas")
+        page_end = page.evaluate(
+            "document.querySelector('.foot').getBoundingClientRect().bottom + window.scrollY"
+        )
+        assert page.evaluate("document.documentElement.scrollHeight") <= page_end + 1
+    finally:
+        context.close()
+
+
+def test_header_stays_frozen_and_the_section_menu_stays_pinned_left(browser, site):
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        # Opening on #europe does not tuck the panel under the frozen header.
+        assert page.evaluate("window.scrollY") == 0
+        _switch_to_country_mode(page)  # the charts below the map make it scroll
+        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+        for where in ("600", "document.documentElement.scrollHeight"):
+            page.evaluate(f"window.scrollTo(0, {where})")
+            page.wait_for_timeout(100)
+            assert page.evaluate("window.scrollY") > 0, "page too short to prove anything"
+            header = _box(page, ".bp-topbar")
+            sidebar = _box(page, ".bp-sidebar")
+            assert abs(header["y"]) <= 1, (where, header)
+            assert sidebar["x"] == 0, (where, sidebar)
+            assert abs(sidebar["y"] - header["height"]) <= 2, (where, header, sidebar)
+            assert abs(sidebar["y"] + sidebar["height"] - 900) <= 2, (where, sidebar)
+            footer = _box(page, ".foot")
+            assert footer["x"] >= sidebar["x"] + sidebar["width"] - 1, (where, footer)
+    finally:
+        context.close()
+
+
+def test_clicking_a_region_opens_a_closable_detail_card_in_the_rail(browser, site):
+    default_id = _first_loaded_indicator_id()
+    code, _ = _two_regions_with_values(_payload(default_id))
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector(f"#em-nutsrg-{code}", timeout=15000)
+        assert page.eval_on_selector("#europeSideCard", "el => el.hidden") is True
+        page.click(f"#em-nutsrg-{code}")
+        page.wait_for_selector("#europeSideCard h3")
+        assert _inside(_box(page, "#europeSideCard"), _box(page, ".bp-europe-map__rail"))
+        page.click("#europeSideCard .bp-europe-map__side-close")
+        assert page.eval_on_selector("#europeSideCard", "el => el.hidden") is True
     finally:
         context.close()

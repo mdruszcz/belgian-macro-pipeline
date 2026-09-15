@@ -83,22 +83,28 @@
      assets/belpulse/layout.css's `.bp-topbar`/`.bp-topbar .wrap`, filled by
      src/pages/shell.py's render_header() through scripts/sync_site_shell.py.
      Batch A1.1: this page no longer overrides it locally. */
-  /* A4: search sits beside the breadcrumb in one head row, not stranded
-     above it on its own (docs review pass, #171 follow-up) -- the same row
-     home2.html and profiles.html put their own commune search in relative to
-     their page's title/breadcrumb. */
-  .macro-head-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--bp-space-3)}
-  .macro-search{
-    display:flex; align-items:center; gap:8px; max-width:330px; flex:1 1 240px;
-    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-    padding:7px 12px; background:var(--bp-bg); margin:0;
-  }
-  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
-  .searchbox svg{color:var(--bp-text-faint); flex:none}
 
   /* ---- body: navy sidebar, light content (the supplied PNG) ---- */
   .bp-body--analytical{max-width:1400px; margin:0 auto}
   .bp-sidebar{position:sticky; top:var(--bp-topbar-h, 56px); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
+  /* 2026-09-15 (maintainer): on a desktop screen the header stays frozen at
+     the top and the section menu is pinned flush to the left edge, from
+     under the header to the bottom of the screen, so neither moves while a
+     panel scrolls -- not even when the footer comes into view (the footer
+     starts right of the menu instead). --macro-topbar-h is the header's
+     measured height, set by the small script before the page's scripts.
+     Tablets and phones keep the layout below unchanged. */
+  @media (min-width:1025px){
+    .macro .bp-topbar{position:sticky; top:0; z-index:40}
+    .bp-body--analytical{max-width:none; margin:0; grid-template-columns:minmax(0,1fr); padding-left:calc(240px + var(--bp-space-6))}
+    .bp-sidebar{
+      position:fixed; left:0; top:var(--macro-topbar-h, var(--bp-topbar-h, 56px)); bottom:0; z-index:30;
+      align-self:stretch; /* layout.css's align-self:start would shrink it to its content */
+      width:240px; min-height:0; box-sizing:border-box; overflow-y:auto; border-radius:0;
+    }
+    .macro .foot{margin-left:240px}
+    .bp-panel{scroll-margin-top:calc(var(--macro-topbar-h, var(--bp-topbar-h, 56px)) + var(--bp-space-6))}
+  }
   .side-title{display:flex; align-items:center; gap:10px; margin:0 0 var(--bp-space-5)}
   .side-title h2{font-family:var(--bp-font-display); font-size:1.15rem; text-transform:none; letter-spacing:0; color:var(--bp-navy-text); margin:0; font-weight:600}
   .side-title .icon{width:22px; height:22px; color:#8fb4ff}
@@ -120,7 +126,6 @@
 
   /* ---- main column ---- */
   .macro-main{min-width:0; display:flex; flex-direction:column; gap:var(--bp-space-5)}
-  .bp-breadcrumb{font-size:12px; color:var(--bp-text-muted)}
   .page-head{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.9fr); gap:var(--bp-space-6); align-items:end; margin-bottom:var(--bp-space-2)}
   .page-head h1{font-size:2.3rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
   .page-head .lead{color:var(--bp-text-muted); margin:0; max-width:52ch; font-size:var(--bp-text-body)}
@@ -268,11 +273,7 @@
     .bp-sidebar{position:static; min-height:0}
     .side-update{margin-top:var(--bp-space-4)}
     /* The top bar's own responsive behaviour (the nav collapsing behind
-       .bp-nav-toggle under 768px) is shared now -- assets/belpulse/layout.css.
-       This page's search box moved out of the header (see the comment above
-       <main>), so it needs no header-specific mobile rule of its own. */
-    .macro-head-row{flex-direction:column; align-items:stretch}
-    .macro-search{max-width:none}
+       .bp-nav-toggle under 768px) is shared now -- assets/belpulse/layout.css. */
   }
   /* No mobile mockup was ever supplied (tokens-measured.md). On a phone the
      navy sidebar filled the ENTIRE first screen before a single figure, so
@@ -337,25 +338,6 @@
   </aside>
 
   <main class="macro-main" id="bp-main">
-    <!-- The commune/indicator search. NOT part of the shared header any more
-         (Batch A1.1's maquette shows only the logo, nav and the two menus
-         there -- docs/features/site_unification.md section 2) -- moved here,
-         same as home2.html, rather than dropped. A4: placed in the same row
-         as the breadcrumb (was floating alone above it, looking stranded --
-         docs review pass, #171 follow-up), consistent with where home2.html
-         and profiles.html put their own commune search relative to the
-         page's own head. -->
-    <div class="macro-head-row">
-      <nav class="bp-breadcrumb" aria-label="Breadcrumb">
-        <a href="home2.html" data-t="navHome">Home</a><span data-t="navMacro">Macro</span>
-      </nav>
-      <label class="searchbox macro-search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
-        <datalist id="communeList"></datalist>
-      </label>
-    </div>
-
     <!-- BATCH A1.4: mobile panel picker, shown only under the sidebar
          breakpoint (macro.html's own <style>, @media max-width:768px). -->
     <div class="bp-panel-select-wrap">
@@ -517,7 +499,7 @@
 
     <!-- ==================== panel: europe ==================== -->
     <section class="bp-panel" id="europe" data-panel hidden>
-      <h2 data-panel-label="europe">Europe</h2>
+      <h2 class="bp-sr-only" data-panel-label="europe">Europe</h2>
       <p class="panel-note" id="europeNote" hidden></p>
       <!-- Batch B3 (docs/features/europe_nuts2.md): europe_map.js fills
            this in only once the panel actually opens -- no indicator id,
@@ -544,6 +526,17 @@
 <footer class="foot"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" aria-label="Footer navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" aria-current="page" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><p class="bp-footer-credit" data-t="footerCredit">Official public sources — see Sources.</p></div></footer>
 <!-- bp-shell:footer:end -->
 
+<script>
+  /* The frozen header's real height, so the pinned section menu starts right
+     under it however the header wraps. */
+  (function(){
+    var bar = document.querySelector('.bp-topbar');
+    if(!bar) return;
+    function set(){ document.documentElement.style.setProperty('--macro-topbar-h', bar.offsetHeight + 'px'); }
+    set();
+    if(window.ResizeObserver) new ResizeObserver(set).observe(bar);
+  })();
+</script>
 <script src="assets/i18n.js"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
@@ -568,7 +561,6 @@
   var SOURCES_URL  = 'public/data/metadata/sources.json';
   var NATIONAL_URL = 'public/data/national.json';
   var MANIFEST_URL = 'public/data/manifest.json';
-  var GEO_URL      = 'public/data/metadata/geographies.json';
 
   var LANG = I18N.initial();
   var T = function(key, vars){ return I18N.t(LANG, key, vars); };
@@ -1076,27 +1068,6 @@
     status.textContent = pass ? T('macroValidationPass') : T('macroValidationOther', {status: manifest.validation_status || '—'});
   }
 
-  /* ---- search: the commune list, as home2 offers it --------------------- */
-  async function loadSearch(){
-    try{
-      var res = await fetch(GEO_URL);
-      if(!res.ok) return;
-      var geo = await res.json();
-      var list = document.getElementById('communeList');
-      list.innerHTML = '';
-      (geo.geographies || []).filter(function(g){ return g.level === 'municipality' && g.nis_code; }).forEach(function(g){
-        var o = document.createElement('option');
-        o.value = (g.name && (g.name[LANG] || g.name.en)) || g.nis_code;
-        o.dataset.nis = g.nis_code;
-        list.appendChild(o);
-      });
-      document.getElementById('communeSearch').addEventListener('change', function(){
-        var opt = Array.prototype.find.call(list.options, function(o){ return o.value === this.value; }, this);
-        if(opt) location.href = 'commune.html?nis=' + opt.dataset.nis;
-      });
-    }catch(e){}
-  }
-
   /* ---- BATCH A1.4: redraw only the currently-visible panel's canvas(es).
    * A canvas measured while its `[data-panel]` ancestor carries `hidden`
    * has width 0 (assets/belpulse/charts.js's sizeCanvas falls back to a
@@ -1160,7 +1131,6 @@
     }
     renderAll();
     renderManifest(state.manifest);
-    loadSearch();
     // BPPanels owns which panel is visible from here on -- initialised
     // ONCE, never inside renderAll, so a language change (which calls
     // renderAll again) cannot reset the reader's panel or double-register

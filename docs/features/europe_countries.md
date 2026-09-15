@@ -309,3 +309,22 @@ indicators into the `international` store without publishing them anywhere.
 - Verified in a real browser (tests/test_europe_panel.py, 22 passed): 20 entries in the Pays
   map's indicator select, 7 cards by default, All -> 24, unticking one chip removes exactly that
   card; no page errors. Screenshot: screenshots-review/europe-countries/08-*.png.
+
+## Amendment 2026-09-15 (layout): map left, controls right
+
+Maintainer request on the live page. Layout only: no payload, formula or indicator changes.
+
+- The macro page's header stays frozen at the top on a desktop screen, and the section menu is
+  pinned flush to the left edge at full height. The breadcrumb and the commune search box are
+  gone from this page (commune search is still on home2 and profiles).
+- The Europe panel has no visible title or intro above the map. It is two columns: the map
+  (about 65% wide, 75% of the screen tall) and a rail on the right (about 35%).
+- Inside the map: the colour legend as a small box in the bottom-left corner (the unit heads it);
+  the source as one short "Source: Eurostat" link to Eurostat's page for that dataset, plus the
+  boundary credit, in the bottom-right corner. Dataset code, retrieval date and geography vintage stay
+  on the link's hover text, on every chart card and on the detail card.
+- The rail, top to bottom: the Régions/Pays toggle and palette, indicator and period, the region
+  or country picker as a closed menu, the detail card for a clicked region or country (with a close button), the "charts shown" filter as a closed menu, the EU27 /
+  euro-area reference toggles, then the first three comparison charts.
+- Every other comparison chart sits in the grid under the map; that section hides itself when the
+  rail already holds them all.
