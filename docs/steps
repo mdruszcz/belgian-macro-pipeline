@@ -1377,6 +1377,57 @@ rather than a second engine.
 Why: The maintainer's 2026-09-15 direction: lift the international pilot's five indicators out of
 the unavailable state and let a reader compare Belgium against its neighbours, not just regions
 within Belgium.
+ ✅ [BUILD] Europe panel polish -- map crop, grouped picker, region comparison, growth toggle, no
+markers, palette (2026-09-15, PR #195, follow-up to #194 from real use of the live page). Africa
+and the Middle East hidden from the map's background country layer via eurostat-map's
+filterGeometriesFunction hook (nutsrg/nutsbn, the licensed 39 countries, untouched; a thin cntbn
+border-line stroke can still show through -- documented, not fixed, no per-country id to filter it
+by without also risking Russia/Belarus/Ukraine). Region <select> grouped by country (<optgroup>,
+same pattern as map.html's own pickers). Region mode gained its own 8-capped comparison selection
+(state.region.selected, a picker mirroring the country one) -- "Comparaison internationale" now
+shows the 3 real NUTS2 indicators when regions are picked, no fabricated EU27/EA21 reference line
+(none exists at regional level). "Croissance annuelle" toggle, Python-computed at export time
+(yoy field, GDP/population/GDP-volume indicators only, never the rate/balance ones -- the
+maintainer's own correction after first asking for all). Comparison-chart lines draw no per-point
+markers (charts.js's drawLine gained an opt-in markers:false, every other caller unaffected). A
+choropleth palette picker (5 named ramps, same values as map.html's, own localStorage key). TWO
+REAL BUGS FOUND AND FIXED AFTER THE PR's OWN CI CAUGHT THEM, not before merging blind: (1) a
+genuine race -- switching map mode called the comparison-chart render before that mode's payloads
+had all arrived, dropping a card's growth toggle; fixed by chaining the render through each mode's
+own all-payloads promise, both directions. (2) a mislabelled test, not a site bug -- it matched a
+comparison card by its French title only, so it failed on GitHub's English-locale runner while
+passing on the maintainer's own French machine; fixed to match any of the three languages.
+How: Read the maintainer's own use of the live page, mirror the existing country-mode selection
+pattern for regions, keep every Python-computed statistic (CLAUDE.md rule 4).
+Why: A shipped feature the maintainer actually opened and pushed on immediately found real rough
+edges a spec review would not have -- the fastest way to close those is fixing them from that use,
+not re-planning from scratch.
+ ✅ [BUILD] Eurostat additional domains -- 21 indicators across 7 new domains (2026-09-15, PR #196,
+approved by the maintainer on a live-verified proposal). 18 country-level (international store) +
+3 NUTS2 regional (nuts2 store, VALUE_ADDED_GROWTH_NUTS2/EMPLOYMENT_RATE_NUTS2/
+HOUSEHOLD_INCOME_TOTAL_NUTS2 -- automatically surfaced in the Europe panel's existing Régions mode,
+3 indicators to 6, a config-only change per CLAUDE.md rule 2/24, not new UI code) covering
+sector/productivity/employment, public finance, trade, social inequalities, energy/transition,
+demography and innovation. Data and catalogue only this batch -- no new page, per the maintainer's
+own scoping. Every Belgian spot-check value matched the live-verified numbers exactly (Gini 2022 =
+24.7, population 2024 = 11,817,096). 4 of the 25 originally-verified candidates were dropped after
+the real load, not for config reasons: 3 hit an unrecognized Eurostat OBS_FLAG, one a
+flag-with-no-value cell at a real, wanted Belgian geography (BE10) -- both need
+src/fetchers/eurostat.py's flag table extended under its own ADR (rule 19), not worked around
+here; a fifth (semi-annual electricity price) was never attempted, the schema's frequency enum
+does not support it. 12 previously-unseen Eurostat geo codes recorded in
+international_excluded.csv with reasons, same convention as the existing UK/US/JP/XK rows. CI
+caught two things a local run did not: the export test still expected exactly 3 NUTS2 indicators
+(fixed to read the real count rather than hardcode it, same class of drift PR #194 hit), and the
+committed public/data/europe/nuts2/*.json payload was never regenerated after the store config
+grew -- the site was still serving the old 3-indicator export until that was caught and fixed (the
+3 pre-existing payload files are byte-identical before/after, confirmed by diff).
+How: Live-verify every candidate dataset against the real Eurostat API before building anything
+(real BE numbers, not assumed), same adapter/allowlist/store mechanics the international pilot
+already established, catalogue rows dated and attributed to the maintainer's approval.
+Why: The maintainer's own direction to scale the international pipeline (docs/data_catalog.md,
+CLAUDE.md rule 8) -- a first concrete slice rather than the full ~100-indicator target, decided on
+real, checked data rather than a guessed list.
 
 🚦 GATE 50%
  🛑 [BLOCKED] Any commune returns >= 50 standardized indicators (2026-09-06: MEASURED, and it passes for 552 of 565 communes but not all -- median 52, max 52, and the roadmap's own How: (pick five at random and count) passes cleanly, all five between 51 and 52. The 13 that fail carry 17 each and are EXACTLY the 2025 merger successors plus Bastogne (which merged 2024-12-02): Pajottegem, Wingene, Tielt, Nazareth-De Pinte, Lochristi, Merelbeke-Melle, Lokeren, Beveren-Kruibeke-Zwijndrecht, Tessenderlo-Ham, Hasselt, Bilzen-Hoeselt, Tongeren-Borgloon, Bastogne. The reason is structural and already documented across this file: every historical source predates them -- fiscal income stops at the 2019 map, Census 2021 is a 2021 snapshot, police.be and ONEM backcast a pre-2025 grid -- so a commune created in 2025 only carries the sources expressed on the current map. Marking this gate item done at "five random ones passed" would be exactly the averages-hide-gaps failure the 80% gate warns about, and the weakest page is what a sceptical prospect opens. NOT a data-loading bug and not fixable by loading more of the same sources; it needs either a source that covers the new communes, or an explicit decision to show a merger successor its predecessors' history with the discontinuity labelled)
