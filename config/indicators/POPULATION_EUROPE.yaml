@@ -1,0 +1,22 @@
+id: POPULATION_EUROPE
+name:
+  en: Population on 1 January
+  fr: Population au 1er janvier
+  nl: Bevolking op 1 januari
+unit: persons
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: neutral
+description:
+  en: Total population on 1 January, all ages, both sexes, every allowlisted European
+    country -- Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15).
+fetch:
+  dataset: demo_pjan
+  filters:
+    age: TOTAL
+    sex: T
+  geographies: allowlist
+  since: "2008"
+display: null

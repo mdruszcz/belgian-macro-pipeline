@@ -1,0 +1,27 @@
+id: GOV_EXPENDITURE_HEALTH_EUROPE
+name:
+  en: General government expenditure on health
+  fr: Dépenses publiques de santé
+  nl: Overheidsuitgaven voor gezondheidszorg
+unit: pct_of_gdp
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: General government (S13) total expenditure on health (COFOG function
+    GF07 -- health only, not a breakdown across every COFOG function; a
+    fuller functional breakdown is a future batch), percentage of GDP,
+    every allowlisted European country -- Eurostat domains batch, 2026-09-15
+    (docs/data_catalog.md).
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    unit: PC_GDP
+    sector: S13
+    na_item: TE
+    cofog99: GF07
+  geographies: allowlist
+  since: "2008"
+display: null

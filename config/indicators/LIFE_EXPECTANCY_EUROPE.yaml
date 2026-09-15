@@ -1,0 +1,23 @@
+id: LIFE_EXPECTANCY_EUROPE
+name:
+  en: Life expectancy at birth
+  fr: Espérance de vie à la naissance
+  nl: Levensverwachting bij de geboorte
+unit: years
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: Life expectancy at birth, both sexes, every allowlisted European country -- Eurostat
+    additional domains batch (docs/data_catalog.md, 2026-09-15).
+fetch:
+  dataset: demo_mlexpec
+  filters:
+    sex: T
+    age: Y_LT1
+    unit: YR
+  geographies: allowlist
+  since: "2008"
+display: null

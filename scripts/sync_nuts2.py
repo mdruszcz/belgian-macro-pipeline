@@ -174,6 +174,18 @@ IS_ADDITIVE = {
     "GDP_PC_PPS_NUTS2": 0,
     "POPULATION_NUTS2": 1,
     "UNEMPLOYMENT_RATE_NUTS2": 0,
+    # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15).
+    "VALUE_ADDED_GROWTH_NUTS2": 0,  # a chain-linked volume INDEX -- not additive
+    "EMPLOYMENT_RATE_NUTS2": 0,  # a rate -- not additive
+    # RD_INTENSITY_NUTS2 (rd_e_gerdreg) DROPPED, not built -- live fetch
+    # 2026-09-15 hit an unrecognized Eurostat OBS_FLAG ('C', uppercase,
+    # within a compound flag) at geo=BE10 (Brussels-Capital Region), a real,
+    # wanted Belgian geography -- unlike the country-level drops in this
+    # same batch, this one cannot be worked around by excluding a geography,
+    # since BE10 must be published. Extending FLAG_STATUS is a source-adapter
+    # change (CLAUDE.md rule 19: separate ADR + maintainer approval), out of
+    # scope here. See docs/data_catalog.md.
+    "HOUSEHOLD_INCOME_TOTAL_NUTS2": 1,  # a TOTAL (million PPS) -- additive
 }
 
 

@@ -1,0 +1,27 @@
+id: GOV_DEBT_QUARTERLY_EUROPE
+name:
+  en: General government gross debt, quarterly
+  fr: Dette brute des administrations publiques, trimestrielle
+  nl: Brutoschuld van de overheid, per kwartaal
+unit: pct_of_gdp
+frequency: Q
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: General government consolidated gross debt, percentage of GDP, quarterly -- OVERLAPS
+    GOV_DEBT_EUROPE conceptually (same underlying concept, different cadence -- this
+    is quarterly, GOV_DEBT_EUROPE is annual). Both kept, deliberately, as different ids
+    rather than one silently replacing the other. Eurostat additional domains batch
+    (docs/data_catalog.md, 2026-09-15). Unit deliberately does not start with "percent" --
+    see GOV_DEBT_EUROPE's own note on the percent_bounded rule.
+fetch:
+  dataset: gov_10q_ggdebt
+  filters:
+    unit: PC_GDP
+    sector: S13
+    na_item: GD
+  geographies: allowlist
+  since: "2008"
+display: null

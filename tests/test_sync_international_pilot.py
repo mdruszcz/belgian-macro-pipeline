@@ -1,16 +1,19 @@
 """Tests for scripts/sync_international.py -- the international pilot's
 direct-Eurostat, every-country-at-once indicators (international pilot PR 1;
-extended to seven by the Europe countries batch, docs/features/europe_countries.md).
+extended to seven by the Europe countries batch, docs/features/europe_countries.md;
+extended again to 25 by the Eurostat additional domains batch,
+docs/data_catalog.md, 2026-09-15).
 
 tests/fixtures/sync_international/*.json are REAL recorded Eurostat responses
 (the original five fetched 2026-09-13, GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY
-fetched 2026-09-15, all sinceTimePeriod=2023, one file per pilot indicator's
-exact dataset+filters) -- replayed with --from-dir so these tests need no
-network and exercise the real geography resolution against real codes
-(EA/EA12/EA19/EA20/EU/EU28/EEA/UK/US/JP/XK/TR all appear in at least one of
-these seven real responses; GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY additionally
-exercise is_country_level_code() against real NUTS 1/2/3 regional codes mixed
-into the same responses).
+and the 18 additional-domains indicators fetched 2026-09-15, one file per
+pilot indicator's exact dataset+filters) -- replayed with --from-dir so these
+tests need no network and exercise the real geography resolution against real
+codes (EA/EA12/EA19/EA20/EU/EU28/EEA/UK/US/JP/XK/TR/FX/EEA31/EEA30_2007/EFTA/
+AM/AZ/BY/RU/SM/AD/MC/CN_X_HK/KR/EA18 all appear in at least one of these 25
+real responses; GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY additionally exercise
+is_country_level_code() against real NUTS 1/2/3 regional codes mixed into the
+same responses).
 """
 
 import json
@@ -70,7 +73,7 @@ def test_reference_rows_only_needs_no_network_and_corrects_the_source_row(tmp_pa
         n_geo = conn.execute("SELECT COUNT(*) FROM geographies").fetchone()[0]
     finally:
         conn.close()
-    assert n_indicators == 7
+    assert n_indicators == 25
     assert n_geo == 43  # every row in config/geography/international.csv
 
 
@@ -99,6 +102,25 @@ def test_replaying_the_real_fixtures_writes_every_allowlisted_geography(db):
         "CONSUMER_CONFIDENCE_EUROPE",
         "GDP_PC_PPS_COUNTRY",
         "POPULATION_COUNTRY",
+        # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15).
+        "VALUE_ADDED_TOTAL_EUROPE",
+        "EMPLOYMENT_LFS_EUROPE",
+        "GOV_BALANCE_EUROPE",
+        "TAX_RECEIPTS_EUROPE",
+        "GOV_EXPENDITURE_HEALTH_EUROPE",
+        "GOV_DEBT_QUARTERLY_EUROPE",
+        "EXPORTS_GOODS_SERVICES_EUROPE",
+        "IMPORTS_GOODS_SERVICES_EUROPE",
+        "GINI_COEFFICIENT_EUROPE",
+        "POVERTY_RATE_EUROPE",
+        "POVERTY_SOCIAL_EXCLUSION_EUROPE",
+        "RENEWABLE_ENERGY_SHARE_EUROPE",
+        "GHG_EMISSIONS_EUROPE",
+        "POPULATION_EUROPE",
+        "LIFE_EXPECTANCY_EUROPE",
+        "POPULATION_GROWTH_RATE_EUROPE",
+        "RD_EXPENDITURE_EUROPE",
+        "RD_PERSONNEL_EUROPE",
     }
     # Belgium and Germany, both allowlisted and both present in namq_10_gdp.
     assert {"be:country", "de:country"} <= geo_ids
@@ -264,4 +286,51 @@ def test_pilot_indicators_excludes_the_eight_single_country_configs():
     assert "GDP_VOLUME_EUROPE" in pilots
     assert "GDP_PC_PPS_COUNTRY" in pilots
     assert "POPULATION_COUNTRY" in pilots
-    assert len(pilots) == 7
+    # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15):
+    # 18 more country-level indicators, still picked up by the same
+    # discriminator (source_id: eurostat, fetch.geographies: allowlist).
+    assert "VALUE_ADDED_TOTAL_EUROPE" in pilots
+    assert "RD_PERSONNEL_EUROPE" in pilots
+    # Dropped candidates (live adapter gap, see docs/data_catalog.md) must
+    # never silently reappear here.
+    assert "EMPLOYMENT_NATACCOUNTS_EUROPE" not in pilots
+    assert "LABOUR_PRODUCTIVITY_GROWTH_EUROPE" not in pilots
+    assert "FERTILITY_RATE_EUROPE" not in pilots
+    # And a NUTS 2 config, even though it also matches "eurostat +
+    # allowlist", must still be excluded (geo_levels: [nuts2]).
+    assert "VALUE_ADDED_GROWTH_NUTS2" not in pilots
+    assert len(pilots) == 25
+
+
+@pytest.mark.parametrize(
+    "code,period,expected",
+    [
+        # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15):
+        # a handful of real-data sanity checks, one per domain group, against
+        # the exact Belgian figure verified live before the batch's own
+        # handoff was written -- these are raw ingested Eurostat values, not
+        # computed, so a ballpark real-data check is enough (no hand-computed
+        # expected value the way a derived statistic would need).
+        ("GINI_COEFFICIENT_EUROPE", "2022", 24.7),
+        ("POVERTY_RATE_EUROPE", "2022", 13.1),
+        ("GOV_BALANCE_EUROPE", "2022", -3.5),
+        ("POPULATION_EUROPE", "2024", 11817096),
+        ("RD_EXPENDITURE_EUROPE", "2022", 3.21),
+    ],
+)
+def test_a_real_belgian_value_lands_correctly(db, monkeypatch, code, period, expected):
+    _one_real_pilot_indicator(monkeypatch, code)
+
+    si.sync(db, from_dir=FIXTURES)
+
+    conn = sqlite3.connect(str(db))
+    try:
+        row = conn.execute(
+            "SELECT value FROM observations WHERE indicator_id = ? AND geo_id = 'be:country' "
+            "AND period = ?",
+            (code, period),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row is not None, f"no {code} row for be:country/{period}"
+    assert row[0] == pytest.approx(expected, rel=1e-6)

@@ -1,0 +1,23 @@
+id: RD_EXPENDITURE_EUROPE
+name:
+  en: R&D expenditure (% of GDP)
+  fr: Dépenses de R&D (% du PIB)
+  nl: O&O-uitgaven (% van het bbp)
+unit: pct_of_gdp
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: Gross domestic expenditure on R&D (GERD), all sectors, percentage of GDP, every
+    allowlisted European country -- Eurostat additional domains batch
+    (docs/data_catalog.md, 2026-09-15).
+fetch:
+  dataset: rd_e_gerdtot
+  filters:
+    sectperf: TOTAL
+    unit: PC_GDP
+  geographies: allowlist
+  since: "2008"
+display: null

@@ -1,0 +1,25 @@
+id: POVERTY_SOCIAL_EXCLUSION_EUROPE
+name:
+  en: People at risk of poverty or social exclusion
+  fr: Personnes exposées au risque de pauvreté ou d'exclusion sociale
+  nl: Mensen met risico op armoede of sociale uitsluiting
+unit: percent
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: Share of the population at risk of poverty or social exclusion
+    (the EU2020/2030 AROPE indicator), total population (age TOTAL, sex T),
+    every allowlisted European country -- Eurostat domains batch,
+    2026-09-15 (docs/data_catalog.md).
+fetch:
+  dataset: ilc_peps01n
+  filters:
+    age: TOTAL
+    sex: T
+    unit: PC
+  geographies: allowlist
+  since: "2008"
+display: null

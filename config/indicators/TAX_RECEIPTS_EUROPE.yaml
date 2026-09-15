@@ -1,0 +1,25 @@
+id: TAX_RECEIPTS_EUROPE
+name:
+  en: Total tax and social contribution receipts
+  fr: Recettes totales des impôts et cotisations sociales
+  nl: Totale ontvangsten uit belastingen en sociale bijdragen
+unit: pct_of_gdp
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: Total receipts from taxes and net social contributions (na_item
+    D2_D5_D91), general government (S13), percentage of GDP, every
+    allowlisted European country -- Eurostat domains batch, 2026-09-15
+    (docs/data_catalog.md).
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    unit: PC_GDP
+    sector: S13
+    na_item: D2_D5_D91
+  geographies: allowlist
+  since: "2008"
+display: null

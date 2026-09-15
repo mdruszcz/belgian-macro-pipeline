@@ -76,15 +76,24 @@ class TestRealExport:
             "GDP_PC_PPS_NUTS2",
             "POPULATION_NUTS2",
             "UNEMPLOYMENT_RATE_NUTS2",
+            # Eurostat additional domains batch (docs/data_catalog.md,
+            # 2026-09-15): 3 more regional-depth indicators joined the same
+            # nuts2 store (config/stores.yaml). RD_INTENSITY_NUTS2 was
+            # dropped, not built -- see config/stores.yaml's own comment.
+            "VALUE_ADDED_GROWTH_NUTS2",
+            "EMPLOYMENT_RATE_NUTS2",
+            "HOUSEHOLD_INCOME_TOTAL_NUTS2",
         }
         for indicator_id in self.indicator_ids:
             assert (self.out_dir / f"{indicator_id}.json").is_file()
 
     def test_index_lists_every_indicator_as_loaded(self):
-        """All three configured indicators load as of 2026-09-14: the
+        """All six configured indicators load as of 2026-09-15: the
         maintainer's empty-u-is-suppressed decision (docs/decisions/0010-
         eurostat-compound-observation-flags.md, amendment) unblocked
-        UNEMPLOYMENT_RATE_NUTS2, the last one still blocked before this."""
+        UNEMPLOYMENT_RATE_NUTS2, the last one still blocked before this;
+        the 3 indicators the Eurostat additional domains batch added
+        (docs/data_catalog.md, 2026-09-15) all load clean too."""
         index = json.loads((self.out_dir / "index.json").read_text(encoding="utf-8"))
         assert index["nuts_version"] == "2024"
         assert index["geometry"] == "geo/nuts2/2024/2.json"
@@ -92,6 +101,9 @@ class TestRealExport:
         ids_and_status = {row["id"]: row["status"] for row in index["indicators"]}
         assert ids_and_status == {
             "GDP_PC_PPS_NUTS2": "loaded",
+            "VALUE_ADDED_GROWTH_NUTS2": "loaded",
+            "EMPLOYMENT_RATE_NUTS2": "loaded",
+            "HOUSEHOLD_INCOME_TOTAL_NUTS2": "loaded",
             "POPULATION_NUTS2": "loaded",
             "UNEMPLOYMENT_RATE_NUTS2": "loaded",
         }

@@ -209,6 +209,61 @@ stores:
       - EUROSTAT_GDP_Q_MEUR_NL
       - EC_CONS_CONF_BE
       - EC_CONS_CONF_EU
+      # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15):
+      # 21 country-level indicators across 7 new domains (sector/productivity/
+      # employment, public finance, trade, social inequalities, energy/
+      # transition, demography, innovation). Same `international` store, same
+      # source_id, same allowlist, same scripts/sync_international.py loader
+      # -- no new store per the docstring above's own rule.
+      - VALUE_ADDED_TOTAL_EUROPE
+      # EMPLOYMENT_NATACCOUNTS_EUROPE (nama_10_a10_e) was DROPPED, not built --
+      # live fetch 2026-09-15 hit an unrecognized Eurostat OBS_FLAG ('C',
+      # uppercase, within a compound flag) at geo=XK (already licence-excluded
+      # via international_excluded.csv, so it would never have been published
+      # anyway). sync_international.py has no per-indicator try/except: one
+      # unrecognized flag aborts the WHOLE daily fetch for every indicator in
+      # this store, not just its own -- so a config that always hits this
+      # cannot be left in config/indicators/ even "for later", since
+      # scripts/sync_international.py picks up every eurostat multi-geo
+      # config it finds regardless of this list. Extending
+      # src/fetchers/eurostat.py's FLAG_STATUS table is a source-adapter
+      # change (CLAUDE.md rule 19: needs its own ADR and maintainer approval,
+      # same as the compound-flag fix in #168 went through its own PR first)
+      # -- out of scope for this batch. Follow-up, not built now; see
+      # docs/data_catalog.md.
+      - EMPLOYMENT_LFS_EUROPE
+      # LABOUR_PRODUCTIVITY_GROWTH_EUROPE (nama_10_lp_ulc) was DROPPED, not
+      # built -- same unrecognized-OBS_FLAG-'C'-at-XK gap as
+      # EMPLOYMENT_NATACCOUNTS_EUROPE above (same nama_10_* dataset family).
+      # Same rule-19 reasoning; not fixed here. Follow-up, not built now; see
+      # docs/data_catalog.md.
+      - GOV_BALANCE_EUROPE
+      - TAX_RECEIPTS_EUROPE
+      - GOV_EXPENDITURE_HEALTH_EUROPE
+      - GOV_DEBT_QUARTERLY_EUROPE
+      - EXPORTS_GOODS_SERVICES_EUROPE
+      - IMPORTS_GOODS_SERVICES_EUROPE
+      - GINI_COEFFICIENT_EUROPE
+      - POVERTY_RATE_EUROPE
+      - POVERTY_SOCIAL_EXCLUSION_EUROPE
+      - RENEWABLE_ENERGY_SHARE_EUROPE
+      - GHG_EMISSIONS_EUROPE
+      - POPULATION_EUROPE
+      # FERTILITY_RATE_EUROPE (demo_find) was DROPPED, not built -- live fetch
+      # 2026-09-15 hit geo=XK (already licence-excluded), period=2015, flag
+      # 'p' ("provisional") with NO value: a flag-with-no-value cell, the
+      # same class of gap documented in scripts/sync_nuts2.py's own module
+      # docstring for lfst_r_lfu3rt/demo_r_pjanaggr3 (both NUTS-level, not
+      # fixed there either). Same rule-19 reasoning as
+      # EMPLOYMENT_NATACCOUNTS_EUROPE above: fixing this generally (e.g. a
+      # geo_filter that skips already-licence-excluded geographies before
+      # flag/value validation, mirroring is_nuts2_code's own use) is a
+      # source-adapter change, out of scope without its own ADR. Follow-up,
+      # not built now; see docs/data_catalog.md.
+      - LIFE_EXPECTANCY_EUROPE
+      - POPULATION_GROWTH_RATE_EUROPE
+      - RD_EXPENDITURE_EUROPE
+      - RD_PERSONNEL_EUROPE
     reference_rows:
       script: scripts/sync_international.py
       args: ["--reference-rows-only"]
@@ -232,6 +287,17 @@ stores:
       - GDP_PC_PPS_NUTS2
       - POPULATION_NUTS2
       - UNEMPLOYMENT_RATE_NUTS2
+      # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15):
+      # the 4 regional-depth indicators of that batch. Same store, same
+      # source_id, same allowlist mechanics.
+      - VALUE_ADDED_GROWTH_NUTS2
+      - EMPLOYMENT_RATE_NUTS2
+      # RD_INTENSITY_NUTS2 (rd_e_gerdreg) was DROPPED, not built -- live fetch
+      # 2026-09-15 hit an unrecognized OBS_FLAG 'C' at geo=BE10 (a real,
+      # wanted Belgian geography, so unlike the country-level drops above
+      # this cannot be worked around by a geography exclusion). See
+      # scripts/sync_nuts2.py's IS_ADDITIVE comment and docs/data_catalog.md.
+      - HOUSEHOLD_INCOME_TOTAL_NUTS2
     reference_rows:
       script: scripts/sync_nuts2.py
       args: ["--reference-rows-only"]

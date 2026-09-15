@@ -1,0 +1,24 @@
+id: VALUE_ADDED_GROWTH_NUTS2
+name:
+  en: Gross value added, volume index (2020=100)
+  fr: Valeur ajoutée brute, indice de volume (2020=100)
+  nl: Bruto toegevoegde waarde, volume-index (2020=100)
+unit: index_2020
+frequency: A
+source_id: eurostat
+geo_levels:
+- nuts2
+preferred_direction: higher_is_better
+description:
+  en: Gross value added, chain-linked volume index (2020=100, na_item B1G),
+    NUTS 2 region, every region whose country is on the international
+    pilot's licence allowlist -- Eurostat domains batch, 2026-09-15
+    (docs/data_catalog.md).
+fetch:
+  dataset: nama_10r_2gvagr
+  filters:
+    na_item: B1G
+    unit: I20
+  geographies: allowlist
+  since: "2000"
+display: null
