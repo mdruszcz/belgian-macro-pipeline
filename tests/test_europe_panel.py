@@ -1097,6 +1097,10 @@ def test_first_three_charts_sit_in_the_rail_and_the_rest_below_the_map(browser, 
         )
         page.click(f"#em-nutsrg-{code}")
         page.wait_for_selector("#europeCountrySideCard canvas")
+        # Measured from the top: the click scrolls the map into view, and a
+        # scrolled page can report its old height for a moment (seen in CI).
+        page.evaluate("window.scrollTo(0, 0)")
+        page.wait_for_timeout(300)
         page_end = page.evaluate(
             "document.querySelector('.foot').getBoundingClientRect().bottom + window.scrollY"
         )
