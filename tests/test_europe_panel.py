@@ -572,7 +572,35 @@ def test_default_belgium_selection_renders_seven_comparison_charts(browser, site
         count = page.eval_on_selector_all(
             "#international .bp-europe-compare__card", "els => els.length"
         )
-        assert count == 7, f"expected 7 comparison cards (one per country indicator), got {count}"
+        # The card's indicator filter (2026-09-15) starts on the index's own
+        # `compare_default` set -- the original seven -- not on every country
+        # indicator (24 once the additional domains were wired in). Read the
+        # expected number off the real index rather than hardcoding it.
+        index_rows = _country_index()["indicators"]
+        expected_default = len([i for i in index_rows if i.get("compare_default")])
+        assert expected_default == 7
+        assert (
+            count == expected_default
+        ), f"expected {expected_default} default comparison cards, got {count}"
+        # Every indicator has a chip; "All" shows every card; unticking one
+        # chip removes exactly that card.
+        chip_count = page.eval_on_selector_all(
+            "#europeCompareFilterList .bp-europe-compare__filter-chip", "els => els.length"
+        )
+        assert chip_count == len(index_rows)
+        page.click("#europeCompareFilterAll")
+        page.wait_for_function(
+            "(n) => document.querySelectorAll('#international .bp-europe-compare__card').length === n",
+            arg=len(index_rows),
+        )
+        first_chip = page.eval_on_selector(
+            "#europeCompareFilterList .bp-europe-compare__filter-chip", "el => el.dataset.indicator"
+        )
+        page.uncheck(f'#europeCompareFilterList label[data-indicator="{first_chip}"] input')
+        page.wait_for_function(
+            "(n) => document.querySelectorAll('#international .bp-europe-compare__card').length === n",
+            arg=len(index_rows) - 1,
+        )
         # data-code, not the (language-dependent) chip text -- the site's
         # default locale here is French ("Belgique"), not English.
         legend_codes = page.eval_on_selector_all(

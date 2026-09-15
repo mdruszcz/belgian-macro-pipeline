@@ -89,9 +89,19 @@ ATTRIBUTION_TEXT = "Administrative boundaries: ©EuroGeographics ©OpenStreetMap
 
 GEO_VINTAGE = "2024"
 
-#: The six indicators painted on the choropleth AND drawn in the comparison
+#: The indicators painted on the choropleth AND drawn in the comparison
 #: charts, in the order the map's indicator select and the comparison
-#: card's small multiples both use.
+#: card's small multiples both use: the original six first (what a reader
+#: already knows), then the Eurostat additional domains batch
+#: (docs/data_catalog.md, 2026-09-15) grouped by domain -- public finance,
+#: employment, social inequalities, energy/transition, demography,
+#: innovation. Wired into the panel on the maintainer's 2026-09-15 ask
+#: ("brancher sur le panneau Europe en mode Pays").
+#:
+#: NOT here on purpose: POPULATION_EUROPE (demo_pjan) duplicates
+#: POPULATION_COUNTRY (the NUTS 0 rows of demo_r_pjanaggr3, already on the
+#: map) -- two "Population" entries with slightly different vintages would
+#: read as a mistake, not a choice; it stays in the store, unpublished here.
 MAP_INDICATOR_IDS = (
     "GDP_PC_PPS_COUNTRY",
     "POPULATION_COUNTRY",
@@ -99,10 +109,57 @@ MAP_INDICATOR_IDS = (
     "HICP_ANNUAL_RATE_EUROPE",
     "GOV_DEBT_EUROPE",
     "CONSUMER_CONFIDENCE_EUROPE",
+    "GOV_BALANCE_EUROPE",
+    "TAX_RECEIPTS_EUROPE",
+    "GOV_EXPENDITURE_HEALTH_EUROPE",
+    "GOV_DEBT_QUARTERLY_EUROPE",
+    "EMPLOYMENT_LFS_EUROPE",
+    "GINI_COEFFICIENT_EUROPE",
+    "POVERTY_RATE_EUROPE",
+    "POVERTY_SOCIAL_EXCLUSION_EUROPE",
+    "RENEWABLE_ENERGY_SHARE_EUROPE",
+    "GHG_EMISSIONS_EUROPE",
+    "LIFE_EXPECTANCY_EUROPE",
+    "POPULATION_GROWTH_RATE_EUROPE",
+    "RD_EXPENDITURE_EUROPE",
+    "RD_PERSONNEL_EUROPE",
 )
-#: The one chart-only indicator -- never painted (see module docstring).
-CHART_ONLY_INDICATOR_IDS = ("GDP_VOLUME_EUROPE",)
+#: Chart-only indicators -- never painted. A level in million euro is not
+#: comparable across countries on a map (Germany vs Malta is a map of
+#: country size, not of anything economic -- the reasoning the maintainer
+#: approved for GDP_VOLUME_EUROPE in the countries batch); the same holds
+#: for total value added and for exports/imports of goods and services.
+#: Only GDP_VOLUME_EUROPE is rebased to an index (see module docstring);
+#: the other three are drawn as the levels Eurostat publishes, with the
+#: growth toggle as the cross-country reading.
+REBASED_INDICATOR_IDS = ("GDP_VOLUME_EUROPE",)
+LEVEL_CHART_ONLY_INDICATOR_IDS = (
+    "VALUE_ADDED_TOTAL_EUROPE",
+    "EXPORTS_GOODS_SERVICES_EUROPE",
+    "IMPORTS_GOODS_SERVICES_EUROPE",
+)
+CHART_ONLY_INDICATOR_IDS = REBASED_INDICATOR_IDS + LEVEL_CHART_ONLY_INDICATOR_IDS
 ALL_INDICATOR_IDS = MAP_INDICATOR_IDS + CHART_ONLY_INDICATOR_IDS
+
+#: What the "Comparaison internationale" card shows before the reader
+#: touches its indicator filter: the seven charts it showed before the
+#: additional domains were wired in. Twenty-four small multiples at once is
+#: a wall, not a comparison -- the rest are one checkbox away (the filter,
+#: maintainer's 2026-09-15 ask: "25 indicateurs possiblement visibles en
+#: dessous mais avec un filtre pour choisir"). Published as `compare_default`
+#: on each index entry: a data binding the generic renderer reads, never an
+#: id it knows (CLAUDE.md rules 2/24).
+COMPARE_DEFAULT_IDS = frozenset(
+    {
+        "GDP_PC_PPS_COUNTRY",
+        "POPULATION_COUNTRY",
+        "UNEMPLOYMENT_RATE_EUROPE",
+        "HICP_ANNUAL_RATE_EUROPE",
+        "GOV_DEBT_EUROPE",
+        "CONSUMER_CONFIDENCE_EUROPE",
+        "GDP_VOLUME_EUROPE",
+    }
+)
 
 #: Allowlisted countries with no outline in this Nuts2json 2024 NUTS0
 #: vintage -- verified against a live fetch of
@@ -128,7 +185,21 @@ BASE_QUARTERS_2015 = ("2015-Q1", "2015-Q2", "2015-Q3", "2015-Q4")
 #: src.analytics.derived.growth_rate/shift_period_years, which shifts only
 #: the YEAR component of a period string and so lands on the same quarter
 #: one year back for free.
-YOY_INDICATOR_IDS = {"GDP_PC_PPS_COUNTRY", "POPULATION_COUNTRY", "GDP_VOLUME_EUROPE"}
+YOY_INDICATOR_IDS = {
+    "GDP_PC_PPS_COUNTRY",
+    "POPULATION_COUNTRY",
+    "GDP_VOLUME_EUROPE",
+    # Additional domains batch: the level series among them, by the same
+    # rule. Not the rates/shares/balances (poverty, Gini, % of GDP, growth
+    # rate, renewable share), not life expectancy (a level in years, but
+    # "growth of life expectancy" is not a reading anyone uses).
+    "EMPLOYMENT_LFS_EUROPE",
+    "GHG_EMISSIONS_EUROPE",
+    "RD_PERSONNEL_EUROPE",
+    "VALUE_ADDED_TOTAL_EUROPE",
+    "EXPORTS_GOODS_SERVICES_EUROPE",
+    "IMPORTS_GOODS_SERVICES_EUROPE",
+}
 
 #: Trilingual "this number was changed by us" statement -- reused verbatim
 #: from the grade vocabulary every other page's provenance badge already
@@ -258,7 +329,7 @@ def _build_indicator_payload(
     }
     unit = indicator_cfg["unit"]
     adapted = None
-    if indicator_id in CHART_ONLY_INDICATOR_IDS:
+    if indicator_id in REBASED_INDICATOR_IDS:
         unit = "index_2015_100"
         adapted = {
             "base_period": "2015",
@@ -330,7 +401,7 @@ def _build_indicator_payload(
     value_universe = country_codes_allowed  # every allowlisted country, data or not
     periods = sorted(by_period)
 
-    if indicator_id in CHART_ONLY_INDICATOR_IDS:
+    if indicator_id in REBASED_INDICATOR_IDS:
         rebased_by_code = {
             code: _rebase_to_2015_index(cells) for code, cells in by_code_all_periods.items()
         }
@@ -341,7 +412,12 @@ def _build_indicator_payload(
             for period, cell in series.items():
                 target[period][code] = cell
         for period in periods:
-            for code in value_universe:
+            # sorted(): value_universe is a set, and a set of strings
+            # iterates in a per-process order (hash randomisation) -- the
+            # committed GDP_VOLUME_EUROPE.json had "UA" in a different slot
+            # from a rebuild on another run, a byte-level difference with no
+            # data behind it (rule 35). The map branch below already sorts.
+            for code in sorted(value_universe):
                 values_out[period].setdefault(code, {"v": None, "s": "missing"})
         class_breaks: dict[str, list[float]] = {}  # never painted -- no map class breaks
         if has_yoy:
@@ -368,7 +444,11 @@ def _build_indicator_payload(
                     ref_values[code] = cell
             values_out[period] = year_values
             reference_lines[period] = ref_values
-            class_breaks[period] = _quantile_breaks(real_numbers)
+            # A chart-only level (LEVEL_CHART_ONLY_INDICATOR_IDS) is never
+            # painted, so it gets no class breaks either -- same as the
+            # rebased index above, and honest about what the payload is for.
+            if is_map:
+                class_breaks[period] = _quantile_breaks(real_numbers)
         if has_yoy:
             _attach_yoy(values_out, periods)
 
@@ -447,6 +527,7 @@ def export(out_dir: Path = DEFAULT_OUT_DIR) -> list[str]:
                 "id": indicator_id,
                 "status": payload["status"],
                 "map": payload["map"],
+                "compare_default": indicator_id in COMPARE_DEFAULT_IDS,
                 "payload": f"{indicator_id}.json",
             }
         )

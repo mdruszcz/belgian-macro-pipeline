@@ -173,6 +173,19 @@ MapUI.unitLabel = function(unit, lang){
   // 2023"), while formatValue keeps printing a plain "%" on the number
   // itself -- no double percent sign.
   if(u === 'pct_of_gdp') return MapUI.text(lang, 'unitPctOfGdp');
+  // Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15),
+  // wired into the Europe panel: the unit codes those indicator configs
+  // introduced, trilingual here for the same reason as the NUTS 2 ones
+  // above. index_0_100 (the Gini coefficient) is a bounded score, not a
+  // "base year = 100" index, so it deliberately does not go through the
+  // index_YYYY regex above.
+  if(u === 'thousand_persons') return MapUI.text(lang, 'unitThousandPersons');
+  if(u === 'kt_co2eq') return MapUI.text(lang, 'unitKtCo2eq');
+  if(u === 'fte') return MapUI.text(lang, 'unitFte');
+  if(u === 'per_mille') return '‰';
+  if(u === 'years') return MapUI.text(lang, 'unitYears');
+  if(u === 'meur_clv2010') return MapUI.text(lang, 'unitMeurClv2010');
+  if(u === 'index_0_100') return MapUI.text(lang, 'unitIndex0100');
   return unit.replace(/_/g, ' ');
 };
 

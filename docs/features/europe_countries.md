@@ -272,3 +272,40 @@ plus one extended real-browser pass through `tests/test_europe_panel.py` (24 tes
 file after this batch). Kept deliberately minimal, per the maintainer's explicit "go fast" scope for
 this batch -- not a new large suite.
   change to the NUTS 2 batch or any Belgian table/export.
+
+## Amendment, 2026-09-15 (later) -- every country indicator on the panel, with a chart filter
+
+Maintainer's ask, verbatim: "Brancher sur le panneau Europe en mode Pays, 25 indicateurs
+possiblement visibles en dessous mais avec un filtre pour choisir." Follows the Eurostat
+additional domains batch (docs/data_catalog.md, 2026-09-15), which had loaded 18 country-level
+indicators into the `international` store without publishing them anywhere.
+
+- `scripts/export_europe_countries.py` now publishes 24 indicators (was 7): the original 7 plus 17
+  of the 18. **Map (20):** the original 6 + public finance (balance, tax receipts, health
+  expenditure, quarterly debt), employment (LFS), social inequalities (Gini, poverty, AROPE),
+  energy (renewable share, GHG emissions), demography (life expectancy, population growth rate),
+  innovation (R&D expenditure, R&D personnel). **Chart-only (4):** GDP volume (rebased, as before)
+  plus total value added, exports and imports of goods and services -- levels in million euro,
+  never painted, for the same reason the maintainer approved for GDP volume; drawn as the levels
+  Eurostat publishes, not rebased, with the growth toggle as the cross-country reading.
+- **Left out on purpose:** POPULATION_EUROPE (demo_pjan) -- it duplicates POPULATION_COUNTRY
+  (the NUTS 0 rows of demo_r_pjanaggr3, already on the map) with a slightly different vintage;
+  two "Population" entries would read as a mistake. It stays in the store.
+- Growth toggle (`has_yoy`) extended to the new level series: employment (LFS), GHG emissions,
+  R&D personnel, value added, exports, imports. Not to the rates/shares/balances, not to life
+  expectancy.
+- **The filter.** The comparison card gets a chip per indicator of the active mode plus All /
+  None. It starts on the seven charts the card showed before (`compare_default: true` on the
+  index entries -- a data binding, not an id list in the renderer, rules 2/24); the other 17 are
+  one tick away. Region mode gets the same chips over its 6 indicators, all ticked by default. A
+  reader's ticks last the page, not longer (no storage).
+- Units the new indicators introduced (`thousand_persons`, `kt_co2eq`, `fte`, `per_mille`,
+  `years`, `meur_clv2010`, `index_0_100`) are read trilingually in `assets/commune_map.js`'s
+  shared unit vocabulary, so no raw unit code reaches a reader (rule 7).
+- Found on the way: the rebased branch of the exporter filled each period's missing countries
+  by iterating a *set*, whose order differs per process -- the committed GDP_VOLUME_EUROPE.json
+  and a fresh rebuild disagreed on the position of one key with no data behind it. Now sorted,
+  like the map branch already was (rule 35).
+- Verified in a real browser (tests/test_europe_panel.py, 22 passed): 20 entries in the Pays
+  map's indicator select, 7 cards by default, All -> 24, unticking one chip removes exactly that
+  card; no page errors. Screenshot: screenshots-review/europe-countries/08-*.png.

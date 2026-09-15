@@ -115,8 +115,31 @@ class TestRealExport:
         for indicator_id in ex.MAP_INDICATOR_IDS:
             assert by_id[indicator_id]["map"] is True
             assert by_id[indicator_id]["status"] == "loaded"
-        assert by_id["GDP_VOLUME_EUROPE"]["map"] is False
-        assert by_id["GDP_VOLUME_EUROPE"]["status"] == "loaded"
+        for indicator_id in ex.CHART_ONLY_INDICATOR_IDS:
+            assert by_id[indicator_id]["map"] is False
+            assert by_id[indicator_id]["status"] == "loaded"
+        # The comparison card's default set is a data binding on the index,
+        # never an id list in the renderer: exactly the original seven.
+        defaults = {i for i, row in by_id.items() if row["compare_default"]}
+        assert defaults == set(ex.COMPARE_DEFAULT_IDS)
+        assert len(defaults) == 7
+
+    def test_a_level_chart_only_indicator_is_a_level_not_an_index(self, tmp_path):
+        """VALUE_ADDED_TOTAL/EXPORTS/IMPORTS are chart-only like GDP_VOLUME
+        but NOT rebased: the unit Eurostat publishes, no adapted notice, no
+        class breaks (never painted), and a growth field since they are
+        levels."""
+        out_dir, _ = self._export(tmp_path)
+        for indicator_id in ex.LEVEL_CHART_ONLY_INDICATOR_IDS:
+            payload = self._load(out_dir, indicator_id)
+            assert payload["map"] is False
+            assert payload["unit"] == "meur_clv2010"
+            assert payload["adapted"] is None
+            assert payload["class_breaks"] == {}
+            assert payload["has_yoy"] is True
+        exports = self._load(out_dir, "EXPORTS_GOODS_SERVICES_EUROPE")
+        # Live-verified 2026-09-15 (handoff): BE 2023-Q1 exports = 98,170.2.
+        assert exports["values"]["2023-Q1"]["BE"]["v"] == 98170.2
 
     def test_index_countries_cover_the_full_allowlist_with_belgium_present(self, tmp_path):
         out_dir, _ = self._export(tmp_path)

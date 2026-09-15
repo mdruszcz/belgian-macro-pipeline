@@ -318,6 +318,18 @@
    caught in a real-browser screenshot, not by the DOM-property-only test
    that had been checking `el.hidden` instead of the computed style. */
 .bp-europe-compare__refs[hidden]{display:none}
+/* The comparison card's indicator filter (2026-09-15, "25 indicateurs
+   possiblement visibles ... avec un filtre pour choisir"): one chip per
+   indicator of the active mode, the same chip look as the country/region
+   pickers above, plus all/none. */
+.bp-europe-compare__filter{margin-bottom:var(--bp-space-4); font-size:12px; color:var(--bp-text-muted)}
+.bp-europe-compare__filter-head{display:flex; align-items:center; gap:var(--bp-space-3); flex-wrap:wrap; margin-bottom:6px}
+.bp-europe-compare__filter-head button{font:inherit; font-size:11px; padding:2px 8px; border:1px solid var(--bp-border); border-radius:999px; background:var(--bp-surface); color:var(--bp-text); cursor:pointer}
+.bp-europe-compare__filter-head button:hover{background:var(--bp-surface-alt)}
+.bp-europe-compare__filter-list{display:flex; flex-wrap:wrap; gap:6px}
+.bp-europe-compare__filter-chip{display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border:1px solid var(--bp-border); border-radius:999px; background:var(--bp-surface); cursor:pointer; color:var(--bp-text)}
+.bp-europe-compare__filter-chip[data-checked="true"]{border-color:var(--bp-accent); background:var(--bp-accent); color:#fff}
+.bp-europe-compare__filter-chip input{margin:0}
 .bp-europe-compare__refs label{display:inline-flex; align-items:center; gap:5px; cursor:pointer}
 .bp-europe-compare__empty{font-size:13px; color:var(--bp-text-muted)}
 .bp-europe-compare__grid{
