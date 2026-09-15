@@ -799,10 +799,15 @@ def test_region_selection_renders_comparison_charts_and_survives_a_mode_switch(b
 def test_growth_toggle_swaps_an_eligible_chart_to_percent_and_leaves_others_alone(browser, site):
     gdp = _country_payload("GDP_PC_PPS_COUNTRY")
     assert gdp["has_yoy"] is True
-    gdp_name = gdp["names"]["fr"]
     unemployment = _country_payload("UNEMPLOYMENT_RATE_EUROPE")
     assert unemployment["has_yoy"] is False
-    unemployment_name = unemployment["names"]["fr"]
+    # The page picks its language from the BROWSER's locale when nothing is
+    # stored (assets/i18n.js I18N.initial -> navigator.language): French on
+    # the maintainer's machine, English on GitHub's en-US runner. Matching
+    # a card by ONE language's title therefore passed locally and failed in
+    # CI every time -- so a card is matched by any of its three names.
+    gdp_names = list(gdp["names"].values())
+    unemployment_names = list(unemployment["names"].values())
 
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
@@ -812,24 +817,24 @@ def test_growth_toggle_swaps_an_eligible_chart_to_percent_and_leaves_others_alon
         _switch_to_country_mode(page)
         page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
 
-        find_card_js = """(name) => Array.from(document.querySelectorAll('#international .bp-europe-compare__card'))
-            .find(c => c.querySelector('h4').textContent.trim() === name)"""
+        find_card_js = """(names) => Array.from(document.querySelectorAll('#international .bp-europe-compare__card'))
+            .find(c => names.indexOf(c.querySelector('h4').textContent.trim()) !== -1)"""
 
         has_toggle = page.evaluate(
-            f"(name) => {{ const c = ({find_card_js})(name); return !!(c && c.querySelector('.bp-europe-compare__growth')); }}",
-            gdp_name,
+            f"(names) => {{ const c = ({find_card_js})(names); return !!(c && c.querySelector('.bp-europe-compare__growth')); }}",
+            gdp_names,
         )
         assert has_toggle is True
         has_toggle_excluded = page.evaluate(
-            f"(name) => {{ const c = ({find_card_js})(name); return !!(c && c.querySelector('.bp-europe-compare__growth')); }}",
-            unemployment_name,
+            f"(names) => {{ const c = ({find_card_js})(names); return !!(c && c.querySelector('.bp-europe-compare__growth')); }}",
+            unemployment_names,
         )
         assert has_toggle_excluded is False
 
-        def tooltip_value_for(name):
+        def tooltip_value_for(names):
             return page.evaluate(
-                f"""(name) => {{
-                    const card = ({find_card_js})(name);
+                f"""(names) => {{
+                    const card = ({find_card_js})(names);
                     if (!card) return null;
                     const canvas = card.querySelector('canvas');
                     canvas.dispatchEvent(new KeyboardEvent('keydown', {{key: 'ArrowLeft'}}));
@@ -837,18 +842,18 @@ def test_growth_toggle_swaps_an_eligible_chart_to_percent_and_leaves_others_alon
                     const valueEl = tip && tip.querySelector('.bp-chart-tip-value');
                     return valueEl ? valueEl.textContent : null;
                 }}""",
-                name,
+                names,
             )
 
-        level_text = tooltip_value_for(gdp_name)
+        level_text = tooltip_value_for(gdp_names)
         assert level_text and "%" not in level_text, level_text
 
         page.evaluate(
-            f"(name) => {{ const c = ({find_card_js})(name); c.querySelector('.bp-europe-compare__growth input').click(); }}",
-            gdp_name,
+            f"(names) => {{ const c = ({find_card_js})(names); c.querySelector('.bp-europe-compare__growth input').click(); }}",
+            gdp_names,
         )
         page.wait_for_timeout(150)
-        growth_text = tooltip_value_for(gdp_name)
+        growth_text = tooltip_value_for(gdp_names)
         assert growth_text and "%" in growth_text, growth_text
     finally:
         context.close()
