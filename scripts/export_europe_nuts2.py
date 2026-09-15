@@ -60,6 +60,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.analytics.derived import growth_rate  # noqa: E402
 from src.geography.international import load_excluded as load_international_excluded  # noqa: E402
 from src.geography.international import load_international_rows  # noqa: E402
 from src.geography.nuts2 import is_nuts2_code, load_nuts2_rows  # noqa: E402
@@ -148,6 +149,13 @@ SUPERSEDED_NUTS_VINTAGE_NO_OUTLINE = dict.fromkeys(
 #: amendment). Kept as a dict, not removed outright, so a FUTURE indicator
 #: that genuinely can't load yet has an obvious place to explain why.
 BLOCKED_REASONS: dict[str, str] = {}
+
+#: Same "croissance annuelle" toggle as export_europe_countries.py's own
+#: YOY_INDICATOR_IDS (docs/features/europe_countries.md, 2026-09-15
+#: amendment) -- level series only. UNEMPLOYMENT_RATE_NUTS2 is already a
+#: rate and is deliberately excluded, matching the maintainer's country-
+#: level decision.
+YOY_INDICATOR_IDS = {"GDP_PC_PPS_NUTS2", "POPULATION_NUTS2"}
 
 
 class ExportError(Exception):
@@ -262,6 +270,26 @@ def _retrieved_date(rows: list[dict]) -> str | None:
     return max(row["vintage"] for row in rows)[:10]
 
 
+def _attach_yoy(values_out: dict[str, dict[str, dict]], years: list[str]) -> None:
+    """Same mechanism as export_europe_countries.py's own `_attach_yoy` (a
+    separate parallel copy, not imported -- each Europe batch keeps its own,
+    see this module's own docstring on why geography logic is duplicated
+    rather than shared): mutates `values_out` (year -> code -> {"v", "s"})
+    in place, adding a `yoy` percent-change key via
+    src.analytics.derived.growth_rate, rounded to 1 decimal at export."""
+    codes: set[str] = set()
+    for year_values in values_out.values():
+        codes.update(year_values)
+    for code in codes:
+        series = {y: values_out[y][code]["v"] for y in years if code in values_out[y]}
+        for y in years:
+            cell = values_out[y].get(code)
+            if cell is None:
+                continue
+            yoy = growth_rate(series, y)
+            cell["yoy"] = None if yoy is None else round(yoy, 1)
+
+
 def _build_indicator_payload(
     indicator_id: str,
     indicator_cfg: dict,
@@ -283,6 +311,8 @@ def _build_indicator_payload(
         "filters": dict(sorted((fetch.get("filters") or {}).items())),
     }
 
+    has_yoy = indicator_id in YOY_INDICATOR_IDS
+
     rows = _load_store_rows(indicator_id)
     if rows is None:
         return {
@@ -301,6 +331,7 @@ def _build_indicator_payload(
             "class_breaks": {},
             "excluded_by_licence": sorted(excluded_by_licence),
             "no_outline": {},  # same type as a loaded payload's (code -> reason), just empty
+            "has_yoy": has_yoy,
         }
 
     by_year: dict[str, dict[str, dict]] = {}
@@ -353,6 +384,8 @@ def _build_indicator_payload(
                     real_numbers.append(cell["v"])
         values_out[year] = year_values
         class_breaks[year] = _quantile_breaks(real_numbers)
+    if has_yoy:
+        _attach_yoy(values_out, years)
 
     latest_year = None
     for year in sorted(years, reverse=True):
@@ -373,6 +406,7 @@ def _build_indicator_payload(
         "class_breaks": class_breaks,
         "excluded_by_licence": sorted(excluded_by_licence),
         "no_outline": {code: no_outline_reasons[code] for code in sorted(no_outline_here)},
+        "has_yoy": has_yoy,
     }
 
 

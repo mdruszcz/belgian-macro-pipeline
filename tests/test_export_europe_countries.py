@@ -156,14 +156,25 @@ class TestRealExport:
         (CLAUDE.md rule 36)."""
         out_dir, _ = self._export(tmp_path)
         payload = self._load(out_dir, "GDP_PC_PPS_COUNTRY")
-        assert payload["values"]["2023"]["BE"] == {"v": 45400.0, "s": "final"}
-        assert payload["values"]["2023"]["DE"] == {"v": 45100.0, "s": "provisional"}
+        # `yoy` (2026-09-15 "croissance annuelle" follow-up) has its own
+        # dedicated, hand-computed test below
+        # (test_yoy_wired_only_onto_the_three_eligible_indicators) -- popped
+        # off here so this test keeps checking only what it always checked:
+        # the live-verified level figures.
+        be_2023 = dict(payload["values"]["2023"]["BE"])
+        be_2023.pop("yoy", None)
+        assert be_2023 == {"v": 45400.0, "s": "final"}
+        de_2023 = dict(payload["values"]["2023"]["DE"])
+        de_2023.pop("yoy", None)
+        assert de_2023 == {"v": 45100.0, "s": "provisional"}
         assert payload["reference_lines"]["2023"]["EU27_2020"] == {"v": 38400.0, "s": "final"}
 
     def test_belgium_population_matches_the_live_checked_figure(self, tmp_path):
         out_dir, _ = self._export(tmp_path)
         payload = self._load(out_dir, "POPULATION_COUNTRY")
-        assert payload["values"]["2025"]["BE"] == {"v": 11883495.0, "s": "final"}
+        be_2025 = dict(payload["values"]["2025"]["BE"])
+        be_2025.pop("yoy", None)  # this test only checks the level figure
+        assert be_2025 == {"v": 11883495.0, "s": "final"}
 
     def test_gdp_volume_is_never_painted_and_carries_an_adapted_notice(self, tmp_path):
         out_dir, _ = self._export(tmp_path)
@@ -174,6 +185,41 @@ class TestRealExport:
         assert payload["adapted"]["notice"]["en"]
         assert payload["adapted"]["notice"]["fr"]
         assert payload["adapted"]["notice"]["nl"]
+
+    def test_yoy_wired_only_onto_the_three_eligible_indicators(self, tmp_path):
+        """CLAUDE.md rule 5: hand-computed, not derived from the code under
+        test. growth_rate() itself (src/analytics/derived.py) already has
+        its own hand-computed tests in tests/test_derived.py -- this only
+        proves export_europe_countries.py wires its answer onto the right
+        cell for the right indicators (2026-09-15 "croissance annuelle"
+        follow-up, docs/features/europe_countries.md).
+
+        BE GDP per capita: 2022 = 42500.0, 2023 = 45400.0 (both real,
+        committed data/international/GDP_PC_PPS_COUNTRY.csv rows) ->
+        (45400 - 42500) / 42500 * 100 = 6.8235...%, rounded to 1 decimal =
+        6.8, by hand.
+        """
+        out_dir, _ = self._export(tmp_path)
+        payload = self._load(out_dir, "GDP_PC_PPS_COUNTRY")
+        assert payload["has_yoy"] is True
+        assert payload["values"]["2023"]["BE"] == {"v": 45400.0, "s": "final", "yoy": 6.8}
+
+        # Excluded (already a rate, maintainer's explicit decision): no
+        # `yoy` key at all, and `has_yoy` says so up front.
+        unemployment = self._load(out_dir, "UNEMPLOYMENT_RATE_EUROPE")
+        assert unemployment["has_yoy"] is False
+        latest = unemployment["latest_period"]
+        assert "yoy" not in unemployment["values"][latest]["BE"]
+
+        # Quarterly wiring: GDP_VOLUME_EUROPE's very first published period
+        # (2008-Q1) has no 2007-Q1 to compare against -- growth_rate()
+        # returns None for a missing prior period, and that None must reach
+        # the payload as `"yoy": None`, never a fabricated number.
+        gdp_volume = self._load(out_dir, "GDP_VOLUME_EUROPE")
+        assert gdp_volume["has_yoy"] is True
+        first_period = gdp_volume["periods"][0]
+        assert first_period == "2008-Q1"
+        assert gdp_volume["values"]["2008-Q1"]["BE"]["yoy"] is None
 
     def test_gdp_volume_belgium_2015_quarters_average_to_100(self, tmp_path):
         out_dir, _ = self._export(tmp_path)

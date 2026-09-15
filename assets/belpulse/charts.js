@@ -395,8 +395,17 @@
 
       // A reference-line series draws no point markers -- the dashed line
       // itself is the cue, and a dot at every period would read as an
-      // extra country among the real, marker-bearing series.
-      if (!s.isReference) {
+      // extra country among the real, marker-bearing series. `opts.markers
+      // === false` (Europe countries/regions comparison charts,
+      // docs/features/europe_countries.md, 2026-09-15 amendment) turns
+      // markers off for every series in the chart, not just reference ones
+      // -- up to 8 selected geographies each drawing a dot at every period
+      // reads as visual noise on a dense multi-country line chart. Default
+      // stays `true` (opts.markers left undefined) so every OTHER existing
+      // caller (macro.html's other history panels via blocks.js, the
+      // single-geography detail chart in europe_map.js's selectRegion/
+      // selectCountryDetail) is completely unaffected.
+      if (!s.isReference && opts.markers !== false) {
         var lastRealIdx = -1;
         rows.forEach(function (r, i) {
           if (r.value != null) lastRealIdx = i;

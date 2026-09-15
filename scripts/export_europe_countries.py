@@ -71,6 +71,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from export_europe_nuts2 import _quantile_breaks  # noqa: E402
 
+from src.analytics.derived import growth_rate  # noqa: E402
 from src.exporters.provenance import GRADES  # noqa: E402
 from src.geography.international import load_excluded, load_international_rows  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
@@ -115,6 +116,19 @@ NO_OUTLINE = {
 
 #: The four 2015 quarters GDP_VOLUME_EUROPE's index is rebased against.
 BASE_QUARTERS_2015 = ("2015-Q1", "2015-Q2", "2015-Q3", "2015-Q4")
+
+#: The "croissance annuelle" toggle (macro.html Europe panel, 2026-09-15
+#: maintainer-requested follow-up, docs/features/europe_countries.md
+#: amendment) is offered only on a LEVEL series, never on something that is
+#: already a rate or a balance -- UNEMPLOYMENT_RATE_EUROPE,
+#: HICP_ANNUAL_RATE_EUROPE, GOV_DEBT_EUROPE, CONSUMER_CONFIDENCE_EUROPE are
+#: deliberately excluded (maintainer's explicit correction, after first
+#: saying "all charts"). GDP_VOLUME_EUROPE is quarterly; every other member
+#: here is annual -- both frequencies are handled by the SAME call below via
+#: src.analytics.derived.growth_rate/shift_period_years, which shifts only
+#: the YEAR component of a period string and so lands on the same quarter
+#: one year back for free.
+YOY_INDICATOR_IDS = {"GDP_PC_PPS_COUNTRY", "POPULATION_COUNTRY", "GDP_VOLUME_EUROPE"}
 
 #: Trilingual "this number was changed by us" statement -- reused verbatim
 #: from the grade vocabulary every other page's provenance badge already
@@ -193,6 +207,32 @@ def _rebase_to_2015_index(period_cells: dict[str, dict]) -> dict[str, dict]:
     return out
 
 
+def _attach_yoy(values_out: dict[str, dict[str, dict]], periods: list[str]) -> None:
+    """Mutates `values_out` (period -> code -> {"v", "s"}) in place, adding a
+    `yoy` percent-change key to every cell -- reuses
+    src.analytics.derived.growth_rate (years=1) rather than a second
+    reimplementation (CLAUDE.md rule 4: never computed in the browser; rule
+    5's hand-computed tests live in tests/test_derived.py for growth_rate
+    itself, and tests/test_export_europe_countries.py only proves this
+    function wires the field onto the right cell). growth_rate already
+    returns None when the prior period is missing or zero (same period
+    format -- YYYY or YYYY-Qn -- growth_rate already parses). Rounded to 1
+    decimal here, matching every other value this exporter rounds AT
+    EXPORT, never inside the pure derivation function (derived.py's own
+    docstring, point 3)."""
+    codes: set[str] = set()
+    for period_values in values_out.values():
+        codes.update(period_values)
+    for code in codes:
+        series = {p: values_out[p][code]["v"] for p in periods if code in values_out[p]}
+        for p in periods:
+            cell = values_out[p].get(code)
+            if cell is None:
+                continue
+            yoy = growth_rate(series, p)
+            cell["yoy"] = None if yoy is None else round(yoy, 1)
+
+
 def _build_indicator_payload(
     indicator_id: str,
     indicator_cfg: dict,
@@ -227,6 +267,8 @@ def _build_indicator_payload(
             "notice": ADAPTED_NOTICE,
         }
 
+    has_yoy = indicator_id in YOY_INDICATOR_IDS
+
     rows = _load_store_rows(indicator_id)
     if rows is None:
         return {
@@ -247,6 +289,7 @@ def _build_indicator_payload(
             "excluded_by_licence": sorted(excluded_codes & geometry_ids),
             "no_outline": {},
             "adapted": adapted,
+            "has_yoy": has_yoy,
         }
 
     by_period: dict[str, dict[str, dict]] = {}
@@ -301,6 +344,8 @@ def _build_indicator_payload(
             for code in value_universe:
                 values_out[period].setdefault(code, {"v": None, "s": "missing"})
         class_breaks: dict[str, list[float]] = {}  # never painted -- no map class breaks
+        if has_yoy:
+            _attach_yoy(values_out, periods)
     else:
         values_out = {}
         reference_lines = {}
@@ -324,6 +369,8 @@ def _build_indicator_payload(
             values_out[period] = year_values
             reference_lines[period] = ref_values
             class_breaks[period] = _quantile_breaks(real_numbers)
+        if has_yoy:
+            _attach_yoy(values_out, periods)
 
     latest_period = None
     for period in sorted(periods, reverse=True):
@@ -348,6 +395,7 @@ def _build_indicator_payload(
         "excluded_by_licence": sorted(excluded_codes & geometry_ids),
         "no_outline": {code: NO_OUTLINE[code] for code in sorted(no_outline_here)},
         "adapted": adapted,
+        "has_yoy": has_yoy,
     }
 
 

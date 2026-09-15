@@ -229,6 +229,17 @@ def _a_region_with_a_value(payload):
     raise AssertionError("no region with a real value in the default payload's latest year")
 
 
+def _two_regions_with_values(payload):
+    year = payload["latest_year"]
+    codes = [
+        code
+        for code, cell in sorted(payload["values"][year].items())
+        if isinstance(cell["v"], (int, float))
+    ]
+    assert len(codes) >= 2, "need at least two regions with real values to test a multi-selection"
+    return codes[0], codes[1]
+
+
 def test_hovering_a_region_shows_its_real_payload_value_in_the_tooltip(browser, site):
     default_id = _first_loaded_indicator_id()
     payload = _payload(default_id)
@@ -545,12 +556,18 @@ def test_selecting_more_than_eight_countries_hits_the_cap(browser, site):
 
 
 def test_default_belgium_selection_renders_seven_comparison_charts(browser, site):
+    """2026-09-15 follow-up: "Comparaison internationale" is now mode-scoped
+    (docs/features/europe_countries.md amendment) -- the 7 country cards
+    only render in country mode, not the panel's default region mode, so
+    this test switches mode first rather than asserting it loads with the
+    panel regardless of mode (that used to be true; it deliberately is not
+    any more)."""
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
         page.goto(f"{site}/macro.html#europe", wait_until="load")
-        # The comparison card loads with the panel, independent of which map
-        # mode is active (default selection is Belgium alone).
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        _switch_to_country_mode(page)
         page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
         count = page.eval_on_selector_all(
             "#international .bp-europe-compare__card", "els => els.length"
@@ -610,15 +627,294 @@ def test_country_mode_requests_only_same_origin_or_fonts(browser, site):
 def test_no_indicator_id_in_europe_map_js_or_macro_html():
     """Rule 2/24: an indicator id belongs in config/pages and payloads, never
     in the generic renderer. Checked against the real ids the countries
-    payload actually publishes (docs/features/europe_countries.md), so it
-    cannot be satisfied by renaming a constant and it grows as indicators
-    are added -- the same shape tests/test_macro.py's own
+    AND nuts2 payloads actually publish (docs/features/europe_countries.md
+    -- the 2026-09-15 follow-up's region comparison card originally
+    hardcoded its 3 NUTS2 ids directly in europe_map.js and was fixed to
+    read state.index.indicators instead, exactly to keep this test green),
+    so it cannot be satisfied by renaming a constant and it grows as
+    indicators are added -- the same shape tests/test_macro.py's own
     test_macro_names_no_indicator_anywhere already uses for national.json."""
-    ids = {i["id"] for i in _country_index()["indicators"]}
-    assert ids, "no country indicator ids to check against, so this test would prove nothing"
+    ids = {i["id"] for i in _country_index()["indicators"]} | {
+        i["id"] for i in _index()["indicators"]
+    }
+    assert ids, "no indicator ids to check against, so this test would prove nothing"
     js = (REPO_ROOT / "assets" / "belpulse" / "europe_map.js").read_text(encoding="utf-8")
     html = (REPO_ROOT / "macro.html").read_text(encoding="utf-8")
     named_js = sorted(i for i in ids if i in js)
     named_html = sorted(i for i in ids if i in html)
     assert not named_js, f"europe_map.js names indicators directly: {named_js}"
     assert not named_html, f"macro.html names indicators directly: {named_html}"
+
+
+# --- 2026-09-15 follow-up (docs/features/europe_countries.md amendment) -----
+# Maintainer-requested polish batch: Africa/Middle East filtering, the
+# region <select>/picker grouped by country, region-mode comparison
+# selection + charts, mode-switch-preserves-both-selections, the growth-
+# rate toggle, no per-point markers on comparison lines, and the palette
+# picker. One real-browser pass, not a large new suite (kept minimal per
+# the maintainer's explicit "go fast" instruction for this batch).
+
+
+def test_africa_middle_east_background_countries_are_hidden_licensed_ones_survive(browser, site):
+    hidden_codes = [
+        "LY",
+        "EG",
+        "IL",
+        "PS",
+        "JO",
+        "LB",
+        "SY",
+        "SA",
+        "KW",
+        "IQ",
+        "IR",
+        "DZ",
+        "TN",
+        "EH",
+        "MA",
+    ]
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        hidden_selector = ",".join(f"#bpEuropeStage #em-cntrg-{c}" for c in hidden_codes)
+        assert page.eval_on_selector_all(hidden_selector, "els => els.length") == 0
+        # A non-denylisted background country (Russia) is untouched -- the
+        # filter is scoped to Africa/Middle East, not a blanket removal.
+        assert page.eval_on_selector_all("#bpEuropeStage #em-cntrg-RU", "els => els.length") == 1
+
+        _switch_to_country_mode(page)
+        hidden_selector_country = ",".join(
+            f"#bpEuropeCountryStage #em-cntrg-{c}" for c in hidden_codes
+        )
+        assert page.eval_on_selector_all(hidden_selector_country, "els => els.length") == 0
+        assert (
+            page.eval_on_selector_all("#bpEuropeCountryStage #em-cntrg-RU", "els => els.length")
+            == 1
+        )
+        # Turkey is licensed at the COUNTRY (NUTS 0) level -- em-nutsrg-TR
+        # -- and must keep rendering regardless of the filter; region mode
+        # has no bare "TR" id (its NUTS2 codes are TR10, TR21, ...), so this
+        # check only makes sense here.
+        assert (
+            page.eval_on_selector_all(
+                "#bpEuropeCountryStage path[id='em-nutsrg-TR']", "els => els.length"
+            )
+            == 1
+        )
+    finally:
+        context.close()
+
+
+def test_region_select_is_grouped_by_country_with_real_names(browser, site):
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        optgroup_count = page.eval_on_selector_all(
+            "#europeRegionSelect optgroup", "els => els.length"
+        )
+        assert optgroup_count > 10, f"expected 30+ country groups, got {optgroup_count}"
+        # Belgium's own group carries a real country name, not the bare
+        # "BE" prefix -- proves country names loaded in time for the FIRST
+        # render even though the panel opened straight into Région mode
+        # (point 2's own requirement: loaded at init, not lazily).
+        be_label = page.evaluate("""() => {
+                const groups = Array.from(document.querySelectorAll('#europeRegionSelect optgroup'));
+                const be = groups.find(g => Array.from(g.children).some(o => o.value.startsWith('BE')));
+                return be ? be.label : null;
+            }""")
+        assert be_label and be_label != "BE", be_label
+    finally:
+        context.close()
+
+
+def test_region_selection_renders_comparison_charts_and_survives_a_mode_switch(browser, site):
+    default_id = _first_loaded_indicator_id()
+    payload = _payload(default_id)
+    code1, code2 = _two_regions_with_values(payload)
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        # No default region selection (unlike country mode's default
+        # Belgium) -- lead review, 2026-09-15: no single Belgian region is
+        # an obvious default.
+        assert page.eval_on_selector("#europeCompareEmpty", "el => el.hidden") is False
+
+        page.click(f"#em-nutsrg-{code1}")
+        page.wait_for_selector(f'#em-nutsrg-{code1}[data-selected="true"]')
+        page.click(f"#em-nutsrg-{code2}")
+        page.wait_for_selector(f'#em-nutsrg-{code2}[data-selected="true"]')
+
+        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+        card_count = page.eval_on_selector_all(
+            "#international .bp-europe-compare__card", "els => els.length"
+        )
+        assert (
+            card_count == 3
+        ), f"expected 3 region-level comparison cards (NUTS2 indicators), got {card_count}"
+        legend_codes = page.eval_on_selector_all(
+            "#international .bp-europe-compare__legend .chip", "els => els.map(e => e.dataset.code)"
+        )
+        assert code1 in legend_codes and code2 in legend_codes, legend_codes
+        # No EU27/euro-area reference checkboxes in region mode -- they do
+        # not exist for a NUTS2 payload (rule 26: a real "not applicable",
+        # never faked).
+        # The COMPUTED style, not just the `hidden` DOM property: a real
+        # bug (an author CSS rule of equal specificity beating the UA
+        # [hidden] default, same class as this file's own documented
+        # .bp-europe-map__mode-section[hidden] fix) let `el.hidden` read
+        # true while the checkboxes stayed visually on screen -- caught by
+        # a real screenshot, not by the weaker property-only assertion
+        # this replaced.
+        assert (
+            page.eval_on_selector(".bp-europe-compare__refs", "el => getComputedStyle(el).display")
+            == "none"
+        )
+
+        # Switching to country mode and back clears neither selection.
+        _switch_to_country_mode(page)
+        page.click("#europeModeRegion")
+        page.wait_for_function("document.getElementById('europeRegionWrap').hidden === false")
+        still_selected = page.eval_on_selector(
+            f"#em-nutsrg-{code1}", "el => el.getAttribute('data-selected')"
+        )
+        assert still_selected == "true"
+        checkbox_checked = page.eval_on_selector(
+            f'label[data-code="{code1}"] input', "el => el.checked"
+        )
+        assert checkbox_checked is True
+        # Country mode's own default Belgium selection is untouched too.
+        _switch_to_country_mode(page)
+        be_checked = page.eval_on_selector('label[data-code="BE"] input', "el => el.checked")
+        assert be_checked is True
+    finally:
+        context.close()
+
+
+def test_growth_toggle_swaps_an_eligible_chart_to_percent_and_leaves_others_alone(browser, site):
+    gdp = _country_payload("GDP_PC_PPS_COUNTRY")
+    assert gdp["has_yoy"] is True
+    gdp_name = gdp["names"]["fr"]
+    unemployment = _country_payload("UNEMPLOYMENT_RATE_EUROPE")
+    assert unemployment["has_yoy"] is False
+    unemployment_name = unemployment["names"]["fr"]
+
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        _switch_to_country_mode(page)
+        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+
+        find_card_js = """(name) => Array.from(document.querySelectorAll('#international .bp-europe-compare__card'))
+            .find(c => c.querySelector('h4').textContent.trim() === name)"""
+
+        has_toggle = page.evaluate(
+            f"(name) => {{ const c = ({find_card_js})(name); return !!(c && c.querySelector('.bp-europe-compare__growth')); }}",
+            gdp_name,
+        )
+        assert has_toggle is True
+        has_toggle_excluded = page.evaluate(
+            f"(name) => {{ const c = ({find_card_js})(name); return !!(c && c.querySelector('.bp-europe-compare__growth')); }}",
+            unemployment_name,
+        )
+        assert has_toggle_excluded is False
+
+        def tooltip_value_for(name):
+            return page.evaluate(
+                f"""(name) => {{
+                    const card = ({find_card_js})(name);
+                    if (!card) return null;
+                    const canvas = card.querySelector('canvas');
+                    canvas.dispatchEvent(new KeyboardEvent('keydown', {{key: 'ArrowLeft'}}));
+                    const tip = document.querySelector('.bp-chart-tip');
+                    const valueEl = tip && tip.querySelector('.bp-chart-tip-value');
+                    return valueEl ? valueEl.textContent : null;
+                }}""",
+                name,
+            )
+
+        level_text = tooltip_value_for(gdp_name)
+        assert level_text and "%" not in level_text, level_text
+
+        page.evaluate(
+            f"(name) => {{ const c = ({find_card_js})(name); c.querySelector('.bp-europe-compare__growth input').click(); }}",
+            gdp_name,
+        )
+        page.wait_for_timeout(150)
+        growth_text = tooltip_value_for(gdp_name)
+        assert growth_text and "%" in growth_text, growth_text
+    finally:
+        context.close()
+
+
+def test_comparison_charts_draw_no_per_point_markers(browser, site):
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    context.add_init_script("""
+        window.__arcCalls = {compare: 0, side: 0};
+        const origArc = CanvasRenderingContext2D.prototype.arc;
+        CanvasRenderingContext2D.prototype.arc = function(...args) {
+            try {
+                if (this.canvas.closest('.bp-europe-compare__card')) window.__arcCalls.compare++;
+                else if (this.canvas.closest('.bp-europe-map__side')) window.__arcCalls.side++;
+            } catch (e) {}
+            return origArc.apply(this, args);
+        };
+        """)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        _switch_to_country_mode(page)
+        page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
+        # A single-country detail chart (markers:true, unaffected by this
+        # batch) still draws its usual per-point dots -- proves the spy
+        # itself is wired correctly, not silently inert.
+        default_id = _first_loaded_map_country_indicator_id()
+        payload = _country_payload(default_id)
+        code, _ = _a_country_with_a_value(payload)
+        page.click(f"#em-nutsrg-{code}")
+        page.wait_for_selector("#europeCountrySideCard canvas")
+        counts = page.evaluate("window.__arcCalls")
+        assert (
+            counts["compare"] == 0
+        ), f"comparison chart(s) drew {counts['compare']} point marker(s)"
+        assert counts["side"] > 0, "sanity check failed: the detail chart drew no markers at all"
+    finally:
+        context.close()
+
+
+def test_palette_picker_repaints_both_map_modes_with_its_own_storage_key(browser, site):
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        _switch_to_country_mode(page)
+        page.wait_for_selector('#bpEuropeCountryStage svg path[id^="em-nutsrg-"]', timeout=15000)
+        page.click("#europeModeRegion")
+        page.wait_for_function("document.getElementById('europeRegionWrap').hidden === false")
+
+        before = page.eval_on_selector(
+            "#europeMapRoot", "el => getComputedStyle(el).getPropertyValue('--ramp-0').trim()"
+        )
+        page.select_option("#europePaletteSelect", "bluered")
+        page.wait_for_timeout(200)
+        after = page.eval_on_selector(
+            "#europeMapRoot", "el => getComputedStyle(el).getPropertyValue('--ramp-0').trim()"
+        )
+        assert after != before, "palette change did not update the --ramp-0 token"
+        stored = page.evaluate("() => localStorage.getItem('belpulse-europe-palette')")
+        assert stored == "bluered"
+        # A separate key from the commune map's own remembered palette
+        # (map.html's 'belpulse-map-palette') -- deliberate, not a bug.
+        commune_stored = page.evaluate("() => localStorage.getItem('belpulse-map-palette')")
+        assert commune_stored is None
+    finally:
+        context.close()

@@ -42,6 +42,10 @@
   var MAX_SELECTED_COUNTRIES = 8;
   var DEFAULT_SELECTED_COUNTRIES = ['BE'];
 
+  // 2026-09-15 follow-up (docs/features/europe_countries.md amendment):
+  // region-mode selection/comparison, mirroring the country ones above.
+  var MAX_SELECTED_REGIONS = 8;
+
   /* eurostat-map always requests
      `${nuts2jsonBaseURL}/${nutsYear}/${proj}/${scale}/${nutsLevel}.json`
      (grepped from the vendored bundle's own URL-builder) -- a shape our
@@ -53,6 +57,57 @@
      to Nuts2json or ec.europa.eu. See `buildMap`'s own comment for the
      narrow, temporary `window.fetch` shim this relies on. */
   var GEOMETRY_SENTINEL = 'bp-vendor-bridge-do-not-fetch';
+
+  /* 2026-09-15 follow-up (docs/features/europe_countries.md amendment,
+     point 1): hides Africa/Middle East outlines from the "cntrg" background-
+     country layer eurostat-map draws unconditionally alongside the 39
+     licensed, coloured `nutsrg` countries -- NEVER touches nutsrg/nutsbn
+     (Turkey included: it is licensed and must keep rendering) and never
+     the geometry files themselves (filtered client-side, per map build,
+     from the SAME committed topology this file already fetches).
+
+     Africa + Middle East only, verified against the committed topology's
+     own cntrg id list (public/data/geo/nuts0/2024/0.json, 75 entries):
+     Libya, Egypt, Israel, Palestine, Jordan, Lebanon, Syria, Saudi Arabia,
+     Kuwait, Iraq, Iran, Algeria, Tunisia, Western Sahara, Morocco.
+     Deliberately NOT Russia/Belarus/Ukraine/the Balkans/the Caucasus/
+     Central Asia -- out of scope for this batch.
+
+     KNOWN LIMITATION, not fixed here: `cntbn` (the background-country
+     BORDER-LINE layer, a separate set of ~185 path segments) carries only
+     numeric segment ids with eu/efta/cc/oth/co boolean flags in this
+     topology -- no per-country ISO2 code at all (verified against the
+     committed file) -- so it cannot be filtered to Africa/Middle East only
+     without risking Russia/Belarus/Ukraine/the Balkans (whose `oth` flag
+     is shared). Left alone deliberately, per lead review: a border LINE
+     may still be visible over the hidden fill area even after this filter.
+     See the PR description for what was actually verified in a browser. */
+  var HIDDEN_BACKGROUND_COUNTRY_CODES = [
+    'LY', 'EG', 'IL', 'PS', 'JO', 'LB', 'SY', 'SA', 'KW', 'IQ', 'IR', 'DZ', 'TN', 'EH', 'MA',
+  ]; // fmt: skip
+
+  /* eurostat-map's own filterGeometriesFunction hook (grepped from the
+     vendored bundle: Geometries.getDefaultGeoData calls it as
+     `fn(rawTopologyArray, mapContext)`, BEFORE nutsrg/nutsbn/cntrg/cntbn
+     are ever extracted into GeoJSON features) -- for this panel's own
+     "EUR"/non-mixed/non-WORLD map, rawTopologyArray is a single-element
+     array holding the SAME topology object this file already fetched
+     (public/data/geo/nuts{0,2}/2024/{0,2}.json, answered via the fetch
+     shim below), never a second, separately-fetched copy. Mutating
+     objects.cntrg.geometries in place and returning the same array is
+     safe: TopoJSON arcs are shared and index-referenced, so removing a
+     geometry entry never invalidates an arc another object still uses. */
+  function filterOutHiddenBackgroundCountries(rawTopologyArray) {
+    (rawTopologyArray || []).forEach(function (topo) {
+      var cntrg = topo && topo.objects && topo.objects.cntrg;
+      if (cntrg && cntrg.geometries) {
+        cntrg.geometries = cntrg.geometries.filter(function (g) {
+          return !(g.properties && HIDDEN_BACKGROUND_COUNTRY_CODES.indexOf(g.properties.id) !== -1);
+        });
+      }
+    });
+    return rawTopologyArray;
+  }
 
   var LANG = I18N.initial();
   var T = function (key, vars) {
@@ -72,6 +127,27 @@
     zoomBaseline: null,
     root: null,
     els: {},
+    // 2026-09-15 follow-up: code -> {en, fr, nl}, loaded once at panel init
+    // (not lazily on first switch to country mode) so the region <select>
+    // can be grouped by country even when the panel opens straight into
+    // Région mode. Fed by the SAME public/data/europe/countries/index.json
+    // country mode already fetches -- see `ensureCountryIndex()`.
+    countryNamesByCode: null,
+    // 2026-09-15 follow-up: up to MAX_SELECTED_REGIONS NUTS2 codes for the
+    // "Comparaison internationale" card's region mode -- the map-click/
+    // picker-checkbox equivalent of state.country.selected below. Starts
+    // EMPTY (no single Belgian region is an obvious default -- Brussels?
+    // one of ten provinces? -- unlike country mode's ['BE']).
+    region: { selected: [] },
+    // 2026-09-15 follow-up: indicator_id -> boolean, the per-card "level /
+    // croissance annuelle" toggle. Shared flat map across BOTH region and
+    // country indicator ids (they never collide -- COUNTRY vs NUTS2
+    // suffixes) rather than one copy per mode.
+    growthModeByIndicator: {},
+    // 2026-09-15 follow-up: the Europe panel's own remembered choropleth
+    // colour scheme, independent of map.html's commune-map palette
+    // (separate localStorage key, see EUROPE_PALETTE_KEY below).
+    paletteName: null,
     // Europe countries batch (docs/features/europe_countries.md): the
     // "Régions / Pays" toggle. Region mode above is entirely unchanged;
     // everything country-shaped lives in this one sub-object so it can
@@ -127,9 +203,70 @@
      Setting the same values as an INLINE style here sidesteps the mystery
      entirely (inline always wins over any stylesheet rule), and this
      function is re-run on every `bp:theme` change so it keeps tracking
-     the reader's actual theme rather than freezing the first one seen. */
-  var RAMP_LIGHT = { 0: '#eef2f7', 1: '#d3dff0', 2: '#aec4e3', 3: '#82a3d2', 4: '#5a80bd', 5: '#3c60a0', 6: '#233f74', nodata: '#e7ded0' };
-  var RAMP_DARK = { 0: '#233f74', 1: '#3c60a0', 2: '#5a80bd', 3: '#82a3d2', 4: '#aec4e3', 5: '#d3dff0', 6: '#eef2f7', nodata: '#2a3550' };
+     the reader's actual theme rather than freezing the first one seen.
+
+     2026-09-15 follow-up (palette picker, point 6): the SAME cascade fight
+     is live for every one of the 5 palettes, not just the default one --
+     macro.html loads assets/commune_map.css too, so a `.bp-europe-map`-
+     scoped CSS rule for `--ramp-*` would lose to that file's own
+     `:root[data-theme][data-palette]` rule exactly like the single ramp
+     used to. Every palette below is therefore applied the SAME
+     inline-style way; the `[data-palette]` CSS block europe_map.css also
+     carries is decorative/inspectable only, never load-bearing. */
+  var EUROPE_PALETTES = {
+    // Today's existing ramp -- kept as the picker's default, so a reader
+    // who never touches the control sees no change at all.
+    default: {
+      light: ['#eef2f7', '#d3dff0', '#aec4e3', '#82a3d2', '#5a80bd', '#3c60a0', '#233f74'],
+      dark: ['#233f74', '#3c60a0', '#5a80bd', '#82a3d2', '#aec4e3', '#d3dff0', '#eef2f7'],
+    },
+    // The remaining four, copied VERBATIM from map.html's own PALETTES
+    // (CLAUDE.md rule 36 -- reused for visual consistency across the two
+    // maps, not reinvented). bluered is deliberately the SAME in both
+    // themes -- see map.html's own comment: a diverging blue-red scale
+    // cannot be inverted without swapping the meaning of blue vs red.
+    bluered: {
+      light: ['#4575b4', '#91bfdb', '#e0f3f8', '#ffffbf', '#fee090', '#fc8d59', '#d73027'],
+      dark: ['#4575b4', '#91bfdb', '#e0f3f8', '#ffffbf', '#fee090', '#fc8d59', '#d73027'],
+    },
+    blues: {
+      light: ['#f7fcf0', '#d9f0d3', '#a8ddb5', '#69c5be', '#41a5c4', '#2b74b4', '#173a8c'],
+      dark: ['#173a8c', '#2b74b4', '#41a5c4', '#69c5be', '#a8ddb5', '#d9f0d3', '#f7fcf0'],
+    },
+    purples: {
+      light: ['#fdf2f8', '#f3d7ea', '#e3b3d8', '#cd8cc4', '#ab66ac', '#7f4691', '#4a2a63'],
+      dark: ['#4a2a63', '#7f4691', '#ab66ac', '#cd8cc4', '#e3b3d8', '#f3d7ea', '#fdf2f8'],
+    },
+    teal: {
+      light: ['#f2f8f4', '#cfe8dc', '#a5d5c4', '#73bcae', '#489d9b', '#2c7681', '#194a5a'],
+      dark: ['#194a5a', '#2c7681', '#489d9b', '#73bcae', '#a5d5c4', '#cfe8dc', '#f2f8f4'],
+    },
+  };
+  // bluered first in map.html's own list; here 'default' leads instead
+  // (see EUROPE_DEFAULT_PALETTE's own comment) -- the picker's option
+  // order, not a ranking.
+  var EUROPE_PALETTE_ORDER = ['default', 'bluered', 'blues', 'teal', 'purples'];
+  var EUROPE_DEFAULT_PALETTE = 'default';
+  // A key of its own, independent from map.html's 'belpulse-map-palette'
+  // -- deliberate, not a bug: the commune map and this panel are two
+  // different choropleths and a reader may want a different scheme on
+  // each.
+  var EUROPE_PALETTE_KEY = 'belpulse-europe-palette';
+  // nodata is theme-dependent only (matching assets/commune_map.css's own
+  // convention: "no data" is not part of any sequential ramp's colour
+  // story), never palette-dependent.
+  var EUROPE_NODATA = { light: '#e7ded0', dark: '#2a3550' };
+
+  function readStoredEuropePalette() {
+    try {
+      var stored = localStorage.getItem(EUROPE_PALETTE_KEY);
+      if (stored && EUROPE_PALETTES[stored]) return stored;
+    } catch (e) {
+      /* private-browsing/storage-blocked: falls back below */
+    }
+    return EUROPE_DEFAULT_PALETTE;
+  }
+
   function currentThemeIsDark() {
     var explicit = document.documentElement.getAttribute('data-theme');
     if (explicit === 'dark') return true;
@@ -138,9 +275,16 @@
   }
   function applyRampTokens() {
     if (!state.root) return;
-    var ramp = currentThemeIsDark() ? RAMP_DARK : RAMP_LIGHT;
+    var themeKey = currentThemeIsDark() ? 'dark' : 'light';
+    var paletteName = state.paletteName || EUROPE_DEFAULT_PALETTE;
+    var ramp = (EUROPE_PALETTES[paletteName] || EUROPE_PALETTES[EUROPE_DEFAULT_PALETTE])[themeKey];
     for (var i = 0; i <= 6; i++) state.root.style.setProperty('--ramp-' + i, ramp[i]);
-    state.root.style.setProperty('--nodata', ramp.nodata);
+    state.root.style.setProperty('--nodata', EUROPE_NODATA[themeKey]);
+    // Decorative/inspectable only (see the long comment above) -- the real
+    // repaint is the inline setProperty calls just above, always run
+    // regardless of whether this attribute ever wins a cascade fight.
+    if (paletteName === EUROPE_DEFAULT_PALETTE) state.root.removeAttribute('data-palette');
+    else state.root.setAttribute('data-palette', paletteName);
   }
 
   function cssVar(name, fallback) {
@@ -202,6 +346,17 @@
     return vendorPromise;
   }
 
+  // 2026-09-15 follow-up: ONE shared promise for
+  // public/data/europe/countries/index.json, used by BOTH init() (region
+  // mode's own country-name lookup, for the grouped select/picker) and
+  // initCountry() (which needs the full index) -- so opening the panel
+  // fetches it once, not twice.
+  var countryIndexPromise = null;
+  function ensureCountryIndex() {
+    if (!countryIndexPromise) countryIndexPromise = fetch(COUNTRY_INDEX_URL).then(readJSON);
+    return countryIndexPromise;
+  }
+
   /* ---- boot -------------------------------------------------------------
      Fired every time the Europe panel becomes the visible one (panels.js's
      bp:panel-shown, including on first load if the page opens on #europe).
@@ -221,15 +376,48 @@
     var geometryPromise = indexPromise.then(function (index) {
       return fetch('public/data/' + index.geometry).then(readJSON);
     });
+    // 2026-09-15 follow-up: country names, loaded at PANEL INIT rather than
+    // lazily on first switch to country mode, so the region <select> (and
+    // picker) can group by country even when the panel opens straight into
+    // Région mode -- the whole reason this is in init()'s own Promise.all
+    // rather than left for initCountry() alone to fetch.
+    var countryNamesPromise = ensureCountryIndex()
+      .then(function (index) {
+        var names = {};
+        index.countries.forEach(function (c) {
+          names[c.code] = c.names;
+        });
+        state.countryNamesByCode = names;
+      })
+      .catch(function () {
+        // A failed country-name fetch must not sink the whole region map --
+        // the select/picker fall back to the bare 2-letter prefix as its
+        // own group label (see buildRegionPicker/populateRegionSelect).
+        state.countryNamesByCode = state.countryNamesByCode || {};
+      });
 
-    Promise.all([indexPromise, geometryPromise, loadVendorScript()])
+    Promise.all([indexPromise, geometryPromise, loadVendorScript(), countryNamesPromise])
       .then(function (results) {
         state.index = results[0];
         state.geometryTopo = results[1];
         indexGeometryNames(results[1]);
+        buildRegionPicker();
         var defaultIndicator = pickDefaultIndicator(state.index.indicators);
         populateIndicatorSelect(state.index.indicators, defaultIndicator);
-        return loadIndicator(defaultIndicator);
+        // Every region indicator's payload is prefetched here (not just the
+        // one on screen) -- 2026-09-15 follow-up: the region-mode
+        // "Comparaison internationale" card needs all three NUTS2
+        // indicators' values regardless of which one the map itself is
+        // currently showing, the same reason country mode already
+        // prefetches all seven of its own indicators (see initCountry()).
+        return Promise.all(
+          state.index.indicators.map(function (i) {
+            return fetchPayload(i.id);
+          })
+        ).then(function () {
+          renderComparisonCharts();
+          return loadIndicator(defaultIndicator);
+        });
       })
       .catch(function (err) {
         showError(err);
@@ -262,6 +450,7 @@
     clear(state.root);
     state.root.removeAttribute('hidden');
     state.root.className = 'bp-europe-map';
+    state.paletteName = readStoredEuropePalette();
     applyRampTokens();
 
     var indicatorSelect = el('select', { id: 'europeIndicatorSelect' });
@@ -302,6 +491,27 @@
       regionSelect,
     ]);
 
+    // 2026-09-15 follow-up: the region-mode comparison picker (search +
+    // checkboxes, grouped by country, mirroring the country picker built
+    // in buildCountryChrome()). Filled once geometry + country names are
+    // ready -- see buildRegionPicker(), called from init()'s own
+    // Promise.all callback.
+    var regionPickerSearch = el('input', {
+      type: 'search',
+      id: 'europeRegionPickerSearch',
+      'aria-label': T('europeRegionPickerSearchLabel'),
+      placeholder: T('europeRegionPickerSearchLabel'),
+    });
+    var regionPickerGroups = el('div', { id: 'europeRegionPickerGroups', class: 'bp-europe-picker__scroll' });
+    var regionCapMsg = el('p', { class: 'bp-europe-picker__cap', id: 'europeRegionCapMsg', text: T('europeRegionCapMsg') });
+    regionCapMsg.hidden = true;
+    var regionPicker = el('div', { class: 'bp-europe-picker' }, [
+      el('label', { for: 'europeRegionPickerSearch', text: T('europeRegionPickerLabel') }),
+      regionPickerSearch,
+      regionPickerGroups,
+      regionCapMsg,
+    ]);
+
     var legendScale = el('div', { class: 'bp-europe-map__legend-scale', id: 'europeLegendScale' });
     var legendExtra = el('div', { id: 'europeLegendExtra' });
     var meta = el('div', { class: 'bp-europe-map__meta', id: 'europeMeta' });
@@ -312,6 +522,7 @@
     var main = el('div', { class: 'bp-europe-map__main' }, [
       controls,
       regionField,
+      regionPicker,
       stage,
       tooltip,
       legend,
@@ -341,6 +552,9 @@
       svg: svg,
       tooltip: tooltip,
       regionSelect: regionSelect,
+      regionPickerSearch: regionPickerSearch,
+      regionPickerGroups: regionPickerGroups,
+      regionCapMsg: regionCapMsg,
       legendScale: legendScale,
       legendExtra: legendExtra,
       meta: meta,
@@ -357,6 +571,9 @@
     yearSelect.addEventListener('change', function () {
       state.currentYear = yearSelect.value;
       render();
+    });
+    regionPickerSearch.addEventListener('input', function () {
+      filterRegionPicker(regionPickerSearch.value);
     });
     regionSelect.addEventListener('change', function () {
       if (regionSelect.value) selectRegion(regionSelect.value);
@@ -386,10 +603,15 @@
     state.root.querySelector('label[for="europeYearSelect"]').textContent = T('europeYearLabel');
     state.root.querySelector('label[for="europeRegionSelect"]').textContent = T('europeRegionLabel');
     state.els.regionSelect.options[0].textContent = T('europeRegionPlaceholder');
+    state.root.querySelector('label[for="europeRegionPickerSearch"]').textContent = T('europeRegionPickerLabel');
+    state.els.regionPickerSearch.setAttribute('placeholder', T('europeRegionPickerSearchLabel'));
+    state.els.regionPickerSearch.setAttribute('aria-label', T('europeRegionPickerSearchLabel'));
+    state.els.regionCapMsg.textContent = T('europeRegionCapMsg');
     state.els.zoomIn.setAttribute('aria-label', T('europeZoomIn'));
     state.els.zoomOut.setAttribute('aria-label', T('europeZoomOut'));
     state.els.zoomReset.setAttribute('aria-label', T('europeResetView'));
     if (state.index) populateIndicatorSelect(state.index.indicators, state.currentIndicatorId);
+    if (state.index) buildRegionPicker(); // rebuilds chip text in the new language
   }
 
   function showError(err) {
@@ -543,6 +765,7 @@
         renderNoOutline(payload);
         populateRegionSelect(yearValues);
         attachRegionHandlers(payload, yearValues);
+        renderRegionSelectionOutline();
 
         if (state.selectedRegion) selectRegion(state.selectedRegion);
       },
@@ -656,6 +879,11 @@
       nutsLevel: cfg.nutsLevel,
       nutsYear: cfg.nutsYear,
       nuts2jsonBaseURL: sentinel,
+      // 2026-09-15 follow-up (point 1): drops the Africa/Middle East cntrg
+      // background-country geometries from the SAME topology this map
+      // already fetched -- see filterOutHiddenBackgroundCountries's own
+      // comment for the exact call signature and the cntbn limitation.
+      filterGeometriesFunction: filterOutHiddenBackgroundCountries,
       // FRY1-FRY5/PT20/PT30 (Guadeloupe, Martinique, Guyane, Réunion,
       // Mayotte, Azores, Madeira) are published under separate per-
       // territory URLs this batch never fetches (payload `no_outline`,
@@ -889,6 +1117,33 @@
     node.textContent = T('europeNoOutlineNote', { n: codes.length, codes: codes.join(', ') });
   }
 
+  /* ---- region <select> grouping and the comparison picker: both group
+     regions by country (a NUTS code's own first two characters), 2026-09-15
+     follow-up. `regionCountryName` is the one shared lookup both use --
+     state.countryNamesByCode is loaded once at panel init (see init()'s own
+     comment), so this works even when the panel opens straight into Région
+     mode, before country mode has ever been touched. ------------------- */
+  function regionCountryName(prefix) {
+    var names = state.countryNamesByCode || {};
+    return (names[prefix] && (names[prefix][LANG] || names[prefix].en)) || prefix;
+  }
+
+  function groupCodesByCountry(codes) {
+    var groups = new Map();
+    codes.forEach(function (code) {
+      var prefix = code.slice(0, 2);
+      if (!groups.has(prefix)) groups.set(prefix, []);
+      groups.get(prefix).push(code);
+    });
+    return groups;
+  }
+
+  function sortedCountryPrefixes(groups) {
+    return Array.from(groups.keys()).sort(function (a, b) {
+      return regionCountryName(a).localeCompare(regionCountryName(b));
+    });
+  }
+
   /* ---- region selection: mouse (path click), keyboard (path focus + Enter,
      or the searchable <select>), and hover (mouseover + focus, same
      handler) all converge on `selectRegion`. -------------------------------- */
@@ -897,14 +1152,129 @@
     var placeholder = select.options[0];
     clear(select);
     select.appendChild(placeholder);
-    Object.keys(yearValues)
-      .sort(function (a, b) {
-        return (state.regionNames[a] || a).localeCompare(state.regionNames[b] || b);
-      })
-      .forEach(function (code) {
-        var name = state.regionNames[code] || code;
-        select.appendChild(el('option', { value: code, text: name + ' (' + code + ')' }));
+    var groups = groupCodesByCountry(Object.keys(yearValues));
+    sortedCountryPrefixes(groups).forEach(function (prefix) {
+      var group = document.createElement('optgroup');
+      group.label = regionCountryName(prefix);
+      groups
+        .get(prefix)
+        .sort(function (a, b) {
+          return (state.regionNames[a] || a).localeCompare(state.regionNames[b] || b);
+        })
+        .forEach(function (code) {
+          var name = state.regionNames[code] || code;
+          var option = document.createElement('option');
+          option.value = code;
+          option.textContent = name + ' (' + code + ')';
+          group.appendChild(option);
+        });
+      select.appendChild(group);
+    });
+  }
+
+  /* ---- region comparison picker: every region the geometry carries a name
+     for, grouped by country (same grouping as the select above), search-
+     filterable, capped at MAX_SELECTED_REGIONS -- the multi-select
+     equivalent of buildCountryPicker() below. Built once geometry +
+     country names are ready (init()'s own Promise.all) and rebuilt on
+     language change (relabelChrome()). ---------------------------------- */
+  function buildRegionPicker() {
+    var wrap = state.els.regionPickerGroups;
+    if (!wrap) return;
+    clear(wrap);
+    var groups = groupCodesByCountry(Object.keys(state.regionNames));
+    sortedCountryPrefixes(groups).forEach(function (prefix) {
+      var groupWrap = el('div', { class: 'bp-europe-picker__group', 'data-group': prefix });
+      groupWrap.appendChild(el('div', { class: 'bp-europe-picker__group-label', text: regionCountryName(prefix) }));
+      var list = el('div', { class: 'bp-europe-picker__list' });
+      groups
+        .get(prefix)
+        .sort(function (a, b) {
+          return (state.regionNames[a] || a).localeCompare(state.regionNames[b] || b);
+        })
+        .forEach(function (code) {
+          var checkbox = el('input', { type: 'checkbox' });
+          var nameSpan = el('span', { class: 'name', text: (state.regionNames[code] || code) + ' (' + code + ')' });
+          var chip = el('label', { class: 'bp-europe-picker__chip', 'data-code': code }, [checkbox, nameSpan]);
+          list.appendChild(chip);
+          checkbox.addEventListener('change', function () {
+            toggleRegionSelection(code);
+          });
+        });
+      groupWrap.appendChild(list);
+      wrap.appendChild(groupWrap);
+    });
+    syncRegionSelectionUI();
+  }
+
+  function filterRegionPicker(query) {
+    var q = (query || '').trim().toLowerCase();
+    var wrap = state.els.regionPickerGroups;
+    if (!wrap) return;
+    Array.prototype.forEach.call(wrap.children, function (groupWrap) {
+      var anyVisible = false;
+      Array.prototype.forEach.call(groupWrap.querySelectorAll('.bp-europe-picker__chip'), function (chip) {
+        var match = q.length === 0 || chip.textContent.toLowerCase().indexOf(q) !== -1;
+        chip.hidden = !match;
+        if (match) anyVisible = true;
       });
+      groupWrap.hidden = !anyVisible;
+    });
+  }
+
+  function toggleRegionSelection(code) {
+    var selected = state.region.selected;
+    var idx = selected.indexOf(code);
+    if (idx !== -1) {
+      selected.splice(idx, 1);
+    } else {
+      if (selected.length >= MAX_SELECTED_REGIONS) {
+        syncRegionSelectionUI(); // reverts a checkbox the user just ticked past the cap
+        return;
+      }
+      selected.push(code);
+    }
+    syncRegionSelectionUI();
+    renderRegionSelectionOutline();
+    renderComparisonCharts();
+  }
+
+  /* Reflects state.region.selected onto the picker chips (checked state,
+     every unchecked chip disabled once the cap is hit) and the cap
+     message -- the region equivalent of syncCountrySelectionUI() below. */
+  function syncRegionSelectionUI() {
+    var wrap = state.els.regionPickerGroups;
+    if (!wrap) return;
+    var selected = state.region.selected;
+    var atCap = selected.length >= MAX_SELECTED_REGIONS;
+    Array.prototype.forEach.call(wrap.querySelectorAll('.bp-europe-picker__chip'), function (chip) {
+      var code = chip.getAttribute('data-code');
+      var checkbox = chip.querySelector('input');
+      var isChecked = selected.indexOf(code) !== -1;
+      checkbox.checked = isChecked;
+      chip.dataset.checked = String(isChecked);
+      var disable = !isChecked && atCap;
+      checkbox.disabled = disable;
+      chip.dataset.disabled = String(disable);
+    });
+    if (state.els.regionCapMsg) state.els.regionCapMsg.hidden = !atCap;
+  }
+
+  /* A selected region's polygon gets the same visible, thicker stroke as a
+     selected country's (`.bp-europe-map__stage path[data-selected="true"]`,
+     europe_map.css -- already generic across both stages, no new CSS
+     needed here). */
+  function renderRegionSelectionOutline() {
+    var stage = state.els.stage;
+    if (!stage) return;
+    var selected = state.region.selected;
+    Array.prototype.forEach.call(stage.querySelectorAll('path[id^="em-nutsrg-"]'), function (p) {
+      var code = p.id.replace('em-nutsrg-', '');
+      var isSelected = selected.indexOf(code) !== -1;
+      if (isSelected) p.setAttribute('data-selected', 'true');
+      else p.removeAttribute('data-selected');
+      p.setAttribute('aria-pressed', String(isSelected));
+    });
   }
 
   function attachRegionHandlers(payload, yearValues) {
@@ -913,13 +1283,20 @@
       if (!pathEl) return;
       pathEl.setAttribute('tabindex', '0');
       pathEl.setAttribute('role', 'button');
+      pathEl.setAttribute('aria-pressed', String(state.region.selected.indexOf(code) !== -1));
       pathEl.setAttribute('aria-label', (state.regionNames[code] || code) + ' (' + code + ')');
+      // Click/keyboard both toggle the comparison selection AND show the
+      // detail side card together (2026-09-15 follow-up, mirroring
+      // attachCountryHandlers()'s own toggleCountrySelection +
+      // selectCountryDetail pair below) -- one interaction, two effects.
       pathEl.addEventListener('click', function () {
+        toggleRegionSelection(code);
         selectRegion(code);
       });
       pathEl.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter' || ev.key === ' ') {
           ev.preventDefault();
+          toggleRegionSelection(code);
           selectRegion(code);
         }
       });
@@ -1056,7 +1433,7 @@
     buildCountryChrome();
     buildCompareChrome();
 
-    var indexPromise = fetch(COUNTRY_INDEX_URL).then(readJSON);
+    var indexPromise = ensureCountryIndex();
     state.country.allPayloadsPromise = indexPromise
       .then(function (index) {
         state.country.index = index;
@@ -1106,9 +1483,18 @@
       'aria-pressed': 'false',
       text: T('europeModeCountry'),
     });
+    // 2026-09-15 follow-up (point 6): ONE palette picker for both map
+    // modes -- both read `--ramp-*`/`--nodata` off the SAME `.bp-europe-map`
+    // root (state.root), so a single control here suffices, placed
+    // alongside the mode toggle (outside both regionWrap/countryWrap) so
+    // it stays visible regardless of which mode is showing.
+    var paletteSelect = el('select', { id: 'europePaletteSelect', 'aria-label': T('mapPaletteLabel') });
+    var paletteField = el('div', { class: 'bp-europe-mode__palette' }, [paletteSelect]);
+
     var bar = el('div', { class: 'bp-europe-mode', role: 'group', 'aria-label': T('europeModeGroupLabel') }, [
       regionBtn,
       countryBtn,
+      paletteField,
     ]);
     // Ahead of everything buildChrome() already put in state.root (the
     // region wrapper) -- the toggle reads as the first thing in the panel,
@@ -1116,11 +1502,28 @@
     state.root.insertBefore(bar, state.root.firstChild);
     state.els.modeRegionBtn = regionBtn;
     state.els.modeCountryBtn = countryBtn;
+    state.els.paletteSelect = paletteSelect;
     regionBtn.addEventListener('click', function () {
       setMode('region');
     });
     countryBtn.addEventListener('click', function () {
       setMode('country');
+    });
+    populatePalettePicker();
+    paletteSelect.addEventListener('change', function () {
+      state.paletteName = EUROPE_PALETTES[paletteSelect.value] ? paletteSelect.value : EUROPE_DEFAULT_PALETTE;
+      try {
+        localStorage.setItem(EUROPE_PALETTE_KEY, state.paletteName);
+      } catch (e) {
+        /* private-browsing/storage-blocked: the choice just does not persist */
+      }
+      applyRampTokens();
+      // Repaints whichever map(s) have actually been built -- see
+      // applyRampTokens()'s own comment: eurostat-map bakes literal hex
+      // colours into each drawn <path>, so a CSS var change alone does not
+      // repaint it; a real redraw is required, same as a theme change.
+      if (state.currentIndicatorId) render();
+      if (state.mode === 'country' && state.country.currentIndicatorId) renderCountryMap();
     });
 
     window.addEventListener('bp:theme', function () {
@@ -1132,8 +1535,25 @@
       relabelCountryChrome();
       relabelCompareChrome();
       if (state.country.index) relabelCountryPicker();
+      populatePalettePicker();
+      paletteSelect.setAttribute('aria-label', T('mapPaletteLabel'));
       if (state.mode === 'country' && state.country.currentIndicatorId) renderCountryMap();
       renderComparisonCharts();
+    });
+  }
+
+  // Reuses map.html's OWN trilingual mapPaletteLabel/mapPalette_* keys
+  // (assets/i18n.js) rather than duplicating them -- point 6's own
+  // instruction: "reuse if already trilingual, check before adding
+  // duplicates" -- they already are.
+  function populatePalettePicker() {
+    var select = state.els.paletteSelect;
+    if (!select) return;
+    clear(select);
+    EUROPE_PALETTE_ORDER.forEach(function (name) {
+      var opt = el('option', { value: name, text: T('mapPalette_' + name) });
+      if (name === state.paletteName) opt.selected = true;
+      select.appendChild(opt);
     });
   }
 
@@ -1147,6 +1567,10 @@
     if (mode === 'country' && state.country.index && state.country.currentIndicatorId) {
       ensureCountryGeometryAndVendor().then(renderCountryMap);
     }
+    // Switching modes never clears EITHER selection array (state.region.
+    // selected / state.country.selected) -- only which one the
+    // "Comparaison internationale" card currently reads.
+    renderComparisonCharts();
   }
 
   /* ---- country map chrome ------------------------------------------------- */
@@ -1777,6 +2201,7 @@
     state.els.compare = {
       heading: heading,
       desc: desc,
+      refRow: refRow,
       refEU: refEU,
       refEULabelText: refEULabelText,
       refEA: refEA,
@@ -1812,11 +2237,172 @@
     return { label: label, unit: payload.unit, colour: colour, dash: dash, isReference: true, points: points };
   }
 
+  function statusLabelVocab() {
+    return {
+      suppressed: T('status_suppressed'),
+      na: T('status_na'),
+      missing: T('status_missing'),
+      provisional: T('status_provisional'),
+      estimate: T('status_estimate'),
+      revised: T('status_revised'),
+    };
+  }
+
+  /* The per-card "level / croissance annuelle" toggle -- 2026-09-15
+     follow-up, only appended for a payload with `has_yoy: true`. Redraws
+     the WHOLE comparison grid on change (simplest correct option: the
+     toggle is rare and the grid is small, at most 8 series x 7 or 3
+     cards). */
+  function buildGrowthToggle(indicatorId) {
+    var checkbox = el('input', { type: 'checkbox' });
+    checkbox.checked = !!state.growthModeByIndicator[indicatorId];
+    var label = el('label', { class: 'bp-europe-compare__growth' }, [checkbox]);
+    label.appendChild(document.createTextNode(' ' + T('europeGrowthToggleLabel')));
+    checkbox.addEventListener('change', function () {
+      state.growthModeByIndicator[indicatorId] = checkbox.checked;
+      renderComparisonCharts();
+    });
+    return label;
+  }
+
+  /* One comparison card -- shared by both country and region rendering
+     below (2026-09-15 follow-up), parameterised over what differs: which
+     payload, which codes are selected, how to name a code, and whether a
+     reference line is even meaningful for this mode (NUTS2 payloads carry
+     no `reference_lines` key at all -- CLAUDE.md rule 26: a real "does not
+     exist", never faked as an empty toggle).
+     @param opts {indicatorId, payload, selectedCodes, nameForCode,
+       statusLabels, allowReference, showEU27, showEA21} */
+  function buildComparisonCard(opts) {
+    var payload = opts.payload;
+    var card = el('div', { class: 'bp-europe-compare__card' });
+    var title = (payload && payload.names && (payload.names[LANG] || payload.names.en)) || opts.indicatorId;
+    card.appendChild(el('h4', { text: title }));
+
+    if (!payload || payload.status !== 'loaded') {
+      card.appendChild(
+        el('p', { class: 'bp-europe-compare__blocked', text: (payload && payload.blocked_reason) || T('europeLoadError') })
+      );
+      return card;
+    }
+
+    // Growth mode is per-card; while it is on, a level-scaled EU27/EA21
+    // reference line is suppressed entirely for THIS card (lead review,
+    // 2026-09-15: percent growth and a level average cannot share one
+    // y-axis without misleading) -- hidden, not merely disabled, and never
+    // offered at all in region mode (opts.allowReference).
+    var growthOn = !!(payload.has_yoy && state.growthModeByIndicator[opts.indicatorId]);
+    if (payload.has_yoy) card.appendChild(buildGrowthToggle(opts.indicatorId));
+
+    var legend = el('div', { class: 'bp-europe-compare__legend' });
+    opts.selectedCodes.forEach(function (code, i) {
+      var name = opts.nameForCode(code);
+      // `data-code` (never a rendered indicator id, just the geography
+      // code the selection itself is keyed on) lets a test or a future
+      // feature find "the Belgium chip" without depending on language.
+      legend.appendChild(
+        el('span', { class: 'chip', 'data-code': code }, [
+          el('span', { class: 'dot', style: 'background:var(--bp-chart-' + ((i % 8) + 1) + ')' }),
+          el('span', { text: name }),
+        ])
+      );
+    });
+    card.appendChild(legend);
+
+    var canvas = document.createElement('canvas');
+    card.appendChild(canvas);
+
+    // Reads either `periods` (country payloads) or `years` (NUTS2
+    // payloads) -- the small local normalizer the spec calls for, rather
+    // than renaming either exporter's own existing field (every other
+    // region-mode reader in this file -- populateRegionSelect,
+    // indexGeometryNames, render() itself -- already depends on the exact
+    // current NUTS2 names).
+    var periods = payload.periods || payload.years || [];
+    var seriesUnit = growthOn ? 'percent_yoy' : payload.unit;
+    var series = opts.selectedCodes.map(function (code, i) {
+      var name = opts.nameForCode(code);
+      var points = periods.map(function (p) {
+        var cell = payload.values[p] && payload.values[p][code];
+        var value = null;
+        if (cell) value = growthOn ? (typeof cell.yoy === 'number' ? cell.yoy : null) : (typeof cell.v === 'number' ? cell.v : null);
+        return { period: p, value: value, status: cell ? cell.s : 'missing' };
+      });
+      return { label: name, unit: seriesUnit, colourIndex: i, points: points };
+    });
+    if (opts.allowReference && !growthOn) {
+      if (opts.showEU27 && hasAnyReference(payload.reference_lines, 'EU27_2020')) {
+        series.push(referenceSeries(payload, 'EU27_2020', T('europeRefEU27'), cssVar('--bp-text-faint', '#8e98ad'), [6, 3]));
+      }
+      if (opts.showEA21 && hasAnyReference(payload.reference_lines, 'EA21')) {
+        series.push(referenceSeries(payload, 'EA21', T('europeRefEA21'), cssVar('--bp-border', '#c8cdd8'), [2, 2]));
+      }
+    }
+
+    var c = state.els.compare;
+    var st = c.chartState[opts.indicatorId] || (c.chartState[opts.indicatorId] = { model: { hits: [] } });
+    st.series = series;
+    st.tipOpts = {
+      locale: LANG,
+      unit: seriesUnit,
+      statusLabels: opts.statusLabels,
+      missingLabel: T('status_missing'),
+      ariaLabel: title,
+      formatValue: MapUI.formatValue,
+    };
+
+    function draw() {
+      if (canvas.offsetParent === null) return;
+      canvas.style.width = '';
+      canvas.style.height = '';
+      // markers:false (2026-09-15 follow-up, point 5) -- up to 8 selected
+      // geographies each drawing a dot at every period reads as noise on
+      // a dense comparison chart; the line alone carries the shape.
+      var next = window.BPCharts.drawLine(canvas, st.series, { locale: LANG, height: 180, markers: false });
+      st.model.hits = next.hits;
+    }
+    draw();
+    window.BPCharts.attachTooltip(canvas, st.model, st.tipOpts);
+    window.BPCharts.register(canvas, draw);
+
+    var metaLines = [];
+    var unitSuffix = MapUI.unitSuffix(seriesUnit, LANG);
+    if (unitSuffix) metaLines.push(unitSuffix.trim());
+    if (payload.source && payload.source.retrieved) {
+      metaLines.push(T('europeSourceLabel') + ': Eurostat (' + payload.source.dataset + '), ' + T('europeRetrievedLabel', { date: payload.source.retrieved }));
+    }
+    if (metaLines.length) card.appendChild(el('p', { class: 'bp-europe-compare__meta', text: metaLines.join(' · ') }));
+
+    if (payload.adapted && payload.adapted.notice) {
+      var noticeText = payload.adapted.notice[LANG] || payload.adapted.notice.en;
+      card.appendChild(el('p', { class: 'bp-europe-compare__adapted', text: T('europeAdaptedLabel') + ': ' + noticeText }));
+    }
+
+    return card;
+  }
+
+  /* ---- "Comparaison internationale": mode-scoped (2026-09-15 follow-up).
+     Country mode keeps its original 7-indicator behaviour unchanged; region
+     mode is new -- 3 NUTS2 indicators, no reference lines (they do not
+     exist for a NUTS2 payload, CLAUDE.md rule 26). Called from every place
+     that used to call the country-only version directly (theme/lang
+     change, ref-checkbox change, mode switch, a selection toggle in
+     either mode), so it must be safe to call before either mode's data has
+     actually loaded -- each branch below guards on its own readiness. */
   function renderComparisonCharts() {
+    var c = state.els.compare;
+    if (!c) return;
+    if (state.mode === 'region') renderRegionComparisonCharts();
+    else renderCountryComparisonCharts();
+  }
+
+  function renderCountryComparisonCharts() {
     var c = state.els.compare;
     if (!c || !state.country.index) return;
     clear(c.grid);
+    c.refRow.hidden = false;
     var selected = state.country.selected;
+    c.desc.textContent = T('europeCompareDesc');
     if (!selected.length) {
       c.empty.hidden = false;
       c.empty.textContent = T('europeComparePickPrompt');
@@ -1825,98 +2411,59 @@
     c.empty.hidden = true;
     var showEU27 = c.refEU.checked;
     var showEA21 = c.refEA.checked;
-    var statusLabels = {
-      suppressed: T('status_suppressed'),
-      na: T('status_na'),
-      missing: T('status_missing'),
-      provisional: T('status_provisional'),
-      estimate: T('status_estimate'),
-      revised: T('status_revised'),
-    };
+    var statusLabels = statusLabelVocab();
 
     state.country.index.indicators.forEach(function (indMeta) {
-      var payload = state.country.payloads[indMeta.id];
-      var card = el('div', { class: 'bp-europe-compare__card' });
-      var title = (payload && payload.names && (payload.names[LANG] || payload.names.en)) || indMeta.id;
-      card.appendChild(el('h4', { text: title }));
-
-      if (!payload || payload.status !== 'loaded') {
-        card.appendChild(
-          el('p', { class: 'bp-europe-compare__blocked', text: (payload && payload.blocked_reason) || T('europeLoadError') })
-        );
-        c.grid.appendChild(card);
-        return;
-      }
-
-      var legend = el('div', { class: 'bp-europe-compare__legend' });
-      selected.forEach(function (code, i) {
-        var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
-        // `data-code` (never a rendered indicator id, just the ISO-shaped
-        // geography code the selection itself is keyed on) lets a test or a
-        // future feature find "the Belgium chip" without depending on
-        // which language happens to be active.
-        legend.appendChild(
-          el('span', { class: 'chip', 'data-code': code }, [
-            el('span', { class: 'dot', style: 'background:var(--bp-chart-' + ((i % 8) + 1) + ')' }),
-            el('span', { text: name }),
-          ])
-        );
-      });
-      card.appendChild(legend);
-
-      var canvas = document.createElement('canvas');
-      card.appendChild(canvas);
-
-      var series = selected.map(function (code, i) {
-        var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
-        var points = payload.periods.map(function (p) {
-          var cell = payload.values[p] && payload.values[p][code];
-          return { period: p, value: cell && typeof cell.v === 'number' ? cell.v : null, status: cell ? cell.s : 'missing' };
-        });
-        return { label: name, unit: payload.unit, colourIndex: i, points: points };
-      });
-      if (showEU27 && hasAnyReference(payload.reference_lines, 'EU27_2020')) {
-        series.push(referenceSeries(payload, 'EU27_2020', T('europeRefEU27'), cssVar('--bp-text-faint', '#8e98ad'), [6, 3]));
-      }
-      if (showEA21 && hasAnyReference(payload.reference_lines, 'EA21')) {
-        series.push(referenceSeries(payload, 'EA21', T('europeRefEA21'), cssVar('--bp-border', '#c8cdd8'), [2, 2]));
-      }
-
-      var st = c.chartState[indMeta.id] || (c.chartState[indMeta.id] = { model: { hits: [] } });
-      st.series = series;
-      st.tipOpts = {
-        locale: LANG,
-        unit: payload.unit,
+      var card = buildComparisonCard({
+        indicatorId: indMeta.id,
+        payload: state.country.payloads[indMeta.id],
+        selectedCodes: selected,
+        nameForCode: function (code) {
+          return (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
+        },
         statusLabels: statusLabels,
-        missingLabel: T('status_missing'),
-        ariaLabel: title,
-        formatValue: MapUI.formatValue,
-      };
+        allowReference: true,
+        showEU27: showEU27,
+        showEA21: showEA21,
+      });
+      c.grid.appendChild(card);
+    });
+  }
 
-      function draw() {
-        if (canvas.offsetParent === null) return;
-        canvas.style.width = '';
-        canvas.style.height = '';
-        var next = window.BPCharts.drawLine(canvas, st.series, { locale: LANG, height: 180 });
-        st.model.hits = next.hits;
-      }
-      draw();
-      window.BPCharts.attachTooltip(canvas, st.model, st.tipOpts);
-      window.BPCharts.register(canvas, draw);
+  function renderRegionComparisonCharts() {
+    var c = state.els.compare;
+    if (!c || !state.index) return; // region index not loaded yet
+    clear(c.grid);
+    c.refRow.hidden = true; // no EU27/EA21 reference for NUTS2 payloads -- see module comment
+    var selected = state.region.selected;
+    c.desc.textContent = T('europeCompareDescRegion');
+    if (!selected.length) {
+      c.empty.hidden = false;
+      c.empty.textContent = T('europeComparePickPromptRegion');
+      return;
+    }
+    c.empty.hidden = true;
+    var statusLabels = statusLabelVocab();
 
-      var metaLines = [];
-      var unitSuffix = MapUI.unitSuffix(payload.unit, LANG);
-      if (unitSuffix) metaLines.push(unitSuffix.trim());
-      if (payload.source && payload.source.retrieved) {
-        metaLines.push(T('europeSourceLabel') + ': Eurostat (' + payload.source.dataset + '), ' + T('europeRetrievedLabel', { date: payload.source.retrieved }));
-      }
-      if (metaLines.length) card.appendChild(el('p', { class: 'bp-europe-compare__meta', text: metaLines.join(' · ') }));
-
-      if (payload.adapted && payload.adapted.notice) {
-        var noticeText = payload.adapted.notice[LANG] || payload.adapted.notice.en;
-        card.appendChild(el('p', { class: 'bp-europe-compare__adapted', text: T('europeAdaptedLabel') + ': ' + noticeText }));
-      }
-
+    // Every region indicator the index lists (currently 3, exactly this
+    // file's own module docstring's promise: "Adding a fourth NUTS 2
+    // indicator later is a pipeline change plus a new payload file, never
+    // an edit here") -- the SAME array populateIndicatorSelect/render use
+    // for the map, not a second, hardcoded list of ids (CLAUDE.md rules
+    // 2/24: no indicator id lives in this generic renderer).
+    state.index.indicators.forEach(function (indMeta) {
+      var card = buildComparisonCard({
+        indicatorId: indMeta.id,
+        payload: state.payloads[indMeta.id],
+        selectedCodes: selected,
+        nameForCode: function (code) {
+          return state.regionNames[code] || code;
+        },
+        statusLabels: statusLabels,
+        allowReference: false,
+        showEU27: false,
+        showEA21: false,
+      });
       c.grid.appendChild(card);
     });
   }
