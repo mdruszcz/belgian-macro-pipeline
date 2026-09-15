@@ -754,9 +754,21 @@ def test_region_selection_renders_comparison_charts_and_survives_a_mode_switch(b
         card_count = page.eval_on_selector_all(
             "#international .bp-europe-compare__card", "els => els.length"
         )
+        # One card per NUTS2 indicator the store actually publishes -- not a
+        # fixed number: the Eurostat additional domains batch
+        # (docs/data_catalog.md, 2026-09-15) grew the nuts2 store from 3 to
+        # 6 indicators (GDP_PC_PPS_NUTS2, POPULATION_NUTS2,
+        # UNEMPLOYMENT_RATE_NUTS2, plus VALUE_ADDED_GROWTH_NUTS2,
+        # EMPLOYMENT_RATE_NUTS2, HOUSEHOLD_INCOME_TOTAL_NUTS2), and
+        # renderRegionComparisonCharts() renders one card per
+        # state.index.indicators entry by design (CLAUDE.md rules 2/24 --
+        # no hardcoded indicator count in this generic renderer). Read the
+        # real, live count from the index the page itself just loaded
+        # rather than hardcoding a number here too.
+        expected_count = len(_index()["indicators"])
         assert (
-            card_count == 3
-        ), f"expected 3 region-level comparison cards (NUTS2 indicators), got {card_count}"
+            card_count == expected_count
+        ), f"expected {expected_count} region-level comparison cards (one per nuts2 store indicator), got {card_count}"
         legend_codes = page.eval_on_selector_all(
             "#international .bp-europe-compare__legend .chip", "els => els.map(e => e.dataset.code)"
         )
