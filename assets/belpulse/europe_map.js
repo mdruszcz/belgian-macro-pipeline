@@ -120,6 +120,15 @@
     geometryTopo: null,
     regionNames: {},
     payloads: {},
+    // The promise chain that fetches every region indicator's payload
+    // (init()'s own Promise.all, see fetchPayload/init below) -- same
+    // shape and same reason as state.country.allPayloadsPromise: setMode()
+    // chains a comparison-chart render through this instead of calling it
+    // synchronously, so a mode switch before all payloads have arrived
+    // never builds a comparison card from a still-undefined payload (see
+    // setMode()'s own comment for the CI-only failure that found the
+    // country-mode half of this).
+    allPayloadsPromise: null,
     currentIndicatorId: null,
     currentYear: null,
     selectedRegion: null,
@@ -396,7 +405,7 @@
         state.countryNamesByCode = state.countryNamesByCode || {};
       });
 
-    Promise.all([indexPromise, geometryPromise, loadVendorScript(), countryNamesPromise])
+    state.allPayloadsPromise = Promise.all([indexPromise, geometryPromise, loadVendorScript(), countryNamesPromise])
       .then(function (results) {
         state.index = results[0];
         state.geometryTopo = results[1];
@@ -1570,7 +1579,31 @@
     // Switching modes never clears EITHER selection array (state.region.
     // selected / state.country.selected) -- only which one the
     // "Comparaison internationale" card currently reads.
-    renderComparisonCharts();
+    //
+    // Real race, found by a CI-only browser-test failure (never reproduced
+    // on a warm local run): switching to country mode before all 7 country
+    // payloads have finished fetching used to call renderComparisonCharts()
+    // synchronously right here, which built comparison cards from a
+    // PARTIALLY filled state.country.payloads -- a card for an indicator
+    // whose fetch hadn't resolved yet got no growth toggle (and no
+    // canvas), since buildComparisonCard() only adds one when
+    // payload.has_yoy is true and payload itself was still undefined. The
+    // grid self-corrected a moment later once initCountry()'s own
+    // allPayloadsPromise resolved and called renderComparisonCharts()
+    // again (~line 1459) -- but a reader (or a test) looking at the very
+    // first paint could see an incomplete card. Chaining through that same
+    // promise here means this call always sees every payload already
+    // loaded; once it has resolved (the normal case, switching modes after
+    // the initial load), .then() still fires on the next microtask, too
+    // fast to notice. The same hole exists in the region direction (this
+    // file's own init() prefetches all three region payloads the same way,
+    // via state.allPayloadsPromise) so both branches chain the same way.
+    var payloadsReady = mode === 'country' ? state.country.allPayloadsPromise : state.allPayloadsPromise;
+    if (payloadsReady) {
+      payloadsReady.then(renderComparisonCharts);
+    } else {
+      renderComparisonCharts();
+    }
   }
 
   /* ---- country map chrome ------------------------------------------------- */
