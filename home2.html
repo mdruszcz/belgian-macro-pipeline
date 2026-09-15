@@ -69,14 +69,6 @@
      assets/belpulse/layout.css's `.bp-topbar`/`.bp-topbar .wrap`, filled by
      src/pages/shell.py's render_header() through scripts/sync_site_shell.py.
      Batch A1.1: this page no longer overrides it locally. */
-  .home2-search-row{padding-top:var(--bp-space-4)}
-  .searchbox{
-    display:flex; align-items:center; gap:8px; max-width:330px;
-    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-    padding:7px 12px; background:var(--bp-bg);
-  }
-  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:var(--bp-text-small); color:inherit; flex:1; min-width:0}
-  .searchbox svg{color:var(--bp-text-faint); flex:none}
 
   /* ---- hero ---- */
   .hero{
@@ -118,28 +110,15 @@
   }
   .glass h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
   .glass .sub{font-size:11px; color:rgba(255,255,255,.55)}
-  /* components.css's details.bp-chart-data reads its colours from --bp-text*
-     tokens, calibrated for a LIGHT surface -- inside this dark glass card
-     that rendered as dark grey on navy, effectively invisible (measured:
-     var(--bp-text-muted) here was well under 4.5:1). Same fix as every
-     other muted label on this card (.sub/.provenance above): plain white at
-     an alpha that clears 4.5:1 against this background, verified against
-     both the base .glass tint and .home2 .glass's own darker one below. */
-  .glass details.bp-chart-data{color:rgba(255,255,255,.75)}
-  .glass details.bp-chart-data > summary{color:rgba(255,255,255,.75)}
-  .glass details.bp-chart-data > summary:hover{color:#fff}
-  .glass details.bp-chart-data th{color:rgba(255,255,255,.55)}
-  .glass details.bp-chart-data td{color:rgba(255,255,255,.92)}
-  .glass details.bp-chart-data th,
-  .glass details.bp-chart-data td{border-bottom-color:rgba(255,255,255,.18)}
   .hero-mini{display:flex; flex-direction:column; gap:var(--bp-space-4)}
-  .hero-mini .glass{padding:var(--bp-space-4); display:flex; flex-direction:column; min-height:0}
+  .hero-mini .glass{padding:var(--bp-space-4); display:flex; flex-direction:column; min-height:0; overflow:hidden}
+  /* Card head: title + unit on the left, latest value + period on the right,
+     on one row -- the plot takes the rest of the card. */
   .mini-head{display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
-  .seemore{font-size:11px; color:#8fb4ff; text-decoration:none; white-space:nowrap}
-  .seemore:hover{text-decoration:underline}
-  .mini-figure{display:flex; align-items:baseline; justify-content:flex-end; gap:8px; margin-top:2px}
-  .mini-figure b{font-size:1.5rem; font-weight:var(--bp-weight-bold)}
-  .mini-delta{font-size:11px}
+  .mini-label{min-width:0; padding-right:4px}
+  .mini-reading{flex:none; text-align:right; line-height:1}
+  .mini-reading b{display:block; font-size:1.5rem; font-weight:var(--bp-weight-bold)}
+  .mini-reading .period{display:block; margin-top:5px}
   /* A canvas with no CSS width keeps its 300px intrinsic size, so
      sizeCanvas() measures 300 and the drawing spills straight out of a
      narrower card into its neighbours. components.css only stretches
@@ -147,6 +126,8 @@
      page's own smaller chart slot. */
   .mini-canvas{position:relative; margin-top:4px; min-width:0}
   .mini-canvas canvas{display:block; width:100%}
+  .hero-mini .mini-canvas{margin-top:auto; padding-top:6px}
+  .hero-mini .provenance{margin-top:2px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
   .hero-map{padding:var(--bp-space-4); position:relative; display:flex; flex-direction:column}
   /* Zone 1: title + indicator picker, its own row. */
@@ -164,6 +145,14 @@
      .bp-shell--navy already means elsewhere in layout.css. */
   .hero-map .swatches div{border-color:rgba(255,255,255,.2)}
   .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage{color:rgba(255,255,255,.6)}
+  /* The shared .map-tip is tuned for a light page; over the hero's photo it
+     was hard to read. Opaque navy surface with the navy theme's text colours. */
+  .hero-map .map-tip{
+    background:var(--bp-navy-surface); border-color:var(--bp-navy-border);
+    color:var(--bp-navy-text); box-shadow:0 8px 24px rgba(0,0,0,.32);
+  }
+  .hero-map .map-tip .v{color:var(--bp-navy-text)}
+  .hero-map .map-tip .m{color:var(--bp-navy-text-muted)}
   .zoombtns{display:flex; flex-direction:column; gap:4px; position:absolute; top:8px; right:8px; z-index:2}
   .zoombtns button{
     width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
@@ -315,14 +304,6 @@
     .features{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
     .cta .wrap{grid-template-columns:minmax(0,1fr)}
   }
-  /* The top bar's own mobile behaviour (the nav collapsing behind
-     .bp-nav-toggle) is shared now -- assets/belpulse/layout.css's own
-     @media(max-width:768px) block, reached through render_header(). The
-     search box moved out of the header (see the comment above <main>) so it
-     needs no header-specific mobile rule of its own any more. */
-  @media (max-width:680px){
-    .searchbox{max-width:none}
-  }
   @media (max-width:680px){
     .hero h1{font-size:2rem}
     .finance{grid-template-columns:minmax(0,1fr)}
@@ -337,26 +318,23 @@
   /* ---- home2 high-fidelity composition ---------------------------------
      Values and map geometry come from the published payloads; only
      composition and presentation are specialised here. */
-  .home2 .wrap{max-width:1096px; padding-left:14px; padding-right:14px}
+  .home2 .wrap{max-width:1400px; padding-left:14px; padding-right:14px}
   /* The top bar's own height and width are shared now (--bp-topbar-h,
      --bp-content-max in assets/belpulse/tokens.css) -- this page no longer
      forces its own 51px. Batch A1.1 removed the override that conflicted
      with the maquette's 56px bar. */
   .home2 .bp-logo-mark{width:24px; height:28px}
   .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
-  .home2 .bp-nav{gap:21px; font-size:10px}
-  .home2 .searchbox{max-width:310px; padding:6px 10px}
-  .home2 .searchbox input{font-size:10px}
 
   .home2 .hero{
-    min-height:339px;
+    min-height:390px;
     background-image:
       linear-gradient(90deg,rgba(5,22,45,.97) 0%,rgba(7,28,55,.89) 42%,rgba(8,31,57,.78) 72%,rgba(6,25,48,.66) 100%),
       url('assets/belpulse/home2/home2-hero-brussels.png');
     background-size:cover; background-position:center right;
   }
   .home2 .hero .wrap{
-    grid-template-columns:minmax(0,1.25fr) minmax(0,1.05fr) minmax(0,.8fr);
+    grid-template-columns:minmax(0,1.18fr) minmax(0,.98fr) minmax(0,.94fr);
     gap:14px; padding-top:11px; padding-bottom:11px; align-items:stretch;
   }
   .home2 .hero-cards{display:contents}
@@ -385,10 +363,11 @@
   .home2 .hero-mini{gap:9px; min-width:0}
   .home2 .hero-mini .glass{padding:10px; min-height:0; flex:1}
   .home2 .hero-mini .glass h3{font-size:10px; line-height:1.2}
-  .home2 .hero-mini .sub,.home2 .seemore{font-size:8px}
+  .home2 .hero-mini .sub{font-size:8px}
   .home2 .hero-mini .provenance,.home2 .national-provenance{font-size:7px; line-height:1.25; color:rgba(255,255,255,.58)}
-  .home2 .mini-figure b{font-size:1.1rem}
+  .home2 .mini-reading b{font-size:1.45rem}
   .home2 .mini-canvas{margin-top:0}
+  .home2 .hero-mini .mini-canvas{margin-top:auto; padding-top:5px}
 
   .home2 .finance{
     min-height:88px; margin-top:10px; padding:10px 12px;
@@ -486,7 +465,6 @@
   @media (max-width:768px){
     .home2 .bp-topbar .wrap{flex-wrap:wrap}
     .home2 .bp-nav{order:3; flex-basis:100%}
-    .home2 .searchbox{order:2; max-width:none; margin-left:auto}
   }
   /* Everything becomes one column, including the two hero charts. */
   @media (max-width:600px){
@@ -509,19 +487,6 @@
 <!-- bp-shell:header:end -->
 
 <main id="bp-main">
-
-  <!-- The commune/indicator search. NOT part of the shared header (Batch
-       A1.1's maquette shows only the logo, nav and the two menus there --
-       docs/features/site_unification.md section 2) -- moved here rather than
-       dropped, since it is a real feature (wireSearch(), below) and nothing
-       about its behaviour is tied to sitting inside the top bar. -->
-  <div class="wrap home2-search-row">
-    <label class="searchbox">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="communeSearch" list="communeList" type="text" data-t-placeholder="homeSearchPlaceholder" placeholder="Search for a commune or an indicator…" autocomplete="off">
-      <datalist id="communeList"></datalist>
-    </label>
-  </div>
 
   <!-- ── hero ────────────────────────────────────────────────────────────── -->
   <section class="hero">
@@ -864,6 +829,18 @@
     return bits.join(' · ');
   }
 
+  /* The hero cards carry a compact source line (source + grade). The
+     retrieval date stays on the national cards lower on the page, and a
+     non-final status is still shown in each point's tooltip. */
+  function nationalSourceLine(entry){
+    var bits = [];
+    var source = entry.source ? state.sources[entry.source] : null;
+    bits.push((source && source.label && (source.label[LANG] || source.label.en)) || entry.source_agency || entry.source || T('unavailable'));
+    var grade = state.grades[entry.grade];
+    if(grade) bits.push('(' + entry.grade + ') ' + (grade[LANG] || grade.en));
+    return bits.join(' · ');
+  }
+
   var valuesCache = {};
   async function loadValues(code){
     if(valuesCache[code]) return valuesCache[code];
@@ -939,6 +916,24 @@
     });
   }
 
+  /* The plot fills whatever the card has left after its head and source
+     line, so the chart is as big as the card allows. The slot itself is
+     left out of the sum, so the result never feeds back into itself; 128px
+     is the floor (and what a content-sized card on a phone gets). */
+  function heroChartHeight(canvas){
+    var slot = canvas.parentNode, card = slot.parentNode;
+    var cs = getComputedStyle(card), used = 0;
+    Array.prototype.forEach.call(card.children, function(child){
+      if(child === slot) return;
+      var st = getComputedStyle(child);
+      used += child.offsetHeight + parseFloat(st.marginTop) + parseFloat(st.marginBottom);
+    });
+    var ss = getComputedStyle(slot);
+    var free = card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
+      used - parseFloat(ss.paddingTop) - parseFloat(ss.marginTop);
+    return Math.max(128, Math.floor(free));
+  }
+
   var heroUnregister = [];
   function renderHeroMini(){
     heroUnregister.forEach(function(unregister){ unregister(); });
@@ -952,25 +947,21 @@
       var latest = latestNumeric(entry);
       var el = document.createElement('div');
       el.className = 'glass';
-      // Order matches every chart card on the site: full title, latest
-      // value + period, the plot, then its source -- the plot never sits
-      // above the figure it illustrates.
+      // Title and latest value + period share the head row, then the plot,
+      // then its source -- the plot never sits above the figure it illustrates.
       el.innerHTML =
-        '<div class="mini-head"><div><h3></h3><div class="sub"></div></div>' +
-        '<a class="seemore" href="macro.html"></a></div>' +
-        '<div class="mini-figure"><b></b></div>' +
-        '<div class="period sub" style="text-align:right"></div>' +
+        '<div class="mini-head"><div class="mini-label"><h3></h3><div class="sub"></div></div>' +
+        '<div class="mini-reading"><b></b><span class="period sub"></span></div></div>' +
         '<div class="mini-canvas"><canvas></canvas></div>' +
         '<div class="provenance sub"></div>';
       el.querySelector('h3').textContent = name;
       // A unit LABEL, never the raw code -- "percent_yy" must not reach a
       // reader (claude.md rule 7; MapUI.unitLabel, shared with macro.html).
       el.querySelector('.sub').textContent = MapUI.unitLabel(entry.unit, LANG);
-      el.querySelector('.seemore').textContent = T('homeSeeMore');
-      el.querySelector('.mini-figure b').textContent =
+      el.querySelector('.mini-reading b').textContent =
         latest ? MapUI.formatValue(latest.value, entry.unit, entry.decimals, LANG) : '—';
       el.querySelector('.period').textContent = latest ? latest.period : '';
-      el.querySelector('.provenance').textContent = nationalProvenance(entry, latest);
+      el.querySelector('.provenance').textContent = nationalSourceLine(entry);
       host.appendChild(el);
       var pts = seriesPoints(entry, 24);
       if(pts.filter(function(p){ return typeof p.value === 'number'; }).length > 1){
@@ -985,8 +976,10 @@
       provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
     };
     draws.forEach(function(d){
-      var model = BPCharts.drawLine(d.canvas, [{label: d.label, unit: d.unit, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: 104});
+      // label: null keeps the indicator name out of the tooltip -- the card
+      // title already names it, and the canvas aria-label still carries it.
+      var model = BPCharts.drawLine(d.canvas, [{label: null, unit: d.unit, points: d.points, colourIndex: d.i}],
+        {locale: LANG, height: heroChartHeight(d.canvas)});
       // formatValue: MapUI's own formatter, the same one every other number
       // on this page uses -- "2,2%", never "2,2 percent_yy" (rule 7).
       var tipOpts = {
@@ -994,16 +987,9 @@
         statusLabels: statusLabels, ariaLabel: d.label, formatValue: MapUI.formatValue,
       };
       BPCharts.attachTooltip(d.canvas, model, tipOpts);
-      // Column headers ("Period"/"Value"/"Status") are charts.js's own
-      // built-in English fallbacks -- BPCharts carries no i18n table of its
-      // own (see the file header). Everything else here, including the
-      // <summary> word, is real translated copy: the title, the value and
-      // its unit, the period, the status word, the source line and
-      // T('chartDataTable') are all trilingual.
-      BPCharts.dataTable(d.card, model, Object.assign({summary: T('chartDataTable'), seriesColumn: false}, tipOpts));
       var redraw = function(){
-        var next = BPCharts.drawLine(d.canvas, [{label: d.label, unit: d.unit, points: d.points, colourIndex: d.i}],
-          {locale: LANG, height: 104});
+        var next = BPCharts.drawLine(d.canvas, [{label: null, unit: d.unit, points: d.points, colourIndex: d.i}],
+          {locale: LANG, height: heroChartHeight(d.canvas)});
         model.hits = next.hits;
       };
       heroUnregister.push(BPCharts.register(d.canvas, redraw));
@@ -1201,31 +1187,14 @@
     });
   }
 
-  /* ---- commune search --------------------------------------------------- */
-  function wireSearch(){
-    var input = document.getElementById('communeSearch');
-    var list = document.getElementById('communeList');
-    if(!state.map) return;
-    list.innerHTML = '';
-    state.map.features.forEach(function(f){
-      var o = document.createElement('option');
-      o.value = f.name + ' (' + f.nis + ')';
-      list.appendChild(o);
-    });
-    input.addEventListener('change', function(){
-      var m = /\((\d{4,5})\)\s*$/.exec(input.value);
-      if(m) window.location.href = 'commune.html?nis=' + m[1];
-    });
-  }
-
   /* ---- boot ------------------------------------------------------------- */
   async function init(){
     // The shared header's language menu (assets/belpulse/shell.js) is what a
     // reader actually clicks now -- it already writes I18N.STORAGE_KEY and
     // re-translates every [data-t*] element itself, and dispatches 'bp:lang'
     // for exactly this: everything on the page that is NOT a plain
-    // translated string (the map, the finance strip, the search list) and
-    // has to be rebuilt from fresh data in the new language.
+    // translated string (the map, the finance strip) and has to be rebuilt
+    // from fresh data in the new language.
     document.addEventListener('bp:lang', function(e){
       LANG = e.detail.lang;
       applyStrings();
@@ -1314,7 +1283,6 @@
     document.getElementById('zoomOut').onclick = function(){ state.map.zoomBy(1.4); };
     document.getElementById('mapIndicator').addEventListener('change', function(e){ drawIndicator(e.target.value); });
 
-    wireSearch();
     renderThumbs();
 
     var opening = (state.sections.headlines || [])[0];

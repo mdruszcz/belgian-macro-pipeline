@@ -133,3 +133,24 @@ def test_home2_hero_series_come_from_national_sections_config_not_the_page():
     assert "national_sections.json" in html
     assert "heroCodes" in html
     assert "heroOrder" in html
+
+
+def test_home2_has_no_search_box_and_uses_the_wide_layout():
+    html = _html()
+    assert 'id="communeSearch"' not in html
+    assert "wireSearch" not in html
+    assert "searchbox" not in html
+    assert ".home2 .wrap{max-width:1400px;" in html
+
+
+def test_home2_nav_uses_the_shared_header_typography():
+    # No page-local font-size on the nav: the shared .bp-nav size applies,
+    # the same as on every other page.
+    assert not re.search(r"\.home2 \.bp-nav\{[^}]*font-size", _html())
+
+
+def test_home2_hero_map_tooltip_is_opaque_navy():
+    rule = re.search(r"\.hero-map \.map-tip\{([^}]+)\}", _html())
+    assert rule, "no hero-map tooltip rule"
+    assert "background:var(--bp-navy-surface)" in rule.group(1)
+    assert "color:var(--bp-navy-text)" in rule.group(1)

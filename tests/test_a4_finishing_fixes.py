@@ -126,7 +126,7 @@ def test_macro_search_lists_every_commune_and_links_to_commune_page(chromium, si
 @pytest.mark.parametrize(
     "path,ready_selector",
     [
-        ("home2.html", "#communeList option"),
+        ("home2.html", "#heroMini .glass canvas"),
         ("macro.html", "#communeList option"),
         ("commune.html?nis=92094", "#allDataSections .indicator-group"),
         ("profiles.html", "#communeList option"),
