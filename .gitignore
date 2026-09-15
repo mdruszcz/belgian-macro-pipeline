@@ -25,3 +25,9 @@ docs/implementation/batches/*-screenshots/
 # DAGSTER_HOME is unset. Run history is never committed.
 .tmp_dagster_home_*/
 .dagster/
+# WAL-mode sidecars left behind by any tool that opens a committed .db file
+# in WAL mode (a DB viewer, an interrupted read) -- offload_stores.py already
+# refuses to run while these sit beside the committed database (see its own
+# module docstring); this just stops one from being committed by accident.
+*.db-shm
+*.db-wal
