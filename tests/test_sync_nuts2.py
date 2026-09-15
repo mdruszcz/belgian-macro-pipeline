@@ -1,5 +1,7 @@
 """Tests for scripts/sync_nuts2.py -- the Europe NUTS 2 batch's regional
-loader (Europe NUTS 2, batch B2, docs/features/europe_nuts2.md).
+loader (Europe NUTS 2, batch B2, docs/features/europe_nuts2.md; extended to
+six indicators by the Eurostat additional domains batch, docs/data_catalog.md,
+2026-09-15).
 
 tests/fixtures/sync_nuts2/GDP_PC_PPS_NUTS2.json is a REAL Eurostat
 nama_10r_2gdp response (fetched 2026-09-14), trimmed to four geo codes
@@ -10,6 +12,11 @@ value in the live nama_10r_2gdp response (confirmed 2026-09-14 against the
 full response), so a value was added by hand at BEZZ/2024 -- the only way to
 exercise the pseudo-region-skip path with this dataset at all. Every other
 cell is Eurostat's own real number.
+
+tests/fixtures/sync_nuts2/{VALUE_ADDED_GROWTH_NUTS2,EMPLOYMENT_RATE_NUTS2,
+HOUSEHOLD_INCOME_TOTAL_NUTS2}.json are REAL, untrimmed Eurostat responses
+fetched 2026-09-15 (nama_10r_2gvagr, lfst_r_lfe2emprt, tgs00026) -- used only
+by the pilot/nuts2-indicator-set tests below, not replayed row-by-row here.
 """
 
 import json
@@ -64,7 +71,7 @@ def test_reference_rows_only_needs_no_network(tmp_path):
         n_geo = conn.execute("SELECT COUNT(*) FROM geographies WHERE level = 'nuts2'").fetchone()[0]
     finally:
         conn.close()
-    assert n_indicators == 3
+    assert n_indicators == 6
     from src.geography.nuts2 import load_nuts2_rows
 
     assert n_geo == len(load_nuts2_rows())
@@ -195,6 +202,25 @@ def test_pilot_indicators_returns_exactly_the_country_level_indicators():
         "CONSUMER_CONFIDENCE_EUROPE",
         "GDP_PC_PPS_COUNTRY",
         "POPULATION_COUNTRY",
+        # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15).
+        "VALUE_ADDED_TOTAL_EUROPE",
+        "EMPLOYMENT_LFS_EUROPE",
+        "GOV_BALANCE_EUROPE",
+        "TAX_RECEIPTS_EUROPE",
+        "GOV_EXPENDITURE_HEALTH_EUROPE",
+        "GOV_DEBT_QUARTERLY_EUROPE",
+        "EXPORTS_GOODS_SERVICES_EUROPE",
+        "IMPORTS_GOODS_SERVICES_EUROPE",
+        "GINI_COEFFICIENT_EUROPE",
+        "POVERTY_RATE_EUROPE",
+        "POVERTY_SOCIAL_EXCLUSION_EUROPE",
+        "RENEWABLE_ENERGY_SHARE_EUROPE",
+        "GHG_EMISSIONS_EUROPE",
+        "POPULATION_EUROPE",
+        "LIFE_EXPECTANCY_EUROPE",
+        "POPULATION_GROWTH_RATE_EUROPE",
+        "RD_EXPENDITURE_EUROPE",
+        "RD_PERSONNEL_EUROPE",
     }
 
 
@@ -211,4 +237,38 @@ def test_nuts2_indicators_and_pilot_indicators_never_overlap():
         "GDP_PC_PPS_NUTS2",
         "POPULATION_NUTS2",
         "UNEMPLOYMENT_RATE_NUTS2",
+        # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15).
+        "VALUE_ADDED_GROWTH_NUTS2",
+        "EMPLOYMENT_RATE_NUTS2",
+        "HOUSEHOLD_INCOME_TOTAL_NUTS2",
     }
+
+
+@pytest.mark.parametrize(
+    "code,period,expected",
+    [
+        # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15):
+        # real-data sanity checks against Brussels-Capital Region (be10:nuts2),
+        # the exact figures verified live before the batch's own handoff was
+        # written.
+        ("VALUE_ADDED_GROWTH_NUTS2", "2022", 106.8),
+        ("EMPLOYMENT_RATE_NUTS2", "2022", 65.2),
+        ("HOUSEHOLD_INCOME_TOTAL_NUTS2", "2021", 22772.49),
+    ],
+)
+def test_a_real_belgian_value_lands_correctly(db, monkeypatch, code, period, expected):
+    _one_real_nuts2_indicator(monkeypatch, code)
+
+    sn2.sync(db, from_dir=FIXTURES)
+
+    conn = sqlite3.connect(str(db))
+    try:
+        row = conn.execute(
+            "SELECT value FROM observations WHERE indicator_id = ? AND geo_id = 'be10:nuts2' "
+            "AND period = ?",
+            (code, period),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row is not None, f"no {code} row for be10:nuts2/{period}"
+    assert row[0] == pytest.approx(expected, rel=1e-6)

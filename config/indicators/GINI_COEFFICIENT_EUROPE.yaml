@@ -1,0 +1,23 @@
+id: GINI_COEFFICIENT_EUROPE
+name:
+  en: Gini coefficient of equivalised disposable income
+  fr: Coefficient de Gini du revenu disponible équivalent
+  nl: Gini-coëfficiënt van het equivalent beschikbaar inkomen
+unit: index_0_100
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: Gini coefficient of equivalised disposable income, total population
+    (age TOTAL), every allowlisted European country -- Eurostat domains
+    batch, 2026-09-15 (docs/data_catalog.md). Bounded 0-100 (0 = perfect
+    equality, 100 = perfect inequality).
+fetch:
+  dataset: ilc_di12
+  filters:
+    age: TOTAL
+  geographies: allowlist
+  since: "2008"
+display: null

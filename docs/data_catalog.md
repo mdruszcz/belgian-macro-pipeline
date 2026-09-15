@@ -861,6 +861,152 @@ approvals are recorded in their own sections rather than added there. Every figu
 | Required credit | Its own `LICENSE` file requirement (EUPL-1.2 notice retained alongside the vendored file) |
 | Licence caveat | **EUPL-1.2**, confirmed from the downloaded `LICENSE` file. Fetches Eurostat statistics, Nuts2json geometry, a GISCO basemap and GISCO place-name labels from `ec.europa.eu`/`raw.githubusercontent.com` **by default at runtime** — grepped from the bundle, listed in full in the spec. Two confirmed-present options (`.nuts2jsonBaseURL(...)`, `.statData().setData(...)`) can redirect geometry to a self-hosted path and inject data in memory instead, which the spec proposes using so no page ever calls Eurostat or GitHub directly — **not yet verified end-to-end in a browser trace**, spec-stage only |
 
+## Eurostat additional domains — 21 indicators, APPROVED by the maintainer 2026-09-15
+
+Live-verified against the real Eurostat API 2026-09-15 (dataset codes, filters and a real Belgian
+sanity number checked per candidate before this row was written), then **approved by the
+maintainer on that scoped, live-verified proposal** — the same catalog sign-off convention as the
+Europe NUTS 2 batch above (CLAUDE.md rule 8). All 21 use the same `eurostat` source, adapter
+(`src/fetchers/eurostat.py`) and licence already covering `GDP_VOLUME_EUROPE`/`GOV_DEBT_EUROPE`
+etc. above — **no new licence decision needed**, and none of the 21 route through the DG ECFIN
+survey path that needed `CONSUMER_CONFIDENCE_EUROPE`'s separate CC0 confirmation (these are all
+plain ESTAT-owned datasets). Country-level indicators load into the existing `international`
+store (`data/international/{ID}.csv`); the four regional-depth candidates load into the existing
+`nuts2` store (`data/nuts2/{ID}.csv`) — same allowlists, same stores, no new store per either
+store's own docstring in `config/stores.yaml`.
+
+**21 of 26 named candidates were actually built.** Every number below is real, loaded data,
+verified 2026-09-15 against the exact Belgian figure named in the batch's own handoff before this
+row was written (e.g. `GINI_COEFFICIENT_EUROPE` BE 2022 = 24.7 exactly).
+
+### Sector, productivity, employment (3 of 4 built) — TOTAL economy only, no per-sector breakdown
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage (2026-09-15 live load) |
+|---|---|---|---|---|---|
+| `VALUE_ADDED_TOTAL_EUROPE` | `nama_10_a10` | meur_clv2010 | A | `unit=CLV10_MEUR, na_item=B1G, nace_r2=TOTAL` | 698 rows, 39 countries |
+| `EMPLOYMENT_LFS_EUROPE` | `lfsa_egan2` | thousand_persons | A | `sex=T, age=Y15-64, unit=THS_PER, nace_r2=TOTAL` | 643 rows, 37 countries |
+
+**Not built: `EMPLOYMENT_NATACCOUNTS_EUROPE`** (`nama_10_a10_e`) and **`LABOUR_PRODUCTIVITY_GROWTH_EUROPE`**
+(`nama_10_lp_ulc`) — both live-verified as fetchable when the candidate list was drafted, but the
+actual load hit an unrecognized Eurostat `OBS_FLAG` value `'C'` (uppercase, inside a compound flag)
+at `geo=XK`, which `src/fetchers/eurostat.py`'s `FLAG_STATUS` table has no mapping for. Per CLAUDE.md
+rule 13 this pipeline refuses to guess a status for an unrecognized flag rather than silently
+dropping or miscoding the row — and per rule 19, extending `FLAG_STATUS` is a source-adapter change
+that needs its own ADR and maintainer approval (the same process the compound-flag fix in #168 went
+through), not something this data-only batch does unilaterally. Both configs were removed rather
+than left half-working, because `scripts/sync_international.py` has no per-indicator try/except: one
+unrecognized flag aborts the fetch for every OTHER indicator in the store too, not just its own — a
+broken config left in `config/indicators/` would break the daily production fetch for the whole
+`international` store the day this PR merges. Follow-up: extend `FLAG_STATUS`, then re-add both.
+
+### Public finance (4 of 4 built)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `GOV_BALANCE_EUROPE` | `gov_10a_main` | pct_of_gdp | A | `unit=PC_GDP, na_item=B9, sector=S13` | 575 rows, 32 countries |
+| `TAX_RECEIPTS_EUROPE` | `gov_10a_taxag` | pct_of_gdp | A | `unit=PC_GDP, sector=S13, na_item=D2_D5_D91` | 553 rows, 32 countries |
+| `GOV_EXPENDITURE_HEALTH_EUROPE` | `gov_10a_exp` | pct_of_gdp | A | `unit=PC_GDP, sector=S13, na_item=TE, cofog99=GF07` | 539 rows, 32 countries — health function (COFOG GF07) only, no other function this batch |
+| `GOV_DEBT_QUARTERLY_EUROPE` | `gov_10q_ggdebt` | pct_of_gdp | Q | `unit=PC_GDP, sector=S13, na_item=GD` | 2,190 rows, 30 countries — **deliberately overlaps** the existing annual `GOV_DEBT_EUROPE` (`gov_10dd_edpt1`): same underlying concept, different Eurostat dataset and cadence. Both kept as separate ids |
+
+### Trade (2 of 2 built; 2 further candidates never attempted, see below)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `EXPORTS_GOODS_SERVICES_EUROPE` | `namq_10_gdp` (same dataset `GDP_VOLUME_EUROPE` already fetches) | meur_clv2010 | Q | `unit=CLV10_MEUR, s_adj=SCA, na_item=P6` | 2,808 rows, 38 countries |
+| `IMPORTS_GOODS_SERVICES_EUROPE` | `namq_10_gdp` | meur_clv2010 | Q | `unit=CLV10_MEUR, s_adj=SCA, na_item=P7` | 2,808 rows, 38 countries |
+
+**Not built (never attempted, per the batch's own handoff):** `bop_c6_q` (returned empty live when
+the candidate list was drafted) and `ext_lt_intertrd` (its EU27_2020 aggregate needs a different
+`partner`-code convention for extra-EU trade that was never resolved live). Both are follow-ups,
+not regressions of this batch.
+
+### Regional depth — NUTS 2 (3 of 4 built)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `VALUE_ADDED_GROWTH_NUTS2` | `nama_10r_2gvagr` | index_2020 | A | `na_item=B1G, unit=I20` | 6,318 rows, 279 regions |
+| `EMPLOYMENT_RATE_NUTS2` | `lfst_r_lfe2emprt` | percent | A | `sex=T, age=Y20-64, unit=PC` | 7,058 rows, 306 regions |
+| `HOUSEHOLD_INCOME_TOTAL_NUTS2` | `tgs00026` | mio_pps_eu27_2020 | A | `direct=BAL, na_item=B6N, unit=MIO_PPS_EU27_2020` | 2,795 rows, 250 regions — a TOTAL as published, no per-capita derivation this batch |
+
+**Not built: `RD_INTENSITY_NUTS2`** (`rd_e_gerdreg`) — live-verified fetchable when drafted, but the
+actual load hit an unrecognized `OBS_FLAG` `'C'` at `geo=BE10` (Brussels-Capital Region) — a real,
+wanted Belgian geography, so unlike the country-level drops above this one cannot be worked around
+by a geography exclusion. Same rule-19 reasoning: needs `FLAG_STATUS` extended under its own ADR.
+Follow-up, not built now.
+
+### Social inequalities (3 of 3 built)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `GINI_COEFFICIENT_EUROPE` | `ilc_di12` | index_0_100 | A | `age=TOTAL` | 417 rows, 37 countries |
+| `POVERTY_RATE_EUROPE` | `ilc_li02` | percent | A | `age=TOTAL, sex=T, unit=PC, rskpovth=B_60, statinfo=MED_EI` | 625 rows, 37 countries. **`statinfo` MUST stay `MED_EI`** (median-based) — `MEAN_EI` gives a materially different Belgian figure (17.9% vs. the loaded 13.1%) and would be a real factual error, not a rounding difference; the config's own comment repeats this warning |
+| `POVERTY_SOCIAL_EXCLUSION_EUROPE` | `ilc_peps01n` | percent | A | `age=TOTAL, sex=T, unit=PC` | 394 rows, 37 countries |
+
+### Energy / transition (2 of 2 built this batch; 1 further candidate deferred by design, not dropped)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `RENEWABLE_ENERGY_SHARE_EUROPE` | `nrg_ind_ren` | percent | A | `nrg_bal=REN, unit=PC` | 641 rows, 37 countries |
+| `GHG_EMISSIONS_EUROPE` | `env_air_gge` | kt_co2eq | A | `airpol=GHG, unit=THS_T, src_crf=TOTXMEMO` | 544 rows, 32 countries |
+
+**`nrg_pc_204` (a third energy candidate) was never attempted.** It is semi-annual ("S" frequency)
+data; `docs/features/indicator_config.schema.json`'s `frequency` enum only allows `A`/`Q`/`M`/`F`,
+and adding `"S"` touches more than the schema alone — `derive_period_bounds()`
+(`scripts/port_existing_indicators.py`) and the period-shape/staleness rules in
+`src/validation/rules.py` are both keyed on the same four letters and would need a matching change.
+That is wider than "genuinely small and additive" and reads as extending the canonical period model
+(CLAUDE.md rule 18: no canonical schema redesign for a batch like this one) — deferred to its own
+proposal rather than built here.
+
+### Demography (3 of 4 built)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `POPULATION_EUROPE` | `demo_pjan` | persons | A | `age=TOTAL, sex=T` | 733 rows, 42 countries |
+| `LIFE_EXPECTANCY_EUROPE` | `demo_mlexpec` | years | A | `sex=T, age=Y_LT1, unit=YR` | 656 rows, 41 countries |
+| `POPULATION_GROWTH_RATE_EUROPE` | `demo_gind` | per_mille | A | `indic_de=GROWRT` | 739 rows, 42 countries |
+
+**Not built: `FERTILITY_RATE_EUROPE`** (`demo_find`) — live-verified fetchable when drafted, but the
+actual load hit a flag-with-no-value cell (`geo=XK`, period 2015, flag `'p'`/"provisional", no
+value) — the same class of gap already documented in `scripts/sync_nuts2.py`'s own module docstring
+for `lfst_r_lfu3rt`/`demo_r_pjanaggr3` (both left unfixed there too). Same rule-19 reasoning.
+Follow-up, not built now.
+
+**This domain's live load also surfaced 9 geographies genuinely new to this pipeline's allowlists**
+(none seen by the original 5-indicator pilot or the Europe countries/NUTS 2 batches): `FX`
+(metropolitan France, an alternate code for the already-allowlisted `FR`), `EEA31`/`EEA30_2007`/`EFTA`
+(aggregate grouping codes, not places), and five real, non-EU/EFTA/candidate countries —
+`AM`/`AZ`/`BY`/`RU`/`SM` (Armenia, Azerbaijan, Belarus, Russia, San Marino) plus `AD`/`MC` (Andorra,
+Monaco) from `demo_pjan`/`demo_gind`, and `CN_X_HK`/`KR` (China ex-Hong Kong, South Korea) from the
+R&D datasets below, and `EA18` (a further superseded euro-area vintage) from `ilc_peps01n`. All 12
+are added to `config/geography/international_excluded.csv` with the same "not EU/EFTA/an official
+candidate" or "superseded/aggregate code" reasoning already used for `UK`/`US`/`JP`/`XK`/`EA12` etc.
+— licence exclusions, not new pilot countries; no maintainer country-roster decision was needed.
+
+### Innovation (2 of 2 built; 1 further candidate deferred)
+
+| Indicator | Dataset | Unit | Freq | Filters | Coverage |
+|---|---|---|---|---|---|
+| `RD_EXPENDITURE_EUROPE` | `rd_e_gerdtot` | pct_of_gdp | A | `sectperf=TOTAL, unit=PC_GDP` | 593 rows, 38 countries |
+| `RD_PERSONNEL_EUROPE` | `rd_p_persocc` | fte | A | `sectperf=TOTAL, prof_pos=TOTAL, sex=T, unit=FTE` | 590 rows, 37 countries |
+
+**`pat_ep_ntot` (a third innovation candidate) was never attempted** — 9 years stale when the
+candidate list was drafted; noted then as a future check for a newer Eurostat patent series, not
+built now.
+
+### Not built, summarized
+
+| Id / dataset | Reason |
+|---|---|
+| `EMPLOYMENT_NATACCOUNTS_EUROPE` (`nama_10_a10_e`) | Live adapter gap: unrecognized `OBS_FLAG` `'C'` at an excluded geography (rule 19, needs its own ADR) |
+| `LABOUR_PRODUCTIVITY_GROWTH_EUROPE` (`nama_10_lp_ulc`) | Same gap, same dataset family |
+| `RD_INTENSITY_NUTS2` (`rd_e_gerdreg`) | Same gap, at `BE10` (a real, wanted geography) |
+| `FERTILITY_RATE_EUROPE` (`demo_find`) | Live adapter gap: flag-with-no-value cell at an excluded geography |
+| `bop_c6_q` | Returned empty live; never built |
+| `ext_lt_intertrd` | Extra-EU `partner` aggregate convention unresolved live; never built |
+| `nrg_pc_204` | Semi-annual frequency the schema/period model does not support without a wider change (rule 18) |
+| `pat_ep_ntot` | 9 years stale; noted as a future check |
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new

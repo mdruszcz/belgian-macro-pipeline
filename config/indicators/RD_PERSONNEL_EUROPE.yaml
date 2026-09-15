@@ -1,0 +1,25 @@
+id: RD_PERSONNEL_EUROPE
+name:
+  en: R&D personnel, full-time equivalent
+  fr: Personnel de R&D, équivalent temps plein
+  nl: O&O-personeel, voltijdequivalent
+unit: fte
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: R&D personnel, all sectors, all professional positions, both sexes, full-time
+    equivalent, every allowlisted European country -- Eurostat additional domains batch
+    (docs/data_catalog.md, 2026-09-15).
+fetch:
+  dataset: rd_p_persocc
+  filters:
+    sectperf: TOTAL
+    prof_pos: TOTAL
+    sex: T
+    unit: FTE
+  geographies: allowlist
+  since: "2008"
+display: null

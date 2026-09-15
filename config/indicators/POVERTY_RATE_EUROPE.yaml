@@ -1,0 +1,31 @@
+id: POVERTY_RATE_EUROPE
+name:
+  en: At-risk-of-poverty rate (60% of median income)
+  fr: Taux de risque de pauvreté (60 % du revenu médian)
+  nl: Armoederisicopercentage (60% van het mediaan inkomen)
+unit: percent
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: Share of the population with equivalised disposable income below 60%
+    of the national median, total population (age TOTAL, sex T), every
+    allowlisted European country -- Eurostat domains batch, 2026-09-15
+    (docs/data_catalog.md). FILTER MUST STAY statinfo=MED_EI (median-based)
+    -- never statinfo=MEAN_EI (mean-based). The two give materially
+    different Belgian figures (MED_EI ~13.1%, MEAN_EI ~17.9%, verified live
+    2026-09-15) and swapping them would be a real factual error, not a
+    rounding difference. Do not "simplify" this filter in a future edit.
+fetch:
+  dataset: ilc_li02
+  filters:
+    age: TOTAL
+    sex: T
+    unit: PC
+    rskpovth: B_60
+    statinfo: MED_EI
+  geographies: allowlist
+  since: "2008"
+display: null

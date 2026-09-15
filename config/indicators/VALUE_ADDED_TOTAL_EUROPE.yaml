@@ -1,0 +1,25 @@
+id: VALUE_ADDED_TOTAL_EUROPE
+name:
+  en: Gross value added, total economy
+  fr: Valeur ajoutée brute, ensemble de l'économie
+  nl: Bruto toegevoegde waarde, totale economie
+unit: meur_clv2010
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: Gross value added at chain-linked volumes (2010 reference year), total economy
+    (NACE Rev.2 TOTAL, no sector breakdown -- a per-sector split is a future
+    batch), every allowlisted European country -- Eurostat domains batch,
+    2026-09-15 (docs/data_catalog.md).
+fetch:
+  dataset: nama_10_a10
+  filters:
+    unit: CLV10_MEUR
+    na_item: B1G
+    nace_r2: TOTAL
+  geographies: allowlist
+  since: "2008"
+display: null

@@ -1,0 +1,27 @@
+id: GHG_EMISSIONS_EUROPE
+name:
+  en: Total greenhouse gas emissions
+  fr: Émissions totales de gaz à effet de serre
+  nl: Totale uitstoot van broeikasgassen
+unit: kt_co2eq
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: Total greenhouse gas emissions excluding LULUCF and including international aviation
+    (src_crf=TOTXMEMO), thousand tonnes CO2 equivalent, every allowlisted European
+    country. Unit named kt_co2eq -- no existing precedent in this pipeline for a
+    greenhouse-gas unit; chosen to be self-explanatory and consistent with the pipeline's
+    short lowercase style. Eurostat additional domains batch (docs/data_catalog.md,
+    2026-09-15).
+fetch:
+  dataset: env_air_gge
+  filters:
+    airpol: GHG
+    unit: THS_T
+    src_crf: TOTXMEMO
+  geographies: allowlist
+  since: "2008"
+display: null

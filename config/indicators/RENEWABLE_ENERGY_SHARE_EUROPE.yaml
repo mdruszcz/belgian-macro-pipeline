@@ -1,0 +1,23 @@
+id: RENEWABLE_ENERGY_SHARE_EUROPE
+name:
+  en: Share of renewable energy in gross final energy consumption
+  fr: Part des énergies renouvelables dans la consommation finale brute d'énergie
+  nl: Aandeel hernieuwbare energie in het bruto-eindverbruik van energie
+unit: percent
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: Share of renewable energy sources in gross final energy consumption, every allowlisted
+    European country -- Eurostat additional domains batch (docs/data_catalog.md,
+    2026-09-15).
+fetch:
+  dataset: nrg_ind_ren
+  filters:
+    nrg_bal: REN
+    unit: PC
+  geographies: allowlist
+  since: "2008"
+display: null

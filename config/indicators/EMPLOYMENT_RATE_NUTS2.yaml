@@ -1,0 +1,24 @@
+id: EMPLOYMENT_RATE_NUTS2
+name:
+  en: Employment rate (20-64)
+  fr: Taux d'emploi (20-64 ans)
+  nl: Werkzaamheidsgraad (20-64 jaar)
+unit: percent
+frequency: A
+source_id: eurostat
+geo_levels:
+- nuts2
+preferred_direction: higher_is_better
+description:
+  en: Employment rate, ages 20-64, total (both sexes), NUTS 2 region, every
+    region whose country is on the international pilot's licence allowlist
+    -- Eurostat domains batch, 2026-09-15 (docs/data_catalog.md).
+fetch:
+  dataset: lfst_r_lfe2emprt
+  filters:
+    sex: T
+    age: Y20-64
+    unit: PC
+  geographies: allowlist
+  since: "2000"
+display: null

@@ -1,0 +1,28 @@
+id: HOUSEHOLD_INCOME_TOTAL_NUTS2
+name:
+  en: Total net disposable household income
+  fr: Revenu disponible net total des ménages
+  nl: Totaal netto beschikbaar inkomen van huishoudens
+unit: mio_pps_eu27_2020
+frequency: A
+source_id: eurostat
+geo_levels:
+- nuts2
+preferred_direction: higher_is_better
+description:
+  en: Net disposable income of households and NPISH (na_item B6N, balance
+    direct=BAL), million PPS on an EU27-from-2020 basis, NUTS 2 region,
+    every region whose country is on the international pilot's licence
+    allowlist -- Eurostat domains batch, 2026-09-15 (docs/data_catalog.md).
+    A TOTAL, not per-capita -- deliberately ingested as published, with no
+    derived per-capita version in this batch (that would be a separate
+    derived-indicator config).
+fetch:
+  dataset: tgs00026
+  filters:
+    direct: BAL
+    na_item: B6N
+    unit: MIO_PPS_EU27_2020
+  geographies: allowlist
+  since: "2000"
+display: null

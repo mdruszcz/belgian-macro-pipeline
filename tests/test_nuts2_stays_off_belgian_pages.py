@@ -25,7 +25,15 @@ from src.validation.config_schema import (  # noqa: E402
     load_and_validate_all,
 )
 
-NUTS2_INDICATOR_IDS = ("GDP_PC_PPS_NUTS2", "POPULATION_NUTS2", "UNEMPLOYMENT_RATE_NUTS2")
+NUTS2_INDICATOR_IDS = (
+    "GDP_PC_PPS_NUTS2",
+    "POPULATION_NUTS2",
+    "UNEMPLOYMENT_RATE_NUTS2",
+    # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15).
+    "VALUE_ADDED_GROWTH_NUTS2",
+    "EMPLOYMENT_RATE_NUTS2",
+    "HOUSEHOLD_INCOME_TOTAL_NUTS2",
+)
 
 
 def _configs():
