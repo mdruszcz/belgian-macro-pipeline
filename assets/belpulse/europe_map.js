@@ -202,6 +202,90 @@
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
+  /* ---- layout helpers (2026-09-15, maintainer: map on the left, every
+     control on the right, pickers as closed menus, legend and a one-line
+     source inside the map) ------------------------------------------------ */
+
+  // A closed menu that opens on click: a real <details>/<summary>, so it is
+  // keyboard-usable with no extra wiring; Escape and a click elsewhere close
+  // it. `summaryText` is filled by the caller (setDropdownSummary).
+  function buildDropdown(id, children) {
+    var summaryText = el('span', { class: 'bp-europe-dropdown__text' });
+    var summary = el('summary', { class: 'bp-europe-dropdown__summary' }, [summaryText]);
+    var panel = el('div', { class: 'bp-europe-dropdown__panel' }, children);
+    var details = el('details', { class: 'bp-europe-dropdown', id: id }, [summary, panel]);
+    details.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && details.open) {
+        details.open = false;
+        summary.focus();
+      }
+    });
+    return { details: details, summaryText: summaryText };
+  }
+
+  function setDropdownSummary(menu, text) {
+    if (menu) menu.summaryText.textContent = text;
+  }
+
+  document.addEventListener('click', function (ev) {
+    Array.prototype.forEach.call(document.querySelectorAll('.bp-europe-dropdown[open]'), function (d) {
+      if (!d.contains(ev.target)) d.open = false;
+    });
+  });
+
+  // The detail card sits in the rail under the pickers and only appears once
+  // a region or country is picked; its close button hides it again.
+  function openSideCard(side) {
+    clear(side);
+    var close = el('button', {
+      type: 'button',
+      class: 'bp-europe-map__side-close',
+      'aria-label': T('europeCloseDetail'),
+      text: '\u00d7',
+    });
+    close.addEventListener('click', function () {
+      side.hidden = true;
+    });
+    side.appendChild(close);
+    side.hidden = false;
+  }
+
+  // The source, reduced to one short link in the map's bottom-right corner.
+  // The dataset, retrieval date and geography vintage stay one hover away
+  // (title) and are printed in full on every chart card and detail card;
+  // the boundary credit stays visible, as its licence requires.
+  var EUROSTAT_DATASET_URL = 'https://ec.europa.eu/eurostat/databrowser/view/';
+  function renderSourceLine(node, payload, period, vintage, attribution) {
+    clear(node);
+    var details = [(payload.names[LANG] || payload.names.en) + ' \u2014 ' + period];
+    if (payload.source && payload.source.dataset) {
+      details.push(
+        'Eurostat (' +
+          payload.source.dataset +
+          ')' +
+          (payload.source.retrieved ? ', ' + T('europeRetrievedLabel', { date: payload.source.retrieved }) : '')
+      );
+    }
+    details.push(T('europeVintageLabel', { version: vintage }));
+    var label = T('europeSourceLabel') + ': Eurostat';
+    var dataset = payload.source && payload.source.dataset;
+    var link = dataset
+      ? el('a', {
+          href: EUROSTAT_DATASET_URL + encodeURIComponent(dataset) + '/default/table',
+          target: '_blank',
+          rel: 'noopener',
+          title: details.join('\n'),
+          text: label,
+        })
+      : el('span', { title: details.join('\n'), text: label });
+    node.appendChild(link);
+    if (attribution) node.appendChild(el('span', { class: 'attribution', text: ' \u00b7 ' + attribution }));
+  }
+
+  // How many comparison charts sit in the right-hand column beside the map;
+  // the rest go in the grid under it.
+  var RAIL_CHART_COUNT = 3;
+
   /* The blue sequential ramp europe_map.css declares scoped to
      `.bp-europe-map` (the same seven hex values assets/commune_map.css
      already ships for its own [data-theme="paper"], copied verbatim, never
@@ -514,45 +598,53 @@
     var regionPickerGroups = el('div', { id: 'europeRegionPickerGroups', class: 'bp-europe-picker__scroll' });
     var regionCapMsg = el('p', { class: 'bp-europe-picker__cap', id: 'europeRegionCapMsg', text: T('europeRegionCapMsg') });
     regionCapMsg.hidden = true;
-    var regionPicker = el('div', { class: 'bp-europe-picker' }, [
+    var regionPickerMenu = buildDropdown('europeRegionPickerMenu', [
       el('label', { for: 'europeRegionPickerSearch', text: T('europeRegionPickerLabel') }),
       regionPickerSearch,
       regionPickerGroups,
       regionCapMsg,
     ]);
+    setDropdownSummary(regionPickerMenu, T('europeRegionPickerSummary', { n: 0 }));
+    var regionPicker = el('div', { class: 'bp-europe-picker' }, [regionPickerMenu.details]);
 
     var legendScale = el('div', { class: 'bp-europe-map__legend-scale', id: 'europeLegendScale' });
     var legendExtra = el('div', { id: 'europeLegendExtra' });
     var meta = el('div', { class: 'bp-europe-map__meta', id: 'europeMeta' });
     var noOutline = el('p', { class: 'bp-europe-map__no-outline', id: 'europeNoOutline' });
     noOutline.hidden = true;
-    var legend = el('div', { class: 'bp-europe-map__legend' }, [legendScale, legendExtra, meta]);
+    var legend = el('div', { class: 'bp-europe-map__legend' }, [legendScale, legendExtra]);
 
-    var main = el('div', { class: 'bp-europe-map__main' }, [
-      controls,
-      regionField,
-      regionPicker,
-      stage,
-      tooltip,
-      legend,
-      noOutline,
-    ]);
-
-    var side = el('div', { class: 'bp-europe-map__side', id: 'europeSideCard' }, [
+    var side = el('div', { class: 'bp-europe-map__side', id: 'europeSideCard', hidden: 'hidden' }, [
       el('p', { class: 'prompt', text: T('europeSelectPrompt') }),
     ]);
 
-    // Wrapped in its own section (Europe countries batch,
-    // docs/features/europe_countries.md) so the "Régions / Pays" toggle
-    // (built by buildModeToggle(), a sibling of this wrapper directly under
-    // state.root) can hide the whole region UI in one step when country
-    // mode is active, without touching any id or class inside it -- every
-    // existing selector (#bpEuropeStage, #europeIndicatorSelect, ...) still
-    // resolves exactly where it did before this batch.
-    var regionWrap = el('div', { class: 'bp-europe-map__mode-section', id: 'europeRegionWrap' }, [main, side]);
-    state.root.appendChild(regionWrap);
+    // Two columns (2026-09-15 layout): the map with its legend and source
+    // floating inside it on the left; the mode toggle, every control, the
+    // detail card and the first comparison charts in the rail on the right.
+    // Each mode owns one wrapper per column, so the "Régions / Pays" toggle
+    // still hides a whole mode in one step (setMode) -- every existing id
+    // (#bpEuropeStage, #europeIndicatorSelect, ...) resolves as before.
+    var mapWrap = el(
+      'div',
+      { class: 'bp-europe-map__mode-section bp-europe-map__map-section', id: 'europeRegionMapWrap' },
+      [stage, legend, meta, noOutline, tooltip]
+    );
+    var regionWrap = el('div', { class: 'bp-europe-map__mode-section', id: 'europeRegionWrap' }, [
+      controls,
+      regionField,
+      regionPicker,
+      side,
+    ]);
+    var mapCol = el('div', { class: 'bp-europe-map__mapcol' }, [mapWrap]);
+    var rail = el('div', { class: 'bp-europe-map__rail' }, [regionWrap]);
+    state.root.appendChild(mapCol);
+    state.root.appendChild(rail);
 
     state.els = {
+      mapCol: mapCol,
+      rail: rail,
+      mapWrap: mapWrap,
+      regionPickerMenu: regionPickerMenu,
       regionWrap: regionWrap,
       indicatorSelect: indicatorSelect,
       yearSelect: yearSelect,
@@ -1053,6 +1145,10 @@
   function renderLegend(payload, breaks, colors, nodataColor, suppressedColor, excludedColor, yearValues) {
     var scale = state.els.legendScale;
     clear(scale);
+    // The unit heads the legend now that the source line under the map no
+    // longer spells it out.
+    var legendUnit = MapUI.unitSuffix(payload.unit, LANG).trim();
+    if (legendUnit) scale.appendChild(el('div', { class: 'bp-europe-map__legend-title', text: legendUnit }));
     var edges = [null].concat(breaks).concat([null]);
     for (var i = 0; i < colors.length; i++) {
       var lo = edges[i],
@@ -1100,19 +1196,7 @@
   }
 
   function renderMeta(payload, year) {
-    var unitSuffix = MapUI.unitSuffix(payload.unit, LANG);
-    var lines = [];
-    lines.push((payload.names[LANG] || payload.names.en) + (unitSuffix ? ' (' + unitSuffix.trim() + ')' : '') + ' — ' + year);
-    if (payload.source && payload.source.retrieved) {
-      lines.push(T('europeSourceLabel') + ': Eurostat (' + payload.source.dataset + '), ' + T('europeRetrievedLabel', { date: payload.source.retrieved }));
-    }
-    lines.push(T('europeVintageLabel', { version: payload.nuts_version }));
-    if (state.index && state.index.attribution) lines.push(state.index.attribution);
-    var meta = state.els.meta;
-    clear(meta);
-    lines.forEach(function (line) {
-      meta.appendChild(el('div', { text: line }));
-    });
+    renderSourceLine(state.els.meta, payload, year, payload.nuts_version, state.index && state.index.attribution);
   }
 
   function renderNoOutline(payload) {
@@ -1267,6 +1351,7 @@
       chip.dataset.disabled = String(disable);
     });
     if (state.els.regionCapMsg) state.els.regionCapMsg.hidden = !atCap;
+    setDropdownSummary(state.els.regionPickerMenu, T('europeRegionPickerSummary', { n: selected.length }));
   }
 
   /* A selected region's polygon gets the same visible, thicker stroke as a
@@ -1368,7 +1453,7 @@
     var name = state.regionNames[code] || code;
 
     var side = state.els.side;
-    clear(side);
+    openSideCard(side);
     side.appendChild(el('h3', { text: name }));
     side.appendChild(el('p', { class: 'code', text: code }));
 
@@ -1508,7 +1593,7 @@
     // Ahead of everything buildChrome() already put in state.root (the
     // region wrapper) -- the toggle reads as the first thing in the panel,
     // above whichever mode's UI is currently visible.
-    state.root.insertBefore(bar, state.root.firstChild);
+    state.els.rail.insertBefore(bar, state.els.rail.firstChild);
     state.els.modeRegionBtn = regionBtn;
     state.els.modeCountryBtn = countryBtn;
     state.els.paletteSelect = paletteSelect;
@@ -1573,6 +1658,8 @@
     state.els.modeCountryBtn.setAttribute('aria-pressed', String(mode === 'country'));
     state.els.regionWrap.hidden = mode !== 'region';
     state.els.country.wrap.hidden = mode !== 'country';
+    state.els.mapWrap.hidden = mode !== 'region';
+    state.els.country.mapWrap.hidden = mode !== 'country';
     if (mode === 'country' && state.country.index && state.country.currentIndicatorId) {
       ensureCountryGeometryAndVendor().then(renderCountryMap);
     }
@@ -1657,31 +1744,40 @@
     });
     var capMsg = el('p', { class: 'bp-europe-picker__cap', id: 'europeCountryCapMsg', text: T('europeCountryCapMsg') });
     capMsg.hidden = true;
-    var picker = el('div', { class: 'bp-europe-picker' }, [
+    var pickerMenu = buildDropdown('europeCountryPickerMenu', [
       el('label', { for: 'europeCountryPickerSearch', text: T('europeCountryPickerLabel') }),
       pickerSearch,
       pickerList,
       capMsg,
     ]);
+    setDropdownSummary(pickerMenu, T('europeCountryPickerSummary', { n: state.country.selected.length }));
+    var picker = el('div', { class: 'bp-europe-picker' }, [pickerMenu.details]);
 
     var legendScale = el('div', { class: 'bp-europe-map__legend-scale', id: 'europeCountryLegendScale' });
     var legendExtra = el('div', { id: 'europeCountryLegendExtra' });
     var meta = el('div', { class: 'bp-europe-map__meta', id: 'europeCountryMeta' });
     var noOutline = el('p', { class: 'bp-europe-map__no-outline', id: 'europeCountryNoOutline' });
     noOutline.hidden = true;
-    var legend = el('div', { class: 'bp-europe-map__legend' }, [legendScale, legendExtra, meta]);
-
-    var main = el('div', { class: 'bp-europe-map__main' }, [controls, note, picker, stage, tooltip, legend, noOutline]);
-    var side = el('div', { class: 'bp-europe-map__side', id: 'europeCountrySideCard' }, [
+    var legend = el('div', { class: 'bp-europe-map__legend' }, [legendScale, legendExtra]);
+    var side = el('div', { class: 'bp-europe-map__side', id: 'europeCountrySideCard', hidden: 'hidden' }, [
       el('p', { class: 'prompt', text: T('europeCountrySelectPrompt') }),
     ]);
 
-    var wrap = el('div', { class: 'bp-europe-map__mode-section', id: 'europeCountryWrap' }, [main, side]);
-    wrap.hidden = true; // region is the default mode
-    state.root.appendChild(wrap);
+    var mapWrap = el(
+      'div',
+      { class: 'bp-europe-map__mode-section bp-europe-map__map-section', id: 'europeCountryMapWrap' },
+      [stage, legend, meta, noOutline, tooltip]
+    );
+    mapWrap.hidden = true; // region is the default mode
+    state.els.mapCol.appendChild(mapWrap);
+    var wrap = el('div', { class: 'bp-europe-map__mode-section', id: 'europeCountryWrap' }, [controls, note, picker, side]);
+    wrap.hidden = true;
+    state.els.rail.appendChild(wrap);
 
     state.els.country = {
       wrap: wrap,
+      mapWrap: mapWrap,
+      pickerMenu: pickerMenu,
       indicatorSelect: indicatorSelect,
       periodSelect: periodSelect,
       blockedReason: blockedReason,
@@ -1734,6 +1830,7 @@
     c.pickerSearch.setAttribute('aria-label', T('europeCountryPickerSearchLabel'));
     c.pickerList.setAttribute('aria-label', T('europeCountryPickerLabel'));
     c.capMsg.textContent = T('europeCountryCapMsg');
+    setDropdownSummary(c.pickerMenu, T('europeCountryPickerSummary', { n: state.country.selected.length }));
     c.zoomIn.setAttribute('aria-label', T('europeZoomIn'));
     c.zoomOut.setAttribute('aria-label', T('europeZoomOut'));
     c.zoomReset.setAttribute('aria-label', T('europeResetView'));
@@ -1908,6 +2005,10 @@
   function renderCountryLegend(payload, breaks, colors, nodataColor, suppressedColor, excludedColor, periodValues) {
     var scale = state.els.country.legendScale;
     clear(scale);
+    // The unit heads the legend now that the source line under the map no
+    // longer spells it out.
+    var legendUnit = MapUI.unitSuffix(payload.unit, LANG).trim();
+    if (legendUnit) scale.appendChild(el('div', { class: 'bp-europe-map__legend-title', text: legendUnit }));
     var edges = [null].concat(breaks).concat([null]);
     for (var i = 0; i < colors.length; i++) {
       var lo = edges[i],
@@ -1955,19 +2056,13 @@
   }
 
   function renderCountryMeta(payload, period) {
-    var unitSuffix = MapUI.unitSuffix(payload.unit, LANG);
-    var lines = [];
-    lines.push((payload.names[LANG] || payload.names.en) + (unitSuffix ? ' (' + unitSuffix.trim() + ')' : '') + ' — ' + period);
-    if (payload.source && payload.source.retrieved) {
-      lines.push(T('europeSourceLabel') + ': Eurostat (' + payload.source.dataset + '), ' + T('europeRetrievedLabel', { date: payload.source.retrieved }));
-    }
-    lines.push(T('europeVintageLabel', { version: payload.geo_vintage }));
-    if (state.country.index && state.country.index.attribution) lines.push(state.country.index.attribution);
-    var meta = state.els.country.meta;
-    clear(meta);
-    lines.forEach(function (line) {
-      meta.appendChild(el('div', { text: line }));
-    });
+    renderSourceLine(
+      state.els.country.meta,
+      payload,
+      period,
+      payload.geo_vintage,
+      state.country.index && state.country.index.attribution
+    );
   }
 
   function renderCountryNoOutline(payload) {
@@ -2049,7 +2144,7 @@
     var name = (state.country.countryNames[code] && state.country.countryNames[code][LANG]) || code;
 
     var side = state.els.country.side;
-    clear(side);
+    openSideCard(side);
     side.appendChild(el('h3', { text: name }));
     side.appendChild(el('p', { class: 'code', text: code }));
 
@@ -2179,6 +2274,7 @@
       chip.dataset.disabled = String(disable);
     });
     c.capMsg.hidden = !atCap;
+    setDropdownSummary(c.pickerMenu, T('europeCountryPickerSummary', { n: selected.length }));
   }
 
   function renderCountrySelectionOutline() {
@@ -2232,17 +2328,23 @@
     var filterHead = el('div', { class: 'bp-europe-compare__filter-head' }, [filterLabel, filterAll, filterNone]);
     var filterList = el('div', { class: 'bp-europe-compare__filter-list', id: 'europeCompareFilterList' });
     var filter = el('div', { class: 'bp-europe-compare__filter', id: 'europeCompareFilter' }, [filterHead, filterList]);
+    var filterMenu = buildDropdown('europeCompareFilterMenu', [filter]);
 
     var grid = el('div', { class: 'bp-europe-compare__grid', id: 'europeCompareGrid' });
     var empty = el('p', { class: 'bp-europe-compare__empty', id: 'europeCompareEmpty' });
     empty.hidden = true;
 
+    var topGrid = el('div', { class: 'bp-europe-compare__grid bp-europe-compare__grid--rail', id: 'europeCompareTop' });
+    var railSection = el('div', { class: 'bp-europe-compare-rail', id: 'europeCompareRail' }, [
+      el('div', { class: 'bp-europe-compare__tools' }, [filterMenu.details, refRow]),
+      empty,
+      topGrid,
+    ]);
+    state.els.rail.appendChild(railSection);
+
     root.appendChild(heading);
     root.appendChild(desc);
-    root.appendChild(refRow);
-    root.appendChild(filter);
     root.appendChild(grid);
-    root.appendChild(empty);
 
     state.els.compare = {
       heading: heading,
@@ -2256,7 +2358,10 @@
       filterAll: filterAll,
       filterNone: filterNone,
       filterList: filterList,
+      filterMenu: filterMenu,
       grid: grid,
+      topGrid: topGrid,
+      root: root,
       empty: empty,
       chartState: {}, // indicator_id -> {series, model, tipOpts} for register()'s resize redraw
     };
@@ -2328,6 +2433,10 @@
       });
       c.filterList.appendChild(chip);
     });
+    var shownCount = indicators.filter(function (indMeta) {
+      return vis[indMeta.id];
+    }).length;
+    setDropdownSummary(c.filterMenu, T('europeCompareFilterSummary', { n: shownCount, total: indicators.length }));
   }
 
   function relabelCompareChrome() {
@@ -2478,7 +2587,7 @@
       // markers:false (2026-09-15 follow-up, point 5) -- up to 8 selected
       // geographies each drawing a dot at every period reads as noise on
       // a dense comparison chart; the line alone carries the shape.
-      var next = window.BPCharts.drawLine(canvas, st.series, { locale: LANG, height: 180, markers: false });
+      var next = window.BPCharts.drawLine(canvas, st.series, { locale: LANG, height: opts.compact ? 140 : 180, markers: false });
       st.model.hits = next.hits;
     }
     draw();
@@ -2514,15 +2623,20 @@
     if (!c) return;
     if (state.mode === 'region') renderRegionComparisonCharts();
     else renderCountryComparisonCharts();
+    // The section under the map only shows when charts overflow the rail.
+    c.root.hidden = !c.grid.children.length;
   }
 
   function renderCountryComparisonCharts() {
     var c = state.els.compare;
     if (!c || !state.country.index) return;
     clear(c.grid);
+    clear(c.topGrid);
     c.refRow.hidden = false;
     var selected = state.country.selected;
     c.desc.textContent = T('europeCompareDesc');
+    var indicators = state.country.index.indicators;
+    renderCompareFilter('country', indicators, state.country.payloads);
     if (!selected.length) {
       c.empty.hidden = false;
       c.empty.textContent = T('europeComparePickPrompt');
@@ -2533,8 +2647,6 @@
     var showEA21 = c.refEA.checked;
     var statusLabels = statusLabelVocab();
 
-    var indicators = state.country.index.indicators;
-    renderCompareFilter('country', indicators, state.country.payloads);
     var vis = compareVisibleFor('country', indicators);
     var shown = indicators.filter(function (indMeta) {
       return vis[indMeta.id];
@@ -2544,9 +2656,10 @@
       c.empty.textContent = T('europeCompareNoneVisible');
       return;
     }
-    shown.forEach(function (indMeta) {
+    shown.forEach(function (indMeta, i) {
       var card = buildComparisonCard({
         indicatorId: indMeta.id,
+        compact: i < RAIL_CHART_COUNT,
         payload: state.country.payloads[indMeta.id],
         selectedCodes: selected,
         nameForCode: function (code) {
@@ -2557,7 +2670,7 @@
         showEU27: showEU27,
         showEA21: showEA21,
       });
-      c.grid.appendChild(card);
+      (i < RAIL_CHART_COUNT ? c.topGrid : c.grid).appendChild(card);
     });
   }
 
@@ -2565,9 +2678,12 @@
     var c = state.els.compare;
     if (!c || !state.index) return; // region index not loaded yet
     clear(c.grid);
+    clear(c.topGrid);
     c.refRow.hidden = true; // no EU27/EA21 reference for NUTS2 payloads -- see module comment
     var selected = state.region.selected;
     c.desc.textContent = T('europeCompareDescRegion');
+    var indicators = state.index.indicators;
+    renderCompareFilter('region', indicators, state.payloads);
     if (!selected.length) {
       c.empty.hidden = false;
       c.empty.textContent = T('europeComparePickPromptRegion');
@@ -2583,8 +2699,6 @@
     // for the map, not a second, hardcoded list of ids (CLAUDE.md rules
     // 2/24: no indicator id lives in this generic renderer) -- minus what
     // the reader unticked in the filter.
-    var indicators = state.index.indicators;
-    renderCompareFilter('region', indicators, state.payloads);
     var vis = compareVisibleFor('region', indicators);
     var shown = indicators.filter(function (indMeta) {
       return vis[indMeta.id];
@@ -2594,9 +2708,10 @@
       c.empty.textContent = T('europeCompareNoneVisible');
       return;
     }
-    shown.forEach(function (indMeta) {
+    shown.forEach(function (indMeta, i) {
       var card = buildComparisonCard({
         indicatorId: indMeta.id,
+        compact: i < RAIL_CHART_COUNT,
         payload: state.payloads[indMeta.id],
         selectedCodes: selected,
         nameForCode: function (code) {
@@ -2607,7 +2722,7 @@
         showEU27: false,
         showEA21: false,
       });
-      c.grid.appendChild(card);
+      (i < RAIL_CHART_COUNT ? c.topGrid : c.grid).appendChild(card);
     });
   }
 

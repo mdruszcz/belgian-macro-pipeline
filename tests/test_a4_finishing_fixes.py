@@ -3,14 +3,12 @@
 One shared local-file HTTP server (the pattern tests/test_sources_page.py
 already uses), one Chromium context per test. Covers:
 
-  1. macro.html's commune search actually lists communes and navigates to
-     commune.html?nis= (it read the wrong geographies.json field names).
+  1. (retired 2026-09-15: macro.html no longer carries a commune search.)
   2. Belgium's own REFNIS label ("ROYAUME" / "HET RIJK") never reaches
      rendered text on any of the pages a reader can see it from.
   5. the age pyramid's bars are real hover/keyboard tooltip targets, showing
      the exact payload count.
-  7. the commune search box sits with the breadcrumb, not stranded above it,
-     and still works at phone width.
+  7. (retired 2026-09-15 with the search box and breadcrumb themselves.)
   9. commune.html's "All data" section is a compact table, one row per
      indicator, not a 14,000px wall of cards.
 """
@@ -93,33 +91,6 @@ def test_fixture_92094_has_a_country_row_carrying_the_refnis_label():
 # --- fix 1: macro.html's commune search --------------------------------------
 
 
-def test_macro_search_lists_every_commune_and_links_to_commune_page(chromium, site):
-    ctx = _context(chromium, width=1280)
-    try:
-        page = ctx.new_page()
-        page.goto(f"{site}/macro.html", wait_until="load")
-        # <option> elements inside a <datalist> render with no box, so the
-        # default "visible" wait state never resolves -- "attached" is what
-        # actually signals "the data loaded and loadSearch() populated it".
-        page.wait_for_selector("#communeList option", state="attached")
-        options = page.locator("#communeList option")
-        count = options.count()
-        assert count > 500, f"expected over 500 commune options, found {count}"
-
-        first = options.first
-        nis = first.get_attribute("data-nis")
-        value = first.get_attribute("value")
-        assert nis and nis.isdigit(), f"option has no numeric data-nis: {nis!r}"
-        assert value, "option has no visible value to search by"
-
-        page.fill("#communeSearch", value)
-        page.dispatch_event("#communeSearch", "change")
-        page.wait_for_url("**/commune.html?nis=*")
-        assert f"commune.html?nis={nis}" in page.url
-    finally:
-        ctx.close()
-
-
 # --- fix 2: Belgium's REFNIS label never reaches a reader --------------------
 
 
@@ -127,7 +98,7 @@ def test_macro_search_lists_every_commune_and_links_to_commune_page(chromium, si
     "path,ready_selector",
     [
         ("home2.html", "#heroMini .glass canvas"),
-        ("macro.html", "#communeList option"),
+        ("macro.html", "#kpiRow .macro-kpi"),
         ("commune.html?nis=92094", "#allDataSections .indicator-group"),
         ("profiles.html", "#communeList option"),
         ("map.html", '#scope option[value="be:country"]'),
@@ -210,39 +181,6 @@ def test_pyramid_bars_are_keyboard_focusable(chromium, site):
         assert bars.count() > 0
         for i in range(min(3, bars.count())):
             assert bars.nth(i).get_attribute("tabindex") == "0"
-    finally:
-        ctx.close()
-
-
-# --- fix 7: macro.html's search box sits with the breadcrumb -----------------
-
-
-def test_macro_search_sits_beside_the_breadcrumb(chromium, site):
-    ctx = _context(chromium)
-    try:
-        page = ctx.new_page()
-        page.goto(f"{site}/macro.html", wait_until="load")
-        page.wait_for_selector("#communeList option", state="attached")
-        row = page.locator(".macro-head-row")
-        assert row.count() == 1
-        assert row.locator(".bp-breadcrumb").count() == 1
-        assert row.locator("#communeSearch").count() == 1
-    finally:
-        ctx.close()
-
-
-def test_macro_search_still_works_at_phone_width(chromium, site):
-    ctx = _context(chromium, width=390, height=800)
-    try:
-        page = ctx.new_page()
-        page.goto(f"{site}/macro.html", wait_until="load")
-        page.wait_for_selector("#communeList option", state="attached")
-        search = page.locator("#communeSearch")
-        assert search.is_visible()
-        box = search.bounding_box()
-        assert box is not None
-        # No horizontal overflow past the 390px viewport.
-        assert box["x"] + box["width"] <= 390 + 1
     finally:
         ctx.close()
 
