@@ -14,6 +14,7 @@ would break a test here -- not a stale expectation baked in by this file.
 
 from __future__ import annotations
 
+import bisect
 import functools
 import hashlib
 import http.server
@@ -293,17 +294,41 @@ def test_switching_year_changes_a_known_regions_fill(browser, site):
     if len(years) < 2:
         pytest.skip("default indicator has fewer than 2 years, nothing to compare")
     code, _ = _a_region_with_a_value(payload)
+    latest = payload["latest_year"]
+
+    # A different year only changes the region's fill if it lands in a
+    # DIFFERENT class band -- the page paints the payload's own precomputed
+    # class_breaks (threshold classification), so two years whose values sit
+    # in the same band paint the same colour, correctly. Pick a year where
+    # the band genuinely differs (same number of breaks, so the band->colour
+    # spread is comparable); skip if none. Before this, the test took the
+    # first year with any value and relied on the band happening to differ,
+    # which held for GDP per capita and stopped holding once a different
+    # indicator became the region map's default (2026-09-15) -- and it read
+    # the fill during the re-render, when the freshly rebuilt <path> carries
+    # the library's default fill for an instant, so the "changed" it saw was
+    # the rebuild, not the classification.
+    def band(year):
+        breaks = payload["class_breaks"].get(year) or []
+        v = payload["values"].get(year, {}).get(code, {}).get("v")
+        if v is None:
+            return None
+        return (len(breaks), bisect.bisect_right(breaks, v))
+
+    band_latest = band(latest)
     other_year = next(
         (
             y
             for y in years
-            if y != payload["latest_year"]
-            and payload["values"].get(y, {}).get(code, {}).get("v") is not None
+            if y != latest
+            and band(y) is not None
+            and band(y)[0] == band_latest[0]
+            and band(y) != band_latest
         ),
         None,
     )
     if other_year is None:
-        pytest.skip("no earlier year has a real value for the same region")
+        pytest.skip("no other year puts the same region in a different class band")
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
@@ -312,6 +337,14 @@ def test_switching_year_changes_a_known_regions_fill(browser, site):
         _wait_for_map_ready(page)
         fill_before = page.eval_on_selector(f"#em-nutsrg-{code}", "el => getComputedStyle(el).fill")
         page.select_option("#europeYearSelect", other_year)
+        # The map is rebuilt from scratch on a year change: wait for the
+        # render pass to FINISH (legend rows are populated inside onBuild,
+        # after every region is painted), not merely for a fill to flicker.
+        page.wait_for_function(
+            "() => !document.querySelector('#europeLegendScale .bp-europe-map__legend-row')"
+            " || document.querySelectorAll('#bpEuropeStage svg').length === 1"
+        )
+        _wait_for_map_ready(page)
         page.wait_for_function(
             "(function(pair){"
             "var el = document.getElementById('em-nutsrg-' + pair[0]);"
