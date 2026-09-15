@@ -29,6 +29,13 @@ PILOT_INDICATORS = (
     "UNEMPLOYMENT_RATE_EUROPE",
     "GOV_DEBT_EUROPE",
     "CONSUMER_CONFIDENCE_EUROPE",
+    # Europe countries batch (docs/features/europe_countries.md, added
+    # 2026-09-15): two more multi-geo indicators in the same `international`
+    # store, subject to the exact same Belgian-page exclusion -- extended
+    # here rather than duplicated in a sibling file, since every test below
+    # already iterates this tuple generically.
+    "GDP_PC_PPS_COUNTRY",
+    "POPULATION_COUNTRY",
 )
 
 

@@ -313,11 +313,18 @@ def test_panel_empty_reasons_are_trilingual_where_present():
         assert all(str(reason[lang]).strip() for lang in LANGS), panel
 
 
-def test_the_europe_panel_declares_an_empty_reason():
-    """The maintainer brief: Europe keeps its existing unavailable card and
-    additionally says, factually, that the regional map is planned."""
+def test_the_europe_panel_declares_no_empty_reason():
+    """Superseded by the Europe countries batch (docs/features/
+    europe_countries.md, 2026-09-15): the europe panel used to declare an
+    empty_reason about the foreign-GDP comparison card being unbuilt (Batch
+    B3). That card is now built for real (the country map, its picker, and
+    the "Comparaison internationale" small multiples,
+    assets/belpulse/europe_map.js), so the panel has nothing left to
+    apologise for -- config/national_sections.yaml no longer carries the
+    key, and macro.html's own renderPanelChrome() already treats a missing
+    empty_reason as "no note" (hides #europeNote)."""
     panels = {p["id"]: p for p in _layout()["panels"]}
-    assert "empty_reason" in panels["europe"], "europe has no empty_reason"
+    assert "empty_reason" not in panels["europe"], panels["europe"]
 
 
 def test_extra_list_labels_are_trilingual():

@@ -122,6 +122,11 @@ exports:
 	# has ever been run (a not-yet-loaded indicator publishes as "blocked",
 	# not missing silently).
 	$(PYTHON) scripts/export_europe_nuts2.py
+	# Europe countries (map country mode + comparison charts,
+	# docs/features/europe_countries.md). Same shape as the NUTS 2 step above:
+	# reads only the committed data/international/*.csv store and the
+	# committed NUTS 0 geometry, no $(DB) involved.
+	$(PYTHON) scripts/export_europe_countries.py
 	$(MAKE) pages
 	$(MAKE) shell-sync
 	$(MAKE) page-documents

@@ -249,6 +249,11 @@ COMMANDS: dict[str, Command] = {
         outputs=("public/data/explorer",),
         writes_repo_only=True,
     ),
+    "europe_countries_payloads": Command(
+        ("scripts/export_europe_countries.py",),
+        outputs=("public/data/europe/countries",),
+        writes_repo_only=True,
+    ),
     "local_pages": Command(
         (
             "scripts/export_local_pages.py",

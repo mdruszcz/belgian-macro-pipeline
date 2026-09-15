@@ -591,6 +591,27 @@ I18N.STRINGS = {
     // NUTS 2 units that vocabulary had no entry for yet.
     unitPpsPerInhabitant: 'PPS per inhabitant',
     unitPersons: 'people',
+    unitPctOfGdp: '% of GDP',
+    // Europe countries batch (docs/features/europe_countries.md): the
+    // "Régions / Pays" map toggle, the country picker, and the
+    // "Comparaison internationale" small-multiple charts. Still no
+    // indicator id, unit or figure here -- those come from
+    // public/data/europe/countries/*.json at runtime (rules 2/7/24).
+    europeModeGroupLabel: 'Map mode',
+    europeModeRegion: 'Regions',
+    europeModeCountry: 'Countries',
+    europePeriodLabel: 'Period',
+    europeUnemploymentNote: 'Regional and country unemployment come from different Eurostat surveys (annual regional labour-force data vs. the monthly country rate) and are not directly comparable.',
+    europeCountryPickerLabel: 'Countries to compare',
+    europeCountrySelectPrompt: 'Click, focus, or pick a country above to see its detail.',
+    europeCountryPickerSearchLabel: 'Search countries…',
+    europeCountryCapMsg: 'Maximum 8 countries selected — remove one to add another.',
+    europeCompareTitle: 'International comparison',
+    europeCompareDesc: 'One line per selected country. Pick countries on the map above or from the list.',
+    europeComparePickPrompt: 'Pick at least one country above to see the comparison charts.',
+    europeRefEU27: 'EU27 average',
+    europeRefEA21: 'Euro area average',
+    europeAdaptedLabel: 'Adapted data',
 
     // ---- Unification A4 finishing fixes ----
     // #allData's compact table (commune.html): an indicator with no published
@@ -1117,6 +1138,27 @@ I18N.STRINGS = {
     // NUTS 2 d'Eurostat qui n'avaient pas encore d'entrée dans ce vocabulaire.
     unitPpsPerInhabitant: 'SPA par habitant',
     unitPersons: 'personnes',
+    unitPctOfGdp: '% du PIB',
+    // Batch pays d'Europe (docs/features/europe_countries.md) : le
+    // commutateur de carte « Régions / Pays », le sélecteur de pays et les
+    // petits graphiques de la « Comparaison internationale ». Toujours
+    // aucun identifiant d'indicateur, unité ou chiffre ici -- tout vient de
+    // public/data/europe/countries/*.json à l'exécution (règles 2/7/24).
+    europeModeGroupLabel: 'Mode de carte',
+    europeModeRegion: 'Régions',
+    europeModeCountry: 'Pays',
+    europePeriodLabel: 'Période',
+    europeUnemploymentNote: 'Le chômage régional et le chômage par pays proviennent d’enquêtes Eurostat différentes (données régionales annuelles de la population active contre taux mensuel par pays) et ne sont pas directement comparables.',
+    europeCountryPickerLabel: 'Pays à comparer',
+    europeCountrySelectPrompt: 'Cliquez, ou choisissez un pays ci-dessus pour voir son détail.',
+    europeCountryPickerSearchLabel: 'Rechercher un pays…',
+    europeCountryCapMsg: 'Maximum 8 pays sélectionnés — retirez-en un pour en ajouter un autre.',
+    europeCompareTitle: 'Comparaison internationale',
+    europeCompareDesc: 'Une ligne par pays sélectionné. Choisissez des pays sur la carte ci-dessus ou dans la liste.',
+    europeComparePickPrompt: 'Choisissez au moins un pays ci-dessus pour voir les graphiques de comparaison.',
+    europeRefEU27: 'Moyenne UE27',
+    europeRefEA21: 'Moyenne zone euro',
+    europeAdaptedLabel: 'Donnée adaptée',
 
     // ---- Unification A4 finishing fixes ----
     pfNoPeriods: 'Aucune période publiée',
@@ -1632,6 +1674,27 @@ I18N.STRINGS = {
     // 2-eenheden van Eurostat die nog geen ingang hadden in dit vocabularium.
     unitPpsPerInhabitant: 'KKS per inwoner',
     unitPersons: 'personen',
+    unitPctOfGdp: '% van het bbp',
+    // Batch Europese landen (docs/features/europe_countries.md): de
+    // kaartschakelaar "Régions / Pays", de landkiezer en de kleine
+    // grafieken van de "Comparaison internationale". Nog steeds geen
+    // indicator-id, eenheid of cijfer hier -- alles komt uit
+    // public/data/europe/countries/*.json tijdens runtime (regels 2/7/24).
+    europeModeGroupLabel: 'Kaartmodus',
+    europeModeRegion: "Regio's",
+    europeModeCountry: 'Landen',
+    europePeriodLabel: 'Periode',
+    europeUnemploymentNote: 'Regionale en nationale werkloosheid komen uit verschillende Eurostat-enquêtes (jaarlijkse regionale arbeidskrachtentelling tegenover het maandelijkse landencijfer) en zijn niet rechtstreeks vergelijkbaar.',
+    europeCountryPickerLabel: 'Landen om te vergelijken',
+    europeCountrySelectPrompt: 'Klik op een land hierboven, of kies er een, om het detail te zien.',
+    europeCountryPickerSearchLabel: 'Landen zoeken…',
+    europeCountryCapMsg: 'Maximaal 8 landen geselecteerd — verwijder er een om een ander toe te voegen.',
+    europeCompareTitle: 'Internationale vergelijking',
+    europeCompareDesc: 'Eén lijn per geselecteerd land. Kies landen op de kaart hierboven of in de lijst.',
+    europeComparePickPrompt: 'Kies hierboven minstens één land om de vergelijkingsgrafieken te zien.',
+    europeRefEU27: 'EU27-gemiddelde',
+    europeRefEA21: 'Eurozone-gemiddelde',
+    europeAdaptedLabel: 'Aangepaste gegevens',
 
     // ---- Unification A4 finishing fixes ----
     pfNoPeriods: 'Geen periode gepubliceerd',
