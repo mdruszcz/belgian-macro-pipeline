@@ -61,12 +61,26 @@ from src.fetchers.base import FetchError  # noqa: E402
 from src.fetchers.eurostat import EurostatSource  # noqa: E402
 from src.geography.international import (  # noqa: E402
     GEO_COLUMNS,
+    is_country_level_code,
     load_excluded,
     load_international_rows,
 )
 from src.validation.config_schema import is_multi_geo, load_and_validate_all  # noqa: E402
 
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
+
+#: The two Europe countries batch datasets (docs/features/europe_countries.md,
+#: GDP_PC_PPS_COUNTRY / POPULATION_COUNTRY) are the SAME datasets the NUTS 2
+#: batch reads (nama_10r_2gdp, demo_r_pjanaggr3) and mix every NUTS level
+#: into one `geo` dimension, exactly like scripts/sync_nuts2.py's own
+#: datasets do -- so their fetch needs the narrowing geo_filter
+#: (is_country_level_code) BEFORE validation, same reasoning as
+#: EurostatSource._parse's own docstring. The five original pilot datasets
+#: (une_rt_m, prc_hicp_manr-shaped, gov_10dd_edpt1, ei_bssi_m_r2, namq_10_gdp)
+#: never mix levels, and their own aggregate code (EA21) would be WRONGLY
+#: filtered out by is_country_level_code (it is NUTS-subdivision-shaped) --
+#: so the filter is applied to these two datasets only, never universally.
+MIXED_NUTS_LEVEL_DATASETS = frozenset({"nama_10r_2gdp", "demo_r_pjanaggr3"})
 
 #: Rounded to what these five indicators actually publish (Eurostat's own
 #: decimals -- a balance, a percentage, a volume in millions of euro).
@@ -259,10 +273,11 @@ def sync(
         )
         fetch_run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
+        geo_filter = is_country_level_code if dataset in MIXED_NUTS_LEVEL_DATASETS else None
         try:
             if from_dir is not None:
                 raw = (from_dir / f"{code}.json").read_bytes()
-                geo_rows_fetched = source._parse(raw, dataset=dataset)
+                geo_rows_fetched = source._parse(raw, dataset=dataset, geo_filter=geo_filter)
             else:
                 # Deliberately no `conn=` here (audit SHOULD-FIX 7): this
                 # loop already opened and will close its own fetch_runs row
@@ -278,7 +293,9 @@ def sync(
                 # and missed the failure entirely. Ten eurostat rows for five
                 # fetches in the committed db was the symptom.
                 url = EurostatSource.build_url(source_meta["base_url"], dataset, filters, since)
-                geo_rows_fetched = source.fetch(url, cache_key=code, dataset=dataset)
+                geo_rows_fetched = source.fetch(
+                    url, cache_key=code, dataset=dataset, geo_filter=geo_filter
+                )
 
             resolved: list[tuple[dict, str]] = []
             seen_codes: set[str] = set()

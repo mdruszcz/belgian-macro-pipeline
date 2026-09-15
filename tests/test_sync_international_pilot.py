@@ -1,12 +1,16 @@
-"""Tests for scripts/sync_international.py -- the international pilot's five
-direct-Eurostat, every-country-at-once indicators (international pilot PR 1).
+"""Tests for scripts/sync_international.py -- the international pilot's
+direct-Eurostat, every-country-at-once indicators (international pilot PR 1;
+extended to seven by the Europe countries batch, docs/features/europe_countries.md).
 
 tests/fixtures/sync_international/*.json are REAL recorded Eurostat responses
-(fetched 2026-09-13, sinceTimePeriod=2023, one file per pilot indicator's
+(the original five fetched 2026-09-13, GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY
+fetched 2026-09-15, all sinceTimePeriod=2023, one file per pilot indicator's
 exact dataset+filters) -- replayed with --from-dir so these tests need no
 network and exercise the real geography resolution against real codes
 (EA/EA12/EA19/EA20/EU/EU28/EEA/UK/US/JP/XK/TR all appear in at least one of
-these five real responses).
+these seven real responses; GDP_PC_PPS_COUNTRY/POPULATION_COUNTRY additionally
+exercise is_country_level_code() against real NUTS 1/2/3 regional codes mixed
+into the same responses).
 """
 
 import json
@@ -66,7 +70,7 @@ def test_reference_rows_only_needs_no_network_and_corrects_the_source_row(tmp_pa
         n_geo = conn.execute("SELECT COUNT(*) FROM geographies").fetchone()[0]
     finally:
         conn.close()
-    assert n_indicators == 5
+    assert n_indicators == 7
     assert n_geo == 43  # every row in config/geography/international.csv
 
 
@@ -93,6 +97,8 @@ def test_replaying_the_real_fixtures_writes_every_allowlisted_geography(db):
         "UNEMPLOYMENT_RATE_EUROPE",
         "GOV_DEBT_EUROPE",
         "CONSUMER_CONFIDENCE_EUROPE",
+        "GDP_PC_PPS_COUNTRY",
+        "POPULATION_COUNTRY",
     }
     # Belgium and Germany, both allowlisted and both present in namq_10_gdp.
     assert {"be:country", "de:country"} <= geo_ids
@@ -256,4 +262,6 @@ def test_pilot_indicators_excludes_the_eight_single_country_configs():
     assert "EUROSTAT_GDP_Q_MEUR" not in pilots
     assert "EC_CONS_CONF_BE" not in pilots
     assert "GDP_VOLUME_EUROPE" in pilots
-    assert len(pilots) == 5
+    assert "GDP_PC_PPS_COUNTRY" in pilots
+    assert "POPULATION_COUNTRY" in pilots
+    assert len(pilots) == 7

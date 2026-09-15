@@ -193,6 +193,14 @@ stores:
       - UNEMPLOYMENT_RATE_EUROPE
       - GOV_DEBT_EUROPE
       - CONSUMER_CONFIDENCE_EUROPE
+      # Europe countries batch (docs/features/europe_countries.md), added
+      # 2026-09-15: country-level counterparts of GDP_PC_PPS_NUTS2 /
+      # POPULATION_NUTS2 -- same two datasets, NUTS 0 cells only (the map's
+      # country mode and the comparison charts). Still `international`, not
+      # a new store: same source_id, same allowlist, same
+      # scripts/sync_international.py loader.
+      - GDP_PC_PPS_COUNTRY
+      - POPULATION_COUNTRY
       - EUROSTAT_GDP_Q_MEUR
       - EUROSTAT_GDP_Q_MEUR_DE
       - EUROSTAT_GDP_Q_MEUR_EA

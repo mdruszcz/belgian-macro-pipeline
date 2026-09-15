@@ -1,0 +1,26 @@
+id: GDP_PC_PPS_COUNTRY
+name:
+  en: GDP per capita, PPS
+  fr: PIB par habitant, SPA
+  nl: Bbp per inwoner, KKS
+unit: pps_per_inhabitant
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: Gross domestic product per inhabitant, in purchasing power standards (PPS,
+    EU27 from 2020 basis) -- Eurostat's own country-level figure, NOT summed or
+    averaged from the NUTS 2 regional series (CLAUDE.md aggregation rules) --
+    every allowlisted country plus the EU27_2020 aggregate, the Europe countries
+    batch (docs/features/europe_countries.md). Same dataset/filter as
+    GDP_PC_PPS_NUTS2 (docs/features/europe_nuts2.md); this config reads only the
+    NUTS 0 (whole-country) cells of that same dataset response.
+fetch:
+  dataset: nama_10r_2gdp
+  filters:
+    unit: PPS_EU27_2020_HAB
+  geographies: allowlist
+  since: "2000"
+display: null
