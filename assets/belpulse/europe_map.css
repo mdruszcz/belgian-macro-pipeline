@@ -182,7 +182,7 @@
    `align-items:stretch` made the toggle buttons themselves stretch to the
    FULL HEIGHT of that row -- measured on a real page, not a guess: two
    giant vertical colour bars instead of a small pill toggle. */
-.bp-europe-mode{display:flex; gap:2px; margin-bottom:var(--bp-space-4); grid-column:1 / -1}
+.bp-europe-mode{display:flex; flex-wrap:wrap; gap:2px; margin-bottom:var(--bp-space-4); grid-column:1 / -1}
 .bp-europe-mode__btn{
   font:inherit; font-size:var(--bp-text-small,13px); padding:7px 16px;
   border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text-muted);
@@ -192,6 +192,63 @@
 .bp-europe-mode__btn:last-child{border-radius:0 var(--bp-radius-control) var(--bp-radius-control) 0; margin-left:-1px}
 .bp-europe-mode__btn[aria-pressed="true"]{background:var(--bp-accent); border-color:var(--bp-accent); color:var(--bp-navy-text); font-weight:600}
 .bp-europe-mode__btn:focus-visible{outline:2px solid var(--bp-accent); outline-offset:1px; z-index:1; position:relative}
+
+/* ---- palette picker (2026-09-15 follow-up, point 6) ----------------------
+   Pushed to the far end of the same toggle bar via margin-left:auto, so it
+   stays visible regardless of which map mode is showing (both read
+   --ramp-*/--nodata off the SAME .bp-europe-map root). The actual repaint
+   is europe_map.js's own inline style.setProperty calls (applyRampTokens)
+   -- see that function's own comment for why a CSS rule alone cannot win
+   the cascade fight against commune_map.css on a page that loads both. The
+   `[data-palette]` block below is therefore decorative/inspectable only. */
+.bp-europe-mode__palette{margin-left:auto}
+.bp-europe-mode__palette select{
+  font:inherit; font-size:var(--bp-text-small,13px); padding:6px 10px;
+  border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+  background:var(--bp-surface); color:var(--bp-text);
+}
+.bp-europe-map[data-palette="bluered"]{
+  --ramp-0:#4575b4; --ramp-1:#91bfdb; --ramp-2:#e0f3f8; --ramp-3:#ffffbf;
+  --ramp-4:#fee090; --ramp-5:#fc8d59; --ramp-6:#d73027;
+}
+.bp-europe-map[data-palette="blues"]{
+  --ramp-0:#f7fcf0; --ramp-1:#d9f0d3; --ramp-2:#a8ddb5; --ramp-3:#69c5be;
+  --ramp-4:#41a5c4; --ramp-5:#2b74b4; --ramp-6:#173a8c;
+}
+.bp-europe-map[data-palette="purples"]{
+  --ramp-0:#fdf2f8; --ramp-1:#f3d7ea; --ramp-2:#e3b3d8; --ramp-3:#cd8cc4;
+  --ramp-4:#ab66ac; --ramp-5:#7f4691; --ramp-6:#4a2a63;
+}
+.bp-europe-map[data-palette="teal"]{
+  --ramp-0:#f2f8f4; --ramp-1:#cfe8dc; --ramp-2:#a5d5c4; --ramp-3:#73bcae;
+  --ramp-4:#489d9b; --ramp-5:#2c7681; --ramp-6:#194a5a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bp-europe-map[data-palette="blues"]{
+    --ramp-0:#173a8c; --ramp-1:#2b74b4; --ramp-2:#41a5c4; --ramp-3:#69c5be;
+    --ramp-4:#a8ddb5; --ramp-5:#d9f0d3; --ramp-6:#f7fcf0;
+  }
+  :root:not([data-theme="light"]) .bp-europe-map[data-palette="purples"]{
+    --ramp-0:#4a2a63; --ramp-1:#7f4691; --ramp-2:#ab66ac; --ramp-3:#cd8cc4;
+    --ramp-4:#e3b3d8; --ramp-5:#f3d7ea; --ramp-6:#fdf2f8;
+  }
+  :root:not([data-theme="light"]) .bp-europe-map[data-palette="teal"]{
+    --ramp-0:#194a5a; --ramp-1:#2c7681; --ramp-2:#489d9b; --ramp-3:#73bcae;
+    --ramp-4:#a5d5c4; --ramp-5:#cfe8dc; --ramp-6:#f2f8f4;
+  }
+}
+:root[data-theme="dark"] .bp-europe-map[data-palette="blues"]{
+  --ramp-0:#173a8c; --ramp-1:#2b74b4; --ramp-2:#41a5c4; --ramp-3:#69c5be;
+  --ramp-4:#a8ddb5; --ramp-5:#d9f0d3; --ramp-6:#f7fcf0;
+}
+:root[data-theme="dark"] .bp-europe-map[data-palette="purples"]{
+  --ramp-0:#4a2a63; --ramp-1:#7f4691; --ramp-2:#ab66ac; --ramp-3:#cd8cc4;
+  --ramp-4:#e3b3d8; --ramp-5:#f3d7ea; --ramp-6:#fdf2f8;
+}
+:root[data-theme="dark"] .bp-europe-map[data-palette="teal"]{
+  --ramp-0:#194a5a; --ramp-1:#2c7681; --ramp-2:#489d9b; --ramp-3:#73bcae;
+  --ramp-4:#a5d5c4; --ramp-5:#cfe8dc; --ramp-6:#f2f8f4;
+}
 
 .bp-europe-map__note{font-size:12px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4); line-height:1.5}
 
@@ -219,6 +276,21 @@
 .bp-europe-picker__chip[hidden]{display:none}
 .bp-europe-picker__cap{font-size:12px; color:var(--bp-text-muted); margin:var(--bp-space-2) 0 0}
 
+/* ---- region picker grouping (2026-09-15 follow-up) -----------------------
+   The country picker above is one flat chip list (39 countries fit fine);
+   the region picker groups ~240 NUTS2 chips by country so the list stays
+   scannable, same "search + checkbox chip" idiom as the country picker,
+   nested one level. */
+.bp-europe-picker__scroll{max-height:220px; overflow-y:auto; padding:2px}
+/* The outer scroll box above is the ONE scroller (~40 country groups x a
+   handful of regions each); each inner .bp-europe-picker__list here must
+   not ALSO scroll independently, unlike the flat country picker's own
+   (unnested) use of that same class. */
+.bp-europe-picker__scroll .bp-europe-picker__list{max-height:none; overflow-y:visible}
+.bp-europe-picker__group{margin-bottom:6px}
+.bp-europe-picker__group[hidden]{display:none}
+.bp-europe-picker__group-label{font-size:11px; font-weight:600; color:var(--bp-text-faint); margin:6px 0 3px; text-transform:uppercase; letter-spacing:.02em}
+
 /* ---- country outline on the map: a selected country's polygon gets a
    visible, thicker stroke -- the map-click equivalent of a checked picker
    chip, so a reader can tell what is selected without opening the picker. */
@@ -235,6 +307,17 @@
 .bp-europe-compare h3{margin:0 0 4px}
 .bp-europe-compare__desc{font-size:13px; color:var(--bp-text-muted); margin:0 0 var(--bp-space-3)}
 .bp-europe-compare__refs{display:flex; gap:var(--bp-space-4); flex-wrap:wrap; font-size:12px; color:var(--bp-text-muted); margin-bottom:var(--bp-space-4)}
+/* 2026-09-15 follow-up: region mode sets `.hidden = true` on this element
+   (no EU27/EA21 reference exists for a NUTS2 payload) -- an attribute
+   selector is required, not just the class rule above, for the SAME
+   reason .bp-europe-map__mode-section[hidden] already needs one further
+   up this file: a plain `[hidden]{display:none}` UA-stylesheet rule loses
+   to an AUTHOR rule of equal specificity (both (0,1,0)) regardless of the
+   `hidden` attribute actually being set, so `display:flex` above was
+   silently winning and the checkboxes kept showing in region mode --
+   caught in a real-browser screenshot, not by the DOM-property-only test
+   that had been checking `el.hidden` instead of the computed style. */
+.bp-europe-compare__refs[hidden]{display:none}
 .bp-europe-compare__refs label{display:inline-flex; align-items:center; gap:5px; cursor:pointer}
 .bp-europe-compare__empty{font-size:13px; color:var(--bp-text-muted)}
 .bp-europe-compare__grid{
@@ -244,6 +327,9 @@
   border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:var(--bp-space-4); min-width:0;
 }
 .bp-europe-compare__card h4{margin:0 0 6px; font-size:.9rem}
+/* Per-card "level / croissance annuelle" toggle (2026-09-15 follow-up),
+   only appended to a card whose payload carries `has_yoy: true`. */
+.bp-europe-compare__growth{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--bp-text-muted); cursor:pointer; margin:0 0 6px}
 .bp-europe-compare__card canvas{width:100%; display:block}
 .bp-europe-compare__legend{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px}
 .bp-europe-compare__legend .chip{display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--bp-text-muted)}

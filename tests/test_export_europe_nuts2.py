@@ -115,6 +115,30 @@ class TestRealExport:
         # blocking cells (flag "bu"), now suppressed.
         assert payload["values"]["2020"]["DE22"] == {"v": None, "s": "suppressed"}
 
+    def test_yoy_wired_only_onto_the_two_eligible_indicators(self):
+        """CLAUDE.md rule 5: hand-computed, not derived from the code under
+        test -- growth_rate() itself (src/analytics/derived.py) already has
+        its own hand-computed tests in tests/test_derived.py; this only
+        proves export_europe_nuts2.py wires its answer onto the right cell
+        (2026-09-15 "croissance annuelle" follow-up,
+        docs/features/europe_countries.md amendment).
+
+        BE10 (Brussels) GDP per capita: 2022 = 68900.0, 2023 = 73100.0
+        (both real, committed data/nuts2/GDP_PC_PPS_NUTS2.csv rows) ->
+        (73100 - 68900) / 68900 * 100 = 6.0958...%, rounded to 1 decimal =
+        6.1, by hand.
+        """
+        payload = self._load("GDP_PC_PPS_NUTS2")
+        assert payload["has_yoy"] is True
+        assert payload["values"]["2023"]["BE10"] == {"v": 73100.0, "s": "final", "yoy": 6.1}
+
+        # Excluded (already a rate, matching the country-level decision):
+        # no `yoy` key at all, and `has_yoy` says so up front.
+        unemployment = self._load("UNEMPLOYMENT_RATE_NUTS2")
+        assert unemployment["has_yoy"] is False
+        latest = unemployment["latest_year"]
+        assert "yoy" not in unemployment["values"][latest]["BE10"]
+
     @pytest.mark.parametrize(
         "indicator_id", ["GDP_PC_PPS_NUTS2", "POPULATION_NUTS2", "UNEMPLOYMENT_RATE_NUTS2"]
     )

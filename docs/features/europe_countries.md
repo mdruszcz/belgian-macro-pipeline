@@ -200,3 +200,75 @@ reads the same two datasets).
 - Rollback: remove the two new indicator configs and store entries, the country payloads and the
   NUTS 0 geometry, and restore `national_sections.yaml`'s `unavailable`/`empty_reason` entries. No
   change to the NUTS 2 batch or any Belgian table/export.
+
+## Amendment, 2026-09-15 -- maintainer-requested polish batch
+
+Seven follow-up fixes to the Europe panel, all on `macro.html#europe`, requested directly by the
+maintainer (not a new spec document -- a fast-turnaround polish pass on the batch above and on
+Europe NUTS 2, `docs/features/europe_nuts2.md`). `assets/belpulse/europe_map.js`,
+`assets/belpulse/europe_map.css`, `assets/belpulse/charts.js`, `assets/i18n.js`,
+`scripts/export_europe_countries.py`, `scripts/export_europe_nuts2.py`.
+
+1. **Africa/Middle East hidden from the map.** eurostat-map's own `filterGeometriesFunction` hook
+   drops a fixed denylist (Libya, Egypt, Israel, Palestine, Jordan, Lebanon, Syria, Saudi Arabia,
+   Kuwait, Iraq, Iran, Algeria, Tunisia, Western Sahara, Morocco) from the `cntrg` background-fill
+   layer, in both map modes. `cntbn` (the background-country BORDER-LINE layer) carries no per-
+   country ISO2 id in this topology, only numeric segment ids with `eu`/`efta`/`cc`/`oth`/`co`
+   flags shared with Russia/Belarus/Ukraine/the Balkans -- it is deliberately left unfiltered, a
+   known, documented limitation rather than a risk of dropping a legitimate border. Never touches
+   `nutsrg`/`nutsbn` (the 39 licensed countries, Turkey included) or either geometry file itself.
+2. **Region `<select>` and the new region picker (point 3) are grouped by country**, `<optgroup>`
+   for the select and a labelled chip group for the picker, both keyed on a NUTS code's own first
+   two characters. Country display names come from `public/data/europe/countries/index.json`,
+   loaded once at panel init (not lazily on first switch to country mode) so grouping works even
+   when the panel opens straight into Région mode.
+3. **Region-mode selection and comparison charts.** `state.region.selected` (cap 8, same shape as
+   `state.country.selected`) mirrors country mode's map-click/checkbox-picker/cap-message model
+   exactly. Starts EMPTY -- no single Belgian region is an obvious default the way `['BE']` is for
+   country mode. "Comparaison internationale" is now MODE-SCOPED: region mode shows the 3 NUTS2
+   indicators (`public/data/europe/nuts2/*.json`), country mode is unchanged (7 country indicators).
+   NUTS2 payloads carry no `reference_lines` key at all, so region mode omits the EU27/euro-area
+   checkboxes entirely rather than fabricate a non-existent aggregate (rule 26). A small read-side
+   normalizer (`payload.periods || payload.years`) lets one shared card-rendering function serve
+   both payload shapes without renaming either exporter's existing field names.
+4. **"Croissance annuelle" (year-on-year growth) toggle**, level series only --
+   `GDP_PC_PPS_COUNTRY`, `POPULATION_COUNTRY`, `GDP_VOLUME_EUROPE`, `GDP_PC_PPS_NUTS2`,
+   `POPULATION_NUTS2`. Computed in Python at export time (rule 4) via
+   `src.analytics.derived.growth_rate`/`shift_period_years` (already handles both annual and
+   quarterly periods correctly -- reused directly, not reimplemented), added as a `yoy` field
+   alongside each period's `{v, s}`, rounded to 1 decimal at export. A top-level `has_yoy` boolean
+   marks which payloads carry it (true for the 5 above, false elsewhere, present on blocked-shape
+   payloads too for uniformity) so the UI never has to know an indicator id. The toggle is per-card,
+   only appended when `has_yoy` is true; while it is on, that card's EU27/EA21 reference line (when
+   otherwise applicable) is hidden entirely rather than plotted next to a percent-growth line on the
+   same axis.
+5. **No per-point markers on comparison-chart lines.** `assets/belpulse/charts.js`'s `drawLine` gets
+   a new `markers` option (default `true`, so every other caller -- macro.html's other history
+   panels, the single-geography detail chart in europe_map.js -- is unaffected); only the country
+   and region comparison renderers pass `markers:false`.
+6. **Palette picker**, reusing `map.html`'s exact 5 names/hex values and its already-trilingual
+   `mapPaletteLabel`/`mapPalette_*` i18n keys (no duplicates added). A real cascade-fight risk,
+   flagged in advance: `europe_map.js`'s existing `applyRampTokens()` already documents that a
+   `.bp-europe-map`-scoped CSS rule for `--ramp-*` loses to `assets/commune_map.css`'s own
+   `:root[data-theme][data-palette]` rule on a page that loads both stylesheets -- exactly why
+   today's single ramp is applied as an inline style, not CSS. The picker extends that SAME inline
+   mechanism for all 5 palettes; the `[data-palette]` CSS block `europe_map.css` also carries is
+   decorative/inspectable only. Own localStorage key (`belpulse-europe-palette`), independent from
+   the commune map's own (`belpulse-map-palette`) -- deliberate, not a bug. Default `'default'`
+   (today's existing blue ramp), not map.html's own `'bluered'` default, so a reader who never
+   touches the picker sees no change.
+7. A real bug found by screenshot review, not by the automated tests as first written: hiding the
+   EU27/EA21 reference checkboxes in region mode (`el.hidden = true`) did not actually hide them on
+   screen -- an author CSS rule (`.bp-europe-compare__refs{display:flex}`) of equal specificity to
+   the browser's own `[hidden]{display:none}` default was winning the cascade, the same class of
+   bug `.bp-europe-map__mode-section[hidden]` already had to guard against earlier in this file.
+   Fixed with the same `[hidden]{display:none}` override; the test that had only checked the
+   `el.hidden` DOM property (not the computed style) was strengthened to check
+   `getComputedStyle(el).display` instead, so this class of bug fails the suite next time.
+
+Tests: two hand-computed unit tests (one per exporter, `growth_rate`'s own hand-computed tests
+already live in `tests/test_derived.py` -- these only prove the field is wired onto the right cell)
+plus one extended real-browser pass through `tests/test_europe_panel.py` (24 tests total in that
+file after this batch). Kept deliberately minimal, per the maintainer's explicit "go fast" scope for
+this batch -- not a new large suite.
+  change to the NUTS 2 batch or any Belgian table/export.
