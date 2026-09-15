@@ -64,6 +64,7 @@ from src.analytics.derived import growth_rate  # noqa: E402
 from src.geography.international import load_excluded as load_international_excluded  # noqa: E402
 from src.geography.international import load_international_rows  # noqa: E402
 from src.geography.nuts2 import is_nuts2_code, load_nuts2_rows  # noqa: E402
+from src.stores import load_stores  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
 DEFAULT_OUT_DIR = REPO_ROOT / "public" / "data" / "europe" / "nuts2"
@@ -412,13 +413,25 @@ def _build_indicator_payload(
 
 def export(out_dir: Path = DEFAULT_OUT_DIR) -> list[str]:
     """Writes index.json and one {indicator_id}.json per configured NUTS 2
-    indicator. Returns the list of indicator_ids processed, in id order."""
+    indicator. Returns the list of indicator_ids processed, in the order
+    config/stores.yaml's `nuts2` store declares them (any nuts2 config the
+    store does not list comes after, in id order).
+
+    Store order, not id order: the index's first loaded entry is the
+    region map's DEFAULT indicator (europe_map.js pickDefaultIndicator).
+    Sorting by id was harmless while the three original indicators happened
+    to sort GDP first; the additional domains batch (2026-09-15) added
+    EMPLOYMENT_RATE_NUTS2, which sorted ahead of it and silently made the
+    employment rate the map a reader lands on. The store lists the original
+    three first."""
     indicator_configs, source_configs = load_and_validate_all(INDICATORS_DIR, SOURCES_DIR)
-    nuts2_indicator_ids = sorted(
+    configured = {
         code
         for code, cfg in indicator_configs.items()
         if cfg.get("source_id") == "eurostat" and "nuts2" in (cfg.get("geo_levels") or [])
-    )
+    }
+    store_order = [i for i in load_stores()["nuts2"].indicators if i in configured]
+    nuts2_indicator_ids = store_order + sorted(configured - set(store_order))
     if not nuts2_indicator_ids:
         raise ExportError("No config/indicators/*.yaml declares geo_levels: [nuts2]")
 

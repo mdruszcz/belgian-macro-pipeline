@@ -592,6 +592,16 @@ I18N.STRINGS = {
     unitPpsPerInhabitant: 'PPS per inhabitant',
     unitPersons: 'people',
     unitPctOfGdp: '% of GDP',
+    unitThousandPersons: 'thousand people',
+    unitKtCo2eq: 'kt CO₂ eq.',
+    unitFte: 'full-time equivalents',
+    unitYears: 'years',
+    unitMeurClv2010: '€ million (2010 volumes)',
+    unitIndex0100: 'score 0–100',
+    europeCompareFilterLabel: 'Charts shown',
+    europeCompareFilterAll: 'All',
+    europeCompareFilterNone: 'None',
+    europeCompareNoneVisible: 'No chart ticked above.',
     // Europe countries batch (docs/features/europe_countries.md): the
     // "Régions / Pays" map toggle, the country picker, and the
     // "Comparaison internationale" small-multiple charts. Still no
@@ -1148,6 +1158,16 @@ I18N.STRINGS = {
     unitPpsPerInhabitant: 'SPA par habitant',
     unitPersons: 'personnes',
     unitPctOfGdp: '% du PIB',
+    unitThousandPersons: 'milliers de personnes',
+    unitKtCo2eq: 'kt éq. CO₂',
+    unitFte: 'équivalents temps plein',
+    unitYears: 'ans',
+    unitMeurClv2010: 'millions € (volumes 2010)',
+    unitIndex0100: 'score 0–100',
+    europeCompareFilterLabel: 'Graphiques affichés',
+    europeCompareFilterAll: 'Tous',
+    europeCompareFilterNone: 'Aucun',
+    europeCompareNoneVisible: 'Aucun graphique coché ci-dessus.',
     // Batch pays d'Europe (docs/features/europe_countries.md) : le
     // commutateur de carte « Régions / Pays », le sélecteur de pays et les
     // petits graphiques de la « Comparaison internationale ». Toujours
@@ -1690,6 +1710,16 @@ I18N.STRINGS = {
     unitPpsPerInhabitant: 'KKS per inwoner',
     unitPersons: 'personen',
     unitPctOfGdp: '% van het bbp',
+    unitThousandPersons: 'duizend personen',
+    unitKtCo2eq: 'kt CO₂-eq.',
+    unitFte: 'voltijdequivalenten',
+    unitYears: 'jaar',
+    unitMeurClv2010: 'miljoen € (volumes 2010)',
+    unitIndex0100: 'score 0–100',
+    europeCompareFilterLabel: 'Getoonde grafieken',
+    europeCompareFilterAll: 'Alle',
+    europeCompareFilterNone: 'Geen',
+    europeCompareNoneVisible: 'Geen enkele grafiek hierboven aangevinkt.',
     // Batch Europese landen (docs/features/europe_countries.md): de
     // kaartschakelaar "Régions / Pays", de landkiezer en de kleine
     // grafieken van de "Comparaison internationale". Nog steeds geen

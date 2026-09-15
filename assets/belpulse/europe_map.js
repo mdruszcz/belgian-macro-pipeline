@@ -2221,6 +2221,18 @@
     refEALabel.appendChild(refEALabelText);
 
     var refRow = el('div', { class: 'bp-europe-compare__refs' }, [refEULabel, refEALabel]);
+    // The indicator filter (2026-09-15, maintainer: "25 indicateurs
+    // possiblement visibles en dessous mais avec un filtre pour choisir"):
+    // one chip per indicator of the active mode, rebuilt by
+    // renderCompareFilter() on every render so its names follow the
+    // language and its set follows the mode.
+    var filterLabel = el('span', { text: T('europeCompareFilterLabel') });
+    var filterAll = el('button', { type: 'button', id: 'europeCompareFilterAll', text: T('europeCompareFilterAll') });
+    var filterNone = el('button', { type: 'button', id: 'europeCompareFilterNone', text: T('europeCompareFilterNone') });
+    var filterHead = el('div', { class: 'bp-europe-compare__filter-head' }, [filterLabel, filterAll, filterNone]);
+    var filterList = el('div', { class: 'bp-europe-compare__filter-list', id: 'europeCompareFilterList' });
+    var filter = el('div', { class: 'bp-europe-compare__filter', id: 'europeCompareFilter' }, [filterHead, filterList]);
+
     var grid = el('div', { class: 'bp-europe-compare__grid', id: 'europeCompareGrid' });
     var empty = el('p', { class: 'bp-europe-compare__empty', id: 'europeCompareEmpty' });
     empty.hidden = true;
@@ -2228,6 +2240,7 @@
     root.appendChild(heading);
     root.appendChild(desc);
     root.appendChild(refRow);
+    root.appendChild(filter);
     root.appendChild(grid);
     root.appendChild(empty);
 
@@ -2239,12 +2252,82 @@
       refEULabelText: refEULabelText,
       refEA: refEA,
       refEALabelText: refEALabelText,
+      filterLabel: filterLabel,
+      filterAll: filterAll,
+      filterNone: filterNone,
+      filterList: filterList,
       grid: grid,
       empty: empty,
       chartState: {}, // indicator_id -> {series, model, tipOpts} for register()'s resize redraw
     };
     refEU.addEventListener('change', renderComparisonCharts);
     refEA.addEventListener('change', renderComparisonCharts);
+    filterAll.addEventListener('click', function () {
+      setAllCompareVisible(true);
+    });
+    filterNone.addEventListener('click', function () {
+      setAllCompareVisible(false);
+    });
+  }
+
+  /* Which comparison cards the reader has ticked, per mode. Seeded from the
+     index's own `compare_default` binding (the seven cards the card showed
+     before the additional domains were wired in; a missing flag means
+     visible, which is every region indicator) -- never from an id this file
+     knows (CLAUDE.md rules 2/24). In-memory only: a reader's ticks last the
+     page, not longer. */
+  function compareVisibleFor(mode, indicators) {
+    if (!state.compareVisible) state.compareVisible = {};
+    var vis = state.compareVisible[mode];
+    if (!vis) {
+      vis = {};
+      indicators.forEach(function (indMeta) {
+        vis[indMeta.id] = indMeta.compare_default !== false;
+      });
+      state.compareVisible[mode] = vis;
+    }
+    return vis;
+  }
+
+  function activeCompareIndicators() {
+    if (state.mode === 'region') return state.index ? state.index.indicators : null;
+    return state.country.index ? state.country.index.indicators : null;
+  }
+
+  function setAllCompareVisible(flag) {
+    var indicators = activeCompareIndicators();
+    if (!indicators) return;
+    var vis = compareVisibleFor(state.mode === 'region' ? 'region' : 'country', indicators);
+    indicators.forEach(function (indMeta) {
+      vis[indMeta.id] = flag;
+    });
+    renderComparisonCharts();
+  }
+
+  function renderCompareFilter(mode, indicators, payloadsById) {
+    var c = state.els.compare;
+    var vis = compareVisibleFor(mode, indicators);
+    clear(c.filterList);
+    indicators.forEach(function (indMeta) {
+      var payload = payloadsById[indMeta.id];
+      var name = (payload && payload.names && (payload.names[LANG] || payload.names.en)) || indMeta.id;
+      var checkbox = el('input', { type: 'checkbox' });
+      checkbox.checked = !!vis[indMeta.id];
+      // `data-indicator` is a data binding for tests and styling (the
+      // geography pickers' chips carry `data-code` the same way), not an
+      // id this renderer reads.
+      var chip = el(
+        'label',
+        { class: 'bp-europe-compare__filter-chip', 'data-indicator': indMeta.id, 'data-checked': String(!!vis[indMeta.id]) },
+        [checkbox]
+      );
+      chip.appendChild(document.createTextNode(' ' + name));
+      checkbox.addEventListener('change', function () {
+        vis[indMeta.id] = checkbox.checked;
+        renderComparisonCharts();
+      });
+      c.filterList.appendChild(chip);
+    });
   }
 
   function relabelCompareChrome() {
@@ -2254,6 +2337,10 @@
     c.desc.textContent = T('europeCompareDesc');
     c.refEULabelText.textContent = ' ' + T('europeRefEU27');
     c.refEALabelText.textContent = ' ' + T('europeRefEA21');
+    c.filterLabel.textContent = T('europeCompareFilterLabel');
+    c.filterAll.textContent = T('europeCompareFilterAll');
+    c.filterNone.textContent = T('europeCompareFilterNone');
+    // The chips' own names are rebuilt by the render that follows.
   }
 
   function hasAnyReference(referenceLines, code) {
@@ -2446,7 +2533,18 @@
     var showEA21 = c.refEA.checked;
     var statusLabels = statusLabelVocab();
 
-    state.country.index.indicators.forEach(function (indMeta) {
+    var indicators = state.country.index.indicators;
+    renderCompareFilter('country', indicators, state.country.payloads);
+    var vis = compareVisibleFor('country', indicators);
+    var shown = indicators.filter(function (indMeta) {
+      return vis[indMeta.id];
+    });
+    if (!shown.length) {
+      c.empty.hidden = false;
+      c.empty.textContent = T('europeCompareNoneVisible');
+      return;
+    }
+    shown.forEach(function (indMeta) {
       var card = buildComparisonCard({
         indicatorId: indMeta.id,
         payload: state.country.payloads[indMeta.id],
@@ -2478,13 +2576,25 @@
     c.empty.hidden = true;
     var statusLabels = statusLabelVocab();
 
-    // Every region indicator the index lists (currently 3, exactly this
+    // Every region indicator the index lists (6 today, exactly this
     // file's own module docstring's promise: "Adding a fourth NUTS 2
     // indicator later is a pipeline change plus a new payload file, never
     // an edit here") -- the SAME array populateIndicatorSelect/render use
     // for the map, not a second, hardcoded list of ids (CLAUDE.md rules
-    // 2/24: no indicator id lives in this generic renderer).
-    state.index.indicators.forEach(function (indMeta) {
+    // 2/24: no indicator id lives in this generic renderer) -- minus what
+    // the reader unticked in the filter.
+    var indicators = state.index.indicators;
+    renderCompareFilter('region', indicators, state.payloads);
+    var vis = compareVisibleFor('region', indicators);
+    var shown = indicators.filter(function (indMeta) {
+      return vis[indMeta.id];
+    });
+    if (!shown.length) {
+      c.empty.hidden = false;
+      c.empty.textContent = T('europeCompareNoneVisible');
+      return;
+    }
+    shown.forEach(function (indMeta) {
       var card = buildComparisonCard({
         indicatorId: indMeta.id,
         payload: state.payloads[indMeta.id],
