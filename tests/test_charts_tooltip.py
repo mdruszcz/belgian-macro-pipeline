@@ -148,29 +148,36 @@ def test_hovering_the_last_point_shows_its_real_value_and_period(desktop):
         ), f"tooltip for {code} missing value {expected_value_text!r}: {tip_text!r}"
 
 
-def test_data_table_lists_every_drawn_period(desktop):
-    hero = _hero_codes()
+def test_hero_cards_are_compact_no_data_table_no_see_more(desktop):
+    """The hero cards follow the compact design: title, latest value, plot,
+    source -- no "see data" table and no "see more" link."""
+    cards = desktop.locator("#heroMini .glass")
+    assert cards.count() >= 1
+    for i in range(cards.count()):
+        card = cards.nth(i)
+        assert card.locator("details.bp-chart-data").count() == 0
+        assert card.locator("a").count() == 0
+        assert card.locator(".mini-head .mini-reading b").inner_text().strip()
+
+
+def test_hero_tooltip_does_not_repeat_the_indicator_name(desktop):
     national = _national()
     cards = desktop.locator("#heroMini .glass")
-
-    for i in range(min(cards.count(), len(hero))):
-        code = hero[i]
-        entry = national[code]
-        drawn_periods = sorted(entry["periods"].keys())[-24:]
-
-        details = cards.nth(i).locator("details.bp-chart-data")
-        assert details.count() == 1, f"no data table for {code}"
-        # <details> content participates in the DOM regardless of [open].
-        rows = details.locator("tbody tr")
-        assert rows.count() == len(
-            drawn_periods
-        ), f"{code}: table has {rows.count()} rows, chart drew {len(drawn_periods)} periods"
-        # text_content(), not inner_text(): the <details> is closed by
-        # default, and inner_text() only returns RENDERED (visible) text --
-        # the table is still fully present in the DOM, which is the point.
-        table_text = details.locator("table").text_content()
-        for period in drawn_periods:
-            assert period in table_text, f"{code}: period {period} missing from its data table"
+    for i in range(cards.count()):
+        code = _hero_codes()[i]
+        title = cards.nth(i).locator("h3").inner_text().strip()
+        assert title
+        box = cards.nth(i).locator("canvas").bounding_box()
+        assert box
+        desktop.mouse.move(box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
+        desktop.wait_for_function(
+            "document.querySelector('.bp-chart-tip') && "
+            "!document.querySelector('.bp-chart-tip').hidden",
+            timeout=5000,
+        )
+        tip_text = desktop.locator(".bp-chart-tip").inner_text()
+        assert title not in tip_text, f"tooltip for {code} still names the series: {tip_text!r}"
+        assert sorted(national[code]["periods"].keys())[-1] in tip_text
 
 
 def test_canvas_is_focusable_and_arrow_left_changes_the_announced_point(desktop):
