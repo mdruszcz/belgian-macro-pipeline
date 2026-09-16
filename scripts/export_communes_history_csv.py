@@ -48,7 +48,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from export_communes_csv import STATUS_TO_LETTER, _ancestor_names  # noqa: E402
 
-from src.analytics.backaggregate import reconstruct  # noqa: E402
+from src.analytics.backaggregate import (  # noqa: E402
+    lineage_from_geographies,
+    reconstruct,
+    territory_consistent_growth,
+    territory_series,
+)
 from src.analytics.engine import ObservationSet, compute  # noqa: E402
 from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
 from src.validation.config_schema import load_and_validate_derived  # noqa: E402
@@ -216,6 +221,40 @@ def export_communes_history_csv(
         existing_derived_cells=existing_derived_cells,
     )
 
+    # GROWTH ON CURRENT TERRITORY -- maintainer decision 2026-09-16, overriding
+    # the merger back-aggregation handoff's original bar on POPULATION_CHANGE_5Y
+    # / POPULATION_CAGR_10Y ever using a reconstructed base. See
+    # src/analytics/backaggregate.py's territory_series/territory_consistent_growth
+    # docstrings for the construction (T = own row + every predecessor's own
+    # row, all-or-nothing). A growth config qualifies only when its single
+    # input is a RAW ADDITIVE indicator -- MUN_REVENUE_GROWTH_1Y and
+    # MUN_EXPENDITURE_GROWTH_1Y take a DERIVED per-capita ratio as their
+    # input, so they never qualify and are computed exactly as before (WalStat
+    # carries no predecessor rows anyway, so T would equal the own row even if
+    # they did qualify -- this filter just makes that explicit rather than
+    # relying on the data happening to agree).
+    lineage = lineage_from_geographies(lineage_rows)
+    territory_growth_rows: list = []
+    territory_overridden_cells: set[tuple[str, str, str]] = set()
+    if lineage:
+        for ind_id, cfg in derived_cfgs.items():
+            spec = cfg.get("derived") or {}
+            if spec.get("function") not in ("five_year_change", "cagr"):
+                continue
+            inputs = spec.get("inputs") or []
+            if len(inputs) != 1 or not indicator_is_additive.get(inputs[0]):
+                continue
+            input_id = inputs[0]
+            territory = territory_series(raw, lineage, input_id)
+            if not territory:
+                continue
+            rows_for_this = territory_consistent_growth(territory, {ind_id: cfg})
+            territory_growth_rows.extend(rows_for_this)
+            territory_overridden_cells.update(
+                (geo_id, indicator_id, period)
+                for geo_id, indicator_id, _n, _u, period, *_ in rows_for_this
+            )
+
     # Raw rows: filtered down to CURRENT communes only for display.
     obs = [row for row in raw if row[0] in commune_by_id]
     obs.extend(row for row in reconstructed if row[0] in commune_by_id)
@@ -225,16 +264,24 @@ def export_communes_history_csv(
     # before ten years of history exist) is DROPPED, not written as a blank
     # row. That mirrors how a missing raw observation already renders as
     # "n/a" in communes.html: absent, not an explicit null.
+    #
+    # A lineage-successor cell that territory_consistent_growth recomputed is
+    # SKIPPED here and added once below instead -- one row per key, never a
+    # live engine value and a territory-consistent one both landing in `obs`.
     for ind_id, cfg in derived_cfgs.items():
         name_en = cfg["name"]["en"]
         unit = cfg["unit"]
         for geo_id, period in sorted(result.cells(ind_id)):
             if geo_id not in commune_by_id:
                 continue
+            if (geo_id, ind_id, period) in territory_overridden_cells:
+                continue
             value = result.value(ind_id, geo_id, period)
             if value is None:
                 continue
             obs.append((geo_id, ind_id, name_en, unit, period, value, "derived", ""))
+
+    obs.extend(row for row in territory_growth_rows if row[0] in commune_by_id)
 
     obs.sort(key=lambda r: (r[0], r[1], r[4]))
     conn.close()

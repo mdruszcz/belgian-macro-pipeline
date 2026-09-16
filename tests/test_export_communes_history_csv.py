@@ -607,3 +607,271 @@ def test_bastogne_style_lineage_is_selected_despite_a_2024_12_02_date(tmp_path):
     bastogne_2020 = [r for r in rows if r["geo_id"] == "be:mun:82039" and r["period"] == "2020"]
     assert len(bastogne_2020) == 1
     assert float(bastogne_2020[0]["value"]) == pytest.approx(150.0)
+
+
+# ── Growth on current territory -- maintainer decision 2026-09-16 ──────────
+# "compute all growth of current territory": POPULATION_CHANGE_5Y and
+# POPULATION_CAGR_10Y are recomputed on T(C, p) = C's own row + every
+# predecessor's own row for p, overriding the earlier bar on a reconstructed
+# base. See src/analytics/backaggregate.py's territory_series docstring.
+
+
+def _change_and_cagr_derived_dir(tmp_path) -> Path:
+    d = tmp_path / "growth_derived"
+    d.mkdir()
+    (d / "POPULATION_CHANGE_5Y.yaml").write_text("""
+id: POPULATION_CHANGE_5Y
+name: {en: Population change over 5 years, fr: x, nl: x}
+unit: percent
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+derived:
+  function: five_year_change
+  inputs: [POPULATION_BY_COMMUNE]
+""")
+    (d / "POPULATION_CAGR_10Y.yaml").write_text(_CAGR_YAML)
+    (d / "POPULATION_PERCENTILE.yaml").write_text(_PERCENTILE_YAML)
+    return d
+
+
+@pytest.fixture
+def growth_territory_db(tmp_path):
+    """Four geographies exercising every branch of growth-on-current-territory:
+
+    SUCC: a whole-commune successor (like the 13) -- OLDA/OLDB report every
+    year 2011-2024, SUCC only exists from 2025. T(2020) = OLDA+OLDB;
+    POPULATION_CHANGE_5Y for SUCC 2025 uses T(2020) as base, and
+    POPULATION_CAGR_10Y for SUCC 2025 uses T(2015) as base.
+
+    ABSORB: an Antwerp-style successor that already existed and keeps
+    reporting every year -- PRED is a separate predecessor merged into it in
+    2025 and ALSO reports every year through 2024. T(p) = ABSORB(p) +
+    PRED(p) for p <= 2024, and just ABSORB(p) for p >= 2025.
+
+    OTHER: an ordinary commune with no lineage row at all -- the control.
+    Its growth must be byte-identical to what the plain engine (no
+    territory pass) would produce.
+
+    PARTIAL: a successor whose predecessor PARTPRED has a full history
+    EXCEPT 2020, which is missing entirely -- so T(2020) must not exist,
+    and the growth cell whose base is 2020 must be absent.
+    """
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+
+    _geo(conn, "be:mun:SUCC", "900", "Successor")
+    _geo(
+        conn,
+        "be:mun:OLDA",
+        "901",
+        "Predecessor A",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:SUCC",
+    )
+    _geo(
+        conn,
+        "be:mun:OLDB",
+        "902",
+        "Predecessor B",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:SUCC",
+    )
+    _geo(conn, "be:mun:ABSORB", "910", "Absorbing commune")
+    _geo(
+        conn,
+        "be:mun:PRED",
+        "911",
+        "Absorbed predecessor",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:ABSORB",
+    )
+    _geo(conn, "be:mun:OTHER", "920", "Control commune")
+    _geo(conn, "be:mun:PARTIAL", "930", "Partial successor")
+    _geo(
+        conn,
+        "be:mun:PARTPRED",
+        "931",
+        "Partial predecessor",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:PARTIAL",
+    )
+
+    for year in range(2011, 2025):
+        offset = year - 2011
+        _pop(conn, "be:mun:OLDA", str(year), 1000.0 + offset * 10)
+        _pop(conn, "be:mun:OLDB", str(year), 500.0 + offset * 5)
+        _pop(conn, "be:mun:ABSORB", str(year), 2000.0 + offset * 20)
+        _pop(conn, "be:mun:PRED", str(year), 300.0 + offset * 3)
+        _pop(conn, "be:mun:OTHER", str(year), 800.0 + offset * 8)
+        if year != 2020:
+            _pop(conn, "be:mun:PARTPRED", str(year), 400.0 + offset * 4)
+    # SUCC born 2025; ABSORB and OTHER keep reporting; PARTIAL born 2025.
+    _pop(conn, "be:mun:SUCC", "2025", 1600.0)
+    _pop(conn, "be:mun:ABSORB", "2025", 2280.0 + 300.0)  # own + absorbed territory scale
+    _pop(conn, "be:mun:OTHER", "2025", 912.0)
+    _pop(conn, "be:mun:PARTIAL", "2025", 900.0)
+
+    conn.commit()
+    conn.close()
+    return db_path
+
+
+def _growth_row(rows, geo_id, indicator_code, period):
+    matches = [
+        r
+        for r in rows
+        if r["geo_id"] == geo_id and r["indicator_code"] == indicator_code and r["period"] == period
+    ]
+    return matches[0] if matches else None
+
+
+def test_whole_commune_successor_gains_both_growth_indicators(growth_territory_db, tmp_path):
+    """SUCC (like the 13 real successors) has no own row before 2025, so
+    T(2020) = OLDA(2020) + OLDB(2020) = (1000+90) + (500+45) = 1635.0, and
+    T(2015) = OLDA(2015) + OLDB(2015) = (1000+40) + (500+20) = 1560.0.
+    POPULATION_CHANGE_5Y 2025 = 1600/1635 - 1 = -2.140673 %.
+    POPULATION_CAGR_10Y 2025 = (1600/1560)^(1/10) - 1 = 0.253909 %.
+    """
+    derived_dir = _change_and_cagr_derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(growth_territory_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+
+    t_2020 = (1000.0 + 90.0) + (500.0 + 45.0)
+    t_2015 = (1000.0 + 40.0) + (500.0 + 20.0)
+    assert t_2020 == pytest.approx(1635.0)
+    assert t_2015 == pytest.approx(1560.0)
+
+    change = _growth_row(rows, "be:mun:SUCC", "POPULATION_CHANGE_5Y", "2025")
+    assert change is not None
+    assert float(change["value"]) == pytest.approx((1600.0 / t_2020 - 1) * 100, abs=1e-6)
+    assert change["status"] == "reconstructed"
+
+    cagr = _growth_row(rows, "be:mun:SUCC", "POPULATION_CAGR_10Y", "2025")
+    assert cagr is not None
+    assert float(cagr["value"]) == pytest.approx(((1600.0 / t_2015) ** 0.1 - 1) * 100, abs=1e-6)
+    assert cagr["status"] == "reconstructed"
+
+
+def test_whole_commune_successor_gains_exactly_two_new_indicators_and_nothing_else(
+    growth_territory_db, tmp_path
+):
+    """Before this change SUCC had no POPULATION_CHANGE_5Y/CAGR_10Y row at
+    all (no own history to compute a plain engine growth from). After, it
+    gains exactly these two and nothing else -- in particular no new
+    POPULATION_PERCENTILE row appears for it beyond what the plain engine
+    already produces from its one real 2025 observation."""
+    derived_dir = _change_and_cagr_derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(growth_territory_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+    succ_indicator_codes = {r["indicator_code"] for r in rows if r["geo_id"] == "be:mun:SUCC"}
+    assert "POPULATION_CHANGE_5Y" in succ_indicator_codes
+    assert "POPULATION_CAGR_10Y" in succ_indicator_codes
+    # No duplicate rows for the same (geo_id, indicator, period).
+    succ_keys = [(r["indicator_code"], r["period"]) for r in rows if r["geo_id"] == "be:mun:SUCC"]
+    assert len(succ_keys) == len(set(succ_keys))
+
+
+def test_absorbing_commune_growth_uses_both_territories_summed(growth_territory_db, tmp_path):
+    """ABSORB (Antwerp-shaped): own row exists every year AND PRED also
+    reports every year through 2024. T(2020) = ABSORB(2020) + PRED(2020) =
+    (2000+180) + (300+27) = 2507.0. POPULATION_CHANGE_5Y 2025 uses this T as
+    the base, not ABSORB(2020) alone."""
+    derived_dir = _change_and_cagr_derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(growth_territory_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+
+    t_2020 = (2000.0 + 180.0) + (300.0 + 27.0)
+    assert t_2020 == pytest.approx(2507.0)
+    own_only_2020 = 2000.0 + 180.0
+
+    change = _growth_row(rows, "be:mun:ABSORB", "POPULATION_CHANGE_5Y", "2025")
+    assert change is not None
+    absorb_2025 = 2280.0 + 300.0
+    expected = (absorb_2025 / t_2020 - 1) * 100
+    wrong_spliced = (absorb_2025 / own_only_2020 - 1) * 100
+    assert float(change["value"]) == pytest.approx(expected, abs=1e-6)
+    assert float(change["value"]) != pytest.approx(wrong_spliced, abs=1e-3)
+    assert change["status"] == "reconstructed"
+
+
+def test_control_commune_growth_is_byte_identical_with_and_without_the_territory_pass(
+    growth_territory_db, tmp_path
+):
+    """OTHER has no lineage row anywhere -- its growth figures must come out
+    exactly the digit the plain engine (no territory override) would have
+    produced. Proven by comparing against a hand-computed plain growth_rate,
+    not merely 'some value came out'."""
+    derived_dir = _change_and_cagr_derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(growth_territory_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+
+    other_2020 = 800.0 + 9 * 8.0  # year offset 2020-2011=9
+    other_2025 = 912.0
+    expected_change = (other_2025 / other_2020 - 1) * 100
+
+    change = _growth_row(rows, "be:mun:OTHER", "POPULATION_CHANGE_5Y", "2025")
+    assert change is not None
+    assert float(change["value"]) == pytest.approx(expected_change, abs=1e-9)
+    # A control commune's growth is never marked reconstructed.
+    assert change["status"] == "derived"
+
+
+def test_partial_lineage_period_yields_an_absent_growth_cell(growth_territory_db, tmp_path):
+    """PARTPRED has no 2020 row at all, so T(2020) is undefined for PARTIAL
+    -- POPULATION_CHANGE_5Y 2025 (base 2020) must be ABSENT, not a partial
+    sum and not silently falling back to PARTIAL's own (nonexistent)
+    pre-merger series."""
+    derived_dir = _change_and_cagr_derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(growth_territory_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+    change = _growth_row(rows, "be:mun:PARTIAL", "POPULATION_CHANGE_5Y", "2025")
+    assert change is None
+
+
+def test_percentile_for_a_pre_merger_period_is_unchanged_by_the_territory_pass(
+    growth_territory_db, tmp_path
+):
+    """The trap named in the handoff: growth-on-current-territory must NEVER
+    feed T or reconstructed rows into the engine's ObservationSet, so
+    POPULATION_PERCENTILE for a pre-merger period must be identical to what
+    it was before this change -- computed only from OLDA/OLDB/PRED/ABSORB/
+    OTHER/PARTPRED's own historical rows, never SUCC or PARTIAL (which do
+    not exist yet in 2020) and never a summed T value."""
+    derived_dir = _change_and_cagr_derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(growth_territory_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+
+    def pct(geo_id, period):
+        r = _growth_row(rows, geo_id, "POPULATION_PERCENTILE", period)
+        return None if r is None else float(r["value"])
+
+    # OTHER's 2020 percentile is computed against every geo_id with a real
+    # 2020 row: OLDA, OLDB, ABSORB, PRED, OTHER, PARTPRED (PARTPRED has no
+    # 2020 row in this fixture) -- N=5 real rows for 2020.
+    values_2020 = {
+        "OLDA": 1000.0 + 9 * 10.0,
+        "OLDB": 500.0 + 9 * 5.0,
+        "ABSORB": 2000.0 + 9 * 20.0,
+        "PRED": 300.0 + 9 * 3.0,
+        "OTHER": 800.0 + 9 * 8.0,
+    }
+    subject = values_2020["OTHER"]
+    below = sum(1 for v in values_2020.values() if v < subject)
+    equal = sum(1 for v in values_2020.values() if v == subject)
+    expected_pct = 100.0 * (below + 0.5 * equal) / len(values_2020)
+
+    assert pct("be:mun:OTHER", "2020") == pytest.approx(expected_pct)
+    # SUCC/PARTIAL must not appear in the 2020 output at all (they don't
+    # exist as current-row communes for 2020, and are not current communes'
+    # own historical geo_id either) -- but more importantly, if the
+    # reconstructed/T value HAD leaked into the peer set, N would be 6 or 7
+    # and this percentile would be a different number.
+    wrong_if_leaked = 100.0 * (below + 0.5 * equal) / (len(values_2020) + 1)
+    assert pct("be:mun:OTHER", "2020") != pytest.approx(wrong_if_leaked)
