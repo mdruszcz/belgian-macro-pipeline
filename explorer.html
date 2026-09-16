@@ -458,6 +458,12 @@ function statusPill(s){
   if(s === 'S') return `<span class="pill suppressed" title="${T('mapWithheld')}">${T('pfSuppressed')}</span>`;
   if(s === 'N') return `<span class="pill other">${T('explorerStatusNa')}</span>`;
   if(s === 'derived') return `<span class="pill derived">${T('pfStatusDerived')}</span>`;
+  // Reconstructed from the communes that existed before a merger. Deliberately
+  // NOT folded into 'derived': that one is computed from this commune's own
+  // figures, this one from a different commune's, and the reader needs to know
+  // whose territory the number describes. The title carries the full
+  // explanation the commune pages already use, in the reader's own language.
+  if(s === 'reconstructed') return `<span class="pill derived" title="${T('reconstructedNote')}">${T('reconstructedSuffix')}</span>`;
   if(!s) return '';
   return `<span class="pill other">${s}</span>`;
 }
@@ -715,6 +721,21 @@ const MAP_STATUS_WORDS = {
   S: 'suppressed', N: 'na', derived: 'derived',
 };
 
+/* `reconstructed` is resolved here rather than added to the table above.
+   commune_map.js's tooltip prints this word as raw text (commune_map.js:674)
+   with no i18n lookup, so every entry in that table reads in English on the
+   French and Dutch pages. The existing entries already carry that flaw;
+   extending it would be a new rule 7 violation, and translating the whole
+   table means changing the tooltip inside the shared engine that seven pages
+   load. This page has T(), so the one new status uses the
+   `reconstructedSuffix` string the merger batch already added in all three
+   languages. Distinct from `derived` on purpose (rule 26): derived is this
+   commune's own figures, reconstructed is a pre-merger commune's. */
+function mapStatusWord(raw){
+  if(raw === 'reconstructed') return T('reconstructedSuffix');
+  return MAP_STATUS_WORDS[raw] || raw;
+}
+
 async function renderMap(){
   const payload = state.payload;
   const available = document.getElementById('mapAvailable');
@@ -758,7 +779,7 @@ async function renderMap(){
   for(const nis of payload.geographies){
     const cell = payload.series[nis][period];
     if(!cell) continue;
-    values[nis] = {value: cell[0], period, status: MAP_STATUS_WORDS[cell[1]] || cell[1]};
+    values[nis] = {value: cell[0], period, status: mapStatusWord(cell[1])};
   }
   map.setData(values, {unit: payload.unit, decimals: payload.decimals, direction: payload.direction});
 

@@ -144,6 +144,25 @@ def test_every_status_letter_has_its_own_word(page):
     for letter in ("A", "P", "R", "E", "S", "N"):
         assert f"'{letter}'" in body or f'"{letter}"' in body, f"status {letter} has no branch"
     assert "derived" in body, "a derived value has no pill of its own"
+    # A cell summed from the communes that existed before a merger. It must
+    # have its own branch rather than falling through to the raw-word default:
+    # `derived` is computed from this commune's own figures, `reconstructed`
+    # from a commune that no longer exists, and rule 26 keeps those distinct.
+    assert "reconstructed" in body, "a reconstructed value has no pill of its own"
+
+
+def test_a_reconstructed_cell_is_named_in_the_readers_own_language(page):
+    """Same contract as communes.html and map.html: `reconstructed` is
+    resolved through T() rather than added to MAP_STATUS_WORDS, because
+    commune_map.js prints that table's words into the tooltip as raw text with
+    no i18n lookup (rule 7). Kept distinct from `derived` (rule 26)."""
+    assert "function mapStatusWord(" in page
+    assert "T('reconstructedSuffix')" in page
+    assert "mapStatusWord(cell[1])" in page
+    assert "MAP_STATUS_WORDS[cell[1]]" not in page
+    table = re.search(r"const MAP_STATUS_WORDS = \{(.*?)\}", page, re.DOTALL)
+    assert table, "MAP_STATUS_WORDS not found"
+    assert "reconstructed" not in table.group(1)
 
 
 def test_a_suppressed_cell_is_never_drawn_as_a_number(page):

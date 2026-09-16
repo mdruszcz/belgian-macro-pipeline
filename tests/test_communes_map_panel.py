@@ -81,6 +81,31 @@ def test_the_map_component_distinguishes_withheld_from_never_collected(page):
     assert "not zero" in strings, "the withheld wording does not rule out a zero reading"
 
 
+def test_a_reconstructed_cell_is_named_in_the_readers_own_language(page):
+    """A cell summed from the communes that existed before a merger arrives
+    with status `reconstructed` (src/analytics/backaggregate.py).
+
+    MAP_STATUS_WORDS is printed into the tooltip as raw text by
+    commune_map.js, with no i18n lookup, so a word added to that table would
+    read in English on the French and Dutch pages (CLAUDE.md rule 7). The
+    status is therefore resolved through this page's own T() instead, against
+    the `reconstructedSuffix` string that exists in all three languages.
+
+    It must NOT be folded into `derived`: derived is computed from this
+    commune's own figures, reconstructed from a commune that no longer
+    exists, and rule 26 keeps those states distinct."""
+    assert "function mapStatusWord(" in page
+    assert "T('reconstructedSuffix')" in page
+    # The tooltip path goes through the helper, not the bare table -- otherwise
+    # the translation above is dead code.
+    assert "mapStatusWord(cell.status)" in page
+    assert "MAP_STATUS_WORDS[cell.status]" not in page
+    # And the word is not quietly added to the untranslated vocabulary.
+    table = re.search(r"const MAP_STATUS_WORDS = \{(.*?)\}", page, re.DOTALL)
+    assert table, "MAP_STATUS_WORDS not found"
+    assert "reconstructed" not in table.group(1)
+
+
 def test_the_map_reads_the_table_rather_than_fetching_its_own_data(page):
     """One source of truth per figure. If the map fetched its own copy, the two
     halves of this page could show different numbers for the same commune."""

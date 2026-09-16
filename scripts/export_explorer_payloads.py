@@ -63,7 +63,26 @@ from pathlib import Path
 #: lets communes.html's statusPill() (communes.html:483-493) be reused
 #: UNCHANGED on this page, and what makes the CSV-equality test in
 #: tests/test_export_explorer_payloads.py a literal string comparison.
-KNOWN_STATUSES = frozenset({"A", "P", "R", "E", "S", "N", "derived"})
+#:
+#: 'reconstructed' is the second such word, and it is mapped here
+#: DELIBERATELY -- which is exactly what _cell()'s own error message below
+#: demands of whoever adds a status. It is written by
+#: src/analytics/backaggregate.py for a cell built by summing the communes
+#: that existed before a merger, so a commune created in the 2025 wave can
+#: show history its own NIS code never reported (docs/features/data_model.md
+#: §1: back-aggregation is a query-layer operation, never written into
+#: `observations`). Without it this script RAISES on the first reconstructed
+#: row, which is the safe failure -- it refuses to publish a figure it cannot
+#: label rather than publishing it unexplained -- but it also means the map
+#: and the explorer, whose payloads this script writes, can show no
+#: pre-merger year at all for the 13 affected communes.
+#:
+#: It is a distinct state from 'derived' and must stay distinct (CLAUDE.md
+#: rule 26): 'derived' is computed from this commune's own figures,
+#: 'reconstructed' is computed from a DIFFERENT commune's figures, and a
+#: reader who cannot tell them apart cannot tell whose territory the number
+#: describes.
+KNOWN_STATUSES = frozenset({"A", "P", "R", "E", "S", "N", "derived", "reconstructed"})
 
 #: Only these two explain a blank value (migrations/001_core_schema.sql:
 #: CHECK (value IS NOT NULL OR status IN ('suppressed','na'))). A blank value

@@ -748,7 +748,7 @@ function drawPeriod(){
   for(const [nis, byPeriod] of Object.entries(state.payload.series || {})){
     const cell = byPeriod[period];
     if(!cell) continue;
-    values[nis] = {value: cell[0], period: period, status: MAP_STATUS_LETTERS[cell[1]] || cell[1]};
+    values[nis] = {value: cell[0], period: period, status: mapStatusWord(cell[1])};
   }
   state.map.setData(values, {
     unit: state.payload.unit,
@@ -773,6 +773,28 @@ const MAP_STATUS_LETTERS = {
   A: 'final', P: 'provisional', R: 'revised',
   E: 'estimate', S: 'suppressed', N: 'na', derived: 'derived',
 };
+
+/* `reconstructed` is deliberately kept OUT of MAP_STATUS_LETTERS above.
+   commune_map.js's tooltip prints whatever that table maps to as raw text
+   (` · ${row.status}`, commune_map.js:674) with no i18n lookup, so every word
+   in it shows in English on the French and Dutch pages. The existing entries
+   carry that flaw already; adding a new one would extend it (CLAUDE.md rule
+   7), and translating the whole table means changing the tooltip inside the
+   shared engine seven pages load — a wider change than this fix should make.
+   explorer.html and communes.html each hold their own copy of this vocabulary
+   (named MAP_STATUS_WORDS there) and get the same treatment.
+
+   So this one status is resolved through the page's own T(), against the
+   `reconstructedSuffix` string the merger batch already added in all three
+   languages. A cell summed from the communes that existed before a merger is
+   kept distinct from `derived` (rule 26): derived is computed from this
+   commune's own figures, reconstructed from a different commune's, and a
+   reader who cannot tell them apart cannot tell whose territory the number
+   describes. */
+function mapStatusWord(raw){
+  if(raw === 'reconstructed') return T('reconstructedSuffix');
+  return MAP_STATUS_LETTERS[raw] || raw;
+}
 
 /* ---------------------------------------------------------------------------
    PALETTE, LEGEND CARD, SCALE BAR.
