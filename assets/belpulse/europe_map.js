@@ -407,6 +407,14 @@
           'viewBox',
           box.x - pad + ' ' + (box.y - pad) + ' ' + (box.width + 2 * pad) + ' ' + (box.height + 2 * pad)
         );
+        // Stated rather than inherited from the SVG default, for the same
+        // reason commune_map.js states it: the stage's box and this viewBox
+        // have different aspect ratios at most widths, and `meet` is what
+        // makes the whole of Europe fit inside the stage (letterboxed)
+        // instead of overflowing it. The default happens to be this value,
+        // so this changes no pixel today -- it stops a later `slice`, or a
+        // vendor default change, from silently cropping the map again.
+        svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         return;
       }
     } catch (e) {
