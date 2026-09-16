@@ -23,6 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.analytics.backaggregate import reconstruct  # noqa: E402
 from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
 
 # The five statuses migrations/001_core_schema.sql permits, all mapped, so
@@ -65,18 +66,15 @@ def _ancestor_names(conn: sqlite3.Connection, geo_id: str) -> dict:
     return names
 
 
-def _latest_rows_from_csv(
-    csv_path: Path, current_communes: set[str], indicator_meta: dict[str, tuple[str, str]]
+def _latest_rows_from_any_csv(
+    csv_path: Path, indicator_meta: dict[str, tuple[str, str]]
 ) -> list[tuple]:
-    """Rows from a committed observations CSV, filtered by the same two rules
-    the SQL query applies: current communes only, and only the most recent
-    period per (geo_id, indicator).
-
-    Manual-only sources live in CSV rather than in the daily-committed
-    database (docs/decisions/0002-split-committed-stores.md), so this export
-    has to read both. Indicator name/unit still come from the `indicators`
-    table -- those reference rows stay in the database even when their
-    observations do not, so there is exactly one metadata path.
+    """Every geo_id's most recent is_latest=1 period per indicator, with NO
+    current-communes filter -- a predecessor commune's own latest snapshot
+    included, so merger back-aggregation has something to reconstruct from.
+    `_latest_rows_from_csv` applies the current-communes restriction on top of
+    this for the rows that get published as-is; reconstruction runs on the
+    unrestricted set first.
     """
     if not csv_path.is_file():
         raise FileNotFoundError(
@@ -87,7 +85,7 @@ def _latest_rows_from_csv(
     best: dict[tuple[str, str], dict] = {}
     with csv_path.open(encoding="utf-8", newline="") as fh:
         for row in csv.DictReader(fh):
-            if row["is_latest"] != "1" or row["geo_id"] not in current_communes:
+            if row["is_latest"] != "1":
                 continue
             key = (row["geo_id"], row["indicator_id"])
             if key not in best or row["period"] > best[key]["period"]:
@@ -116,6 +114,26 @@ def _latest_rows_from_csv(
             )
         )
     return out
+
+
+def _latest_rows_from_csv(
+    csv_path: Path, current_communes: set[str], indicator_meta: dict[str, tuple[str, str]]
+) -> list[tuple]:
+    """Rows from a committed observations CSV, filtered by the same two rules
+    the SQL query applies: current communes only, and only the most recent
+    period per (geo_id, indicator).
+
+    Manual-only sources live in CSV rather than in the daily-committed
+    database (docs/decisions/0002-split-committed-stores.md), so this export
+    has to read both. Indicator name/unit still come from the `indicators`
+    table -- those reference rows stay in the database even when their
+    observations do not, so there is exactly one metadata path.
+    """
+    return [
+        row
+        for row in _latest_rows_from_any_csv(csv_path, indicator_meta)
+        if row[0] in current_communes
+    ]
 
 
 def export_communes_csv(
@@ -164,8 +182,35 @@ def export_communes_csv(
             row[0]: (row[1], row[2])
             for row in conn.execute("SELECT indicator_id, name_en, unit FROM indicators")
         }
+        indicator_is_additive = {
+            row[0]: bool(row[1])
+            for row in conn.execute("SELECT indicator_id, is_additive FROM indicators")
+        }
+        lineage_rows = conn.execute(
+            "SELECT geo_id, valid_to, successor_geo_id FROM geographies "
+            "WHERE valid_to IS NOT NULL AND successor_geo_id IS NOT NULL"
+        ).fetchall()
+
+        # Merger back-aggregation reads the UNRESTRICTED latest rows -- a
+        # predecessor's own latest snapshot included -- from each extra CSV,
+        # since that is the only place these four sources' observations live
+        # (src/analytics/backaggregate.py never opens a file itself). Only
+        # the gap-filled result is added to `obs`; a successor's own value is
+        # never touched (see reconstruct()'s gap-fill contract).
         for csv_path in extra_observations:
-            obs = obs + _latest_rows_from_csv(csv_path, set(commune_by_id), indicator_meta)
+            all_latest = _latest_rows_from_any_csv(csv_path, indicator_meta)
+            reconstructed = reconstruct(
+                all_latest,
+                lineage_rows,
+                indicator_is_additive=indicator_is_additive,
+                indicator_meta=indicator_meta,
+                # This exporter has no derived-config pass of its own (no
+                # AVG_NET_TAXABLE_INCOME-style ratio is computed here at
+                # all, live or reconstructed) -- only the raw SUM indicators
+                # this CSV carries are reconstructable from it.
+                derived_configs=None,
+            )
+            obs = obs + [row for row in all_latest if row[0] in commune_by_id] + reconstructed
         obs.sort(key=lambda r: (r[0], r[1]))
 
     conn.close()

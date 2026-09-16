@@ -113,6 +113,18 @@ I18N.STRINGS = {
     withheldCell: 'withheld by the source (fewer than 10)',
     withheldSuffix: 'withheld',
     inputsPrefix: 'inputs',
+    // Merger back-aggregation (src/analytics/backaggregate.py). A commune
+    // created by the 2019 or 2025 merger waves publishes far fewer
+    // indicators than an ordinary one, because every historical source still
+    // reports on the pre-merger map. Where every one of its predecessor
+    // communes has a real recorded value for a period, this site reconstructs
+    // the successor's figure by summing (or, for a ratio, recomputing from
+    // the summed components) -- but ONLY where the successor has no value of
+    // its own. A cell the successor already publishes is never replaced or
+    // combined with a predecessor's. The label says so, in the same three
+    // languages as everything else on this page.
+    reconstructedSuffix: 'reconstructed from predecessor communes',
+    reconstructedNote: 'This figure is reconstructed from the commune(s) that existed here before a merger, because the original source still publishes on the pre-merger map. It is a sum (or, for a ratio, a recomputation) of those communes’ own reported figures for the same period -- never an estimate, and never applied where this commune already reports its own value.',
     staticFooter: '{n} indicators shown. Full history for this commune:',
     jsonPayload: 'JSON payload',
     allCommunes: 'all communes',
@@ -734,6 +746,8 @@ I18N.STRINGS = {
     withheldCell: 'non communiqué par la source (moins de 10)',
     withheldSuffix: 'non communiqué',
     inputsPrefix: 'données sources',
+    reconstructedSuffix: 'reconstitué à partir des communes précédentes',
+    reconstructedNote: 'Ce chiffre est reconstitué à partir de la ou des communes qui existaient ici avant une fusion, car la source d’origine publie toujours sur la carte antérieure à la fusion. Il s’agit d’une somme (ou, pour un taux, d’un recalcul) des chiffres propres de ces communes pour la même période -- jamais une estimation, et jamais appliqué lorsque cette commune publie déjà sa propre valeur.',
     staticFooter: '{n} indicateurs affichés. Historique complet de cette commune :',
     jsonPayload: 'données JSON',
     allCommunes: 'toutes les communes',
@@ -1293,6 +1307,8 @@ I18N.STRINGS = {
     withheldCell: 'niet vrijgegeven door de bron (minder dan 10)',
     withheldSuffix: 'niet vrijgegeven',
     inputsPrefix: 'broncijfers',
+    reconstructedSuffix: 'gereconstrueerd uit voorgaande gemeenten',
+    reconstructedNote: 'Dit cijfer is gereconstrueerd op basis van de gemeente(n) die hier vóór een fusie bestonden, omdat de oorspronkelijke bron nog steeds rapporteert op de kaart van vóór de fusie. Het is een som (of, voor een verhouding, een herberekening) van de eigen gerapporteerde cijfers van die gemeenten voor dezelfde periode -- nooit een schatting, en nooit toegepast wanneer deze gemeente al een eigen waarde rapporteert.',
     staticFooter: '{n} indicatoren weergegeven. Volledige geschiedenis van deze gemeente:',
     jsonPayload: 'JSON-gegevens',
     allCommunes: 'alle gemeenten',

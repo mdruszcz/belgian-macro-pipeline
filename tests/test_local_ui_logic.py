@@ -731,3 +731,88 @@ def test_the_withheld_wording_exists_in_all_three_languages():
     # And each keeps the placeholder the caller substitutes.
     for lang in ("en", "fr", "nl"):
         assert "{p}" in out[lang][1], f"{lang} lost the period placeholder"
+
+
+# ── Merger back-aggregation (src/analytics/backaggregate.py) ───────────────
+#
+# A commune created by the 2019/2025 merger waves gets its missing history
+# gap-filled from its predecessors, but only where it has no value of its own
+# for that period. Every payload cell that carries a reconstructed value has
+# status "reconstructed"; the page has to be able to say so, in words, on the
+# figure itself -- CLAUDE.md rule 7 (multilingual) and the whole reason this
+# batch exists ("the label ships with the numbers").
+
+
+def test_is_reconstructed_true_only_for_that_exact_status():
+    out = _run_node("""
+        console.log(JSON.stringify({
+          reconstructed: LocalUI.isReconstructed({value: 1, status: 'reconstructed'}),
+          final:         LocalUI.isReconstructed({value: 1, status: 'final'}),
+          derived:       LocalUI.isReconstructed({value: 1, status: 'derived'}),
+          suppressed:    LocalUI.isReconstructed({value: null, status: 'suppressed'}),
+          missing:       LocalUI.isReconstructed(null),
+        }));
+        """)
+    assert out == {
+        "reconstructed": True,
+        "final": False,
+        "derived": False,
+        "suppressed": False,
+        "missing": False,
+    }
+
+
+def test_reconstructed_periods_lists_only_the_reconstructed_ones():
+    out = _run_node("""
+        const entry = {periods: {
+          '2020': {value: 100, status: 'reconstructed'},
+          '2021': {value: 110, status: 'reconstructed'},
+          '2025': {value: 200, status: 'final'},
+        }};
+        console.log(JSON.stringify(LocalUI.reconstructedPeriods(entry)));
+        """)
+    assert out == ["2020", "2021"]
+
+
+def test_latest_of_flags_a_reconstructed_latest_cell():
+    """The gap-fill rule end to end: a period this commune reports itself
+    must never be flagged, and one built from predecessors always is."""
+    out = _run_node("""
+        const reconstructedLatest = {unit: 'eur', names: {en: 'Income'},
+          periods: {'2020': {value: 100, status: 'reconstructed'},
+                    '2021': {value: 110, status: 'reconstructed'}}};
+        const ownLatest = {unit: 'eur', names: {en: 'Income'},
+          periods: {'2020': {value: 100, status: 'reconstructed'},
+                    '2025': {value: 200, status: 'final'}}};
+        console.log(JSON.stringify({
+          a: LocalUI.latestOf(reconstructedLatest),
+          b: LocalUI.latestOf(ownLatest),
+        }));
+        """)
+    assert out["a"]["reconstructed"] is True
+    assert out["a"]["reconstructedPeriods"] == ["2020", "2021"]
+    # The successor's own 2025 value must never be flagged, even though an
+    # earlier period of the SAME indicator was reconstructed -- gap-fill is
+    # per period, not per indicator.
+    assert out["b"]["reconstructed"] is False
+    assert out["b"]["reconstructedPeriods"] == ["2020"]
+
+
+def test_the_reconstructed_wording_exists_in_all_three_languages():
+    """Same rule-7 check as the withheld wording above, for the new strings
+    this batch adds: a string added to `en` alone would silently render
+    English on the French or Dutch page."""
+    out = _run_node("""
+        const keys = ['reconstructed', 'reconstructedNote'];
+        const out = {};
+        for(const lang of LocalUI.LANGS){
+          out[lang] = keys.map(k => (LocalUI.STRINGS[lang] || {})[k] || null);
+        }
+        console.log(JSON.stringify(out));
+        """)
+    for lang in ("en", "fr", "nl"):
+        assert all(out[lang]), f"{lang} is missing a reconstructed string: {out[lang]}"
+    assert out["fr"][0] != out["en"][0]
+    assert out["nl"][0] != out["en"][0]
+    assert out["fr"][1] != out["en"][1]
+    assert out["nl"][1] != out["en"][1]

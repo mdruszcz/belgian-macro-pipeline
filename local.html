@@ -232,6 +232,16 @@
     color:var(--text-muted);margin-top:4px}
   .withheld-note{font-size:.72rem;color:var(--text-muted);
     padding:6px 10px 0;line-height:1.4}
+  /* A reconstructed figure is a REAL number -- summed or recomputed from
+     communes that genuinely reported it -- not a guess, so it is not styled
+     down the way a withheld one is. It gets a quiet dotted underline (the
+     tooltip carries the full explanation) so a reader who compares two years
+     of the same chart can see, without leaving the page, which side of the
+     merger the number came from. */
+  .fact.reconstructed .fv{border-bottom:1px dotted var(--text-faint)}
+  .fact .fp.reconstructed-note{font-family:inherit;font-size:.68rem;line-height:1.3;
+    color:var(--text-muted);margin-top:2px;cursor:help;
+    text-decoration:underline dotted;text-decoration-color:var(--border-strong)}
 
   .no-data{
     border:1px dashed var(--border-strong);border-radius:var(--radius);
@@ -391,6 +401,8 @@ LocalUI.STRINGS = {
     asOf: 'as of', updated: 'updated', derived: 'derived',
     withheld: 'Withheld by the source for privacy — fewer than 10 people, not zero.',
     withheldSince: 'Withheld by the source for {p}.',
+    reconstructed: 'reconstructed',
+    reconstructedNote: 'This commune was created by a merger. This figure is reconstructed by summing (or, for a ratio, recomputing from) the reported figures of the commune(s) that existed here before the merger — never an estimate, and never used for a period this commune already reports itself.',
     retrieved: 'retrieved',
     computedFrom: 'computed from {s} figures last updated {d}',
     source: 'Source',
@@ -427,6 +439,8 @@ LocalUI.STRINGS = {
     asOf: 'au', updated: 'mis à jour', derived: 'calculé',
     withheld: 'Non communiqué par la source pour raison de confidentialité — moins de 10 personnes, et non zéro.',
     withheldSince: 'Non communiqué par la source pour {p}.',
+    reconstructed: 'reconstitué',
+    reconstructedNote: 'Cette commune est issue d’une fusion. Ce chiffre est reconstitué en additionnant (ou, pour un taux, en recalculant à partir) les chiffres publiés par la ou les communes qui existaient ici avant la fusion — jamais une estimation, et jamais utilisé pour une période que cette commune publie déjà elle-même.',
     retrieved: 'extrait le',
     computedFrom: 'calculé à partir de données {s} mises à jour le {d}',
     source: 'Source',
@@ -463,6 +477,8 @@ LocalUI.STRINGS = {
     asOf: 'op', updated: 'bijgewerkt', derived: 'berekend',
     withheld: 'Niet vrijgegeven door de bron wegens privacy — minder dan 10 personen, en niet nul.',
     withheldSince: 'Niet vrijgegeven door de bron voor {p}.',
+    reconstructed: 'gereconstrueerd',
+    reconstructedNote: 'Deze gemeente is ontstaan uit een fusie. Dit cijfer is gereconstrueerd door de gerapporteerde cijfers van de gemeente(n) die hier vóór de fusie bestonden op te tellen (of, voor een verhouding, opnieuw te berekenen) — nooit een schatting, en nooit gebruikt voor een periode die deze gemeente al zelf rapporteert.',
     retrieved: 'opgehaald op',
     computedFrom: 'berekend uit {s}-cijfers, laatst bijgewerkt op {d}',
     source: 'Bron',
@@ -591,6 +607,23 @@ LocalUI.chartPoints = function(entry){
     .map(p => ({period: p, value: entry.periods[p].value}));
 };
 
+/* Merger back-aggregation (src/analytics/backaggregate.py): a cell built by
+   summing (or, for a ratio, recomputing from) a merged-away commune's own
+   predecessors, because every historical source still reports on the
+   pre-merger map. It carries status "reconstructed", set only where THIS
+   commune has no observation of its own for that period -- a gap-fill, never
+   a restatement of a figure the commune already publishes. Every period
+   still shown must say so, so a reader comparing two years on the same chart
+   can tell which side of the discontinuity a number falls on. */
+LocalUI.isReconstructed = function(cell){
+  return !!cell && cell.status === 'reconstructed';
+};
+
+LocalUI.reconstructedPeriods = function(entry){
+  if(!entry || !entry.periods) return [];
+  return Object.keys(entry.periods).sort().filter(p => LocalUI.isReconstructed(entry.periods[p]));
+};
+
 LocalUI.latestOf = function(entry){
   if(!entry) return null;
   const p = LocalUI.latestPeriodWithValue(entry);
@@ -603,6 +636,8 @@ LocalUI.latestOf = function(entry){
     value: entry.periods[p].value, period: p, unit: entry.unit,
     names: entry.names, updated: entry.updated,
     withheldSince: LocalUI.suppressedTail(entry),
+    reconstructed: LocalUI.isReconstructed(entry.periods[p]),
+    reconstructedPeriods: LocalUI.reconstructedPeriods(entry),
   };
 };
 
@@ -1018,10 +1053,19 @@ function factHTML(entry, indicatorId){
   const tail = latest.withheldSince.length
     ? `<div class="fp withheld-note">${esc(T('withheldSince').replace('{p}', latest.withheldSince.join(', ')))}</div>`
     : '';
-  return `<div class="fact"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
+  // Merger back-aggregation: this commune's figure for THIS period was built
+  // by summing (or recomputing from) predecessor communes, because every
+  // historical source still reports on the pre-merger map. Marked on the
+  // figure that is actually reconstructed, not on every cell the indicator
+  // ever had -- a period this commune reports itself never carries this note,
+  // gap-fill only, per the maintainer's decision.
+  const reconstructedNote = latest.reconstructed
+    ? `<div class="fp reconstructed-note" title="${esc(T('reconstructedNote'))}">${esc(T('reconstructed'))}</div>`
+    : '';
+  return `<div class="fact${latest.reconstructed ? ' reconstructed' : ''}"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
     `<div class="fl">${esc(LocalUI.localName(latest.names, LANG))} (${latest.period})</div>` +
     (rank ? `<div class="frank">${esc(rank)}</div>` : '') +
-    `${badge}${tail}</div>`;
+    `${badge}${tail}${reconstructedNote}</div>`;
 }
 
 // Sections come from public/data/metadata/sections.json, so this file holds
