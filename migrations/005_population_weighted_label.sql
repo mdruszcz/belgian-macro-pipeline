@@ -1,0 +1,65 @@
+-- Retire the `population_weighted` value of indicators.aggregation_method.
+--
+-- CLAUDE.md's aggregation rule is explicit that population-weighting "is NOT
+-- used and must not be added", because it was measured against the correct
+-- figure and is wrong for both ratios in this pipeline -- population is not
+-- their denominator (income is per tax return, the dependency ratio is per
+-- working-age person). See docs/features/comparison.md, "Correction 1".
+--
+-- Despite that, 27 rows carried `aggregation_method = 'population_weighted'`,
+-- written as a hardcoded literal by scripts/port_existing_indicators.py and
+-- scripts/sync_to_canonical.py (both corrected in the same commit as this
+-- file). All 27 are national or international series -- NBB national
+-- accounts, Eurostat GDP, EC consumer confidence, AMECO labour costs -- with
+-- no sub-national parts to rebuild them from, so `not_applicable` is what
+-- they should always have said.
+--
+-- NOTHING READS THIS COLUMN TODAY, so this migration changes no published
+-- number: nothing under src/ mentions aggregation_method at all, the real
+-- gate is indicators.is_additive (src/analytics/aggregate.py:
+-- `SUM if is_additive else REFUSE`), and all 27 rows already carry
+-- is_additive = 0, so they are correctly refused either way. There is even a
+-- test whose note records that the column "is vestigial and must not be read
+-- at all" (tests/pages/test_page_document_semantics.py).
+--
+-- The reason to fix it anyway is the next reader, not today's output.
+-- `aggregation_method` is the obviously-named field someone implementing an
+-- aggregation reaches for first -- merger back-aggregation for the 2025
+-- commune mergers is being built right now -- and finding 27 rows
+-- recommending a method the project forbids is a trap laid for them. The two
+-- writer scripts stop producing the value; this corrects the rows already
+-- stored, which neither script would have fixed on its own
+-- (port_existing_indicators.py uses INSERT OR IGNORE, and
+-- sync_to_canonical.py's ON CONFLICT DO UPDATE never listed this column).
+--
+-- Data-only: no schema change, so no `migration-mode` marker and no table
+-- recreation. The column's CHECK already admits 'not_applicable', so the
+-- UPDATE below needs no constraint change.
+--
+-- WHAT THIS MIGRATION DELIBERATELY DOES *NOT* FIX, because it cannot be done
+-- without an ADR and the maintainer's approval (CLAUDE.md rule 19, and the
+-- precedent of migrations/004, which cites ADR 0009 for its schema change):
+--
+--     aggregation_method TEXT NOT NULL DEFAULT 'population_weighted'
+--       CHECK (aggregation_method IN
+--              ('population_weighted','sum','unweighted_mean','not_applicable'))
+--
+-- The forbidden method is the column's DEFAULT, and it is still a legal value
+-- of the CHECK. So any future INSERT that omits this column silently receives
+-- the one method CLAUDE.md says must never be used -- which is how all 27 rows
+-- corrected below most likely came to hold it in the first place. Correcting
+-- that means dropping 'population_weighted' from the CHECK and changing the
+-- default to 'not_applicable', which in SQLite requires recreating the table
+-- (recreate-with-foreign-keys-off mode, as migration 004 documents).
+--
+-- tests/test_aggregation_method_label.py guards the gap in the meantime: it
+-- fails if any stored row carries the value, and if either writer script
+-- emits it as a literal again. A row inserted via the column DEFAULT would be
+-- caught by the first of those, but only after the fact.
+--
+-- 'unweighted_mean' is in the same CHECK and is equally forbidden by the
+-- aggregation rule (averaging commune ratios is the exact error it names);
+-- no row currently uses it, so it is not addressed here either.
+UPDATE indicators
+   SET aggregation_method = 'not_applicable'
+ WHERE aggregation_method = 'population_weighted';

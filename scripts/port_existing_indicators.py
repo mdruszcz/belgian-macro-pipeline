@@ -215,7 +215,18 @@ def port(db_path: Path, run_date: str | None = None) -> None:
                  description_nl, description_fr, description_en,
                  frequency, unit, preferred_direction, aggregation_method,
                  is_additive, decimals, config_path, is_active)
-            VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'population_weighted', 0, 1, ?, 1)
+            -- `not_applicable`, not `population_weighted`: these are national
+            -- and international series (NBB, Eurostat, AMECO) with no
+            -- sub-national parts to rebuild them from, and CLAUDE.md's
+            -- aggregation rule forbids population-weighting outright -- it was
+            -- measured against the correct figure and is wrong for both ratios
+            -- in this pipeline, because population is not their denominator.
+            -- The column is vestigial (nothing under src/ reads it; the real
+            -- gate is is_additive, which is already 0 here), so this changes no
+            -- published number -- it stops the next person who implements an
+            -- aggregation from reaching for the obviously-named field and
+            -- finding a forbidden method recommended to them.
+            VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 'not_applicable', 0, 1, ?, 1)
         """,
             (
                 code,
