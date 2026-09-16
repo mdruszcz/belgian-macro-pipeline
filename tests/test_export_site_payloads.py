@@ -807,9 +807,60 @@ def test_an_unknown_status_letter_stops_the_build(tmp_path):
     assert mod._status_word("A") == "final"
     assert mod._status_word("S") == "suppressed"
     assert mod._status_word("derived") == "derived"
+    assert mod._status_word("reconstructed") == "reconstructed"
     assert mod._status_word("") is None
     with pytest.raises(ValueError, match="unknown observation status"):
         mod._status_word("X")
+
+
+def test_a_reconstructed_cell_is_labelled_distinctly_from_a_real_one(tmp_path):
+    """Merger back-aggregation (src/analytics/backaggregate.py) writes
+    status "reconstructed" into the history CSV for a gap-filled cell. The
+    payload must publish that word verbatim, not fold it into "final" -- a
+    reader has to be able to tell a reconstructed figure apart from one the
+    source actually published for this commune."""
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    history = tmp_path / "history.csv"
+    _write(
+        history,
+        HISTORY_HEADER,
+        [
+            _history_row(
+                "11002",
+                "be:mun:11002",
+                "Antwerp",
+                "FISCAL_TOT_NET_TAXABLE_INC",
+                "Total net taxable income",
+                "eur",
+                "2023",
+                "1040214383.77",
+                "reconstructed",
+            ),
+        ],
+    )
+    latest = tmp_path / "latest.csv"
+    _write(latest, LATEST_HEADER, [])
+    national = tmp_path / "national.csv"
+    _write(national, HISTORY_HEADER, [])
+
+    out_dir = tmp_path / "out"
+    export_site_payloads(
+        db_path=db_path,
+        communes_history_csv=history,
+        communes_latest_csv=latest,
+        national_csv=national,
+        out_dir=out_dir,
+        build_id="test",
+        validation_status="unknown",
+        sections_config=None,
+    )
+
+    cell = json.loads((out_dir / "communes" / "11002.json").read_text())["indicators"][
+        "FISCAL_TOT_NET_TAXABLE_INC"
+    ]["periods"]["2023"]
+    assert cell == {"value": pytest.approx(1040214383.77), "status": "reconstructed"}
 
 
 def test_coverage_counts_numbers_not_keys(tmp_path):

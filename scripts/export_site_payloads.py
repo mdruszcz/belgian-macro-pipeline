@@ -42,7 +42,13 @@ STATUS_LETTER_TO_WORD = {
 
 # Written as a word, not a letter, by export_communes_history_csv.py, because a
 # derived figure has no source status to letter-code. Allowed through as-is.
-STATUS_WORDS_PASSED_THROUGH = {"derived"}
+# "reconstructed" is the merger back-aggregation status (src/analytics/
+# backaggregate.py): a cell built by summing a merged-away commune's
+# predecessors rather than read from any source file for the successor
+# itself. It gets its own word, never "final" or "derived", so a reader (and
+# _cell()/_note_updated() below) can always tell a reconstructed figure apart
+# from one the source actually published for this geography.
+STATUS_WORDS_PASSED_THROUGH = {"derived", "reconstructed"}
 
 
 def _status_word(status: str) -> str:

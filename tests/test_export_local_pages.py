@@ -474,6 +474,48 @@ def test_a_figure_whose_later_years_were_withheld_says_so(
     assert "13" in page
 
 
+def test_a_reconstructed_figure_is_labelled_in_its_period_cell(payload_dir, tmp_path, db):
+    """Merger back-aggregation (src/analytics/backaggregate.py) marks a
+    gap-filled cell with status "reconstructed". These static pages carry no
+    JavaScript, so the label has to live in the text itself -- the same shape
+    as the withheld-later-years note above, not a separate column."""
+    commune = _commune()
+    commune["indicators"]["POPULATION_AGE_0_14"] = {
+        "names": {"en": "Population aged 0 to 14"},
+        "unit": "count",
+        "periods": {
+            "2023": {"value": 1234, "status": "reconstructed"},
+        },
+    }
+    (payload_dir / "communes" / "11001.json").write_text(json.dumps(commune), encoding="utf-8")
+    _run(payload_dir, tmp_path, db)
+    page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
+    assert "<td>2023 (reconstructed from predecessor communes)</td>" in page
+
+
+def test_a_figure_the_commune_reports_itself_carries_no_reconstructed_label(
+    payload_dir, tmp_path, db
+):
+    """Gap-fill only, never blanket-labelling an indicator: a period this
+    commune reports on its own must not be marked, even if an earlier period
+    of the SAME indicator was reconstructed."""
+    commune = _commune()
+    commune["indicators"]["POPULATION_AGE_0_14"] = {
+        "names": {"en": "Population aged 0 to 14"},
+        "unit": "count",
+        "periods": {
+            "2023": {"value": 1200, "status": "reconstructed"},
+            "2024": {"value": 1250, "status": "final"},
+        },
+    }
+    (payload_dir / "communes" / "11001.json").write_text(json.dumps(commune), encoding="utf-8")
+    _run(payload_dir, tmp_path, db)
+    page = (tmp_path / "local" / "11001" / "index.html").read_text(encoding="utf-8")
+    # The latest (own, real) period is shown, unlabelled.
+    assert "<td>2024</td>" in page
+    assert "reconstructed" not in page.lower()
+
+
 # --- three languages, three routes -----------------------------------------
 
 

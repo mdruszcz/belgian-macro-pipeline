@@ -47,11 +47,12 @@ def _base_db(db_path: Path) -> sqlite3.Connection:
     return conn
 
 
-def _geo(conn, geo_id, nis, name, valid_to=None):
+def _geo(conn, geo_id, nis, name, valid_to=None, successor_geo_id=None):
     conn.execute(
         "INSERT INTO geographies (geo_id, nis_code, level, name_nl, name_fr, name_en, "
-        "valid_from, valid_to) VALUES (?,?, 'municipality', ?,?,?, '1830-01-01', ?)",
-        (geo_id, nis, name, name, name, valid_to),
+        "valid_from, valid_to, successor_geo_id) VALUES (?,?, 'municipality', ?,?,?, "
+        "'1830-01-01', ?, ?)",
+        (geo_id, nis, name, name, name, valid_to, successor_geo_id),
     )
 
 
@@ -268,3 +269,269 @@ def test_the_trim_never_starves_a_derived_indicators_own_lookback(long_history_d
     # 2026/2016 over 10 years.
     expected = (2026 / 2016) ** (1 / 10) - 1
     assert float(cagr_2026[0]["value"]) == pytest.approx(expected * 100, abs=1e-6)
+
+
+# ── Merger back-aggregation, integrated through the exporter ────────────────
+
+
+@pytest.fixture
+def merger_lineage_db(tmp_path):
+    """Two predecessors (OLDA, OLDB) merged into SUCC in 2025; a third,
+    unrelated current commune (OTHER) exists throughout and is never involved
+    in any merger -- present so the peer-set-unchanged test has something to
+    compare a pre-merger percentile against."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:SUCC", "900", "Successor")
+    _geo(
+        conn,
+        "be:mun:OLDA",
+        "901",
+        "Predecessor A",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:SUCC",
+    )
+    _geo(
+        conn,
+        "be:mun:OLDB",
+        "902",
+        "Predecessor B",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:SUCC",
+    )
+    _geo(conn, "be:mun:OTHER", "903", "Other")
+    # 2020-2024: only the predecessors have population (pre-merger years).
+    for period, a, b, other in [
+        ("2020", 100.0, 50.0, 30.0),
+        ("2021", 110.0, 55.0, 31.0),
+    ]:
+        _pop(conn, "be:mun:OLDA", period, a)
+        _pop(conn, "be:mun:OLDB", period, b)
+        _pop(conn, "be:mun:OTHER", period, other)
+    # From 2025 the successor has its own value.
+    _pop(conn, "be:mun:SUCC", "2025", 200.0)
+    _pop(conn, "be:mun:OTHER", "2025", 32.0)
+    conn.commit()
+    conn.close()
+    return db_path
+
+
+def test_the_successor_gains_reconstructed_pre_merger_population(merger_lineage_db, tmp_path):
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        merger_lineage_db, out, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    rows = _rows(out)
+    succ_2020 = [r for r in rows if r["geo_id"] == "be:mun:SUCC" and r["period"] == "2020"]
+    assert len(succ_2020) == 1
+    assert float(succ_2020[0]["value"]) == pytest.approx(150.0)  # 100 + 50
+    assert succ_2020[0]["status"] == "reconstructed"
+
+
+def test_the_successor_keeps_its_own_value_where_it_has_one(merger_lineage_db, tmp_path):
+    """Gap-fill, not restatement: 2025 is the successor's own real value and
+    must not be replaced or supplemented by a reconstructed sum."""
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        merger_lineage_db, out, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    rows = _rows(out)
+    succ_2025 = [r for r in rows if r["geo_id"] == "be:mun:SUCC" and r["period"] == "2025"]
+    assert len(succ_2025) == 1
+    assert float(succ_2025[0]["value"]) == pytest.approx(200.0)
+    assert succ_2025[0]["status"] == "A"  # the real status letter, not reconstructed
+
+
+def test_a_predecessor_never_gets_its_own_row(merger_lineage_db, tmp_path):
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        merger_lineage_db, out, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    rows = _rows(out)
+    assert not any(r["geo_id"] in ("be:mun:OLDA", "be:mun:OLDB") for r in rows)
+
+
+def test_percentile_for_a_pre_merger_period_is_unchanged_by_reconstruction(
+    merger_lineage_db, tmp_path
+):
+    """Reconstructed rows must never enter the engine's peer set: OTHER's 2020
+    percentile is computed over {OLDA=100, OLDB=50, OTHER=30}, N=3, exactly as
+    it would be with no merger back-aggregation at all. If the reconstructed
+    SUCC=150 leaked into that set, N would become 4 and the percentile would
+    change to a different, wrong number."""
+    derived_dir = _derived_dir(tmp_path)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(merger_lineage_db, out, derived_dir=derived_dir, all_periods=True)
+    rows = _rows(out)
+
+    def pct(geo_id, period):
+        for r in rows:
+            if (
+                r["geo_id"] == geo_id
+                and r["indicator_code"] == "POPULATION_PERCENTILE"
+                and r["period"] == period
+            ):
+                return float(r["value"])
+        raise AssertionError(f"no POPULATION_PERCENTILE row for {geo_id}/{period}")
+
+    # N=3 {100, 50, 30}: OTHER (30) is lowest -> below=0, equal=1 -> 100*0.5/3.
+    assert pct("be:mun:OTHER", "2020") == pytest.approx(100 * 0.5 / 3)
+    # If the reconstructed SUCC value had leaked into the peer set (N=4), the
+    # result would differ from the N=3 answer above.
+    assert pct("be:mun:OTHER", "2020") != pytest.approx(100 * 0.5 / 4)
+
+
+def test_a_partial_predecessor_set_produces_no_reconstructed_row(tmp_path):
+    """Rule 2 end to end: if OLDB never reports 2020 at all, SUCC must get no
+    reconstructed 2020 row -- not a sum of OLDA alone."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:SUCC", "900", "Successor")
+    _geo(
+        conn,
+        "be:mun:OLDA",
+        "901",
+        "Predecessor A",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:SUCC",
+    )
+    _geo(
+        conn,
+        "be:mun:OLDB",
+        "902",
+        "Predecessor B",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:SUCC",
+    )
+    _pop(conn, "be:mun:OLDA", "2020", 100.0)
+    # OLDB has no 2020 row at all.
+    conn.commit()
+    conn.close()
+
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(db_path, out, derived_dir=tmp_path / "empty", all_periods=True)
+    rows = _rows(out)
+    assert not any(r["geo_id"] == "be:mun:SUCC" and r["period"] == "2020" for r in rows)
+
+
+def test_antwerp_keeps_its_own_value_gap_fill_not_restatement(tmp_path):
+    """The maintainer's named example: Antwerp (11002) already publishes its
+    own fiscal figure, and Borsbeek (11007, merged into it in 2025) must never
+    change it -- gap-fill only, never a recombination of the two."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    conn.execute("""INSERT INTO indicators
+           (indicator_id, source_id, name_nl, name_fr, name_en, frequency, unit,
+            preferred_direction, is_additive, config_path)
+           VALUES ('FISCAL_TOT_NET_TAXABLE_INC', 'statbel', 'x', 'x',
+                   'Total net taxable income', 'A', 'eur', 'higher_is_better', 1, 'x')""")
+    _geo(conn, "be:mun:11002", "11002", "Antwerp")
+    _geo(
+        conn,
+        "be:mun:11007",
+        "11007",
+        "Borsbeek",
+        valid_to="2025-01-01",
+        successor_geo_id="be:mun:11002",
+    )
+    conn.execute("""INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('FISCAL_TOT_NET_TAXABLE_INC', 'be:mun:11002', '2023', 'v1',
+                   11097002409.83, 'final', '2023-01-01', '2023-12-31', 1, 1,
+                   '2026-01-01T00:00:00+00:00')""")
+    conn.execute("""INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('FISCAL_TOT_NET_TAXABLE_INC', 'be:mun:11007', '2023', 'v1',
+                   300000000.0, 'final', '2023-01-01', '2023-12-31', 1, 1,
+                   '2026-01-01T00:00:00+00:00')""")
+    conn.commit()
+    conn.close()
+
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(db_path, out, derived_dir=tmp_path / "empty", all_periods=True)
+    rows = _rows(out)
+    antwerp_2023 = [
+        r
+        for r in rows
+        if r["geo_id"] == "be:mun:11002"
+        and r["indicator_code"] == "FISCAL_TOT_NET_TAXABLE_INC"
+        and r["period"] == "2023"
+    ]
+    assert len(antwerp_2023) == 1
+    assert float(antwerp_2023[0]["value"]) == pytest.approx(11097002409.83)
+    assert antwerp_2023[0]["status"] == "A"  # its own real status, never reconstructed
+
+
+def test_the_database_file_is_byte_identical_after_a_reconstructing_export(
+    merger_lineage_db, tmp_path
+):
+    """CLAUDE.md rule 6: a derived value is never written into observations
+    as if it were source data. Reconstruction runs entirely in the query
+    layer -- the database file itself must be bit-for-bit unchanged by an
+    export that reconstructs several communes' history."""
+    import hashlib
+
+    def sha256(path):
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+    before = sha256(merger_lineage_db)
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        merger_lineage_db, out, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    after = sha256(merger_lineage_db)
+    assert before == after
+
+
+def test_two_consecutive_builds_are_byte_identical(merger_lineage_db, tmp_path):
+    """CLAUDE.md rule 35: identical inputs must keep producing byte-identical
+    output. Reconstruction adds no nondeterminism (no timestamps, no random
+    ordering) that a second run against the same database could disagree
+    with."""
+    out1 = tmp_path / "history1.csv"
+    out2 = tmp_path / "history2.csv"
+    export_communes_history_csv(
+        merger_lineage_db, out1, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    export_communes_history_csv(
+        merger_lineage_db, out2, derived_dir=tmp_path / "empty", all_periods=True
+    )
+    assert out1.read_bytes() == out2.read_bytes()
+
+
+def test_bastogne_style_lineage_is_selected_despite_a_2024_12_02_date(tmp_path):
+    """The exact trap named in the handoff: a successor_geo_id row can carry
+    valid_to = 2024-12-02, not 2025-01-01. The exporter must still reconstruct
+    it -- there is no date-based wave filter anywhere in the query it runs."""
+    db_path = tmp_path / "test.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:82039", "82039", "Bastogne")
+    _geo(
+        conn,
+        "be:mun:82003",
+        "82003",
+        "Bastenaken",
+        valid_to="2024-12-02",
+        successor_geo_id="be:mun:82039",
+    )
+    _geo(
+        conn,
+        "be:mun:82005",
+        "82005",
+        "Bertogne",
+        valid_to="2024-12-02",
+        successor_geo_id="be:mun:82039",
+    )
+    _pop(conn, "be:mun:82003", "2020", 100.0)
+    _pop(conn, "be:mun:82005", "2020", 50.0)
+    conn.commit()
+    conn.close()
+
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(db_path, out, derived_dir=tmp_path / "empty", all_periods=True)
+    rows = _rows(out)
+    bastogne_2020 = [r for r in rows if r["geo_id"] == "be:mun:82039" and r["period"] == "2020"]
+    assert len(bastogne_2020) == 1
+    assert float(bastogne_2020[0]["value"]) == pytest.approx(150.0)

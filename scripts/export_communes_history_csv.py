@@ -48,6 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from export_communes_csv import STATUS_TO_LETTER, _ancestor_names  # noqa: E402
 
+from src.analytics.backaggregate import reconstruct  # noqa: E402
 from src.analytics.engine import ObservationSet, compute  # noqa: E402
 from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
 from src.validation.config_schema import load_and_validate_derived  # noqa: E402
@@ -149,6 +150,18 @@ def export_communes_history_csv(
         row[0]: (row[1], row[2])
         for row in conn.execute("SELECT indicator_id, name_en, unit FROM indicators")
     }
+    indicator_is_additive = {
+        row[0]: bool(row[1])
+        for row in conn.execute("SELECT indicator_id, is_additive FROM indicators")
+    }
+
+    # geo_id -> its predecessor(s), driven by successor_geo_id ONLY -- never
+    # by a wave date. See src/analytics/backaggregate.py's module docstring
+    # for why a date filter would silently drop Bastogne.
+    lineage_rows = conn.execute(
+        "SELECT geo_id, valid_to, successor_geo_id FROM geographies "
+        "WHERE valid_to IS NOT NULL AND successor_geo_id IS NOT NULL"
+    ).fetchall()
 
     # Monthly municipal series go into the gitignored --all-periods file, which
     # feeds the site payloads, and stay out of the trimmed file this repository
@@ -160,6 +173,11 @@ def export_communes_history_csv(
 
     # The engine sees every geo_id (current AND historical) so a percentile's
     # peer set has the right size for its year -- see the module docstring.
+    # Reconstructed rows are NEVER added to this set: see
+    # src/analytics/backaggregate.py's module docstring, rule 3 -- the
+    # predecessors are already in it on their own historical geo_id, and
+    # adding the successor alongside them would double-count the same
+    # territory and shift every commune's percentile.
     obs_set = ObservationSet(
         (indicator_id, geo_id, period, value)
         for geo_id, indicator_id, _name, _unit, period, value, _status, _created in raw
@@ -168,8 +186,23 @@ def export_communes_history_csv(
     derived_cfgs = load_and_validate_derived(derived_dir, known_ids) if derived_dir.is_dir() else {}
     result = compute(obs_set, derived_cfgs, known_ids)
 
+    # Merger back-aggregation: reconstruct the 13 successor communes'
+    # pre-merger history from their predecessors' RAW rows only, gap-filling
+    # cells the successor has no observation of its own for. Runs against the
+    # engine's raw inputs, never its output, and only after compute() has
+    # already produced every live derived value from the real (unreconstructed)
+    # observation set above.
+    reconstructed = reconstruct(
+        raw,
+        lineage_rows,
+        indicator_is_additive=indicator_is_additive,
+        indicator_meta=indicator_meta,
+        derived_configs=derived_cfgs,
+    )
+
     # Raw rows: filtered down to CURRENT communes only for display.
     obs = [row for row in raw if row[0] in commune_by_id]
+    obs.extend(row for row in reconstructed if row[0] in commune_by_id)
 
     # Derived rows: same current-communes filter, and a cell with no value
     # (an indicator not yet computable for that year -- e.g. a 10-year CAGR

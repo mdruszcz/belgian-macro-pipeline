@@ -527,6 +527,16 @@ def _section_rows(
             if later_withheld
             else period
         )
+        # Merger back-aggregation (src/analytics/backaggregate.py): this cell
+        # was built by summing (or recomputing from) predecessor communes'
+        # own reported figures, gap-filling a period this commune has no
+        # observation of its own for. Marked on the exact cell shown, never
+        # on the indicator as a whole -- a period this commune reports itself
+        # is never marked, matching the gap-fill-only rule the reconstruction
+        # itself enforces. These static pages carry no JavaScript, so the
+        # label has to live in the period cell's own text, not a hover title.
+        if cell.get("status") == "reconstructed":
+            period_cell = f"{period_cell} ({_t(strings, lang, 'reconstructedSuffix')})"
         rows.append(
             (
                 _local_name(entry.get("names"), lang, indicator_id),
