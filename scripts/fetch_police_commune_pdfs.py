@@ -152,6 +152,15 @@ def main() -> None:
     ap.add_argument("--lang", default="fr", choices=("fr", "nl"))
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     ap.add_argument("--limit", type=int, default=0, help="stop after N files (smoke test; 0 = all)")
+    ap.add_argument(
+        "--filter",
+        default=None,
+        help=(
+            "regex on the published path, to download a subset -- e.g. filling the French "
+            "tree's gaps from the Dutch one with "
+            "'10_Vlaams-Brabant|Oud_Turnhout|Pont_a_Celles|Meix_devant_Virton'"
+        ),
+    )
     args = ap.parse_args()
 
     index_url = INDEX_URL[args.lang]
