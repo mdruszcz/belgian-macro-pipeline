@@ -105,9 +105,14 @@ def curl(url: str, dest: Path | None) -> tuple[int, bytes]:
     return int(proc.stdout[-3:] or 0), proc.stdout[:-3]
 
 
-def commune_links(index_html: str, quarter: str, lang: str) -> list[str]:
-    """Every per-commune PDF link the index page publishes for `quarter`."""
+def commune_links(
+    index_html: str, quarter: str, lang: str, pattern: str | None = None
+) -> list[str]:
+    """Every per-commune PDF link the index page publishes for `quarter`,
+    optionally narrowed to those whose path matches `pattern`. The pattern
+    selects among published links; it never builds one."""
     year = quarter.split("_")[0]
+    selector = re.compile(pattern) if pattern else None
     links = []
     for raw in re.findall(r'href="([^"]+)"', index_html):
         href = html.unescape(raw)
@@ -115,6 +120,8 @@ def commune_links(index_html: str, quarter: str, lang: str) -> list[str]:
         if not path.endswith(f"_{lang}.pdf"):
             continue
         if f"/{year}/{quarter}/crimi_{lang}/{COMMUNE_DIR[lang]}/" not in path:
+            continue
+        if selector and not selector.search(path):
             continue
         links.append(urllib.parse.urljoin("https://www.police.be/", href))
     return sorted(set(links))
@@ -155,11 +162,12 @@ def main() -> None:
             f"::error::index page returned HTTP {status or 'connection failure'}. "
             "If this is the 403 maintenance page, police.be is manual-download again."
         )
-    links = commune_links(body.decode("utf-8", "replace"), args.quarter, args.lang)
+    links = commune_links(body.decode("utf-8", "replace"), args.quarter, args.lang, args.filter)
     if not links:
         sys.exit(
-            f"::error::no per-commune {args.lang} links for {args.quarter} on the index page. "
-            "The page's structure or the quarter's folder naming changed -- do not guess URLs."
+            f"::error::no per-commune {args.lang} links for {args.quarter} on the index page"
+            f"{f' matching {args.filter!r}' if args.filter else ''}. The page's structure, the "
+            "quarter's folder naming or the filter is wrong -- do not guess URLs."
         )
     print(f"{len(links)} per-commune {args.lang} PDFs published for {args.quarter}")
 
@@ -206,7 +214,7 @@ def main() -> None:
         print(f"::warning::{len(failures)} downloads failed:")
         for filename, state in failures[:20]:
             print(f"  {filename}: {state}")
-    if not args.limit and ok < EXPECTED_COMMUNES:
+    if not args.limit and not args.filter and ok < EXPECTED_COMMUNES:
         print(
             f"::warning::{EXPECTED_COMMUNES - ok} of Belgium's {EXPECTED_COMMUNES} communes "
             f"have no {args.lang} PDF for {args.quarter}. Upstream gap, not a download "

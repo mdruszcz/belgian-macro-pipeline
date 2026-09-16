@@ -89,3 +89,14 @@ def test_download_keeps_a_real_pdf_and_reports_its_digest(tmp_path):
     assert size == len(body)
     assert dest.read_bytes() == body
     assert len(digest) == 64
+
+
+def test_filter_narrows_to_published_links_only():
+    """The French tree's gaps are filled from the Dutch one by selecting among
+    published links -- the filter must never widen the set."""
+    links = commune_links(INDEX_HTML, "2025_T04", "fr", "06_Limburg|Renaix")
+    assert [link.rsplit("/", 1)[-1] for link in links] == [
+        "Limburg_Bilzen-Hoeselt_fr.pdf",
+        "Oost_Vlaanderen_Renaix_fr.pdf",
+    ]
+    assert commune_links(INDEX_HTML, "2025_T04", "fr", "Vlaams_Brabant_Leuven") == []
