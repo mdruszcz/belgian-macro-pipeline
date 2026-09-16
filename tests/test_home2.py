@@ -154,3 +154,136 @@ def test_home2_hero_map_tooltip_is_opaque_navy():
     assert rule, "no hero-map tooltip rule"
     assert "background:var(--bp-navy-surface)" in rule.group(1)
     assert "color:var(--bp-navy-text)" in rule.group(1)
+
+
+# --- Batch A2b: visual polish -------------------------------------------------
+
+
+def test_home2_headline_wraps_with_a_balanced_measure_not_a_tight_character_cap():
+    """Item 1: 'mises à jour automatiquement' used to leave 'jour' alone on
+    its own line in every theme, because the h1 was capped to 17ch -- tighter
+    than the column it sits in actually allows. text-wrap:balance lets the
+    browser choose break points that avoid an orphan; the widened cap gives
+    it room to do that instead of being forced back to the same four lines."""
+    html = _html()
+    rule = re.search(r"\.home2 \.hero h1\{([^}]+)\}", html)
+    assert rule, "no .home2 .hero h1 rule"
+    body = rule.group(1).replace(" ", "")
+    assert "text-wrap:balance" in body
+    assert "max-width:17ch" not in body, "still capped to the width that produced the orphan"
+
+
+def test_home2_headline_translations_have_no_new_orphan_risk():
+    """The fix is CSS, not wording (item 1 says so explicitly) -- so the same
+    three strings from before must still be there, unedited, in all three
+    languages."""
+    strings = (REPO / "assets" / "i18n.js").read_text(encoding="utf-8")
+    assert "homeTitle: 'Belgium’s economic data, updated automatically.'," in strings
+    assert (
+        "homeTitle: 'Les données économiques de la Belgique, mises à jour automatiquement.',"
+        in strings
+    )
+    assert "homeTitle: 'De economische gegevens van België, automatisch bijgewerkt.'," in strings
+
+
+def test_home2_finance_strip_is_one_compact_line_not_four_cards():
+    """Item 2/3: was four cards, each reading 'Not published by this pipeline
+    yet' -- the widest band on the page, right under the hero. Same honest
+    state (FINANCE_KEYS + homeFinanceUnavailable), built into one line with
+    the 'see national data' link inline instead."""
+    html = _html()
+    assert "ftile" not in html, "the old four-card markup/CSS is still here"
+    strip = re.search(
+        r'<section class="finance" id="financeStrip">(.*?)</section>', html, re.DOTALL
+    )
+    assert strip, "no #financeStrip section"
+    body = strip.group(1)
+    assert 'id="financeCompactText"' in body
+    assert 'class="fin-link"' in body
+    assert 'data-t="homeAllIndicators"' in body
+    assert 'data-t="homeFinanceTitle"' in body
+
+
+def test_home2_finance_compact_sentence_reuses_the_existing_honest_strings():
+    """The absence must remain visible (claude.md rule 26 in spirit -- an
+    honest 'unavailable' must not quietly disappear): the compact line is
+    still built from FINANCE_KEYS and the same homeFinanceUnavailable/
+    homeFinanceWhy strings the four cards used, not a new invented one."""
+    html = _html()
+    render = re.search(r"function renderFinance\(\)\{(.*?)\n  \}", html, re.DOTALL)
+    assert render, "renderFinance() not found"
+    body = render.group(1)
+    assert "FINANCE_KEYS.map" in body
+    assert "listJoinerAnd" in body
+    assert "homeFinanceUnavailable" in body
+    assert "homeFinanceWhy" in body
+    # And the joiner itself exists in all three languages.
+    strings = (REPO / "assets" / "i18n.js").read_text(encoding="utf-8")
+    assert strings.count("listJoinerAnd:") == 3
+
+
+def test_home2_map_legend_caption_is_built_from_the_payload_not_hardcoded():
+    """Item 4, and claude.md rules 2/24: the caption naming what the legend's
+    ticks count must come from state.byCode's own name and
+    MapUI.unitLabel(meta.unit, LANG) -- the same shared unit vocabulary the
+    KPI cards use -- never a literal indicator name or unit string typed into
+    this page."""
+    html = _html()
+    assert 'id="legendCaption"' in html
+    draw = re.search(r"async function drawIndicator\(code\)\{(.*?)\n  \}", html, re.DOTALL)
+    assert draw, "drawIndicator() not found"
+    body = draw.group(1)
+    assert "getElementById('legendCaption')" in body
+    assert "MapUI.unitLabel(meta.unit, LANG)" in body
+    assert "nameOf(code)" in body
+    # Never assigned a literal string -- always the name/unit variables above.
+    assert not re.search(r"legendCaption'\)\.textContent\s*=\s*['\"]", body)
+
+
+def test_home2_thumbnail_captions_share_one_explicit_background_not_an_accidental_one():
+    """Item 5: pixel-sampling the reviewer's own screenshots showed the three
+    captions were already byte-identical in background colour -- the
+    apparent 'first is white, the others are tinted' was each ramp's own
+    lightest band meeting the caption with no real boundary between them.
+    An explicit, uniform background + divider removes the ambiguity instead
+    of leaving it to whatever the adjacent map colour happens to be."""
+    html = _html()
+    rule = re.search(r"\.thumb \.tcap\{([^}]+)\}", html)
+    assert rule, "no .thumb .tcap rule"
+    body = rule.group(1).replace(" ", "")
+    assert "background:var(--bp-surface-alt)" in body
+    assert "border-top:1pxsolidvar(--bp-border)" in body
+
+
+def test_home2_licence_notice_is_a_native_disclosure_reachable_without_js():
+    """Item 6: presentation changed (collapsed by default, one summary line,
+    source/licence links visible without opening it) -- the notice itself did
+    not. tests/test_statbel_attribution.py reads the full text out of this
+    exact markup and must keep passing unweakened; this test pins the
+    STRUCTURE that makes it reachable with no script running: a native
+    <details>/<summary>, never `hidden`, and the full text still inside the
+    same #attribution block."""
+    html = _html()
+    block = re.search(
+        r'<div class="attribution" id="attribution">(.*?)</div>\s*\n<script',
+        html,
+        re.DOTALL,
+    )
+    assert block, "no #attribution block found before the first <script>"
+    body = block.group(1)
+    assert "<details" in body and "<summary" in body
+    assert 'id="attrBoundaries"' in body
+    assert 'id="attrValues"' in body
+    assert 'id="attrUpdated"' in body
+
+    details_tag = re.search(r"<details[^>]*>", body).group(0)
+    assert "hidden" not in details_tag, "a hidden <details> defeats native no-JS toggling"
+
+    summary = re.search(r"<summary[^>]*>(.*?)</summary>", body, re.DOTALL).group(1)
+    for href in (
+        "statbel.fgov.be",
+        "onem.be",
+        "police.be",
+        "creativecommons.org/licenses/by/4.0",
+    ):
+        assert href in summary, f"{href} is not visible in the always-shown summary"

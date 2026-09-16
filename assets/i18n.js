@@ -164,6 +164,12 @@ I18N.STRINGS = {
        macro.html's kpi cards, each carrying its own source label from
        public/data/metadata/sources.json) -- never here. */
     footerCredit: 'Official public sources — see Sources.',
+    // Batch A2b, item 6: the always-visible summary line on home2.html's
+    // licence disclosure. UI chrome, not the licence wording itself -- the
+    // legal text in #attrBoundaries/#attrValues stays English-only by
+    // design (see the comment beside it) and is untouched here.
+    homeAttributionLead: 'Official sources for this page’s figures:',
+    homeAttributionToggle: 'Full licence text and update dates',
     mapIndicatorLabel: 'Indicator',
     mapScopeLabel: 'Area of analysis',
     mapFindLabel: 'Find a commune',
@@ -230,6 +236,10 @@ I18N.STRINGS = {
     homeFinanceRevenue: 'State revenue',
     homeFinanceBalance: 'Budget balance',
     homeFinanceDebt: 'Public debt',
+    // Batch A2b: joins the FINANCE_KEYS labels into one sentence ("A, B and
+    // C") for the compact finance line on home2.html -- a plain conjunction,
+    // not a fact about any indicator, so one word per language is enough.
+    listJoinerAnd: 'and',
     homeCommunesSub: 'Compare every Belgian commune and explore its economic and social indicators.',
     homeMapsSub: 'Explore regional dynamics through interactive maps built on official data.',
     homeCtaStart: 'Start exploring',
@@ -751,6 +761,8 @@ I18N.STRINGS = {
     skipToContent: 'Aller au contenu',
     navMenu: 'Menu',
     footerCredit: 'Sources publiques officielles — voir Sources.',
+    homeAttributionLead: 'Sources officielles des chiffres de cette page :',
+    homeAttributionToggle: 'Texte complet de la licence et dates de mise à jour',
     mapIndicatorLabel: 'Indicateur',
     mapScopeLabel: 'Zone d’analyse',
     mapFindLabel: 'Rechercher une commune',
@@ -814,6 +826,7 @@ I18N.STRINGS = {
     homeFinanceRevenue: 'Recettes de l’État',
     homeFinanceBalance: 'Solde budgétaire',
     homeFinanceDebt: 'Dette publique',
+    listJoinerAnd: 'et',
     homeCommunesSub: 'Comparez les communes belges et explorez leurs indicateurs économiques et sociaux.',
     homeMapsSub: 'Explorez les dynamiques régionales grâce à nos cartes interactives basées sur des données officielles.',
     homeCtaStart: 'Commencer à explorer',
@@ -1307,6 +1320,8 @@ I18N.STRINGS = {
     skipToContent: 'Naar de inhoud',
     navMenu: 'Menu',
     footerCredit: 'Officiële openbare bronnen — zie Bronnen.',
+    homeAttributionLead: 'Officiële bronnen voor de cijfers op deze pagina:',
+    homeAttributionToggle: 'Volledige licentietekst en updatedata',
     mapIndicatorLabel: 'Indicator',
     mapScopeLabel: 'Analysegebied',
     mapFindLabel: 'Zoek een gemeente',
@@ -1370,6 +1385,7 @@ I18N.STRINGS = {
     homeFinanceRevenue: 'Overheidsontvangsten',
     homeFinanceBalance: 'Begrotingssaldo',
     homeFinanceDebt: 'Staatsschuld',
+    listJoinerAnd: 'en',
     homeCommunesSub: 'Vergelijk de Belgische gemeenten en verken hun economische en sociale indicatoren.',
     homeMapsSub: 'Verken regionale dynamieken met interactieve kaarten op basis van officiële gegevens.',
     homeCtaStart: 'Beginnen met verkennen',
