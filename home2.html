@@ -144,7 +144,8 @@
      inside the dark hero those need the dark treatment, which is what
      .bp-shell--navy already means elsewhere in layout.css. */
   .hero-map .swatches div{border-color:rgba(255,255,255,.2)}
-  .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage{color:rgba(255,255,255,.6)}
+  .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage, .hero-map .legend-caption{color:rgba(255,255,255,.6)}
+  .legend-caption{font-size:11px; margin-bottom:3px}
   /* The shared .map-tip is tuned for a light page; over the hero's photo it
      was hard to read. Opaque navy surface with the navy theme's text colours. */
   .hero-map .map-tip{
@@ -160,22 +161,28 @@
   }
   .zoombtns button:hover{background:rgba(255,255,255,.16)}
 
-  /* ---- finance strip ---- */
+  /* ---- finance strip ----
+     Batch A2b, item 2/3: this used to be a grid of four cards, each reading
+     "Not published by this pipeline yet" -- the widest, loudest band on the
+     page, immediately under the hero, saying nothing four times over. The
+     absence itself is real and stays honest (see the JS below, and the
+     header comment further down); only the SHAPE changes, to one compact
+     line with the "see national data" link inline instead of squeezed
+     against the card edge on three lines. */
   .finance{
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
-    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5) var(--bp-space-6);
-    display:grid; grid-template-columns:auto repeat(4, minmax(0,1fr)) auto;
-    gap:var(--bp-space-5); align-items:center; margin:calc(-1 * var(--bp-space-8)) 0 0;
+    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4) var(--bp-space-6);
+    display:flex; align-items:center; gap:var(--bp-space-4); flex-wrap:wrap;
+    margin:calc(-1 * var(--bp-space-8)) 0 0;
     position:relative; z-index:3;
   }
-  .finance-title h2{font-size:var(--bp-text-h2); margin:0 0 2px}
-  .finance-title p{font-size:11px; color:var(--bp-text-faint); margin:0; max-width:20ch}
-  .ftile{display:flex; align-items:center; gap:var(--bp-space-3)}
   .ficon{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none}
-  .ftile .lbl{font-size:11px; color:var(--bp-text-muted)}
-  .ftile .val{font-size:1.05rem; font-weight:var(--bp-weight-bold); line-height:1.2}
-  .ftile .bp-state-message{padding:0}
-  .ftile .why{font-size:10px}
+  .fin-icon{width:32px; height:32px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted)}
+  .fin-text{flex:1 1 320px; min-width:0; margin:0; font-size:12px; line-height:1.45; color:var(--bp-text-muted)}
+  .fin-title{display:inline; margin:0 4px 0 0; font:inherit; font-weight:var(--bp-weight-semibold); color:var(--bp-text)}
+  .fin-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium); flex:none}
+  .fin-link:hover{text-decoration:underline}
 
   /* ---- two-column mid band ---- */
   .duo{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-8); margin-top:var(--bp-space-10)}
@@ -217,7 +224,17 @@
   .thumb:hover{border-color:var(--bp-accent)}
   .thumb .tmap{height:118px; position:relative; background:var(--bp-surface-alt)}
   .thumb .tmap svg{width:100%; height:100%; display:block}
-  .thumb .tcap{padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:6px}
+  /* Batch A2b, item 5: an explicit, uniform background + divider on every
+     caption, not just whatever colour happened to be transparent through to
+     the card. Each thumbnail's own ramp runs a different hue (see the
+     nth-child overrides below) and its lowest band sits close to white --
+     with no real boundary here, the caption read as if it sat on a tint that
+     differed thumbnail to thumbnail, when the three were already identical.
+     This makes the identical treatment visible instead of accidental. */
+  .thumb .tcap{
+    padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:6px;
+    background:var(--bp-surface-alt); border-top:1px solid var(--bp-border);
+  }
   .thumb .tcap b{font-size:11px; font-weight:var(--bp-weight-semibold); display:block; line-height:1.3}
   .thumb .tcap span{font-size:10px; color:var(--bp-text-faint)}
 
@@ -285,11 +302,24 @@
   .foot-script{font-family:var(--bp-font-decorative); font-size:.95rem; color:var(--bp-text-muted); display:flex; align-items:center; gap:8px; margin-left:auto}
 
   .attribution{
-    padding:var(--bp-space-6) 0; font-size:11px; line-height:1.6;
+    padding:var(--bp-space-4) 0; font-size:11px; line-height:1.6;
     color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border);
   }
   .attribution strong{color:var(--bp-text)}
   .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+  /* Item 6's disclosure: collapsed by default (no `open` attribute), a
+     one-line summary the reader can act on without expanding anything, and
+     the full notice unchanged underneath. Native <details>, so all of this
+     works with no script running. */
+  .attr-disclosure summary{cursor:pointer; list-style:none}
+  .attr-disclosure summary::-webkit-details-marker{display:none}
+  .attr-summary{display:flex; flex-wrap:wrap; align-items:center; gap:5px 12px}
+  .attr-links{display:inline-flex; flex-wrap:wrap; gap:2px 10px}
+  .attr-links a,.attr-toggle{color:var(--bp-accent)}
+  .attr-toggle{margin-left:auto; white-space:nowrap; font-weight:var(--bp-weight-medium); display:inline-flex; align-items:center; gap:4px}
+  .attr-toggle::after{content:'▸'; font-size:9px; display:inline-block; transition:transform .15s}
+  .attr-disclosure[open] .attr-toggle::after{transform:rotate(90deg)}
+  .attr-body{padding-top:var(--bp-space-4)}
 
   /* Every collapsed track is minmax(0,1fr), never plain 1fr. A `1fr` track's
      implied minimum is min-content, so a wide child (the map card, a long
@@ -298,7 +328,7 @@
   @media (max-width:1024px){
     .hero .wrap{grid-template-columns:minmax(0,1fr)}
     .hero-cards{grid-template-columns:minmax(0,1fr)}
-    .finance{grid-template-columns:minmax(0,1fr) minmax(0,1fr); margin-top:var(--bp-space-6)}
+    .finance{margin-top:var(--bp-space-6)}
     .duo{grid-template-columns:minmax(0,1fr)}
     .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
     .features{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -306,7 +336,6 @@
   }
   @media (max-width:680px){
     .hero h1{font-size:2rem}
-    .finance{grid-template-columns:minmax(0,1fr)}
     .commune-card{grid-template-columns:minmax(0,1fr)}
     .thumbs{grid-template-columns:minmax(0,1fr)}
     .kpirow{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -339,7 +368,7 @@
   }
   .home2 .hero-cards{display:contents}
   .home2 .hero .eyebrow{font-size:8px; margin:3px 0 14px}
-  .home2 .hero h1{font-size:2.15rem; line-height:1.08; max-width:17ch; margin-bottom:13px}
+  .home2 .hero h1{font-size:2.15rem; line-height:1.08; max-width:24ch; text-wrap:balance; margin-bottom:13px}
   .home2 .hero .lead{font-size:12px; line-height:1.45; max-width:48ch; margin-bottom:16px}
   .home2 .hero .bp-btn{font-size:10px; padding:8px 13px}
   .home2 .hero-script{margin-top:17px; font-size:1rem}
@@ -360,6 +389,7 @@
   .home2 .hero-map .swatches div{height:8px; width:35px}
   .home2 .hero-map .ticks{font-size:8px}
   .home2 .hero-map .sub{font-size:8px}
+  .home2 .legend-caption{font-size:8px; margin-bottom:2px}
   .home2 .hero-mini{gap:9px; min-width:0}
   .home2 .hero-mini .glass{padding:10px; min-height:0; flex:1}
   .home2 .hero-mini .glass h3{font-size:10px; line-height:1.2}
@@ -370,17 +400,10 @@
   .home2 .hero-mini .mini-canvas{margin-top:auto; padding-top:5px}
 
   .home2 .finance{
-    min-height:88px; margin-top:10px; padding:10px 12px;
-    grid-template-columns:145px repeat(4,minmax(0,1fr)) 88px; gap:9px;
-    border-radius:6px; box-shadow:none;
+    min-height:0; margin-top:10px; padding:10px 14px;
+    border-radius:6px; box-shadow:none; gap:10px;
   }
-  .home2 .finance > *{min-width:0}
-  .home2 .finance > .sechead-link{white-space:normal!important; text-align:center; line-height:1.25}
-  .home2 .finance-title h2{font-size:1rem}
-  .home2 .finance-title p,.home2 .ftile .lbl{font-size:9px}
-  .home2 .ftile{gap:7px; padding:7px 6px; border:1px solid var(--bp-border); border-radius:5px; min-height:62px}
-  .home2 .ficon{width:33px; height:33px; border-radius:8px}
-  .home2 .ftile .why{font-size:8px; line-height:1.2}
+  .home2 .fin-text,.home2 .fin-link{font-size:10px}
 
   .home2 .duo{gap:26px; margin-top:25px}
   .home2 .duo > section{min-width:0}
@@ -440,12 +463,12 @@
   .home2 .foot-script{font-size:.82rem}
   .home2 .ai-image-note{font-size:8px; color:var(--bp-text-faint); margin:5px 0 0}
   .home2 .featured-meta{position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important}
-  .home2 .attribution{font-size:9px; padding:14px 0}
+  .home2 .attribution{font-size:9px; padding:8px 0}
+  .home2 .attr-summary{gap:4px 8px}
 
   @media (max-width:1024px){
     .home2 .bp-topbar{height:auto; min-height:51px}
-    .home2 .finance{grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:12px}
-    .home2 .finance-title,.home2 .finance .sechead-link{grid-column:1/-1}
+    .home2 .finance{margin-top:12px}
     .home2 .duo{grid-template-columns:minmax(0,1fr)}
     .home2 .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
     .home2 .features{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -470,7 +493,9 @@
   @media (max-width:600px){
     .home2 .hero h1{font-size:2rem}
     .home2 .hero-mini{grid-template-columns:minmax(0,1fr)}
-    .home2 .finance{grid-template-columns:minmax(0,1fr)}
+    .home2 .finance{flex-direction:column; align-items:flex-start}
+    .home2 .fin-text{flex:none; width:100%}
+    .home2 .fin-link{white-space:normal}
     .home2 .commune-card{grid-template-columns:minmax(0,1fr)}
     .home2 .cc-photo img{height:160px}
     .home2 .thumbs{grid-template-columns:minmax(0,1fr)}
@@ -549,6 +574,12 @@
                to the component here; map.html, one click away and linked
                below, carries the full explanation. -->
           <div class="mapfoot">
+            <!-- Batch A2b, item 4: what the bare ticks below are counting.
+                 Built in drawIndicator() from the SAME state.byCode name and
+                 MapUI.unitLabel(meta.unit, LANG) the map title and every
+                 other unit hint on this page already use -- never a literal
+                 indicator name/unit typed here (claude.md rule 2/24). -->
+            <div class="legend-caption" id="legendCaption"></div>
             <div class="legend">
               <div class="swatches" id="swatches"></div>
               <div class="ticks" id="ticks"></div>
@@ -562,15 +593,19 @@
     </div>
   </section>
 
-  <!-- ── public finances: built as designed, honestly unavailable ───────── -->
+  <!-- ── public finances: built as designed, honestly unavailable ─────────
+       Batch A2b, item 2/3: was four cards, each repeating "Not published by
+       this pipeline yet" -- the widest band on the page and the reader's
+       second impression of the whole site. The absence is still stated (see
+       renderFinance() below, which builds the sentence from the same
+       homeFinance* strings the old cards used -- no new fact, no indicator
+       id, just fewer pixels), now as one line with the link inline instead
+       of wrapping onto three lines squeezed against the card edge. -->
   <div class="wrap">
     <section class="finance" id="financeStrip">
-      <div class="finance-title">
-        <h2 data-t="homeFinanceTitle">Public finances</h2>
-        <p data-t="homeFinanceLead">Live figures (updated daily)</p>
-      </div>
-      <!-- the four tiles are injected here, each in the `unavailable` state -->
-      <a class="sechead-link" href="macro.html" style="font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap" data-t="homeAllIndicators">See all national data →</a>
+      <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
+      <div class="fin-text"><h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2> <span id="financeCompactText"></span></div>
+      <a class="fin-link" href="macro.html" data-t="homeAllIndicators">See all national data →</a>
     </section>
   </div>
 
@@ -682,23 +717,43 @@
      figures through the choropleth, so it carries the same conditions as
      communes.html, local.html and map.html, and is listed alongside them in
      tests/test_statbel_attribution.py. English stays in the markup so a
-     reader whose JavaScript never runs still gets the complete notice. -->
+     reader whose JavaScript never runs still gets the complete notice.
+
+     Batch A2b, item 6: this used to render as a dense wall of legal text
+     immediately under the page's content, outweighing everything above it.
+     The <details>/<summary> below is native HTML -- no script required to
+     open it -- so the full notice stays in the DOM, unedited and reachable
+     without JavaScript, exactly as before; only the box it sits in starts
+     collapsed, with a one-line summary and the source/licence links (the
+     same hrefs used in the full notice below, not new ones) visible without
+     opening it. Nothing here may reword, truncate or hide the notice itself
+     -- see tests/test_statbel_attribution.py, which reads this page's raw
+     markup. -->
 <div class="attribution" id="attribution">
   <div class="wrap">
-  <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
-  (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
-  1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
-  document already recorded in <code>docs/licences/</code>.
-  <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
-  communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
-  a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
-  longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
-  are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
-  <br><br>
-  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
-       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
-  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
-  <!-- values-attribution:end --></span>
+  <details class="attr-disclosure">
+    <summary class="attr-summary">
+      <span class="attr-lead" data-t="homeAttributionLead">Official sources for this page&#8217;s figures:</span>
+      <span class="attr-links"><a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> · <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> · <a href="https://www.police.be/statistiques/" rel="noopener">Police fédérale</a> · <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a></span>
+      <span class="attr-toggle" data-t="homeAttributionToggle">Full licence text and update dates</span>
+    </summary>
+    <div class="attr-body">
+    <span id="attrBoundaries" data-t-html="boundariesAttribution"><strong>Boundaries:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a>
+    (Direction g&eacute;n&eacute;rale Statistique &mdash; Statistics Belgium), statistical sectors of
+    1 January 2026, reused under Statbel's <em>Licence open data</em> of 22 October 2015, the same
+    document already recorded in <code>docs/licences/</code>.
+    <strong>Changes were made:</strong> the 20,781 statistical sectors were merged into the 565
+    communes, the outlines simplified to a 50&nbsp;m tolerance so the file is small enough to send to
+    a browser, and the coordinates converted from Belgian Lambert 2008 (EPSG:3812) to
+    longitude/latitude. The source is accurate to 1:10,000; these simplified outlines are not, and
+    are drawn for comparison, never for measurement or for locating a boundary on the ground.</span>
+    <br><br>
+    <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+         identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+    <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+    <!-- values-attribution:end --></span>
+    </div>
+  </details>
   </div>
 </div>
 
@@ -738,10 +793,8 @@
   var LANG = I18N.initial();
   var T = function(key, vars){ return I18N.t(LANG, key, vars); };
 
-  // The finance tiles' icon tints, by position. Not indicator colours -- the
-  // four tiles are a fixed editorial group in the design, and none of them
-  // has any data behind it yet (see the file header).
-  var FINANCE_TINTS = ['--bp-accent', '--bp-green', '--bp-red-signal', '--bp-chart-5'];
+  // A fixed editorial group in the design -- not indicator colours, and
+  // none of them has any data behind it yet (see the file header).
   var FINANCE_KEYS = ['homeFinanceSpending', 'homeFinanceRevenue', 'homeFinanceBalance', 'homeFinanceDebt'];
 
   var state = {
@@ -854,7 +907,14 @@
     var card = document.getElementById('mapCard');
     var meta = state.byCode[code];
     if(!meta || !state.map) return;
-    document.getElementById('mapTitle').textContent = nameOf(code);
+    var name = nameOf(code);
+    document.getElementById('mapTitle').textContent = name;
+    // The legend had bare ticks (5,5 k … 31,7 k) with nothing saying what
+    // was counted. MapUI.unitLabel is the same shared unit vocabulary the
+    // national KPI cards use (rule 2/24: no unit or indicator name literal
+    // here, only the payload's own name and unit code).
+    var unit = MapUI.unitLabel(meta.unit, LANG);
+    document.getElementById('legendCaption').textContent = unit ? name + ' (' + unit + ')' : name;
     var payload = await loadValues(code);
     if(!payload){ card.dataset.state = 'error'; return; }
     card.dataset.state = 'ready';
@@ -1029,29 +1089,20 @@
     });
   }
 
-  /* ---- finance strip: designed shape, honest state ---------------------- */
+  /* ---- finance strip: designed shape, honest state ----------------------
+     Batch A2b, item 2/3: one compact line instead of four cards. Still
+     built from FINANCE_KEYS/homeFinanceUnavailable/homeFinanceWhy -- the
+     same fixed editorial group and the same honest "unavailable" state as
+     before (see the file header for why this pipeline holds no public-
+     finance levels), just not one card and one repeated sentence per item. */
   function renderFinance(){
-    var strip = document.getElementById('financeStrip');
-    strip.querySelectorAll('.ftile').forEach(function(n){ n.remove(); });
-    var before = strip.querySelector('.sechead-link');
-    FINANCE_KEYS.forEach(function(key, i){
-      var tile = document.createElement('div');
-      tile.className = 'ftile bp-state';
-      tile.dataset.state = 'unavailable';
-      tile.innerHTML =
-        '<span class="ficon"></span>' +
-        '<div><div class="lbl"></div>' +
-        '<div class="bp-state-body"><div class="val">—</div></div>' +
-        '<div class="bp-state-message"><span class="why"></span></div></div>';
-      var icon = tile.querySelector('.ficon');
-      icon.style.background = 'color-mix(in srgb, var(' + FINANCE_TINTS[i] + ') 14%, transparent)';
-      icon.style.color = 'var(' + FINANCE_TINTS[i] + ')';
-      icon.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg>';
-      tile.querySelector('.lbl').textContent = T(key);
-      tile.querySelector('.why').textContent = T('homeFinanceUnavailable');
-      tile.title = T('homeFinanceWhy');
-      strip.insertBefore(tile, before);
-    });
+    var span = document.getElementById('financeCompactText');
+    var names = FINANCE_KEYS.map(function(key){ return T(key); });
+    var joined = names.length > 1
+      ? names.slice(0, -1).join(', ') + ' ' + T('listJoinerAnd') + ' ' + names[names.length - 1]
+      : names.join('');
+    span.textContent = joined + ' — ' + T('homeFinanceUnavailable') + '.';
+    span.title = T('homeFinanceWhy');
   }
 
   /* ---- map theme tabs + three thumbnails --------------------------------

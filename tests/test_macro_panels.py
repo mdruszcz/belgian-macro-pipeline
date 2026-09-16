@@ -410,3 +410,47 @@ def test_a_panel_charts_data_table_lists_every_drawn_period(browser, site, panel
             assert period in table_text, f"{chart_id}: period {period} missing from its data table"
     finally:
         context.close()
+
+
+def test_a_compact_empty_cards_message_only_renders_for_the_state_that_owns_it(browser, site):
+    """A2b audit, Finding 4: item 7's compact empty-state rule used
+    `!important` (`.card-compact-empty .bp-state-message{display:flex
+    !important; ...!important}`), which overrides components.css's state
+    machine UNCONDITIONALLY -- not just for the `unavailable` state the card
+    ships in today. `#map` and `#news` are hard-set to `unavailable` right
+    now (renderUnavailable()), so this was latent, but the very first time
+    either slot carries real data and moves to another state (`loading` while
+    it fetches, `ready` once drawn), "Not available yet" would render right
+    next to it -- collapsing distinct states into one, which CLAUDE.md rule
+    26 forbids. The fix scopes the override to
+    `.card-compact-empty[data-state="unavailable"]` instead of `!important`,
+    so this drives the card through the OTHER real state names the page
+    itself uses (assets/belpulse/components.css) and checks the message
+    actually disappears, the way it does for every other card on the page."""
+    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html", wait_until="load")
+        page.wait_for_selector("#map .bp-state-message")
+
+        # Sanity check: as shipped, #map is `unavailable` and the message
+        # does render -- otherwise the states below would pass vacuously.
+        assert page.get_attribute("#map", "data-state") == "unavailable"
+        shown = page.eval_on_selector(
+            "#map .bp-state-message", "el => getComputedStyle(el).display"
+        )
+        assert shown == "flex", "message should render while #map is unavailable"
+
+        for other_state in ("loading", "ready", "suppressed"):
+            page.evaluate(
+                "(s) => { document.getElementById('map').dataset.state = s; }", other_state
+            )
+            hidden = page.eval_on_selector(
+                "#map .bp-state-message", "el => getComputedStyle(el).display"
+            )
+            assert hidden == "none", (
+                f"#map still renders 'Not available yet' with data-state={other_state!r} "
+                "-- the !important override is back"
+            )
+    finally:
+        context.close()

@@ -363,6 +363,102 @@ def test_the_page_renders_a_slot_for_every_unavailable_section():
         assert f'data-slot="{entry["id"]}"' in html, entry["id"]
 
 
+def test_the_two_named_unavailable_cards_are_compact_not_a_designed_size_box():
+    """Batch A2b, item 7: 'Carte économique' and 'Actualités économiques'
+    used to hold open a large hatched placeholder at the design's drawn size
+    (see the `unavailable:` block's own comment in
+    config/national_sections.yaml: "built at their designed size") -- right
+    beside #key, a real populated card, so a third of the row read as empty
+    hatching. That placeholder is macro.html's own markup/CSS (.placeholder,
+    defined in this file), not something the config controls: the config
+    only ever supplied the label/reason/link text, unchanged here (see
+    test_the_page_renders_a_slot_for_every_unavailable_section and
+    test_every_label_in_the_layout_is_trilingual, both still passing).
+    #public-finance is out of item 7's scope and keeps its box -- it is its
+    own single-card panel, not a row beside a taller populated card."""
+    html = _html()
+    map_card = re.search(r'<article[^>]+id="map"[^>]*>.*?</article>', html, re.DOTALL)
+    news_card = re.search(r'<article[^>]+id="news"[^>]*>.*?</article>', html, re.DOTALL)
+    finance_card = re.search(
+        r'<article[^>]+id="public-finance"[^>]*>.*?</article>', html, re.DOTALL
+    )
+    assert map_card and news_card and finance_card
+    assert 'class="placeholder"' not in map_card.group(0)
+    assert 'class="placeholder"' not in news_card.group(0)
+    assert 'class="placeholder"' in finance_card.group(
+        0
+    ), "public-finance is out of scope for item 7 and must keep its designed-size box"
+    assert "card-compact-empty" in map_card.group(0)
+    assert "card-compact-empty" in news_card.group(0)
+    assert "card-compact-empty" not in finance_card.group(0)
+    # The label/reason/link text itself is untouched -- still config-driven.
+    assert 'data-slot="economic_map"' in map_card.group(0)
+    assert 'data-slot="news"' in news_card.group(0)
+    assert "slot-link" in map_card.group(0)
+
+
+def test_the_compact_empty_cards_do_not_stretch_to_match_a_taller_sibling():
+    """Removing the placeholder alone would still leave a tall, mostly blank
+    card: CSS grid stretches row items to the row's tallest member (#key,
+    the real 'Indicateurs clés' list) by default."""
+    rule = re.search(r"\.card-compact-empty\{([^}]+)\}", _html())
+    assert rule, "no .card-compact-empty rule"
+    assert "align-self:start" in rule.group(1).replace(" ", "")
+
+
+def test_the_desktop_rail_background_fills_the_whole_column():
+    """Batch A2b, item 8: the fixed sidebar (position:fixed, pinned since
+    #201) always covers the live viewport correctly as a reader scrolls, but
+    a `position:fixed` box does not stretch to match a full-page capture
+    rendered at the whole document's height in one shot -- the navy stopped
+    wherever the sidebar's own content happened to end, with plain page
+    background for the rest of the column. A plain absolutely-positioned
+    fill, behind the fixed nav and sized to the column's real content height,
+    closes that gap. Desktop-only, inside the same >=1025px block #201 added
+    -- tablet/phone layouts (the media queries below it) are untouched.
+
+    The fill must resolve to the SAME token the sidebar itself actually
+    renders with, or the fix just relocates the visible seam instead of
+    closing it (A2b audit, Finding 1). macro.html's <body> carries no
+    bp-shell--navy class, so the sidebar takes layout.css's un-scoped
+    .bp-sidebar rule, not the --navy-shell-scoped one -- this test resolves
+    that the same way the cascade does, from the body's own classes, so it
+    keeps failing if the fill and the sidebar ever disagree again, including
+    if the sidebar's OWN token changes later."""
+    html = _html()
+    body_class = re.search(r'<body class="([^"]*)"', html)
+    assert body_class, "no <body class=...> on macro.html"
+    is_navy_shell = "bp-shell--navy" in body_class.group(1).split()
+
+    layout_css = (REPO / "assets" / "belpulse" / "layout.css").read_text(encoding="utf-8")
+    base_rule = re.search(r"(?<!\.bp-shell--navy )\.bp-sidebar\{([^}]+)\}", layout_css)
+    navy_rule = re.search(r"\.bp-shell--navy \.bp-sidebar\{([^}]+)\}", layout_css)
+    assert base_rule and navy_rule, "layout.css's .bp-sidebar background rules moved"
+
+    def _bg_token(rule_body):
+        token = re.search(r"background:(var\([^)]+\))", rule_body)
+        assert token, rule_body
+        return token.group(1)
+
+    expected_token = _bg_token(navy_rule.group(1) if is_navy_shell else base_rule.group(1))
+
+    block = re.search(r"@media \(min-width:1025px\)\{(.*?)\n  \}\n", html, re.DOTALL)
+    assert block, "no @media (min-width:1025px) block"
+    body = block.group(1)
+    assert ".bp-body--analytical{" in body and "position:relative" in body
+    assert ".bp-body--analytical::before{" in body
+    fill = re.search(r"\.bp-body--analytical::before\{([^}]+)\}", body)
+    assert fill, "no .bp-body--analytical::before rule"
+    fill_body = fill.group(1).replace(" ", "")
+    assert "position:absolute" in fill_body
+    assert f"background:{expected_token}" in fill_body, (
+        "fill paints a different token than the sidebar actually renders "
+        f"with ({expected_token}) -- the seam just moved, it didn't close"
+    )
+    # Still inside the >=1025px block, alongside the fixed sidebar it backs.
+    assert ".bp-sidebar{" in body and "position:fixed" in body
+
+
 def test_every_label_in_the_layout_is_trilingual():
     """CLAUDE.md rule 7, on the strings this file owns."""
     layout = _layout()

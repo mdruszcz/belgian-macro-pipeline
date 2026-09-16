@@ -96,7 +96,24 @@
      Tablets and phones keep the layout below unchanged. */
   @media (min-width:1025px){
     .macro .bp-topbar{position:sticky; top:0; z-index:40}
-    .bp-body--analytical{max-width:none; margin:0; grid-template-columns:minmax(0,1fr); padding-left:calc(240px + var(--bp-space-6))}
+    /* Batch A2b, item 8: position:relative turns this wrapper into the
+       containing block for the ::before fill just below -- a plain
+       decorative rectangle, painted behind everything else in the column,
+       that always runs exactly as tall as the column itself. The fixed
+       sidebar (below) already covers the live viewport correctly as a
+       reader scrolls; the gap this closes only ever showed up in a
+       full-page capture, where the browser renders the whole document at
+       once and a `position:fixed` box does not stretch to match -- so the
+       navy stopped wherever the sidebar's OWN content happened to end,
+       with plain page background for the rest of the column's height. */
+    .bp-body--analytical{
+      max-width:none; margin:0; grid-template-columns:minmax(0,1fr); padding-left:calc(240px + var(--bp-space-6));
+      position:relative;
+    }
+    .bp-body--analytical::before{
+      content:''; position:absolute; top:0; bottom:0; left:0; width:240px;
+      background:var(--bp-navy-bg); z-index:0;
+    }
     .bp-sidebar{
       position:fixed; left:0; top:var(--macro-topbar-h, var(--bp-topbar-h, 56px)); bottom:0; z-index:30;
       align-self:stretch; /* layout.css's align-self:start would shrink it to its content */
@@ -229,6 +246,16 @@
   .bp-state[data-state="unavailable"] .bp-state-message{padding:0}
   .bp-state .placeholder{flex:1; min-height:120px; border:1px dashed var(--bp-border); border-radius:var(--bp-radius-control); margin:var(--bp-space-3) 0; background:repeating-linear-gradient(135deg, transparent 0 10px, var(--bp-surface-alt) 10px 11px)}
   .bp-state .why{font-size:12px}
+  /* Item 7's compact empty state: sized to its own message, not stretched by
+     CSS grid to match a taller sibling in the same .row (#key, here). */
+  .card-compact-empty{align-self:start}
+  .card-compact-empty[data-state="unavailable"] .bp-state-message{
+    display:flex; gap:var(--bp-space-3); align-items:flex-start; padding:var(--bp-space-3) 0 0;
+  }
+  .card-compact-empty .bp-state-icon{
+    width:30px; height:30px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted);
+  }
   .card-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium); margin-top:var(--bp-space-3); align-self:flex-end}
   .card-link:hover{text-decoration:underline}
 
@@ -388,16 +415,35 @@
           <div class="bp-chart-head"><div><h3 data-t="macroKeyIndicators">Key indicators</h3></div></div>
           <ul class="bp-list-panel" id="keyList"></ul>
         </article>
-        <article class="bp-chart-card bp-state" id="map" data-slot="economic_map" data-state="unavailable">
+        <!-- Batch A2b, item 7: these two used to hold open a placeholder box
+             at the design's full drawn size (see the `unavailable:` block in
+             config/national_sections.yaml, "built at their designed size") --
+             right beside #key, a real populated card, that read as a third of
+             the row being empty hatching. This is page markup/CSS
+             (.placeholder, right above), not something the config controls:
+             the config only ever supplied the label/reason/link text, which
+             is unchanged below. Dropping the placeholder div makes these two
+             fall back to the SAME compact .bp-state-message-only rendering
+             every other unavailable/missing/error card on this page already
+             uses (growth, drivers, prices, employment, business-cycle,
+             below) -- not a new pattern, the existing one, applied here too.
+             #public-finance keeps its placeholder: it is its own single-card
+             panel, not a row beside a tall populated card, and item 7 does
+             not name it. -->
+        <article class="bp-chart-card bp-state card-compact-empty" id="map" data-slot="economic_map" data-state="unavailable">
           <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-          <div class="placeholder"></div>
-          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+          <div class="bp-state-message">
+            <span class="bp-state-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/></svg></span>
+            <span><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></span>
+          </div>
           <a class="card-link slot-link" hidden><span data-t="macroSeeMap">See the interactive map</span> →</a>
         </article>
-        <article class="bp-chart-card bp-state" id="news" data-slot="news" data-state="unavailable">
+        <article class="bp-chart-card bp-state card-compact-empty" id="news" data-slot="news" data-state="unavailable">
           <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-          <div class="placeholder"></div>
-          <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+          <div class="bp-state-message">
+            <span class="bp-state-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></span>
+            <span><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></span>
+          </div>
         </article>
       </section>
     </section>
