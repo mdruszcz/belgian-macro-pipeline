@@ -371,11 +371,12 @@ def test_part_time_benefit_recipients_pinned_vintage_is_565_not_527(working_db):
     """The exact red-team finding: coverage.of was 527 for
     PART_TIME_BENEFIT_RECIPIENTS at be:country, 2017-2021 -- a community
     count that never existed. 527 was the value-filtered union across all
-    ten periods (measured directly against data/onem_observations.csv: per
-    period it ranges from 399 to 511 communes with a printable value, and the
-    union of those ten sets is 527). The honest pinned vintage, once
-    suppressed rows count toward "reports on this map", is 565: every single
-    period actually carries all 565 of today's communes."""
+    ten periods (measured directly against the ONEM store registered in
+    config/stores.yaml: per period it ranges from 399 to 511 communes with a
+    printable value, and the union of those ten sets is 527). The honest
+    pinned vintage, once suppressed rows count toward "reports on this map",
+    is 565: every single period actually carries all 565 of today's
+    communes."""
     conn = sqlite3.connect(f"file:{working_db}?mode=ro", uri=True)
     try:
         universe_of, pinned = _universe_of_and_pinned(conn)

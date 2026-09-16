@@ -273,15 +273,15 @@ def _universe_rows(conn: sqlite3.Connection, extra_csvs: tuple[Path, ...]):
     only ever sees the communes that happened to have a printable value, so
     its "full set of communes this source ever reports on" undercounts by
     exactly the suppressed communes. Measured for PART_TIME_BENEFIT_RECIPIENTS
-    (config/indicators/PART_TIME_BENEFIT_RECIPIENTS.yaml, source ONEM,
-    data/onem_observations.csv): the value-filtered union across 2017-2026 is
-    527 communes, but every single period actually carries all 565 --
-    487 final + 78 suppressed in 2021 alone. 527 is not a real vintage; no
-    geography snapshot has ever had 527 municipalities. 565 is (today's map,
-    confirmed via `SELECT COUNT(*) FROM geographies WHERE level='municipality'
-    AND valid_to IS NULL`), and it is the map ONEM expresses its whole series
-    on -- the pinned-vintage detector correctly catches that once it can see
-    the suppressed rows too.
+    (config/indicators/PART_TIME_BENEFIT_RECIPIENTS.yaml, source ONEM, its
+    store CSV registered in config/stores.yaml): the value-filtered union
+    across 2017-2026 is 527 communes, but every single period actually
+    carries all 565 -- 487 final + 78 suppressed in 2021 alone. 527 is not a
+    real vintage; no geography snapshot has ever had 527 municipalities. 565
+    is (today's map, confirmed via `SELECT COUNT(*) FROM geographies WHERE
+    level='municipality' AND valid_to IS NULL`), and it is the map ONEM
+    expresses its whole series on -- the pinned-vintage detector correctly
+    catches that once it can see the suppressed rows too.
     """
     triples: set[tuple[str, str, str]] = set()
     for indicator_id, geo_id, period in conn.execute(
