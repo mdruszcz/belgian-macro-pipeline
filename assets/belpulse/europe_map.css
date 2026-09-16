@@ -101,6 +101,23 @@
 }
 
 .bp-europe-map__stage{position:absolute; inset:0; overflow:hidden; background:var(--bp-surface-alt)}
+/* eurostat-map wraps its <svg> in a `div.em-map-wrapper` of its own, which it
+   sizes to the library's NOMINAL width/height (760x790 here) and leaves as an
+   `inline-block`. That wrapper is what the rule below resolves its percentages
+   against -- not the stage -- so without this it is the wrapper, not the stage,
+   that decides how big the map is:
+     - wide viewport: the wrapper stays content-sized, so the map drew 760px
+       wide inside a 1016px stage and simply looked small;
+     - mid viewport: the wrapper's WIDTH gets capped by the stage but its
+       HEIGHT stays aspect-driven, so at 1440px the svg came out 736x765 in a
+       736x673 stage and `overflow:hidden` cut 92px off the bottom -- southern
+       Europe, measured in Chromium.
+   The stage has had a definite height since #201 gave it `max(75vh, 440px)`,
+   which is what turned that long-standing mismatch into a visible crop.
+   Specificity (0,2,0) beats the vendor's own `.em-map-wrapper` (0,1,0), so
+   unlike the theme overrides below this needs no `!important` despite the
+   vendor stylesheet being injected after this file. */
+.bp-europe-map__stage .em-map-wrapper{display:block; width:100%; height:100%}
 .bp-europe-map__stage svg{display:block; width:100%; height:100%}
 /* The library's own default sea/background-country fills (#fff / #e1e1e1,
    its own bundled CSS, injected as a <style> tag at runtime) are fixed

@@ -1151,3 +1151,48 @@ def test_clicking_a_region_opens_a_closable_detail_card_in_the_rail(browser, sit
         assert page.eval_on_selector("#europeSideCard", "el => el.hidden") is True
     finally:
         context.close()
+
+
+# Measured geometry of the drawn map, not a CSS string: eurostat-map inserts
+# its own `div.em-map-wrapper` between the stage and the <svg> and sizes it to
+# the library's nominal 760x790. Percentages on the <svg> resolve against THAT
+# wrapper, so before the fix the wrapper -- not the stage -- decided the map's
+# size: at 1870px it stayed content-sized (a 760px map in a 1016px stage), and
+# at 1440px its width was capped while its height stayed aspect-driven, giving
+# a 736x765 svg inside a 736x673 stage whose `overflow:hidden` cut 92px of
+# southern Europe off the bottom. Asserting the RENDERED boxes is what catches
+# that; asserting the rule text would not, since the rule was already there.
+@pytest.mark.parametrize("width", [1870, 1440, 1122])
+def test_the_whole_map_fits_inside_the_stage_and_fills_it(browser, site, width):
+    context = browser.new_context(viewport={"width": width, "height": 900})
+    page = context.new_page()
+    try:
+        page.goto(f"{site}/macro.html#europe", wait_until="load")
+        page.wait_for_selector("#europeLegendScale .bp-europe-map__legend-row", timeout=15000)
+        page.wait_for_selector(".bp-europe-map__stage svg .em-nutsrg path", timeout=15000)
+        geom = page.evaluate("""() => {
+              const stage = document.querySelector('.bp-europe-map__stage');
+              const svg = stage.querySelector('svg');
+              const s = stage.getBoundingClientRect();
+              const v = svg.getBoundingClientRect();
+              const r = svg.querySelector('.em-nutsrg').getBoundingClientRect();
+              return {
+                stage: {w: s.width, h: s.height},
+                svg: {w: v.width, h: v.height},
+                clipTop: s.top - r.top,
+                clipBottom: r.bottom - s.bottom,
+                clipLeft: s.left - r.left,
+                clipRight: r.right - s.right,
+                regionsH: r.height,
+              };
+            }""")
+        # No edge of the drawn regions is outside the stage that clips them.
+        for edge in ("clipTop", "clipBottom", "clipLeft", "clipRight"):
+            assert geom[edge] <= 1, (edge, geom)
+        # And the map is not merely uncropped by being tiny: the svg fills the
+        # stage box, and the regions use most of the height available to them.
+        assert abs(geom["svg"]["w"] - geom["stage"]["w"]) <= 2, geom
+        assert abs(geom["svg"]["h"] - geom["stage"]["h"]) <= 2, geom
+        assert geom["regionsH"] > geom["stage"]["h"] * 0.6, geom
+    finally:
+        context.close()
