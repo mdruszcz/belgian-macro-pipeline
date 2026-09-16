@@ -54,28 +54,56 @@ future file's own garbage rows are handled the same way without an edit
 here. A nonzero value on an unresolvable code is a different situation and
 raises.
 
-`z == 0` ON A REAL, RESOLVABLE COMMUNE IS NOT A MEASUREMENT EITHER (maintainer
-direction, 2026-09-16: "Hainaut is missing data, not 0 for car theft").
-Measured on the committed store before this rule existed: every one of
-Hainaut's 69 communes carried CAR_THEFT_PER_10K = 0.0 for 2025, status
-provisional -- a whole province with zero car thefts, which is not a real
-outcome. police.be's own export pairs a placeholder row with `z: 0` (see
-above); this loader already honours that for a geo_code that resolves to NO
-geography. It did NOT honour it for a geo_code that DOES resolve -- the same
-placeholder value was written as a measured zero, collapsing "not available"
-into "confirmed zero" (CLAUDE.md rule 26) and silently coercing the source's
-own marker into data (rule 13).
+`z == 0` ON A REAL, RESOLVABLE COMMUNE IS NOT ALWAYS A MEASUREMENT (maintainer
+direction, 2026-09-16: "Hainaut is missing data, not 0 for car theft" --
+corrected again the same day: "you removed all the zero instead of just
+hainaut like i asked". The first fix (ADR 0012, PR #215) over-applied the
+rule to EVERY zero anywhere, erasing genuine zeros in small communes that had
+nothing to do with Hainaut's problem. This corrects that over-broad rule.
 
-FIXED HERE: `z == 0` on a resolvable commune is loaded as status `na`, value
-NULL, for every commune, every indicator, every year -- not just Hainaut, not
-just car theft, because the file gives no way to tell a placeholder zero from
-a genuine one for ANY commune. No province-level or magnitude heuristic is
-used (a small commune's honest zero-car-theft year would look identical to a
-placeholder, so guessing which is which would be exactly the guess CLAUDE.md
-forbids). The cost is real and accepted: a small commune's genuine zero for a
-year is lost as "not available" rather than published as 0. That loss is
-preferred to the alternative, which is calling an unmeasured cell a
-confirmed zero for 565 communes at once.
+THE RULE IS PROVINCE-WIDE, not per-commune. Measured on the pre-#215 store
+(git show 66468d61:data/police_observations.csv), 2025: Hainaut's 69
+communes were 69/69 zero for CAR_THEFT_PER_10K and 69/69 zero for
+THEFT_FROM_VEHICLE_PER_10K -- a whole province reporting nothing on exactly
+two indicators, while the SAME province's HOUSE_BURGLARIES_PER_10K and
+DOMESTIC_VIOLENCE_PER_10K were 0/69 zero, real data throughout (Charleroi:
+109.6 and 173.2). That is a non-report for one (indicator, province, year)
+cell, not a coincidence 69 communes share. Every OTHER province has a normal
+scatter of zero shares (0-25% per indicator, e.g. Flandre occidentale car
+theft 16/64, Liège 13/84) sitting alongside real burglary/violence rates in
+the same small communes (median population 7,323 among the 64 non-Hainaut
+car-theft zero communes, max 21,546 Koksijde) -- those are genuine "no car
+theft this year" outcomes, exactly what #215 wrongly erased everywhere.
+
+So the test is: a zero is a placeholder ONLY when EVERY live, resolvable
+commune of the same PROVINCE has a zero for that indicator in that period (a
+whole-province zero is the source's non-report, not 69 coincidences). Such
+cells load as status `na`, value NULL. Every other zero -- including a lone
+small commune's zero sitting next to 564 nonzero neighbours -- is a measured
+zero and is stored as `0.0` with the year's normal status (final/
+provisional). This is computed fresh from each file, per (indicator, year),
+not a hardcoded "Hainaut" list: a future province-wide gap in any indicator
+is caught the same way, and a province that starts reporting again flips
+back to measured zeros automatically, with no code change.
+
+PROVINCE GROUPING walks `geographies.parent_geo_id` from each commune up to
+the ancestor whose `level = 'province'` (same walk as
+export_communes_csv.py's `_ancestor_names`). The 19 Brussels communes have no
+province ancestor at all (their arrondissement's parent is the region
+directly) -- see docs/features/geography.md Q3 -- so for those the grouping
+key is the REGION instead (`be:reg:04000`, Brussels-Capital), and every
+Brussels commune's zero/nonzero status for an indicator/year is compared
+against its 18 siblings under that same regional key, not silently dropped
+from the check.
+
+No province-level or magnitude heuristic is used to judge any INDIVIDUAL
+commune's zero -- only the province-wide unanimity test above decides. The
+cost is real and accepted: a province where every commune genuinely had zero
+of some indicator in some year would still read as `na`, indistinguishable
+from a non-report. At 565-commune, ~4-indicator scale, a true province-wide
+zero is exceptionally unlikely for any of these four crime categories, and a
+false "na" costs one province-year cell, not a systematic bias; the ADR
+records this as the accepted residual risk.
 
 A COMMUNE DISSOLVED BEFORE THE FILE'S OWN YEAR GETS NO ROW AT ALL, not `na`.
 Resolution still happens at the fixed PINNED_PERIOD (2024) as above -- that
@@ -175,6 +203,45 @@ def _read_rates(path: Path) -> dict[str, float]:
 
 def _resolve(conn: sqlite3.Connection, nis: str) -> str:
     return resolve_geo(conn, nis, PINNED_PERIOD)
+
+
+def _province_group(conn: sqlite3.Connection, geo_id: str) -> str:
+    """The geo_id of the ancestor used to test "did this whole province
+    report nothing" -- normally the commune's `level = 'province'` ancestor,
+    found by walking `parent_geo_id` up (same walk as
+    export_communes_csv.py's `_ancestor_names`).
+
+    The 19 Brussels communes have NO province ancestor -- their
+    arrondissement's parent is the region directly (docs/features/
+    geography.md Q3) -- so for those this returns the REGION geo_id instead
+    (Brussels-Capital, be:reg:04000). They are still grouped and checked, just
+    under a coarser key; a Brussels-wide non-report is caught the same way a
+    province-wide one is, since Brussels only has one region either way.
+    """
+    current = geo_id
+    seen = set()
+    region_fallback = None
+    while current and current not in seen:
+        seen.add(current)
+        row = conn.execute(
+            "SELECT level, parent_geo_id FROM geographies WHERE geo_id = ?",
+            (current,),
+        ).fetchone()
+        if not row:
+            break
+        level, parent = row
+        if level == "province":
+            return current
+        if level == "region":
+            region_fallback = current
+        current = parent
+    if region_fallback is not None:
+        return region_fallback
+    raise ValueError(
+        f"{geo_id!r} has no province or region ancestor in `geographies` -- cannot "
+        "test the province-wide zero rule for it (CLAUDE.md rule 13: fail loudly "
+        "rather than guess a grouping)."
+    )
 
 
 def _dissolved_before(conn: sqlite3.Connection, geo_id: str, period_start: str) -> bool:
@@ -303,6 +370,15 @@ def sync(
             rates = _read_rates(directory / year)
             rows_read += len(rates)
 
+            # PASS 1: resolve every code and drop dissolved-before-this-year
+            # rows, exactly as before. What remains (`live_rows`) is every
+            # row that names a real commune that existed for this period --
+            # the population the province-wide unanimity test in PASS 2 must
+            # be computed over. This must happen for the WHOLE file before
+            # any row is classified, because "is this a placeholder" is a
+            # question about the file's OTHER rows, not this row alone.
+            live_rows: list[tuple[str, str, float]] = []  # (nis, geo_id, value)
+
             for nis, value in sorted(rates.items()):
                 try:
                     geo_id = _resolve(conn, nis)
@@ -327,17 +403,40 @@ def sync(
                     skipped_dissolved += 1
                     continue
 
-                if value == 0:
-                    # See module docstring: police.be pairs a placeholder row
-                    # with z: 0, and this file gives no way to distinguish
-                    # that from a genuine zero for a real, resolvable
-                    # commune either -- so this can never be loaded as a
-                    # measured 0 (CLAUDE.md rules 13 and 26). Recorded as
-                    # `na`/NULL, never a manufactured zero.
+                live_rows.append((nis, geo_id, value))
+
+            # PASS 2: group the surviving rows by province (Brussels
+            # communes group by region -- see _province_group), and find
+            # which groups are unanimously zero. Only THOSE groups' zero
+            # cells are placeholders; every other zero, anywhere else, is a
+            # measured 0.0 (maintainer correction, 2026-09-16: the uniform
+            # "every zero is na" rule over-applied Hainaut's problem
+            # everywhere and erased genuine small-commune zeros).
+            group_all_zero: dict[str, bool] = {}
+            for _nis, geo_id, value in live_rows:
+                group = _province_group(conn, geo_id)
+                is_zero = value == 0
+                if group not in group_all_zero:
+                    group_all_zero[group] = is_zero
+                else:
+                    group_all_zero[group] = group_all_zero[group] and is_zero
+
+            for _nis, geo_id, value in live_rows:
+                group = _province_group(conn, geo_id)
+                if value == 0 and group_all_zero[group]:
+                    # Every commune of this row's province (or, for Brussels,
+                    # region) reported exactly 0 for this indicator/year --
+                    # a province-wide non-report, not 69 (or however many)
+                    # coincidences. police.be's own placeholder marker, the
+                    # same convention already honoured for a geo_code that
+                    # resolves to no geography at all.
                     row_value: float | None = None
                     row_status = "na"
                     written_na += 1
                 else:
+                    # Either nonzero, or zero but sitting alongside at least
+                    # one nonzero sibling in the same province/region -- a
+                    # measured reading, including a measured zero.
                     row_value = value
                     row_status = status
 
@@ -371,7 +470,8 @@ def sync(
     print(
         f"Read {rows_read} (indicator, commune, year) rates across {len(DATASETS)} categories "
         f"({skipped_zero_placeholder} zero-valued non-geography code(s) skipped, "
-        f"{written_na} zero-valued resolvable code(s) written as na/NULL, "
+        f"{written_na} zero-valued resolvable code(s) written as na/NULL because their whole "
+        f"province (or region, for Brussels) was zero that year, "
         f"{skipped_dissolved} row(s) skipped for a commune dissolved before that year)."
     )
     return rows_read, rows_written
