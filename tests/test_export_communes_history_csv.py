@@ -414,10 +414,32 @@ def test_a_partial_predecessor_set_produces_no_reconstructed_row(tmp_path):
     assert not any(r["geo_id"] == "be:mun:SUCC" and r["period"] == "2020" for r in rows)
 
 
+_AVG_NET_TAXABLE_INCOME_YAML = """
+id: AVG_NET_TAXABLE_INCOME
+name: {en: Average net taxable income per tax return, fr: x, nl: x}
+unit: eur
+frequency: A
+geo_levels: [municipal]
+preferred_direction: higher_is_better
+derived:
+  function: mean_from_total
+  inputs: [FISCAL_TOT_NET_TAXABLE_INC, FISCAL_NBR_NON_ZERO_INC]
+"""
+
+
 def test_antwerp_keeps_its_own_value_gap_fill_not_restatement(tmp_path):
     """The maintainer's named example: Antwerp (11002) already publishes its
-    own fiscal figure, and Borsbeek (11007, merged into it in 2025) must never
-    change it -- gap-fill only, never a recombination of the two."""
+    own fiscal figures, and Borsbeek (11007, merged into it in 2025) must
+    never change them -- gap-fill only, never a recombination of the two.
+
+    Exercises the REAL derived config (AVG_NET_TAXABLE_INCOME, recomputed
+    from FISCAL_TOT_NET_TAXABLE_INC / FISCAL_NBR_NON_ZERO_INC), because the
+    ratio is exactly what FINDING 1 showed slipping past gap-fill: it is
+    derived-only and never appears in `raw`, so a version of this test that
+    points `derived_dir` at an empty directory never computes the ratio at
+    all and cannot see the collision. `derived_dir=tmp_path / "empty"` was
+    the bug in this test, not just in the code.
+    """
     db_path = tmp_path / "test.db"
     conn = _base_db(db_path)
     conn.execute("""INSERT INTO indicators
@@ -425,6 +447,11 @@ def test_antwerp_keeps_its_own_value_gap_fill_not_restatement(tmp_path):
             preferred_direction, is_additive, config_path)
            VALUES ('FISCAL_TOT_NET_TAXABLE_INC', 'statbel', 'x', 'x',
                    'Total net taxable income', 'A', 'eur', 'higher_is_better', 1, 'x')""")
+    conn.execute("""INSERT INTO indicators
+           (indicator_id, source_id, name_nl, name_fr, name_en, frequency, unit,
+            preferred_direction, is_additive, config_path)
+           VALUES ('FISCAL_NBR_NON_ZERO_INC', 'statbel', 'x', 'x',
+                   'Non-zero income returns', 'A', 'count', 'contextual', 1, 'x')""")
     _geo(conn, "be:mun:11002", "11002", "Antwerp")
     _geo(
         conn,
@@ -434,6 +461,8 @@ def test_antwerp_keeps_its_own_value_gap_fill_not_restatement(tmp_path):
         valid_to="2025-01-01",
         successor_geo_id="be:mun:11002",
     )
+    # Antwerp's own real fiscal figures -- these two together give the
+    # correct AVG_NET_TAXABLE_INCOME derived value for Antwerp alone.
     conn.execute("""INSERT INTO observations
            (indicator_id, geo_id, period, vintage, value, status,
             period_start, period_end, is_latest, fetch_run_id, created_at)
@@ -443,25 +472,68 @@ def test_antwerp_keeps_its_own_value_gap_fill_not_restatement(tmp_path):
     conn.execute("""INSERT INTO observations
            (indicator_id, geo_id, period, vintage, value, status,
             period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('FISCAL_NBR_NON_ZERO_INC', 'be:mun:11002', '2023', 'v1',
+                   313772.0, 'final', '2023-01-01', '2023-12-31', 1, 1,
+                   '2026-01-01T00:00:00+00:00')""")
+    # Borsbeek's own real fiscal figures -- reconstruction would sum these
+    # onto Antwerp if gap-fill did not block it.
+    conn.execute("""INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
            VALUES ('FISCAL_TOT_NET_TAXABLE_INC', 'be:mun:11007', '2023', 'v1',
                    300000000.0, 'final', '2023-01-01', '2023-12-31', 1, 1,
+                   '2026-01-01T00:00:00+00:00')""")
+    conn.execute("""INSERT INTO observations
+           (indicator_id, geo_id, period, vintage, value, status,
+            period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('FISCAL_NBR_NON_ZERO_INC', 'be:mun:11007', '2023', 'v1',
+                   9000.0, 'final', '2023-01-01', '2023-12-31', 1, 1,
                    '2026-01-01T00:00:00+00:00')""")
     conn.commit()
     conn.close()
 
+    derived_dir = tmp_path / "derived"
+    derived_dir.mkdir()
+    (derived_dir / "AVG_NET_TAXABLE_INCOME.yaml").write_text(_AVG_NET_TAXABLE_INCOME_YAML)
+
     out = tmp_path / "history.csv"
-    export_communes_history_csv(db_path, out, derived_dir=tmp_path / "empty", all_periods=True)
+    export_communes_history_csv(db_path, out, derived_dir=derived_dir, all_periods=True)
     rows = _rows(out)
-    antwerp_2023 = [
+
+    antwerp_2023_raw = [
         r
         for r in rows
         if r["geo_id"] == "be:mun:11002"
         and r["indicator_code"] == "FISCAL_TOT_NET_TAXABLE_INC"
         and r["period"] == "2023"
     ]
-    assert len(antwerp_2023) == 1
-    assert float(antwerp_2023[0]["value"]) == pytest.approx(11097002409.83)
-    assert antwerp_2023[0]["status"] == "A"  # its own real status, never reconstructed
+    assert len(antwerp_2023_raw) == 1
+    assert float(antwerp_2023_raw[0]["value"]) == pytest.approx(11097002409.83)
+    assert antwerp_2023_raw[0]["status"] == "A"  # its own real status, never reconstructed
+
+    # FINDING 1: the derived ratio must ALSO stay singular and ALSO keep
+    # Antwerp's own value -- 11097002409.83 / 313772 -- never the combined
+    # (Antwerp + Borsbeek) sum-ratio a reconstruction would otherwise produce.
+    antwerp_2023_ratio = [
+        r
+        for r in rows
+        if r["geo_id"] == "be:mun:11002"
+        and r["indicator_code"] == "AVG_NET_TAXABLE_INCOME"
+        and r["period"] == "2023"
+    ]
+    assert len(antwerp_2023_ratio) == 1, (
+        "Antwerp must have exactly one AVG_NET_TAXABLE_INCOME/2023 row, not a "
+        "derived one plus a reconstructed one"
+    )
+    expected_own_ratio = 11097002409.83 / 313772.0
+    assert float(antwerp_2023_ratio[0]["value"]) == pytest.approx(expected_own_ratio, rel=1e-9)
+    assert antwerp_2023_ratio[0]["status"] == "derived"
+
+    # And the general property FINDING 1 asked for: no duplicate
+    # (geo_id, indicator_code, period) key anywhere in the export.
+    keys = [(r["geo_id"], r["indicator_code"], r["period"]) for r in rows]
+    duplicates = {k for k in keys if keys.count(k) > 1}
+    assert not duplicates, f"duplicate (geo_id, indicator_code, period) rows: {duplicates}"
 
 
 def test_the_database_file_is_byte_identical_after_a_reconstructing_export(

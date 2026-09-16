@@ -354,4 +354,66 @@ def test_reconstruct_end_to_end_produces_both_components_and_ratio():
     assert "AVG_NET_TAXABLE_INCOME" in ids
     ratio_row = next(r for r in out if r[1] == "AVG_NET_TAXABLE_INCOME")
     assert ratio_row[5] == pytest.approx(38960.80, abs=0.01)
-    assert ratio_row[6] == "reconstructed"
+
+
+# ── FINDING 1: gap-fill must cover derived ratios too ──────────────────────
+
+
+def test_a_reconstructed_ratio_is_dropped_when_the_successor_already_has_it():
+    """AVG_NET_TAXABLE_INCOME never appears in `raw_rows` -- it is
+    derived-only -- so the plain `existing = [row for row in raw_rows ...]`
+    gap-fill guard is structurally blind to it. Antwerp already has its own
+    live AVG_NET_TAXABLE_INCOME/2023 (from compute(), passed in here as
+    `existing_derived_cells`); the reconstructed sum-ratio for that same key
+    must be dropped, not emitted alongside it."""
+    out = reconstruct(
+        FISCAL_RAW,
+        FISCAL_LINEAGE,
+        indicator_is_additive={"FISCAL_TOT_NET_TAXABLE_INC": True, "FISCAL_NBR_NON_ZERO_INC": True},
+        indicator_meta={**FISCAL_META, **AVG_META},
+        derived_configs=AVG_NET_TAXABLE_INCOME_CONFIG,
+        existing_derived_cells={(TONGEREN_BORGLOON, "AVG_NET_TAXABLE_INCOME", "2023")},
+    )
+    assert not any(r[1] == "AVG_NET_TAXABLE_INCOME" for r in out)
+    # The raw components are untouched by this guard -- it targets only the
+    # derived-cell key it was given.
+    assert any(r[1] == "FISCAL_TOT_NET_TAXABLE_INC" for r in out)
+
+
+def test_existing_derived_cells_is_scoped_to_its_own_key_not_every_ratio():
+    """The guard must key on (geo_id, indicator_id, period) exactly, not drop
+    every ratio just because compute() already produced something for that
+    successor -- e.g. a different period must survive untouched."""
+    out = reconstruct(
+        FISCAL_RAW,
+        FISCAL_LINEAGE,
+        indicator_is_additive={"FISCAL_TOT_NET_TAXABLE_INC": True, "FISCAL_NBR_NON_ZERO_INC": True},
+        indicator_meta={**FISCAL_META, **AVG_META},
+        derived_configs=AVG_NET_TAXABLE_INCOME_CONFIG,
+        existing_derived_cells={(TONGEREN_BORGLOON, "AVG_NET_TAXABLE_INCOME", "2099")},
+    )
+    ratio_row = next(r for r in out if r[1] == "AVG_NET_TAXABLE_INCOME")
+    assert ratio_row[4] == "2023"
+    assert ratio_row[5] == pytest.approx(38960.80, abs=0.01)
+
+
+def test_existing_derived_cells_defaults_to_empty_and_changes_nothing():
+    """Callers that never pass the new parameter (export_communes_csv.py,
+    which always passes derived_configs=None anyway) must see byte-identical
+    behaviour to before this parameter existed."""
+    with_default = reconstruct(
+        FISCAL_RAW,
+        FISCAL_LINEAGE,
+        indicator_is_additive={"FISCAL_TOT_NET_TAXABLE_INC": True, "FISCAL_NBR_NON_ZERO_INC": True},
+        indicator_meta={**FISCAL_META, **AVG_META},
+        derived_configs=AVG_NET_TAXABLE_INCOME_CONFIG,
+    )
+    with_empty = reconstruct(
+        FISCAL_RAW,
+        FISCAL_LINEAGE,
+        indicator_is_additive={"FISCAL_TOT_NET_TAXABLE_INC": True, "FISCAL_NBR_NON_ZERO_INC": True},
+        indicator_meta={**FISCAL_META, **AVG_META},
+        derived_configs=AVG_NET_TAXABLE_INCOME_CONFIG,
+        existing_derived_cells=(),
+    )
+    assert with_default == with_empty

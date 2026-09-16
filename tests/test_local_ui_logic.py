@@ -816,3 +816,74 @@ def test_the_reconstructed_wording_exists_in_all_three_languages():
     assert out["nl"][0] != out["en"][0]
     assert out["fr"][1] != out["en"][1]
     assert out["nl"][1] != out["en"][1]
+
+
+# FINDING 2 (fix round): the discontinuity note must be able to fire from ANY
+# reconstructed period in the series, not only when the LATEST cell happens to
+# be one -- which is never true for the 13 real successor communes, since
+# their reconstructed years are the old ones and their latest year is their
+# own real report. `factHTML` itself lives outside the exported LocalUI
+# module and needs a browser DOM to render (see this file's own docstring),
+# so what is tested here is the LocalUI-level data factHTML now reads to
+# decide: the series-level string exists trilingually, and chartPoints carries
+# enough per-point information for the chart to draw the break.
+
+
+def test_the_reconstructed_series_note_wording_exists_in_all_three_languages():
+    out = _run_node("""
+        const out = {};
+        for(const lang of LocalUI.LANGS){
+          out[lang] = (LocalUI.STRINGS[lang] || {})['reconstructedSeriesNote'] || null;
+        }
+        console.log(JSON.stringify(out));
+        """)
+    for lang in ("en", "fr", "nl"):
+        assert out[lang], f"{lang} is missing reconstructedSeriesNote"
+    assert out["fr"] != out["en"]
+    assert out["nl"] != out["en"]
+    # The template placeholder LocalUI.t substitutes {p} with must survive
+    # into every language's string, or the rendered note would show a blank
+    # instead of the named years.
+    for lang in ("en", "fr", "nl"):
+        assert "{p}" in out[lang]
+
+
+def test_chart_points_flag_which_points_are_reconstructed():
+    """The chart needs to know, per point, whether it is reconstructed so it
+    can draw the pre-merger run differently and mark the seam -- this is the
+    data drawSeries now consumes to make Bastogne's discontinuity visible."""
+    out = _run_node("""
+        const entry = {periods: {
+          '2016': {value: 100, status: 'reconstructed'},
+          '2020': {value: 110, status: 'reconstructed'},
+          '2025': {value: 200, status: 'final'},
+          '2026': {value: 210, status: 'final'},
+        }};
+        console.log(JSON.stringify(LocalUI.chartPoints(entry)));
+        """)
+    assert out == [
+        {"period": "2016", "value": 100, "reconstructed": True},
+        {"period": "2020", "value": 110, "reconstructed": True},
+        {"period": "2025", "value": 200, "reconstructed": False},
+        {"period": "2026", "value": 210, "reconstructed": False},
+    ]
+
+
+def test_latest_of_exposes_reconstructed_periods_even_when_latest_is_real():
+    """The exact Bastogne shape: 2016-2024 reconstructed, 2025-2026 real. The
+    latest cell (2026) is not reconstructed, but reconstructedPeriods must
+    still list the old years -- this is what lets factHTML render the series
+    note on a page where `latest.reconstructed` alone is false."""
+    out = _run_node("""
+        const bastogneStyle = {unit: 'count', names: {en: 'Population'}, periods: {
+          '2016': {value: 100, status: 'reconstructed'},
+          '2020': {value: 110, status: 'reconstructed'},
+          '2024': {value: 120, status: 'reconstructed'},
+          '2025': {value: 200, status: 'final'},
+          '2026': {value: 210, status: 'final'},
+        }};
+        console.log(JSON.stringify(LocalUI.latestOf(bastogneStyle)));
+        """)
+    assert out["period"] == "2026"
+    assert out["reconstructed"] is False
+    assert out["reconstructedPeriods"] == ["2016", "2020", "2024"]

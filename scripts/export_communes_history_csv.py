@@ -192,12 +192,28 @@ def export_communes_history_csv(
     # engine's raw inputs, never its output, and only after compute() has
     # already produced every live derived value from the real (unreconstructed)
     # observation set above.
+    #
+    # The nine RECOMPUTE ratios (AVG_NET_TAXABLE_INCOME and siblings) are
+    # derived-only: they never appear in `raw`, so gap-fill has nothing to
+    # match a reconstructed ratio against unless told separately what
+    # compute() already produced for these same successors. Without this,
+    # Antwerp (already publishing its own AVG_NET_TAXABLE_INCOME derived from
+    # its own fiscal rows) would ALSO get a `reconstructed` row summing in
+    # Borsbeek -- two rows, one key, and no rule saying which one a reader
+    # sees. See src/analytics/backaggregate.py's `existing_derived_cells` for
+    # the enforcement.
+    existing_derived_cells = {
+        (geo_id, ind_id, period)
+        for ind_id in derived_cfgs
+        for geo_id, period in result.cells(ind_id)
+    }
     reconstructed = reconstruct(
         raw,
         lineage_rows,
         indicator_is_additive=indicator_is_additive,
         indicator_meta=indicator_meta,
         derived_configs=derived_cfgs,
+        existing_derived_cells=existing_derived_cells,
     )
 
     # Raw rows: filtered down to CURRENT communes only for display.
