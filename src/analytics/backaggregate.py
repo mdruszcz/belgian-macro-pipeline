@@ -169,10 +169,12 @@ def methods_from_metadata(
     is_additive for raw indicators, and on the derived function name for
     everything else -- but deliberately not the same function object, so this
     module stays importable with zero dependency on aggregate.py or the
-    engine. `indicators.aggregation_method` is NEVER read: 27 rows carry
-    'population_weighted', a method CLAUDE.md forbids and that was measured
-    wrong for the two ratios in this pipeline, and nothing under src/ reads
-    that column today. Fixing those 27 rows is a separate PR.
+    engine. `indicators.aggregation_method` is NEVER read: the column holds
+    only 'not_applicable' (80 rows) and 'sum' (35 rows) today -- the forbidden
+    'population_weighted' label was retired in PR #206 -- and nothing under
+    src/ reads that column. Even 'sum' is not read here: is_additive and each
+    derived config's own function name are this module's source of truth,
+    exactly as in aggregate.py.
     """
     methods: dict[str, str] = {}
     for indicator_id, is_additive in indicator_is_additive.items():
@@ -369,6 +371,7 @@ def reconstruct(
     indicator_meta: Mapping[str, tuple[str, str]],
     derived_configs: Mapping[str, Mapping] | None = None,
     refused_indicator_ids: Iterable[str] = (),
+    existing_derived_cells: Iterable[tuple[str, str, str]] = (),
 ) -> list[Row]:
     """The single entry point the two exporters call.
 
@@ -388,6 +391,21 @@ def reconstruct(
     caller's indicator_is_additive mapping were ever wrong about them --
     belt-and-braces, since methods_from_metadata already refuses anything
     with is_additive=0.
+
+    `existing_derived_cells` is `(geo_id, indicator_id, period)` for every
+    DERIVED cell the successor already has from the engine's own live
+    compute() pass -- e.g. AVG_NET_TAXABLE_INCOME for Antwerp 2023. The nine
+    RECOMPUTE ratios never appear in `raw_rows` (they are derived-only, no row
+    of their own in `observations`), so gap-fill rule 1 above is otherwise
+    structurally blind to them: `existing` below is built from `raw_rows`
+    alone and a reconstructed ratio would never collide with anything in it,
+    even for a (geo_id, indicator, period) the successor already publishes.
+    Without this, a caller that computes derived indicators (like the history
+    exporter's compute() pass) could end up with BOTH a `reconstructed` ratio
+    and the successor's own `derived` one for the same cell -- two rows for
+    one key, with no rule saying which wins. Passing the already-computed
+    keys here closes that gap at the source, so a caller never has to dedupe
+    downstream or rely on append/sort order for correctness.
     """
     lineage = lineage_from_geographies(lineage_rows)
     if not lineage:
@@ -407,4 +425,9 @@ def reconstruct(
 
     reconstructed = components + ratios
     existing = [row for row in raw_rows if row[0] in lineage]
-    return only_missing_cells(reconstructed, existing)
+    filled = only_missing_cells(reconstructed, existing)
+
+    already_derived = set(existing_derived_cells)
+    if not already_derived:
+        return filled
+    return [row for row in filled if (row[0], row[1], row[4]) not in already_derived]

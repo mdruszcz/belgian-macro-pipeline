@@ -403,6 +403,7 @@ LocalUI.STRINGS = {
     withheldSince: 'Withheld by the source for {p}.',
     reconstructed: 'reconstructed',
     reconstructedNote: 'This commune was created by a merger. This figure is reconstructed by summing (or, for a ratio, recomputing from) the reported figures of the commune(s) that existed here before the merger — never an estimate, and never used for a period this commune already reports itself.',
+    reconstructedSeriesNote: 'This commune was created by a merger. The years {p} shown here are reconstructed from the commune(s) that existed on this territory before the merger — the current figure above is the commune’s own report, not reconstructed.',
     retrieved: 'retrieved',
     computedFrom: 'computed from {s} figures last updated {d}',
     source: 'Source',
@@ -441,6 +442,7 @@ LocalUI.STRINGS = {
     withheldSince: 'Non communiqué par la source pour {p}.',
     reconstructed: 'reconstitué',
     reconstructedNote: 'Cette commune est issue d’une fusion. Ce chiffre est reconstitué en additionnant (ou, pour un taux, en recalculant à partir) les chiffres publiés par la ou les communes qui existaient ici avant la fusion — jamais une estimation, et jamais utilisé pour une période que cette commune publie déjà elle-même.',
+    reconstructedSeriesNote: 'Cette commune est issue d’une fusion. Les années {p} indiquées ici sont reconstituées à partir de la ou des communes qui existaient sur ce territoire avant la fusion — le chiffre actuel ci-dessus est publié par la commune elle-même, non reconstitué.',
     retrieved: 'extrait le',
     computedFrom: 'calculé à partir de données {s} mises à jour le {d}',
     source: 'Source',
@@ -479,6 +481,7 @@ LocalUI.STRINGS = {
     withheldSince: 'Niet vrijgegeven door de bron voor {p}.',
     reconstructed: 'gereconstrueerd',
     reconstructedNote: 'Deze gemeente is ontstaan uit een fusie. Dit cijfer is gereconstrueerd door de gerapporteerde cijfers van de gemeente(n) die hier vóór de fusie bestonden op te tellen (of, voor een verhouding, opnieuw te berekenen) — nooit een schatting, en nooit gebruikt voor een periode die deze gemeente al zelf rapporteert.',
+    reconstructedSeriesNote: 'Deze gemeente is ontstaan uit een fusie. De jaren {p} hier getoond zijn gereconstrueerd op basis van de gemeente(n) die vóór de fusie op dit grondgebied bestonden — het huidige cijfer hierboven is door de gemeente zelf gerapporteerd, niet gereconstrueerd.',
     retrieved: 'opgehaald op',
     computedFrom: 'berekend uit {s}-cijfers, laatst bijgewerkt op {d}',
     source: 'Bron',
@@ -600,11 +603,19 @@ LocalUI.isWhollyWithheld = function(entry){
    Plotting it as null breaks the path; plotting it as zero would state a
    figure the source refused to publish. The withheld years are named in words
    beside the chart instead. */
+// Each point also carries `reconstructed` (per LocalUI.isReconstructed on
+// its own cell), so a chart can render the pre-merger run differently from
+// the commune's own reporting and mark exactly where the two meet -- see
+// LocalUI.reconstructedPeriods for the discontinuity this feeds.
 LocalUI.chartPoints = function(entry){
   if(!entry || !entry.periods) return [];
   return Object.keys(entry.periods).sort()
     .filter(p => entry.periods[p].value !== null && entry.periods[p].value !== undefined)
-    .map(p => ({period: p, value: entry.periods[p].value}));
+    .map(p => ({
+      period: p,
+      value: entry.periods[p].value,
+      reconstructed: LocalUI.isReconstructed(entry.periods[p]),
+    }));
 };
 
 /* Merger back-aggregation (src/analytics/backaggregate.py): a cell built by
@@ -944,14 +955,46 @@ function drawSeries(canvas, points){
     ctx.fillStyle = fillC; ctx.fill();
   }
 
-  ctx.beginPath();
-  points.forEach((p,i) => i === 0 ? ctx.moveTo(xOf(i), yOf(p.value)) : ctx.lineTo(xOf(i), yOf(p.value)));
-  ctx.strokeStyle = lineC; ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+  // Merger back-aggregation: a reconstructed run and the commune's own
+  // reporting are drawn as one continuous path (the underlying series IS
+  // continuous -- the discontinuity is in PROVENANCE, not in the numbers),
+  // but each SEGMENT is styled by whether the point it leads into is
+  // reconstructed, and a dashed vertical marks the one seam where the two
+  // meet -- so a reader can tell, on the chart itself, which side of the
+  // merger any given point falls on (local.html findings, batch fix round).
+  for(let i = 1; i < n; i++){
+    ctx.beginPath();
+    ctx.moveTo(xOf(i-1), yOf(points[i-1].value));
+    ctx.lineTo(xOf(i), yOf(points[i].value));
+    ctx.strokeStyle = points[i].reconstructed ? gridC : lineC;
+    ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if(points[i].reconstructed) ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  points.forEach((p,i) => {
+    const isLast = i === n-1;
+    const isSeam = i > 0 && p.reconstructed !== points[i-1].reconstructed;
+    if(isSeam){
+      const x = Math.round(xOf(i) - slW / 2) + 0.5;
+      ctx.beginPath();
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = labelC; ctx.lineWidth = 1;
+      ctx.moveTo(x, pT); ctx.lineTo(x, H - pB);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
 
   points.forEach((p,i) => {
     const isLast = i === n-1;
     ctx.beginPath(); ctx.arc(xOf(i), yOf(p.value), isLast ? 4.5 : 2.5, 0, Math.PI*2);
-    ctx.fillStyle = isLast ? dotC : lineC; ctx.fill();
+    ctx.fillStyle = isLast ? dotC : (p.reconstructed ? gridC : lineC);
+    ctx.fill();
+    if(p.reconstructed){
+      ctx.lineWidth = 1; ctx.strokeStyle = labelC; ctx.stroke();
+    }
   });
 }
 
@@ -1055,13 +1098,26 @@ function factHTML(entry, indicatorId){
     : '';
   // Merger back-aggregation: this commune's figure for THIS period was built
   // by summing (or recomputing from) predecessor communes, because every
-  // historical source still reports on the pre-merger map. Marked on the
-  // figure that is actually reconstructed, not on every cell the indicator
-  // ever had -- a period this commune reports itself never carries this note,
-  // gap-fill only, per the maintainer's decision.
+  // historical source still reports on the pre-merger map. The dotted
+  // underline on the VALUE itself is gap-fill only, per the maintainer's
+  // decision -- shown only when the period being displayed here is itself
+  // reconstructed, never for a period the commune reports itself.
+  //
+  // The NOTE, though, has to answer a different question: "does this
+  // commune's history contain a discontinuity at all", not just "is the
+  // number in front of you reconstructed". For all 13 successors the
+  // reconstructed years are the OLD ones and the latest (displayed) year is
+  // the commune's own real report, so `latest.reconstructed` alone is false
+  // on every one of their pages and the note never rendered -- the reader
+  // could not tell where the break falls. Any reconstructed period anywhere
+  // in the series triggers the note; which wording depends on whether the
+  // figure ON SCREEN is itself one of them.
+  const hasReconstructedHistory = !!(latest.reconstructedPeriods && latest.reconstructedPeriods.length);
   const reconstructedNote = latest.reconstructed
     ? `<div class="fp reconstructed-note" title="${esc(T('reconstructedNote'))}">${esc(T('reconstructed'))}</div>`
-    : '';
+    : hasReconstructedHistory
+      ? `<div class="fp reconstructed-note" title="${esc(T('reconstructedSeriesNote', {p: latest.reconstructedPeriods.join(', ')}))}">${esc(T('reconstructed'))}</div>`
+      : '';
   return `<div class="fact${latest.reconstructed ? ' reconstructed' : ''}"><div class="fv">${fmt(latest.value, latest.unit)}</div>` +
     `<div class="fl">${esc(LocalUI.localName(latest.names, LANG))} (${latest.period})</div>` +
     (rank ? `<div class="frank">${esc(rank)}</div>` : '') +
