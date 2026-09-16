@@ -287,6 +287,33 @@ def test_clicking_a_region_fills_the_side_card(browser, site):
 # --- year switch changes classification --------------------------------------
 
 
+# eurostat-map paints every region with its own default fill (#e1e1e1, read
+# back as rgb(224, 224, 225)) on each rebuild and applies the class colour
+# afterwards; a year change can rebuild more than once. A fill read during
+# that window is the library's placeholder, not the classification.
+LIBRARY_DEFAULT_FILL = "rgb(224, 224, 225)"
+
+
+def _settled_class_fill(page, code, not_equal_to=None, timeout=15000):
+    """The computed fill of region `code` once it is a real class colour --
+    not the library default, not `not_equal_to` -- and unchanged across two
+    consecutive animation frames. Waits on that condition, never on a timer."""
+    page.wait_for_function(
+        "(function(args){"
+        "var el = document.getElementById('em-nutsrg-' + args[0]);"
+        "if (!el) return false;"
+        "var f = getComputedStyle(el).fill;"
+        "if (f === args[1] || (args[2] && f === args[2])) return false;"
+        "if (el.__bpLastFill !== f) { el.__bpLastFill = f; return false; }"
+        "return true;"
+        "})",
+        arg=[code, LIBRARY_DEFAULT_FILL, not_equal_to],
+        polling="raf",
+        timeout=timeout,
+    )
+    return page.eval_on_selector(f"#em-nutsrg-{code}", "el => getComputedStyle(el).fill")
+
+
 def test_switching_year_changes_a_known_regions_fill(browser, site):
     default_id = _first_loaded_indicator_id()
     payload = _payload(default_id)
@@ -335,7 +362,16 @@ def test_switching_year_changes_a_known_regions_fill(browser, site):
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector(f"#em-nutsrg-{code}", timeout=15000)
         _wait_for_map_ready(page)
-        fill_before = page.eval_on_selector(f"#em-nutsrg-{code}", "el => getComputedStyle(el).fill")
+        # Failed in CI on 2026-09-16 (PR #221, which touched only police data)
+        # with fill_before == fill_after == rgb(224, 224, 225): that is the
+        # vendored library's own default region fill (#e1e1e1), which every
+        # <path> carries for an instant on each rebuild. Both reads had landed
+        # inside a rebuild. Legend rows exist once onBuild has run, but the
+        # class fill is applied to the paths after that, and a year change can
+        # trigger more than one rebuild -- so "legend present" and "fill
+        # differs from before" both pass momentarily and then lie. Read a fill
+        # only once it is a real class colour AND stable across two frames.
+        fill_before = _settled_class_fill(page, code)
         page.select_option("#europeYearSelect", other_year)
         # The map is rebuilt from scratch on a year change: wait for the
         # render pass to FINISH (legend rows are populated inside onBuild,
@@ -345,14 +381,7 @@ def test_switching_year_changes_a_known_regions_fill(browser, site):
             " || document.querySelectorAll('#bpEuropeStage svg').length === 1"
         )
         _wait_for_map_ready(page)
-        page.wait_for_function(
-            "(function(pair){"
-            "var el = document.getElementById('em-nutsrg-' + pair[0]);"
-            "return el && getComputedStyle(el).fill !== pair[1];"
-            "})",
-            arg=[code, fill_before],
-        )
-        fill_after = page.eval_on_selector(f"#em-nutsrg-{code}", "el => getComputedStyle(el).fill")
+        fill_after = _settled_class_fill(page, code, not_equal_to=fill_before)
         assert fill_after != fill_before
     finally:
         context.close()
