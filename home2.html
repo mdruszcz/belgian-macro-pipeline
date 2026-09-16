@@ -180,7 +180,7 @@
   .fin-icon{width:32px; height:32px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center;
     background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted)}
   .fin-text{flex:1 1 320px; min-width:0; margin:0; font-size:12px; line-height:1.45; color:var(--bp-text-muted)}
-  .fin-text strong{color:var(--bp-text); font-weight:var(--bp-weight-semibold); margin-right:4px}
+  .fin-title{display:inline; margin:0 4px 0 0; font:inherit; font-weight:var(--bp-weight-semibold); color:var(--bp-text)}
   .fin-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium); flex:none}
   .fin-link:hover{text-decoration:underline}
 
@@ -604,7 +604,7 @@
   <div class="wrap">
     <section class="finance" id="financeStrip">
       <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
-      <p class="fin-text"><strong data-t="homeFinanceTitle">Public finances</strong> <span id="financeCompactText"></span></p>
+      <div class="fin-text"><h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2> <span id="financeCompactText"></span></div>
       <a class="fin-link" href="macro.html" data-t="homeAllIndicators">See all national data →</a>
     </section>
   </div>

@@ -222,6 +222,40 @@ def test_home2_finance_compact_sentence_reuses_the_existing_honest_strings():
     assert strings.count("listJoinerAnd:") == 3
 
 
+def test_home2_heading_structure_exposes_one_h1_and_a_named_h2_per_section():
+    """A2b audit, Finding 3: the compact finance strip (item 2/3) swapped the
+    section's <h2> for a <strong>, so a screen-reader user navigating by
+    heading no longer found 'Finances publiques' in the page outline, and
+    <section class="finance"> lost the heading every sibling section still
+    has. The visual result (small, inline with the compact sentence) is
+    fine -- what regressed was the element, not the styling -- so this pins
+    the element, not the look."""
+    html = _html()
+    body = re.search(r"<body[^>]*>(.*)</body>", html, re.DOTALL).group(1)
+
+    # Exactly one <h1> on the page -- the hero title.
+    assert len(re.findall(r"<h1\b", body)) == 1
+
+    # The finance strip's title is a real heading element, not a <strong>
+    # or a bare paragraph, so it shows up when navigating by heading.
+    assert re.search(
+        r'<h[1-6][^>]*\bdata-t="homeFinanceTitle"', body
+    ), "finance strip title is not a real heading element"
+    assert '<strong data-t="homeFinanceTitle"' not in body
+
+    # Every top-level content section keeps its own named <h2>, matching
+    # the site's existing pattern (commune profiles, maps, key indicators,
+    # cta) -- five sections in the outline, not four.
+    for key in (
+        "homeFinanceTitle",
+        "homeCommunesTitle",
+        "homeMapsTitle",
+        "homeIndicatorsTitle",
+        "homeCtaTitle",
+    ):
+        assert re.search(rf'<h2\b[^>]*\bdata-t="{key}"', body), key
+
+
 def test_home2_map_legend_caption_is_built_from_the_payload_not_hardcoded():
     """Item 4, and claude.md rules 2/24: the caption naming what the legend's
     ticks count must come from state.byCode's own name and

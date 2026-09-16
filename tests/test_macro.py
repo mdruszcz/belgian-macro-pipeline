@@ -415,8 +415,33 @@ def test_the_desktop_rail_background_fills_the_whole_column():
     background for the rest of the column. A plain absolutely-positioned
     fill, behind the fixed nav and sized to the column's real content height,
     closes that gap. Desktop-only, inside the same >=1025px block #201 added
-    -- tablet/phone layouts (the media queries below it) are untouched."""
+    -- tablet/phone layouts (the media queries below it) are untouched.
+
+    The fill must resolve to the SAME token the sidebar itself actually
+    renders with, or the fix just relocates the visible seam instead of
+    closing it (A2b audit, Finding 1). macro.html's <body> carries no
+    bp-shell--navy class, so the sidebar takes layout.css's un-scoped
+    .bp-sidebar rule, not the --navy-shell-scoped one -- this test resolves
+    that the same way the cascade does, from the body's own classes, so it
+    keeps failing if the fill and the sidebar ever disagree again, including
+    if the sidebar's OWN token changes later."""
     html = _html()
+    body_class = re.search(r'<body class="([^"]*)"', html)
+    assert body_class, "no <body class=...> on macro.html"
+    is_navy_shell = "bp-shell--navy" in body_class.group(1).split()
+
+    layout_css = (REPO / "assets" / "belpulse" / "layout.css").read_text(encoding="utf-8")
+    base_rule = re.search(r"(?<!\.bp-shell--navy )\.bp-sidebar\{([^}]+)\}", layout_css)
+    navy_rule = re.search(r"\.bp-shell--navy \.bp-sidebar\{([^}]+)\}", layout_css)
+    assert base_rule and navy_rule, "layout.css's .bp-sidebar background rules moved"
+
+    def _bg_token(rule_body):
+        token = re.search(r"background:(var\([^)]+\))", rule_body)
+        assert token, rule_body
+        return token.group(1)
+
+    expected_token = _bg_token(navy_rule.group(1) if is_navy_shell else base_rule.group(1))
+
     block = re.search(r"@media \(min-width:1025px\)\{(.*?)\n  \}\n", html, re.DOTALL)
     assert block, "no @media (min-width:1025px) block"
     body = block.group(1)
@@ -426,7 +451,10 @@ def test_the_desktop_rail_background_fills_the_whole_column():
     assert fill, "no .bp-body--analytical::before rule"
     fill_body = fill.group(1).replace(" ", "")
     assert "position:absolute" in fill_body
-    assert "background:var(--bp-navy-surface)" in fill_body
+    assert f"background:{expected_token}" in fill_body, (
+        "fill paints a different token than the sidebar actually renders "
+        f"with ({expected_token}) -- the seam just moved, it didn't close"
+    )
     # Still inside the >=1025px block, alongside the fixed sidebar it backs.
     assert ".bp-sidebar{" in body and "position:fixed" in body
 

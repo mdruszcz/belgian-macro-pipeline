@@ -112,7 +112,7 @@
     }
     .bp-body--analytical::before{
       content:''; position:absolute; top:0; bottom:0; left:0; width:240px;
-      background:var(--bp-navy-surface); z-index:0;
+      background:var(--bp-navy-bg); z-index:0;
     }
     .bp-sidebar{
       position:fixed; left:0; top:var(--macro-topbar-h, var(--bp-topbar-h, 56px)); bottom:0; z-index:30;
@@ -249,8 +249,8 @@
   /* Item 7's compact empty state: sized to its own message, not stretched by
      CSS grid to match a taller sibling in the same .row (#key, here). */
   .card-compact-empty{align-self:start}
-  .card-compact-empty .bp-state-message{
-    display:flex!important; gap:var(--bp-space-3); align-items:flex-start; padding:var(--bp-space-3) 0 0!important;
+  .card-compact-empty[data-state="unavailable"] .bp-state-message{
+    display:flex; gap:var(--bp-space-3); align-items:flex-start; padding:var(--bp-space-3) 0 0;
   }
   .card-compact-empty .bp-state-icon{
     width:30px; height:30px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center;
