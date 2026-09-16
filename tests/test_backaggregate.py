@@ -30,6 +30,8 @@ from src.analytics.backaggregate import (
     reconstruct_additive,
     reconstruct_ratios,
     resolve_successor,
+    territory_consistent_growth,
+    territory_series,
 )
 
 BORGLOON = "be:mun:73009"
@@ -417,3 +419,248 @@ def test_existing_derived_cells_defaults_to_empty_and_changes_nothing():
         existing_derived_cells=(),
     )
     assert with_default == with_empty
+
+
+# ── territory_series / territory_consistent_growth ─────────────────────────
+# Maintainer decision 2026-09-16: "compute all growth of current territory".
+#
+# ANTWERP figures are the real is_latest=1 POPULATION_BY_COMMUNE rows from
+# data/population_observations.csv (be:mun:11002 / be:mun:11007), read
+# directly and summed by hand -- not typed from the handoff, re-derived from
+# the source rows:
+#   POPULATION_BY_COMMUNE 11002 2016 = 517,042.0   2020 = 529,247.0
+#                                2024 = 544,759.0   2025 = 562,002.0
+#                                2026 = 565,615.0
+#   POPULATION_BY_COMMUNE 11007 2016 =  10,540.0   2020 =  10,949.0
+#   T(2016) = 517,042 + 10,540 = 527,582.0
+#   T(2020) = 529,247 + 10,949 = 540,196.0
+#   POPULATION_CHANGE_5Y 2025 = 562,002 / 540,196 - 1        = 4.036683 %
+#   POPULATION_CAGR_10Y 2026  = (565,615 / 527,582)^0.1 - 1  = 0.698522 %
+# The SPLICED (wrong, pre-fix) values used Antwerp's own row alone as the
+# base: 562,002 / 529,247 - 1 = 6.188982 %, (565,615 / 517,042)^0.1 - 1 =
+# 0.901938 % -- both asserted as the values that must NOT come out.
+
+ANTWERP = "be:mun:11002"
+BORSBEEK = "be:mun:11007"
+ANTWERP_LINEAGE_ROWS = [(BORSBEEK, "2025-01-01", ANTWERP)]
+
+_POP_META = {"POPULATION_BY_COMMUNE": ("Population", "count")}
+
+
+def _pop_row(geo_id, period, value, status="final"):
+    return (geo_id, "POPULATION_BY_COMMUNE", "Population", "count", period, value, status, "c")
+
+
+ANTWERP_POP_RAW = [
+    _pop_row(ANTWERP, "2016", 517042.0),
+    _pop_row(ANTWERP, "2020", 529247.0),
+    _pop_row(ANTWERP, "2024", 544759.0),
+    _pop_row(ANTWERP, "2025", 562002.0),
+    _pop_row(ANTWERP, "2026", 565615.0),
+    _pop_row(BORSBEEK, "2016", 10540.0),
+    _pop_row(BORSBEEK, "2020", 10949.0),
+    # Borsbeek stops reporting after its 2025-01-01 merger -- no 2025/2026 row.
+]
+
+POPULATION_CHANGE_5Y_CONFIG = {
+    "POPULATION_CHANGE_5Y": {
+        "name": {"en": "Population change over 5 years"},
+        "unit": "percent",
+        "derived": {"function": "five_year_change", "inputs": ["POPULATION_BY_COMMUNE"]},
+    }
+}
+POPULATION_CAGR_10Y_CONFIG = {
+    "POPULATION_CAGR_10Y": {
+        "name": {"en": "10y CAGR"},
+        "unit": "percent_per_year",
+        "derived": {
+            "function": "cagr",
+            "inputs": ["POPULATION_BY_COMMUNE"],
+            "args": {"years": 10},
+        },
+    }
+}
+
+
+def test_territory_series_antwerp_2020_sums_own_plus_borsbeek():
+    lineage = lineage_from_geographies(ANTWERP_LINEAGE_ROWS)
+    series = territory_series(ANTWERP_POP_RAW, lineage, "POPULATION_BY_COMMUNE")
+    value, used_predecessor = series[ANTWERP]["2020"]
+    assert value == pytest.approx(540196.0)
+    assert used_predecessor is True
+
+
+def test_territory_series_antwerp_2025_is_its_own_row_only_borsbeek_gone():
+    """Post-merger, Borsbeek reports nothing -- T is just Antwerp's own row,
+    and used_predecessor_data must be False: this base is NOT reconstructed."""
+    lineage = lineage_from_geographies(ANTWERP_LINEAGE_ROWS)
+    series = territory_series(ANTWERP_POP_RAW, lineage, "POPULATION_BY_COMMUNE")
+    value, used_predecessor = series[ANTWERP]["2025"]
+    assert value == pytest.approx(562002.0)
+    assert used_predecessor is False
+
+
+def test_antwerp_population_change_5y_2025_is_4_04_percent_not_the_spliced_6_19():
+    lineage = lineage_from_geographies(ANTWERP_LINEAGE_ROWS)
+    territory = territory_series(ANTWERP_POP_RAW, lineage, "POPULATION_BY_COMMUNE")
+    out = territory_consistent_growth(territory, POPULATION_CHANGE_5Y_CONFIG)
+    row = next(r for r in out if r[0] == ANTWERP and r[4] == "2025")
+    assert row[5] == pytest.approx(4.036683, abs=1e-5)
+    assert row[5] != pytest.approx(6.188982, abs=1e-3)  # the pre-fix spliced value
+    # The base period (2020) used Borsbeek's predecessor row, so the growth
+    # figure itself carries the discontinuity label.
+    assert row[6] == "reconstructed"
+
+
+def test_antwerp_population_cagr_10y_2026_is_0_70_percent_not_the_spliced_0_90():
+    lineage = lineage_from_geographies(ANTWERP_LINEAGE_ROWS)
+    territory = territory_series(ANTWERP_POP_RAW, lineage, "POPULATION_BY_COMMUNE")
+    out = territory_consistent_growth(territory, POPULATION_CAGR_10Y_CONFIG)
+    row = next(r for r in out if r[0] == ANTWERP and r[4] == "2026")
+    assert row[5] == pytest.approx(0.698522, abs=1e-5)
+    assert row[5] != pytest.approx(0.901938, abs=1e-3)  # the pre-fix spliced value
+    assert row[6] == "reconstructed"  # base year 2016 used Borsbeek's row
+
+
+def test_a_later_antwerp_growth_cell_whose_base_is_post_merger_is_not_marked_reconstructed():
+    """A hypothetical POPULATION_CHANGE_5Y for 2030 (base 2025) would use only
+    Antwerp's own row on both ends -- status must read 'derived', not
+    'reconstructed', once the territory has stopped needing predecessor data."""
+    lineage = lineage_from_geographies(ANTWERP_LINEAGE_ROWS)
+    raw = ANTWERP_POP_RAW + [_pop_row(ANTWERP, "2030", 600000.0)]
+    territory = territory_series(raw, lineage, "POPULATION_BY_COMMUNE")
+    out = territory_consistent_growth(territory, POPULATION_CHANGE_5Y_CONFIG)
+    row = next(r for r in out if r[0] == ANTWERP and r[4] == "2030")
+    assert row[6] == "derived"
+
+
+# BASTOGNE (82039) is a WHOLE-COMMUNE successor (no own row before 2025) --
+# real rows from data/population_observations.csv for its two predecessors,
+# Bastenaken (82003) and Bertogne (82005):
+#   POPULATION_BY_COMMUNE 82003 2020 = 16,276.0
+#   POPULATION_BY_COMMUNE 82005 2020 =  3,656.0
+#   T(2020) = 16,276 + 3,656 = 19,932.0  (matches reconstruct_additive's own
+#   gap-filled 2020 value for the same fixture, since Bastogne has no own row
+#   that year -- T and gap-fill agree exactly in the pre-merger-only case)
+#   POPULATION_BY_COMMUNE 82039 2025 (own, real) = 20,940.0
+#   POPULATION_CHANGE_5Y 2025 = 20,940 / 19,932 - 1 = 5.057194 %
+
+BASTOGNE = "be:mun:82039"
+BASTENAKEN = "be:mun:82003"
+BERTOGNE = "be:mun:82005"
+BASTOGNE_LINEAGE_ROWS = [
+    (BASTENAKEN, "2024-12-02", BASTOGNE),
+    (BERTOGNE, "2024-12-02", BASTOGNE),
+]
+BASTOGNE_POP_RAW = [
+    _pop_row(BASTENAKEN, "2020", 16276.0),
+    _pop_row(BERTOGNE, "2020", 3656.0),
+    _pop_row(BASTOGNE, "2025", 20940.0),
+]
+
+
+def test_bastogne_population_change_5y_2025_from_reconstructed_2020_base():
+    lineage = lineage_from_geographies(BASTOGNE_LINEAGE_ROWS)
+    territory = territory_series(BASTOGNE_POP_RAW, lineage, "POPULATION_BY_COMMUNE")
+    assert territory[BASTOGNE]["2020"] == (pytest.approx(19932.0), True)
+    out = territory_consistent_growth(territory, POPULATION_CHANGE_5Y_CONFIG)
+    row = next(r for r in out if r[0] == BASTOGNE and r[4] == "2025")
+    assert row[5] == pytest.approx(5.057194, abs=1e-5)
+    assert row[6] == "reconstructed"
+
+
+def test_a_growth_cell_whose_endpoint_AND_base_are_both_reconstructed_is_still_marked():
+    """Bastogne did not exist before 2025, so a growth cell computed for an
+    EARLIER year (both endpoint and base pre-merger, both summed from
+    predecessors) must still read 'reconstructed' -- checking only the base
+    would happen to give the same answer here (base is always at least as
+    close to the merger as the endpoint), but this proves the endpoint side
+    of the check is not a no-op: both years' T come from predecessor sums.
+    T(2016) = Bastenaken(2016) + Bertogne(2016) = 15,580 + 3,483 = 19,063.
+    T(2021) = Bastenaken(2021) + Bertogne(2021) = 16,296 + 3,750 = 20,046.
+    """
+    lineage = lineage_from_geographies(BASTOGNE_LINEAGE_ROWS)
+    raw = [
+        _pop_row(BASTENAKEN, "2016", 15580.0),
+        _pop_row(BERTOGNE, "2016", 3483.0),
+        _pop_row(BASTENAKEN, "2021", 16296.0),
+        _pop_row(BERTOGNE, "2021", 3750.0),
+    ]
+    territory = territory_series(raw, lineage, "POPULATION_BY_COMMUNE")
+    assert territory[BASTOGNE]["2016"] == (pytest.approx(19063.0), True)
+    assert territory[BASTOGNE]["2021"] == (pytest.approx(20046.0), True)
+    out = territory_consistent_growth(territory, POPULATION_CHANGE_5Y_CONFIG)
+    row = next(r for r in out if r[0] == BASTOGNE and r[4] == "2021")
+    expected = (20046.0 / 19063.0 - 1) * 100
+    assert row[5] == pytest.approx(expected, abs=1e-6)
+    assert row[6] == "reconstructed"
+
+
+def test_a_partial_lineage_period_yields_no_territory_entry_for_that_period():
+    """Rule 26 / all-predecessors-or-nothing: if Bertogne never reports 2020
+    at all, T(2020) must not exist -- not a partial sum of Bastenaken alone."""
+    lineage = lineage_from_geographies(BASTOGNE_LINEAGE_ROWS)
+    partial_raw = [
+        _pop_row(BASTENAKEN, "2020", 16276.0),
+        # Bertogne has no 2020 row at all.
+        _pop_row(BASTOGNE, "2025", 20940.0),
+    ]
+    territory = territory_series(partial_raw, lineage, "POPULATION_BY_COMMUNE")
+    assert "2020" not in territory.get(BASTOGNE, {})
+    # And therefore no POPULATION_CHANGE_5Y 2025 cell is produced either --
+    # the endpoint (2025) exists but the base (2020) does not, so the growth
+    # figure is ABSENT, never computed from a partial base.
+    out = territory_consistent_growth(territory, POPULATION_CHANGE_5Y_CONFIG)
+    assert not any(r[0] == BASTOGNE and r[4] == "2025" for r in out)
+
+
+def test_a_suppressed_predecessor_also_blocks_the_territory_period():
+    lineage = lineage_from_geographies(BASTOGNE_LINEAGE_ROWS)
+    partial_raw = [
+        _pop_row(BASTENAKEN, "2020", 16276.0),
+        _pop_row(BERTOGNE, "2020", None, status="suppressed"),
+        _pop_row(BASTOGNE, "2025", 20940.0),
+    ]
+    territory = territory_series(partial_raw, lineage, "POPULATION_BY_COMMUNE")
+    assert "2020" not in territory.get(BASTOGNE, {})
+
+
+def test_a_commune_with_no_lineage_row_is_absent_from_territory_series():
+    """An ordinary commune (no successor_geo_id row anywhere) never appears
+    as a key in territory_series's output at all -- the caller falls back to
+    the plain engine-computed growth for it, unchanged."""
+    lineage = lineage_from_geographies(BASTOGNE_LINEAGE_ROWS)
+    other_raw = [_pop_row("be:mun:99999", "2020", 1000.0), _pop_row("be:mun:99999", "2025", 1100.0)]
+    territory = territory_series(other_raw, lineage, "POPULATION_BY_COMMUNE")
+    assert "be:mun:99999" not in territory
+
+
+def test_mun_revenue_growth_1y_never_qualifies_its_input_is_derived_not_raw():
+    """MUN_REVENUE_GROWTH_1Y / MUN_EXPENDITURE_GROWTH_1Y take a DERIVED
+    per-capita ratio as input, never a raw additive indicator -- so
+    territory_series is never even called for them by the real exporter (see
+    export_communes_history_csv.py's input_id/is_additive filter). This test
+    documents the shape territory_consistent_growth would see if it were
+    mistakenly pointed at a per-capita config: since the "territory" mapping
+    passed in is keyed by the RAW indicator, a config naming a different
+    input than what territory was built from produces no rows at all --
+    proving the two can never silently cross-apply."""
+    lineage = lineage_from_geographies(ANTWERP_LINEAGE_ROWS)
+    territory = territory_series(ANTWERP_POP_RAW, lineage, "POPULATION_BY_COMMUNE")
+    revenue_growth_config = {
+        "MUN_REVENUE_GROWTH_1Y": {
+            "name": {"en": "Revenue growth"},
+            "unit": "percent",
+            "derived": {
+                "function": "growth_rate",
+                "inputs": ["MUN_REVENUE_ORDINARY_PER_CAPITA"],
+                "args": {"years": 1},
+            },
+        }
+    }
+    # growth_rate itself is not in _GROWTH_FUNCTION_HORIZONS (only
+    # five_year_change and cagr are), so this produces nothing regardless --
+    # confirming a 1-year WalStat growth indicator can never be swept in by
+    # this function even if a caller passed it a population territory map.
+    out = territory_consistent_growth(territory, revenue_growth_config)
+    assert out == []

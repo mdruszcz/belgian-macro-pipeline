@@ -269,6 +269,174 @@ def reconstruct_additive(
     return out
 
 
+def territory_series(
+    rows: Iterable[Row],
+    lineage: Mapping[str, list[str]],
+    indicator_id: str,
+) -> dict[str, dict[str, tuple[float, bool]]]:
+    """T(C, p) -- the TERRITORY-CONSISTENT series for one additive indicator,
+    for every successor in `lineage`. Maintainer decision 2026-09-16: "compute
+    all growth of current territory".
+
+    T(C, p) = C's own row for p (if it has one) PLUS every one of C's
+    predecessors' own row for p (if it has one) -- summed over every
+    geography whose territory is now part of C at today's map. This is NOT
+    the same construction as `reconstruct_additive`'s gap-fill: gap-fill
+    stops summing predecessors the moment the successor has ANY own row for
+    that cell (a published figure never changes). T sums BOTH, because they
+    describe DIFFERENT, non-overlapping territory for exactly as long as the
+    predecessor still reported on its own -- Antwerp's own 2020 row (529,247)
+    genuinely does not include Borsbeek (10,949), which still existed as its
+    own reporting geography that year, so T(2020) = 540,196 is the true
+    population of Antwerp's CURRENT territory in 2020, not a double-count.
+
+    Returned as geo_id -> period -> (value, used_predecessor_data). The
+    second element of the tuple is True whenever at least one predecessor
+    contributed to that period's T -- the caller uses it to mark a growth
+    figure whose BASE period used predecessor data, so a reader can tell
+    (the discontinuity label, same convention as a `reconstructed` level).
+
+    ALL-PREDECESSORS-OR-NOTHING still applies to the predecessor side: if the
+    successor has no own row for p, T(p) exists only when EVERY predecessor
+    has a real value for p (not suppressed, not na, not absent) -- exactly
+    `reconstruct_additive`'s rule 2, reapplied here. If the successor DOES
+    have its own row for p, that alone is enough for T(p) to exist (an
+    ordinary commune with no lineage row for that period at all reduces to
+    this case), and any predecessor that also reports for p is added on top,
+    again all-or-nothing among the predecessors that exist for p -- a
+    partial predecessor sum is refused even when the successor's own row
+    could stand alone, because a HALF-territory addition is worse than none:
+    it would silently move T away from both "successor alone" and "full
+    current territory" without saying which partial view a reader is seeing.
+    """
+    by_cell = _index_rows(r for r in rows if r[1] == indicator_id)
+
+    def _value(geo_id: str, period: str) -> float | None:
+        row = by_cell.get((geo_id, indicator_id, period))
+        if row is None:
+            return None
+        value, status = row[5], row[6]
+        if value is None or status in ("suppressed", "na"):
+            return None
+        return value
+
+    out: dict[str, dict[str, tuple[float, bool]]] = {}
+    for successor, predecessors in lineage.items():
+        periods: set[str] = set()
+        for geo_id, _ind, _n, _u, period, *_ in rows:
+            if geo_id == successor or geo_id in predecessors:
+                periods.add(period)
+
+        series: dict[str, tuple[float, bool]] = {}
+        for period in sorted(periods):
+            own = _value(successor, period)
+
+            pred_values = [_value(pred, period) for pred in predecessors]
+            any_pred_row = any((pred, indicator_id, period) in by_cell for pred in predecessors)
+            all_preds_present = bool(predecessors) and all(v is not None for v in pred_values)
+
+            if own is not None and not any_pred_row:
+                # No predecessor reports for this period at all (post-merger
+                # years, or an ordinary commune with a lineage row for a
+                # different period only) -- T is just the successor's own row.
+                series[period] = (own, False)
+            elif all_preds_present:
+                total = sum(v for v in pred_values if v is not None)
+                if own is not None:
+                    total += own
+                series[period] = (total, True)
+            # else: predecessors partially reported and cannot be summed
+            # (rule above) -- T(p) is undefined for this period, own row or
+            # not, so no entry is written.
+        if series:
+            out[successor] = series
+    return out
+
+
+# The two horizon functions growth-on-current-territory applies to, and the
+# keyword each expects for its lookback in years -- deliberately NOT read
+# from a generic "years" kwarg, because five_year_change hardcodes 5 and
+# takes no `years` argument at all (see derived.py), so the horizon has to be
+# named per function rather than assumed uniform.
+_GROWTH_FUNCTION_HORIZONS = {
+    "five_year_change": 5,
+    "cagr": None,  # read from the config's own args.years instead.
+}
+
+
+def territory_consistent_growth(
+    territory: Mapping[str, Mapping[str, tuple[float, bool]]],
+    growth_configs: Mapping[str, Mapping],
+) -> list[Row]:
+    """Recompute a growth-shaped derived indicator on T instead of a raw
+    series, for every successor `territory_series` produced a series for.
+
+    `growth_configs` is the subset of derived configs whose function is one
+    of `_GROWTH_FUNCTION_HORIZONS` and whose single input is the SAME raw
+    additive indicator `territory` was built from (the caller filters this;
+    see export_communes_history_csv.py) -- POPULATION_CHANGE_5Y and
+    POPULATION_CAGR_10Y today, and nothing else, because MUN_REVENUE_GROWTH_1Y
+    / MUN_EXPENDITURE_GROWTH_1Y take a DERIVED per-capita ratio as their
+    input, not a raw additive indicator, so they never reach this function at
+    all -- one rule (this function only ever sees an additive input's own
+    territory series), no indicator-ID special case inside it.
+
+    Uses the SAME functions as the live engine (src/analytics/derived.py),
+    imported lazily for the same reason reconstruct_ratios does: this module
+    promises not to require the engine as a hard dependency.
+
+    A cell is written only when BOTH endpoints exist in `territory` (rule 26:
+    absent, never a partial computation) -- exactly what growth_rate/cagr
+    already refuse internally, re-derived here from T's own shape so a
+    period where T itself is undefined never reaches the function at all.
+
+    status is "reconstructed" whenever EITHER endpoint used predecessor data
+    (`territory`'s own used_predecessor_data flag) -- the discontinuity
+    label a reader needs on a growth figure that spans a now-different-shaped
+    territory than pre-merger source data alone would show. Checking only
+    the base would still be correct in practice -- a predecessor stops
+    reporting once merged away, so if the LATER (endpoint) period needed a
+    predecessor, the EARLIER (base) period necessarily did too, since it is
+    at least as close to or further from the merger date -- but both are
+    checked explicitly rather than relying on that one-directional argument
+    silently staying true if a future lineage shape ever violates it.
+    """
+    from src.analytics import derived as derived_functions
+
+    out: list[Row] = []
+    for indicator_id, config in growth_configs.items():
+        spec = config.get("derived") or {}
+        function_name = spec.get("function")
+        if function_name not in _GROWTH_FUNCTION_HORIZONS:
+            continue
+        years = _GROWTH_FUNCTION_HORIZONS[function_name] or (spec.get("args") or {}).get("years")
+        if not years:
+            continue
+        func = getattr(derived_functions, function_name)
+        name_en = (config.get("name") or {}).get("en", indicator_id)
+        unit = config.get("unit", "")
+
+        for geo_id, series in territory.items():
+            plain_series = {period: value for period, (value, _used_pred) in series.items()}
+            for period in sorted(series):
+                base_period = derived_functions.shift_period_years(period, years)
+                if base_period not in series:
+                    continue  # endpoint exists, base does not -- absent, not partial.
+                kwargs = {} if function_name == "five_year_change" else {"years": years}
+                value = func(plain_series, period, **kwargs)
+                if value is None:
+                    continue
+                _base_value, base_used_predecessor = series[base_period]
+                _endpoint_value, endpoint_used_predecessor = series[period]
+                status = (
+                    "reconstructed"
+                    if (base_used_predecessor or endpoint_used_predecessor)
+                    else "derived"
+                )
+                out.append((geo_id, indicator_id, name_en, unit, period, value, status, ""))
+    return out
+
+
 def reconstruct_ratios(
     reconstructed_components: Iterable[Row],
     lineage: Mapping[str, list[str]],
