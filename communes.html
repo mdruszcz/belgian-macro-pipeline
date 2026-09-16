@@ -879,6 +879,26 @@ const MAP_STATUS_WORDS = {
   S: 'suppressed', N: 'n/a', derived: 'derived',
 };
 
+/* `reconstructed` -- a cell summed from the communes that existed before a
+   merger (src/analytics/backaggregate.py) -- is resolved here rather than
+   added to the table above. commune_map.js's tooltip prints this word as raw
+   text (commune_map.js:674) with no i18n lookup, so every entry in that table
+   reads in English on the French and Dutch pages; the existing entries carry
+   that flaw already, and extending it would be a new rule 7 violation. This
+   page has T() (above), so the one new status uses the `reconstructedSuffix`
+   string the merger batch already added in all three languages.
+
+   Kept distinct from `derived` on purpose (rule 26): derived is computed from
+   this commune's own figures, reconstructed from a commune that no longer
+   exists, and a reader who cannot tell them apart cannot tell whose territory
+   the number describes. statusPill() above is deliberately NOT changed -- its
+   labels are hardcoded English for every status, which is a pre-existing
+   defect of this page and not one this fix should half-correct. */
+function mapStatusWord(raw){
+  if(raw === 'reconstructed') return T('reconstructedSuffix');
+  return MAP_STATUS_WORDS[raw] || raw;
+}
+
 /* The set of communes the table is currently showing. The map dims everything
    outside it rather than removing it: a Belgium with holes is harder to read
    than a Belgium with a highlighted region, and the surrounding outline is
@@ -911,7 +931,7 @@ function valuesForMap(code, year){
   for(const c of COMMUNES){
     const cell = c.indicators[code]?.byYear[year];
     if(!cell) continue;
-    const status = MAP_STATUS_WORDS[cell.status] || cell.status;
+    const status = mapStatusWord(cell.status);
     const num = cell.value === '' ? NaN : parseFloat(cell.value);
     if(isNaN(num)){
       // A WITHHELD CELL IS PASSED THROUGH WITH A NULL VALUE, not dropped.

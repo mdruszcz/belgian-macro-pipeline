@@ -345,6 +345,38 @@ def test_map_pages_load_the_shared_component(page):
     ), f"{page.name} carries its own copy of the classification"
 
 
+def test_a_reconstructed_cell_is_named_in_the_readers_own_language():
+    """map.html's own status vocabulary must not gain `reconstructed`.
+
+    A cell summed from the communes that existed before a merger arrives with
+    that status (src/analytics/backaggregate.py). MAP_STATUS_LETTERS is printed
+    into the tooltip as raw text by commune_map.js -- `· ${row.status}`, no
+    i18n lookup -- so a word added to that table reads in English on the French
+    and Dutch pages (CLAUDE.md rule 7). The status is resolved through the
+    page's own T() instead, against `reconstructedSuffix`, which exists in all
+    three languages.
+
+    Kept distinct from `derived` (rule 26): derived is computed from this
+    commune's own figures, reconstructed from a commune that no longer exists,
+    and a reader who cannot tell them apart cannot tell whose territory the
+    number describes.
+
+    The same contract is tested for communes.html in
+    tests/test_communes_map_panel.py and for explorer.html in
+    tests/test_explorer.py -- three pages, one vocabulary each, all three
+    resolved the same way.
+    """
+    text = MAP_HTML.read_text(encoding="utf-8")
+    assert "function mapStatusWord(" in text
+    assert "T('reconstructedSuffix')" in text
+    # The tooltip path goes through the helper, or the translation is dead code.
+    assert "mapStatusWord(cell[1])" in text
+    assert "MAP_STATUS_LETTERS[cell[1]]" not in text
+    table = re.search(r"const MAP_STATUS_LETTERS = \{(.*?)\}", text, re.DOTALL)
+    assert table, "MAP_STATUS_LETTERS not found"
+    assert "reconstructed" not in table.group(1)
+
+
 def test_swatch_width_agrees_between_the_component_and_its_stylesheet():
     """The legend positions its ticks in pixels, so the number in the JS and
     the width in the CSS are one fact stored twice. If they drift, every tick

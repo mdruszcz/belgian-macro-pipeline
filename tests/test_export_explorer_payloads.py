@@ -221,6 +221,21 @@ def test_cell_passes_through_every_known_status_letter():
     assert _cell("41.2", "derived", where="x") == [41.2, "derived"]
 
 
+def test_cell_passes_through_a_reconstructed_merger_cell():
+    """`reconstructed` is written by src/analytics/backaggregate.py for a cell
+    summed from the communes that existed before a merger. Before it was mapped
+    deliberately into KNOWN_STATUSES this raised, which meant the explorer and
+    map payloads -- and so every pre-merger year for the 13 communes created in
+    the 2025 wave -- could not be published at all.
+
+    It must stay DISTINCT from 'derived' in the payload (CLAUDE.md rule 26):
+    'derived' is computed from this commune's own figures, 'reconstructed' from
+    a different commune's, and collapsing the two would hide whose territory a
+    number describes."""
+    assert _cell("38960.8", "reconstructed", where="x") == [38960.8, "reconstructed"]
+    assert _cell("38960.8", "reconstructed", where="x") != [38960.8, "derived"]
+
+
 def test_cell_turns_a_suppressed_blank_into_a_null_value():
     assert _cell("", "S", where="x") == [None, "S"]
 
