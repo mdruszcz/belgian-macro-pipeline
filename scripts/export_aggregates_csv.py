@@ -142,7 +142,7 @@ def _period_start(period: str) -> str:
 def _universe_resolver(
     levels: dict[str, str],
     windows: dict[str, tuple[str, str | None]],
-    rows: list[tuple[str, str, str, float]],
+    universe_rows: set[tuple[str, str, str]],
 ):
     """Build the coverage denominator: which communes each indicator covers in
     each period.
@@ -166,6 +166,17 @@ def _universe_resolver(
     Detected from the data, not from a hand-maintained list, so a new
     back-casting source is handled the day it lands rather than the day
     somebody notices.
+
+    `universe_rows` -- (indicator_id, geo_id, period) triples, from
+    _universe_rows() -- deliberately carries EVERY status, suppressed and na
+    included, unlike the value-filtered rows the engine sums. A commune ONEM
+    masks under its privacy floor still filed; dropping it here would shrink
+    "the full set of communes this source ever reports on" by exactly the
+    communes most in need of the coverage check, which is exactly backwards.
+    Confirmed by measurement: feeding this resolver the value-filtered rows
+    instead put PART_TIME_BENEFIT_RECIPIENTS's pinned vintage at 527 -- a
+    commune count that has never existed at any point in Belgian geography --
+    instead of the real 565 map ONEM's whole 2017-2026 series is expressed on.
     """
     valid_by_period: dict[str, set[str]] = {}
 
@@ -198,7 +209,7 @@ def _universe_resolver(
         return valid_by_period[period]
 
     observed: dict[str, dict[str, set[str]]] = {}
-    for indicator_id, geo_id, period, _value in rows:
+    for indicator_id, geo_id, period in universe_rows:
         observed.setdefault(indicator_id, {}).setdefault(period, set()).add(geo_id)
 
     pinned: dict[str, set[str]] = {}
@@ -214,7 +225,13 @@ def _universe_resolver(
 
 def _observations(conn: sqlite3.Connection, extra_csvs: tuple[Path, ...]):
     """Every is_latest municipal observation across both committed stores,
-    UNRESTRICTED by current-commune status. See trap 1."""
+    UNRESTRICTED by current-commune status. See trap 1.
+
+    Restricted to rows with a value: this is the input the engine SUMS, and a
+    suppressed/na row has nothing to add. See _universe_rows for the sibling
+    read that must NOT apply this filter -- the coverage denominator needs to
+    know a commune existed and reported, even when its value was withheld.
+    """
     rows: list[tuple[str, str, str, float]] = []
     for indicator_id, geo_id, period, value in conn.execute(
         "SELECT o.indicator_id, o.geo_id, o.period, o.value FROM observations o "
@@ -244,6 +261,50 @@ def _observations(conn: sqlite3.Connection, extra_csvs: tuple[Path, ...]):
     return rows
 
 
+def _universe_rows(conn: sqlite3.Connection, extra_csvs: tuple[Path, ...]):
+    """Every is_latest municipal (indicator_id, geo_id, period) triple, ANY
+    status -- suppressed and na included -- for _universe_resolver.
+
+    A commune ONEM masks under its under-10 privacy rule still filed a
+    return; it existed and reported, it just was not allowed to publish the
+    number. _observations() above drops that row because it has nothing to
+    sum, which is correct for the total but wrong for the denominator: fed
+    _observations()'s value-filtered rows, the pinned-vintage detector below
+    only ever sees the communes that happened to have a printable value, so
+    its "full set of communes this source ever reports on" undercounts by
+    exactly the suppressed communes. Measured for PART_TIME_BENEFIT_RECIPIENTS
+    (config/indicators/PART_TIME_BENEFIT_RECIPIENTS.yaml, source ONEM,
+    data/onem_observations.csv): the value-filtered union across 2017-2026 is
+    527 communes, but every single period actually carries all 565 --
+    487 final + 78 suppressed in 2021 alone. 527 is not a real vintage; no
+    geography snapshot has ever had 527 municipalities. 565 is (today's map,
+    confirmed via `SELECT COUNT(*) FROM geographies WHERE level='municipality'
+    AND valid_to IS NULL`), and it is the map ONEM expresses its whole series
+    on -- the pinned-vintage detector correctly catches that once it can see
+    the suppressed rows too.
+    """
+    triples: set[tuple[str, str, str]] = set()
+    for indicator_id, geo_id, period in conn.execute(
+        "SELECT o.indicator_id, o.geo_id, o.period FROM observations o "
+        "JOIN geographies g ON g.geo_id = o.geo_id AND g.level = 'municipality' "
+        "WHERE o.is_latest = 1"
+    ):
+        triples.add((indicator_id, canonical(geo_id), period))
+
+    for path in extra_csvs:
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"--extra-observations {path} does not exist. Refusing to compute "
+                "aggregates that silently omit that source's indicators."
+            )
+        with path.open(encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh):
+                if row["is_latest"] != "1":
+                    continue
+                triples.add((row["indicator_id"], canonical(row["geo_id"]), row["period"]))
+    return triples
+
+
 def export_aggregates_csv(
     db_path: Path,
     out_path: Path,
@@ -262,10 +323,11 @@ def export_aggregates_csv(
     }
 
     rows = _observations(conn, extra_observations)
+    universe_rows = _universe_rows(conn, extra_observations)
     conn.close()
 
     obs = ObservationSet(rows)
-    universe_of, pinned = _universe_resolver(levels, windows, rows)
+    universe_of, pinned = _universe_resolver(levels, windows, universe_rows)
     if pinned:
         print(
             "Coverage measured against each source's own commune vintage for: "
