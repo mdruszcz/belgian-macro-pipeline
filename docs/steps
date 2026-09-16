@@ -1428,6 +1428,57 @@ already established, catalogue rows dated and attributed to the maintainer's app
 Why: The maintainer's own direction to scale the international pipeline (docs/data_catalog.md,
 CLAUDE.md rule 8) -- a first concrete slice rather than the full ~100-indicator target, decided on
 real, checked data rather than a guessed list.
+ ✅ [BUILD] Europe panel, Pays mode -- all 24 country indicators behind a chart filter (2026-09-15,
+PR #200, the maintainer's own ask: "25 indicateurs possiblement visibles en dessous mais avec un
+filtre pour choisir"). The 18 country-level indicators #196 loaded were reaching no page at all;
+scripts/export_europe_countries.py now publishes 24 -- 20 mapped, 4 chart-only levels (value added,
+exports, imports) deliberately not rebased -- with a compare_default binding and a set-order
+determinism fix, plus 7 new unit codes in assets/commune_map.js and assets/i18n.js in all three
+languages. The filter is a chip menu serving both modes, in memory only. POPULATION_EUROPE is
+deliberately not published: it duplicates POPULATION_COUNTRY. Targeted tests only (CI runs the
+suite): tests/test_export_europe_countries.py 77 passed, tests/test_europe_panel.py 22 passed / 1
+pre-existing skip in a real browser. The six original payloads are byte-identical after
+regeneration and GDP_VOLUME_EUROPE.json differs only in key order, from the determinism fix.
+NOT DONE and stated as such: the 24 chips are a flat alphabetical list with no grouping by domain,
+and the filter's ticks do not persist across a reload.
+How: Publish every country indicator the international store actually holds and let the reader pick
+which comparison charts to see, rather than hardcoding a shortlist in the renderer.
+Why: The previous step loaded 18 new country indicators that no page exposed -- data paid for and
+fetched daily that a reader could not reach.
+ ✅ [BUILD] Europe panel ergonomics -- map left, controls right, frozen header, pinned menu
+(2026-09-15, PR #201, straight from the maintainer's use of the live macro.html#europe page).
+Desktop only (>=1025px), tablets and phones keep their layout: the header stays at the top of the
+screen, the section menu is pinned to the left edge from under the header to the bottom, the footer
+starts to the right of it, and the breadcrumb and commune search leave this page (the search stays
+on home2 and profiles). The Europe panel becomes two columns -- the map ~65% wide and 75% of screen
+height, with the legend boxed bottom-left and a "Source: Eurostat" link bottom-right whose hover
+text carries the dataset code, retrieval date and NUTS version; the right rail holds mode and
+palette, indicator and period, a closed country picker, the detail card with a close button, the
+chart filter, the EU27 / euro-area checkboxes and the first three comparison charts, with the rest
+in a grid under the map that hides itself when empty. On a phone the legend and source move below
+the map. Four new trilingual i18n keys. No payload, formula, adapter or indicator change, and no
+indicator id in the renderer. Targeted tests only: tests/test_europe_panel.py 28 passed / 1
+pre-existing skip, plus 2006 across test_macro.py, test_macro_panels.py, test_a4_finishing_fixes.py,
+test_i18n.py and tests/site. The three macro search/breadcrumb tests were removed along with the
+search box itself. FLAGGED, not fixed: the Eurostat databrowser link is built from the payload's
+dataset code and is never checked against the network, so a pattern change upstream would 404.
+How: Put the map on the left and every control on the right, with nothing above the map, and apply
+the frozen header and pinned menu page-wide rather than only inside the panel.
+Why: The maintainer opened the shipped feature and found it awkward to use -- fixing that from real
+use is faster and truer than re-planning the layout from the spec.
+ ✅ [BUILD] CI: a docs-only change no longer pays for the full three tiers (2026-09-15, PR #199).
+A change touching only docs/** or Markdown used to run the fast, browser and generated-site suites
+at 3-5 minutes each. Each tier now detects a docs-only diff with a plain git diff
+(.github/workflows/docs_only.sh, no third-party action) and skips its own work while still
+reporting success, so the `test` gate's rule that a skipped tier counts as a failure is untouched.
+Every unresolvable case -- a branch's first push, no base, an empty diff -- falls back to the full
+run. Checked by hand against real commits: PR #197 (docs only) -> true, PR #196's merge -> false,
+an all-zero base -> false. GitHub Pages' own build and deploy jobs are a separate mechanism on
+every push to develop and were not touched.
+How: Detect the docs-only diff inside each tier rather than gating the whole workflow, so the
+required checks still report.
+Why: Ticking a roadmap line was costing three full test tiers, which is most of what makes updating
+docs/steps feel expensive.
 
 🚦 GATE 50%
  🛑 [BLOCKED] Any commune returns >= 50 standardized indicators (2026-09-06: MEASURED, and it passes for 552 of 565 communes but not all -- median 52, max 52, and the roadmap's own How: (pick five at random and count) passes cleanly, all five between 51 and 52. The 13 that fail carry 17 each and are EXACTLY the 2025 merger successors plus Bastogne (which merged 2024-12-02): Pajottegem, Wingene, Tielt, Nazareth-De Pinte, Lochristi, Merelbeke-Melle, Lokeren, Beveren-Kruibeke-Zwijndrecht, Tessenderlo-Ham, Hasselt, Bilzen-Hoeselt, Tongeren-Borgloon, Bastogne. The reason is structural and already documented across this file: every historical source predates them -- fiscal income stops at the 2019 map, Census 2021 is a 2021 snapshot, police.be and ONEM backcast a pre-2025 grid -- so a commune created in 2025 only carries the sources expressed on the current map. Marking this gate item done at "five random ones passed" would be exactly the averages-hide-gaps failure the 80% gate warns about, and the weakest page is what a sceptical prospect opens. NOT a data-loading bug and not fixable by loading more of the same sources; it needs either a source that covers the new communes, or an explicit decision to show a merger successor its predecessors' history with the discontinuity labelled)
