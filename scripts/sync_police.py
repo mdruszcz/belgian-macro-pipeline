@@ -54,6 +54,47 @@ future file's own garbage rows are handled the same way without an edit
 here. A nonzero value on an unresolvable code is a different situation and
 raises.
 
+`z == 0` ON A REAL, RESOLVABLE COMMUNE IS NOT A MEASUREMENT EITHER (maintainer
+direction, 2026-09-16: "Hainaut is missing data, not 0 for car theft").
+Measured on the committed store before this rule existed: every one of
+Hainaut's 69 communes carried CAR_THEFT_PER_10K = 0.0 for 2025, status
+provisional -- a whole province with zero car thefts, which is not a real
+outcome. police.be's own export pairs a placeholder row with `z: 0` (see
+above); this loader already honours that for a geo_code that resolves to NO
+geography. It did NOT honour it for a geo_code that DOES resolve -- the same
+placeholder value was written as a measured zero, collapsing "not available"
+into "confirmed zero" (CLAUDE.md rule 26) and silently coercing the source's
+own marker into data (rule 13).
+
+FIXED HERE: `z == 0` on a resolvable commune is loaded as status `na`, value
+NULL, for every commune, every indicator, every year -- not just Hainaut, not
+just car theft, because the file gives no way to tell a placeholder zero from
+a genuine one for ANY commune. No province-level or magnitude heuristic is
+used (a small commune's honest zero-car-theft year would look identical to a
+placeholder, so guessing which is which would be exactly the guess CLAUDE.md
+forbids). The cost is real and accepted: a small commune's genuine zero for a
+year is lost as "not available" rather than published as 0. That loss is
+preferred to the alternative, which is calling an unmeasured cell a
+confirmed zero for 565 communes at once.
+
+A COMMUNE DISSOLVED BEFORE THE FILE'S OWN YEAR GETS NO ROW AT ALL, not `na`.
+Resolution still happens at the fixed PINNED_PERIOD (2024) as above -- that
+answers "which geo_id does this code name" -- but once resolved, the row is
+only written if that geo_id's `valid_to` (from `geographies`, never a date
+literal) is after the FILE's own year started. A commune dissolved on or
+before that date did not exist to be measured in that year, so it is not
+"not available" (which implies something the commune could have had), it is
+absent. This matters even inside the 2024 pin: Bastenaken/Bastogne's two
+predecessors (82003 Bastenaken-old, 82005 Bertogne) both dissolved
+2024-12-02, so they still resolve at the 2024 pin but must not carry a 2025
+row -- and the 2025-created successor (82039) cannot resolve at the 2024 pin
+at all, so it never gets one either. Measured on the raw file as fetched
+2026-09-06: it expresses 2025 entirely on the pre-2025 587-code grid (proven
+by `sync()` succeeding, since it raises on any unresolvable nonzero code) --
+so none of the 13 merger-created 2025 codes appear in it, and this pipeline
+does not attempt to reconstruct police figures for them (the maintainer
+confirmed they cannot be reconstructed from this source).
+
 STATUS: every year is 'final' except the MOST RECENT year in each
 category's own file set, which is 'provisional'. Measured, not assumed, for
 `cambriolage`: national totals across the real 2000/2017-2024 series are
@@ -134,6 +175,31 @@ def _read_rates(path: Path) -> dict[str, float]:
 
 def _resolve(conn: sqlite3.Connection, nis: str) -> str:
     return resolve_geo(conn, nis, PINNED_PERIOD)
+
+
+def _dissolved_before(conn: sqlite3.Connection, geo_id: str, period_start: str) -> bool:
+    """True if `geo_id` had already ceased to exist by the start of the
+    period being loaded -- i.e. it did not exist to be measured in that year.
+
+    Reads `geographies.valid_to` (never a date literal, per the brief): a
+    commune's own row is the one source of truth for when it stopped
+    existing. `valid_to` is an EXCLUSIVE upper bound (see resolve_geo), so
+    "dissolved on or before the period's start" is `valid_to <= period_start`,
+    not `<`. A NULL `valid_to` (still current) is never dissolved.
+
+    This is deliberately independent of the PINNED_PERIOD resolution above:
+    _resolve() answers "which geo_id does this NIS code name" using the fixed
+    2024 pin (because police.be backcasts its current grid onto every file
+    regardless of year); this answers a different question -- "did that named
+    entity still exist in the year THIS FILE claims to describe" -- using the
+    file's own year, because a commune can resolve at the 2024 pin (it was
+    alive on 2024-01-01) and still have dissolved before a later file's year
+    (e.g. Bastenaken-old and Bertogne, both gone 2024-12-02, resolve fine at
+    the 2024 pin but must not carry a 2025 row).
+    """
+    row = conn.execute("SELECT valid_to FROM geographies WHERE geo_id = ?", (geo_id,)).fetchone()
+    valid_to = row[0] if row else None
+    return valid_to is not None and valid_to <= period_start
 
 
 def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict) -> None:
@@ -217,6 +283,8 @@ def sync(
 
     rows_read = rows_written = 0
     skipped_zero_placeholder = 0
+    skipped_dissolved = 0
+    written_na = 0
     unresolved: list[tuple[str, str, str]] = []
 
     for indicator_id, dirname in DATASETS.items():
@@ -248,6 +316,31 @@ def sync(
                         continue
                     unresolved.append((indicator_id, year, nis))
                     continue
+
+                if _dissolved_before(conn, geo_id, period_start):
+                    # See module docstring: this geo_id existed at the fixed
+                    # PINNED_PERIOD but had already been dissolved by the
+                    # start of THIS FILE's own year -- it did not exist to be
+                    # measured in that year. No row at all, not `na`: `na`
+                    # means "existed but we don't have a real reading",
+                    # which is not this case.
+                    skipped_dissolved += 1
+                    continue
+
+                if value == 0:
+                    # See module docstring: police.be pairs a placeholder row
+                    # with z: 0, and this file gives no way to distinguish
+                    # that from a genuine zero for a real, resolvable
+                    # commune either -- so this can never be loaded as a
+                    # measured 0 (CLAUDE.md rules 13 and 26). Recorded as
+                    # `na`/NULL, never a manufactured zero.
+                    row_value: float | None = None
+                    row_status = "na"
+                    written_na += 1
+                else:
+                    row_value = value
+                    row_status = status
+
                 rows_written += upsert_observation(
                     conn,
                     indicator_id=indicator_id,
@@ -255,8 +348,8 @@ def sync(
                     period=year,
                     period_start=period_start,
                     period_end=period_end,
-                    value=value,
-                    status=status,
+                    value=row_value,
+                    status=row_status,
                     vintage=now,
                     fetch_run_id=fetch_run_id,
                 )
@@ -277,7 +370,9 @@ def sync(
         )
     print(
         f"Read {rows_read} (indicator, commune, year) rates across {len(DATASETS)} categories "
-        f"({skipped_zero_placeholder} zero-valued non-geography code(s) skipped)."
+        f"({skipped_zero_placeholder} zero-valued non-geography code(s) skipped, "
+        f"{written_na} zero-valued resolvable code(s) written as na/NULL, "
+        f"{skipped_dissolved} row(s) skipped for a commune dissolved before that year)."
     )
     return rows_read, rows_written
 

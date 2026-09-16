@@ -259,3 +259,173 @@ def test_reference_rows_only_needs_no_source_files(db, tmp_path):
     db_path, conn = db
     read, written = sync_police.sync(db_path, tmp_path / "does_not_exist", reference_rows_only=True)
     assert (read, written) == (0, 0)
+
+
+# --- z == 0 on a resolvable commune is `na`, never a measured zero ----------
+# Maintainer direction, 2026-09-16: "Hainaut is missing data, not 0 for car
+# theft." See the module docstring's "z == 0 ON A REAL, RESOLVABLE COMMUNE"
+# section.
+
+
+def test_zero_on_a_resolvable_commune_is_loaded_as_na_not_zero(db, tmp_path, monkeypatch):
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"CAR_THEFT_PER_10K": "vol de voiture"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(raw_dir / "vol de voiture", "2025", [{"geo_code": "11001", "z": 0}])
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (1, 1)
+    row = conn.execute(
+        "SELECT value, status FROM observations WHERE indicator_id = 'CAR_THEFT_PER_10K' "
+        "AND geo_id = 'be:mun:11001'"
+    ).fetchone()
+    assert row == (None, "na")
+
+
+def test_zero_on_an_unresolvable_code_is_still_skipped_as_placeholder(db, tmp_path, monkeypatch):
+    """The pre-existing rule for a code that names NO geography at all must
+    be unchanged by the new rule for a code that DOES resolve."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"CAR_THEFT_PER_10K": "vol de voiture"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(
+        raw_dir / "vol de voiture",
+        "2025",
+        [{"geo_code": "11001", "z": 3.5}, {"geo_code": "-1", "z": 0}],
+    )
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (2, 1)  # only 11001 written; -1 is a placeholder, not a row
+    row = conn.execute(
+        "SELECT value, status FROM observations WHERE indicator_id = 'CAR_THEFT_PER_10K'"
+    ).fetchone()
+    assert row == (3.5, "provisional")
+
+
+def test_nonzero_value_on_a_resolvable_commune_is_unaffected(db, tmp_path, monkeypatch):
+    """A single-year file, same shape as test_a_single_year_category_has_that_
+    one_year_provisional -- its one year is 'the latest', hence provisional;
+    the point here is only that a nonzero value is untouched by the new na
+    handling, not the final/provisional rule (already covered elsewhere)."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"HOUSE_BURGLARIES_PER_10K": "cambriolage"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(raw_dir / "cambriolage", "2024", [{"geo_code": "11001", "z": 76.77}])
+    sync_police.sync(db_path, raw_dir)
+    row = conn.execute(
+        "SELECT value, status FROM observations WHERE indicator_id = 'HOUSE_BURGLARIES_PER_10K' "
+        "AND period = '2024'"
+    ).fetchone()
+    assert row == (76.77, "provisional")
+
+
+def test_a_whole_provinces_worth_of_zeros_all_become_na(db, tmp_path, monkeypatch):
+    """The actual shape of the real defect: many communes, all z: 0, all
+    resolvable -- none of them may collapse into a confirmed-zero province."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"CAR_THEFT_PER_10K": "vol de voiture"})
+    raw_dir = tmp_path / "raw"
+    codes = ["11001", "11002", "11004", "11005"]  # any resolvable communes
+    _write_year_file(raw_dir / "vol de voiture", "2025", [{"geo_code": c, "z": 0} for c in codes])
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (len(codes), len(codes))
+    rows = conn.execute(
+        "SELECT value, status FROM observations WHERE indicator_id = 'CAR_THEFT_PER_10K'"
+    ).fetchall()
+    assert len(rows) == len(codes)
+    assert all(row == (None, "na") for row in rows)
+
+
+# --- a commune dissolved before the file's own year gets NO row -------------
+
+
+def test_a_commune_dissolved_before_the_files_year_gets_no_row(db, tmp_path, monkeypatch):
+    """Borsbeek (11007) merged into Antwerp on 2025-01-01 (valid_to). It still
+    resolves at the fixed PINNED_PERIOD (2024-01-01, before its own merger),
+    but a 2025 file's row for it must be dropped entirely -- it did not exist
+    to be measured in 2025. Not `na`: no row at all."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"HOUSE_BURGLARIES_PER_10K": "cambriolage"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(raw_dir / "cambriolage", "2025", [{"geo_code": "11007", "z": 61.47}])
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (1, 0)
+    row = conn.execute(
+        "SELECT * FROM observations WHERE indicator_id = 'HOUSE_BURGLARIES_PER_10K' "
+        "AND geo_id = 'be:mun:11007'"
+    ).fetchone()
+    assert row is None
+
+
+def test_a_commune_alive_for_the_whole_file_year_still_gets_a_row(db, tmp_path, monkeypatch):
+    """Same Borsbeek code, but a 2024 file -- it was alive for all of 2024
+    (valid_to is 2025-01-01, after 2024's period_start), so the row must be
+    kept as usual."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"HOUSE_BURGLARIES_PER_10K": "cambriolage"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(raw_dir / "cambriolage", "2024", [{"geo_code": "11007", "z": 61.47}])
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (1, 1)
+    row = conn.execute(
+        "SELECT geo_id, value, status FROM observations "
+        "WHERE indicator_id = 'HOUSE_BURGLARIES_PER_10K' AND period = '2024'"
+    ).fetchone()
+    assert row == ("be:mun:11007", 61.47, "provisional")
+
+
+def test_bastogne_predecessors_get_no_2025_row_even_though_they_resolve_at_the_2024_pin(
+    db, tmp_path, monkeypatch
+):
+    """The sharpest case (coordinator finding, 2026-09-16): Bastenaken-old
+    (82003) and Bertogne (82005) both dissolved 2024-12-02 -- BEFORE the 2024
+    pin's own reference date of 2024-01-01 is irrelevant here; what matters is
+    that valid_to (2024-12-02) is before 2025's period_start (2025-01-01), so
+    a 2025 file's row for either must be dropped, even though _resolve()
+    happily resolves them (they existed at 2024-01-01). Their 2025 rows in
+    the real store were 0.0 placeholders anyway, but this must hold for any
+    value."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"CAR_THEFT_PER_10K": "vol de voiture"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(
+        raw_dir / "vol de voiture",
+        "2025",
+        [{"geo_code": "82003", "z": 0}, {"geo_code": "82005", "z": 0}],
+    )
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (2, 0)
+    rows = conn.execute(
+        "SELECT * FROM observations WHERE indicator_id = 'CAR_THEFT_PER_10K'"
+    ).fetchall()
+    assert rows == []
+
+
+def test_bastogne_merger_successor_has_no_2025_code_in_the_real_grid_and_gets_no_rows(
+    db, tmp_path, monkeypatch
+):
+    """82039 (the merged Bastogne/Bastenaken) did not exist at the 2024 pin,
+    so a file that somehow carried its code would raise (unresolvable,
+    nonzero) or be silently skipped (unresolvable, zero) exactly like any
+    other code the fixed grid does not recognise -- proving this pipeline
+    makes no attempt to load police figures for a 2025-merger successor.
+    police.be's real 2025 file, as fetched 2026-09-06, contains no such code
+    at all (the sync succeeds only because every code in it resolves at the
+    2024 pin), so this asserts the defensive behaviour if one ever appeared."""
+    db_path, conn = db
+    monkeypatch.setattr(sync_police, "DATASETS", {"CAR_THEFT_PER_10K": "vol de voiture"})
+    raw_dir = tmp_path / "raw"
+    _write_year_file(raw_dir / "vol de voiture", "2025", [{"geo_code": "82039", "z": 0}])
+    read, written = sync_police.sync(db_path, raw_dir)
+    assert (read, written) == (1, 0)  # skipped as an unresolvable zero placeholder
+    rows = conn.execute(
+        "SELECT * FROM observations WHERE indicator_id = 'CAR_THEFT_PER_10K'"
+    ).fetchall()
+    assert rows == []
+
+
+def test_dissolved_before_helper_uses_the_exclusive_valid_to_boundary(db):
+    db_path, conn = db
+    # Borsbeek: valid_to = 2025-01-01 (exclusive upper bound of its life).
+    assert sync_police._dissolved_before(conn, "be:mun:11007", "2025-01-01") is True
+    assert sync_police._dissolved_before(conn, "be:mun:11007", "2024-01-01") is False
+    # A currently-live commune (valid_to IS NULL) is never dissolved.
+    assert sync_police._dissolved_before(conn, "be:mun:11001", "2099-01-01") is False
