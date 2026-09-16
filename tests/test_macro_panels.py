@@ -329,6 +329,33 @@ def test_a_panel_charts_canvas_fills_its_cards_inner_width(browser, site, panel_
         context.close()
 
 
+def _hover_until_tip(page, x, y, budget_ms=5000, step_ms=200):
+    """Hover (x, y) and wait for the shared tooltip to show, re-nudging the
+    pointer on every poll. A single mouse.move fires one mousemove; if the
+    chart's hover layer attaches after that (data arriving late on a slow
+    runner), nothing re-triggers it. Moving by one pixel on each poll gives a
+    late-attached handler an event to answer. Waits on the real condition --
+    the tooltip element visible -- never on a fixed sleep, and fails loudly
+    with the same message as before once the budget is spent."""
+    tip_visible = (
+        "document.querySelector('.bp-chart-tip') && "
+        "!document.querySelector('.bp-chart-tip').hidden"
+    )
+    waited = 0
+    nudge = 0
+    while True:
+        page.mouse.move(x + nudge, y)
+        if page.evaluate(f"() => !!({tip_visible})"):
+            return
+        if waited >= budget_ms:
+            raise AssertionError(
+                f"tooltip did not appear within {budget_ms} ms of hovering ({x}, {y})"
+            )
+        page.wait_for_timeout(step_ms)
+        waited += step_ms
+        nudge = 1 - nudge  # 0, 1, 0, 1 ... a one-pixel wiggle, never leaving the point
+
+
 def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, site):
     chart_id, canvas_id = PANEL_CHARTS["prix"]
     series = _panel_chart(chart_id)["series"]
@@ -344,12 +371,27 @@ def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, s
         canvas = page.locator(f"#{canvas_id}")
         box = canvas.bounding_box()
         assert box, "HICP canvas has no layout box"
-        page.mouse.move(box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
+        # Failed twice on 2026-09-16 in CI (develop push after #209, then the
+        # bot PR #216) with "Timeout 5000ms exceeded", 186 others passing,
+        # and passed on rerun both times -- a race, not a regression.
+        # _open_panel_chart waits for the canvas to have its LAYOUT (width
+        # >= 90% of its wrapper), not for the chart's DATA to be drawn or its
+        # hover layer to be attached: macro.html draws the series and calls
+        # BPCharts.attachTooltip only once national.json has arrived, and on
+        # a loaded runner that lands AFTER a single mouse.move. One mousemove
+        # fires once; nothing re-fires it when the hover layer appears later,
+        # so the wait expires. Two fixes, both on real conditions rather than
+        # a longer sleep: (1) wait for the hover layer to be bound -- macro.html
+        # sets canvas.dataset.bpBound = '1' in the same synchronous block that
+        # calls attachTooltip after the first draw; (2) re-nudge the mouse
+        # while polling, so a redraw that lands after the first move (the
+        # ResizeObserver redraw is rAF-coalesced, i.e. asynchronous) still gets
+        # a mousemove to answer. Same 5 s budget as before.
         page.wait_for_function(
-            "document.querySelector('.bp-chart-tip') && "
-            "!document.querySelector('.bp-chart-tip').hidden",
-            timeout=5000,
+            f"document.getElementById('{canvas_id}').dataset.bpBound === '1'",
+            timeout=15000,
         )
+        _hover_until_tip(page, box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
         tip_text = page.locator(".bp-chart-tip").inner_text()
         assert last_period in tip_text, f"tooltip missing period: {tip_text!r}"
 
