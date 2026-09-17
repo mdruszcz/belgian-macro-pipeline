@@ -2,15 +2,15 @@
     "BEL20": {
         "name": "BEL 20",
         "ticker": "^BFX",
-        "price": 5750.41,
-        "change": 1.0824721427780393,
+        "price": 5760.91,
+        "change": 0.8322598260918301,
         "currency": "EUR"
     },
     "EURUSD": {
         "name": "EUR/USD",
         "ticker": "EURUSD=X",
-        "price": 1.1541,
-        "change": -0.799381124290879,
+        "price": 1.1478,
+        "change": -1.1369509043927735,
         "currency": "USD"
     },
     "BE_10Y": {
@@ -30,7 +30,7 @@
     "ECB_RATE": {
         "name": "ECB Rate",
         "ticker": "MRO",
-        "price": 2.4,
+        "price": 2.65,
         "change": 0.0,
         "currency": "%"
     },
