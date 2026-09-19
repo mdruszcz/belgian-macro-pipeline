@@ -341,7 +341,7 @@ be:mun:11016,11016,Essen,Essen,Essen,Flanders,Antwerp,Arrondissement Antwerpen,U
 be:mun:11016,11016,Essen,Essen,Essen,Flanders,Antwerp,Arrondissement Antwerpen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.26,A,2026-09-14T12:20:12.880627+00:00
 be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,443186.36,A,2026-09-06T20:39:35.516406+00:00
 be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,5.4,A,2026-09-12T14:25:17.692249+00:00
-be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,CAS_EMPLOYED,Employed population (15-64),count,2021,5433.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,CAS_INACTIVE,Inactive population (15-64),count,2021,1696.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5784.0,A,2026-09-06T18:32:19.814670+00:00
@@ -383,7 +383,7 @@ be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement An
 be:mun:11018,11018,Hemiksem,Hemiksem,Hemiksem,Flanders,Antwerp,Arrondissement Antwerpen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.82,A,2026-09-14T12:20:12.880627+00:00
 be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,110180.2,A,2026-09-06T20:39:35.516406+00:00
 be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,CAS_EMPLOYED,Employed population (15-64),count,2021,3541.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,CAS_INACTIVE,Inactive population (15-64),count,2021,1235.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11021,11021,Hove,Hove,Hove,Flanders,Antwerp,Arrondissement Antwerpen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3677.0,A,2026-09-06T18:32:19.814670+00:00
@@ -551,7 +551,7 @@ be:mun:11024,11024,Kontich,Kontich,Kontich,Flanders,Antwerp,Arrondissement Antwe
 be:mun:11024,11024,Kontich,Kontich,Kontich,Flanders,Antwerp,Arrondissement Antwerpen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.16,A,2026-09-14T12:20:12.880627+00:00
 be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,143638.34,A,2026-09-06T20:39:35.516406+00:00
 be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,CAS_EMPLOYED,Employed population (15-64),count,2021,4084.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,CAS_INACTIVE,Inactive population (15-64),count,2021,1236.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11025,11025,Lint,Lint,Lint,Flanders,Antwerp,Arrondissement Antwerpen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4259.0,A,2026-09-06T18:32:19.814670+00:00
@@ -1139,7 +1139,7 @@ be:mun:11055,11055,Zoersel,Zoersel,Zoersel,Flanders,Antwerp,Arrondissement Antwe
 be:mun:11055,11055,Zoersel,Zoersel,Zoersel,Flanders,Antwerp,Arrondissement Antwerpen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.98,A,2026-09-14T12:20:12.880627+00:00
 be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,402272.51,A,2026-09-06T20:39:35.516406+00:00
 be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,CAS_EMPLOYED,Employed population (15-64),count,2021,7275.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,CAS_INACTIVE,Inactive population (15-64),count,2021,2361.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:11057,11057,Malle,Malle,Malle,Flanders,Antwerp,Arrondissement Antwerpen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,7593.0,A,2026-09-06T18:32:19.814670+00:00
@@ -1223,7 +1223,7 @@ be:mun:12002,12002,Berlaar,Berlaar,Berlaar,Flanders,Antwerp,Arrondissement Meche
 be:mun:12002,12002,Berlaar,Berlaar,Berlaar,Flanders,Antwerp,Arrondissement Mechelen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.26,A,2026-09-14T12:20:12.880627+00:00
 be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,319583.93,A,2026-09-06T20:39:35.516406+00:00
 be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,CAS_EMPLOYED,Employed population (15-64),count,2021,6851.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,CAS_INACTIVE,Inactive population (15-64),count,2021,2099.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:12005,12005,Bonheiden,Bonheiden,Bonheiden,Flanders,Antwerp,Arrondissement Mechelen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,7120.0,A,2026-09-06T18:32:19.814670+00:00
@@ -1731,7 +1731,7 @@ be:mun:13001,13001,Arendonk,Arendonk,Arendonk,Flanders,Antwerp,Arrondissement Tu
 be:mun:13001,13001,Arendonk,Arendonk,Arendonk,Flanders,Antwerp,Arrondissement Turnhout,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.38,A,2026-09-14T12:20:12.880627+00:00
 be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,13055.66,A,2026-09-06T20:39:35.516406+00:00
 be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,CAS_EMPLOYED,Employed population (15-64),count,2021,1301.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,CAS_INACTIVE,Inactive population (15-64),count,2021,426.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13002,13002,Baarle-Hertog,Baerle-Duc,Baarle-Hertog,Flanders,Antwerp,Arrondissement Turnhout,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1356.0,A,2026-09-06T18:32:19.814670+00:00
@@ -2151,7 +2151,7 @@ be:mun:13014,13014,Hoogstraten,Hoogstraten,Hoogstraten,Flanders,Antwerp,Arrondis
 be:mun:13014,13014,Hoogstraten,Hoogstraten,Hoogstraten,Flanders,Antwerp,Arrondissement Turnhout,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.98,A,2026-09-14T12:20:12.880627+00:00
 be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,580558.04,A,2026-09-06T20:39:35.516406+00:00
 be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.5,A,2026-09-12T14:25:17.692249+00:00
-be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,CAS_EMPLOYED,Employed population (15-64),count,2021,5107.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,CAS_INACTIVE,Inactive population (15-64),count,2021,1558.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13016,13016,Hulshout,Hulshout,Hulshout,Flanders,Antwerp,Arrondissement Turnhout,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5337.0,A,2026-09-06T18:32:19.814670+00:00
@@ -2529,7 +2529,7 @@ be:mun:13035,13035,Ravels,Ravels,Ravels,Flanders,Antwerp,Arrondissement Turnhout
 be:mun:13035,13035,Ravels,Ravels,Ravels,Flanders,Antwerp,Arrondissement Turnhout,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.29,A,2026-09-14T12:20:12.880627+00:00
 be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,254685.53,A,2026-09-06T20:39:35.516406+00:00
 be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,4.0,A,2026-09-12T14:25:17.692249+00:00
-be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,CAS_EMPLOYED,Employed population (15-64),count,2021,5438.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,CAS_INACTIVE,Inactive population (15-64),count,2021,1650.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13036,13036,Retie,Retie,Retie,Flanders,Antwerp,Arrondissement Turnhout,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5679.0,A,2026-09-06T18:32:19.814670+00:00
@@ -2655,7 +2655,7 @@ be:mun:13040,13040,Turnhout,Turnhout,Turnhout,Flanders,Antwerp,Arrondissement Tu
 be:mun:13040,13040,Turnhout,Turnhout,Turnhout,Flanders,Antwerp,Arrondissement Turnhout,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.13,A,2026-09-14T12:20:12.880627+00:00
 be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,355551.77,A,2026-09-06T20:39:35.516406+00:00
 be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,CAS_EMPLOYED,Employed population (15-64),count,2021,3716.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,CAS_INACTIVE,Inactive population (15-64),count,2021,1196.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3885.0,A,2026-09-06T18:32:19.814670+00:00
@@ -2697,7 +2697,7 @@ be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement
 be:mun:13044,13044,Vorselaar,Vorselaar,Vorselaar,Flanders,Antwerp,Arrondissement Turnhout,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.25,A,2026-09-14T12:20:12.880627+00:00
 be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,425561.13,A,2026-09-06T20:39:35.516406+00:00
 be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.5,A,2026-09-12T14:25:17.692249+00:00
-be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,CAS_EMPLOYED,Employed population (15-64),count,2021,5395.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,CAS_INACTIVE,Inactive population (15-64),count,2021,1631.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:13046,13046,Vosselaar,Vosselaar,Vosselaar,Flanders,Antwerp,Arrondissement Turnhout,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5640.0,A,2026-09-06T18:32:19.814670+00:00
@@ -3702,7 +3702,7 @@ be:mun:23003,23003,Beersel,Beersel,Beersel,Flanders,Flemish Brabant,Arrondisseme
 be:mun:23003,23003,Beersel,Beersel,Beersel,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.45,A,2026-09-14T12:20:12.880627+00:00
 be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,41026.97,A,2026-09-06T20:39:35.516406+00:00
 be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_EMPLOYED,Employed population (15-64),count,2021,1063.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_INACTIVE,Inactive population (15-64),count,2021,338.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23009,23009,Bever,Biévène,Bever,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1103.0,A,2026-09-06T18:32:19.814670+00:00
@@ -3953,7 +3953,7 @@ be:mun:23038,23038,Kampenhout,Kampenhout,Kampenhout,Flanders,Flemish Brabant,Arr
 be:mun:23038,23038,Kampenhout,Kampenhout,Kampenhout,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.97,A,2026-09-14T12:20:12.880627+00:00
 be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,316369.01,A,2026-09-06T20:39:35.516406+00:00
 be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_EMPLOYED,Employed population (15-64),count,2021,4474.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_INACTIVE,Inactive population (15-64),count,2021,1330.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23039,23039,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Kapelle-op-den-Bos,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4652.0,A,2026-09-06T18:32:19.814670+00:00
@@ -4289,12 +4289,12 @@ be:mun:23062,23062,Overijse,Overijse,Overijse,Flanders,Flemish Brabant,Arrondiss
 be:mun:23062,23062,Overijse,Overijse,Overijse,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.35,A,2026-09-14T12:20:12.880627+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,92420.53,A,2026-09-06T20:39:35.516406+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.5,A,2026-09-12T14:25:17.692249+00:00
-be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_EMPLOYED,Employed population (15-64),count,2021,2169.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_INACTIVE,Inactive population (15-64),count,2021,639.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2231.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_UNEMPLOYED,Unemployed population (15-64),count,2021,62.0,A,2026-09-06T18:32:19.814670+00:00
-be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,DOMESTIC_VIOLENCE_PER_10K,"Domestic violence (per 10,000 households)",per_10000_households,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,DOMESTIC_VIOLENCE_PER_10K,"Domestic violence (per 10,000 households)",per_10000_households,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,DWELLINGS_IN_SINGLE_UNIT_BUILDING,Dwellings in single-dwelling buildings,count,2021,1638.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,DWELLINGS_OCCUPIED,Occupied dwellings,count,2021,1668.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23064,23064,Pepingen,Pepingen,Pepingen,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,DWELLINGS_TOTAL,"Dwellings, total",count,2021,1817.0,A,2026-09-06T18:32:19.814670+00:00
@@ -4877,7 +4877,7 @@ be:mun:23103,23103,Wezembeek-Oppem,Wezembeek-Oppem,Wezembeek-Oppem,Flanders,Flem
 be:mun:23103,23103,Wezembeek-Oppem,Wezembeek-Oppem,Wezembeek-Oppem,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.03,A,2026-09-14T12:20:12.880627+00:00
 be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,89746.96,A,2026-09-06T20:39:35.516406+00:00
 be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_EMPLOYED,Employed population (15-64),count,2021,4267.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_INACTIVE,Inactive population (15-64),count,2021,1342.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:23104,23104,Lennik,Lennik,Lennik,Flanders,Flemish Brabant,Arrondissement Halle-Vilvoorde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4398.0,A,2026-09-06T18:32:19.814670+00:00
@@ -5213,7 +5213,7 @@ be:mun:24011,24011,Bierbeek,Bierbeek,Bierbeek,Flanders,Flemish Brabant,Arrondiss
 be:mun:24011,24011,Bierbeek,Bierbeek,Bierbeek,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.71,A,2026-09-14T12:20:12.880627+00:00
 be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,241746.8,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_EMPLOYED,Employed population (15-64),count,2021,6017.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_INACTIVE,Inactive population (15-64),count,2021,1683.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24014,24014,Boortmeerbeek,Boortmeerbeek,Boortmeerbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,6221.0,A,2026-09-06T18:32:19.814670+00:00
@@ -5667,7 +5667,7 @@ be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arr
 be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,60.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,58.857142857,P,2026-09-09T09:22:42.352272+00:00
 be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,266766.01,A,2026-09-06T20:39:35.516406+00:00
-be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,61.857142857,P,2026-09-09T09:22:42.352272+00:00
 be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,1202781.23,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24054,24054,Kortenaken,Kortenaken,Kortenaken,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,70.285714286,P,2026-09-09T09:22:42.352272+00:00
@@ -5801,7 +5801,7 @@ be:mun:24062,24062,Leuven,Louvain,Leuven,Flanders,Flemish Brabant,Arrondissement
 be:mun:24062,24062,Leuven,Louvain,Leuven,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.75,A,2026-09-14T12:20:12.880627+00:00
 be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,315794.64,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_EMPLOYED,Employed population (15-64),count,2021,6683.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_INACTIVE,Inactive population (15-64),count,2021,2139.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24066,24066,Lubbeek,Lubbeek,Lubbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,6907.0,A,2026-09-06T18:32:19.814670+00:00
@@ -6095,7 +6095,7 @@ be:mun:24130,24130,Zoutleeuw,Léau,Zoutleeuw,Flanders,Flemish Brabant,Arrondisse
 be:mun:24130,24130,Zoutleeuw,Léau,Zoutleeuw,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.68,A,2026-09-14T12:20:12.880627+00:00
 be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,284579.78,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_EMPLOYED,Employed population (15-64),count,2021,3506.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_INACTIVE,Inactive population (15-64),count,2021,976.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24133,24133,Linter,Linter,Linter,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3646.0,A,2026-09-06T18:32:19.814670+00:00
@@ -6213,7 +6213,7 @@ be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,164.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,54.857142857,P,2026-09-09T09:22:42.352272+00:00
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,223595.71,A,2026-09-06T20:39:35.516406+00:00
-be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,114.0,P,2026-09-09T09:22:42.352272+00:00
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,2148935.55,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,120.85714286,P,2026-09-09T09:22:42.352272+00:00
@@ -6221,7 +6221,7 @@ be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,
 be:mun:24135,24135,Tielt-Winge,Tielt-Winge,Tielt-Winge,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.76,A,2026-09-14T12:20:12.880627+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,107856.02,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_EMPLOYED,Employed population (15-64),count,2021,2561.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_INACTIVE,Inactive population (15-64),count,2021,753.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2634.0,A,2026-09-06T18:32:19.814670+00:00
@@ -6255,7 +6255,7 @@ be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondiss
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,55.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,25.0,P,2026-09-09T09:22:42.352272+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,114671.51,A,2026-09-06T20:39:35.516406+00:00
-be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,35.714285714,P,2026-09-09T09:22:42.352272+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,602765.97,A,2026-09-06T20:39:35.516406+00:00
 be:mun:24137,24137,Glabbeek,Glabbeek,Glabbeek,Flanders,Flemish Brabant,Arrondissement Leuven,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,38.285714286,P,2026-09-09T09:22:42.352272+00:00
@@ -7511,7 +7511,7 @@ be:mun:25121,25121,Ottignies-Louvain-la-Neuve,Ottignies-Louvain-la-Neuve,Ottigni
 be:mun:25121,25121,Ottignies-Louvain-la-Neuve,Ottignies-Louvain-la-Neuve,Ottignies-Louvain-la-Neuve,Wallonia,Walloon Brabant,Arrondissement Nijvel,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.32,A,2026-09-14T12:20:12.880627+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,355048.32,A,2026-09-06T20:39:35.516406+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,7.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,CAS_EMPLOYED,Employed population (15-64),count,2021,3017.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,CAS_INACTIVE,Inactive population (15-64),count,2021,1024.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3245.0,A,2026-09-06T18:32:19.814670+00:00
@@ -7554,7 +7554,7 @@ be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrond
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,48.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,37.571428571,P,2026-09-09T09:22:42.352272+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,175417.9,A,2026-09-06T20:39:35.516406+00:00
-be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,114.42857143,P,2026-09-09T09:22:42.352272+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,2258611.71,A,2026-09-06T20:39:35.516406+00:00
 be:mun:25122,25122,Ramillies,Ramillies,Ramillies,Wallonia,Walloon Brabant,Arrondissement Nijvel,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,116.85714286,P,2026-09-09T09:22:42.352272+00:00
@@ -8037,7 +8037,7 @@ be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arron
 be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,12.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,14.428571429,P,2026-09-09T09:22:42.352272+00:00
 be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,83719.88,A,2026-09-06T20:39:35.516406+00:00
-be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,42.428571429,P,2026-09-09T09:22:42.352272+00:00
 be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,496194.24,A,2026-09-06T20:39:35.516406+00:00
 be:mun:31042,31042,Zuienkerke,Zuienkerke,Zuienkerke,Flanders,West Flanders,Arrondissement Brugge,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,43.428571429,P,2026-09-09T09:22:42.352272+00:00
@@ -8129,7 +8129,7 @@ be:mun:32003,32003,Diksmuide,Dixmude,Diksmuide,Flanders,West Flanders,Arrondisse
 be:mun:32003,32003,Diksmuide,Dixmude,Diksmuide,Flanders,West Flanders,Arrondissement Diksmuide,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.26,A,2026-09-14T12:20:12.880627+00:00
 be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,281176.5,A,2026-09-06T20:39:35.516406+00:00
 be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.5,A,2026-09-12T14:25:17.692249+00:00
-be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,CAS_EMPLOYED,Employed population (15-64),count,2021,4938.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,CAS_INACTIVE,Inactive population (15-64),count,2021,1372.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5110.0,A,2026-09-06T18:32:19.814670+00:00
@@ -8171,7 +8171,7 @@ be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondis
 be:mun:32006,32006,Houthulst,Houthulst,Houthulst,Flanders,West Flanders,Arrondissement Diksmuide,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.55,A,2026-09-14T12:20:12.880627+00:00
 be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,270476.51,A,2026-09-06T20:39:35.516406+00:00
 be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,CAS_EMPLOYED,Employed population (15-64),count,2021,4133.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,CAS_INACTIVE,Inactive population (15-64),count,2021,1144.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:32010,32010,Koekelare,Koekelare,Koekelare,Flanders,West Flanders,Arrondissement Diksmuide,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4259.0,A,2026-09-06T18:32:19.814670+00:00
@@ -8255,7 +8255,7 @@ be:mun:32011,32011,Kortemark,Kortemark,Kortemark,Flanders,West Flanders,Arrondis
 be:mun:32011,32011,Kortemark,Kortemark,Kortemark,Flanders,West Flanders,Arrondissement Diksmuide,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.06,A,2026-09-14T12:20:12.880627+00:00
 be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,38005.11,A,2026-09-06T20:39:35.516406+00:00
 be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,1.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,CAS_EMPLOYED,Employed population (15-64),count,2021,1559.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,CAS_INACTIVE,Inactive population (15-64),count,2021,437.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:32030,32030,Lo-Reninge,Lo-Reninge,Lo-Reninge,Flanders,West Flanders,Arrondissement Diksmuide,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1594.0,A,2026-09-06T18:32:19.814670+00:00
@@ -8548,7 +8548,7 @@ be:mun:33039,33039,Heuvelland,Heuvelland,Heuvelland,Flanders,West Flanders,Arron
 be:mun:33039,33039,Heuvelland,Heuvelland,Heuvelland,Flanders,West Flanders,Arrondissement Ieper,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.7,A,2026-09-14T12:20:12.880627+00:00
 be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,255344.41,A,2026-09-06T20:39:35.516406+00:00
 be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.5,A,2026-09-12T14:25:17.692249+00:00
-be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,CAS_EMPLOYED,Employed population (15-64),count,2021,3833.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,CAS_INACTIVE,Inactive population (15-64),count,2021,1049.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:33040,33040,Langemark-Poelkapelle,Langemark-Poelkapelle,Langemark-Poelkapelle,Flanders,West Flanders,Arrondissement Ieper,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3952.0,A,2026-09-06T18:32:19.814670+00:00
@@ -8884,7 +8884,7 @@ be:mun:34023,34023,Kuurne,Kuurne,Kuurne,Flanders,West Flanders,Arrondissement Ko
 be:mun:34023,34023,Kuurne,Kuurne,Kuurne,Flanders,West Flanders,Arrondissement Kortrijk,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.78,A,2026-09-14T12:20:12.880627+00:00
 be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,231686.56,A,2026-09-06T20:39:35.516406+00:00
 be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.9,A,2026-09-12T14:25:17.692249+00:00
-be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,CAS_EMPLOYED,Employed population (15-64),count,2021,2643.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,CAS_INACTIVE,Inactive population (15-64),count,2021,772.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:34025,34025,Lendelede,Lendelede,Lendelede,Flanders,West Flanders,Arrondissement Kortrijk,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2722.0,A,2026-09-06T18:32:19.814670+00:00
@@ -9219,7 +9219,7 @@ be:mun:35005,35005,Gistel,Gistel,Gistel,Flanders,West Flanders,Arrondissement Oo
 be:mun:35005,35005,Gistel,Gistel,Gistel,Flanders,West Flanders,Arrondissement Oostende,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.63,A,2026-09-14T12:20:12.880627+00:00
 be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,494491.55,A,2026-09-06T20:39:35.516406+00:00
 be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,CAS_EMPLOYED,Employed population (15-64),count,2021,6730.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,CAS_INACTIVE,Inactive population (15-64),count,2021,1879.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:35006,35006,Ichtegem,Ichtegem,Ichtegem,Flanders,West Flanders,Arrondissement Oostende,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,6970.0,A,2026-09-06T18:32:19.814670+00:00
@@ -9345,7 +9345,7 @@ be:mun:35013,35013,Ostend,Ostende,Oostende,Flanders,West Flanders,Arrondissement
 be:mun:35013,35013,Ostend,Ostende,Oostende,Flanders,West Flanders,Arrondissement Oostende,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,5.37,A,2026-09-14T12:20:12.880627+00:00
 be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,366251.67,A,2026-09-06T20:39:35.516406+00:00
 be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.5,A,2026-09-12T14:25:17.692249+00:00
-be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,CAS_EMPLOYED,Employed population (15-64),count,2021,4556.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,CAS_INACTIVE,Inactive population (15-64),count,2021,1336.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:35014,35014,Oudenburg,Oudenburg,Oudenburg,Flanders,West Flanders,Arrondissement Oostende,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4737.0,A,2026-09-06T18:32:19.814670+00:00
@@ -9765,7 +9765,7 @@ be:mun:36019,36019,Staden,Staden,Staden,Flanders,West Flanders,Arrondissement Ro
 be:mun:36019,36019,Staden,Staden,Staden,Flanders,West Flanders,Arrondissement Roeselare,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.57,A,2026-09-14T12:20:12.880627+00:00
 be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,231879.48,A,2026-09-06T20:39:35.516406+00:00
 be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,CAS_EMPLOYED,Employed population (15-64),count,2021,4201.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,CAS_INACTIVE,Inactive population (15-64),count,2021,1185.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4307.0,A,2026-09-06T18:32:19.814670+00:00
@@ -9807,7 +9807,7 @@ be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondis
 be:mun:37002,37002,Dentergem,Dentergem,Dentergem,Flanders,West Flanders,Arrondissement Tielt,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.08,A,2026-09-14T12:20:12.880627+00:00
 be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,310836.42,A,2026-09-06T20:39:35.516406+00:00
 be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.8,A,2026-09-12T14:25:17.692249+00:00
-be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,CAS_EMPLOYED,Employed population (15-64),count,2021,4000.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,CAS_INACTIVE,Inactive population (15-64),count,2021,946.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:37010,37010,Oostrozebeke,Oostrozebeke,Oostrozebeke,Flanders,West Flanders,Arrondissement Tielt,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4125.0,A,2026-09-06T18:32:19.814670+00:00
@@ -10059,7 +10059,7 @@ be:mun:37022,37022,Tielt,Tielt,Tielt,Flanders,West Flanders,Arrondissement Tielt
 be:mun:37022,37022,Tielt,Tielt,Tielt,Flanders,West Flanders,Arrondissement Tielt,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.75,A,2026-09-14T12:20:12.880627+00:00
 be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,140479.49,A,2026-09-06T20:39:35.516406+00:00
 be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,CAS_EMPLOYED,Employed population (15-64),count,2021,2461.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,CAS_INACTIVE,Inactive population (15-64),count,2021,715.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2528.0,A,2026-09-06T18:32:19.814670+00:00
@@ -10101,7 +10101,7 @@ be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arron
 be:mun:38002,38002,Alveringem,Alveringem,Alveringem,Flanders,West Flanders,Arrondissement Veurne,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.42,A,2026-09-14T12:20:12.880627+00:00
 be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,218437.56,A,2026-09-06T20:39:35.516406+00:00
 be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.4,A,2026-09-12T14:25:17.692249+00:00
-be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,CAS_EMPLOYED,Employed population (15-64),count,2021,4064.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,CAS_INACTIVE,Inactive population (15-64),count,2021,1843.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,4462.0,A,2026-09-06T18:32:19.814670+00:00
@@ -10143,7 +10143,7 @@ be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissem
 be:mun:38008,38008,De Panne,La Panne,De Panne,Flanders,West Flanders,Arrondissement Veurne,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.83,A,2026-09-14T12:20:12.880627+00:00
 be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,307753.26,A,2026-09-06T20:39:35.516406+00:00
 be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,4.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,CAS_EMPLOYED,Employed population (15-64),count,2021,7437.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,CAS_INACTIVE,Inactive population (15-64),count,2021,3103.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:38014,38014,Koksijde,Koksijde,Koksijde,Flanders,West Flanders,Arrondissement Veurne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,7915.0,A,2026-09-06T18:32:19.814670+00:00
@@ -10395,7 +10395,7 @@ be:mun:41018,41018,Geraardsbergen,Grammont,Geraardsbergen,Flanders,East Flanders
 be:mun:41018,41018,Geraardsbergen,Grammont,Geraardsbergen,Flanders,East Flanders,Arrondissement Aalst,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.57,A,2026-09-14T12:20:12.880627+00:00
 be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,640375.78,A,2026-09-06T20:39:35.516406+00:00
 be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,CAS_EMPLOYED,Employed population (15-64),count,2021,8973.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,CAS_INACTIVE,Inactive population (15-64),count,2021,2688.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:41024,41024,Haaltert,Haaltert,Haaltert,Flanders,East Flanders,Arrondissement Aalst,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,9300.0,A,2026-09-06T18:32:19.814670+00:00
@@ -10563,7 +10563,7 @@ be:mun:41048,41048,Ninove,Ninove,Ninove,Flanders,East Flanders,Arrondissement Aa
 be:mun:41048,41048,Ninove,Ninove,Ninove,Flanders,East Flanders,Arrondissement Aalst,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.09,A,2026-09-14T12:20:12.880627+00:00
 be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,291101.14,A,2026-09-06T20:39:35.516406+00:00
 be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,CAS_EMPLOYED,Employed population (15-64),count,2021,5169.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,CAS_INACTIVE,Inactive population (15-64),count,2021,1409.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:41063,41063,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Sint-Lievens-Houtem,Flanders,East Flanders,Arrondissement Aalst,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5326.0,A,2026-09-06T18:32:19.814670+00:00
@@ -11227,7 +11227,7 @@ be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissem
 be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,31.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,51.285714286,P,2026-09-09T09:22:42.352272+00:00
 be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,132178.69,A,2026-09-06T20:39:35.516406+00:00
-be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,63.714285714,P,2026-09-09T09:22:42.352272+00:00
 be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,1102033.09,A,2026-09-06T20:39:35.516406+00:00
 be:mun:43007,43007,Kaprijke,Kaprijke,Kaprijke,Flanders,East Flanders,Arrondissement Eeklo,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,76.142857143,P,2026-09-09T09:22:42.352272+00:00
@@ -11445,7 +11445,7 @@ be:mun:44019,44019,Evergem,Evergem,Evergem,Flanders,East Flanders,Arrondissement
 be:mun:44019,44019,Evergem,Evergem,Evergem,Flanders,East Flanders,Arrondissement Gent,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.2,A,2026-09-14T12:20:12.880627+00:00
 be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,563089.36,A,2026-09-06T20:39:35.516406+00:00
 be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.9,A,2026-09-12T14:25:17.692249+00:00
-be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,CAS_EMPLOYED,Employed population (15-64),count,2021,6254.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,CAS_INACTIVE,Inactive population (15-64),count,2021,1832.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:44020,44020,Gavere,Gavere,Gavere,Flanders,East Flanders,Arrondissement Gent,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,6457.0,A,2026-09-06T18:32:19.814670+00:00
@@ -12003,7 +12003,7 @@ be:mun:45041,45041,Ronse,Renaix,Ronse,Flanders,East Flanders,Arrondissement Oude
 be:mun:45041,45041,Ronse,Renaix,Ronse,Flanders,East Flanders,Arrondissement Oudenaarde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.94,A,2026-09-14T12:20:12.880627+00:00
 be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,585815.25,A,2026-09-06T20:39:35.516406+00:00
 be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_EMPLOYED,Employed population (15-64),count,2021,6878.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_INACTIVE,Inactive population (15-64),count,2021,2160.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:45059,45059,Brakel,Brakel,Brakel,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,7125.0,A,2026-09-06T18:32:19.814670+00:00
@@ -12087,7 +12087,7 @@ be:mun:45060,45060,Kluisbergen,Kluisbergen,Kluisbergen,Flanders,East Flanders,Ar
 be:mun:45060,45060,Kluisbergen,Kluisbergen,Kluisbergen,Flanders,East Flanders,Arrondissement Oudenaarde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.77,A,2026-09-14T12:20:12.880627+00:00
 be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,169651.99,A,2026-09-06T20:39:35.516406+00:00
 be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_EMPLOYED,Employed population (15-64),count,2021,3156.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_INACTIVE,Inactive population (15-64),count,2021,841.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3248.0,A,2026-09-06T18:32:19.814670+00:00
@@ -12129,7 +12129,7 @@ be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,E
 be:mun:45061,45061,Wortegem-Petegem,Wortegem-Petegem,Wortegem-Petegem,Flanders,East Flanders,Arrondissement Oudenaarde,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,0.96,A,2026-09-14T12:20:12.880627+00:00
 be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,87124.64,A,2026-09-06T20:39:35.516406+00:00
 be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_EMPLOYED,Employed population (15-64),count,2021,929.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_INACTIVE,Inactive population (15-64),count,2021,230.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:45062,45062,Horebeke,Horebeke,Horebeke,Flanders,East Flanders,Arrondissement Oudenaarde,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,950.0,A,2026-09-06T18:32:19.814670+00:00
@@ -16329,7 +16329,7 @@ be:mun:61010,61010,Burdinne,Burdinne,Burdinne,Wallonia,Liège,Arrondissement Hoe
 be:mun:61010,61010,Burdinne,Burdinne,Burdinne,Wallonia,Liège,Arrondissement Hoei,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.68,A,2026-09-14T12:20:12.880627+00:00
 be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,278659.46,A,2026-09-06T20:39:35.516406+00:00
 be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,CAS_EMPLOYED,Employed population (15-64),count,2021,2215.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,CAS_INACTIVE,Inactive population (15-64),count,2021,691.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61012,61012,Clavier,Clavier,Clavier,Wallonia,Liège,Arrondissement Hoei,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2363.0,A,2026-09-06T18:32:19.814670+00:00
@@ -16433,7 +16433,7 @@ be:mun:61019,61019,Ferrières,Ferrières,Ferrières,Wallonia,Liège,Arrondisseme
 be:mun:61019,61019,Ferrières,Ferrières,Ferrières,Wallonia,Liège,Arrondissement Hoei,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.94,A,2026-09-14T12:20:12.880627+00:00
 be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,314370.07,A,2026-09-06T20:39:35.516406+00:00
 be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,12.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,CAS_EMPLOYED,Employed population (15-64),count,2021,1533.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,CAS_INACTIVE,Inactive population (15-64),count,2021,685.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61024,61024,Hamoir,Hamoir,Hamoir,Wallonia,Liège,Arrondissement Hoei,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1744.0,A,2026-09-06T18:32:19.814670+00:00
@@ -16743,7 +16743,7 @@ be:mun:61043,61043,Nandrin,Nandrin,Nandrin,Wallonia,Liège,Arrondissement Hoei,U
 be:mun:61043,61043,Nandrin,Nandrin,Nandrin,Wallonia,Liège,Arrondissement Hoei,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.7,A,2026-09-14T12:20:12.880627+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,201275.81,A,2026-09-06T20:39:35.516406+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,7.4,A,2026-09-12T14:25:17.692249+00:00
-be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,CAS_EMPLOYED,Employed population (15-64),count,2021,1245.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,CAS_INACTIVE,Inactive population (15-64),count,2021,452.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1358.0,A,2026-09-06T18:32:19.814670+00:00
@@ -16785,7 +16785,7 @@ be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,POP_
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,16.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,30.857142857,P,2026-09-09T09:22:42.352272+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,145622.55,A,2026-09-06T20:39:35.516406+00:00
-be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,64.0,P,2026-09-09T09:22:42.352272+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,984991.97,A,2026-09-06T20:39:35.516406+00:00
 be:mun:61048,61048,Ouffet,Ouffet,Ouffet,Wallonia,Liège,Arrondissement Hoei,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,64.0,P,2026-09-09T09:22:42.352272+00:00
@@ -17416,7 +17416,7 @@ be:mun:62022,62022,Chaudfontaine,Chaudfontaine,Chaudfontaine,Wallonia,Liège,Arr
 be:mun:62022,62022,Chaudfontaine,Chaudfontaine,Chaudfontaine,Wallonia,Liège,Arrondissement Luik,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.25,A,2026-09-14T12:20:12.880627+00:00
 be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,490971.82,A,2026-09-06T20:39:35.516406+00:00
 be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,12.0,A,2026-09-12T14:25:17.692249+00:00
-be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,CAS_EMPLOYED,Employed population (15-64),count,2021,2161.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,CAS_INACTIVE,Inactive population (15-64),count,2021,996.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:62026,62026,Comblain-au-Pont,Comblain-au-Pont,Comblain-au-Pont,Wallonia,Liège,Arrondissement Luik,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2428.0,A,2026-09-06T18:32:19.814670+00:00
@@ -18352,7 +18352,7 @@ be:mun:62122,62122,Trooz,Trooz,Trooz,Wallonia,Liège,Arrondissement Luik,UNEMPLO
 be:mun:62122,62122,Trooz,Trooz,Trooz,Wallonia,Liège,Arrondissement Luik,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.09,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,167718.64,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,2766.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,782.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63001,63001,Amel,Amblève,Amel,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2810.0,A,2026-09-06T18:32:19.814670+00:00
@@ -18454,7 +18454,7 @@ be:mun:63003,63003,Aubel,Aubel,Aubel,Wallonia,Liège,Arrondissement Verviers,UNE
 be:mun:63003,63003,Aubel,Aubel,Aubel,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.2,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,324723.13,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.9,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,2117.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,665.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63004,63004,Baelen,Baelen,Baelen,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2279.0,A,2026-09-06T18:32:19.814670+00:00
@@ -18867,7 +18867,7 @@ be:mun:63040,63040,Kelmis,La Calamine,Kelmis,Wallonia,Liège,Arrondissement Verv
 be:mun:63040,63040,Kelmis,La Calamine,Kelmis,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.1,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,235962.81,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,7.0,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,1576.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,641.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63045,63045,Lierneux,Lierneux,Lierneux,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1700.0,A,2026-09-06T18:32:19.814670+00:00
@@ -19331,7 +19331,7 @@ be:mun:63072,63072,Spa,Spa,Spa,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYM
 be:mun:63072,63072,Spa,Spa,Spa,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,5.35,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,530735.45,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,9.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,3182.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,1024.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63073,63073,Stavelot,Stavelot,Stavelot,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3506.0,A,2026-09-06T18:32:19.814670+00:00
@@ -19538,7 +19538,7 @@ be:mun:63079,63079,Verviers,Verviers,Verviers,Wallonia,Liège,Arrondissement Ver
 be:mun:63079,63079,Verviers,Verviers,Verviers,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,6.33,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,483656.26,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,5.9,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,3554.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,1027.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63080,63080,Waimes,Waimes,Weismes,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3779.0,A,2026-09-06T18:32:19.814670+00:00
@@ -19694,7 +19694,7 @@ be:mun:63086,63086,Trois-Ponts,Trois-Ponts,Trois-Ponts,Wallonia,Liège,Arrondiss
 be:mun:63086,63086,Trois-Ponts,Trois-Ponts,Trois-Ponts,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.68,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,66067.08,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,2.4,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,1802.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,703.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1859.0,A,2026-09-06T18:32:19.814670+00:00
@@ -19745,7 +19745,7 @@ be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrond
 be:mun:63087,63087,Burg-Reuland,Burg-Reuland,Burg-Reuland,Wallonia,Liège,Arrondissement Verviers,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,0.8,A,2026-09-14T12:20:12.880627+00:00
 be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,527715.39,A,2026-09-06T20:39:35.516406+00:00
 be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,7.7,A,2026-09-12T14:25:17.692249+00:00
-be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,CAS_EMPLOYED,Employed population (15-64),count,2021,4719.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,CAS_INACTIVE,Inactive population (15-64),count,2021,1686.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:63088,63088,Plombières,Plombières,Plombières,Wallonia,Liège,Arrondissement Verviers,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,5078.0,A,2026-09-06T18:32:19.814670+00:00
@@ -20106,7 +20106,7 @@ be:mun:64025,64025,Fexhe-le-Haut-Clocher,Fexhe-le-Haut-Clocher,Fexhe-le-Haut-Clo
 be:mun:64025,64025,Fexhe-le-Haut-Clocher,Fexhe-le-Haut-Clocher,Fexhe-le-Haut-Clocher,Wallonia,Liège,Arrondissement Borgworm,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.84,A,2026-09-14T12:20:12.880627+00:00
 be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,188266.19,A,2026-09-06T20:39:35.516406+00:00
 be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,CAS_EMPLOYED,Employed population (15-64),count,2021,1661.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,CAS_INACTIVE,Inactive population (15-64),count,2021,565.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:64029,64029,Geer,Geer,Geer,Wallonia,Liège,Arrondissement Borgworm,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1794.0,A,2026-09-06T18:32:19.814670+00:00
@@ -20467,7 +20467,7 @@ be:mun:64074,64074,Waremme,Waremme,Borgworm,Wallonia,Liège,Arrondissement Borgw
 be:mun:64074,64074,Waremme,Waremme,Borgworm,Wallonia,Liège,Arrondissement Borgworm,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.96,A,2026-09-14T12:20:12.880627+00:00
 be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,170044.07,A,2026-09-06T20:39:35.516406+00:00
 be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,CAS_EMPLOYED,Employed population (15-64),count,2021,1394.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,CAS_INACTIVE,Inactive population (15-64),count,2021,444.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:64075,64075,Wasseiges,Wasseiges,Wasseiges,Wallonia,Liège,Arrondissement Borgworm,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1506.0,A,2026-09-06T18:32:19.814670+00:00
@@ -20947,7 +20947,7 @@ be:mun:71037,71037,Lummen,Lummen,Lummen,Flanders,Limburg,Arrondissement Hasselt,
 be:mun:71037,71037,Lummen,Lummen,Lummen,Flanders,Limburg,Arrondissement Hasselt,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.2,A,2026-09-14T12:20:12.880627+00:00
 be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,277063.29,A,2026-09-06T20:39:35.516406+00:00
 be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,CAS_EMPLOYED,Employed population (15-64),count,2021,3338.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,CAS_INACTIVE,Inactive population (15-64),count,2021,982.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:71045,71045,Nieuwerkerken,Nieuwerkerken,Nieuwerkerken,Flanders,Limburg,Arrondissement Hasselt,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3466.0,A,2026-09-06T18:32:19.814670+00:00
@@ -21795,7 +21795,7 @@ be:mun:73001,73001,Alken,Alken,Alken,Flanders,Limburg,Arrondissement Tongeren,UN
 be:mun:73001,73001,Alken,Alken,Alken,Flanders,Limburg,Arrondissement Tongeren,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.22,A,2026-09-14T12:20:12.880627+00:00
 be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,379760.21,A,2026-09-06T20:39:35.516406+00:00
 be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.6,A,2026-09-12T14:25:17.692249+00:00
-be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,CAS_EMPLOYED,Employed population (15-64),count,2021,3429.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,CAS_INACTIVE,Inactive population (15-64),count,2021,1110.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3586.0,A,2026-09-06T18:32:19.814670+00:00
@@ -21837,12 +21837,12 @@ be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,UN
 be:mun:73022,73022,Heers,Heers,Heers,Flanders,Limburg,Arrondissement Tongeren,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.71,A,2026-09-14T12:20:12.880627+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,0.0,A,2026-09-06T20:39:35.516406+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,,S,2026-09-12T14:25:17.692249+00:00
-be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,CAS_EMPLOYED,Employed population (15-64),count,2021,31.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,CAS_INACTIVE,Inactive population (15-64),count,2021,9.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,35.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,CAS_UNEMPLOYED,Unemployed population (15-64),count,2021,4.0,A,2026-09-06T18:32:19.814670+00:00
-be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,DOMESTIC_VIOLENCE_PER_10K,"Domestic violence (per 10,000 households)",per_10000_households,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,DOMESTIC_VIOLENCE_PER_10K,"Domestic violence (per 10,000 households)",per_10000_households,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,DWELLINGS_IN_SINGLE_UNIT_BUILDING,Dwellings in single-dwelling buildings,count,2021,30.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,DWELLINGS_OCCUPIED,Occupied dwellings,count,2021,29.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,DWELLINGS_TOTAL,"Dwellings, total",count,2021,36.0,A,2026-09-06T18:32:19.814670+00:00
@@ -21855,7 +21855,7 @@ be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,FISCAL_TOT_TAXES,Total tax assessed,eur,2023,430725.9,A,2026-09-06T11:24:33.304313+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,HOUSEHOLDS_PRIVATE,Private households,count,2021,29.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,HOUSEHOLDS_SINGLE_PERSON,One-person households,count,2021,6.0,A,2026-09-06T18:32:19.814670+00:00
-be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,HOUSE_BURGLARIES_PER_10K,"House burglaries (per 10,000 dwellings)",per_10000_dwellings,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,HOUSE_BURGLARIES_PER_10K,"House burglaries (per 10,000 dwellings)",per_10000_dwellings,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,HOUSE_SALES_TRANSACTIONS,House sales (excl. apartments),count,2025,1.0,P,2026-09-06T22:42:03.124792+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,LOCAL_UNITS_BY_COMMUNE,Local business units,count,2023-Q4,25.0,A,2026-09-05T19:00:05.127955+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,PART_TIME_BENEFIT_RECIPIENTS,Part-time workers receiving an income guarantee,count,2026,0.0,P,2026-09-06T20:39:35.516406+00:00
@@ -21869,7 +21869,7 @@ be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,POP_MARRIED,Married population,count,2021,38.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,0.0,P,2026-09-06T20:39:35.516406+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,1729.46,A,2026-09-06T20:39:35.516406+00:00
-be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,0.0,P,2026-09-06T20:39:35.516406+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,191.28,A,2026-09-06T20:39:35.516406+00:00
 be:mun:73028,73028,Herstappe,Herstappe,Herstappe,Flanders,Limburg,Arrondissement Tongeren,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,0.0,P,2026-09-06T20:39:35.516406+00:00
@@ -21961,7 +21961,7 @@ be:mun:73066,73066,Riemst,Riemst,Riemst,Flanders,Limburg,Arrondissement Tongeren
 be:mun:73066,73066,Riemst,Riemst,Riemst,Flanders,Limburg,Arrondissement Tongeren,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,1.97,A,2026-09-14T12:20:12.880627+00:00
 be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,261827.91,A,2026-09-06T20:39:35.516406+00:00
 be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,3.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,CAS_EMPLOYED,Employed population (15-64),count,2021,3490.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,CAS_INACTIVE,Inactive population (15-64),count,2021,1094.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:73098,73098,Wellen,Wellen,Wellen,Flanders,Limburg,Arrondissement Tongeren,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3646.0,A,2026-09-06T18:32:19.814670+00:00
@@ -22223,7 +22223,7 @@ be:mun:81001,81001,Arlon,Arlon,Aarlen,Wallonia,Luxembourg,Arrondissement Aarlen,
 be:mun:81001,81001,Arlon,Arlon,Aarlen,Wallonia,Luxembourg,Arrondissement Aarlen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.12,A,2026-09-14T12:20:12.880627+00:00
 be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,147925.58,A,2026-09-06T20:39:35.516406+00:00
 be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,5.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,CAS_EMPLOYED,Employed population (15-64),count,2021,2586.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,CAS_INACTIVE,Inactive population (15-64),count,2021,1063.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:81003,81003,Attert,Attert,Attert,Wallonia,Luxembourg,Arrondissement Aarlen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2708.0,A,2026-09-06T18:32:19.814670+00:00
@@ -22326,7 +22326,7 @@ be:mun:81004,81004,Aubange,Aubange,Aubange,Wallonia,Luxembourg,Arrondissement Aa
 be:mun:81004,81004,Aubange,Aubange,Aubange,Wallonia,Luxembourg,Arrondissement Aarlen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.22,A,2026-09-14T12:20:12.880627+00:00
 be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,150866.65,A,2026-09-06T20:39:35.516406+00:00
 be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,10.2,A,2026-09-12T14:25:17.692249+00:00
-be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,CAS_EMPLOYED,Employed population (15-64),count,2021,837.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,CAS_INACTIVE,Inactive population (15-64),count,2021,351.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:81013,81013,Martelange,Martelange,Martelange,Wallonia,Luxembourg,Arrondissement Aarlen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,915.0,A,2026-09-06T18:32:19.814670+00:00
@@ -22480,7 +22480,7 @@ be:mun:82009,82009,Fauvillers,Fauvillers,Fauvillers,Wallonia,Luxembourg,Arrondis
 be:mun:82009,82009,Fauvillers,Fauvillers,Fauvillers,Wallonia,Luxembourg,Arrondissement Bastenaken,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.91,A,2026-09-14T12:20:12.880627+00:00
 be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,279229.38,A,2026-09-06T20:39:35.516406+00:00
 be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,8.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,CAS_EMPLOYED,Employed population (15-64),count,2021,2289.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,CAS_INACTIVE,Inactive population (15-64),count,2021,847.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:82014,82014,Houffalize,Houffalize,Houffalize,Wallonia,Luxembourg,Arrondissement Bastenaken,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2497.0,A,2026-09-06T18:32:19.814670+00:00
@@ -22832,7 +22832,7 @@ be:mun:83012,83012,Durbuy,Durbuy,Durbuy,Wallonia,Luxembourg,Arrondissement March
 be:mun:83012,83012,Durbuy,Durbuy,Durbuy,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.7,A,2026-09-14T12:20:12.880627+00:00
 be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,231560.28,A,2026-09-06T20:39:35.516406+00:00
 be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,9.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_EMPLOYED,Employed population (15-64),count,2021,1406.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_INACTIVE,Inactive population (15-64),count,2021,590.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83013,83013,Erezée,Erezée,Erezée,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1536.0,A,2026-09-06T18:32:19.814670+00:00
@@ -22936,7 +22936,7 @@ be:mun:83028,83028,Hotton,Hotton,Hotton,Wallonia,Luxembourg,Arrondissement March
 be:mun:83028,83028,Hotton,Hotton,Hotton,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.05,A,2026-09-14T12:20:12.880627+00:00
 be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,294886.64,A,2026-09-06T20:39:35.516406+00:00
 be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,9.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_EMPLOYED,Employed population (15-64),count,2021,1819.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_INACTIVE,Inactive population (15-64),count,2021,684.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83031,83031,La Roche-en-Ardenne,La Roche-en-Ardenne,La Roche-en-Ardenne,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2021.0,A,2026-09-06T18:32:19.814670+00:00
@@ -23135,7 +23135,7 @@ be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Ma
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,20.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,32.571428571,P,2026-09-09T09:22:42.352272+00:00
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,144534.55,A,2026-09-06T20:39:35.516406+00:00
-be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,57.285714286,P,2026-09-09T09:22:42.352272+00:00
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,986343.08,A,2026-09-06T20:39:35.516406+00:00
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,58.285714286,P,2026-09-09T09:22:42.352272+00:00
@@ -23144,7 +23144,7 @@ be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Ma
 be:mun:83044,83044,Rendeux,Rendeux,Rendeux,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.12,A,2026-09-14T12:20:12.880627+00:00
 be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,139404.2,A,2026-09-06T20:39:35.516406+00:00
 be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.0,A,2026-09-12T14:25:17.692249+00:00
-be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_EMPLOYED,Employed population (15-64),count,2021,1320.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_INACTIVE,Inactive population (15-64),count,2021,427.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1404.0,A,2026-09-06T18:32:19.814670+00:00
@@ -23195,7 +23195,7 @@ be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondis
 be:mun:83049,83049,Tenneville,Tenneville,Tenneville,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,2.6,A,2026-09-14T12:20:12.880627+00:00
 be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,154677.22,A,2026-09-06T20:39:35.516406+00:00
 be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.1,A,2026-09-12T14:25:17.692249+00:00
-be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_EMPLOYED,Employed population (15-64),count,2021,1691.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_INACTIVE,Inactive population (15-64),count,2021,570.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:83055,83055,Manhay,Manhay,Manhay,Wallonia,Luxembourg,Arrondissement Marche-en-Famenne,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1816.0,A,2026-09-06T18:32:19.814670+00:00
@@ -23401,7 +23401,7 @@ be:mun:84016,84016,Daverdisse,Daverdisse,Daverdisse,Wallonia,Luxembourg,Arrondis
 be:mun:84016,84016,Daverdisse,Daverdisse,Daverdisse,Wallonia,Luxembourg,Arrondissement Neufchâteau,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.23,A,2026-09-14T12:20:12.880627+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,133675.61,A,2026-09-06T20:39:35.516406+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,11.0,A,2026-09-12T14:25:17.692249+00:00
-be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_EMPLOYED,Employed population (15-64),count,2021,708.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_INACTIVE,Inactive population (15-64),count,2021,293.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,774.0,A,2026-09-06T18:32:19.814670+00:00
@@ -23444,7 +23444,7 @@ be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondis
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,POP_NON_EU_NATIONALS,Population of non-EU nationality,count,2021,22.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,TEMP_UNEMPLOYED,Temporarily unemployed,count,2026,16.857142857,P,2026-09-09T09:22:42.352272+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,TEMP_UNEMPLOYMENT_BENEFIT_PAID,Temporary unemployment benefit paid,EUR,2025,54029.36,A,2026-09-06T20:39:35.516406+00:00
-be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,THEFT_FROM_VEHICLE_PER_10K,"Theft from a vehicle (per 10,000 vehicles)",per_10000_vehicles,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,UNEMPLOYED_JOBSEEKERS,Unemployed benefit claimants seeking work,count,2026,33.142857143,P,2026-09-09T09:22:42.352272+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,UNEMPLOYMENT_BENEFIT_PAID,Full unemployment benefit paid,EUR,2025,677333.51,A,2026-09-06T20:39:35.516406+00:00
 be:mun:84029,84029,Herbeumont,Herbeumont,Herbeumont,Wallonia,Luxembourg,Arrondissement Neufchâteau,UNEMPLOYMENT_BENEFIT_RECIPIENTS,Full unemployment benefit recipients (all statuses),count,2026,33.285714286,P,2026-09-09T09:22:42.352272+00:00
@@ -23659,7 +23659,7 @@ be:mun:84050,84050,Paliseul,Paliseul,Paliseul,Wallonia,Luxembourg,Arrondissement
 be:mun:84050,84050,Paliseul,Paliseul,Paliseul,Wallonia,Luxembourg,Arrondissement Neufchâteau,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.05,A,2026-09-14T12:20:12.880627+00:00
 be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,401414.35,A,2026-09-06T20:39:35.516406+00:00
 be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,9.0,A,2026-09-12T14:25:17.692249+00:00
-be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_EMPLOYED,Employed population (15-64),count,2021,2313.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_INACTIVE,Inactive population (15-64),count,2021,1021.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,2525.0,A,2026-09-06T18:32:19.814670+00:00
@@ -23711,7 +23711,7 @@ be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Ar
 be:mun:84059,84059,Saint-Hubert,Saint-Hubert,Saint-Hubert,Wallonia,Luxembourg,Arrondissement Neufchâteau,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,3.21,A,2026-09-14T12:20:12.880627+00:00
 be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,205164.91,A,2026-09-06T20:39:35.516406+00:00
 be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,8.3,A,2026-09-12T14:25:17.692249+00:00
-be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_EMPLOYED,Employed population (15-64),count,2021,1033.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_INACTIVE,Inactive population (15-64),count,2021,421.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:84068,84068,Tellin,Tellin,Tellin,Wallonia,Luxembourg,Arrondissement Neufchâteau,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,1147.0,A,2026-09-06T18:32:19.814670+00:00
@@ -25420,7 +25420,7 @@ be:mun:92048,92048,Fosses-la-Ville,Fosses-la-Ville,Fosses-la-Ville,Wallonia,Namu
 be:mun:92048,92048,Fosses-la-Ville,Fosses-la-Ville,Fosses-la-Ville,Wallonia,Namur,Arrondissement Namen,UNEMPLOYMENT_RATE_INSURED_MONTHLY,"Unemployment rate (ONEM definition, monthly)",percent,2026-07,4.82,A,2026-09-14T12:20:12.880627+00:00
 be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,491808.7,A,2026-09-06T20:39:35.516406+00:00
 be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,ADMIN_UNEMPLOYMENT_RATE_COM,Administrative unemployment rate (15-64),percent,2024,6.8,A,2026-09-12T14:25:17.692249+00:00
-be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,,N,2026-09-06T21:55:49.719566+00:00
+be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,CAR_THEFT_PER_10K,"Car theft (per 10,000 cars)",per_10000_cars,2025,0.0,P,2026-09-06T21:55:49.719566+00:00
 be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,CAS_EMPLOYED,Employed population (15-64),count,2021,3328.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,CAS_INACTIVE,Inactive population (15-64),count,2021,1195.0,A,2026-09-06T18:32:19.814670+00:00
 be:mun:92054,92054,Gesves,Gesves,Gesves,Wallonia,Namur,Arrondissement Namen,CAS_LABOUR_FORCE,Labour force (15-64),count,2021,3597.0,A,2026-09-06T18:32:19.814670+00:00
