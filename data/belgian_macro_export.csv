@@ -417,6 +417,7 @@ CONSUMER_CONFIDENCE,Consumer confidence (NBB),2026-05,-37.0,A,balance,NBB,2026-0
 CONSUMER_CONFIDENCE,Consumer confidence (NBB),2026-06,-31.0,A,balance,NBB,2026-09-05T12:48:35.250844+00:00
 CONSUMER_CONFIDENCE,Consumer confidence (NBB),2026-07,-27.0,A,balance,NBB,2026-09-05T12:48:35.250844+00:00
 CONSUMER_CONFIDENCE,Consumer confidence (NBB),2026-08,-32.0,A,balance,NBB,2026-09-05T12:48:35.250844+00:00
+CONSUMER_CONFIDENCE,Consumer confidence (NBB),2026-09,-41.0,A,balance,NBB,2026-09-22T09:37:31.992907+00:00
 EC_CONS_CONF_BE,"Consumer confidence indicator, Belgium",2008-01,-11.6,A,balance,Eurostat,2026-09-14T05:58:46.582618+00:00
 EC_CONS_CONF_BE,"Consumer confidence indicator, Belgium",2008-02,-10.2,A,balance,Eurostat,2026-09-05T12:48:35.250844+00:00
 EC_CONS_CONF_BE,"Consumer confidence indicator, Belgium",2008-03,-10.2,A,balance,Eurostat,2026-09-05T12:48:35.250844+00:00
