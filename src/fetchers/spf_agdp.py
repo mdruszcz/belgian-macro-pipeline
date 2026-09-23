@@ -60,6 +60,7 @@ use, for the same reason -- scripts/sync_spf_agdp.py resolves it.
 from __future__ import annotations
 
 import csv
+import http.client
 import io
 import re
 import time
@@ -219,7 +220,7 @@ class _RangedHttpFile(io.RawIOBase):
             try:
                 with urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT) as resp:
                     return resp.read(), resp.status
-            except (urllib.error.URLError, TimeoutError) as exc:
+            except (urllib.error.URLError, TimeoutError, http.client.HTTPException) as exc:
                 last_exc = exc
                 if attempt < _RANGE_MAX_ATTEMPTS - 1:
                     time.sleep(_RANGE_BACKOFF_SECONDS[attempt])
