@@ -30,7 +30,12 @@ def _verdict(tmp_path, changed_paths, base_override=None):
     _git(repo, "add", ".")
     _git(repo, "commit", "-q", "-m", "base")
     base = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=repo, check=True, capture_output=True, text=True
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
     ).stdout.strip()
     for rel in changed_paths:
         path = repo / rel
