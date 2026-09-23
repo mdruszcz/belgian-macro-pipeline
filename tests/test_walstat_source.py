@@ -28,6 +28,7 @@ from src.analytics.derived import growth_rate, share_of_total  # noqa: E402
 from src.analytics.engine import ObservationSet, compute  # noqa: E402
 from src.db import migrate  # noqa: E402
 from src.fetchers.walstat import (  # noqa: E402
+    EXTRA_PERIOD_FORMS,
     WalStatCoverageError,
     WalStatSchemaError,
     WalStatSource,
@@ -73,14 +74,24 @@ def test_namur_grapa_share_2023_is_7_23_percent(geo_conn):
     """Read off the live 833300_0 API 2026-09-23: Namur (92094), period
     01/01/2023, valeur 7.23. Exercises the '01/01/YYYY' period form end to
     end, not just in the regex unit tests above."""
-    rows = parse(geo_conn, [row(period="01/01/2023", value="7.23")], reconcile=False)
+    rows = parse(
+        geo_conn,
+        [row(period="01/01/2023", value="7.23")],
+        reconcile=False,
+        period_forms=EXTRA_PERIOD_FORMS["GRAPA_RECIPIENTS_SHARE_65_PLUS"],
+    )
     assert rows == [{"geo_id": "be:mun:92094", "period": "2023", "value": 7.23, "status": "final"}]
 
 
 def test_namur_bim_share_2024_is_26_15_percent(geo_conn):
     """Read off the live 833800_0 API 2026-09-23: Namur (92094), period
     '2024' (a bare year, BIM's own periode form), valeur 26.15."""
-    rows = parse(geo_conn, [row(period="2024", value="26.15")], reconcile=False)
+    rows = parse(
+        geo_conn,
+        [row(period="2024", value="26.15")],
+        reconcile=False,
+        period_forms=EXTRA_PERIOD_FORMS["BIM_BENEFICIARIES_SHARE"],
+    )
     assert rows == [{"geo_id": "be:mun:92094", "period": "2024", "value": 26.15, "status": "final"}]
 
 
@@ -112,15 +123,41 @@ def test_the_new_ns2_period_forms_all_map_to_their_calendar_year(geo_conn):
             row(ins="51067", period="2024"),
         ],
         reconcile=False,
+        period_forms=frozenset({"01/01", "31/12", "bare"}),
     )
     assert {r["period"] for r in rows} == {"2024"}
+
+
+@pytest.mark.parametrize("periode", ["2024", "01/01/2024", "31/12/2024"])
+def test_the_ns2_forms_are_refused_for_a_series_that_does_not_write_them(geo_conn, periode):
+    """The NS2 forms are declared per indicator. A finance or labour-market
+    series (no period_forms) that suddenly wrote one of them must still
+    refuse loudly, not be read as a year (rule 13)."""
+    with pytest.raises(WalStatSchemaError, match="is not a period form"):
+        parse(geo_conn, [row(period=periode)], reconcile=False)
+
+
+def test_a_form_declared_for_one_series_is_refused_for_another(geo_conn):
+    """The meter series write 31/12/YYYY only; a bare year there refuses."""
+    with pytest.raises(WalStatSchemaError, match="is not a period form"):
+        parse(
+            geo_conn,
+            [row(period="2024")],
+            reconcile=False,
+            period_forms=EXTRA_PERIOD_FORMS["PREPAYMENT_METERS_GAS_SHARE"],
+        )
 
 
 def test_an_unseen_day_month_still_refuses(geo_conn):
     """A real day/month, not the 01/01 or 31/12 snapshot convention: refused
     rather than parsed by a permissive digit-anywhere pattern (rule 13)."""
-    with pytest.raises(WalStatSchemaError, match="does not read"):
-        parse(geo_conn, [row(period="15/06/2024")], reconcile=False)
+    with pytest.raises(WalStatSchemaError, match="is not a period form"):
+        parse(
+            geo_conn,
+            [row(period="15/06/2024")],
+            reconcile=False,
+            period_forms=frozenset({"01/01", "31/12", "bare"}),
+        )
 
 
 def test_bastogne_and_bertogne_resolve_for_2024_and_their_successor_for_2025(geo_conn):
@@ -262,8 +299,8 @@ def test_a_year_under_the_90_percent_floor_is_refused_as_partial(geo_conn):
         ({"data": []}, "not the documented bare array"),
         ([{"ins": "92094", "valeur": "1"}], "keys"),
         ([row(kind="Province")], "not 'Commune'"),
-        ([row(period="15/06/2024")], "does not read"),
-        ([row(period="T1 2024")], "does not read"),
+        ([row(period="15/06/2024")], "is not a period form"),
+        ([row(period="T1 2024")], "is not a period form"),
         ([row(value="")], "is not a number"),
         ([row(value="n.d.")], "is not a number"),
         ([row(), row()], "appears twice"),
