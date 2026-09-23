@@ -262,12 +262,13 @@ def test_municipal_time_series_contract_bankruptcies(tmp_path, monkeypatch):
 # --- the population-movement municipal contract, same deviation --------------
 #
 # PopulationMovementSource is a MunicipalTimeSeriesSource, but `geo_id` is
-# the raw NIS string (never resolved inline -- resolution needs a per-row
-# DERIVED period, sheet_year + 1, that only scripts/sync_population_movement.py
-# computes) and each row carries a fifth key, `indicator_id`, since one fetch
-# emits up to four indicators (BIRTHS, DEATHS, INTERNAL_MIGRATION_NET,
-# INTERNATIONAL_MIGRATION_NET) per commune-year cell. See
-# src/fetchers/population_movement.py's module docstring.
+# the raw NIS string (never resolved inline -- resolution needs a live db
+# connection, which this layer does not have; resolve_geo(conn, nis,
+# sheet_year) is scripts/sync_population_movement.py's job, against the
+# row's OWN sheet year) and each row carries a fifth key, `indicator_id`,
+# since one fetch emits up to four indicators (BIRTHS, DEATHS,
+# INTERNAL_MIGRATION_NET, INTERNATIONAL_MIGRATION_NET) per commune-year
+# cell. See src/fetchers/population_movement.py's module docstring.
 
 sys.path.insert(0, str(REPO / "tests"))
 from test_population_movement_source import (  # noqa: E402
