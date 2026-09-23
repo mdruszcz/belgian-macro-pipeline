@@ -1,18 +1,53 @@
 """Load SPF Finances' communal additional personal-income-tax rate --
 MUN_IPP_ADDITIONAL_RATE, docs/features/ipp_rate.md.
 
-DAILY, AUTOMATIC. One XLSX per tax year at a fixed URL pattern:
-`https://fin.belgium.be/sites/default/files/media/documents/
-taux-taxe-communale-{year}.xlsx`. There is no landing page listing these
-files (checked 2026-09-23 -- unlike Statbel's bankruptcies/population-
-movement pages, SPF Finances has no page that links them by href), so this
-script ITERATES tax years from 2024 up to (current year + 1) at the known
-pattern, exactly as the handoff specifies: a 404 on a year beyond what has
-been published yet is expected (not yet released) and simply stops the
-iteration; a 404 on a year already loaded in a PREVIOUS successful run, or a
-response whose sheet/header has drifted from the documented shape, fails the
-WHOLE run (CLAUDE.md rule 13) -- never a silent partial load, never a
-fallback to a cached or hard-coded file.
+NOT PART OF THE DAILY AUTOMATIC FETCH SINCE 2026-09-23. One XLSX per tax
+year at a fixed URL pattern: `https://fin.belgium.be/sites/default/files/
+media/documents/taux-taxe-communale-{year}.xlsx`. There is no landing page
+listing these files (checked 2026-09-23 -- unlike Statbel's bankruptcies/
+population-movement pages, SPF Finances has no page that links them by
+href), so this script ITERATES tax years from 2024 up to (current year + 1)
+at the known pattern: a 404 on a year beyond what has been published yet is
+expected (not yet released) and simply stops the iteration; a 404 on a year
+already loaded in a PREVIOUS successful run, or a response whose
+sheet/header has drifted from the documented shape, fails the WHOLE run
+(CLAUDE.md rule 13) -- never a silent partial load, never a fallback to a
+cached or hard-coded file.
+
+WHY NOT DAILY ANY MORE. Diagnosed 2026-09-23 on the scheduled run
+(2026-09-23T18:09): fin.belgium.be answers EVERY request from a GitHub
+Actions runner with a CAPTCHA challenge page (HTTP 200, text/html, ~46 KB,
+"This question is for testing whether you are a human visitor... What code
+is in the image?", carrying a support ID) instead of the XLSX file. A probe
+run confirmed this is runner-specific: the same URL still returns the real
+file from a maintainer's own machine (this pipeline's TLS interception is
+unrelated -- the file downloads fine over the same unverified SSL context
+used everywhere else here). This pipeline does not solve or evade CAPTCHAs.
+So orchestration/commands.py's `ipp_rate_observations` Command carries no
+`workflow_step` and is absent from TRACKED / the daily fetch_sources job;
+the committed store (config/stores.yaml `ipp_rate`, mode: in_db) is
+untouched and keeps flowing into every export.
+
+HOW TO REFRESH. Two ways, both from a machine that still passes the
+CAPTCHA (this one, as of 2026-09-23):
+  1. Live, unattended:  python scripts/sync_ipp_rate.py --db data/belgian_macro.db
+  2. From hand-downloaded file(s), when even this machine gets challenged:
+     download https://fin.belgium.be/sites/default/files/media/documents/
+     taux-taxe-communale-{YEAR}.xlsx by hand (a browser, which passes the
+     CAPTCHA interactively) for each tax year, then:
+       python scripts/sync_ipp_rate.py --db data/belgian_macro.db \
+           --from-file taux-taxe-communale-2024.xlsx \
+           --from-file taux-taxe-communale-2025.xlsx
+     `--from-file` runs the exact same parse/resolve/validate path as the
+     live fetch (IppRateSource._parse, then the same name->NIS->geo_id
+     resolution below) -- only the transport differs. The tax year is read
+     from the filename (must match `taux-taxe-communale-{YEAR}.xlsx`, case-
+     insensitive, exactly the shape URL_PATTERN produces); a filename that
+     does not match refuses rather than guessing the year.
+The store's `max_age_days` / the `staleness` validation rule is what flags
+when a refresh is actually due -- this source's own fetch_window_days no
+longer applies since it is not in the daily gate, but staleness still
+checks the DATA's own age regardless of how it arrived.
 
 NO NIS CODES IN THE SOURCE FILE -- the key is a commune NAME. Unlike
 bankruptcies.py/population_movement.py (which resolve a raw NIS code),
@@ -48,6 +83,8 @@ reason).
 
 Usage:  python scripts/sync_ipp_rate.py --db data/belgian_macro.db
         python scripts/sync_ipp_rate.py --db X --reference-rows-only
+        python scripts/sync_ipp_rate.py --db X --from-file taux-taxe-communale-2024.xlsx \
+            --from-file taux-taxe-communale-2025.xlsx
 """
 
 from __future__ import annotations
@@ -79,6 +116,27 @@ CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
 #: PDF-only, out of scope). Never lowered without re-verifying the earlier
 #: years are still PDF-only.
 FIRST_TAX_YEAR = 2024
+
+#: The basename URL_PATTERN produces, e.g. "taux-taxe-communale-2024.xlsx" --
+#: --from-file reads the tax year from a hand-downloaded file's own name
+#: rather than accepting it as a separate argument, so the file and the year
+#: it is loaded as can never drift apart. Case-insensitive (a browser's
+#: "Save As" sometimes changes case); anything else refuses (CLAUDE.md rule
+#: 13) rather than guessing.
+_FROM_FILE_NAME = re.compile(r"^taux-taxe-communale-(\d{4})\.xlsx$", re.IGNORECASE)
+
+
+def _tax_year_from_filename(path: Path) -> int:
+    match = _FROM_FILE_NAME.match(path.name)
+    if not match:
+        raise SystemExit(
+            f"::error::--from-file {path} does not match the expected filename "
+            f"'taux-taxe-communale-{{YEAR}}.xlsx' (URL_PATTERN's own basename); refusing to "
+            "guess which tax year this file belongs to. Rename it to match, or re-download "
+            f"from {URL_PATTERN.format(year='YEAR')}."
+        )
+    return int(match.group(1))
+
 
 #: One explicit, verified name->geo_id override for the one genuinely
 #: ambiguous name in the file, measured 2026-09-23 (module docstring; see
@@ -357,7 +415,10 @@ def sync(
 
 def main() -> None:
     ap = argparse.ArgumentParser(
-        description="Load SPF Finances' communal additional IPP rate (daily, automatic)"
+        description=(
+            "Load SPF Finances' communal additional IPP rate (not part of the daily "
+            "automatic fetch since 2026-09-23 -- see module docstring)"
+        )
     )
     ap.add_argument("--db", required=True)
     ap.add_argument(
@@ -365,8 +426,24 @@ def main() -> None:
         action="store_true",
         help="Insert only the sources/indicators rows; needs no network",
     )
+    ap.add_argument(
+        "--from-file",
+        action="append",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Load a hand-downloaded 'taux-taxe-communale-{YEAR}.xlsx' instead of fetching "
+            "live -- repeatable, one per tax year. Same parse/resolve/validate path as the "
+            "live fetch; only the transport differs. No network."
+        ),
+    )
     args = ap.parse_args()
-    read, written = sync(Path(args.db), args.reference_rows_only)
+    if args.from_file:
+        year_bytes = {_tax_year_from_filename(path): path.read_bytes() for path in args.from_file}
+        read, written = sync(Path(args.db), args.reference_rows_only, year_bytes=year_bytes)
+    else:
+        read, written = sync(Path(args.db), args.reference_rows_only)
     if args.reference_rows_only:
         print(f"Reference rows ensured for: {INDICATOR_ID}")
     else:

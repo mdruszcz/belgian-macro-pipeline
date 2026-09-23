@@ -290,6 +290,62 @@ def test_a_year_under_the_90_percent_floor_is_refused_as_partial(geo_conn):
     assert len(parse(geo_conn, complete[:236])) == 236  # 90.08%
 
 
+# --- FIRST_YEAR (2026-09-23 fix: the gas prepayment-meter series' 2016) -------
+
+
+def test_the_gas_series_2016_is_skipped_and_reported_not_a_coverage_failure(geo_conn):
+    """PREPAYMENT_METERS_GAS_SHARE lists only 170 of 263 Walloon communes for
+    31/12/2016 on the live API -- under COVERAGE_FLOOR, so without FIRST_YEAR
+    this partial year would refuse the whole run. Declared out of scope via
+    first_year="2017": the 2016 rows are skipped and counted
+    (source.before_first_year), never loaded, and never reach the coverage
+    check at all -- a small (170-row) 2016 response parses cleanly instead of
+    raising WalStatCoverageError."""
+    partial_2016 = [
+        row(nis, "x", period="31/12/2016")
+        for nis in list(walloon_communes_on(geo_conn, "2016"))[:170]
+    ]
+    source = WalStatSource()
+    rows = source._parse(
+        json.dumps(partial_2016).encode(),
+        geo_conn=geo_conn,
+        period_forms=EXTRA_PERIOD_FORMS["PREPAYMENT_METERS_GAS_SHARE"],
+        first_year="2017",
+    )
+    assert rows == []
+    assert len(source.before_first_year) == 170
+    assert all(period == "2016" for _nis, period in source.before_first_year)
+    assert source.missing == {}  # 2016 never entered `by_period`, so nothing to reconcile
+
+
+def test_a_partial_year_at_or_after_first_year_still_raises_coverage_error(geo_conn):
+    """FIRST_YEAR excludes exactly the declared early year -- a partial
+    response for a LATER year (2017, on or after the declared first year)
+    still hits the ordinary 90% floor."""
+    communes_2017 = list(walloon_communes_on(geo_conn, "2017"))
+    partial_2017 = [row(nis, "x", period="31/12/2017") for nis in communes_2017[:150]]
+    with pytest.raises(WalStatCoverageError, match="under the 90% floor"):
+        WalStatSource()._parse(
+            json.dumps(partial_2017).encode(),
+            geo_conn=geo_conn,
+            period_forms=EXTRA_PERIOD_FORMS["PREPAYMENT_METERS_GAS_SHARE"],
+            first_year="2017",
+        )
+
+
+def test_first_year_does_not_affect_a_series_with_no_declared_first_year(geo_conn):
+    """FIRST_YEAR is per-indicator; a series with no entry in that map (the
+    ordinary case -- first_year=None passed through) keeps evaluating 2016
+    exactly as before this fix, coverage floor included."""
+    complete_2013 = [
+        row(nis, "x", period="année 2013") for nis in walloon_communes_on(geo_conn, "2013")
+    ]
+    source = WalStatSource()
+    rows = source._parse(json.dumps(complete_2013).encode(), geo_conn=geo_conn, first_year=None)
+    assert len(rows) == len(complete_2013)
+    assert source.before_first_year == []
+
+
 # --- every refusal ------------------------------------------------------------
 
 

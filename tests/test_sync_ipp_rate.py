@@ -209,6 +209,61 @@ def test_output_is_deterministic_regardless_of_input_row_order(db):
     assert [(g, p, v, s) for g, p, v, s in rows_a] == [(g, p, v, s) for g, p, v, s in rows_b]
 
 
+# --- --from-file (2026-09-23: fin.belgium.be CAPTCHAs CI, manual refresh) ---
+
+
+def test_from_file_loads_a_hand_downloaded_workbook_by_filename_year(db, monkeypatch, tmp_path):
+    """--from-file reads the tax year from the filename
+    ('taux-taxe-communale-{YEAR}.xlsx') and runs the exact same parse/
+    resolve/write path as a live fetch -- same hand-computed 2026 values as
+    the network-backed test above."""
+    path = tmp_path / "taux-taxe-communale-2026.xlsx"
+    path.write_bytes(_make_workbook(REAL_2026_ROWS))
+    monkeypatch.setattr(
+        sys, "argv", ["sync_ipp_rate.py", "--db", str(db), "--from-file", str(path)]
+    )
+    sync_ipp_rate.main()
+
+    rows = _observations(db)
+    by_geo = {geo_id: (value, status) for geo_id, period, value, status in rows}
+    assert by_geo["be:mun:41002"] == (7.5, "final")  # Aalst
+    assert by_geo["be:mun:11001"] == (5.0, "final")  # Aartselaar
+    assert by_geo["be:mun:31043"] == (0.0, "final")  # Knokke-Heist, a real measured zero
+
+
+def test_from_file_accepts_several_tax_years_in_one_run(db, monkeypatch, tmp_path):
+    path_2025 = tmp_path / "taux-taxe-communale-2025.xlsx"
+    path_2026 = tmp_path / "taux-taxe-communale-2026.xlsx"
+    path_2025.write_bytes(_make_workbook([("Aalst", 6.5)]))
+    path_2026.write_bytes(_make_workbook([("Aalst", 7.5)]))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "sync_ipp_rate.py",
+            "--db",
+            str(db),
+            "--from-file",
+            str(path_2025),
+            "--from-file",
+            str(path_2026),
+        ],
+    )
+    sync_ipp_rate.main()
+
+    rows = _observations(db, geo_id="be:mun:41002")
+    by_period = {period: (value, status) for _geo, period, value, status in rows}
+    assert by_period["2025"] == (6.5, "final")
+    assert by_period["2026"] == (7.5, "final")
+
+
+def test_from_file_with_a_filename_not_matching_the_pattern_refuses(tmp_path):
+    bad = tmp_path / "ipp_2026.xlsx"
+    bad.write_bytes(_make_workbook(REAL_2026_ROWS))
+    with pytest.raises(SystemExit, match="does not match the expected filename"):
+        sync_ipp_rate._tax_year_from_filename(bad)
+
+
 # --- name normalisation ----------------------------------------------------
 
 

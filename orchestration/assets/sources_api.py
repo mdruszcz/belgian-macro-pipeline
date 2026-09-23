@@ -6,6 +6,15 @@ Each source depends only on the working database (and canonical_observations
 on the macro fetch), so under the in-process executor they run one after the
 other, never two writing the database at once, in an order Dagster picks.
 None reads what another wrote, so that order does not matter.
+
+THREE OF THESE ASSETS ARE NOT PART OF THE DAILY RUN ANY MORE (2026-09-23):
+bankruptcies_observations, population_movement_observations and
+ipp_rate_observations still exist here -- so a maintainer can materialize one
+by hand from a machine that passes the CAPTCHA -- but their Command in
+orchestration/commands.py carries no `workflow_step`, so they are absent from
+TRACKED and therefore from the `fetch_sources` job's AssetSelection
+(orchestration/definitions.py: `AssetSelection.assets(*TRACKED)`). See
+commands.py's own comment on those three entries for why.
 """
 
 from dagster import AssetExecutionContext, MaterializeResult, asset

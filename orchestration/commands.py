@@ -26,7 +26,9 @@ class Command:
     # Files or directories the command writes, for the asset's metadata.
     outputs: tuple[str, ...] = ()
     # The step id in daily_fetch.yml whose outcome decides auto-merge today.
-    # Exactly these eight are tracked in the coordinator's source manifest.
+    # None for a source with no daily/automatic fetch -- absent from TRACKED
+    # below and from the coordinator's source manifest, even though its
+    # Command still exists so it can be run by hand or from the Makefile.
     workflow_step: str | None = None
     # fetch_runs source ids; the freshness window comes from their
     # `fetch_window_days` (config/sources/*.yaml).
@@ -87,19 +89,29 @@ COMMANDS: dict[str, Command] = {
         workflow_step="sync_walstat",
         source_ids=("walstat",),
     ),
+    # bankruptcies_observations, population_movement_observations and
+    # ipp_rate_observations: NOT tracked (no workflow_step) since 2026-09-23.
+    # statbel.fgov.be and fin.belgium.be now answer every request from a
+    # GitHub Actions runner with a CAPTCHA challenge page (confirmed by a
+    # live probe from a runner the same day; the same URLs still return the
+    # real file from a maintainer's own machine). These three can no longer
+    # run unattended in CI -- see each script's own module docstring and
+    # docs/features/{bankruptcies,population_movement,ipp_rate}.md for how to
+    # refresh them by hand. Their committed stores (config/stores.yaml,
+    # mode: in_db) are untouched and keep flowing into every export; only the
+    # daily automatic fetch stops. Still runnable by hand (`python
+    # scripts/sync_bankruptcies.py --db ...`, from a machine that passes the
+    # CAPTCHA) or from a hand-downloaded file (--from-file), never by CI.
     "bankruptcies_observations": Command(
         ("scripts/sync_bankruptcies.py", "--db", "{db}"),
-        workflow_step="sync_bankruptcies",
         source_ids=("statbel",),
     ),
     "population_movement_observations": Command(
         ("scripts/sync_population_movement.py", "--db", "{db}"),
-        workflow_step="sync_population_movement",
         source_ids=("statbel",),
     ),
     "ipp_rate_observations": Command(
         ("scripts/sync_ipp_rate.py", "--db", "{db}"),
-        workflow_step="sync_ipp_rate",
         source_ids=("spf_finances",),
     ),
     "spf_agdp_observations": Command(
@@ -298,6 +310,7 @@ COMMANDS: dict[str, Command] = {
     ),
 }
 
-# The eight outcomes daily_fetch.yml's "Check every source succeeded" step
-# gates auto-merge on, in the workflow's order.
+# The outcomes daily_fetch.yml's "Check every source succeeded" step gates
+# auto-merge on. Count drifts as sources are added/retired from the daily
+# run; tests/test_orchestration.py pins the exact current count and set.
 TRACKED: tuple[str, ...] = tuple(name for name, c in COMMANDS.items() if c.workflow_step)
