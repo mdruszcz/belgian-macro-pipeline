@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from port_existing_indicators import derive_period_bounds  # noqa: E402
 
 from src.db.vintages import upsert_observation  # noqa: E402
-from src.fetchers.walstat import WalStatSource  # noqa: E402
+from src.fetchers.walstat import EXTRA_PERIOD_FORMS, WalStatSource  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
@@ -156,12 +156,20 @@ def sync(
         try:
             if from_dir is not None:
                 raw = (from_dir / f"{code}.json").read_bytes()
-                rows = source._parse(raw, geo_conn=conn)
+                rows = source._parse(
+                    raw, geo_conn=conn, period_forms=EXTRA_PERIOD_FORMS.get(code, frozenset())
+                )
             else:
                 url = source_meta["base_url"] + ind["fetch"]["query"]
                 # `conn` is for the adapter's own fetch_runs logging; `geo_conn`
                 # is the parse-time geography lookup. Same connection, two roles.
-                rows = source.fetch(url, cache_key=code, conn=conn, geo_conn=conn)
+                rows = source.fetch(
+                    url,
+                    cache_key=code,
+                    conn=conn,
+                    geo_conn=conn,
+                    period_forms=EXTRA_PERIOD_FORMS.get(code, frozenset()),
+                )
         except Exception as exc:
             # This script's own run row must not say `ok` for a series that
             # refused: the fetch_error validation rule reads the latest run.

@@ -112,19 +112,45 @@ EXPECTED_KEYS = frozenset({"ins", "type_entite", "entite", "periode", "valeur"})
 #: annuelle 1999" instead, because they ARE an annual average of monthly
 #: readings rather than a closed account (UNEMPLOYMENT_RATE_BIT, series
 #: 236400_0). Both name one calendar year and resolve to the same period.
-#: The social-protection and prepayment-meter series (Block NS2) write a full
-#: date instead: "01/01/YYYY" (GRAPA/RG, BIM) or "31/12/YYYY" (electricity and
-#: gas prepayment meters) -- both map to the year YYYY, the API's convention
-#: for a snapshot taken on one day of the year -- or a bare "YYYY" (BIM's own
-#: `periode` for several years is just the year, no words and no date). Every
-#: one of these five forms names exactly one calendar year and nothing else
-#: is accepted, so a form nobody has seen (a real day/month, "15/06/2024")
-#: still refuses rather than being parsed by a looser \d{4}-anywhere pattern
-#: (rule 13).
-_PERIOD = re.compile(
-    r"^(?:(?:ann[ée]e|moyenne\s+annuelle)\s+(\d{4})|(?:01/01|31/12)/(\d{4})|(\d{4}))$",
-    re.IGNORECASE,
-)
+_PERIOD = re.compile(r"^(?:ann[ée]e|moyenne\s+annuelle)\s+(\d{4})$", re.IGNORECASE)
+
+#: The social-protection and prepayment-meter series (Block NS2) write their
+#: period differently: "01/01/YYYY" (GRAPA/RG, BIM), "31/12/YYYY" (electricity
+#: and gas prepayment meters) -- a snapshot on one day, which names the year
+#: YYYY -- or, for BIM in several years, a bare "YYYY". These forms are
+#: accepted ONLY for the series that write them, declared per indicator in
+#: EXTRA_PERIOD_FORMS and passed to _parse as `period_forms`. Every other
+#: series still accepts only the two worded forms above, so a finance or
+#: labour-market series that suddenly wrote "2024" or "01/01/2024" still
+#: refuses loudly (rule 13) instead of being read as a year.
+_EXTRA_PERIOD = {
+    "01/01": re.compile(r"^01/01/(\d{4})$"),
+    "31/12": re.compile(r"^31/12/(\d{4})$"),
+    "bare": re.compile(r"^(\d{4})$"),
+}
+
+#: Which extra period forms each NS2 indicator's series writes (measured on
+#: the live API 2026-09-23). An indicator absent from this map gets none.
+EXTRA_PERIOD_FORMS: dict[str, frozenset[str]] = {
+    "GRAPA_RECIPIENTS_SHARE_65_PLUS": frozenset({"01/01"}),
+    "BIM_BENEFICIARIES_SHARE": frozenset({"01/01", "bare"}),
+    "PREPAYMENT_METERS_ELECTRICITY_SHARE": frozenset({"31/12"}),
+    "PREPAYMENT_METERS_GAS_SHARE": frozenset({"31/12"}),
+}
+
+
+def _match_period(periode: str, period_forms: frozenset[str]) -> str | None:
+    """The calendar year a `periode` names, or None if its form is not one
+    this series is allowed to write."""
+    match = _PERIOD.match(periode)
+    if match:
+        return match.group(1)
+    for form in sorted(period_forms):
+        match = _EXTRA_PERIOD[form].match(periode)
+        if match:
+            return match.group(1)
+    return None
+
 
 #: The Walloon Region's geo_id, the root every commune here must chain up to.
 WALLONIA = "be:reg:03000"
@@ -305,6 +331,10 @@ class WalStatSource(MunicipalTimeSeriesSource):
         if conn is None:
             raise ValueError("WalStatSource._parse needs geo_conn= (a connection with geographies)")
         reconcile: bool = kwargs.get("reconcile", True)
+        period_forms: frozenset[str] = frozenset(kwargs.get("period_forms", ()))
+        unknown_forms = period_forms - set(_EXTRA_PERIOD)
+        if unknown_forms:
+            raise ValueError(f"unknown period_forms {sorted(unknown_forms)}")
 
         try:
             data = json.loads(raw)
@@ -338,16 +368,14 @@ class WalStatSource(MunicipalTimeSeriesSource):
                     f"row {index}: type_entite {row['type_entite']!r} is not 'Commune' -- this "
                     "series was requested for communes and something else came back"
                 )
-            match = _PERIOD.match(str(row["periode"]).strip())
-            if not match:
+            period = _match_period(str(row["periode"]).strip(), period_forms)
+            if period is None:
                 raise WalStatSchemaError(
-                    f"row {index}: periode {row['periode']!r} does not read 'année YYYY', "
-                    "'01/01/YYYY', '31/12/YYYY' or a bare 'YYYY'"
+                    f"row {index}: periode {row['periode']!r} is not a period form this "
+                    f"series writes ('année YYYY' / 'moyenne annuelle YYYY'"
+                    + (f", plus {sorted(period_forms)}" if period_forms else "")
+                    + ")"
                 )
-            # Three alternatives, one live group each: "année YYYY" /
-            # "moyenne annuelle YYYY" in group 1, "01/01/YYYY" / "31/12/YYYY"
-            # in group 2, a bare "YYYY" in group 3. Exactly one is not None.
-            period = next(g for g in match.groups() if g is not None)
             nis = str(row["ins"]).strip()
             if (nis, period) in seen:
                 raise WalStatSchemaError(f"INS {nis} appears twice for {period}")
