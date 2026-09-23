@@ -1,0 +1,66 @@
+id: MUN_LEASE_RENT_MEDIAN_HOUSING
+name:
+  en: Median monthly rent, new housing leases
+  fr: Loyer mensuel médian, nouveaux baux de logement
+  nl: Mediane maandelijkse huur, nieuwe woninghuurcontracten
+unit: eur_per_month
+frequency: Q
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 270
+description:
+  en: >
+    Median monthly rent (RentP50, EUR/month, excluding charges) across residential lease
+    registrations (RegistrationType=HousingRegistration, LessorType=TOTAL,
+    TakerType=TOTAL) in the commune in the quarter, published directly by SPF Finances --
+    not recomputed here (CLAUDE.md rule 6; a median cannot be reconstructed from a count
+    and a total the way a mean can). Source: SPF Finances AGDP real-estate leases dataset
+    (52.01.01), Municipality-level CSV. PERIOD IS THE CALENDAR QUARTER derived from the
+    version's own publication date. SUPPRESSED, NOT ZERO, when the underlying registration
+    count (MUN_LEASES_NEW_HOUSING) is 1-4 in that commune-quarter -- SPF Finances withholds
+    the percentile below five registrations to avoid identifying an individual lease;
+    status is 'suppressed' with value NULL, never a fabricated figure. NOT APPLICABLE when
+    the count is zero (no lease of this kind that quarter, so no median exists to report --
+    status 'na', value NULL, distinct from suppression). is_additive=false,
+    aggregation_method=not_applicable: a median has no defensible aggregate -- it is
+    neither summed nor recomputable from a sum this pipeline holds, so province/region/
+    Belgium figures are refused, never averaged across communes (CLAUDE.md Definitions).
+  fr: >
+    Loyer mensuel médian (RentP50, EUR/mois, charges non comprises) sur les enregistrements
+    de baux résidentiels (RegistrationType=HousingRegistration, LessorType=TOTAL,
+    TakerType=TOTAL) dans la commune au cours du trimestre, publié directement par le SPF
+    Finances -- non recalculé ici (règle 6 de CLAUDE.md ; une médiane ne peut pas être
+    reconstruite à partir d'un nombre et d'un total comme une moyenne). Source : jeu de
+    données AGDP baux immobiliers du SPF Finances (52.01.01), CSV au niveau communal. LA
+    PÉRIODE EST LE TRIMESTRE CALENDAIRE dérivé de la date de publication de la version.
+    SUPPRIMÉ, ET NON ZÉRO, lorsque le nombre d'enregistrements sous-jacent
+    (MUN_LEASES_NEW_HOUSING) est compris entre 1 et 4 dans cette commune-trimestre -- le
+    SPF Finances retient le percentile en dessous de cinq enregistrements pour éviter
+    d'identifier un bail individuel ; le statut est 'suppressed' avec une valeur NULL,
+    jamais un chiffre fabriqué. NON APPLICABLE lorsque le nombre est nul (aucun bail de ce
+    type ce trimestre-là, donc aucune médiane à rapporter -- statut 'na', valeur NULL,
+    distinct de la suppression). is_additive=false, aggregation_method=not_applicable :
+    une médiane n'a pas d'agrégat défendable -- elle n'est ni additionnée ni recalculable
+    à partir d'une somme détenue par ce pipeline, donc les chiffres provinciaux/régionaux/
+    nationaux sont refusés, jamais moyennés entre communes (Définitions de CLAUDE.md).
+  nl: >
+    Mediane maandelijkse huurprijs (RentP50, EUR/maand, exclusief kosten) over de
+    registraties van woninghuurcontracten (RegistrationType=HousingRegistration,
+    LessorType=TOTAL, TakerType=TOTAL) in de gemeente in het kwartaal, rechtstreeks
+    gepubliceerd door de FOD Financiën -- hier niet herberekend (CLAUDE.md-regel 6; een
+    mediaan kan niet worden gereconstrueerd uit een aantal en een totaal zoals een
+    gemiddelde dat wel kan). Bron: AGDP vastgoedhuur-dataset van de FOD Financiën
+    (52.01.01), CSV op gemeenteniveau. DE PERIODE IS HET KALENDERKWARTAAL afgeleid uit de
+    publicatiedatum van de versie. ONDERDRUKT, NIET NUL, wanneer het onderliggende aantal
+    registraties (MUN_LEASES_NEW_HOUSING) 1-4 bedraagt in die gemeente-kwartaal -- de FOD
+    Financiën houdt het percentiel onder de vijf registraties achter om een individueel
+    huurcontract niet identificeerbaar te maken; status is 'suppressed' met waarde NULL,
+    nooit een verzonnen cijfer. NIET VAN TOEPASSING wanneer het aantal nul is (geen
+    huurcontract van dit type dat kwartaal, dus geen mediaan te rapporteren -- status
+    'na', waarde NULL, te onderscheiden van onderdrukking). is_additive=false,
+    aggregation_method=not_applicable: een mediaan heeft geen verdedigbaar geaggregeerd
+    cijfer -- ze is noch optelbaar, noch herberekenbaar uit een som die deze pipeline
+    bijhoudt, dus provincie-/gewest-/Belgiëcijfers worden geweigerd, nooit gemiddeld over
+    gemeenten (Definities in CLAUDE.md).
+display: null

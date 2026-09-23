@@ -1,0 +1,56 @@
+id: MUN_PROPERTY_SALES
+name:
+  en: Property sales transactions
+  fr: Transactions de ventes immobilières
+  nl: Vastgoedverkooptransacties
+unit: count
+frequency: Q
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 270
+description:
+  en: >
+    Number of ordinary sale transactions (TransactionType=VENTEIMMEUB) across every
+    parcel nature (ParcelNature=TOTAL -- houses, flats, land, garages and every other
+    parcel type combined) in the commune in the quarter. Source: SPF Finances AGDP
+    real-estate transactions dataset (52.01.02), Municipality-level CSV, one quarter per
+    published version. PERIOD IS THE CALENDAR QUARTER derived from the version's own
+    publication date. DELIBERATELY EXCLUDES a median sale price: VENTEIMMEUB/TOTAL mixes
+    houses, flats, land and garages, whose prices are not comparable, so no price
+    indicator is derived from this transaction type at this granularity (see
+    docs/features/spf_agdp.md). A quarter with zero sales is a real, published zero
+    (CLAUDE.md rule 26) -- the source publishes a row for every live commune every
+    quarter. is_additive=true, aggregation_method=sum: province/region/Belgium totals are
+    summed from this count the ordinary way over the geographies that existed that
+    quarter.
+  fr: >
+    Nombre de transactions de vente ordinaires (TransactionType=VENTEIMMEUB) toutes
+    natures de parcelle confondues (ParcelNature=TOTAL -- maisons, appartements,
+    terrains, garages et tout autre type de parcelle réunis) dans la commune au cours du
+    trimestre. Source : jeu de données AGDP transactions immobilières du SPF Finances
+    (52.01.02), CSV au niveau communal, une version par trimestre publié. LA PÉRIODE EST
+    LE TRIMESTRE CALENDAIRE dérivé de la date de publication de la version. EXCLUT
+    DÉLIBÉRÉMENT un prix médian de vente : VENTEIMMEUB/TOTAL mélange maisons,
+    appartements, terrains et garages, dont les prix ne sont pas comparables, donc aucun
+    indicateur de prix n'est dérivé de ce type de transaction à ce niveau de granularité
+    (voir docs/features/spf_agdp.md). Un trimestre sans aucune vente est un zéro
+    réellement publié (règle 26 de CLAUDE.md) -- la source publie une ligne pour chaque
+    commune existante à chaque trimestre. is_additive=true, aggregation_method=sum : les
+    totaux provinciaux/régionaux/nationaux sont additionnés normalement sur les entités
+    géographiques existant ce trimestre-là.
+  nl: >
+    Aantal gewone verkooptransacties (TransactionType=VENTEIMMEUB) over alle
+    perceelaarden samen (ParcelNature=TOTAL -- huizen, appartementen, grond, garages en
+    elk ander perceeltype samen) in de gemeente in het kwartaal. Bron: AGDP
+    vastgoedtransacties-dataset van de FOD Financiën (52.01.02), CSV op gemeenteniveau,
+    één kwartaal per gepubliceerde versie. DE PERIODE IS HET KALENDERKWARTAAL afgeleid uit
+    de publicatiedatum van de versie. SLUIT BEWUST een mediane verkoopprijs UIT:
+    VENTEIMMEUB/TOTAL combineert huizen, appartementen, grond en garages, waarvan de
+    prijzen niet vergelijkbaar zijn, dus wordt er op dit granulariteitsniveau geen
+    prijsindicator afgeleid van dit transactietype (zie docs/features/spf_agdp.md). Een
+    kwartaal zonder verkopen is een werkelijk gepubliceerde nul (CLAUDE.md-regel 26) -- de
+    bron publiceert elk kwartaal een rij voor elke bestaande gemeente. is_additive=true,
+    aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de gewone manier
+    opgeteld over de geografische entiteiten die dat kwartaal bestonden.
+display: null

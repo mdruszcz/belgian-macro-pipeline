@@ -365,3 +365,26 @@ stores:
     reference_rows:
       script: scripts/sync_ipp_rate.py
       args: ["--reference-rows-only"]
+
+  # Wave 4, SPF Finances AGDP patrimony datasets (docs/features/spf_agdp.md):
+  # real-estate leases (52.01.01) and transactions (52.01.02). Same
+  # source_id as ipp_rate (spf_finances) -- one SPF Finances source, several
+  # adapters/stores, same reasoning as `international`'s single source_id
+  # across several sync scripts. in_db: both ATOM feeds are reachable live
+  # from CI, same reason bankruptcies/population_movement/ipp_rate are
+  # in_db. Estimated ~94,300 rows / ~12.8 MB -- one CSV, not
+  # one_csv_per_indicator (well under the 25 MB commit limit; re-measure if
+  # Wave 5's annual AGDP datasets are ever folded into this same store
+  # rather than getting their own).
+  spf_agdp:
+    path: data/spf_agdp_observations.csv
+    source_id: spf_finances
+    mode: in_db
+    indicators:
+      - MUN_LEASES_NEW_HOUSING
+      - MUN_LEASE_RENT_MEDIAN_HOUSING
+      - MUN_LEASE_CHARGES_MEDIAN_HOUSING
+      - MUN_PROPERTY_SALES
+    reference_rows:
+      script: scripts/sync_spf_agdp.py
+      args: ["--reference-rows-only"]
