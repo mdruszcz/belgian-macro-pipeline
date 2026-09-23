@@ -1,13 +1,17 @@
 """Load SPF Finances' AGDP real-estate leases and transactions datasets --
 MUN_LEASES_NEW_HOUSING, MUN_LEASE_RENT_MEDIAN_HOUSING,
-MUN_LEASE_CHARGES_MEDIAN_HOUSING, MUN_PROPERTY_SALES. Block Wave 4,
+MUN_LEASE_CHARGES_MEDIAN_HOUSING, MUN_PROPERTY_SALES (Block Wave 4) -- plus,
+Wave 5 lot A, two annual datasets: owner occupants (52.01.14) and real-estate
+property dynamics (52.01.24), MUN_OWNER_OCCUPIERS, MUN_PARCELS_OWNED,
+MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN.
 docs/features/spf_agdp.md.
 
-DAILY, AUTOMATIC. Two ATOM feeds (one per dataset), each version a fixed
-one-quarter zip -- src/fetchers/spf_agdp.py's module docstring covers feed
-discovery, the ranged zip read and the per-row five-state parsing; this
-script is the layer that knows about the database: incremental-fetch state,
-per-period geo resolution, and the write.
+DAILY, AUTOMATIC. Four ATOM feeds (one per dataset): the Wave 4 pair, each
+version a fixed one-quarter zip, and the Wave 5 annual pair, each version a
+fixed one-year (1-January snapshot) zip -- src/fetchers/spf_agdp.py's module
+docstring covers feed discovery, the ranged zip read and the per-row
+five-state parsing; this script is the layer that knows about the database:
+incremental-fetch state, per-period geo resolution, and the write.
 
 INCREMENTAL FETCH, NOT A FULL RE-READ EVERY DAY. Re-downloading and
 re-parsing all ~40 versions of both datasets daily would mean the
@@ -29,17 +33,21 @@ maps a CSV row to {value, status}; this script's only remaining state
 decision is per-NIS geography resolution (below) -- it never re-derives a
 value or a status.
 
-GEOGRAPHY IS PERIOD-CORRECT, PER ROW'S OWN QUARTER -- resolve_geo(conn, nis,
-quarter), the ordinary rule (CLAUDE.md rule 3), like
+GEOGRAPHY IS PERIOD-CORRECT, PER ROW'S OWN PERIOD -- resolve_geo(conn, nis,
+period), the ordinary rule (CLAUDE.md rule 3), like
 scripts/sync_population_movement.py and UNLIKE sync_bankruptcies.py /
 sync_ipp_rate.py's pinned-period resolution: every commune alive in a given
-quarter already has rows for every (RegistrationType x LessorType x
-TakerType) / (TransactionType x ParcelNature) combination that quarter's
-file publishes, so there is no zero-fill grid to build here (unlike
-bankruptcies.py, which DOES need one because an absent commune-month there
-is a genuine unpublished zero) -- a NIS code with no row in a live quarter's
-file is not expected and is treated as a schema surprise by
-src/fetchers/spf_agdp.py's "zero matched rows" guard, not handled here.
+quarter/year already has rows for every (RegistrationType x LessorType x
+TakerType) / (TransactionType x ParcelNature) / (PersonType x
+HousingRightType) / ParcelNature combination that period's file publishes,
+so there is no zero-fill grid to build here (unlike bankruptcies.py, which
+DOES need one because an absent commune-month there is a genuine unpublished
+zero) -- a NIS code with no row in a live period's file is not expected and
+is treated as a schema surprise by src/fetchers/spf_agdp.py's "zero matched
+rows" guard, not handled here. For the annual datasets, resolve_geo(conn,
+nis, "YYYY") resolves at YYYY-01-01, matching the ATOM feed's own 1-January
+snapshot semantics exactly -- an ordinary, unremarkable resolve_geo() call,
+never pinned to a different date.
 
 An NIS code that fails resolve_geo() for its OWN quarter -- not covered by
 any geography row at that date -- is collected and refuses the WHOLE run at
@@ -70,6 +78,8 @@ from src.db.vintages import upsert_observation  # noqa: E402
 from src.fetchers.spf_agdp import (  # noqa: E402
     ATOM_URL_PATTERN,
     LEASES,
+    OWNER_OCCUPANTS,
+    PROPERTY_DYNAMICS,
     TRANSACTIONS,
     AgdpDatasetConfig,
     AgdpSource,
@@ -83,8 +93,16 @@ from src.validation.config_schema import load_and_validate_all  # noqa: E402
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
 STATE_PATH = Path(__file__).resolve().parents[1] / "data" / "spf_agdp_state.json"
 
-#: dataset config key (state file / CLI) -> AgdpDatasetConfig.
-DATASETS: dict[str, AgdpDatasetConfig] = {"leases": LEASES, "transactions": TRANSACTIONS}
+#: dataset config key (state file / CLI) -> AgdpDatasetConfig. Wave 5 lot A
+#: adds the two annual datasets (owner_occupants, property_dynamics) to the
+#: quarterly pair loaded in Wave 4 -- same state file, same store, only the
+#: config and `derive_period_bounds` frequency differ per dataset.
+DATASETS: dict[str, AgdpDatasetConfig] = {
+    "leases": LEASES,
+    "transactions": TRANSACTIONS,
+    "owner_occupants": OWNER_OCCUPANTS,
+    "property_dynamics": PROPERTY_DYNAMICS,
+}
 
 
 def _load_state(path: Path) -> dict:
@@ -155,6 +173,10 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict, so
         ("MUN_LEASE_RENT_MEDIAN_HOUSING", 0, "not_applicable"),
         ("MUN_LEASE_CHARGES_MEDIAN_HOUSING", 0, "not_applicable"),
         ("MUN_PROPERTY_SALES", 1, "sum"),
+        ("MUN_OWNER_OCCUPIERS", 1, "sum"),
+        ("MUN_PARCELS_OWNED", 1, "sum"),
+        ("MUN_OWNERSHIP_DURATION_MEDIAN", 0, "not_applicable"),
+        ("MUN_OWNERSHIP_ROTATION_MEAN", 0, "not_applicable"),
     ):
         ind = indicator_configs[indicator_id]
         conn.execute(
@@ -234,13 +256,31 @@ def sync(
 
     all_rows: list[dict] = []
     versions_loaded: dict[str, list[str]] = {}
+    # indicator_id -> derive_period_bounds() frequency ("A"/"Q"), so PASS 2's
+    # write loop can derive the right period_start/period_end per row without
+    # threading frequency through `all_rows` itself.
+    indicator_frequency: dict[str, str] = {
+        indicator_id: config.frequency
+        for config in DATASETS.values()
+        for indicator_id, _is_count in config.indicators.values()
+    }
 
     for dataset_key, config in DATASETS.items():
         if atom_bytes is not None:
+            if dataset_key not in atom_bytes:
+                # Fixture mode only (production always fetches live for every
+                # configured dataset): a test exercising only a subset of
+                # DATASETS -- e.g. Wave 4's tests, which predate Wave 5's
+                # owner_occupants/property_dynamics and only ever build a
+                # {"leases": ..., "transactions": ...} atom_bytes dict -- skips
+                # the untested dataset entirely rather than KeyError'ing,
+                # exactly as if that feed had zero new/changed versions.
+                versions_loaded[dataset_key] = []
+                continue
             xml = atom_bytes[dataset_key]
         else:
             xml = _fetch_atom_bytes(config.uuid)
-        versions = parse_atom_feed(xml, dataset_label=config.label)
+        versions = parse_atom_feed(xml, dataset_label=config.label, frequency=config.frequency)
 
         state_for_dataset = state.setdefault(dataset_key, {})
         to_load = _versions_to_load(versions, state_for_dataset)
@@ -318,7 +358,7 @@ def sync(
     for indicator_id, geo_id, period, value, status in sorted(
         to_write, key=lambda t: (t[0], t[1], t[2])
     ):
-        period_start, period_end = derive_period_bounds(period, "Q")
+        period_start, period_end = derive_period_bounds(period, indicator_frequency[indicator_id])
         rows_written += upsert_observation(
             conn,
             indicator_id=indicator_id,
@@ -366,7 +406,8 @@ def main() -> None:
         print(
             "Reference rows ensured for: MUN_LEASES_NEW_HOUSING, "
             "MUN_LEASE_RENT_MEDIAN_HOUSING, MUN_LEASE_CHARGES_MEDIAN_HOUSING, "
-            "MUN_PROPERTY_SALES"
+            "MUN_PROPERTY_SALES, MUN_OWNER_OCCUPIERS, MUN_PARCELS_OWNED, "
+            "MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN"
         )
     else:
         print(f"Wrote {written} new vintage(s).")

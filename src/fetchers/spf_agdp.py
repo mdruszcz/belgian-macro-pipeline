@@ -86,6 +86,12 @@ _QUARTER_END = re.compile(r"^(\d{4})-(\d{2})-\d{2}T")
 #: schema surprise, refused rather than guessed (CLAUDE.md rule 13).
 _QUARTER_END_MONTH = {3: 1, 6: 2, 9: 3, 12: 4}
 
+#: Matches the annual timestamp Wave 5's annual AGDP datasets carry, e.g.
+#: "2026-01-01T00:00:00Z" -- month and day must both be 01 (a 1-January
+#: snapshot); anything else is a schema surprise, refused rather than
+#: guessed (CLAUDE.md rule 13).
+_ANNUAL_TIMESTAMP = re.compile(r"^(\d{4})-01-01T")
+
 #: The one CSV member name pattern this module ever reads out of a zip --
 #: case varies by dataset ("Municipality.csv" / "Municipality_LEASES.csv"
 #: are both observed shapes across AGDP datasets), so this matches by
@@ -138,13 +144,32 @@ def _quarter_from_timestamp(raw: str, *, context: str) -> str:
     return f"{year:04d}-Q{quarter}"
 
 
-def parse_atom_feed(xml_bytes: bytes, *, dataset_label: str) -> list[AgdpVersion]:
+def _year_from_timestamp(raw: str, *, context: str) -> str:
+    match = _ANNUAL_TIMESTAMP.match(raw)
+    if not match:
+        raise AgdpSchemaError(
+            f"{context}: ATOM `time` attribute {raw!r} does not match the expected "
+            "annual YYYY-01-01T... shape (a 1-January snapshot). Refusing to guess a "
+            "period (CLAUDE.md rule 13)."
+        )
+    return match.group(1)
+
+
+def parse_atom_feed(
+    xml_bytes: bytes, *, dataset_label: str, frequency: str = "Q"
+) -> list[AgdpVersion]:
     """Every version link in one AGDP dataset's ATOM feed, oldest first.
 
     Raises AgdpSchemaError on a `<link rel="section">` missing `href`,
     `time`, or `length`, or on zero such links -- an empty or malformed feed
     is refused rather than treated as "no new data" (CLAUDE.md rule 13).
+
+    `frequency` selects the period parser: "Q" (default, unchanged) expects
+    a calendar quarter-end timestamp and returns "YYYY-Qn"; "A" expects a
+    1-January timestamp and returns "YYYY" (Wave 5's annual datasets).
     """
+    if frequency not in ("Q", "A"):
+        raise ValueError(f"Unknown frequency {frequency!r}, expected 'Q' or 'A'.")
     try:
         root = ElementTree.fromstring(xml_bytes)
     except ElementTree.ParseError as exc:
@@ -169,8 +194,11 @@ def parse_atom_feed(xml_bytes: bytes, *, dataset_label: str) -> list[AgdpVersion
             raise AgdpSchemaError(
                 f"{dataset_label}: link length {length_attr!r} is not an integer."
             ) from exc
-        quarter = _quarter_from_timestamp(time_attr, context=dataset_label)
-        versions.append(AgdpVersion(url=href, quarter=quarter, length=length))
+        if frequency == "A":
+            period = _year_from_timestamp(time_attr, context=dataset_label)
+        else:
+            period = _quarter_from_timestamp(time_attr, context=dataset_label)
+        versions.append(AgdpVersion(url=href, quarter=period, length=length))
 
     if not versions:
         raise AgdpSchemaError(
@@ -362,6 +390,23 @@ class AgdpDatasetConfig:
     status for every percentile column in `indicators` (Leases: RentsNumber;
     Transactions: ParcelsNumber) -- SPF Finances suppresses every percentile
     on the same row together, keyed off the one row count.
+
+    `frequency` selects both the ATOM period parser (`parse_atom_feed`) and,
+    in `_row_to_observations`, which five-state mapping applies: "Q"
+    (default) is the quarterly Leases/Transactions mapping with its 1-4
+    suppression tier, described above. "A" is Wave 5's annual mapping (Owner
+    Occupants / Property Dynamics): a count column is final as-is including a
+    real zero, exactly like "Q"; but a non-count column has no suppression
+    tier at all -- it is `na`/NULL only when `count_column`'s value is
+    missing or literally zero (never a fabricated zero duration/mean), and
+    `final` otherwise, always requiring a non-blank cell. There is no 1-4
+    tier for these two datasets (the handoff measured none).
+
+    `row_filter`, if given, is called once per raw CSV row (before `select`
+    is checked) and must return True to keep the row -- e.g. Owner Occupants
+    skips the one Fictious=1/NISCode="N/A" placeholder set and any row whose
+    NISCode is not all-digit, rather than special-casing that inside
+    `_parse`.
     """
 
     label: str
@@ -370,6 +415,8 @@ class AgdpDatasetConfig:
     select: dict[str, str]
     count_column: str
     indicators: dict[str, tuple[str, bool]]  # csv_column -> (indicator_id, is_count)
+    frequency: str = "Q"
+    row_filter: object = None  # Callable[[dict[str, str]], bool] | None
 
 
 LEASES = AgdpDatasetConfig(
@@ -433,6 +480,71 @@ TRANSACTIONS = AgdpDatasetConfig(
 )
 
 
+#: NIS codes are five-digit strings in every live dataset; the Owner
+#: Occupants fictitious placeholder set publishes NISCode "N/A" instead.
+_ALL_DIGIT_NIS = re.compile(r"^\d+$")
+
+
+def _skip_fictitious_and_non_numeric_nis(row: dict[str, str]) -> bool:
+    """Owner Occupants row filter (handoff): skip the one Fictious=1/
+    NISCode="N/A" placeholder set, and any row whose NISCode is not
+    all-digit -- applied before `select`, so `_parse`'s own blank-NIS and
+    zero-matched-rows guards never have to special-case it."""
+    if row.get("Fictious", "").strip() != "0":
+        return False
+    nis = row.get("NISCode", "").strip()
+    return bool(_ALL_DIGIT_NIS.match(nis))
+
+
+OWNER_OCCUPANTS = AgdpDatasetConfig(
+    label="SPF Finances owner occupants (52.01.14)",
+    uuid="a54ced71-dcc5-4b51-99f5-40b391631727",
+    required_columns=(
+        "NISCode",
+        "Fictious",
+        "NameFre",
+        "NameDut",
+        "NameGer",
+        "PersonType",
+        "HousingRightType",
+        "PersonNumber",
+    ),
+    select={"PersonType": "Total", "HousingRightType": "OCCUPANTPUPES"},
+    count_column="PersonNumber",
+    indicators={
+        "PersonNumber": ("MUN_OWNER_OCCUPIERS", True),
+    },
+    frequency="A",
+    row_filter=_skip_fictitious_and_non_numeric_nis,
+)
+
+PROPERTY_DYNAMICS = AgdpDatasetConfig(
+    label="SPF Finances real-estate property dynamics (52.01.24)",
+    uuid="219cd997-631a-11f0-bb32-00be432db085",
+    required_columns=(
+        "NISCode",
+        "NameFre",
+        "NameDut",
+        "NameGer",
+        "ParcelNature",
+        "ParcelsNumber",
+        "PropertyDurationP25",
+        "PropertyDurationP50",
+        "PropertyDurationP75",
+        "PropertyDurationMean",
+        "PropertyRotationMean",
+    ),
+    select={"ParcelNature": "TOTAL"},
+    count_column="ParcelsNumber",
+    indicators={
+        "ParcelsNumber": ("MUN_PARCELS_OWNED", True),
+        "PropertyDurationP50": ("MUN_OWNERSHIP_DURATION_MEDIAN", False),
+        "PropertyRotationMean": ("MUN_OWNERSHIP_ROTATION_MEAN", False),
+    },
+    frequency="A",
+)
+
+
 def _to_int_or_blank(raw: str) -> int | None:
     raw = raw.strip()
     return None if raw == "" else int(raw)
@@ -441,6 +553,79 @@ def _to_int_or_blank(raw: str) -> int | None:
 def _to_float_or_blank(raw: str) -> float | None:
     raw = raw.strip()
     return None if raw == "" else float(raw)
+
+
+def _annual_row_to_observations(
+    row: dict[str, str], *, config: AgdpDatasetConfig, quarter: str, context: str
+) -> list[dict]:
+    """Wave 5's annual five-state mapping (Owner Occupants / Property
+    Dynamics) -- simpler than the quarterly Leases/Transactions mapping
+    below: no 1-4 suppression tier was measured for either dataset.
+
+    - count column: a numeric value, including a real 0, is written as-is,
+      final (owner-occupant counts and parcel counts are always published).
+    - non-count column (a percentile/mean), count column >= 1: value is
+      present -> value, final.
+    - non-count column, count column blank or 0: SPF writes a literal 0 for
+      a duration/mean when the row has no parcels -- that is not a measured
+      figure, so it maps to value None, status na, never a fabricated zero.
+
+    Raises AgdpSchemaError if a non-count column is unexpectedly blank while
+    its count column is >= 1 -- the measured "the file never blanks a
+    percentile/mean at TOTAL when ParcelsNumber >= 1" rule no longer holds
+    (CLAUDE.md rule 13).
+    """
+    nis = row["NISCode"].strip()
+    if not nis:
+        raise AgdpSchemaError(f"{context}: a data row has a blank NISCode.")
+
+    count_raw = row[config.count_column]
+    count = _to_int_or_blank(count_raw)
+
+    results: list[dict] = []
+    for csv_column, (indicator_id, is_count) in config.indicators.items():
+        if is_count:
+            value = 0.0 if count is None else float(count)
+            results.append(
+                {
+                    "geo_id": nis,
+                    "period": quarter,
+                    "value": value,
+                    "status": "final",
+                    "indicator_id": indicator_id,
+                }
+            )
+            continue
+
+        raw_cell = row[csv_column].strip()
+        if count is None or count == 0:
+            results.append(
+                {
+                    "geo_id": nis,
+                    "period": quarter,
+                    "value": None,
+                    "status": "na",
+                    "indicator_id": indicator_id,
+                }
+            )
+        else:
+            if raw_cell == "":
+                raise AgdpSchemaError(
+                    f"{context}, NIS {nis}: {csv_column} is blank but "
+                    f"{config.count_column} is {count} (>= 1) -- expected a published "
+                    "value. The measured rule (no blank percentile/mean when "
+                    "ParcelsNumber >= 1) no longer holds (CLAUDE.md rule 13)."
+                )
+            results.append(
+                {
+                    "geo_id": nis,
+                    "period": quarter,
+                    "value": float(raw_cell),
+                    "status": "final",
+                    "indicator_id": indicator_id,
+                }
+            )
+    return results
 
 
 def _row_to_observations(
@@ -465,7 +650,14 @@ def _row_to_observations(
     either means the measured suppression rule (blank count 1-4, minimum
     published median count exactly 5) no longer holds, and this must fail
     loudly rather than silently mis-map a state.
+
+    Dispatches to `_annual_row_to_observations` when `config.frequency ==
+    "A"` -- the quarterly path below this check is otherwise byte-for-byte
+    unchanged.
     """
+    if config.frequency == "A":
+        return _annual_row_to_observations(row, config=config, quarter=quarter, context=context)
+
     nis = row["NISCode"].strip()
     if not nis:
         raise AgdpSchemaError(f"{context}: a data row has a blank NISCode.")
@@ -581,6 +773,8 @@ class AgdpSource(MunicipalTimeSeriesSource):
         results: list[dict] = []
         matched_rows = 0
         for row in reader:
+            if config.row_filter is not None and not config.row_filter(row):
+                continue
             if all(row.get(k) == v for k, v in config.select.items()):
                 matched_rows += 1
                 results.extend(

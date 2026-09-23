@@ -366,16 +366,19 @@ stores:
       script: scripts/sync_ipp_rate.py
       args: ["--reference-rows-only"]
 
-  # Wave 4, SPF Finances AGDP patrimony datasets (docs/features/spf_agdp.md):
-  # real-estate leases (52.01.01) and transactions (52.01.02). Same
-  # source_id as ipp_rate (spf_finances) -- one SPF Finances source, several
-  # adapters/stores, same reasoning as `international`'s single source_id
-  # across several sync scripts. in_db: both ATOM feeds are reachable live
-  # from CI, same reason bankruptcies/population_movement/ipp_rate are
-  # in_db. Estimated ~94,300 rows / ~12.8 MB -- one CSV, not
-  # one_csv_per_indicator (well under the 25 MB commit limit; re-measure if
-  # Wave 5's annual AGDP datasets are ever folded into this same store
-  # rather than getting their own).
+  # Wave 4 + Wave 5 lot A, SPF Finances AGDP patrimony datasets
+  # (docs/features/spf_agdp.md): real-estate leases (52.01.01), transactions
+  # (52.01.02) -- both quarterly, Wave 4 -- plus owner occupants (52.01.14)
+  # and real-estate property dynamics (52.01.24) -- both annual, Wave 5 lot
+  # A. Same source_id as ipp_rate (spf_finances) -- one SPF Finances source,
+  # several adapters/stores, same reasoning as `international`'s single
+  # source_id across several sync scripts. in_db: all four ATOM feeds are
+  # reachable live from CI, same reason bankruptcies/population_movement/
+  # ipp_rate are in_db. Wave 4 alone measured ~94,300 rows / ~12.8 MB; Wave 5
+  # lot A adds an estimated ~31,700 rows, folded into this same store rather
+  # than a new one (handoff) -- real committed size reported in the PR;
+  # switches to `layout: one_csv_per_indicator` if the real file ever
+  # exceeds 20 MB.
   spf_agdp:
     path: data/spf_agdp_observations.csv
     source_id: spf_finances
@@ -385,6 +388,10 @@ stores:
       - MUN_LEASE_RENT_MEDIAN_HOUSING
       - MUN_LEASE_CHARGES_MEDIAN_HOUSING
       - MUN_PROPERTY_SALES
+      - MUN_OWNER_OCCUPIERS
+      - MUN_PARCELS_OWNED
+      - MUN_OWNERSHIP_DURATION_MEDIAN
+      - MUN_OWNERSHIP_ROTATION_MEAN
     reference_rows:
       script: scripts/sync_spf_agdp.py
       args: ["--reference-rows-only"]

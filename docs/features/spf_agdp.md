@@ -1,4 +1,4 @@
-# Feature: SPF Finances AGDP patrimony datasets (leases + transactions), Wave 4
+# Feature: SPF Finances AGDP patrimony datasets (leases + transactions, Wave 4; owner occupants + property dynamics, Wave 5 lot A)
 
 ## Source
 
@@ -222,20 +222,96 @@ field in `docs/features/indicator_config.schema.json`); as with
 ## Store
 
 `spf_agdp`, `config/stores.yaml`, `source_id: spf_finances`, `mode: in_db`
-(both ATOM feeds are reachable live from CI, the same reason
+(all four ATOM feeds are reachable live from CI, the same reason
 bankruptcies/population_movement/ipp_rate are `in_db`). Reference-rows
 script `scripts/sync_spf_agdp.py --reference-rows-only`. Path
-`data/spf_agdp_observations.csv`. Estimated ~94,300 rows, ~12.8 MB -- a
-single CSV, not `layout: one_csv_per_indicator`, comfortably under the
-25 MB commit limit.
+`data/spf_agdp_observations.csv`. Wave 4 alone measured ~94,300 rows,
+~12.8 MB; with Wave 5 lot A's ~32,000 rows added, the real committed file is
+~126,800 rows / ~18.9 MB -- still a single CSV, not
+`layout: one_csv_per_indicator`, under the 25 MB commit limit (re-measure
+before adding further AGDP datasets to this store; the handoff's own
+threshold to switch layouts was 20 MB).
+
+## Wave 5 lot A: owner occupants + real-estate property dynamics (annual)
+
+Two more AGDP datasets, reusing every piece of this module unchanged except
+the ATOM period parser (below): SPF Finances publishes these two as annual
+1-January snapshots, not calendar quarters, so `AgdpDatasetConfig` gained a
+`frequency` field (`"Q"` default, unchanged behaviour; `"A"` for these two)
+and `parse_atom_feed()` gained a `frequency` parameter that switches between
+the existing quarter-end parser and a new one requiring the ATOM `time`
+attribute to be exactly `YYYY-01-01T...` -- any other month or day is a
+schema surprise, refused loudly (CLAUDE.md rule 13), never guessed.
+
+**Owner occupants (52.01.14, "Titulaires occupants")**, uuid
+`a54ced71-dcc5-4b51-99f5-40b391631727`, 7 versions (2020-2026), member
+`MunicipalityWideOwnerOccupant_<YYYYMMDD>.csv`. Columns:
+`NISCode;Fictious;NameFre;NameDut;NameGer;PersonType;HousingRightType;PersonNumber`.
+Row selected: `PersonType=Total, HousingRightType=OCCUPANTPUPES`. The
+dataset publishes one fictitious placeholder row set per version
+(`Fictious=1`, `NISCode="N/A"`) which is skipped by `AgdpDatasetConfig.
+row_filter` before `select` is ever checked, along with any row whose
+NISCode is not all-digit -- a new mechanism (`row_filter`, a
+`Callable[[dict], bool]` run once per raw row) added instead of
+special-casing this one dataset inside `_parse`.
+
+- `MUN_OWNER_OCCUPIERS` -- `PersonNumber`. Unit `count`, `is_additive=1`,
+  `aggregation_method='sum'`, `preferred_direction=contextual`. A real zero
+  is written as-is, `final` -- same count semantics as Wave 4's
+  `MUN_PROPERTY_SALES`.
+
+**Real-estate property dynamics (52.01.24, "Dynamique de la propriété
+immobilière")**, uuid `219cd997-631a-11f0-bb32-00be432db085`, 16 versions
+(2011-2026), member `MunicipalityWidePropertyDynamics_<YYYYMMDD>.csv`.
+Columns include `ParcelNature;ParcelsNumber;PropertyDurationP25/P50/P75;
+PropertyDurationMean;PropertyRotationMean`. Row selected:
+`ParcelNature=TOTAL`.
+
+- `MUN_PARCELS_OWNED` -- `ParcelsNumber`. Unit `count`, `is_additive=1`,
+  `aggregation_method='sum'`, `preferred_direction=contextual`.
+- `MUN_OWNERSHIP_DURATION_MEDIAN` -- `PropertyDurationP50`. Unit `years`,
+  `is_additive=0`, `aggregation_method='not_applicable'`,
+  `preferred_direction=contextual`.
+- `MUN_OWNERSHIP_ROTATION_MEAN` -- `PropertyRotationMean`. Same shape as the
+  duration median.
+
+**Guard against a fabricated zero**: at other parcel natures than `TOTAL`
+the source writes a literal `0` for every duration/rotation column when
+`ParcelsNumber` is `0` for that row -- not a measured duration. At
+`ParcelNature=TOTAL` every commune measured has a non-zero `ParcelsNumber`
+and a real percentile/mean in every one of the 16 versions, but the guard
+exists in `_annual_row_to_observations` regardless: `ParcelsNumber` blank or
+`0` maps every duration/rotation column to `value=None, status='na'`, never
+a fabricated zero; `ParcelsNumber >= 1` requires a non-blank cell or the row
+is refused (CLAUDE.md rule 13) -- no 1-4 suppression tier exists for either
+Wave 5 dataset (none was measured, unlike Leases/Transactions' `RentsNumber`
+/`ParcelsNumber` suppression at 1-4).
+
+**Geography**: an ordinary, unremarked `resolve_geo(conn, nis, "YYYY")` call
+-- the annual period string resolves at `YYYY-01-01`
+(`src/geography/resolve.py`'s `period_to_date`), exactly matching the ATOM
+feed's own 1-January snapshot semantics. Verified: 23106 (Pajottegem)
+resolves for 2025 and raises for 2024; 82039 resolves for 2025 not 2024;
+23023 resolves for 2024 not 2025; 44011 resolves for 2018, 44083 for 2020.
+
+**Excluded from this batch (originally scoped for Wave 5 lot A, dropped by
+the lead)**:
+
+- 52.01.15 (buyer profile) -- no `TOTAL` rows; a commune headline would
+  require summing partly-blanked cells, and a blank is indistinguishable
+  from suppressed at that granularity. Follow-up.
+- 52.01.21 (buyers' origin) -- an origin-destination matrix, ~259 MB per
+  year; its only scalar duplicates `MUN_PROPERTY_SALES` already loaded by
+  Wave 4. Follow-up.
 
 ## Out of scope (this batch)
 
-- Wave 5's 13 additional AGDP datasets.
-- Any page surfacing of these four indicators.
+- 52.01.15 and 52.01.21 (see above).
+- Wave 5's remaining AGDP datasets beyond this lot.
+- Any page surfacing of these eight indicators.
 - `src/analytics/aggregate.py`, `resolve_geo()`, any other adapter, or the
   database schema.
 - `docs/data_catalog.md` and `docs/steps` (not touched by this batch).
-- The Division and StatisticalUnit members of either zip.
-- Province/region rows from either dataset (Municipality-level only).
-- A median sale price (see above).
+- The Division and StatisticalUnit members of any zip.
+- Province/region rows from any dataset (Municipality-level only).
+- A median sale price (see above, Wave 4).

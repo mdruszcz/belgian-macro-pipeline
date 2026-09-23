@@ -1,0 +1,51 @@
+id: MUN_OWNERSHIP_ROTATION_MEAN
+name:
+  en: Mean property ownership rotation
+  fr: Rotation moyenne de la propriété immobilière
+  nl: Gemiddelde eigendomsrotatie
+unit: years
+source_id: spf_finances
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Mean number of years between ownership changes for a parcel in the commune, across
+    every parcel nature combined (ParcelNature=TOTAL). Source: SPF Finances AGDP
+    real-estate property dynamics dataset (52.01.24), PropertyRotationMean column,
+    Municipality-level CSV, one 1-January snapshot per published version. PERIOD IS THE
+    CALENDAR YEAR of the snapshot's own publication date (ATOM `time` YYYY-01-01). NOT
+    AVAILABLE (status na) rather than zero when MUN_PARCELS_OWNED is zero or blank for
+    that commune/year -- the source writes a literal 0 in that case as a placeholder,
+    which is never a measured rotation figure (see docs/features/spf_agdp.md).
+    is_additive=false, aggregation_method=not_applicable: a mean-of-means cannot be
+    summed or recomputed from commune means, so no province/region/Belgium aggregate is
+    produced for this indicator.
+  fr: >
+    Nombre moyen d'années entre deux changements de propriétaire pour une parcelle de la
+    commune, toutes natures de parcelle confondues (ParcelNature=TOTAL). Source : jeu de
+    données AGDP dynamique de la propriété immobilière du SPF Finances (52.01.24),
+    colonne PropertyRotationMean, CSV au niveau communal, un instantané au 1er janvier
+    par version publiée. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la date de publication de
+    l'instantané (ATOM `time` YYYY-01-01). NON DISPONIBLE (statut na) plutôt que zéro
+    lorsque MUN_PARCELS_OWNED est nul ou vide pour cette commune/année -- la source
+    écrit dans ce cas un 0 littéral comme valeur de remplissage, qui n'est jamais une
+    valeur de rotation mesurée (voir docs/features/spf_agdp.md). is_additive=false,
+    aggregation_method=not_applicable : une moyenne de moyennes ne peut être ni
+    additionnée ni recalculée à partir des moyennes communales, donc aucun agrégat
+    provincial/régional/national n'est produit pour cet indicateur.
+  nl: >
+    Gemiddeld aantal jaren tussen eigendomswisselingen voor een perceel in de gemeente,
+    over alle perceelaarden samen (ParcelNature=TOTAL). Bron: AGDP-dataset dynamiek van
+    de eigendom van onroerend goed van de FOD Financiën (52.01.24), kolom
+    PropertyRotationMean, CSV op gemeenteniveau, één momentopname per 1 januari per
+    gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van de eigen publicatiedatum
+    van de momentopname (ATOM `time` YYYY-01-01). NIET BESCHIKBAAR (status na) in plaats
+    van nul wanneer MUN_PARCELS_OWNED nul of leeg is voor die gemeente/dat jaar -- de
+    bron schrijft in dat geval een letterlijke 0 als plaatshouder, wat nooit een gemeten
+    rotatiewaarde is (zie docs/features/spf_agdp.md). is_additive=false,
+    aggregation_method=not_applicable: een gemiddelde van gemiddelden kan niet worden
+    opgeteld of herrekend uit gemeentelijke gemiddelden, dus wordt er voor deze indicator
+    geen provincie-/gewest-/Belgiëaggregaat geproduceerd.
+display: null
