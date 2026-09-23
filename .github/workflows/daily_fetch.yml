@@ -116,6 +116,10 @@ jobs:
           exit $STATUS
 
       - name: Guard against oversized data files
+        # TEMPORARILY 80 MB (was 40), maintainer's decision 2026-09-23: the new
+        # municipal sources took data/communes_history.csv from 36 to 62 MB and
+        # blocked publication. The source-side fix (splitting that download per
+        # source) follows next; restore 40 MB when it lands.
         # A repo-health tripwire, not a technical limit (GitHub warns at
         # 50 MB). Scoped to files git would actually commit: a gitignored
         # file (data/communes_history_full.csv, data/local/**) cannot bloat
@@ -128,9 +132,9 @@ jobs:
             # check-ignore exits 0 when the path IS ignored, so the `||`
             # branch collects exactly the files that would be committed.
             git check-ignore -q "$f" || OVERSIZED="${OVERSIZED}${f}"$'\n'
-          done < <(find data/ public/ local/ -type f -size +40000k)
+          done < <(find data/ public/ local/ -type f -size +80000k)
           if [ -n "$OVERSIZED" ]; then
-            echo "::error::Committed file(s) under data/, public/ or local/ exceed 40 MB; refusing to commit:"
+            echo "::error::Committed file(s) under data/, public/ or local/ exceed 80 MB; refusing to commit:"
             echo "$OVERSIZED" | while read -r f; do
               [ -n "$f" ] && echo "  $f ($(du -h "$f" | cut -f1))"
             done
