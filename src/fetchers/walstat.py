@@ -21,8 +21,16 @@ refuses rather than coerces (rule 13):
   commune would be a wrong number under a real NIS code;
 * the period must read "année YYYY" or "moyenne annuelle YYYY" (the site
   varies the capital, and the labour-market series are annual averages rather
-  than closed accounts), and the
-  value must be a number -- with ONE documented exception, learned from the
+  than closed accounts), OR "01/01/YYYY", "31/12/YYYY" or a bare "YYYY" --
+  the social-protection and prepayment-meter series (Block NS2:
+  GRAPA_RECIPIENTS_SHARE_65_PLUS, BIM_BENEFICIARIES_SHARE,
+  PREPAYMENT_METERS_ELECTRICITY_SHARE, PREPAYMENT_METERS_GAS_SHARE) write a
+  full date rather than "année YYYY", and BOTH "01/01/YYYY" and "31/12/YYYY"
+  name the SAME calendar year for their series (the API's own convention for
+  a snapshot taken on one day of the year) -- each form maps to the year it
+  names and nothing else is accepted, so an unseen day/month (say "15/06/2024")
+  still refuses rather than being parsed by a permissive digit search. The
+  value must be a number -- with documented exceptions, learned from the
   first live run: WalStat writes the literal string "non disponible" where a
   commune's account for a year is not yet available (row 407 of the 2024
   revenue series, Chièvres). That is a MISSING reading -- not zero, not a
@@ -56,6 +64,27 @@ refuses rather than coerces (rule 13):
   response -- the same 90% floor this pipeline already applies to
   aggregates (CLAUDE.md, Definitions), not a new threshold.
 
+THE GAS PREPAYMENT-METER SERIES (813000_1) WRITES SEVEN NON-NUMERIC STRINGS,
+none of them a zero and none of them collapsed into another (CLAUDE.md rule
+26). Matched case-insensitively with internal whitespace collapsed, so
+"Non fiable"/"non fiable" and "pas de gaz"/"pas  de gaz" (a double space, seen
+92 times) count as the same state:
+    - "pas de gaz"       -- no gas network in the commune: NOT-APPLICABLE,
+                             not zero (a commune with a network and zero
+                             prepayment meters is a different fact);
+    - "< 300 compteurs"  -- IWEPS's own small-number suppression floor;
+    - "non fiable"       -- the publisher disowns the figure: a MISSING
+                             reading, not a suppression (nothing is
+                             deliberately withheld, the number is just not
+                             trusted);
+    - "non diffusé"      -- WITHHELD: IWEPS has the figure and chose not to
+                             publish it, a different fact from "non fiable";
+    - "non disponible"   -- MISSING, the same state the finance series use
+                             (`NOT_AVAILABLE` above).
+Every one of these is skip-count-report-never-write, the adapter's only
+mechanism: no new status is invented and no column is added, they are only
+counted, under a separate counter per meaning so the sync can report each.
+
 Status is `final` on every row, and WalStat publishes no provisional marker to
 carry on any of them. For the finance series that is because they are closed
 municipal accounts (the source is the SPW's Département des Finances locales,
@@ -82,17 +111,74 @@ EXPECTED_KEYS = frozenset({"ins", "type_entite", "entite", "periode", "valeur"})
 #: The finance series write that form; the labour-market ones write "moyenne
 #: annuelle 1999" instead, because they ARE an annual average of monthly
 #: readings rather than a closed account (UNEMPLOYMENT_RATE_BIT, series
-#: 236400_0). Both name one calendar year and resolve to the same period, so
-#: both are accepted -- and nothing else is, so a form nobody has seen still
-#: refuses rather than being parsed by a looser pattern (rule 13).
+#: 236400_0). Both name one calendar year and resolve to the same period.
 _PERIOD = re.compile(r"^(?:ann[ée]e|moyenne\s+annuelle)\s+(\d{4})$", re.IGNORECASE)
+
+#: The social-protection and prepayment-meter series (Block NS2) write their
+#: period differently: "01/01/YYYY" (GRAPA/RG, BIM), "31/12/YYYY" (electricity
+#: and gas prepayment meters) -- a snapshot on one day, which names the year
+#: YYYY -- or, for BIM in several years, a bare "YYYY". These forms are
+#: accepted ONLY for the series that write them, declared per indicator in
+#: EXTRA_PERIOD_FORMS and passed to _parse as `period_forms`. Every other
+#: series still accepts only the two worded forms above, so a finance or
+#: labour-market series that suddenly wrote "2024" or "01/01/2024" still
+#: refuses loudly (rule 13) instead of being read as a year.
+_EXTRA_PERIOD = {
+    "01/01": re.compile(r"^01/01/(\d{4})$"),
+    "31/12": re.compile(r"^31/12/(\d{4})$"),
+    "bare": re.compile(r"^(\d{4})$"),
+}
+
+#: Which extra period forms each NS2 indicator's series writes (measured on
+#: the live API 2026-09-23). An indicator absent from this map gets none.
+EXTRA_PERIOD_FORMS: dict[str, frozenset[str]] = {
+    "GRAPA_RECIPIENTS_SHARE_65_PLUS": frozenset({"01/01"}),
+    "BIM_BENEFICIARIES_SHARE": frozenset({"01/01", "bare"}),
+    "PREPAYMENT_METERS_ELECTRICITY_SHARE": frozenset({"31/12"}),
+    "PREPAYMENT_METERS_GAS_SHARE": frozenset({"31/12"}),
+}
+
+
+def _match_period(periode: str, period_forms: frozenset[str]) -> str | None:
+    """The calendar year a `periode` names, or None if its form is not one
+    this series is allowed to write."""
+    match = _PERIOD.match(periode)
+    if match:
+        return match.group(1)
+    for form in sorted(period_forms):
+        match = _EXTRA_PERIOD[form].match(periode)
+        if match:
+            return match.group(1)
+    return None
+
 
 #: The Walloon Region's geo_id, the root every commune here must chain up to.
 WALLONIA = "be:reg:03000"
 
 #: WalStat's own marker for an account not yet filed. Exact string, seen on the
-#: live API 2026-09-11; anything else non-numeric is a broken row.
+#: live API 2026-09-11; anything else non-numeric is a broken row unless it
+#: matches one of the gas-meter states below.
 NOT_AVAILABLE = "non disponible"
+
+#: The seven non-numeric strings the gas prepayment-meter series (813000_1)
+#: writes, each a distinct state (CLAUDE.md rule 26) -- never a zero, never
+#: collapsed into another. Matched after lowercasing and collapsing internal
+#: whitespace, so "Non fiable" / "non fiable" and "pas de gaz" / "pas  de gaz"
+#: (a double space, seen 92 times live) are the same key. NOT_AVAILABLE
+#: ("non disponible") is handled by the existing check above and is not
+#: repeated here.
+NOT_APPLICABLE_GAS = frozenset({"pas de gaz"})
+SUPPRESSED_SMALL_N = frozenset({"< 300 compteurs"})
+UNRELIABLE = frozenset({"non fiable"})
+WITHHELD = frozenset({"non diffusé"})
+
+
+def _normalize_cell(raw: str) -> str:
+    """Lowercased, internal whitespace collapsed to one space -- the matching
+    key for both NOT_AVAILABLE and the gas-meter states, so a double space or
+    a stray capital never falls through to "is not a number"."""
+    return re.sub(r"\s+", " ", raw.strip().lower())
+
 
 #: Below this share of a year's communes the response is a partial year, not a
 #: year with gaps. The pipeline's existing coverage floor for aggregates.
@@ -207,12 +293,32 @@ class WalStatSource(MunicipalTimeSeriesSource):
         #: period -> geo_ids of communes the source listed in no row at all
         #: for that year. Missing readings, reported, never invented.
         self.missing: dict[str, list[str]] = {}
+        #: (nis, period) pairs the gas prepayment-meter series marked
+        #: "pas de gaz" -- no gas network, NOT-APPLICABLE, never a zero.
+        self.no_gas_network: list[tuple[str, str]] = []
+        #: (nis, period) pairs marked "< 300 compteurs" -- IWEPS's own
+        #: small-number suppression.
+        self.suppressed_small_n: list[tuple[str, str]] = []
+        #: (nis, period) pairs marked "non fiable" -- the publisher disowns
+        #: the figure. A MISSING reading, distinct from "non disponible".
+        self.unreliable: list[tuple[str, str]] = []
+        #: (nis, period) pairs marked "non diffusé" -- WITHHELD: IWEPS has
+        #: the figure and chose not to publish it.
+        self.withheld: list[tuple[str, str]] = []
 
     def _rows_read_hint(self, rows: list[dict]) -> int | None:
         # rows_read counts every row the source sent, including the
         # "non disponible" cells and the backcast rows; rows_written does not.
         # The gap is the number of readings that were not there to load.
-        return len(rows) + len(self.unavailable) + len(self.backcast)
+        return (
+            len(rows)
+            + len(self.unavailable)
+            + len(self.backcast)
+            + len(self.no_gas_network)
+            + len(self.suppressed_small_n)
+            + len(self.unreliable)
+            + len(self.withheld)
+        )
 
     def _parse(self, raw: bytes, **kwargs) -> list[dict]:
         """`{geo_id, period, value, status}` per row, after every check above.
@@ -225,6 +331,10 @@ class WalStatSource(MunicipalTimeSeriesSource):
         if conn is None:
             raise ValueError("WalStatSource._parse needs geo_conn= (a connection with geographies)")
         reconcile: bool = kwargs.get("reconcile", True)
+        period_forms: frozenset[str] = frozenset(kwargs.get("period_forms", ()))
+        unknown_forms = period_forms - set(_EXTRA_PERIOD)
+        if unknown_forms:
+            raise ValueError(f"unknown period_forms {sorted(unknown_forms)}")
 
         try:
             data = json.loads(raw)
@@ -243,6 +353,10 @@ class WalStatSource(MunicipalTimeSeriesSource):
         self.backcast = []
         self.recoded = []
         self.missing = {}
+        self.no_gas_network = []
+        self.suppressed_small_n = []
+        self.unreliable = []
+        self.withheld = []
         for index, row in enumerate(data):
             if not isinstance(row, dict) or set(row) != EXPECTED_KEYS:
                 got = sorted(row) if isinstance(row, dict) else type(row).__name__
@@ -254,12 +368,14 @@ class WalStatSource(MunicipalTimeSeriesSource):
                     f"row {index}: type_entite {row['type_entite']!r} is not 'Commune' -- this "
                     "series was requested for communes and something else came back"
                 )
-            match = _PERIOD.match(str(row["periode"]).strip())
-            if not match:
+            period = _match_period(str(row["periode"]).strip(), period_forms)
+            if period is None:
                 raise WalStatSchemaError(
-                    f"row {index}: periode {row['periode']!r} does not read 'année YYYY'"
+                    f"row {index}: periode {row['periode']!r} is not a period form this "
+                    f"series writes ('année YYYY' / 'moyenne annuelle YYYY'"
+                    + (f", plus {sorted(period_forms)}" if period_forms else "")
+                    + ")"
                 )
-            period = match.group(1)
             nis = str(row["ins"]).strip()
             if (nis, period) in seen:
                 raise WalStatSchemaError(f"INS {nis} appears twice for {period}")
@@ -281,11 +397,28 @@ class WalStatSource(MunicipalTimeSeriesSource):
             if not geo_id.endswith(nis):
                 self.recoded.append((nis, period, geo_id))
             raw_value = str(row["valeur"]).strip()
-            if raw_value.lower() == NOT_AVAILABLE:
+            cell = _normalize_cell(raw_value)
+            if cell == NOT_AVAILABLE:
                 # Present in the response -- so it counts toward coverage --
                 # but carrying no reading.
                 by_period.setdefault(period, set()).add(geo_id)
                 self.unavailable.append((nis, period))
+                continue
+            if cell in NOT_APPLICABLE_GAS:
+                by_period.setdefault(period, set()).add(geo_id)
+                self.no_gas_network.append((nis, period))
+                continue
+            if cell in SUPPRESSED_SMALL_N:
+                by_period.setdefault(period, set()).add(geo_id)
+                self.suppressed_small_n.append((nis, period))
+                continue
+            if cell in UNRELIABLE:
+                by_period.setdefault(period, set()).add(geo_id)
+                self.unreliable.append((nis, period))
+                continue
+            if cell in WITHHELD:
+                by_period.setdefault(period, set()).add(geo_id)
+                self.withheld.append((nis, period))
                 continue
             try:
                 value = float(raw_value)

@@ -186,6 +186,12 @@ stores:
       - MUN_REVENUE_ORDINARY_PER_CAPITA
       - MUN_REVENUE_TOTAL_PER_CAPITA
       - UNEMPLOYMENT_RATE_BIT
+      # Block NS2: social-protection uptake and energy prepayment-meter
+      # shares, Walloon communes only (docs/features/walstat_adapter.md).
+      - GRAPA_RECIPIENTS_SHARE_65_PLUS
+      - BIM_BENEFICIARIES_SHARE
+      - PREPAYMENT_METERS_ELECTRICITY_SHARE
+      - PREPAYMENT_METERS_GAS_SHARE
     reference_rows:
       script: scripts/sync_walstat.py
       args: ["--reference-rows-only"]

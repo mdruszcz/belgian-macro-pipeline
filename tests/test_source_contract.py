@@ -167,6 +167,35 @@ def test_municipal_time_series_contract_walstat(tmp_path, monkeypatch, geo_conn)
     assert list(tmp_path.rglob("X.json")), "raw response not cached under RAW_CACHE_DIR"
 
 
+#: Block NS2's four new WalStat indicators -- the two period forms (01/01,
+#: 31/12) and the bare-year form must each be a config the shared loader
+#: accepts, walstat-sourced, with a fetch.query naming a real series id.
+WALSTAT_NS2_INDICATOR_IDS = frozenset(
+    {
+        "GRAPA_RECIPIENTS_SHARE_65_PLUS",
+        "BIM_BENEFICIARIES_SHARE",
+        "PREPAYMENT_METERS_ELECTRICITY_SHARE",
+        "PREPAYMENT_METERS_GAS_SHARE",
+    }
+)
+
+
+@pytest.mark.parametrize("indicator_id", sorted(WALSTAT_NS2_INDICATOR_IDS))
+def test_walstat_ns2_indicators_are_configured_and_walstat_sourced(indicator_id):
+    from src.validation.config_schema import load_and_validate_all
+
+    indicators, _sources = load_and_validate_all(
+        REPO / "config" / "indicators", REPO / "config" / "sources"
+    )
+    assert indicator_id in indicators, f"{indicator_id} has no config or failed validation"
+    cfg = indicators[indicator_id]
+    assert cfg["source_id"] == "walstat"
+    assert cfg["unit"] == "percent"
+    assert cfg["geo_levels"] == ["municipal"]
+    query = cfg["fetch"]["query"]
+    assert query.startswith("/json/") and query.endswith("/com+period=all"), query
+
+
 # --- the bankruptcies municipal contract, with a documented deviation --------
 #
 # BankruptciesSource is a MunicipalTimeSeriesSource, but geo_id is the raw

@@ -1,0 +1,36 @@
+id: GRAPA_RECIPIENTS_SHARE_65_PLUS
+name:
+  en: GRAPA/income guarantee recipients, share of the 65+
+  fr: Bénéficiaires GRAPA/RG, part des 65 ans et plus
+  nl: GRAPA/IGO-gerechtigden, aandeel van de 65-plussers
+unit: percent
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Share of residents aged 65 and over receiving the GRAPA (Garantie de Revenus aux
+    Personnes Agées) or the older Revenu Garanti aux Personnes Agées (RG) it replaced --
+    Belgium's means-tested minimum income for the elderly, paid where a pension (or its
+    absence) leaves someone under the guaranteed threshold. Source: WalStat (IWEPS), series
+    833300_0, theme "Protection sociale". Read off the live API 2026-09-23: 6308 rows, 263
+    communes, 24 annual periods 2002-2025, no non-numeric values.
+
+    WALLOON COMMUNES ONLY. Same catalogue-scope reasoning as UNEMPLOYMENT_RATE_BIT: WalStat's
+    opendata.iweps.be catalogue is Walloon, and no not-applicable mechanism exists yet for a
+    region-scoped indicator on Flemish/Brussels communes, so this indicator carries only the
+    262-263 Walloon rows rather than na rows for the other 302.
+
+    A SHARE WITH NO PUBLISHED NUMERATOR OR DENOMINATOR (docs/decisions/0003): WalStat gives
+    the percentage directly, not the recipient count or the 65+ population it is computed
+    against, so a province or regional figure cannot be recomputed from these rows.
+    is_additive false, aggregation_method not_applicable; refuse rather than invent.
+
+    lower_is_better as the roadmap's default reading of a means-tested benefit's uptake among
+    the elderly -- a higher share reflects more residents below the income-guarantee
+    threshold, not a desirable outcome in itself.
+fetch:
+  query: /json/833300_0/com+period=all
+display: null

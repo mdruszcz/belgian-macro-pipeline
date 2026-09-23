@@ -1,0 +1,37 @@
+id: BIM_BENEFICIARIES_SHARE
+name:
+  en: Increased-reimbursement (BIM) health-insurance beneficiaries, share of population
+  fr: Bénéficiaires de l'intervention majorée (BIM), part de la population
+  nl: Rechthebbenden op de verhoogde tegemoetkoming (RVV/BIM), aandeel van de bevolking
+unit: percent
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Share of residents entitled to the BIM (Bénéficiaire de l'Intervention Majorée /
+    Rechthebbende op de Verhoogde Verzekeringstegemoetkoming), the increased reimbursement
+    rate on health-care costs granted to households under an income threshold -- one of
+    Belgium's standard proxies for the population at risk of poverty. Source: WalStat
+    (IWEPS), series 833800_0, theme "Protection sociale". Read off the live API 2026-09-23:
+    5260 rows, 263 communes, 20 annual periods 2005-2024, no non-numeric values.
+
+    WALLOON COMMUNES ONLY, for the same catalogue-scope reason as UNEMPLOYMENT_RATE_BIT and
+    GRAPA_RECIPIENTS_SHARE_65_PLUS; no not-applicable mechanism exists yet for a region-scoped
+    indicator, so the other 302 Belgian communes carry no row here rather than an invented na.
+
+    periode on this series is a bare year ("2024"), not "année 2024" -- one of the three new
+    period forms this adapter's period pattern was widened to accept.
+
+    A SHARE WITH NO PUBLISHED NUMERATOR OR DENOMINATOR (docs/decisions/0003): WalStat
+    publishes the percentage directly, not the beneficiary count or the population it is
+    computed against, so no province or regional figure can be recomputed. is_additive false,
+    aggregation_method not_applicable; refuse rather than invent.
+
+    lower_is_better as the roadmap's default reading: a higher BIM share reflects more
+    households under the income threshold for increased reimbursement.
+fetch:
+  query: /json/833800_0/com+period=all
+display: null
