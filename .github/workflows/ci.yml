@@ -175,9 +175,25 @@ jobs:
         if: steps.docsonly.outputs.docs_only != 'true'
         run: pip install -e ".[dev]"
 
-      - name: Tests (generated-site tier)
+      - name: Detect a change no page generator reads
+        id: siteinert
         if: steps.docsonly.outputs.docs_only != 'true'
+        run: .github/workflows/site_inert.sh
+
+      - name: Tests (generated-site tier)
+        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert != 'true'
         run: make test-generated-site
+
+      - name: Tests (slow only -- the change cannot affect the generated site)
+        # SITE-INERT SHORT-CIRCUIT (2026-09-23, maintainer's request): the
+        # generated_site sweeps are the thirteen-minute part of this tier and
+        # only matter when something a page generator reads changed. A change
+        # confined to fetchers, sync scripts, orchestration, source/store
+        # config, validation or non-page tests (site_inert.sh has the exact
+        # allowlist) runs the `slow` tests only -- the store, validation and
+        # export checks still run on every PR. Any doubt runs everything.
+        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert == 'true'
+        run: make test-slow
 
   test:
     # The required check. Passes only when every tier passed; a cancelled or

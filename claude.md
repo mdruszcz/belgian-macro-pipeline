@@ -23,7 +23,11 @@ than a missing feature.
 7. Preserve multilingual labels (en/fr/nl) on every user-facing string.
 8. NEVER add a new data source without a row in docs/data_catalog.md approved
    by the maintainer.
-9. Run the full test suite before claiming completion. Report the actual output.
+9. Tests run on GitHub CI, on the PR (maintainer's rule, 2026-09-23). Locally, run
+   only the test files you are writing, plus ruff and black on changed files --
+   no local test suites. Push, open the PR, watch `gh pr checks <n> --watch` and
+   fix on the branch until CI is green. Never claim completion, or tell the
+   maintainer a PR is ready, before CI is green. Report the actual CI result.
 10. Do not modify files unrelated to the issue. If you believe an unrelated
     change is needed, stop and say so.
 11. Never commit directly to main or develop.
@@ -107,7 +111,8 @@ replace rules 1-16.
 ## Workflow you must follow
 1. Read the linked spec in docs/features/. If no spec exists, stop and ask.
 2. Work on a branch named feat/<issue-number>-<slug>.
-3. Implement. Add tests. Run ruff, black, pytest.
+3. Implement. Add tests. Run ruff and black, and only the tests you wrote;
+   CI runs the full suite on the PR (rule 9).
 4. Open a PR stating: files changed, tests added, tests run and their output,
    assumptions made, unresolved issues.
 5. Do not merge. The maintainer merges.
