@@ -154,6 +154,23 @@ stores:
       script: scripts/sync_onem_rates.py
       args: ["--reference-rows-only"]
 
+  # layout: one_csv_per_indicator (same mechanism as `international`/`nuts2`
+  # above), not a single CSV: the monthly, 21-year, 565-commune, explicit-
+  # zero-filled series is 40.5 MB as one file, over the 25 MB commit limit.
+  # Split, BANKRUPTCIES and BANKRUPTCY_JOBS_LOST measure 19.7 MB and 20.9 MB
+  # respectively (maintainer decision, 2026-09-23).
+  bankruptcies:
+    path: data/bankruptcies/
+    source_id: statbel
+    mode: in_db
+    layout: one_csv_per_indicator
+    indicators:
+      - BANKRUPTCIES
+      - BANKRUPTCY_JOBS_LOST
+    reference_rows:
+      script: scripts/sync_bankruptcies.py
+      args: ["--reference-rows-only"]
+
   walstat:
     path: data/walstat_observations.csv
     source_id: walstat

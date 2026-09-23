@@ -351,6 +351,71 @@ def test_refuses_an_undeclared_indicator_of_an_offloaded_source(pipeline):
     _assert_nothing_changed(pipeline, before, pipeline["working"].parent)
 
 
+def test_tolerates_a_store_less_indicator_already_in_the_committed_database(pipeline):
+    """The LOCAL_UNITS_BY_COMMUNE case (feat/ns1-bankruptcies): an indicator
+    under an offloaded source (walstat here, statbel for the real
+    LOCAL_UNITS_BY_COMMUNE) that NO store declares, but that already sits in
+    the committed database untouched -- present there before this run, same
+    rows, nothing new. This must NOT refuse: the indicator was never part of
+    what this mechanism offloads, so its presence is not a regression the
+    safety net should catch, unlike test_refuses_an_undeclared_indicator_of_an_offloaded_source's
+    MUN_SOMETHING_NEW, which has no committed-database history at all."""
+    import load_geography
+
+    load_geography.load(
+        pipeline["committed_db"], REPO / "config" / "geography", allow_unverified=True
+    )
+
+    conn = sqlite3.connect(pipeline["committed_db"])
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("""INSERT OR IGNORE INTO sources
+               (source_id, name, agency, adapter, base_url, licence, catalog_ref, cadence, is_active)
+           VALUES ('walstat', 'WalStat', 'IWEPS', 'walstat', 'x', 'x', 'x', 'x', 1)""")
+    conn.execute("""INSERT INTO indicators (indicator_id, source_id, name_nl, name_fr, name_en,
+               frequency, unit, preferred_direction, aggregation_method, is_additive,
+               decimals, config_path, is_active)
+           VALUES ('WALSTAT_UNSTORED', 'walstat', 'x', 'x', 'x', 'A', 'eur', 'neutral',
+               'sum', 1, 0, 'x', 1)""")
+    conn.execute(
+        "INSERT INTO fetch_runs (source_id, adapter, started_at, status) "
+        "VALUES ('walstat', 'walstat', '2026-09-01T05:00:00+00:00', 'ok')"
+    )
+    run_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    conn.execute(
+        """INSERT INTO observations (indicator_id, geo_id, period, vintage, value, status,
+               period_start, period_end, is_latest, fetch_run_id, created_at)
+           VALUES ('WALSTAT_UNSTORED', ?, '2024', 'v', 1.0, 'final', '2024-01-01',
+               '2024-12-31', 1, ?, 'v')""",
+        (GEO, run_id),
+    )
+    conn.commit()
+    conn.close()
+
+    # Rebuild the working database from this committed state (with the extra
+    # indicator) plus the existing in_db CSV -- the same "assembled from what
+    # is committed" state every other test in this file starts from,
+    # WALSTAT_UNSTORED carried over unchanged, exactly like
+    # LOCAL_UNITS_BY_COMMUNE is carried over by the real
+    # scripts/build_staging_db.py.
+    build(
+        source_db=pipeline["committed_db"],
+        working_db=pipeline["working"],
+        stores_path=pipeline["registry"],
+    )
+
+    counts = _offload(pipeline)
+    assert counts  # offload proceeded rather than refusing
+
+    conn = sqlite3.connect(pipeline["committed_db"])
+    try:
+        still_there = conn.execute(
+            "SELECT COUNT(*) FROM observations WHERE indicator_id = 'WALSTAT_UNSTORED'"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert still_there == 1, "the store-less indicator must stay in the committed database"
+
+
 def test_refuses_a_working_db_that_lost_committed_rows(pipeline):
     """The catastrophic case: a working database not assembled from the
     committed CSVs. Offloading it would overwrite the history with one day."""

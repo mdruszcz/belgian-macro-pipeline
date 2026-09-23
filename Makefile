@@ -239,6 +239,7 @@ fetch:
 	$(PYTHON) scripts/sync_onem.py --db $(DB)
 	$(PYTHON) scripts/sync_onem_rates.py --db $(DB)
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
+	$(PYTHON) scripts/sync_bankruptcies.py --db $(DB)
 	$(PYTHON) scripts/sync_international.py --db $(DB)
 
 ## sync-nuts2: fetch the Europe NUTS 2 batch's three regional Eurostat
