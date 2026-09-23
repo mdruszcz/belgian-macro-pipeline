@@ -43,7 +43,7 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 12
+    assert len(stores) == 13
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
@@ -74,6 +74,7 @@ def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
         "international",
         "nuts2",
         "bankruptcies",
+        "population_movement",
     }
     assert len(extra_csv_stores(stores)) == 6
     assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())

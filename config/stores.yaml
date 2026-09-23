@@ -196,6 +196,28 @@ stores:
       script: scripts/sync_walstat.py
       args: ["--reference-rows-only"]
 
+  # Block NS3, population-movement workbook (births, deaths, internal and
+  # international net migration -- docs/features/population_movement.md).
+  # Single CSV, not one_csv_per_indicator: measured 10.32 MB for all four
+  # indicators together after the sheet_year+1 -> sheet_year resolution fix
+  # (PR #233's audit fixes; re-measured post-regeneration, 2026-09-23 --
+  # larger than the pre-fix 6.06 MB because the retired pre-fix vintages
+  # for the 31 transition codes are kept, append-only, alongside the
+  # corrected rows), well under the 25 MB commit limit (maintainer
+  # decision, 2026-09-23, same threshold as the bankruptcies store's split).
+  population_movement:
+    path: data/population_movement_observations.csv
+    source_id: statbel
+    mode: in_db
+    indicators:
+      - BIRTHS
+      - DEATHS
+      - INTERNAL_MIGRATION_NET
+      - INTERNATIONAL_MIGRATION_NET
+    reference_rows:
+      script: scripts/sync_population_movement.py
+      args: ["--reference-rows-only"]
+
   # International pilot (docs/features/international.md). One CSV per
   # indicator, never a store per indicator (~100 candidates in the full
   # rollout) -- layout: one_csv_per_indicator, src/stores.py's Store.csv_paths()/

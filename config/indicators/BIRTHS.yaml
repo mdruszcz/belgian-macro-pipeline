@@ -1,0 +1,25 @@
+id: BIRTHS
+name:
+  en: Births
+  fr: Naissances
+  nl: Geboorten
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 550
+description:
+  en: >
+    Number of live births registered to residents of the commune during the calendar year,
+    from Statbel's population-movement workbook (docs/features/population_movement.md), column
+    NAISSANCES. The publisher's own count, taken as published -- not recomputed or derived
+    (CLAUDE.md rule 6). Geography is period-correct: each year's rows resolve against the
+    commune map in effect at the START of that same calendar year (not a pinned current-day
+    map -- see src/fetchers/population_movement.py and
+    docs/features/population_movement.md), so a commune created by a later merger carries no
+    rows before it existed, and a commune whose code only appears on the transition sheet
+    ahead of its own merger date is excluded from that one sheet rather than mapped onto a map
+    that did not yet apply. preferred_direction is 'contextual': more or fewer births is
+    neither better nor worse on its own.
+display: null

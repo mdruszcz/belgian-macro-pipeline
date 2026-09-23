@@ -25,6 +25,7 @@ from src.fetchers.bankruptcies import BankruptciesSource
 from src.fetchers.dbnomics import DBnomicsSource
 from src.fetchers.eurostat import EurostatSource
 from src.fetchers.nbb import NBBSource
+from src.fetchers.population_movement import PopulationMovementSource
 from src.fetchers.walstat import WalStatSource
 
 REPO = Path(__file__).resolve().parents[1]
@@ -256,3 +257,47 @@ def test_municipal_time_series_contract_bankruptcies(tmp_path, monkeypatch):
         assert row["indicator_id"] in {"BANKRUPTCIES", "BANKRUPTCY_JOBS_LOST"}
     # The raw response was cached before parsing, the base class's own promise.
     assert list(tmp_path.rglob("X.zip")), "raw response not cached under RAW_CACHE_DIR"
+
+
+# --- the population-movement municipal contract, same deviation --------------
+#
+# PopulationMovementSource is a MunicipalTimeSeriesSource, but `geo_id` is
+# the raw NIS string (never resolved inline -- resolution needs a live db
+# connection, which this layer does not have; resolve_geo(conn, nis,
+# sheet_year) is scripts/sync_population_movement.py's job, against the
+# row's OWN sheet year) and each row carries a fifth key, `indicator_id`,
+# since one fetch emits up to four indicators (BIRTHS, DEATHS,
+# INTERNAL_MIGRATION_NET, INTERNATIONAL_MIGRATION_NET) per commune-year
+# cell. See src/fetchers/population_movement.py's module docstring.
+
+sys.path.insert(0, str(REPO / "tests"))
+from test_population_movement_source import (  # noqa: E402
+    REAL_2025_AARTSELAAR,
+    REAL_2025_LIEGE,
+    REAL_2025_NAMUR,
+    _make_workbook,
+)
+
+
+def test_municipal_time_series_contract_population_movement(tmp_path, monkeypatch):
+    raw = _make_workbook({"2025": [REAL_2025_NAMUR, REAL_2025_LIEGE, REAL_2025_AARTSELAAR]})
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr("src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(raw))
+
+    rows = PopulationMovementSource().fetch("https://example.test/x.xlsx", cache_key="X")
+
+    assert rows, "fixture must produce at least one row to be a meaningful contract check"
+    for row in rows:
+        assert {"geo_id", "period", "value", "status"} <= set(row.keys())
+        assert isinstance(row["geo_id"], str)
+        assert isinstance(row["period"], str)
+        assert isinstance(row["value"], float)
+        assert row["status"] in {"final", "provisional", "estimate", "revised", "suppressed", "na"}
+        assert row["indicator_id"] in {
+            "BIRTHS",
+            "DEATHS",
+            "INTERNAL_MIGRATION_NET",
+            "INTERNATIONAL_MIGRATION_NET",
+        }
+    # The raw response was cached before parsing, the base class's own promise.
+    assert list(tmp_path.rglob("X.xlsx")), "raw response not cached under RAW_CACHE_DIR"
