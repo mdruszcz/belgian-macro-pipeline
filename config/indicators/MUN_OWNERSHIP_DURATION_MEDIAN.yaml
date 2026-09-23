@@ -1,0 +1,52 @@
+id: MUN_OWNERSHIP_DURATION_MEDIAN
+name:
+  en: Median property ownership duration
+  fr: Durée médiane de détention immobilière
+  nl: Mediane eigendomsduur
+unit: years
+source_id: spf_finances
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Median number of years a parcel in the commune has been held by its current owner,
+    across every parcel nature combined (ParcelNature=TOTAL). Source: SPF Finances AGDP
+    real-estate property dynamics dataset (52.01.24), PropertyDurationP50 column,
+    Municipality-level CSV, one 1-January snapshot per published version. PERIOD IS THE
+    CALENDAR YEAR of the snapshot's own publication date (ATOM `time` YYYY-01-01). NOT
+    AVAILABLE (status na) rather than zero when MUN_PARCELS_OWNED is zero or blank for
+    that commune/year -- the source writes a literal 0 in that case as a placeholder,
+    which is never a measured duration (see docs/features/spf_agdp.md). is_additive=false,
+    aggregation_method=not_applicable: a median cannot be summed or recomputed from
+    commune medians, so no province/region/Belgium aggregate is produced for this
+    indicator.
+  fr: >
+    Nombre médian d'années pendant lesquelles une parcelle de la commune a été détenue
+    par son propriétaire actuel, toutes natures de parcelle confondues
+    (ParcelNature=TOTAL). Source : jeu de données AGDP dynamique de la propriété
+    immobilière du SPF Finances (52.01.24), colonne PropertyDurationP50, CSV au niveau
+    communal, un instantané au 1er janvier par version publiée. LA PÉRIODE EST L'ANNÉE
+    CALENDAIRE de la date de publication de l'instantané (ATOM `time` YYYY-01-01). NON
+    DISPONIBLE (statut na) plutôt que zéro lorsque MUN_PARCELS_OWNED est nul ou vide
+    pour cette commune/année -- la source écrit dans ce cas un 0 littéral comme
+    valeur de remplissage, qui n'est jamais une durée mesurée (voir
+    docs/features/spf_agdp.md). is_additive=false, aggregation_method=not_applicable :
+    une médiane ne peut être ni additionnée ni recalculée à partir des médianes
+    communales, donc aucun agrégat provincial/régional/national n'est produit pour cet
+    indicateur.
+  nl: >
+    Mediaan aantal jaren dat een perceel in de gemeente in bezit is van de huidige
+    eigenaar, over alle perceelaarden samen (ParcelNature=TOTAL). Bron: AGDP-dataset
+    dynamiek van de eigendom van onroerend goed van de FOD Financiën (52.01.24), kolom
+    PropertyDurationP50, CSV op gemeenteniveau, één momentopname per 1 januari per
+    gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van de eigen publicatiedatum
+    van de momentopname (ATOM `time` YYYY-01-01). NIET BESCHIKBAAR (status na) in plaats
+    van nul wanneer MUN_PARCELS_OWNED nul of leeg is voor die gemeente/dat jaar -- de
+    bron schrijft in dat geval een letterlijke 0 als plaatshouder, wat nooit een gemeten
+    duur is (zie docs/features/spf_agdp.md). is_additive=false,
+    aggregation_method=not_applicable: een mediaan kan niet worden opgeteld of herrekend
+    uit gemeentelijke medianen, dus wordt er voor deze indicator geen provincie-/gewest-/
+    Belgiëaggregaat geproduceerd.
+display: null

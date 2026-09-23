@@ -15,6 +15,8 @@ import pytest
 
 from src.fetchers.spf_agdp import (
     LEASES,
+    OWNER_OCCUPANTS,
+    PROPERTY_DYNAMICS,
     TRANSACTIONS,
     AgdpSchemaError,
     AgdpSource,
@@ -379,3 +381,220 @@ def test_ranged_http_file_seek_and_tell():
     assert f.tell() == 8
     f.seek(2, io.SEEK_CUR)
     assert f.tell() == 10
+
+
+# --- annual ATOM period parsing (Wave 5 lot A) --------------------------------
+
+
+def test_parse_atom_feed_annual_reads_year_from_jan1_timestamp():
+    xml = _atom_bytes(
+        [
+            ("https://example.test/v2026.zip", "2026-01-01T00:00:00Z", 5000000),
+            ("https://example.test/v2020.zip", "2020-01-01T00:00:00Z", 4000000),
+        ]
+    )
+    versions = parse_atom_feed(xml, dataset_label="test", frequency="A")
+    assert [(v.quarter, v.length, v.url) for v in versions] == [
+        ("2020", 4000000, "https://example.test/v2020.zip"),
+        ("2026", 5000000, "https://example.test/v2026.zip"),
+    ]
+
+
+def test_parse_atom_feed_annual_rejects_non_jan1_month():
+    xml = _atom_bytes([("https://example.test/v1.zip", "2026-03-31T00:00:00Z", 1)])
+    with pytest.raises(AgdpSchemaError, match="annual"):
+        parse_atom_feed(xml, dataset_label="test", frequency="A")
+
+
+def test_parse_atom_feed_annual_rejects_non_jan1_day():
+    xml = _atom_bytes([("https://example.test/v1.zip", "2026-01-15T00:00:00Z", 1)])
+    with pytest.raises(AgdpSchemaError, match="annual"):
+        parse_atom_feed(xml, dataset_label="test", frequency="A")
+
+
+def test_parse_atom_feed_quarterly_path_unaffected_by_frequency_default():
+    # frequency defaults to "Q" -- the Wave 4 quarterly path is byte-for-byte
+    # unchanged by adding the frequency parameter.
+    xml = _atom_bytes([("https://example.test/v1.zip", "2026-03-31T00:00:00Z", 10)])
+    versions = parse_atom_feed(xml, dataset_label="test")
+    assert versions[0].quarter == "2026-Q1"
+
+
+def test_unknown_frequency_rejected():
+    xml = _atom_bytes([("https://example.test/v1.zip", "2026-01-01T00:00:00Z", 10)])
+    with pytest.raises(ValueError, match="Unknown frequency"):
+        parse_atom_feed(xml, dataset_label="test", frequency="M")
+
+
+# --- Owner Occupants (52.01.14): fictitious/non-numeric NIS row filter -------
+
+_OWNER_HEADER = "NISCode;Fictious;NameFre;NameDut;NameGer;PersonType;HousingRightType;PersonNumber"
+
+
+def _owner_row(
+    nis="11001", fictious="0", person_type="Total", housing_right="OCCUPANTPUPES", number="7722"
+):
+    return f"{nis};{fictious};Antwerpen;Antwerpen;Antwerpen;{person_type};{housing_right};{number}"
+
+
+def _owner_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_OWNER_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_owner_occupants_real_value_2026_antwerp():
+    csv_bytes = _owner_csv([_owner_row(nis="11001", number="7722")])
+    rows = AgdpSource(OWNER_OCCUPANTS)._parse(csv_bytes, quarter="2026")
+    assert rows == [
+        {
+            "geo_id": "11001",
+            "period": "2026",
+            "value": 7722.0,
+            "status": "final",
+            "indicator_id": "MUN_OWNER_OCCUPIERS",
+        }
+    ]
+
+
+def test_owner_occupants_skips_fictitious_placeholder_row():
+    csv_bytes = _owner_csv(
+        [
+            _owner_row(nis="N/A", fictious="1", number="999999"),
+            _owner_row(nis="11001", fictious="0", number="7722"),
+        ]
+    )
+    rows = AgdpSource(OWNER_OCCUPANTS)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 1
+    assert rows[0]["geo_id"] == "11001"
+
+
+def test_owner_occupants_skips_non_numeric_nis_even_if_fictious_is_zero():
+    csv_bytes = _owner_csv(
+        [
+            _owner_row(nis="ABCDE", fictious="0", number="1"),
+            _owner_row(nis="11001", fictious="0", number="7722"),
+        ]
+    )
+    rows = AgdpSource(OWNER_OCCUPANTS)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 1
+    assert rows[0]["geo_id"] == "11001"
+
+
+def test_owner_occupants_real_zero_count_is_final_not_na():
+    csv_bytes = _owner_csv([_owner_row(nis="11001", number="0")])
+    rows = AgdpSource(OWNER_OCCUPANTS)._parse(csv_bytes, quarter="2026")
+    assert rows[0] == {
+        "geo_id": "11001",
+        "period": "2026",
+        "value": 0.0,
+        "status": "final",
+        "indicator_id": "MUN_OWNER_OCCUPIERS",
+    }
+
+
+def test_owner_occupants_only_total_occupantpupes_row_selected():
+    csv_bytes = _owner_csv(
+        [
+            _owner_row(
+                nis="11001", person_type="MTotal", housing_right="OCCUPANTPUPES", number="3768"
+            ),
+            _owner_row(
+                nis="11001", person_type="Total", housing_right="SPOUSESPUPES", number="999"
+            ),
+            _owner_row(
+                nis="11001", person_type="Total", housing_right="OCCUPANTPUPES", number="7722"
+            ),
+        ]
+    )
+    rows = AgdpSource(OWNER_OCCUPANTS)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 1
+    assert rows[0]["value"] == 7722.0
+
+
+# --- Property Dynamics (52.01.24): guard against fabricated zero duration ---
+
+_DYNAMICS_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;ParcelNature;ParcelsNumber;"
+    "PropertyChange0Y;PropertyDurationP25;PropertyDurationP50;PropertyDurationP75;"
+    "PropertyDurationMean;PropertyRotationMean"
+)
+
+
+def _dynamics_row(
+    nis="11001", nature="TOTAL", parcels="11538", p50="9.0102669405", rotation="15.159677398"
+):
+    return f"{nis};Antwerpen;Antwerpen;Antwerpen;{nature};{parcels};0;8;{p50};10;9.5;{rotation}"
+
+
+def _dynamics_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_DYNAMICS_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_property_dynamics_real_value_2026_antwerp():
+    csv_bytes = _dynamics_csv(
+        [_dynamics_row(nis="11001", parcels="11538", p50="9.0102669405", rotation="15.159677398")]
+    )
+    rows = AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_PARCELS_OWNED"]["value"] == 11538.0
+    assert by_indicator["MUN_PARCELS_OWNED"]["status"] == "final"
+    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["value"] == pytest.approx(9.0102669405)
+    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["status"] == "final"
+    assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["value"] == pytest.approx(15.159677398)
+    assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["status"] == "final"
+
+
+def test_property_dynamics_only_total_parcel_nature_selected():
+    csv_bytes = _dynamics_csv(
+        [
+            _dynamics_row(nis="11001", nature="TYPE_HOUSE", parcels="500", p50="5.0"),
+            _dynamics_row(nis="11001", nature="TOTAL", parcels="11538", p50="9.0102669405"),
+        ]
+    )
+    rows = AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_PARCELS_OWNED"]["value"] == 11538.0
+
+
+def test_property_dynamics_zero_parcels_is_na_never_a_fabricated_zero_duration():
+    # SPF writes a literal 0 for duration/rotation when ParcelsNumber is 0 --
+    # this must map to na/None, never a real published zero duration.
+    csv_bytes = _dynamics_csv([_dynamics_row(nis="11001", parcels="0", p50="0", rotation="0")])
+    rows = AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_PARCELS_OWNED"] == {
+        "geo_id": "11001",
+        "period": "2026",
+        "value": 0.0,
+        "status": "final",
+        "indicator_id": "MUN_PARCELS_OWNED",
+    }
+    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["value"] is None
+    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["status"] == "na"
+    assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["value"] is None
+    assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["status"] == "na"
+
+
+def test_property_dynamics_blank_parcels_is_na_never_a_fabricated_zero_duration():
+    csv_bytes = _dynamics_csv([_dynamics_row(nis="11001", parcels="", p50="", rotation="")])
+    rows = AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_PARCELS_OWNED"]["value"] == 0.0
+    assert by_indicator["MUN_PARCELS_OWNED"]["status"] == "final"
+    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["status"] == "na"
+    assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["status"] == "na"
+
+
+def test_property_dynamics_nonzero_parcels_blank_duration_refuses():
+    csv_bytes = _dynamics_csv([_dynamics_row(nis="11001", parcels="100", p50="")])
+    with pytest.raises(AgdpSchemaError, match="expected a published value"):
+        AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
+
+
+def test_property_dynamics_2016_real_value():
+    csv_bytes = _dynamics_csv([_dynamics_row(nis="11001", parcels="9779", p50="9.5140314853")])
+    rows = AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2016")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_PARCELS_OWNED"]["value"] == 9779.0
+    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["value"] == pytest.approx(9.5140314853)

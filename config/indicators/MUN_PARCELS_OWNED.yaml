@@ -1,0 +1,59 @@
+id: MUN_PARCELS_OWNED
+name:
+  en: Parcels tracked for ownership dynamics
+  fr: Parcelles suivies pour la dynamique de propriété
+  nl: Percelen gevolgd voor eigendomsdynamiek
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of parcels in the commune, across every parcel nature combined
+    (ParcelNature=TOTAL -- houses, flats, land, garages and every other parcel type),
+    covered by SPF Finances' real-estate ownership dynamics tracking for the year.
+    Source: SPF Finances AGDP real-estate property dynamics dataset (52.01.24),
+    Municipality-level CSV, one 1-January snapshot per published version. PERIOD IS THE
+    CALENDAR YEAR of the snapshot's own publication date (ATOM `time` YYYY-01-01). This
+    is the denominator behind MUN_OWNERSHIP_DURATION_MEDIAN and
+    MUN_OWNERSHIP_ROTATION_MEAN: a parcel count of zero for a given parcel nature makes
+    a duration/rotation figure for that nature unmeasurable, not zero (see
+    docs/features/spf_agdp.md) -- at ParcelNature=TOTAL every live commune has a
+    non-zero count in every version measured, but the guard exists because other parcel
+    natures do not. is_additive=true, aggregation_method=sum: province/region/Belgium
+    totals are summed from this count the ordinary way over the geographies that
+    existed that year.
+  fr: >
+    Nombre de parcelles dans la commune, toutes natures de parcelle confondues
+    (ParcelNature=TOTAL -- maisons, appartements, terrains, garages et tout autre type
+    de parcelle), couvertes par le suivi de la dynamique de propriété immobilière du SPF
+    Finances pour l'année. Source : jeu de données AGDP dynamique de la propriété
+    immobilière du SPF Finances (52.01.24), CSV au niveau communal, un instantané au
+    1er janvier par version publiée. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la date de
+    publication de l'instantané (ATOM `time` YYYY-01-01). C'est le dénominateur derrière
+    MUN_OWNERSHIP_DURATION_MEDIAN et MUN_OWNERSHIP_ROTATION_MEAN : un nombre de
+    parcelles nul pour une nature de parcelle donnée rend une valeur de
+    durée/rotation pour cette nature non mesurable, et non nulle (voir
+    docs/features/spf_agdp.md) -- pour ParcelNature=TOTAL, chaque commune existante a un
+    nombre non nul dans chaque version mesurée, mais la protection existe car ce n'est
+    pas le cas pour les autres natures de parcelle. is_additive=true,
+    aggregation_method=sum : les totaux provinciaux/régionaux/nationaux sont additionnés
+    normalement sur les entités géographiques existant cette année-là.
+  nl: >
+    Aantal percelen in de gemeente, over alle perceelaarden samen (ParcelNature=TOTAL --
+    huizen, appartementen, grond, garages en elk ander perceeltype), gedekt door de
+    opvolging van de eigendomsdynamiek van onroerend goed van de FOD Financiën voor het
+    jaar. Bron: AGDP-dataset dynamiek van de eigendom van onroerend goed van de FOD
+    Financiën (52.01.24), CSV op gemeenteniveau, één momentopname per 1 januari per
+    gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van de eigen publicatiedatum
+    van de momentopname (ATOM `time` YYYY-01-01). Dit is de noemer achter
+    MUN_OWNERSHIP_DURATION_MEDIAN en MUN_OWNERSHIP_ROTATION_MEAN: een perceelaantal van
+    nul voor een bepaalde perceelaard maakt een duur-/rotatiecijfer voor die aard
+    onmeetbaar, niet nul (zie docs/features/spf_agdp.md) -- bij ParcelNature=TOTAL heeft
+    elke bestaande gemeente een niet-nul aantal in elke gemeten versie, maar de
+    bescherming bestaat omdat dat niet geldt voor andere perceelaarden. is_additive=true,
+    aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de gewone manier
+    opgeteld over de geografische entiteiten die dat jaar bestonden.
+display: null

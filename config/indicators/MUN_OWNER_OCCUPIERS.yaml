@@ -1,0 +1,58 @@
+id: MUN_OWNER_OCCUPIERS
+name:
+  en: Owner occupants
+  fr: Titulaires occupants
+  nl: Bewonende eigenaars
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of individuals in the commune who own the housing unit they occupy, as the
+    principal occupant (PersonType=Total, HousingRightType=OCCUPANTPUPES). Source: SPF
+    Finances AGDP owner-occupants dataset (52.01.14), Municipality-level CSV, one
+    1-January snapshot per published version. PERIOD IS THE CALENDAR YEAR of the
+    snapshot's own publication date (ATOM `time` YYYY-01-01). EXCLUDES spouses,
+    cohabitants, ancestors, descendants and other co-owners occupying the same unit
+    (HousingRightType values SPOUSESPUPES/COHABITANTPUPES/ANCESTORPUPES/
+    DESCENDANTPUPES/OTHER) and the dataset's one fictitious placeholder row set
+    (Fictious=1, NISCode="N/A"), which is skipped before any figure is computed (see
+    docs/features/spf_agdp.md). A commune with zero owner-occupants of this type is a
+    real, published zero (CLAUDE.md rule 26) -- the source publishes a row for every live
+    commune every year. is_additive=true, aggregation_method=sum: province/region/Belgium
+    totals are summed from this count the ordinary way over the geographies that existed
+    that year.
+  fr: >
+    Nombre de personnes dans la commune qui possèdent le logement qu'elles occupent, en
+    tant qu'occupant principal (PersonType=Total, HousingRightType=OCCUPANTPUPES).
+    Source : jeu de données AGDP titulaires occupants du SPF Finances (52.01.14), CSV au
+    niveau communal, un instantané au 1er janvier par version publiée. LA PÉRIODE EST
+    L'ANNÉE CALENDAIRE de la date de publication de l'instantané (ATOM `time`
+    YYYY-01-01). EXCLUT les conjoints, cohabitants, ascendants, descendants et autres
+    copropriétaires occupant le même logement (valeurs HousingRightType
+    SPOUSESPUPES/COHABITANTPUPES/ANCESTORPUPES/DESCENDANTPUPES/OTHER) ainsi que
+    l'unique ensemble de lignes fictives du jeu de données (Fictious=1, NISCode="N/A"),
+    écarté avant tout calcul (voir docs/features/spf_agdp.md). Une commune sans aucun
+    titulaire occupant de ce type est un zéro réellement publié (règle 26 de CLAUDE.md)
+    -- la source publie une ligne pour chaque commune existante chaque année.
+    is_additive=true, aggregation_method=sum : les totaux provinciaux/régionaux/nationaux
+    sont additionnés normalement sur les entités géographiques existant cette année-là.
+  nl: >
+    Aantal personen in de gemeente die de woning waarin ze wonen zelf bezitten, als
+    hoofdbewoner (PersonType=Total, HousingRightType=OCCUPANTPUPES). Bron: AGDP
+    bewonende-eigenaars-dataset van de FOD Financiën (52.01.14), CSV op gemeenteniveau,
+    één momentopname per 1 januari per gepubliceerde versie. DE PERIODE IS HET
+    KALENDERJAAR van de eigen publicatiedatum van de momentopname (ATOM `time`
+    YYYY-01-01). SLUIT partners, samenwonenden, ouders, kinderen en andere
+    mede-eigenaars die dezelfde woning bewonen UIT (HousingRightType-waarden
+    SPOUSESPUPES/COHABITANTPUPES/ANCESTORPUPES/DESCENDANTPUPES/OTHER), evenals de ene
+    fictieve rijenset van de dataset (Fictious=1, NISCode="N/A"), die vóór elke
+    berekening wordt overgeslagen (zie docs/features/spf_agdp.md). Een gemeente zonder
+    bewonende eigenaars van dit type is een werkelijk gepubliceerde nul (CLAUDE.md-regel
+    26) -- de bron publiceert elk jaar een rij voor elke bestaande gemeente.
+    is_additive=true, aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op
+    de gewone manier opgeteld over de geografische entiteiten die dat jaar bestonden.
+display: null
