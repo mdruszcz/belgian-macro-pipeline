@@ -97,6 +97,10 @@ MapUI.formatValue = function(num, unit, decimals, lang){
      it can never be read as a total: Namur's 2 319,7 is what the commune
      raises per resident, not its budget. Mirrored in src/pages/resolve.py. */
   if(u === 'eur_per_inhabitant') return '\u20ac' + body + '\u202f/\u202fhab.';
+  /* Euros PER MONTH (SPF Finances housing-leases batch: median rent and
+     charges on new residential leases), same on-number rate treatment as
+     eur_per_inhabitant above. Mirrored in src/pages/resolve.py. */
+  if(u === 'eur_per_month') return '\u20ac' + body + '\u202f/\u202fmo.';
   // pct_of_gdp (Europe countries batch, docs/features/europe_countries.md,
   // GOV_DEBT_EUROPE): deliberately not spelled "percent*" in the indicator
   // config (percent_bounded validation fails above 100, and several

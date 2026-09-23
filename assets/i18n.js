@@ -618,6 +618,10 @@ I18N.STRINGS = {
     unitKtCo2eq: 'kt CO₂ eq.',
     unitFte: 'full-time equivalents',
     unitYears: 'years',
+    // MapUI.formatValue (assets/commune_map.js) / src/pages/resolve.py's
+    // _format_value: the SPF Finances housing-leases batch's monthly rent
+    // and charges medians, the first "€ per month" unit on the site.
+    unitEurPerMonth: '€ / month',
     unitMeurClv2010: '€ million (2010 volumes)',
     unitIndex0100: 'score 0–100',
     europeCompareFilterLabel: 'Charts shown',
@@ -1193,6 +1197,10 @@ I18N.STRINGS = {
     unitKtCo2eq: 'kt éq. CO₂',
     unitFte: 'équivalents temps plein',
     unitYears: 'ans',
+    // MapUI.formatValue (assets/commune_map.js) / _format_value de
+    // src/pages/resolve.py : les médianes mensuelles de loyer et de charges
+    // du lot des baux SPF Finances, la première unité "€ par mois" du site.
+    unitEurPerMonth: '€ / mois',
     unitMeurClv2010: 'millions € (volumes 2010)',
     unitIndex0100: 'score 0–100',
     europeCompareFilterLabel: 'Graphiques affichés',
@@ -1754,6 +1762,11 @@ I18N.STRINGS = {
     unitKtCo2eq: 'kt CO₂-eq.',
     unitFte: 'voltijdequivalenten',
     unitYears: 'jaar',
+    // MapUI.formatValue (assets/commune_map.js) / _format_value in
+    // src/pages/resolve.py: de mediane maandelijkse huur- en kostencijfers
+    // van het SPF Financiën-huurbatch, de eerste "€ per maand"-eenheid op de
+    // site.
+    unitEurPerMonth: '€ / maand',
     unitMeurClv2010: 'miljoen € (volumes 2010)',
     unitIndex0100: 'score 0–100',
     europeCompareFilterLabel: 'Getoonde grafieken',
