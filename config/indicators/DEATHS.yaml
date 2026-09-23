@@ -1,0 +1,22 @@
+id: DEATHS
+name:
+  en: Deaths
+  fr: Décès
+  nl: Overlijdens
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 550
+description:
+  en: >
+    Number of deaths registered among residents of the commune during the calendar year, from
+    Statbel's population-movement workbook (docs/features/population_movement.md), column DECES.
+    The publisher's own count, taken as published -- not recomputed or derived (CLAUDE.md rule
+    6). Geography is period-correct: each year's rows resolve against the commune map in effect
+    at the end of that year (the workbook's own convention -- see
+    src/fetchers/population_movement.py), not a pinned current-day map, so a commune created by
+    a later merger carries no rows before it existed. preferred_direction is 'contextual': more
+    or fewer deaths reflects population size and age structure, not something to optimise.
+display: null

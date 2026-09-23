@@ -166,9 +166,10 @@ RETIRED_GATE_IDS = {
 # The live set TRACKED (orchestration/commands.py) gates auto-merge on today,
 # under Dagster -- RETIRED_GATE_IDS above stays a frozen historical record of
 # the pre-Dagster workflow and is never edited for a new source; this is the
-# one place a newly tracked daily source (bankruptcies, feat/ns1-bankruptcies)
-# is added to what the CURRENT gate covers.
-CURRENT_GATE_IDS = RETIRED_GATE_IDS | {"sync_bankruptcies"}
+# one place a newly tracked daily source (bankruptcies, feat/ns1-bankruptcies;
+# population movement, feat/ns3-population-movement) is added to what the
+# CURRENT gate covers.
+CURRENT_GATE_IDS = RETIRED_GATE_IDS | {"sync_bankruptcies", "sync_population_movement"}
 
 
 @pytest.mark.parametrize("name", sorted(COMMANDS))
@@ -262,7 +263,7 @@ def test_the_production_job_is_the_export_job_plus_the_offload():
 
 def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
     assert {COMMANDS[n].workflow_step for n in TRACKED} == CURRENT_GATE_IDS
-    assert len(TRACKED) == 9
+    assert len(TRACKED) == 10
     gate = next(s for s in _steps() if s.get("id") == "sources")
     assert "orchestration.manifest" in gate["run"]
 

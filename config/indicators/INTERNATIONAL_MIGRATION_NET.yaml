@@ -1,0 +1,25 @@
+id: INTERNATIONAL_MIGRATION_NET
+name:
+  en: Net international migration
+  fr: Solde migratoire international
+  nl: Internationaal migratiesaldo
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 550
+description:
+  en: >
+    Net international migration (arrivals minus departures, to/from outside Belgium) for
+    residents of the commune during the calendar year, from Statbel's population-movement
+    workbook (docs/features/population_movement.md), column P -- the publisher's own SOLDE for
+    "MOUVEMENT MIGRATOIRE INTERNATIONAL", taken as published, not recomputed (CLAUDE.md rule 6).
+    This value can be negative -- CLAUDE.md's `counts_non_negative` validation rule currently
+    rejects any negative value where unit is 'count'; see the PR body for how this batch
+    resolves that conflict rather than silently weakening the rule. Geography is period-correct:
+    each year's rows resolve against the commune map in effect at the end of that year (the
+    workbook's own convention -- see src/fetchers/population_movement.py), not a pinned
+    current-day map. preferred_direction is 'contextual': a positive or negative net migration
+    figure is neither better nor worse on its own.
+display: null
