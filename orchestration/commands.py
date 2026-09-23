@@ -97,6 +97,11 @@ COMMANDS: dict[str, Command] = {
         workflow_step="sync_population_movement",
         source_ids=("statbel",),
     ),
+    "ipp_rate_observations": Command(
+        ("scripts/sync_ipp_rate.py", "--db", "{db}"),
+        workflow_step="sync_ipp_rate",
+        source_ids=("spf_finances",),
+    ),
     "international_observations": Command(
         ("scripts/sync_international.py", "--db", "{db}"),
         workflow_step="sync_international",

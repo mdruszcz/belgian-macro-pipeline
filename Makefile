@@ -241,6 +241,7 @@ fetch:
 	$(PYTHON) scripts/sync_walstat.py --db $(DB)
 	$(PYTHON) scripts/sync_bankruptcies.py --db $(DB)
 	$(PYTHON) scripts/sync_population_movement.py --db $(DB)
+	$(PYTHON) scripts/sync_ipp_rate.py --db $(DB)
 	$(PYTHON) scripts/sync_international.py --db $(DB)
 
 ## sync-nuts2: fetch the Europe NUTS 2 batch's three regional Eurostat

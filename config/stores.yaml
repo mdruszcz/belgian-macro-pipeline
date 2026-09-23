@@ -346,3 +346,22 @@ stores:
     reference_rows:
       script: scripts/sync_nuts2.py
       args: ["--reference-rows-only"]
+
+  # Block NS6, communal additional IPP rate (docs/features/ipp_rate.md).
+  # Single small CSV: three tax years (2024-2026) x ~565 communes, well
+  # under the 25 MB commit limit. in_db because SPF Finances is reachable
+  # live from CI, the same reason bankruptcies/population_movement are
+  # in_db rather than extra_csv (docs/decisions/0006's own split). No
+  # aggregate is computed from this indicator (is_additive false,
+  # aggregation_method not_applicable -- see
+  # config/indicators/MUN_IPP_ADDITIONAL_RATE.yaml and
+  # scripts/sync_ipp_rate.py).
+  ipp_rate:
+    path: data/ipp_rate_observations.csv
+    source_id: spf_finances
+    mode: in_db
+    indicators:
+      - MUN_IPP_ADDITIONAL_RATE
+    reference_rows:
+      script: scripts/sync_ipp_rate.py
+      args: ["--reference-rows-only"]

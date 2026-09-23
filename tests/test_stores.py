@@ -43,7 +43,7 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 13
+    assert len(stores) == 14
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
@@ -65,7 +65,8 @@ def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
     `bankruptcies` (feat/ns1-bankruptcies) -- the first in_db store whose
     source_id (statbel) also backs extra_csv stores, since Statbel's
     bankruptcies file is reachable live where the other Statbel files this
-    pipeline loads are not."""
+    pipeline loads are not. Plus `ipp_rate` (feat/ns6-ipp-rate) -- SPF
+    Finances' communal additional IPP rate, also reachable live."""
     stores = load_stores(DEFAULT_STORES_PATH)
     assert {s.name for s in in_db_stores(stores)} == {
         "onem",
@@ -75,6 +76,7 @@ def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
         "nuts2",
         "bankruptcies",
         "population_movement",
+        "ipp_rate",
     }
     assert len(extra_csv_stores(stores)) == 6
     assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())
