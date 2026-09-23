@@ -1455,11 +1455,12 @@ neither has been evaluated as a candidate dataset itself yet, since that require
 specific dataset within each, which is exactly the enumeration Block E's `[H]` scoring step
 still needs from the maintainer.
 
-## New municipal sources — PROPOSED 2026-09-23, awaiting the maintainer's approval
+## New municipal sources — APPROVED by the maintainer 2026-09-23
 
 Drafted from `docs/idées/` (the licence inventory PDF and the SPF Finances portal note) under the
-plan approved 2026-09-23: easiest first, one wave per source. **Nothing below may be built until
-the maintainer marks the row APPROVED** (rule 8). Every fact tagged *measured* was read off the real
+plan approved 2026-09-23: easiest first, one wave per source. The maintainer approved every row on 2026-09-23, in his words: "j'approuve toutes les lignes du
+PR #229, et une commune sans faillite un mois donné compte pour 0" (rule 8). The IPP tax-year
+question stays open until wave 6. Every fact tagged *measured* was read off the real
 file or a real GitHub Actions run on 2026-09-23, not inferred.
 
 **Reachability, measured.** A temporary probe on a real GitHub Actions runner (run `35830872431`,
@@ -1470,7 +1471,7 @@ runners** (the TCP handshake used to time out). The SPF bulk patrimony zip (118 
 downloading when the probe's 90 s limit cut it off; that is size, not a block. So every source
 below can run in the existing daily job; none needs a hand-download.
 
-### Wave 1 — Statbel bankruptcies by commune (PROPOSED)
+### Wave 1 — Statbel bankruptcies by commune (APPROVED 2026-09-23)
 
 | Field | Value |
 |---|---|
@@ -1483,9 +1484,9 @@ below can run in the existing daily job; none needs a hand-download.
 | Suppression | *Measured:* none. 202,332 rows, every count ≥ 1, no blank or non-numeric value |
 | Proposed indicators | `BANKRUPTCIES` (count, monthly, additive) and `BANKRUPTCY_JOBS_LOST` (count, monthly, additive); annual totals as tested derived indicators |
 | Licence | Statbel open-data licence — already verified above; commercial reuse allowed, credit and publication date required |
-| **Decision needed** | The file lists only commune-months that *had* a bankruptcy. Is a commune with no row for a month an explicit **0** (a real measured zero), or left empty? Recommendation: 0 for every commune that existed, from 2005 on, because the file is a complete register of events, not a sample. Rule 26 means this must be decided, not assumed |
+| **Decided by the maintainer 2026-09-23** | The file lists only commune-months that *had* a bankruptcy. A commune-month with no row is an explicit **0**, for every commune that existed: the file is a complete register of events, not a sample (rule 26: decided, not assumed) |
 
-### Wave 2 — WalStat, Wallonia only (PROPOSED)
+### Wave 2 — WalStat, Wallonia only (APPROVED 2026-09-23)
 
 | Field | Value |
 |---|---|
@@ -1495,7 +1496,7 @@ below can run in the existing daily job; none needs a hand-download.
 | Licence | CC0 — already verified above |
 | Status | Exact WalStat indicator ids to be read off the WalStat catalogue in the spec |
 
-### Wave 3 — Statbel population movement (PROPOSED)
+### Wave 3 — Statbel population movement (APPROVED 2026-09-23)
 
 | Field | Value |
 |---|---|
@@ -1504,7 +1505,7 @@ below can run in the existing daily job; none needs a hand-download.
 | Licence | Statbel open-data licence — already verified |
 | Status | The exact open-data file URL is not yet identified (search engines hit a CAPTCHA); to be found in the spec |
 
-### Waves 4–5 — SPF Finances, patrimony open data (AGDP) (PROPOSED)
+### Waves 4–5 — SPF Finances, patrimony open data (AGDP) (APPROVED 2026-09-23)
 
 | Field | Value |
 |---|---|
@@ -1518,7 +1519,7 @@ below can run in the existing daily job; none needs a hand-download.
 | Licence | **Maintainer ruling 2026-09-23: the whole SPF Finances open-data portal may be reused commercially.** For the record, the SPF's own page describes "une licence unique, basée sur la licence Creative Commons CC BY" (`https://finances.belgium.be/sites/default/files/Licence_plan_opendata_FR.PDF`), so the source is credited on every view |
 | Excluded | The SPF's fiscal-control statistics (audits, ISI, e-audit): outside BelPulse by the maintainer's own cumul declaration |
 
-### Wave 6 — Communal additional IPP rate (PROPOSED)
+### Wave 6 — Communal additional IPP rate (APPROVED 2026-09-23)
 
 | Field | Value |
 |---|---|

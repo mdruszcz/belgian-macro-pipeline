@@ -2003,7 +2003,7 @@ Block NS — New municipal sources (plan approved by the maintainer 2026-09-23; 
  ✅ [VERIFY] Can a GitHub Actions runner reach the candidate sources? (2026-09-23, run 35830872431 on a temporary probe/ branch, deleted afterwards: statbel.fgov.be page and bankruptcy zip, Bestat, SPF Finances ATOM feeds and IPP-rate PDF, WalStat all answered HTTP 200. REVERSES the older finding that statbel.fgov.be is unreachable from the runners, so every new source can run in the daily job with no hand-download. The SPF bulk patrimony zip, 118 MB, was still arriving when the 90 s probe limit cut it -- size, not a block)
 How: A throwaway workflow on a probe/ branch curls each URL once; read the log; delete the branch.
 Why: Decides, per source, "automatic in the daily run" vs "the maintainer downloads it by hand".
- [H] Approve the proposed catalogue rows (PENDING -- drafted 2026-09-23 in docs/data_catalog.md, "New municipal sources"; two decisions inside: bankruptcy zero-rows, IPP tax-year semantics)
+ ✅ [H] Approve the proposed catalogue rows (2026-09-23, the maintainer: "j'approuve toutes les lignes du PR #229, et une commune sans faillite un mois donné compte pour 0". The IPP tax-year question stays open until wave 6)
 How: Mark each row APPROVED, or strike it.
 Why: Rule 8 -- no source is built before its catalogue row is approved.
  [BUILD] Wave 1 -- Statbel bankruptcies and jobs lost by commune, monthly, automatic
