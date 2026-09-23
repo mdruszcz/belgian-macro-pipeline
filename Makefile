@@ -236,7 +236,15 @@ test-full:
 ## fetch: pull new data from the sources CI can reach, into $(DB). NOT part
 ## of `all` -- needs the network, and the manual sources need hand-downloaded
 ## files under data/raw/ that are gitignored. This is what daily_fetch.yml
-## runs. Order: `make assemble fetch validate exports offload`.
+## runs -- EXCEPT sync_bankruptcies/sync_population_movement/sync_ipp_rate
+## below, which are listed here (this target still runs them, and
+## orchestration/commands.py still knows their command line, so `make fetch`
+## from a machine that passes the CAPTCHA still refreshes them) but carry no
+## workflow_step, so Dagster's daily fetch_sources job (TRACKED,
+## orchestration/commands.py) does NOT run them automatically -- see that
+## file's comment on the three entries for why (2026-09-23: statbel.fgov.be
+## and fin.belgium.be answer a GitHub Actions runner with a CAPTCHA page).
+## Order: `make assemble fetch validate exports offload`.
 fetch:
 	$(PYTHON) belgian_macro_db.py --db $(DB) --fetch --latest --export csv
 	$(PYTHON) scripts/sync_to_canonical.py --db $(DB)

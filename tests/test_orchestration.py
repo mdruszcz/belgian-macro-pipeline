@@ -166,14 +166,18 @@ RETIRED_GATE_IDS = {
 # The live set TRACKED (orchestration/commands.py) gates auto-merge on today,
 # under Dagster -- RETIRED_GATE_IDS above stays a frozen historical record of
 # the pre-Dagster workflow and is never edited for a new source; this is the
-# one place a newly tracked daily source (bankruptcies, feat/ns1-bankruptcies;
-# population movement, feat/ns3-population-movement; the communal additional
-# IPP rate, feat/ns6-ipp-rate; the AGDP leases/transactions datasets,
-# feat/ns4-spf-agdp) is added to what the CURRENT gate covers.
+# one place a newly tracked daily source (the AGDP leases/transactions
+# datasets, feat/ns4-spf-agdp) is added to what the CURRENT gate covers.
+#
+# sync_bankruptcies, sync_population_movement and sync_ipp_rate were tracked
+# here (feat/ns1-bankruptcies, feat/ns3-population-movement,
+# feat/ns6-ipp-rate) and are REMOVED as of 2026-09-23: statbel.fgov.be and
+# fin.belgium.be now answer every request from a GitHub Actions runner with a
+# CAPTCHA challenge page, so these three commands no longer carry a
+# `workflow_step` in orchestration/commands.py and are absent from TRACKED.
+# Their Command entries -- and the Makefile lines that still run them by
+# hand -- are unchanged; only the daily auto-merge gate no longer covers them.
 CURRENT_GATE_IDS = RETIRED_GATE_IDS | {
-    "sync_bankruptcies",
-    "sync_population_movement",
-    "sync_ipp_rate",
     "sync_spf_agdp",
 }
 
@@ -269,7 +273,7 @@ def test_the_production_job_is_the_export_job_plus_the_offload():
 
 def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
     assert {COMMANDS[n].workflow_step for n in TRACKED} == CURRENT_GATE_IDS
-    assert len(TRACKED) == 12
+    assert len(TRACKED) == 9
     gate = next(s for s in _steps() if s.get("id") == "sources")
     assert "orchestration.manifest" in gate["run"]
 

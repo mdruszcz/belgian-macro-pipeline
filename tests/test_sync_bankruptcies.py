@@ -219,3 +219,23 @@ def test_running_twice_writes_no_new_vintage_the_second_time(db):
     sync_bankruptcies.sync(db, zip_bytes=raw)
     _read, written = sync_bankruptcies.sync(db, zip_bytes=raw)
     assert written == 0
+
+
+# --- --from-file (2026-09-23: statbel.fgov.be CAPTCHAs CI, manual refresh) ---
+
+
+def test_from_file_loads_a_hand_downloaded_zip(db, monkeypatch, tmp_path):
+    """--from-file runs the exact same parse/pinned-resolution/zero-fill path
+    as a live fetch -- no network, no landing-page discovery."""
+    path = tmp_path / "TF_BANKRUPTCIES_2026.zip"
+    path.write_bytes(_make_zip([_row(3, 4, "11001", 2026, 8)]))
+    monkeypatch.setattr(
+        sys, "argv", ["sync_bankruptcies.py", "--db", str(db), "--from-file", str(path)]
+    )
+    sync_bankruptcies.main()
+
+    rows = _observations(db, "BANKRUPTCIES", "be:mun:11001")
+    assert rows == [("be:mun:11001", "2026-08", 3.0, "final")]
+    # The zero-fill still runs for a commune absent from the file.
+    zero_rows = _observations(db, "BANKRUPTCIES", "be:mun:21004")
+    assert zero_rows == [("be:mun:21004", "2026-08", 0.0, "final")]

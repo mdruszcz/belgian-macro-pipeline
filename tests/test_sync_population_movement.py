@@ -520,3 +520,20 @@ def test_a_stale_row_from_a_pre_fix_run_is_retired_not_left_is_latest(db):
     # (12041 for 2018 is an excluded transition code; nothing should be
     # current for that key at all).
     assert rows == [(218.0, 0)]
+
+
+# --- --from-file (2026-09-23: statbel.fgov.be CAPTCHAs CI, manual refresh) ---
+
+
+def test_from_file_loads_a_hand_downloaded_workbook(db, monkeypatch, tmp_path):
+    """--from-file runs the exact same parse/per-row-resolution/transition-
+    exclusion path as a live fetch -- no network, no theme-page discovery."""
+    path = tmp_path / "mouvement-de-la-population.xlsx"
+    path.write_bytes(_make_workbook({"2025": [REAL_2025_NAMUR]}))
+    monkeypatch.setattr(
+        sys, "argv", ["sync_population_movement.py", "--db", str(db), "--from-file", str(path)]
+    )
+    sync_population_movement.main()
+
+    rows = _observations(db, "BIRTHS", "be:mun:92094")
+    assert rows == [("be:mun:92094", "2025", 1036.0, "final")]

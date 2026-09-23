@@ -12,9 +12,47 @@ op de personenbelasting). One XLSX file per tax year (exercice d'imposition),
 at a fixed URL pattern:
 `https://fin.belgium.be/sites/default/files/media/documents/taux-taxe-communale-{year}.xlsx`.
 New source, `config/sources/spf_finances.yaml`, `source_id: spf_finances`.
-Reachable live from this pipeline's network context, so the sync is DAILY and
-AUTOMATIC, wired into the Dagster asset graph and `make fetch` like the
-bankruptcies and population-movement sources.
+Reachable live from a maintainer's own machine, but **not from CI since
+2026-09-23** — see "Not daily any more" below. Still wired into the Dagster
+asset graph and `make fetch`, run by hand.
+
+## Not daily any more (2026-09-23)
+
+Diagnosed on the scheduled run 2026-09-23T18:09: fin.belgium.be answers
+every request from a GitHub Actions runner with a CAPTCHA challenge page
+(HTTP 200, text/html, ~46 KB, "This question is for testing whether you are
+a human visitor... What code is in the image?", carrying a support ID)
+instead of the XLSX file. A probe run confirmed this is runner-specific —
+the same URL still returns the real file from a maintainer's own machine.
+This pipeline does not solve or evade CAPTCHAs (no browser automation, no
+IP/agent rotation, no third-party solving service).
+
+`orchestration/commands.py`'s `ipp_rate_observations` Command now carries no
+`workflow_step`, so it is absent from `TRACKED` and from the daily
+`fetch_sources` job — the daily run no longer touches this source at all.
+The committed store (`config/stores.yaml` `ipp_rate`, `mode: in_db`) is
+unchanged and keeps flowing into every export; only the automatic refresh
+stopped.
+
+**How to refresh**, from a machine that still passes the CAPTCHA:
+```
+python scripts/sync_ipp_rate.py --db data/belgian_macro.db
+```
+or, if even that machine gets challenged, download each tax year's XLSX by
+hand (a browser passes the CAPTCHA interactively) and load it with
+`--from-file` (repeatable, one per tax year; the tax year is read from the
+filename, which must match `taux-taxe-communale-{YEAR}.xlsx`):
+```
+python scripts/sync_ipp_rate.py --db data/belgian_macro.db \
+    --from-file taux-taxe-communale-2024.xlsx \
+    --from-file taux-taxe-communale-2025.xlsx
+```
+`--from-file` runs the exact same parse/resolve/validate path as the live
+fetch. The indicator's `max_age_days` and the `staleness` validation rule
+are what flag when a refresh is actually due; `spf_finances.yaml`'s
+`fetch_window_days` no longer applies to this indicator specifically since
+it is not in the daily gate (it still applies to `spf_agdp`, the other
+`spf_finances` source, which remains daily).
 
 ## Year discovery, not link discovery
 

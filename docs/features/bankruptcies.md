@@ -9,9 +9,46 @@ Branch: feat/ns1-bankruptcies
 Statbel's monthly bankruptcies-by-NACE open-data file. Landing page:
 `https://statbel.fgov.be/fr/open-data/evolution-mensuelle-des-faillites-par-nace`.
 `source_id: statbel` (existing `config/sources/statbel.yaml`, untouched by this
-batch). Unlike police.be and the real-estate workbook, this source is reachable
-live from this pipeline's network context, so the sync is DAILY and AUTOMATIC,
-wired into the Dagster asset graph and `make fetch` like ONEM/WalStat.
+batch). Unlike police.be and the real-estate workbook, this source used to be
+reachable live from this pipeline's network context in CI, wired into the
+Dagster asset graph and `make fetch` like ONEM/WalStat. **Not daily any more
+as of 2026-09-23 -- see below.**
+
+## Not daily any more (2026-09-23)
+
+Diagnosed on the scheduled run 2026-09-23T18:09: statbel.fgov.be answers
+every request from a GitHub Actions runner with a CAPTCHA challenge page
+(HTTP 200, text/html, ~46 KB, "This question is for testing whether you are
+a human visitor... What code is in the image?", carrying a support ID)
+instead of the landing page or the zip. A probe run confirmed this is
+runner-specific -- the same URLs still return the real page/file from a
+maintainer's own machine. This pipeline does not solve or evade CAPTCHAs.
+
+`orchestration/commands.py`'s `bankruptcies_observations` Command now
+carries no `workflow_step`, so it is absent from `TRACKED` and from the
+daily `fetch_sources` job. The committed store (`config/stores.yaml`
+`bankruptcies`, `mode: in_db`) is unchanged and keeps flowing into every
+export; only the automatic refresh stopped.
+
+**How to refresh**, from a machine that still passes the CAPTCHA:
+```
+python scripts/sync_bankruptcies.py --db data/belgian_macro.db
+```
+or, if even that machine gets challenged, open the landing page in a
+browser (which passes the CAPTCHA interactively), follow its
+`TF_BANKRUPTCIES(<year>).zip` link, save it, then:
+```
+python scripts/sync_bankruptcies.py --db data/belgian_macro.db \
+    --from-file TF_BANKRUPTCIES_2026.zip
+```
+`--from-file` runs the exact same parse/pinned-resolution/zero-fill path as
+the live fetch. The indicators' `max_age_days` and the `staleness`
+validation rule are what flag when a refresh of THIS data is actually due.
+`statbel.yaml`'s `fetch_window_days`/`fetch_silence` check is keyed on the
+shared `statbel` source_id, not per-indicator -- it still passes because
+`statbel_local_units` (Bestat) stays in the daily gate and keeps fetching
+that source_id every day; it says nothing about bankruptcies specifically
+having gone quiet.
 
 ## Link discovery
 

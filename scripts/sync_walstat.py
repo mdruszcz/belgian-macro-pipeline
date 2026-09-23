@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from port_existing_indicators import derive_period_bounds  # noqa: E402
 
 from src.db.vintages import upsert_observation  # noqa: E402
-from src.fetchers.walstat import EXTRA_PERIOD_FORMS, WalStatSource  # noqa: E402
+from src.fetchers.walstat import EXTRA_PERIOD_FORMS, FIRST_YEAR, WalStatSource  # noqa: E402
 from src.validation.config_schema import load_and_validate_all  # noqa: E402
 
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
@@ -157,7 +157,10 @@ def sync(
             if from_dir is not None:
                 raw = (from_dir / f"{code}.json").read_bytes()
                 rows = source._parse(
-                    raw, geo_conn=conn, period_forms=EXTRA_PERIOD_FORMS.get(code, frozenset())
+                    raw,
+                    geo_conn=conn,
+                    period_forms=EXTRA_PERIOD_FORMS.get(code, frozenset()),
+                    first_year=FIRST_YEAR.get(code),
                 )
             else:
                 url = source_meta["base_url"] + ind["fetch"]["query"]
@@ -169,6 +172,7 @@ def sync(
                     conn=conn,
                     geo_conn=conn,
                     period_forms=EXTRA_PERIOD_FORMS.get(code, frozenset()),
+                    first_year=FIRST_YEAR.get(code),
                 )
         except Exception as exc:
             # This script's own run row must not say `ok` for a series that
@@ -190,7 +194,9 @@ def sync(
             f"{len(source.no_gas_network)} 'pas de gaz' (not-applicable, no gas network), "
             f"{len(source.suppressed_small_n)} '< 300 compteurs' (suppressed), "
             f"{len(source.unreliable)} 'non fiable' (missing, publisher disowns), "
-            f"{len(source.withheld)} 'non diffusé' (withheld)"
+            f"{len(source.withheld)} 'non diffusé' (withheld), "
+            f"{len(source.before_first_year)} row(s) before this series' declared "
+            f"FIRST_YEAR ({FIRST_YEAR.get(code, 'n/a')}) skipped"
         )
 
         for row in rows:

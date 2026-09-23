@@ -138,6 +138,27 @@ EXTRA_PERIOD_FORMS: dict[str, frozenset[str]] = {
     "PREPAYMENT_METERS_GAS_SHARE": frozenset({"31/12"}),
 }
 
+#: Per-indicator declared FIRST year this series is in scope for -- the same
+#: shape as EXTRA_PERIOD_FORMS. Diagnosed 2026-09-23 (daily run failure):
+#: the gas prepayment-meter series (813000_1, PREPAYMENT_METERS_GAS_SHARE)
+#: lists only 170 of the 263 Walloon communes on 31/12/2016 (measured; every
+#: later year is complete, min 261/263 per the other three NS2 series). 170
+#: of 263 is under COVERAGE_FLOOR, so 2016 would already be refused by the
+#: 90% check below -- but refusing the WHOLE run for one partial year, when
+#: the cause is known (probably the gas-meter series' own first published
+#: year, not a broken request), is worse than declaring it out of scope
+#: explicitly and skipping it the same way FIRST_TAX_YEAR does for
+#: scripts/sync_ipp_rate.py. Rows for this series strictly before its
+#: declared first year are SKIPPED AND COUNTED, never loaded, never treated
+#: as a coverage failure -- reported by sync_walstat.py. An indicator absent
+#: from this map has no lower bound (the ordinary "año 2013.." floor of the
+#: other series is unaffected). A partial year at or after FIRST_YEAR still
+#: raises WalStatCoverageError exactly as before; only the declared first
+#: year of the declared series is excluded.
+FIRST_YEAR: dict[str, str] = {
+    "PREPAYMENT_METERS_GAS_SHARE": "2017",
+}
+
 
 def _match_period(periode: str, period_forms: frozenset[str]) -> str | None:
     """The calendar year a `periode` names, or None if its form is not one
@@ -305,6 +326,10 @@ class WalStatSource(MunicipalTimeSeriesSource):
         #: (nis, period) pairs marked "non diffusé" -- WITHHELD: IWEPS has
         #: the figure and chose not to publish it.
         self.withheld: list[tuple[str, str]] = []
+        #: (nis, period) pairs SKIPPED because their period is strictly
+        #: before this series' declared FIRST_YEAR (module-level constant) --
+        #: a partial first year excluded on purpose, never a coverage failure.
+        self.before_first_year: list[tuple[str, str]] = []
 
     def _rows_read_hint(self, rows: list[dict]) -> int | None:
         # rows_read counts every row the source sent, including the
@@ -316,6 +341,7 @@ class WalStatSource(MunicipalTimeSeriesSource):
             + len(self.backcast)
             + len(self.no_gas_network)
             + len(self.suppressed_small_n)
+            + len(self.before_first_year)
             + len(self.unreliable)
             + len(self.withheld)
         )
@@ -335,6 +361,11 @@ class WalStatSource(MunicipalTimeSeriesSource):
         unknown_forms = period_forms - set(_EXTRA_PERIOD)
         if unknown_forms:
             raise ValueError(f"unknown period_forms {sorted(unknown_forms)}")
+        #: Declared first year this series is in scope for (FIRST_YEAR,
+        #: module level) -- None means no lower bound. A row whose period is
+        #: strictly before it is skipped and counted (self.before_first_year),
+        #: before it can ever reach the coverage reconciliation below.
+        first_year: str | None = kwargs.get("first_year")
 
         try:
             data = json.loads(raw)
@@ -357,6 +388,7 @@ class WalStatSource(MunicipalTimeSeriesSource):
         self.suppressed_small_n = []
         self.unreliable = []
         self.withheld = []
+        self.before_first_year = []
         for index, row in enumerate(data):
             if not isinstance(row, dict) or set(row) != EXPECTED_KEYS:
                 got = sorted(row) if isinstance(row, dict) else type(row).__name__
@@ -377,6 +409,14 @@ class WalStatSource(MunicipalTimeSeriesSource):
                     + ")"
                 )
             nis = str(row["ins"]).strip()
+            if first_year is not None and period < first_year:
+                # Declared out of scope (FIRST_YEAR) -- skipped and counted
+                # BEFORE the duplicate/coverage checks below, so an excluded
+                # early year never counts toward `by_period` and can never
+                # trigger WalStatCoverageError for a year this series simply
+                # does not cover yet.
+                self.before_first_year.append((nis, period))
+                continue
             if (nis, period) in seen:
                 raise WalStatSchemaError(f"INS {nis} appears twice for {period}")
             seen.add((nis, period))

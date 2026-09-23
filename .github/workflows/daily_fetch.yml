@@ -147,9 +147,9 @@ jobs:
         #
         # Reads THIS run's source manifest, the path the Dagster step wrote --
         # never a fixed path, so an older manifest cannot pass for today's.
-        # all_ok is "true" only if the assemble, all eight tracked outcomes,
-        # validate_and_export and the offload succeeded
-        # (orchestration/manifest.py gate()).
+        # all_ok is "true" only if the assemble, every tracked outcome
+        # (orchestration/commands.py TRACKED), validate_and_export and the
+        # offload succeeded (orchestration/manifest.py gate()).
         # A missing manifest fails this step: no evidence, no PR.
         run: |
           python -m orchestration.manifest "${{ steps.daily.outputs.manifest }}" > "$RUNNER_TEMP/gate.txt"

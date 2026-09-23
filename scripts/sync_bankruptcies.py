@@ -1,12 +1,44 @@
 """Load Statbel's monthly bankruptcies-by-NACE open-data file --
 BANKRUPTCIES and BANKRUPTCY_JOBS_LOST, docs/features/bankruptcies.md.
 
-DAILY, AUTOMATIC. Unlike police.be and the real-estate workbook (both
-MANUAL: statbel.fgov.be itself is unreachable from this pipeline's network
-context for those), this file is discovered and downloaded live: the landing
-page's own href for `TF_BANKRUPTCIES(<year>).zip` (see
-src/fetchers/bankruptcies.py's discover_zip_url), a year that changes as
-Statbel republishes -- never hard-coded, never a cached fallback.
+NOT PART OF THE DAILY AUTOMATIC FETCH SINCE 2026-09-23. Unlike police.be and
+the real-estate workbook (both MANUAL from the start: statbel.fgov.be itself
+is unreachable from this pipeline's network context for those), this file
+used to be discovered and downloaded live: the landing page's own href for
+`TF_BANKRUPTCIES(<year>).zip` (see src/fetchers/bankruptcies.py's
+discover_zip_url), a year that changes as Statbel republishes -- never
+hard-coded, never a cached fallback. That discovery-and-download logic is
+unchanged and still runs when no `--from-file` is given.
+
+WHY NOT DAILY ANY MORE. Diagnosed 2026-09-23 on the scheduled run
+(2026-09-23T18:09): statbel.fgov.be answers EVERY request from a GitHub
+Actions runner with a CAPTCHA challenge page (HTTP 200, text/html, ~46 KB,
+"This question is for testing whether you are a human visitor... What code
+is in the image?", carrying a support ID) instead of the landing page or the
+zip. A probe run confirmed this is runner-specific: the same URLs still
+return the real page/file from a maintainer's own machine. This pipeline
+does not solve or evade CAPTCHAs. So orchestration/commands.py's
+`bankruptcies_observations` Command carries no `workflow_step` and is absent
+from TRACKED / the daily fetch_sources job; the committed store
+(config/stores.yaml `bankruptcies`, mode: in_db) is untouched and keeps
+flowing into every export.
+
+HOW TO REFRESH. Two ways, both from a machine that still passes the CAPTCHA
+(this one, as of 2026-09-23):
+  1. Live, unattended:  python scripts/sync_bankruptcies.py --db data/belgian_macro.db
+  2. From a hand-downloaded file, when even this machine gets challenged:
+     open the landing page (LANDING_PAGE_URL below) in a browser (which
+     passes the CAPTCHA interactively), follow its `TF_BANKRUPTCIES(<year>).zip`
+     link, save the zip, then:
+       python scripts/sync_bankruptcies.py --db data/belgian_macro.db \
+           --from-file TF_BANKRUPTCIES_2026.zip
+     `--from-file` runs the exact same parse/resolve/zero-fill path as the
+     live fetch (BankruptciesSource._parse, then the same PINNED_PERIOD
+     resolution and zero-fill below) -- only the transport differs.
+The store's `max_age_days` / the `staleness` validation rule is what flags
+when a refresh is actually due -- this source's own fetch_window_days no
+longer applies since it is not in the daily gate, but staleness still
+checks the DATA's own age regardless of how it arrived.
 
 GEOGRAPHY: PINNED at "2026", the same pattern scripts/sync_police.py and
 scripts/sync_realestate.py already use, and for the same reason -- the file
@@ -316,7 +348,10 @@ def sync(
 
 def main() -> None:
     ap = argparse.ArgumentParser(
-        description="Load Statbel's monthly bankruptcies-by-NACE file (daily, automatic)"
+        description=(
+            "Load Statbel's monthly bankruptcies-by-NACE file (not part of the daily "
+            "automatic fetch since 2026-09-23 -- see module docstring)"
+        )
     )
     ap.add_argument("--db", required=True)
     ap.add_argument(
@@ -324,8 +359,24 @@ def main() -> None:
         action="store_true",
         help="Insert only the sources/indicators rows; needs no network",
     )
+    ap.add_argument(
+        "--from-file",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Load a hand-downloaded TF_BANKRUPTCIES(<year>).zip instead of discovering and "
+            "fetching live. Same parse/resolve/zero-fill path as the live fetch; only the "
+            "transport differs. No network."
+        ),
+    )
     args = ap.parse_args()
-    read, written = sync(Path(args.db), args.reference_rows_only)
+    if args.from_file:
+        read, written = sync(
+            Path(args.db), args.reference_rows_only, zip_bytes=args.from_file.read_bytes()
+        )
+    else:
+        read, written = sync(Path(args.db), args.reference_rows_only)
     if args.reference_rows_only:
         print(f"Reference rows ensured for: {', '.join(DATASETS)}")
     else:

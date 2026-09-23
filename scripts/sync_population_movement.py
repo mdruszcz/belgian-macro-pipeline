@@ -1,11 +1,43 @@
 """Load Statbel's population-movement workbook -- BIRTHS, DEATHS,
 INTERNAL_MIGRATION_NET, INTERNATIONAL_MIGRATION_NET, Block NS3.
 
-DAILY, AUTOMATIC. Discovered live off the theme page
+NOT PART OF THE DAILY AUTOMATIC FETCH SINCE 2026-09-23. Used to be
+discovered live off the theme page
 (https://statbel.fgov.be/fr/themes/population/mouvement-de-la-population),
 the same discipline scripts/sync_bankruptcies.py uses for its own landing
 page: the href is read off the page's HTML, never hard-coded, never a
-cached fallback (CLAUDE.md rule 13).
+cached fallback (CLAUDE.md rule 13). That discovery-and-download logic is
+unchanged and still runs when no `--from-file` is given.
+
+WHY NOT DAILY ANY MORE. Diagnosed 2026-09-23 on the scheduled run
+(2026-09-23T18:09): statbel.fgov.be answers EVERY request from a GitHub
+Actions runner with a CAPTCHA challenge page (HTTP 200, text/html, ~46 KB,
+"This question is for testing whether you are a human visitor... What code
+is in the image?", carrying a support ID) instead of the theme page or the
+workbook. A probe run confirmed this is runner-specific: the same URLs
+still return the real page/file from a maintainer's own machine. This
+pipeline does not solve or evade CAPTCHAs. So orchestration/commands.py's
+`population_movement_observations` Command carries no `workflow_step` and
+is absent from TRACKED / the daily fetch_sources job; the committed store
+(config/stores.yaml `population_movement`, mode: in_db) is untouched and
+keeps flowing into every export.
+
+HOW TO REFRESH. Two ways, both from a machine that still passes the CAPTCHA
+(this one, as of 2026-09-23):
+  1. Live, unattended:  python scripts/sync_population_movement.py --db data/belgian_macro.db
+  2. From a hand-downloaded file, when even this machine gets challenged:
+     open the theme page (THEME_PAGE_URL below) in a browser (which passes
+     the CAPTCHA interactively), follow its workbook link, save the XLSX,
+     then:
+       python scripts/sync_population_movement.py --db data/belgian_macro.db \
+           --from-file mouvement-de-la-population.xlsx
+     `--from-file` runs the exact same parse/resolve/transition-exclusion
+     path as the live fetch (PopulationMovementSource._parse, then the same
+     per-row resolve_geo below) -- only the transport differs.
+The store's `max_age_days` / the `staleness` validation rule is what flags
+when a refresh is actually due -- this source's own fetch_window_days no
+longer applies since it is not in the daily gate, but staleness still
+checks the DATA's own age regardless of how it arrived.
 
 GEOGRAPHY IS PER-ROW, NOT PINNED -- the opposite of sync_bankruptcies.py /
 sync_police.py / sync_realestate.py, and the reason this script exists
@@ -449,7 +481,10 @@ def sync(
 
 def main() -> None:
     ap = argparse.ArgumentParser(
-        description="Load Statbel's population-movement workbook (daily, automatic)"
+        description=(
+            "Load Statbel's population-movement workbook (not part of the daily automatic "
+            "fetch since 2026-09-23 -- see module docstring)"
+        )
     )
     ap.add_argument("--db", required=True)
     ap.add_argument(
@@ -457,8 +492,24 @@ def main() -> None:
         action="store_true",
         help="Insert only the sources/indicators rows; needs no network",
     )
+    ap.add_argument(
+        "--from-file",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Load a hand-downloaded population-movement workbook instead of discovering and "
+            "fetching live. Same parse/resolve/transition-exclusion path as the live fetch; "
+            "only the transport differs. No network."
+        ),
+    )
     args = ap.parse_args()
-    read, written = sync(Path(args.db), args.reference_rows_only)
+    if args.from_file:
+        read, written = sync(
+            Path(args.db), args.reference_rows_only, xlsx_bytes=args.from_file.read_bytes()
+        )
+    else:
+        read, written = sync(Path(args.db), args.reference_rows_only)
     if args.reference_rows_only:
         print(f"Reference rows ensured for: {', '.join(ALL_INDICATORS)}")
     else:
