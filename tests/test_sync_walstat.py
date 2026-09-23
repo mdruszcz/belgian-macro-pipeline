@@ -11,6 +11,7 @@ year it came from -- the way tests/test_sync_onem.py fakes its sheets.
 
 from __future__ import annotations
 
+import csv
 import json
 import sqlite3
 import sys
@@ -220,6 +221,91 @@ def test_one_absent_commune_loads_the_other_261_and_leaves_a_hole(db, tmp_path, 
     assert "1 commune-year(s) absent" in capsys.readouterr().out
 
 
+def test_the_gas_meter_states_are_skipped_counted_and_reported_through_sync(db, tmp_path, capsys):
+    """The gas prepayment-meter series (PREPAYMENT_METERS_GAS_SHARE) end to
+    end: a response mixing all seven non-numeric strings with real numbers
+    loads only the numeric rows, and the sync's own console report names
+    each skipped state -- not just the parser's internal counters."""
+    conn = sqlite3.connect(str(db))
+    communes = sorted(walloon_communes_on(conn, "2024"))
+    conn.close()
+    assert len(communes) >= 8
+    non_numeric = [
+        "pas de gaz",
+        "pas  de gaz",
+        "< 300 compteurs",
+        "Non fiable",
+        "non fiable",
+        "non diffusé",
+        "non disponible",
+    ]
+    rows = []
+    for index, nis in enumerate(communes):
+        value = non_numeric[index] if index < len(non_numeric) else f"{10 + index % 5}.{index % 10}"
+        rows.append(
+            {
+                "ins": nis,
+                "type_entite": "Commune",
+                "entite": f"Commune {nis}",
+                "periode": "31/12/2024",
+                "valeur": value,
+            }
+        )
+    out_dir = tmp_path / "replay"
+    out_dir.mkdir()
+    (out_dir / "PREPAYMENT_METERS_GAS_SHARE.json").write_text(
+        json.dumps(rows, ensure_ascii=False), encoding="utf-8"
+    )
+    # The other 13 series still need files -- the sync reads every configured
+    # walstat indicator, so fill them minimally, reusing build_replay's shape
+    # for a year that is not being asserted on here.
+    codes = series_by_code(finance_only=False)
+    for code, series in codes.items():
+        if code == "PREPAYMENT_METERS_GAS_SHARE":
+            continue
+        is_rate = not code.startswith("MUN_")
+        filler = [
+            {
+                "ins": nis,
+                "type_entite": "Commune",
+                "entite": f"Commune {nis}",
+                "periode": "année 2024" if not is_rate else "moyenne annuelle 2024",
+                "valeur": f"{10 + i % 5}.{i % 10}" if is_rate else f"{1000 + i}.{int(series[-1])}",
+            }
+            for i, nis in enumerate(communes)
+        ]
+        (out_dir / f"{code}.json").write_text(
+            json.dumps(filler, ensure_ascii=False), encoding="utf-8"
+        )
+
+    sync_walstat.sync(db, from_dir=out_dir)
+    out = capsys.readouterr().out
+    assert "PREPAYMENT_METERS_GAS_SHARE:" in out
+    assert "'pas de gaz' (not-applicable, no gas network)" in out
+    assert "'< 300 compteurs' (suppressed)" in out
+    assert "'non fiable' (missing, publisher disowns)" in out
+    assert "'non diffusé' (withheld)" in out
+
+    conn = sqlite3.connect(str(db))
+    written = conn.execute(
+        "SELECT COUNT(*) FROM observations WHERE indicator_id = 'PREPAYMENT_METERS_GAS_SHARE' "
+        "AND period = '2024'"
+    ).fetchone()[0]
+    # 7 of the communes carried a non-numeric state, skipped; the rest wrote.
+    assert written == len(communes) - 7
+    # None of the seven non-numeric communes got a row -- not a zero, not any
+    # other value -- for this indicator-period.
+    seven_nis = communes[:7]
+    for nis in seven_nis:
+        assert (
+            conn.execute(
+                "SELECT COUNT(*) FROM observations WHERE indicator_id = 'PREPAYMENT_METERS_GAS_SHARE' "
+                f"AND geo_id = 'be:mun:{nis}' AND period = '2024'"
+            ).fetchone()[0]
+            == 0
+        )
+
+
 def test_a_partial_file_refuses_the_series_and_marks_its_run_an_error(db, tmp_path):
     """Half a year is a partial response, not a year with gaps: refused, and
     this script's own fetch_runs row says `error` so the validation layer's
@@ -244,6 +330,38 @@ def test_a_partial_file_refuses_the_series_and_marks_its_run_an_error(db, tmp_pa
         == "error"
     )
     assert codes
+
+
+def test_two_syncs_of_the_same_response_write_byte_identical_csvs(db, tmp_path):
+    """CLAUDE.md rule 35: identical inputs must keep producing byte-identical
+    output. Two independent DBs, same replayed response (including 14-decimal
+    gas-share values), exported through the same CSV writer the real offload
+    path uses -- every column except the two run timestamps (vintage,
+    created_at) must match exactly."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(REPO / "scripts"))
+    from export_observations_csv import COLUMNS, export_observations
+
+    codes = build_replay(db, tmp_path / "replay")
+    sync_walstat.sync(db, from_dir=tmp_path / "replay")
+    csv1 = tmp_path / "run1.csv"
+    export_observations(db, csv1, list(codes))
+
+    db2 = tmp_path / "walstat2.db"
+    migrate.run(db2, migrations_dir=REPO / "migrations")
+    load_geography.load(db2, REPO / "config" / "geography", allow_unverified=True)
+    build_replay(db2, tmp_path / "replay2")
+    sync_walstat.sync(db2, from_dir=tmp_path / "replay2")
+    csv2 = tmp_path / "run2.csv"
+    export_observations(db2, csv2, list(codes))
+
+    timestamp_cols = {"vintage", "created_at"}
+    keep = [i for i, c in enumerate(COLUMNS) if c not in timestamp_cols]
+    rows1 = [tuple(r[i] for i in keep) for r in csv.reader(csv1.open(encoding="utf-8"))]
+    rows2 = [tuple(r[i] for i in keep) for r in csv.reader(csv2.open(encoding="utf-8"))]
+    assert rows1 == rows2
+    assert len(rows1) > 1
 
 
 def test_every_walstat_config_names_its_series():

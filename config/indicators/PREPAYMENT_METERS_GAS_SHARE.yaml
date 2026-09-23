@@ -1,0 +1,51 @@
+id: PREPAYMENT_METERS_GAS_SHARE
+name:
+  en: Gas meters with an active prepayment function, share of meters
+  fr: Compteurs de gaz à fonction de prépaiement active, part des compteurs
+  nl: Gasmeters met actieve vooruitbetalingsfunctie, aandeel van de meters
+unit: percent
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Share of residential gas meters fitted with an active prepayment (budget-meter) function
+    -- installed by the grid operator when a household has fallen behind on payments, so the
+    household tops up in advance rather than being billed after the fact. Source: WalStat
+    (IWEPS), series 813000_1, theme "Energie". Read off the live API 2026-09-23: 2532 rows,
+    263 communes, 10 annual periods (snapshots at 31/12 of each year, 2016-2025).
+
+    WALLOON COMMUNES ONLY, for the same catalogue-scope reason as UNEMPLOYMENT_RATE_BIT; no
+    not-applicable mechanism exists yet for a region-scoped indicator, so the other 302
+    Belgian communes carry no row here rather than an invented na.
+
+    periode reads "31/12/YYYY", resolving to the calendar year YYYY -- the same convention
+    PREPAYMENT_METERS_ELECTRICITY_SHARE uses.
+
+    SEVEN NON-NUMERIC STRINGS APPEAR IN THIS SERIES, and this is the series that forced the
+    adapter to learn all of them (CLAUDE.md rule 26, none collapsed into another): "pas de
+    gaz" (434 rows, plus 92 more written with a double space) means the commune has no gas
+    network at all -- not-applicable, never a zero; "< 300 compteurs" (359) is IWEPS's own
+    small-number suppression; "Non fiable"/"non fiable" (329 + 6) means the publisher
+    disowns the figure -- missing, not suppressed; "non diffusé" (141) means IWEPS holds the
+    figure but withheld it from publication; "non disponible" (26) is the ordinary missing
+    marker this adapter already handled for the finance series. Every one of the seven is
+    skipped, counted under its own state, and never written as a row -- so a commune with no
+    gas network at all will have NO OBSERVATION for this indicator, distinguishable from a
+    commune with a gas network and (for now) zero prepayment meters only by checking a
+    separate WalStat coverage source; this indicator alone cannot tell the two apart from an
+    absent row, and no attempt is made to encode that distinction here.
+
+    A SHARE WITH NO PUBLISHED NUMERATOR OR DENOMINATOR (docs/decisions/0003): WalStat
+    publishes the percentage of meters directly, not the prepayment-meter count or the total
+    gas-meter count it is computed against, so no province or regional figure can be
+    recomputed. is_additive false, aggregation_method not_applicable; refuse rather than
+    invent.
+
+    lower_is_better: a higher prepayment-meter share reflects more households in payment
+    difficulty on their gas bill, not a desirable outcome.
+fetch:
+  query: /json/813000_1/com+period=all
+display: null

@@ -1,0 +1,38 @@
+id: PREPAYMENT_METERS_ELECTRICITY_SHARE
+name:
+  en: Electricity meters with an active prepayment function, share of meters
+  fr: Compteurs électriques à fonction de prépaiement active, part des compteurs
+  nl: Elektriciteitsmeters met actieve vooruitbetalingsfunctie, aandeel van de meters
+unit: percent
+frequency: A
+source_id: walstat
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 1095
+description:
+  en: >
+    Share of residential electricity meters fitted with an active prepayment (budget-meter)
+    function -- installed by the grid operator when a household has fallen behind on
+    payments, so the household tops up in advance rather than being billed after the fact.
+    Source: WalStat (IWEPS), series 813000_0, theme "Energie". Read off the live API
+    2026-09-23: 2625 rows, 263 communes, 10 annual periods (snapshots at 31/12 of each year,
+    2016-2025), no non-numeric values.
+
+    WALLOON COMMUNES ONLY, for the same catalogue-scope reason as UNEMPLOYMENT_RATE_BIT; no
+    not-applicable mechanism exists yet for a region-scoped indicator, so the other 302
+    Belgian communes carry no row here rather than an invented na.
+
+    periode on this series reads "31/12/YYYY" -- a snapshot date, not "année YYYY" -- one of
+    the new period forms this adapter's period pattern was widened to accept; it resolves to
+    the calendar year YYYY, same as the "01/01/YYYY" form GRAPA/BIM use.
+
+    A SHARE WITH NO PUBLISHED NUMERATOR OR DENOMINATOR (docs/decisions/0003): WalStat
+    publishes the percentage of meters directly, not the prepayment-meter count or the total
+    meter count it is computed against, so no province or regional figure can be recomputed.
+    is_additive false, aggregation_method not_applicable; refuse rather than invent.
+
+    lower_is_better: a higher prepayment-meter share reflects more households in payment
+    difficulty on their electricity bill, not a desirable outcome.
+fetch:
+  query: /json/813000_0/com+period=all
+display: null

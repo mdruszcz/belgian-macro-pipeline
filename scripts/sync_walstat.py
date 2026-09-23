@@ -178,7 +178,11 @@ def sync(
             f"  {code}: {len(rows)} readings; {len(source.unavailable)} 'non disponible', "
             f"{len(source.backcast)} backcast rows for a not-yet-existing commune skipped, "
             f"{len(source.recoded)} attributed to a re-coded commune's earlier code, "
-            f"{absent} commune-year(s) absent from the response"
+            f"{absent} commune-year(s) absent from the response, "
+            f"{len(source.no_gas_network)} 'pas de gaz' (not-applicable, no gas network), "
+            f"{len(source.suppressed_small_n)} '< 300 compteurs' (suppressed), "
+            f"{len(source.unreliable)} 'non fiable' (missing, publisher disowns), "
+            f"{len(source.withheld)} 'non diffusé' (withheld)"
         )
 
         for row in rows:
