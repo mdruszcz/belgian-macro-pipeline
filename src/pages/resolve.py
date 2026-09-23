@@ -290,6 +290,11 @@ def _format_value(value, meta: Mapping, lang: str = "en") -> str:
         # A rate, written as one, so a per-head figure is never read as a
         # total. Mirrors MapUI.formatValue in assets/commune_map.js.
         return f"\u20ac{rendered}\u202f/\u202fhab."
+    if unit == "eur_per_month":
+        # SPF Finances housing-leases batch: median rent and charges on new
+        # residential leases. Same on-number rate treatment as
+        # eur_per_inhabitant above. Mirrors MapUI.formatValue.
+        return f"\u20ac{rendered}\u202f/\u202fmo."
     if unit.startswith("percent"):
         return f"{rendered}%"
     return rendered

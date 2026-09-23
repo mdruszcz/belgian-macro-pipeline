@@ -194,3 +194,95 @@ def test_map_ui_and_format_value_agree_for_count_percent_and_balance():
             return float(body)
 
         assert _numeric(py, lang) == _numeric(js, lang), (value, unit, py, js)
+
+
+# ── eur_per_month (site_housing_indicators batch: SPF Finances lease medians) ──
+
+
+def test_format_value_renders_eur_per_month_as_a_rate_not_a_total():
+    out = _format_value(725.0, {"unit": "eur_per_month", "decimals": None}, "en")
+    assert out.startswith("€")
+    assert "725" in out
+    # A rate suffix, same treatment as eur_per_inhabitant -- never read as a
+    # bare euro total.
+    assert "mo" in out.lower()
+
+
+def test_map_ui_format_value_renders_eur_per_month_as_a_rate():
+    out = _run_node(
+        "console.log(JSON.stringify(MapUI.formatValue(725, 'eur_per_month', null, 'en')));"
+    )
+    assert out.startswith("€")
+    assert "725" in out
+    assert "mo" in out.lower()
+
+
+def test_map_ui_and_format_value_agree_for_eur_per_month():
+    """The unit this batch's eight SPF Finances housing indicators introduce
+    (MUN_LEASE_RENT_MEDIAN_HOUSING / MUN_LEASE_CHARGES_MEDIAN_HOUSING) --
+    checked the same way the existing count/percent/balance agreement test
+    above is, per the handoff's requirement that any new unit be added to
+    both formatters and tested for agreement."""
+    cases = [
+        (725.0, "eur_per_month", None, "en"),
+        (0.0, "eur_per_month", None, "fr"),
+        (410.5, "eur_per_month", None, "nl"),
+    ]
+    for value, unit, decimals, lang in cases:
+        py = _format_value(value, {"unit": unit, "decimals": decimals}, lang)
+        js = _run_node(
+            f"console.log(JSON.stringify("
+            f"MapUI.formatValue({value!r}, {unit!r}, {json.dumps(decimals)}, {lang!r})));"
+        )
+        assert ("€" in py) == ("€" in js), (value, unit, py, js)
+        py_sign = "-" if py.startswith("-") or py.startswith("−") else ""
+        js_sign = "-" if js.startswith("-") else ""
+        assert py_sign == js_sign, (value, unit, py, js)
+
+        def _numeric(text: str, lang: str) -> float:
+            body = text.lstrip("-−").replace("€", "").split(" ")[0].split("/")[0].strip()
+            if lang == "fr":
+                body = body.replace(" ", "").replace(",", ".")
+            elif lang == "nl":
+                body = body.replace(".", "").replace(",", ".")
+            else:
+                body = body.replace(",", "")
+            return float(body)
+
+        assert _numeric(py, lang) == _numeric(js, lang), (value, unit, py, js)
+
+
+# ── suppressed median renders withheld wording, never zero (rule 26) ───────
+# MUN_LEASE_RENT_MEDIAN_HOUSING / MUN_LEASE_CHARGES_MEDIAN_HOUSING are
+# 'suppressed' with value NULL below 5 leases in a commune-quarter, distinct
+# from a genuine 0.0 charges median (~60% of cells) and from 'na' when the
+# underlying lease count is zero. _cell_state must keep these three states
+# apart -- collapsing suppressed into missing or into zero is exactly what
+# rule 26 forbids.
+
+
+def test_cell_state_suppressed_median_is_neither_missing_nor_zero():
+    entry = {
+        "periods": {
+            "2025-Q1": {"status": "suppressed"},
+            "2025-Q2": {"value": 0.0, "status": "final"},
+        }
+    }
+    state, value = _cell_state(entry, "2025-Q1")
+    assert state == "suppressed"
+    assert value is None
+
+    state, value = _cell_state(entry, "2025-Q2")
+    assert state == "ready"
+    assert value == 0.0
+
+
+def test_format_value_never_called_with_none_for_a_suppressed_cell():
+    """_format_value(None, ...) must not silently render as a zero-like
+    string -- callers branch on _cell_state's 'suppressed' before ever
+    reaching _format_value (see _resolve_latest), but this guards the
+    formatter itself against masking a withheld figure as blank-that-looks-
+    like-zero if a caller ever skipped that branch."""
+    out = _format_value(None, {"unit": "eur_per_month", "decimals": None}, "en")
+    assert out == ""
+    assert out != "0" and "0" not in out

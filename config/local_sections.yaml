@@ -164,16 +164,23 @@ sections:
       en: >
         Median house sale price, updated quarterly by Statbel, and the dwelling stock as
         counted by Census 2021. The median is not comparable to province, region or
-        Belgium — a median cannot be honestly aggregated the way a total can.
+        Belgium — a median cannot be honestly aggregated the way a total can. Rents and
+        charges are medians of new residential leases registered that quarter (SPF
+        Finances), withheld below five leases; ownership figures are as of 1 January.
       fr: >
         Prix médian de vente des maisons, mis à jour chaque trimestre par Statbel, et le
         parc de logements recensé par le Census 2021. Le prix médian n’est pas comparable
         à la province, à la région ou à la Belgique — un tel taux ne peut être agrégé
-        honnêtement.
+        honnêtement. Les loyers et charges sont les médianes des nouveaux baux résidentiels
+        enregistrés ce trimestre-là (SPF Finances), retenues en dessous de cinq baux ; les
+        chiffres de propriété sont arrêtés au 1er janvier.
       nl: >
         Mediane verkoopprijs van woningen, elk kwartaal bijgewerkt door Statbel, en de
         woningvoorraad volgens de Census 2021. De mediaan is niet vergelijkbaar met
-        provincie, gewest of België — een mediaan kan niet eerlijk worden opgeteld.
+        provincie, gewest of België — een mediaan kan niet eerlijk worden opgeteld. Huur en
+        kosten zijn medianen van nieuwe woninghuurcontracten geregistreerd dat kwartaal
+        (FOD Financiën), achtergehouden onder vijf contracten; eigendomscijfers gelden op
+        1 januari.
     headline: MEDIAN_HOUSE_PRICE
     indicators:
       - HOUSE_SALES_TRANSACTIONS
@@ -182,6 +189,14 @@ sections:
       - DWELLINGS_OCCUPIED
       - DWELLINGS_VACANT
       - DWELLINGS_IN_SINGLE_UNIT_BUILDING
+      - MUN_LEASES_NEW_HOUSING
+      - MUN_LEASE_RENT_MEDIAN_HOUSING
+      - MUN_LEASE_CHARGES_MEDIAN_HOUSING
+      - MUN_PROPERTY_SALES
+      - MUN_OWNER_OCCUPIERS
+      - MUN_PARCELS_OWNED
+      - MUN_OWNERSHIP_DURATION_MEDIAN
+      - MUN_OWNERSHIP_ROTATION_MEAN
 
   - id: business
     label: {en: Business, fr: Entreprises, nl: Ondernemingen}
