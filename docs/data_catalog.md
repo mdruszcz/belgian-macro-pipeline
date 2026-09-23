@@ -1523,8 +1523,8 @@ below can run in the existing daily job; none needs a hand-download.
 
 | Field | Value |
 |---|---|
-| Publisher | SPF Finances — one PDF per tax year, e.g. `https://fin.belgium.be/sites/default/files/media/documents/taux-taxe-communale-2025_1.pdf` (*measured:* reachable from a runner) |
+| Publisher | SPF Finances — one XLSX per tax year for 2024, 2025 and 2026, e.g. `https://fin.belgium.be/sites/default/files/media/documents/taux-taxe-communale-2026.xlsx` (pointed out by the maintainer 2026-09-23; *measured:* one sheet "Liste communes", columns `VILLE OU COMMUNE` / `Taux (%)`, 581 rows for 2024 and 565 for 2025–2026, rates 0–9, no NIS codes). Earlier tax years exist only as PDFs (e.g. `taux-taxe-communale-2025_1.pdf`); the 2018–2023 XLSX URLs return 404 |
 | What | The additional communal rate on personal income tax (IPP), per commune, per tax year (*exercice d'imposition*) |
-| Difficulty | A table extracted from a PDF, probably matched on commune names, with history rebuilt one PDF at a time. Any row that does not match a commune stops the load |
+| Matching | *Measured:* after accent/case normalisation every name matches exactly one commune on that tax year's 1 January map, except "Saint-Nicolas" (the Liège-province commune, while Sint-Niklaas is listed under its Dutch name), resolved by one explicit override. Knokke-Heist is a real 0 %. Any other unmatched or ambiguous name stops the load. First build: the three XLSX years only; the PDF years are a later step |
 | **Decision needed** | Any figure combining this rate with `FISCAL_TOT_MUNICIP_TAXES` (e.g. the yield of one IPP point) depends on how tax years line up with income years. The maintainer confirms the semantics before any code |
 | Licence | Same maintainer ruling as waves 4–5 |
