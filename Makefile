@@ -224,6 +224,11 @@ test-browser:
 test-generated-site:
 	$(PYTHON) -m pytest tests/ -q -m "generated_site or slow"
 
+## test-slow: the `slow` tests without the generated_site sweeps -- what CI's
+## generated-site tier runs when site_inert.sh finds nothing a page reads.
+test-slow:
+	$(PYTHON) -m pytest tests/ -q -m "slow and not generated_site"
+
 ## test-full: everything -- what `make all` and CI's `test` gate run.
 test-full:
 	$(PYTHON) -m pytest tests/ -q
