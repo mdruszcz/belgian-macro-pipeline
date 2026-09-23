@@ -522,6 +522,14 @@ def _fixture_observations() -> ObservationSet:
     by_series = {}
     for path in sorted(DERIVED_DIR.parent.glob("MUN_*.yaml")):
         cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+        # "MUN_" is a naming convention shared by several sources (e.g.
+        # feat/ns6-ipp-rate's MUN_IPP_ADDITIONAL_RATE, source_id
+        # spf_finances, which has no fetch.query at all -- a whole-file
+        # sync, not a per-series IWEPS query). This fixture only indexes
+        # WalStat's own municipal series by their IWEPS series id, so it
+        # must filter on source_id, not just the filename prefix.
+        if cfg.get("source_id") != "walstat":
+            continue
         by_series[re.search(r"/(\d{6}_\d)/", cfg["fetch"]["query"]).group(1)] = cfg["id"]
     cells = []
     for series_id, rows in FIXTURE.items():
