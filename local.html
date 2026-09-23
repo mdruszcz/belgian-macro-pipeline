@@ -1135,10 +1135,17 @@ function sectionHTML(section){
       ${noDataHTML(LocalUI.localName(section.unavailable, LANG))}</section>`;
   }
 
-  const head = COMMUNE.indicators[section.headline];
-  const latest = LocalUI.latestOf(head);
+  // A section with no `headline` in the layout (e.g. one whose only
+  // indicators cover a single region) has no chart panel at all, rather
+  // than an unconditional "no data" box on every commune that would say
+  // nothing true about the communes that DO have facts to show below it.
+  // Generic on the presence of the field, never on which indicator it is.
+  const head = section.headline ? COMMUNE.indicators[section.headline] : null;
+  const latest = section.headline ? LocalUI.latestOf(head) : null;
   let panel;
-  if(!latest){
+  if(!section.headline){
+    panel = '';
+  } else if(!latest){
     panel = noDataHTML(T('noHistory'));
   } else {
     const points = LocalUI.chartPoints(head);
