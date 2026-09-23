@@ -17,44 +17,55 @@ INTERNATIONAL). A header that has moved is refused, never silently
 re-indexed.
 
 GEOGRAPHY IS PERIOD-CORRECT, NOT PINNED -- the opposite convention from
-police.be/real-estate/bankruptcies, and load-bearing here. But "period-
-correct" needs one correction learned from the real file, not assumed:
-column W's own label is "POPULATION AU 31 DECEMBRE (SOIT AU 1/1 DE L'ANNEE
-SUIVANTE)" -- population at 31 December, i.e. at 1 January of the FOLLOWING
-year. Measured directly (2026-09-23): the sheet named "2018" already carries
-the NEW codes the 2019-01-01 merger created (12041, 44083-85, 45068, 51067-
-69, 55085-86, 57096-97, 58001-04, 72042-43 -- eighteen of them), and none of
-the geography table's own `valid_from` rows for those codes starts before
-2019-01-01. Likewise sheet "2024" already carries 82039 (Bastogne+Bertogne,
-valid_from 2024-12-02, inside sheet "2024"'s own year) and the thirteen
-2025-01-01 merger codes. So a row's commune-grid "as of" date for geography
-purposes is `{sheet_year + 1}-01-01`, NOT `{sheet_year}-01-01` -- this
-adapter resolves nothing itself (no period is fixed enough to hand
-resolve_geo a single answer across every row-purpose), so it hands back the
-raw NIS string and the sheet's own year string, and
-scripts/sync_population_movement.py is the one that knows to call
-resolve_geo(conn, nis, str(int(sheet_year) + 1)) for the geography lookup
-while still writing the OBSERVATION under period=sheet_year (the movement
-happened during that calendar year; only the commune-grid lookup needs the
-following-year date). This is the same adapter/sync split
-src/fetchers/bankruptcies.py documents for its own, different reason (a
-pinned period only the sync script knows) -- here the sync script needs a
-per-row DERIVED period, not a pinned one, but the shape of the split is the
-same and for the same reason: `_parse` has no way to derive it correctly
-without importing geography-resolution knowledge into an adapter, which is
-not this layer's job.
+police.be/real-estate/bankruptcies, and load-bearing here. Each row resolves
+against the commune map in effect at the START of its OWN sheet year --
+resolve_geo(conn, nis, sheet_year), the ordinary rule (CLAUDE.md rule 3) --
+NOT at sheet_year + 1. An earlier version of this adapter resolved at
+sheet_year + 1 on the theory that column W's own label, "POPULATION AU 31
+DECEMBRE (SOIT AU 1/1 DE L'ANNEE SUIVANTE)", meant the whole sheet's commune
+grid was dated to the following 1 January; that reading was measured against
+the real file and rejected (see docs/features/population_movement.md) --
+resolving at sheet_year + 1 makes a transition-year sheet's forward-mapped
+codes (see below) look valid for THAT sheet's own period, which silently
+manufactures rows for communes that did not yet exist when the events being
+counted happened, and corrupts every downstream coverage calculation that
+compares this indicator's per-period geo_id set against the calendar map
+(scripts/export_aggregates_csv.py's `_universe_resolver`).
+
+TRANSITION SHEETS carry forward-mapped codes ahead of their own merger date.
+Measured directly (2026-09-23) against the real file: the sheet named "2018"
+already carries the NEW codes the 2019-01-01 merger created (12041, 44083-
+85, 45068, 51067-69, 55085-86, 57096-97, 58001-04, 72042-43 -- eighteen of
+them) -- and NOT their pre-merger predecessor codes, which are simply absent
+from that sheet. Likewise sheet "2024" already carries 82039
+(Bastogne+Bertogne, valid_from 2024-12-02, inside sheet "2024"'s own
+calendar year) and the twelve other 2025-01-01 merger codes (thirteen
+total), again with no predecessor rows. Resolved at the sheet's own period,
+none of these thirty-one rows resolves (the commune did not exist yet at
+that sheet-year's 1 January), so scripts/sync_population_movement.py drops
+them -- loudly, counted and logged per sheet, and checked against an
+explicit expected set, per the handoff: Statbel publishes the transition
+year only on the post-merger map, so on that year's own map these communes'
+figures genuinely do not exist for that one year (the missing state, not a
+zero) -- neither the predecessor (whose code the sheet does not carry) nor
+the successor (which did not yet legally exist) has a defensible row.
 
 ROW-FILTERING TRAP, per the handoff: do not select commune rows by "5-digit
 code not ending in 000" -- that includes 20001/20002 (the two Brabant
-provinces) alongside the 565 real communes in 2025. `_parse` does not filter
-rows at all; every row with a 5-digit numeric CODE INS is emitted with its
-raw code, unfiltered. scripts/sync_population_movement.py does the real
-filtering, by checking each code resolves to a `municipality` level in the
-geographies table at the row's own as-of date (see above) -- a code that
-resolves to a different level (province, arrondissement, region, country)
-is dropped as an expected non-municipal row; a code that resolves to
-NOTHING is collected and the whole run refused at the end (never partial),
-the same sync_police.py pattern.
+provinces) alongside the real communes. `_parse` does not filter rows at
+all; every row with a 5-digit numeric CODE INS is emitted with its raw code,
+unfiltered, together with the sheet's own year string as `period` (this
+adapter resolves nothing itself; resolve_geo needs a live db connection,
+which is scripts/sync_population_movement.py's job, the same adapter/sync
+split src/fetchers/bankruptcies.py uses for its own, different reason).
+scripts/sync_population_movement.py does the real filtering, by checking
+each code resolves to a `municipality` level in the geographies table at
+the row's own sheet-year as-of date -- a code that resolves to a different
+level (province, arrondissement, region, country) is dropped as an expected
+non-municipal row; a code that resolves to NOTHING is either an expected
+transition-sheet exclusion (above) or, outside that expected set, causes
+the whole run to be refused (never partial), the same sync_police.py
+pattern.
 
 FOUR INDICATORS, ONE FETCH: like bankruptcies.py, one row in the source
 produces up to four output rows, one per indicator, each carrying a fifth
@@ -182,9 +193,10 @@ class PopulationMovementSource(MunicipalTimeSeriesSource):
     """Contract deviation, documented in the module docstring and tested in
     tests/test_source_contract.py: `geo_id` is the raw NIS string (never
     resolved inline) and `period` is the sheet's own year string, exactly as
-    published -- NOT yet corrected for the "as of following 1 January"
-    geography lookup, which is scripts/sync_population_movement.py's job.
-    Each row also carries a fifth key, `indicator_id`.
+    published -- resolve_geo(conn, nis, period) against this same sheet
+    year is scripts/sync_population_movement.py's job, since resolving needs
+    a live db connection this layer does not have. Each row also carries a
+    fifth key, `indicator_id`.
     """
 
     source_id = "statbel"

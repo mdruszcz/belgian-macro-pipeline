@@ -15,8 +15,11 @@ description:
     Statbel's population-movement workbook (docs/features/population_movement.md), column DECES.
     The publisher's own count, taken as published -- not recomputed or derived (CLAUDE.md rule
     6). Geography is period-correct: each year's rows resolve against the commune map in effect
-    at the end of that year (the workbook's own convention -- see
-    src/fetchers/population_movement.py), not a pinned current-day map, so a commune created by
-    a later merger carries no rows before it existed. preferred_direction is 'contextual': more
-    or fewer deaths reflects population size and age structure, not something to optimise.
+    at the START of that same calendar year (not a pinned current-day map -- see
+    src/fetchers/population_movement.py and docs/features/population_movement.md), so a
+    commune created by a later merger carries no rows before it existed, and a commune whose
+    code only appears on the transition sheet ahead of its own merger date is excluded from
+    that one sheet rather than mapped onto a map that did not yet apply.
+    preferred_direction is 'contextual': more or fewer deaths reflects population size and age
+    structure, not something to optimise.
 display: null

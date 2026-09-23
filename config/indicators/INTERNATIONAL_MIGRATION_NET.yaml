@@ -3,7 +3,7 @@ name:
   en: Net international migration
   fr: Solde migratoire international
   nl: Internationaal migratiesaldo
-unit: count
+unit: balance
 frequency: A
 source_id: statbel
 geo_levels: [municipal]
@@ -15,11 +15,12 @@ description:
     residents of the commune during the calendar year, from Statbel's population-movement
     workbook (docs/features/population_movement.md), column P -- the publisher's own SOLDE for
     "MOUVEMENT MIGRATOIRE INTERNATIONAL", taken as published, not recomputed (CLAUDE.md rule 6).
-    This value can be negative -- CLAUDE.md's `counts_non_negative` validation rule currently
-    rejects any negative value where unit is 'count'; see the PR body for how this batch
-    resolves that conflict rather than silently weakening the rule. Geography is period-correct:
-    each year's rows resolve against the commune map in effect at the end of that year (the
-    workbook's own convention -- see src/fetchers/population_movement.py), not a pinned
-    current-day map. preferred_direction is 'contextual': a positive or negative net migration
-    figure is neither better nor worse on its own.
+    This value can be negative, so unit is 'balance' (signed, additive) rather than 'count' --
+    'count' carries CLAUDE.md's `counts_non_negative` validation rule, which this indicator's
+    real data would fail, and this batch does not weaken that rule (see the PR body). Geography
+    is period-correct: each year's rows resolve against the commune map in effect at the START
+    of that same calendar year (not a pinned current-day map -- see
+    src/fetchers/population_movement.py and docs/features/population_movement.md).
+    preferred_direction is 'contextual': a positive or negative net migration figure is neither
+    better nor worse on its own.
 display: null
