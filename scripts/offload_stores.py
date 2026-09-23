@@ -182,8 +182,45 @@ def _refuse_an_open_committed_database(committed_db: Path) -> None:
 
 
 def _check_every_offloaded_source_indicator_is_declared(
-    conn: sqlite3.Connection, sources: set[str], declared: set[str]
+    conn: sqlite3.Connection,
+    committed_conn: sqlite3.Connection,
+    sources: set[str],
+    declared: set[str],
 ) -> None:
+    """Refuses if the working database holds a row for a source that has an
+    in_db store, under an indicator that in_db store does not declare --
+    UNLESS that indicator already sits in the COMMITTED database untouched
+    (same source, present there already), meaning this run is not being
+    asked to offload it and never has been.
+
+    Before feat/ns1-bankruptcies, "a source has an in_db store" and "every
+    indicator under that source is in_db" were the same fact for every
+    offloaded source (onem, walstat, eurostat each had exactly one store,
+    covering every indicator they configure). `statbel` breaks that: it now
+    backs the new `bankruptcies` in_db store AND four pre-existing extra_csv
+    stores (population, fiscal_income, census2021, realestate; their rows
+    are never in the working database at all -- extra_csv never loads into
+    any database, config/stores.yaml's own header comment -- so they were
+    never a problem for this check) AND one indicator with no CSV store at
+    all, LOCAL_UNITS_BY_COMMUNE (scripts/sync_statbel.py's own module
+    docstring, "Non-goals": it stays directly in the small committed
+    database by design, never offloaded). That last one WAS a real gap in
+    this check, exposed (not created) by statbel gaining its first in_db
+    store: LOCAL_UNITS_BY_COMMUNE's 565 rows are present in the working
+    database (carried over from the committed database at assemble time,
+    scripts/build_staging_db.py) and, before this fix, tripped "undeclared"
+    even though nothing about it changed and no store was ever supposed to
+    declare it.
+
+    The committed-database comparison is what makes the fix exact rather
+    than a second hardcoded list: an indicator is "already there, untouched"
+    -- and excluded from `undeclared` -- only if it is ALREADY a row in the
+    committed database before this offload writes anything. A genuinely new,
+    never-before-seen indicator under an offloaded source that no in_db
+    store declares (a config mistake, not LOCAL_UNITS_BY_COMMUNE's
+    deliberate case) has no committed-database history and still refuses
+    here exactly as before.
+    """
     present = {
         row[0]
         for row in conn.execute(
@@ -193,13 +230,25 @@ def _check_every_offloaded_source_indicator_is_declared(
             sorted(sources),
         )
     }
-    undeclared = sorted(present - declared)
-    if undeclared:
+    undeclared = present - declared
+    if not undeclared:
+        return
+    already_committed = {
+        row[0]
+        for row in committed_conn.execute(
+            f"""SELECT DISTINCT indicator_id FROM observations
+                WHERE indicator_id IN ({_placeholders(len(undeclared))})""",
+            sorted(undeclared),
+        )
+    }
+    still_undeclared = sorted(undeclared - already_committed)
+    if still_undeclared:
         raise OffloadError(
-            f"the working database holds rows for {undeclared}, whose source is offloaded "
-            f"({sorted(sources)}) but which no in_db store in config/stores.yaml declares. "
-            "Add them to the right store's `indicators` -- refusing to leave them to "
-            "re-grow the committed database."
+            f"the working database holds rows for {still_undeclared}, whose source is "
+            f"offloaded ({sorted(sources)}) but which no in_db store in config/stores.yaml "
+            "declares, and which are not already present in the committed database. Add "
+            "them to the right store's `indicators` -- refusing to leave them to re-grow "
+            "the committed database."
         )
 
 
@@ -349,7 +398,13 @@ def offload(
     try:
         conn = sqlite3.connect(f"file:{working_db}?mode=ro", uri=True)
         try:
-            _check_every_offloaded_source_indicator_is_declared(conn, sources, set(declared))
+            committed_conn = sqlite3.connect(f"file:{committed_db}?mode=ro", uri=True)
+            try:
+                _check_every_offloaded_source_indicator_is_declared(
+                    conn, committed_conn, sources, set(declared)
+                )
+            finally:
+                committed_conn.close()
             for store in stores:
                 _check_no_committed_row_is_lost(conn, store)
             total = conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0]

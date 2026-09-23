@@ -23,6 +23,7 @@ _DESCRIPTIONS = {
     "onem_observations": "ONEM/RVA commune unemployment (scripts/sync_onem.py).",
     "onem_rates_observations": "ONEM/RVA published unemployment rate (scripts/sync_onem_rates.py).",
     "walstat_observations": "WalStat (IWEPS) municipal finance (scripts/sync_walstat.py).",
+    "bankruptcies_observations": "Statbel monthly bankruptcies by NACE (scripts/sync_bankruptcies.py).",
     "market_data": "BEL 20, EUR/USD and spreads to data/stocks.json (fetch_stocks.py). No database.",
     "canonical_observations": "Legacy macro tables synced into the canonical schema (scripts/sync_to_canonical.py).",
     "international_observations": "International pilot: five direct-Eurostat, every-country indicators (scripts/sync_international.py).",
@@ -61,6 +62,9 @@ onem_rates_observations = _source_asset(
 walstat_observations = _source_asset(
     "walstat_observations", group="sources_api", deps=["staging_db"]
 )
+bankruptcies_observations = _source_asset(
+    "bankruptcies_observations", group="sources_api", deps=["staging_db"]
+)
 international_observations = _source_asset(
     "international_observations", group="sources_api", deps=["staging_db"]
 )
@@ -73,6 +77,7 @@ ASSETS = [
     onem_observations,
     onem_rates_observations,
     walstat_observations,
+    bankruptcies_observations,
     international_observations,
     market_data,
 ]

@@ -12,13 +12,16 @@ into a regression test: a future adapter that returns the wrong types fails
 here, not as a downstream KeyError in upsert_observations.
 """
 
+import io
 import json
 import sqlite3
 import sys
+import zipfile
 from pathlib import Path
 
 import pytest
 
+from src.fetchers.bankruptcies import BankruptciesSource
 from src.fetchers.dbnomics import DBnomicsSource
 from src.fetchers.eurostat import EurostatSource
 from src.fetchers.nbb import NBBSource
@@ -162,3 +165,65 @@ def test_municipal_time_series_contract_walstat(tmp_path, monkeypatch, geo_conn)
         assert row["status"] in {"final", "provisional", "estimate", "revised", "suppressed", "na"}
     # The raw response was cached before parsing, the base class's own promise.
     assert list(tmp_path.rglob("X.json")), "raw response not cached under RAW_CACHE_DIR"
+
+
+# --- the bankruptcies municipal contract, with a documented deviation --------
+#
+# BankruptciesSource is a MunicipalTimeSeriesSource, but geo_id is the raw
+# NIS string (never resolved inline -- see src/fetchers/bankruptcies.py's
+# module docstring for why: resolution needs a pinned period only
+# scripts/sync_bankruptcies.py knows) and each row carries a fifth key,
+# `indicator_id`, since one fetch here emits two indicators
+# (BANKRUPTCIES, BANKRUPTCY_JOBS_LOST) per commune-month cell rather than
+# one row per indicator per fetch. The shared base four keys are still
+# checked -- {"geo_id","period","value","status"} is a subset of every row's
+# keys, exactly as the shared contract requires -- just not asserted as the
+# row's *entire* key set, which is why this is its own test rather than a
+# parametrize entry alongside WalStat above.
+
+_BANKRUPTCIES_HEADER = (
+    "MS_COUNTOF_BANKRUPTCIES|MS_COUNTOF_FULL_TIME_WORKERS|MS_COUNTOF_PART_TIME_WORKERS|"
+    "MS_COUNTOF_SELF_EMPLOYED_WORKERS|MS_COUNTOF_WORKERS|CD_YEAR|CD_MONTH|CD_EMPLOYMENT_CLASS|"
+    "TX_EMPLOYMENT_CLASS_DESCR_FR|TX_EMPLOYMENT_CLASS_DESCR_NL|CD_LEGAL_FORM|"
+    "TX_LEGAL_FORM_DESCR_FR|TX_LEGAL_FORM_DESCR_NL|CD_MUNTY_REFNIS|TX_MUNTY_DESCR_FR|"
+    "TX_MUNTY_DESCR_NL|CD_DSTR_REFNIS|TX_ADM_DSTR_DESCR_FR|TX_ADM_DSTR_DESCR_NL|CD_PROV_REFNIS|"
+    "TX_PROV_DESCR_FR|TX_PROV_DESCR_NL|CD_RGN_REFNIS|TX_RGN_DESCR_FR|TX_RGN_DESCR_NL|"
+    "CD_NACE_REV2_CLASS|TX_NACE_REV2_CLASS|TX_NACE_REV2_CLASS_FR|TX_NACE_REV2_CLASS_NL|"
+    "TX_NACE_REV2_GROUP|TX_NACE_REV2_GROUP_FR|TX_NACE_REV2_GROUP_NL|TX_NACE_REV2_DIVISION|"
+    "TX_NACE_REV2_DIVISION_FR|TX_NACE_REV2_DIVISION_NL|TX_NACE_REV2_SECTION|"
+    "TX_NACE_REV2_SECTION_FR|TX_NACE_REV2_SECTION_NL|CD_COMPANY_DURATION|"
+    "TX_COMPANY_DURATION_FR|TX_COMPANY_DURATION_NL"
+)
+_BANKRUPTCIES_ROW = (
+    "1|0|0|0|1|2026|8|1|0 - 4 salariés|0 - 4 werknemers|1|SNC|VOF|11001|Commune|Gemeente|"
+    "0|D|D|0|P|P|0|R|R|4711|x|x|x|x|x|x|x|x|x|x|x|0200|x|x"
+)
+
+
+def _bankruptcies_zip_bytes() -> bytes:
+    text = "﻿" + "\n".join([_BANKRUPTCIES_HEADER, _BANKRUPTCIES_ROW]) + "\n"
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("TF_BANKRUPTCIES.txt", text.encode("utf-8"))
+    return buf.getvalue()
+
+
+def test_municipal_time_series_contract_bankruptcies(tmp_path, monkeypatch):
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(_bankruptcies_zip_bytes()),
+    )
+
+    rows = BankruptciesSource().fetch("https://example.test/x.zip", cache_key="X")
+
+    assert rows, "fixture must produce at least one row to be a meaningful contract check"
+    for row in rows:
+        assert {"geo_id", "period", "value", "status"} <= set(row.keys())
+        assert isinstance(row["geo_id"], str)
+        assert isinstance(row["period"], str)
+        assert isinstance(row["value"], float)
+        assert row["status"] in {"final", "provisional", "estimate", "revised", "suppressed", "na"}
+        assert row["indicator_id"] in {"BANKRUPTCIES", "BANKRUPTCY_JOBS_LOST"}
+    # The raw response was cached before parsing, the base class's own promise.
+    assert list(tmp_path.rglob("X.zip")), "raw response not cached under RAW_CACHE_DIR"

@@ -43,7 +43,7 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 11
+    assert len(stores) == 12
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
@@ -56,12 +56,16 @@ def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
 
 
 def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
-    """The six hand-loaded sources stay extra_csv; the four CI fetches itself
-    and that outgrew the committed database are in_db (docs/decisions/0006,
-    plus the international pilot's directory store), plus the Europe NUTS 2
-    batch's directory store (also in_db, same registry mechanism -- see
-    config/stores.yaml's own comment on the `nuts2` entry for why it is not
-    wired into the daily fetch despite being in_db)."""
+    """The six hand-loaded sources stay extra_csv; the sources CI fetches
+    itself and that outgrew the committed database are in_db
+    (docs/decisions/0006, plus the international pilot's directory store),
+    plus the Europe NUTS 2 batch's directory store (also in_db, same registry
+    mechanism -- see config/stores.yaml's own comment on the `nuts2` entry
+    for why it is not wired into the daily fetch despite being in_db), plus
+    `bankruptcies` (feat/ns1-bankruptcies) -- the first in_db store whose
+    source_id (statbel) also backs extra_csv stores, since Statbel's
+    bankruptcies file is reachable live where the other Statbel files this
+    pipeline loads are not."""
     stores = load_stores(DEFAULT_STORES_PATH)
     assert {s.name for s in in_db_stores(stores)} == {
         "onem",
@@ -69,6 +73,7 @@ def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
         "walstat",
         "international",
         "nuts2",
+        "bankruptcies",
     }
     assert len(extra_csv_stores(stores)) == 6
     assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())
@@ -85,17 +90,67 @@ def _configured_indicators_by_source() -> dict[str, set[str]]:
 def test_in_db_stores_declare_every_indicator_their_sources_configure():
     """The offload's row set is the declared list. An ONEM or WalStat indicator
     configured but not declared would make scripts/offload_stores.py refuse
-    to run on the first day it is fetched -- caught here, at PR time, instead."""
+    to run on the first day it is fetched -- caught here, at PR time, instead.
+
+    Compares against `configured[source_id]` MINUS whatever an extra_csv store
+    of that same source_id already declares, and minus any indicator with NO
+    store at all under that source_id (pre-existing: LOCAL_UNITS_BY_COMMUNE is
+    configured with source_id statbel but lives directly in the small
+    committed belgian_macro.db, no CSV store of either kind -- unrelated to
+    this batch, out of scope to fix here, and never exercised by this test
+    before because no in_db store previously shared a source_id with any
+    extra_csv or store-less indicator).
+
+    Added for the `bankruptcies` store (feat/ns1-bankruptcies): `statbel` now
+    backs both extra_csv stores (population, fiscal_income, census2021,
+    realestate) and an in_db store (bankruptcies) at once, the first time one
+    source_id has had both kinds. Those extra_csv indicators already have a
+    documented CSV location of their own and are not this in_db store's job
+    to declare; the real invariant this test protects -- every indicator
+    configured under a source with an in_db store, that ALSO has some store
+    home, has it in the in_db store -- is unchanged for every source. Whether
+    every configured indicator has a store home AT ALL is a separate,
+    narrower question, checked by test_every_configured_indicator_has_exactly_one_store_home
+    below with `<=` rather than `==`, precisely so it does not re-litigate
+    the pre-existing LOCAL_UNITS_BY_COMMUNE gap either."""
     stores = load_stores(DEFAULT_STORES_PATH)
     configured = _configured_indicators_by_source()
     declared: dict[str, set[str]] = {}
+    any_store_declared: dict[str, set[str]] = {}
+    other_store_declared: dict[str, set[str]] = {}
     for store in in_db_stores(stores):
         declared.setdefault(store.source_id, set()).update(store.indicators)
+    for store in stores.values():
+        any_store_declared.setdefault(store.source_id, set()).update(store.indicators)
+        if store.mode != MODE_IN_DB:
+            other_store_declared.setdefault(store.source_id, set()).update(store.indicators)
     for source_id, ids in declared.items():
-        assert ids == configured[source_id], (
+        has_some_store = configured[source_id] & any_store_declared.get(source_id, set())
+        expected = has_some_store - other_store_declared.get(source_id, set())
+        assert ids == expected, (
             f"source {source_id}: configured but undeclared "
-            f"{sorted(configured[source_id] - ids)}, declared but unconfigured "
-            f"{sorted(ids - configured[source_id])}"
+            f"{sorted(expected - ids)}, declared but unconfigured "
+            f"{sorted(ids - expected)}"
+        )
+
+
+def test_every_configured_indicator_has_exactly_one_store_home():
+    """The invariant test_in_db_stores_declare_every_indicator_their_sources_configure
+    used to check in one step, kept exact now that a source_id can back both
+    an in_db and an extra_csv store: every indicator configured under a
+    source that has ANY committed store is declared by exactly one store
+    (in_db or extra_csv), never zero, never two -- test_no_indicator_is_declared_by_two_stores
+    above already covers "never two" registry-wide; this covers "never zero"
+    for a source with a store at all."""
+    stores = load_stores(DEFAULT_STORES_PATH)
+    configured = _configured_indicators_by_source()
+    all_declared_by_source: dict[str, set[str]] = {}
+    for store in stores.values():
+        all_declared_by_source.setdefault(store.source_id, set()).update(store.indicators)
+    for source_id, declared_ids in all_declared_by_source.items():
+        assert declared_ids <= configured.get(source_id, set()), (
+            f"source {source_id}: declared but unconfigured "
+            f"{sorted(declared_ids - configured.get(source_id, set()))}"
         )
 
 

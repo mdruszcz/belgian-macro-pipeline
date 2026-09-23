@@ -1,0 +1,25 @@
+id: BANKRUPTCIES
+name:
+  en: Bankruptcies
+  fr: Faillites
+  nl: Faillissementen
+unit: count
+frequency: M
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: lower_is_better
+max_age_days: 75
+description:
+  en: >
+    Number of company bankruptcies pronounced in the commune in the month, summed from
+    Statbel's monthly bankruptcies-by-NACE open-data file across every employment class,
+    legal form, NACE class and company duration the file reports. A commune with no row in
+    the file for a given month had zero bankruptcies that month and is loaded as an explicit
+    0.0, not left absent -- the file's own silence about a commune-month means nothing
+    happened, not that nothing was measured.
+
+    Every observation resolves against the current (2026) commune map, the same pinned-period
+    convention already used for the police.be and Statbel real-estate series: this file
+    backcasts today's 565-commune grid onto its whole 2005-2026 history, so a code created by
+    a later municipal merger can carry real values in years before that commune existed.
+display: null
