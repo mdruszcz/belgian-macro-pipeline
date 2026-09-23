@@ -1477,7 +1477,7 @@ below can run in the existing daily job; none needs a hand-download.
 |---|---|
 | Publisher | Statbel |
 | Page | `https://statbel.fgov.be/fr/open-data/evolution-mensuelle-des-faillites-par-nace` |
-| File | `TF_BANKRUPTCIES(2025).zip` → `TF_BANKRUPTCIES.txt`, pipe-separated, UTF-8 BOM then cp1252 text. The year in the file name changes, so the link is read off the page and the fetch fails loudly if it is not found |
+| File | `TF_BANKRUPTCIES(2025).zip` → `TF_BANKRUPTCIES.txt`, pipe-separated, UTF-8 with a BOM (*measured:* strict UTF-8 throughout; decoding it as cp1252 would silently garble commune names like Liège). The year in the file name changes, so the link is read off the page and the fetch fails loudly if it is not found |
 | What | `MS_COUNTOF_BANKRUPTCIES` and `MS_COUNTOF_WORKERS` (jobs affected), by month × commune × NACE × legal form × size class × company age |
 | Periods | *Measured:* monthly, 2005-01 → 2026-08; published ~15 days after the month |
 | Geography | *Measured:* `CD_MUNTY_REFNIS`, 564 distinct codes, all known to our geography. **The whole series is expressed on today's commune map:** 31 codes created in the 2019 or 2025 mergers appear in years before they existed (e.g. 44083, 23106, 37021). So it resolves at a pinned current period, like police, and aggregates use the pinned-vintage coverage rule |
