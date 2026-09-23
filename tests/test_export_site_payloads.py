@@ -18,8 +18,11 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from export_site_payloads import (  # noqa: E402
+    SECTIONS_CONFIG,
     _check_national_sections,
+    _check_sections,
     _national_sections,
+    _sections,
     export_site_payloads,
 )
 
@@ -269,6 +272,66 @@ def test_national_sections_layout_passes_through_and_checks_panel_charts(tmp_pat
     _check_national_sections(layout, known={"A", "B"})
     with pytest.raises(ValueError, match=r"\['B'\]"):
         _check_national_sections(layout, known={"A"})
+
+
+def test_real_local_sections_layout_passes_check_sections_given_its_own_indicators():
+    """Batch (site_new_indicators): config/local_sections.yaml is the real
+    layout local.html renders. This is the same guarantee
+    test_national_sections_layout_* gives config/national_sections.yaml --
+    every indicator the real file names (headline, sections, hero row,
+    compositions) must validate against SOME set of known ids, so a typo in
+    the committed layout is caught here rather than only at build time
+    against whatever database happens to be assembled locally.
+
+    The `known` set here is exactly what the real layout claims, i.e. this
+    proves _check_sections does not choke on the file's own shape (every
+    field it uses, headline/indicators/compositions parts+whole) -- it is not
+    a claim that these indicators are already published; that is
+    export_site_payloads.py's job against a real database, not a unit test's.
+    """
+    layout = _sections(SECTIONS_CONFIG)
+    known = {
+        *layout["headlines"],
+        *(
+            indicator_id
+            for section in layout["sections"]
+            for indicator_id in [
+                *([section["headline"]] if section.get("headline") else []),
+                *(section.get("indicators") or []),
+            ]
+        ),
+        *(
+            indicator_id
+            for group in layout.get("compositions") or []
+            for indicator_id in [
+                *(group.get("parts") or []),
+                *([group["whole"]] if group.get("whole") else []),
+            ]
+        ),
+    }
+    _check_sections(layout, known)  # must not raise
+
+
+def test_check_sections_refuses_a_section_naming_an_unpublished_indicator():
+    """The guard the site_new_indicators batch relied on: a section (headline
+    or supporting indicator) or a hero-row id that no commune payload
+    actually carries must stop the build, never render as a silent empty
+    box on 565 pages."""
+    layout = {
+        "headlines": ["A"],
+        "sections": [
+            {
+                "id": "demo",
+                "label": {"en": "Demo", "fr": "Demo", "nl": "Demo"},
+                "headline": "A",
+                "indicators": ["B", "GHOST_INDICATOR"],
+            }
+        ],
+        "compositions": [],
+    }
+    _check_sections(layout, known={"A", "B"} | {"GHOST_INDICATOR"})  # must not raise
+    with pytest.raises(ValueError, match=r"GHOST_INDICATOR"):
+        _check_sections(layout, known={"A", "B"})
 
 
 def test_geographies_metadata_ancestor_walk_resolves_to_a_real_region(tmp_path):

@@ -211,6 +211,34 @@ def test_latest_of_picks_the_most_recent_period_not_insertion_order():
     assert results["value"] == 110
 
 
+def test_latest_of_keeps_an_explicit_zero_rather_than_treating_it_as_absent():
+    """BANKRUPTCIES/BANKRUPTCY_JOBS_LOST (site_new_indicators): 53% of the
+    source rows are real zero-fills -- a month with no bankruptcies is a
+    measured fact, not a gap. `latestPeriodWithValue`'s own falsy check would
+    skip a value of 0 exactly like it skips null/undefined unless it tests
+    with `!== null`, so this pins the behaviour a truthiness check would
+    silently break (rule 26 -- five distinct states, never collapsed)."""
+    out = _run_node("""
+        const entry = {names: {en: 'Bankruptcies'}, unit: 'count',
+          periods: {'2026-07': {value: 3, status: 'final'},
+                    '2026-08': {value: 0, status: 'final'}}};
+        console.log(JSON.stringify(LocalUI.latestOf(entry)));
+    """)
+    assert out["period"] == "2026-08"
+    assert out["value"] == 0
+
+
+def test_latest_of_an_undefined_entry_is_null_so_the_page_renders_no_tile():
+    """The precondition factHTML's early return relies on: an indicator the
+    layout names but this commune's payload never carries at all --
+    COMMUNE.indicators[id] is undefined, exactly what a Flemish commune's
+    payload gives for a Walloon-only WalStat indicator -- must resolve to
+    null cleanly rather than throwing, so the page shows no card at all
+    (not an empty box) for that commune."""
+    out = _run_node("console.log(JSON.stringify(LocalUI.latestOf(undefined)));")
+    assert out is None
+
+
 # ── the comparison column (Block L) ────────────────────────────────────────
 
 _COMMUNE_WITH_COMPARISON = {
