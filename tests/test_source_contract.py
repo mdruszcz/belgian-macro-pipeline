@@ -301,3 +301,40 @@ def test_municipal_time_series_contract_population_movement(tmp_path, monkeypatc
         }
     # The raw response was cached before parsing, the base class's own promise.
     assert list(tmp_path.rglob("X.xlsx")), "raw response not cached under RAW_CACHE_DIR"
+
+
+# --- the IPP-rate municipal contract, same deviation, no indicator fanout ----
+#
+# IppRateSource is a MunicipalTimeSeriesSource, but `geo_id` is the raw
+# commune NAME (the source file carries no NIS code at all, not even a raw
+# one) -- resolution to a geo_id needs a live db connection and a documented
+# name override, scripts/sync_ipp_rate.py's job. Unlike bankruptcies.py and
+# population_movement.py, this adapter emits exactly one indicator per row
+# (no `indicator_id` fanout), so the base four keys ARE the row's whole key
+# set here -- still checked as a subset (<=) for consistency with the other
+# municipal contract cases in this file, per src/fetchers/spf_finances.py's
+# module docstring.
+
+from src.fetchers.spf_finances import IppRateSource  # noqa: E402
+
+sys.path.insert(0, str(REPO / "tests"))
+from test_spf_finances_source import REAL_2026_ROWS  # noqa: E402
+from test_spf_finances_source import _make_workbook as _make_ipp_workbook  # noqa: E402
+
+
+def test_municipal_time_series_contract_ipp_rate(tmp_path, monkeypatch):
+    raw = _make_ipp_workbook(REAL_2026_ROWS)
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr("src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(raw))
+
+    rows = IppRateSource().fetch("https://example.test/x.xlsx", cache_key="X", tax_year="2026")
+
+    assert rows, "fixture must produce at least one row to be a meaningful contract check"
+    for row in rows:
+        assert {"geo_id", "period", "value", "status"} <= set(row.keys())
+        assert isinstance(row["geo_id"], str)
+        assert isinstance(row["period"], str)
+        assert isinstance(row["value"], float)
+        assert row["status"] in {"final", "provisional", "estimate", "revised", "suppressed", "na"}
+    # The raw response was cached before parsing, the base class's own promise.
+    assert list(tmp_path.rglob("X.xlsx")), "raw response not cached under RAW_CACHE_DIR"

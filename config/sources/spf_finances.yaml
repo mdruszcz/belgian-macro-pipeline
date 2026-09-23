@@ -1,0 +1,39 @@
+source_id: spf_finances
+name: SPF Finances communal additional personal-income-tax rate
+agency: SPF Finances / FOD Financiën
+adapter: spf_finances
+base_url: https://fin.belgium.be/sites/default/files/media/documents
+licence: >-
+  SPF Finances' open-data licence (single licence based on CC BY, maintainer-confirmed
+  reusable): https://finances.belgium.be/sites/default/files/Licence_plan_opendata_FR.PDF.
+  Attribution to SPF Finances / FOD Financiën required.
+catalog_ref: docs/data_catalog.md -- SPF Finances IPP additional-rate row
+cadence: annual, one file per tax year, published on an irregular schedule; fetched daily
+fetch_window_days: 14
+is_active: true
+homepage: https://finances.belgium.be/fr/opendata
+label:
+  en: SPF Finances
+  fr: SPF Finances
+  nl: FOD Financiën
+licence_note:
+  en: >-
+    Communal additional personal-income-tax rate published by SPF Finances under its
+    open-data licence (based on CC BY -- attribution required):
+    https://finances.belgium.be/sites/default/files/Licence_plan_opendata_FR.PDF. One file
+    per tax year; tax years 2024, 2025 and 2026 only (earlier years are PDF-only and out of
+    scope). No commune-level aggregate is computed from this rate.
+  fr: >-
+    Taux communal additionnel à l'impôt des personnes physiques, publié par le SPF
+    Finances sous sa licence open data (basée sur CC BY -- mention obligatoire) :
+    https://finances.belgium.be/sites/default/files/Licence_plan_opendata_FR.PDF. Un
+    fichier par exercice d'imposition ; exercices 2024, 2025 et 2026 uniquement (les
+    années antérieures ne sont disponibles qu'en PDF, hors périmètre). Aucun agrégat n'est
+    calculé à partir de ce taux.
+  nl: >-
+    Aanvullend gemeentelijk percentage op de personenbelasting, gepubliceerd door de FOD
+    Financiën onder haar open-datalicentie (gebaseerd op CC BY -- bronvermelding
+    verplicht): https://finances.belgium.be/sites/default/files/Licence_plan_opendata_FR.PDF.
+    Eén bestand per aanslagjaar; enkel aanslagjaren 2024, 2025 en 2026 (eerdere jaren zijn
+    enkel als PDF beschikbaar, buiten bereik). Er wordt geen enkel geaggregeerd cijfer uit
+    dit tarief berekend.

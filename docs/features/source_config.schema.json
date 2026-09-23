@@ -35,7 +35,8 @@
         "onem",
         "police",
         "walstat",
-        "var"
+        "var",
+        "spf_finances"
       ]
     },
     "base_url": {
