@@ -1454,3 +1454,77 @@ Both are now "verified to exist and be worth a real look," upgraded from "not in
 neither has been evaluated as a candidate dataset itself yet, since that requires picking a
 specific dataset within each, which is exactly the enumeration Block E's `[H]` scoring step
 still needs from the maintainer.
+
+## New municipal sources — APPROVED by the maintainer 2026-09-23
+
+Drafted from `docs/idées/` (the licence inventory PDF and the SPF Finances portal note) under the
+plan approved 2026-09-23: easiest first, one wave per source. The maintainer approved every row on 2026-09-23, in his words: "j'approuve toutes les lignes du
+PR #229, et une commune sans faillite un mois donné compte pour 0" (rule 8). The IPP tax-year
+question stays open until wave 6. Every fact tagged *measured* was read off the real
+file or a real GitHub Actions run on 2026-09-23, not inferred.
+
+**Reachability, measured.** A temporary probe on a real GitHub Actions runner (run `35830872431`,
+branch deleted afterwards) reached every source below: `statbel.fgov.be` open-data page and zip
+(HTTP 200, 6.5 MB in 12 s), Bestat, the SPF Finances ATOM feeds and IPP-rate PDF, and WalStat.
+**This reverses the older note in this file that `statbel.fgov.be` is unreachable from the
+runners** (the TCP handshake used to time out). The SPF bulk patrimony zip (118 MB) was still
+downloading when the probe's 90 s limit cut it off; that is size, not a block. So every source
+below can run in the existing daily job; none needs a hand-download.
+
+### Wave 1 — Statbel bankruptcies by commune (APPROVED 2026-09-23)
+
+| Field | Value |
+|---|---|
+| Publisher | Statbel |
+| Page | `https://statbel.fgov.be/fr/open-data/evolution-mensuelle-des-faillites-par-nace` |
+| File | `TF_BANKRUPTCIES(2025).zip` → `TF_BANKRUPTCIES.txt`, pipe-separated, UTF-8 BOM then cp1252 text. The year in the file name changes, so the link is read off the page and the fetch fails loudly if it is not found |
+| What | `MS_COUNTOF_BANKRUPTCIES` and `MS_COUNTOF_WORKERS` (jobs affected), by month × commune × NACE × legal form × size class × company age |
+| Periods | *Measured:* monthly, 2005-01 → 2026-08; published ~15 days after the month |
+| Geography | *Measured:* `CD_MUNTY_REFNIS`, 564 distinct codes, all known to our geography. **The whole series is expressed on today's commune map:** 31 codes created in the 2019 or 2025 mergers appear in years before they existed (e.g. 44083, 23106, 37021). So it resolves at a pinned current period, like police, and aggregates use the pinned-vintage coverage rule |
+| Suppression | *Measured:* none. 202,332 rows, every count ≥ 1, no blank or non-numeric value |
+| Proposed indicators | `BANKRUPTCIES` (count, monthly, additive) and `BANKRUPTCY_JOBS_LOST` (count, monthly, additive); annual totals as tested derived indicators |
+| Licence | Statbel open-data licence — already verified above; commercial reuse allowed, credit and publication date required |
+| **Decided by the maintainer 2026-09-23** | The file lists only commune-months that *had* a bankruptcy. A commune-month with no row is an explicit **0**, for every commune that existed: the file is a complete register of events, not a sample (rule 26: decided, not assumed) |
+
+### Wave 2 — WalStat, Wallonia only (APPROVED 2026-09-23)
+
+| Field | Value |
+|---|---|
+| Publisher | IWEPS (WalStat) — adapter already exists (`src/fetchers/walstat.py`) |
+| What | Share of GRAPA recipients among the 65+; share of BIM (increased-reimbursement) beneficiaries; budget meters for electricity/gas (CWaPE data via IWEPS) |
+| Geography | 261 Walloon communes only. Flemish and Brussels communes show **not applicable**, never missing or zero. No Belgium aggregate |
+| Licence | CC0 — already verified above |
+| Status | Exact WalStat indicator ids to be read off the WalStat catalogue in the spec |
+
+### Wave 3 — Statbel population movement (APPROVED 2026-09-23)
+
+| Field | Value |
+|---|---|
+| Publisher | Statbel — births, deaths, internal and international migration by commune, annual |
+| Proposed indicators | Counts as source data; birth rate, death rate and net migration per 1,000 residents as tested derived indicators over the population we already hold |
+| Licence | Statbel open-data licence — already verified |
+| Status | The exact open-data file URL is not yet identified (search engines hit a CAPTCHA); to be found in the spec |
+
+### Waves 4–5 — SPF Finances, patrimony open data (AGDP) (APPROVED 2026-09-23)
+
+| Field | Value |
+|---|---|
+| Publisher | SPF Finances, Administration générale de la Documentation patrimoniale |
+| Access | *Measured:* one ATOM feed per dataset, `https://opendata.fin.belgium.be/download/ATOM/{uuid}-en.xml`, listing every version as a direct zip, `.../download/datasets/{uuid}_{YYYYMMDD}_csv_NA_01000.zip`, plus a technical-specification PDF. Leases `84d5f470-51ca-11eb-8a67-3448ed25ad7c` (latest 2026-03-31); transactions `89209670-51ca-11eb-beeb-3448ed25ad7c` (latest 2025-12-31) |
+| Cadence | Leases and transactions quarterly; every other dataset annual |
+| Geography | Belgium → region → province → arrondissement → commune, some down to statistical sector |
+| Wave 4 | Leases (52.01.01): median rent, median charges, number of new leases. Transactions (52.01.02): number of transactions, total market value |
+| Wave 5 | Annual datasets in lots of 3–4: 52.01.14, .15, .21, .24; then .10, .04, .05, .03; then .08, .06/.07/.09/.11/.12, .16/.19/.20/.22/.23, .25, .17/.18. The spec picks 1–3 headline figures per dataset |
+| Medians | Not re-aggregatable. A province or region median is stored only if the SPF publishes it itself, as source data for that level; otherwise it is refused |
+| Licence | **Maintainer ruling 2026-09-23: the whole SPF Finances open-data portal may be reused commercially.** For the record, the SPF's own page describes "une licence unique, basée sur la licence Creative Commons CC BY" (`https://finances.belgium.be/sites/default/files/Licence_plan_opendata_FR.PDF`), so the source is credited on every view |
+| Excluded | The SPF's fiscal-control statistics (audits, ISI, e-audit): outside BelPulse by the maintainer's own cumul declaration |
+
+### Wave 6 — Communal additional IPP rate (APPROVED 2026-09-23)
+
+| Field | Value |
+|---|---|
+| Publisher | SPF Finances — one PDF per tax year, e.g. `https://fin.belgium.be/sites/default/files/media/documents/taux-taxe-communale-2025_1.pdf` (*measured:* reachable from a runner) |
+| What | The additional communal rate on personal income tax (IPP), per commune, per tax year (*exercice d'imposition*) |
+| Difficulty | A table extracted from a PDF, probably matched on commune names, with history rebuilt one PDF at a time. Any row that does not match a commune stops the load |
+| **Decision needed** | Any figure combining this rate with `FISCAL_TOT_MUNICIP_TAXES` (e.g. the yield of one IPP point) depends on how tax years line up with income years. The maintainer confirms the semantics before any code |
+| Licence | Same maintainer ruling as waves 4–5 |
