@@ -1,0 +1,51 @@
+id: MUN_LEASE_CHARGES_MEDIAN_HOUSING
+name:
+  en: Median monthly charges, new housing leases
+  fr: Charges mensuelles médianes, nouveaux baux de logement
+  nl: Mediane maandelijkse kosten, nieuwe woninghuurcontracten
+unit: eur_per_month
+frequency: Q
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 270
+description:
+  en: >
+    Median monthly charges (ChargesP50, EUR/month, on top of rent) across residential
+    lease registrations (RegistrationType=HousingRegistration, LessorType=TOTAL,
+    TakerType=TOTAL) in the commune in the quarter, published directly by SPF Finances --
+    not recomputed here (CLAUDE.md rule 6). Source: SPF Finances AGDP real-estate leases
+    dataset (52.01.01), Municipality-level CSV. PERIOD IS THE CALENDAR QUARTER derived
+    from the version's own publication date. SUPPRESSED, NOT ZERO, when the underlying
+    registration count (MUN_LEASES_NEW_HOUSING) is 1-4 in that commune-quarter -- status
+    'suppressed', value NULL. NOT APPLICABLE when the count is zero -- status 'na', value
+    NULL, distinct from suppression. is_additive=false, aggregation_method=not_applicable:
+    a median has no defensible aggregate; province/region/Belgium figures are refused,
+    never averaged across communes (CLAUDE.md Definitions).
+  fr: >
+    Charges mensuelles médianes (ChargesP50, EUR/mois, en sus du loyer) sur les
+    enregistrements de baux résidentiels (RegistrationType=HousingRegistration,
+    LessorType=TOTAL, TakerType=TOTAL) dans la commune au cours du trimestre, publiées
+    directement par le SPF Finances -- non recalculées ici (règle 6 de CLAUDE.md). Source :
+    jeu de données AGDP baux immobiliers du SPF Finances (52.01.01), CSV au niveau
+    communal. LA PÉRIODE EST LE TRIMESTRE CALENDAIRE dérivé de la date de publication de
+    la version. SUPPRIMÉ, ET NON ZÉRO, lorsque le nombre d'enregistrements sous-jacent
+    (MUN_LEASES_NEW_HOUSING) est compris entre 1 et 4 -- statut 'suppressed', valeur NULL.
+    NON APPLICABLE lorsque le nombre est nul -- statut 'na', valeur NULL, distinct de la
+    suppression. is_additive=false, aggregation_method=not_applicable : une médiane n'a
+    pas d'agrégat défendable ; les chiffres provinciaux/régionaux/nationaux sont refusés,
+    jamais moyennés entre communes (Définitions de CLAUDE.md).
+  nl: >
+    Mediane maandelijkse kosten (ChargesP50, EUR/maand, bovenop de huur) over de
+    registraties van woninghuurcontracten (RegistrationType=HousingRegistration,
+    LessorType=TOTAL, TakerType=TOTAL) in de gemeente in het kwartaal, rechtstreeks
+    gepubliceerd door de FOD Financiën -- hier niet herberekend (CLAUDE.md-regel 6). Bron:
+    AGDP vastgoedhuur-dataset van de FOD Financiën (52.01.01), CSV op gemeenteniveau. DE
+    PERIODE IS HET KALENDERKWARTAAL afgeleid uit de publicatiedatum van de versie.
+    ONDERDRUKT, NIET NUL, wanneer het onderliggende aantal registraties
+    (MUN_LEASES_NEW_HOUSING) 1-4 bedraagt -- status 'suppressed', waarde NULL. NIET VAN
+    TOEPASSING wanneer het aantal nul is -- status 'na', waarde NULL, te onderscheiden van
+    onderdrukking. is_additive=false, aggregation_method=not_applicable: een mediaan heeft
+    geen verdedigbaar geaggregeerd cijfer; provincie-/gewest-/Belgiëcijfers worden
+    geweigerd, nooit gemiddeld over gemeenten (Definities in CLAUDE.md).
+display: null

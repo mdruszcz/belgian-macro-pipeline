@@ -1,0 +1,54 @@
+id: MUN_LEASES_NEW_HOUSING
+name:
+  en: New housing leases registered
+  fr: Nouveaux baux de logement enregistrés
+  nl: Nieuw geregistreerde woninghuurcontracten
+unit: count
+frequency: Q
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+# AGDP publishes with roughly a two-quarter lag (measured: 2026-Q1 is the
+# latest version as of 2026-09-23); a generous window avoids a false
+# staleness warning between quarterly republications.
+max_age_days: 270
+description:
+  en: >
+    Number of residential lease registrations (RegistrationType=HousingRegistration) in
+    the commune in the quarter, for LessorType=TOTAL and TakerType=TOTAL -- i.e. every
+    lessor and every tenant type, the housing-registration total. Source: SPF Finances
+    AGDP real-estate leases dataset (52.01.01), Municipality-level CSV, one quarter per
+    published version. PERIOD IS THE CALENDAR QUARTER derived from the version's own
+    publication date (the only period signal in the source; no CSV column carries one).
+    A quarter with zero registrations of this kind is a real, published zero (CLAUDE.md
+    rule 26) -- the source publishes a row for every live commune every quarter, so a
+    blank count cell means "none registered", not "not measured". is_additive=true,
+    aggregation_method=sum: province/region/Belgium totals are summed from this count the
+    ordinary way over the geographies that existed that quarter.
+  fr: >
+    Nombre d'enregistrements de baux résidentiels (RegistrationType=HousingRegistration)
+    dans la commune au cours du trimestre, pour LessorType=TOTAL et TakerType=TOTAL --
+    c'est-à-dire tout type de bailleur et de preneur, le total des enregistrements de
+    logement. Source : jeu de données AGDP baux immobiliers du SPF Finances (52.01.01),
+    CSV au niveau communal, une version par trimestre publié. LA PÉRIODE EST LE TRIMESTRE
+    CALENDAIRE dérivé de la date de publication de la version (seul signal de période
+    disponible ; aucune colonne du CSV n'en porte). Un trimestre sans aucun enregistrement
+    de ce type est un zéro réellement publié (règle 26 de CLAUDE.md) -- la source publie
+    une ligne pour chaque commune existante à chaque trimestre, donc une cellule de
+    comptage vide signifie « aucun enregistré », pas « non mesuré ». is_additive=true,
+    aggregation_method=sum : les totaux provinciaux/régionaux/nationaux sont additionnés
+    normalement sur les entités géographiques existant ce trimestre-là.
+  nl: >
+    Aantal registraties van woninghuurcontracten (RegistrationType=HousingRegistration)
+    in de gemeente in het kwartaal, voor LessorType=TOTAL en TakerType=TOTAL -- dus elk
+    type verhuurder en huurder samen, het totaal van de woningregistraties. Bron: AGDP
+    vastgoedhuur-dataset van de FOD Financiën (52.01.01), CSV op gemeenteniveau, één
+    kwartaal per gepubliceerde versie. DE PERIODE IS HET KALENDERKWARTAAL afgeleid uit de
+    publicatiedatum van de versie (het enige periodesignaal; geen enkele CSV-kolom bevat
+    er één). Een kwartaal zonder registraties van dit type is een werkelijk gepubliceerde
+    nul (CLAUDE.md-regel 26) -- de bron publiceert elk kwartaal een rij voor elke
+    bestaande gemeente, dus een lege telcel betekent "geen geregistreerd", niet "niet
+    gemeten". is_additive=true, aggregation_method=sum: provincie-/gewest-/Belgiëtotalen
+    worden op de gewone manier opgeteld over de geografische entiteiten die dat kwartaal
+    bestonden.
+display: null

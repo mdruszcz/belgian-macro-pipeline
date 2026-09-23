@@ -338,3 +338,73 @@ def test_municipal_time_series_contract_ipp_rate(tmp_path, monkeypatch):
         assert row["status"] in {"final", "provisional", "estimate", "revised", "suppressed", "na"}
     # The raw response was cached before parsing, the base class's own promise.
     assert list(tmp_path.rglob("X.xlsx")), "raw response not cached under RAW_CACHE_DIR"
+
+
+# --- the AGDP municipal contract, same deviation, plus a legitimate None value -
+#
+# AgdpSource is a MunicipalTimeSeriesSource with the same geo_id deviation as
+# bankruptcies.py/population_movement.py (raw NIS string, own-quarter
+# resolution is scripts/sync_spf_agdp.py's job) and the same indicator_id
+# fanout as bankruptcies.py (one CSV row feeds several indicators). UNLIKE
+# every other adapter checked in this file, `value` is legitimately None on
+# a suppressed/na row (CLAUDE.md rule 26) -- src/fetchers/spf_agdp.py's own
+# module docstring covers the five-state mapping in full;
+# tests/test_spf_agdp_source.py exercises every branch of it. This is the
+# same None-or-float relaxation the EurostatSource case above already uses,
+# for the same reason (a suppressed/na cell is a known state with no value,
+# not encodable as a float).
+
+from src.fetchers.spf_agdp import LEASES as _AGDP_LEASES  # noqa: E402
+from src.fetchers.spf_agdp import AgdpSource  # noqa: E402
+
+_AGDP_LEASES_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;RegistrationType;LessorType;TakerType;"
+    "RentsNumber;RentP25;RentP50;RentP75;ChargesP25;ChargesP50;ChargesP75;"
+    "TotalRentP25;TotalRentP50;TotalRentP75"
+)
+
+
+def _agdp_leases_csv_bytes() -> bytes:
+    rows = [
+        # A count >= 5 row: every percentile final.
+        "11002;Antwerpen;Antwerpen;Antwerpen;HousingRegistration;TOTAL;TOTAL;"
+        "3297;800;895;950;60;70;80;900;1000;1100",
+        # A count 1-4 row (different commune): percentiles suppressed, value None.
+        "11001;Aartselaar;Aartselaar;Aartselaar;HousingRegistration;TOTAL;TOTAL;"
+        "2;800;;950;60;;80;900;1000;1100",
+    ]
+    text = "﻿" + "\r\n".join([_AGDP_LEASES_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_municipal_time_series_contract_spf_agdp():
+    rows = AgdpSource(_AGDP_LEASES)._parse(_agdp_leases_csv_bytes(), quarter="2026-Q1")
+
+    assert rows, "fixture must produce at least one row to be a meaningful contract check"
+    for row in rows:
+        assert {"geo_id", "period", "value", "status"} <= set(row.keys())
+        assert isinstance(row["geo_id"], str)
+        assert isinstance(row["period"], str)
+        assert row["value"] is None or isinstance(row["value"], float)
+        assert row["status"] in {"final", "provisional", "estimate", "revised", "suppressed", "na"}
+        assert row["indicator_id"] in {
+            "MUN_LEASES_NEW_HOUSING",
+            "MUN_LEASE_RENT_MEDIAN_HOUSING",
+            "MUN_LEASE_CHARGES_MEDIAN_HOUSING",
+        }
+    # The suppressed row's None values are actually exercised, not just
+    # permitted by the type check above.
+    suppressed = [
+        r
+        for r in rows
+        if r["geo_id"] == "11001" and r["indicator_id"] == "MUN_LEASE_RENT_MEDIAN_HOUSING"
+    ]
+    assert suppressed == [
+        {
+            "geo_id": "11001",
+            "period": "2026-Q1",
+            "value": None,
+            "status": "suppressed",
+            "indicator_id": "MUN_LEASE_RENT_MEDIAN_HOUSING",
+        }
+    ]
