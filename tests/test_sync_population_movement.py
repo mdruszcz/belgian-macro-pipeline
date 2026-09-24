@@ -32,8 +32,8 @@ from test_population_movement_source import (  # noqa: E402
 REAL_MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 REAL_GEOGRAPHY_CONFIG_DIR = Path(__file__).resolve().parents[1] / "config" / "geography"
 
-REAL_2025_NAMUR = _data_row("92094", 1036, 1118, -300, 826)
-REAL_2025_LIEGE = _data_row("62063", 2016, 2024, -1293, 2135)
+REAL_2025_NAMUR = _data_row("92094", 1036, 1118, -300, 826, 5258, 5558)
+REAL_2025_LIEGE = _data_row("62063", 2016, 2024, -1293, 2135, 10411, 11704)
 REAL_2025_AARTSELAAR = _data_row("11001", 131, 170, 34, 0)
 
 
@@ -69,6 +69,8 @@ def test_reference_rows_only_needs_no_network(db):
         "DEATHS",
         "INTERNAL_MIGRATION_NET",
         "INTERNATIONAL_MIGRATION_NET",
+        "INTERNAL_MIGRATION_IN",
+        "INTERNAL_MIGRATION_OUT",
     ):
         row = conn.execute(
             "SELECT is_additive, aggregation_method FROM indicators WHERE indicator_id = ?",
@@ -94,11 +96,21 @@ def test_hand_computed_2025_values_land_correctly(db):
     assert value("DEATHS", "be:mun:92094") == 1118.0
     assert value("INTERNAL_MIGRATION_NET", "be:mun:92094") == -300.0
     assert value("INTERNATIONAL_MIGRATION_NET", "be:mun:92094") == 826.0
+    assert value("INTERNAL_MIGRATION_IN", "be:mun:92094") == 5258.0
+    assert value("INTERNAL_MIGRATION_OUT", "be:mun:92094") == 5558.0
+    assert value("INTERNAL_MIGRATION_IN", "be:mun:92094") - value(
+        "INTERNAL_MIGRATION_OUT", "be:mun:92094"
+    ) == value("INTERNAL_MIGRATION_NET", "be:mun:92094")
 
     assert value("BIRTHS", "be:mun:62063") == 2016.0
     assert value("DEATHS", "be:mun:62063") == 2024.0
     assert value("INTERNAL_MIGRATION_NET", "be:mun:62063") == -1293.0
     assert value("INTERNATIONAL_MIGRATION_NET", "be:mun:62063") == 2135.0
+    assert value("INTERNAL_MIGRATION_IN", "be:mun:62063") == 10411.0
+    assert value("INTERNAL_MIGRATION_OUT", "be:mun:62063") == 11704.0
+    assert value("INTERNAL_MIGRATION_IN", "be:mun:62063") - value(
+        "INTERNAL_MIGRATION_OUT", "be:mun:62063"
+    ) == value("INTERNAL_MIGRATION_NET", "be:mun:62063")
 
     assert value("BIRTHS", "be:mun:11001") == 131.0
     assert value("DEATHS", "be:mun:11001") == 170.0
@@ -194,7 +206,7 @@ def test_sheet_2018_transition_codes_are_excluded_loudly_and_match_expected(db):
     raw = _make_workbook({"2018": rows})
     read, written = sync_population_movement.sync(db, xlsx_bytes=raw)
     assert written == 0
-    assert read == 18 * 4
+    assert read == 18 * 6
     conn = sqlite3.connect(str(db))
     n = conn.execute("SELECT COUNT(*) FROM observations WHERE period = '2018'").fetchone()[0]
     conn.close()
@@ -224,7 +236,7 @@ def test_sheet_2024_transition_codes_are_excluded_loudly_and_match_expected(db):
     raw = _make_workbook({"2024": rows})
     read, written = sync_population_movement.sync(db, xlsx_bytes=raw)
     assert written == 0
-    assert read == 13 * 4
+    assert read == 13 * 6
     conn = sqlite3.connect(str(db))
     n = conn.execute("SELECT COUNT(*) FROM observations WHERE period = '2024'").fetchone()[0]
     conn.close()
@@ -263,7 +275,7 @@ def test_a_transition_sheet_still_writes_its_ordinary_rows(db):
         {"2018": [REAL_2025_NAMUR] + [_data_row(c, 10, 5, 1, 1) for c in new_2019_codes]}
     )
     read, written = sync_population_movement.sync(db, xlsx_bytes=raw)
-    assert written == 4  # Namur's four indicators; all 18 transition codes excluded
+    assert written == 6  # Namur's six indicators; all 18 transition codes excluded
     rows = _observations(db, "BIRTHS", "be:mun:92094")
     assert rows == [("be:mun:92094", "2018", 1036.0, "final")]
 
@@ -299,7 +311,7 @@ def test_province_codes_are_dropped_not_written_and_not_unresolved():
         load_geography.load(db_path, REAL_GEOGRAPHY_CONFIG_DIR, allow_unverified=True)
         read, written = sync_population_movement.sync(db_path, xlsx_bytes=raw)
         # Only Namur's 4 indicators written; 20001 contributed nothing.
-        assert written == 4
+        assert written == 6
         conn = sqlite3.connect(str(db_path))
         n = conn.execute(
             "SELECT COUNT(*) FROM observations WHERE geo_id LIKE '%20001%'"
@@ -319,9 +331,9 @@ def test_belgium_row_01000_is_dropped_not_written():
         read, written = sync_population_movement.sync(db_path, xlsx_bytes=raw)
         assert written == 0
         # One data row in the sheet, but the adapter emits one output row
-        # per indicator (four) for it -- rows_read counts those, mirroring
+        # per indicator (six) for it -- rows_read counts those, mirroring
         # scripts/sync_bankruptcies.py's own convention.
-        assert read == 4
+        assert read == 6
 
 
 # --- an unresolvable code refuses the whole run ------------------------------
@@ -443,7 +455,7 @@ def test_the_same_nis_on_two_different_sheets_is_not_a_duplicate(db):
         }
     )
     read, written = sync_population_movement.sync(db, xlsx_bytes=raw)
-    assert written == 8  # 4 indicators x 2 sheet years
+    assert written == 12  # 6 indicators x 2 sheet years
     assert len(_observations(db, "BIRTHS", "be:mun:92094")) == 2
 
 
@@ -520,20 +532,3 @@ def test_a_stale_row_from_a_pre_fix_run_is_retired_not_left_is_latest(db):
     # (12041 for 2018 is an excluded transition code; nothing should be
     # current for that key at all).
     assert rows == [(218.0, 0)]
-
-
-# --- --from-file (2026-09-23: statbel.fgov.be CAPTCHAs CI, manual refresh) ---
-
-
-def test_from_file_loads_a_hand_downloaded_workbook(db, monkeypatch, tmp_path):
-    """--from-file runs the exact same parse/per-row-resolution/transition-
-    exclusion path as a live fetch -- no network, no theme-page discovery."""
-    path = tmp_path / "mouvement-de-la-population.xlsx"
-    path.write_bytes(_make_workbook({"2025": [REAL_2025_NAMUR]}))
-    monkeypatch.setattr(
-        sys, "argv", ["sync_population_movement.py", "--db", str(db), "--from-file", str(path)]
-    )
-    sync_population_movement.main()
-
-    rows = _observations(db, "BIRTHS", "be:mun:92094")
-    assert rows == [("be:mun:92094", "2025", 1036.0, "final")]

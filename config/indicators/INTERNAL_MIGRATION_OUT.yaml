@@ -1,0 +1,48 @@
+id: INTERNAL_MIGRATION_OUT
+name:
+  en: Internal migration departures
+  fr: Départs migratoires internes
+  nl: Interne migratie vertrekken
+unit: count
+frequency: A
+source_id: statbel
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 550
+description:
+  en: >
+    Departures to elsewhere in Belgium by residents of the commune during the calendar year,
+    from Statbel's population-movement workbook (docs/features/population_movement.md), column
+    H -- the publisher's own SORTIES for "MOUVEMENT MIGRATOIRE INTERNE", taken as published, not
+    recomputed (CLAUDE.md rule 6). Always non-negative, so unit is 'count'.
+    INTERNAL_MIGRATION_NET = INTERNAL_MIGRATION_IN - INTERNAL_MIGRATION_OUT, as published by
+    Statbel (see INTERNAL_MIGRATION_IN and INTERNAL_MIGRATION_NET). Geography is period-correct:
+    each year's rows resolve against the commune map in effect at the START of that same
+    calendar year (not a pinned current-day map -- see src/fetchers/population_movement.py and
+    docs/features/population_movement.md). preferred_direction is 'contextual': more departures
+    is neither better nor worse on its own.
+  fr: >
+    Départs vers ailleurs en Belgique, pour les résidents de la commune durant l'année civile,
+    tirés du tableau Statbel du mouvement de la population
+    (docs/features/population_movement.md), colonne H -- le solde SORTIES publié pour
+    "MOUVEMENT MIGRATOIRE INTERNE", repris tel quel, non recalculé (règle 6 du CLAUDE.md).
+    Toujours positif ou nul, d'où l'unité 'count'. INTERNAL_MIGRATION_NET =
+    INTERNAL_MIGRATION_IN - INTERNAL_MIGRATION_OUT, tel que publié par Statbel (voir
+    INTERNAL_MIGRATION_IN et INTERNAL_MIGRATION_NET). La géographie est correcte pour chaque
+    période : les lignes de chaque année sont résolues sur la carte communale en vigueur au
+    DEBUT de cette même année civile (pas la carte actuelle -- voir
+    src/fetchers/population_movement.py et docs/features/population_movement.md).
+    preferred_direction est 'contextual' : davantage de départs n'est en soi ni meilleur ni
+    pire.
+  nl: >
+    Vertrekken naar de rest van België door inwoners van de gemeente tijdens het kalenderjaar,
+    uit de Statbel-tabel van de bevolkingsbeweging (docs/features/population_movement.md),
+    kolom H -- het gepubliceerde SORTIES-saldo voor "MOUVEMENT MIGRATOIRE INTERNE", overgenomen
+    zoals gepubliceerd, niet herberekend (CLAUDE.md-regel 6). Steeds niet-negatief, vandaar
+    unit 'count'. INTERNAL_MIGRATION_NET = INTERNAL_MIGRATION_IN - INTERNAL_MIGRATION_OUT, zoals
+    gepubliceerd door Statbel (zie INTERNAL_MIGRATION_IN en INTERNAL_MIGRATION_NET). De
+    geografie is periode-correct: elk jaar wordt opgelost tegen de gemeentekaart die gold aan
+    het BEGIN van dat kalenderjaar (niet de huidige kaart -- zie
+    src/fetchers/population_movement.py en docs/features/population_movement.md).
+    preferred_direction is 'contextual': meer vertrekken is op zich niet beter of slechter.
+display: null
