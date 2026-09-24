@@ -56,6 +56,15 @@
     text-wrap:balance; letter-spacing:-.01em;
   }
   .subtitle{color:var(--text-muted); font-size:.95rem; max-width:62ch}
+
+  /* ---- per-source downloads (split-communes-history), same rules as explorer.html ---- */
+  .shard-downloads{
+    display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+    font-size:.78rem; color:var(--text-muted); margin:.5rem 0 0;
+  }
+  .shard-downloads-label{color:var(--text-faint)}
+  .shard-downloads-link{color:inherit; text-decoration:underline; white-space:nowrap}
+  .shard-downloads-link:hover{color:var(--accent)}
   .subtitle code{
     font-family:"IBM Plex Mono",monospace; font-size:.85em;
     background:var(--accent-soft); color:var(--accent-ink);
@@ -316,7 +325,8 @@
 </div>
   <header>
     <h1 data-t="communesTitle">Commune Data</h1>
-    <p class="subtitle" data-t-html="communesLead">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The full underlying rows are in <code>data/communes_history.csv</code>, for a researcher who wants everything at once. Or press <strong>Show map</strong> to draw the column you are sorting by, in the year you have picked. See <a href="map.html">map.html</a> for a full-page map of the latest figures, <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
+    <p class="subtitle" data-t-html="communesLead">Every municipal-level observation this pipeline holds &mdash; every year on record, one row per commune. Pick a year below; hover a value for its full history. The core indicators' full rows are in <code>data/communes_history.csv</code>; each other source's full history is in its own file below, for a researcher who wants everything at once. Or press <strong>Show map</strong> to draw the column you are sorting by, in the year you have picked. See <a href="map.html">map.html</a> for a full-page map of the latest figures, <a href="all_data.html">all_data.html</a> for national-level data, <a href="dashboard.html">dashboard.html</a> for the presented view, or <a href="local.html">local.html</a> for a single commune's own profile page.</p>
+    <div id="shardDownloads" class="shard-downloads" hidden></div>
   </header>
 
   <div class="stats">
@@ -405,6 +415,8 @@ let COMMUNES = [];    // one object per commune, indicator values pivoted onto i
 let INDICATOR_CODES = []; // discovered from the data, in first-seen order
 let INDICATOR_META = {};  // code -> {name, unit, years: sorted list of years the indicator has ANY row for}
 let YEARS = [];       // every distinct year across the whole dataset, sorted ascending
+let SHARDS = [];       // data/communes_history/{store}.csv manifest, from explorer's own index.json (PR: split-communes-history)
+let SOURCES = {};      // source_id -> trilingual label, from public/data/metadata/sources.json -- never hand-typed (rule 28)
 let selectedYear = null;
 let sortKey = 'name_en', sortDir = 1;
 let HEADLINE_CODES = []; // metadata/sections.json's headlines, filtered to codes this table actually has
@@ -460,6 +472,31 @@ let ATTR_UPDATED = '';
 const SOURCE_LABELS = {statbel: 'Statbel', onem: 'ONEM/RVA', police: 'Federal Police',
                        nbb: 'NBB', eurostat: 'Eurostat', ameco_ec: 'AMECO/EC', fpb: 'FPB'};
 const GRADE_WORDS = {A: 'Official', B: 'Restated', C: 'Derived', D: 'Forecast'};
+
+/* Same mechanism as explorer.html's renderShardDownloads(): one link per
+   data/communes_history/{store}.csv shard, labelled from the published
+   source registry (SOURCES, state.sources' equivalent here) and falling
+   back to the file's own name only when a source has no trilingual label. */
+function renderShardDownloads(){
+  const holder = document.getElementById('shardDownloads');
+  if(!holder) return;
+  holder.innerHTML = '';
+  if(!SHARDS.length){ holder.hidden = true; return; }
+  holder.hidden = false;
+  const label = document.createElement('span');
+  label.className = 'shard-downloads-label';
+  label.textContent = T('explorerShardDownloads');
+  holder.appendChild(label);
+  SHARDS.forEach(shard => {
+    const src = SOURCES[shard.source];
+    const text = (src && src.label && (src.label[LANG] || src.label.en)) || shard.path.split('/').pop();
+    const a = document.createElement('a');
+    a.className = 'shard-downloads-link';
+    a.href = shard.path;
+    a.textContent = text;
+    holder.appendChild(a);
+  });
+}
 
 function formatValue(value, unit){
   if(value === '' || value === undefined || value === null) return '';
@@ -710,6 +747,7 @@ document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('cl
   // The table's own chrome and the map's legend both hold translated text, so
   // both are redrawn. Cheap: no fetch, and the map keeps its view.
   buildHeader();
+  renderShardDownloads();
   if(typeof buildMapIndicatorPicker === 'function'){
     const chosen = document.getElementById('mapIndicator').value;
     buildMapIndicatorPicker();
@@ -818,6 +856,20 @@ async function load(){
         HEADLINE_CODES = (sections.headlines || []).filter(code => INDICATOR_CODES.includes(code));
       }
     }catch(_){ /* HEADLINE_CODES stays [] */ }
+
+    // Per-source shard downloads (split-communes-history): reuses the exact
+    // manifest explorer.html's renderShardDownloads() reads, so this list
+    // and that one can never drift apart. A failed fetch just leaves the
+    // list empty rather than guessing at file names.
+    try{
+      const [idxRes, srcRes] = await Promise.all([
+        fetch('public/data/explorer/index.json?t=' + Date.now()),
+        fetch('public/data/metadata/sources.json?t=' + Date.now()),
+      ]);
+      if(idxRes.ok) SHARDS = (await idxRes.json()).shards || [];
+      if(srcRes.ok) SOURCES = (await srcRes.json()).sources || {};
+    }catch(_){ /* SHARDS stays [] */ }
+    renderShardDownloads();
 
     buildHeader();
     populateRegionFilter();

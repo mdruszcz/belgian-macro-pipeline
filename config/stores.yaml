@@ -52,7 +52,12 @@ stores:
   # hardcoded indicator list. Every store below was already comfortably
   # under 25 MB on its own before the split; flagged anyway so the core file
   # (which was itself already at 37 MB before the new sources) has headroom
-  # for years to come rather than only just clearing the line today.
+  # rather than only just clearing the line today. That headroom is not
+  # permanent for every shard, though: spf_agdp alone is already ~21 MB
+  # (106,776 rows since 2017 at ~207 bytes/row) and grows ~2.4 MB/year, so on
+  # current trend it hits the 25 MB ceiling in roughly 1.5 years and will
+  # need its own per-indicator sub-split before then -- see the spf_agdp
+  # store below.
   population:
     path: data/population_observations.csv
     source_id: statbel

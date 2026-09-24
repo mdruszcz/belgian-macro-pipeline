@@ -722,7 +722,8 @@
         <div class="spanel">
           <div class="shead"><h3 data-t="cpLinks">Useful links</h3></div>
           <a class="linkbtn" id="linkMap" href="map.html"><span data-t="cpLinkMap">See on the map</span></a>
-          <a class="linkbtn" id="linkCsv" href="profiles.html"><span data-t="cpLinkCsv">Export the data (CSV)</span></a>
+          <a class="linkbtn" id="linkCsv" href="profiles.html"><span data-t="cpLinkCsv">Export the core indicators (CSV)</span></a>
+          <a class="linkbtn" id="linkCsvAll" href="explorer.html"><span data-t="cpLinkCsvAll">Every indicator's full history (by source)</span></a>
           <a class="linkbtn" href="about.html"><span data-t="cpLinkMethod">Read the methodology</span></a>
         </div>
       </aside>
@@ -921,6 +922,13 @@
     document.getElementById('linkMap').querySelector('span').textContent = T('cpLinkMap', {name: name});
     document.getElementById('shareLink').href = window.location.href;
     document.getElementById('downloadLink').href = COMMUNE_URL(state.nis);
+    // data/communes_history.csv now holds only the core indicators (PR:
+    // split-communes-history) -- an indicator sourced from a history_shard
+    // store lives in data/communes_history/{store}.csv instead, so linkCsv
+    // is relabelled "core indicators" (never claims "the data") and
+    // linkCsvAll sends a reader who wants everything to explorer.html's own
+    // per-source download list, built from the same published manifest
+    // (rule 28). The URL itself is unchanged (rule 31).
     document.getElementById('linkCsv').href = 'data/communes_history.csv';
     document.getElementById('linkMap').href = 'map.html';
     var dates = Object.keys(state.profile.indicators)

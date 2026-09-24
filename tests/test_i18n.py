@@ -162,7 +162,7 @@ def test_a_translated_page_loads_the_shared_strings(page):
         assert f'data-lang="{lang}"' in text, f"{page} cannot switch to {lang}"
 
 
-@pytest.mark.parametrize("page", ["communes.html", "map.html"])
+@pytest.mark.parametrize("page", ["communes.html", "map.html", "commune.html"])
 def test_every_key_a_page_asks_for_actually_exists(page, strings):
     """A typo in a data-t attribute renders the key itself on screen. Silent in
     English too, because the fallback is the key."""
