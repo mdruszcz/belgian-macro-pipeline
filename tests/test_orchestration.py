@@ -179,6 +179,7 @@ RETIRED_GATE_IDS = {
 # hand -- are unchanged; only the daily auto-merge gate no longer covers them.
 CURRENT_GATE_IDS = RETIRED_GATE_IDS | {
     "sync_spf_agdp",
+    "sync_commune_flows",
 }
 
 
@@ -273,7 +274,7 @@ def test_the_production_job_is_the_export_job_plus_the_offload():
 
 def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
     assert {COMMANDS[n].workflow_step for n in TRACKED} == CURRENT_GATE_IDS
-    assert len(TRACKED) == 9
+    assert len(TRACKED) == 10
     gate = next(s for s in _steps() if s.get("id") == "sources")
     assert "orchestration.manifest" in gate["run"]
 

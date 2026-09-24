@@ -26,6 +26,9 @@ from src.flows.buyer_origin import (  # noqa: E402
     BUCKET_IDS,
     NO_PURCHASES_RECORDED,
     FlowSchemaError,
+    _ancestors,
+    _bucket_for_origin,
+    _normalized_geo_id,
     compute_all_destinations,
     compute_destination_flows,
     parse_municipality_rows,
@@ -415,14 +418,132 @@ def test_unresolvable_origin_nis_raises_never_bucketed_as_unknown(db):
 # --- Aggregation over multiple destinations: deterministic ordering -----------------
 
 
+def _all_municipality_nis(conn) -> list[str]:
+    rows = conn.execute(
+        "SELECT nis_code FROM geographies WHERE level = 'municipality' "
+        "AND valid_from <= '2025-01-01' AND (valid_to IS NULL OR valid_to > '2025-01-01')"
+    ).fetchall()
+    return [r[0] for r in rows]
+
+
+# --- geo_id version-suffix normalisation (audit finding 3) --------------------------
+
+
+def test_normalized_geo_id_strips_version_suffix():
+    assert _normalized_geo_id("BE_ARR_11000@2025-01-01") == "BE_ARR_11000"
+    assert _normalized_geo_id("BE_ARR_11000") == "BE_ARR_11000"
+
+
+def test_bucket_for_origin_treats_versioned_and_unversioned_arrondissement_as_equal():
+    """One versioned, one unversioned geo_id for the same real arrondissement must compare
+    equal -- a same-arrondissement origin must land in rest_of_arrondissement, not
+    other_regions, regardless of which row happens to carry a version marker."""
+    bucket = _bucket_for_origin(
+        origin_geo_id="BE_MUN_11002",
+        origin_is_unknown=False,
+        origin_is_abroad=False,
+        dest_geo_id="BE_MUN_11004",
+        dest_arr_id="BE_ARR_11000@2025-01-01",  # versioned
+        dest_reg_id="BE_REG_02000",
+        origin_arr_id="BE_ARR_11000",  # unversioned, same real arrondissement
+        origin_reg_id="BE_REG_02000",
+    )
+    assert bucket == "rest_of_arrondissement"
+
+
+def test_bucket_for_origin_treats_versioned_and_unversioned_region_as_equal():
+    bucket = _bucket_for_origin(
+        origin_geo_id="BE_MUN_41018",
+        origin_is_unknown=False,
+        origin_is_abroad=False,
+        dest_geo_id="BE_MUN_11004",
+        dest_arr_id="BE_ARR_41000",
+        dest_reg_id="BE_REG_02000@2025-01-01",  # versioned
+        origin_arr_id="BE_ARR_41000_OTHER",
+        origin_reg_id="BE_REG_02000",  # unversioned, same real region
+    )
+    assert bucket == "rest_of_region"
+
+
+# --- Ancestor cache (audit finding 5) -------------------------------------------------
+
+
+def test_ancestors_cache_returns_same_result_and_is_populated(db):
+    from src.geography.resolve import resolve_geo
+
+    geo_id = resolve_geo(db, "11004", PERIOD)
+    cache: dict = {}
+    first = _ancestors(db, geo_id, cache=cache)
+    assert geo_id in cache
+    assert cache[geo_id] == first
+
+
+class _CountingConnProxy:
+    """Wraps a sqlite3.Connection and counts `.execute()` calls -- sqlite3.Connection is a C
+    type and cannot be monkeypatched directly, so this proxy stands in for it."""
+
+    def __init__(self, conn):
+        self._conn = conn
+        self.execute_count = 0
+
+    def execute(self, *args, **kwargs):
+        self.execute_count += 1
+        return self._conn.execute(*args, **kwargs)
+
+
+def test_ancestors_cache_avoids_a_second_query(db):
+    from src.geography.resolve import resolve_geo
+
+    geo_id = resolve_geo(db, "11004", PERIOD)
+    proxy = _CountingConnProxy(db)
+    cache: dict = {}
+    _ancestors(proxy, geo_id, cache=cache)  # populates the cache
+    calls_after_first = proxy.execute_count
+    assert calls_after_first > 0
+
+    result = _ancestors(proxy, geo_id, cache=cache)
+    assert proxy.execute_count == calls_after_first  # cache hit -- no new query issued
+    assert result == cache[geo_id]
+
+
 def test_compute_all_destinations_sorted_by_geo_id(db):
     origin_table = _small_origin_table()
+    all_nis = _all_municipality_nis(db)
+    named = {"41018", "11002", "11004"}
     rows = [
-        {"nis": "41018", "parcels_number": 1, "cells": {"41018": Decimal("1")}},
-        {"nis": "11002", "parcels_number": 1, "cells": {"11002": Decimal("1")}},
-        {"nis": "11004", "parcels_number": 1, "cells": {"11004": Decimal("1")}},
+        (
+            {"nis": nis, "parcels_number": 1, "cells": {nis: Decimal("1")}}
+            if nis in named and nis in origin_table
+            else {"nis": nis, "parcels_number": 0, "cells": {}}
+        )
+        for nis in all_nis
     ]
     results = compute_all_destinations(
         db, destinations=rows, origin_table=origin_table, period=PERIOD
     )
+    assert len(results) == len(all_nis)
     assert [r.dest_geo_id for r in results] == sorted(r.dest_geo_id for r in results)
+
+
+# --- Destination completeness (audit finding 1) -------------------------------------
+
+
+def test_compute_all_destinations_refuses_when_a_commune_is_missing(db):
+    """The resolved destination set must equal every municipality valid at the period --
+    a fixture missing one commune (Herstappe, 73028) must raise, naming the missing NIS."""
+    origin_table = _small_origin_table()
+    all_nis = [n for n in _all_municipality_nis(db) if n != "73028"]
+    rows = [{"nis": nis, "parcels_number": 0, "cells": {}} for nis in all_nis]
+    with pytest.raises(FlowSchemaError, match="73028"):
+        compute_all_destinations(db, destinations=rows, origin_table=origin_table, period=PERIOD)
+
+
+def test_compute_all_destinations_refuses_when_an_extra_nis_is_present(db):
+    """An extra destination NIS the geography table does not recognise as a municipality at
+    this period (here, a made-up 5-digit code) must also raise, naming the extra NIS."""
+    origin_table = _small_origin_table()
+    all_nis = _all_municipality_nis(db)
+    rows = [{"nis": nis, "parcels_number": 0, "cells": {}} for nis in all_nis]
+    rows.append({"nis": "00000", "parcels_number": 0, "cells": {}})
+    with pytest.raises(FlowSchemaError, match="00000"):
+        compute_all_destinations(db, destinations=rows, origin_table=origin_table, period=PERIOD)

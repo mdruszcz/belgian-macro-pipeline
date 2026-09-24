@@ -123,10 +123,12 @@ COMMANDS: dict[str, Command] = {
     # writes the separate committed flows store, data/flows/buyer_origin_<year>.json
     # (src/flows/store.py). `source_ids=()` because run.source_snapshot's UI metadata reads
     # observations/fetch_runs by source_id, which this script never touches.
-    # `workflow_step=None` (the default): this asset is not part of TRACKED / the daily
-    # auto-merge gate yet -- it is new in this PR and the gate is being widened deliberately,
-    # not by accident, in a follow-up once this has run clean for a while, the same caution
-    # already applied to bankruptcies/population_movement/ipp_rate above.
+    # `workflow_step="sync_commune_flows"` (audit fix, PR #260): opendata.fin.belgium.be is
+    # reachable from a GitHub Actions runner (spf_agdp_observations, same host, already runs
+    # there daily) -- unlike statbel.fgov.be/fin.belgium.be's CAPTCHA-gated endpoints that
+    # bankruptcies/population_movement/ipp_rate hit, this one has no such block. It is
+    # therefore wired the same way spf_agdp_observations is, not held back the way those
+    # three are.
     # `outputs` is deliberately empty: the store's filename carries the data's own year
     # (buyer_origin_<year>.json), which changes as new years publish -- a fixed template here
     # would go stale the day after the next year's file lands. `run.output_metadata` has
@@ -138,6 +140,7 @@ COMMANDS: dict[str, Command] = {
         # always writes data/flows/** under the repository root -- same reason
         # commune_adjacency/commune_typology below are writes_repo_only.
         writes_repo_only=True,
+        workflow_step="sync_commune_flows",
     ),
     "international_observations": Command(
         ("scripts/sync_international.py", "--db", "{db}"),

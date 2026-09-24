@@ -96,11 +96,17 @@ def store_path(data_dir: Path, period: str) -> Path:
 
 def write_store(path: Path, document: dict) -> None:
     """Atomic write (CLAUDE.md's builder-rule on atomic writes) -- write to a temp file in the
-    same directory, then replace, so a crash mid-write never leaves a truncated store."""
+    same directory, then replace, so a crash mid-write never leaves a truncated store.
+
+    `newline="\\n"` (audit finding 4, CLAUDE.md rule 35): `Path.write_text`'s default text-mode
+    translation would otherwise turn every "\\n" this module writes into "\\r\\n" on Windows,
+    so the same run on Windows and on a GitHub Actions (Linux) runner would not produce
+    byte-identical files. `json.dumps` never emits "\\r\\n" itself, so passing `newline="\\n"`
+    is enough to make the file's bytes the same on every OS."""
     path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(document, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(text, encoding="utf-8")
+    tmp.write_text(text, encoding="utf-8", newline="\n")
     tmp.replace(path)
 
 

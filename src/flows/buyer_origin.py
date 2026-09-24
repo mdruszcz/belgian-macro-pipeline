@@ -42,7 +42,7 @@ import io
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
 
-from src.geography.resolve import UnknownGeographyError, resolve_geo
+from src.geography.resolve import UnknownGeographyError, period_to_date, resolve_geo
 
 #: The two origin codes the OriginTable.csv/TechSpec disagree about (ADR "One place the
 #: TechSpec contradicts the origin lookup") -- both are unknown-origin states regardless of
@@ -267,6 +267,16 @@ def parse_municipality_rows(raw: bytes, *, origin_table: dict[str, OriginEntry])
     return destinations
 
 
+def _normalized_geo_id(geo_id: str) -> str:
+    """Strip a trailing "@<date>" version suffix, if present, so a versioned and an
+    unversioned geo_id for the same entity compare equal (audit finding 3). Some geo_id
+    values in this schema carry a version marker (e.g. an arrondissement whose row changed
+    mid-period); `_ancestors` returns whatever `geographies.geo_id` holds verbatim, and two
+    rows for the same real-world arrondissement must not be treated as two different
+    arrondissements just because one row happens to be versioned and the other is not."""
+    return geo_id.split("@", 1)[0]
+
+
 def _bucket_for_origin(
     *,
     origin_geo_id: str | None,
@@ -285,23 +295,40 @@ def _bucket_for_origin(
         return "origin_unknown"
     if origin_is_abroad:
         return "abroad"
-    if origin_geo_id == dest_geo_id:
+    if _normalized_geo_id(origin_geo_id) == _normalized_geo_id(dest_geo_id):
         return "same_commune"
-    if origin_arr_id == dest_arr_id:
+    if _normalized_geo_id(origin_arr_id) == _normalized_geo_id(dest_arr_id):
         return "rest_of_arrondissement"
-    if origin_reg_id == dest_reg_id:
+    if _normalized_geo_id(origin_reg_id) == _normalized_geo_id(dest_reg_id):
         return "rest_of_region"
     return "other_regions"
 
 
-def _ancestors(conn, geo_id: str) -> tuple[str | None, str | None]:
+def _ancestors(
+    conn, geo_id: str, *, cache: dict[str, tuple[str | None, str | None]] | None = None
+) -> tuple[str | None, str | None]:
     """(arrondissement_geo_id, region_geo_id) for a municipality geo_id, walking
     parent_geo_id up the chain: municipality -> arrondissement -> province -> region (the
     real hierarchy depth on this schema, checked live 2026-09-24 against `geographies` --
     a municipality's parent is its arrondissement, but the region is the arrondissement's
     GRANDPARENT via the province, never its direct parent). Walks by LEVEL, not a fixed hop
     count, so a future schema change that drops or adds a level fails loudly here rather than
-    silently misclassifying a bucket."""
+    silently misclassifying a bucket.
+
+    `cache`, keyed by geo_id, is purely a speed optimisation (audit finding 5) -- a single
+    sync run resolves the same handful of commune/arrondissement geo_ids thousands of times
+    (every destination x every non-zero origin), and the result never changes within one run.
+    Callers that pass no cache get the original per-call behaviour."""
+    if cache is not None and geo_id in cache:
+        return cache[geo_id]
+
+    result = _ancestors_uncached(conn, geo_id)
+    if cache is not None:
+        cache[geo_id] = result
+    return result
+
+
+def _ancestors_uncached(conn, geo_id: str) -> tuple[str | None, str | None]:
     row = conn.execute(
         "SELECT level, parent_geo_id FROM geographies WHERE geo_id = ?", (geo_id,)
     ).fetchone()
@@ -350,19 +377,25 @@ def compute_destination_flows(
     dest_row: dict,
     origin_table: dict[str, OriginEntry],
     period: str,
+    ancestor_cache: dict[str, tuple[str | None, str | None]] | None = None,
 ) -> DestinationFlows:
     """The ADR's full per-destination computation: resolve both axes, sum D(d), the six
     buckets, coverage, the top-8 named origins with their tie-break, and the zero-purchase
     state. Raises FlowSchemaError (wrapping UnknownGeographyError) if the destination or any
     non-zero origin NIS fails to resolve -- never silently skipped or bucketed as unknown
     (ADR decision 4's own text: "An origin NIS that fails to resolve raises... it is never
-    bucketed as unknown")."""
+    bucketed as unknown").
+
+    `ancestor_cache` (audit finding 5): an optional dict callers share across every
+    destination in a run, so the same arrondissement/region walk is not repeated for every
+    non-zero cell that shares an origin commune. Purely a speed optimisation -- omitting it
+    reproduces the original per-call behaviour."""
     dest_nis = dest_row["nis"]
     try:
         dest_geo_id = resolve_geo(conn, dest_nis, period)
     except UnknownGeographyError as exc:
         raise FlowSchemaError(f"Destination NIS {dest_nis!r}: {exc}") from exc
-    dest_arr_id, dest_reg_id = _ancestors(conn, dest_geo_id)
+    dest_arr_id, dest_reg_id = _ancestors(conn, dest_geo_id, cache=ancestor_cache)
 
     cells: dict[str, Decimal] = dest_row["cells"]
     parcels_number = dest_row["parcels_number"]
@@ -411,7 +444,7 @@ def compute_destination_flows(
                 f"BuyerFrom{code}): {exc}. An origin NIS that fails to resolve is a schema "
                 "surprise -- never silently bucketed as unknown (ADR 0013 decision 4)."
             ) from exc
-        origin_arr_id, origin_reg_id = _ancestors(conn, origin_geo_id)
+        origin_arr_id, origin_reg_id = _ancestors(conn, origin_geo_id, cache=ancestor_cache)
         bucket = _bucket_for_origin(
             origin_geo_id=origin_geo_id,
             origin_is_unknown=False,
@@ -467,13 +500,55 @@ def compute_destination_flows(
     )
 
 
+def _all_municipality_nis_at(conn, period: str) -> set[str]:
+    """Every NIS code valid for a municipality-level geography row at `period`'s reference
+    date -- the reference set destination completeness is checked against (audit finding 1).
+    Derived from `geographies`, never a hardcoded 565: the answer depends on the year, exactly
+    like walloon_communes_on's own reasoning in src/fetchers/walstat.py."""
+    as_of = period_to_date(period)
+    rows = conn.execute(
+        """
+        SELECT nis_code FROM geographies
+        WHERE level = 'municipality'
+          AND valid_from <= ? AND (valid_to IS NULL OR valid_to > ?)
+        """,
+        (as_of, as_of),
+    ).fetchall()
+    return {r[0] for r in rows}
+
+
 def compute_all_destinations(
     conn, *, destinations: list[dict], origin_table: dict[str, OriginEntry], period: str
 ) -> list[DestinationFlows]:
     """Every destination row's DestinationFlows, sorted by dest_geo_id for a deterministic,
-    byte-identical store (CLAUDE.md rule 35)."""
+    byte-identical store (CLAUDE.md rule 35).
+
+    Destination completeness (audit finding 1): the resolved destination NIS set must equal
+    every municipality valid at the file's reference date -- exactly, not a subset or a
+    superset. A missing commune would silently under-publish; an extra NIS the geography table
+    does not recognise as a municipality at this period is exactly the kind of schema surprise
+    CLAUDE.md rule 13 exists to catch loudly rather than let through.
+    """
+    got_nis = {row["nis"] for row in destinations}
+    expected_nis = _all_municipality_nis_at(conn, period)
+    if got_nis != expected_nis:
+        missing = sorted(expected_nis - got_nis)
+        extra = sorted(got_nis - expected_nis)
+        raise FlowSchemaError(
+            f"Municipality wide CSV, period {period!r}: destination NIS codes do not match "
+            f"every municipality valid at this period. Missing {len(missing)}: {missing}. "
+            f"Extra {len(extra)}: {extra}. Refusing to guess (CLAUDE.md rule 13)."
+        )
+
+    ancestor_cache: dict[str, tuple[str | None, str | None]] = {}
     results = [
-        compute_destination_flows(conn, dest_row=row, origin_table=origin_table, period=period)
+        compute_destination_flows(
+            conn,
+            dest_row=row,
+            origin_table=origin_table,
+            period=period,
+            ancestor_cache=ancestor_cache,
+        )
         for row in destinations
     ]
     results.sort(key=lambda d: d.dest_geo_id)
