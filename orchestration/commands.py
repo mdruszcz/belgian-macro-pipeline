@@ -245,7 +245,10 @@ COMMANDS: dict[str, Command] = {
             "--stores",
             "{stores}",
         ),
-        outputs=("{data}/communes_history.csv",),
+        # The core file plus its shard directory (config/stores.yaml
+        # history_shard stores' own data/communes_history/{store}.csv) --
+        # both written by this one call (PR: split-communes-history).
+        outputs=("{data}/communes_history.csv", "{data}/communes_history"),
         function="export_communes_history_csv:export_communes_history_csv",
     ),
     "indicator_metadata_json": Command(

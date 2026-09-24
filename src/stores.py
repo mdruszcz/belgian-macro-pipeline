@@ -73,6 +73,7 @@ class Store:
     reference_rows_reason: str | None = None
     raw_path: str = field(default="", repr=False)  # repo-relative, as declared
     layout: str = LAYOUT_SINGLE_CSV
+    history_shard: bool = False
 
     def csv_for(self, indicator_id: str) -> Path:
         """The committed CSV holding `indicator_id`'s rows.
@@ -199,6 +200,7 @@ def load_stores(
             reference_rows_reason=reason,
             raw_path=raw_path,
             layout=layout,
+            history_shard=bool(entry.get("history_shard", False)),
         )
 
     if problems:
@@ -216,6 +218,34 @@ def extra_csv_stores(stores: dict[str, Store]) -> tuple[Store, ...]:
 
 def in_db_stores(stores: dict[str, Store]) -> tuple[Store, ...]:
     return tuple(s for _, s in sorted(stores.items()) if s.mode == MODE_IN_DB)
+
+
+def history_shard_stores(stores: dict[str, Store]) -> tuple[Store, ...]:
+    """The stores flagged `history_shard: true`, sorted by name for
+    deterministic ordering -- these get their own data/communes_history/{name}.csv
+    from scripts/export_communes_history_csv.py instead of landing in the
+    single committed data/communes_history.csv."""
+    return tuple(s for _, s in sorted(stores.items()) if s.history_shard)
+
+
+def history_shard_map(stores: dict[str, Store]) -> dict[str, str]:
+    """indicator_id -> store name, for every indicator declared by a
+    history_shard store. Drives export_communes_history_csv.py's split:
+    never a hardcoded indicator list (CLAUDE.md rules 2/24). An indicator
+    declared by two history_shard stores would be ambiguous -- raises
+    StoreConfigError rather than silently picking one, same spirit as this
+    module's other drift checks."""
+    mapping: dict[str, str] = {}
+    for store in history_shard_stores(stores):
+        for indicator_id in store.indicators:
+            if indicator_id in mapping:
+                raise StoreConfigError(
+                    f"indicator {indicator_id!r} is declared by both history_shard "
+                    f"stores {mapping[indicator_id]!r} and {store.name!r} -- ambiguous "
+                    "shard assignment"
+                )
+            mapping[indicator_id] = store.name
+    return mapping
 
 
 def extra_csv_paths(path: Path | str = DEFAULT_STORES_PATH) -> tuple[Path, ...]:

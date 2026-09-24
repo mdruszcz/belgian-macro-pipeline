@@ -87,6 +87,11 @@ def exporter_arguments(name: str, paths: PipelinePaths) -> dict:
         given = values[EXPORTER_STORES]
         registry = str(paths.resolve(given)) if given else ""
         arguments["extra_observations"] = resolve_extra_observations([], registry)
+        if name in ("communes_history_csv", "communes_history_full_csv"):
+            # export_communes_history_csv's history_shard split reads the same
+            # registry --stores already names -- '' disables it exactly like it
+            # disables extra_observations above, so one flag controls both.
+            arguments["stores_path"] = registry
     for switch in sorted(switches):
         arguments[EXPORTER_SWITCHES[switch]] = True
     return arguments

@@ -146,6 +146,15 @@
   #status{font-size:.82rem; color:var(--bp-text-muted); white-space:nowrap; font-variant-numeric:tabular-nums; margin-left:auto}
   #status.err{color:var(--bp-red-signal)}
 
+  /* ---- per-source downloads (split-communes-history) ------------------------ */
+  .shard-downloads{
+    display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;
+    font-size:.78rem; color:var(--bp-text-muted); margin:0 0 var(--bp-space-4);
+  }
+  .shard-downloads-label{color:var(--bp-text-faint)}
+  .shard-downloads-link{color:inherit; text-decoration:underline; white-space:nowrap}
+  .shard-downloads-link:hover{color:var(--bp-accent)}
+
   /* ---- mode segmented control ----------------------------------------------
      Same visual language as the site's existing Light/Auto/Dark switch
      (assets/belpulse/layout.css's .bp-theme-toggle), a new class because it
@@ -296,6 +305,7 @@
       <a class="bp-btn bp-btn--outline" id="downloadLink" href="data/belgian_macro_export.csv" data-t="explorerDownload">Download the full CSV</a>
       <span id="status" data-t="loading">Loading…</span>
     </div>
+    <div id="shardDownloads" class="shard-downloads" hidden></div>
 
     <!-- ── table mode ──────────────────────────────────────────────────── -->
     <section id="viewTable" class="table-card">
@@ -395,6 +405,7 @@ const T = (key, vars) => I18N.t(LANG, key, vars);
 
 const state = {
   index: [],              // index.json's "indicators" array
+  shards: [],              // index.json's "shards" array (split-communes-history)
   geo: {byNis: {}, regions: [], byGeoId: {}},  // built from metadata/geographies.json
   sources: {}, grades: {},
   scope: '', code: null, mode: 'table',
@@ -907,6 +918,37 @@ function updateDownloadLink(){
     : 'data/belgian_macro_export.csv';
 }
 
+/* Per-source municipal downloads (split-communes-history): the committed
+   data/communes_history.csv download only ever holds the CORE indicators --
+   every indicator claimed by a history_shard store (config/stores.yaml)
+   lives in its own data/communes_history/{store}.csv instead, so this list
+   is what lets a reader who wants a shard-only indicator's full history
+   actually find the file it is in. Labels come from public/data/metadata/
+   sources.json (state.sources, already loaded for the provenance panel) --
+   never hand-typed (rule 28) -- keyed by the shard's own `source` (a
+   source_id, e.g. "onem"), with the file's own name as the fallback when no
+   trilingual label exists for that source_id. */
+function renderShardDownloads(){
+  const holder = document.getElementById('shardDownloads');
+  if(!holder) return;
+  holder.innerHTML = '';
+  if(!state.shards.length) { holder.hidden = true; return; }
+  holder.hidden = false;
+  const label = document.createElement('span');
+  label.className = 'shard-downloads-label';
+  label.textContent = T('explorerShardDownloads');
+  holder.appendChild(label);
+  state.shards.forEach(shard => {
+    const src = state.sources[shard.source];
+    const text = (src && src.label && (src.label[LANG] || src.label.en)) || shard.path.split('/').pop();
+    const a = document.createElement('a');
+    a.className = 'shard-downloads-link';
+    a.href = shard.path;
+    a.textContent = text;
+    holder.appendChild(a);
+  });
+}
+
 async function loadIndicator(scope, code){
   document.getElementById('status').textContent = T('loading');
   document.getElementById('status').classList.remove('err');
@@ -951,13 +993,16 @@ async function init(){
       fetch('public/data/metadata/sources.json?t=' + Date.now()),
     ]);
     if(!idxRes.ok) throw new Error('index missing');
-    state.index = (await idxRes.json()).indicators || [];
+    const idx = await idxRes.json();
+    state.index = idx.indicators || [];
+    state.shards = idx.shards || [];
     if(geoRes.ok) state.geo = buildGeoIndex((await geoRes.json()).geographies || []);
     if(srcRes.ok){
       const registry = await srcRes.json();
       state.sources = registry.sources || {};
       state.grades = registry.grades || {};
     }
+    renderShardDownloads();
 
     document.getElementById('statIndicators').textContent = state.index.length;
     document.getElementById('statRows').textContent = state.index.reduce((n, r) => n + r.rows, 0).toLocaleString(LANG);

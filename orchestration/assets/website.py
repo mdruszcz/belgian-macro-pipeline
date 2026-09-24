@@ -45,7 +45,9 @@ communes_history_csv = function_asset(
     deps=[VALIDATED],
     kinds={"csv"},
     description=(
-        "Committed commune history, last 10 years: export_communes_history_csv() from "
+        "Committed commune history, last 10 years, plus its per-store shard "
+        "directory (data/communes_history/, config/stores.yaml history_shard "
+        "stores): export_communes_history_csv() from "
         "scripts/export_communes_history_csv.py, called in process."
     ),
 )
