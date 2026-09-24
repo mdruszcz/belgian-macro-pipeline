@@ -66,6 +66,28 @@ land use and tax exemptions at low ParcelsNumber -- see
 lot B's six chosen columns, which are always published (non-blank) at
 TOTAL/ParcelNature=TOTAL/ExemptionType=TOTAL for a live commune -- verified
 across 2026, 2025 and 2017. `is_count=True` for all six, same as lot A.
+
+LOT C (Wave 5 lot C, patrimony): two more annual datasets -- notifications of
+the cadastral income (52.01.25, `frequency="AY"`, a genuinely different
+period-parser mode: the ATOM `time` is a 31-December calendar-year-end
+timestamp, not lot A/B's 1-January snapshot -- `_calendar_year_from_timestamp`
+is a separate, narrower regex from `_year_from_timestamp`, and never loosens
+the latter's 1-January requirement) and concentration of cadastral income
+(52.01.08, `frequency="A"`, selected at `ParcelNature=TOTAL,
+Range=Range30001` -- the one band, of 34, whose own cumulated columns ARE
+the SPF's all-bands total, verified by a band-sum cross-check in tests, never
+recomputed by summing the bands here). Concentration also introduces
+`require_unique_match_per_nis`, since `Range30001` selection is a positional
+"top band" pick rather than a value guaranteed unique by construction like
+every earlier dataset's `select` -- `_parse` now raises if that selector ever
+matches more than one row for the same NIS in one version's file, rather than
+falling back to a max or a sum. Both datasets publish only three/one of the
+CSV's columns as indicators (see docs/features/spf_agdp.md for the twelve
+dropped datasets and why); `AgdpDatasetConfig.__post_init__` now enforces, at
+construction time, the invariants earlier configs only asserted in
+docstrings: at most one `is_count=True` indicators entry, that entry's column
+matching `count_column`, and `always_final_columns` never naming a count
+column.
 """
 
 from __future__ import annotations
@@ -102,6 +124,16 @@ _QUARTER_END_MONTH = {3: 1, 6: 2, 9: 3, 12: 4}
 #: snapshot); anything else is a schema surprise, refused rather than
 #: guessed (CLAUDE.md rule 13).
 _ANNUAL_TIMESTAMP = re.compile(r"^(\d{4})-01-01T")
+
+#: Matches the CALENDAR-YEAR-END timestamp Wave 5 lot C's notifications
+#: dataset (52.01.25) carries, e.g. "2025-12-31T00:00:00Z" -- a flow measured
+#: over the calendar year, published as of 31 December, NOT a 1-January
+#: snapshot like `_ANNUAL_TIMESTAMP` above. Month and day must both be
+#: 12/31; anything else is a schema surprise, refused rather than guessed
+#: (CLAUDE.md rule 13). This is deliberately a SEPARATE, narrower pattern --
+#: it does not loosen `_ANNUAL_TIMESTAMP`, which still only accepts
+#: 1-January and must keep rejecting a 31-December timestamp.
+_CALENDAR_YEAR_END_TIMESTAMP = re.compile(r"^(\d{4})-12-31T")
 
 #: The one CSV member name pattern this module ever reads out of a zip --
 #: case varies by dataset ("Municipality.csv" / "Municipality_LEASES.csv"
@@ -166,6 +198,17 @@ def _year_from_timestamp(raw: str, *, context: str) -> str:
     return match.group(1)
 
 
+def _calendar_year_from_timestamp(raw: str, *, context: str) -> str:
+    match = _CALENDAR_YEAR_END_TIMESTAMP.match(raw)
+    if not match:
+        raise AgdpSchemaError(
+            f"{context}: ATOM `time` attribute {raw!r} does not match the expected "
+            "calendar-year-end YYYY-12-31T... shape. Refusing to guess a period "
+            "(CLAUDE.md rule 13)."
+        )
+    return match.group(1)
+
+
 def parse_atom_feed(
     xml_bytes: bytes, *, dataset_label: str, frequency: str = "Q"
 ) -> list[AgdpVersion]:
@@ -177,10 +220,14 @@ def parse_atom_feed(
 
     `frequency` selects the period parser: "Q" (default, unchanged) expects
     a calendar quarter-end timestamp and returns "YYYY-Qn"; "A" expects a
-    1-January timestamp and returns "YYYY" (Wave 5's annual datasets).
+    1-January timestamp and returns "YYYY" (Wave 5's annual datasets); "AY"
+    expects a 31-December (calendar-year-end) timestamp and returns "YYYY"
+    (Wave 5 lot C's notifications dataset, 52.01.25 -- a calendar-year flow,
+    not a 1-January snapshot). "AY" is a strictly separate, narrower parser
+    from "A" -- it never loosens "A"'s own 1-January requirement.
     """
-    if frequency not in ("Q", "A"):
-        raise ValueError(f"Unknown frequency {frequency!r}, expected 'Q' or 'A'.")
+    if frequency not in ("Q", "A", "AY"):
+        raise ValueError(f"Unknown frequency {frequency!r}, expected 'Q', 'A' or 'AY'.")
     try:
         root = ElementTree.fromstring(xml_bytes)
     except ElementTree.ParseError as exc:
@@ -207,6 +254,8 @@ def parse_atom_feed(
             ) from exc
         if frequency == "A":
             period = _year_from_timestamp(time_attr, context=dataset_label)
+        elif frequency == "AY":
+            period = _calendar_year_from_timestamp(time_attr, context=dataset_label)
         else:
             period = _quarter_from_timestamp(time_attr, context=dataset_label)
         versions.append(AgdpVersion(url=href, quarter=period, length=length))
@@ -445,6 +494,79 @@ class AgdpDatasetConfig:
     #: above. Empty for every quarterly and lot-A annual config; lot B's
     #: land use and building condition datasets populate it.
     always_final_columns: tuple[str, ...] = ()
+    #: When True, `_parse` raises AgdpSchemaError if `select` ever matches
+    #: more than one row for the same NISCode in one version's file --
+    #: concentration (52.01.08)'s Range30001 guard (handoff): "if the slice
+    #: is not exactly one row per commune, raise -- never fall back to a max
+    #: or a sum." False (default, unchanged) for every dataset where a
+    #: static `select` dict-equality match against one dimension combination
+    #: is already known, by construction, to pick out at most one row per
+    #: commune (every dataset before lot C).
+    require_unique_match_per_nis: bool = False
+    #: `_notifications_row_to_observations` (frequency="AY") only: CSV
+    #: columns whose literal '0' at count=0 is a genuine additive
+    #: sum-of-zero-items, mapped to a real measured 0.0/final -- NOT a
+    #: fabricated placeholder the way CadastralIncomeP50's own '0' at count
+    #: 0 is (mapped to na there). Measured live 2026-09-24 (NIS 73028,
+    #: 2019): SPF writes a literal '0', not a blank, for EVERY value column
+    #: at count 0, including the median -- this set is what distinguishes
+    #: "genuinely zero" (TotalCadastralIncome) from "undefined, written as a
+    #: 0 placeholder" (CadastralIncomeP50) among those literal zeros. Empty
+    #: for every dataset that does not use the "AY" mapping.
+    zero_count_is_final_columns: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Hardening added for Wave 5 lot C, after an audit of lot B flagged
+        that nothing actually enforced the invariants `indicators`'
+        docstring only asserted in prose: at most one `is_count=True` entry,
+        that entry's CSV column matching `count_column` itself (when one
+        exists -- concentration, 52.01.08, keys its suppression logic off
+        `ParcelsCumulatedNumber` without publishing it as its own indicator,
+        so zero `is_count=True` entries is valid too), and
+        `always_final_columns` never naming a count column (it would be a
+        contradiction -- a count column is already always final via the
+        `is_count` branch, and `always_final_columns` is specifically for a
+        NON-count column that must never collapse to na/suppressed). All
+        three are structural mistakes in a new AgdpDatasetConfig, not a data
+        surprise, so they raise ValueError at construction time, not
+        AgdpSchemaError at parse time.
+        """
+        count_entries = [
+            (csv_column, indicator_id)
+            for csv_column, (indicator_id, is_count) in self.indicators.items()
+            if is_count
+        ]
+        if len(count_entries) > 1:
+            raise ValueError(
+                f"{self.label}: expected at most one indicators entry with is_count=True, "
+                f"found {len(count_entries)} ({[c for c, _ in count_entries]})."
+            )
+        if count_entries:
+            count_csv_column, _count_indicator_id = count_entries[0]
+            if count_csv_column != self.count_column:
+                raise ValueError(
+                    f"{self.label}: the is_count=True entry's column {count_csv_column!r} does "
+                    f"not match count_column {self.count_column!r}."
+                )
+        non_count_columns = {
+            csv_column
+            for csv_column, (_indicator_id, is_count) in self.indicators.items()
+            if not is_count
+        }
+        bad_always_final = [c for c in self.always_final_columns if c not in non_count_columns]
+        if bad_always_final:
+            raise ValueError(
+                f"{self.label}: always_final_columns {bad_always_final} is not a non-count "
+                f"key of indicators ({sorted(non_count_columns)})."
+            )
+        bad_zero_count_final = [
+            c for c in self.zero_count_is_final_columns if c not in non_count_columns
+        ]
+        if bad_zero_count_final:
+            raise ValueError(
+                f"{self.label}: zero_count_is_final_columns {bad_zero_count_final} is not a "
+                f"non-count key of indicators ({sorted(non_count_columns)})."
+            )
 
 
 LEASES = AgdpDatasetConfig(
@@ -642,6 +764,92 @@ TAX_EXEMPTIONS = AgdpDatasetConfig(
 )
 
 
+# --- Wave 5 lot C: notifications of cadastral income + concentration -------
+
+NOTIFICATIONS = AgdpDatasetConfig(
+    label="SPF Finances notifications of the cadastral income (52.01.25)",
+    uuid="3db017b1-37c0-11f0-aeb6-f4dd0692c5d4",
+    required_columns=(
+        "NISCode",
+        "NameFre",
+        "NameDut",
+        "NameGer",
+        "CadastralIncomeFiscalStatus",
+        "CadastralIncomeNature",
+        "NotificationMotivationCategory",
+        "CadastralIncomeNumber",
+        "TotalCadastralIncome",
+        "CadastralIncomeP25",
+        "CadastralIncomeP50",
+        "CadastralIncomeP75",
+        "CadastralIncomeSD",
+    ),
+    select={
+        "CadastralIncomeFiscalStatus": "TOTAL",
+        "CadastralIncomeNature": "TOTAL",
+        "NotificationMotivationCategory": "TOTAL",
+    },
+    count_column="CadastralIncomeNumber",
+    indicators={
+        "CadastralIncomeNumber": ("MUN_CI_NOTIFICATIONS", True),
+        "TotalCadastralIncome": ("MUN_CI_NOTIFIED_TOTAL", False),
+        "CadastralIncomeP50": ("MUN_CI_NOTIFIED_MEDIAN", False),
+    },
+    frequency="AY",
+    # NOT always_final_columns: measured live 2026-09-24, TotalCadastralIncome
+    # IS blanked by the same 1-4 suppression tier as CadastralIncomeP50 (NIS
+    # 33016/2016 count=4, 73028/2016-2018 count 1-2: both TotalCadastralIncome
+    # and CadastralIncomeP50 blank). The two columns share the same tier
+    # structure end to end and differ only in how count=0's literal '0' is
+    # interpreted (additive real zero vs. undefined-median placeholder) --
+    # zero_count_is_final_columns marks TotalCadastralIncome as the real-zero
+    # one; CadastralIncomeP50 (not listed) maps its own literal '0' at count
+    # 0 to na instead.
+    zero_count_is_final_columns=("TotalCadastralIncome",),
+)
+
+CONCENTRATION = AgdpDatasetConfig(
+    label="SPF Finances concentration of cadastral income (52.01.08)",
+    uuid="8894f840-51ca-11eb-bfa6-3448ed25ad7c",
+    required_columns=(
+        "NISCode",
+        "NameFre",
+        "NameDut",
+        "NameGer",
+        "ParcelNature",
+        "Range",
+        "ParcelsNumber",
+        "ParcelsCumulatedNumber",
+        "HousingsNumber",
+        "HousingsCumulatedNumber",
+        "TotalCadastralIncome",
+        "CumulatedCadastralIncome",
+    ),
+    select={"ParcelNature": "TOTAL", "Range": "Range30001"},
+    # The suppression driver is the TOP BAND's OWN ParcelsNumber, not
+    # ParcelsCumulatedNumber (the running total `select` uses to find the
+    # top band) -- measured live 2026-09-24, 2011: 72 of 589 rows blank
+    # CumulatedCadastralIncome at ParcelsNumber 1-4 even when
+    # ParcelsCumulatedNumber is in the thousands (e.g. NIS 11005:
+    # ParcelsNumber=4, ParcelsCumulatedNumber=6637, CumulatedCadastralIncome
+    # blank). Using ParcelsCumulatedNumber here would have missed every one
+    # of those 72 real suppressions.
+    count_column="ParcelsNumber",
+    indicators={
+        "CumulatedCadastralIncome": ("MUN_RESIDENTIAL_PARCELS_CI_TOTAL", False),
+    },
+    frequency="A",
+    # NOT always_final_columns: real 1-4 suppression tier measured on this
+    # exact column (see count_column comment above). zero_count_is_final_
+    # columns instead: at ParcelsNumber=0 (nothing NEW entered the top band
+    # that year), SPF still publishes the running cumulated total carried
+    # forward from lower bands -- a real, large, non-blank figure, not an
+    # unmeasured placeholder -- so it maps to final, not na.
+    zero_count_is_final_columns=("CumulatedCadastralIncome",),
+    require_unique_match_per_nis=True,
+)
+
+
 def _to_int_or_blank(raw: str) -> int | None:
     raw = raw.strip()
     return None if raw == "" else int(raw)
@@ -656,22 +864,26 @@ def _annual_row_to_observations(
     row: dict[str, str], *, config: AgdpDatasetConfig, quarter: str, context: str
 ) -> list[dict]:
     """Wave 5's annual five-state mapping (lot A: Owner Occupants / Property
-    Dynamics; lot B: land use / building condition / tax exemptions) --
-    simpler than the quarterly Leases/Transactions mapping below in one way
-    (no blanket 1-4 suppression tier applies to a *count* column here) but
-    NOT in every way: lot B measured a real 1-4 tier on the *non-count*
-    cadastral-income columns of two lot B datasets (land use, tax
-    exemptions) at low ParcelsNumber -- landuse 2026 blanks
-    TotalCadastralIncome/TaxableCadastralIncome for 30,171 rows at
-    ParcelsNumber 1-4; exempt 2026 blanks TotalCadastralIncome for 156 rows
-    at ParcelsNumber 1-4; the relation is exact: 0 -> not blank, 1-4 ->
-    blank, >=5 -> not blank. This does NOT apply to any of lot B's six
-    chosen columns (verified 2026/2025/2017: never blank at TOTAL), so no
-    suppression mapping is added here -- every lot B non-count column stays
-    on the same two-branch mapping below (final needs a non-blank cell; blank
-    count -> na). It is recorded here only so the next dataset added to this
-    function does not assume "no suppression tier exists in the annual
-    shape" -- it does, just not on any column this batch reads.
+    Dynamics; lot B: land use / building condition / tax exemptions; lot C's
+    concentration of cadastral income) -- simpler than the quarterly Leases/
+    Transactions mapping below in one way (no blanket 1-4 suppression tier
+    applies to a *count* column here) but NOT in every way: a real 1-4 tier
+    DOES exist on *non-count* columns in this annual shape -- lot B measured
+    it on land use/tax exemptions' cadastral-income columns (never touching
+    either dataset's own six chosen columns, verified 2026/2025/2017); lot C
+    measured it directly on concentration's own chosen column,
+    CumulatedCadastralIncome, keyed off the TOP BAND'S OWN ParcelsNumber (not
+    ParcelsCumulatedNumber, the running total used for `select`) -- 2011
+    real data: 72 of 589 rows blank CumulatedCadastralIncome at
+    ParcelsNumber 1-4 (e.g. NIS 11005, ParcelsNumber=4,
+    ParcelsCumulatedNumber=6637 -- a large cumulated total, yet still
+    suppressed, because it is the TOP BAND's OWN 1-4 parcels that trigger
+    it, not the cumulated count). The relation is exact: 0 -> not blank
+    (SPF still publishes the running cumulated total carried forward from
+    lower bands when nothing new entered the top band that year), 1-4 ->
+    blank, >=5 -> not blank -- a genuine three-tier mapping, not the
+    two-branch "final needs non-blank; blank count -> na" shape this
+    function used before lot C.
 
     - count column: a numeric value, including a real 0, is written as-is,
       final (every count in every dataset routed through this function is
@@ -679,36 +891,31 @@ def _annual_row_to_observations(
       a schema surprise, not a real zero -- CLAUDE.md rule 26 forbids
       collapsing "missing" into "measured zero" -- so a blank count raises
       AgdpSchemaError naming the dataset, quarter/year and NIS rather than
-      silently writing a fabricated 0.0 (fixed here: the previous code
-      wrote `0.0 if count is None else float(count)`, which is exactly that
-      fabrication; no live cell for any dataset routed through this
-      function has ever actually been blank at a count column, per the
-      handoff's own verification, so this only changes behaviour if that
-      measured invariant is ever violated).
-    - non-count column (a percentile/mean/cadastral figure), count column
-      >= 1: value is present -> value, final.
-    - non-count column, count column blank or 0: SPF writes a literal 0 for
-      a duration/mean when the row has no parcels -- that is not a measured
-      figure, so it maps to value None, status na, never a fabricated zero.
-      A literal 0 count itself is still a genuine measured zero and stays
-      final (e.g. tax-exempt parcel counts: NIS 44001 in 2017 has
-      ExemptionType=TOTAL ParcelsNumber=0 -- final, not na).
-      EXCEPTION: a column named in `config.always_final_columns` (lot B's
-      TotalCadastralIncome/TaxableCadastralIncome/CentralHeating -- each its
-      own independent additive figure, never derived by dividing by the
-      count) is never mapped to na this way: its own cell is read and
-      written, final, regardless of the count column's value, and a blank
-      cell there is always a schema surprise (raises), never a legitimate
-      na state. All six of lot B's chosen columns are additive by the
-      handoff's own indicator classification, so none of them should ever
-      collapse into an unmeasured/na state at TOTAL -- that state genuinely
-      does not arise for these six (see docs/features/spf_agdp.md).
+      silently writing a fabricated 0.0.
+    - `config.always_final_columns` (lot B's TotalCadastralIncome/
+      TaxableCadastralIncome/CentralHeating -- each its own independent
+      additive figure, never derived by dividing by the count, and never
+      blanked at ANY count in the files this batch measured): its own cell
+      is always read and written, final, regardless of the count column's
+      value; a blank cell there is always a schema surprise (raises).
+    - a non-count, non-always_final column, count 1-4: blank by
+      construction -> value None, status suppressed (never zero, never na).
+      A non-blank cell here is a schema surprise -> raises.
+    - a non-count, non-always_final column, count None or 0:
+      `config.zero_count_is_final_columns` (concentration's
+      CumulatedCadastralIncome) reads its own cell as a real published
+      value, final -- a blank cell there is a schema surprise -> raises.
+      Every OTHER such column (lot A/B's percentiles/means/durations, where
+      SPF writes a literal 0 placeholder for an undefined figure) maps to
+      value None, status na, never a fabricated zero -- unchanged from
+      before lot C.
+    - a non-count, non-always_final, non-zero_count_is_final column,
+      count >= 5: value is present -> value, final. A blank cell here is a
+      schema surprise -> raises.
 
-    Raises AgdpSchemaError if a non-count column is unexpectedly blank while
-    its count column is >= 1, or if an `always_final_columns` column is
-    blank at all -- the measured "the file never blanks a
-    percentile/mean/cadastral figure at TOTAL" rule no longer holds
-    (CLAUDE.md rule 13).
+    Raises AgdpSchemaError on any of the "expected X, got Y" mismatches
+    above -- the measured suppression/finality rule for that column no
+    longer holds (CLAUDE.md rule 13).
     """
     nis = row["NISCode"].strip()
     if not nis:
@@ -755,13 +962,191 @@ def _annual_row_to_observations(
                     "indicator_id": indicator_id,
                 }
             )
-        elif count is None or count == 0:
+        elif count is not None and 1 <= count <= 4:
+            if raw_cell != "":
+                raise AgdpSchemaError(
+                    f"{context}, NIS {nis}: {csv_column} is {raw_cell!r} but "
+                    f"{config.count_column} is {count} (1-4) -- expected suppression. "
+                    "Suppression rule no longer matches what was measured (CLAUDE.md "
+                    "rule 13)."
+                )
             results.append(
                 {
                     "geo_id": nis,
                     "period": quarter,
                     "value": None,
-                    "status": "na",
+                    "status": "suppressed",
+                    "indicator_id": indicator_id,
+                }
+            )
+        elif count is None or count == 0:
+            if csv_column in config.zero_count_is_final_columns:
+                if raw_cell == "":
+                    raise AgdpSchemaError(
+                        f"{context}, NIS {nis}: {csv_column} is blank but "
+                        f"{config.count_column} is {count_raw!r} (0) -- expected a published "
+                        "value (this column's own count of 0 does not mean the underlying "
+                        "figure is unmeasured). The measured rule no longer holds (CLAUDE.md "
+                        "rule 13)."
+                    )
+                results.append(
+                    {
+                        "geo_id": nis,
+                        "period": quarter,
+                        "value": float(raw_cell),
+                        "status": "final",
+                        "indicator_id": indicator_id,
+                    }
+                )
+            else:
+                results.append(
+                    {
+                        "geo_id": nis,
+                        "period": quarter,
+                        "value": None,
+                        "status": "na",
+                        "indicator_id": indicator_id,
+                    }
+                )
+        else:
+            if raw_cell == "":
+                raise AgdpSchemaError(
+                    f"{context}, NIS {nis}: {csv_column} is blank but "
+                    f"{config.count_column} is {count} (>= 5) -- expected a published "
+                    "value. The measured rule (no blank percentile/mean when "
+                    "ParcelsNumber >= 5) no longer holds (CLAUDE.md rule 13)."
+                )
+            results.append(
+                {
+                    "geo_id": nis,
+                    "period": quarter,
+                    "value": float(raw_cell),
+                    "status": "final",
+                    "indicator_id": indicator_id,
+                }
+            )
+    return results
+
+
+def _notifications_row_to_observations(
+    row: dict[str, str], *, config: AgdpDatasetConfig, quarter: str, context: str
+) -> list[dict]:
+    """Wave 5 lot C's notifications mapping (52.01.25, `frequency="AY"`) --
+    a real 1-4 suppression tier like the quarterly Leases/Transactions
+    mapping, but on an ANNUAL (calendar-year) row, and with one deliberate
+    difference from BOTH the quarterly and the lot A/B annual mappings: a
+    blank count cell is a schema surprise here too (CLAUDE.md rule 26 -- the
+    quarterly mapping's "blank count -> fabricated 0.0" is a Wave 4
+    peculiarity of RentsNumber/ParcelsNumber, never revisited; lot C does
+    not repeat it).
+
+    MEASURED LIVE (2026-09-24, real ATOM/CSV): at CadastralIncomeNumber=0
+    (NIS 73028/2019, the one live count-0 row in the 2016-2019 cache,
+    caught by this batch's own schema guard before it reached the committed
+    store) SPF Finances writes a literal `0` for EVERY value column,
+    including CadastralIncomeP50 -- NOT a blank, contradicting the
+    handoff's original assumption ("blank by construction" at count 0). At
+    count 1-4 (NIS 33016/2016 count=4, 73028/2016-2018 count 1-2) BOTH
+    TotalCadastralIncome and CadastralIncomeP50 ARE blank, exactly as the
+    handoff described -- the two columns share one tier structure and
+    differ only in what count=0's shared literal '0' means:
+    TotalCadastralIncome's is a genuine additive sum-of-zero-items (a real
+    measured zero); CadastralIncomeP50's is the same "no defined value at
+    zero observations" placeholder Property Dynamics (lot A) already
+    measured and handled
+    (`_annual_row_to_observations`'s own docstring,
+    `test_property_dynamics_zero_parcels_is_na_never_a_fabricated_zero_duration`).
+    `config.zero_count_is_final_columns` (TotalCadastralIncome only) marks
+    which one. The real mapping, fixed here to match what SPF actually
+    publishes rather than the unverified original assumption:
+
+    - count column (CadastralIncomeNumber): a numeric value, including a
+      real 0, is written as-is, final. A blank count is a schema surprise
+      (no live cell has ever been blank at TOTAL/TOTAL/TOTAL) -> raises.
+    - a value column, count >= 5: value is present -> value, final.
+    - a value column, count 1-4: blank by construction -> value None,
+      status suppressed (never zero, never na).
+    - a value column in `config.zero_count_is_final_columns`, count 0: the
+      cell is a literal '0' (a real additive sum-of-zero-items) -> value
+      0.0, status final.
+    - a value column NOT in `config.zero_count_is_final_columns`, count 0:
+      the cell is a literal '0' too, but it is SPF's own placeholder for
+      "no defined value at zero observations" (a median/percentile) ->
+      value None, status na, never a fabricated zero (CLAUDE.md rule 26).
+    - a value column non-'0' at count 0, non-blank at count 1-4, or blank
+      at count >= 5, is a schema surprise -> raises.
+    """
+    nis = row["NISCode"].strip()
+    if not nis:
+        raise AgdpSchemaError(f"{context}: a data row has a blank NISCode.")
+
+    count_raw = row[config.count_column]
+    count = _to_int_or_blank(count_raw)
+    if count is None:
+        raise AgdpSchemaError(
+            f"{context}, NIS {nis}: count column {config.count_column!r} is blank. A blank "
+            "count is a schema surprise, not a measured zero -- refusing to fabricate a value "
+            "(CLAUDE.md rule 26)."
+        )
+
+    results: list[dict] = []
+    for csv_column, (indicator_id, is_count) in config.indicators.items():
+        if is_count:
+            results.append(
+                {
+                    "geo_id": nis,
+                    "period": quarter,
+                    "value": float(count),
+                    "status": "final",
+                    "indicator_id": indicator_id,
+                }
+            )
+            continue
+
+        raw_cell = row[csv_column].strip()
+
+        if count == 0:
+            if raw_cell != "0":
+                raise AgdpSchemaError(
+                    f"{context}, NIS {nis}: {csv_column} is {raw_cell!r} but "
+                    f"{config.count_column} is 0 -- expected a literal '0' (SPF's own "
+                    "zero-count placeholder). The measured rule no longer holds (CLAUDE.md "
+                    "rule 13)."
+                )
+            if csv_column in config.zero_count_is_final_columns:
+                results.append(
+                    {
+                        "geo_id": nis,
+                        "period": quarter,
+                        "value": 0.0,
+                        "status": "final",
+                        "indicator_id": indicator_id,
+                    }
+                )
+            else:
+                results.append(
+                    {
+                        "geo_id": nis,
+                        "period": quarter,
+                        "value": None,
+                        "status": "na",
+                        "indicator_id": indicator_id,
+                    }
+                )
+        elif 1 <= count <= 4:
+            if raw_cell != "":
+                raise AgdpSchemaError(
+                    f"{context}, NIS {nis}: {csv_column} is {raw_cell!r} but "
+                    f"{config.count_column} is {count} (1-4) -- expected suppression. "
+                    "Suppression rule no longer matches what was measured (CLAUDE.md "
+                    "rule 13)."
+                )
+            results.append(
+                {
+                    "geo_id": nis,
+                    "period": quarter,
+                    "value": None,
+                    "status": "suppressed",
                     "indicator_id": indicator_id,
                 }
             )
@@ -769,9 +1154,9 @@ def _annual_row_to_observations(
             if raw_cell == "":
                 raise AgdpSchemaError(
                     f"{context}, NIS {nis}: {csv_column} is blank but "
-                    f"{config.count_column} is {count} (>= 1) -- expected a published "
-                    "value. The measured rule (no blank percentile/mean when "
-                    "ParcelsNumber >= 1) no longer holds (CLAUDE.md rule 13)."
+                    f"{config.count_column} is {count} (>= 5) -- expected a published "
+                    "value. Suppression rule no longer matches what was measured "
+                    "(CLAUDE.md rule 13)."
                 )
             results.append(
                 {
@@ -809,11 +1194,16 @@ def _row_to_observations(
     loudly rather than silently mis-map a state.
 
     Dispatches to `_annual_row_to_observations` when `config.frequency ==
-    "A"` -- the quarterly path below this check is otherwise byte-for-byte
-    unchanged.
+    "A"`, and to `_notifications_row_to_observations` when `config.frequency
+    == "AY"` -- the quarterly path below this check is otherwise
+    byte-for-byte unchanged.
     """
     if config.frequency == "A":
         return _annual_row_to_observations(row, config=config, quarter=quarter, context=context)
+    if config.frequency == "AY":
+        return _notifications_row_to_observations(
+            row, config=config, quarter=quarter, context=context
+        )
 
     nis = row["NISCode"].strip()
     if not nis:
@@ -929,11 +1319,15 @@ class AgdpSource(MunicipalTimeSeriesSource):
 
         results: list[dict] = []
         matched_rows = 0
+        matched_nis_counts: dict[str, int] = {}
         for row in reader:
             if config.row_filter is not None and not config.row_filter(row):
                 continue
             if all(row.get(k) == v for k, v in config.select.items()):
                 matched_rows += 1
+                if config.require_unique_match_per_nis:
+                    nis = row.get("NISCode", "").strip()
+                    matched_nis_counts[nis] = matched_nis_counts.get(nis, 0) + 1
                 results.extend(
                     _row_to_observations(
                         row, config=config, quarter=quarter, context=f"{config.label} {quarter}"
@@ -945,4 +1339,13 @@ class AgdpSource(MunicipalTimeSeriesSource):
                 f"{config.label} {quarter}: zero rows matched selector {config.select}. "
                 "Refusing to load an empty series (CLAUDE.md rule 13)."
             )
+        if config.require_unique_match_per_nis:
+            duplicated = {nis: n for nis, n in matched_nis_counts.items() if n != 1}
+            if duplicated:
+                raise AgdpSchemaError(
+                    f"{config.label} {quarter}: selector {config.select} matched more than "
+                    f"one row for {len(duplicated)} commune(s) (e.g. {dict(list(duplicated.items())[:5])}), "
+                    "expected exactly one row per commune. Refusing to fall back to a max or "
+                    "a sum (CLAUDE.md rule 13)."
+                )
         return results

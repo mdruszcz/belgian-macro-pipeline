@@ -448,6 +448,8 @@ def _annual_fixture(
     land_use=None,
     building_condition=None,
     tax_exemptions=None,
+    notifications=None,
+    concentration=None,
 ):
     """atom_bytes/version_bytes covering only the annual dataset(s) under
     test -- the Wave 4 quarterly pair is left out of `atom_bytes` entirely,
@@ -458,7 +460,10 @@ def _annual_fixture(
     feed (an ATOM feed with zero <link rel="section"> entries is a schema
     error, not "nothing new" -- parse_atom_feed's own guard, unchanged by
     this handoff). Wave 5 lot B adds land_use/building_condition/
-    tax_exemptions alongside lot A's owner_occupants/property_dynamics."""
+    tax_exemptions alongside lot A's owner_occupants/property_dynamics; Wave
+    5 lot C adds notifications (frequency="AY", a calendar-year-end ATOM
+    timestamp -- `_notif_atom_xml` below, not `_annual_atom_xml`) and
+    concentration (frequency="A", ordinary 1-January timestamp)."""
     atom_bytes = {}
     version_bytes = {}
     if owner_occupants is not None:
@@ -471,6 +476,10 @@ def _annual_fixture(
         atom_bytes["building_condition"] = _annual_atom_xml(building_condition)
     if tax_exemptions is not None:
         atom_bytes["tax_exemptions"] = _annual_atom_xml(tax_exemptions)
+    if notifications is not None:
+        atom_bytes["notifications"] = _annual_atom_xml(notifications)
+    if concentration is not None:
+        atom_bytes["concentration"] = _annual_atom_xml(concentration)
     return atom_bytes, version_bytes
 
 
@@ -980,3 +989,340 @@ def test_annual_second_run_unchanged_reads_no_zip_and_adds_no_rows(db, state_pat
         db, atom_bytes=atom_bytes, version_bytes={}, state_path=state_path
     )
     assert (read2, written2) == (0, 0)
+
+
+# --- Wave 5 lot C fixtures: notifications / concentration ---------------------
+
+_NOTIF_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;CadastralIncomeFiscalStatus;CadastralIncomeNature;"
+    "NotificationMotivationCategory;CadastralIncomeNumber;TotalCadastralIncome;"
+    "CadastralIncomeP25;CadastralIncomeP50;CadastralIncomeP75;CadastralIncomeSD"
+)
+_CONC_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;ParcelNature;Range;ParcelsNumber;"
+    "ParcelsCumulatedNumber;HousingsNumber;HousingsCumulatedNumber;"
+    "TotalCadastralIncome;CumulatedCadastralIncome"
+)
+
+
+def _notif_row(nis, count, total="", p25="", p50="", p75="", sd=""):
+    return f"{nis};Commune;Commune;Commune;TOTAL;TOTAL;TOTAL;{count};{total};{p25};{p50};{p75};{sd}"
+
+
+def _notif_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_NOTIF_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def _conc_row(nis, cumulated_ci, parcels_cum="1", nature="TOTAL", rng="Range30001", parcels="100"):
+    # `parcels` (the top band's OWN ParcelsNumber, >= 5 by default so the
+    # real 1-4 suppression tier does not fire) is deliberately independent
+    # from `parcels_cum` (ParcelsCumulatedNumber, the running total) --
+    # real measured data shows a large parcels_cum can still sit on a
+    # suppressed (1-4 parcels) row (see test_spf_agdp_source.py's
+    # test_concentration_parcels_1to4_suppresses_never_zero).
+    return (
+        f"{nis};Commune;Commune;Commune;{nature};{rng};{parcels};{parcels_cum};"
+        f"{parcels_cum};{parcels_cum};1000;{cumulated_ci}"
+    )
+
+
+def _conc_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_CONC_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_lot_c_reference_rows_only_needs_no_network(db, state_path):
+    read, written = sync_spf_agdp.sync(db, reference_rows_only=True, state_path=state_path)
+    assert (read, written) == (0, 0)
+    conn = sqlite3.connect(str(db))
+    rows = conn.execute(
+        "SELECT indicator_id, is_additive, aggregation_method FROM indicators "
+        "WHERE indicator_id IN ('MUN_CI_NOTIFICATIONS', 'MUN_CI_NOTIFIED_TOTAL', "
+        "'MUN_CI_NOTIFIED_MEDIAN', 'MUN_RESIDENTIAL_PARCELS_CI_TOTAL') ORDER BY indicator_id"
+    ).fetchall()
+    conn.close()
+    assert rows == [
+        ("MUN_CI_NOTIFICATIONS", 1, "sum"),
+        ("MUN_CI_NOTIFIED_MEDIAN", 0, "not_applicable"),
+        ("MUN_CI_NOTIFIED_TOTAL", 1, "sum"),
+        ("MUN_RESIDENTIAL_PARCELS_CI_TOTAL", 1, "sum"),
+    ]
+    assert not state_path.exists()
+
+
+def test_notifications_2025_real_values_four_communes(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv(
+        [
+            _notif_row("11001", 208, total="773812", p25="400", p50="826", p75="1300", sd="200"),
+            _notif_row("44083", 1143, total="3501614", p25="200", p50="444", p75="700", sd="150"),
+            _notif_row("23106", 414, total="278705", p25="100", p50="228", p75="400", sd="100"),
+            _notif_row("82039", 712, total="479212", p25="5", p50="16", p75="30", sd="10"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    count = {g: v for g, p, v, s in _observations(db, "MUN_CI_NOTIFICATIONS")}
+    total = {g: v for g, p, v, s in _observations(db, "MUN_CI_NOTIFIED_TOTAL")}
+    median = {g: v for g, p, v, s in _observations(db, "MUN_CI_NOTIFIED_MEDIAN")}
+    assert count["be:mun:11001"] == 208.0
+    assert total["be:mun:11001"] == 773812.0
+    assert median["be:mun:11001"] == 826.0
+    assert count["be:mun:44083"] == 1143.0
+    assert total["be:mun:44083"] == 3501614.0
+    assert median["be:mun:44083"] == 444.0
+    assert count["be:mun:23106"] == 414.0
+    assert total["be:mun:23106"] == 278705.0
+    assert median["be:mun:23106"] == 228.0
+    assert count["be:mun:82039"] == 712.0
+    assert total["be:mun:82039"] == 479212.0
+    assert median["be:mun:82039"] == 16.0
+
+
+def test_notifications_2025_44001_absent(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv(
+        [_notif_row("11001", 208, total="773812", p50="826")]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:44001") == []
+
+
+def test_notifications_2025_herstappe_count_three_suppressed(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv([_notif_row("73028", 3)])
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:73028") == [
+        ("be:mun:73028", "2025", 3.0, "final")
+    ]
+    assert _observations(db, "MUN_CI_NOTIFIED_TOTAL", "be:mun:73028") == [
+        ("be:mun:73028", "2025", None, "suppressed")
+    ]
+    assert _observations(db, "MUN_CI_NOTIFIED_MEDIAN", "be:mun:73028") == [
+        ("be:mun:73028", "2025", None, "suppressed")
+    ]
+
+
+def test_notifications_2016_real_values(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2016.zip", "2016-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2016")] = _notif_csv(
+        [
+            _notif_row("11001", 211, total="908627", p25="400", p50="926", p75="1300", sd="200"),
+            _notif_row("44001", 552, total="8707921", p25="500", p50="809", p75="1000", sd="200"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:11001") == [
+        ("be:mun:11001", "2016", 211.0, "final")
+    ]
+    assert _observations(db, "MUN_CI_NOTIFIED_TOTAL", "be:mun:11001") == [
+        ("be:mun:11001", "2016", 908627.0, "final")
+    ]
+    assert _observations(db, "MUN_CI_NOTIFIED_MEDIAN", "be:mun:11001") == [
+        ("be:mun:11001", "2016", 926.0, "final")
+    ]
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:44001") == [
+        ("be:mun:44001", "2016", 552.0, "final")
+    ]
+    # 44083/23106/82039 did not exist in 2016 -- absent, not zero.
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:44083") == []
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:23106") == []
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:82039") == []
+
+
+def test_notifications_period_bounds_are_full_calendar_year(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv(
+        [_notif_row("11001", 208, total="773812", p50="826")]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    conn = sqlite3.connect(str(db))
+    row = conn.execute(
+        "SELECT period_start, period_end FROM observations "
+        "WHERE indicator_id = 'MUN_CI_NOTIFICATIONS' AND geo_id = 'be:mun:11001' AND is_latest = 1"
+    ).fetchone()
+    conn.close()
+    assert row == ("2025-01-01", "2025-12-31")
+
+
+def test_notifications_second_run_unchanged_reads_no_zip_and_adds_no_rows(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv(
+        [_notif_row("11001", 208, total="773812", p50="826")]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    read2, written2 = sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes={}, state_path=state_path
+    )
+    assert (read2, written2) == (0, 0)
+
+
+def test_notifications_changed_length_rereads_that_one_version(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)]
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv(
+        [_notif_row("11001", 208, total="773812", p50="826")]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+
+    atom_bytes_v2, version_bytes_v2 = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 2)]
+    )
+    version_bytes_v2[("notifications", "2025")] = _notif_csv(
+        [_notif_row("11001", 210, total="800000", p50="830")]
+    )
+    read2, written2 = sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes_v2, version_bytes=version_bytes_v2, state_path=state_path
+    )
+    assert written2 > 0
+    assert _observations(db, "MUN_CI_NOTIFICATIONS", "be:mun:11001") == [
+        ("be:mun:11001", "2025", 210.0, "final")
+    ]
+
+
+def test_concentration_2026_real_values_four_communes(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        concentration=[("https://example.test/conc2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("concentration", "2026")] = _conc_csv(
+        [
+            _conc_row("11001", "8428254", parcels_cum="6453"),
+            _conc_row("44083", "19155664", parcels_cum="21111"),
+            _conc_row("23106", "11298541", parcels_cum="10758"),
+            _conc_row("82039", "8466649", parcels_cum="8998"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    ci = {g: v for g, p, v, s in _observations(db, "MUN_RESIDENTIAL_PARCELS_CI_TOTAL")}
+    assert ci["be:mun:11001"] == 8428254.0
+    assert ci["be:mun:44083"] == 19155664.0
+    assert ci["be:mun:23106"] == 11298541.0
+    assert ci["be:mun:82039"] == 8466649.0
+
+
+def test_concentration_2026_herstappe_real_value(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        concentration=[("https://example.test/conc2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("concentration", "2026")] = _conc_csv(
+        [_conc_row("73028", "27177", parcels_cum="30")]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_RESIDENTIAL_PARCELS_CI_TOTAL", "be:mun:73028") == [
+        ("be:mun:73028", "2026", 27177.0, "final")
+    ]
+
+
+def test_concentration_2011_real_values(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        concentration=[("https://example.test/conc2011.zip", "2011-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("concentration", "2011")] = _conc_csv(
+        [
+            _conc_row("11001", "7473689", parcels_cum="5760"),
+            _conc_row("44001", "7127074", parcels_cum="8311"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_RESIDENTIAL_PARCELS_CI_TOTAL", "be:mun:11001") == [
+        ("be:mun:11001", "2011", 7473689.0, "final")
+    ]
+    assert _observations(db, "MUN_RESIDENTIAL_PARCELS_CI_TOTAL", "be:mun:44001") == [
+        ("be:mun:44001", "2011", 7127074.0, "final")
+    ]
+    # 44083/23106/82039 did not exist in 2011.
+    assert _observations(db, "MUN_RESIDENTIAL_PARCELS_CI_TOTAL", "be:mun:44083") == []
+
+
+def test_concentration_period_bounds_are_full_calendar_year(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        concentration=[("https://example.test/conc2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("concentration", "2026")] = _conc_csv([_conc_row("11001", "8428254")])
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    conn = sqlite3.connect(str(db))
+    row = conn.execute(
+        "SELECT period_start, period_end FROM observations "
+        "WHERE indicator_id = 'MUN_RESIDENTIAL_PARCELS_CI_TOTAL' AND geo_id = 'be:mun:11001' "
+        "AND is_latest = 1"
+    ).fetchone()
+    conn.close()
+    assert row == ("2026-01-01", "2026-12-31")
+
+
+def test_concentration_second_run_unchanged_reads_no_zip_and_adds_no_rows(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        concentration=[("https://example.test/conc2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("concentration", "2026")] = _conc_csv([_conc_row("11001", "8428254")])
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    read2, written2 = sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes={}, state_path=state_path
+    )
+    assert (read2, written2) == (0, 0)
+
+
+def test_lot_c_period_correct_geography_five_codes(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        notifications=[("https://example.test/notif2025.zip", "2025-12-31T00:00:00Z", 1)],
+        concentration=[("https://example.test/conc2026.zip", "2026-01-01T00:00:00Z", 1)],
+    )
+    version_bytes[("notifications", "2025")] = _notif_csv(
+        [
+            _notif_row("11001", 208, total="773812", p50="826"),
+            _notif_row("44083", 1143, total="3501614", p50="444"),
+            _notif_row("23106", 414, total="278705", p50="228"),
+            _notif_row("82039", 712, total="479212", p50="16"),
+        ]
+    )
+    version_bytes[("concentration", "2026")] = _conc_csv(
+        [
+            _conc_row("11001", "8428254"),
+            _conc_row("44083", "19155664"),
+            _conc_row("23106", "11298541"),
+            _conc_row("82039", "8466649"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    for nis in ("11001", "44083", "23106", "82039"):
+        assert _observations(db, "MUN_CI_NOTIFICATIONS", f"be:mun:{nis}") != []
+        assert _observations(db, "MUN_RESIDENTIAL_PARCELS_CI_TOTAL", f"be:mun:{nis}") != []

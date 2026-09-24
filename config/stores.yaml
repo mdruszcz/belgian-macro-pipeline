@@ -438,6 +438,13 @@ stores:
   # check, ~line 263-269, refuses a run where two stores claim the same
   # indicator -- this store and `spf_agdp` declare disjoint indicator sets,
   # verified by tests/test_stores.py).
+  # Wave 5 lot C adds two more annual datasets to this same store: notifications
+  # of the cadastral income (52.01.25) and concentration of cadastral income
+  # (52.01.08) -- MUN_CI_NOTIFICATIONS, MUN_CI_NOTIFIED_TOTAL,
+  # MUN_CI_NOTIFIED_MEDIAN, MUN_RESIDENTIAL_PARCELS_CI_TOTAL. Kept in
+  # spf_agdp_patrimony rather than a new store (handoff): the combined size,
+  # reported in the PR, stays under the 18 MB the handoff set as the split
+  # threshold for this batch.
   spf_agdp_patrimony:
     path: data/spf_agdp_patrimony_observations.csv
     source_id: spf_finances
@@ -449,7 +456,11 @@ stores:
       - MUN_CADASTRAL_INCOME_TAXABLE
       - MUN_CADASTRAL_INCOME_TOTAL
       - MUN_CADASTRAL_PARCELS_TOTAL
+      - MUN_CI_NOTIFICATIONS
+      - MUN_CI_NOTIFIED_MEDIAN
+      - MUN_CI_NOTIFIED_TOTAL
       - MUN_PARCELS_TAX_EXEMPT
+      - MUN_RESIDENTIAL_PARCELS_CI_TOTAL
     reference_rows:
       script: scripts/sync_spf_agdp.py
       args: ["--reference-rows-only"]
