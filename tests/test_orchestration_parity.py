@@ -125,7 +125,15 @@ def test_the_exporters_write_identical_files(working_db, tmp_path, monkeypatch, 
     assert result.success
 
     written = sorted(p.relative_to(tmp_path / "a") for p in (tmp_path / "a").rglob("*.csv"))
-    assert len(written) == 1
+    # communes_history_csv (PR: split-communes-history) also writes one
+    # shard per history_shard store under data/communes_history/ in the SAME
+    # call -- every other exporter still writes exactly its one file. What
+    # matters for parity is that both routes wrote the same SET of files,
+    # each one byte-identical, not that there is only one.
+    if name != "communes_history_csv":
+        assert len(written) == 1
+    else:
+        assert len(written) > 1, "expected the core file plus at least one shard"
     for relative in written:
         assert (tmp_path / "a" / relative).read_bytes() == (tmp_path / "b" / relative).read_bytes()
 

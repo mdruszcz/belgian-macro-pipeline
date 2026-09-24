@@ -275,6 +275,84 @@ def test_export_writes_one_file_per_scope_subdirectory(fixture_paths):
     assert (fixture_paths["out_dir"] / "index.json").is_file()
 
 
+def test_missing_communes_history_dir_is_not_an_error(fixture_paths):
+    """No shard directory at all -- a bare export with no registry (--stores
+    '') writes none. This must behave exactly as before the split, not
+    raise."""
+    counts = export_explorer_payloads(
+        fixture_paths["communes_history"],
+        fixture_paths["national"],
+        fixture_paths["municipal_metadata"],
+        fixture_paths["national_metadata"],
+        fixture_paths["out_dir"],
+        communes_history_dir=fixture_paths["communes_history"].parent / "does_not_exist",
+    )
+    assert counts == {"municipal": 1, "national": 1, "total_rows": 5}
+
+
+def test_a_shard_only_indicator_gets_a_payload_and_appears_in_the_index(fixture_paths):
+    """An indicator entirely claimed by a history_shard store never appears
+    in the core communes_history.csv at all -- it must still get a payload,
+    read from data/communes_history/{store}.csv, exactly as if it were a
+    core-file indicator."""
+    shard_dir = fixture_paths["communes_history"].parent / "communes_history"
+    _write_csv(
+        shard_dir / "shardstore.csv",
+        MUNICIPAL_HEADER,
+        [
+            [
+                "be:mun:11001",
+                "11001",
+                "Aartselaar",
+                "Aartselaar",
+                "Aartselaar",
+                "Flanders",
+                "Antwerp",
+                "Arrondissement Antwerpen",
+                "SHARD_ONLY",
+                "Shard-only indicator",
+                "count",
+                "2024",
+                "99",
+                "A",
+                "2026-01-01T00:00:00+00:00",
+            ],
+        ],
+    )
+    metadata = json.loads(fixture_paths["municipal_metadata"].read_text("utf-8"))
+    metadata["indicators"].append(
+        {
+            "indicator_code": "SHARD_ONLY",
+            "names": {"en": "Shard-only", "fr": "x", "nl": "y"},
+            "unit": "count",
+            "direction": "contextual",
+            "decimals": 0,
+            "grade": "A",
+            "source": "statbel",
+            "updated": "2026-01-01",
+        }
+    )
+    fixture_paths["municipal_metadata"].write_text(json.dumps(metadata), encoding="utf-8")
+
+    counts = export_explorer_payloads(
+        fixture_paths["communes_history"],
+        fixture_paths["national"],
+        fixture_paths["municipal_metadata"],
+        fixture_paths["national_metadata"],
+        fixture_paths["out_dir"],
+        communes_history_dir=shard_dir,
+    )
+    assert counts["municipal"] == 2
+    payload_path = fixture_paths["out_dir"] / "municipal" / "SHARD_ONLY.json"
+    assert payload_path.is_file()
+    payload = json.loads(payload_path.read_text("utf-8"))
+    assert payload["series"]["11001"]["2024"] == [99.0, "A"]
+
+    index = json.loads((fixture_paths["out_dir"] / "index.json").read_text("utf-8"))
+    codes = {r["indicator_code"] for r in index["indicators"] if r["scope"] == "municipal"}
+    assert "SHARD_ONLY" in codes
+
+
 def test_a_real_value_and_a_suppressed_one_round_trip(fixture_paths):
     export_explorer_payloads(
         fixture_paths["communes_history"],
@@ -459,6 +537,7 @@ def test_payload_keys_are_sorted_for_deterministic_diffs(fixture_paths):
 
 
 REAL_COMMUNES_HISTORY = REPO / "data" / "communes_history.csv"
+REAL_COMMUNES_HISTORY_DIR = REPO / "data" / "communes_history"
 REAL_NATIONAL = REPO / "data" / "belgian_macro_export.csv"
 REAL_MUNICIPAL_METADATA = REPO / "public" / "data" / "metadata" / "indicators.json"
 REAL_NATIONAL_METADATA = REPO / "public" / "data" / "national.json"
@@ -468,19 +547,26 @@ REAL_EXPLORER_DIR = REPO / "public" / "data" / "explorer"
 #: reason beyond alphabetical convenience: one with real values and one that
 #: is known (from a direct read of the committed CSV, see the batch report)
 #: to carry at least one suppressed cell, so the equality check below is not
-#: exercising only the easy path.
+#: exercising only the easy path. Both are now history_shard indicators
+#: (MEDIAN_HOUSE_PRICE: realestate, PART_TIME_BENEFIT_RECIPIENTS: onem) --
+#: living entirely in data/communes_history/*.csv, not the core file -- so
+#: this equality check exercises the shard-reading path, not just the core.
 SAMPLE_MUNICIPAL_CODES = ("MEDIAN_HOUSE_PRICE", "PART_TIME_BENEFIT_RECIPIENTS")
 SAMPLE_NATIONAL_CODES = ("GDP_ANNUAL_CY", "BUSINESS_CONFIDENCE")
 
 
 def _municipal_csv_rows(code: str) -> dict[tuple[str, str], list]:
     out = {}
-    with REAL_COMMUNES_HISTORY.open(encoding="utf-8", newline="") as fh:
-        for row in csv.DictReader(fh):
-            if row["indicator_code"] != code:
-                continue
-            value = None if row["value"] == "" else float(row["value"])
-            out[(row["nis_code"], row["period"])] = [value, row["status"]]
+    paths = [REAL_COMMUNES_HISTORY]
+    if REAL_COMMUNES_HISTORY_DIR.is_dir():
+        paths.extend(sorted(REAL_COMMUNES_HISTORY_DIR.glob("*.csv")))
+    for path in paths:
+        with path.open(encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh):
+                if row["indicator_code"] != code:
+                    continue
+                value = None if row["value"] == "" else float(row["value"])
+                out[(row["nis_code"], row["period"])] = [value, row["status"]]
     return out
 
 
@@ -530,14 +616,18 @@ def test_real_national_payload_matches_the_real_csv_exactly(code):
 
 @pytest.mark.slow
 def test_every_municipal_indicator_code_in_the_history_csv_has_a_payload():
-    """The other direction: no row in the download describes an indicator
-    the page cannot show."""
+    """The other direction: no row in the download (core file OR any shard)
+    describes an indicator the page cannot show."""
     if not REAL_COMMUNES_HISTORY.is_file():
         pytest.skip("data/communes_history.csv not present")
     codes = set()
-    with REAL_COMMUNES_HISTORY.open(encoding="utf-8", newline="") as fh:
-        for row in csv.DictReader(fh):
-            codes.add(row["indicator_code"])
+    paths = [REAL_COMMUNES_HISTORY]
+    if REAL_COMMUNES_HISTORY_DIR.is_dir():
+        paths.extend(sorted(REAL_COMMUNES_HISTORY_DIR.glob("*.csv")))
+    for path in paths:
+        with path.open(encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh):
+                codes.add(row["indicator_code"])
     if not (REAL_EXPLORER_DIR / "index.json").is_file():
         pytest.skip("explorer payloads not built")
     index = json.loads((REAL_EXPLORER_DIR / "index.json").read_text("utf-8"))

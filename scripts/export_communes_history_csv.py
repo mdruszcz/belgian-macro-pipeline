@@ -35,12 +35,38 @@ makes old years expensive to keep around forever. --all-periods (or
 all_periods=True) always computes on the FULL series first regardless -- the
 trim only ever removes which rows make it to the file, never what a derived
 indicator is computed from.
+
+THE SPLIT (2026-09-23, PR: split-communes-history). New municipal sources
+(spf_agdp, population_movement, ipp_rate) pushed data/communes_history.csv
+from ~36 MB to ~62 MB in CI, over CLAUDE.md rule 12's 25 MB commit ceiling.
+Rather than raise the commit-size guard a fourth time, every indicator
+belonging to a store flagged `history_shard: true` in config/stores.yaml
+(src/stores.py's history_shard_map(), never a hardcoded indicator list --
+rules 2/24) is written to its own data/communes_history/{store}.csv instead
+of the core data/communes_history.csv -- same 15-column header, column order
+and sort key as the core file. Every indicator NOT claimed by a
+history_shard store -- including every DERIVED indicator and every
+reconstructed/territory row, which belong to no store -- stays in the core
+file, so data/communes_history.csv keeps existing at the same path with the
+same header (rule 31; commune.html's linkCsv, explorer.html's downloadLink
+and the i18n strings all still point at it unmodified).
+
+The 10-year trim is computed ONCE, over every row from every source
+combined, before the split -- a shard must never gain a different cutoff
+year than the core file just because the newest year for its own indicators
+differs from the newest year overall. --all-periods writes the core file
+only, with no shard directory at all: the full-history file is the
+gitignored intermediate export_communes_table_json.py and
+export_site_payloads.py read, and neither of those readers needs (or should
+depend on) the shard split -- see this module's own historical comment on
+that contract.
 """
 
 import argparse
 import csv
 import sqlite3
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -55,7 +81,12 @@ from src.analytics.backaggregate import (  # noqa: E402
     territory_series,
 )
 from src.analytics.engine import ObservationSet, compute  # noqa: E402
-from src.stores import DEFAULT_STORES_PATH, resolve_extra_observations  # noqa: E402
+from src.stores import (  # noqa: E402
+    DEFAULT_STORES_PATH,
+    history_shard_map,
+    load_stores,
+    resolve_extra_observations,
+)
 from src.validation.config_schema import load_and_validate_derived  # noqa: E402
 
 DEFAULT_DERIVED_DIR = Path(__file__).resolve().parents[1] / "config" / "indicators" / "derived"
@@ -135,6 +166,63 @@ def _all_rows_from_csv(csv_path: Path, indicator_meta: dict[str, tuple[str, str]
     return out
 
 
+_HISTORY_HEADER = [
+    "geo_id",
+    "nis_code",
+    "name_en",
+    "name_fr",
+    "name_nl",
+    "region",
+    "province",
+    "arrondissement",
+    "indicator_code",
+    "indicator_name",
+    "unit",
+    "period",
+    "value",
+    "status",
+    "fetched_at",
+]
+
+
+def _write_history_csv(
+    out_path: Path,
+    obs: list[tuple],
+    commune_by_id: dict,
+    ancestors: dict,
+) -> None:
+    """Write one 15-column history CSV (the core file or one shard) --
+    always the same header, column order and `lineterminator="\\n"` (rule
+    35), so a shard is byte-for-byte the same shape as the core file it was
+    split out of."""
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(_HISTORY_HEADER)
+        for geo_id, indicator_id, ind_name, unit, period, value, status, created_at in obs:
+            nis, name_en, name_fr, name_nl = commune_by_id[geo_id]
+            a = ancestors.get(geo_id, {})
+            writer.writerow(
+                [
+                    geo_id,
+                    nis,
+                    name_en,
+                    name_fr,
+                    name_nl,
+                    a.get("region", ""),
+                    a.get("province", ""),
+                    a.get("arrondissement", ""),
+                    indicator_id,
+                    ind_name,
+                    unit,
+                    period,
+                    value,
+                    STATUS_TO_LETTER.get(status, status or ""),
+                    created_at,
+                ]
+            )
+
+
 def export_communes_history_csv(
     db_path: Path,
     out_path: Path,
@@ -142,7 +230,33 @@ def export_communes_history_csv(
     derived_dir: Path = DEFAULT_DERIVED_DIR,
     all_periods: bool = False,
     recent_years: int = 10,
+    *,
+    stores_path: Path | str | None = None,
+    shard_dir: Path | None = None,
 ) -> int:
+    """... (see module docstring for the split).
+
+    `stores_path`: config/stores.yaml, read for which stores' indicators get
+    their own shard (src/stores.py's history_shard_map()). Defaults to None
+    (no split, every row lands in `out_path`) -- an explicit opt-in, same
+    shape as `extra_observations` above, so a caller that builds its own
+    minimal fixture DB (every test in tests/test_export_communes_history_csv.py)
+    is never silently redirected into a real repo's config/stores.yaml it
+    never asked for. main() below passes the real registry by default for
+    the CLI; callers that want the split from Python must pass `stores_path`
+    themselves. Falsy (None or "") disables the split entirely.
+
+    `shard_dir`: where shard CSVs are written, one per history_shard store,
+    named `{store}.csv`. Defaults to `out_path.parent / "communes_history"`.
+    Ignored (no shard directory is written) when `all_periods=True`: the
+    full-history file stays ONE unsharded file, feeding
+    export_communes_table_json.py and export_site_payloads.py exactly as
+    before -- see the module docstring.
+
+    Returns the TOTAL row count across the core file and every shard
+    combined (this changed: previously the return value was `out_path`'s row
+    count alone, which was also the total since nothing was split out yet).
+    """
     conn = sqlite3.connect(str(db_path))
     communes = conn.execute(
         "SELECT geo_id, nis_code, name_en, name_fr, name_nl FROM geographies "
@@ -311,51 +425,43 @@ def export_communes_history_csv(
         cutoff = newest_year - recent_years + 1
         obs = [row for row in obs if int(row[4][:4]) >= cutoff]
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, lineterminator="\n")
-        writer.writerow(
-            [
-                "geo_id",
-                "nis_code",
-                "name_en",
-                "name_fr",
-                "name_nl",
-                "region",
-                "province",
-                "arrondissement",
-                "indicator_code",
-                "indicator_name",
-                "unit",
-                "period",
-                "value",
-                "status",
-                "fetched_at",
-            ]
-        )
-        for geo_id, indicator_id, ind_name, unit, period, value, status, created_at in obs:
-            nis, name_en, name_fr, name_nl = commune_by_id[geo_id]
-            a = ancestors.get(geo_id, {})
-            writer.writerow(
-                [
-                    geo_id,
-                    nis,
-                    name_en,
-                    name_fr,
-                    name_nl,
-                    a.get("region", ""),
-                    a.get("province", ""),
-                    a.get("arrondissement", ""),
-                    indicator_id,
-                    ind_name,
-                    unit,
-                    period,
-                    value,
-                    STATUS_TO_LETTER.get(status, status or ""),
-                    created_at,
-                ]
+    total_rows = len(obs)
+
+    # THE SPLIT. Every row's store is looked up by indicator_id
+    # (src/stores.py's history_shard_map()) -- never a hardcoded indicator
+    # list (rules 2/24). An indicator claimed by no history_shard store
+    # (every derived indicator, every reconstructed/territory row, and any
+    # store not flagged) stays in the core file. --all-periods never shards:
+    # the full-history file is the gitignored intermediate the two internal
+    # readers need whole (see module docstring).
+    shard_map: dict[str, str] = {}
+    if not all_periods and stores_path:
+        shard_map = history_shard_map(load_stores(stores_path))
+
+    if shard_map:
+        core_obs = [row for row in obs if row[1] not in shard_map]
+        by_store: dict[str, list] = defaultdict(list)
+        for row in obs:
+            store_name = shard_map.get(row[1])
+            if store_name is not None:
+                by_store[store_name].append(row)
+    else:
+        core_obs = obs
+        by_store = {}
+
+    _write_history_csv(out_path, core_obs, commune_by_id, ancestors)
+
+    if shard_map:
+        resolved_shard_dir = shard_dir or (out_path.parent / "communes_history")
+        for store_name, rows in by_store.items():
+            _write_history_csv(
+                resolved_shard_dir / f"{store_name}.csv", rows, commune_by_id, ancestors
             )
-    return len(obs)
+
+    # total rows out == total rows in: every row landed in exactly the core
+    # file or exactly one shard, never both and never dropped.
+    assert sum(len(rows) for rows in by_store.values()) + len(core_obs) == total_rows
+    return total_rows
 
 
 def main() -> None:
@@ -396,6 +502,15 @@ def main() -> None:
         default=10,
         help="Years of history to keep by default (ignored with --all-periods).",
     )
+    ap.add_argument(
+        "--shard-dir",
+        default=None,
+        metavar="DIR",
+        help="Where history_shard stores' CSVs are written, one per store "
+        "(see config/stores.yaml). Defaults to a communes_history/ directory "
+        "next to --out. Ignored with --all-periods: the full-history file is "
+        "never split. Pass --stores '' to disable the split entirely.",
+    )
     args = ap.parse_args()
     n = export_communes_history_csv(
         Path(args.db),
@@ -404,9 +519,14 @@ def main() -> None:
         args.derived_dir,
         all_periods=args.all_periods,
         recent_years=args.recent_years,
+        stores_path=args.stores,
+        shard_dir=Path(args.shard_dir) if args.shard_dir else None,
     )
     scope = "all periods" if args.all_periods else f"last {args.recent_years} years"
-    print(f"Exported {n} rows ({scope}) to {args.out}")
+    print(
+        f"Exported {n} rows ({scope}) to {args.out}"
+        + ("" if args.all_periods else " and its shards")
+    )
 
 
 if __name__ == "__main__":

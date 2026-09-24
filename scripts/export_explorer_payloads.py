@@ -121,27 +121,77 @@ def _cell(value_raw: str, status: str, *, where: str) -> list:
     return [float(value_raw), status]
 
 
-def _read_municipal_series(csv_path: Path) -> dict[str, dict]:
+def _read_municipal_series(csv_path: Path, shard_dir: Path | None = None) -> dict[str, dict]:
     """indicator_code -> {"series": {nis: {period: [value, status]}}, "rows": int}.
 
-    One dict entry per row of data/communes_history.csv -- the trimmed,
-    committed, publicly-downloadable file, not communes_history_full.csv
-    (which is gitignored and is not the download; see the exports target in
-    the Makefile for why two passes exist)."""
+    One dict entry per row of data/communes_history.csv (the trimmed,
+    committed, publicly-downloadable core file, not communes_history_full.csv
+    which is gitignored and is not the download; see the exports target in
+    the Makefile for why two passes exist) PLUS every row of every
+    data/communes_history/*.csv shard (config/stores.yaml `history_shard:
+    true` stores -- PR: split-communes-history). A shard-only indicator (one
+    entirely claimed by a history_shard store, so it never appears in the
+    core file at all) gets a payload exactly the same way a core-file
+    indicator does: this function reads both into the same dict before
+    anything downstream can tell the two apart. `shard_dir` missing entirely
+    is not an error -- a bare export with no registry (--stores '') writes
+    no shard directory at all, and that is a valid, if smaller, history
+    export."""
     out: dict[str, dict] = {}
-    with csv_path.open(encoding="utf-8", newline="") as fh:
-        for row in csv.DictReader(fh):
-            code = row["indicator_code"]
-            entry = out.setdefault(code, {"series": {}, "rows": 0})
-            nis = row["nis_code"]
-            cell = _cell(
-                row["value"],
-                row["status"],
-                where=f"{csv_path.name}:{code}/{nis}/{row['period']}",
-            )
-            entry["series"].setdefault(nis, {})[row["period"]] = cell
-            entry["rows"] += 1
+
+    def _read_one(path: Path) -> None:
+        with path.open(encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh):
+                code = row["indicator_code"]
+                entry = out.setdefault(code, {"series": {}, "rows": 0})
+                nis = row["nis_code"]
+                cell = _cell(
+                    row["value"],
+                    row["status"],
+                    where=f"{path.name}:{code}/{nis}/{row['period']}",
+                )
+                entry["series"].setdefault(nis, {})[row["period"]] = cell
+                entry["rows"] += 1
+
+    _read_one(csv_path)
+    if shard_dir is not None and shard_dir.is_dir():
+        for shard_path in sorted(shard_dir.glob("*.csv")):
+            _read_one(shard_path)
     return out
+
+
+def _shard_manifest(shard_dir: Path | None, municipal_meta: dict[str, dict]) -> list[dict]:
+    """One entry per data/communes_history/{store}.csv shard, for
+    explorer.html's per-source download list (PR: split-communes-history).
+    `store` is the file's own stem -- config/stores.yaml's store name, since
+    that is exactly how scripts/export_communes_history_csv.py names each
+    shard file. `source` is the published `source` (source_id) of the
+    shard's first indicator, read from the SAME already-published
+    public/data/metadata/indicators.json this script reads for every other
+    field (rule 28: never hand-typed) -- a store maps to exactly one
+    source_id (config/stores.yaml's own schema), so any indicator in the
+    file names it. A shard whose only indicators have no metadata entry
+    (should not happen; export_explorer_payloads already raises earlier for
+    that case) is simply skipped here rather than guessed."""
+    if shard_dir is None or not shard_dir.is_dir():
+        return []
+    manifest = []
+    for shard_path in sorted(shard_dir.glob("*.csv")):
+        source_id = None
+        with shard_path.open(encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh):
+                meta = municipal_meta.get(row["indicator_code"])
+                if meta is not None:
+                    source_id = meta.get("source")
+                    break
+        manifest.append(
+            {
+                "store": shard_path.stem,
+                "path": f"data/communes_history/{shard_path.name}",
+                "source": source_id,
+            }
+        )
+    return manifest
 
 
 def _read_national_series(csv_path: Path) -> dict[str, dict]:
@@ -251,8 +301,10 @@ def export_explorer_payloads(
     municipal_metadata: Path,
     national_metadata: Path,
     out_dir: Path,
+    *,
+    communes_history_dir: Path | None = None,
 ) -> dict[str, int]:
-    municipal_series = _read_municipal_series(communes_history_csv)
+    municipal_series = _read_municipal_series(communes_history_csv, communes_history_dir)
     national_series = _read_national_series(national_csv)
     municipal_meta = _read_municipal_metadata(municipal_metadata)
     national_meta = _read_national_metadata(national_metadata)
@@ -306,7 +358,8 @@ def export_explorer_payloads(
         )
 
     index_rows.sort(key=lambda r: (r["scope"], r["indicator_code"]))
-    _write_json(out_dir / "index.json", {"indicators": index_rows})
+    shards = _shard_manifest(communes_history_dir, municipal_meta)
+    _write_json(out_dir / "index.json", {"indicators": index_rows, "shards": shards})
 
     return {
         "municipal": len(municipal_series),
@@ -321,6 +374,12 @@ def main() -> None:
         description="Export sharded per-indicator payloads for explorer.html (Batch 8a)"
     )
     ap.add_argument("--communes-history", default="data/communes_history.csv")
+    ap.add_argument(
+        "--communes-history-dir",
+        default="data/communes_history/",
+        help="Per-store shard CSVs split out of --communes-history (config/stores.yaml "
+        "history_shard stores). A missing directory is not an error.",
+    )
     ap.add_argument("--national", default="data/belgian_macro_export.csv")
     ap.add_argument(
         "--municipal-metadata",
@@ -341,6 +400,7 @@ def main() -> None:
         Path(args.municipal_metadata),
         Path(args.national_metadata),
         Path(args.out_dir),
+        communes_history_dir=Path(args.communes_history_dir),
     )
     print(
         f"Exported {counts['municipal']} municipal + {counts['national']} national "

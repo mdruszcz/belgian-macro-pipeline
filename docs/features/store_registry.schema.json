@@ -64,6 +64,11 @@
           "reference_rows_reason": {
             "type": ["string", "null"],
             "description": "Required (non-null) when reference_rows is null -- why no script exists yet."
+          },
+          "history_shard": {
+            "type": "boolean",
+            "default": false,
+            "description": "true: this store's indicators are written to their own data/communes_history/{name}.csv by scripts/export_communes_history_csv.py, instead of into the single committed data/communes_history.csv. Added when the core file grew past CLAUDE.md rule 12's 25 MB commit ceiling (PR: split-communes-history). Every indicator NOT claimed by a history_shard store -- including every derived indicator -- stays in the core file."
           }
         }
       }

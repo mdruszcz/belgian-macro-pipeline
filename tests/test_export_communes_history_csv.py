@@ -1,6 +1,6 @@
 """Tests for the full-history commune export (export_communes_history_csv.py).
 
-Two properties are unique to THIS export and not already covered by
+Three properties are unique to THIS export and not already covered by
 test_export_communes_csv.py or test_derived_engine.py, so they are what this
 file actually tests:
 
@@ -10,13 +10,19 @@ file actually tests:
      percentile/z_score, even though it never appears as an output row --
      the two-stage "compute wide, display narrow" shape the module docstring
      describes.
+  3. THE SPLIT (PR: split-communes-history): a history_shard store's
+     indicators land in their own data/communes_history/{store}.csv and
+     nowhere else; a derived indicator (belonging to no store) always stays
+     in the core file; --all-periods never shards.
 """
 
+import csv as csv_module
 import sqlite3
 import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
@@ -875,3 +881,389 @@ def test_percentile_for_a_pre_merger_period_is_unchanged_by_the_territory_pass(
     # and this percentile would be a different number.
     wrong_if_leaked = 100.0 * (below + 0.5 * equal) / (len(values_2020) + 1)
     assert pct("be:mun:OTHER", "2020") != pytest.approx(wrong_if_leaked)
+
+
+# ── THE SPLIT (split-communes-history) ──────────────────────────────────────
+
+
+def _shard_obs(conn, indicator_id, geo_id, period, value):
+    conn.execute(
+        "INSERT INTO observations (indicator_id, geo_id, period, vintage, value, status, "
+        "period_start, period_end, is_latest, fetch_run_id, created_at) "
+        "VALUES (?, ?, ?, 'v1', ?, 'final', ?, ?, 1, 1, '2026-01-01T00:00:00+00:00')",
+        (indicator_id, geo_id, period, value, f"{period}-01-01", f"{period}-12-31"),
+    )
+
+
+def _register_shard_me(db_path: Path) -> None:
+    """SHARD_ME's name/unit must resolve through the indicators table like
+    any other extra_csv row, so register it even when the row itself comes
+    from a --extra-observations CSV, not a raw DB observation."""
+    conn = sqlite3.connect(str(db_path))
+    conn.execute(
+        "INSERT INTO indicators (indicator_id, source_id, name_nl, name_fr, name_en, "
+        "frequency, unit, preferred_direction, is_additive, config_path) "
+        "VALUES ('SHARD_ME', 'statbel', 'X', 'X', 'Shard indicator', "
+        "'A', 'count', 'contextual', 1, 'x')"
+    )
+    conn.commit()
+    conn.close()
+
+
+def _write_shard_stores_yaml(tmp_path: Path, shard_csv: Path) -> Path:
+    """A minimal config/stores.yaml: `shardstore` (history_shard: true,
+    SHARD_ME only) as extra_csv. POPULATION_BY_COMMUNE is claimed by no
+    store in this fixture registry -- an indicator in no store must land in
+    the core file."""
+    stores_yaml = {
+        "stores": {
+            "shardstore": {
+                "path": str(shard_csv),
+                "source_id": "statbel",
+                "mode": "extra_csv",
+                "history_shard": True,
+                "indicators": ["SHARD_ME"],
+                "reference_rows": {"script": "scripts/sync_shard.py"},
+            }
+        }
+    }
+    path = tmp_path / "stores.yaml"
+    path.write_text(yaml.safe_dump(stores_yaml, sort_keys=False), encoding="utf-8")
+    return path
+
+
+def _write_shard_extra_csv(path: Path, geo_id: str, period: str, value: float) -> None:
+    """A minimal extra_csv-shaped observations CSV for SHARD_ME -- the shape
+    _all_rows_from_csv reads: is_latest plus the ten canonical columns."""
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv_module.writer(fh, lineterminator="\n")
+        w.writerow(
+            [
+                "indicator_id",
+                "geo_id",
+                "period",
+                "vintage",
+                "value",
+                "status",
+                "period_start",
+                "period_end",
+                "is_latest",
+                "created_at",
+            ]
+        )
+        w.writerow(
+            [
+                "SHARD_ME",
+                geo_id,
+                period,
+                "v1",
+                value,
+                "final",
+                f"{period}-01-01",
+                f"{period}-12-31",
+                "1",
+                "2026-01-01T00:00:00+00:00",
+            ]
+        )
+
+
+def _shard_rows(path: Path) -> list[dict]:
+    with path.open(encoding="utf-8", newline="") as fh:
+        return list(csv_module.DictReader(fh))
+
+
+def test_a_history_shard_stores_indicator_lands_in_its_shard_not_the_core(tmp_path):
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2024", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    empty_derived = tmp_path / "derived"
+    empty_derived.mkdir()
+
+    out = tmp_path / "history.csv"
+    shard_dir = tmp_path / "shards"
+    export_communes_history_csv(
+        db_path,
+        out,
+        extra_observations=(extra_csv,),
+        derived_dir=empty_derived,
+        stores_path=stores_yaml,
+        shard_dir=shard_dir,
+    )
+
+    core_codes = {r["indicator_code"] for r in _rows(out)}
+    assert "SHARD_ME" not in core_codes
+    assert "POPULATION_BY_COMMUNE" in core_codes
+
+    shard_rows = _shard_rows(shard_dir / "shardstore.csv")
+    shard_codes = {r["indicator_code"] for r in shard_rows}
+    assert shard_codes == {"SHARD_ME"}
+    assert shard_rows[0]["value"] == "42.0"
+
+
+def test_a_derived_indicator_always_lands_in_the_core_file(tmp_path):
+    """POPULATION_PERCENTILE is derived -- it belongs to no store, so even
+    with a history_shard registry active it must stay in the core file."""
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _geo(conn, "be:mun:B", "2", "Commune B")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    _pop(conn, "be:mun:B", "2024", 50.0)
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2024", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    derived_dir = _derived_dir(tmp_path)
+
+    out = tmp_path / "history.csv"
+    shard_dir = tmp_path / "shards"
+    export_communes_history_csv(
+        db_path,
+        out,
+        extra_observations=(extra_csv,),
+        derived_dir=derived_dir,
+        stores_path=stores_yaml,
+        shard_dir=shard_dir,
+    )
+
+    core_codes = {r["indicator_code"] for r in _rows(out)}
+    assert "POPULATION_PERCENTILE" in core_codes
+    assert (shard_dir / "shardstore.csv").is_file()
+    shard_codes = {r["indicator_code"] for r in _shard_rows(shard_dir / "shardstore.csv")}
+    assert "POPULATION_PERCENTILE" not in shard_codes
+
+
+def test_an_indicator_in_no_store_lands_in_the_core(tmp_path):
+    """POPULATION_BY_COMMUNE is a raw indicator claimed by no store in this
+    fixture's registry (only SHARD_ME is history_shard) -- it must land in
+    the core file, not be dropped."""
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2024", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    empty_derived = tmp_path / "derived"
+    empty_derived.mkdir()
+
+    out = tmp_path / "history.csv"
+    export_communes_history_csv(
+        db_path,
+        out,
+        extra_observations=(extra_csv,),
+        derived_dir=empty_derived,
+        stores_path=stores_yaml,
+    )
+    core_codes = {r["indicator_code"] for r in _rows(out)}
+    assert "POPULATION_BY_COMMUNE" in core_codes
+
+
+def test_total_rows_across_core_and_shards_equals_unsharded_count(tmp_path):
+    """Same fixture, run once with the split and once with stores_path=None
+    (no split): the two runs must produce the same total row count."""
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _geo(conn, "be:mun:B", "2", "Commune B")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    _pop(conn, "be:mun:B", "2024", 50.0)
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2024", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    derived_dir = _derived_dir(tmp_path)
+
+    out_unsharded = tmp_path / "unsharded.csv"
+    unsharded_total = export_communes_history_csv(
+        db_path,
+        out_unsharded,
+        extra_observations=(extra_csv,),
+        derived_dir=derived_dir,
+        stores_path=None,
+    )
+
+    out_sharded = tmp_path / "sharded.csv"
+    shard_dir = tmp_path / "shards"
+    sharded_total = export_communes_history_csv(
+        db_path,
+        out_sharded,
+        extra_observations=(extra_csv,),
+        derived_dir=derived_dir,
+        stores_path=stores_yaml,
+        shard_dir=shard_dir,
+    )
+
+    assert sharded_total == unsharded_total
+    core_rows = len(_rows(out_sharded))
+    shard_rows = len(_shard_rows(shard_dir / "shardstore.csv"))
+    assert core_rows + shard_rows == sharded_total
+    assert len(_rows(out_unsharded)) == unsharded_total
+
+
+def test_the_trim_cutoff_is_shared_between_core_and_shards(tmp_path):
+    """A shard-only indicator's newest year must not set its own cutoff --
+    the cutoff is computed once over EVERY row (core + shard-bound) before
+    the split, so an old shard row that would survive on its own family's
+    newest year is trimmed exactly like an old core row would be."""
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    # Core indicator's newest year is 2024 -- cutoff (recent_years=3) is 2022.
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    _pop(conn, "be:mun:A", "2015", 10.0)  # older than cutoff -- must be trimmed
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    # Shard-only row from 2015 too -- if the shard had its own cutoff (its
+    # own newest year, also 2015), this row would wrongly survive.
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2015", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    empty_derived = tmp_path / "derived"
+    empty_derived.mkdir()
+
+    out = tmp_path / "history.csv"
+    shard_dir = tmp_path / "shards"
+    export_communes_history_csv(
+        db_path,
+        out,
+        extra_observations=(extra_csv,),
+        derived_dir=empty_derived,
+        stores_path=stores_yaml,
+        shard_dir=shard_dir,
+        recent_years=3,
+    )
+
+    core_periods = {r["period"] for r in _rows(out)}
+    assert "2015" not in core_periods
+    # A store with zero surviving rows after the shared trim gets no shard
+    # file at all -- same tolerance as Store.csv_paths() for a store with
+    # nothing to write (see src/stores.py's own docstring on that
+    # asymmetry). What matters here is that the 2015 row did NOT survive on
+    # its own family's newest year (2015): if the shard had computed its own
+    # cutoff independently, shardstore.csv would exist with a 2015 row in it.
+    shard_path = shard_dir / "shardstore.csv"
+    if shard_path.is_file():
+        shard_periods = {r["period"] for r in _shard_rows(shard_path)}
+        assert "2015" not in shard_periods
+    else:
+        assert True, "no shard file at all is the correct outcome: nothing survived the trim"
+
+
+def test_all_periods_writes_one_file_and_no_shard_directory(tmp_path):
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2024", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    empty_derived = tmp_path / "derived"
+    empty_derived.mkdir()
+
+    out = tmp_path / "full.csv"
+    shard_dir = tmp_path / "shards"
+    export_communes_history_csv(
+        db_path,
+        out,
+        extra_observations=(extra_csv,),
+        derived_dir=empty_derived,
+        stores_path=stores_yaml,
+        shard_dir=shard_dir,
+        all_periods=True,
+    )
+
+    codes = {r["indicator_code"] for r in _rows(out)}
+    assert "SHARD_ME" in codes, "SHARD_ME must still be IN the one unsharded file"
+    assert not shard_dir.exists(), "--all-periods must never write a shard directory"
+
+
+def test_a_missing_shard_dir_is_not_an_error_when_no_store_is_shard_eligible(tmp_path):
+    """stores_path=None (no registry) must behave exactly as before this PR:
+    every row in the one core file, no shard directory written."""
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    conn.commit()
+    conn.close()
+
+    empty_derived = tmp_path / "derived"
+    empty_derived.mkdir()
+
+    out = tmp_path / "history.csv"
+    shard_dir = tmp_path / "shards"
+    export_communes_history_csv(
+        db_path,
+        out,
+        derived_dir=empty_derived,
+        stores_path=None,
+        shard_dir=shard_dir,
+    )
+    assert not shard_dir.exists()
+    assert "POPULATION_BY_COMMUNE" in {r["indicator_code"] for r in _rows(out)}
+
+
+def test_rerun_is_byte_identical(tmp_path):
+    db_path = tmp_path / "shard.db"
+    conn = _base_db(db_path)
+    _geo(conn, "be:mun:A", "1", "Commune A")
+    _pop(conn, "be:mun:A", "2024", 100.0)
+    conn.commit()
+    conn.close()
+
+    extra_csv = tmp_path / "shardstore_observations.csv"
+    _write_shard_extra_csv(extra_csv, "be:mun:A", "2024", 42.0)
+    _register_shard_me(db_path)
+
+    stores_yaml = _write_shard_stores_yaml(tmp_path, extra_csv)
+    empty_derived = tmp_path / "derived"
+    empty_derived.mkdir()
+
+    def _run(out_name, shard_name):
+        out = tmp_path / out_name
+        shard_dir = tmp_path / shard_name
+        export_communes_history_csv(
+            db_path,
+            out,
+            extra_observations=(extra_csv,),
+            derived_dir=empty_derived,
+            stores_path=stores_yaml,
+            shard_dir=shard_dir,
+        )
+        return out.read_bytes(), (shard_dir / "shardstore.csv").read_bytes()
+
+    core1, shard1 = _run("out1.csv", "shards1")
+    core2, shard2 = _run("out2.csv", "shards2")
+    assert core1 == core2
+    assert shard1 == shard2

@@ -32,6 +32,8 @@ from src.stores import (  # noqa: E402
     StoreConfigError,
     extra_csv_paths,
     extra_csv_stores,
+    history_shard_map,
+    history_shard_stores,
     in_db_stores,
     load_stores,
     resolve_extra_observations,
@@ -399,6 +401,106 @@ def test_a_directory_store_needs_a_directory_not_a_file(tmp_path):
     registry = _dir_registry(tmp_path, csv_path, ["FOO"], MODE_IN_DB)
     with pytest.raises(StoreConfigError, match="not a directory"):
         load_stores(registry)
+
+
+# ── history_shard (split-communes-history) ──────────────────────────────────
+
+
+def test_a_store_with_no_history_shard_flag_defaults_to_false(tmp_path):
+    csv_path = tmp_path / "x_observations.csv"
+    _make_csv(csv_path, ["FOO"])
+    registry = _write_registry(
+        tmp_path,
+        {
+            "stores": {
+                "x": {
+                    "path": str(csv_path),
+                    "source_id": "statbel",
+                    "mode": MODE_EXTRA_CSV,
+                    "indicators": ["FOO"],
+                    "reference_rows": {"script": "scripts/sync_x.py"},
+                }
+            }
+        },
+        tmp_path,
+    )
+    stores = load_stores(registry)
+    assert stores["x"].history_shard is False
+    assert history_shard_stores(stores) == ()
+    assert history_shard_map(stores) == {}
+
+
+def _shard_registry(tmp_path: Path, names_and_indicators: dict[str, list[str]]) -> Path:
+    stores = {}
+    for name, indicators in names_and_indicators.items():
+        csv_path = tmp_path / f"{name}_observations.csv"
+        _make_csv(csv_path, indicators)
+        stores[name] = {
+            "path": str(csv_path),
+            "source_id": "statbel",
+            "mode": MODE_EXTRA_CSV,
+            "history_shard": True,
+            "indicators": indicators,
+            "reference_rows": {"script": f"scripts/sync_{name}.py"},
+        }
+    return _write_registry(tmp_path, {"stores": stores}, tmp_path)
+
+
+def test_history_shard_true_is_loaded_and_collected():
+    stores = load_stores(DEFAULT_STORES_PATH)
+    shards = history_shard_stores(stores)
+    assert shards, "expected at least one history_shard store in the real registry"
+    assert all(s.history_shard for s in shards)
+    assert list(shards) == sorted(shards, key=lambda s: s.name), "sorted by name"
+
+
+def test_history_shard_map_covers_every_indicator_of_every_flagged_store(tmp_path):
+    registry = _shard_registry(tmp_path, {"alpha": ["A1", "A2"], "beta": ["B1"]})
+    stores = load_stores(registry)
+    mapping = history_shard_map(stores)
+    assert mapping == {"A1": "alpha", "A2": "alpha", "B1": "beta"}
+
+
+def test_an_indicator_in_no_history_shard_store_is_absent_from_the_map(tmp_path):
+    csv_path = tmp_path / "core_observations.csv"
+    _make_csv(csv_path, ["CORE_ONLY"])
+    registry = _write_registry(
+        tmp_path,
+        {
+            "stores": {
+                "core": {
+                    "path": str(csv_path),
+                    "source_id": "statbel",
+                    "mode": MODE_EXTRA_CSV,
+                    "indicators": ["CORE_ONLY"],
+                    "reference_rows": {"script": "scripts/sync_core.py"},
+                }
+            }
+        },
+        tmp_path,
+    )
+    stores = load_stores(registry)
+    mapping = history_shard_map(stores)
+    assert "CORE_ONLY" not in mapping
+
+
+def test_an_indicator_declared_by_two_history_shard_stores_is_ambiguous(tmp_path):
+    stores_yaml = {}
+    for name in ("alpha", "beta"):
+        csv_path = tmp_path / f"{name}_observations.csv"
+        _make_csv(csv_path, ["SHARED"])
+        stores_yaml[name] = {
+            "path": str(csv_path),
+            "source_id": "statbel",
+            "mode": MODE_EXTRA_CSV,
+            "history_shard": True,
+            "indicators": ["SHARED"],
+            "reference_rows": {"script": f"scripts/sync_{name}.py"},
+        }
+    registry = _write_registry(tmp_path, {"stores": stores_yaml}, tmp_path)
+    stores = load_stores(registry)
+    with pytest.raises(StoreConfigError, match="ambiguous shard assignment"):
+        history_shard_map(stores)
 
 
 def test_csv_paths_omits_a_declared_indicator_with_no_file_yet(tmp_path):

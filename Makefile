@@ -92,6 +92,10 @@ exports:
 	# pass, with no --all-periods, is the trimmed last-10-years file that
 	# actually gets committed and offered as a download -- data/communes_history_full.csv
 	# is gitignored so it never reaches the commit-size guard it exists to avoid.
+	# The second pass ALSO writes data/communes_history/*.csv -- one shard per
+	# config/stores.yaml `history_shard: true` store, split out of the core
+	# file so every committed download stays under the 25 MB guard (PR:
+	# split-communes-history). One invocation, both outputs.
 	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) \
 		--out data/communes_history_full.csv --all-periods --stores $(STORES)
 	$(PYTHON) scripts/export_communes_history_csv.py --db $(DB) --out data/communes_history.csv --stores $(STORES)
@@ -109,12 +113,12 @@ exports:
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
 	$(PYTHON) scripts/export_commune_adjacency.py
 	$(PYTHON) scripts/export_commune_typology.py
-	# Reads the two CSVs written above -- data/communes_history.csv (the
-	# trimmed file that is actually committed and offered for download) and
-	# data/belgian_macro_export.csv -- and shards them one file per
-	# indicator for explorer.html. Deliberately built from the published
-	# downloads rather than from the database, so the page cannot show a
-	# figure the download does not have. Must run AFTER both.
+	# Reads the CSVs written above -- data/communes_history.csv (the trimmed
+	# core file) PLUS every data/communes_history/*.csv shard, and
+	# data/belgian_macro_export.csv -- and shards them one file per indicator
+	# for explorer.html. Deliberately built from the published downloads
+	# rather than from the database, so the page cannot show a figure the
+	# download does not have. Must run AFTER both.
 	$(PYTHON) scripts/export_explorer_payloads.py
 	# Europe NUTS 2 (batch B2). Reads only the committed data/nuts2/*.csv
 	# store, config/geography/nuts2.csv and the committed geometry -- no

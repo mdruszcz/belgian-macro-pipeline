@@ -39,10 +39,25 @@
 # allows `reference_rows: null` with a `reference_rows_reason` for a future
 # store that genuinely has none.
 stores:
+  # history_shard: true below -- data/communes_history.csv (the committed,
+  # 10-year download) grew from ~36 MB to 62 MB in CI on 2026-09-23 when the
+  # new municipal sources (spf_agdp, population_movement, ipp_rate) landed,
+  # over CLAUDE.md rule 12's 25 MB ceiling. Split per store instead of
+  # raising the commit-size guard a third time (PR: split-communes-history).
+  # Each history_shard store's indicators go to their own
+  # data/communes_history/{name}.csv -- same 15-column header, order and
+  # sort as the core file -- instead of into data/communes_history.csv.
+  # scripts/export_communes_history_csv.py reads this flag from
+  # config/stores.yaml (src/stores.py's history_shard_map()), never a
+  # hardcoded indicator list. Every store below was already comfortably
+  # under 25 MB on its own before the split; flagged anyway so the core file
+  # (which was itself already at 37 MB before the new sources) has headroom
+  # for years to come rather than only just clearing the line today.
   population:
     path: data/population_observations.csv
     source_id: statbel
     mode: extra_csv
+    history_shard: true
     indicators:
       - POPULATION_AGE_0_14
       - POPULATION_AGE_15_64
@@ -56,6 +71,7 @@ stores:
     path: data/fiscal_income_observations.csv
     source_id: statbel
     mode: extra_csv
+    history_shard: true
     indicators:
       - FISCAL_NBR_NON_ZERO_INC
       - FISCAL_TOT_MUNICIP_TAXES
@@ -69,6 +85,7 @@ stores:
     path: data/census2021_observations.csv
     source_id: statbel
     mode: extra_csv
+    history_shard: true
     indicators:
       - CAS_EMPLOYED
       - CAS_INACTIVE
@@ -95,6 +112,7 @@ stores:
     path: data/realestate_observations.csv
     source_id: statbel
     mode: extra_csv
+    history_shard: true
     indicators:
       - HOUSE_SALES_TRANSACTIONS
       - MEDIAN_HOUSE_PRICE
@@ -106,6 +124,7 @@ stores:
     path: data/police_observations.csv
     source_id: police
     mode: extra_csv
+    history_shard: true
     indicators:
       - CAR_THEFT_PER_10K
       - DOMESTIC_VIOLENCE_PER_10K
@@ -119,6 +138,7 @@ stores:
     path: data/var_unemployment_observations.csv
     source_id: steunpunt_werk
     mode: extra_csv
+    history_shard: true
     indicators:
       - ADMIN_UNEMPLOYMENT_RATE_COM
     reference_rows:
@@ -131,6 +151,7 @@ stores:
     path: data/onem_observations.csv
     source_id: onem
     mode: in_db
+    history_shard: true
     indicators:
       - ACTIVATION_MEASURES_PAID
       - PART_TIME_BENEFIT_RECIPIENTS
@@ -147,6 +168,7 @@ stores:
     path: data/onem_rates_observations.csv
     source_id: onem
     mode: in_db
+    history_shard: true
     indicators:
       - UNEMPLOYMENT_RATE_INSURED
       - UNEMPLOYMENT_RATE_INSURED_MONTHLY
@@ -175,6 +197,7 @@ stores:
     path: data/walstat_observations.csv
     source_id: walstat
     mode: in_db
+    history_shard: true
     indicators:
       - MUN_DEBT_LONG_TERM_PER_CAPITA
       - MUN_DEBT_SHORT_TERM_PER_CAPITA
@@ -209,6 +232,7 @@ stores:
     path: data/population_movement_observations.csv
     source_id: statbel
     mode: in_db
+    history_shard: true
     indicators:
       - BIRTHS
       - DEATHS
@@ -360,6 +384,7 @@ stores:
     path: data/ipp_rate_observations.csv
     source_id: spf_finances
     mode: in_db
+    history_shard: true
     indicators:
       - MUN_IPP_ADDITIONAL_RATE
     reference_rows:
@@ -383,6 +408,7 @@ stores:
     path: data/spf_agdp_observations.csv
     source_id: spf_finances
     mode: in_db
+    history_shard: true
     indicators:
       - MUN_LEASES_NEW_HOUSING
       - MUN_LEASE_RENT_MEDIAN_HOUSING
