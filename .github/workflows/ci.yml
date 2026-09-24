@@ -180,20 +180,40 @@ jobs:
         if: steps.docsonly.outputs.docs_only != 'true'
         run: .github/workflows/site_inert.sh
 
-      - name: Tests (generated-site tier)
-        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert != 'true'
-        run: make test-generated-site
+      - name: Detect a change the slow tests don't read
+        id: slowinert
+        if: steps.docsonly.outputs.docs_only != 'true'
+        run: .github/workflows/slow_inert.sh
+
+      # SITE-INERT / SLOW-INERT SHORT-CIRCUITS (2026-09-23 and 2026-09-24,
+      # maintainer's request): this tier is really two independent sweeps --
+      # generated_site (one case per route/page) and slow (build_staging_db,
+      # committed-store consistency, exports, offload, orchestration parity,
+      # validation) -- each gated by its own script. Four cases:
+      #   both inert       -> nothing here can be affected; skip both, but
+      #                       this step still succeeds so the `test` gate
+      #                       (which requires this job's success) still
+      #                       passes, same as the docs-only short-circuit.
+      #   site_inert only  -> today's behaviour: `make test-slow`.
+      #   slow_inert only  -> the mirror case: only the generated_site sweeps.
+      #   neither          -> full tier, `make test-generated-site`.
+      # Any doubt in either script resolves to false, so the safe outcome is
+      # always "run more", never "run less".
+      - name: Tests (both tiers inert -- nothing here can be affected)
+        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert == 'true' && steps.slowinert.outputs.slow_inert == 'true'
+        run: echo "Skipping - no changed path feeds a page generator or the slow tests."
 
       - name: Tests (slow only -- the change cannot affect the generated site)
-        # SITE-INERT SHORT-CIRCUIT (2026-09-23, maintainer's request): the
-        # generated_site sweeps are the thirteen-minute part of this tier and
-        # only matter when something a page generator reads changed. A change
-        # confined to fetchers, sync scripts, orchestration, source/store
-        # config, validation or non-page tests (site_inert.sh has the exact
-        # allowlist) runs the `slow` tests only -- the store, validation and
-        # export checks still run on every PR. Any doubt runs everything.
-        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert == 'true'
+        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert == 'true' && steps.slowinert.outputs.slow_inert != 'true'
         run: make test-slow
+
+      - name: Tests (generated-site sweeps only -- the change cannot affect the slow tests)
+        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert != 'true' && steps.slowinert.outputs.slow_inert == 'true'
+        run: make test-generated-site-only
+
+      - name: Tests (generated-site tier)
+        if: steps.docsonly.outputs.docs_only != 'true' && steps.siteinert.outputs.site_inert != 'true' && steps.slowinert.outputs.slow_inert != 'true'
+        run: make test-generated-site
 
   test:
     # The required check. Passes only when every tier passed; a cancelled or
