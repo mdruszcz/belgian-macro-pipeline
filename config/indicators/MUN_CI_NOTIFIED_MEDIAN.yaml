@@ -1,0 +1,68 @@
+id: MUN_CI_NOTIFIED_MEDIAN
+name:
+  en: Median notified cadastral income
+  fr: Revenu cadastral notifié médian
+  nl: Mediaan kennisgegeven kadastraal inkomen
+unit: eur
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Median cadastral income (EUR, CadastralIncomeP50) across cadastral income notifications
+    issued for the commune in the calendar year, across every fiscal status, cadastral-income
+    nature and notification-motivation category combined (CadastralIncomeFiscalStatus=TOTAL,
+    CadastralIncomeNature=TOTAL, NotificationMotivationCategory=TOTAL), published directly by
+    SPF Finances -- not recomputed here (CLAUDE.md rule 6; a median cannot be reconstructed
+    from a count and a total the way a mean can). Source: SPF Finances AGDP notifications of
+    the cadastral income dataset (52.01.25), Municipality-level CSV. PERIOD IS THE CALENDAR
+    YEAR the notifications were issued in (ATOM `time` YYYY-12-31). SUPPRESSED, NOT ZERO, when
+    the underlying notification count (MUN_CI_NOTIFICATIONS) is 1-4 in that commune-year -- SPF
+    Finances withholds the percentile below five notifications to avoid identifying an
+    individual property; status is 'suppressed' with value NULL, never a fabricated figure.
+    NOT APPLICABLE when the count is zero (no notification that year, so no median to report --
+    status 'na', value NULL, distinct from suppression). is_additive=false,
+    aggregation_method=not_applicable: a median has no defensible aggregate -- it is neither
+    summed nor recomputable from a sum this pipeline holds, so province/region/Belgium figures
+    are refused, never averaged across communes (CLAUDE.md Definitions).
+  fr: >
+    Revenu cadastral médian (EUR, CadastralIncomeP50) sur les notifications de revenu
+    cadastral émises pour la commune au cours de l'année civile, tous statuts fiscaux, natures
+    de revenu cadastral et catégories de motivation confondus (CadastralIncomeFiscalStatus=
+    TOTAL, CadastralIncomeNature=TOTAL, NotificationMotivationCategory=TOTAL), publié
+    directement par le SPF Finances -- non recalculé ici (règle 6 de CLAUDE.md ; une médiane
+    ne peut pas être reconstruite à partir d'un nombre et d'un total comme une moyenne).
+    Source : jeu de données AGDP notifications du revenu cadastral du SPF Finances (52.01.25),
+    CSV au niveau communal. LA PÉRIODE EST L'ANNÉE CIVILE au cours de laquelle les
+    notifications ont été émises (ATOM `time` YYYY-12-31). SUPPRIMÉ, ET NON ZÉRO, lorsque le
+    nombre de notifications sous-jacent (MUN_CI_NOTIFICATIONS) est compris entre 1 et 4 dans
+    cette commune-année -- le SPF Finances retient le percentile en dessous de cinq
+    notifications pour éviter d'identifier un bien individuel ; le statut est 'suppressed' avec
+    une valeur NULL, jamais un chiffre fabriqué. NON APPLICABLE lorsque le nombre est nul
+    (aucune notification cette année-là, donc aucune médiane à rapporter -- statut 'na', valeur
+    NULL, distinct de la suppression). is_additive=false, aggregation_method=not_applicable :
+    une médiane n'a pas d'agrégat défendable -- elle n'est ni additionnée ni recalculable à
+    partir d'une somme détenue par ce pipeline, donc les chiffres provinciaux/régionaux/
+    nationaux sont refusés, jamais moyennés entre communes (Définitions de CLAUDE.md).
+  nl: >
+    Mediaan kadastraal inkomen (EUR, CadastralIncomeP50) over de kennisgevingen van kadastraal
+    inkomen uitgereikt voor de gemeente in het kalenderjaar, over alle fiscale statussen,
+    aarden van kadastraal inkomen en motivatiecategorieën samen (CadastralIncomeFiscalStatus=
+    TOTAL, CadastralIncomeNature=TOTAL, NotificationMotivationCategory=TOTAL), rechtstreeks
+    gepubliceerd door de FOD Financiën -- hier niet herberekend (CLAUDE.md-regel 6; een
+    mediaan kan niet worden gereconstrueerd uit een aantal en een totaal zoals een gemiddelde
+    dat wel kan). Bron: AGDP-dataset kennisgevingen kadastraal inkomen van de FOD Financiën
+    (52.01.25), CSV op gemeenteniveau. DE PERIODE IS HET KALENDERJAAR waarin de kennisgevingen
+    werden uitgereikt (ATOM `time` YYYY-12-31). ONDERDRUKT, NIET NUL, wanneer het
+    onderliggende aantal kennisgevingen (MUN_CI_NOTIFICATIONS) 1-4 bedraagt in dat
+    gemeente-jaar -- de FOD Financiën houdt het percentiel onder de vijf kennisgevingen achter
+    om een individueel goed niet identificeerbaar te maken; status is 'suppressed' met waarde
+    NULL, nooit een verzonnen cijfer. NIET VAN TOEPASSING wanneer het aantal nul is (geen
+    kennisgeving dat jaar, dus geen mediaan te rapporteren -- status 'na', waarde NULL, te
+    onderscheiden van onderdrukking). is_additive=false, aggregation_method=not_applicable:
+    een mediaan heeft geen verdedigbaar geaggregeerd cijfer -- ze is noch optelbaar, noch
+    herberekenbaar uit een som die deze pipeline bijhoudt, dus provincie-/gewest-/
+    Belgiëcijfers worden geweigerd, nooit gemiddeld over gemeenten (Definities in CLAUDE.md).
+display: null

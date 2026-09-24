@@ -8,7 +8,11 @@ lot B, three more annual patrimony datasets: land use (52.01.04), building
 condition (52.01.05) and property-tax exemptions (52.01.03),
 MUN_CADASTRAL_PARCELS_TOTAL, MUN_CADASTRAL_INCOME_TOTAL,
 MUN_CADASTRAL_INCOME_TAXABLE, MUN_BUILDINGS_TOTAL,
-MUN_BUILDINGS_CENTRAL_HEATING, MUN_PARCELS_TAX_EXEMPT.
+MUN_BUILDINGS_CENTRAL_HEATING, MUN_PARCELS_TAX_EXEMPT -- plus, Wave 5 lot C,
+two more annual datasets: notifications of the cadastral income (52.01.25)
+and concentration of cadastral income (52.01.08), MUN_CI_NOTIFICATIONS,
+MUN_CI_NOTIFIED_TOTAL, MUN_CI_NOTIFIED_MEDIAN,
+MUN_RESIDENTIAL_PARCELS_CI_TOTAL.
 docs/features/spf_agdp.md.
 
 DAILY, AUTOMATIC. Seven ATOM feeds (one per dataset): the Wave 4 pair, each
@@ -92,8 +96,10 @@ from src.db.vintages import upsert_observation  # noqa: E402
 from src.fetchers.spf_agdp import (  # noqa: E402
     ATOM_URL_PATTERN,
     BUILDING_CONDITION,
+    CONCENTRATION,
     LAND_USE,
     LEASES,
+    NOTIFICATIONS,
     OWNER_OCCUPANTS,
     PROPERTY_DYNAMICS,
     TAX_EXEMPTIONS,
@@ -113,7 +119,10 @@ STATE_PATH = Path(__file__).resolve().parents[1] / "data" / "spf_agdp_state.json
 #: dataset config key (state file / CLI) -> AgdpDatasetConfig. Wave 5 lot A
 #: adds the two annual datasets (owner_occupants, property_dynamics) to the
 #: quarterly pair loaded in Wave 4; Wave 5 lot B adds three more annual
-#: datasets (land_use, building_condition, tax_exemptions) -- same state
+#: datasets (land_use, building_condition, tax_exemptions); Wave 5 lot C adds
+#: two more -- notifications (annual, but frequency="AY", a calendar-year-end
+#: ATOM timestamp, unlike lot A/B's 1-January snapshot) and concentration
+#: (annual, frequency="A", selected at the single top band) -- same state
 #: file, same script, only the config, `derive_period_bounds` frequency and
 #: (config/stores.yaml) destination store differ per dataset.
 DATASETS: dict[str, AgdpDatasetConfig] = {
@@ -124,6 +133,8 @@ DATASETS: dict[str, AgdpDatasetConfig] = {
     "land_use": LAND_USE,
     "building_condition": BUILDING_CONDITION,
     "tax_exemptions": TAX_EXEMPTIONS,
+    "notifications": NOTIFICATIONS,
+    "concentration": CONCENTRATION,
 }
 
 
@@ -206,6 +217,13 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict, so
         ("MUN_BUILDINGS_TOTAL", 1, "sum"),
         ("MUN_BUILDINGS_CENTRAL_HEATING", 1, "sum"),
         ("MUN_PARCELS_TAX_EXEMPT", 1, "sum"),
+        # Wave 5 lot C (spf_agdp_patrimony store): three additive/summed, one
+        # median (not additive, not_applicable -- modelled on
+        # MUN_LEASE_RENT_MEDIAN_HOUSING).
+        ("MUN_CI_NOTIFICATIONS", 1, "sum"),
+        ("MUN_CI_NOTIFIED_TOTAL", 1, "sum"),
+        ("MUN_CI_NOTIFIED_MEDIAN", 0, "not_applicable"),
+        ("MUN_RESIDENTIAL_PARCELS_CI_TOTAL", 1, "sum"),
     ):
         ind = indicator_configs[indicator_id]
         conn.execute(
@@ -285,11 +303,17 @@ def sync(
 
     all_rows: list[dict] = []
     versions_loaded: dict[str, list[str]] = {}
-    # indicator_id -> derive_period_bounds() frequency ("A"/"Q"), so PASS 2's
-    # write loop can derive the right period_start/period_end per row without
-    # threading frequency through `all_rows` itself.
+    # indicator_id -> derive_period_bounds() frequency ("A"/"Q"/"M"/"D"), so
+    # PASS 2's write loop can derive the right period_start/period_end per
+    # row without threading frequency through `all_rows` itself.
+    # derive_period_bounds() only knows "A"/"Q"/"M"/"D" -- lot C's
+    # notifications dataset uses AgdpDatasetConfig.frequency="AY" purely to
+    # select the calendar-year-END atom parser (`_calendar_year_from_timestamp`),
+    # never to change the period's own shape: both "A" and "AY" produce a
+    # plain "YYYY" period and cover the full calendar year, so "AY" maps to
+    # the ordinary "A" bounds here.
     indicator_frequency: dict[str, str] = {
-        indicator_id: config.frequency
+        indicator_id: ("A" if config.frequency == "AY" else config.frequency)
         for config in DATASETS.values()
         for indicator_id, _is_count in config.indicators.values()
     }
@@ -439,7 +463,9 @@ def main() -> None:
             "MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN, "
             "MUN_CADASTRAL_PARCELS_TOTAL, MUN_CADASTRAL_INCOME_TOTAL, "
             "MUN_CADASTRAL_INCOME_TAXABLE, MUN_BUILDINGS_TOTAL, "
-            "MUN_BUILDINGS_CENTRAL_HEATING, MUN_PARCELS_TAX_EXEMPT"
+            "MUN_BUILDINGS_CENTRAL_HEATING, MUN_PARCELS_TAX_EXEMPT, "
+            "MUN_CI_NOTIFICATIONS, MUN_CI_NOTIFIED_TOTAL, MUN_CI_NOTIFIED_MEDIAN, "
+            "MUN_RESIDENTIAL_PARCELS_CI_TOTAL"
         )
     else:
         print(f"Wrote {written} new vintage(s).")

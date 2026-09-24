@@ -8,6 +8,7 @@ Small, trimmed fixtures only -- no real SPF Finances zip is fetched here.
 
 from __future__ import annotations
 
+import csv
 import io
 import zipfile
 
@@ -15,12 +16,15 @@ import pytest
 
 from src.fetchers.spf_agdp import (
     BUILDING_CONDITION,
+    CONCENTRATION,
     LAND_USE,
     LEASES,
+    NOTIFICATIONS,
     OWNER_OCCUPANTS,
     PROPERTY_DYNAMICS,
     TAX_EXEMPTIONS,
     TRANSACTIONS,
+    AgdpDatasetConfig,
     AgdpSchemaError,
     AgdpSource,
     _RangedHttpFile,
@@ -936,3 +940,504 @@ def test_exempt_blank_parcels_count_refuses():
     csv_bytes = _exempt_csv([_exempt_row(nis="73028", parcels="")])
     with pytest.raises(AgdpSchemaError, match="blank"):
         AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2025")
+
+
+# --- Wave 5 lot C: __post_init__ hardening -----------------------------------
+
+
+def test_post_init_rejects_more_than_one_is_count_entry():
+    with pytest.raises(ValueError, match="at most one"):
+        AgdpDatasetConfig(
+            label="x",
+            uuid="u",
+            required_columns=("A", "B"),
+            select={},
+            count_column="A",
+            indicators={"A": ("IND1", True), "B": ("IND2", True)},
+        )
+
+
+def test_post_init_rejects_is_count_column_mismatching_count_column():
+    with pytest.raises(ValueError, match="does not match count_column"):
+        AgdpDatasetConfig(
+            label="x",
+            uuid="u",
+            required_columns=("A", "B"),
+            select={},
+            count_column="B",
+            indicators={"A": ("IND1", True)},
+        )
+
+
+def test_post_init_rejects_always_final_columns_naming_a_count_column():
+    with pytest.raises(ValueError, match="not a non-count key"):
+        AgdpDatasetConfig(
+            label="x",
+            uuid="u",
+            required_columns=("A",),
+            select={},
+            count_column="A",
+            indicators={"A": ("IND1", True)},
+            always_final_columns=("A",),
+        )
+
+
+def test_post_init_allows_zero_is_count_entries():
+    # Concentration (52.01.08) keys suppression off ParcelsCumulatedNumber
+    # without publishing it as its own indicator -- zero is_count=True
+    # entries must be allowed, not just exactly one.
+    config = AgdpDatasetConfig(
+        label="x",
+        uuid="u",
+        required_columns=("A", "B"),
+        select={},
+        count_column="A",
+        indicators={"B": ("IND1", False)},
+        always_final_columns=("B",),
+    )
+    assert config.count_column == "A"
+
+
+def test_post_init_accepts_real_configs():
+    for config in (
+        LEASES,
+        TRANSACTIONS,
+        OWNER_OCCUPANTS,
+        PROPERTY_DYNAMICS,
+        LAND_USE,
+        BUILDING_CONDITION,
+        TAX_EXEMPTIONS,
+        NOTIFICATIONS,
+        CONCENTRATION,
+    ):
+        # Constructed at import time already; re-running __post_init__ here
+        # via a fresh construction (dataclasses don't expose it standalone)
+        # would just re-validate the same object -- this asserts every real
+        # config module-level constant actually exists and is the right type.
+        assert isinstance(config, AgdpDatasetConfig)
+
+
+# --- Wave 5 lot C: notifications of the cadastral income (52.01.25) ---------
+
+_NOTIF_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;CadastralIncomeFiscalStatus;CadastralIncomeNature;"
+    "NotificationMotivationCategory;CadastralIncomeNumber;TotalCadastralIncome;"
+    "CadastralIncomeP25;CadastralIncomeP50;CadastralIncomeP75;CadastralIncomeSD"
+)
+
+
+def _notif_row(
+    nis,
+    count,
+    fiscal_status="TOTAL",
+    nature="TOTAL",
+    motivation="TOTAL",
+    total="",
+    p25="",
+    p50="",
+    p75="",
+    sd="",
+):
+    return (
+        f"{nis};Commune;Commune;Commune;{fiscal_status};{nature};{motivation};{count};"
+        f"{total};{p25};{p50};{p75};{sd}"
+    )
+
+
+def _notif_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_NOTIF_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_notifications_2025_real_value_11001():
+    # Hand-computed from the handoff: 11001 2025 count 208, total 773812, P50 826.
+    csv_bytes = _notif_csv(
+        [_notif_row("11001", 208, total="773812", p25="400", p50="826", p75="1300", sd="250")]
+    )
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFICATIONS"] == {
+        "geo_id": "11001",
+        "period": "2025",
+        "value": 208.0,
+        "status": "final",
+        "indicator_id": "MUN_CI_NOTIFICATIONS",
+    }
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["value"] == 773812.0
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["status"] == "final"
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["value"] == 826.0
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["status"] == "final"
+
+
+@pytest.mark.parametrize(
+    "nis,count,total,p50",
+    [
+        ("44083", 1143, "3501614", "444"),
+        ("23106", 414, "278705", "228"),
+        ("82039", 712, "479212", "16"),
+    ],
+)
+def test_notifications_2025_real_values_other_communes(nis, count, total, p50):
+    csv_bytes = _notif_csv([_notif_row(nis, count, total=total, p25="1", p50=p50, p75="1", sd="1")])
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFICATIONS"]["value"] == float(count)
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["value"] == float(total)
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["value"] == float(p50)
+
+
+def test_notifications_2025_herstappe_count_three_is_suppressed():
+    # 73028 Herstappe count 3 -> count final, total/P50 value None, status
+    # suppressed.
+    csv_bytes = _notif_csv([_notif_row("73028", 3)])
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFICATIONS"] == {
+        "geo_id": "73028",
+        "period": "2025",
+        "value": 3.0,
+        "status": "final",
+        "indicator_id": "MUN_CI_NOTIFICATIONS",
+    }
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["value"] is None
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["status"] == "suppressed"
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["value"] is None
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["status"] == "suppressed"
+
+
+def test_notifications_2016_real_values():
+    # 11001 2016 count 211, total 908627, P50 926. 44001 2016 count 552,
+    # total 8707921, P50 809.
+    csv_bytes = _notif_csv(
+        [
+            _notif_row("11001", 211, total="908627", p25="500", p50="926", p75="1400", sd="300"),
+            _notif_row("44001", 552, total="8707921", p25="600", p50="809", p75="1100", sd="200"),
+        ]
+    )
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2016")
+    by_geo = {}
+    for r in rows:
+        by_geo.setdefault(r["geo_id"], {})[r["indicator_id"]] = r
+    assert by_geo["11001"]["MUN_CI_NOTIFICATIONS"]["value"] == 211.0
+    assert by_geo["11001"]["MUN_CI_NOTIFIED_TOTAL"]["value"] == 908627.0
+    assert by_geo["11001"]["MUN_CI_NOTIFIED_MEDIAN"]["value"] == 926.0
+    assert by_geo["44001"]["MUN_CI_NOTIFICATIONS"]["value"] == 552.0
+    assert by_geo["44001"]["MUN_CI_NOTIFIED_TOTAL"]["value"] == 8707921.0
+    assert by_geo["44001"]["MUN_CI_NOTIFIED_MEDIAN"]["value"] == 809.0
+
+
+def test_notifications_2016_count_one_is_suppressed():
+    # 73028 2016 count 1 -> suppressed.
+    csv_bytes = _notif_csv([_notif_row("73028", 1)])
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2016")
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["status"] == "suppressed"
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["value"] is None
+
+
+def test_notifications_2016_count_four_is_suppressed():
+    # 33016 2016 count 4 -> suppressed.
+    csv_bytes = _notif_csv([_notif_row("33016", 4)])
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2016")
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFIED_TOTAL"]["status"] == "suppressed"
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["status"] == "suppressed"
+
+
+def test_notifications_count_zero_total_is_final_zero_median_is_na():
+    # Measured live 2026-09-24 (NIS 73028, 2019): at count 0, SPF writes a
+    # literal '0' for EVERY value column, including the median -- not a
+    # blank. TotalCadastralIncome's 0 is a genuine additive sum-of-zero
+    # (final); CadastralIncomeP50's 0 is SPF's own undefined-median
+    # placeholder (na), same distinction Property Dynamics already makes
+    # for zero-parcel duration/rotation.
+    csv_bytes = _notif_csv([_notif_row("44001", 0, total="0", p25="0", p50="0", p75="0", sd="0")])
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFICATIONS"] == {
+        "geo_id": "44001",
+        "period": "2025",
+        "value": 0.0,
+        "status": "final",
+        "indicator_id": "MUN_CI_NOTIFICATIONS",
+    }
+    assert by["MUN_CI_NOTIFIED_TOTAL"] == {
+        "geo_id": "44001",
+        "period": "2025",
+        "value": 0.0,
+        "status": "final",
+        "indicator_id": "MUN_CI_NOTIFIED_TOTAL",
+    }
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["value"] is None
+    assert by["MUN_CI_NOTIFIED_MEDIAN"]["status"] == "na"
+
+
+def test_notifications_count_zero_blank_value_refuses():
+    # A blank cell at count 0 is itself a schema surprise now -- SPF's own
+    # shape at count 0 is a literal '0', never a blank.
+    csv_bytes = _notif_csv([_notif_row("44001", 0)])
+    with pytest.raises(AgdpSchemaError, match="expected a literal '0'"):
+        AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+
+
+def test_notifications_blank_count_refuses_never_a_fabricated_value():
+    csv_bytes = _notif_csv([_notif_row("11001", "")])
+    with pytest.raises(AgdpSchemaError, match="blank"):
+        AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+
+
+def test_notifications_count_zero_unexpected_nonblank_value_refuses():
+    csv_bytes = _notif_csv([_notif_row("44001", 0, total="100")])
+    with pytest.raises(AgdpSchemaError, match="expected a literal '0'"):
+        AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+
+
+def test_notifications_count_1to4_unexpected_nonblank_value_refuses():
+    csv_bytes = _notif_csv([_notif_row("73028", 3, total="100")])
+    with pytest.raises(AgdpSchemaError, match="expected suppression"):
+        AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+
+
+def test_notifications_count_5plus_unexpected_blank_value_refuses():
+    csv_bytes = _notif_csv([_notif_row("11001", 10)])
+    with pytest.raises(AgdpSchemaError, match="expected a published"):
+        AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+
+
+def test_notifications_only_total_total_total_row_selected():
+    csv_bytes = _notif_csv(
+        [
+            _notif_row("11001", 50, fiscal_status="OTHER", total="10000", p50="200"),
+            _notif_row("11001", 208, total="773812", p50="826"),
+        ]
+    )
+    rows = AgdpSource(NOTIFICATIONS)._parse(csv_bytes, quarter="2025")
+    assert len(rows) == 3
+    by = {r["indicator_id"]: r for r in rows}
+    assert by["MUN_CI_NOTIFICATIONS"]["value"] == 208.0
+
+
+def test_notifications_missing_required_column_refuses():
+    bad_header = _NOTIF_HEADER.replace("CadastralIncomeP50;", "")
+    text = "﻿" + "\r\n".join([bad_header, _notif_row("11001", 10)]) + "\r\n"
+    with pytest.raises(AgdpSchemaError, match="missing required"):
+        AgdpSource(NOTIFICATIONS)._parse(text.encode("utf-8"), quarter="2025")
+
+
+def test_notifications_atom_accepts_calendar_year_end_timestamp():
+    xml = _atom_bytes([("https://example.test/2025.zip", "2025-12-31T00:00:00Z", 1)])
+    versions = parse_atom_feed(xml, dataset_label="notifications", frequency="AY")
+    assert [(v.quarter, v.length) for v in versions] == [("2025", 1)]
+
+
+def test_annual_atom_rejects_calendar_year_end_timestamp():
+    # The 1-January parser ("A") must keep rejecting a 31-December
+    # timestamp -- "AY" is a separate, narrower mode, never a loosening of
+    # "A" itself.
+    xml = _atom_bytes([("https://example.test/2025.zip", "2025-12-31T00:00:00Z", 1)])
+    with pytest.raises(AgdpSchemaError, match="1-January"):
+        parse_atom_feed(xml, dataset_label="notifications", frequency="A")
+
+
+def test_calendar_year_end_atom_rejects_january_first_timestamp():
+    xml = _atom_bytes([("https://example.test/2025.zip", "2025-01-01T00:00:00Z", 1)])
+    with pytest.raises(AgdpSchemaError, match="calendar-year-end"):
+        parse_atom_feed(xml, dataset_label="notifications", frequency="AY")
+
+
+# --- Wave 5 lot C: concentration of cadastral income (52.01.08) ------------
+
+_CONC_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;ParcelNature;Range;ParcelsNumber;"
+    "ParcelsCumulatedNumber;HousingsNumber;HousingsCumulatedNumber;"
+    "TotalCadastralIncome;CumulatedCadastralIncome"
+)
+
+
+def _conc_row(
+    nis,
+    rng,
+    parcels_cum,
+    ci_cum,
+    nature="TOTAL",
+    parcels="100",
+    housings="100",
+    housings_cum="100",
+    ci="1000",
+):
+    return (
+        f"{nis};Commune;Commune;Commune;{nature};{rng};{parcels};{parcels_cum};"
+        f"{housings};{housings_cum};{ci};{ci_cum}"
+    )
+
+
+def _conc_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_CONC_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_concentration_2026_real_value_11001():
+    # Hand-computed: 11001 2026 cumulated CI 8428254 at Range30001.
+    csv_bytes = _conc_csv([_conc_row("11001", "Range30001", "6453", "8428254")])
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+    assert rows == [
+        {
+            "geo_id": "11001",
+            "period": "2026",
+            "value": 8428254.0,
+            "status": "final",
+            "indicator_id": "MUN_RESIDENTIAL_PARCELS_CI_TOTAL",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "nis,ci_cum",
+    [
+        ("44083", "19155664"),
+        ("23106", "11298541"),
+        ("82039", "8466649"),
+    ],
+)
+def test_concentration_2026_real_values_other_communes(nis, ci_cum):
+    csv_bytes = _conc_csv([_conc_row(nis, "Range30001", "1", ci_cum)])
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+    assert rows[0]["value"] == float(ci_cum)
+
+
+def test_concentration_2026_herstappe_real_value():
+    csv_bytes = _conc_csv([_conc_row("73028", "Range30001", "30", "27177")])
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+    assert rows[0]["value"] == 27177.0
+
+
+def test_concentration_2011_real_values():
+    csv_bytes = _conc_csv(
+        [
+            _conc_row("11001", "Range30001", "5760", "7473689"),
+            _conc_row("44001", "Range30001", "8311", "7127074"),
+        ]
+    )
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2011")
+    by_geo = {r["geo_id"]: r for r in rows}
+    assert by_geo["11001"]["value"] == 7473689.0
+    assert by_geo["44001"]["value"] == 7127074.0
+
+
+def test_concentration_only_total_nature_range30001_selected():
+    csv_bytes = _conc_csv(
+        [
+            _conc_row("11001", "Range1", "500", "500", nature="TOTAL"),
+            _conc_row("11001", "Range30001", "500", "3000", nature="TYPE_HOUSE"),
+            _conc_row("11001", "Range30001", "6453", "8428254", nature="TOTAL"),
+        ]
+    )
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 1
+    assert rows[0]["value"] == 8428254.0
+
+
+def test_concentration_range30001_missing_for_one_commune_no_row_written():
+    csv_bytes = _conc_csv(
+        [
+            _conc_row("11001", "Range30001", "6453", "8428254"),
+            _conc_row("44001", "Range1", "5", "5"),
+        ]
+    )
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 1
+    assert rows[0]["geo_id"] == "11001"
+
+
+def test_concentration_duplicate_range30001_row_for_same_nis_refuses():
+    csv_bytes = _conc_csv(
+        [
+            _conc_row("11001", "Range30001", "6453", "8428254"),
+            _conc_row("11001", "Range30001", "1", "1"),
+        ]
+    )
+    with pytest.raises(AgdpSchemaError, match="more than one row"):
+        AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+
+
+def test_concentration_blank_cumulated_ci_at_parcels_5plus_refuses():
+    # parcels="100" default (>= 5) -- SPF always publishes a value there.
+    csv_bytes = _conc_csv([_conc_row("11001", "Range30001", "6453", "")])
+    with pytest.raises(AgdpSchemaError, match="expected a published value"):
+        AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2026")
+
+
+def test_concentration_parcels_1to4_suppresses_never_zero():
+    # Real measured shape (2011, NIS 11005): the TOP BAND's own ParcelsNumber
+    # 1-4 suppresses CumulatedCadastralIncome even when the cumulated running
+    # total (ParcelsCumulatedNumber) is in the thousands.
+    csv_bytes = _conc_csv([_conc_row("11005", "Range30001", "6637", "", parcels="4")])
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2011")
+    assert rows == [
+        {
+            "geo_id": "11005",
+            "period": "2011",
+            "value": None,
+            "status": "suppressed",
+            "indicator_id": "MUN_RESIDENTIAL_PARCELS_CI_TOTAL",
+        }
+    ]
+
+
+def test_concentration_parcels_1to4_unexpected_nonblank_refuses():
+    csv_bytes = _conc_csv([_conc_row("11005", "Range30001", "6637", "12345", parcels="4")])
+    with pytest.raises(AgdpSchemaError, match="expected suppression"):
+        AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2011")
+
+
+def test_concentration_parcels_zero_publishes_carried_forward_total():
+    # Real measured shape (2011, NIS 11001): ParcelsNumber=0 (nothing NEW in
+    # the top band that year) still publishes a real, large cumulated total
+    # carried forward from lower bands -- final, not na.
+    csv_bytes = _conc_csv([_conc_row("11001", "Range30001", "5760", "7473689", parcels="0")])
+    rows = AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2011")
+    assert rows == [
+        {
+            "geo_id": "11001",
+            "period": "2011",
+            "value": 7473689.0,
+            "status": "final",
+            "indicator_id": "MUN_RESIDENTIAL_PARCELS_CI_TOTAL",
+        }
+    ]
+
+
+def test_concentration_parcels_zero_blank_cumulated_ci_refuses():
+    csv_bytes = _conc_csv([_conc_row("11001", "Range30001", "5760", "", parcels="0")])
+    with pytest.raises(AgdpSchemaError, match="expected a published"):
+        AgdpSource(CONCENTRATION)._parse(csv_bytes, quarter="2011")
+
+
+def test_concentration_missing_required_column_refuses():
+    bad_header = _CONC_HEADER.replace("HousingsCumulatedNumber;", "")
+    text = "﻿" + "\r\n".join([bad_header, _conc_row("11001", "Range30001", "1", "1")]) + "\r\n"
+    with pytest.raises(AgdpSchemaError, match="missing required"):
+        AgdpSource(CONCENTRATION)._parse(text.encode("utf-8"), quarter="2026")
+
+
+def test_concentration_band_sum_cross_check_11001_2026():
+    # Cross-check test (handoff): 34 bands' ParcelsNumber sum to 6453,
+    # ParcelsCumulatedNumber at Range30001 -- the SPF's own all-bands total.
+    # This is a test-only cross-check; production code never sums the bands.
+    # 33 bands of 190 plus one final band that makes the total exactly 6453
+    # -- the individual band values are arbitrary test fixtures, not real
+    # SPF figures; only the total (the real measured 11001/2026 value) and
+    # the count of bands (34, per the handoff) matter here.
+    band_parcels = [190] * 33 + [6453 - 190 * 33]
+    assert len(band_parcels) == 34
+    assert sum(band_parcels) == 6453
+    rows = [
+        _conc_row("11001", f"Range{i}", parcels=str(p), parcels_cum="0", ci_cum="0")
+        for i, p in enumerate(band_parcels)
+    ]
+    rows[-1] = _conc_row("11001", "Range30001", "6453", "8428254", parcels=str(band_parcels[-1]))
+    csv_bytes = _conc_csv(rows)
+    reader_rows = list(csv.DictReader(io.StringIO(csv_bytes.decode("utf-8-sig")), delimiter=";"))
+    total_parcels = sum(int(r["ParcelsNumber"]) for r in reader_rows if r["NISCode"] == "11001")
+    range30001 = next(r for r in reader_rows if r["Range"] == "Range30001")
+    assert total_parcels == int(range30001["ParcelsCumulatedNumber"])

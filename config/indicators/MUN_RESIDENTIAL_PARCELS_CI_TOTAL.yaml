@@ -1,0 +1,80 @@
+id: MUN_RESIDENTIAL_PARCELS_CI_TOTAL
+name:
+  en: Cadastral income, residential parcels
+  fr: Revenu cadastral, parcelles résidentielles
+  nl: Kadastraal inkomen, residentiële percelen
+unit: eur
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Total cadastral income (EUR), summed across all residential parcels in the commune, as of
+    1 January (a stock, not a flow). Read from the SPF Finances AGDP concentration of
+    cadastral income dataset (52.01.08), which publishes cadastral parcels grouped into 34
+    cadastral-income bands (Range) with a running cumulated total per band; the top band,
+    Range30001, carries the SPF's own all-bands cumulated total for the 13 residential parcel
+    natures (ParcelNature=TOTAL) -- this indicator reads that band's own CumulatedCadastralIncome
+    cell directly, never recomputed by summing the other 33 bands here (CLAUDE.md rule 6).
+    NOT the same figure as MUN_CADASTRAL_INCOME_TOTAL (land use, 52.01.04): that dataset's
+    ParcelNature=TOTAL covers every parcel use (houses, flats, land, garages, industrial, and
+    more); this one covers only the 13 residential natures the concentration dataset itself
+    groups under TOTAL -- e.g. for NIS 11001 in 2026, land use's all-uses cumulated parcel
+    count is 11,540 while this dataset's residential-only count (not itself an indicator here)
+    is 6,453, roughly half. Source: SPF Finances AGDP concentration of cadastral income
+    dataset (52.01.08), Municipality-level CSV. PERIOD IS THE CALENDAR YEAR of the snapshot's
+    own publication date (ATOM `time` YYYY-01-01). is_additive=true, aggregation_method=sum:
+    province/region/Belgium totals are summed from this figure the ordinary way over the
+    geographies that existed that year -- never averaged. A commune absent from a given year's
+    file, or missing the Range30001 row that year, is not written as zero -- the load never
+    falls back to a max or a sum across the other bands.
+  fr: >
+    Revenu cadastral total (EUR), additionné sur toutes les parcelles résidentielles de la
+    commune, au 1er janvier (un stock, pas un flux). Lu à partir du jeu de données AGDP
+    concentration du revenu cadastral du SPF Finances (52.01.08), qui publie les parcelles
+    cadastrales regroupées en 34 tranches de revenu cadastral (Range) avec un total cumulé
+    courant par tranche ; la tranche supérieure, Range30001, porte le total cumulé
+    toutes-tranches du SPF lui-même pour les 13 natures de parcelles résidentielles
+    (ParcelNature=TOTAL) -- cet indicateur lit directement la cellule CumulatedCadastralIncome
+    de cette tranche, jamais recalculé en additionnant les 33 autres tranches ici (règle 6 de
+    CLAUDE.md). CE N'EST PAS le même chiffre que MUN_CADASTRAL_INCOME_TOTAL (usage du sol,
+    52.01.04) : ce jeu de données couvre, avec ParcelNature=TOTAL, tous les usages de parcelle
+    (maisons, appartements, terrains, garages, industrie, et plus) ; celui-ci ne couvre que les
+    13 natures résidentielles que le jeu de données de concentration regroupe lui-même sous
+    TOTAL -- par exemple, pour le NIS 11001 en 2026, le nombre cumulé de parcelles tous usages
+    de l'usage du sol est de 11 540 tandis que le nombre résidentiel uniquement de ce jeu de
+    données (qui n'est pas lui-même un indicateur ici) est de 6 453, environ la moitié.
+    Source : jeu de données AGDP concentration du revenu cadastral du SPF Finances (52.01.08),
+    CSV au niveau communal. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la date de publication de
+    l'instantané (ATOM `time` YYYY-01-01). is_additive=true, aggregation_method=sum : les
+    totaux provinciaux/régionaux/nationaux sont additionnés normalement sur les entités
+    géographiques existant cette année-là -- jamais moyennés. Une commune absente du fichier
+    d'une année donnée, ou dépourvue de la ligne Range30001 cette année-là, n'est pas écrite
+    comme zéro -- le chargement ne revient jamais à un maximum ou une somme des autres
+    tranches.
+  nl: >
+    Totaal kadastraal inkomen (EUR), opgeteld over alle residentiële percelen in de gemeente,
+    per 1 januari (een voorraad, geen stroom). Gelezen uit de AGDP-dataset concentratie van
+    kadastraal inkomen van de FOD Financiën (52.01.08), die kadastrale percelen groepeert in
+    34 kadastraal-inkomenschijven (Range) met een lopend gecumuleerd totaal per schijf; de
+    hoogste schijf, Range30001, draagt het eigen alle-schijven-gecumuleerde totaal van de FOD
+    voor de 13 residentiële perceelaarden (ParcelNature=TOTAL) -- deze indicator leest de
+    eigen CumulatedCadastralIncome-cel van die schijf rechtstreeks, nooit hier herberekend door
+    de andere 33 schijven op te tellen (CLAUDE.md-regel 6). NIET hetzelfde cijfer als
+    MUN_CADASTRAL_INCOME_TOTAL (bodemgebruik, 52.01.04): die dataset dekt met ParcelNature=
+    TOTAL elke perceelbestemming (huizen, appartementen, grond, garages, industrie, en meer);
+    deze dekt enkel de 13 residentiële aarden die de concentratiedataset zelf onder TOTAL
+    groepeert -- bijvoorbeeld, voor NIS 11001 in 2026 is het gecumuleerde perceelaantal alle
+    bestemmingen van bodemgebruik 11.540, terwijl het residentiële-only aantal van deze
+    dataset (zelf geen indicator hier) 6.453 is, ruwweg de helft. Bron: AGDP-dataset
+    concentratie van kadastraal inkomen van de FOD Financiën (52.01.08), CSV op
+    gemeenteniveau. DE PERIODE IS HET KALENDERJAAR van de eigen publicatiedatum van de
+    momentopname (ATOM `time` YYYY-01-01). is_additive=true, aggregation_method=sum:
+    provincie-/gewest-/Belgiëtotalen worden op de gewone manier opgeteld over de geografische
+    entiteiten die dat jaar bestonden -- nooit gemiddeld. Een gemeente die in het bestand van
+    een bepaald jaar ontbreekt, of geen Range30001-rij heeft dat jaar, wordt niet als nul
+    geschreven -- het inladen valt nooit terug op een maximum of een som van de andere
+    schijven.
+display: null

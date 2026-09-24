@@ -1,4 +1,4 @@
-# Feature: SPF Finances AGDP patrimony datasets (leases + transactions, Wave 4; owner occupants + property dynamics, Wave 5 lot A; land use + building condition + tax exemptions, Wave 5 lot B)
+# Feature: SPF Finances AGDP patrimony datasets (leases + transactions, Wave 4; owner occupants + property dynamics, Wave 5 lot A; land use + building condition + tax exemptions, Wave 5 lot B; notifications of the cadastral income + concentration of cadastral income, Wave 5 lot C)
 
 ## Source
 
@@ -515,4 +515,215 @@ are unchanged by this batch (18.86 MB / 21.69 MB).
   database schema.
 - `docs/data_catalog.md` and `docs/steps` (not touched by this batch).
 - The quarterly Leases/Transactions path (unchanged).
+
+## Wave 5 lot C: notifications of the cadastral income + concentration of cadastral income (annual)
+
+Two more annual datasets, four new indicators, same generic reader:
+
+- **Notifications of the cadastral income (52.01.25)**, ATOM feed
+  `https://opendata.fin.belgium.be/download/ATOM/3db017b1-37c0-11f0-aeb6-f4dd0692c5d4-en.xml`
+  -- 10 versions, 2016 through 2025. `frequency="AY"`: the ATOM `time` is a
+  31-December CALENDAR-YEAR-END timestamp (e.g. "2025-12-31T00:00:00Z"), a
+  genuinely different period-parser mode from every other annual dataset in
+  this module, which snapshots on 1 January. `_calendar_year_from_timestamp`
+  is a new, narrower regex, separate from `_year_from_timestamp` -- it does
+  not loosen the 1-January parser, which still rejects a 31-December
+  timestamp (tested directly).
+- **Concentration of cadastral income (52.01.08)**, ATOM feed
+  `https://opendata.fin.belgium.be/download/ATOM/8894f840-51ca-11eb-bfa6-3448ed25ad7c-en.xml`
+  -- 16 versions, 2011 through 2026. `frequency="A"`, an ordinary 1-January
+  snapshot.
+
+### The twelve datasets dropped (never built)
+
+- **52.01.06 / .07 / .09** (rights of natural persons / legal persons /
+  real-estate companies): `RealRight` has no TOTAL row (13 individual
+  values, no aggregate); the Municipality member is 324 MB with 58 columns.
+- **52.01.11 / .12** (wealth distribution, legal persons / real-estate
+  companies): neither `Range` (34 bands) nor `PersonType` has a TOTAL row,
+  and there is no cumulated column to read a single "top band" figure from
+  the way concentration's `Range30001` works.
+- **52.01.16 / .19 / .20** (origin of holders) and **52.01.22 / .23**
+  (origin of buyers): 819-column commune-by-commune matrices, 259-265 MB
+  each -- the maintainer has a separate "commune-to-commune flows" design
+  step for these; they do not fit this module's one-row-per-commune shape.
+- **52.01.17** (property abroad, characteristics): no `Municipality` member
+  in the zip at all.
+- **52.01.18** (property abroad, holder profile): 250+ per-country columns,
+  no total column to read.
+
+A share or band sum for any of these needs its own ADR (CLAUDE.md rule 19);
+none is computed here.
+
+### Notifications columns
+
+`NISCode; NameFre; NameDut; NameGer; CadastralIncomeFiscalStatus;
+CadastralIncomeNature; NotificationMotivationCategory; CadastralIncomeNumber;
+TotalCadastralIncome; CadastralIncomeP25; CadastralIncomeP50;
+CadastralIncomeP75; CadastralIncomeSD` -- identical across the oldest (2016)
+and newest (2025) versions measured. `select` picks all three dimensions at
+TOTAL (`CadastralIncomeFiscalStatus=TOTAL, CadastralIncomeNature=TOTAL,
+NotificationMotivationCategory=TOTAL`) -- one row per commune, 565 rows in
+2025, 589 in 2016.
+
+### Concentration columns
+
+`NISCode; NameFre; NameDut; NameGer; ParcelNature; Range; ParcelsNumber;
+ParcelsCumulatedNumber; HousingsNumber; HousingsCumulatedNumber;
+TotalCadastralIncome; CumulatedCadastralIncome` -- identical 2011/2026.
+`ParcelNature` has a TOTAL; `Range` has 34 bands and NO TOTAL, but the top
+band, `Range30001`, carries the SPF's own all-bands cumulated total for the
+13 residential parcel natures grouped under `ParcelNature=TOTAL` --
+confirmed by a band-sum cross-check test
+(`test_concentration_band_sum_cross_check_11001_2026` in
+tests/test_spf_agdp_source.py and, against the real 2026 file, in this PR's
+manual verification): 34 bands' `ParcelsNumber` sum to 6,453 for NIS 11001,
+exactly `ParcelsCumulatedNumber` at `Range30001`. `select` is
+`{ParcelNature: TOTAL, Range: Range30001}`; `_parse` additionally guards
+that this selector matches AT MOST ONE row per commune
+(`require_unique_match_per_nis=True`) -- Range30001 is a positional "top
+band" pick, not a value guaranteed unique by construction the way every
+earlier dataset's `select` is, so a duplicate match raises rather than
+falling back to a max or a sum.
+
+**Not a duplicate of lot B**: lot B's `MUN_CADASTRAL_PARCELS_TOTAL` (land
+use, 52.01.04, `ParcelNature=TOTAL`) covers every parcel use -- houses,
+flats, land, garages, industrial, and more. Concentration's own
+`ParcelNature=TOTAL` covers only the 13 residential natures it groups under
+that label. Measured, NIS 11001, 2026: land use's all-uses cumulated parcel
+count is 11,540; concentration's residential-only count (itself not
+published as an indicator here) is 6,453 -- roughly half. The two datasets'
+totals are not comparable and the description of
+`MUN_RESIDENTIAL_PARCELS_CI_TOTAL` says so explicitly.
+
+### The suppression tier -- two real hazards found only by running the live backfill
+
+The handoff's original suppression mapping, written before this batch ran
+the real files, turned out to be wrong in two independent ways. Both were
+caught by `AgdpSchemaError` firing on real data during the backfill (CLAUDE.md
+rule 13 doing exactly its job), not discovered by inspection -- fixed here,
+not worked around:
+
+**1. Notifications, count = 0: SPF publishes a literal `0`, not a blank.**
+The handoff assumed every value column (`TotalCadastralIncome`,
+`CadastralIncomeP50`) is blank at `CadastralIncomeNumber=0`, mapping both to
+`na`. The real 2019 file (NIS 73028, Herstappe) has
+`CadastralIncomeNumber=0` with `TotalCadastralIncome='0'` and
+`CadastralIncomeP50='0'` -- a literal zero, not a blank. The two columns
+still mean different things at that literal zero:
+`TotalCadastralIncome` is its own additive figure (a genuine
+sum-of-zero-items, a real measured zero) -> **final, 0.0**.
+`CadastralIncomeP50` is a median, which has no defined value over zero
+observations -- SPF's `0` there is the same kind of placeholder Property
+Dynamics (lot A) already measured for zero-parcel duration/rotation -> **na,
+None**, never a fabricated zero (CLAUDE.md rule 26). `AgdpDatasetConfig`
+gained `zero_count_is_final_columns` (a new field, alongside
+`always_final_columns`) naming which columns' literal zero-at-count-0 is a
+genuine measured zero; `TotalCadastralIncome` is the only one so far. At
+count 1-4 both columns ARE blank exactly as the handoff described (NIS
+33016/2016 count=4, NIS 73028/2016-2018 count 1-2) -- suppressed, matching
+the original mapping.
+
+**2. Concentration: the suppression driver is the top band's OWN
+`ParcelsNumber`, never `ParcelsCumulatedNumber`.** The handoff's original
+config used `ParcelsCumulatedNumber` (the running total, needed to locate
+Range30001 via `select`) as the count column feeding suppression, on the
+untested assumption that a large cumulated total meant a published, final
+`CumulatedCadastralIncome`. The real 2011 file disproves this: NIS 11005
+has `ParcelsNumber=4` (the top band's OWN count, 1-4) with
+`ParcelsCumulatedNumber=6637` (a large running total) and
+`CumulatedCadastralIncome` BLANK -- 72 of 589 communes in 2011 hit exactly
+this shape. `count_column` was changed to `ParcelsNumber`. At
+`ParcelsNumber=0` (nothing NEW entered the top band that year), SPF still
+publishes the real cumulated total carried forward from lower bands -- a
+large, genuine, non-blank figure -> **final** (via
+`zero_count_is_final_columns=("CumulatedCadastralIncome",)`), not `na`. At
+1-4, blank -> suppressed. At >=5, published -> final. `_annual_row_to_
+observations` gained a genuine three-tier branch (0 / 1-4 / >=5) to express
+this -- previously it only had a two-branch shape ("final if count >= 1,
+else na") because no lot A/B column had ever needed the middle tier.
+
+Both fixes are covered by tests built directly from the real rows that
+exposed them (`test_notifications_count_zero_total_is_final_zero_median_is_na`,
+`test_concentration_parcels_1to4_suppresses_never_zero`,
+`test_concentration_parcels_zero_publishes_carried_forward_total` in
+tests/test_spf_agdp_source.py).
+
+### The indicators (4)
+
+- **MUN_CI_NOTIFICATIONS** -- `CadastralIncomeNumber`, unit `count`,
+  `preferred_direction: contextual` (building/revision activity is neither
+  good nor bad), `is_additive=true`, `aggregation_method=sum`.
+- **MUN_CI_NOTIFIED_TOTAL** -- `TotalCadastralIncome`, unit `eur`,
+  contextual, additive, `sum`. Suppressed (not zero) at count 1-4; a real
+  final zero at count 0.
+- **MUN_CI_NOTIFIED_MEDIAN** -- `CadastralIncomeP50`, unit `eur`,
+  contextual, `is_additive=false`, `aggregation_method=not_applicable` (a
+  median has no defensible aggregate -- CLAUDE.md Definitions). Modelled
+  directly on `MUN_LEASE_RENT_MEDIAN_HOUSING`'s suppressed/na split; not
+  listed in any `always_final_columns`/`zero_count_is_final_columns` set,
+  since its own zero-count literal `0` is SPF's unmeasured-median
+  placeholder, not a real value.
+- **MUN_RESIDENTIAL_PARCELS_CI_TOTAL** -- `CumulatedCadastralIncome` at
+  `Range30001`, unit `eur`, contextual, additive, `sum`. A stock as of 1
+  January, not a flow.
+
+### Geography
+
+Ordinary `resolve_geo(conn, nis, "YYYY")` per row's own year, same rule as
+every other dataset in this module (CLAUDE.md rule 3) -- notifications'
+`frequency="AY"` changes only which ATOM timestamp shape is accepted, never
+how the resulting `"YYYY"` period resolves against the commune grid.
+Verified period-correct against the real files: notifications 2025 has 565
+communes (44001 absent, merged away), 2016 has 589 (44083/23106/82039 absent
+-- did not yet exist); concentration 2026 has 565 communes (44001 absent),
+2011 has 589 (44083/23106/82039 absent).
+
+### Hand-computed expected values (real files, live-verified)
+
+Notifications 2025, TOTAL/TOTAL/TOTAL -- 11001: count 208, total 773,812,
+median 826. 44083: 1,143 / 3,501,614 / 444. 23106: 414 / 278,705 / 228.
+82039: 712 / 479,212 / 16. 44001: absent. 73028 (Herstappe): count 3 (final)
+-- total and median suppressed (value NULL). Notifications 2016 -- 11001:
+211 / 908,627 / 926. 44001: 552 / 8,707,921 / 809. 44083/23106/82039:
+absent. 73028: count 1 -- suppressed. 33016: count 4 -- suppressed.
+
+Concentration, `ParcelNature=TOTAL, Range=Range30001`, 2026 -- 11001:
+cumulated CI 8,428,254 (cumulated parcels 6,453, cumulated housings 6,635).
+44083: 19,155,664 (21,111 / 21,639). 23106: 11,298,541 (10,758 / 10,957).
+82039: 8,466,649 (8,998 / 9,770). 73028: 27,177 (30 / 32). 44001: absent.
+2011 -- 11001: 7,473,689 (5,760 / 5,999). 44001: 7,127,074 (8,311 / 8,554).
+44083/23106/82039: absent. 73028: 25,772 (29 / 31).
+
+Every one of these values was read back live from `data/local/working.db`
+after the real backfill (not merely from the fixture tests) and matches
+exactly.
+
+### Store
+
+Both datasets land in the existing `spf_agdp_patrimony` store
+(config/stores.yaml) -- no new store. Real backfill: 26,782 rows across all
+26 versions (10 notifications + 16 concentration), 620 distinct communes.
+Combined with lot B's existing 55,968 rows, the store now holds 82,750 rows.
+Committed CSV `data/spf_agdp_patrimony_observations.csv` measures 12.26 MB,
+well under the 18 MB threshold this batch's handoff set for staying in the
+same store rather than splitting. `data/spf_agdp_observations.csv` (Wave
+4/lot A) is untouched by this batch -- byte-identical, confirmed by `git
+diff --stat` showing no change. The store's `data/communes_history/
+spf_agdp_patrimony.csv` history shard is produced by the next daily run, not
+this PR (the daily workflow regenerates `public/data/**` and the history
+shards together; this PR commits only the store CSV, the state file and the
+database, per the handoff).
+
+### Out of scope (Wave 5 lot C)
+
+- The twelve dropped datasets above (each needs its own ADR if ever
+  revisited for a share/band-sum figure).
+- Any page surfacing of these four indicators.
+- `src/analytics/aggregate.py`, `resolve_geo()`, any other adapter, or the
+  database schema.
+- `docs/data_catalog.md` and `docs/steps` (not touched by this batch).
+- The quarterly Leases/Transactions path and lots A/B (unchanged).
+- Loosening `_ANNUAL_TIMESTAMP` (the 1-January parser) -- `_CALENDAR_YEAR_END_TIMESTAMP`
+  is a wholly separate, narrower regex.
 - Province/region rows (Municipality-level only).

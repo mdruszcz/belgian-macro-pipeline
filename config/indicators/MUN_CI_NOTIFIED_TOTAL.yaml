@@ -1,0 +1,59 @@
+id: MUN_CI_NOTIFIED_TOTAL
+name:
+  en: Total notified cadastral income
+  fr: Revenu cadastral total notifié
+  nl: Totaal kennisgegeven kadastraal inkomen
+unit: eur
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Total cadastral income (EUR/year) across every cadastral income notification issued for
+    the commune in the calendar year, across every fiscal status, cadastral-income nature and
+    notification-motivation category combined (CadastralIncomeFiscalStatus=TOTAL,
+    CadastralIncomeNature=TOTAL, NotificationMotivationCategory=TOTAL). Source: SPF Finances
+    AGDP notifications of the cadastral income dataset (52.01.25), Municipality-level CSV.
+    PERIOD IS THE CALENDAR YEAR the notifications were issued in (ATOM `time` YYYY-12-31).
+    SUPPRESSED, NOT ZERO, when the underlying notification count (MUN_CI_NOTIFICATIONS) is 1-4
+    in that commune-year -- SPF Finances withholds the figure below five notifications to
+    avoid identifying an individual property; status is 'suppressed' with value NULL, never a
+    fabricated figure. NOT APPLICABLE when the count is zero (no notification that year, so no
+    total to report -- status 'na', value NULL, distinct from suppression). is_additive=true,
+    aggregation_method=sum: province/region/Belgium totals are summed from this figure the
+    ordinary way over the geographies that existed that year -- never averaged.
+  fr: >
+    Revenu cadastral total (EUR/an) sur l'ensemble des notifications de revenu cadastral
+    émises pour la commune au cours de l'année civile, tous statuts fiscaux, natures de revenu
+    cadastral et catégories de motivation confondus (CadastralIncomeFiscalStatus=TOTAL,
+    CadastralIncomeNature=TOTAL, NotificationMotivationCategory=TOTAL). Source : jeu de
+    données AGDP notifications du revenu cadastral du SPF Finances (52.01.25), CSV au niveau
+    communal. LA PÉRIODE EST L'ANNÉE CIVILE au cours de laquelle les notifications ont été
+    émises (ATOM `time` YYYY-12-31). SUPPRIMÉ, ET NON ZÉRO, lorsque le nombre de notifications
+    sous-jacent (MUN_CI_NOTIFICATIONS) est compris entre 1 et 4 dans cette commune-année -- le
+    SPF Finances retient le chiffre en dessous de cinq notifications pour éviter d'identifier
+    un bien individuel ; le statut est 'suppressed' avec une valeur NULL, jamais un chiffre
+    fabriqué. NON APPLICABLE lorsque le nombre est nul (aucune notification cette année-là,
+    donc aucun total à rapporter -- statut 'na', valeur NULL, distinct de la suppression).
+    is_additive=true, aggregation_method=sum : les totaux provinciaux/régionaux/nationaux sont
+    additionnés normalement sur les entités géographiques existant cette année-là -- jamais
+    moyennés.
+  nl: >
+    Totaal kadastraal inkomen (EUR/jaar) over alle kennisgevingen van kadastraal inkomen
+    uitgereikt voor de gemeente in het kalenderjaar, over alle fiscale statussen, aarden van
+    kadastraal inkomen en motivatiecategorieën samen (CadastralIncomeFiscalStatus=TOTAL,
+    CadastralIncomeNature=TOTAL, NotificationMotivationCategory=TOTAL). Bron: AGDP-dataset
+    kennisgevingen kadastraal inkomen van de FOD Financiën (52.01.25), CSV op gemeenteniveau.
+    DE PERIODE IS HET KALENDERJAAR waarin de kennisgevingen werden uitgereikt (ATOM `time`
+    YYYY-12-31). ONDERDRUKT, NIET NUL, wanneer het onderliggende aantal kennisgevingen
+    (MUN_CI_NOTIFICATIONS) 1-4 bedraagt in dat gemeente-jaar -- de FOD Financiën houdt het
+    cijfer onder de vijf kennisgevingen achter om een individueel goed niet identificeerbaar te
+    maken; status is 'suppressed' met waarde NULL, nooit een verzonnen cijfer. NIET VAN
+    TOEPASSING wanneer het aantal nul is (geen kennisgeving dat jaar, dus geen totaal te
+    rapporteren -- status 'na', waarde NULL, te onderscheiden van onderdrukking).
+    is_additive=true, aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de
+    gewone manier opgeteld over de geografische entiteiten die dat jaar bestonden -- nooit
+    gemiddeld.
+display: null

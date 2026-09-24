@@ -1,0 +1,64 @@
+id: MUN_CI_NOTIFICATIONS
+name:
+  en: Cadastral income notifications
+  fr: Notifications de revenu cadastral
+  nl: Kennisgevingen kadastraal inkomen
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of cadastral income notifications issued for the commune in the calendar year,
+    across every fiscal status, cadastral-income nature and notification-motivation category
+    combined (CadastralIncomeFiscalStatus=TOTAL, CadastralIncomeNature=TOTAL,
+    NotificationMotivationCategory=TOTAL) -- a notification records a change to a property's
+    cadastral income (new construction, renovation, revision, etc.), so this figure reflects
+    building/revision activity, not a value judgement (preferred_direction is contextual, not
+    higher_is_better or lower_is_better). Source: SPF Finances AGDP notifications of the
+    cadastral income dataset (52.01.25), Municipality-level CSV. PERIOD IS THE CALENDAR YEAR
+    the notifications were issued in (ATOM `time` YYYY-12-31, a calendar-year flow, not a
+    1-January snapshot). A literal 0 is a genuine measured zero, final; a blank cell at
+    TOTAL/TOTAL/TOTAL is a schema surprise and the load refuses rather than guess (never
+    observed live). is_additive=true, aggregation_method=sum: province/region/Belgium totals
+    are summed from this count the ordinary way over the geographies that existed that year --
+    never averaged. A commune absent from a given year's file is not written as zero -- it did
+    not yet exist, or the file simply has no row for it that year.
+  fr: >
+    Nombre de notifications de revenu cadastral émises pour la commune au cours de l'année
+    civile, tous statuts fiscaux, natures de revenu cadastral et catégories de motivation de
+    notification confondus (CadastralIncomeFiscalStatus=TOTAL, CadastralIncomeNature=TOTAL,
+    NotificationMotivationCategory=TOTAL) -- une notification enregistre un changement du
+    revenu cadastral d'un bien (nouvelle construction, rénovation, révision, etc.), ce chiffre
+    reflète donc une activité de construction/révision, pas un jugement de valeur
+    (preferred_direction est contextual, ni higher_is_better ni lower_is_better). Source : jeu
+    de données AGDP notifications du revenu cadastral du SPF Finances (52.01.25), CSV au
+    niveau communal. LA PÉRIODE EST L'ANNÉE CIVILE au cours de laquelle les notifications ont
+    été émises (ATOM `time` YYYY-12-31, un flux annuel civil, pas un instantané au 1er
+    janvier). Un 0 littéral est un zéro réellement mesuré, final ; une cellule vide à
+    TOTAL/TOTAL/TOTAL est une anomalie de schéma et le chargement refuse plutôt que de deviner
+    (jamais observé en pratique). is_additive=true, aggregation_method=sum : les totaux
+    provinciaux/régionaux/nationaux sont additionnés normalement sur les entités géographiques
+    existant cette année-là -- jamais moyennés. Une commune absente du fichier d'une année
+    donnée n'est pas écrite comme zéro -- elle n'existait pas encore, ou le fichier n'a
+    simplement aucune ligne pour elle cette année-là.
+  nl: >
+    Aantal kennisgevingen van kadastraal inkomen uitgereikt voor de gemeente in het
+    kalenderjaar, over alle fiscale statussen, aarden van kadastraal inkomen en
+    motivatiecategorieën samen (CadastralIncomeFiscalStatus=TOTAL, CadastralIncomeNature=TOTAL,
+    NotificationMotivationCategory=TOTAL) -- een kennisgeving registreert een wijziging van het
+    kadastraal inkomen van een goed (nieuwbouw, renovatie, herziening, enz.), dit cijfer
+    weerspiegelt dus bouw-/herzieningsactiviteit, geen waardeoordeel (preferred_direction is
+    contextual, niet higher_is_better of lower_is_better). Bron: AGDP-dataset kennisgevingen
+    kadastraal inkomen van de FOD Financiën (52.01.25), CSV op gemeenteniveau. DE PERIODE IS
+    HET KALENDERJAAR waarin de kennisgevingen werden uitgereikt (ATOM `time` YYYY-12-31, een
+    kalenderjaarlijkse stroom, geen momentopname op 1 januari). Een letterlijke 0 is een echt
+    gemeten nul, definitief; een lege cel bij TOTAL/TOTAL/TOTAL is een schema-verrassing en het
+    inladen weigert eerder dan te gokken (nooit live waargenomen). is_additive=true,
+    aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de gewone manier
+    opgeteld over de geografische entiteiten die dat jaar bestonden -- nooit gemiddeld. Een
+    gemeente die in het bestand van een bepaald jaar ontbreekt, wordt niet als nul geschreven
+    -- ze bestond nog niet, of het bestand heeft eenvoudigweg geen rij voor haar dat jaar.
+display: null
