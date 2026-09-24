@@ -119,6 +119,26 @@ COMMANDS: dict[str, Command] = {
         workflow_step="sync_spf_agdp",
         source_ids=("spf_finances",),
     ),
+    # NOT an observations write (rule 18: no origin dimension in that table's PK) -- this
+    # writes the separate committed flows store, data/flows/buyer_origin_<year>.json
+    # (src/flows/store.py). `source_ids=()` because run.source_snapshot's UI metadata reads
+    # observations/fetch_runs by source_id, which this script never touches.
+    # `workflow_step=None` (the default): this asset is not part of TRACKED / the daily
+    # auto-merge gate yet -- it is new in this PR and the gate is being widened deliberately,
+    # not by accident, in a follow-up once this has run clean for a while, the same caution
+    # already applied to bankruptcies/population_movement/ipp_rate above.
+    # `outputs` is deliberately empty: the store's filename carries the data's own year
+    # (buyer_origin_<year>.json), which changes as new years publish -- a fixed template here
+    # would go stale the day after the next year's file lands. `run.output_metadata` has
+    # nothing to report on for this asset for that reason; the sync's own stdout, and the
+    # store file's presence under data/flows/, are the evidence a run worked.
+    "commune_flows_buyer_origin": Command(
+        ("scripts/sync_commune_flows.py", "--db", "{db}"),
+        # No --out-dir option in its own command line (unlike an exporter's --out), so it
+        # always writes data/flows/** under the repository root -- same reason
+        # commune_adjacency/commune_typology below are writes_repo_only.
+        writes_repo_only=True,
+    ),
     "international_observations": Command(
         ("scripts/sync_international.py", "--db", "{db}"),
         workflow_step="sync_international",

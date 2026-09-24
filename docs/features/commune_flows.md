@@ -101,12 +101,22 @@ cells. Any share at province level is recomputed from those sums, never averaged
 
 Not the observations table: its PK `(indicator_id, geo_id, period, vintage)` has no origin
 dimension, and rule 18 forbids reshaping the canonical schema for this. So: a **separate
-committed flow store**, one CSV per dataset, long format
-`period,dest_geo_id,origin_key,value,coverage`, holding only the top 8 named origins plus the
-five bucket rows per destination per year. Measured: a full year for all 581 destinations
-serialises to **0.12 MB**, so ten years of buyers plus sixteen of owners stays under a megabyte
-— far below rule 12's 25 MB, which matters since `communes_history.csv` already had to be
-sharded at that ceiling. The full 266 MB matrix is **never committed**: read, trimmed, discarded.
+committed flow store**, one JSON file per dataset per year (PR 1, as built:
+`data/flows/buyer_origin_<year>.json`, `src/flows/store.py`) — a document per destination
+carrying its denominator, coverage, the top 8 named origins and the SIX bucket values
+(ADR 0013 decision 4 added `origin_unknown` as its own bucket, so five buckets in this
+paragraph's original draft is superseded by the ADR's six), not a flat long-format CSV as
+first sketched here. JSON was chosen over CSV because the ADR's own per-destination shape
+(a denominator, a coverage figure, 8 named rows and 6 bucket rows, several of them carrying
+both an unrounded value and a rounded share) nests naturally and needs no synthetic
+`origin_key` enum to distinguish a named origin from a bucket row. Deterministic key
+ordering (`sort_keys=True`) and destinations sorted by `dest_geo_id` keep two runs over the
+same real input byte-identical (rule 35) except the provenance `fetched_at` timestamp, which
+legitimately differs per run. Measured on the real 2025 file, all 565 destinations: **0.96 MB**
+(the ADR's example bucket count grew by one since this section's 0.12 MB CSV estimate, and JSON
+carries more punctuation than long-format CSV) — still far below rule 12's 25 MB ceiling. The
+full ~259 MB Municipality-wide CSV (and the 266 MB StatisticalUnit member this dataset never
+reads) is **never committed**: read via the ranged zip reader, trimmed, discarded.
 
 Public payload: `public/data/flows/<dataset>/<nis>.json` — one small static file per commune,
 fetched on demand by the block, GitHub-Pages compatible (rule 30). Source, unit, period and

@@ -36,6 +36,7 @@ _DESCRIPTIONS = {
     "population_movement_observations": "Statbel population movement: births, deaths, internal/international migration (scripts/sync_population_movement.py).",
     "ipp_rate_observations": "SPF Finances communal additional personal-income-tax rate (scripts/sync_ipp_rate.py).",
     "spf_agdp_observations": "SPF Finances AGDP real-estate leases/transactions, owner occupants/property dynamics, and land use/building condition/tax exemptions (scripts/sync_spf_agdp.py).",
+    "commune_flows_buyer_origin": "SPF Finances buyer-origin flows, latest year only, written to the separate committed flows store rather than observations (scripts/sync_commune_flows.py).",
     "market_data": "BEL 20, EUR/USD and spreads to data/stocks.json (fetch_stocks.py). No database.",
     "canonical_observations": "Legacy macro tables synced into the canonical schema (scripts/sync_to_canonical.py).",
     "international_observations": "International pilot: five direct-Eurostat, every-country indicators (scripts/sync_international.py).",
@@ -86,6 +87,9 @@ ipp_rate_observations = _source_asset(
 spf_agdp_observations = _source_asset(
     "spf_agdp_observations", group="sources_api", deps=["staging_db"]
 )
+commune_flows_buyer_origin = _source_asset(
+    "commune_flows_buyer_origin", group="sources_api", deps=["staging_db"]
+)
 international_observations = _source_asset(
     "international_observations", group="sources_api", deps=["staging_db"]
 )
@@ -102,6 +106,7 @@ ASSETS = [
     population_movement_observations,
     ipp_rate_observations,
     spf_agdp_observations,
+    commune_flows_buyer_origin,
     international_observations,
     market_data,
 ]
