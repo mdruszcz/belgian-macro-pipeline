@@ -132,7 +132,10 @@ def test_the_values_attribution_markers_are_intact():
 def test_every_registered_source_could_render_a_row():
     """Sanity check on the fixture data itself, so a browser test failure
     below is never mistaken for an empty registry."""
-    assert len(_sources_registry()) == 9
+    # At least the nine sources registered when this page was built; the
+    # registry grows as sources are added (spf_finances made ten on
+    # 2026-09-24), so an exact count would fail on every new source.
+    assert len(_sources_registry()) >= 9
 
 
 # --- browser checks ------------------------------------------------------
