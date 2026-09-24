@@ -1,7 +1,7 @@
 # ADR 0013 — Buyers'-origin shares: what a cell counts, the denominator, and the five buckets
 
 Date: 2026-09-24
-Status: Proposed — awaiting the maintainer's approval
+Status: Accepted — approved by the maintainer on 2026-09-24 ("approuve"), as proposed, including publishing coverage without a gate.
 Required by: `docs/features/commune_flows.md` §2 ("Data rules"), which names this record as a
 precondition for any code. Extends [ADR 0003](0003-aggregation-rule.md) (aggregates are built from
 the ground up or refused) and [ADR 0012](0012-police-zero-is-not-available.md) (a zero is a state,
