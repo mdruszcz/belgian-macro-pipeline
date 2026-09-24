@@ -208,7 +208,15 @@ def test_all_data_is_one_row_per_indicator_and_stays_compact(chromium, site):
 
         box = page.locator("#allData").bounding_box()
         assert box is not None
-        assert box["height"] < 4000, f"#allData is {box['height']}px tall, expected under 4000px"
+        # Compactness per row, not in total: 4000px was the budget when Namur
+        # carried 70 indicators (#189, 2026-09-14), i.e. ~57px a row. A total
+        # cap fails every time a source is added (89 indicators on 2026-09-24)
+        # without the table getting any less compact.
+        per_row = box["height"] / indicator_count
+        assert per_row < 4000 / 70, (
+            f"#allData is {box['height']}px for {indicator_count} rows "
+            f"({per_row:.1f}px a row), expected under {4000 / 70:.1f}px a row"
+        )
     finally:
         ctx.close()
 
