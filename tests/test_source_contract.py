@@ -296,7 +296,9 @@ def test_municipal_time_series_contract_population_movement(tmp_path, monkeypatc
         assert row["indicator_id"] in {
             "BIRTHS",
             "DEATHS",
+            "INTERNAL_MIGRATION_IN",
             "INTERNAL_MIGRATION_NET",
+            "INTERNAL_MIGRATION_OUT",
             "INTERNATIONAL_MIGRATION_NET",
         }
     # The raw response was cached before parsing, the base class's own promise.

@@ -1,5 +1,7 @@
 """Statbel's population-movement workbook -- BIRTHS, DEATHS,
-INTERNAL_MIGRATION_NET, INTERNATIONAL_MIGRATION_NET, Block NS3.
+INTERNAL_MIGRATION_NET, INTERNATIONAL_MIGRATION_NET,
+INTERNAL_MIGRATION_IN, INTERNAL_MIGRATION_OUT, Block NS3 (+ this batch,
+2026-09-24, internal migration arrivals/departures).
 
 TWO STEPS, same discipline as src/fetchers/bankruptcies.py: the theme page
 (https://statbel.fgov.be/fr/themes/population/mouvement-de-la-population)
@@ -67,12 +69,20 @@ transition-sheet exclusion (above) or, outside that expected set, causes
 the whole run to be refused (never partial), the same sync_police.py
 pattern.
 
-FOUR INDICATORS, ONE FETCH: like bankruptcies.py, one row in the source
-produces up to four output rows, one per indicator, each carrying a fifth
-key `indicator_id` beyond the base MunicipalTimeSeriesSource four. All four
-values (NAISSANCES, DECES, internal SOLDE, international SOLDE) are the
+SIX INDICATORS, ONE FETCH: like bankruptcies.py, one row in the source
+produces up to six output rows, one per indicator, each carrying a fifth
+key `indicator_id` beyond the base MunicipalTimeSeriesSource four. All six
+values (NAISSANCES, DECES, internal SOLDE, international SOLDE, and --
+added 2026-09-24 -- internal ENTREES/SORTIES, columns G and H) are the
 publisher's own totals -- nothing here recomputes or derives a value
-(CLAUDE.md rule 6).
+(CLAUDE.md rule 6). INTERNAL_MIGRATION_IN (G/ENTREES) and
+INTERNAL_MIGRATION_OUT (H/SORTIES) are published alongside I/SOLDE under the
+same "MOUVEMENT MIGRATOIRE INTERNE" group; INTERNAL_MIGRATION_NET =
+INTERNAL_MIGRATION_IN - INTERNAL_MIGRATION_OUT, as published by Statbel
+(not recomputed here -- verified equal to the existing SOLDE column for
+every row parsed, but the sync writes I/SOLDE unchanged, and IN/OUT are
+each written unchanged too; three independent published numbers, not two
+plus a derivation).
 
 Status is 'final' on every row: this file publishes settled annual
 demographic accounts, no provisional marker anywhere in it.
@@ -91,13 +101,24 @@ BIRTHS = "BIRTHS"
 DEATHS = "DEATHS"
 INTERNAL_MIGRATION_NET = "INTERNAL_MIGRATION_NET"
 INTERNATIONAL_MIGRATION_NET = "INTERNATIONAL_MIGRATION_NET"
+INTERNAL_MIGRATION_IN = "INTERNAL_MIGRATION_IN"
+INTERNAL_MIGRATION_OUT = "INTERNAL_MIGRATION_OUT"
 
-ALL_INDICATORS = (BIRTHS, DEATHS, INTERNAL_MIGRATION_NET, INTERNATIONAL_MIGRATION_NET)
+ALL_INDICATORS = (
+    BIRTHS,
+    DEATHS,
+    INTERNAL_MIGRATION_NET,
+    INTERNATIONAL_MIGRATION_NET,
+    INTERNAL_MIGRATION_IN,
+    INTERNAL_MIGRATION_OUT,
+)
 
 #: Column letters -> 0-based index, for readability at the call sites below.
 _COL_CODE_INS = 0
 _COL_NAISSANCES = 3  # D
 _COL_DECES = 4  # E
+_COL_INTERNAL_ENTREES = 6  # G
+_COL_INTERNAL_SORTIES = 7  # H
 _COL_INTERNAL_SOLDE = 8  # I
 _COL_INTERNATIONAL_SOLDE = 15  # P
 
@@ -117,6 +138,8 @@ _COL_INTERNAL_GROUP_ORIGIN = 6  # G
 _EXPECTED_HEADER = {
     _COL_NAISSANCES: ("MOUVEMENT NATUREL", None, "NAISSANCES"),
     _COL_DECES: (None, None, "DECES"),
+    _COL_INTERNAL_ENTREES: (None, None, "ENTREES"),
+    _COL_INTERNAL_SORTIES: (None, None, "SORTIES"),
     _COL_INTERNAL_SOLDE: (None, None, "SOLDE"),
     _COL_INTERNATIONAL_SOLDE: (None, "SOLDE", None),
 }
@@ -240,6 +263,8 @@ class PopulationMovementSource(MunicipalTimeSeriesSource):
                     (_COL_DECES, DEATHS),
                     (_COL_INTERNAL_SOLDE, INTERNAL_MIGRATION_NET),
                     (_COL_INTERNATIONAL_SOLDE, INTERNATIONAL_MIGRATION_NET),
+                    (_COL_INTERNAL_ENTREES, INTERNAL_MIGRATION_IN),
+                    (_COL_INTERNAL_SORTIES, INTERNAL_MIGRATION_OUT),
                 ):
                     cell = row[col]
                     if not isinstance(cell, (int, float)):

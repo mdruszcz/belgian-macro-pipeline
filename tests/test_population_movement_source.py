@@ -21,7 +21,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.fetchers.population_movement import (
     BIRTHS,
     DEATHS,
+    INTERNAL_MIGRATION_IN,
     INTERNAL_MIGRATION_NET,
+    INTERNAL_MIGRATION_OUT,
     INTERNATIONAL_MIGRATION_NET,
     PopulationMovementLinkNotFoundError,
     PopulationMovementSchemaError,
@@ -104,7 +106,13 @@ ROW4 = [
 
 
 def _data_row(
-    code: str, naissances: float, deces: float, internal_solde: float, international_solde: float
+    code: str,
+    naissances: float,
+    deces: float,
+    internal_solde: float,
+    international_solde: float,
+    internal_entrees: float | None = None,
+    internal_sorties: float | None = None,
 ) -> list:
     row = [None] * 25
     row[0] = code
@@ -113,6 +121,15 @@ def _data_row(
     row[3] = naissances
     row[4] = deces
     row[5] = naissances - deces
+    # Default ENTREES/SORTIES to values consistent with the given SOLDE when
+    # not supplied explicitly, so existing callers (which only pass SOLDE)
+    # keep working without every fixture needing updating.
+    if internal_entrees is None:
+        internal_entrees = max(internal_solde, 0)
+    if internal_sorties is None:
+        internal_sorties = internal_entrees - internal_solde
+    row[6] = internal_entrees
+    row[7] = internal_sorties
     row[8] = internal_solde
     row[15] = international_solde
     return row
@@ -143,8 +160,11 @@ def _make_workbook(sheets: dict[str, list[list]]) -> bytes:
     return buf.getvalue()
 
 
-REAL_2025_NAMUR = _data_row("92094", 1036, 1118, -300, 826)
-REAL_2025_LIEGE = _data_row("62063", 2016, 2024, -1293, 2135)
+# ENTREES/SORTIES (columns G/H) hand-copied from the real 2025 sheet,
+# 2026-09-24: Namur 5258/5558 (5258-5558=-300, matches the existing SOLDE
+# column I exactly), Liège 10411/11704 (10411-11704=-1293, matches).
+REAL_2025_NAMUR = _data_row("92094", 1036, 1118, -300, 826, 5258, 5558)
+REAL_2025_LIEGE = _data_row("62063", 2016, 2024, -1293, 2135, 10411, 11704)
 REAL_2025_AARTSELAAR = _data_row("11001", 131, 170, 34, 0)
 
 
@@ -188,11 +208,26 @@ def test_parses_hand_computed_2025_values():
     assert by_key[(DEATHS, "92094", "2025")] == 1118.0
     assert by_key[(INTERNAL_MIGRATION_NET, "92094", "2025")] == -300.0
     assert by_key[(INTERNATIONAL_MIGRATION_NET, "92094", "2025")] == 826.0
+    assert by_key[(INTERNAL_MIGRATION_IN, "92094", "2025")] == 5258.0
+    assert by_key[(INTERNAL_MIGRATION_OUT, "92094", "2025")] == 5558.0
+    # IN - OUT reproduces the publisher's own SOLDE exactly.
+    assert (
+        by_key[(INTERNAL_MIGRATION_IN, "92094", "2025")]
+        - by_key[(INTERNAL_MIGRATION_OUT, "92094", "2025")]
+        == by_key[(INTERNAL_MIGRATION_NET, "92094", "2025")]
+    )
 
     assert by_key[(BIRTHS, "62063", "2025")] == 2016.0
     assert by_key[(DEATHS, "62063", "2025")] == 2024.0
     assert by_key[(INTERNAL_MIGRATION_NET, "62063", "2025")] == -1293.0
     assert by_key[(INTERNATIONAL_MIGRATION_NET, "62063", "2025")] == 2135.0
+    assert by_key[(INTERNAL_MIGRATION_IN, "62063", "2025")] == 10411.0
+    assert by_key[(INTERNAL_MIGRATION_OUT, "62063", "2025")] == 11704.0
+    assert (
+        by_key[(INTERNAL_MIGRATION_IN, "62063", "2025")]
+        - by_key[(INTERNAL_MIGRATION_OUT, "62063", "2025")]
+        == by_key[(INTERNAL_MIGRATION_NET, "62063", "2025")]
+    )
 
     assert by_key[(BIRTHS, "11001", "2025")] == 131.0
     assert by_key[(DEATHS, "11001", "2025")] == 170.0
@@ -214,18 +249,22 @@ def test_every_row_carries_the_base_contract_keys():
             DEATHS,
             INTERNAL_MIGRATION_NET,
             INTERNATIONAL_MIGRATION_NET,
+            INTERNAL_MIGRATION_IN,
+            INTERNAL_MIGRATION_OUT,
         }
 
 
-def test_four_indicators_emitted_per_data_row():
+def test_six_indicators_emitted_per_data_row():
     raw = _make_workbook({"2025": [REAL_2025_NAMUR]})
     rows = PopulationMovementSource()._parse(raw)
-    assert len(rows) == 4
+    assert len(rows) == 6
     assert {r["indicator_id"] for r in rows} == {
         BIRTHS,
         DEATHS,
         INTERNAL_MIGRATION_NET,
         INTERNATIONAL_MIGRATION_NET,
+        INTERNAL_MIGRATION_IN,
+        INTERNAL_MIGRATION_OUT,
     }
 
 
@@ -247,7 +286,7 @@ def test_footer_and_blank_rows_are_skipped_not_errored():
     buf = io.BytesIO()
     wb.save(buf)
     rows = PopulationMovementSource()._parse(buf.getvalue())
-    assert len(rows) == 4  # only Namur's row produced data
+    assert len(rows) == 6  # only Namur's row produced data
 
 
 # --- schema refusals (CLAUDE.md rule 13) -------------------------------------
@@ -310,6 +349,40 @@ def test_internal_migration_group_label_moved_refuses():
     buf = io.BytesIO()
     wb.save(buf)
     with pytest.raises(PopulationMovementSchemaError, match="MOUVEMENT MIGRATOIRE INTERNE"):
+        PopulationMovementSource()._parse(buf.getvalue())
+
+
+def test_internal_entrees_column_header_moved_refuses():
+    row4 = list(ROW4)
+    row4[6] = "SOMETHING ELSE"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    ws = wb.create_sheet("2025")
+    ws.append(["title"] + [None] * 24)
+    ws.append(ROW2)
+    ws.append(ROW3)
+    ws.append(row4)
+    ws.append(REAL_2025_NAMUR)
+    buf = io.BytesIO()
+    wb.save(buf)
+    with pytest.raises(PopulationMovementSchemaError, match="ENTREES"):
+        PopulationMovementSource()._parse(buf.getvalue())
+
+
+def test_internal_sorties_column_header_moved_refuses():
+    row4 = list(ROW4)
+    row4[7] = "SOMETHING ELSE"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    ws = wb.create_sheet("2025")
+    ws.append(["title"] + [None] * 24)
+    ws.append(ROW2)
+    ws.append(ROW3)
+    ws.append(row4)
+    ws.append(REAL_2025_NAMUR)
+    buf = io.BytesIO()
+    wb.save(buf)
+    with pytest.raises(PopulationMovementSchemaError, match="SORTIES"):
         PopulationMovementSource()._parse(buf.getvalue())
 
 
