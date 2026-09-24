@@ -2045,3 +2045,9 @@ Why: Rule 12.
  [NEXT] [BUILD] Wave 5 lot B -- SPF Finances annual: property wealth by age (52.01.10), land use (52.01.04), building condition (52.01.05), property-tax exemptions (52.01.03)
 How: Same AGDP adapter; measure first; real backfill; audited.
 Why: Completes the housing and local-finance picture.
+ [BUILD] Internal migration arrivals and departures per commune (maintainer's request 2026-09-24)
+How: Two more indicators from the Statbel population-movement workbook already loaded by wave 3 -- the internal-migration ENTREES and SORTIES columns (G/H), published counts, per-period geography like the four existing ones; then add them to the commune page's demography section.
+Why: A net balance of -1,293 hides whether 10,000 or 2,000 people moved in; arrivals and departures make it readable.
+ [SPEC] Where movers and buyers come from: commune-to-commune flows (maintainer's request 2026-09-24)
+How: Design first -- the SPF buyer-origin files (52.01.21/.22/.23) and owner-origin files (52.01.16/.19/.20) are commune x commune matrices (up to 259 MB a year), not one figure per commune; decide the product (e.g. top origins per commune, flow map), the storage (not the observations store as-is), and whether any share needs an ADR; check whether Statbel publishes true migration flows between communes.
+Why: Residential attraction -- who moves or buys where -- is one of the most asked questions about a commune.
