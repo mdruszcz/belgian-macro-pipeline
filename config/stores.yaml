@@ -421,3 +421,35 @@ stores:
     reference_rows:
       script: scripts/sync_spf_agdp.py
       args: ["--reference-rows-only"]
+
+  # Wave 5 lot B, SPF Finances AGDP patrimony datasets (docs/features/
+  # spf_agdp.md): land use (52.01.04), building condition (52.01.05) and
+  # property-tax exemptions (52.01.03), all three annual. A SEPARATE store
+  # from `spf_agdp` above, not folded into it, purely for committed-CSV size:
+  # data/spf_agdp_observations.csv (Wave 4 + lot A) already measures ~18.9 MB
+  # (docs/features/spf_agdp.md); lot B's three datasets add roughly
+  # 55,700 more rows across 16/16/16 versions x ~565 communes x up to 3
+  # indicators each, which would push the combined file well past the 25 MB
+  # commit ceiling. Real measured size reported in the PR. Same source_id
+  # (spf_finances) and same sync script (scripts/sync_spf_agdp.py) as
+  # `ipp_rate` and `spf_agdp` -- one script now writes rows for BOTH stores
+  # in a single run; scripts/offload_stores.py dispatches each row to
+  # whichever store declares its indicator_id (its own `declared` overlap
+  # check, ~line 263-269, refuses a run where two stores claim the same
+  # indicator -- this store and `spf_agdp` declare disjoint indicator sets,
+  # verified by tests/test_stores.py).
+  spf_agdp_patrimony:
+    path: data/spf_agdp_patrimony_observations.csv
+    source_id: spf_finances
+    mode: in_db
+    history_shard: true
+    indicators:
+      - MUN_BUILDINGS_CENTRAL_HEATING
+      - MUN_BUILDINGS_TOTAL
+      - MUN_CADASTRAL_INCOME_TAXABLE
+      - MUN_CADASTRAL_INCOME_TOTAL
+      - MUN_CADASTRAL_PARCELS_TOTAL
+      - MUN_PARCELS_TAX_EXEMPT
+    reference_rows:
+      script: scripts/sync_spf_agdp.py
+      args: ["--reference-rows-only"]

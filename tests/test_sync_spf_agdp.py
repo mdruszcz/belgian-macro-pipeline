@@ -441,23 +441,341 @@ def _annual_atom_xml(links: list[tuple[str, str, int]]) -> bytes:
     ).encode()
 
 
-def _annual_fixture(*, owner_occupants=None, property_dynamics=None):
+def _annual_fixture(
+    *,
+    owner_occupants=None,
+    property_dynamics=None,
+    land_use=None,
+    building_condition=None,
+    tax_exemptions=None,
+):
     """atom_bytes/version_bytes covering only the annual dataset(s) under
     test -- the Wave 4 quarterly pair is left out of `atom_bytes` entirely,
     which `sync()`'s fixture-mode "missing dataset key" path (added
     alongside Wave 5 lot A) treats as zero new/changed versions, the same as
-    Wave 4's own tests do for the datasets they don't exercise. An
-    owner_occupants/property_dynamics kwarg left as None is likewise left
-    out of `atom_bytes`, not passed as an empty feed (an ATOM feed with zero
-    <link rel="section"> entries is a schema error, not "nothing new" --
-    parse_atom_feed's own guard, unchanged by this handoff)."""
+    Wave 4's own tests do for the datasets they don't exercise. A kwarg left
+    as None is likewise left out of `atom_bytes`, not passed as an empty
+    feed (an ATOM feed with zero <link rel="section"> entries is a schema
+    error, not "nothing new" -- parse_atom_feed's own guard, unchanged by
+    this handoff). Wave 5 lot B adds land_use/building_condition/
+    tax_exemptions alongside lot A's owner_occupants/property_dynamics."""
     atom_bytes = {}
     version_bytes = {}
     if owner_occupants is not None:
         atom_bytes["owner_occupants"] = _annual_atom_xml(owner_occupants)
     if property_dynamics is not None:
         atom_bytes["property_dynamics"] = _annual_atom_xml(property_dynamics)
+    if land_use is not None:
+        atom_bytes["land_use"] = _annual_atom_xml(land_use)
+    if building_condition is not None:
+        atom_bytes["building_condition"] = _annual_atom_xml(building_condition)
+    if tax_exemptions is not None:
+        atom_bytes["tax_exemptions"] = _annual_atom_xml(tax_exemptions)
     return atom_bytes, version_bytes
+
+
+# --- Wave 5 lot B fixtures: land use / building condition / tax exemptions ---
+
+_LANDUSE_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;ParcelNature;ParcelsNumber;"
+    "TotalCadastralIncome;TaxableCadastralIncome;TaxExemptCadastralIncome"
+)
+_BUILDING_HEADER = "NISCode;NameFre;NameDut;NameGer;ParcelNature;ParcelsNumber;CentralHeating"
+_EXEMPT_HEADER = "NISCode;NameFre;NameDut;NameGer;ExemptionType;ParcelsNumber"
+
+
+def _landuse_row(nis, parcels, total_ci, taxable_ci, exempt_ci="0"):
+    return f"{nis};Commune;Commune;Commune;TOTAL;{parcels};{total_ci};{taxable_ci};{exempt_ci}"
+
+
+def _landuse_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_LANDUSE_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def _building_row(nis, parcels, heating):
+    return f"{nis};Commune;Commune;Commune;TOTAL;{parcels};{heating}"
+
+
+def _building_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_BUILDING_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def _exempt_row(nis, parcels):
+    return f"{nis};Commune;Commune;Commune;TOTAL;{parcels}"
+
+
+def _exempt_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_EXEMPT_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_lot_b_reference_rows_only_needs_no_network(db, state_path):
+    read, written = sync_spf_agdp.sync(db, reference_rows_only=True, state_path=state_path)
+    assert (read, written) == (0, 0)
+    conn = sqlite3.connect(str(db))
+    rows = conn.execute(
+        "SELECT indicator_id, is_additive, aggregation_method FROM indicators "
+        "WHERE indicator_id IN ('MUN_CADASTRAL_PARCELS_TOTAL', 'MUN_CADASTRAL_INCOME_TOTAL', "
+        "'MUN_CADASTRAL_INCOME_TAXABLE', 'MUN_BUILDINGS_TOTAL', "
+        "'MUN_BUILDINGS_CENTRAL_HEATING', 'MUN_PARCELS_TAX_EXEMPT') ORDER BY indicator_id"
+    ).fetchall()
+    conn.close()
+    assert rows == [
+        ("MUN_BUILDINGS_CENTRAL_HEATING", 1, "sum"),
+        ("MUN_BUILDINGS_TOTAL", 1, "sum"),
+        ("MUN_CADASTRAL_INCOME_TAXABLE", 1, "sum"),
+        ("MUN_CADASTRAL_INCOME_TOTAL", 1, "sum"),
+        ("MUN_CADASTRAL_PARCELS_TOTAL", 1, "sum"),
+        ("MUN_PARCELS_TAX_EXEMPT", 1, "sum"),
+    ]
+    assert not state_path.exists()
+
+
+def test_landuse_2026_real_values_four_communes(db, state_path):
+    """Hand-computed values from the handoff, land use 2026 TOTAL."""
+    atom_bytes, version_bytes = _annual_fixture(
+        land_use=[("https://example.test/lu2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("land_use", "2026")] = _landuse_csv(
+        [
+            _landuse_row("11001", "11540", "15431671", "13908911"),
+            _landuse_row("44083", "46948", "30809990", "27168364"),
+            _landuse_row("23106", "38624", "14644408", "13718983"),
+            _landuse_row("82039", "55633", "14059868", "11787166"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    parcels = {g: v for g, p, v, s in _observations(db, "MUN_CADASTRAL_PARCELS_TOTAL")}
+    total_ci = {g: v for g, p, v, s in _observations(db, "MUN_CADASTRAL_INCOME_TOTAL")}
+    taxable_ci = {g: v for g, p, v, s in _observations(db, "MUN_CADASTRAL_INCOME_TAXABLE")}
+    assert parcels["be:mun:11001"] == 11540.0
+    assert total_ci["be:mun:11001"] == 15431671.0
+    assert taxable_ci["be:mun:11001"] == 13908911.0
+    assert parcels["be:mun:44083"] == 46948.0
+    assert total_ci["be:mun:44083"] == 30809990.0
+    assert taxable_ci["be:mun:44083"] == 27168364.0
+    assert parcels["be:mun:23106"] == 38624.0
+    assert total_ci["be:mun:23106"] == 14644408.0
+    assert taxable_ci["be:mun:23106"] == 13718983.0
+    assert parcels["be:mun:82039"] == 55633.0
+    assert total_ci["be:mun:82039"] == 14059868.0
+    assert taxable_ci["be:mun:82039"] == 11787166.0
+
+
+def test_landuse_2017_real_values(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        land_use=[("https://example.test/lu2017.zip", "2017-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("land_use", "2017")] = _landuse_csv(
+        [
+            _landuse_row("11001", "9925", "14338902", "12000000"),
+            _landuse_row("44001", "23424", "16144345", "14000000"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_CADASTRAL_PARCELS_TOTAL", "be:mun:11001") == [
+        ("be:mun:11001", "2017", 9925.0, "final")
+    ]
+    assert _observations(db, "MUN_CADASTRAL_INCOME_TOTAL", "be:mun:11001") == [
+        ("be:mun:11001", "2017", 14338902.0, "final")
+    ]
+    assert _observations(db, "MUN_CADASTRAL_PARCELS_TOTAL", "be:mun:44001") == [
+        ("be:mun:44001", "2017", 23424.0, "final")
+    ]
+    assert _observations(db, "MUN_CADASTRAL_INCOME_TOTAL", "be:mun:44001") == [
+        ("be:mun:44001", "2017", 16144345.0, "final")
+    ]
+
+
+def test_building_2026_real_values_four_communes(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        building_condition=[("https://example.test/bc2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("building_condition", "2026")] = _building_csv(
+        [
+            _building_row("11001", "9553", "6419"),
+            _building_row("44083", "29756", "18711"),
+            _building_row("23106", "13798", "9216"),
+            _building_row("82039", "13716", "8505"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    total = {g: v for g, p, v, s in _observations(db, "MUN_BUILDINGS_TOTAL")}
+    heating = {g: v for g, p, v, s in _observations(db, "MUN_BUILDINGS_CENTRAL_HEATING")}
+    assert total["be:mun:11001"] == 9553.0
+    assert heating["be:mun:11001"] == 6419.0
+    assert total["be:mun:44083"] == 29756.0
+    assert heating["be:mun:44083"] == 18711.0
+    assert total["be:mun:23106"] == 13798.0
+    assert heating["be:mun:23106"] == 9216.0
+    assert total["be:mun:82039"] == 13716.0
+    assert heating["be:mun:82039"] == 8505.0
+
+
+def test_building_2017_real_values(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        building_condition=[("https://example.test/bc2017.zip", "2017-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("building_condition", "2017")] = _building_csv(
+        [
+            _building_row("11001", "8011", "5636"),
+            _building_row("44001", "11937", "7211"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_BUILDINGS_TOTAL", "be:mun:11001") == [
+        ("be:mun:11001", "2017", 8011.0, "final")
+    ]
+    assert _observations(db, "MUN_BUILDINGS_CENTRAL_HEATING", "be:mun:11001") == [
+        ("be:mun:11001", "2017", 5636.0, "final")
+    ]
+    assert _observations(db, "MUN_BUILDINGS_TOTAL", "be:mun:44001") == [
+        ("be:mun:44001", "2017", 11937.0, "final")
+    ]
+    assert _observations(db, "MUN_BUILDINGS_CENTRAL_HEATING", "be:mun:44001") == [
+        ("be:mun:44001", "2017", 7211.0, "final")
+    ]
+
+
+def test_exempt_2026_real_values_four_communes(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        tax_exemptions=[("https://example.test/te2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("tax_exemptions", "2026")] = _exempt_csv(
+        [
+            _exempt_row("11001", "216"),
+            _exempt_row("44083", "1210"),
+            _exempt_row("23106", "775"),
+            _exempt_row("82039", "2638"),
+        ]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    exempt = {g: v for g, p, v, s in _observations(db, "MUN_PARCELS_TAX_EXEMPT")}
+    assert exempt["be:mun:11001"] == 216.0
+    assert exempt["be:mun:44083"] == 1210.0
+    assert exempt["be:mun:23106"] == 775.0
+    assert exempt["be:mun:82039"] == 2638.0
+
+
+def test_exempt_2017_real_zero_is_final_not_na(db, state_path):
+    """44001 2017: 0 -- a real measured zero, final, not na (handoff)."""
+    atom_bytes, version_bytes = _annual_fixture(
+        tax_exemptions=[("https://example.test/te2017.zip", "2017-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("tax_exemptions", "2017")] = _exempt_csv(
+        [_exempt_row("11001", "206"), _exempt_row("44001", "0")]
+    )
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    assert _observations(db, "MUN_PARCELS_TAX_EXEMPT", "be:mun:11001") == [
+        ("be:mun:11001", "2017", 206.0, "final")
+    ]
+    assert _observations(db, "MUN_PARCELS_TAX_EXEMPT", "be:mun:44001") == [
+        ("be:mun:44001", "2017", 0.0, "final")
+    ]
+
+
+def test_lot_b_period_correct_geography_four_codes(db, state_path):
+    """44083 present 2026 absent 2017; 23106 present 2026 absent 2017;
+    82039 present 2026 absent 2017; 44001 absent 2026 present 2017 (handoff,
+    verified against the real land-use file)."""
+    atom_2026, version_2026 = _annual_fixture(
+        land_use=[("https://example.test/lu2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_2026[("land_use", "2026")] = _landuse_csv(
+        [
+            _landuse_row("44083", "46948", "30809990", "27168364"),
+            _landuse_row("23106", "38624", "14644408", "13718983"),
+            _landuse_row("82039", "55633", "14059868", "11787166"),
+        ]
+    )
+    sync_spf_agdp.sync(db, atom_bytes=atom_2026, version_bytes=version_2026, state_path=state_path)
+    for nis in ("44083", "23106", "82039"):
+        assert _observations(db, "MUN_CADASTRAL_PARCELS_TOTAL", f"be:mun:{nis}")
+
+    atom_2017, version_2017 = _annual_fixture(
+        land_use=[("https://example.test/lu2017.zip", "2017-01-01T00:00:00Z", 2)]
+    )
+    version_2017[("land_use", "2017")] = _landuse_csv([_landuse_row("44001", "23424", "1", "1")])
+    sync_spf_agdp.sync(db, atom_bytes=atom_2017, version_bytes=version_2017, state_path=state_path)
+    assert _observations(db, "MUN_CADASTRAL_PARCELS_TOTAL", "be:mun:44001") == [
+        ("be:mun:44001", "2017", 23424.0, "final")
+    ]
+
+    # 44083/23106/82039 absent from a 2017 file would refuse the run (handoff
+    # "44083 present 2026 absent 2017" etc.) -- exercised here by the mirror
+    # image: an unresolved code refuses the whole run.
+    atom_bad, version_bad = _annual_fixture(
+        land_use=[("https://example.test/lu2017b.zip", "2017-01-01T00:00:00Z", 3)]
+    )
+    version_bad[("land_use", "2017")] = _landuse_csv([_landuse_row("44083", "1", "1", "1")])
+    with pytest.raises(SystemExit, match="resolved to no geography row"):
+        sync_spf_agdp.sync(
+            db, atom_bytes=atom_bad, version_bytes=version_bad, state_path=state_path
+        )
+
+
+def test_no_fictitious_column_or_non_numeric_nis_in_lot_b_row_filter():
+    """Lot B configs (unlike Owner Occupants) declare no row_filter -- there
+    is no Fictious column and no N/A NIS placeholder in any of the three
+    datasets (handoff). Asserted directly on the configs, not just by
+    absence of a crash, since a silently-added row_filter would still pass
+    every other test here."""
+    from src.fetchers.spf_agdp import BUILDING_CONDITION, LAND_USE, TAX_EXEMPTIONS
+
+    for config in (LAND_USE, BUILDING_CONDITION, TAX_EXEMPTIONS):
+        assert config.row_filter is None
+        assert "Fictious" not in config.required_columns
+
+
+def test_lot_b_second_run_unchanged_reads_no_zip_and_adds_no_rows(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        tax_exemptions=[("https://example.test/te2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("tax_exemptions", "2026")] = _exempt_csv([_exempt_row("11001", "216")])
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+    read2, written2 = sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes={}, state_path=state_path
+    )
+    assert (read2, written2) == (0, 0)
+
+
+def test_lot_b_changed_length_rereads_that_one_version(db, state_path):
+    atom_bytes, version_bytes = _annual_fixture(
+        tax_exemptions=[("https://example.test/te2026.zip", "2026-01-01T00:00:00Z", 1)]
+    )
+    version_bytes[("tax_exemptions", "2026")] = _exempt_csv([_exempt_row("11001", "216")])
+    sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes, version_bytes=version_bytes, state_path=state_path
+    )
+
+    atom_bytes2, version_bytes2 = _annual_fixture(
+        tax_exemptions=[("https://example.test/te2026.zip", "2026-01-01T00:00:00Z", 2)]
+    )
+    version_bytes2[("tax_exemptions", "2026")] = _exempt_csv([_exempt_row("11001", "220")])
+    read2, written2 = sync_spf_agdp.sync(
+        db, atom_bytes=atom_bytes2, version_bytes=version_bytes2, state_path=state_path
+    )
+    assert read2 == 1
+    assert written2 == 1
+    assert _observations(db, "MUN_PARCELS_TAX_EXEMPT", "be:mun:11001") == [
+        ("be:mun:11001", "2026", 220.0, "final")
+    ]
 
 
 def test_owner_occupiers_2026_real_values_five_communes(db, state_path):

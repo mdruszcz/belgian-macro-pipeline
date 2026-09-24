@@ -1,0 +1,64 @@
+id: MUN_CADASTRAL_PARCELS_TOTAL
+name:
+  en: Cadastral parcels (all uses)
+  fr: Parcelles cadastrales (tous usages)
+  nl: Kadastrale percelen (alle bestemmingen)
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of cadastral parcels in the commune, across every parcel use combined
+    (ParcelNature=TOTAL -- houses, flats, land, garages, industrial and every other
+    registered use), as of the AGDP land-use snapshot's own 1-January publication date.
+    Source: SPF Finances AGDP land-use dataset (52.01.04), Municipality-level CSV, one
+    1-January snapshot per published version. PERIOD IS THE CALENDAR YEAR of the
+    snapshot's own publication date (ATOM `time` YYYY-01-01). preferred_direction is
+    contextual, not higher_is_better or lower_is_better: a commune with more registered
+    parcels is bigger or more subdivided, not "better" or "worse" served. is_additive=true,
+    aggregation_method=sum: province/region/Belgium totals are summed from this count the
+    ordinary way over the geographies that existed that year -- never averaged. A literal 0
+    is a genuine measured zero, final; a blank cell at TOTAL is a schema surprise and the
+    load refuses rather than guess (never observed live: every commune measured in 2026,
+    2025 and 2017 has a non-blank ParcelsNumber at TOTAL). A commune absent from a given
+    year's file is not written as zero -- it did not yet exist, or the file simply has no
+    row for it that year.
+  fr: >
+    Nombre de parcelles cadastrales dans la commune, tous usages confondus
+    (ParcelNature=TOTAL -- maisons, appartements, terrains, garages, industrie et tout autre
+    usage enregistré), à la date de publication au 1er janvier de l'instantané AGDP sur
+    l'usage du sol. Source : jeu de données AGDP usage du sol du SPF Finances (52.01.04),
+    CSV au niveau communal, un instantané au 1er janvier par version publiée. LA PÉRIODE EST
+    L'ANNÉE CALENDAIRE de la date de publication de l'instantané (ATOM `time` YYYY-01-01).
+    preferred_direction est contextual, ni higher_is_better ni lower_is_better : une commune
+    avec plus de parcelles enregistrées est plus grande ou plus subdivisée, pas "meilleure"
+    ou "moins bonne". is_additive=true, aggregation_method=sum : les totaux
+    provinciaux/régionaux/nationaux sont additionnés normalement sur les entités
+    géographiques existant cette année-là -- jamais moyennés. Un 0 littéral est un zéro
+    réellement mesuré, final ; une cellule vide à TOTAL est une anomalie de schéma et le
+    chargement refuse plutôt que de deviner (jamais observé en pratique : chaque commune
+    mesurée en 2026, 2025 et 2017 a un ParcelsNumber non vide à TOTAL). Une commune absente
+    du fichier d'une année donnée n'est pas écrite comme zéro -- elle n'existait pas encore,
+    ou le fichier n'a simplement aucune ligne pour elle cette année-là.
+  nl: >
+    Aantal kadastrale percelen in de gemeente, over alle bestemmingen samen
+    (ParcelNature=TOTAL -- huizen, appartementen, grond, garages, industrie en elke andere
+    geregistreerde bestemming), op de eigen publicatiedatum van 1 januari van de
+    AGDP-momentopname over bodemgebruik. Bron: AGDP-dataset bodemgebruik van de FOD
+    Financiën (52.01.04), CSV op gemeenteniveau, één momentopname per 1 januari per
+    gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van de eigen publicatiedatum van de
+    momentopname (ATOM `time` YYYY-01-01). preferred_direction is contextual, niet
+    higher_is_better of lower_is_better: een gemeente met meer geregistreerde percelen is
+    groter of meer versnipperd, niet "beter" of "slechter". is_additive=true,
+    aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de gewone manier
+    opgeteld over de geografische entiteiten die dat jaar bestonden -- nooit gemiddeld. Een
+    letterlijke 0 is een echt gemeten nul, definitief; een lege cel bij TOTAL is een
+    schema-verrassing en het inladen weigert eerder dan te gokken (nooit live waargenomen:
+    elke gemeente gemeten in 2026, 2025 en 2017 heeft een niet-lege ParcelsNumber bij TOTAL).
+    Een gemeente die in het bestand van een bepaald jaar ontbreekt, wordt niet als nul
+    geschreven -- ze bestond nog niet, of het bestand heeft eenvoudigweg geen rij voor haar
+    dat jaar.
+display: null

@@ -1,4 +1,4 @@
-# Feature: SPF Finances AGDP patrimony datasets (leases + transactions, Wave 4; owner occupants + property dynamics, Wave 5 lot A)
+# Feature: SPF Finances AGDP patrimony datasets (leases + transactions, Wave 4; owner occupants + property dynamics, Wave 5 lot A; land use + building condition + tax exemptions, Wave 5 lot B)
 
 ## Source
 
@@ -304,10 +304,10 @@ the lead)**:
   year; its only scalar duplicates `MUN_PROPERTY_SALES` already loaded by
   Wave 4. Follow-up.
 
-## Out of scope (this batch)
+## Out of scope (Wave 5 lot A)
 
 - 52.01.15 and 52.01.21 (see above).
-- Wave 5's remaining AGDP datasets beyond this lot.
+- Wave 5's remaining AGDP datasets beyond lot A.
 - Any page surfacing of these eight indicators.
 - `src/analytics/aggregate.py`, `resolve_geo()`, any other adapter, or the
   database schema.
@@ -315,3 +315,204 @@ the lead)**:
 - The Division and StatisticalUnit members of any zip.
 - Province/region rows from any dataset (Municipality-level only).
 - A median sale price (see above, Wave 4).
+
+## Wave 5 lot B: land use + building condition + tax exemptions (annual)
+
+Three more annual AGDP datasets, reusing every piece of this module
+unchanged: same `frequency="A"` annual mapping, same ATOM discovery, same
+ranged zip read. Six new indicators, a NEW committed store
+(`spf_agdp_patrimony`, config/stores.yaml), kept separate from `spf_agdp`
+above purely for committed-CSV size (see that store's own comment).
+
+**Dropped from this lot (originally scoped, dropped by the lead before
+work started)**: 52.01.10, distribution of real-estate wealth for natural
+persons. Its `Range` dimension has no all-bands `Total` row -- 34 distinct
+`Range*` values and nothing summing them -- so a commune headline would
+require summing 34 partly-blanked bands, a derived function needing its own
+ADR (CLAUDE.md rule 19). Follow-up, not built.
+
+**Land use (52.01.04, "Utilisation du sol")**, uuid
+`86999d70-51ca-11eb-9238-3448ed25ad7c`, 16 versions (2011-2026), Municipality
+member 14.6 MB, UTF-8 BOM, `;`-delimited, 21 columns, 155,375 rows in 2026.
+Row selected: `ParcelNature=TOTAL`. Columns loaded: `ParcelsNumber`,
+`TotalCadastralIncome`, `TaxableCadastralIncome`.
+
+- `MUN_CADASTRAL_PARCELS_TOTAL` -- `ParcelsNumber`. Unit `count`,
+  `is_additive=1`, `aggregation_method='sum'`, `preferred_direction=contextual`.
+- `MUN_CADASTRAL_INCOME_TOTAL` -- `TotalCadastralIncome`. Unit `eur` (already
+  used elsewhere in the schema, no new unit), `is_additive=1`,
+  `aggregation_method='sum'`, `preferred_direction=contextual`.
+- `MUN_CADASTRAL_INCOME_TAXABLE` -- `TaxableCadastralIncome`. Same shape as
+  the total.
+
+`TaxExemptCadastralIncome` (the third euro column on this row) is NOT loaded
+as its own indicator: it is byte-identical, for all 565 communes measured in
+2026, to 52.01.03's `TotalCadastralIncome` at `ExemptionType=TOTAL` --
+verified: 11001 1,522,760 EUR, 44083 3,641,626 EUR, 23106 925,425 EUR, 82039
+2,272,702 EUR, in both datasets independently. Loading it twice under two
+indicator IDs would publish the same euro figure twice; only 52.01.03's
+parcel COUNT is loaded from that dataset instead (see below).
+
+**Building condition (52.01.05, "Etat du bati")**, uuid
+`857b351e-51ca-11eb-a86d-3448ed25ad7c`, 16 versions (2011-2026), 82 columns,
+105,090 rows in 2026, zero blank cells measured. Row selected:
+`ParcelNature=TOTAL`. Columns loaded: `ParcelsNumber`, `CentralHeating`.
+
+- `MUN_BUILDINGS_TOTAL` -- `ParcelsNumber`. Unit `count`, `is_additive=1`,
+  `aggregation_method='sum'`, `preferred_direction=contextual`.
+- `MUN_BUILDINGS_CENTRAL_HEATING` -- `CentralHeating`. Same shape. No
+  share/percentage of central-heating coverage is published here -- that
+  would be a derived ratio, out of scope for this batch and needing its own
+  ADR (CLAUDE.md rule 19). Follow-up.
+
+**Property-tax exemptions (52.01.03, "Exonerations du precompte
+immobilier")**, uuid `8607969e-51ca-11eb-8d7d-3448ed25ad7c`, 16 versions
+(2011-2026), 14 columns, 2,825 rows in 2026 (565 communes x ExemptionType
+{1,2,3,4,TOTAL}). Row selected: `ExemptionType=TOTAL`. Column loaded:
+`ParcelsNumber` only -- `TotalCadastralIncome` on this row duplicates land
+use's own euro total (see above) and is deliberately not loaded a second
+time.
+
+- `MUN_PARCELS_TAX_EXEMPT` -- `ParcelsNumber`. Unit `count`, `is_additive=1`,
+  `aggregation_method='sum'`, `preferred_direction=contextual` -- explicitly
+  NOT higher_is_better or lower_is_better: a higher exempt count can mean
+  more public/charitable land use in the commune, or a weaker taxable base
+  relative to its size. Neither reading is uniformly "better".
+
+All six: `frequency=A`, `max_age_days=450`, `source_id=spf_finances`. No new
+unit (`count` and `eur` both already existed) and no formatter/i18n change.
+
+### The blank-count fix (a real hazard, fixed here)
+
+`_annual_row_to_observations`'s count branch previously wrote
+`0.0 if count is None else float(count)` -- a blank count cell silently
+became a fabricated measured zero (CLAUDE.md rule 26 forbids exactly this:
+missing and measured-zero are different states). Fixed to raise
+`AgdpSchemaError`, naming the dataset, year and NIS, on a blank count --
+matching every other unexpected-blank guard in this module. No live cell in
+any dataset routed through this function (lot A or lot B) has ever actually
+been blank at a count column, so this changes behaviour only if that
+measured invariant is ever violated. One existing lot A test asserted the
+old (buggy) behaviour directly --
+`test_property_dynamics_blank_parcels_is_na_never_a_fabricated_zero_duration`
+in tests/test_spf_agdp_source.py, which fed a blank `ParcelsNumber` and
+asserted `MUN_PARCELS_OWNED` came back `0.0, final`. That assertion was
+itself the bug; it is now
+`test_property_dynamics_blank_parcels_count_refuses_never_a_fabricated_zero`
+and asserts the raise instead. No other existing test relied on the old
+behaviour.
+
+### A second, independent hazard the new columns exposed: `always_final_columns`
+
+The original count/non-count split in `_annual_row_to_observations` assumed
+at most one CSV column per config is the actual count driver (`is_count`
+doubled as "read the count value, not your own cell" AND "this is the
+row-count column"). Lot A never had a second additive column, so this never
+surfaced. Land use (`TotalCadastralIncome`, `TaxableCadastralIncome`) and
+building condition (`CentralHeating`) are each their own independently
+measured additive figure -- not derived by dividing by the parcel count the
+way a percentile/median/mean is -- so marking them `is_count=True` would
+have made them silently copy `ParcelsNumber`'s own value instead of their
+own cell (caught by this batch's own tests before it ever reached a
+fixture). `AgdpDatasetConfig` gained `always_final_columns`, a tuple of CSV
+column names that are always read from their own cell and written `final`,
+never collapsed to `na` at a zero/blank count the way a lot A percentile is.
+`is_count` stays reserved for exactly the one column that IS
+`config.count_column` itself.
+
+### The real 1-4 suppression tier lot A never measured
+
+Lot A's docstring said no 1-4 suppression tier existed in the annual shape;
+lot B's raw files prove that only true of the specific columns lot A
+happened to load. Land use and tax exemptions DO blank their
+`TotalCadastralIncome`/`TaxableCadastralIncome` columns at low
+`ParcelsNumber` -- measured 2026: land use blanks 30,171 rows at
+`ParcelsNumber` 1-4; tax exemptions blanks 156 rows at `ParcelsNumber` 1-4.
+The relation is exact: `ParcelsNumber=0` -> not blank; `1-4` -> blank; `>=5`
+-> not blank -- the same shape as the quarterly Leases/Transactions
+suppression tier, just previously unmeasured for the annual datasets. It
+never touches any of lot B's six CHOSEN columns (verified non-blank at
+TOTAL/ExemptionType=TOTAL across 2026, 2025 and 2017), so no suppression
+mapping was added for them -- but the module docstring and
+`_annual_row_to_observations`'s own docstring now name it, so the next
+annual dataset added here does not assume it does not exist.
+
+**Herstappe (NIS 73028)**: the one place this tier bites at TOTAL rather
+than a sub-band -- `ParcelsNumber=4` at `ExemptionType=TOTAL` in 2025 and
+2017, with `TotalCadastralIncome` blank: a genuine suppressed state. That
+column is excluded from this batch entirely (see "duplication" above); the
+one column this batch DOES read from that dataset, `ParcelsNumber` itself,
+is never blank for Herstappe or any other commune measured.
+
+### The five states (lot B)
+
+For all three datasets: the chosen cell is always published (non-blank) for
+a live commune; a literal `0` is a real measured zero, final (e.g. NIS 44001
+in 2017 has `ExemptionType=TOTAL ParcelsNumber=0` -- loaded as a real zero,
+not `na`); a blank cell at TOTAL/ExemptionType=TOTAL is a schema surprise
+and the load refuses (CLAUDE.md rule 13) rather than guess; a commune absent
+from a given year's file is not zero-filled or written at all. `suppressed`
+does not arise for any of the six chosen columns -- it is a real state in
+these files (see above), just never on a column this batch reads.
+
+### Geography
+
+Ordinary `resolve_geo(conn, nis, "YYYY")` per row's own year, same as lot A
+and the module's general rule (CLAUDE.md rule 3). Verified period-correct
+against the real land-use file: 2026 has 565 communes, 2017 has 589; 44083
+present 2026 absent 2017; 23106 present 2026 absent 2017; 82039 present 2026
+absent 2017; 44001 absent 2026 present 2017. No `Fictious` column and no
+`N/A` NIS placeholder in any of the three datasets (unlike lot A's Owner
+Occupants) -- asserted directly in
+`test_no_fictitious_column_or_non_numeric_nis_in_lot_b_row_filter`
+(tests/test_sync_spf_agdp.py); no `row_filter` configured for any of the
+three.
+
+### Hand-computed expected values (real files, TOTAL rows)
+
+Land use 2026 -- 11001: parcels 11,540, cadastral income total 15,431,671,
+taxable 13,908,911. 44083: 46,948 / 30,809,990 / 27,168,364. 23106: 38,624 /
+14,644,408 / 13,718,983. 82039: 55,633 / 14,059,868 / 11,787,166.
+Land use 2017 -- 11001: 9,925 / 14,338,902. 44001: 23,424 / 16,144,345.
+
+Building condition 2026 -- 11001: parcels 9,553, central heating 6,419.
+44083: 29,756 / 18,711. 23106: 13,798 / 9,216. 82039: 13,716 / 8,505.
+Building condition 2017 -- 11001: 8,011 / 5,636. 44001: 11,937 / 7,211.
+
+Tax exemptions 2026 -- 11001: 216. 44083: 1,210. 23106: 775. 82039: 2,638.
+Tax exemptions 2017 -- 11001: 206. 44001: 0 (real measured zero, final, not
+`na`).
+
+Cross-check, land use `TaxExemptCadastralIncome` vs. exemptions dataset's
+own `TotalCadastralIncome`, both 2026: 11001 1,522,760; 44083 3,641,626;
+23106 925,425; 82039 2,272,702 -- confirmed equal in both datasets
+independently, and (indirectly) as
+`MUN_CADASTRAL_INCOME_TOTAL - MUN_CADASTRAL_INCOME_TAXABLE` for each commune
+in the real committed store.
+
+### Store
+
+`spf_agdp_patrimony`, config/stores.yaml, `source_id: spf_finances`,
+`mode: in_db`, same sync script (`scripts/sync_spf_agdp.py`) as `spf_agdp`
+and `ipp_rate` -- one script now writes rows for two stores in the same run;
+`scripts/offload_stores.py` splits them by declared `indicator_id`, refusing
+a run where two stores claim the same indicator (its own `declared` overlap
+check). Real backfill: 55,968 rows across all 16 versions of all three
+datasets, 620 distinct communes (covering every commune that has existed
+since 2011). Committed CSV `data/spf_agdp_patrimony_observations.csv`
+measures 8.30 MB; its history shard
+`data/communes_history/spf_agdp_patrimony.csv` measures 6.91 MB -- both well
+under the 20 MB threshold the handoff set for staying a single CSV (not
+`layout: one_csv_per_indicator`). `spf_agdp`'s own committed CSV and shard
+are unchanged by this batch (18.86 MB / 21.69 MB).
+
+### Out of scope (Wave 5 lot B)
+
+- 52.01.10 (see above -- dropped, not built).
+- Any page surfacing of these six indicators.
+- A central-heating share/percentage (needs its own ADR).
+- `src/analytics/aggregate.py`, `resolve_geo()`, any other adapter, or the
+  database schema.
+- `docs/data_catalog.md` and `docs/steps` (not touched by this batch).
+- The quarterly Leases/Transactions path (unchanged).
+- Province/region rows (Municipality-level only).

@@ -1,0 +1,70 @@
+id: MUN_CADASTRAL_INCOME_TAXABLE
+name:
+  en: Taxable cadastral income
+  fr: Revenu cadastral imposable
+  nl: Belastbaar kadastraal inkomen
+unit: eur
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Sum of cadastral income actually subject to property tax across every parcel in the
+    commune, all uses combined (ParcelNature=TOTAL) -- MUN_CADASTRAL_INCOME_TOTAL minus the
+    exempt portion (public buildings, places of worship, certain non-profits and other
+    statutory exemptions). Source: SPF Finances AGDP land-use dataset (52.01.04),
+    Municipality-level CSV, one 1-January snapshot per published version. PERIOD IS THE
+    CALENDAR YEAR of the snapshot's own publication date (ATOM `time` YYYY-01-01). 52.01.03's
+    TotalCadastralIncome at ExemptionType=TOTAL is byte-identical to this dataset's
+    TaxExemptCadastralIncome for every commune measured in 2026 -- only 52.01.03's parcel
+    COUNT (MUN_PARCELS_TAX_EXEMPT) is loaded from that dataset, to avoid publishing the same
+    euro figure under two indicator IDs. preferred_direction is contextual: a higher taxable
+    base reflects a bigger or wealthier property tax base, not a "better" or "worse" outcome.
+    is_additive=true, aggregation_method=sum: province/region/Belgium totals are summed from
+    this figure the ordinary way over the geographies that existed that year -- never
+    averaged. A blank cell at TOTAL is a schema surprise and the load refuses rather than
+    guess (never observed live at TOTAL for a live commune in 2026, 2025 or 2017). A commune
+    absent from a given year's file is not written as zero.
+  fr: >
+    Somme du revenu cadastral réellement soumis au précompte immobilier sur toutes les
+    parcelles de la commune, tous usages confondus (ParcelNature=TOTAL) --
+    MUN_CADASTRAL_INCOME_TOTAL moins la part exonérée (bâtiments publics, lieux de culte,
+    certaines associations sans but lucratif et autres exonérations légales). Source : jeu de
+    données AGDP usage du sol du SPF Finances (52.01.04), CSV au niveau communal, un
+    instantané au 1er janvier par version publiée. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la
+    date de publication de l'instantané (ATOM `time` YYYY-01-01). Le TotalCadastralIncome du
+    jeu de données 52.01.03 à ExemptionType=TOTAL est identique bit à bit au
+    TaxExemptCadastralIncome de ce jeu de données pour chaque commune mesurée en 2026 -- seul
+    le NOMBRE de parcelles du jeu 52.01.03 (MUN_PARCELS_TAX_EXEMPT) est chargé depuis ce jeu
+    de données, pour éviter de publier le même montant en euros sous deux identifiants
+    d'indicateur différents. preferred_direction est contextual : une base imposable plus
+    élevée reflète une base fiscale immobilière plus grande ou plus riche, pas un résultat
+    "meilleur" ou "moins bon". is_additive=true, aggregation_method=sum : les totaux
+    provinciaux/régionaux/nationaux sont additionnés normalement sur les entités
+    géographiques existant cette année-là -- jamais moyennés. Une cellule vide à TOTAL est
+    une anomalie de schéma et le chargement refuse plutôt que de deviner (jamais observé en
+    pratique à TOTAL pour une commune existante en 2026, 2025 ou 2017). Une commune absente
+    du fichier d'une année donnée n'est pas écrite comme zéro.
+  nl: >
+    Som van het kadastraal inkomen dat effectief onderworpen is aan de onroerende voorheffing
+    over alle percelen in de gemeente, alle bestemmingen samen (ParcelNature=TOTAL) --
+    MUN_CADASTRAL_INCOME_TOTAL min het vrijgestelde deel (openbare gebouwen,
+    religieuze gebouwen, bepaalde vzw's en andere wettelijke vrijstellingen). Bron:
+    AGDP-dataset bodemgebruik van de FOD Financiën (52.01.04), CSV op gemeenteniveau, één
+    momentopname per 1 januari per gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van
+    de eigen publicatiedatum van de momentopname (ATOM `time` YYYY-01-01). De
+    TotalCadastralIncome van dataset 52.01.03 bij ExemptionType=TOTAL is byte-identiek aan de
+    TaxExemptCadastralIncome van deze dataset voor elke gemeente gemeten in 2026 -- enkel het
+    AANTAL percelen van dataset 52.01.03 (MUN_PARCELS_TAX_EXEMPT) wordt uit die dataset
+    geladen, om te vermijden dat hetzelfde eurobedrag onder twee verschillende
+    indicator-ID's wordt gepubliceerd. preferred_direction is contextual: een hogere
+    belastbare basis weerspiegelt een grotere of rijkere onroerendgoedbelastingbasis, geen
+    "beter" of "slechter" resultaat. is_additive=true, aggregation_method=sum:
+    provincie-/gewest-/Belgiëtotalen worden op de gewone manier opgeteld over de geografische
+    entiteiten die dat jaar bestonden -- nooit gemiddeld. Een lege cel bij TOTAL is een
+    schema-verrassing en het inladen weigert eerder dan te gokken (nooit live waargenomen bij
+    TOTAL voor een bestaande gemeente in 2026, 2025 of 2017). Een gemeente die in het bestand
+    van een bepaald jaar ontbreekt, wordt niet als nul geschreven.
+display: null
