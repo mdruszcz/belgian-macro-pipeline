@@ -3,15 +3,29 @@ MUN_LEASES_NEW_HOUSING, MUN_LEASE_RENT_MEDIAN_HOUSING,
 MUN_LEASE_CHARGES_MEDIAN_HOUSING, MUN_PROPERTY_SALES (Block Wave 4) -- plus,
 Wave 5 lot A, two annual datasets: owner occupants (52.01.14) and real-estate
 property dynamics (52.01.24), MUN_OWNER_OCCUPIERS, MUN_PARCELS_OWNED,
-MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN.
+MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN -- plus, Wave 5
+lot B, three more annual patrimony datasets: land use (52.01.04), building
+condition (52.01.05) and property-tax exemptions (52.01.03),
+MUN_CADASTRAL_PARCELS_TOTAL, MUN_CADASTRAL_INCOME_TOTAL,
+MUN_CADASTRAL_INCOME_TAXABLE, MUN_BUILDINGS_TOTAL,
+MUN_BUILDINGS_CENTRAL_HEATING, MUN_PARCELS_TAX_EXEMPT.
 docs/features/spf_agdp.md.
 
-DAILY, AUTOMATIC. Four ATOM feeds (one per dataset): the Wave 4 pair, each
-version a fixed one-quarter zip, and the Wave 5 annual pair, each version a
-fixed one-year (1-January snapshot) zip -- src/fetchers/spf_agdp.py's module
-docstring covers feed discovery, the ranged zip read and the per-row
-five-state parsing; this script is the layer that knows about the database:
-incremental-fetch state, per-period geo resolution, and the write.
+DAILY, AUTOMATIC. Seven ATOM feeds (one per dataset): the Wave 4 pair, each
+version a fixed one-quarter zip, and the five annual datasets (Wave 5 lots A
+and B), each version a fixed one-year (1-January snapshot) zip --
+src/fetchers/spf_agdp.py's module docstring covers feed discovery, the
+ranged zip read and the per-row five-state parsing; this script is the layer
+that knows about the database: incremental-fetch state, per-period geo
+resolution, and the write.
+
+TWO STORES, ONE SCRIPT (Wave 5 lot B, config/stores.yaml): lot B's six
+indicators land in a NEW store, `spf_agdp_patrimony`, kept separate from
+Wave 4/lot A's `spf_agdp` store purely for committed-CSV size (the combined
+file would near the 25 MB commit ceiling) -- this script's DATASETS dict and
+write logic are unaware of that split, which is entirely
+scripts/offload_stores.py's concern (it dispatches each row to the store
+that declares its indicator_id). Nothing here changes because of it.
 
 INCREMENTAL FETCH, NOT A FULL RE-READ EVERY DAY. Re-downloading and
 re-parsing all ~40 versions of both datasets daily would mean the
@@ -77,9 +91,12 @@ from port_existing_indicators import derive_period_bounds  # noqa: E402
 from src.db.vintages import upsert_observation  # noqa: E402
 from src.fetchers.spf_agdp import (  # noqa: E402
     ATOM_URL_PATTERN,
+    BUILDING_CONDITION,
+    LAND_USE,
     LEASES,
     OWNER_OCCUPANTS,
     PROPERTY_DYNAMICS,
+    TAX_EXEMPTIONS,
     TRANSACTIONS,
     AgdpDatasetConfig,
     AgdpSource,
@@ -95,13 +112,18 @@ STATE_PATH = Path(__file__).resolve().parents[1] / "data" / "spf_agdp_state.json
 
 #: dataset config key (state file / CLI) -> AgdpDatasetConfig. Wave 5 lot A
 #: adds the two annual datasets (owner_occupants, property_dynamics) to the
-#: quarterly pair loaded in Wave 4 -- same state file, same store, only the
-#: config and `derive_period_bounds` frequency differ per dataset.
+#: quarterly pair loaded in Wave 4; Wave 5 lot B adds three more annual
+#: datasets (land_use, building_condition, tax_exemptions) -- same state
+#: file, same script, only the config, `derive_period_bounds` frequency and
+#: (config/stores.yaml) destination store differ per dataset.
 DATASETS: dict[str, AgdpDatasetConfig] = {
     "leases": LEASES,
     "transactions": TRANSACTIONS,
     "owner_occupants": OWNER_OCCUPANTS,
     "property_dynamics": PROPERTY_DYNAMICS,
+    "land_use": LAND_USE,
+    "building_condition": BUILDING_CONDITION,
+    "tax_exemptions": TAX_EXEMPTIONS,
 }
 
 
@@ -177,6 +199,13 @@ def _ensure_reference_rows(conn: sqlite3.Connection, indicator_configs: dict, so
         ("MUN_PARCELS_OWNED", 1, "sum"),
         ("MUN_OWNERSHIP_DURATION_MEDIAN", 0, "not_applicable"),
         ("MUN_OWNERSHIP_ROTATION_MEAN", 0, "not_applicable"),
+        # Wave 5 lot B (spf_agdp_patrimony store): all six additive, summed.
+        ("MUN_CADASTRAL_PARCELS_TOTAL", 1, "sum"),
+        ("MUN_CADASTRAL_INCOME_TOTAL", 1, "sum"),
+        ("MUN_CADASTRAL_INCOME_TAXABLE", 1, "sum"),
+        ("MUN_BUILDINGS_TOTAL", 1, "sum"),
+        ("MUN_BUILDINGS_CENTRAL_HEATING", 1, "sum"),
+        ("MUN_PARCELS_TAX_EXEMPT", 1, "sum"),
     ):
         ind = indicator_configs[indicator_id]
         conn.execute(
@@ -407,7 +436,10 @@ def main() -> None:
             "Reference rows ensured for: MUN_LEASES_NEW_HOUSING, "
             "MUN_LEASE_RENT_MEDIAN_HOUSING, MUN_LEASE_CHARGES_MEDIAN_HOUSING, "
             "MUN_PROPERTY_SALES, MUN_OWNER_OCCUPIERS, MUN_PARCELS_OWNED, "
-            "MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN"
+            "MUN_OWNERSHIP_DURATION_MEDIAN, MUN_OWNERSHIP_ROTATION_MEAN, "
+            "MUN_CADASTRAL_PARCELS_TOTAL, MUN_CADASTRAL_INCOME_TOTAL, "
+            "MUN_CADASTRAL_INCOME_TAXABLE, MUN_BUILDINGS_TOTAL, "
+            "MUN_BUILDINGS_CENTRAL_HEATING, MUN_PARCELS_TAX_EXEMPT"
         )
     else:
         print(f"Wrote {written} new vintage(s).")

@@ -1,0 +1,72 @@
+id: MUN_BUILDINGS_CENTRAL_HEATING
+name:
+  en: Parcels with central heating
+  fr: Parcelles avec chauffage central
+  nl: Percelen met centrale verwarming
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of parcels in the commune recorded as having central heating, across every parcel
+    use combined (ParcelNature=TOTAL) -- a raw count, out of MUN_BUILDINGS_TOTAL's own total
+    tracked parcels for the same commune-year. Source: SPF Finances AGDP building-condition
+    dataset (52.01.05), Municipality-level CSV, one 1-January snapshot per published version.
+    PERIOD IS THE CALENDAR YEAR of the snapshot's own publication date (ATOM `time`
+    YYYY-01-01). No share or percentage of central-heating coverage is published here: that
+    would be a derived ratio, out of scope for this batch and requiring its own ADR (CLAUDE.md
+    rule 19 -- see the follow-up noted in docs/features/spf_agdp.md); consumers who want that
+    ratio must compute it themselves from this count and MUN_BUILDINGS_TOTAL, never averaged
+    across communes. preferred_direction is contextual, not higher_is_better: a higher count
+    can reflect either broader access to central heating or simply a bigger commune, and is
+    never population- or dwelling-normalized here. is_additive=true, aggregation_method=sum:
+    province/region/Belgium totals are summed from this count the ordinary way over the
+    geographies that existed that year. A literal 0 is a genuine measured zero, final; a
+    blank cell at TOTAL is a schema surprise and the load refuses rather than guess (never
+    observed live: every commune measured in 2026 and 2017 has a non-blank CentralHeating
+    cell at TOTAL). A commune absent from a given year's file is not written as zero.
+  fr: >
+    Nombre de parcelles dans la commune enregistrées comme équipées de chauffage central,
+    tous usages de parcelle confondus (ParcelNature=TOTAL) -- un comptage brut, sur le total
+    des parcelles suivies de MUN_BUILDINGS_TOTAL pour la même commune-année. Source : jeu de
+    données AGDP état du bâti du SPF Finances (52.01.05), CSV au niveau communal, un
+    instantané au 1er janvier par version publiée. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la
+    date de publication de l'instantané (ATOM `time` YYYY-01-01). Aucune part ou pourcentage
+    de couverture en chauffage central n'est publié ici : ce serait un ratio dérivé, hors
+    périmètre de ce lot et nécessitant son propre ADR (règle 19 de CLAUDE.md -- voir la suite
+    donnée notée dans docs/features/spf_agdp.md) ; les utilisateurs souhaitant ce ratio
+    doivent le calculer eux-mêmes à partir de ce comptage et de MUN_BUILDINGS_TOTAL, jamais
+    moyenné entre communes. preferred_direction est contextual, pas higher_is_better : un
+    comptage plus élevé peut refléter soit un accès plus large au chauffage central, soit
+    simplement une commune plus grande, et n'est jamais normalisé ici par population ou par
+    logement. is_additive=true, aggregation_method=sum : les totaux
+    provinciaux/régionaux/nationaux sont additionnés normalement sur les entités
+    géographiques existant cette année-là. Un 0 littéral est un zéro réellement mesuré,
+    final ; une cellule vide à TOTAL est une anomalie de schéma et le chargement refuse
+    plutôt que de deviner (jamais observé en pratique : chaque commune mesurée en 2026 et
+    2017 a une cellule CentralHeating non vide à TOTAL). Une commune absente du fichier d'une
+    année donnée n'est pas écrite comme zéro.
+  nl: >
+    Aantal percelen in de gemeente geregistreerd als uitgerust met centrale verwarming, over
+    alle perceelbestemmingen samen (ParcelNature=TOTAL) -- een ruw aantal, op het totaal
+    aantal gevolgde percelen van MUN_BUILDINGS_TOTAL voor dezelfde gemeente-jaar. Bron:
+    AGDP-dataset bouwtoestand van de FOD Financiën (52.01.05), CSV op gemeenteniveau, één
+    momentopname per 1 januari per gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van
+    de eigen publicatiedatum van de momentopname (ATOM `time` YYYY-01-01). Er wordt hier geen
+    aandeel of percentage van centrale-verwarmingsdekking gepubliceerd: dat zou een afgeleide
+    verhouding zijn, buiten het bereik van dit blok en met een eigen ADR nodig (CLAUDE.md
+    regel 19 -- zie de vervolgstap vermeld in docs/features/spf_agdp.md); wie die verhouding
+    wil, moet ze zelf berekenen uit dit aantal en MUN_BUILDINGS_TOTAL, nooit gemiddeld over
+    gemeenten. preferred_direction is contextual, niet higher_is_better: een hoger aantal kan
+    ofwel bredere toegang tot centrale verwarming weerspiegelen, ofwel gewoon een grotere
+    gemeente, en wordt hier nooit genormaliseerd naar bevolking of woningen. is_additive=true,
+    aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de gewone manier
+    opgeteld over de geografische entiteiten die dat jaar bestonden. Een letterlijke 0 is een
+    echt gemeten nul, definitief; een lege cel bij TOTAL is een schema-verrassing en het
+    inladen weigert eerder dan te gokken (nooit live waargenomen: elke gemeente gemeten in
+    2026 en 2017 heeft een niet-lege CentralHeating-cel bij TOTAL). Een gemeente die in het
+    bestand van een bepaald jaar ontbreekt, wordt niet als nul geschreven.
+display: null

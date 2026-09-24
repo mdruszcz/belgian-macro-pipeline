@@ -1,0 +1,86 @@
+id: MUN_PARCELS_TAX_EXEMPT
+name:
+  en: Parcels exempt from property tax
+  fr: Parcelles exonérées de précompte immobilier
+  nl: Van onroerende voorheffing vrijgestelde percelen
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of parcels in the commune exempt from property tax, across every exemption
+    category combined (ExemptionType=TOTAL -- public buildings, places of worship, certain
+    non-profits and other statutory exemptions). Source: SPF Finances AGDP property-tax
+    exemptions dataset (52.01.03), Municipality-level CSV, one 1-January snapshot per
+    published version. PERIOD IS THE CALENDAR YEAR of the snapshot's own publication date
+    (ATOM `time` YYYY-01-01). preferred_direction is contextual, deliberately NOT
+    lower_is_better or higher_is_better: a higher exempt count can mean more public or
+    charitable land use in the commune, OR a weaker taxable base relative to its size --
+    neither reading is uniformly "better". is_additive=true, aggregation_method=sum:
+    province/region/Belgium totals are summed from this count the ordinary way over the
+    geographies that existed that year -- never averaged. A literal 0 is a genuine measured
+    zero, final -- e.g. NIS 44001 in 2017 has ExemptionType=TOTAL ParcelsNumber=0, loaded as
+    a real zero, not na. A blank ParcelsNumber cell at TOTAL is a schema surprise and the
+    load refuses rather than guess (never observed live at TOTAL: every commune measured in
+    2026, 2025 and 2017 has a non-blank ParcelsNumber there). This dataset's own
+    TotalCadastralIncome column DOES genuinely blank at ExemptionType=TOTAL for NIS 73028
+    Herstappe (ParcelsNumber=4) in 2025 and 2017 -- a real suppressed state for that column,
+    which is why only the parcel count, never that euro figure, is loaded from this dataset
+    (see MUN_CADASTRAL_INCOME_TOTAL, whose own euro total is drawn from the land-use dataset
+    instead and is byte-identical to this dataset's TaxExemptCadastralIncome for every
+    commune measured in 2026). A commune absent from a given year's file is not written as
+    zero.
+  fr: >
+    Nombre de parcelles dans la commune exonérées de précompte immobilier, toutes catégories
+    d'exonération confondues (ExemptionType=TOTAL -- bâtiments publics, lieux de culte,
+    certaines associations sans but lucratif et autres exonérations légales). Source : jeu de
+    données AGDP exonérations de précompte immobilier du SPF Finances (52.01.03), CSV au
+    niveau communal, un instantané au 1er janvier par version publiée. LA PÉRIODE EST L'ANNÉE
+    CALENDAIRE de la date de publication de l'instantané (ATOM `time` YYYY-01-01).
+    preferred_direction est contextual, délibérément NI lower_is_better NI higher_is_better :
+    un nombre d'exonérations plus élevé peut signifier soit un usage plus public ou caritatif
+    du sol dans la commune, soit une base imposable plus faible par rapport à sa taille --
+    aucune des deux lectures n'est uniformément "meilleure". is_additive=true,
+    aggregation_method=sum : les totaux provinciaux/régionaux/nationaux sont additionnés
+    normalement sur les entités géographiques existant cette année-là -- jamais moyennés. Un
+    0 littéral est un zéro réellement mesuré, final -- par exemple le NIS 44001 en 2017 a
+    ExemptionType=TOTAL ParcelsNumber=0, chargé comme un zéro réel, pas na. Une cellule
+    ParcelsNumber vide à TOTAL est une anomalie de schéma et le chargement refuse plutôt que
+    de deviner (jamais observé en pratique à TOTAL : chaque commune mesurée en 2026, 2025 et
+    2017 y a un ParcelsNumber non vide). La colonne TotalCadastralIncome de ce jeu de données
+    se vide réellement à ExemptionType=TOTAL pour le NIS 73028 Herstappe (ParcelsNumber=4) en
+    2025 et 2017 -- un véritable état supprimé pour cette colonne, raison pour laquelle seul
+    le nombre de parcelles, jamais ce montant en euros, est chargé depuis ce jeu de données
+    (voir MUN_CADASTRAL_INCOME_TOTAL, dont le propre total en euros provient du jeu de
+    données sur l'usage du sol et est identique bit à bit au TaxExemptCadastralIncome de ce
+    jeu de données pour chaque commune mesurée en 2026). Une commune absente du fichier d'une
+    année donnée n'est pas écrite comme zéro.
+  nl: >
+    Aantal percelen in de gemeente vrijgesteld van onroerende voorheffing, over alle
+    vrijstellingscategorieën samen (ExemptionType=TOTAL -- openbare gebouwen, religieuze
+    gebouwen, bepaalde vzw's en andere wettelijke vrijstellingen). Bron: AGDP-dataset
+    vrijstellingen onroerende voorheffing van de FOD Financiën (52.01.03), CSV op
+    gemeenteniveau, één momentopname per 1 januari per gepubliceerde versie. DE PERIODE IS
+    HET KALENDERJAAR van de eigen publicatiedatum van de momentopname (ATOM `time`
+    YYYY-01-01). preferred_direction is contextual, bewust NIET lower_is_better of
+    higher_is_better: een hoger aantal vrijstellingen kan wijzen op meer openbaar of
+    liefdadig grondgebruik in de gemeente, OF op een zwakkere belastbare basis in verhouding
+    tot haar grootte -- geen van beide lezingen is eenduidig "beter". is_additive=true,
+    aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de gewone manier
+    opgeteld over de geografische entiteiten die dat jaar bestonden -- nooit gemiddeld. Een
+    letterlijke 0 is een echt gemeten nul, definitief -- bijvoorbeeld NIS 44001 heeft in 2017
+    ExemptionType=TOTAL ParcelsNumber=0, geladen als een echte nul, niet als na. Een lege
+    ParcelsNumber-cel bij TOTAL is een schema-verrassing en het inladen weigert eerder dan te
+    gokken (nooit live waargenomen bij TOTAL: elke gemeente gemeten in 2026, 2025 en 2017
+    heeft daar een niet-lege ParcelsNumber). De kolom TotalCadastralIncome van deze dataset
+    is wel degelijk leeg bij ExemptionType=TOTAL voor NIS 73028 Herstappe (ParcelsNumber=4)
+    in 2025 en 2017 -- een echte onderdrukte toestand voor die kolom, daarom wordt enkel het
+    aantal percelen, nooit dat eurobedrag, uit deze dataset geladen (zie
+    MUN_CADASTRAL_INCOME_TOTAL, waarvan het eigen eurobedrag afkomstig is uit de
+    bodemgebruik-dataset en byte-identiek is aan de TaxExemptCadastralIncome van deze dataset
+    voor elke gemeente gemeten in 2026). Een gemeente die in het bestand van een bepaald jaar
+    ontbreekt, wordt niet als nul geschreven.
+display: null

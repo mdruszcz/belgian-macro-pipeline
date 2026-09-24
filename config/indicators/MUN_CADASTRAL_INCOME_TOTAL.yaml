@@ -1,0 +1,82 @@
+id: MUN_CADASTRAL_INCOME_TOTAL
+name:
+  en: Total cadastral income
+  fr: Revenu cadastral total
+  nl: Totaal kadastraal inkomen
+unit: eur
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Sum of cadastral income (a notional annual rental value SPF Finances assigns to each
+    parcel, the base for property tax) across every parcel in the commune, all uses combined
+    (ParcelNature=TOTAL). Source: SPF Finances AGDP land-use dataset (52.01.04),
+    Municipality-level CSV, one 1-January snapshot per published version. PERIOD IS THE
+    CALENDAR YEAR of the snapshot's own publication date (ATOM `time` YYYY-01-01). This is
+    NOT the same figure as MUN_CADASTRAL_INCOME_TAXABLE (the exempt portion is excluded
+    there); the exempt portion itself equals MUN_PARCELS_TAX_EXEMPT's own dataset total for
+    the same commune-year (verified for 2026: 11001 1,522,760 EUR, 44083 3,641,626 EUR,
+    23106 925,425 EUR, 82039 2,272,702 EUR -- both datasets independently measure the same
+    figure, only the parcel COUNT is taken from the exemptions dataset to avoid publishing a
+    duplicate column). preferred_direction is contextual: a higher cadastral income reflects
+    a bigger or wealthier property tax base, not a "better" or "worse" outcome by itself.
+    is_additive=true, aggregation_method=sum: province/region/Belgium totals are summed from
+    this figure the ordinary way over the geographies that existed that year -- never
+    averaged. A blank cell at TOTAL is a schema surprise and the load refuses rather than
+    guess (never observed live at TOTAL for a live commune in 2026, 2025 or 2017 -- unlike
+    the property-tax exemptions dataset, whose TotalCadastralIncome column DOES genuinely
+    blank at ExemptionType=TOTAL for NIS 73028 Herstappe, ParcelsNumber=4, in 2025 and 2017:
+    a real suppressed state, which is why that column is not loaded as an indicator here). A
+    commune absent from a given year's file is not written as zero.
+  fr: >
+    Somme du revenu cadastral (une valeur locative annuelle théorique que le SPF Finances
+    attribue à chaque parcelle, base du précompte immobilier) sur toutes les parcelles de la
+    commune, tous usages confondus (ParcelNature=TOTAL). Source : jeu de données AGDP usage
+    du sol du SPF Finances (52.01.04), CSV au niveau communal, un instantané au 1er janvier
+    par version publiée. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la date de publication de
+    l'instantané (ATOM `time` YYYY-01-01). Ce n'est PAS le même chiffre que
+    MUN_CADASTRAL_INCOME_TAXABLE (la part exonérée en est exclue) ; la part exonérée
+    elle-même est égale au total du jeu de données MUN_PARCELS_TAX_EXEMPT pour la même
+    commune-année (vérifié pour 2026 : 11001 1 522 760 EUR, 44083 3 641 626 EUR, 23106
+    925 425 EUR, 82039 2 272 702 EUR -- les deux jeux de données mesurent indépendamment le
+    même chiffre, seul le NOMBRE de parcelles est repris du jeu de données des exonérations
+    pour éviter de publier une colonne dupliquée). preferred_direction est contextual : un
+    revenu cadastral plus élevé reflète une base fiscale immobilière plus grande ou plus
+    riche, pas un résultat "meilleur" ou "moins bon" en soi. is_additive=true,
+    aggregation_method=sum : les totaux provinciaux/régionaux/nationaux sont additionnés
+    normalement sur les entités géographiques existant cette année-là -- jamais moyennés. Une
+    cellule vide à TOTAL est une anomalie de schéma et le chargement refuse plutôt que de
+    deviner (jamais observé en pratique à TOTAL pour une commune existante en 2026, 2025 ou
+    2017 -- contrairement au jeu de données des exonérations, dont la colonne
+    TotalCadastralIncome se vide réellement à ExemptionType=TOTAL pour le NIS 73028
+    Herstappe, ParcelsNumber=4, en 2025 et 2017 : un véritable état supprimé, raison pour
+    laquelle cette colonne n'est pas chargée comme indicateur ici). Une commune absente du
+    fichier d'une année donnée n'est pas écrite comme zéro.
+  nl: >
+    Som van het kadastraal inkomen (een fictieve jaarlijkse huurwaarde die de FOD Financiën
+    aan elk perceel toekent, de basis voor de onroerende voorheffing) over alle percelen in
+    de gemeente, alle bestemmingen samen (ParcelNature=TOTAL). Bron: AGDP-dataset
+    bodemgebruik van de FOD Financiën (52.01.04), CSV op gemeenteniveau, één momentopname per
+    1 januari per gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van de eigen
+    publicatiedatum van de momentopname (ATOM `time` YYYY-01-01). Dit is NIET hetzelfde
+    cijfer als MUN_CADASTRAL_INCOME_TAXABLE (het vrijgestelde deel is daar uitgesloten); het
+    vrijgestelde deel zelf is gelijk aan het eigen totaal van de dataset
+    MUN_PARCELS_TAX_EXEMPT voor dezelfde gemeente-jaar (geverifieerd voor 2026: 11001
+    1.522.760 EUR, 44083 3.641.626 EUR, 23106 925.425 EUR, 82039 2.272.702 EUR -- beide
+    datasets meten onafhankelijk hetzelfde cijfer, enkel het AANTAL percelen wordt uit de
+    vrijstellingendataset gehaald om een dubbele kolom te vermijden). preferred_direction is
+    contextual: een hoger kadastraal inkomen weerspiegelt een grotere of rijkere
+    onroerendgoedbelastingbasis, geen "beter" of "slechter" resultaat op zich.
+    is_additive=true, aggregation_method=sum: provincie-/gewest-/Belgiëtotalen worden op de
+    gewone manier opgeteld over de geografische entiteiten die dat jaar bestonden -- nooit
+    gemiddeld. Een lege cel bij TOTAL is een schema-verrassing en het inladen weigert eerder
+    dan te gokken (nooit live waargenomen bij TOTAL voor een bestaande gemeente in 2026, 2025
+    of 2017 -- in tegenstelling tot de vrijstellingendataset, waar de kolom
+    TotalCadastralIncome wel degelijk leeg is bij ExemptionType=TOTAL voor NIS 73028
+    Herstappe, ParcelsNumber=4, in 2025 en 2017: een echte onderdrukte toestand, daarom wordt
+    die kolom hier niet als indicator geladen). Een gemeente die in het bestand van een
+    bepaald jaar ontbreekt, wordt niet als nul geschreven.
+display: null

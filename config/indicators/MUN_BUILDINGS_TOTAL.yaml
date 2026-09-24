@@ -1,0 +1,64 @@
+id: MUN_BUILDINGS_TOTAL
+name:
+  en: Cadastral parcels tracked for building condition
+  fr: Parcelles cadastrales suivies pour l'état du bâti
+  nl: Kadastrale percelen gevolgd voor bouwtoestand
+unit: count
+frequency: A
+source_id: spf_finances
+geo_levels: [municipal]
+preferred_direction: contextual
+max_age_days: 450
+description:
+  en: >
+    Number of parcels in the commune covered by SPF Finances' building-condition tracking,
+    across every parcel use combined (ParcelNature=TOTAL). Source: SPF Finances AGDP
+    building-condition dataset (52.01.05), Municipality-level CSV, one 1-January snapshot per
+    published version. PERIOD IS THE CALENDAR YEAR of the snapshot's own publication date
+    (ATOM `time` YYYY-01-01). This is the denominator behind MUN_BUILDINGS_CENTRAL_HEATING --
+    no share/percentage of central-heating coverage is published here, since that would be a
+    derived ratio requiring its own aggregation rule and ADR (see docs/features/spf_agdp.md
+    follow-ups); the raw counts alone are loaded. preferred_direction is contextual: a
+    commune with more tracked parcels is bigger or more built-up, not "better" or "worse"
+    served. is_additive=true, aggregation_method=sum: province/region/Belgium totals are
+    summed from this count the ordinary way over the geographies that existed that year --
+    never averaged. A literal 0 is a genuine measured zero, final; a blank cell at TOTAL is a
+    schema surprise and the load refuses rather than guess (never observed live: every
+    commune measured in 2026 and 2017 has a non-blank ParcelsNumber at TOTAL). A commune
+    absent from a given year's file is not written as zero.
+  fr: >
+    Nombre de parcelles dans la commune couvertes par le suivi de l'état du bâti du SPF
+    Finances, tous usages de parcelle confondus (ParcelNature=TOTAL). Source : jeu de données
+    AGDP état du bâti du SPF Finances (52.01.05), CSV au niveau communal, un instantané au
+    1er janvier par version publiée. LA PÉRIODE EST L'ANNÉE CALENDAIRE de la date de
+    publication de l'instantané (ATOM `time` YYYY-01-01). C'est le dénominateur derrière
+    MUN_BUILDINGS_CENTRAL_HEATING -- aucune part/pourcentage de couverture en chauffage
+    central n'est publié ici, car ce serait un ratio dérivé nécessitant sa propre règle
+    d'agrégation et son ADR (voir les suites données dans docs/features/spf_agdp.md) ; seuls
+    les comptages bruts sont chargés. preferred_direction est contextual : une commune avec
+    plus de parcelles suivies est plus grande ou plus bâtie, pas "meilleure" ou "moins bonne".
+    is_additive=true, aggregation_method=sum : les totaux provinciaux/régionaux/nationaux
+    sont additionnés normalement sur les entités géographiques existant cette année-là --
+    jamais moyennés. Un 0 littéral est un zéro réellement mesuré, final ; une cellule vide à
+    TOTAL est une anomalie de schéma et le chargement refuse plutôt que de deviner (jamais
+    observé en pratique : chaque commune mesurée en 2026 et 2017 a un ParcelsNumber non vide
+    à TOTAL). Une commune absente du fichier d'une année donnée n'est pas écrite comme zéro.
+  nl: >
+    Aantal percelen in de gemeente gedekt door de opvolging van de bouwtoestand van de FOD
+    Financiën, over alle perceelbestemmingen samen (ParcelNature=TOTAL). Bron:
+    AGDP-dataset bouwtoestand van de FOD Financiën (52.01.05), CSV op gemeenteniveau, één
+    momentopname per 1 januari per gepubliceerde versie. DE PERIODE IS HET KALENDERJAAR van
+    de eigen publicatiedatum van de momentopname (ATOM `time` YYYY-01-01). Dit is de noemer
+    achter MUN_BUILDINGS_CENTRAL_HEATING -- er wordt hier geen aandeel/percentage van
+    centrale-verwarmingsdekking gepubliceerd, aangezien dat een afgeleide verhouding zou zijn
+    die een eigen aggregatieregel en ADR vereist (zie de vervolgstappen in
+    docs/features/spf_agdp.md); enkel de ruwe aantallen worden geladen. preferred_direction
+    is contextual: een gemeente met meer gevolgde percelen is groter of meer bebouwd, niet
+    "beter" of "slechter" bediend. is_additive=true, aggregation_method=sum:
+    provincie-/gewest-/Belgiëtotalen worden op de gewone manier opgeteld over de geografische
+    entiteiten die dat jaar bestonden -- nooit gemiddeld. Een letterlijke 0 is een echt
+    gemeten nul, definitief; een lege cel bij TOTAL is een schema-verrassing en het inladen
+    weigert eerder dan te gokken (nooit live waargenomen: elke gemeente gemeten in 2026 en
+    2017 heeft een niet-lege ParcelsNumber bij TOTAL). Een gemeente die in het bestand van
+    een bepaald jaar ontbreekt, wordt niet als nul geschreven.
+display: null

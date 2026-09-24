@@ -14,9 +14,12 @@ import zipfile
 import pytest
 
 from src.fetchers.spf_agdp import (
+    BUILDING_CONDITION,
+    LAND_USE,
     LEASES,
     OWNER_OCCUPANTS,
     PROPERTY_DYNAMICS,
+    TAX_EXEMPTIONS,
     TRANSACTIONS,
     AgdpSchemaError,
     AgdpSource,
@@ -576,14 +579,18 @@ def test_property_dynamics_zero_parcels_is_na_never_a_fabricated_zero_duration()
     assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["status"] == "na"
 
 
-def test_property_dynamics_blank_parcels_is_na_never_a_fabricated_zero_duration():
+def test_property_dynamics_blank_parcels_count_refuses_never_a_fabricated_zero():
+    # Previously this asserted a bug: a blank ParcelsNumber (a schema
+    # surprise -- no live file has ever measured one) silently became a
+    # written 0.0, final. CLAUDE.md rule 26 forbids collapsing "missing"
+    # into "measured zero" for a count column exactly as much as for a
+    # percentile/mean one -- fixed in _annual_row_to_observations (Wave 5
+    # lot B handoff) to raise AgdpSchemaError instead, naming the dataset,
+    # year and NIS, the same as every other unexpected-blank guard in this
+    # module already does.
     csv_bytes = _dynamics_csv([_dynamics_row(nis="11001", parcels="", p50="", rotation="")])
-    rows = AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
-    by_indicator = {r["indicator_id"]: r for r in rows}
-    assert by_indicator["MUN_PARCELS_OWNED"]["value"] == 0.0
-    assert by_indicator["MUN_PARCELS_OWNED"]["status"] == "final"
-    assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["status"] == "na"
-    assert by_indicator["MUN_OWNERSHIP_ROTATION_MEAN"]["status"] == "na"
+    with pytest.raises(AgdpSchemaError, match="blank"):
+        AgdpSource(PROPERTY_DYNAMICS)._parse(csv_bytes, quarter="2026")
 
 
 def test_property_dynamics_nonzero_parcels_blank_duration_refuses():
@@ -598,3 +605,334 @@ def test_property_dynamics_2016_real_value():
     by_indicator = {r["indicator_id"]: r for r in rows}
     assert by_indicator["MUN_PARCELS_OWNED"]["value"] == 9779.0
     assert by_indicator["MUN_OWNERSHIP_DURATION_MEDIAN"]["value"] == pytest.approx(9.5140314853)
+
+
+# --- Wave 5 lot B: land use (52.01.04) ---------------------------------------
+
+_LANDUSE_HEADER = (
+    "NISCode;NameFre;NameDut;NameGer;ParcelNature;ParcelsNumber;"
+    "TotalCadastralIncome;TaxableCadastralIncome;TaxExemptCadastralIncome"
+)
+
+
+def _landuse_row(
+    nis="11001",
+    nature="TOTAL",
+    parcels="11540",
+    total_ci="15431671",
+    taxable_ci="13908911",
+    exempt_ci="1522760",
+):
+    return (
+        f"{nis};Antwerpen;Antwerpen;Antwerpen;{nature};{parcels};"
+        f"{total_ci};{taxable_ci};{exempt_ci}"
+    )
+
+
+def _landuse_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_LANDUSE_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_landuse_2026_real_values_11001():
+    # Hand-computed from the real 2026 Municipality CSV: parcels 11540,
+    # CI total 15431671, CI taxable 13908911.
+    csv_bytes = _landuse_csv(
+        [_landuse_row(nis="11001", parcels="11540", total_ci="15431671", taxable_ci="13908911")]
+    )
+    rows = AgdpSource(LAND_USE)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_CADASTRAL_PARCELS_TOTAL"] == {
+        "geo_id": "11001",
+        "period": "2026",
+        "value": 11540.0,
+        "status": "final",
+        "indicator_id": "MUN_CADASTRAL_PARCELS_TOTAL",
+    }
+    assert by_indicator["MUN_CADASTRAL_INCOME_TOTAL"]["value"] == 15431671.0
+    assert by_indicator["MUN_CADASTRAL_INCOME_TOTAL"]["status"] == "final"
+    assert by_indicator["MUN_CADASTRAL_INCOME_TAXABLE"]["value"] == 13908911.0
+    assert by_indicator["MUN_CADASTRAL_INCOME_TAXABLE"]["status"] == "final"
+
+
+@pytest.mark.parametrize(
+    "nis,parcels,total_ci,taxable_ci",
+    [
+        ("44083", "46948", "30809990", "27168364"),
+        ("23106", "38624", "14644408", "13718983"),
+        ("82039", "55633", "14059868", "11787166"),
+    ],
+)
+def test_landuse_2026_real_values_other_communes(nis, parcels, total_ci, taxable_ci):
+    csv_bytes = _landuse_csv(
+        [_landuse_row(nis=nis, parcels=parcels, total_ci=total_ci, taxable_ci=taxable_ci)]
+    )
+    rows = AgdpSource(LAND_USE)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_CADASTRAL_PARCELS_TOTAL"]["value"] == float(parcels)
+    assert by_indicator["MUN_CADASTRAL_INCOME_TOTAL"]["value"] == float(total_ci)
+    assert by_indicator["MUN_CADASTRAL_INCOME_TAXABLE"]["value"] == float(taxable_ci)
+
+
+def test_landuse_2017_real_values():
+    # 11001: 9925 / 14338902. 44001: 23424 / 16144345.
+    csv_bytes = _landuse_csv(
+        [
+            _landuse_row(nis="11001", parcels="9925", total_ci="14338902", taxable_ci="12000000"),
+            _landuse_row(nis="44001", parcels="23424", total_ci="16144345", taxable_ci="14000000"),
+        ]
+    )
+    rows = AgdpSource(LAND_USE)._parse(csv_bytes, quarter="2017")
+    by_geo = {}
+    for r in rows:
+        by_geo.setdefault(r["geo_id"], {})[r["indicator_id"]] = r
+    assert by_geo["11001"]["MUN_CADASTRAL_PARCELS_TOTAL"]["value"] == 9925.0
+    assert by_geo["11001"]["MUN_CADASTRAL_INCOME_TOTAL"]["value"] == 14338902.0
+    assert by_geo["44001"]["MUN_CADASTRAL_PARCELS_TOTAL"]["value"] == 23424.0
+    assert by_geo["44001"]["MUN_CADASTRAL_INCOME_TOTAL"]["value"] == 16144345.0
+
+
+def test_landuse_only_total_parcel_nature_selected():
+    csv_bytes = _landuse_csv(
+        [
+            _landuse_row(nis="11001", nature="TYPE_HOUSE", parcels="500"),
+            _landuse_row(nis="11001", nature="TOTAL", parcels="11540"),
+        ]
+    )
+    rows = AgdpSource(LAND_USE)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 3  # three indicators, one matched row
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_CADASTRAL_PARCELS_TOTAL"]["value"] == 11540.0
+
+
+def test_landuse_blank_parcels_count_refuses():
+    csv_bytes = _landuse_csv([_landuse_row(nis="11001", parcels="")])
+    with pytest.raises(AgdpSchemaError, match="blank"):
+        AgdpSource(LAND_USE)._parse(csv_bytes, quarter="2026")
+
+
+def test_landuse_blank_cadastral_income_at_nonzero_parcels_refuses():
+    # Land use's TotalCadastralIncome must refuse loudly if a nonzero-parcel
+    # row ever blanks it, since no suppression tier applies to this column at
+    # TOTAL (measured 2026/2025/2017). The real 1-4 suppression tier this
+    # dataset does have at TOTAL never touches this column in any measured
+    # file; if it ever does, this must fail loudly, not silently mis-map.
+    csv_bytes = _landuse_csv([_landuse_row(nis="11001", parcels="11540", total_ci="")])
+    with pytest.raises(AgdpSchemaError, match="always_final_columns"):
+        AgdpSource(LAND_USE)._parse(csv_bytes, quarter="2026")
+
+
+def test_landuse_missing_required_column_refuses():
+    header = _LANDUSE_HEADER.replace("TotalCadastralIncome;", "")
+    text = "﻿" + "\r\n".join([header, _landuse_row()]) + "\r\n"
+    with pytest.raises(AgdpSchemaError, match="missing required column"):
+        AgdpSource(LAND_USE)._parse(text.encode("utf-8"), quarter="2026")
+
+
+# --- Wave 5 lot B: building condition (52.01.05) ------------------------------
+
+_BUILDING_HEADER = "NISCode;NameFre;NameDut;NameGer;ParcelNature;ParcelsNumber;CentralHeating"
+
+
+def _building_row(nis="11001", nature="TOTAL", parcels="9553", heating="6419"):
+    return f"{nis};Antwerpen;Antwerpen;Antwerpen;{nature};{parcels};{heating}"
+
+
+def _building_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_BUILDING_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_building_2026_real_values_11001():
+    csv_bytes = _building_csv([_building_row(nis="11001", parcels="9553", heating="6419")])
+    rows = AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_BUILDINGS_TOTAL"] == {
+        "geo_id": "11001",
+        "period": "2026",
+        "value": 9553.0,
+        "status": "final",
+        "indicator_id": "MUN_BUILDINGS_TOTAL",
+    }
+    assert by_indicator["MUN_BUILDINGS_CENTRAL_HEATING"]["value"] == 6419.0
+    assert by_indicator["MUN_BUILDINGS_CENTRAL_HEATING"]["status"] == "final"
+
+
+@pytest.mark.parametrize(
+    "nis,parcels,heating",
+    [
+        ("44083", "29756", "18711"),
+        ("23106", "13798", "9216"),
+        ("82039", "13716", "8505"),
+    ],
+)
+def test_building_2026_real_values_other_communes(nis, parcels, heating):
+    csv_bytes = _building_csv([_building_row(nis=nis, parcels=parcels, heating=heating)])
+    rows = AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_BUILDINGS_TOTAL"]["value"] == float(parcels)
+    assert by_indicator["MUN_BUILDINGS_CENTRAL_HEATING"]["value"] == float(heating)
+
+
+def test_building_2017_real_values():
+    # 11001: 8011 / 5636. 44001: 11937 / 7211.
+    csv_bytes = _building_csv(
+        [
+            _building_row(nis="11001", parcels="8011", heating="5636"),
+            _building_row(nis="44001", parcels="11937", heating="7211"),
+        ]
+    )
+    rows = AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2017")
+    by_geo = {}
+    for r in rows:
+        by_geo.setdefault(r["geo_id"], {})[r["indicator_id"]] = r
+    assert by_geo["11001"]["MUN_BUILDINGS_TOTAL"]["value"] == 8011.0
+    assert by_geo["11001"]["MUN_BUILDINGS_CENTRAL_HEATING"]["value"] == 5636.0
+    assert by_geo["44001"]["MUN_BUILDINGS_TOTAL"]["value"] == 11937.0
+    assert by_geo["44001"]["MUN_BUILDINGS_CENTRAL_HEATING"]["value"] == 7211.0
+
+
+def test_building_zero_central_heating_is_real_measured_zero_final():
+    csv_bytes = _building_csv([_building_row(nis="11001", parcels="100", heating="0")])
+    rows = AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_BUILDINGS_CENTRAL_HEATING"] == {
+        "geo_id": "11001",
+        "period": "2026",
+        "value": 0.0,
+        "status": "final",
+        "indicator_id": "MUN_BUILDINGS_CENTRAL_HEATING",
+    }
+
+
+def test_building_blank_central_heating_at_nonzero_parcels_refuses():
+    csv_bytes = _building_csv([_building_row(nis="11001", parcels="100", heating="")])
+    with pytest.raises(AgdpSchemaError, match="always_final_columns"):
+        AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+
+
+def test_building_central_heating_stays_final_even_if_parcels_were_zero():
+    # always_final_columns must never collapse to na the way a
+    # percentile/mean does at zero count -- CentralHeating is its own
+    # independent additive figure. Not observed live at TOTAL (every
+    # measured commune has ParcelsNumber > 0), but the mapping must still be
+    # correct if it ever occurred, rather than silently mis-classifying a
+    # real value as unmeasured.
+    csv_bytes = _building_csv([_building_row(nis="11001", parcels="0", heating="0")])
+    rows = AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_BUILDINGS_TOTAL"]["value"] == 0.0
+    assert by_indicator["MUN_BUILDINGS_TOTAL"]["status"] == "final"
+    assert by_indicator["MUN_BUILDINGS_CENTRAL_HEATING"] == {
+        "geo_id": "11001",
+        "period": "2026",
+        "value": 0.0,
+        "status": "final",
+        "indicator_id": "MUN_BUILDINGS_CENTRAL_HEATING",
+    }
+
+
+def test_building_blank_parcels_count_refuses():
+    csv_bytes = _building_csv([_building_row(nis="11001", parcels="")])
+    with pytest.raises(AgdpSchemaError, match="blank"):
+        AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+
+
+def test_building_only_total_parcel_nature_selected():
+    csv_bytes = _building_csv(
+        [
+            _building_row(nis="11001", nature="TYPE_HOUSE", parcels="500", heating="400"),
+            _building_row(nis="11001", nature="TOTAL", parcels="9553", heating="6419"),
+        ]
+    )
+    rows = AgdpSource(BUILDING_CONDITION)._parse(csv_bytes, quarter="2026")
+    by_indicator = {r["indicator_id"]: r for r in rows}
+    assert by_indicator["MUN_BUILDINGS_TOTAL"]["value"] == 9553.0
+
+
+# --- Wave 5 lot B: property-tax exemptions (52.01.03) -------------------------
+
+_EXEMPT_HEADER = "NISCode;NameFre;NameDut;NameGer;ExemptionType;ParcelsNumber"
+
+
+def _exempt_row(nis="11001", exemption="TOTAL", parcels="216"):
+    return f"{nis};Antwerpen;Antwerpen;Antwerpen;{exemption};{parcels}"
+
+
+def _exempt_csv(rows: list[str]) -> bytes:
+    text = "﻿" + "\r\n".join([_EXEMPT_HEADER, *rows]) + "\r\n"
+    return text.encode("utf-8")
+
+
+def test_exempt_2026_real_values():
+    # 11001: 216. 44083: 1210. 23106: 775. 82039: 2638.
+    csv_bytes = _exempt_csv([_exempt_row(nis="11001", parcels="216")])
+    rows = AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2026")
+    assert rows == [
+        {
+            "geo_id": "11001",
+            "period": "2026",
+            "value": 216.0,
+            "status": "final",
+            "indicator_id": "MUN_PARCELS_TAX_EXEMPT",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "nis,parcels",
+    [
+        ("44083", "1210"),
+        ("23106", "775"),
+        ("82039", "2638"),
+    ],
+)
+def test_exempt_2026_real_values_other_communes(nis, parcels):
+    csv_bytes = _exempt_csv([_exempt_row(nis=nis, parcels=parcels)])
+    rows = AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2026")
+    assert rows[0]["value"] == float(parcels)
+
+
+def test_exempt_2017_real_zero_is_final_not_na():
+    # 44001 2017: 0 -- a real measured zero, final, not na (handoff).
+    csv_bytes = _exempt_csv([_exempt_row(nis="44001", parcels="0")])
+    rows = AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2017")
+    assert rows == [
+        {
+            "geo_id": "44001",
+            "period": "2017",
+            "value": 0.0,
+            "status": "final",
+            "indicator_id": "MUN_PARCELS_TAX_EXEMPT",
+        }
+    ]
+
+
+def test_exempt_2017_11001_real_value():
+    csv_bytes = _exempt_csv([_exempt_row(nis="11001", parcels="206")])
+    rows = AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2017")
+    assert rows[0]["value"] == 206.0
+
+
+def test_exempt_only_total_exemption_type_selected():
+    csv_bytes = _exempt_csv(
+        [
+            _exempt_row(nis="11001", exemption="1", parcels="50"),
+            _exempt_row(nis="11001", exemption="2", parcels="60"),
+            _exempt_row(nis="11001", exemption="TOTAL", parcels="216"),
+        ]
+    )
+    rows = AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2026")
+    assert len(rows) == 1
+    assert rows[0]["value"] == 216.0
+
+
+def test_exempt_blank_parcels_count_refuses():
+    # Herstappe (73028) genuinely blanks TotalCadastralIncome at
+    # ParcelsNumber=4 in this dataset (excluded from this batch's chosen
+    # columns), but ParcelsNumber itself is never blank in any measured
+    # file. A blank here is still a schema surprise, refused loudly rather
+    # than treated as a measured zero.
+    csv_bytes = _exempt_csv([_exempt_row(nis="73028", parcels="")])
+    with pytest.raises(AgdpSchemaError, match="blank"):
+        AgdpSource(TAX_EXEMPTIONS)._parse(csv_bytes, quarter="2025")

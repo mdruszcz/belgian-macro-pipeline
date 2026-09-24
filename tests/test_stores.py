@@ -45,7 +45,7 @@ from src.stores import (  # noqa: E402
 
 def test_the_real_registry_loads_and_validates():
     stores = load_stores(DEFAULT_STORES_PATH)
-    assert len(stores) == 15
+    assert len(stores) == 16
 
 
 def test_every_store_is_in_exactly_one_mode_and_its_path_exists():
@@ -70,7 +70,11 @@ def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
     pipeline loads are not. Plus `ipp_rate` (feat/ns6-ipp-rate) -- SPF
     Finances' communal additional IPP rate, also reachable live. Plus
     `spf_agdp` (feat/ns4-spf-agdp) -- SPF Finances' AGDP leases/transactions
-    datasets, same source_id as ipp_rate, also reachable live."""
+    datasets, same source_id as ipp_rate, also reachable live. Plus
+    `spf_agdp_patrimony` (feat/ns5b-spf-agdp-patrimony, Wave 5 lot B) -- SPF
+    Finances' AGDP land use/building condition/tax exemptions datasets, same
+    source_id and sync script as `spf_agdp`, kept in a separate store purely
+    for committed-CSV size (see config/stores.yaml's own comment)."""
     stores = load_stores(DEFAULT_STORES_PATH)
     assert {s.name for s in in_db_stores(stores)} == {
         "onem",
@@ -82,6 +86,7 @@ def test_the_split_is_hand_loaded_extra_csv_and_ci_fetched_in_db():
         "population_movement",
         "ipp_rate",
         "spf_agdp",
+        "spf_agdp_patrimony",
     }
     assert len(extra_csv_stores(stores)) == 6
     assert all(s.mode in (MODE_EXTRA_CSV, MODE_IN_DB) for s in stores.values())
