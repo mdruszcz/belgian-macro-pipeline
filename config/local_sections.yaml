@@ -166,21 +166,30 @@ sections:
         counted by Census 2021. The median is not comparable to province, region or
         Belgium — a median cannot be honestly aggregated the way a total can. Rents and
         charges are medians of new residential leases registered that quarter (SPF
-        Finances), withheld below five leases; ownership figures are as of 1 January.
+        Finances), withheld below five leases; ownership figures are as of 1 January. The
+        building stock and its share with central heating (SPF Finances AGDP) are also as of
+        1 January; notifications count new or revised cadastral incomes issued that year,
+        with amounts withheld below five notifications.
       fr: >
         Prix médian de vente des maisons, mis à jour chaque trimestre par Statbel, et le
         parc de logements recensé par le Census 2021. Le prix médian n’est pas comparable
         à la province, à la région ou à la Belgique — un tel taux ne peut être agrégé
         honnêtement. Les loyers et charges sont les médianes des nouveaux baux résidentiels
         enregistrés ce trimestre-là (SPF Finances), retenues en dessous de cinq baux ; les
-        chiffres de propriété sont arrêtés au 1er janvier.
+        chiffres de propriété sont arrêtés au 1er janvier. Le parc de bâtiments et sa part
+        avec chauffage central (AGDP du SPF Finances) sont également arrêtés au 1er janvier ;
+        les notifications comptent les revenus cadastraux nouveaux ou révisés émis cette
+        année-là, les montants étant retenus en dessous de cinq notifications.
       nl: >
         Mediane verkoopprijs van woningen, elk kwartaal bijgewerkt door Statbel, en de
         woningvoorraad volgens de Census 2021. De mediaan is niet vergelijkbaar met
         provincie, gewest of België — een mediaan kan niet eerlijk worden opgeteld. Huur en
         kosten zijn medianen van nieuwe woninghuurcontracten geregistreerd dat kwartaal
         (FOD Financiën), achtergehouden onder vijf contracten; eigendomscijfers gelden op
-        1 januari.
+        1 januari. Het gebouwenbestand en het aandeel daarvan met centrale verwarming (FOD
+        Financiën AGDP) gelden eveneens op 1 januari; kennisgevingen tellen het aantal
+        nieuwe of herziene kadastrale inkomens dat jaar, met bedragen achtergehouden onder
+        vijf kennisgevingen.
     headline: MEDIAN_HOUSE_PRICE
     indicators:
       - HOUSE_SALES_TRANSACTIONS
@@ -197,6 +206,11 @@ sections:
       - MUN_PARCELS_OWNED
       - MUN_OWNERSHIP_DURATION_MEDIAN
       - MUN_OWNERSHIP_ROTATION_MEAN
+      - MUN_BUILDINGS_TOTAL
+      - MUN_BUILDINGS_CENTRAL_HEATING
+      - MUN_CI_NOTIFICATIONS
+      - MUN_CI_NOTIFIED_TOTAL
+      - MUN_CI_NOTIFIED_MEDIAN
 
   - id: business
     label: {en: Business, fr: Entreprises, nl: Ondernemingen}
@@ -300,20 +314,31 @@ sections:
         only — municipal debt, revenue and expenditure per capita. The tax-rate period is the
         TAX YEAR (exercice d'imposition), not the income year it is assessed on; the
         municipal-finance figures below it cover Wallonia only and do not appear on Flemish
-        or Brussels pages.
+        or Brussels pages. The cadastral figures are the SPF's notional rental value used to
+        set property tax, as of 1 January; residential cadastral income covers residential
+        parcels only, so it is smaller than the all-parcel total below it — the two are
+        different figures, not an inconsistency.
       fr: >
         Le taux additionnel communal à l'impôt des personnes physiques, ainsi que — pour la
         Wallonie uniquement — la dette, les recettes et les dépenses communales par habitant.
         La période du taux est l'ANNÉE D'IMPOSITION (exercice d'imposition), pas l'année de
         revenus sur laquelle il est calculé ; les chiffres de finances communales ci-dessous
         ne couvrent que la Wallonie et n'apparaissent pas sur les pages flamandes ou
-        bruxelloises.
+        bruxelloises. Les chiffres cadastraux sont le revenu locatif théorique du SPF servant
+        de base au précompte immobilier, arrêtés au 1er janvier ; le revenu cadastral
+        résidentiel ne porte que sur les parcelles résidentielles, donc il est plus petit que
+        le total tous usages ci-dessous — ce sont deux chiffres différents, pas une
+        incohérence.
       nl: >
         Het eigen aanvullend gemeentelijk opcentiem op de personenbelasting, plus — enkel
         voor Wallonië — gemeentelijke schuld, ontvangsten en uitgaven per inwoner. De periode
         van het tarief is het AANSLAGJAAR (exercice d'imposition), niet het inkomstenjaar
         waarop het wordt berekend; de gemeentefinanciën-cijfers hieronder dekken enkel
-        Wallonië en verschijnen niet op Vlaamse of Brusselse pagina's.
+        Wallonië en verschijnen niet op Vlaamse of Brusselse pagina's. De kadastrale cijfers
+        zijn het fictieve huurinkomen van de FOD dat als basis dient voor de onroerende
+        voorheffing, vastgesteld op 1 januari; het residentieel kadastraal inkomen dekt enkel
+        residentiële percelen, dus het is kleiner dan het totaal over alle percelen
+        hieronder — dit zijn twee verschillende cijfers, geen tegenstrijdigheid.
     headline: MUN_IPP_ADDITIONAL_RATE
     indicators:
       - MUN_DEBT_TOTAL_PER_CAPITA
@@ -325,3 +350,8 @@ sections:
       - MUN_EXPENDITURE_TOTAL_PER_CAPITA
       - MUN_EXPENDITURE_ORDINARY_PER_CAPITA
       - MUN_EXPENDITURE_EXTRAORDINARY_PER_CAPITA
+      - MUN_CADASTRAL_PARCELS_TOTAL
+      - MUN_CADASTRAL_INCOME_TOTAL
+      - MUN_CADASTRAL_INCOME_TAXABLE
+      - MUN_PARCELS_TAX_EXEMPT
+      - MUN_RESIDENTIAL_PARCELS_CI_TOTAL
