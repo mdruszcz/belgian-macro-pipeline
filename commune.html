@@ -328,6 +328,7 @@
   .flows-note{font-size:11px; color:var(--bp-text-muted); line-height:1.5; margin:var(--bp-space-3) 0 0}
   .flows-note .cov{border-bottom:1px dotted var(--bp-text-faint); cursor:help}
   .flows-pronote{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:6px 0 0}
+  .flows-source{font-size:13px; color:var(--bp-text-muted); line-height:1.4; margin:6px 0 0}
   .flows-zero{font-size:var(--bp-text-small); color:var(--bp-text-muted); padding:var(--bp-space-3) 0}
   .maprow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .maprow .mapbox{position:relative; min-height:230px}
@@ -642,6 +643,7 @@
               <ol class="flows-origins" id="flowsOrigins"></ol>
               <p class="flows-note" id="flowsNote"></p>
               <p class="flows-pronote" data-t="cpFlowsPronote"></p>
+              <p class="flows-source" id="flowsSource"></p>
             </div>
           </div>
         </section>
@@ -1400,12 +1402,37 @@
     var coverageLabel = isFinite(coverageDigits)
       ? coverageDigits.toLocaleString(LANG, {minimumFractionDigits: 1, maximumFractionDigits: 1})
       : '—';
-    note.textContent = T('cpFlowsNote', {year: payload.period, coverage: coverageLabel});
+    // ParcelsNumber (ADR 0013 decision 7) is the payload's own parcel count
+    // for the commune -- shown, never re-derived, and never collapsed into
+    // "-" for a real zero (rule 26).
+    var parcelsNumber = payload.parcels_number;
+    var parcelsLabel = (typeof parcelsNumber === 'number' && isFinite(parcelsNumber))
+      ? parcelsNumber.toLocaleString(LANG, {maximumFractionDigits: 0})
+      : '—';
+    note.textContent = T('cpFlowsNote', {year: payload.period, coverage: coverageLabel, parcels: parcelsLabel});
     note.title = T('cpFlowsCoverageTooltip');
     // A <p> is not natively focusable; tabIndex makes the coverage
     // explanation reachable (and its title readable) from the keyboard too,
     // not only on mouse hover.
     note.tabIndex = 0;
+
+    // Source line (rule 28): the source name resolved from the shared
+    // sources.json registry via the payload's own source_id -- the same
+    // lookup allDataSourceLabels()/mapProvenance use elsewhere on this page
+    // -- and the fetch date from the payload's own fetched_at. Never a
+    // hand-typed source name: if the id is missing from metadata, the raw
+    // id is shown instead of invented text.
+    var sourceEl = document.getElementById('flowsSource');
+    var sourceMeta = payload.source_id ? state.sources[payload.source_id] : null;
+    var sourceLabel = sourceMeta && sourceMeta.label ? mlText(sourceMeta.label) : payload.source_id;
+    var fetchedDate = (typeof payload.fetched_at === 'string') ? payload.fetched_at.slice(0, 10) : '';
+    if(sourceLabel && fetchedDate){
+      sourceEl.textContent = T('cpFlowsSource', {source: sourceLabel, date: fetchedDate});
+      sourceEl.hidden = false;
+    } else {
+      sourceEl.textContent = '';
+      sourceEl.hidden = true;
+    }
   }
 
   function renderCompositions(){

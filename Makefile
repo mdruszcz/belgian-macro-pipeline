@@ -113,10 +113,6 @@ exports:
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
 	$(PYTHON) scripts/export_commune_adjacency.py
 	$(PYTHON) scripts/export_commune_typology.py
-	# Commune-flows PR 2: one small static payload per commune from the committed
-	# data/flows/buyer_origin_<year>.json store (PR 1) -- run after site_payloads
-	# since it needs public/data/metadata/geographies.json for trilingual names.
-	$(PYTHON) scripts/export_commune_flows.py
 	# Reads the CSVs written above -- data/communes_history.csv (the trimmed
 	# core file) PLUS every data/communes_history/*.csv shard, and
 	# data/belgian_macro_export.csv -- and shards them one file per indicator
@@ -135,6 +131,13 @@ exports:
 	# reads only the committed data/international/*.csv store and the
 	# committed NUTS 0 geometry, no $(DB) involved.
 	$(PYTHON) scripts/export_europe_countries.py
+	# Commune-flows PR 2: one small static payload per commune from the committed
+	# data/flows/buyer_origin_<year>.json store (PR 1) -- needs
+	# public/data/metadata/geographies.json for trilingual names, written by
+	# site_payloads above. Deliberately run LAST among the export steps: it
+	# fails loudly (rule 13) if the flows store is missing, and that must
+	# never stop the explorer/Europe steps above, which do not depend on it.
+	$(PYTHON) scripts/export_commune_flows.py
 	$(MAKE) pages
 	$(MAKE) shell-sync
 	$(MAKE) page-documents
