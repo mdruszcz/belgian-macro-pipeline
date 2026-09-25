@@ -113,6 +113,10 @@ exports:
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
 	$(PYTHON) scripts/export_commune_adjacency.py
 	$(PYTHON) scripts/export_commune_typology.py
+	# Commune-flows PR 2: one small static payload per commune from the committed
+	# data/flows/buyer_origin_<year>.json store (PR 1) -- run after site_payloads
+	# since it needs public/data/metadata/geographies.json for trilingual names.
+	$(PYTHON) scripts/export_commune_flows.py
 	# Reads the CSVs written above -- data/communes_history.csv (the trimmed
 	# core file) PLUS every data/communes_history/*.csv shard, and
 	# data/belgian_macro_export.csv -- and shards them one file per indicator

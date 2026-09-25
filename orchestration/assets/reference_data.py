@@ -43,5 +43,18 @@ commune_typology = script_asset(
     kinds={"json"},
     description="Belfius socio-economic clusters (scripts/export_commune_typology.py).",
 )
+# Depends on site_payloads (for geographies.json's trilingual names) AND
+# commune_flows_buyer_origin (the committed flows store PR 1 writes) --
+# docs/features/commune_flows.md, PR 2.
+commune_flows_export = script_asset(
+    "commune_flows_export",
+    group="reference_data",
+    deps=["site_payloads", "commune_flows_buyer_origin"],
+    kinds={"json"},
+    description=(
+        "One buyer-origin flows payload per commune, reshaped from the committed "
+        "flows store (scripts/export_commune_flows.py)."
+    ),
+)
 
-ASSETS = [staging_db, commune_adjacency, commune_typology]
+ASSETS = [staging_db, commune_adjacency, commune_typology, commune_flows_export]
