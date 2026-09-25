@@ -308,13 +308,22 @@
   /* ---- buyers' origin flows (commune-flows PR 2) ---- */
   .flows-buckets{list-style:none; margin:0 0 var(--bp-space-4); padding:0; display:flex; flex-direction:column; gap:9px}
   .flows-buckets .barlist{margin:0}
+  /* Neutral ink fill, visually distinct from the top-8 list's accent red
+     (which is reserved for the commune's own row there) -- the buckets are
+     a different kind of breakdown (exhaustive geography classes, not a
+     ranked list of named communes) and must not read as the same series. */
+  .flows-buckets .barlist .bar i{background:var(--bp-text-muted)}
   .flows-origins{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
   .flows-origins li{display:grid; grid-template-columns:18px minmax(0,1.15fr) minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:11px}
   .flows-origins .rk{color:var(--bp-text-faint); font-variant-numeric:tabular-nums; text-align:right}
   .flows-origins .lbl{color:var(--bp-text-muted); line-height:1.3}
   .flows-origins .lbl.self{color:var(--bp-text); font-weight:var(--bp-weight-semibold)}
   .flows-origins .bar{height:8px; border-radius:4px; background:var(--bp-surface-alt); overflow:hidden}
-  .flows-origins .bar i{display:block; height:100%; border-radius:4px; background:var(--bp-accent)}
+  /* Neutral by default -- the accent red is reserved for the commune's own
+     row (li.self), so only one bar in the list ever reads as "the subject",
+     matching the buckets' own neutral ink fill above for every other row. */
+  .flows-origins .bar i{display:block; height:100%; border-radius:4px; background:var(--bp-text-muted)}
+  .flows-origins li.self .bar i{background:var(--bp-accent)}
   .flows-origins .pct{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
   .flows-note{font-size:11px; color:var(--bp-text-muted); line-height:1.5; margin:var(--bp-space-3) 0 0}
   .flows-note .cov{border-bottom:1px dotted var(--bp-text-faint); cursor:help}
@@ -1374,7 +1383,7 @@
       li.querySelector('.rk').textContent = String(i + 1);
       var lbl = li.querySelector('.lbl');
       lbl.textContent = (origin.name && (origin.name[LANG] || origin.name.en)) || origin.nis;
-      if(isSelf) lbl.className = 'lbl self';
+      if(isSelf){ lbl.className = 'lbl self'; li.className = 'self'; }
       li.querySelector('.bar i').style.width = (sharePct / maxShare * 100).toFixed(1) + '%';
       li.querySelector('.pct').textContent = flowsPct(origin.share_pct);
       originsHost.appendChild(li);

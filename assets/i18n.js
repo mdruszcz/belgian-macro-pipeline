@@ -902,7 +902,7 @@ I18N.STRINGS = {
     cpFlowsBucketAbroad: 'Étranger',
     cpFlowsBucketUnknown: 'Origine inconnue',
     cpFlowsTopOriginsTitle: 'Principales communes d’origine',
-    cpFlowsNote: 'Part des parcelles achetées en {year}, selon le domicile des acheteurs. Couverture : {coverage} % des parcelles.',
+    cpFlowsNote: 'Part des parcelles achetées en {year}, selon le domicile des acheteurs. Couverture : {coverage} % des parcelles.',
     cpFlowsCoverageTooltip: 'La couverture compare ce total au nombre de parcelles de la commune et peut dépasser 100 %, car une parcelle achetée conjointement par des personnes de deux communes différentes est comptée, au prorata, dans les deux.',
     cpFlowsZeroPurchases: 'Aucune acquisition enregistrée en {year}.',
     cpFlowsUnavailable: 'Aucune répartition par origine des acheteurs n’est publiée pour cette commune.',
