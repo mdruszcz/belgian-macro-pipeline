@@ -2060,3 +2060,8 @@ Why: A pyramid over 17 years shows ageing and the arrival of young families; one
  [SPEC] Commune page redesign "Portrait" (maintainer's request 2026-09-24; a local mockup only, not on the site: three review rounds (~40 fixes), interactive and animated charts, circle charts for shares, maps in slate tones. Kept at screenshots-review/commune-beta/v4b (opens with Ouvrir.cmd). Integration into the real site waits for the maintainer's go and will be several PRs)
 How: One page per commune built from the existing public/data payloads and the shared map engine; no new data.
 Why: The current page shows 6 of ~89 indicators up front; the rest hides in a collapsed table.
+
+USER-REQUESTED ADDITION — 2026-09-26
+ (PENDING) [BUILD] Searchable 2025 FWB school-site ISE directory, then an average ISE class and a list of schools per commune (2026-09-26: the directory page ecoles-ise.html exists from the ODWB dataset, 4,005 school sites, ED class 1-20 per site, FO and SO kept distinct, no NIS in the source. NEXT in the same PR: join on the FASE site number to the FWB site register (commune name, network, coordinates; 3,957 of 4,005 sites match), name-to-NIS on the 2026 map with the Saint-Nicolas override, mean class per commune per formula, a commune filter on the page and a Schools block on commune.html; Flemish communes "not applicable". Tick after the live check on Namur 92094)
+How: scripts/export_schools_ise.py joins the two ODWB datasets and writes public/data/schools/by_commune.json; hand-computed tests.
+Why: A commune's schools and their ISE profile is a question parents and communal officers ask; a list without commune is unusable.

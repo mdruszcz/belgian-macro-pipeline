@@ -1528,3 +1528,14 @@ below can run in the existing daily job; none needs a hand-download.
 | Matching | *Measured:* after accent/case normalisation every name matches exactly one commune on that tax year's 1 January map, except "Saint-Nicolas" (the Liège-province commune, while Sint-Niklaas is listed under its Dutch name), resolved by one explicit override. Knokke-Heist is a real 0 %. Any other unmatched or ambiguous name stops the load. First build: the three XLSX years only; the PDF years are a later step |
 | **Decision needed** | Any figure combining this rate with `FISCAL_TOT_MUNICIP_TAXES` (e.g. the yield of one IPP point) depends on how tax years line up with income years. The maintainer confirms the semantics before any code |
 | Licence | Same maintainer ruling as waves 4–5 |
+
+### FWB school-site ISE classes — user-requested 2026-09-26
+
+| Field | Value |
+|---|---|
+| Publisher | Fédération Wallonie-Bruxelles, Direction générale du Pilotage du Système éducatif, via [ODWB](https://www.odwb.be/explore/dataset/fwb-age_classes-dise-pour-les-implantations-scolaires/) |
+| What | The 2025 differentiated-support (ED) and specialised-education (HED) regulatory class for each school site. The source is not a count of pupils, a school quality score, or a commune-level socioeconomic index. |
+| Coverage | 4,005 site/formula records in the 2025 export; Brussels and Wallonia. FO and SO are different calculation formulas and their class numbers are not comparable. |
+| Keys | FASE site ID, school name and postal address. No NIS commune code; no automatic commune assignment or aggregation. |
+| Licence | CC BY, as declared in the dataset API. Attribute the Fédération Wallonie-Bruxelles and link the dataset. |
+| Implementation | `scripts/export_schools_ise.py` validates the exact schema and writes the deterministic 2025 snapshot `public/data/schools_ise_2025.json`; the v5 local preview offers a searchable site-level view. |
