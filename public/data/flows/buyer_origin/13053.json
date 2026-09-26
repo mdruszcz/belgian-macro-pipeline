@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.3",
+      "value": "130.0"
+    },
+    "rest_of_region": {
+      "share_pct": "31.5",
+      "value": "144.63895"
+    },
+    "same_commune": {
+      "share_pct": "40.0",
+      "value": "183.68"
+    }
+  },
+  "coverage_pct": "99.2",
+  "dataset": "buyer_origin",
+  "denominator": "459.31895",
+  "dest_geo_id": "be:mun:13053",
+  "dest_name": {
+    "en": "Laakdal",
+    "fr": "Laakdal",
+    "nl": "Laakdal"
+  },
+  "dest_nis": "13053",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 463,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Laakdal",
+        "fr": "Laakdal",
+        "nl": "Laakdal"
+      },
+      "nis": "13053",
+      "share_pct": "40.0",
+      "value": "183.68"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "11.0",
+      "value": "50.5"
+    },
+    {
+      "name": {
+        "en": "Tessenderlo-Ham",
+        "fr": "Tessenderlo-Ham",
+        "nl": "Tessenderlo-Ham"
+      },
+      "nis": "71071",
+      "share_pct": "8.1",
+      "value": "37.16895"
+    },
+    {
+      "name": {
+        "en": "Scherpenheuvel-Zichem",
+        "fr": "Montaigu-Zichem",
+        "nl": "Scherpenheuvel-Zichem"
+      },
+      "nis": "24134",
+      "share_pct": "4.2",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "3.6",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Westerlo",
+        "fr": "Westerlo",
+        "nl": "Westerlo"
+      },
+      "nis": "13049",
+      "share_pct": "3.4",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "3.0",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "2.2",
+      "value": "10"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "2.6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.9",
+      "value": "6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "34.2",
+      "value": "108.3333333326"
+    },
+    "rest_of_region": {
+      "share_pct": "7.6",
+      "value": "24.1474000000"
+    },
+    "same_commune": {
+      "share_pct": "55.5",
+      "value": "175.75333333"
+    }
+  },
+  "coverage_pct": "96.6",
+  "dataset": "buyer_origin",
+  "denominator": "316.8340666626",
+  "dest_geo_id": "be:mun:63038",
+  "dest_name": {
+    "en": "Jalhay",
+    "fr": "Jalhay",
+    "nl": "Jalhay"
+  },
+  "dest_nis": "63038",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 328,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Jalhay",
+        "fr": "Jalhay",
+        "nl": "Jalhay"
+      },
+      "nis": "63038",
+      "share_pct": "55.5",
+      "value": "175.75333333"
+    },
+    {
+      "name": {
+        "en": "Verviers",
+        "fr": "Verviers",
+        "nl": "Verviers"
+      },
+      "nis": "63079",
+      "share_pct": "12.1",
+      "value": "38.25"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "6.7",
+      "value": "21.333333333"
+    },
+    {
+      "name": {
+        "en": "Welkenraedt",
+        "fr": "Welkenraedt",
+        "nl": "Welkenraedt"
+      },
+      "nis": "63084",
+      "share_pct": "4.5",
+      "value": "14.35"
+    },
+    {
+      "name": {
+        "en": "Spa",
+        "fr": "Spa",
+        "nl": "Spa"
+      },
+      "nis": "63072",
+      "share_pct": "4.5",
+      "value": "14.333333333"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "1.7",
+      "value": "5.3333333333"
+    },
+    {
+      "name": {
+        "en": "Stavelot",
+        "fr": "Stavelot",
+        "nl": "Stavelot"
+      },
+      "nis": "63073",
+      "share_pct": "1.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "1.6",
+      "value": "4.9474"
+    }
+  ]
+}

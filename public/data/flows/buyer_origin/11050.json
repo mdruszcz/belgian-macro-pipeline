@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "64.7",
+      "value": "180.90"
+    },
+    "rest_of_region": {
+      "share_pct": "5.4",
+      "value": "15.0"
+    },
+    "same_commune": {
+      "share_pct": "29.6",
+      "value": "82.81"
+    }
+  },
+  "coverage_pct": "98.5",
+  "dataset": "buyer_origin",
+  "denominator": "279.71",
+  "dest_geo_id": "be:mun:11050",
+  "dest_name": {
+    "en": "Wijnegem",
+    "fr": "Wijnegem",
+    "nl": "Wijnegem"
+  },
+  "dest_nis": "11050",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 284,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Wijnegem",
+        "fr": "Wijnegem",
+        "nl": "Wijnegem"
+      },
+      "nis": "11050",
+      "share_pct": "29.6",
+      "value": "82.81"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "29.0",
+      "value": "81.22"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "12.4",
+      "value": "34.68"
+    },
+    {
+      "name": {
+        "en": "Schoten",
+        "fr": "Schoten",
+        "nl": "Schoten"
+      },
+      "nis": "11040",
+      "share_pct": "5.9",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Wommelgem",
+        "fr": "Wommelgem",
+        "nl": "Wommelgem"
+      },
+      "nis": "11052",
+      "share_pct": "5.4",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "4.3",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "2.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "2.5",
+      "value": "7"
+    }
+  ]
+}

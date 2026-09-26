@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "5.6666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.7",
+      "value": "299.2366666669"
+    },
+    "rest_of_region": {
+      "share_pct": "19.3",
+      "value": "254.0166666667"
+    },
+    "same_commune": {
+      "share_pct": "56.9",
+      "value": "749.08652"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "1316.0065200003",
+  "dest_geo_id": "be:mun:13008",
+  "dest_name": {
+    "en": "Geel",
+    "fr": "Geel",
+    "nl": "Geel"
+  },
+  "dest_nis": "13008",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1352,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "56.9",
+      "value": "749.08652"
+    },
+    {
+      "name": {
+        "en": "Mol",
+        "fr": "Mol",
+        "nl": "Mol"
+      },
+      "nis": "13025",
+      "share_pct": "3.9",
+      "value": "51.166666667"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.9",
+      "value": "38.5"
+    },
+    {
+      "name": {
+        "en": "Kasterlee",
+        "fr": "Kasterlee",
+        "nl": "Kasterlee"
+      },
+      "nis": "13017",
+      "share_pct": "2.3",
+      "value": "30.766666667"
+    },
+    {
+      "name": {
+        "en": "Westerlo",
+        "fr": "Westerlo",
+        "nl": "Westerlo"
+      },
+      "nis": "13049",
+      "share_pct": "2.3",
+      "value": "30.3"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "2.2",
+      "value": "29.5"
+    },
+    {
+      "name": {
+        "en": "Tessenderlo-Ham",
+        "fr": "Tessenderlo-Ham",
+        "nl": "Tessenderlo-Ham"
+      },
+      "nis": "71071",
+      "share_pct": "2.2",
+      "value": "29.25"
+    },
+    {
+      "name": {
+        "en": "Olen",
+        "fr": "Olen",
+        "nl": "Olen"
+      },
+      "nis": "13029",
+      "share_pct": "2.1",
+      "value": "27"
+    }
+  ]
+}

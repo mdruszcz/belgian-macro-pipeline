@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1.2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "1.7"
+    },
+    "other_regions": {
+      "share_pct": "21.5",
+      "value": "141.5100000000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.3",
+      "value": "74.131111111"
+    },
+    "rest_of_region": {
+      "share_pct": "33.9",
+      "value": "223.45"
+    },
+    "same_commune": {
+      "share_pct": "32.9",
+      "value": "216.75"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "658.7411111110",
+  "dest_geo_id": "be:mun:55004",
+  "dest_name": {
+    "en": "Braine-le-Comte",
+    "fr": "Braine-le-Comte",
+    "nl": "’s Gravenbrakel"
+  },
+  "dest_nis": "55004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 679,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Braine-le-Comte",
+        "fr": "Braine-le-Comte",
+        "nl": "’s Gravenbrakel"
+      },
+      "nis": "55004",
+      "share_pct": "32.9",
+      "value": "216.75"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "6.8",
+      "value": "44.51"
+    },
+    {
+      "name": {
+        "en": "Ecaussinnes",
+        "fr": "Ecaussinnes",
+        "nl": "Ecaussinnes"
+      },
+      "nis": "55050",
+      "share_pct": "5.6",
+      "value": "37.121111111"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "4.3",
+      "value": "28"
+    },
+    {
+      "name": {
+        "en": "Rebecq",
+        "fr": "Rebecq",
+        "nl": "Rebecq"
+      },
+      "nis": "25123",
+      "share_pct": "3.2",
+      "value": "21.02"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "3.1",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.4",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "2.2",
+      "value": "14.5"
+    }
+  ]
+}

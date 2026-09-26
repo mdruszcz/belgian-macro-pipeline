@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0.05"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "51.0",
+      "value": "211.291666667"
+    },
+    "rest_of_region": {
+      "share_pct": "12.2",
+      "value": "50.5"
+    },
+    "same_commune": {
+      "share_pct": "36.5",
+      "value": "151.15416667"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "413.995833337",
+  "dest_geo_id": "be:mun:11004",
+  "dest_name": {
+    "en": "Boechout",
+    "fr": "Boechout",
+    "nl": "Boechout"
+  },
+  "dest_nis": "11004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 423,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Boechout",
+        "fr": "Boechout",
+        "nl": "Boechout"
+      },
+      "nis": "11004",
+      "share_pct": "36.5",
+      "value": "151.15416667"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "19.2",
+      "value": "79.6"
+    },
+    {
+      "name": {
+        "en": "Mortsel",
+        "fr": "Mortsel",
+        "nl": "Mortsel"
+      },
+      "nis": "11029",
+      "share_pct": "11.3",
+      "value": "46.858333333"
+    },
+    {
+      "name": {
+        "en": "Hove",
+        "fr": "Hove",
+        "nl": "Hove"
+      },
+      "nis": "11021",
+      "share_pct": "5.4",
+      "value": "22.166666667"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "4.1",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "2.9",
+      "value": "12.186666667"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "2.4",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Geraardsbergen",
+        "fr": "Grammont",
+        "nl": "Geraardsbergen"
+      },
+      "nis": "41018",
+      "share_pct": "2.4",
+      "value": "10"
+    }
+  ]
+}

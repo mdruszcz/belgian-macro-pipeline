@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "44.8",
+      "value": "68.333333334"
+    },
+    "rest_of_region": {
+      "share_pct": "18.4",
+      "value": "28"
+    },
+    "same_commune": {
+      "share_pct": "36.8",
+      "value": "56.166666667"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "152.500000001",
+  "dest_geo_id": "be:mun:62006",
+  "dest_name": {
+    "en": "Awans",
+    "fr": "Awans",
+    "nl": "Awans"
+  },
+  "dest_nis": "62006",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 155,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "36.8",
+      "value": "56.166666667"
+    },
+    {
+      "name": {
+        "en": "Ans",
+        "fr": "Ans",
+        "nl": "Ans"
+      },
+      "nis": "62003",
+      "share_pct": "13.9",
+      "value": "21.166666667"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "13.2",
+      "value": "20.166666667"
+    },
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "5.2",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "3.3",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Juprelle",
+        "fr": "Juprelle",
+        "nl": "Juprelle"
+      },
+      "nis": "62060",
+      "share_pct": "3.3",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Saint-Nicolas",
+        "fr": "Saint-Nicolas",
+        "nl": "Saint-Nicolas"
+      },
+      "nis": "62093",
+      "share_pct": "2.3",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Visé",
+        "fr": "Visé",
+        "nl": "Wezet"
+      },
+      "nis": "62108",
+      "share_pct": "2.0",
+      "value": "3"
+    }
+  ]
+}

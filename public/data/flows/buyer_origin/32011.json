@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.8",
+      "value": "60.1"
+    },
+    "rest_of_region": {
+      "share_pct": "27.5",
+      "value": "111.52"
+    },
+    "same_commune": {
+      "share_pct": "57.5",
+      "value": "232.73"
+    }
+  },
+  "coverage_pct": "98.3",
+  "dataset": "buyer_origin",
+  "denominator": "404.85",
+  "dest_geo_id": "be:mun:32011",
+  "dest_name": {
+    "en": "Kortemark",
+    "fr": "Kortemark",
+    "nl": "Kortemark"
+  },
+  "dest_nis": "32011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 412,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kortemark",
+        "fr": "Kortemark",
+        "nl": "Kortemark"
+      },
+      "nis": "32011",
+      "share_pct": "57.5",
+      "value": "232.73"
+    },
+    {
+      "name": {
+        "en": "Diksmuide",
+        "fr": "Dixmude",
+        "nl": "Diksmuide"
+      },
+      "nis": "32003",
+      "share_pct": "6.2",
+      "value": "25"
+    },
+    {
+      "name": {
+        "en": "Torhout",
+        "fr": "Torhout",
+        "nl": "Torhout"
+      },
+      "nis": "31033",
+      "share_pct": "4.8",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Houthulst",
+        "fr": "Houthulst",
+        "nl": "Houthulst"
+      },
+      "nis": "32006",
+      "share_pct": "4.7",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Ichtegem",
+        "fr": "Ichtegem",
+        "nl": "Ichtegem"
+      },
+      "nis": "35006",
+      "share_pct": "3.8",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Koekelare",
+        "fr": "Koekelare",
+        "nl": "Koekelare"
+      },
+      "nis": "32010",
+      "share_pct": "3.7",
+      "value": "15.1"
+    },
+    {
+      "name": {
+        "en": "Hooglede",
+        "fr": "Hooglede",
+        "nl": "Hooglede"
+      },
+      "nis": "36006",
+      "share_pct": "3.2",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Lichtervelde",
+        "fr": "Lichtervelde",
+        "nl": "Lichtervelde"
+      },
+      "nis": "36011",
+      "share_pct": "1.7",
+      "value": "7"
+    }
+  ]
+}

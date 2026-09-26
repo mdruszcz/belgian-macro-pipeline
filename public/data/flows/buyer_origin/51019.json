@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "43.4",
+      "value": "60.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "27.2",
+      "value": "38.0"
+    },
+    "rest_of_region": {
+      "share_pct": "7.2",
+      "value": "10"
+    },
+    "same_commune": {
+      "share_pct": "22.2",
+      "value": "31"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "139.5",
+  "dest_geo_id": "be:mun:51019",
+  "dest_name": {
+    "en": "Flobecq",
+    "fr": "Flobecq",
+    "nl": "Vloesberg"
+  },
+  "dest_nis": "51019",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 142,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Flobecq",
+        "fr": "Flobecq",
+        "nl": "Vloesberg"
+      },
+      "nis": "51019",
+      "share_pct": "22.2",
+      "value": "31"
+    },
+    {
+      "name": {
+        "en": "Lessines",
+        "fr": "Lessines",
+        "nl": "Lessen"
+      },
+      "nis": "51069",
+      "share_pct": "9.3",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Geraardsbergen",
+        "fr": "Grammont",
+        "nl": "Geraardsbergen"
+      },
+      "nis": "41018",
+      "share_pct": "7.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Ellezelles",
+        "fr": "Ellezelles",
+        "nl": "Elzele"
+      },
+      "nis": "51017",
+      "share_pct": "7.2",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "6.1",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "5.4",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "5.4",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Herzele",
+        "fr": "Herzele",
+        "nl": "Herzele"
+      },
+      "nis": "41027",
+      "share_pct": "4.7",
+      "value": "6.5"
+    }
+  ]
+}

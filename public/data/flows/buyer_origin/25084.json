@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "8.9",
+      "value": "25.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "39.2",
+      "value": "110.00"
+    },
+    "rest_of_region": {
+      "share_pct": "17.6",
+      "value": "49.5"
+    },
+    "same_commune": {
+      "share_pct": "33.7",
+      "value": "94.5"
+    }
+  },
+  "coverage_pct": "99.8",
+  "dataset": "buyer_origin",
+  "denominator": "280.50",
+  "dest_geo_id": "be:mun:25084",
+  "dest_name": {
+    "en": "Perwez",
+    "fr": "Perwez",
+    "nl": "Perwijs"
+  },
+  "dest_nis": "25084",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 281,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Perwez",
+        "fr": "Perwez",
+        "nl": "Perwijs"
+      },
+      "nis": "25084",
+      "share_pct": "33.7",
+      "value": "94.5"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "6.9",
+      "value": "19.35"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "6.2",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "5.7",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "3.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "2.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Mont-Saint-Guibert",
+        "fr": "Mont-Saint-Guibert",
+        "nl": "Mont-Saint-Guibert"
+      },
+      "nis": "25068",
+      "share_pct": "2.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Walhain",
+        "fr": "Walhain",
+        "nl": "Walhain"
+      },
+      "nis": "25124",
+      "share_pct": "2.9",
+      "value": "8"
+    }
+  ]
+}

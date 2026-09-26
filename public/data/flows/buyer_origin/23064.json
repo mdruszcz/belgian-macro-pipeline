@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "18.1",
+      "value": "17"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "48.6",
+      "value": "45.6090666667"
+    },
+    "rest_of_region": {
+      "share_pct": "3.9",
+      "value": "3.6909333333"
+    },
+    "same_commune": {
+      "share_pct": "29.3",
+      "value": "27.4706"
+    }
+  },
+  "coverage_pct": "99.8",
+  "dataset": "buyer_origin",
+  "denominator": "93.7706000000",
+  "dest_geo_id": "be:mun:23064",
+  "dest_name": {
+    "en": "Pepingen",
+    "fr": "Pepingen",
+    "nl": "Pepingen"
+  },
+  "dest_nis": "23064",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 94,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Pepingen",
+        "fr": "Pepingen",
+        "nl": "Pepingen"
+      },
+      "nis": "23064",
+      "share_pct": "29.3",
+      "value": "27.4706"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "19.0",
+      "value": "17.8"
+    },
+    {
+      "name": {
+        "en": "Pajottegem",
+        "fr": "Pajottegem",
+        "nl": "Pajottegem"
+      },
+      "nis": "23106",
+      "share_pct": "10.1",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Sint-Pieters-Leeuw",
+        "fr": "Sint-Pieters-Leeuw",
+        "nl": "Sint-Pieters-Leeuw"
+      },
+      "nis": "23077",
+      "share_pct": "9.2",
+      "value": "8.6666666667"
+    },
+    {
+      "name": {
+        "en": "Flobecq",
+        "fr": "Flobecq",
+        "nl": "Vloesberg"
+      },
+      "nis": "51019",
+      "share_pct": "4.3",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "3.2",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "3.2",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.1",
+      "value": "2"
+    }
+  ]
+}

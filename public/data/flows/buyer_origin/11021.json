@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.4",
+      "value": "6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "68.5",
+      "value": "122.686666667"
+    },
+    "rest_of_region": {
+      "share_pct": "3.6",
+      "value": "6.5"
+    },
+    "same_commune": {
+      "share_pct": "23.9",
+      "value": "42.833333333"
+    }
+  },
+  "coverage_pct": "99.5",
+  "dataset": "buyer_origin",
+  "denominator": "179.020000000",
+  "dest_geo_id": "be:mun:11021",
+  "dest_name": {
+    "en": "Hove",
+    "fr": "Hove",
+    "nl": "Hove"
+  },
+  "dest_nis": "11021",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 180,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "32.5",
+      "value": "58.166666667"
+    },
+    {
+      "name": {
+        "en": "Hove",
+        "fr": "Hove",
+        "nl": "Hove"
+      },
+      "nis": "11021",
+      "share_pct": "23.9",
+      "value": "42.833333333"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "14.3",
+      "value": "25.52"
+    },
+    {
+      "name": {
+        "en": "Mortsel",
+        "fr": "Mortsel",
+        "nl": "Mortsel"
+      },
+      "nis": "11029",
+      "share_pct": "7.8",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Boechout",
+        "fr": "Boechout",
+        "nl": "Boechout"
+      },
+      "nis": "11004",
+      "share_pct": "5.6",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "3.1",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "2.2",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Aartselaar",
+        "fr": "Aartselaar",
+        "nl": "Aartselaar"
+      },
+      "nis": "11001",
+      "share_pct": "1.1",
+      "value": "2"
+    }
+  ]
+}

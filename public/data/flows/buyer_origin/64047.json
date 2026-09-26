@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "24.6",
+      "value": "16.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.2",
+      "value": "7.5"
+    },
+    "rest_of_region": {
+      "share_pct": "31.3",
+      "value": "21.0"
+    },
+    "same_commune": {
+      "share_pct": "32.8",
+      "value": "22"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "67.0",
+  "dest_geo_id": "be:mun:64047",
+  "dest_name": {
+    "en": "Lincent",
+    "fr": "Lincent",
+    "nl": "Lijsem"
+  },
+  "dest_nis": "64047",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 69,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lincent",
+        "fr": "Lincent",
+        "nl": "Lijsem"
+      },
+      "nis": "64047",
+      "share_pct": "32.8",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Chaudfontaine",
+        "fr": "Chaudfontaine",
+        "nl": "Chaudfontaine"
+      },
+      "nis": "62022",
+      "share_pct": "6.0",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Hélécine",
+        "fr": "Hélécine",
+        "nl": "Hélécine"
+      },
+      "nis": "25118",
+      "share_pct": "5.2",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Wasseiges",
+        "fr": "Wasseiges",
+        "nl": "Wasseiges"
+      },
+      "nis": "64075",
+      "share_pct": "5.2",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "4.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "3.7",
+      "value": "2.5"
+    },
+    {
+      "name": {
+        "en": "Landen",
+        "fr": "Landen",
+        "nl": "Landen"
+      },
+      "nis": "24059",
+      "share_pct": "3.7",
+      "value": "2.5"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "3.7",
+      "value": "2.5"
+    }
+  ]
+}

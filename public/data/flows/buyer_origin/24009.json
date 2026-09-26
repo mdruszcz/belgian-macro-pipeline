@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "7.1",
+      "value": "17.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "43.4",
+      "value": "107.050933333"
+    },
+    "rest_of_region": {
+      "share_pct": "8.6",
+      "value": "21.2666666666"
+    },
+    "same_commune": {
+      "share_pct": "40.7",
+      "value": "100.25"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "246.5675999996",
+  "dest_geo_id": "be:mun:24009",
+  "dest_name": {
+    "en": "Bertem",
+    "fr": "Bertem",
+    "nl": "Bertem"
+  },
+  "dest_nis": "24009",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 251,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Bertem",
+        "fr": "Bertem",
+        "nl": "Bertem"
+      },
+      "nis": "24009",
+      "share_pct": "40.7",
+      "value": "100.25"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "21.1",
+      "value": "52.0282"
+    },
+    {
+      "name": {
+        "en": "Tervuren",
+        "fr": "Tervuren",
+        "nl": "Tervuren"
+      },
+      "nis": "24104",
+      "share_pct": "8.5",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Kortenberg",
+        "fr": "Kortenberg",
+        "nl": "Kortenberg"
+      },
+      "nis": "24055",
+      "share_pct": "5.8",
+      "value": "14.333333333"
+    },
+    {
+      "name": {
+        "en": "Huldenberg",
+        "fr": "Huldenberg",
+        "nl": "Huldenberg"
+      },
+      "nis": "24045",
+      "share_pct": "2.4",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Overijse",
+        "fr": "Overijse",
+        "nl": "Overijse"
+      },
+      "nis": "23062",
+      "share_pct": "1.9",
+      "value": "4.6"
+    },
+    {
+      "name": {
+        "en": "Wezembeek-Oppem",
+        "fr": "Wezembeek-Oppem",
+        "nl": "Wezembeek-Oppem"
+      },
+      "nis": "23103",
+      "share_pct": "1.4",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "1.2",
+      "value": "3"
+    }
+  ]
+}

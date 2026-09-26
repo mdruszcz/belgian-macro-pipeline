@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "2.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.2",
+      "value": "10"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.8",
+      "value": "40.133333333"
+    },
+    "rest_of_region": {
+      "share_pct": "37.5",
+      "value": "89.62"
+    },
+    "same_commune": {
+      "share_pct": "40.4",
+      "value": "96.62"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "238.873333333",
+  "dest_geo_id": "be:mun:55035",
+  "dest_name": {
+    "en": "Le Roeulx",
+    "fr": "Le Roeulx",
+    "nl": "Le Roeulx"
+  },
+  "dest_nis": "55035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 245,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Le Roeulx",
+        "fr": "Le Roeulx",
+        "nl": "Le Roeulx"
+      },
+      "nis": "55035",
+      "share_pct": "40.4",
+      "value": "96.62"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "13.4",
+      "value": "32.02"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "9.5",
+      "value": "22.633333333"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "6.1",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "2.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Manage",
+        "fr": "Manage",
+        "nl": "Manage"
+      },
+      "nis": "55086",
+      "share_pct": "2.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "2.3",
+      "value": "5.6"
+    },
+    {
+      "name": {
+        "en": "Ecaussinnes",
+        "fr": "Ecaussinnes",
+        "nl": "Ecaussinnes"
+      },
+      "nis": "55050",
+      "share_pct": "2.1",
+      "value": "5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.0",
+      "value": "64.5"
+    },
+    "rest_of_region": {
+      "share_pct": "21.9",
+      "value": "45.5"
+    },
+    "same_commune": {
+      "share_pct": "44.7",
+      "value": "93"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "208.0",
+  "dest_geo_id": "be:mun:85024",
+  "dest_name": {
+    "en": "Meix-devant-Virton",
+    "fr": "Meix-devant-Virton",
+    "nl": "Meix-devant-Virton"
+  },
+  "dest_nis": "85024",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 208,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Meix-devant-Virton",
+        "fr": "Meix-devant-Virton",
+        "nl": "Meix-devant-Virton"
+      },
+      "nis": "85024",
+      "share_pct": "44.7",
+      "value": "93"
+    },
+    {
+      "name": {
+        "en": "Virton",
+        "fr": "Virton",
+        "nl": "Virton"
+      },
+      "nis": "85045",
+      "share_pct": "12.3",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Rouvroy",
+        "fr": "Rouvroy",
+        "nl": "Rouvroy"
+      },
+      "nis": "85047",
+      "share_pct": "10.6",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Léglise",
+        "fr": "Léglise",
+        "nl": "Léglise"
+      },
+      "nis": "84033",
+      "share_pct": "5.8",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "3.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Tintigny",
+        "fr": "Tintigny",
+        "nl": "Tintigny"
+      },
+      "nis": "85039",
+      "share_pct": "3.1",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Amay",
+        "fr": "Amay",
+        "nl": "Amay"
+      },
+      "nis": "61003",
+      "share_pct": "2.9",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Wanze",
+        "fr": "Wanze",
+        "nl": "Wanze"
+      },
+      "nis": "61072",
+      "share_pct": "2.9",
+      "value": "6"
+    }
+  ]
+}

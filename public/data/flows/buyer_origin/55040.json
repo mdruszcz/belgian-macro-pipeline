@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "8.5",
+      "value": "61.724054054"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.1",
+      "value": "109.967027027"
+    },
+    "rest_of_region": {
+      "share_pct": "22.3",
+      "value": "162.241200503"
+    },
+    "same_commune": {
+      "share_pct": "53.6",
+      "value": "389.6136895"
+    }
+  },
+  "coverage_pct": "95.0",
+  "dataset": "buyer_origin",
+  "denominator": "727.045971084",
+  "dest_geo_id": "be:mun:55040",
+  "dest_name": {
+    "en": "Soignies",
+    "fr": "Soignies",
+    "nl": "Zinnik"
+  },
+  "dest_nis": "55040",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 765,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "53.6",
+      "value": "389.6136895"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Comte",
+        "fr": "Braine-le-Comte",
+        "nl": "’s Gravenbrakel"
+      },
+      "nis": "55004",
+      "share_pct": "9.3",
+      "value": "67.727027027"
+    },
+    {
+      "name": {
+        "en": "Ecaussinnes",
+        "fr": "Ecaussinnes",
+        "nl": "Ecaussinnes"
+      },
+      "nis": "55050",
+      "share_pct": "3.1",
+      "value": "22.2"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "3.0",
+      "value": "22.162162162"
+    },
+    {
+      "name": {
+        "en": "Le Roeulx",
+        "fr": "Le Roeulx",
+        "nl": "Le Roeulx"
+      },
+      "nis": "55035",
+      "share_pct": "2.2",
+      "value": "16.04"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "2.0",
+      "value": "14.527027027"
+    },
+    {
+      "name": {
+        "en": "Enghien",
+        "fr": "Enghien",
+        "nl": "Edingen"
+      },
+      "nis": "51067",
+      "share_pct": "2.0",
+      "value": "14.44795726"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "1.7",
+      "value": "12.054054054"
+    }
+  ]
+}

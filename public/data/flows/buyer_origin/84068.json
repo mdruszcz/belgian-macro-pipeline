@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "5.0",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.5",
+      "value": "10.02"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.2",
+      "value": "17"
+    },
+    "rest_of_region": {
+      "share_pct": "23.7",
+      "value": "19.0"
+    },
+    "same_commune": {
+      "share_pct": "37.5",
+      "value": "30"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "80.02",
+  "dest_geo_id": "be:mun:84068",
+  "dest_name": {
+    "en": "Tellin",
+    "fr": "Tellin",
+    "nl": "Tellin"
+  },
+  "dest_nis": "84068",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 82,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tellin",
+        "fr": "Tellin",
+        "nl": "Tellin"
+      },
+      "nis": "84068",
+      "share_pct": "37.5",
+      "value": "30"
+    },
+    {
+      "name": {
+        "en": "Wellin",
+        "fr": "Wellin",
+        "nl": "Wellin"
+      },
+      "nis": "84075",
+      "share_pct": "15.0",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Rochefort",
+        "fr": "Rochefort",
+        "nl": "Rochefort"
+      },
+      "nis": "91114",
+      "share_pct": "6.9",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Daverdisse",
+        "fr": "Daverdisse",
+        "nl": "Daverdisse"
+      },
+      "nis": "84016",
+      "share_pct": "5.0",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.5",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Auderghem",
+        "fr": "Auderghem",
+        "nl": "Oudergem"
+      },
+      "nis": "21002",
+      "share_pct": "2.5",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Montigny-le-Tilleul",
+        "fr": "Montigny-le-Tilleul",
+        "nl": "Montigny-le-Tilleul"
+      },
+      "nis": "52048",
+      "share_pct": "2.5",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Nassogne",
+        "fr": "Nassogne",
+        "nl": "Nassogne"
+      },
+      "nis": "83040",
+      "share_pct": "2.5",
+      "value": "2"
+    }
+  ]
+}

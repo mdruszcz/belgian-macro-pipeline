@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.0",
+      "value": "11.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.1",
+      "value": "46.34"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "49.1",
+      "value": "187.76"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "35.7",
+      "value": "136.63"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "382.23",
+  "dest_geo_id": "be:mun:21017",
+  "dest_name": {
+    "en": "Watermael-Boitsfort",
+    "fr": "Watermael-Boitsfort",
+    "nl": "Watermaal-Bosvoorde"
+  },
+  "dest_nis": "21017",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 394,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Watermael-Boitsfort",
+        "fr": "Watermael-Boitsfort",
+        "nl": "Watermaal-Bosvoorde"
+      },
+      "nis": "21017",
+      "share_pct": "35.7",
+      "value": "136.63"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "11.9",
+      "value": "45.4"
+    },
+    {
+      "name": {
+        "en": "Auderghem",
+        "fr": "Auderghem",
+        "nl": "Oudergem"
+      },
+      "nis": "21002",
+      "share_pct": "11.3",
+      "value": "43.35"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "4.8",
+      "value": "18.51"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "4.6",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "3.9",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "3.1",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "2.6",
+      "value": "10"
+    }
+  ]
+}

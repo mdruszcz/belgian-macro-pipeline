@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "12.0663157895"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "10.0",
+      "value": "134.4629824562"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "7.6",
+      "value": "102.225407925"
+    },
+    "rest_of_region": {
+      "share_pct": "28.6",
+      "value": "383.2026607406"
+    },
+    "same_commune": {
+      "share_pct": "52.7",
+      "value": "705.96894567"
+    }
+  },
+  "coverage_pct": "95.8",
+  "dataset": "buyer_origin",
+  "denominator": "1338.9263125813",
+  "dest_geo_id": "be:mun:58001",
+  "dest_name": {
+    "en": "La Louvière",
+    "fr": "La Louvière",
+    "nl": "La Louvière"
+  },
+  "dest_nis": "58001",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1397,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "52.7",
+      "value": "705.96894567"
+    },
+    {
+      "name": {
+        "en": "Manage",
+        "fr": "Manage",
+        "nl": "Manage"
+      },
+      "nis": "55086",
+      "share_pct": "5.8",
+      "value": "77.485606061"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "4.3",
+      "value": "57.598484848"
+    },
+    {
+      "name": {
+        "en": "Morlanwelz",
+        "fr": "Morlanwelz",
+        "nl": "Morlanwelz"
+      },
+      "nis": "58004",
+      "share_pct": "2.7",
+      "value": "36.576923077"
+    },
+    {
+      "name": {
+        "en": "Le Roeulx",
+        "fr": "Le Roeulx",
+        "nl": "Le Roeulx"
+      },
+      "nis": "55035",
+      "share_pct": "2.0",
+      "value": "26.282163743"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "1.7",
+      "value": "23.210277778"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "1.6",
+      "value": "21.455555556"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "1.4",
+      "value": "19.066666667"
+    }
+  ]
+}

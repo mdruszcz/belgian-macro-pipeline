@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "17.4",
+      "value": "51.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.5",
+      "value": "60.60"
+    },
+    "rest_of_region": {
+      "share_pct": "17.4",
+      "value": "51.5"
+    },
+    "same_commune": {
+      "share_pct": "43.6",
+      "value": "128.6591"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "295.2591",
+  "dest_geo_id": "be:mun:23105",
+  "dest_name": {
+    "en": "Affligem",
+    "fr": "Affligem",
+    "nl": "Affligem"
+  },
+  "dest_nis": "23105",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 298,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Affligem",
+        "fr": "Affligem",
+        "nl": "Affligem"
+      },
+      "nis": "23105",
+      "share_pct": "43.6",
+      "value": "128.6591"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "8.3",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "5.6",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "4.4",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "3.1",
+      "value": "9.25"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "2.9",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "2.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "2.0",
+      "value": "6"
+    }
+  ]
+}

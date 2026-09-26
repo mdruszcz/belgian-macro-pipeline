@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.0",
+      "value": "20.2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.2",
+      "value": "100.9"
+    },
+    "rest_of_region": {
+      "share_pct": "31.8",
+      "value": "158.8841"
+    },
+    "same_commune": {
+      "share_pct": "43.7",
+      "value": "218.6284"
+    }
+  },
+  "coverage_pct": "94.5",
+  "dataset": "buyer_origin",
+  "denominator": "500.1125",
+  "dest_geo_id": "be:mun:41034",
+  "dest_name": {
+    "en": "Lede",
+    "fr": "Lede",
+    "nl": "Lede"
+  },
+  "dest_nis": "41034",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 529,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lede",
+        "fr": "Lede",
+        "nl": "Lede"
+      },
+      "nis": "41034",
+      "share_pct": "43.7",
+      "value": "218.6284"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "11.6",
+      "value": "58"
+    },
+    {
+      "name": {
+        "en": "Wetteren",
+        "fr": "Wetteren",
+        "nl": "Wetteren"
+      },
+      "nis": "42025",
+      "share_pct": "5.9",
+      "value": "29.5"
+    },
+    {
+      "name": {
+        "en": "Erpe-Mere",
+        "fr": "Erpe-Mere",
+        "nl": "Erpe-Mere"
+      },
+      "nis": "41082",
+      "share_pct": "4.9",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Wichelen",
+        "fr": "Wichelen",
+        "nl": "Wichelen"
+      },
+      "nis": "42026",
+      "share_pct": "4.0",
+      "value": "20.2141"
+    },
+    {
+      "name": {
+        "en": "Dendermonde",
+        "fr": "Termonde",
+        "nl": "Dendermonde"
+      },
+      "nis": "42006",
+      "share_pct": "2.6",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "2.2",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.9",
+      "value": "9.5"
+    }
+  ]
+}

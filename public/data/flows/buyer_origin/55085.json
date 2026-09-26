@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.5",
+      "value": "7.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "9.1",
+      "value": "25.01"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "6.5",
+      "value": "18.0"
+    },
+    "rest_of_region": {
+      "share_pct": "44.6",
+      "value": "123.015490196"
+    },
+    "same_commune": {
+      "share_pct": "36.9",
+      "value": "101.76502732"
+    }
+  },
+  "coverage_pct": "95.4",
+  "dataset": "buyer_origin",
+  "denominator": "275.790517516",
+  "dest_geo_id": "be:mun:55085",
+  "dest_name": {
+    "en": "Seneffe",
+    "fr": "Seneffe",
+    "nl": "Seneffe"
+  },
+  "dest_nis": "55085",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 289,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "36.9",
+      "value": "101.76502732"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "15.9",
+      "value": "43.725490196"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "5.8",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "3.6",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Manage",
+        "fr": "Manage",
+        "nl": "Manage"
+      },
+      "nis": "55086",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "2.4",
+      "value": "6.5"
+    }
+  ]
+}

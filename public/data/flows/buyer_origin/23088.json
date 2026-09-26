@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2.62068"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "29.8",
+      "value": "310.2822"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.4",
+      "value": "222.55116"
+    },
+    "rest_of_region": {
+      "share_pct": "16.3",
+      "value": "170.38032"
+    },
+    "same_commune": {
+      "share_pct": "32.3",
+      "value": "336.48903704"
+    }
+  },
+  "coverage_pct": "95.4",
+  "dataset": "buyer_origin",
+  "denominator": "1042.32339704",
+  "dest_geo_id": "be:mun:23088",
+  "dest_name": {
+    "en": "Vilvoorde",
+    "fr": "Vilvorde",
+    "nl": "Vilvoorde"
+  },
+  "dest_nis": "23088",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1093,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Vilvoorde",
+        "fr": "Vilvorde",
+        "nl": "Vilvoorde"
+      },
+      "nis": "23088",
+      "share_pct": "32.3",
+      "value": "336.48903704"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "8.1",
+      "value": "84.412"
+    },
+    {
+      "name": {
+        "en": "Grimbergen",
+        "fr": "Grimbergen",
+        "nl": "Grimbergen"
+      },
+      "nis": "23025",
+      "share_pct": "7.7",
+      "value": "80.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "7.1",
+      "value": "73.5"
+    },
+    {
+      "name": {
+        "en": "Machelen",
+        "fr": "Machelen",
+        "nl": "Machelen"
+      },
+      "nis": "23047",
+      "share_pct": "2.4",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Evere",
+        "fr": "Evere",
+        "nl": "Evere"
+      },
+      "nis": "21006",
+      "share_pct": "2.3",
+      "value": "23.7"
+    },
+    {
+      "name": {
+        "en": "Steenokkerzeel",
+        "fr": "Steenokkerzeel",
+        "nl": "Steenokkerzeel"
+      },
+      "nis": "23081",
+      "share_pct": "2.0",
+      "value": "20.57"
+    },
+    {
+      "name": {
+        "en": "Zemst",
+        "fr": "Zemst",
+        "nl": "Zemst"
+      },
+      "nis": "23096",
+      "share_pct": "2.0",
+      "value": "20.5"
+    }
+  ]
+}

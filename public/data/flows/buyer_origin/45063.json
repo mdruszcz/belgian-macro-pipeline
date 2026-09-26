@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.2",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.5",
+      "value": "32.4"
+    },
+    "rest_of_region": {
+      "share_pct": "46.1",
+      "value": "76.5"
+    },
+    "same_commune": {
+      "share_pct": "33.2",
+      "value": "55"
+    }
+  },
+  "coverage_pct": "99.3",
+  "dataset": "buyer_origin",
+  "denominator": "165.9",
+  "dest_geo_id": "be:mun:45063",
+  "dest_name": {
+    "en": "Lierde",
+    "fr": "Lierde",
+    "nl": "Lierde"
+  },
+  "dest_nis": "45063",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 167,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lierde",
+        "fr": "Lierde",
+        "nl": "Lierde"
+      },
+      "nis": "45063",
+      "share_pct": "33.2",
+      "value": "55"
+    },
+    {
+      "name": {
+        "en": "Geraardsbergen",
+        "fr": "Grammont",
+        "nl": "Geraardsbergen"
+      },
+      "nis": "41018",
+      "share_pct": "20.5",
+      "value": "34"
+    },
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "12.0",
+      "value": "19.9"
+    },
+    {
+      "name": {
+        "en": "Herzele",
+        "fr": "Herzele",
+        "nl": "Herzele"
+      },
+      "nis": "41027",
+      "share_pct": "6.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Zwalm",
+        "fr": "Zwalm",
+        "nl": "Zwalm"
+      },
+      "nis": "45065",
+      "share_pct": "5.4",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Ninove",
+        "fr": "Ninove",
+        "nl": "Ninove"
+      },
+      "nis": "41048",
+      "share_pct": "3.3",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "2.4",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Gavere",
+        "fr": "Gavere",
+        "nl": "Gavere"
+      },
+      "nis": "44020",
+      "share_pct": "2.1",
+      "value": "3.5"
+    }
+  ]
+}

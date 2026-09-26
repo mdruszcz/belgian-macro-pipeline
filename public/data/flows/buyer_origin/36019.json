@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.7",
+      "value": "46.01"
+    },
+    "rest_of_region": {
+      "share_pct": "33.6",
+      "value": "82.8460606060"
+    },
+    "same_commune": {
+      "share_pct": "47.3",
+      "value": "116.5"
+    }
+  },
+  "coverage_pct": "98.5",
+  "dataset": "buyer_origin",
+  "denominator": "246.3560606060",
+  "dest_geo_id": "be:mun:36019",
+  "dest_name": {
+    "en": "Staden",
+    "fr": "Staden",
+    "nl": "Staden"
+  },
+  "dest_nis": "36019",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 250,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Staden",
+        "fr": "Staden",
+        "nl": "Staden"
+      },
+      "nis": "36019",
+      "share_pct": "47.3",
+      "value": "116.5"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "9.5",
+      "value": "23.51"
+    },
+    {
+      "name": {
+        "en": "Jabbeke",
+        "fr": "Jabbeke",
+        "nl": "Jabbeke"
+      },
+      "nis": "31012",
+      "share_pct": "7.7",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Hooglede",
+        "fr": "Hooglede",
+        "nl": "Hooglede"
+      },
+      "nis": "36006",
+      "share_pct": "7.5",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Kortemark",
+        "fr": "Kortemark",
+        "nl": "Kortemark"
+      },
+      "nis": "32011",
+      "share_pct": "4.5",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Langemark-Poelkapelle",
+        "fr": "Langemark-Poelkapelle",
+        "nl": "Langemark-Poelkapelle"
+      },
+      "nis": "33040",
+      "share_pct": "4.3",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "2.6",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Koekelare",
+        "fr": "Koekelare",
+        "nl": "Koekelare"
+      },
+      "nis": "32010",
+      "share_pct": "1.6",
+      "value": "4"
+    }
+  ]
+}

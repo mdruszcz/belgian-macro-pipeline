@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.2",
+      "value": "7.6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "20.5",
+      "value": "71.7"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.2",
+      "value": "109.0"
+    },
+    "rest_of_region": {
+      "share_pct": "2.0",
+      "value": "6.9"
+    },
+    "same_commune": {
+      "share_pct": "44.1",
+      "value": "154.07"
+    }
+  },
+  "coverage_pct": "99.5",
+  "dataset": "buyer_origin",
+  "denominator": "349.27",
+  "dest_geo_id": "be:mun:25037",
+  "dest_name": {
+    "en": "Grez-Doiceau",
+    "fr": "Grez-Doiceau",
+    "nl": "Graven"
+  },
+  "dest_nis": "25037",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 351,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "44.1",
+      "value": "154.07"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "8.8",
+      "value": "30.6"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "4.2",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "3.4",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "3.0",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Incourt",
+        "fr": "Incourt",
+        "nl": "Incourt"
+      },
+      "nis": "25043",
+      "share_pct": "2.0",
+      "value": "6.9"
+    },
+    {
+      "name": {
+        "en": "Beauvechain",
+        "fr": "Beauvechain",
+        "nl": "Bevekom"
+      },
+      "nis": "25005",
+      "share_pct": "1.9",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "1.7",
+      "value": "6"
+    }
+  ]
+}

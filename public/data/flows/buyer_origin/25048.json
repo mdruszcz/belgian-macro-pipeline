@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "2.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "15.7",
+      "value": "81.985"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.1",
+      "value": "151.778824026"
+    },
+    "rest_of_region": {
+      "share_pct": "6.4",
+      "value": "33.6183333334"
+    },
+    "same_commune": {
+      "share_pct": "48.3",
+      "value": "251.73666667"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "521.6188240294",
+  "dest_geo_id": "be:mun:25048",
+  "dest_name": {
+    "en": "Jodoigne",
+    "fr": "Jodoigne",
+    "nl": "Geldenaken"
+  },
+  "dest_nis": "25048",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 536,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "48.3",
+      "value": "251.73666667"
+    },
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "3.9",
+      "value": "20.525974026"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "3.0",
+      "value": "15.49"
+    },
+    {
+      "name": {
+        "en": "Orp-Jauche",
+        "fr": "Orp-Jauche",
+        "nl": "Orp-Jauche"
+      },
+      "nis": "25120",
+      "share_pct": "2.9",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Hélécine",
+        "fr": "Hélécine",
+        "nl": "Hélécine"
+      },
+      "nis": "25118",
+      "share_pct": "2.8",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Incourt",
+        "fr": "Incourt",
+        "nl": "Incourt"
+      },
+      "nis": "25043",
+      "share_pct": "2.7",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Beauvechain",
+        "fr": "Beauvechain",
+        "nl": "Bevekom"
+      },
+      "nis": "25005",
+      "share_pct": "2.6",
+      "value": "13.62"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "2.5",
+      "value": "13.14285"
+    }
+  ]
+}

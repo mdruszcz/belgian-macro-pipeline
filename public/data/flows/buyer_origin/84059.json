@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "5.8",
+      "value": "14.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "10.7",
+      "value": "27.01"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.3",
+      "value": "48.5"
+    },
+    "rest_of_region": {
+      "share_pct": "10.7",
+      "value": "26.8333333334"
+    },
+    "same_commune": {
+      "share_pct": "53.2",
+      "value": "133.91666667"
+    }
+  },
+  "coverage_pct": "98.7",
+  "dataset": "buyer_origin",
+  "denominator": "251.7600000034",
+  "dest_geo_id": "be:mun:84059",
+  "dest_name": {
+    "en": "Saint-Hubert",
+    "fr": "Saint-Hubert",
+    "nl": "Saint-Hubert"
+  },
+  "dest_nis": "84059",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 255,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Saint-Hubert",
+        "fr": "Saint-Hubert",
+        "nl": "Saint-Hubert"
+      },
+      "nis": "84059",
+      "share_pct": "53.2",
+      "value": "133.91666667"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "9.1",
+      "value": "23"
+    },
+    {
+      "name": {
+        "en": "Libin",
+        "fr": "Libin",
+        "nl": "Libin"
+      },
+      "nis": "84035",
+      "share_pct": "5.2",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Hotton",
+        "fr": "Hotton",
+        "nl": "Hotton"
+      },
+      "nis": "83028",
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Tellin",
+        "fr": "Tellin",
+        "nl": "Tellin"
+      },
+      "nis": "84068",
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "1.4",
+      "value": "3.5"
+    }
+  ]
+}

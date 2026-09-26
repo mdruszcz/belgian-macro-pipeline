@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.5",
+      "value": "4.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "18.3",
+      "value": "54.625"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.5",
+      "value": "88.01"
+    },
+    "rest_of_region": {
+      "share_pct": "19.3",
+      "value": "57.5"
+    },
+    "same_commune": {
+      "share_pct": "31.2",
+      "value": "92.91"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "298.045",
+  "dest_geo_id": "be:mun:25120",
+  "dest_name": {
+    "en": "Orp-Jauche",
+    "fr": "Orp-Jauche",
+    "nl": "Orp-Jauche"
+  },
+  "dest_nis": "25120",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 307,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Orp-Jauche",
+        "fr": "Orp-Jauche",
+        "nl": "Orp-Jauche"
+      },
+      "nis": "25120",
+      "share_pct": "31.2",
+      "value": "92.91"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "9.7",
+      "value": "29"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "9.6",
+      "value": "28.51"
+    },
+    {
+      "name": {
+        "en": "Ramillies",
+        "fr": "Ramillies",
+        "nl": "Ramillies"
+      },
+      "nis": "25122",
+      "share_pct": "5.5",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "3.4",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Perwez",
+        "fr": "Perwez",
+        "nl": "Perwijs"
+      },
+      "nis": "25084",
+      "share_pct": "2.9",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Grimbergen",
+        "fr": "Grimbergen",
+        "nl": "Grimbergen"
+      },
+      "nis": "23025",
+      "share_pct": "2.4",
+      "value": "7.125"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "2.0",
+      "value": "6"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.0",
+      "value": "56.673529412"
+    },
+    "rest_of_region": {
+      "share_pct": "17.0",
+      "value": "48.1666666667"
+    },
+    "same_commune": {
+      "share_pct": "63.0",
+      "value": "178.89"
+    }
+  },
+  "coverage_pct": "98.5",
+  "dataset": "buyer_origin",
+  "denominator": "283.7301960787",
+  "dest_geo_id": "be:mun:13037",
+  "dest_name": {
+    "en": "Rijkevorsel",
+    "fr": "Rijkevorsel",
+    "nl": "Rijkevorsel"
+  },
+  "dest_nis": "13037",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 288,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Rijkevorsel",
+        "fr": "Rijkevorsel",
+        "nl": "Rijkevorsel"
+      },
+      "nis": "13037",
+      "share_pct": "63.0",
+      "value": "178.89"
+    },
+    {
+      "name": {
+        "en": "Hoogstraten",
+        "fr": "Hoogstraten",
+        "nl": "Hoogstraten"
+      },
+      "nis": "13014",
+      "share_pct": "10.1",
+      "value": "28.693529412"
+    },
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "5.1",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Wuustwezel",
+        "fr": "Wuustwezel",
+        "nl": "Wuustwezel"
+      },
+      "nis": "11053",
+      "share_pct": "4.1",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "3.4",
+      "value": "9.6666666667"
+    },
+    {
+      "name": {
+        "en": "Malle",
+        "fr": "Malle",
+        "nl": "Malle"
+      },
+      "nis": "11057",
+      "share_pct": "2.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Merksplas",
+        "fr": "Merksplas",
+        "nl": "Merksplas"
+      },
+      "nis": "13023",
+      "share_pct": "2.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "2.5",
+      "value": "6.98"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.53"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "36.8",
+      "value": "184.6359999993"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "24.0",
+      "value": "120.1901"
+    },
+    "rest_of_region": {
+      "share_pct": "3.2",
+      "value": "15.99"
+    },
+    "same_commune": {
+      "share_pct": "35.9",
+      "value": "179.72"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "501.0660999993",
+  "dest_geo_id": "be:mun:23003",
+  "dest_name": {
+    "en": "Beersel",
+    "fr": "Beersel",
+    "nl": "Beersel"
+  },
+  "dest_nis": "23003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 514,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "35.9",
+      "value": "179.72"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "8.5",
+      "value": "42.583333333"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "7.1",
+      "value": "35.4471"
+    },
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "5.4",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "4.9",
+      "value": "24.35"
+    },
+    {
+      "name": {
+        "en": "Sint-Pieters-Leeuw",
+        "fr": "Sint-Pieters-Leeuw",
+        "nl": "Sint-Pieters-Leeuw"
+      },
+      "nis": "23077",
+      "share_pct": "4.3",
+      "value": "21.6"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "3.8",
+      "value": "18.833333333"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "2.4",
+      "value": "12.15"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.9",
+      "value": "96.136666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.8",
+      "value": "20"
+    },
+    "other_regions": {
+      "share_pct": "18.1",
+      "value": "446.863333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "36.7",
+      "value": "908.740350003"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "40.5",
+      "value": "1002.0344836"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "2473.774833603",
+  "dest_geo_id": "be:mun:21016",
+  "dest_name": {
+    "en": "Uccle",
+    "fr": "Uccle",
+    "nl": "Ukkel"
+  },
+  "dest_nis": "21016",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2548,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "40.5",
+      "value": "1002.0344836"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "11.7",
+      "value": "288.27915"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "6.3",
+      "value": "156.12836667"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "5.3",
+      "value": "130.2201"
+    },
+    {
+      "name": {
+        "en": "Saint-Gilles",
+        "fr": "Saint-Gilles",
+        "nl": "Sint-Gillis"
+      },
+      "nis": "21013",
+      "share_pct": "3.9",
+      "value": "95.3584"
+    },
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "2.5",
+      "value": "62.8"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "1.9",
+      "value": "46.875"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "1.5",
+      "value": "37.99"
+    }
+  ]
+}

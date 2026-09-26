@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.6",
+      "value": "21.8636"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.1",
+      "value": "185.35"
+    },
+    "rest_of_region": {
+      "share_pct": "6.8",
+      "value": "57.0"
+    },
+    "same_commune": {
+      "share_pct": "68.6",
+      "value": "575.95519562"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "840.16879562",
+  "dest_geo_id": "be:mun:72043",
+  "dest_name": {
+    "en": "Pelt",
+    "fr": "Pelt",
+    "nl": "Pelt"
+  },
+  "dest_nis": "72043",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 852,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Pelt",
+        "fr": "Pelt",
+        "nl": "Pelt"
+      },
+      "nis": "72043",
+      "share_pct": "68.6",
+      "value": "575.95519562"
+    },
+    {
+      "name": {
+        "en": "Hamont-Achel",
+        "fr": "Hamont-Achel",
+        "nl": "Hamont-Achel"
+      },
+      "nis": "72037",
+      "share_pct": "7.2",
+      "value": "60.6"
+    },
+    {
+      "name": {
+        "en": "Lommel",
+        "fr": "Lommel",
+        "nl": "Lommel"
+      },
+      "nis": "72020",
+      "share_pct": "6.0",
+      "value": "50"
+    },
+    {
+      "name": {
+        "en": "Peer",
+        "fr": "Peer",
+        "nl": "Peer"
+      },
+      "nis": "72030",
+      "share_pct": "3.2",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Hechtel-Eksel",
+        "fr": "Hechtel-Eksel",
+        "nl": "Hechtel-Eksel"
+      },
+      "nis": "72038",
+      "share_pct": "2.6",
+      "value": "21.75"
+    },
+    {
+      "name": {
+        "en": "Bocholt",
+        "fr": "Bocholt",
+        "nl": "Bocholt"
+      },
+      "nis": "72003",
+      "share_pct": "1.6",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "1.2",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Holsbeek",
+        "fr": "Holsbeek",
+        "nl": "Holsbeek"
+      },
+      "nis": "24043",
+      "share_pct": "1.1",
+      "value": "9"
+    }
+  ]
+}

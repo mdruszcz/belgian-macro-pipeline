@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.7",
+      "value": "9"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.0",
+      "value": "41.49"
+    },
+    "rest_of_region": {
+      "share_pct": "35.2",
+      "value": "86.1666666667"
+    },
+    "same_commune": {
+      "share_pct": "43.7",
+      "value": "106.81555556"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "244.4722222267",
+  "dest_geo_id": "be:mun:45060",
+  "dest_name": {
+    "en": "Kluisbergen",
+    "fr": "Kluisbergen",
+    "nl": "Kluisbergen"
+  },
+  "dest_nis": "45060",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 248,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kluisbergen",
+        "fr": "Kluisbergen",
+        "nl": "Kluisbergen"
+      },
+      "nis": "45060",
+      "share_pct": "43.7",
+      "value": "106.81555556"
+    },
+    {
+      "name": {
+        "en": "Avelgem",
+        "fr": "Avelgem",
+        "nl": "Avelgem"
+      },
+      "nis": "34003",
+      "share_pct": "8.2",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "6.9",
+      "value": "16.99"
+    },
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "6.7",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Zwevegem",
+        "fr": "Zwevegem",
+        "nl": "Zwevegem"
+      },
+      "nis": "34042",
+      "share_pct": "4.9",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "4.5",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Waregem",
+        "fr": "Waregem",
+        "nl": "Waregem"
+      },
+      "nis": "34040",
+      "share_pct": "3.1",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Izegem",
+        "fr": "Izegem",
+        "nl": "Izegem"
+      },
+      "nis": "36008",
+      "share_pct": "2.9",
+      "value": "7"
+    }
+  ]
+}

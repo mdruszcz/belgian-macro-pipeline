@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.2",
+      "value": "5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "45.0",
+      "value": "191.231666667"
+    },
+    "rest_of_region": {
+      "share_pct": "10.9",
+      "value": "46.15"
+    },
+    "same_commune": {
+      "share_pct": "42.3",
+      "value": "179.94"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "425.321666667",
+  "dest_geo_id": "be:mun:24094",
+  "dest_name": {
+    "en": "Rotselaar",
+    "fr": "Rotselaar",
+    "nl": "Rotselaar"
+  },
+  "dest_nis": "24094",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 435,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Rotselaar",
+        "fr": "Rotselaar",
+        "nl": "Rotselaar"
+      },
+      "nis": "24094",
+      "share_pct": "42.3",
+      "value": "179.94"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "20.5",
+      "value": "87.21"
+    },
+    {
+      "name": {
+        "en": "Herent",
+        "fr": "Herent",
+        "nl": "Herent"
+      },
+      "nis": "24038",
+      "share_pct": "5.1",
+      "value": "21.541666667"
+    },
+    {
+      "name": {
+        "en": "Haacht",
+        "fr": "Haacht",
+        "nl": "Haacht"
+      },
+      "nis": "24033",
+      "share_pct": "4.0",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Aarschot",
+        "fr": "Aarschot",
+        "nl": "Aarschot"
+      },
+      "nis": "24001",
+      "share_pct": "3.4",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Tremelo",
+        "fr": "Tremelo",
+        "nl": "Tremelo"
+      },
+      "nis": "24109",
+      "share_pct": "2.8",
+      "value": "11.81"
+    },
+    {
+      "name": {
+        "en": "Holsbeek",
+        "fr": "Holsbeek",
+        "nl": "Holsbeek"
+      },
+      "nis": "24043",
+      "share_pct": "2.7",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Keerbergen",
+        "fr": "Keerbergen",
+        "nl": "Keerbergen"
+      },
+      "nis": "24048",
+      "share_pct": "1.5",
+      "value": "6.5"
+    }
+  ]
+}

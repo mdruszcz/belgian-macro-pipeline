@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "4.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "21.1",
+      "value": "157.9666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "48.5",
+      "value": "363.11"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "29.6",
+      "value": "221.6"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "748.1766666667",
+  "dest_geo_id": "be:mun:21002",
+  "dest_name": {
+    "en": "Auderghem",
+    "fr": "Auderghem",
+    "nl": "Oudergem"
+  },
+  "dest_nis": "21002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 768,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Auderghem",
+        "fr": "Auderghem",
+        "nl": "Oudergem"
+      },
+      "nis": "21002",
+      "share_pct": "29.6",
+      "value": "221.6"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "8.4",
+      "value": "62.83"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "8.0",
+      "value": "59.5"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "6.4",
+      "value": "48.25"
+    },
+    {
+      "name": {
+        "en": "Watermael-Boitsfort",
+        "fr": "Watermael-Boitsfort",
+        "nl": "Watermaal-Bosvoorde"
+      },
+      "nis": "21017",
+      "share_pct": "6.0",
+      "value": "44.52"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "4.1",
+      "value": "31"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "4.0",
+      "value": "30.15"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "3.3",
+      "value": "24.84"
+    }
+  ]
+}

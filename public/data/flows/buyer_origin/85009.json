@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.0",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "34.9",
+      "value": "70"
+    },
+    "rest_of_region": {
+      "share_pct": "11.7",
+      "value": "23.5"
+    },
+    "same_commune": {
+      "share_pct": "49.9",
+      "value": "100"
+    }
+  },
+  "coverage_pct": "99.8",
+  "dataset": "buyer_origin",
+  "denominator": "200.5",
+  "dest_geo_id": "be:mun:85009",
+  "dest_name": {
+    "en": "Etalle",
+    "fr": "Etalle",
+    "nl": "Etalle"
+  },
+  "dest_nis": "85009",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 201,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Etalle",
+        "fr": "Etalle",
+        "nl": "Etalle"
+      },
+      "nis": "85009",
+      "share_pct": "49.9",
+      "value": "100"
+    },
+    {
+      "name": {
+        "en": "Habay",
+        "fr": "Habay",
+        "nl": "Habay"
+      },
+      "nis": "85046",
+      "share_pct": "23.4",
+      "value": "47"
+    },
+    {
+      "name": {
+        "en": "Saint-Léger",
+        "fr": "Saint-Léger",
+        "nl": "Saint-Léger"
+      },
+      "nis": "85034",
+      "share_pct": "5.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "4.5",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Tintigny",
+        "fr": "Tintigny",
+        "nl": "Tintigny"
+      },
+      "nis": "85039",
+      "share_pct": "3.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Aubange",
+        "fr": "Aubange",
+        "nl": "Aubange"
+      },
+      "nis": "81004",
+      "share_pct": "3.0",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Evere",
+        "fr": "Evere",
+        "nl": "Evere"
+      },
+      "nis": "21006",
+      "share_pct": "2.0",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Virton",
+        "fr": "Virton",
+        "nl": "Virton"
+      },
+      "nis": "85045",
+      "share_pct": "2.0",
+      "value": "4"
+    }
+  ]
+}

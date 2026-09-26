@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "25.7",
+      "value": "73.51"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.2",
+      "value": "83.5"
+    },
+    "rest_of_region": {
+      "share_pct": "21.0",
+      "value": "59.995"
+    },
+    "same_commune": {
+      "share_pct": "24.1",
+      "value": "69.01"
+    }
+  },
+  "coverage_pct": "99.3",
+  "dataset": "buyer_origin",
+  "denominator": "286.015",
+  "dest_geo_id": "be:mun:23044",
+  "dest_name": {
+    "en": "Liedekerke",
+    "fr": "Liedekerke",
+    "nl": "Liedekerke"
+  },
+  "dest_nis": "23044",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 288,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Liedekerke",
+        "fr": "Liedekerke",
+        "nl": "Liedekerke"
+      },
+      "nis": "23044",
+      "share_pct": "24.1",
+      "value": "69.01"
+    },
+    {
+      "name": {
+        "en": "Denderleeuw",
+        "fr": "Denderleeuw",
+        "nl": "Denderleeuw"
+      },
+      "nis": "41011",
+      "share_pct": "8.9",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "6.1",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Roosdaal",
+        "fr": "Roosdaal",
+        "nl": "Roosdaal"
+      },
+      "nis": "23097",
+      "share_pct": "5.9",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Affligem",
+        "fr": "Affligem",
+        "nl": "Affligem"
+      },
+      "nis": "23105",
+      "share_pct": "5.8",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "5.1",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "4.7",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "3.1",
+      "value": "9"
+    }
+  ]
+}

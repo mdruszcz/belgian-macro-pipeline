@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.3",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.3",
+      "value": "5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "49.8",
+      "value": "75.5"
+    },
+    "rest_of_region": {
+      "share_pct": "7.3",
+      "value": "11.0"
+    },
+    "same_commune": {
+      "share_pct": "38.3",
+      "value": "58"
+    }
+  },
+  "coverage_pct": "99.7",
+  "dataset": "buyer_origin",
+  "denominator": "151.5",
+  "dest_geo_id": "be:mun:57003",
+  "dest_name": {
+    "en": "Antoing",
+    "fr": "Antoing",
+    "nl": "Antoing"
+  },
+  "dest_nis": "57003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 152,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Antoing",
+        "fr": "Antoing",
+        "nl": "Antoing"
+      },
+      "nis": "57003",
+      "share_pct": "38.3",
+      "value": "58"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "27.1",
+      "value": "41"
+    },
+    {
+      "name": {
+        "en": "Péruwelz",
+        "fr": "Péruwelz",
+        "nl": "Péruwelz"
+      },
+      "nis": "57064",
+      "share_pct": "6.9",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Brunehaut",
+        "fr": "Brunehaut",
+        "nl": "Brunehaut"
+      },
+      "nis": "57093",
+      "share_pct": "6.3",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Leuze-en-Hainaut",
+        "fr": "Leuze-en-Hainaut",
+        "nl": "Leuze-en-Hainaut"
+      },
+      "nis": "57094",
+      "share_pct": "3.3",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Rumes",
+        "fr": "Rumes",
+        "nl": "Rumes"
+      },
+      "nis": "57072",
+      "share_pct": "3.0",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "2.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.0",
+      "value": "3"
+    }
+  ]
+}

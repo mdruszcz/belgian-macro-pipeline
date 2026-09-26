@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.8",
+      "value": "12.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "43.5",
+      "value": "188.4351"
+    },
+    "rest_of_region": {
+      "share_pct": "6.4",
+      "value": "27.645"
+    },
+    "same_commune": {
+      "share_pct": "47.3",
+      "value": "204.8765"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "433.4566",
+  "dest_geo_id": "be:mun:11022",
+  "dest_name": {
+    "en": "Kalmthout",
+    "fr": "Kalmthout",
+    "nl": "Kalmthout"
+  },
+  "dest_nis": "11022",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 445,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kalmthout",
+        "fr": "Kalmthout",
+        "nl": "Kalmthout"
+      },
+      "nis": "11022",
+      "share_pct": "47.3",
+      "value": "204.8765"
+    },
+    {
+      "name": {
+        "en": "Essen",
+        "fr": "Essen",
+        "nl": "Essen"
+      },
+      "nis": "11016",
+      "share_pct": "9.3",
+      "value": "40.425"
+    },
+    {
+      "name": {
+        "en": "Kapellen",
+        "fr": "Kapellen",
+        "nl": "Kapellen"
+      },
+      "nis": "11023",
+      "share_pct": "9.2",
+      "value": "39.6727"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "8.9",
+      "value": "38.49"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "5.2",
+      "value": "22.475"
+    },
+    {
+      "name": {
+        "en": "Wuustwezel",
+        "fr": "Wuustwezel",
+        "nl": "Wuustwezel"
+      },
+      "nis": "11053",
+      "share_pct": "4.5",
+      "value": "19.308"
+    },
+    {
+      "name": {
+        "en": "Stabroek",
+        "fr": "Stabroek",
+        "nl": "Stabroek"
+      },
+      "nis": "11044",
+      "share_pct": "1.9",
+      "value": "8.3"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "1.6",
+      "value": "7"
+    }
+  ]
+}

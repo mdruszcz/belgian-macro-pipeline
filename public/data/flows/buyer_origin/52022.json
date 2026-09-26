@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "2.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.8",
+      "value": "14.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "30.6",
+      "value": "92.042553191"
+    },
+    "rest_of_region": {
+      "share_pct": "29.4",
+      "value": "88.5"
+    },
+    "same_commune": {
+      "share_pct": "34.3",
+      "value": "103.02380952"
+    }
+  },
+  "coverage_pct": "99.2",
+  "dataset": "buyer_origin",
+  "denominator": "300.566362711",
+  "dest_geo_id": "be:mun:52022",
+  "dest_name": {
+    "en": "Fontaine-l’Evêque",
+    "fr": "Fontaine-l’Evêque",
+    "nl": "Fontaine-l’Evêque"
+  },
+  "dest_nis": "52022",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 303,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Fontaine-l’Evêque",
+        "fr": "Fontaine-l’Evêque",
+        "nl": "Fontaine-l’Evêque"
+      },
+      "nis": "52022",
+      "share_pct": "34.3",
+      "value": "103.02380952"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "16.8",
+      "value": "50.542553191"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "6.8",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Anderlues",
+        "fr": "Anderlues",
+        "nl": "Anderlues"
+      },
+      "nis": "56001",
+      "share_pct": "4.5",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "3.0",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Thuin",
+        "fr": "Thuin",
+        "nl": "Thuin"
+      },
+      "nis": "56078",
+      "share_pct": "2.8",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Châtelet",
+        "fr": "Châtelet",
+        "nl": "Châtelet"
+      },
+      "nis": "52012",
+      "share_pct": "2.2",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "2.2",
+      "value": "6.5"
+    }
+  ]
+}

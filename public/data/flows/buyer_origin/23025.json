@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.3",
+      "value": "12.0357142857"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "30.7",
+      "value": "290.2700476193"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "24.6",
+      "value": "232.74"
+    },
+    "rest_of_region": {
+      "share_pct": "6.1",
+      "value": "57.9523333333"
+    },
+    "same_commune": {
+      "share_pct": "37.2",
+      "value": "351.64225696"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "944.6403521983",
+  "dest_geo_id": "be:mun:23025",
+  "dest_name": {
+    "en": "Grimbergen",
+    "fr": "Grimbergen",
+    "nl": "Grimbergen"
+  },
+  "dest_nis": "23025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 960,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Grimbergen",
+        "fr": "Grimbergen",
+        "nl": "Grimbergen"
+      },
+      "nis": "23025",
+      "share_pct": "37.2",
+      "value": "351.64225696"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "9.5",
+      "value": "90"
+    },
+    {
+      "name": {
+        "en": "Vilvoorde",
+        "fr": "Vilvorde",
+        "nl": "Vilvoorde"
+      },
+      "nis": "23088",
+      "share_pct": "6.1",
+      "value": "58"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "5.1",
+      "value": "47.901"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "4.7",
+      "value": "44"
+    },
+    {
+      "name": {
+        "en": "Meise",
+        "fr": "Meise",
+        "nl": "Meise"
+      },
+      "nis": "23050",
+      "share_pct": "4.7",
+      "value": "43.95"
+    },
+    {
+      "name": {
+        "en": "Wemmel",
+        "fr": "Wemmel",
+        "nl": "Wemmel"
+      },
+      "nis": "23102",
+      "share_pct": "3.7",
+      "value": "35"
+    },
+    {
+      "name": {
+        "en": "Saint-Josse-ten-Noode",
+        "fr": "Saint-Josse-ten-Noode",
+        "nl": "Sint-Joost-ten-Node"
+      },
+      "nis": "21014",
+      "share_pct": "1.6",
+      "value": "15"
+    }
+  ]
+}

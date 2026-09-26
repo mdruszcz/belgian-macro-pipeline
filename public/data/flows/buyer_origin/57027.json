@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "8.1",
+      "value": "20.316666667"
+    },
+    "origin_unknown": {
+      "share_pct": "1.2",
+      "value": "2.9"
+    },
+    "other_regions": {
+      "share_pct": "9.3",
+      "value": "23.2307692307"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "47.2",
+      "value": "117.555256411"
+    },
+    "rest_of_region": {
+      "share_pct": "2.0",
+      "value": "5.0"
+    },
+    "same_commune": {
+      "share_pct": "32.2",
+      "value": "80.283333333"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "249.2860256417",
+  "dest_geo_id": "be:mun:57027",
+  "dest_name": {
+    "en": "Estaimpuis",
+    "fr": "Estaimpuis",
+    "nl": "Estaimpuis"
+  },
+  "dest_nis": "57027",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 257,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Estaimpuis",
+        "fr": "Estaimpuis",
+        "nl": "Estaimpuis"
+      },
+      "nis": "57027",
+      "share_pct": "32.2",
+      "value": "80.283333333"
+    },
+    {
+      "name": {
+        "en": "Mouscron",
+        "fr": "Mouscron",
+        "nl": "Moeskroen"
+      },
+      "nis": "57096",
+      "share_pct": "25.5",
+      "value": "63.666666667"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "11.3",
+      "value": "28.221923077"
+    },
+    {
+      "name": {
+        "en": "Pecq",
+        "fr": "Pecq",
+        "nl": "Pecq"
+      },
+      "nis": "57062",
+      "share_pct": "6.5",
+      "value": "16.166666667"
+    },
+    {
+      "name": {
+        "en": "Zwevegem",
+        "fr": "Zwevegem",
+        "nl": "Zwevegem"
+      },
+      "nis": "34042",
+      "share_pct": "2.6",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Waregem",
+        "fr": "Waregem",
+        "nl": "Waregem"
+      },
+      "nis": "34040",
+      "share_pct": "2.0",
+      "value": "5.0769230769"
+    },
+    {
+      "name": {
+        "en": "Anzegem",
+        "fr": "Anzegem",
+        "nl": "Anzegem"
+      },
+      "nis": "34002",
+      "share_pct": "0.8",
+      "value": "2.0769230769"
+    },
+    {
+      "name": {
+        "en": "Oostrozebeke",
+        "fr": "Oostrozebeke",
+        "nl": "Oostrozebeke"
+      },
+      "nis": "37010",
+      "share_pct": "0.8",
+      "value": "2.0769230769"
+    }
+  ]
+}

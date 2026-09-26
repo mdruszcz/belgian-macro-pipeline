@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.3",
+      "value": "92.85"
+    },
+    "rest_of_region": {
+      "share_pct": "35.2",
+      "value": "288.376666667"
+    },
+    "same_commune": {
+      "share_pct": "53.2",
+      "value": "435.40666667"
+    }
+  },
+  "coverage_pct": "98.7",
+  "dataset": "buyer_origin",
+  "denominator": "818.133333337",
+  "dest_geo_id": "be:mun:71071",
+  "dest_name": {
+    "en": "Tessenderlo-Ham",
+    "fr": "Tessenderlo-Ham",
+    "nl": "Tessenderlo-Ham"
+  },
+  "dest_nis": "71071",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 829,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tessenderlo-Ham",
+        "fr": "Tessenderlo-Ham",
+        "nl": "Tessenderlo-Ham"
+      },
+      "nis": "71071",
+      "share_pct": "53.2",
+      "value": "435.40666667"
+    },
+    {
+      "name": {
+        "en": "Laakdal",
+        "fr": "Laakdal",
+        "nl": "Laakdal"
+      },
+      "nis": "13053",
+      "share_pct": "5.2",
+      "value": "42.196666667"
+    },
+    {
+      "name": {
+        "en": "Meerhout",
+        "fr": "Meerhout",
+        "nl": "Meerhout"
+      },
+      "nis": "13021",
+      "share_pct": "4.8",
+      "value": "39.5"
+    },
+    {
+      "name": {
+        "en": "Diest",
+        "fr": "Diest",
+        "nl": "Diest"
+      },
+      "nis": "24020",
+      "share_pct": "4.8",
+      "value": "39.5"
+    },
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "4.8",
+      "value": "39"
+    },
+    {
+      "name": {
+        "en": "Balen",
+        "fr": "Balen",
+        "nl": "Balen"
+      },
+      "nis": "13003",
+      "share_pct": "2.2",
+      "value": "18.4"
+    },
+    {
+      "name": {
+        "en": "Leopoldsburg",
+        "fr": "Bourg-Léopold",
+        "nl": "Leopoldsburg"
+      },
+      "nis": "71034",
+      "share_pct": "1.8",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Scherpenheuvel-Zichem",
+        "fr": "Montaigu-Zichem",
+        "nl": "Scherpenheuvel-Zichem"
+      },
+      "nis": "24134",
+      "share_pct": "1.7",
+      "value": "14"
+    }
+  ]
+}

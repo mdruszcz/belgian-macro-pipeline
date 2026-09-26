@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "41.2",
+      "value": "84.0"
+    },
+    "rest_of_region": {
+      "share_pct": "2.0",
+      "value": "4"
+    },
+    "same_commune": {
+      "share_pct": "54.4",
+      "value": "110.83333333"
+    }
+  },
+  "coverage_pct": "98.9",
+  "dataset": "buyer_origin",
+  "denominator": "203.83333333",
+  "dest_geo_id": "be:mun:57093",
+  "dest_name": {
+    "en": "Brunehaut",
+    "fr": "Brunehaut",
+    "nl": "Brunehaut"
+  },
+  "dest_nis": "57093",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 206,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Brunehaut",
+        "fr": "Brunehaut",
+        "nl": "Brunehaut"
+      },
+      "nis": "57093",
+      "share_pct": "54.4",
+      "value": "110.83333333"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "26.2",
+      "value": "53.5"
+    },
+    {
+      "name": {
+        "en": "Antoing",
+        "fr": "Antoing",
+        "nl": "Antoing"
+      },
+      "nis": "57003",
+      "share_pct": "6.4",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Péruwelz",
+        "fr": "Péruwelz",
+        "nl": "Péruwelz"
+      },
+      "nis": "57064",
+      "share_pct": "3.2",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Estaimpuis",
+        "fr": "Estaimpuis",
+        "nl": "Estaimpuis"
+      },
+      "nis": "57027",
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Rumes",
+        "fr": "Rumes",
+        "nl": "Rumes"
+      },
+      "nis": "57072",
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Bernissart",
+        "fr": "Bernissart",
+        "nl": "Bernissart"
+      },
+      "nis": "51009",
+      "share_pct": "1.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Pecq",
+        "fr": "Pecq",
+        "nl": "Pecq"
+      },
+      "nis": "57062",
+      "share_pct": "0.7",
+      "value": "1.5"
+    }
+  ]
+}

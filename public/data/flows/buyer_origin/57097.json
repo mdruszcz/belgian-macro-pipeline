@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.5",
+      "value": "15.333333333"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "16.0",
+      "value": "55.186666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "2.0",
+      "value": "6.9"
+    },
+    "rest_of_region": {
+      "share_pct": "0.7",
+      "value": "2.5"
+    },
+    "same_commune": {
+      "share_pct": "76.8",
+      "value": "264.3668254"
+    }
+  },
+  "coverage_pct": "96.7",
+  "dataset": "buyer_origin",
+  "denominator": "344.286825400",
+  "dest_geo_id": "be:mun:57097",
+  "dest_name": {
+    "en": "Comines-Warneton",
+    "fr": "Comines-Warneton",
+    "nl": "Komen-Waasten"
+  },
+  "dest_nis": "57097",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 356,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Comines-Warneton",
+        "fr": "Comines-Warneton",
+        "nl": "Komen-Waasten"
+      },
+      "nis": "57097",
+      "share_pct": "76.8",
+      "value": "264.3668254"
+    },
+    {
+      "name": {
+        "en": "Wervik",
+        "fr": "Wervik",
+        "nl": "Wervik"
+      },
+      "nis": "33029",
+      "share_pct": "6.1",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Heuvelland",
+        "fr": "Heuvelland",
+        "nl": "Heuvelland"
+      },
+      "nis": "33039",
+      "share_pct": "4.0",
+      "value": "13.666666667"
+    },
+    {
+      "name": {
+        "en": "Mesen",
+        "fr": "Messines",
+        "nl": "Mesen"
+      },
+      "nis": "33016",
+      "share_pct": "2.2",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "2.0",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Mouscron",
+        "fr": "Mouscron",
+        "nl": "Moeskroen"
+      },
+      "nis": "57096",
+      "share_pct": "1.1",
+      "value": "3.9"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "0.9",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "0.6",
+      "value": "2.02"
+    }
+  ]
+}

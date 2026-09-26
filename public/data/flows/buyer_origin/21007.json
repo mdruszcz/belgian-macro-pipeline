@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.1",
+      "value": "43.9366666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "12.3",
+      "value": "175.676666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "53.7",
+      "value": "769.246666663"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "30.9",
+      "value": "442.74742857"
+    }
+  },
+  "coverage_pct": "98.1",
+  "dataset": "buyer_origin",
+  "denominator": "1433.6074285667",
+  "dest_geo_id": "be:mun:21007",
+  "dest_name": {
+    "en": "Forest",
+    "fr": "Forest",
+    "nl": "Vorst"
+  },
+  "dest_nis": "21007",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1462,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "30.9",
+      "value": "442.74742857"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "12.0",
+      "value": "172.2644"
+    },
+    {
+      "name": {
+        "en": "Saint-Gilles",
+        "fr": "Saint-Gilles",
+        "nl": "Sint-Gillis"
+      },
+      "nis": "21013",
+      "share_pct": "11.2",
+      "value": "161.11"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "10.2",
+      "value": "145.8336"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "9.3",
+      "value": "132.88333333"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.2",
+      "value": "31.615333333"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "1.8",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "1.2",
+      "value": "17.5"
+    }
+  ]
+}

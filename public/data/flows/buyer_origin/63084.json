@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.2",
+      "value": "3.1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "46.5",
+      "value": "118.4040262173"
+    },
+    "rest_of_region": {
+      "share_pct": "5.3",
+      "value": "13.5"
+    },
+    "same_commune": {
+      "share_pct": "45.5",
+      "value": "115.84395833"
+    }
+  },
+  "coverage_pct": "96.2",
+  "dataset": "buyer_origin",
+  "denominator": "254.8479845473",
+  "dest_geo_id": "be:mun:63084",
+  "dest_name": {
+    "en": "Welkenraedt",
+    "fr": "Welkenraedt",
+    "nl": "Welkenraedt"
+  },
+  "dest_nis": "63084",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 265,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Welkenraedt",
+        "fr": "Welkenraedt",
+        "nl": "Welkenraedt"
+      },
+      "nis": "63084",
+      "share_pct": "45.5",
+      "value": "115.84395833"
+    },
+    {
+      "name": {
+        "en": "Plombières",
+        "fr": "Plombières",
+        "nl": "Plombières"
+      },
+      "nis": "63088",
+      "share_pct": "7.7",
+      "value": "19.522846442"
+    },
+    {
+      "name": {
+        "en": "Lontzen",
+        "fr": "Lontzen",
+        "nl": "Lontzen"
+      },
+      "nis": "63048",
+      "share_pct": "6.7",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Thimister-Clermont",
+        "fr": "Thimister-Clermont",
+        "nl": "Thimister-Clermont"
+      },
+      "nis": "63089",
+      "share_pct": "5.9",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Baelen",
+        "fr": "Baelen",
+        "nl": "Baelen"
+      },
+      "nis": "63004",
+      "share_pct": "4.5",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Limbourg",
+        "fr": "Limbourg",
+        "nl": "Limburg"
+      },
+      "nis": "63046",
+      "share_pct": "4.3",
+      "value": "11.022846442"
+    },
+    {
+      "name": {
+        "en": "Eupen",
+        "fr": "Eupen",
+        "nl": "Eupen"
+      },
+      "nis": "63023",
+      "share_pct": "3.7",
+      "value": "9.4"
+    },
+    {
+      "name": {
+        "en": "Dison",
+        "fr": "Dison",
+        "nl": "Dison"
+      },
+      "nis": "63020",
+      "share_pct": "2.9",
+      "value": "7.5"
+    }
+  ]
+}

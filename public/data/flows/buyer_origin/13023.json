@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.7",
+      "value": "1.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.6",
+      "value": "64.9333333333"
+    },
+    "rest_of_region": {
+      "share_pct": "6.1",
+      "value": "12.5"
+    },
+    "same_commune": {
+      "share_pct": "61.1",
+      "value": "125.66666667"
+    }
+  },
+  "coverage_pct": "98.8",
+  "dataset": "buyer_origin",
+  "denominator": "205.6000000033",
+  "dest_geo_id": "be:mun:13023",
+  "dest_name": {
+    "en": "Merksplas",
+    "fr": "Merksplas",
+    "nl": "Merksplas"
+  },
+  "dest_nis": "13023",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 208,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Merksplas",
+        "fr": "Merksplas",
+        "nl": "Merksplas"
+      },
+      "nis": "13023",
+      "share_pct": "61.1",
+      "value": "125.66666667"
+    },
+    {
+      "name": {
+        "en": "Hoogstraten",
+        "fr": "Hoogstraten",
+        "nl": "Hoogstraten"
+      },
+      "nis": "13014",
+      "share_pct": "8.8",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "8.3",
+      "value": "17.1"
+    },
+    {
+      "name": {
+        "en": "Turnhout",
+        "fr": "Turnhout",
+        "nl": "Turnhout"
+      },
+      "nis": "13040",
+      "share_pct": "4.3",
+      "value": "8.8333333333"
+    },
+    {
+      "name": {
+        "en": "Rijkevorsel",
+        "fr": "Rijkevorsel",
+        "nl": "Rijkevorsel"
+      },
+      "nis": "13037",
+      "share_pct": "4.1",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Vosselaar",
+        "fr": "Vosselaar",
+        "nl": "Vosselaar"
+      },
+      "nis": "13046",
+      "share_pct": "3.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "1.7",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "1.5",
+      "value": "3"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.6",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "36.9",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "30.9",
+      "value": "3.3466666666"
+    },
+    "rest_of_region": {
+      "share_pct": "9.2",
+      "value": "1"
+    },
+    "same_commune": {
+      "share_pct": "18.4",
+      "value": "2"
+    }
+  },
+  "coverage_pct": "77.5",
+  "dataset": "buyer_origin",
+  "denominator": "10.8466666666",
+  "dest_geo_id": "be:mun:33016",
+  "dest_name": {
+    "en": "Mesen",
+    "fr": "Messines",
+    "nl": "Mesen"
+  },
+  "dest_nis": "33016",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 14,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Comines-Warneton",
+        "fr": "Comines-Warneton",
+        "nl": "Komen-Waasten"
+      },
+      "nis": "57097",
+      "share_pct": "36.9",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Heuvelland",
+        "fr": "Heuvelland",
+        "nl": "Heuvelland"
+      },
+      "nis": "33039",
+      "share_pct": "21.5",
+      "value": "2.3333333333"
+    },
+    {
+      "name": {
+        "en": "Mesen",
+        "fr": "Messines",
+        "nl": "Mesen"
+      },
+      "nis": "33016",
+      "share_pct": "18.4",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "9.2",
+      "value": "1"
+    },
+    {
+      "name": {
+        "en": "Oosterzele",
+        "fr": "Oosterzele",
+        "nl": "Oosterzele"
+      },
+      "nis": "44052",
+      "share_pct": "9.2",
+      "value": "1"
+    },
+    {
+      "name": {
+        "en": "Wervik",
+        "fr": "Wervik",
+        "nl": "Wervik"
+      },
+      "nis": "33029",
+      "share_pct": "0.1",
+      "value": "0.0133333333"
+    }
+  ]
+}

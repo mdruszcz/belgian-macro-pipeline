@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.1",
+      "value": "8.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.9",
+      "value": "9"
+    },
+    "rest_of_region": {
+      "share_pct": "36.4",
+      "value": "25.5"
+    },
+    "same_commune": {
+      "share_pct": "38.6",
+      "value": "27"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "70.0",
+  "dest_geo_id": "be:mun:64075",
+  "dest_name": {
+    "en": "Wasseiges",
+    "fr": "Wasseiges",
+    "nl": "Wasseiges"
+  },
+  "dest_nis": "64075",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 72,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Wasseiges",
+        "fr": "Wasseiges",
+        "nl": "Wasseiges"
+      },
+      "nis": "64075",
+      "share_pct": "38.6",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "7.1",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "5.7",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Gesves",
+        "fr": "Gesves",
+        "nl": "Gesves"
+      },
+      "nis": "92054",
+      "share_pct": "5.7",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Fernelmont",
+        "fr": "Fernelmont",
+        "nl": "Fernelmont"
+      },
+      "nis": "92138",
+      "share_pct": "5.7",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "4.3",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Eghezée",
+        "fr": "Eghezée",
+        "nl": "Eghezée"
+      },
+      "nis": "92035",
+      "share_pct": "4.3",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "2.9",
+      "value": "2"
+    }
+  ]
+}

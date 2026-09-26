@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.7",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.6",
+      "value": "8.25"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.4",
+      "value": "24.131"
+    },
+    "rest_of_region": {
+      "share_pct": "33.9",
+      "value": "50.0"
+    },
+    "same_commune": {
+      "share_pct": "41.4",
+      "value": "61.03"
+    }
+  },
+  "coverage_pct": "93.3",
+  "dataset": "buyer_origin",
+  "denominator": "147.411",
+  "dest_geo_id": "be:mun:84029",
+  "dest_name": {
+    "en": "Herbeumont",
+    "fr": "Herbeumont",
+    "nl": "Herbeumont"
+  },
+  "dest_nis": "84029",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 158,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Herbeumont",
+        "fr": "Herbeumont",
+        "nl": "Herbeumont"
+      },
+      "nis": "84029",
+      "share_pct": "41.4",
+      "value": "61.03"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "10.2",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Chiny",
+        "fr": "Chiny",
+        "nl": "Chiny"
+      },
+      "nis": "85007",
+      "share_pct": "5.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "5.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "5.1",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Saint-Léger",
+        "fr": "Saint-Léger",
+        "nl": "Saint-Léger"
+      },
+      "nis": "85034",
+      "share_pct": "5.1",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Dinant",
+        "fr": "Dinant",
+        "nl": "Dinant"
+      },
+      "nis": "91034",
+      "share_pct": "4.7",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Virton",
+        "fr": "Virton",
+        "nl": "Virton"
+      },
+      "nis": "85045",
+      "share_pct": "4.1",
+      "value": "6"
+    }
+  ]
+}

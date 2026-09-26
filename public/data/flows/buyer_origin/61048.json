@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.7",
+      "value": "10.5"
+    },
+    "rest_of_region": {
+      "share_pct": "25.4",
+      "value": "17.0"
+    },
+    "same_commune": {
+      "share_pct": "58.9",
+      "value": "39.46"
+    }
+  },
+  "coverage_pct": "72.8",
+  "dataset": "buyer_origin",
+  "denominator": "66.96",
+  "dest_geo_id": "be:mun:61048",
+  "dest_name": {
+    "en": "Ouffet",
+    "fr": "Ouffet",
+    "nl": "Ouffet"
+  },
+  "dest_nis": "61048",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 92,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ouffet",
+        "fr": "Ouffet",
+        "nl": "Ouffet"
+      },
+      "nis": "61048",
+      "share_pct": "58.9",
+      "value": "39.46"
+    },
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "6.0",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Anthisnes",
+        "fr": "Anthisnes",
+        "nl": "Anthisnes"
+      },
+      "nis": "61079",
+      "share_pct": "5.2",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Nandrin",
+        "fr": "Nandrin",
+        "nl": "Nandrin"
+      },
+      "nis": "61043",
+      "share_pct": "4.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Clavier",
+        "fr": "Clavier",
+        "nl": "Clavier"
+      },
+      "nis": "61012",
+      "share_pct": "3.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "3.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Malmedy",
+        "fr": "Malmedy",
+        "nl": "Malmedy"
+      },
+      "nis": "63049",
+      "share_pct": "3.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "2.2",
+      "value": "1.5"
+    }
+  ]
+}

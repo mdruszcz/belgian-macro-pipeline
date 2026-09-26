@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.2",
+      "value": "9.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "1.1",
+      "value": "9"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "55.9",
+      "value": "448.327685383"
+    },
+    "rest_of_region": {
+      "share_pct": "9.6",
+      "value": "76.6666666667"
+    },
+    "same_commune": {
+      "share_pct": "32.0",
+      "value": "256.98176407"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "802.4761161197",
+  "dest_geo_id": "be:mun:11029",
+  "dest_name": {
+    "en": "Mortsel",
+    "fr": "Mortsel",
+    "nl": "Mortsel"
+  },
+  "dest_nis": "11029",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 822,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "36.0",
+      "value": "288.75932403"
+    },
+    {
+      "name": {
+        "en": "Mortsel",
+        "fr": "Mortsel",
+        "nl": "Mortsel"
+      },
+      "nis": "11029",
+      "share_pct": "32.0",
+      "value": "256.98176407"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "5.9",
+      "value": "47.0554"
+    },
+    {
+      "name": {
+        "en": "Hove",
+        "fr": "Hove",
+        "nl": "Hove"
+      },
+      "nis": "11021",
+      "share_pct": "3.9",
+      "value": "31.132850242"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "2.3",
+      "value": "18.611111111"
+    },
+    {
+      "name": {
+        "en": "Boechout",
+        "fr": "Boechout",
+        "nl": "Boechout"
+      },
+      "nis": "11004",
+      "share_pct": "1.8",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "1.6",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Lint",
+        "fr": "Lint",
+        "nl": "Lint"
+      },
+      "nis": "11025",
+      "share_pct": "1.1",
+      "value": "8.759"
+    }
+  ]
+}

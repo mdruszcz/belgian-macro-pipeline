@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.5",
+      "value": "19.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "3"
+    },
+    "other_regions": {
+      "share_pct": "16.8",
+      "value": "131.3103"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "37.8",
+      "value": "295.006333333"
+    },
+    "rest_of_region": {
+      "share_pct": "11.9",
+      "value": "92.4888571428"
+    },
+    "same_commune": {
+      "share_pct": "30.6",
+      "value": "238.18266667"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "779.4881571458",
+  "dest_geo_id": "be:mun:25121",
+  "dest_name": {
+    "en": "Ottignies-Louvain-la-Neuve",
+    "fr": "Ottignies-Louvain-la-Neuve",
+    "nl": "Ottignies-Louvain-la-Neuve"
+  },
+  "dest_nis": "25121",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 799,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "30.6",
+      "value": "238.18266667"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "8.1",
+      "value": "62.85"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "4.8",
+      "value": "37.5"
+    },
+    {
+      "name": {
+        "en": "Mont-Saint-Guibert",
+        "fr": "Mont-Saint-Guibert",
+        "nl": "Mont-Saint-Guibert"
+      },
+      "nis": "25068",
+      "share_pct": "3.3",
+      "value": "25.477333333"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "3.1",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "2.8",
+      "value": "21.579"
+    },
+    {
+      "name": {
+        "en": "Court-Saint-Etienne",
+        "fr": "Court-Saint-Etienne",
+        "nl": "Court-Saint-Etienne"
+      },
+      "nis": "25023",
+      "share_pct": "2.2",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "2.2",
+      "value": "17.04"
+    }
+  ]
+}

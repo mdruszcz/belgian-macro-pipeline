@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.0",
+      "value": "11.165"
+    },
+    "origin_unknown": {
+      "share_pct": "0.5",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "24.8",
+      "value": "92.7542857141"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "32.8",
+      "value": "122.8381965549"
+    },
+    "rest_of_region": {
+      "share_pct": "1.7",
+      "value": "6.2"
+    },
+    "same_commune": {
+      "share_pct": "37.2",
+      "value": "139.01219"
+    }
+  },
+  "coverage_pct": "92.6",
+  "dataset": "buyer_origin",
+  "denominator": "373.9696722690",
+  "dest_geo_id": "be:mun:25119",
+  "dest_name": {
+    "en": "Lasne",
+    "fr": "Lasne",
+    "nl": "Lasne"
+  },
+  "dest_nis": "25119",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 404,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lasne",
+        "fr": "Lasne",
+        "nl": "Lasne"
+      },
+      "nis": "25119",
+      "share_pct": "37.2",
+      "value": "139.01219"
+    },
+    {
+      "name": {
+        "en": "La Hulpe",
+        "fr": "La Hulpe",
+        "nl": "Terhulpen"
+      },
+      "nis": "25050",
+      "share_pct": "4.9",
+      "value": "18.333333333"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "4.5",
+      "value": "16.99"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "4.0",
+      "value": "14.9"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "3.6",
+      "value": "13.51"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "3.4",
+      "value": "12.642857143"
+    },
+    {
+      "name": {
+        "en": "Auderghem",
+        "fr": "Auderghem",
+        "nl": "Oudergem"
+      },
+      "nis": "21002",
+      "share_pct": "3.3",
+      "value": "12.513333333"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "2.1",
+      "value": "8"
+    }
+  ]
+}

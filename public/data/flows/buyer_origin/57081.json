@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.6",
+      "value": "44.05"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "5.5",
+      "value": "92.0370370370"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.8",
+      "value": "348.805370370"
+    },
+    "rest_of_region": {
+      "share_pct": "8.9",
+      "value": "149.55"
+    },
+    "same_commune": {
+      "share_pct": "62.1",
+      "value": "1041.2808832"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "1676.7232906070",
+  "dest_geo_id": "be:mun:57081",
+  "dest_name": {
+    "en": "Tournai",
+    "fr": "Tournai",
+    "nl": "Doornik"
+  },
+  "dest_nis": "57081",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1737,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "62.1",
+      "value": "1041.2808832"
+    },
+    {
+      "name": {
+        "en": "Mouscron",
+        "fr": "Mouscron",
+        "nl": "Moeskroen"
+      },
+      "nis": "57096",
+      "share_pct": "3.2",
+      "value": "53.833333333"
+    },
+    {
+      "name": {
+        "en": "Celles",
+        "fr": "Celles",
+        "nl": "Celles"
+      },
+      "nis": "57018",
+      "share_pct": "3.2",
+      "value": "53.5"
+    },
+    {
+      "name": {
+        "en": "Leuze-en-Hainaut",
+        "fr": "Leuze-en-Hainaut",
+        "nl": "Leuze-en-Hainaut"
+      },
+      "nis": "57094",
+      "share_pct": "2.9",
+      "value": "48.75"
+    },
+    {
+      "name": {
+        "en": "Estaimpuis",
+        "fr": "Estaimpuis",
+        "nl": "Estaimpuis"
+      },
+      "nis": "57027",
+      "share_pct": "2.4",
+      "value": "41"
+    },
+    {
+      "name": {
+        "en": "Antoing",
+        "fr": "Antoing",
+        "nl": "Antoing"
+      },
+      "nis": "57003",
+      "share_pct": "2.3",
+      "value": "38.5"
+    },
+    {
+      "name": {
+        "en": "Rumes",
+        "fr": "Rumes",
+        "nl": "Rumes"
+      },
+      "nis": "57072",
+      "share_pct": "2.1",
+      "value": "35"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "1.9",
+      "value": "32.24"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.9",
+      "value": "1.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "23.9",
+      "value": "41.0"
+    },
+    "rest_of_region": {
+      "share_pct": "27.7",
+      "value": "47.62"
+    },
+    "same_commune": {
+      "share_pct": "47.5",
+      "value": "81.5"
+    }
+  },
+  "coverage_pct": "95.3",
+  "dataset": "buyer_origin",
+  "denominator": "171.62",
+  "dest_geo_id": "be:mun:13012",
+  "dest_name": {
+    "en": "Herenthout",
+    "fr": "Herenthout",
+    "nl": "Herenthout"
+  },
+  "dest_nis": "13012",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 180,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Herenthout",
+        "fr": "Herenthout",
+        "nl": "Herenthout"
+      },
+      "nis": "13012",
+      "share_pct": "47.5",
+      "value": "81.5"
+    },
+    {
+      "name": {
+        "en": "Grobbendonk",
+        "fr": "Grobbendonk",
+        "nl": "Grobbendonk"
+      },
+      "nis": "13010",
+      "share_pct": "11.1",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Nijlen",
+        "fr": "Nijlen",
+        "nl": "Nijlen"
+      },
+      "nis": "12026",
+      "share_pct": "7.6",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "7.3",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "4.5",
+      "value": "7.72"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "2.3",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "2.3",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Vorselaar",
+        "fr": "Vorselaar",
+        "nl": "Vorselaar"
+      },
+      "nis": "13044",
+      "share_pct": "2.3",
+      "value": "4"
+    }
+  ]
+}

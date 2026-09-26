@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "9.7",
+      "value": "55.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "25.7",
+      "value": "147.3333333332"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "9.0",
+      "value": "51.833333333"
+    },
+    "rest_of_region": {
+      "share_pct": "9.8",
+      "value": "55.9883333330"
+    },
+    "same_commune": {
+      "share_pct": "45.9",
+      "value": "263.07"
+    }
+  },
+  "coverage_pct": "95.1",
+  "dataset": "buyer_origin",
+  "denominator": "573.7249999992",
+  "dest_geo_id": "be:mun:82014",
+  "dest_name": {
+    "en": "Houffalize",
+    "fr": "Houffalize",
+    "nl": "Houffalize"
+  },
+  "dest_nis": "82014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 603,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Houffalize",
+        "fr": "Houffalize",
+        "nl": "Houffalize"
+      },
+      "nis": "82014",
+      "share_pct": "45.9",
+      "value": "263.07"
+    },
+    {
+      "name": {
+        "en": "Bastogne",
+        "fr": "Bastogne",
+        "nl": "Bastenaken"
+      },
+      "nis": "82039",
+      "share_pct": "6.6",
+      "value": "37.833333333"
+    },
+    {
+      "name": {
+        "en": "Kraainem",
+        "fr": "Kraainem",
+        "nl": "Kraainem"
+      },
+      "nis": "23099",
+      "share_pct": "5.9",
+      "value": "34"
+    },
+    {
+      "name": {
+        "en": "Oud-Heverlee",
+        "fr": "Oud-Heverlee",
+        "nl": "Oud-Heverlee"
+      },
+      "nis": "24086",
+      "share_pct": "3.7",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Lennik",
+        "fr": "Lennik",
+        "nl": "Lennik"
+      },
+      "nis": "23104",
+      "share_pct": "2.3",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Beveren-Kruibeke-Zwijndrecht",
+        "fr": "Beveren-Kruibeke-Zwijndrecht",
+        "nl": "Beveren-Kruibeke-Zwijndrecht"
+      },
+      "nis": "46030",
+      "share_pct": "2.1",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "La Roche-en-Ardenne",
+        "fr": "La Roche-en-Ardenne",
+        "nl": "La Roche-en-Ardenne"
+      },
+      "nis": "83031",
+      "share_pct": "1.8",
+      "value": "10.333333333"
+    },
+    {
+      "name": {
+        "en": "Vilvoorde",
+        "fr": "Vilvorde",
+        "nl": "Vilvoorde"
+      },
+      "nis": "23088",
+      "share_pct": "1.4",
+      "value": "8"
+    }
+  ]
+}

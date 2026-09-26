@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.6",
+      "value": "19.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "44.1",
+      "value": "66.5000000000"
+    },
+    "rest_of_region": {
+      "share_pct": "3.6",
+      "value": "5.5"
+    },
+    "same_commune": {
+      "share_pct": "39.4",
+      "value": "59.407333333"
+    }
+  },
+  "coverage_pct": "93.7",
+  "dataset": "buyer_origin",
+  "denominator": "150.9073333330",
+  "dest_geo_id": "be:mun:25043",
+  "dest_name": {
+    "en": "Incourt",
+    "fr": "Incourt",
+    "nl": "Incourt"
+  },
+  "dest_nis": "25043",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 161,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Incourt",
+        "fr": "Incourt",
+        "nl": "Incourt"
+      },
+      "nis": "25043",
+      "share_pct": "39.4",
+      "value": "59.407333333"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "8.0",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "7.3",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Lasne",
+        "fr": "Lasne",
+        "nl": "Lasne"
+      },
+      "nis": "25119",
+      "share_pct": "5.3",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Perwez",
+        "fr": "Perwez",
+        "nl": "Perwijs"
+      },
+      "nis": "25084",
+      "share_pct": "4.4",
+      "value": "6.6666666667"
+    },
+    {
+      "name": {
+        "en": "Beauvechain",
+        "fr": "Beauvechain",
+        "nl": "Bevekom"
+      },
+      "nis": "25005",
+      "share_pct": "3.8",
+      "value": "5.78"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "3.8",
+      "value": "5.72"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "3.3",
+      "value": "5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "27.7",
+      "value": "31.3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.3",
+      "value": "29.7"
+    },
+    "rest_of_region": {
+      "share_pct": "26.1",
+      "value": "29.5"
+    },
+    "same_commune": {
+      "share_pct": "19.9",
+      "value": "22.5"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "113.0",
+  "dest_geo_id": "be:mun:25118",
+  "dest_name": {
+    "en": "Hélécine",
+    "fr": "Hélécine",
+    "nl": "Hélécine"
+  },
+  "dest_nis": "25118",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 113,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hélécine",
+        "fr": "Hélécine",
+        "nl": "Hélécine"
+      },
+      "nis": "25118",
+      "share_pct": "19.9",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "9.7",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Mont-Saint-Guibert",
+        "fr": "Mont-Saint-Guibert",
+        "nl": "Mont-Saint-Guibert"
+      },
+      "nis": "25068",
+      "share_pct": "6.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "6.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Orp-Jauche",
+        "fr": "Orp-Jauche",
+        "nl": "Orp-Jauche"
+      },
+      "nis": "25120",
+      "share_pct": "5.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Burdinne",
+        "fr": "Burdinne",
+        "nl": "Burdinne"
+      },
+      "nis": "61010",
+      "share_pct": "5.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "5.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "4.4",
+      "value": "5"
+    }
+  ]
+}

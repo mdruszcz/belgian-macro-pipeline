@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "42.0",
+      "value": "121.18"
+    },
+    "rest_of_region": {
+      "share_pct": "18.1",
+      "value": "52.25"
+    },
+    "same_commune": {
+      "share_pct": "39.6",
+      "value": "114.27"
+    }
+  },
+  "coverage_pct": "96.9",
+  "dataset": "buyer_origin",
+  "denominator": "288.70",
+  "dest_geo_id": "be:mun:12002",
+  "dest_name": {
+    "en": "Berlaar",
+    "fr": "Berlaar",
+    "nl": "Berlaar"
+  },
+  "dest_nis": "12002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 298,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Berlaar",
+        "fr": "Berlaar",
+        "nl": "Berlaar"
+      },
+      "nis": "12002",
+      "share_pct": "39.6",
+      "value": "114.27"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "12.1",
+      "value": "35"
+    },
+    {
+      "name": {
+        "en": "Heist-op-den-Berg",
+        "fr": "Heist-op-den-Berg",
+        "nl": "Heist-op-den-Berg"
+      },
+      "nis": "12014",
+      "share_pct": "9.9",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "5.2",
+      "value": "14.99"
+    },
+    {
+      "name": {
+        "en": "Putte",
+        "fr": "Putte",
+        "nl": "Putte"
+      },
+      "nis": "12029",
+      "share_pct": "5.0",
+      "value": "14.52"
+    },
+    {
+      "name": {
+        "en": "Sint-Katelijne-Waver",
+        "fr": "Sint-Katelijne-Waver",
+        "nl": "Sint-Katelijne-Waver"
+      },
+      "nis": "12035",
+      "share_pct": "4.5",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Duffel",
+        "fr": "Duffel",
+        "nl": "Duffel"
+      },
+      "nis": "12009",
+      "share_pct": "4.2",
+      "value": "12.16"
+    },
+    {
+      "name": {
+        "en": "Nijlen",
+        "fr": "Nijlen",
+        "nl": "Nijlen"
+      },
+      "nis": "12026",
+      "share_pct": "3.8",
+      "value": "11"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.5",
+      "value": "188.679311594"
+    },
+    "rest_of_region": {
+      "share_pct": "14.3",
+      "value": "106.2120333333"
+    },
+    "same_commune": {
+      "share_pct": "59.5",
+      "value": "440.35985991"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "740.2512048373",
+  "dest_geo_id": "be:mun:13011",
+  "dest_name": {
+    "en": "Herentals",
+    "fr": "Herentals",
+    "nl": "Herentals"
+  },
+  "dest_nis": "13011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 762,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "59.5",
+      "value": "440.35985991"
+    },
+    {
+      "name": {
+        "en": "Olen",
+        "fr": "Olen",
+        "nl": "Olen"
+      },
+      "nis": "13029",
+      "share_pct": "5.7",
+      "value": "42"
+    },
+    {
+      "name": {
+        "en": "Westerlo",
+        "fr": "Westerlo",
+        "nl": "Westerlo"
+      },
+      "nis": "13049",
+      "share_pct": "3.3",
+      "value": "24.5125"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.9",
+      "value": "21.5"
+    },
+    {
+      "name": {
+        "en": "Heist-op-den-Berg",
+        "fr": "Heist-op-den-Berg",
+        "nl": "Heist-op-den-Berg"
+      },
+      "nis": "12014",
+      "share_pct": "2.8",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Lille",
+        "fr": "Lille",
+        "nl": "Lille"
+      },
+      "nis": "13019",
+      "share_pct": "2.5",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "2.3",
+      "value": "17.333333333"
+    },
+    {
+      "name": {
+        "en": "Herenthout",
+        "fr": "Herenthout",
+        "nl": "Herenthout"
+      },
+      "nis": "13012",
+      "share_pct": "2.2",
+      "value": "16.553478261"
+    }
+  ]
+}

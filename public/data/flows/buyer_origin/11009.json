@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "40.7",
+      "value": "271.133333337"
+    },
+    "rest_of_region": {
+      "share_pct": "6.1",
+      "value": "40.46"
+    },
+    "same_commune": {
+      "share_pct": "52.6",
+      "value": "350.83380952"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "666.427142857",
+  "dest_geo_id": "be:mun:11009",
+  "dest_name": {
+    "en": "Brecht",
+    "fr": "Brecht",
+    "nl": "Brecht"
+  },
+  "dest_nis": "11009",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 676,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "52.6",
+      "value": "350.83380952"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "15.1",
+      "value": "100.64166667"
+    },
+    {
+      "name": {
+        "en": "Schoten",
+        "fr": "Schoten",
+        "nl": "Schoten"
+      },
+      "nis": "11040",
+      "share_pct": "5.3",
+      "value": "35.166666667"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "4.3",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Wuustwezel",
+        "fr": "Wuustwezel",
+        "nl": "Wuustwezel"
+      },
+      "nis": "11053",
+      "share_pct": "4.1",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Malle",
+        "fr": "Malle",
+        "nl": "Malle"
+      },
+      "nis": "11057",
+      "share_pct": "2.8",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "2.5",
+      "value": "16.725"
+    },
+    {
+      "name": {
+        "en": "Hoogstraten",
+        "fr": "Hoogstraten",
+        "nl": "Hoogstraten"
+      },
+      "nis": "13014",
+      "share_pct": "2.4",
+      "value": "16.02"
+    }
+  ]
+}

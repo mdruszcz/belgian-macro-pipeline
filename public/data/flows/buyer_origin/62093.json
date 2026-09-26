@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "1.2",
+      "value": "5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "58.7",
+      "value": "252.920085470"
+    },
+    "rest_of_region": {
+      "share_pct": "13.2",
+      "value": "57.0"
+    },
+    "same_commune": {
+      "share_pct": "26.7",
+      "value": "114.85006435"
+    }
+  },
+  "coverage_pct": "96.8",
+  "dataset": "buyer_origin",
+  "denominator": "430.770149820",
+  "dest_geo_id": "be:mun:62093",
+  "dest_name": {
+    "en": "Saint-Nicolas",
+    "fr": "Saint-Nicolas",
+    "nl": "Saint-Nicolas"
+  },
+  "dest_nis": "62093",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 445,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Saint-Nicolas",
+        "fr": "Saint-Nicolas",
+        "nl": "Saint-Nicolas"
+      },
+      "nis": "62093",
+      "share_pct": "26.7",
+      "value": "114.85006435"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "25.9",
+      "value": "111.4"
+    },
+    {
+      "name": {
+        "en": "Seraing",
+        "fr": "Seraing",
+        "nl": "Seraing"
+      },
+      "nis": "62096",
+      "share_pct": "8.3",
+      "value": "35.675641026"
+    },
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "6.2",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Ans",
+        "fr": "Ans",
+        "nl": "Ans"
+      },
+      "nis": "62003",
+      "share_pct": "3.8",
+      "value": "16.244444444"
+    },
+    {
+      "name": {
+        "en": "Oupeye",
+        "fr": "Oupeye",
+        "nl": "Oupeye"
+      },
+      "nis": "62079",
+      "share_pct": "2.6",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "2.3",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Flémalle",
+        "fr": "Flémalle",
+        "nl": "Flémalle"
+      },
+      "nis": "62120",
+      "share_pct": "2.3",
+      "value": "10"
+    }
+  ]
+}

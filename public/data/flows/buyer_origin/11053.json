@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "10"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "1.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.2",
+      "value": "104.66"
+    },
+    "rest_of_region": {
+      "share_pct": "7.7",
+      "value": "32.0"
+    },
+    "same_commune": {
+      "share_pct": "64.4",
+      "value": "267.67"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "415.83",
+  "dest_geo_id": "be:mun:11053",
+  "dest_name": {
+    "en": "Wuustwezel",
+    "fr": "Wuustwezel",
+    "nl": "Wuustwezel"
+  },
+  "dest_nis": "11053",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 428,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Wuustwezel",
+        "fr": "Wuustwezel",
+        "nl": "Wuustwezel"
+      },
+      "nis": "11053",
+      "share_pct": "64.4",
+      "value": "267.67"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "5.4",
+      "value": "22.3"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "4.8",
+      "value": "20.15"
+    },
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "4.3",
+      "value": "18.02"
+    },
+    {
+      "name": {
+        "en": "Kalmthout",
+        "fr": "Kalmthout",
+        "nl": "Kalmthout"
+      },
+      "nis": "11022",
+      "share_pct": "4.1",
+      "value": "17.19"
+    },
+    {
+      "name": {
+        "en": "Hoogstraten",
+        "fr": "Hoogstraten",
+        "nl": "Hoogstraten"
+      },
+      "nis": "13014",
+      "share_pct": "1.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Essen",
+        "fr": "Essen",
+        "nl": "Essen"
+      },
+      "nis": "11016",
+      "share_pct": "1.6",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Kapellen",
+        "fr": "Kapellen",
+        "nl": "Kapellen"
+      },
+      "nis": "11023",
+      "share_pct": "1.6",
+      "value": "6.5"
+    }
+  ]
+}

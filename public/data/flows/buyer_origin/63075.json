@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "22.6",
+      "value": "56.7"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "13.3",
+      "value": "33.5"
+    },
+    "rest_of_region": {
+      "share_pct": "13.3",
+      "value": "33.32"
+    },
+    "same_commune": {
+      "share_pct": "48.4",
+      "value": "121.5"
+    }
+  },
+  "coverage_pct": "99.2",
+  "dataset": "buyer_origin",
+  "denominator": "251.02",
+  "dest_geo_id": "be:mun:63075",
+  "dest_name": {
+    "en": "Stoumont",
+    "fr": "Stoumont",
+    "nl": "Stoumont"
+  },
+  "dest_nis": "63075",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 253,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Stoumont",
+        "fr": "Stoumont",
+        "nl": "Stoumont"
+      },
+      "nis": "63075",
+      "share_pct": "48.4",
+      "value": "121.5"
+    },
+    {
+      "name": {
+        "en": "Overijse",
+        "fr": "Overijse",
+        "nl": "Overijse"
+      },
+      "nis": "23062",
+      "share_pct": "7.4",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Kortenberg",
+        "fr": "Kortenberg",
+        "nl": "Kortenberg"
+      },
+      "nis": "24055",
+      "share_pct": "7.4",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Jalhay",
+        "fr": "Jalhay",
+        "nl": "Jalhay"
+      },
+      "nis": "63038",
+      "share_pct": "6.8",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Ferrières",
+        "fr": "Ferrières",
+        "nl": "Ferrières"
+      },
+      "nis": "61019",
+      "share_pct": "2.6",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "2.5",
+      "value": "6.22"
+    },
+    {
+      "name": {
+        "en": "Stavelot",
+        "fr": "Stavelot",
+        "nl": "Stavelot"
+      },
+      "nis": "63073",
+      "share_pct": "2.4",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Saint-Nicolas",
+        "fr": "Saint-Nicolas",
+        "nl": "Saint-Nicolas"
+      },
+      "nis": "62093",
+      "share_pct": "1.6",
+      "value": "4"
+    }
+  ]
+}

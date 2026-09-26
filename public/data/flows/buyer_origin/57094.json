@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "2.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "6.7",
+      "value": "20.50"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.1",
+      "value": "43.0"
+    },
+    "rest_of_region": {
+      "share_pct": "36.4",
+      "value": "110.8"
+    },
+    "same_commune": {
+      "share_pct": "42.0",
+      "value": "127.78333333"
+    }
+  },
+  "coverage_pct": "99.4",
+  "dataset": "buyer_origin",
+  "denominator": "304.08333333",
+  "dest_geo_id": "be:mun:57094",
+  "dest_name": {
+    "en": "Leuze-en-Hainaut",
+    "fr": "Leuze-en-Hainaut",
+    "nl": "Leuze-en-Hainaut"
+  },
+  "dest_nis": "57094",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 306,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Leuze-en-Hainaut",
+        "fr": "Leuze-en-Hainaut",
+        "nl": "Leuze-en-Hainaut"
+      },
+      "nis": "57094",
+      "share_pct": "42.0",
+      "value": "127.78333333"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "11.8",
+      "value": "35.8"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "7.9",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "7.6",
+      "value": "23"
+    },
+    {
+      "name": {
+        "en": "Péruwelz",
+        "fr": "Péruwelz",
+        "nl": "Péruwelz"
+      },
+      "nis": "57064",
+      "share_pct": "3.6",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Beloeil",
+        "fr": "Beloeil",
+        "nl": "Beloeil"
+      },
+      "nis": "51008",
+      "share_pct": "3.5",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Lessines",
+        "fr": "Lessines",
+        "nl": "Lessen"
+      },
+      "nis": "51069",
+      "share_pct": "3.1",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Bernissart",
+        "fr": "Bernissart",
+        "nl": "Bernissart"
+      },
+      "nis": "51009",
+      "share_pct": "2.0",
+      "value": "6"
+    }
+  ]
+}

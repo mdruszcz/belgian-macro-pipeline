@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.8",
+      "value": "8.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "42.3",
+      "value": "74.7"
+    },
+    "rest_of_region": {
+      "share_pct": "26.3",
+      "value": "46.50"
+    },
+    "same_commune": {
+      "share_pct": "26.1",
+      "value": "46.06"
+    }
+  },
+  "coverage_pct": "97.7",
+  "dataset": "buyer_origin",
+  "denominator": "176.76",
+  "dest_geo_id": "be:mun:51014",
+  "dest_name": {
+    "en": "Chièvres",
+    "fr": "Chièvres",
+    "nl": "Chièvres"
+  },
+  "dest_nis": "51014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 181,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Chièvres",
+        "fr": "Chièvres",
+        "nl": "Chièvres"
+      },
+      "nis": "51014",
+      "share_pct": "26.1",
+      "value": "46.06"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "20.4",
+      "value": "36"
+    },
+    {
+      "name": {
+        "en": "Lens",
+        "fr": "Lens",
+        "nl": "Lens"
+      },
+      "nis": "53046",
+      "share_pct": "9.1",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Brugelette",
+        "fr": "Brugelette",
+        "nl": "Brugelette"
+      },
+      "nis": "51012",
+      "share_pct": "7.9",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Beloeil",
+        "fr": "Beloeil",
+        "nl": "Beloeil"
+      },
+      "nis": "51008",
+      "share_pct": "4.6",
+      "value": "8.2"
+    },
+    {
+      "name": {
+        "en": "Jurbise",
+        "fr": "Jurbise",
+        "nl": "Jurbeke"
+      },
+      "nis": "53044",
+      "share_pct": "4.0",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Lessines",
+        "fr": "Lessines",
+        "nl": "Lessen"
+      },
+      "nis": "51069",
+      "share_pct": "3.4",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Leuze-en-Hainaut",
+        "fr": "Leuze-en-Hainaut",
+        "nl": "Leuze-en-Hainaut"
+      },
+      "nis": "57094",
+      "share_pct": "2.8",
+      "value": "5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "25.1",
+      "value": "121.23"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "49.9",
+      "value": "241.256666667"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "24.7",
+      "value": "119.3947619"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "483.881428567",
+  "dest_geo_id": "be:mun:21003",
+  "dest_name": {
+    "en": "Berchem-Sainte-Agathe",
+    "fr": "Berchem-Sainte-Agathe",
+    "nl": "Sint-Agatha-Berchem"
+  },
+  "dest_nis": "21003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 495,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Berchem-Sainte-Agathe",
+        "fr": "Berchem-Sainte-Agathe",
+        "nl": "Sint-Agatha-Berchem"
+      },
+      "nis": "21003",
+      "share_pct": "24.7",
+      "value": "119.3947619"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "12.5",
+      "value": "60.52"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "5.8",
+      "value": "28"
+    },
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "5.6",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "5.3",
+      "value": "25.65"
+    },
+    {
+      "name": {
+        "en": "Ganshoren",
+        "fr": "Ganshoren",
+        "nl": "Ganshoren"
+      },
+      "nis": "21008",
+      "share_pct": "5.2",
+      "value": "25.4"
+    },
+    {
+      "name": {
+        "en": "Koekelberg",
+        "fr": "Koekelberg",
+        "nl": "Koekelberg"
+      },
+      "nis": "21011",
+      "share_pct": "4.2",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "3.0",
+      "value": "14.666666667"
+    }
+  ]
+}

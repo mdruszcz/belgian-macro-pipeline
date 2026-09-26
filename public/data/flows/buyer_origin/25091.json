@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.2",
+      "value": "6.0666666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "40.4",
+      "value": "201.9178333338"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "23.1",
+      "value": "115.3121666667"
+    },
+    "rest_of_region": {
+      "share_pct": "2.3",
+      "value": "11.5"
+    },
+    "same_commune": {
+      "share_pct": "33.1",
+      "value": "165.45"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "500.2466666672",
+  "dest_geo_id": "be:mun:25091",
+  "dest_name": {
+    "en": "Rixensart",
+    "fr": "Rixensart",
+    "nl": "Rixensart"
+  },
+  "dest_nis": "25091",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 513,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "33.1",
+      "value": "165.45"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "4.8",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Lasne",
+        "fr": "Lasne",
+        "nl": "Lasne"
+      },
+      "nis": "25119",
+      "share_pct": "4.5",
+      "value": "22.577166667"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "4.2",
+      "value": "21.166666667"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "3.9",
+      "value": "19.317833333"
+    },
+    {
+      "name": {
+        "en": "La Hulpe",
+        "fr": "La Hulpe",
+        "nl": "Terhulpen"
+      },
+      "nis": "25050",
+      "share_pct": "3.5",
+      "value": "17.718833333"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "3.5",
+      "value": "17.51"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "3.5",
+      "value": "17.5"
+    }
+  ]
+}

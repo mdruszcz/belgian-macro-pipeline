@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "11.6",
+      "value": "31.545454545"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.2",
+      "value": "49.5"
+    },
+    "rest_of_region": {
+      "share_pct": "9.0",
+      "value": "24.52"
+    },
+    "same_commune": {
+      "share_pct": "61.1",
+      "value": "166.49094545"
+    }
+  },
+  "coverage_pct": "95.6",
+  "dataset": "buyer_origin",
+  "denominator": "272.556399995",
+  "dest_geo_id": "be:mun:72018",
+  "dest_name": {
+    "en": "Kinrooi",
+    "fr": "Kinrooi",
+    "nl": "Kinrooi"
+  },
+  "dest_nis": "72018",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 285,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kinrooi",
+        "fr": "Kinrooi",
+        "nl": "Kinrooi"
+      },
+      "nis": "72018",
+      "share_pct": "61.1",
+      "value": "166.49094545"
+    },
+    {
+      "name": {
+        "en": "Maaseik",
+        "fr": "Maaseik",
+        "nl": "Maaseik"
+      },
+      "nis": "72021",
+      "share_pct": "9.5",
+      "value": "26"
+    },
+    {
+      "name": {
+        "en": "Bree",
+        "fr": "Bree",
+        "nl": "Bree"
+      },
+      "nis": "72004",
+      "share_pct": "4.6",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Meise",
+        "fr": "Meise",
+        "nl": "Meise"
+      },
+      "nis": "23050",
+      "share_pct": "3.3",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Maasmechelen",
+        "fr": "Maasmechelen",
+        "nl": "Maasmechelen"
+      },
+      "nis": "73107",
+      "share_pct": "1.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Heist-op-den-Berg",
+        "fr": "Heist-op-den-Berg",
+        "nl": "Heist-op-den-Berg"
+      },
+      "nis": "12014",
+      "share_pct": "1.1",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Dilsen-Stokkem",
+        "fr": "Dilsen-Stokkem",
+        "nl": "Dilsen-Stokkem"
+      },
+      "nis": "72041",
+      "share_pct": "1.1",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Oudsbergen",
+        "fr": "Oudsbergen",
+        "nl": "Oudsbergen"
+      },
+      "nis": "72042",
+      "share_pct": "1.1",
+      "value": "3"
+    }
+  ]
+}

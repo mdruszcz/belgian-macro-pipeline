@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0.2"
+    },
+    "other_regions": {
+      "share_pct": "6.4",
+      "value": "32.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.5",
+      "value": "102.775"
+    },
+    "rest_of_region": {
+      "share_pct": "32.2",
+      "value": "161.241666667"
+    },
+    "same_commune": {
+      "share_pct": "40.8",
+      "value": "204.27993333"
+    }
+  },
+  "coverage_pct": "97.7",
+  "dataset": "buyer_origin",
+  "denominator": "500.996599997",
+  "dest_geo_id": "be:mun:23096",
+  "dest_name": {
+    "en": "Zemst",
+    "fr": "Zemst",
+    "nl": "Zemst"
+  },
+  "dest_nis": "23096",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 513,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zemst",
+        "fr": "Zemst",
+        "nl": "Zemst"
+      },
+      "nis": "23096",
+      "share_pct": "40.8",
+      "value": "204.27993333"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "16.4",
+      "value": "82.141666667"
+    },
+    {
+      "name": {
+        "en": "Vilvoorde",
+        "fr": "Vilvorde",
+        "nl": "Vilvoorde"
+      },
+      "nis": "23088",
+      "share_pct": "7.6",
+      "value": "37.9"
+    },
+    {
+      "name": {
+        "en": "Boortmeerbeek",
+        "fr": "Boortmeerbeek",
+        "nl": "Boortmeerbeek"
+      },
+      "nis": "24014",
+      "share_pct": "4.5",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Grimbergen",
+        "fr": "Grimbergen",
+        "nl": "Grimbergen"
+      },
+      "nis": "23025",
+      "share_pct": "2.6",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "2.2",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Machelen",
+        "fr": "Machelen",
+        "nl": "Machelen"
+      },
+      "nis": "23047",
+      "share_pct": "2.0",
+      "value": "9.875"
+    },
+    {
+      "name": {
+        "en": "Kampenhout",
+        "fr": "Kampenhout",
+        "nl": "Kampenhout"
+      },
+      "nis": "23038",
+      "share_pct": "1.9",
+      "value": "9.5"
+    }
+  ]
+}

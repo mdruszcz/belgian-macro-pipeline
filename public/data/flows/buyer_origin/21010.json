@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "10.3333333333"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "20.7",
+      "value": "223.4900000000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "47.6",
+      "value": "512.68333333"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "30.7",
+      "value": "330.55666667"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "1078.0633333333",
+  "dest_geo_id": "be:mun:21010",
+  "dest_name": {
+    "en": "Jette",
+    "fr": "Jette",
+    "nl": "Jette"
+  },
+  "dest_nis": "21010",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1098,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "30.7",
+      "value": "330.55666667"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "12.8",
+      "value": "138.48333333"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "5.8",
+      "value": "62.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "4.0",
+      "value": "43"
+    },
+    {
+      "name": {
+        "en": "Ganshoren",
+        "fr": "Ganshoren",
+        "nl": "Ganshoren"
+      },
+      "nis": "21008",
+      "share_pct": "3.3",
+      "value": "35.75"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.6",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "2.6",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Koekelberg",
+        "fr": "Koekelberg",
+        "nl": "Koekelberg"
+      },
+      "nis": "21011",
+      "share_pct": "2.6",
+      "value": "28.44"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "3.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "7.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "33.2",
+      "value": "379.768991821"
+    },
+    "rest_of_region": {
+      "share_pct": "13.7",
+      "value": "157.1088364625"
+    },
+    "same_commune": {
+      "share_pct": "52.1",
+      "value": "596.11865967"
+    }
+  },
+  "coverage_pct": "94.7",
+  "dataset": "buyer_origin",
+  "denominator": "1143.4964879535",
+  "dest_geo_id": "be:mun:44083",
+  "dest_name": {
+    "en": "Deinze",
+    "fr": "Deinze",
+    "nl": "Deinze"
+  },
+  "dest_nis": "44083",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1207,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "52.1",
+      "value": "596.11865967"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "14.6",
+      "value": "166.76718273"
+    },
+    {
+      "name": {
+        "en": "Nazareth-De Pinte",
+        "fr": "Nazareth-De Pinte",
+        "nl": "Nazareth-De Pinte"
+      },
+      "nis": "44086",
+      "share_pct": "6.1",
+      "value": "69.24"
+    },
+    {
+      "name": {
+        "en": "Sint-Martens-Latem",
+        "fr": "Sint-Martens-Latem",
+        "nl": "Sint-Martens-Latem"
+      },
+      "nis": "44064",
+      "share_pct": "3.0",
+      "value": "33.755"
+    },
+    {
+      "name": {
+        "en": "Aalter",
+        "fr": "Aalter",
+        "nl": "Aalter"
+      },
+      "nis": "44084",
+      "share_pct": "2.8",
+      "value": "31.590909091"
+    },
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "2.1",
+      "value": "24.4634"
+    },
+    {
+      "name": {
+        "en": "Zulte",
+        "fr": "Zulte",
+        "nl": "Zulte"
+      },
+      "nis": "44081",
+      "share_pct": "1.5",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Tielt",
+        "fr": "Tielt",
+        "nl": "Tielt"
+      },
+      "nis": "37022",
+      "share_pct": "1.5",
+      "value": "16.75"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.1",
+      "value": "6.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "2.9",
+      "value": "8.8758"
+    },
+    "rest_of_region": {
+      "share_pct": "54.2",
+      "value": "166.523290910"
+    },
+    "same_commune": {
+      "share_pct": "40.8",
+      "value": "125.23727273"
+    }
+  },
+  "coverage_pct": "94.5",
+  "dataset": "buyer_origin",
+  "denominator": "307.136363640",
+  "dest_geo_id": "be:mun:56086",
+  "dest_name": {
+    "en": "Ham-sur-Heure-Nalinnes",
+    "fr": "Ham-sur-Heure-Nalinnes",
+    "nl": "Ham-sur-Heure-Nalinnes"
+  },
+  "dest_nis": "56086",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 325,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ham-sur-Heure-Nalinnes",
+        "fr": "Ham-sur-Heure-Nalinnes",
+        "nl": "Ham-sur-Heure-Nalinnes"
+      },
+      "nis": "56086",
+      "share_pct": "40.8",
+      "value": "125.23727273"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "27.5",
+      "value": "84.344545455"
+    },
+    {
+      "name": {
+        "en": "Gerpinnes",
+        "fr": "Gerpinnes",
+        "nl": "Gerpinnes"
+      },
+      "nis": "52025",
+      "share_pct": "3.5",
+      "value": "10.634545455"
+    },
+    {
+      "name": {
+        "en": "Fontaine-l’Evêque",
+        "fr": "Fontaine-l’Evêque",
+        "nl": "Fontaine-l’Evêque"
+      },
+      "nis": "52022",
+      "share_pct": "3.4",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Montigny-le-Tilleul",
+        "fr": "Montigny-le-Tilleul",
+        "nl": "Montigny-le-Tilleul"
+      },
+      "nis": "52048",
+      "share_pct": "2.8",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Pont-à-Celles",
+        "fr": "Pont-à-Celles",
+        "nl": "Pont-à-Celles"
+      },
+      "nis": "52055",
+      "share_pct": "1.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Walcourt",
+        "fr": "Walcourt",
+        "nl": "Walcourt"
+      },
+      "nis": "93088",
+      "share_pct": "1.5",
+      "value": "4.51"
+    },
+    {
+      "name": {
+        "en": "Châtelet",
+        "fr": "Châtelet",
+        "nl": "Châtelet"
+      },
+      "nis": "52012",
+      "share_pct": "1.5",
+      "value": "4.5"
+    }
+  ]
+}

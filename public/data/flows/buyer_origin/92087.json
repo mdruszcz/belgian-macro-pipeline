@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "3.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.0",
+      "value": "22.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.1",
+      "value": "63.15"
+    },
+    "rest_of_region": {
+      "share_pct": "37.2",
+      "value": "166.01"
+    },
+    "same_commune": {
+      "share_pct": "42.9",
+      "value": "191.5"
+    }
+  },
+  "coverage_pct": "96.9",
+  "dataset": "buyer_origin",
+  "denominator": "446.66",
+  "dest_geo_id": "be:mun:92087",
+  "dest_name": {
+    "en": "Mettet",
+    "fr": "Mettet",
+    "nl": "Mettet"
+  },
+  "dest_nis": "92087",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 461,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Mettet",
+        "fr": "Mettet",
+        "nl": "Mettet"
+      },
+      "nis": "92087",
+      "share_pct": "42.9",
+      "value": "191.5"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "15.2",
+      "value": "68"
+    },
+    {
+      "name": {
+        "en": "Anhée",
+        "fr": "Anhée",
+        "nl": "Anhée"
+      },
+      "nis": "91005",
+      "share_pct": "7.2",
+      "value": "32"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "5.0",
+      "value": "22.13"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "3.1",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Fosses-la-Ville",
+        "fr": "Fosses-la-Ville",
+        "nl": "Fosses-la-Ville"
+      },
+      "nis": "92048",
+      "share_pct": "2.2",
+      "value": "10.01"
+    },
+    {
+      "name": {
+        "en": "Sambreville",
+        "fr": "Sambreville",
+        "nl": "Sambreville"
+      },
+      "nis": "92137",
+      "share_pct": "1.9",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Jemeppe-sur-Sambre",
+        "fr": "Jemeppe-sur-Sambre",
+        "nl": "Jemeppe-sur-Sambre"
+      },
+      "nis": "92140",
+      "share_pct": "1.8",
+      "value": "8"
+    }
+  ]
+}

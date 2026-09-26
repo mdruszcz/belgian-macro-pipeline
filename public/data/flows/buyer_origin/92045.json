@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.4",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "56.5",
+      "value": "83.68"
+    },
+    "rest_of_region": {
+      "share_pct": "14.8",
+      "value": "21.86"
+    },
+    "same_commune": {
+      "share_pct": "27.1",
+      "value": "40.09"
+    }
+  },
+  "coverage_pct": "92.6",
+  "dataset": "buyer_origin",
+  "denominator": "148.13",
+  "dest_geo_id": "be:mun:92045",
+  "dest_name": {
+    "en": "Floreffe",
+    "fr": "Floreffe",
+    "nl": "Floreffe"
+  },
+  "dest_nis": "92045",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 160,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "29.5",
+      "value": "43.64"
+    },
+    {
+      "name": {
+        "en": "Floreffe",
+        "fr": "Floreffe",
+        "nl": "Floreffe"
+      },
+      "nis": "92045",
+      "share_pct": "27.1",
+      "value": "40.09"
+    },
+    {
+      "name": {
+        "en": "Fosses-la-Ville",
+        "fr": "Fosses-la-Ville",
+        "nl": "Fosses-la-Ville"
+      },
+      "nis": "92048",
+      "share_pct": "5.8",
+      "value": "8.54"
+    },
+    {
+      "name": {
+        "en": "Sambreville",
+        "fr": "Sambreville",
+        "nl": "Sambreville"
+      },
+      "nis": "92137",
+      "share_pct": "5.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "5.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Jemeppe-sur-Sambre",
+        "fr": "Jemeppe-sur-Sambre",
+        "nl": "Jemeppe-sur-Sambre"
+      },
+      "nis": "92140",
+      "share_pct": "4.7",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "2.0",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Court-Saint-Etienne",
+        "fr": "Court-Saint-Etienne",
+        "nl": "Court-Saint-Etienne"
+      },
+      "nis": "25023",
+      "share_pct": "2.0",
+      "value": "3"
+    }
+  ]
+}

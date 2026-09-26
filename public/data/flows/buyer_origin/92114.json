@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "6.1",
+      "value": "8.7666666666"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.0",
+      "value": "29.9666666663"
+    },
+    "rest_of_region": {
+      "share_pct": "30.0",
+      "value": "42.8333333333"
+    },
+    "same_commune": {
+      "share_pct": "42.8",
+      "value": "61.133333333"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "142.6999999992",
+  "dest_geo_id": "be:mun:92114",
+  "dest_name": {
+    "en": "Sombreffe",
+    "fr": "Sombreffe",
+    "nl": "Sombreffe"
+  },
+  "dest_nis": "92114",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 144,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sombreffe",
+        "fr": "Sombreffe",
+        "nl": "Sombreffe"
+      },
+      "nis": "92114",
+      "share_pct": "42.8",
+      "value": "61.133333333"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "10.6",
+      "value": "15.133333333"
+    },
+    {
+      "name": {
+        "en": "Villers-la-Ville",
+        "fr": "Villers-la-Ville",
+        "nl": "Villers-la-Ville"
+      },
+      "nis": "25107",
+      "share_pct": "9.6",
+      "value": "13.65"
+    },
+    {
+      "name": {
+        "en": "Sambreville",
+        "fr": "Sambreville",
+        "nl": "Sambreville"
+      },
+      "nis": "92137",
+      "share_pct": "5.8",
+      "value": "8.3333333333"
+    },
+    {
+      "name": {
+        "en": "Jemeppe-sur-Sambre",
+        "fr": "Jemeppe-sur-Sambre",
+        "nl": "Jemeppe-sur-Sambre"
+      },
+      "nis": "92140",
+      "share_pct": "3.5",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "3.0",
+      "value": "4.3333333333"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "2.9",
+      "value": "4.2"
+    },
+    {
+      "name": {
+        "en": "Chastre",
+        "fr": "Chastre",
+        "nl": "Chastre"
+      },
+      "nis": "25117",
+      "share_pct": "2.8",
+      "value": "4"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.7",
+      "value": "103.0305"
+    },
+    "rest_of_region": {
+      "share_pct": "24.4",
+      "value": "151.090928571"
+    },
+    "same_commune": {
+      "share_pct": "58.6",
+      "value": "361.86703504"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "617.988463611",
+  "dest_geo_id": "be:mun:42008",
+  "dest_name": {
+    "en": "Hamme",
+    "fr": "Hamme",
+    "nl": "Hamme"
+  },
+  "dest_nis": "42008",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 631,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hamme",
+        "fr": "Hamme",
+        "nl": "Hamme"
+      },
+      "nis": "42008",
+      "share_pct": "58.6",
+      "value": "361.86703504"
+    },
+    {
+      "name": {
+        "en": "Dendermonde",
+        "fr": "Termonde",
+        "nl": "Dendermonde"
+      },
+      "nis": "42006",
+      "share_pct": "7.6",
+      "value": "47"
+    },
+    {
+      "name": {
+        "en": "Waasmunster",
+        "fr": "Waasmunster",
+        "nl": "Waasmunster"
+      },
+      "nis": "42023",
+      "share_pct": "5.8",
+      "value": "36"
+    },
+    {
+      "name": {
+        "en": "Sint-Niklaas",
+        "fr": "Saint-Nicolas",
+        "nl": "Sint-Niklaas"
+      },
+      "nis": "46021",
+      "share_pct": "4.7",
+      "value": "29"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "3.3",
+      "value": "20.2"
+    },
+    {
+      "name": {
+        "en": "Temse",
+        "fr": "Tamise",
+        "nl": "Temse"
+      },
+      "nis": "46025",
+      "share_pct": "3.3",
+      "value": "20.1"
+    },
+    {
+      "name": {
+        "en": "Lokeren",
+        "fr": "Lokeren",
+        "nl": "Lokeren"
+      },
+      "nis": "46029",
+      "share_pct": "2.4",
+      "value": "15.071428571"
+    },
+    {
+      "name": {
+        "en": "Zele",
+        "fr": "Zele",
+        "nl": "Zele"
+      },
+      "nis": "42028",
+      "share_pct": "1.5",
+      "value": "9"
+    }
+  ]
+}

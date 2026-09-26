@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "19.3",
+      "value": "57.080"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "32.4",
+      "value": "95.676666666"
+    },
+    "rest_of_region": {
+      "share_pct": "8.3",
+      "value": "24.5833333333"
+    },
+    "same_commune": {
+      "share_pct": "39.8",
+      "value": "117.67"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "295.5099999993",
+  "dest_geo_id": "be:mun:23086",
+  "dest_name": {
+    "en": "Ternat",
+    "fr": "Ternat",
+    "nl": "Ternat"
+  },
+  "dest_nis": "23086",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 302,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "39.8",
+      "value": "117.67"
+    },
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "12.8",
+      "value": "37.843333333"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "4.7",
+      "value": "13.833333333"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "3.4",
+      "value": "9.925"
+    },
+    {
+      "name": {
+        "en": "Roosdaal",
+        "fr": "Roosdaal",
+        "nl": "Roosdaal"
+      },
+      "nis": "23097",
+      "share_pct": "3.2",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Ganshoren",
+        "fr": "Ganshoren",
+        "nl": "Ganshoren"
+      },
+      "nis": "21008",
+      "share_pct": "3.0",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "2.9",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "2.9",
+      "value": "8.5"
+    }
+  ]
+}

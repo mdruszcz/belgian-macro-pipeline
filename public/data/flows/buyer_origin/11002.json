@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "312.4423296264"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "48.316666667"
+    },
+    "other_regions": {
+      "share_pct": "1.1",
+      "value": "167.8433333334"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.7",
+      "value": "2415.190972729"
+    },
+    "rest_of_region": {
+      "share_pct": "13.5",
+      "value": "2081.6250732449"
+    },
+    "same_commune": {
+      "share_pct": "67.4",
+      "value": "10371.372669"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "15396.7910446007",
+  "dest_geo_id": "be:mun:11002",
+  "dest_name": {
+    "en": "Antwerp",
+    "fr": "Anvers",
+    "nl": "Antwerpen"
+  },
+  "dest_nis": "11002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 15807,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "67.4",
+      "value": "10371.372669"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "1.9",
+      "value": "289.44175653"
+    },
+    {
+      "name": {
+        "en": "Schoten",
+        "fr": "Schoten",
+        "nl": "Schoten"
+      },
+      "nis": "11040",
+      "share_pct": "1.5",
+      "value": "238.56055221"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "1.1",
+      "value": "162.35366667"
+    },
+    {
+      "name": {
+        "en": "Mortsel",
+        "fr": "Mortsel",
+        "nl": "Mortsel"
+      },
+      "nis": "11029",
+      "share_pct": "1.0",
+      "value": "160.49470588"
+    },
+    {
+      "name": {
+        "en": "Beveren-Kruibeke-Zwijndrecht",
+        "fr": "Beveren-Kruibeke-Zwijndrecht",
+        "nl": "Beveren-Kruibeke-Zwijndrecht"
+      },
+      "nis": "46030",
+      "share_pct": "1.0",
+      "value": "154.69674444"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "1.0",
+      "value": "154.59066364"
+    },
+    {
+      "name": {
+        "en": "Kapellen",
+        "fr": "Kapellen",
+        "nl": "Kapellen"
+      },
+      "nis": "11023",
+      "share_pct": "1.0",
+      "value": "149.1792361"
+    }
+  ]
+}

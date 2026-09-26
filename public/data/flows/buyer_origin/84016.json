@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.1",
+      "value": "2.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "27.4",
+      "value": "21.99"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "8.7",
+      "value": "7.0"
+    },
+    "rest_of_region": {
+      "share_pct": "29.4",
+      "value": "23.59"
+    },
+    "same_commune": {
+      "share_pct": "31.4",
+      "value": "25.25"
+    }
+  },
+  "coverage_pct": "94.5",
+  "dataset": "buyer_origin",
+  "denominator": "80.33",
+  "dest_geo_id": "be:mun:84016",
+  "dest_name": {
+    "en": "Daverdisse",
+    "fr": "Daverdisse",
+    "nl": "Daverdisse"
+  },
+  "dest_nis": "84016",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 85,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Daverdisse",
+        "fr": "Daverdisse",
+        "nl": "Daverdisse"
+      },
+      "nis": "84016",
+      "share_pct": "31.4",
+      "value": "25.25"
+    },
+    {
+      "name": {
+        "en": "Rochefort",
+        "fr": "Rochefort",
+        "nl": "Rochefort"
+      },
+      "nis": "91114",
+      "share_pct": "10.0",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Paliseul",
+        "fr": "Paliseul",
+        "nl": "Paliseul"
+      },
+      "nis": "84050",
+      "share_pct": "6.2",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Orp-Jauche",
+        "fr": "Orp-Jauche",
+        "nl": "Orp-Jauche"
+      },
+      "nis": "25120",
+      "share_pct": "3.7",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "3.7",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Amay",
+        "fr": "Amay",
+        "nl": "Amay"
+      },
+      "nis": "61003",
+      "share_pct": "3.7",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Beauraing",
+        "fr": "Beauraing",
+        "nl": "Beauraing"
+      },
+      "nis": "91013",
+      "share_pct": "3.1",
+      "value": "2.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.5",
+      "value": "2"
+    }
+  ]
+}

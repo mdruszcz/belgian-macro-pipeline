@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.7",
+      "value": "23.6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "1.5"
+    },
+    "other_regions": {
+      "share_pct": "43.3",
+      "value": "273.254057358"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.1",
+      "value": "95.0992249119"
+    },
+    "rest_of_region": {
+      "share_pct": "4.4",
+      "value": "28.01"
+    },
+    "same_commune": {
+      "share_pct": "33.2",
+      "value": "209.4742"
+    }
+  },
+  "coverage_pct": "95.7",
+  "dataset": "buyer_origin",
+  "denominator": "630.9374822699",
+  "dest_geo_id": "be:mun:25110",
+  "dest_name": {
+    "en": "Waterloo",
+    "fr": "Waterloo",
+    "nl": "Waterloo"
+  },
+  "dest_nis": "25110",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 659,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "33.2",
+      "value": "209.4742"
+    },
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "7.5",
+      "value": "47.02"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "6.5",
+      "value": "40.775"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "6.5",
+      "value": "40.75"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "2.8",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "2.7",
+      "value": "16.91"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "2.5",
+      "value": "15.526666667"
+    },
+    {
+      "name": {
+        "en": "Watermael-Boitsfort",
+        "fr": "Watermael-Boitsfort",
+        "nl": "Watermaal-Bosvoorde"
+      },
+      "nis": "21017",
+      "share_pct": "2.2",
+      "value": "14.147390691"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.8",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "6.9",
+      "value": "19.3333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.4",
+      "value": "57.0"
+    },
+    "rest_of_region": {
+      "share_pct": "10.1",
+      "value": "28.3333333333"
+    },
+    "same_commune": {
+      "share_pct": "60.8",
+      "value": "170.17424242"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "279.8409090866",
+  "dest_geo_id": "be:mun:84050",
+  "dest_name": {
+    "en": "Paliseul",
+    "fr": "Paliseul",
+    "nl": "Paliseul"
+  },
+  "dest_nis": "84050",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 285,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Paliseul",
+        "fr": "Paliseul",
+        "nl": "Paliseul"
+      },
+      "nis": "84050",
+      "share_pct": "60.8",
+      "value": "170.17424242"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "8.6",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Bouillon",
+        "fr": "Bouillon",
+        "nl": "Bouillon"
+      },
+      "nis": "84010",
+      "share_pct": "4.3",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Libin",
+        "fr": "Libin",
+        "nl": "Libin"
+      },
+      "nis": "84035",
+      "share_pct": "2.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "2.7",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Neufchâteau",
+        "fr": "Neufchâteau",
+        "nl": "Neufchâteau"
+      },
+      "nis": "84043",
+      "share_pct": "1.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Vresse-sur-Semois",
+        "fr": "Vresse-sur-Semois",
+        "nl": "Vresse-sur-Semois"
+      },
+      "nis": "91143",
+      "share_pct": "1.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "1.4",
+      "value": "4"
+    }
+  ]
+}

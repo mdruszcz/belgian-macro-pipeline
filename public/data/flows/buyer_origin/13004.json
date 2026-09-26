@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "4.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "32.6",
+      "value": "130.066666667"
+    },
+    "rest_of_region": {
+      "share_pct": "14.5",
+      "value": "57.99"
+    },
+    "same_commune": {
+      "share_pct": "51.9",
+      "value": "207.3809"
+    }
+  },
+  "coverage_pct": "97.7",
+  "dataset": "buyer_origin",
+  "denominator": "399.437566667",
+  "dest_geo_id": "be:mun:13004",
+  "dest_name": {
+    "en": "Beerse",
+    "fr": "Beerse",
+    "nl": "Beerse"
+  },
+  "dest_nis": "13004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 409,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "51.9",
+      "value": "207.3809"
+    },
+    {
+      "name": {
+        "en": "Vosselaar",
+        "fr": "Vosselaar",
+        "nl": "Vosselaar"
+      },
+      "nis": "13046",
+      "share_pct": "6.5",
+      "value": "26"
+    },
+    {
+      "name": {
+        "en": "Malle",
+        "fr": "Malle",
+        "nl": "Malle"
+      },
+      "nis": "11057",
+      "share_pct": "6.0",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Turnhout",
+        "fr": "Turnhout",
+        "nl": "Turnhout"
+      },
+      "nis": "13040",
+      "share_pct": "5.8",
+      "value": "23.2"
+    },
+    {
+      "name": {
+        "en": "Lille",
+        "fr": "Lille",
+        "nl": "Lille"
+      },
+      "nis": "13019",
+      "share_pct": "4.5",
+      "value": "17.916666667"
+    },
+    {
+      "name": {
+        "en": "Rijkevorsel",
+        "fr": "Rijkevorsel",
+        "nl": "Rijkevorsel"
+      },
+      "nis": "13037",
+      "share_pct": "4.4",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Merksplas",
+        "fr": "Merksplas",
+        "nl": "Merksplas"
+      },
+      "nis": "13023",
+      "share_pct": "3.4",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.9",
+      "value": "11.49"
+    }
+  ]
+}

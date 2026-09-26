@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "36.0666666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "10.5"
+    },
+    "other_regions": {
+      "share_pct": "11.0",
+      "value": "465.7147902091"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.2",
+      "value": "686.488633603"
+    },
+    "rest_of_region": {
+      "share_pct": "22.4",
+      "value": "949.7614686182"
+    },
+    "same_commune": {
+      "share_pct": "49.3",
+      "value": "2091.5637773"
+    }
+  },
+  "coverage_pct": "96.7",
+  "dataset": "buyer_origin",
+  "denominator": "4240.0953363970",
+  "dest_geo_id": "be:mun:52011",
+  "dest_name": {
+    "en": "Charleroi",
+    "fr": "Charleroi",
+    "nl": "Charleroi"
+  },
+  "dest_nis": "52011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 4383,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "49.3",
+      "value": "2091.5637773"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "3.4",
+      "value": "142.27282051"
+    },
+    {
+      "name": {
+        "en": "Châtelet",
+        "fr": "Châtelet",
+        "nl": "Châtelet"
+      },
+      "nis": "52012",
+      "share_pct": "2.8",
+      "value": "120.5"
+    },
+    {
+      "name": {
+        "en": "Ham-sur-Heure-Nalinnes",
+        "fr": "Ham-sur-Heure-Nalinnes",
+        "nl": "Ham-sur-Heure-Nalinnes"
+      },
+      "nis": "56086",
+      "share_pct": "2.5",
+      "value": "107.33333333"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "1.7",
+      "value": "71.610130719"
+    },
+    {
+      "name": {
+        "en": "Gerpinnes",
+        "fr": "Gerpinnes",
+        "nl": "Gerpinnes"
+      },
+      "nis": "52025",
+      "share_pct": "1.6",
+      "value": "67.5"
+    },
+    {
+      "name": {
+        "en": "Fleurus",
+        "fr": "Fleurus",
+        "nl": "Fleurus"
+      },
+      "nis": "52021",
+      "share_pct": "1.4",
+      "value": "58.804343396"
+    },
+    {
+      "name": {
+        "en": "Montigny-le-Tilleul",
+        "fr": "Montigny-le-Tilleul",
+        "nl": "Montigny-le-Tilleul"
+      },
+      "nis": "52048",
+      "share_pct": "1.4",
+      "value": "58.25"
+    }
+  ]
+}

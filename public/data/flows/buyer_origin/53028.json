@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "3.8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.9",
+      "value": "4"
+    },
+    "other_regions": {
+      "share_pct": "5.0",
+      "value": "23.0433333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "49.1",
+      "value": "226.1550000000"
+    },
+    "rest_of_region": {
+      "share_pct": "8.9",
+      "value": "40.9761904762"
+    },
+    "same_commune": {
+      "share_pct": "35.3",
+      "value": "162.68661905"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "460.6611428595",
+  "dest_geo_id": "be:mun:53028",
+  "dest_name": {
+    "en": "Frameries",
+    "fr": "Frameries",
+    "nl": "Frameries"
+  },
+  "dest_nis": "53028",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 472,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Frameries",
+        "fr": "Frameries",
+        "nl": "Frameries"
+      },
+      "nis": "53028",
+      "share_pct": "35.3",
+      "value": "162.68661905"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "17.4",
+      "value": "80.125"
+    },
+    {
+      "name": {
+        "en": "Quévy",
+        "fr": "Quévy",
+        "nl": "Quévy"
+      },
+      "nis": "53084",
+      "share_pct": "10.5",
+      "value": "48.52"
+    },
+    {
+      "name": {
+        "en": "Quaregnon",
+        "fr": "Quaregnon",
+        "nl": "Quaregnon"
+      },
+      "nis": "53065",
+      "share_pct": "4.8",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Saint-Ghislain",
+        "fr": "Saint-Ghislain",
+        "nl": "Saint-Ghislain"
+      },
+      "nis": "53070",
+      "share_pct": "4.5",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Colfontaine",
+        "fr": "Colfontaine",
+        "nl": "Colfontaine"
+      },
+      "nis": "53082",
+      "share_pct": "4.2",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "2.6",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Dour",
+        "fr": "Dour",
+        "nl": "Dour"
+      },
+      "nis": "53020",
+      "share_pct": "2.3",
+      "value": "10.5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.6",
+      "value": "6.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "9.9",
+      "value": "24.3856666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.2",
+      "value": "94.4187777777"
+    },
+    "rest_of_region": {
+      "share_pct": "3.6",
+      "value": "8.8333333334"
+    },
+    "same_commune": {
+      "share_pct": "45.6",
+      "value": "112.77333333"
+    }
+  },
+  "coverage_pct": "94.8",
+  "dataset": "buyer_origin",
+  "denominator": "247.4111111078",
+  "dest_geo_id": "be:mun:24041",
+  "dest_name": {
+    "en": "Hoegaarden",
+    "fr": "Hoegaarden",
+    "nl": "Hoegaarden"
+  },
+  "dest_nis": "24041",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 261,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hoegaarden",
+        "fr": "Hoegaarden",
+        "nl": "Hoegaarden"
+      },
+      "nis": "24041",
+      "share_pct": "45.6",
+      "value": "112.77333333"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "16.2",
+      "value": "40.011111111"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "6.8",
+      "value": "16.881"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "3.6",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Boutersem",
+        "fr": "Boutersem",
+        "nl": "Boutersem"
+      },
+      "nis": "24016",
+      "share_pct": "2.8",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Beauvechain",
+        "fr": "Beauvechain",
+        "nl": "Bevekom"
+      },
+      "nis": "25005",
+      "share_pct": "2.6",
+      "value": "6.3856666667"
+    },
+    {
+      "name": {
+        "en": "Glabbeek",
+        "fr": "Glabbeek",
+        "nl": "Glabbeek"
+      },
+      "nis": "24137",
+      "share_pct": "2.1",
+      "value": "5.1"
+    },
+    {
+      "name": {
+        "en": "Landen",
+        "fr": "Landen",
+        "nl": "Landen"
+      },
+      "nis": "24059",
+      "share_pct": "2.0",
+      "value": "5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "25.9",
+      "value": "65.6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.5",
+      "value": "49.333333333"
+    },
+    "rest_of_region": {
+      "share_pct": "17.0",
+      "value": "43"
+    },
+    "same_commune": {
+      "share_pct": "37.1",
+      "value": "93.873333333"
+    }
+  },
+  "coverage_pct": "95.4",
+  "dataset": "buyer_origin",
+  "denominator": "252.806666666",
+  "dest_geo_id": "be:mun:25123",
+  "dest_name": {
+    "en": "Rebecq",
+    "fr": "Rebecq",
+    "nl": "Rebecq"
+  },
+  "dest_nis": "25123",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 265,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Rebecq",
+        "fr": "Rebecq",
+        "nl": "Rebecq"
+      },
+      "nis": "25123",
+      "share_pct": "37.1",
+      "value": "93.873333333"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "9.6",
+      "value": "24.333333333"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Comte",
+        "fr": "Braine-le-Comte",
+        "nl": "’s Gravenbrakel"
+      },
+      "nis": "55004",
+      "share_pct": "5.1",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "4.9",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Ittre",
+        "fr": "Ittre",
+        "nl": "Itter"
+      },
+      "nis": "25044",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "3.6",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Enghien",
+        "fr": "Enghien",
+        "nl": "Edingen"
+      },
+      "nis": "51067",
+      "share_pct": "2.8",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "2.2",
+      "value": "5.5"
+    }
+  ]
+}

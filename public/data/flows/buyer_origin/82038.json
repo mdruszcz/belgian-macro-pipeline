@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.1",
+      "value": "12"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "11.9",
+      "value": "35.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "6.1",
+      "value": "18"
+    },
+    "rest_of_region": {
+      "share_pct": "11.2",
+      "value": "33.0"
+    },
+    "same_commune": {
+      "share_pct": "66.7",
+      "value": "196"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "294.0",
+  "dest_geo_id": "be:mun:82038",
+  "dest_name": {
+    "en": "Sainte-Ode",
+    "fr": "Sainte-Ode",
+    "nl": "Sainte-Ode"
+  },
+  "dest_nis": "82038",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 294,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sainte-Ode",
+        "fr": "Sainte-Ode",
+        "nl": "Sainte-Ode"
+      },
+      "nis": "82038",
+      "share_pct": "66.7",
+      "value": "196"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "8.5",
+      "value": "25"
+    },
+    {
+      "name": {
+        "en": "Bastogne",
+        "fr": "Bastogne",
+        "nl": "Bastenaken"
+      },
+      "nis": "82039",
+      "share_pct": "2.7",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "2.7",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Vaux-sur-Sûre",
+        "fr": "Vaux-sur-Sûre",
+        "nl": "Vaux-sur-Sûre"
+      },
+      "nis": "82036",
+      "share_pct": "2.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "La Roche-en-Ardenne",
+        "fr": "La Roche-en-Ardenne",
+        "nl": "La Roche-en-Ardenne"
+      },
+      "nis": "83031",
+      "share_pct": "1.5",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "1.4",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "1.4",
+      "value": "4"
+    }
+  ]
+}

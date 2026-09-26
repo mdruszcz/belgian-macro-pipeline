@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.7",
+      "value": "77.558333333"
+    },
+    "rest_of_region": {
+      "share_pct": "27.5",
+      "value": "127.6288333334"
+    },
+    "same_commune": {
+      "share_pct": "55.8",
+      "value": "259.31916667"
+    }
+  },
+  "coverage_pct": "95.2",
+  "dataset": "buyer_origin",
+  "denominator": "464.5063333364",
+  "dest_geo_id": "be:mun:31033",
+  "dest_name": {
+    "en": "Torhout",
+    "fr": "Torhout",
+    "nl": "Torhout"
+  },
+  "dest_nis": "31033",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 488,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Torhout",
+        "fr": "Torhout",
+        "nl": "Torhout"
+      },
+      "nis": "31033",
+      "share_pct": "55.8",
+      "value": "259.31916667"
+    },
+    {
+      "name": {
+        "en": "Zedelgem",
+        "fr": "Zedelgem",
+        "nl": "Zedelgem"
+      },
+      "nis": "31040",
+      "share_pct": "5.9",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "5.0",
+      "value": "23.258333333"
+    },
+    {
+      "name": {
+        "en": "Kortemark",
+        "fr": "Kortemark",
+        "nl": "Kortemark"
+      },
+      "nis": "32011",
+      "share_pct": "4.6",
+      "value": "21.5"
+    },
+    {
+      "name": {
+        "en": "Lichtervelde",
+        "fr": "Lichtervelde",
+        "nl": "Lichtervelde"
+      },
+      "nis": "36011",
+      "share_pct": "3.6",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "3.4",
+      "value": "15.6"
+    },
+    {
+      "name": {
+        "en": "Oostkamp",
+        "fr": "Oostkamp",
+        "nl": "Oostkamp"
+      },
+      "nis": "31022",
+      "share_pct": "3.0",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Ichtegem",
+        "fr": "Ichtegem",
+        "nl": "Ichtegem"
+      },
+      "nis": "35006",
+      "share_pct": "2.2",
+      "value": "10"
+    }
+  ]
+}

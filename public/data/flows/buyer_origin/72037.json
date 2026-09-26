@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "7.8",
+      "value": "21.061111111"
+    },
+    "origin_unknown": {
+      "share_pct": "1.6",
+      "value": "4.25"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.7",
+      "value": "45.29"
+    },
+    "rest_of_region": {
+      "share_pct": "3.3",
+      "value": "9.0"
+    },
+    "same_commune": {
+      "share_pct": "70.6",
+      "value": "190.81215556"
+    }
+  },
+  "coverage_pct": "95.2",
+  "dataset": "buyer_origin",
+  "denominator": "270.413266671",
+  "dest_geo_id": "be:mun:72037",
+  "dest_name": {
+    "en": "Hamont-Achel",
+    "fr": "Hamont-Achel",
+    "nl": "Hamont-Achel"
+  },
+  "dest_nis": "72037",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 284,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hamont-Achel",
+        "fr": "Hamont-Achel",
+        "nl": "Hamont-Achel"
+      },
+      "nis": "72037",
+      "share_pct": "70.6",
+      "value": "190.81215556"
+    },
+    {
+      "name": {
+        "en": "Pelt",
+        "fr": "Pelt",
+        "nl": "Pelt"
+      },
+      "nis": "72043",
+      "share_pct": "11.6",
+      "value": "31.29"
+    },
+    {
+      "name": {
+        "en": "Lommel",
+        "fr": "Lommel",
+        "nl": "Lommel"
+      },
+      "nis": "72020",
+      "share_pct": "1.7",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Bocholt",
+        "fr": "Bocholt",
+        "nl": "Bocholt"
+      },
+      "nis": "72003",
+      "share_pct": "1.3",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Genk",
+        "fr": "Genk",
+        "nl": "Genk"
+      },
+      "nis": "71016",
+      "share_pct": "1.1",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Bree",
+        "fr": "Bree",
+        "nl": "Bree"
+      },
+      "nis": "72004",
+      "share_pct": "0.7",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Houthalen-Helchteren",
+        "fr": "Houthalen-Helchteren",
+        "nl": "Houthalen-Helchteren"
+      },
+      "nis": "72039",
+      "share_pct": "0.7",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Kalmthout",
+        "fr": "Kalmthout",
+        "nl": "Kalmthout"
+      },
+      "nis": "11022",
+      "share_pct": "0.4",
+      "value": "1"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.2",
+      "value": "1.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "30.1",
+      "value": "24.8333333333"
+    },
+    "rest_of_region": {
+      "share_pct": "40.2",
+      "value": "33.1666666666"
+    },
+    "same_commune": {
+      "share_pct": "28.5",
+      "value": "23.5"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "82.4999999999",
+  "dest_geo_id": "be:mun:64063",
+  "dest_name": {
+    "en": "Remicourt",
+    "fr": "Remicourt",
+    "nl": "Remicourt"
+  },
+  "dest_nis": "64063",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 84,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Remicourt",
+        "fr": "Remicourt",
+        "nl": "Remicourt"
+      },
+      "nis": "64063",
+      "share_pct": "28.5",
+      "value": "23.5"
+    },
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "7.7",
+      "value": "6.35"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "7.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "6.7",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Donceel",
+        "fr": "Donceel",
+        "nl": "Donceel"
+      },
+      "nis": "64023",
+      "share_pct": "6.1",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "4.8",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Crisnée",
+        "fr": "Crisnée",
+        "nl": "Crisnée"
+      },
+      "nis": "64021",
+      "share_pct": "4.8",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "3.2",
+      "value": "2.65"
+    }
+  ]
+}

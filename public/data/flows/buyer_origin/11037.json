@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.1",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.3",
+      "value": "142.1226991974"
+    },
+    "rest_of_region": {
+      "share_pct": "26.4",
+      "value": "97.9147619047"
+    },
+    "same_commune": {
+      "share_pct": "34.1",
+      "value": "126.53"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "371.0674611021",
+  "dest_geo_id": "be:mun:11037",
+  "dest_name": {
+    "en": "Rumst",
+    "fr": "Rumst",
+    "nl": "Rumst"
+  },
+  "dest_nis": "11037",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 380,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Rumst",
+        "fr": "Rumst",
+        "nl": "Rumst"
+      },
+      "nis": "11037",
+      "share_pct": "34.1",
+      "value": "126.53"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "10.7",
+      "value": "39.555281038"
+    },
+    {
+      "name": {
+        "en": "Boom",
+        "fr": "Boom",
+        "nl": "Boom"
+      },
+      "nis": "11005",
+      "share_pct": "10.3",
+      "value": "38.25"
+    },
+    {
+      "name": {
+        "en": "Duffel",
+        "fr": "Duffel",
+        "nl": "Duffel"
+      },
+      "nis": "12009",
+      "share_pct": "7.8",
+      "value": "28.76"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "5.9",
+      "value": "21.745989588"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "5.0",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Aartselaar",
+        "fr": "Aartselaar",
+        "nl": "Aartselaar"
+      },
+      "nis": "11001",
+      "share_pct": "3.0",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Sint-Katelijne-Waver",
+        "fr": "Sint-Katelijne-Waver",
+        "nl": "Sint-Katelijne-Waver"
+      },
+      "nis": "12035",
+      "share_pct": "2.2",
+      "value": "8.2"
+    }
+  ]
+}

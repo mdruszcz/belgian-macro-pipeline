@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "18.4",
+      "value": "82.6150793652"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.7",
+      "value": "101.583333333"
+    },
+    "rest_of_region": {
+      "share_pct": "13.1",
+      "value": "58.5357142857"
+    },
+    "same_commune": {
+      "share_pct": "45.4",
+      "value": "203.30809524"
+    }
+  },
+  "coverage_pct": "96.8",
+  "dataset": "buyer_origin",
+  "denominator": "448.0422222239",
+  "dest_geo_id": "be:mun:83044",
+  "dest_name": {
+    "en": "Rendeux",
+    "fr": "Rendeux",
+    "nl": "Rendeux"
+  },
+  "dest_nis": "83044",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 463,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Rendeux",
+        "fr": "Rendeux",
+        "nl": "Rendeux"
+      },
+      "nis": "83044",
+      "share_pct": "45.4",
+      "value": "203.30809524"
+    },
+    {
+      "name": {
+        "en": "Erezée",
+        "fr": "Erezée",
+        "nl": "Erezée"
+      },
+      "nis": "83013",
+      "share_pct": "5.0",
+      "value": "22.333333333"
+    },
+    {
+      "name": {
+        "en": "Marche-en-Famenne",
+        "fr": "Marche-en-Famenne",
+        "nl": "Marche-en-Famenne"
+      },
+      "nis": "83034",
+      "share_pct": "4.9",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Hotton",
+        "fr": "Hotton",
+        "nl": "Hotton"
+      },
+      "nis": "83028",
+      "share_pct": "4.7",
+      "value": "21.25"
+    },
+    {
+      "name": {
+        "en": "Attert",
+        "fr": "Attert",
+        "nl": "Attert"
+      },
+      "nis": "81003",
+      "share_pct": "4.5",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Durbuy",
+        "fr": "Durbuy",
+        "nl": "Durbuy"
+      },
+      "nis": "83012",
+      "share_pct": "3.6",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.5",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "La Roche-en-Ardenne",
+        "fr": "La Roche-en-Ardenne",
+        "nl": "La Roche-en-Ardenne"
+      },
+      "nis": "83031",
+      "share_pct": "2.0",
+      "value": "9"
+    }
+  ]
+}

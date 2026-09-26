@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.7",
+      "value": "72.181428571"
+    },
+    "rest_of_region": {
+      "share_pct": "28.5",
+      "value": "161.7958730163"
+    },
+    "same_commune": {
+      "share_pct": "58.8",
+      "value": "333.61666667"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "567.5939682573",
+  "dest_geo_id": "be:mun:32003",
+  "dest_name": {
+    "en": "Diksmuide",
+    "fr": "Dixmude",
+    "nl": "Diksmuide"
+  },
+  "dest_nis": "32003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 583,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Diksmuide",
+        "fr": "Dixmude",
+        "nl": "Diksmuide"
+      },
+      "nis": "32003",
+      "share_pct": "58.8",
+      "value": "333.61666667"
+    },
+    {
+      "name": {
+        "en": "Koekelare",
+        "fr": "Koekelare",
+        "nl": "Koekelare"
+      },
+      "nis": "32010",
+      "share_pct": "4.2",
+      "value": "24.061428571"
+    },
+    {
+      "name": {
+        "en": "Houthulst",
+        "fr": "Houthulst",
+        "nl": "Houthulst"
+      },
+      "nis": "32006",
+      "share_pct": "3.8",
+      "value": "21.6"
+    },
+    {
+      "name": {
+        "en": "Middelkerke",
+        "fr": "Middelkerke",
+        "nl": "Middelkerke"
+      },
+      "nis": "35011",
+      "share_pct": "3.3",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Koksijde",
+        "fr": "Koksijde",
+        "nl": "Koksijde"
+      },
+      "nis": "38014",
+      "share_pct": "3.3",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Veurne",
+        "fr": "Furnes",
+        "nl": "Veurne"
+      },
+      "nis": "38025",
+      "share_pct": "3.1",
+      "value": "17.428571429"
+    },
+    {
+      "name": {
+        "en": "Kortemark",
+        "fr": "Kortemark",
+        "nl": "Kortemark"
+      },
+      "nis": "32011",
+      "share_pct": "2.6",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Lo-Reninge",
+        "fr": "Lo-Reninge",
+        "nl": "Lo-Reninge"
+      },
+      "nis": "32030",
+      "share_pct": "2.1",
+      "value": "12.02"
+    }
+  ]
+}

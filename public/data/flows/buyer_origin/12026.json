@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.2",
+      "value": "0.8"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.0",
+      "value": "91.83"
+    },
+    "rest_of_region": {
+      "share_pct": "30.6",
+      "value": "155.697"
+    },
+    "same_commune": {
+      "share_pct": "50.9",
+      "value": "259.3381329"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "509.1651329",
+  "dest_geo_id": "be:mun:12026",
+  "dest_name": {
+    "en": "Nijlen",
+    "fr": "Nijlen",
+    "nl": "Nijlen"
+  },
+  "dest_nis": "12026",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 522,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Nijlen",
+        "fr": "Nijlen",
+        "nl": "Nijlen"
+      },
+      "nis": "12026",
+      "share_pct": "50.9",
+      "value": "259.3381329"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "10.9",
+      "value": "55.33"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "6.9",
+      "value": "35"
+    },
+    {
+      "name": {
+        "en": "Berlaar",
+        "fr": "Berlaar",
+        "nl": "Berlaar"
+      },
+      "nis": "12002",
+      "share_pct": "5.6",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "4.7",
+      "value": "23.9"
+    },
+    {
+      "name": {
+        "en": "Grobbendonk",
+        "fr": "Grobbendonk",
+        "nl": "Grobbendonk"
+      },
+      "nis": "13010",
+      "share_pct": "2.4",
+      "value": "12.17"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "1.9",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Herenthout",
+        "fr": "Herenthout",
+        "nl": "Herenthout"
+      },
+      "nis": "13012",
+      "share_pct": "1.5",
+      "value": "7.5"
+    }
+  ]
+}

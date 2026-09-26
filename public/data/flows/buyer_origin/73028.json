@@ -1,0 +1,57 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "100.0",
+      "value": "1"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "1",
+  "dest_geo_id": "be:mun:73028",
+  "dest_name": {
+    "en": "Herstappe",
+    "fr": "Herstappe",
+    "nl": "Herstappe"
+  },
+  "dest_nis": "73028",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Herstappe",
+        "fr": "Herstappe",
+        "nl": "Herstappe"
+      },
+      "nis": "73028",
+      "share_pct": "100.0",
+      "value": "1"
+    }
+  ]
+}

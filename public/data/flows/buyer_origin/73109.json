@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "21.9",
+      "value": "26.7222"
+    },
+    "origin_unknown": {
+      "share_pct": "1.0",
+      "value": "1.2222"
+    },
+    "other_regions": {
+      "share_pct": "16.4",
+      "value": "20.00"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "1.6",
+      "value": "2"
+    },
+    "rest_of_region": {
+      "share_pct": "0.8",
+      "value": "1"
+    },
+    "same_commune": {
+      "share_pct": "58.2",
+      "value": "71"
+    }
+  },
+  "coverage_pct": "93.1",
+  "dataset": "buyer_origin",
+  "denominator": "121.9444",
+  "dest_geo_id": "be:mun:73109",
+  "dest_name": {
+    "en": "Voeren",
+    "fr": "Fourons",
+    "nl": "Voeren"
+  },
+  "dest_nis": "73109",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 131,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Voeren",
+        "fr": "Fourons",
+        "nl": "Voeren"
+      },
+      "nis": "73109",
+      "share_pct": "58.2",
+      "value": "71"
+    },
+    {
+      "name": {
+        "en": "Dalhem",
+        "fr": "Dalhem",
+        "nl": "Dalhem"
+      },
+      "nis": "62027",
+      "share_pct": "5.7",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Visé",
+        "fr": "Visé",
+        "nl": "Wezet"
+      },
+      "nis": "62108",
+      "share_pct": "4.9",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Aubel",
+        "fr": "Aubel",
+        "nl": "Aubel"
+      },
+      "nis": "63003",
+      "share_pct": "2.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Oupeye",
+        "fr": "Oupeye",
+        "nl": "Oupeye"
+      },
+      "nis": "62079",
+      "share_pct": "2.2",
+      "value": "2.63"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "1.6",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Maaseik",
+        "fr": "Maaseik",
+        "nl": "Maaseik"
+      },
+      "nis": "72021",
+      "share_pct": "0.8",
+      "value": "1"
+    },
+    {
+      "name": {
+        "en": "Plombières",
+        "fr": "Plombières",
+        "nl": "Plombières"
+      },
+      "nis": "63088",
+      "share_pct": "0.4",
+      "value": "0.5"
+    }
+  ]
+}

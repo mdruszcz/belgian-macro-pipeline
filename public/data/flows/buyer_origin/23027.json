@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1.66"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "2.34"
+    },
+    "other_regions": {
+      "share_pct": "19.9",
+      "value": "201.3301424243"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.0",
+      "value": "283.4022222221"
+    },
+    "rest_of_region": {
+      "share_pct": "4.5",
+      "value": "45.935"
+    },
+    "same_commune": {
+      "share_pct": "47.2",
+      "value": "477.14393162"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "1011.8112962664",
+  "dest_geo_id": "be:mun:23027",
+  "dest_name": {
+    "en": "Halle",
+    "fr": "Hal",
+    "nl": "Halle"
+  },
+  "dest_nis": "23027",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1040,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "47.2",
+      "value": "477.14393162"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "9.7",
+      "value": "97.791111111"
+    },
+    {
+      "name": {
+        "en": "Sint-Pieters-Leeuw",
+        "fr": "Sint-Pieters-Leeuw",
+        "nl": "Sint-Pieters-Leeuw"
+      },
+      "nis": "23077",
+      "share_pct": "6.9",
+      "value": "69.7"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "4.9",
+      "value": "49.590909091"
+    },
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "2.2",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Pajottegem",
+        "fr": "Pajottegem",
+        "nl": "Pajottegem"
+      },
+      "nis": "23106",
+      "share_pct": "1.6",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Pepingen",
+        "fr": "Pepingen",
+        "nl": "Pepingen"
+      },
+      "nis": "23064",
+      "share_pct": "1.4",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "1.4",
+      "value": "14.3224"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "8.1",
+      "value": "21.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.3",
+      "value": "48.25"
+    },
+    "rest_of_region": {
+      "share_pct": "30.0",
+      "value": "79.25"
+    },
+    "same_commune": {
+      "share_pct": "43.6",
+      "value": "115.09945652"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "264.09945652",
+  "dest_geo_id": "be:mun:55050",
+  "dest_name": {
+    "en": "Ecaussinnes",
+    "fr": "Ecaussinnes",
+    "nl": "Ecaussinnes"
+  },
+  "dest_nis": "55050",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 270,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ecaussinnes",
+        "fr": "Ecaussinnes",
+        "nl": "Ecaussinnes"
+      },
+      "nis": "55050",
+      "share_pct": "43.6",
+      "value": "115.09945652"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "7.8",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Comte",
+        "fr": "Braine-le-Comte",
+        "nl": "’s Gravenbrakel"
+      },
+      "nis": "55004",
+      "share_pct": "6.2",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Rebecq",
+        "fr": "Rebecq",
+        "nl": "Rebecq"
+      },
+      "nis": "25123",
+      "share_pct": "3.0",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "2.8",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "2.7",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "2.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "2.3",
+      "value": "6"
+    }
+  ]
+}

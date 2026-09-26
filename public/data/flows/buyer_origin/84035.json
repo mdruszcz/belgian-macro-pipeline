@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.0",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "8.2",
+      "value": "22.02"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.3",
+      "value": "78.5"
+    },
+    "rest_of_region": {
+      "share_pct": "18.5",
+      "value": "49.5"
+    },
+    "same_commune": {
+      "share_pct": "41.1",
+      "value": "110.17"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "268.19",
+  "dest_geo_id": "be:mun:84035",
+  "dest_name": {
+    "en": "Libin",
+    "fr": "Libin",
+    "nl": "Libin"
+  },
+  "dest_nis": "84035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 272,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Libin",
+        "fr": "Libin",
+        "nl": "Libin"
+      },
+      "nis": "84035",
+      "share_pct": "41.1",
+      "value": "110.17"
+    },
+    {
+      "name": {
+        "en": "Habay",
+        "fr": "Habay",
+        "nl": "Habay"
+      },
+      "nis": "85046",
+      "share_pct": "8.9",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "7.1",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Saint-Hubert",
+        "fr": "Saint-Hubert",
+        "nl": "Saint-Hubert"
+      },
+      "nis": "84059",
+      "share_pct": "6.5",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Paliseul",
+        "fr": "Paliseul",
+        "nl": "Paliseul"
+      },
+      "nis": "84050",
+      "share_pct": "6.2",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Neufchâteau",
+        "fr": "Neufchâteau",
+        "nl": "Neufchâteau"
+      },
+      "nis": "84043",
+      "share_pct": "4.8",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "2.6",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "1.5",
+      "value": "4"
+    }
+  ]
+}

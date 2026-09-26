@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "6.75"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "8.5",
+      "value": "24.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "2.4",
+      "value": "7.0"
+    },
+    "rest_of_region": {
+      "share_pct": "50.4",
+      "value": "144.75"
+    },
+    "same_commune": {
+      "share_pct": "36.3",
+      "value": "104.12"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "287.12",
+  "dest_geo_id": "be:mun:61019",
+  "dest_name": {
+    "en": "Ferrières",
+    "fr": "Ferrières",
+    "nl": "Ferrières"
+  },
+  "dest_nis": "61019",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 296,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ferrières",
+        "fr": "Ferrières",
+        "nl": "Ferrières"
+      },
+      "nis": "61019",
+      "share_pct": "36.3",
+      "value": "104.12"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "18.8",
+      "value": "54"
+    },
+    {
+      "name": {
+        "en": "Aywaille",
+        "fr": "Aywaille",
+        "nl": "Aywaille"
+      },
+      "nis": "62009",
+      "share_pct": "7.3",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Durbuy",
+        "fr": "Durbuy",
+        "nl": "Durbuy"
+      },
+      "nis": "83012",
+      "share_pct": "7.3",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "4.2",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "2.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Stoumont",
+        "fr": "Stoumont",
+        "nl": "Stoumont"
+      },
+      "nis": "63075",
+      "share_pct": "2.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Sprimont",
+        "fr": "Sprimont",
+        "nl": "Sprimont"
+      },
+      "nis": "62100",
+      "share_pct": "2.3",
+      "value": "6.5"
+    }
+  ]
+}

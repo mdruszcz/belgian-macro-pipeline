@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1.35"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "1.35"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.3",
+      "value": "119.94957466"
+    },
+    "rest_of_region": {
+      "share_pct": "24.5",
+      "value": "76.909047619"
+    },
+    "same_commune": {
+      "share_pct": "36.3",
+      "value": "113.90212068"
+    }
+  },
+  "coverage_pct": "91.9",
+  "dataset": "buyer_origin",
+  "denominator": "313.460742959",
+  "dest_geo_id": "be:mun:44020",
+  "dest_name": {
+    "en": "Gavere",
+    "fr": "Gavere",
+    "nl": "Gavere"
+  },
+  "dest_nis": "44020",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 341,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Gavere",
+        "fr": "Gavere",
+        "nl": "Gavere"
+      },
+      "nis": "44020",
+      "share_pct": "36.3",
+      "value": "113.90212068"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "13.8",
+      "value": "43.26878733"
+    },
+    {
+      "name": {
+        "en": "Nazareth-De Pinte",
+        "fr": "Nazareth-De Pinte",
+        "nl": "Nazareth-De Pinte"
+      },
+      "nis": "44086",
+      "share_pct": "10.0",
+      "value": "31.25678733"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "7.5",
+      "value": "23.424"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "4.3",
+      "value": "13.52"
+    },
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "4.0",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "3.5",
+      "value": "10.869047619"
+    },
+    {
+      "name": {
+        "en": "Sint-Martens-Latem",
+        "fr": "Sint-Martens-Latem",
+        "nl": "Sint-Martens-Latem"
+      },
+      "nis": "44064",
+      "share_pct": "2.9",
+      "value": "9"
+    }
+  ]
+}

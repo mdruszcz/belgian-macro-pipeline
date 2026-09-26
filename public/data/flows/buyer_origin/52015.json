@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "7.1",
+      "value": "48.03"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "33.0",
+      "value": "223.50361111"
+    },
+    "rest_of_region": {
+      "share_pct": "22.7",
+      "value": "154.296666667"
+    },
+    "same_commune": {
+      "share_pct": "36.6",
+      "value": "248.43333333"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "678.263611107",
+  "dest_geo_id": "be:mun:52015",
+  "dest_name": {
+    "en": "Courcelles",
+    "fr": "Courcelles",
+    "nl": "Courcelles"
+  },
+  "dest_nis": "52015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 698,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "36.6",
+      "value": "248.43333333"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "16.7",
+      "value": "113.11111111"
+    },
+    {
+      "name": {
+        "en": "Pont-à-Celles",
+        "fr": "Pont-à-Celles",
+        "nl": "Pont-à-Celles"
+      },
+      "nis": "52055",
+      "share_pct": "4.4",
+      "value": "30.03"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "4.1",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "2.5",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Châtelet",
+        "fr": "Châtelet",
+        "nl": "Châtelet"
+      },
+      "nis": "52012",
+      "share_pct": "2.1",
+      "value": "14.5625"
+    },
+    {
+      "name": {
+        "en": "Fontaine-l’Evêque",
+        "fr": "Fontaine-l’Evêque",
+        "nl": "Fontaine-l’Evêque"
+      },
+      "nis": "52022",
+      "share_pct": "1.9",
+      "value": "13.1"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "1.8",
+      "value": "12.166666667"
+    }
+  ]
+}

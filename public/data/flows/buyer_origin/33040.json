@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.8",
+      "value": "51.333333333"
+    },
+    "rest_of_region": {
+      "share_pct": "40.8",
+      "value": "111.00"
+    },
+    "same_commune": {
+      "share_pct": "40.4",
+      "value": "110"
+    }
+  },
+  "coverage_pct": "99.4",
+  "dataset": "buyer_origin",
+  "denominator": "272.333333333",
+  "dest_geo_id": "be:mun:33040",
+  "dest_name": {
+    "en": "Langemark-Poelkapelle",
+    "fr": "Langemark-Poelkapelle",
+    "nl": "Langemark-Poelkapelle"
+  },
+  "dest_nis": "33040",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 274,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Langemark-Poelkapelle",
+        "fr": "Langemark-Poelkapelle",
+        "nl": "Langemark-Poelkapelle"
+      },
+      "nis": "33040",
+      "share_pct": "40.4",
+      "value": "110"
+    },
+    {
+      "name": {
+        "en": "Staden",
+        "fr": "Staden",
+        "nl": "Staden"
+      },
+      "nis": "36019",
+      "share_pct": "13.2",
+      "value": "36"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "11.3",
+      "value": "30.833333333"
+    },
+    {
+      "name": {
+        "en": "Houthulst",
+        "fr": "Houthulst",
+        "nl": "Houthulst"
+      },
+      "nis": "32006",
+      "share_pct": "7.5",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "5.1",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Zonnebeke",
+        "fr": "Zonnebeke",
+        "nl": "Zonnebeke"
+      },
+      "nis": "33037",
+      "share_pct": "4.8",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Lo-Reninge",
+        "fr": "Lo-Reninge",
+        "nl": "Lo-Reninge"
+      },
+      "nis": "32030",
+      "share_pct": "3.3",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Wevelgem",
+        "fr": "Wevelgem",
+        "nl": "Wevelgem"
+      },
+      "nis": "34041",
+      "share_pct": "2.3",
+      "value": "6.25"
+    }
+  ]
+}

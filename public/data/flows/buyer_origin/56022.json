@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.2",
+      "value": "6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "36.5",
+      "value": "98.24"
+    },
+    "rest_of_region": {
+      "share_pct": "24.0",
+      "value": "64.516666667"
+    },
+    "same_commune": {
+      "share_pct": "36.2",
+      "value": "97.516666667"
+    }
+  },
+  "coverage_pct": "89.5",
+  "dataset": "buyer_origin",
+  "denominator": "269.273333334",
+  "dest_geo_id": "be:mun:56022",
+  "dest_name": {
+    "en": "Erquelinnes",
+    "fr": "Erquelinnes",
+    "nl": "Erquelinnes"
+  },
+  "dest_nis": "56022",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 301,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Erquelinnes",
+        "fr": "Erquelinnes",
+        "nl": "Erquelinnes"
+      },
+      "nis": "56022",
+      "share_pct": "36.2",
+      "value": "97.516666667"
+    },
+    {
+      "name": {
+        "en": "Merbes-le-Château",
+        "fr": "Merbes-le-Château",
+        "nl": "Merbes-le-Château"
+      },
+      "nis": "56049",
+      "share_pct": "20.1",
+      "value": "54"
+    },
+    {
+      "name": {
+        "en": "Beaumont",
+        "fr": "Beaumont",
+        "nl": "Beaumont"
+      },
+      "nis": "56005",
+      "share_pct": "10.8",
+      "value": "29.04"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "4.1",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "3.7",
+      "value": "10.016666667"
+    },
+    {
+      "name": {
+        "en": "Estinnes",
+        "fr": "Estinnes",
+        "nl": "Estinnes"
+      },
+      "nis": "58003",
+      "share_pct": "3.2",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "2.0",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "1.9",
+      "value": "5"
+    }
+  ]
+}

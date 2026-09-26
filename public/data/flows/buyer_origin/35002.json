@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.6",
+      "value": "23.046511628"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.7",
+      "value": "29.9999999999"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.2",
+      "value": "103.7297323229"
+    },
+    "rest_of_region": {
+      "share_pct": "49.6",
+      "value": "316.7171317833"
+    },
+    "same_commune": {
+      "share_pct": "25.9",
+      "value": "165.61333333"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "639.1067090641",
+  "dest_geo_id": "be:mun:35002",
+  "dest_name": {
+    "en": "Bredene",
+    "fr": "Bredene",
+    "nl": "Bredene"
+  },
+  "dest_nis": "35002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 657,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Bredene",
+        "fr": "Bredene",
+        "nl": "Bredene"
+      },
+      "nis": "35002",
+      "share_pct": "25.9",
+      "value": "165.61333333"
+    },
+    {
+      "name": {
+        "en": "Ostend",
+        "fr": "Ostende",
+        "nl": "Oostende"
+      },
+      "nis": "35013",
+      "share_pct": "10.4",
+      "value": "66.520833333"
+    },
+    {
+      "name": {
+        "en": "De Haan",
+        "fr": "De Haan",
+        "nl": "De Haan"
+      },
+      "nis": "35029",
+      "share_pct": "2.9",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.4",
+      "value": "15.166666667"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "2.3",
+      "value": "14.51"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.6",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Gistel",
+        "fr": "Gistel",
+        "nl": "Gistel"
+      },
+      "nis": "35005",
+      "share_pct": "1.5",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Jabbeke",
+        "fr": "Jabbeke",
+        "nl": "Jabbeke"
+      },
+      "nis": "31012",
+      "share_pct": "1.3",
+      "value": "8.5"
+    }
+  ]
+}

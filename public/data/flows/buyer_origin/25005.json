@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "24.4",
+      "value": "46.000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "32.1",
+      "value": "60.5"
+    },
+    "rest_of_region": {
+      "share_pct": "2.7",
+      "value": "5"
+    },
+    "same_commune": {
+      "share_pct": "40.0",
+      "value": "75.3"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "188.300",
+  "dest_geo_id": "be:mun:25005",
+  "dest_name": {
+    "en": "Beauvechain",
+    "fr": "Beauvechain",
+    "nl": "Bevekom"
+  },
+  "dest_nis": "25005",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 190,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beauvechain",
+        "fr": "Beauvechain",
+        "nl": "Bevekom"
+      },
+      "nis": "25005",
+      "share_pct": "40.0",
+      "value": "75.3"
+    },
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "8.2",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "6.4",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "5.0",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "4.8",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "3.2",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "La Hulpe",
+        "fr": "La Hulpe",
+        "nl": "Terhulpen"
+      },
+      "nis": "25050",
+      "share_pct": "2.7",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "2.1",
+      "value": "4"
+    }
+  ]
+}

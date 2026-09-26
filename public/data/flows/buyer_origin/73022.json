@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.0",
+      "value": "31"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.8",
+      "value": "54.0000000000"
+    },
+    "rest_of_region": {
+      "share_pct": "26.2",
+      "value": "68.0"
+    },
+    "same_commune": {
+      "share_pct": "41.0",
+      "value": "106.16666667"
+    }
+  },
+  "coverage_pct": "99.7",
+  "dataset": "buyer_origin",
+  "denominator": "259.1666666700",
+  "dest_geo_id": "be:mun:73022",
+  "dest_name": {
+    "en": "Heers",
+    "fr": "Heers",
+    "nl": "Heers"
+  },
+  "dest_nis": "73022",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 260,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Heers",
+        "fr": "Heers",
+        "nl": "Heers"
+      },
+      "nis": "73022",
+      "share_pct": "41.0",
+      "value": "106.16666667"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "16.4",
+      "value": "42.5"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "14.9",
+      "value": "38.5"
+    },
+    {
+      "name": {
+        "en": "Oreye",
+        "fr": "Oreye",
+        "nl": "Oerle"
+      },
+      "nis": "64056",
+      "share_pct": "4.6",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Alken",
+        "fr": "Alken",
+        "nl": "Alken"
+      },
+      "nis": "73001",
+      "share_pct": "2.1",
+      "value": "5.3333333333"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "1.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Gingelom",
+        "fr": "Gingelom",
+        "nl": "Gingelom"
+      },
+      "nis": "71017",
+      "share_pct": "1.7",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Lummen",
+        "fr": "Lummen",
+        "nl": "Lummen"
+      },
+      "nis": "71037",
+      "share_pct": "1.5",
+      "value": "4"
+    }
+  ]
+}

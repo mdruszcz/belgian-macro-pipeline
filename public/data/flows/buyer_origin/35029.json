@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "5.3",
+      "value": "53.333333333"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "7.3",
+      "value": "73.456938"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "3.5",
+      "value": "34.52"
+    },
+    "rest_of_region": {
+      "share_pct": "64.5",
+      "value": "644.4398660000"
+    },
+    "same_commune": {
+      "share_pct": "19.4",
+      "value": "193.52733333"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "999.7774706630",
+  "dest_geo_id": "be:mun:35029",
+  "dest_name": {
+    "en": "De Haan",
+    "fr": "De Haan",
+    "nl": "De Haan"
+  },
+  "dest_nis": "35029",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1029,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "De Haan",
+        "fr": "De Haan",
+        "nl": "De Haan"
+      },
+      "nis": "35029",
+      "share_pct": "19.4",
+      "value": "193.52733333"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.9",
+      "value": "29"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "2.6",
+      "value": "25.51"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.9",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Bredene",
+        "fr": "Bredene",
+        "nl": "Bredene"
+      },
+      "nis": "35002",
+      "share_pct": "1.5",
+      "value": "15.01"
+    },
+    {
+      "name": {
+        "en": "Zuienkerke",
+        "fr": "Zuienkerke",
+        "nl": "Zuienkerke"
+      },
+      "nis": "31042",
+      "share_pct": "1.5",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Lubbeek",
+        "fr": "Lubbeek",
+        "nl": "Lubbeek"
+      },
+      "nis": "24066",
+      "share_pct": "1.2",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "1.1",
+      "value": "11"
+    }
+  ]
+}

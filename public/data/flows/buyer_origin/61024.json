@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "9.5",
+      "value": "17"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.1",
+      "value": "20"
+    },
+    "rest_of_region": {
+      "share_pct": "34.3",
+      "value": "61.4966666667"
+    },
+    "same_commune": {
+      "share_pct": "45.1",
+      "value": "81"
+    }
+  },
+  "coverage_pct": "94.5",
+  "dataset": "buyer_origin",
+  "denominator": "179.4966666667",
+  "dest_geo_id": "be:mun:61024",
+  "dest_name": {
+    "en": "Hamoir",
+    "fr": "Hamoir",
+    "nl": "Hamoir"
+  },
+  "dest_nis": "61024",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 190,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hamoir",
+        "fr": "Hamoir",
+        "nl": "Hamoir"
+      },
+      "nis": "61024",
+      "share_pct": "45.1",
+      "value": "81"
+    },
+    {
+      "name": {
+        "en": "Comblain-au-Pont",
+        "fr": "Comblain-au-Pont",
+        "nl": "Comblain-au-Pont"
+      },
+      "nis": "62026",
+      "share_pct": "5.1",
+      "value": "9.1666666667"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "4.5",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "4.5",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Aywaille",
+        "fr": "Aywaille",
+        "nl": "Aywaille"
+      },
+      "nis": "62009",
+      "share_pct": "4.2",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Ferrières",
+        "fr": "Ferrières",
+        "nl": "Ferrières"
+      },
+      "nis": "61019",
+      "share_pct": "3.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "3.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Ouffet",
+        "fr": "Ouffet",
+        "nl": "Ouffet"
+      },
+      "nis": "61048",
+      "share_pct": "2.8",
+      "value": "5"
+    }
+  ]
+}

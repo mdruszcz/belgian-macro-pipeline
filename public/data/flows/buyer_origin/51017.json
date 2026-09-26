@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "31.3",
+      "value": "77.4666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "30.7",
+      "value": "76.04"
+    },
+    "rest_of_region": {
+      "share_pct": "7.1",
+      "value": "17.5"
+    },
+    "same_commune": {
+      "share_pct": "31.0",
+      "value": "76.86"
+    }
+  },
+  "coverage_pct": "95.7",
+  "dataset": "buyer_origin",
+  "denominator": "247.8666666667",
+  "dest_geo_id": "be:mun:51017",
+  "dest_name": {
+    "en": "Ellezelles",
+    "fr": "Ellezelles",
+    "nl": "Elzele"
+  },
+  "dest_nis": "51017",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 259,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ellezelles",
+        "fr": "Ellezelles",
+        "nl": "Elzele"
+      },
+      "nis": "51017",
+      "share_pct": "31.0",
+      "value": "76.86"
+    },
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "9.1",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Lessines",
+        "fr": "Lessines",
+        "nl": "Lessen"
+      },
+      "nis": "51069",
+      "share_pct": "8.3",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Flobecq",
+        "fr": "Flobecq",
+        "nl": "Vloesberg"
+      },
+      "nis": "51019",
+      "share_pct": "7.5",
+      "value": "18.54"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "6.5",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "5.8",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Maarkedal",
+        "fr": "Maarkedal",
+        "nl": "Maarkedal"
+      },
+      "nis": "45064",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Meise",
+        "fr": "Meise",
+        "nl": "Meise"
+      },
+      "nis": "23050",
+      "share_pct": "2.4",
+      "value": "6"
+    }
+  ]
+}

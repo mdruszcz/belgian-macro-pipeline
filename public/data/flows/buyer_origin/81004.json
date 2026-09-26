@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "17.7",
+      "value": "99.283333333"
+    },
+    "origin_unknown": {
+      "share_pct": "2.4",
+      "value": "13.5333333333"
+    },
+    "other_regions": {
+      "share_pct": "0.5",
+      "value": "3.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.6",
+      "value": "110.055555556"
+    },
+    "rest_of_region": {
+      "share_pct": "11.9",
+      "value": "66.7777777774"
+    },
+    "same_commune": {
+      "share_pct": "48.0",
+      "value": "269.79634615"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "562.4463461497",
+  "dest_geo_id": "be:mun:81004",
+  "dest_name": {
+    "en": "Aubange",
+    "fr": "Aubange",
+    "nl": "Aubange"
+  },
+  "dest_nis": "81004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 586,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Aubange",
+        "fr": "Aubange",
+        "nl": "Aubange"
+      },
+      "nis": "81004",
+      "share_pct": "48.0",
+      "value": "269.79634615"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "11.7",
+      "value": "65.566666667"
+    },
+    {
+      "name": {
+        "en": "Messancy",
+        "fr": "Messancy",
+        "nl": "Messancy"
+      },
+      "nis": "81015",
+      "share_pct": "7.4",
+      "value": "41.488888889"
+    },
+    {
+      "name": {
+        "en": "Musson",
+        "fr": "Musson",
+        "nl": "Musson"
+      },
+      "nis": "85026",
+      "share_pct": "3.5",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Saint-Léger",
+        "fr": "Saint-Léger",
+        "nl": "Saint-Léger"
+      },
+      "nis": "85034",
+      "share_pct": "2.0",
+      "value": "11.333333333"
+    },
+    {
+      "name": {
+        "en": "Etalle",
+        "fr": "Etalle",
+        "nl": "Etalle"
+      },
+      "nis": "85009",
+      "share_pct": "1.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "0.7",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Habay",
+        "fr": "Habay",
+        "nl": "Habay"
+      },
+      "nis": "85046",
+      "share_pct": "0.6",
+      "value": "3.5"
+    }
+  ]
+}

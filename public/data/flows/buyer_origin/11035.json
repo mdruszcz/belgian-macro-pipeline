@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "45.2",
+      "value": "231.4473809529"
+    },
+    "rest_of_region": {
+      "share_pct": "12.2",
+      "value": "62.5145238097"
+    },
+    "same_commune": {
+      "share_pct": "42.4",
+      "value": "216.70805714"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "511.6699619026",
+  "dest_geo_id": "be:mun:11035",
+  "dest_name": {
+    "en": "Ranst",
+    "fr": "Ranst",
+    "nl": "Ranst"
+  },
+  "dest_nis": "11035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 533,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "42.4",
+      "value": "216.70805714"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "19.1",
+      "value": "97.75"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "6.2",
+      "value": "31.892857143"
+    },
+    {
+      "name": {
+        "en": "Wommelgem",
+        "fr": "Wommelgem",
+        "nl": "Wommelgem"
+      },
+      "nis": "11052",
+      "share_pct": "5.9",
+      "value": "30.31"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "2.8",
+      "value": "14.531666667"
+    },
+    {
+      "name": {
+        "en": "Wijnegem",
+        "fr": "Wijnegem",
+        "nl": "Wijnegem"
+      },
+      "nis": "11050",
+      "share_pct": "2.6",
+      "value": "13.192857143"
+    },
+    {
+      "name": {
+        "en": "Boechout",
+        "fr": "Boechout",
+        "nl": "Boechout"
+      },
+      "nis": "11004",
+      "share_pct": "2.3",
+      "value": "11.52"
+    },
+    {
+      "name": {
+        "en": "Schoten",
+        "fr": "Schoten",
+        "nl": "Schoten"
+      },
+      "nis": "11040",
+      "share_pct": "2.2",
+      "value": "11.5"
+    }
+  ]
+}

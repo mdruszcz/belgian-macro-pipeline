@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "55.21"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "2.0"
+    },
+    "other_regions": {
+      "share_pct": "6.1",
+      "value": "169.384333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.0",
+      "value": "472.249618402"
+    },
+    "rest_of_region": {
+      "share_pct": "20.7",
+      "value": "575.7963333333"
+    },
+    "same_commune": {
+      "share_pct": "54.1",
+      "value": "1503.0804633"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "2777.7207483683",
+  "dest_geo_id": "be:mun:92094",
+  "dest_name": {
+    "en": "Namur",
+    "fr": "Namur",
+    "nl": "Namen"
+  },
+  "dest_nis": "92094",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2859,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "54.1",
+      "value": "1503.0804633"
+    },
+    {
+      "name": {
+        "en": "Andenne",
+        "fr": "Andenne",
+        "nl": "Andenne"
+      },
+      "nis": "92003",
+      "share_pct": "2.1",
+      "value": "59.45"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "2.0",
+      "value": "55.892156863"
+    },
+    {
+      "name": {
+        "en": "Profondeville",
+        "fr": "Profondeville",
+        "nl": "Profondeville"
+      },
+      "nis": "92101",
+      "share_pct": "1.9",
+      "value": "51.766666667"
+    },
+    {
+      "name": {
+        "en": "Eghezée",
+        "fr": "Eghezée",
+        "nl": "Eghezée"
+      },
+      "nis": "92035",
+      "share_pct": "1.7",
+      "value": "47"
+    },
+    {
+      "name": {
+        "en": "Gesves",
+        "fr": "Gesves",
+        "nl": "Gesves"
+      },
+      "nis": "92054",
+      "share_pct": "1.6",
+      "value": "44.205128205"
+    },
+    {
+      "name": {
+        "en": "La Bruyère",
+        "fr": "La Bruyère",
+        "nl": "La Bruyère"
+      },
+      "nis": "92141",
+      "share_pct": "1.6",
+      "value": "44.01"
+    },
+    {
+      "name": {
+        "en": "Assesse",
+        "fr": "Assesse",
+        "nl": "Assesse"
+      },
+      "nis": "92006",
+      "share_pct": "1.4",
+      "value": "38.665666667"
+    }
+  ]
+}

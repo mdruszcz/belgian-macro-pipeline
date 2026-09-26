@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "12.1666666666"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "5"
+    },
+    "other_regions": {
+      "share_pct": "0.8",
+      "value": "12.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.5",
+      "value": "245.421266666"
+    },
+    "rest_of_region": {
+      "share_pct": "17.5",
+      "value": "260.7913333330"
+    },
+    "same_commune": {
+      "share_pct": "64.1",
+      "value": "955.56175238"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "1491.4410190456",
+  "dest_geo_id": "be:mun:71016",
+  "dest_name": {
+    "en": "Genk",
+    "fr": "Genk",
+    "nl": "Genk"
+  },
+  "dest_nis": "71016",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1529,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Genk",
+        "fr": "Genk",
+        "nl": "Genk"
+      },
+      "nis": "71016",
+      "share_pct": "64.1",
+      "value": "955.56175238"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "5.4",
+      "value": "80.733333333"
+    },
+    {
+      "name": {
+        "en": "Houthalen-Helchteren",
+        "fr": "Houthalen-Helchteren",
+        "nl": "Houthalen-Helchteren"
+      },
+      "nis": "72039",
+      "share_pct": "4.0",
+      "value": "59.02"
+    },
+    {
+      "name": {
+        "en": "As",
+        "fr": "As",
+        "nl": "As"
+      },
+      "nis": "71002",
+      "share_pct": "3.0",
+      "value": "45"
+    },
+    {
+      "name": {
+        "en": "Diepenbeek",
+        "fr": "Diepenbeek",
+        "nl": "Diepenbeek"
+      },
+      "nis": "71011",
+      "share_pct": "2.3",
+      "value": "34.067"
+    },
+    {
+      "name": {
+        "en": "Oudsbergen",
+        "fr": "Oudsbergen",
+        "nl": "Oudsbergen"
+      },
+      "nis": "72042",
+      "share_pct": "2.2",
+      "value": "32.625"
+    },
+    {
+      "name": {
+        "en": "Bilzen-Hoeselt",
+        "fr": "Bilzen-Hoeselt",
+        "nl": "Bilzen-Hoeselt"
+      },
+      "nis": "73110",
+      "share_pct": "1.8",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Zutendaal",
+        "fr": "Zutendaal",
+        "nl": "Zutendaal"
+      },
+      "nis": "71067",
+      "share_pct": "1.8",
+      "value": "26.4376"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.5",
+      "value": "11.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.5",
+      "value": "2.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "46.1",
+      "value": "213.207499997"
+    },
+    "rest_of_region": {
+      "share_pct": "9.3",
+      "value": "43.06"
+    },
+    "same_commune": {
+      "share_pct": "41.5",
+      "value": "192.0225"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "462.289999997",
+  "dest_geo_id": "be:mun:13031",
+  "dest_name": {
+    "en": "Oud-Turnhout",
+    "fr": "Oud-Turnhout",
+    "nl": "Oud-Turnhout"
+  },
+  "dest_nis": "13031",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 475,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Oud-Turnhout",
+        "fr": "Oud-Turnhout",
+        "nl": "Oud-Turnhout"
+      },
+      "nis": "13031",
+      "share_pct": "41.5",
+      "value": "192.0225"
+    },
+    {
+      "name": {
+        "en": "Turnhout",
+        "fr": "Turnhout",
+        "nl": "Turnhout"
+      },
+      "nis": "13040",
+      "share_pct": "24.1",
+      "value": "111.33333333"
+    },
+    {
+      "name": {
+        "en": "Ravels",
+        "fr": "Ravels",
+        "nl": "Ravels"
+      },
+      "nis": "13035",
+      "share_pct": "6.5",
+      "value": "30"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.5",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Lille",
+        "fr": "Lille",
+        "nl": "Lille"
+      },
+      "nis": "13019",
+      "share_pct": "2.4",
+      "value": "11.166666667"
+    },
+    {
+      "name": {
+        "en": "Kasterlee",
+        "fr": "Kasterlee",
+        "nl": "Kasterlee"
+      },
+      "nis": "13017",
+      "share_pct": "2.3",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "2.0",
+      "value": "9.15"
+    },
+    {
+      "name": {
+        "en": "Arendonk",
+        "fr": "Arendonk",
+        "nl": "Arendonk"
+      },
+      "nis": "13001",
+      "share_pct": "1.6",
+      "value": "7.5"
+    }
+  ]
+}

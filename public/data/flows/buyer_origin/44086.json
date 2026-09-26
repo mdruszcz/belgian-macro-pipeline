@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "1.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "48.7",
+      "value": "198.152258065"
+    },
+    "rest_of_region": {
+      "share_pct": "11.2",
+      "value": "45.6078571429"
+    },
+    "same_commune": {
+      "share_pct": "39.6",
+      "value": "161.086"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "406.8461152079",
+  "dest_geo_id": "be:mun:44086",
+  "dest_name": {
+    "en": "Nazareth-De Pinte",
+    "fr": "Nazareth-De Pinte",
+    "nl": "Nazareth-De Pinte"
+  },
+  "dest_nis": "44086",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 418,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Nazareth-De Pinte",
+        "fr": "Nazareth-De Pinte",
+        "nl": "Nazareth-De Pinte"
+      },
+      "nis": "44086",
+      "share_pct": "39.6",
+      "value": "161.086"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "25.1",
+      "value": "102.01"
+    },
+    {
+      "name": {
+        "en": "Sint-Martens-Latem",
+        "fr": "Sint-Martens-Latem",
+        "nl": "Sint-Martens-Latem"
+      },
+      "nis": "44064",
+      "share_pct": "7.5",
+      "value": "30.642258065"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "4.8",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "4.2",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Gavere",
+        "fr": "Gavere",
+        "nl": "Gavere"
+      },
+      "nis": "44020",
+      "share_pct": "3.4",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "1.4",
+      "value": "5.52"
+    },
+    {
+      "name": {
+        "en": "Destelbergen",
+        "fr": "Destelbergen",
+        "nl": "Destelbergen"
+      },
+      "nis": "44013",
+      "share_pct": "1.4",
+      "value": "5.5"
+    }
+  ]
+}

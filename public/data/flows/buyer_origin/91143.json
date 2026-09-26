@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.0",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "36.3",
+      "value": "97.6966666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.2",
+      "value": "30"
+    },
+    "rest_of_region": {
+      "share_pct": "17.1",
+      "value": "46.1166666667"
+    },
+    "same_commune": {
+      "share_pct": "32.4",
+      "value": "87.1"
+    }
+  },
+  "coverage_pct": "92.7",
+  "dataset": "buyer_origin",
+  "denominator": "268.9133333334",
+  "dest_geo_id": "be:mun:91143",
+  "dest_name": {
+    "en": "Vresse-sur-Semois",
+    "fr": "Vresse-sur-Semois",
+    "nl": "Vresse-sur-Semois"
+  },
+  "dest_nis": "91143",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 290,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Vresse-sur-Semois",
+        "fr": "Vresse-sur-Semois",
+        "nl": "Vresse-sur-Semois"
+      },
+      "nis": "91143",
+      "share_pct": "32.4",
+      "value": "87.1"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "7.1",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Sint-Martens-Latem",
+        "fr": "Sint-Martens-Latem",
+        "nl": "Sint-Martens-Latem"
+      },
+      "nis": "44064",
+      "share_pct": "5.6",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Bièvre",
+        "fr": "Bièvre",
+        "nl": "Bièvre"
+      },
+      "nis": "91015",
+      "share_pct": "4.5",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Gedinne",
+        "fr": "Gedinne",
+        "nl": "Gedinne"
+      },
+      "nis": "91054",
+      "share_pct": "4.5",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "4.1",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Bouillon",
+        "fr": "Bouillon",
+        "nl": "Bouillon"
+      },
+      "nis": "84010",
+      "share_pct": "3.1",
+      "value": "8.45"
+    },
+    {
+      "name": {
+        "en": "Hamme",
+        "fr": "Hamme",
+        "nl": "Hamme"
+      },
+      "nis": "42008",
+      "share_pct": "3.0",
+      "value": "8"
+    }
+  ]
+}

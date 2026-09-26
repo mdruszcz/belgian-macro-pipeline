@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.7",
+      "value": "12"
+    },
+    "origin_unknown": {
+      "share_pct": "0.6",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "8.1",
+      "value": "26.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "24.6",
+      "value": "80.15"
+    },
+    "rest_of_region": {
+      "share_pct": "26.6",
+      "value": "86.7280980392"
+    },
+    "same_commune": {
+      "share_pct": "36.4",
+      "value": "118.76769804"
+    }
+  },
+  "coverage_pct": "98.8",
+  "dataset": "buyer_origin",
+  "denominator": "326.1457960792",
+  "dest_geo_id": "be:mun:23038",
+  "dest_name": {
+    "en": "Kampenhout",
+    "fr": "Kampenhout",
+    "nl": "Kampenhout"
+  },
+  "dest_nis": "23038",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 330,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kampenhout",
+        "fr": "Kampenhout",
+        "nl": "Kampenhout"
+      },
+      "nis": "23038",
+      "share_pct": "36.4",
+      "value": "118.76769804"
+    },
+    {
+      "name": {
+        "en": "Steenokkerzeel",
+        "fr": "Steenokkerzeel",
+        "nl": "Steenokkerzeel"
+      },
+      "nis": "23081",
+      "share_pct": "7.7",
+      "value": "25.2"
+    },
+    {
+      "name": {
+        "en": "Kortenberg",
+        "fr": "Kortenberg",
+        "nl": "Kortenberg"
+      },
+      "nis": "24055",
+      "share_pct": "6.4",
+      "value": "20.875"
+    },
+    {
+      "name": {
+        "en": "Machelen",
+        "fr": "Machelen",
+        "nl": "Machelen"
+      },
+      "nis": "23047",
+      "share_pct": "5.1",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Vilvoorde",
+        "fr": "Vilvorde",
+        "nl": "Vilvoorde"
+      },
+      "nis": "23088",
+      "share_pct": "5.1",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "2.9",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Zemst",
+        "fr": "Zemst",
+        "nl": "Zemst"
+      },
+      "nis": "23096",
+      "share_pct": "2.9",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Haacht",
+        "fr": "Haacht",
+        "nl": "Haacht"
+      },
+      "nis": "24033",
+      "share_pct": "2.8",
+      "value": "9.05"
+    }
+  ]
+}

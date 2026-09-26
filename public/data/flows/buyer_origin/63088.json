@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "5.9",
+      "value": "15.45"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.2",
+      "value": "11.1666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.5",
+      "value": "67.25"
+    },
+    "rest_of_region": {
+      "share_pct": "10.9",
+      "value": "28.8928571429"
+    },
+    "same_commune": {
+      "share_pct": "53.5",
+      "value": "141.26666667"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "264.0261904796",
+  "dest_geo_id": "be:mun:63088",
+  "dest_name": {
+    "en": "Plombières",
+    "fr": "Plombières",
+    "nl": "Plombières"
+  },
+  "dest_nis": "63088",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 270,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Plombières",
+        "fr": "Plombières",
+        "nl": "Plombières"
+      },
+      "nis": "63088",
+      "share_pct": "53.5",
+      "value": "141.26666667"
+    },
+    {
+      "name": {
+        "en": "Welkenraedt",
+        "fr": "Welkenraedt",
+        "nl": "Welkenraedt"
+      },
+      "nis": "63084",
+      "share_pct": "9.3",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Dalhem",
+        "fr": "Dalhem",
+        "nl": "Dalhem"
+      },
+      "nis": "62027",
+      "share_pct": "6.4",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Kelmis",
+        "fr": "La Calamine",
+        "nl": "Kelmis"
+      },
+      "nis": "63040",
+      "share_pct": "5.1",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Voeren",
+        "fr": "Fourons",
+        "nl": "Voeren"
+      },
+      "nis": "73109",
+      "share_pct": "3.1",
+      "value": "8.1666666667"
+    },
+    {
+      "name": {
+        "en": "Eupen",
+        "fr": "Eupen",
+        "nl": "Eupen"
+      },
+      "nis": "63023",
+      "share_pct": "2.7",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Baelen",
+        "fr": "Baelen",
+        "nl": "Baelen"
+      },
+      "nis": "63004",
+      "share_pct": "2.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "1.9",
+      "value": "5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.1",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "54.7",
+      "value": "191.5100"
+    },
+    "rest_of_region": {
+      "share_pct": "10.6",
+      "value": "37.0185"
+    },
+    "same_commune": {
+      "share_pct": "33.6",
+      "value": "117.6435"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "350.1720",
+  "dest_geo_id": "be:mun:24135",
+  "dest_name": {
+    "en": "Tielt-Winge",
+    "fr": "Tielt-Winge",
+    "nl": "Tielt-Winge"
+  },
+  "dest_nis": "24135",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 360,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tielt-Winge",
+        "fr": "Tielt-Winge",
+        "nl": "Tielt-Winge"
+      },
+      "nis": "24135",
+      "share_pct": "33.6",
+      "value": "117.6435"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "12.9",
+      "value": "45"
+    },
+    {
+      "name": {
+        "en": "Lubbeek",
+        "fr": "Lubbeek",
+        "nl": "Lubbeek"
+      },
+      "nis": "24066",
+      "share_pct": "11.0",
+      "value": "38.5"
+    },
+    {
+      "name": {
+        "en": "Holsbeek",
+        "fr": "Holsbeek",
+        "nl": "Holsbeek"
+      },
+      "nis": "24043",
+      "share_pct": "7.7",
+      "value": "27.1329"
+    },
+    {
+      "name": {
+        "en": "Aarschot",
+        "fr": "Aarschot",
+        "nl": "Aarschot"
+      },
+      "nis": "24001",
+      "share_pct": "6.5",
+      "value": "22.8671"
+    },
+    {
+      "name": {
+        "en": "Herent",
+        "fr": "Herent",
+        "nl": "Herent"
+      },
+      "nis": "24038",
+      "share_pct": "4.4",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "2.3",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "2.3",
+      "value": "8"
+    }
+  ]
+}

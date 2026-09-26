@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "36.9",
+      "value": "300.3122583296"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "23.4",
+      "value": "190.529289215"
+    },
+    "rest_of_region": {
+      "share_pct": "8.8",
+      "value": "71.666666667"
+    },
+    "same_commune": {
+      "share_pct": "30.4",
+      "value": "247.55166667"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "814.0598808816",
+  "dest_geo_id": "be:mun:25105",
+  "dest_name": {
+    "en": "Tubize",
+    "fr": "Tubize",
+    "nl": "Tubeke"
+  },
+  "dest_nis": "25105",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 844,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "30.4",
+      "value": "247.55166667"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Château",
+        "fr": "Braine-le-Château",
+        "nl": "Kasteelbrakel"
+      },
+      "nis": "25015",
+      "share_pct": "8.6",
+      "value": "70.014705882"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "5.0",
+      "value": "40.5"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "4.9",
+      "value": "39.613333333"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "3.0",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.9",
+      "value": "23.5"
+    },
+    {
+      "name": {
+        "en": "Sint-Pieters-Leeuw",
+        "fr": "Sint-Pieters-Leeuw",
+        "nl": "Sint-Pieters-Leeuw"
+      },
+      "nis": "23077",
+      "share_pct": "2.8",
+      "value": "22.538461538"
+    },
+    {
+      "name": {
+        "en": "Ittre",
+        "fr": "Ittre",
+        "nl": "Itter"
+      },
+      "nis": "25044",
+      "share_pct": "2.7",
+      "value": "22"
+    }
+  ]
+}

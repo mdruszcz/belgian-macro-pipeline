@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.4",
+      "value": "17"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "13.1",
+      "value": "41.0"
+    },
+    "rest_of_region": {
+      "share_pct": "41.5",
+      "value": "129.8786"
+    },
+    "same_commune": {
+      "share_pct": "40.0",
+      "value": "125.3615"
+    }
+  },
+  "coverage_pct": "96.7",
+  "dataset": "buyer_origin",
+  "denominator": "313.2401",
+  "dest_geo_id": "be:mun:24014",
+  "dest_name": {
+    "en": "Boortmeerbeek",
+    "fr": "Boortmeerbeek",
+    "nl": "Boortmeerbeek"
+  },
+  "dest_nis": "24014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 324,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Boortmeerbeek",
+        "fr": "Boortmeerbeek",
+        "nl": "Boortmeerbeek"
+      },
+      "nis": "24014",
+      "share_pct": "40.0",
+      "value": "125.3615"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "6.9",
+      "value": "21.6786"
+    },
+    {
+      "name": {
+        "en": "Zemst",
+        "fr": "Zemst",
+        "nl": "Zemst"
+      },
+      "nis": "23096",
+      "share_pct": "5.2",
+      "value": "16.2"
+    },
+    {
+      "name": {
+        "en": "Haacht",
+        "fr": "Haacht",
+        "nl": "Haacht"
+      },
+      "nis": "24033",
+      "share_pct": "4.6",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Steenokkerzeel",
+        "fr": "Steenokkerzeel",
+        "nl": "Steenokkerzeel"
+      },
+      "nis": "23081",
+      "share_pct": "4.2",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "4.0",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Kampenhout",
+        "fr": "Kampenhout",
+        "nl": "Kampenhout"
+      },
+      "nis": "23038",
+      "share_pct": "3.4",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "2.6",
+      "value": "8"
+    }
+  ]
+}

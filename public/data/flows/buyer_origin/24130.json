@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "1.1",
+      "value": "3"
+    },
+    "other_regions": {
+      "share_pct": "3.0",
+      "value": "8"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "35.7",
+      "value": "94.1"
+    },
+    "rest_of_region": {
+      "share_pct": "16.6",
+      "value": "43.73"
+    },
+    "same_commune": {
+      "share_pct": "43.5",
+      "value": "114.79"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "263.62",
+  "dest_geo_id": "be:mun:24130",
+  "dest_name": {
+    "en": "Zoutleeuw",
+    "fr": "Léau",
+    "nl": "Zoutleeuw"
+  },
+  "dest_nis": "24130",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 269,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zoutleeuw",
+        "fr": "Léau",
+        "nl": "Zoutleeuw"
+      },
+      "nis": "24130",
+      "share_pct": "43.5",
+      "value": "114.79"
+    },
+    {
+      "name": {
+        "en": "Linter",
+        "fr": "Linter",
+        "nl": "Linter"
+      },
+      "nis": "24133",
+      "share_pct": "7.8",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "7.2",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "6.8",
+      "value": "18.03"
+    },
+    {
+      "name": {
+        "en": "Kortenaken",
+        "fr": "Kortenaken",
+        "nl": "Kortenaken"
+      },
+      "nis": "24054",
+      "share_pct": "5.1",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Geetbets",
+        "fr": "Geetbets",
+        "nl": "Geetbets"
+      },
+      "nis": "24028",
+      "share_pct": "4.9",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Landen",
+        "fr": "Landen",
+        "nl": "Landen"
+      },
+      "nis": "24059",
+      "share_pct": "3.8",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "2.0",
+      "value": "5.4"
+    }
+  ]
+}

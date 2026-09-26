@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.5",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.4",
+      "value": "20.750"
+    },
+    "rest_of_region": {
+      "share_pct": "43.0",
+      "value": "51.455"
+    },
+    "same_commune": {
+      "share_pct": "36.7",
+      "value": "43.875"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "119.580",
+  "dest_geo_id": "be:mun:61028",
+  "dest_name": {
+    "en": "Héron",
+    "fr": "Héron",
+    "nl": "Héron"
+  },
+  "dest_nis": "61028",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 122,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Héron",
+        "fr": "Héron",
+        "nl": "Héron"
+      },
+      "nis": "61028",
+      "share_pct": "36.7",
+      "value": "43.875"
+    },
+    {
+      "name": {
+        "en": "Andenne",
+        "fr": "Andenne",
+        "nl": "Andenne"
+      },
+      "nis": "92003",
+      "share_pct": "13.4",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Huy",
+        "fr": "Huy",
+        "nl": "Hoei"
+      },
+      "nis": "61031",
+      "share_pct": "6.2",
+      "value": "7.375"
+    },
+    {
+      "name": {
+        "en": "Fernelmont",
+        "fr": "Fernelmont",
+        "nl": "Fernelmont"
+      },
+      "nis": "92138",
+      "share_pct": "5.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Wanze",
+        "fr": "Wanze",
+        "nl": "Wanze"
+      },
+      "nis": "61072",
+      "share_pct": "2.9",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Amay",
+        "fr": "Amay",
+        "nl": "Amay"
+      },
+      "nis": "61003",
+      "share_pct": "2.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Burdinne",
+        "fr": "Burdinne",
+        "nl": "Burdinne"
+      },
+      "nis": "61010",
+      "share_pct": "2.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "2.5",
+      "value": "3"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "25.6",
+      "value": "66.5300000000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.7",
+      "value": "38.27"
+    },
+    "rest_of_region": {
+      "share_pct": "8.4",
+      "value": "21.8633333334"
+    },
+    "same_commune": {
+      "share_pct": "50.6",
+      "value": "131.5"
+    }
+  },
+  "coverage_pct": "95.8",
+  "dataset": "buyer_origin",
+  "denominator": "259.6633333334",
+  "dest_geo_id": "be:mun:91072",
+  "dest_name": {
+    "en": "Houyet",
+    "fr": "Houyet",
+    "nl": "Houyet"
+  },
+  "dest_nis": "91072",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 271,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Houyet",
+        "fr": "Houyet",
+        "nl": "Houyet"
+      },
+      "nis": "91072",
+      "share_pct": "50.6",
+      "value": "131.5"
+    },
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "11.9",
+      "value": "31"
+    },
+    {
+      "name": {
+        "en": "Dinant",
+        "fr": "Dinant",
+        "nl": "Dinant"
+      },
+      "nis": "91034",
+      "share_pct": "4.5",
+      "value": "11.77"
+    },
+    {
+      "name": {
+        "en": "Beauraing",
+        "fr": "Beauraing",
+        "nl": "Beauraing"
+      },
+      "nis": "91013",
+      "share_pct": "3.9",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "2.5",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Saint-Gilles",
+        "fr": "Saint-Gilles",
+        "nl": "Sint-Gillis"
+      },
+      "nis": "21013",
+      "share_pct": "2.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "2.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "2.1",
+      "value": "5.53"
+    }
+  ]
+}

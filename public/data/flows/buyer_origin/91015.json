@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "3.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "13.0",
+      "value": "43.91"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "4.3",
+      "value": "14.5"
+    },
+    "rest_of_region": {
+      "share_pct": "40.9",
+      "value": "138.31"
+    },
+    "same_commune": {
+      "share_pct": "40.8",
+      "value": "138.15666667"
+    }
+  },
+  "coverage_pct": "96.7",
+  "dataset": "buyer_origin",
+  "denominator": "338.37666667",
+  "dest_geo_id": "be:mun:91015",
+  "dest_name": {
+    "en": "Bièvre",
+    "fr": "Bièvre",
+    "nl": "Bièvre"
+  },
+  "dest_nis": "91015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 350,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Bièvre",
+        "fr": "Bièvre",
+        "nl": "Bièvre"
+      },
+      "nis": "91015",
+      "share_pct": "40.8",
+      "value": "138.15666667"
+    },
+    {
+      "name": {
+        "en": "Paliseul",
+        "fr": "Paliseul",
+        "nl": "Paliseul"
+      },
+      "nis": "84050",
+      "share_pct": "8.1",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Sombreffe",
+        "fr": "Sombreffe",
+        "nl": "Sombreffe"
+      },
+      "nis": "92114",
+      "share_pct": "7.7",
+      "value": "26"
+    },
+    {
+      "name": {
+        "en": "Bouillon",
+        "fr": "Bouillon",
+        "nl": "Bouillon"
+      },
+      "nis": "84010",
+      "share_pct": "4.1",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Fernelmont",
+        "fr": "Fernelmont",
+        "nl": "Fernelmont"
+      },
+      "nis": "92138",
+      "share_pct": "2.5",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Gedinne",
+        "fr": "Gedinne",
+        "nl": "Gedinne"
+      },
+      "nis": "91054",
+      "share_pct": "2.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Marche-en-Famenne",
+        "fr": "Marche-en-Famenne",
+        "nl": "Marche-en-Famenne"
+      },
+      "nis": "83034",
+      "share_pct": "2.1",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Eghezée",
+        "fr": "Eghezée",
+        "nl": "Eghezée"
+      },
+      "nis": "92035",
+      "share_pct": "1.9",
+      "value": "6.5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "17.1",
+      "value": "29.166666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "41.4",
+      "value": "70.733333333"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "41.0",
+      "value": "70"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "170.900000000",
+  "dest_geo_id": "be:mun:63048",
+  "dest_name": {
+    "en": "Lontzen",
+    "fr": "Lontzen",
+    "nl": "Lontzen"
+  },
+  "dest_nis": "63048",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 178,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lontzen",
+        "fr": "Lontzen",
+        "nl": "Lontzen"
+      },
+      "nis": "63048",
+      "share_pct": "41.0",
+      "value": "70"
+    },
+    {
+      "name": {
+        "en": "Welkenraedt",
+        "fr": "Welkenraedt",
+        "nl": "Welkenraedt"
+      },
+      "nis": "63084",
+      "share_pct": "21.7",
+      "value": "37.1"
+    },
+    {
+      "name": {
+        "en": "Eupen",
+        "fr": "Eupen",
+        "nl": "Eupen"
+      },
+      "nis": "63023",
+      "share_pct": "6.8",
+      "value": "11.633333333"
+    },
+    {
+      "name": {
+        "en": "Baelen",
+        "fr": "Baelen",
+        "nl": "Baelen"
+      },
+      "nis": "63004",
+      "share_pct": "4.7",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Plombières",
+        "fr": "Plombières",
+        "nl": "Plombières"
+      },
+      "nis": "63088",
+      "share_pct": "3.5",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Aubel",
+        "fr": "Aubel",
+        "nl": "Aubel"
+      },
+      "nis": "63003",
+      "share_pct": "1.8",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Dison",
+        "fr": "Dison",
+        "nl": "Dison"
+      },
+      "nis": "63020",
+      "share_pct": "0.6",
+      "value": "1"
+    },
+    {
+      "name": {
+        "en": "Jalhay",
+        "fr": "Jalhay",
+        "nl": "Jalhay"
+      },
+      "nis": "63038",
+      "share_pct": "0.6",
+      "value": "1"
+    }
+  ]
+}

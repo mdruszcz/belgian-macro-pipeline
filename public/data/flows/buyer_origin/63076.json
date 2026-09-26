@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.2",
+      "value": "77.6666666664"
+    },
+    "rest_of_region": {
+      "share_pct": "8.7",
+      "value": "21.6666666667"
+    },
+    "same_commune": {
+      "share_pct": "57.7",
+      "value": "143.935"
+    }
+  },
+  "coverage_pct": "95.5",
+  "dataset": "buyer_origin",
+  "denominator": "249.2683333331",
+  "dest_geo_id": "be:mun:63076",
+  "dest_name": {
+    "en": "Theux",
+    "fr": "Theux",
+    "nl": "Theux"
+  },
+  "dest_nis": "63076",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 261,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "57.7",
+      "value": "143.935"
+    },
+    {
+      "name": {
+        "en": "Verviers",
+        "fr": "Verviers",
+        "nl": "Verviers"
+      },
+      "nis": "63079",
+      "share_pct": "10.7",
+      "value": "26.583333333"
+    },
+    {
+      "name": {
+        "en": "Pepinster",
+        "fr": "Pepinster",
+        "nl": "Pepinster"
+      },
+      "nis": "63058",
+      "share_pct": "4.6",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Jalhay",
+        "fr": "Jalhay",
+        "nl": "Jalhay"
+      },
+      "nis": "63038",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "3.5",
+      "value": "8.6666666667"
+    },
+    {
+      "name": {
+        "en": "Spa",
+        "fr": "Spa",
+        "nl": "Spa"
+      },
+      "nis": "63072",
+      "share_pct": "3.1",
+      "value": "7.6666666667"
+    },
+    {
+      "name": {
+        "en": "Aubel",
+        "fr": "Aubel",
+        "nl": "Aubel"
+      },
+      "nis": "63003",
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Herve",
+        "fr": "Herve",
+        "nl": "Herve"
+      },
+      "nis": "63035",
+      "share_pct": "1.2",
+      "value": "3"
+    }
+  ]
+}

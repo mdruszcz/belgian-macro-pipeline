@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.5",
+      "value": "7"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "33.7",
+      "value": "52.75"
+    },
+    "rest_of_region": {
+      "share_pct": "45.7",
+      "value": "71.5000000000"
+    },
+    "same_commune": {
+      "share_pct": "16.2",
+      "value": "25.315"
+    }
+  },
+  "coverage_pct": "96.1",
+  "dataset": "buyer_origin",
+  "denominator": "156.5650000000",
+  "dest_geo_id": "be:mun:64021",
+  "dest_name": {
+    "en": "Crisnée",
+    "fr": "Crisnée",
+    "nl": "Crisnée"
+  },
+  "dest_nis": "64021",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 163,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Crisnée",
+        "fr": "Crisnée",
+        "nl": "Crisnée"
+      },
+      "nis": "64021",
+      "share_pct": "16.2",
+      "value": "25.315"
+    },
+    {
+      "name": {
+        "en": "Oreye",
+        "fr": "Oreye",
+        "nl": "Oerle"
+      },
+      "nis": "64056",
+      "share_pct": "8.8",
+      "value": "13.75"
+    },
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "8.3",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "7.3",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Fléron",
+        "fr": "Fléron",
+        "nl": "Fléron"
+      },
+      "nis": "62038",
+      "share_pct": "6.4",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Donceel",
+        "fr": "Donceel",
+        "nl": "Donceel"
+      },
+      "nis": "64023",
+      "share_pct": "5.7",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Wanze",
+        "fr": "Wanze",
+        "nl": "Wanze"
+      },
+      "nis": "61072",
+      "share_pct": "5.1",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Wasseiges",
+        "fr": "Wasseiges",
+        "nl": "Wasseiges"
+      },
+      "nis": "64075",
+      "share_pct": "5.1",
+      "value": "8"
+    }
+  ]
+}

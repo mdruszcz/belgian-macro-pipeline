@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "6.6666666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "10.12"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "10.2",
+      "value": "232.008333333"
+    },
+    "rest_of_region": {
+      "share_pct": "19.6",
+      "value": "446.5515973663"
+    },
+    "same_commune": {
+      "share_pct": "69.5",
+      "value": "1587.7187038"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "2283.0653011660",
+  "dest_geo_id": "be:mun:46030",
+  "dest_name": {
+    "en": "Beveren-Kruibeke-Zwijndrecht",
+    "fr": "Beveren-Kruibeke-Zwijndrecht",
+    "nl": "Beveren-Kruibeke-Zwijndrecht"
+  },
+  "dest_nis": "46030",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2346,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beveren-Kruibeke-Zwijndrecht",
+        "fr": "Beveren-Kruibeke-Zwijndrecht",
+        "nl": "Beveren-Kruibeke-Zwijndrecht"
+      },
+      "nis": "46030",
+      "share_pct": "69.5",
+      "value": "1587.7187038"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "10.4",
+      "value": "237.9811507"
+    },
+    {
+      "name": {
+        "en": "Sint-Niklaas",
+        "fr": "Saint-Nicolas",
+        "nl": "Sint-Niklaas"
+      },
+      "nis": "46021",
+      "share_pct": "3.9",
+      "value": "89.04"
+    },
+    {
+      "name": {
+        "en": "Temse",
+        "fr": "Tamise",
+        "nl": "Temse"
+      },
+      "nis": "46025",
+      "share_pct": "2.7",
+      "value": "62.32"
+    },
+    {
+      "name": {
+        "en": "Sint-Gillis-Waas",
+        "fr": "Sint-Gillis-Waas",
+        "nl": "Sint-Gillis-Waas"
+      },
+      "nis": "46020",
+      "share_pct": "2.1",
+      "value": "47.235"
+    },
+    {
+      "name": {
+        "en": "Stekene",
+        "fr": "Stekene",
+        "nl": "Stekene"
+      },
+      "nis": "46024",
+      "share_pct": "1.0",
+      "value": "22.98"
+    },
+    {
+      "name": {
+        "en": "Waasmunster",
+        "fr": "Waasmunster",
+        "nl": "Waasmunster"
+      },
+      "nis": "42023",
+      "share_pct": "1.0",
+      "value": "22.533333333"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "0.8",
+      "value": "19.0056605"
+    }
+  ]
+}

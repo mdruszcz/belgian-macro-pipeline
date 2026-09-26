@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.3",
+      "value": "14.0272413793"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "5.2",
+      "value": "57.525"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "9.6",
+      "value": "105.8862420956"
+    },
+    "rest_of_region": {
+      "share_pct": "55.6",
+      "value": "615.9190932314"
+    },
+    "same_commune": {
+      "share_pct": "28.3",
+      "value": "314.10104866"
+    }
+  },
+  "coverage_pct": "96.8",
+  "dataset": "buyer_origin",
+  "denominator": "1108.4586253663",
+  "dest_geo_id": "be:mun:31004",
+  "dest_name": {
+    "en": "Blankenberge",
+    "fr": "Blankenberge",
+    "nl": "Blankenberge"
+  },
+  "dest_nis": "31004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1145,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Blankenberge",
+        "fr": "Blankenberge",
+        "nl": "Blankenberge"
+      },
+      "nis": "31004",
+      "share_pct": "28.3",
+      "value": "314.10104866"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "4.8",
+      "value": "52.685185185"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "2.6",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Knokke-Heist",
+        "fr": "Knokke-Heist",
+        "nl": "Knokke-Heist"
+      },
+      "nis": "31043",
+      "share_pct": "2.4",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "De Haan",
+        "fr": "De Haan",
+        "nl": "De Haan"
+      },
+      "nis": "35029",
+      "share_pct": "2.3",
+      "value": "25.925"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.0",
+      "value": "22.666666667"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "1.4",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "1.3",
+      "value": "14"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "4.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "7.4",
+      "value": "50.6786666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.9",
+      "value": "114.742857143"
+    },
+    "rest_of_region": {
+      "share_pct": "34.9",
+      "value": "237.36"
+    },
+    "same_commune": {
+      "share_pct": "40.3",
+      "value": "274.12159664"
+    }
+  },
+  "coverage_pct": "98.1",
+  "dataset": "buyer_origin",
+  "denominator": "680.9031204497",
+  "dest_geo_id": "be:mun:92142",
+  "dest_name": {
+    "en": "Gembloux",
+    "fr": "Gembloux",
+    "nl": "Gembloux"
+  },
+  "dest_nis": "92142",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 694,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "40.3",
+      "value": "274.12159664"
+    },
+    {
+      "name": {
+        "en": "La Bruyère",
+        "fr": "La Bruyère",
+        "nl": "La Bruyère"
+      },
+      "nis": "92141",
+      "share_pct": "3.9",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "3.7",
+      "value": "25.1"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "3.3",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Chastre",
+        "fr": "Chastre",
+        "nl": "Chastre"
+      },
+      "nis": "25117",
+      "share_pct": "2.9",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "2.6",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Jemeppe-sur-Sambre",
+        "fr": "Jemeppe-sur-Sambre",
+        "nl": "Jemeppe-sur-Sambre"
+      },
+      "nis": "92140",
+      "share_pct": "2.5",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Sombreffe",
+        "fr": "Sombreffe",
+        "nl": "Sombreffe"
+      },
+      "nis": "92114",
+      "share_pct": "2.4",
+      "value": "16.642857143"
+    }
+  ]
+}

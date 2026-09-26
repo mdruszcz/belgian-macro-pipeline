@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.4",
+      "value": "12.1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.7",
+      "value": "194.00"
+    },
+    "rest_of_region": {
+      "share_pct": "24.9",
+      "value": "124.666666667"
+    },
+    "same_commune": {
+      "share_pct": "33.0",
+      "value": "165.34090909"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "501.107575757",
+  "dest_geo_id": "be:mun:11005",
+  "dest_name": {
+    "en": "Boom",
+    "fr": "Boom",
+    "nl": "Boom"
+  },
+  "dest_nis": "11005",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 512,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Boom",
+        "fr": "Boom",
+        "nl": "Boom"
+      },
+      "nis": "11005",
+      "share_pct": "33.0",
+      "value": "165.34090909"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "19.4",
+      "value": "97.25"
+    },
+    {
+      "name": {
+        "en": "Rumst",
+        "fr": "Rumst",
+        "nl": "Rumst"
+      },
+      "nis": "11037",
+      "share_pct": "6.2",
+      "value": "31.25"
+    },
+    {
+      "name": {
+        "en": "Niel",
+        "fr": "Niel",
+        "nl": "Niel"
+      },
+      "nis": "11030",
+      "share_pct": "4.1",
+      "value": "20.46"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "3.3",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Aartselaar",
+        "fr": "Aartselaar",
+        "nl": "Aartselaar"
+      },
+      "nis": "11001",
+      "share_pct": "3.1",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Puurs-Sint-Amands",
+        "fr": "Puurs-Sint-Amands",
+        "nl": "Puurs-Sint-Amands"
+      },
+      "nis": "12041",
+      "share_pct": "2.6",
+      "value": "13.166666667"
+    },
+    {
+      "name": {
+        "en": "Willebroek",
+        "fr": "Willebroek",
+        "nl": "Willebroek"
+      },
+      "nis": "12040",
+      "share_pct": "2.4",
+      "value": "12"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "67.5",
+      "value": "150.415"
+    },
+    "rest_of_region": {
+      "share_pct": "9.2",
+      "value": "20.5"
+    },
+    "same_commune": {
+      "share_pct": "22.6",
+      "value": "50.364467923"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "222.779467923",
+  "dest_geo_id": "be:mun:62015",
+  "dest_name": {
+    "en": "Beyne-Heusay",
+    "fr": "Beyne-Heusay",
+    "nl": "Beyne-Heusay"
+  },
+  "dest_nis": "62015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 229,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "28.1",
+      "value": "62.625"
+    },
+    {
+      "name": {
+        "en": "Beyne-Heusay",
+        "fr": "Beyne-Heusay",
+        "nl": "Beyne-Heusay"
+      },
+      "nis": "62015",
+      "share_pct": "22.6",
+      "value": "50.364467923"
+    },
+    {
+      "name": {
+        "en": "Fléron",
+        "fr": "Fléron",
+        "nl": "Fléron"
+      },
+      "nis": "62038",
+      "share_pct": "10.8",
+      "value": "24.165"
+    },
+    {
+      "name": {
+        "en": "Soumagne",
+        "fr": "Soumagne",
+        "nl": "Soumagne"
+      },
+      "nis": "62099",
+      "share_pct": "7.2",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Blegny",
+        "fr": "Blegny",
+        "nl": "Blegny"
+      },
+      "nis": "62119",
+      "share_pct": "4.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Chaudfontaine",
+        "fr": "Chaudfontaine",
+        "nl": "Chaudfontaine"
+      },
+      "nis": "62022",
+      "share_pct": "3.8",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "3.6",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Seraing",
+        "fr": "Seraing",
+        "nl": "Seraing"
+      },
+      "nis": "62096",
+      "share_pct": "2.5",
+      "value": "5.5"
+    }
+  ]
+}

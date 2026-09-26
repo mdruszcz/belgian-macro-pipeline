@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0.05"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "20.3",
+      "value": "81.6749999997"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.4",
+      "value": "154.844500000"
+    },
+    "rest_of_region": {
+      "share_pct": "6.3",
+      "value": "25.5545"
+    },
+    "same_commune": {
+      "share_pct": "34.9",
+      "value": "140.7354"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "402.8593999997",
+  "dest_geo_id": "be:mun:23050",
+  "dest_name": {
+    "en": "Meise",
+    "fr": "Meise",
+    "nl": "Meise"
+  },
+  "dest_nis": "23050",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 413,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Meise",
+        "fr": "Meise",
+        "nl": "Meise"
+      },
+      "nis": "23050",
+      "share_pct": "34.9",
+      "value": "140.7354"
+    },
+    {
+      "name": {
+        "en": "Grimbergen",
+        "fr": "Grimbergen",
+        "nl": "Grimbergen"
+      },
+      "nis": "23025",
+      "share_pct": "12.5",
+      "value": "50.37"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "6.0",
+      "value": "24.358333333"
+    },
+    {
+      "name": {
+        "en": "Wemmel",
+        "fr": "Wemmel",
+        "nl": "Wemmel"
+      },
+      "nis": "23102",
+      "share_pct": "5.1",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Merchtem",
+        "fr": "Merchtem",
+        "nl": "Merchtem"
+      },
+      "nis": "23052",
+      "share_pct": "4.1",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Londerzeel",
+        "fr": "Londerzeel",
+        "nl": "Londerzeel"
+      },
+      "nis": "23045",
+      "share_pct": "3.7",
+      "value": "14.706666667"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "3.6",
+      "value": "14.65"
+    },
+    {
+      "name": {
+        "en": "Kapelle-op-den-Bos",
+        "fr": "Kapelle-op-den-Bos",
+        "nl": "Kapelle-op-den-Bos"
+      },
+      "nis": "23039",
+      "share_pct": "3.6",
+      "value": "14.367833333"
+    }
+  ]
+}

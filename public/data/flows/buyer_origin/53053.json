@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "29.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "6"
+    },
+    "other_regions": {
+      "share_pct": "7.9",
+      "value": "201.3109090909"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "13.5",
+      "value": "342.8411494256"
+    },
+    "rest_of_region": {
+      "share_pct": "24.2",
+      "value": "616.2510840661"
+    },
+    "same_commune": {
+      "share_pct": "53.1",
+      "value": "1352.7641283"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "2548.1672708826",
+  "dest_geo_id": "be:mun:53053",
+  "dest_name": {
+    "en": "Mons",
+    "fr": "Mons",
+    "nl": "Bergen"
+  },
+  "dest_nis": "53053",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2623,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "53.1",
+      "value": "1352.7641283"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "3.0",
+      "value": "76.61"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "2.9",
+      "value": "74.5"
+    },
+    {
+      "name": {
+        "en": "Jurbise",
+        "fr": "Jurbise",
+        "nl": "Jurbeke"
+      },
+      "nis": "53044",
+      "share_pct": "2.7",
+      "value": "69.606666667"
+    },
+    {
+      "name": {
+        "en": "Frameries",
+        "fr": "Frameries",
+        "nl": "Frameries"
+      },
+      "nis": "53028",
+      "share_pct": "2.5",
+      "value": "63.59"
+    },
+    {
+      "name": {
+        "en": "Quaregnon",
+        "fr": "Quaregnon",
+        "nl": "Quaregnon"
+      },
+      "nis": "53065",
+      "share_pct": "1.9",
+      "value": "48"
+    },
+    {
+      "name": {
+        "en": "Quévy",
+        "fr": "Quévy",
+        "nl": "Quévy"
+      },
+      "nis": "53084",
+      "share_pct": "1.4",
+      "value": "36.5"
+    },
+    {
+      "name": {
+        "en": "Le Roeulx",
+        "fr": "Le Roeulx",
+        "nl": "Le Roeulx"
+      },
+      "nis": "55035",
+      "share_pct": "1.3",
+      "value": "33.5"
+    }
+  ]
+}

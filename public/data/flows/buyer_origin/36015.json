@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "8.48"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "9.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.8",
+      "value": "235.070000000"
+    },
+    "rest_of_region": {
+      "share_pct": "24.8",
+      "value": "368.0300995677"
+    },
+    "same_commune": {
+      "share_pct": "58.2",
+      "value": "864.03517609"
+    }
+  },
+  "coverage_pct": "92.3",
+  "dataset": "buyer_origin",
+  "denominator": "1484.6152756577",
+  "dest_geo_id": "be:mun:36015",
+  "dest_name": {
+    "en": "Roeselare",
+    "fr": "Roulers",
+    "nl": "Roeselare"
+  },
+  "dest_nis": "36015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1609,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "58.2",
+      "value": "864.03517609"
+    },
+    {
+      "name": {
+        "en": "Izegem",
+        "fr": "Izegem",
+        "nl": "Izegem"
+      },
+      "nis": "36008",
+      "share_pct": "3.4",
+      "value": "50.413333333"
+    },
+    {
+      "name": {
+        "en": "Ardooie",
+        "fr": "Ardooie",
+        "nl": "Ardooie"
+      },
+      "nis": "37020",
+      "share_pct": "3.2",
+      "value": "48.155909091"
+    },
+    {
+      "name": {
+        "en": "Staden",
+        "fr": "Staden",
+        "nl": "Staden"
+      },
+      "nis": "36019",
+      "share_pct": "2.8",
+      "value": "42"
+    },
+    {
+      "name": {
+        "en": "Hooglede",
+        "fr": "Hooglede",
+        "nl": "Hooglede"
+      },
+      "nis": "36006",
+      "share_pct": "2.8",
+      "value": "41.966666667"
+    },
+    {
+      "name": {
+        "en": "Moorslede",
+        "fr": "Moorslede",
+        "nl": "Moorslede"
+      },
+      "nis": "36012",
+      "share_pct": "2.8",
+      "value": "41.84"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "1.9",
+      "value": "28.125"
+    },
+    {
+      "name": {
+        "en": "Lichtervelde",
+        "fr": "Lichtervelde",
+        "nl": "Lichtervelde"
+      },
+      "nis": "36011",
+      "share_pct": "1.6",
+      "value": "24"
+    }
+  ]
+}

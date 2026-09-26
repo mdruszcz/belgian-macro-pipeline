@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.8",
+      "value": "4.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "55.0",
+      "value": "43.0"
+    },
+    "rest_of_region": {
+      "share_pct": "19.8",
+      "value": "15.5"
+    },
+    "same_commune": {
+      "share_pct": "19.5",
+      "value": "15.25"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "78.25",
+  "dest_geo_id": "be:mun:64008",
+  "dest_name": {
+    "en": "Berloz",
+    "fr": "Berloz",
+    "nl": "Berloz"
+  },
+  "dest_nis": "64008",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 79,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Berloz",
+        "fr": "Berloz",
+        "nl": "Berloz"
+      },
+      "nis": "64008",
+      "share_pct": "19.5",
+      "value": "15.25"
+    },
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "13.9",
+      "value": "10.9"
+    },
+    {
+      "name": {
+        "en": "Geer",
+        "fr": "Geer",
+        "nl": "Geer"
+      },
+      "nis": "64029",
+      "share_pct": "10.2",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "6.4",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Faimes",
+        "fr": "Faimes",
+        "nl": "Faimes"
+      },
+      "nis": "64076",
+      "share_pct": "6.4",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "5.8",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Orp-Jauche",
+        "fr": "Orp-Jauche",
+        "nl": "Orp-Jauche"
+      },
+      "nis": "25120",
+      "share_pct": "5.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Oreye",
+        "fr": "Oreye",
+        "nl": "Oerle"
+      },
+      "nis": "64056",
+      "share_pct": "5.1",
+      "value": "4"
+    }
+  ]
+}

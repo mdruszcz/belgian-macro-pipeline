@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.7",
+      "value": "55.059803922"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "4.8857142857"
+    },
+    "other_regions": {
+      "share_pct": "13.1",
+      "value": "154.8051282055"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "10.1",
+      "value": "118.9240729276"
+    },
+    "rest_of_region": {
+      "share_pct": "2.5",
+      "value": "29.4"
+    },
+    "same_commune": {
+      "share_pct": "69.3",
+      "value": "818.30423862"
+    }
+  },
+  "coverage_pct": "96.6",
+  "dataset": "buyer_origin",
+  "denominator": "1181.3789579608",
+  "dest_geo_id": "be:mun:57096",
+  "dest_name": {
+    "en": "Mouscron",
+    "fr": "Mouscron",
+    "nl": "Moeskroen"
+  },
+  "dest_nis": "57096",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1223,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Mouscron",
+        "fr": "Mouscron",
+        "nl": "Moeskroen"
+      },
+      "nis": "57096",
+      "share_pct": "69.3",
+      "value": "818.30423862"
+    },
+    {
+      "name": {
+        "en": "Estaimpuis",
+        "fr": "Estaimpuis",
+        "nl": "Estaimpuis"
+      },
+      "nis": "57027",
+      "share_pct": "3.6",
+      "value": "42.204269006"
+    },
+    {
+      "name": {
+        "en": "Menen",
+        "fr": "Menin",
+        "nl": "Menen"
+      },
+      "nis": "34027",
+      "share_pct": "3.4",
+      "value": "40.5"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "2.9",
+      "value": "34.21"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "2.6",
+      "value": "30.246666667"
+    },
+    {
+      "name": {
+        "en": "Pecq",
+        "fr": "Pecq",
+        "nl": "Pecq"
+      },
+      "nis": "57062",
+      "share_pct": "1.5",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Comines-Warneton",
+        "fr": "Comines-Warneton",
+        "nl": "Komen-Waasten"
+      },
+      "nis": "57097",
+      "share_pct": "1.1",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Spiere-Helkijn",
+        "fr": "Espierres-Helchin",
+        "nl": "Spiere-Helkijn"
+      },
+      "nis": "34043",
+      "share_pct": "0.9",
+      "value": "11"
+    }
+  ]
+}

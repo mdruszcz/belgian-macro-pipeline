@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "1.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.3",
+      "value": "113.341111111"
+    },
+    "rest_of_region": {
+      "share_pct": "17.2",
+      "value": "66.5755555556"
+    },
+    "same_commune": {
+      "share_pct": "52.3",
+      "value": "202.18756993"
+    }
+  },
+  "coverage_pct": "95.2",
+  "dataset": "buyer_origin",
+  "denominator": "386.6042365966",
+  "dest_geo_id": "be:mun:38025",
+  "dest_name": {
+    "en": "Veurne",
+    "fr": "Furnes",
+    "nl": "Veurne"
+  },
+  "dest_nis": "38025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 406,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Veurne",
+        "fr": "Furnes",
+        "nl": "Veurne"
+      },
+      "nis": "38025",
+      "share_pct": "52.3",
+      "value": "202.18756993"
+    },
+    {
+      "name": {
+        "en": "Koksijde",
+        "fr": "Koksijde",
+        "nl": "Koksijde"
+      },
+      "nis": "38014",
+      "share_pct": "10.8",
+      "value": "41.751111111"
+    },
+    {
+      "name": {
+        "en": "Alveringem",
+        "fr": "Alveringem",
+        "nl": "Alveringem"
+      },
+      "nis": "38002",
+      "share_pct": "9.0",
+      "value": "34.666666667"
+    },
+    {
+      "name": {
+        "en": "De Panne",
+        "fr": "La Panne",
+        "nl": "De Panne"
+      },
+      "nis": "38008",
+      "share_pct": "6.9",
+      "value": "26.759662921"
+    },
+    {
+      "name": {
+        "en": "Nieuwpoort",
+        "fr": "Nieuport",
+        "nl": "Nieuwpoort"
+      },
+      "nis": "38016",
+      "share_pct": "2.6",
+      "value": "10.163670412"
+    },
+    {
+      "name": {
+        "en": "Diksmuide",
+        "fr": "Dixmude",
+        "nl": "Diksmuide"
+      },
+      "nis": "32003",
+      "share_pct": "2.1",
+      "value": "8.0655555556"
+    },
+    {
+      "name": {
+        "en": "Middelkerke",
+        "fr": "Middelkerke",
+        "nl": "Middelkerke"
+      },
+      "nis": "35011",
+      "share_pct": "2.1",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Lo-Reninge",
+        "fr": "Lo-Reninge",
+        "nl": "Lo-Reninge"
+      },
+      "nis": "32030",
+      "share_pct": "1.6",
+      "value": "6"
+    }
+  ]
+}

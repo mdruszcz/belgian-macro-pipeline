@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "5.7",
+      "value": "35.696956522"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "2.5"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.8",
+      "value": "168.000"
+    },
+    "rest_of_region": {
+      "share_pct": "10.9",
+      "value": "68.433478261"
+    },
+    "same_commune": {
+      "share_pct": "55.9",
+      "value": "350.54844933"
+    }
+  },
+  "coverage_pct": "96.6",
+  "dataset": "buyer_origin",
+  "denominator": "627.178884113",
+  "dest_geo_id": "be:mun:72021",
+  "dest_name": {
+    "en": "Maaseik",
+    "fr": "Maaseik",
+    "nl": "Maaseik"
+  },
+  "dest_nis": "72021",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 649,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Maaseik",
+        "fr": "Maaseik",
+        "nl": "Maaseik"
+      },
+      "nis": "72021",
+      "share_pct": "55.9",
+      "value": "350.54844933"
+    },
+    {
+      "name": {
+        "en": "Dilsen-Stokkem",
+        "fr": "Dilsen-Stokkem",
+        "nl": "Dilsen-Stokkem"
+      },
+      "nis": "72041",
+      "share_pct": "10.3",
+      "value": "64.5"
+    },
+    {
+      "name": {
+        "en": "Kinrooi",
+        "fr": "Kinrooi",
+        "nl": "Kinrooi"
+      },
+      "nis": "72018",
+      "share_pct": "6.6",
+      "value": "41.499"
+    },
+    {
+      "name": {
+        "en": "Oudsbergen",
+        "fr": "Oudsbergen",
+        "nl": "Oudsbergen"
+      },
+      "nis": "72042",
+      "share_pct": "3.9",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Bree",
+        "fr": "Bree",
+        "nl": "Bree"
+      },
+      "nis": "72004",
+      "share_pct": "2.4",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Maasmechelen",
+        "fr": "Maasmechelen",
+        "nl": "Maasmechelen"
+      },
+      "nis": "73107",
+      "share_pct": "2.2",
+      "value": "13.643478261"
+    },
+    {
+      "name": {
+        "en": "Bocholt",
+        "fr": "Bocholt",
+        "nl": "Bocholt"
+      },
+      "nis": "72003",
+      "share_pct": "1.6",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Lanaken",
+        "fr": "Lanaken",
+        "nl": "Lanaken"
+      },
+      "nis": "73042",
+      "share_pct": "1.6",
+      "value": "10"
+    }
+  ]
+}

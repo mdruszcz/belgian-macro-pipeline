@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.0",
+      "value": "38.12"
+    },
+    "rest_of_region": {
+      "share_pct": "35.5",
+      "value": "64.375"
+    },
+    "same_commune": {
+      "share_pct": "42.7",
+      "value": "77.430980392"
+    }
+  },
+  "coverage_pct": "91.6",
+  "dataset": "buyer_origin",
+  "denominator": "181.425980392",
+  "dest_geo_id": "be:mun:37002",
+  "dest_name": {
+    "en": "Dentergem",
+    "fr": "Dentergem",
+    "nl": "Dentergem"
+  },
+  "dest_nis": "37002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 198,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Dentergem",
+        "fr": "Dentergem",
+        "nl": "Dentergem"
+      },
+      "nis": "37002",
+      "share_pct": "42.7",
+      "value": "77.430980392"
+    },
+    {
+      "name": {
+        "en": "Tielt",
+        "fr": "Tielt",
+        "nl": "Tielt"
+      },
+      "nis": "37022",
+      "share_pct": "13.2",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Zulte",
+        "fr": "Zulte",
+        "nl": "Zulte"
+      },
+      "nis": "44081",
+      "share_pct": "9.9",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Waregem",
+        "fr": "Waregem",
+        "nl": "Waregem"
+      },
+      "nis": "34040",
+      "share_pct": "6.7",
+      "value": "12.125"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "6.1",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Wielsbeke",
+        "fr": "Wielsbeke",
+        "nl": "Wielsbeke"
+      },
+      "nis": "37017",
+      "share_pct": "3.0",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Ardooie",
+        "fr": "Ardooie",
+        "nl": "Ardooie"
+      },
+      "nis": "37020",
+      "share_pct": "2.5",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Berlare",
+        "fr": "Berlare",
+        "nl": "Berlare"
+      },
+      "nis": "42003",
+      "share_pct": "1.7",
+      "value": "3"
+    }
+  ]
+}

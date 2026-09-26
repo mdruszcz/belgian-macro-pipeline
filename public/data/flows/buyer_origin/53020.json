@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "5.30"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "2.4",
+      "value": "13"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.7",
+      "value": "211.148589743"
+    },
+    "rest_of_region": {
+      "share_pct": "16.2",
+      "value": "88.321764706"
+    },
+    "same_commune": {
+      "share_pct": "41.6",
+      "value": "227.115"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "545.885354449",
+  "dest_geo_id": "be:mun:53020",
+  "dest_name": {
+    "en": "Dour",
+    "fr": "Dour",
+    "nl": "Dour"
+  },
+  "dest_nis": "53020",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 555,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Dour",
+        "fr": "Dour",
+        "nl": "Dour"
+      },
+      "nis": "53020",
+      "share_pct": "41.6",
+      "value": "227.115"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "8.4",
+      "value": "45.875"
+    },
+    {
+      "name": {
+        "en": "Boussu",
+        "fr": "Boussu",
+        "nl": "Boussu"
+      },
+      "nis": "53014",
+      "share_pct": "8.2",
+      "value": "44.541666667"
+    },
+    {
+      "name": {
+        "en": "Frameries",
+        "fr": "Frameries",
+        "nl": "Frameries"
+      },
+      "nis": "53028",
+      "share_pct": "4.3",
+      "value": "23.538461538"
+    },
+    {
+      "name": {
+        "en": "Quaregnon",
+        "fr": "Quaregnon",
+        "nl": "Quaregnon"
+      },
+      "nis": "53065",
+      "share_pct": "4.3",
+      "value": "23.25"
+    },
+    {
+      "name": {
+        "en": "Beloeil",
+        "fr": "Beloeil",
+        "nl": "Beloeil"
+      },
+      "nis": "51008",
+      "share_pct": "4.1",
+      "value": "22.211764706"
+    },
+    {
+      "name": {
+        "en": "Colfontaine",
+        "fr": "Colfontaine",
+        "nl": "Colfontaine"
+      },
+      "nis": "53082",
+      "share_pct": "3.8",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Saint-Ghislain",
+        "fr": "Saint-Ghislain",
+        "nl": "Saint-Ghislain"
+      },
+      "nis": "53070",
+      "share_pct": "2.8",
+      "value": "15.538461538"
+    }
+  ]
+}

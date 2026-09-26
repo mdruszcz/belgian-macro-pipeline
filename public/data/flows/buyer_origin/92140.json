@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.4",
+      "value": "9"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "38.9",
+      "value": "146.7163742689"
+    },
+    "rest_of_region": {
+      "share_pct": "24.8",
+      "value": "93.5"
+    },
+    "same_commune": {
+      "share_pct": "33.9",
+      "value": "127.88263158"
+    }
+  },
+  "coverage_pct": "98.3",
+  "dataset": "buyer_origin",
+  "denominator": "377.5990058489",
+  "dest_geo_id": "be:mun:92140",
+  "dest_name": {
+    "en": "Jemeppe-sur-Sambre",
+    "fr": "Jemeppe-sur-Sambre",
+    "nl": "Jemeppe-sur-Sambre"
+  },
+  "dest_nis": "92140",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 384,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Jemeppe-sur-Sambre",
+        "fr": "Jemeppe-sur-Sambre",
+        "nl": "Jemeppe-sur-Sambre"
+      },
+      "nis": "92140",
+      "share_pct": "33.9",
+      "value": "127.88263158"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "13.8",
+      "value": "52.111111111"
+    },
+    {
+      "name": {
+        "en": "Sambreville",
+        "fr": "Sambreville",
+        "nl": "Sambreville"
+      },
+      "nis": "92137",
+      "share_pct": "8.2",
+      "value": "31"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "5.2",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Fleurus",
+        "fr": "Fleurus",
+        "nl": "Fleurus"
+      },
+      "nis": "52021",
+      "share_pct": "3.6",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Floreffe",
+        "fr": "Floreffe",
+        "nl": "Floreffe"
+      },
+      "nis": "92045",
+      "share_pct": "3.0",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "2.3",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Sombreffe",
+        "fr": "Sombreffe",
+        "nl": "Sombreffe"
+      },
+      "nis": "92114",
+      "share_pct": "2.1",
+      "value": "8"
+    }
+  ]
+}
