@@ -363,10 +363,20 @@ def test_map_pages_load_the_shared_component(page):
 
     Two copies of the classification would eventually disagree, and the same
     commune would sit in different bands on two pages of the same site.
+
+    The src/href match allows an optional ?v=... query string -- commune.html
+    now versions its local asset URLs with a content-hash query
+    (tests/test_commune_asset_versioning.py) so a stale 10-minute-cached
+    asset can never pair with a newer page; this must not stop counting as
+    "loads the shared component" just because the URL grew a query string.
     """
     text = page.read_text(encoding="utf-8")
-    assert 'src="assets/commune_map.js"' in text, f"{page.name} does not load the component"
-    assert 'href="assets/commune_map.css"' in text, f"{page.name} does not load its styles"
+    assert re.search(
+        r'src="assets/commune_map\.js(\?[^"]*)?"', text
+    ), f"{page.name} does not load the component"
+    assert re.search(
+        r'href="assets/commune_map\.css(\?[^"]*)?"', text
+    ), f"{page.name} does not load its styles"
     assert (
         "MapUI.quantileBreaks = function" not in text
     ), f"{page.name} carries its own copy of the classification"

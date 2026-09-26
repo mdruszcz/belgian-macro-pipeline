@@ -48,7 +48,17 @@ def _page_text() -> str:
 
 
 def _content_hash(path: str) -> str:
-    data = (REPO / path).read_bytes()
+    # CRLF normalized to LF before hashing: .gitattributes declares
+    # `* text=auto eol=lf` for this repo, so what actually ships (what git
+    # checks out on GitHub Pages / CI) is always LF-only, regardless of a
+    # developer's local core.autocrlf setting or an old working-tree copy
+    # that predates that normalization. Hashing the raw working-tree bytes
+    # without this step is real and reproduced: one asset in this batch
+    # (assets/belpulse/components.js) had a CRLF-polluted local copy that
+    # hashed differently here than the LF blob CI actually checked out,
+    # even though `git diff`/`git hash-object` (which apply the same
+    # filter) reported no difference at all.
+    data = (REPO / path).read_bytes().replace(b"\r\n", b"\n")
     return hashlib.sha256(data).hexdigest()[:10]
 
 
