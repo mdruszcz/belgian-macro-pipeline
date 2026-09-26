@@ -2070,7 +2070,7 @@ I18N.STRINGS = {
     v4ColSource: 'Bron',
     v4DownloadCsv: 'CSV downloaden',
     v4ShowingCount: '{n} van {total} indicatoren',
-    v4ParaValue: '{name}: {value} in {period}.',
+    v4ParaValue: '{name} bedroeg {value} in {period}.',
     v4ParaValuePopulation: '{name} telt {value} inwoners in {period}.',
     v4ParaRank: '{rank}e gemeente op {peers} in België.',
     v4ParaCompareAbovePt: 'dat ligt {diff} boven {scope} ({other}).',
