@@ -1553,7 +1553,7 @@ How: Tag, Release, tick Phase I in roadmap.md.
 Why: Marks the frozen reference point for Phase II, and gives you a visible win at the moment motivation usually dips.
 PHASE II — 50% → 80%
 Block M — Peer model
- [SPEC] Write /docs/features/peer_model.md
+ [SPEC] Write /docs/features/peer_model.md (2026-09-26: PR #276 open, awaiting the maintainer's variable approval)
 How: Variable list, standardization, distance metric, k, exclusions, version number.
 Why: This becomes a versioned commercial asset. It has to be a document before it is an algorithm.
  [H] Approve the variable list personally
