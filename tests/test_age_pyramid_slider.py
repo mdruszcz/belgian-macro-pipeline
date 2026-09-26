@@ -98,9 +98,7 @@ def test_fixture_92094_history_has_multiple_years():
 # --- browser behaviour -------------------------------------------------------
 
 
-def test_slider_moves_to_2010_and_updates_the_displayed_year_with_no_console_errors(
-    chromium, site
-):
+def test_slider_moves_to_2010_and_updates_the_displayed_year_with_no_console_errors(chromium, site):
     ctx = _context(chromium)
     try:
         page = ctx.new_page()
