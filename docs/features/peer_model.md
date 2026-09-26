@@ -186,15 +186,18 @@ convenience computed from the distance, never stored as if it were itself a meas
 similarity. Defined as:
 
 ```
-score = 100 × (1 − d / d_max_national)
+score = 100 × (1 − d / d_max)
 ```
 
-where `d_max_national` is the largest of the ten national distances actually returned for that
-commune (not a global constant across all 565 communes) — chosen over a rank-based score
-because it preserves *how much* closer the nearest peer is than the tenth, information a rank
-alone throws away, and because clamping to each commune's own worst-of-ten keeps the score
-inside 0–100 without needing a second, arbitrary ceiling constant. Every place this score is
-shown states "for display only; the underlying figure is the standardised Euclidean distance."
+where `d_max` is the largest of the ten distances actually returned **in that same list** (not a
+global constant across all 565 communes, and computed separately for `national` and `region` —
+never the national list's `d_max` reused for the region list, which could send a region score
+below 0 whenever a region peer is farther than the farthest national peer) — chosen over a
+rank-based score because it preserves *how much* closer the nearest peer is than the tenth,
+information a rank alone throws away, and because clamping to each list's own worst-of-ten keeps
+the score inside 0–100 without needing a second, arbitrary ceiling constant. Every place this
+score is shown states "for display only; the underlying figure is the standardised Euclidean
+distance."
 
 ### Per-indicator benchmarks (defined here, built later)
 
@@ -220,19 +223,22 @@ For any municipal indicator (not only the eleven feature variables) and any comm
   this appears on a page, the wording is **"median of comparable communes,"** never "average
   of," "total for," or any phrasing that could be read as an aggregate.
 
-### Circularity — income and unemployment are both inputs and headlines
+### Circularity — any of the eleven selection variables can also be a headline
 
-`AVG_NET_TAXABLE_INCOME` (variable 6) and `UNEMPLOYMENT_RATE_INSURED` (variable 7) are used to
-*select* peers and are also published as headline indicators a reader would want benchmarked
-against those same peers. Whenever either variable's own deviation is shown for a commune, the
-display carries the note **"peers were chosen partly on this figure"** — the deviation is real
-and correctly computed, but a reader should understand that a commune's income peers were, in
-part, chosen for being close on income, which mechanically compresses how large an income
-deviation among peers can ever look. This is disclosed, not hidden. By contrast, Block P's
-finance/debt benchmarks (WalStat's `MUN_DEBT_*`, `MUN_REVENUE_*`, `MUN_EXPENDITURE_*` and the
-communal income-tax surcharge) select peers from a model that contains **no finance variable at
-all** — true by construction, since none of the eleven candidates above is a finance figure —
-so those benchmarks carry no such caveat.
+`AVG_NET_TAXABLE_INCOME` (variable 6) and `UNEMPLOYMENT_RATE_INSURED` (variable 7) are the two
+most obvious cases, but the same risk applies to **any of the eleven selection variables** that
+is also published elsewhere as its own indicator — the two age shares, population change over
+5 years, share of foreign nationals and average household size are all published commune-level
+indicators in their own right, not only inputs to this model. Whenever a peer benchmark is shown
+for a commune's own value of *any* of the eleven, the display carries the note **"peers were
+chosen partly on this figure"** — the deviation is real and correctly computed, but a reader
+should understand that a commune's peers were, in part, chosen for being close on that same
+figure, which mechanically compresses how large a deviation among peers can ever look for it.
+This is disclosed, not hidden. By contrast, Block P's finance/debt benchmarks (WalStat's
+`MUN_DEBT_*`, `MUN_REVENUE_*`, `MUN_EXPENDITURE_*` and the communal income-tax surcharge) select
+peers from a model that contains **no finance variable at all** — true by construction, since
+none of the eleven candidates above is a finance figure — so those benchmarks carry no such
+caveat.
 
 ### Stability — a stand-in until a second data vintage exists
 

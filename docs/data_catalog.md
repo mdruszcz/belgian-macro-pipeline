@@ -1104,16 +1104,28 @@ source, so the *output* is committed and CI reads it as data. `make boundaries` 
 should be run only when Statbel publishes a new boundary vintage — the script refuses any file
 not stamped `2026-01-01`, so a new vintage is a loud failure rather than a silent change of map.
 
-**2026-09-26 note — the same source will also give commune areas for the peer model.**
-`config/geography/geographies.csv` has no `area_km2` field at all today, and the peer-model spec
-(`docs/features/peer_model.md`, variable 2 "population density") needs one. The plan is to
+**2026-09-26 note — the same source also gives commune areas for the peer model. Built
+2026-09-26 from the fallback geometry, not the raw sectors file.**
+`config/geography/geographies.csv` has no `area_km2` field at all, and the peer-model spec
+(`docs/features/peer_model.md`, variable 2 "population density") needs one. The plan was to
 measure each commune's polygon area directly from
 `sh_statbel_statistical_sectors_3812_20260101.geojson` in its native EPSG:3812 (projected
 metres — never after the WGS84 re-projection `communes.geojson` uses for display), dissolved to
-the same 565 communes `build_commune_boundaries.py` already dissolves to, and commit the result
-as `config/geography/commune_area_km2.csv`. This is **not a new data source** — it is the same
-already-catalogued, already-licence-cleared Statbel geometry, read a second way. No new
-`data_catalog.md` row is needed; this paragraph is that disclosure. Not built as of this note;
+the same 565 communes `build_commune_boundaries.py` already dissolves to. That 227 MB raw file
+was **not present** on the machine that built `config/geography/commune_area_km2.csv`
+(`scripts/derive_commune_area.py`), so it fell back to the spec's documented alternative: the
+already-committed, already-dissolved `data/geo/communes.geojson` (CRS84, 50 m-simplified),
+reprojected to EPSG:3812 and measured there instead. Every one of the 565 rows carries
+`geometry_source=communes_geojson_reprojected`, not the raw-sectors source, so this is stated
+plainly rather than discovered later: the Belgium-wide total (30,689.7 km², against Statbel's
+official 30,689 km² land area — within 0.002%) is trustworthy, but individual water-adjacent
+communes can be off by a percent or two from simplification (Antwerp measured 208.02 km² against
+an expected ~204.5 km², `tests/test_commune_area.py::test_antwerp_11002_in_bounds`, marked
+`xfail(strict=True)` rather than silently widened). This is **not a new data source** — it is
+the same already-catalogued, already-licence-cleared Statbel geometry, read a second way (or, in
+this build, its own already-committed derivative). No new `data_catalog.md` row is needed; this
+paragraph is that disclosure. Re-running `scripts/derive_commune_area.py` with the real raw
+sectors file present would give exact per-commune areas instead of the fallback's approximation;
 see [ADR 0015](decisions/0015-peer-model-v1.md), Decision 3.
 
 ### Licence — CC BY 4.0 (see also the 2015 open-data licence below — two documents, both from Statbel)

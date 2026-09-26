@@ -73,6 +73,17 @@ COMMANDS: dict[str, Command] = {
         outputs=("public/data/metadata/peers.json", "data/peers.csv"),
         writes_repo_only=True,
     ),
+    # Per-indicator peer benchmarks (Block M, docs/features/peer_model.md
+    # "Per-indicator benchmarks", ADR 0015). Reads peer_model_export's own
+    # output (public/data/metadata/peers.json) plus the same committed
+    # history CSVs -- no --db needed. One file per current commune, so
+    # `outputs` names the directory, same shape as commune_flows_export's
+    # own variable-file-count output below.
+    "peer_benchmarks_export": Command(
+        ("scripts/export_peer_benchmarks.py",),
+        outputs=("public/data/peers",),
+        writes_repo_only=True,
+    ),
     # Commune-flows PR 2 (docs/features/commune_flows.md). Reads the committed
     # data/flows/buyer_origin_<year>.json store (commune_flows_buyer_origin, below)
     # plus public/data/metadata/geographies.json (site_payloads) and writes one

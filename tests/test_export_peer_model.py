@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -197,3 +198,102 @@ def test_pca_variant_is_a_different_variant_field_and_structure(model):
         assert len(commune["national"]) == 10, nis
         assert len(commune["region"]) == 10, nis
         assert nis not in {e["nis"] for e in commune["national"]}
+
+
+def test_every_similarity_in_both_lists_is_within_0_100(model):
+    """Audit finding S2 (2026-09-26): similarity must be computed per list
+    (national d_max for the national list, region d_max for the region
+    list) -- reusing the national d_max for the region list let a region
+    peer farther than the farthest national peer score below 0. This test
+    would have caught it: 461/565 region lists had a negative entry under
+    the bug."""
+    payload, _meta = model
+    for nis, commune in payload["communes"].items():
+        for list_name in ("national", "region"):
+            for entry in commune[list_name]:
+                assert 0.0 <= entry["similarity"] <= 100.0, (nis, list_name, entry)
+
+
+def _read_value(path: Path, indicator: str, period: str, nis: str) -> float:
+    """One value read directly from a committed history CSV -- used only by
+    the data-binding test below, never by the exporter itself (which reads
+    the whole file once via _index_by_indicator_period; this helper is
+    intentionally a second, independent, much slower path so the two do not
+    share a bug)."""
+    with path.open(encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if (
+                row["indicator_code"] == indicator
+                and row["period"] == period
+                and row["nis_code"] == nis
+            ):
+                return float(row["value"])
+    raise AssertionError(f"no row for {indicator} {period} {nis} in {path}")
+
+
+def test_namur_every_variable_recomputed_from_committed_csvs_matches_features(model):
+    """Audit finding B1's missing test: for Namur (92094), recompute EVERY
+    one of the eleven raw feature values directly from the committed CSV
+    rows at the spec's own literal periods (docs/features/peer_model.md
+    "The variable list") -- independently of build_raw_values -- and assert
+    each equals payload["communes"]["92094"]["features"][var_id]. This is
+    the binding test that would have caught B1 (enterprise_density using
+    population 2026 instead of the spec's 2023): every variable gets its
+    own independent recomputation, not just the one that was wrong.
+
+    features stores the value AFTER any log transform (population,
+    population_density, enterprise_density, property_tax_base_per_resident
+    are all logged per the spec's variable table) -- this test applies
+    exactly that same transform to its own independently-read raw value
+    before comparing, mirroring build_feature_matrix's own log step rather
+    than re-deriving a different formula.
+    """
+    payload, _meta = model
+    nis = "92094"
+    features = payload["communes"][nis]["features"]
+
+    history_dir = export_peer_model.DEFAULT_HISTORY_DIR
+    history_csv = export_peer_model.DEFAULT_HISTORY_CSV
+    population_path = history_dir / "population.csv"
+    onem_rates_path = history_dir / "onem_rates.csv"
+    patrimony_path = history_dir / "spf_agdp_patrimony.csv"
+
+    pop_2026 = _read_value(population_path, "POPULATION_BY_COMMUNE", "2026", nis)
+    age_65_2026 = _read_value(population_path, "POPULATION_AGE_65_PLUS", "2026", nis)
+    age_0_14_2026 = _read_value(population_path, "POPULATION_AGE_0_14", "2026", nis)
+    unemployment_2026 = _read_value(onem_rates_path, "UNEMPLOYMENT_RATE_INSURED", "2026", nis)
+    cadastral_2026 = _read_value(patrimony_path, "MUN_CADASTRAL_INCOME_TOTAL", "2026", nis)
+    pop_change_5y = _read_value(history_csv, "POPULATION_CHANGE_5Y", "2026", nis)
+    avg_income_2023 = _read_value(history_csv, "AVG_NET_TAXABLE_INCOME", "2023", nis)
+    share_foreign_2021 = _read_value(history_csv, "SHARE_FOREIGN_NATIONALS", "2021", nis)
+    household_size_2021 = _read_value(history_csv, "AVERAGE_HOUSEHOLD_SIZE", "2021", nis)
+    local_units_2023q4 = _read_value(history_csv, "LOCAL_UNITS_BY_COMMUNE", "2023-Q4", nis)
+    # Spec variable 10's own denominator: POPULATION_BY_COMMUNE at 2023, the
+    # same year as the 2023-Q4 enterprise snapshot -- NOT 2026 (B1).
+    pop_2023 = _read_value(population_path, "POPULATION_BY_COMMUNE", "2023", nis)
+
+    area_km2 = None
+    with export_peer_model.DEFAULT_AREAS.open(encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if row["nis"] == nis:
+                area_km2 = float(row["area_km2"])
+                break
+    assert area_km2 is not None
+
+    expected = {
+        "population": math.log(pop_2026),
+        "population_density": math.log(pop_2026 / area_km2),
+        "share_65_plus": (age_65_2026 / pop_2026) * 100.0,
+        "share_0_14": (age_0_14_2026 / pop_2026) * 100.0,
+        "population_change_5y": pop_change_5y,
+        "avg_net_taxable_income": avg_income_2023,
+        "unemployment_rate_insured": unemployment_2026,
+        "share_foreign_nationals": share_foreign_2021,
+        "average_household_size": household_size_2021,
+        "enterprise_density": math.log((local_units_2023q4 / pop_2023) * 1000.0),
+        "property_tax_base_per_resident": math.log(cadastral_2026 / pop_2026),
+    }
+
+    assert set(expected) == set(features)
+    for var_id, expected_value in expected.items():
+        assert features[var_id] == pytest.approx(expected_value, rel=1e-9), var_id

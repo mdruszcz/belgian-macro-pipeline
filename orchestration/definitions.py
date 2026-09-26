@@ -60,6 +60,7 @@ EXPORT_SELECTION = AssetSelection.assets(
     "commune_adjacency",
     "commune_typology",
     "peer_model_export",
+    "peer_benchmarks_export",
     "commune_flows_export",
     "schools_ise_export",
     "schools_by_commune_export",
