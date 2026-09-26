@@ -304,6 +304,32 @@
   .pyramid-track.left i{background:var(--bp-chart-1); border-radius:4px 0 0 4px}
   .pyramid-track.right i{background:var(--bp-chart-7); border-radius:0 4px 4px 0}
   .pyramid-note{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:var(--bp-space-3) 0 0}
+
+  /* ---- buyers' origin flows (commune-flows PR 2) ---- */
+  .flows-buckets{list-style:none; margin:0 0 var(--bp-space-4); padding:0; display:flex; flex-direction:column; gap:9px}
+  .flows-buckets .barlist{margin:0}
+  /* Neutral ink fill, visually distinct from the top-8 list's accent red
+     (which is reserved for the commune's own row there) -- the buckets are
+     a different kind of breakdown (exhaustive geography classes, not a
+     ranked list of named communes) and must not read as the same series. */
+  .flows-buckets .barlist .bar i{background:var(--bp-text-muted)}
+  .flows-origins{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .flows-origins li{display:grid; grid-template-columns:18px minmax(0,1.15fr) minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:11px}
+  .flows-origins .rk{color:var(--bp-text-faint); font-variant-numeric:tabular-nums; text-align:right}
+  .flows-origins .lbl{color:var(--bp-text-muted); line-height:1.3}
+  .flows-origins .lbl.self{color:var(--bp-text); font-weight:var(--bp-weight-semibold)}
+  .flows-origins .bar{height:8px; border-radius:4px; background:var(--bp-surface-alt); overflow:hidden}
+  /* Neutral by default -- the accent red is reserved for the commune's own
+     row (li.self), so only one bar in the list ever reads as "the subject",
+     matching the buckets' own neutral ink fill above for every other row. */
+  .flows-origins .bar i{display:block; height:100%; border-radius:4px; background:var(--bp-text-muted)}
+  .flows-origins li.self .bar i{background:var(--bp-accent)}
+  .flows-origins .pct{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
+  .flows-note{font-size:11px; color:var(--bp-text-muted); line-height:1.5; margin:var(--bp-space-3) 0 0}
+  .flows-note .cov{border-bottom:1px dotted var(--bp-text-faint); cursor:help}
+  .flows-pronote{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:6px 0 0}
+  .flows-source{font-size:13px; color:var(--bp-text-muted); line-height:1.4; margin:6px 0 0}
+  .flows-zero{font-size:var(--bp-text-small); color:var(--bp-text-muted); padding:var(--bp-space-3) 0}
   .maprow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--bp-space-4)}
   .maprow .mapbox{position:relative; min-height:230px}
   .maprow .legend{overflow-x:auto; margin-top:8px}
@@ -601,6 +627,27 @@
           </div>
         </section>
 
+        <!-- ── buyers' origin flows (Block NS, commune-flows PR 2) ──────────
+             docs/features/commune_flows.md, docs/decisions/0013. A missing
+             payload hides the whole section rather than showing an empty or
+             "unavailable" panel -- the maintainer's rule -- so this section
+             starts `hidden` and renderFlows() only un-hides it once a real
+             payload for this commune has loaded. -->
+        <section id="flowsSection" hidden>
+          <h2 class="sec" data-t="cpFlowsTitle">Where buyers come from</h2>
+          <div class="panel">
+            <div id="flowsZero" class="flows-zero" hidden></div>
+            <div id="flowsContent" hidden>
+              <div class="flows-buckets" id="flowsBuckets"></div>
+              <h3 data-t="cpFlowsTopOriginsTitle">Top origin communes</h3>
+              <ol class="flows-origins" id="flowsOrigins"></ol>
+              <p class="flows-note" id="flowsNote"></p>
+              <p class="flows-pronote" data-t="cpFlowsPronote"></p>
+              <p class="flows-source" id="flowsSource"></p>
+            </div>
+          </div>
+        </section>
+
         <section>
           <div class="sechead">
             <h2 data-t="cpMaps">Commune maps</h2>
@@ -807,6 +854,7 @@
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
   var AGE_SEX_URL = function(nis){ return 'public/data/demography/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
+  var FLOWS_URL = function(nis){ return 'public/data/flows/buyer_origin/' + nis + '.json'; };
 
   var LANG = I18N.initial();
   var T = function(k, v){ return I18N.t(LANG, k, v); };
@@ -817,7 +865,7 @@
     sections: {headlines: [], sections: []}, sources: {}, grades: {},
     geojson: null, map: null, locator: null, manifest: {},
     geographies: {}, adjacency: {}, photos: {}, headlineValues: null, nbMap: null,
-    ageSex: null,
+    ageSex: null, flows: null,
   };
 
   /* The geography row for a NIS code, and the chain above it. geographies.json
@@ -1246,6 +1294,145 @@
       updated: calendarDate(payload.source_updated),
     });
     panel.dataset.state = 'ready';
+  }
+
+  /* ---- buyers' origin flows (Block NS, commune-flows PR 2) --------------
+     docs/features/commune_flows.md, docs/decisions/0013. The payload
+     (public/data/flows/buyer_origin/<nis>.json, scripts/export_commune_flows.py)
+     already carries every share, bucket and name resolved server-side --
+     this function only lays the numbers out, it never computes one (rule 27:
+     no ratio is ever averaged or derived in the browser). Bucket ids and the
+     dataset id stay in this block's own binding, never in generic renderer
+     logic elsewhere on the page (rule 24). */
+  var FLOWS_BUCKET_ORDER = [
+    ['same_commune', 'cpFlowsBucketSameCommune'],
+    ['rest_of_arrondissement', 'cpFlowsBucketRestArr'],
+    ['rest_of_region', 'cpFlowsBucketRestRegion'],
+    ['other_regions', 'cpFlowsBucketOtherRegions'],
+    ['abroad', 'cpFlowsBucketAbroad'],
+    ['origin_unknown', 'cpFlowsBucketUnknown'],
+  ];
+
+  function flowsPct(str){
+    // French/Dutch number formatting (a comma decimal separator, LANG-driven)
+    // for a share already rounded to one decimal by the exporter -- this
+    // function only re-renders the same digits in the reader's locale, it
+    // does not round or recompute the figure (rule 27).
+    var n = parseFloat(str);
+    if(!isFinite(n)) return '—';
+    return n.toLocaleString(LANG, {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%';
+  }
+
+  function renderFlows(){
+    var section = document.getElementById('flowsSection');
+    var payload = state.flows;
+    // No payload for this commune (not yet published, or a 404) -- hide the
+    // whole section rather than show an empty or "unavailable" panel, per
+    // the maintainer's rule for this block.
+    if(!payload || payload.dest_nis !== state.nis){
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+
+    var zeroBox = document.getElementById('flowsZero');
+    var content = document.getElementById('flowsContent');
+
+    if(payload.state === 'no_purchases_recorded'){
+      content.hidden = true;
+      zeroBox.hidden = false;
+      zeroBox.textContent = T('cpFlowsZeroPurchases', {year: payload.period});
+      return;
+    }
+
+    zeroBox.hidden = true;
+    content.hidden = false;
+
+    // Buckets: a horizontal bar list, fixed order (ADR 0013 decision 4), each
+    // row's own bucket id resolved to its i18n label here -- never a bucket
+    // id shown raw.
+    var bucketsHost = document.getElementById('flowsBuckets');
+    bucketsHost.innerHTML = '';
+    var list = document.createElement('ul');
+    list.className = 'barlist';
+    FLOWS_BUCKET_ORDER.forEach(function(pair){
+      var bucketId = pair[0], labelKey = pair[1];
+      var bucket = payload.buckets[bucketId];
+      if(!bucket) return;
+      var sharePct = parseFloat(bucket.share_pct) || 0;
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="lbl"></span><span class="bar"><i></i></span><span class="pct"></span>';
+      li.querySelector('.lbl').textContent = T(labelKey);
+      li.querySelector('.bar i').style.width = Math.max(0, Math.min(100, sharePct)) + '%';
+      li.querySelector('.pct').textContent = flowsPct(bucket.share_pct);
+      list.appendChild(li);
+    });
+    bucketsHost.appendChild(list);
+
+    // Top 8 named origins: a ranked list, the commune itself highlighted if
+    // it appears among them (it usually does -- ADR: a median commune's
+    // largest single origin is itself).
+    var originsHost = document.getElementById('flowsOrigins');
+    originsHost.innerHTML = '';
+    var maxShare = (payload.top_origins || []).reduce(function(m, o){
+      return Math.max(m, parseFloat(o.share_pct) || 0);
+    }, 0) || 1;
+    (payload.top_origins || []).forEach(function(origin, i){
+      var sharePct = parseFloat(origin.share_pct) || 0;
+      var isSelf = origin.nis === payload.dest_nis;
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="rk"></span><span class="lbl"></span><span class="bar"><i></i></span><span class="pct"></span>';
+      li.querySelector('.rk').textContent = String(i + 1);
+      var lbl = li.querySelector('.lbl');
+      lbl.textContent = (origin.name && (origin.name[LANG] || origin.name.en)) || origin.nis;
+      if(isSelf){ lbl.className = 'lbl self'; li.className = 'self'; }
+      li.querySelector('.bar i').style.width = (sharePct / maxShare * 100).toFixed(1) + '%';
+      li.querySelector('.pct').textContent = flowsPct(origin.share_pct);
+      originsHost.appendChild(li);
+    });
+
+    // The note carries the reference year and coverage straight from the
+    // payload's own metadata (rule 28) -- never hand-typed. Coverage can
+    // exceed 100% (ADR 0013 decision 3, e.g. Gesves); a title tooltip on the
+    // whole sentence explains why rather than the figure being "fixed" to
+    // look bounded (built with textContent, not innerHTML, so nothing in a
+    // translated string or a coverage figure is ever parsed as markup).
+    var note = document.getElementById('flowsNote');
+    var coverageDigits = parseFloat(payload.coverage_pct);
+    var coverageLabel = isFinite(coverageDigits)
+      ? coverageDigits.toLocaleString(LANG, {minimumFractionDigits: 1, maximumFractionDigits: 1})
+      : '—';
+    // ParcelsNumber (ADR 0013 decision 7) is the payload's own parcel count
+    // for the commune -- shown, never re-derived, and never collapsed into
+    // "-" for a real zero (rule 26).
+    var parcelsNumber = payload.parcels_number;
+    var parcelsLabel = (typeof parcelsNumber === 'number' && isFinite(parcelsNumber))
+      ? parcelsNumber.toLocaleString(LANG, {maximumFractionDigits: 0})
+      : '—';
+    note.textContent = T('cpFlowsNote', {year: payload.period, coverage: coverageLabel, parcels: parcelsLabel});
+    note.title = T('cpFlowsCoverageTooltip');
+    // A <p> is not natively focusable; tabIndex makes the coverage
+    // explanation reachable (and its title readable) from the keyboard too,
+    // not only on mouse hover.
+    note.tabIndex = 0;
+
+    // Source line (rule 28): the source name resolved from the shared
+    // sources.json registry via the payload's own source_id -- the same
+    // lookup allDataSourceLabels()/mapProvenance use elsewhere on this page
+    // -- and the fetch date from the payload's own fetched_at. Never a
+    // hand-typed source name: if the id is missing from metadata, the raw
+    // id is shown instead of invented text.
+    var sourceEl = document.getElementById('flowsSource');
+    var sourceMeta = payload.source_id ? state.sources[payload.source_id] : null;
+    var sourceLabel = sourceMeta && sourceMeta.label ? mlText(sourceMeta.label) : payload.source_id;
+    var fetchedDate = (typeof payload.fetched_at === 'string') ? payload.fetched_at.slice(0, 10) : '';
+    if(sourceLabel && fetchedDate){
+      sourceEl.textContent = T('cpFlowsSource', {source: sourceLabel, date: fetchedDate});
+      sourceEl.hidden = false;
+    } else {
+      sourceEl.textContent = '';
+      sourceEl.hidden = true;
+    }
   }
 
   function renderCompositions(){
@@ -2026,6 +2213,7 @@
     renderCompositions();
     renderAgeSex();
     renderFinances();
+    renderFlows();
     renderComparison();
     renderRanks();
     renderFocus();
@@ -2068,7 +2256,7 @@
       fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
       fetch(MANIFEST_URL), fetch(COMMUNE_URL(state.nis)),
       fetch(GEOGRAPHIES_URL), fetch(ADJACENCY_URL), fetch(PHOTOS_URL),
-      fetch(AGE_SEX_URL(state.nis)),
+      fetch(AGE_SEX_URL(state.nis)), fetch(FLOWS_URL(state.nis)),
     ]);
     // Each of these is optional and degrades to the honest state: no
     // geography metadata means English place names, no adjacency means the
@@ -2080,6 +2268,10 @@
     if(res[6].ok) state.adjacency = (await res[6].json()).neighbours || {};
     if(res[7].ok) state.photos = await res[7].json();
     if(res[8].ok) state.ageSex = await res[8].json();
+    // A missing payload (no file for this NIS -- e.g. not yet published, or
+    // a merged commune the exporter has not re-keyed) means the whole
+    // section stays hidden (renderFlows()), never an "unavailable" panel.
+    if(res[9].ok) state.flows = await res[9].json();
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });

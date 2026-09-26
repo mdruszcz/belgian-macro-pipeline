@@ -61,6 +61,18 @@ COMMANDS: dict[str, Command] = {
         outputs=("public/data/metadata/typology.json",),
         writes_repo_only=True,
     ),
+    # Commune-flows PR 2 (docs/features/commune_flows.md). Reads the committed
+    # data/flows/buyer_origin_<year>.json store (commune_flows_buyer_origin, below)
+    # plus public/data/metadata/geographies.json (site_payloads) and writes one
+    # small payload per commune. `outputs` names the directory, not a file list,
+    # for the same reason commune_flows_buyer_origin's own `outputs` is empty: the
+    # set of NIS files can change (a merged commune) and a fixed file list would
+    # go stale.
+    "commune_flows_export": Command(
+        ("scripts/export_commune_flows.py",),
+        outputs=("public/data/flows/buyer_origin",),
+        writes_repo_only=True,
+    ),
     # ── sources_api ────────────────────────────────────────────────────────
     "macro_legacy_fetch": Command(
         ("belgian_macro_db.py", "--db", "{db}", "--fetch", "--latest", "--export", "csv"),

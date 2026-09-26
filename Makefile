@@ -131,6 +131,13 @@ exports:
 	# reads only the committed data/international/*.csv store and the
 	# committed NUTS 0 geometry, no $(DB) involved.
 	$(PYTHON) scripts/export_europe_countries.py
+	# Commune-flows PR 2: one small static payload per commune from the committed
+	# data/flows/buyer_origin_<year>.json store (PR 1) -- needs
+	# public/data/metadata/geographies.json for trilingual names, written by
+	# site_payloads above. Deliberately run LAST among the export steps: it
+	# fails loudly (rule 13) if the flows store is missing, and that must
+	# never stop the explorer/Europe steps above, which do not depend on it.
+	$(PYTHON) scripts/export_commune_flows.py
 	$(MAKE) pages
 	$(MAKE) shell-sync
 	$(MAKE) page-documents
