@@ -30,7 +30,7 @@ Next batch:            Batch C — the finance section on the commune profile
 
 ## What this batch does
 
-Builds `macro.html` from the supplied design (`assets/belpulse/macro page.png`,
+Builds `macro.html` from the supplied design (`docs/design-references/macro.png`,
 `docs/design-references/macro.md`) as a noindexed preview beside `dashboard.html`, on
 Batch 1's tokens and Batch 2's components.
 

@@ -79,13 +79,15 @@ ROOT_PAGES: tuple[Page, ...] = (
     Page(
         "/communes.html",
         False,
-        "legacy commune table; kept reachable for bookmarks, replaced in navigation by profiles.html",
+        "legacy commune table; now a redirect stub to profiles.html (rule 31 keeps the "
+        "URL valid), noindexed so the stub itself never competes with profiles.html",
     ),
     Page("/map.html", True, "the choropleth explorer"),
     Page(
         "/all_data.html",
         False,
-        "legacy data browser; kept reachable for bookmarks, replaced in navigation by macro and micro",
+        "legacy data browser; now a redirect stub to explorer.html (rule 31 keeps the "
+        "URL valid), noindexed so the stub itself never competes with explorer.html",
     ),
     Page(
         "/sources.html",
@@ -105,21 +107,22 @@ ROOT_PAGES: tuple[Page, ...] = (
     Page(
         "/dashboard.html",
         False,
-        "rendered inside index.html's iframe; / is the stronger URL for the "
-        "same content, and both would compete",
+        "now a redirect stub to macro.html (rule 31 keeps the URL valid); "
+        "noindexed so the stub itself never competes with macro.html",
     ),
     Page(
         "/local.html",
         False,
-        "a JavaScript app shell -- local.html?nis=NNNNN. The indexable form of "
-        "a commune is /local/{nis}/, which local/sitemap.xml already submits, "
-        "and a crawler sees nothing useful here",
+        "now a redirect stub to commune.html, forwarding ?nis= and any other "
+        "query string or hash (rule 31 keeps the URL valid); noindexed so the "
+        "stub itself never competes with commune.html",
     ),
     Page(
         "/home.html",
         False,
-        "the unreleased redesign of /. Reachable, but submitting it would put "
-        "two homepages in the index; it enters the sitemap when it replaces /",
+        "superseded by home2.html; now a redirect stub to it (rule 31 keeps "
+        "the URL valid), noindexed so the stub itself never competes with "
+        "home2.html",
     ),
     Page(
         "/home2.html",
@@ -171,7 +174,19 @@ ROOT_PAGES: tuple[Page, ...] = (
 #: live pages carry no canonical at all, so without this the preview is the
 #: only version claiming to be canonical.
 NOINDEX_PREFIXES = ("/preview/",)
-NOINDEX_ROUTES = frozenset({"/explorer.html"})
+NOINDEX_ROUTES = frozenset(
+    {
+        "/explorer.html",
+        # The five legacy redirect stubs (rule 31: URL stays valid, but a stub
+        # with no content of its own must never be offered to a crawler as an
+        # alternative to the page it redirects to).
+        "/home.html",
+        "/dashboard.html",
+        "/all_data.html",
+        "/communes.html",
+        "/local.html",
+    }
+)
 
 
 def is_indexable(route: str) -> bool:
