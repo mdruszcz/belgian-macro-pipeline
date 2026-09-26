@@ -110,4 +110,10 @@ def test_visual_profile_loads_and_renders_the_specialised_payload():
     assert "'public/data/demography/' + nis + '.json'" in page
     assert "function renderAgeSex()" in page
     assert 'id="pyramidChart"' in page
-    assert "payload.bands.slice().reverse()" in page
+    # The reversal that puts the oldest age band at the bottom of the pyramid
+    # now lives in the shared drawPyramid() helper (bands.slice().reverse()),
+    # which both the default single-year view and the year-slider history
+    # (public/data/demography_history/<nis>.json) call -- so the check is on
+    # the shared helper's own bands parameter, not literally "payload.bands".
+    assert "function drawPyramid(" in page
+    assert "bands.slice().reverse()" in page
