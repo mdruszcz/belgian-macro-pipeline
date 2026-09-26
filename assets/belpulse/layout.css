@@ -358,6 +358,13 @@
 .bp-shell--navy .bp-btn--outline,
 .bp-cta-band .bp-btn--outline{border-color:var(--bp-navy-border); color:var(--bp-navy-text)}
 .bp-btn--outline:hover{background:var(--bp-surface-alt)}
+/* Moved here from a page-local <style> block profiles.html still carries
+   its own copy of (identical declaration) -- commune.html's #downloadLink
+   referenced this class with no matching rule anywhere after PR #278
+   replaced the page that used to define it locally, so it rendered as a
+   bare, unstyled link. --bp-navy-bg is a theme token (tokens.css), so this
+   adapts correctly across light/dark/paper without anything page-local. */
+.bp-btn--dark{background:var(--bp-navy-bg); color:#fff}
 
 /* ---- theme toggle (matches the pattern every existing page already uses) --- */
 .bp-theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}
