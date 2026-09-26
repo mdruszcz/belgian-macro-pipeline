@@ -121,6 +121,11 @@ exports:
 	# only; --pca is a separate, on-demand comparison run, never part of the
 	# daily job.
 	$(PYTHON) scripts/export_peer_model.py
+	# Per-indicator peer benchmarks (docs/features/peer_model.md
+	# "Per-indicator benchmarks", ADR 0015). Reads the peer lists just
+	# written above (public/data/metadata/peers.json) plus the same
+	# committed history CSVs -- must run AFTER export_peer_model.py.
+	$(PYTHON) scripts/export_peer_benchmarks.py
 	# Reads the CSVs written above -- data/communes_history.csv (the trimmed
 	# core file) PLUS every data/communes_history/*.csv shard, and
 	# data/belgian_macro_export.csv -- and shards them one file per indicator
