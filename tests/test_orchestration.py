@@ -272,6 +272,21 @@ def test_the_production_job_is_the_export_job_plus_the_offload():
     assert {p.to_user_string() for p in parents} == exports
 
 
+def test_every_reference_data_exporter_is_in_the_export_job():
+    """reference_data is not one of the two groups EXPORT_SELECTION pulls in
+    wholesale (only "derived" and "website" are) -- each of its script_asset
+    exporters must be named explicitly instead. commune_flows_export shipped
+    in this group without being added to that name list, so the daily job
+    never ran it and public/data/flows/ never appeared on the live site.
+    Catch that class of bug for every current and future reference_data
+    exporter, not just this one."""
+    graph = _graph()
+    exports = _selected("validate_and_export")
+    exporters = {name for name in _group(graph, "reference_data") if name != "staging_db"}
+    assert exporters, "expected at least one reference_data exporter"
+    assert exporters <= exports, exporters - exports
+
+
 def test_the_tracked_outcomes_are_the_ones_the_workflow_gated_auto_merge_on():
     assert {COMMANDS[n].workflow_step for n in TRACKED} == CURRENT_GATE_IDS
     assert len(TRACKED) == 10
