@@ -62,6 +62,7 @@
             "cagr",
             "five_year_change",
             "per_capita",
+            "per_thousand",
             "share_of_total",
             "index_base_100",
             "dependency_ratio",

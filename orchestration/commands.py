@@ -73,6 +73,25 @@ COMMANDS: dict[str, Command] = {
         outputs=("public/data/flows/buyer_origin",),
         writes_repo_only=True,
     ),
+    # Schools ISE (docs/features/schools_ise.md). Fetches both ODWB datasets live
+    # (the ISE-class export and the FASE site register) and resolves each site's
+    # commune against the committed config/geography/geographies.csv +
+    # municipality_crosswalk.csv -- no --db needed, unlike most sync_*.py scripts.
+    # Both odwb.be endpoints are reachable from GitHub runners (no CAPTCHA, unlike
+    # statbel.fgov.be/fin.belgium.be).
+    "schools_ise_export": Command(
+        ("scripts/export_schools_ise.py",),
+        outputs=("public/data/schools_ise_2025.json",),
+        writes_repo_only=True,
+    ),
+    # Reads schools_ise_export's own output; must run after it (the asset graph
+    # below declares that dependency, same pattern as commune_flows_export after
+    # commune_flows_buyer_origin).
+    "schools_by_commune_export": Command(
+        ("scripts/export_schools_by_commune.py",),
+        outputs=("public/data/schools/by_commune.json",),
+        writes_repo_only=True,
+    ),
     # ── sources_api ────────────────────────────────────────────────────────
     "macro_legacy_fetch": Command(
         ("belgian_macro_db.py", "--db", "{db}", "--fetch", "--latest", "--export", "csv"),

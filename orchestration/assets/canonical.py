@@ -141,6 +141,8 @@ EXPORTED = [
     reference_data.commune_adjacency,
     reference_data.commune_typology,
     reference_data.commune_flows_export,
+    reference_data.schools_ise_export,
+    reference_data.schools_by_commune_export,
 ]
 
 

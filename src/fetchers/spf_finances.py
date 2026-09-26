@@ -19,9 +19,11 @@ src/fetchers/population_movement.py: `_parse` resolves nothing. `geo_id`
 here is not even a raw NIS code -- the file carries no NIS codes at all, only
 a commune NAME -- so it is the raw name string exactly as published, and
 `period` is the tax year exactly as published (a string, e.g. "2026"), per
-the handoff: tax-year-to-income-year mapping has not been confirmed by the
-maintainer, so the tax year is stored as-is rather than translated to
-anything else. scripts/sync_ipp_rate.py resolves name -> NIS against the
+the handoff: the tax year is stored as-is, not translated to an income
+year. The tax-year-to-income-year mapping itself is decided (maintainer,
+2026-09-26: tax year T taxes income year T-1 -- see docs/features/
+ipp_rate.md) but nothing in this adapter uses it; `period` stays the tax
+year as published. scripts/sync_ipp_rate.py resolves name -> NIS against the
 commune map valid at f"{tax_year}-01-01" (after accent/case/punctuation
 normalisation), then NIS -> geo_id via resolve_geo(conn, nis, tax_year) --
 the same adapter/sync split bankruptcies.py and population_movement.py use,

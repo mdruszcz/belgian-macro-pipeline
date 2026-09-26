@@ -4,9 +4,9 @@ name:
   fr: Taxe communale additionnelle à l'IPP
   nl: Aanvullende gemeentebelasting op de personenbelasting
 definition:
-  en: "Additional percentage the commune adds to residents' personal income tax bill, for the tax year."
-  fr: "Pourcentage additionnel que la commune ajoute à l'impôt des personnes physiques de ses habitants, pour l'exercice d'imposition."
-  nl: "Aanvullend percentage dat de gemeente heft op de personenbelasting van haar inwoners, voor het aanslagjaar."
+  en: "Additional percentage the commune adds to residents' personal income tax bill, for the tax year; the tax year T rate applies to income earned in year T-1 (e.g. the 2025 rate applies to 2024 income)."
+  fr: "Pourcentage additionnel que la commune ajoute à l'impôt des personnes physiques de ses habitants, pour l'exercice d'imposition ; le taux de l'exercice d'imposition T s'applique aux revenus de l'année T-1 (par exemple, le taux de l'exercice d'imposition 2025 s'applique aux revenus de 2024)."
+  nl: "Aanvullend percentage dat de gemeente heft op de personenbelasting van haar inwoners, voor het aanslagjaar; het tarief van aanslagjaar T is van toepassing op de inkomsten van jaar T-1 (bijvoorbeeld, het tarief van aanslagjaar 2025 is van toepassing op de inkomsten van 2024)."
 unit: percent
 frequency: A
 source_id: spf_finances
@@ -31,8 +31,12 @@ description:
     The communal additional percentage on personal income tax (impôt des personnes
     physiques / personenbelasting), as published by SPF Finances for each tax year
     (exercice d'imposition). PERIOD IS THE TAX YEAR EXACTLY AS PUBLISHED IN THE SOURCE
-    FILE -- how a tax year maps to the income year it taxes has not been confirmed and is
-    not asserted here. Source: SPF Finances, one file per tax year at a fixed URL pattern;
+    FILE. Tax year T taxes income earned in year T-1 (maintainer decision, 2026-09-26):
+    the tax-year-2025 rate applies to 2024 income, tax-year-2024 to 2023 income, and
+    tax-year-2026 to 2025 income (no income data published for 2025 yet). This rate is
+    combinable only with income-year-T-1 figures under that rule; nothing combines them
+    in this pipeline yet -- see docs/features/ipp_rate.md. Source: SPF Finances, one file
+    per tax year at a fixed URL pattern;
     tax years 2024, 2025 and 2026 only (2018-2023 are published as PDF only and are out of
     scope). No NIS code appears in the source file -- rows are matched to a commune by
     name, verified against the geographies table valid on 1 January of the row's own tax
@@ -42,17 +46,21 @@ description:
     value. THIS RATE HAS NO DEFENSIBLE AGGREGATE and none is computed: it is neither an
     additive total nor a ratio recomputable from an underlying sum, so province/region/
     Belgium figures are refused, not averaged (is_additive false, aggregation_method
-    not_applicable). It is also never combined with fiscal income or tax-amount figures
-    to derive a yield, a revenue estimate, or any other indicator -- the rate alone does
-    not license that calculation.
+    not_applicable). It is not yet combined with fiscal income or tax-amount figures to
+    derive a yield, a revenue estimate, or any other indicator -- any such calculation
+    needs its own spec and ADR, using the tax-year-to-income-year rule above.
   fr: >
     Le pourcentage additionnel communal sur l'impôt des personnes physiques (IPP), tel que
     publié par le SPF Finances pour chaque exercice d'imposition. LA PÉRIODE EST
-    L'EXERCICE D'IMPOSITION TEL QUE PUBLIÉ DANS LE FICHIER SOURCE -- la correspondance
-    entre exercice d'imposition et année de revenus n'a pas été confirmée et n'est pas
-    affirmée ici. Source : SPF Finances, un fichier par exercice d'imposition à une URL de
-    forme fixe ; exercices 2024, 2025 et 2026 uniquement (2018-2023 ne sont publiés qu'en
-    PDF, hors périmètre). Le fichier source ne contient aucun code INS -- les lignes sont
+    L'EXERCICE D'IMPOSITION TEL QUE PUBLIÉ DANS LE FICHIER SOURCE. L'exercice d'imposition
+    T porte sur les revenus de l'année T-1 (décision du mainteneur, 2026-09-26) : le taux
+    de l'exercice d'imposition 2025 s'applique aux revenus de 2024, celui de 2024 aux
+    revenus de 2023, et celui de 2026 aux revenus de 2025 (pas encore de données de revenus
+    publiées pour 2025). Ce taux n'est combinable qu'avec les chiffres de l'année de
+    revenus T-1 selon cette règle ; rien n'est encore combiné dans ce pipeline -- voir
+    docs/features/ipp_rate.md. Source : SPF Finances, un fichier par exercice d'imposition
+    à une URL de forme fixe ; exercices 2024, 2025 et 2026 uniquement (2018-2023 ne sont
+    publiés qu'en PDF, hors périmètre). Le fichier source ne contient aucun code INS -- les lignes sont
     associées à une commune par son nom, vérifié par rapport à la table des géographies
     valide au 1er janvier de l'exercice concerné, avec une seule exception documentée pour
     le nom ambigu du fichier (voir src/fetchers/spf_finances.py et
@@ -61,16 +69,22 @@ description:
     N'A PAS D'AGRÉGAT DÉFENDABLE et aucun n'est calculé : ce n'est ni un total additif ni
     un ratio recalculable à partir d'une somme sous-jacente, donc les chiffres provinciaux/
     régionaux/nationaux sont refusés, jamais moyennés (is_additive faux, aggregation_method
-    not_applicable). Il n'est également jamais combiné avec des montants de revenu ou
-    d'impôt pour dériver un rendement, une estimation de recette, ou tout autre indicateur
-    -- le taux seul ne permet pas ce calcul.
+    not_applicable). Il n'est pas encore combiné avec des montants de revenu ou d'impôt
+    pour dériver un rendement, une estimation de recette, ou tout autre indicateur -- un
+    tel calcul nécessite sa propre spécification et son propre ADR, en utilisant la règle
+    exercice-d'imposition/année-de-revenus ci-dessus.
   nl: >
     Het aanvullend gemeentelijk percentage op de personenbelasting (IPP), zoals
     gepubliceerd door de FOD Financiën per aanslagjaar. DE PERIODE IS HET AANSLAGJAAR
-    PRECIES ZOALS GEPUBLICEERD IN HET BRONBESTAND -- hoe een aanslagjaar zich verhoudt tot
-    het belastbare inkomstenjaar is niet bevestigd en wordt hier niet beweerd. Bron: FOD
-    Financiën, één bestand per aanslagjaar op een vast URL-patroon; enkel aanslagjaren
-    2024, 2025 en 2026 (2018-2023 zijn enkel als PDF gepubliceerd, buiten bereik). Het
+    PRECIES ZOALS GEPUBLICEERD IN HET BRONBESTAND. Aanslagjaar T belast de inkomsten van
+    jaar T-1 (beslissing van de beheerder, 2026-09-26): het tarief van aanslagjaar 2025 is
+    van toepassing op de inkomsten van 2024, dat van 2024 op de inkomsten van 2023, en dat
+    van 2026 op de inkomsten van 2025 (nog geen inkomstengegevens gepubliceerd voor 2025).
+    Dit tarief is enkel combineerbaar met de cijfers van inkomstenjaar T-1 volgens deze
+    regel; in deze pipeline wordt nog niets gecombineerd -- zie docs/features/ipp_rate.md.
+    Bron: FOD Financiën, één bestand per aanslagjaar op een vast URL-patroon; enkel
+    aanslagjaren 2024, 2025 en 2026 (2018-2023 zijn enkel als PDF gepubliceerd, buiten
+    bereik). Het
     bronbestand bevat geen NIS-code -- rijen worden gekoppeld aan een gemeente op basis van
     de naam, geverifieerd tegen de geografietabel die geldig is op 1 januari van het
     betrokken aanslagjaar, met één gedocumenteerde uitzondering voor de ene dubbelzinnige
@@ -80,7 +94,8 @@ description:
     GEAGGREGEERD CIJFER en er wordt er geen berekend: het is noch een optelbaar totaal,
     noch een verhouding herberekenbaar uit een onderliggende som, dus provincie-/gewest-/
     Belgiëcijfers worden geweigerd, nooit gemiddeld (is_additive onwaar, aggregation_method
-    not_applicable). Het wordt evenmin ooit gecombineerd met inkomens- of belastingbedragen
-    om een opbrengst, een ontvangstenraming, of enige andere indicator af te leiden -- het
-    tarief alleen laat die berekening niet toe.
+    not_applicable). Het wordt nog niet gecombineerd met inkomens- of belastingbedragen om
+    een opbrengst, een ontvangstenraming, of enige andere indicator af te leiden -- zo'n
+    berekening heeft een eigen specificatie en een eigen ADR nodig, met de bovenstaande
+    aanslagjaar/inkomstenjaar-regel.
 display: null

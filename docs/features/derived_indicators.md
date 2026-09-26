@@ -75,7 +75,7 @@ period. Puurs-Sint-Amands has no 2018 percentile; its predecessors do.
 
 ## Function catalogue
 
-Ten functions in `src/analytics/derived.py`. Every one is a pure function of its inputs.
+Eleven functions in `src/analytics/derived.py`. Every one is a pure function of its inputs.
 
 | Function | Definition | Output unit |
 |---|---|---|
@@ -83,12 +83,18 @@ Ten functions in `src/analytics/derived.py`. Every one is a pure function of its
 | `cagr(x, years)` | `((v_t / v_{t−n})^(1/years) − 1) × 100` | percent per year |
 | `five_year_change(x)` | `growth_rate(x, years=5)` | percent |
 | `per_capita(x, denominator)` | `v / population`, same geo and period | x's unit per person |
+| `per_thousand(x, denominator)` | `v / population × 1,000`, same geo and period | x's unit per 1,000 residents |
 | `share_of_total(x, total)` | `v / v_total × 100` | percent |
 | `index_base_100(x, base_period)` | `v_t / v_base × 100` | index |
 | `dependency_ratio()` | `(age_0_14 + age_65_plus) / age_15_64 × 100` | percent |
 | `z_score(x, scope)` | `(v − mean(peers)) / stdev(peers)` | standard deviations |
 | `percentile(x, scope)` | see below | percent |
 | `regional_share(x)` | `v_commune / v_region × 100` | percent |
+
+`per_thousand` is `per_capita` scaled by 1,000, added by ADR 0014 for births, deaths and
+migration rates, where a per-person ratio would round to a string of leading zeros. Same null
+and divide-by-zero policy as `per_capita`; the numerator may be signed (a net migration
+balance), and the function does not clamp it.
 
 **Periods are specified in years, not in period counts.** `five_year_change` on a quarterly series
 must span 20 quarters, not 5. Taking `years` and converting via the indicator's `frequency` removes

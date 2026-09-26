@@ -85,6 +85,7 @@ RECOMPUTABLE_FUNCTIONS = {
     "mean_from_total",
     "dependency_ratio",
     "per_capita",
+    "per_thousand",
     "share_of_total",
 }
 

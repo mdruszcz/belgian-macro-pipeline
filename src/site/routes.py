@@ -98,6 +98,11 @@ ROOT_PAGES: tuple[Page, ...] = (
         "licence page that is harder to find than the figures it covers",
     ),
     Page(
+        "/ecoles-ise.html",
+        True,
+        "the searchable 2025 FWB school-site ISE directory, linked from sources.html",
+    ),
+    Page(
         "/about.html",
         True,
         "what this project is -- and the FIRST BLOCK-BUILT page on this site "
