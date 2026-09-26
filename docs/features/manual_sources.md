@@ -54,6 +54,11 @@ Not an observation store, listed because it is generated from one:
 `public/data/demography/{nis}.json` (five-year population bands by sex for the commune-profile
 pyramid, written by `scripts/export_commune_age_sex.py` when the population source is refreshed).
 
+Also not an observation store, and generated from the same download rather than a new one:
+`public/data/demography_history/{nis}.json` (every year Statbel has published for
+`TF_SOC_POP_STRUCT`, summed onto today's 565 communes, written by
+`scripts/export_commune_age_sex_history.py` — see "Refreshing the age-pyramid history" below).
+
 `extra_csv` stores are hand-loaded and merged at export time. `in_db` stores are fetched by CI,
 loaded into the working database for the run, and dumped back by `scripts/offload_stores.py`
 ([ADR 0006](../decisions/0006-stores-split-by-volume.md)).
@@ -186,6 +191,62 @@ Steps 3 and 4 are also available as `.github/workflows/manual_sources.yml`
 PR. It deliberately does **not** attempt step 1 or 2: it cannot reach Statbel and does not have the
 raw files.
 
+## Refreshing the age-pyramid history
+
+Statbel keeps every year of `TF_SOC_POP_STRUCT` on the same page as the current year — 2010
+through 2026 all resolve at the time of writing, at the same URL pattern as step 5 above, with
+only the year changing. Download every year you want into `data/raw/statbel/population/` (same
+gitignored directory, still not committed — ~2.5 MB per year zipped), then:
+
+```bash
+python scripts/export_commune_age_sex_history.py \
+  --source-dir data/raw/statbel/population \
+  --output-dir public/data/demography_history
+```
+
+This reads every `.zip`/`.txt`/`.csv` file in `--source-dir` with the exact same column-picking
+reader `export_commune_age_sex.py` already uses (so a schema Statbel changes is refused the same
+way, in the same place, for both scripts), sums each year's counts onto the commune that holds that
+territory TODAY, and writes one `public/data/demography_history/{nis}.json` per current commune:
+
+```json
+{"nis_code": "...", "source_id": "statbel", "bands": [{"from": 0, "to": 4}, ...],
+ "years": [{"period": "2010", "reference_date": "2010-01-01",
+            "male": [...21 band counts...], "female": [...21 band counts...],
+            "coverage": {"found": 1, "expected": 1}}, ...]}
+```
+
+**Growth on current territory** (the maintainer's 2026-09-16 decision, already applied to
+`POPULATION_CHANGE_5Y`/`POPULATION_CAGR_10Y` by `src/analytics/backaggregate.py`): a merged
+commune's pre-merger years sum every predecessor's own counts onto the successor, because for
+those years the predecessor and the successor are different, non-overlapping pieces of today's
+territory — never averaged, never estimated. The lineage comes straight from
+`config/geography/municipality_crosswalk.csv` (`old_nis` → `new_nis`), walked recursively with a
+cycle guard exactly as `backaggregate.py`'s `resolve_successor` walks `successor_geo_id` — this
+script stays a plain NIS-keyed CSV/JSON reader with no database access, so it reimplements that
+walk rather than importing from `src/`, but the semantics (ignore `has_partial_transfer`,
+lineage keyed by the FINAL successor after every hop) are identical on purpose.
+
+**Coverage** records, per commune per year, how many of the expected contributing communes
+(the commune itself, plus any predecessor that had not yet merged away) actually had rows in that
+year's file. It is never used to fill or estimate a missing cell — a shortfall is published as a
+smaller, honestly-labelled sum, not silently completed.
+
+Verified against the real 17 files (2010–2026): commune counts step from 589 (2010–2018) to 581
+(2019–2024) to 565 (2025–2026), exactly matching the crosswalk's two merger waves, and every merged
+commune's `coverage` goes from `found == expected == 2` (predecessor still reporting) to
+`found == expected == 1` (successor alone) at its own merger year, with the summed total moving
+continuously across the boundary — no step, no gap. Namur (92094, no lineage) matches
+`POPULATION_BY_COMMUNE` exactly for every year that indicator carries (2017–2026).
+
+This does **not** touch `public/data/demography/{nis}.json` — that single-year payload keeps being
+written by `export_commune_age_sex.py` exactly as before, byte-identical, since pages already read
+it. It follows the same manual, hand-triggered route as the rest of this file: it is not part of
+`local-automation/refresh-captcha-sources.ps1`'s monthly loop (that script only covers
+bankruptcies, population movement and the IPP rate — sources whose sync code can run against an
+already-downloaded file). A future year's history refresh is the same by-hand procedure as
+"Refreshing population data" above, just pointed at a directory of files instead of one.
+
 ## Rebuilding from what is committed
 
 ```bash
@@ -207,6 +268,22 @@ Needs no network and no raw files: schema from `migrations/`, `geographies` from
 - the loader refuses an indicator with no config, and a missing CSV;
 - `--extra-observations` refuses a path that does not exist, rather than silently publishing a
   commune export missing that source.
+
+`tests/test_age_sex_history.py`:
+
+- a two-year fixture with a predecessor/successor pair proves growth-on-current-territory: the
+  pre-merger year sums both, hand-computed; the post-merger year is the successor alone;
+- a year where a predecessor's row is simply missing (not merged, just absent) is published with
+  `coverage.found < coverage.expected`, never silently treated as complete;
+- a `.zip` and a bare `.txt` source are read identically;
+- an unrecognised column layout raises (`MissingPopulationData`, from the shared reader), never
+  guesses;
+- two files claiming the same year raise, rather than one silently overwriting the other;
+- a crosswalk row resolving to a NIS code absent from `geographies.json` raises;
+- the successor-walk helper handles a two-hop chain and refuses a cycle;
+- repeated export of the same inputs is byte-identical;
+- the existing single-year `public/data/demography/*.json` and its exporter are unmodified by this
+  change.
 
 ## Assumptions and open questions
 
