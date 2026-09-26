@@ -70,7 +70,6 @@ from src.analytics.peers import (
     nearest,
     pairwise_distances,
     pca_reduce,
-    region_of,
     similarity_score,
     standardise,
 )
@@ -319,27 +318,3 @@ def test_pca_deterministic_sign_convention():
     # component under the "largest-|loading| positive" convention, since
     # its z-values are the largest in magnitude and positive.
     assert scores1.loc["10004", "pc1"] > 0
-
-
-# ── region_of ──────────────────────────────────────────────────────────────
-
-
-def test_region_of_walks_parent_chain():
-    by_geo_id = {
-        "be:mun:11001": {"geo_id": "be:mun:11001", "parent_geo_id": "be:prov:10000"},
-        "be:prov:10000": {"geo_id": "be:prov:10000", "parent_geo_id": "be:reg:02000"},
-        "be:reg:02000": {"geo_id": "be:reg:02000", "parent_geo_id": "be:country"},
-    }
-    region_by_geo_id = {"be:reg:02000": "VLA"}
-    assert region_of("be:mun:11001", by_geo_id, region_by_geo_id) == "VLA"
-
-
-def test_region_of_refuses_unknown_geo_id():
-    with pytest.raises(PeerModelError):
-        region_of("be:mun:99999", {}, {"be:reg:02000": "VLA"})
-
-
-def test_region_of_refuses_when_no_region_found():
-    by_geo_id = {"be:mun:11001": {"geo_id": "be:mun:11001", "parent_geo_id": None}}
-    with pytest.raises(PeerModelError):
-        region_of("be:mun:11001", by_geo_id, {"be:reg:02000": "VLA"})

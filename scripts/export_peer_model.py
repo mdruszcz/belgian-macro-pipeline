@@ -229,6 +229,12 @@ def build_raw_values(
     share_foreign_2021 = _series(index, "SHARE_FOREIGN_NATIONALS", "2021", communes)
     household_size_2021 = _series(index, "AVERAGE_HOUSEHOLD_SIZE", "2021", communes)
     local_units_2023q4 = _series(index, "LOCAL_UNITS_BY_COMMUNE", "2023-Q4", communes)
+    # Spec variable 10's own denominator is POPULATION_BY_COMMUNE 2023 (matching
+    # the 2023-Q4 enterprise snapshot's own year), NOT the 2026 population used
+    # everywhere else -- src/analytics/peers.py's Variable("enterprise_density", ...)
+    # description says this explicitly. Audit finding B1 (2026-09-26): this was
+    # wrongly using population_2026, moving the national top-10 of 101/565 communes.
+    population_2023 = _series(index, "POPULATION_BY_COMMUNE", "2023", communes)
 
     areas = _read_areas(areas_path, communes)
 
@@ -242,7 +248,7 @@ def build_raw_values(
     values["unemployment_rate_insured"] = unemployment_2026
     values["share_foreign_nationals"] = share_foreign_2021
     values["average_household_size"] = household_size_2021
-    values["enterprise_density"] = (local_units_2023q4 / population_2026) * 1000.0
+    values["enterprise_density"] = (local_units_2023q4 / population_2023) * 1000.0
     values["property_tax_base_per_resident"] = cadastral_income_2026 / population_2026
 
     return values
@@ -291,7 +297,15 @@ def build_model(
         region_pools[nis] = [n for n in nis_index if meta[n]["region"] == region_code]
     region_peers = nearest(D, nis_index, k=K, pool=region_pools)
 
-    def _entries(peer_list, d_max_national: float) -> list[dict]:
+    def _entries(peer_list) -> list[dict]:
+        # d_max is PER LIST -- the largest of the ten distances actually
+        # returned in THIS list (national or region), never a value borrowed
+        # from the other list. Audit finding S2 (2026-09-26, lead decision):
+        # passing the national d_max into the region list produced negative
+        # "similarity" scores whenever a region peer was farther than the
+        # farthest national peer (461 cases, e.g. Antwerpen's region list
+        # down to -11.97) -- outside the spec's own 0-100 display range.
+        d_max = max(d for _peer, d in peer_list)
         entries = []
         for rank, (peer_nis, distance) in enumerate(peer_list, start=1):
             entries.append(
@@ -299,21 +313,18 @@ def build_model(
                     "nis": peer_nis,
                     "distance": _round(distance),
                     "rank": rank,
-                    "similarity": _round(similarity_score(distance, d_max_national)),
+                    "similarity": _round(similarity_score(distance, d_max)),
                 }
             )
         return entries
 
     communes_payload: dict[str, dict] = {}
     for nis in nis_index:
-        national_list = national_peers[nis]
-        d_max_national = max(d for _peer, d in national_list)
-
         communes_payload[nis] = {
             "features": {v.id: float(X.loc[nis, v.id]) for v in VARIABLES},
             "z": {v.id: float(Z.loc[nis, v.id]) for v in VARIABLES},
-            "national": _entries(national_list, d_max_national),
-            "region": _entries(region_peers[nis], d_max_national),
+            "national": _entries(national_peers[nis]),
+            "region": _entries(region_peers[nis]),
         }
 
     variables_payload = {
