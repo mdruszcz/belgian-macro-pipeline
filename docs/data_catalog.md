@@ -1460,7 +1460,7 @@ still needs from the maintainer.
 Drafted from `docs/idées/` (the licence inventory PDF and the SPF Finances portal note) under the
 plan approved 2026-09-23: easiest first, one wave per source. The maintainer approved every row on 2026-09-23, in his words: "j'approuve toutes les lignes du
 PR #229, et une commune sans faillite un mois donné compte pour 0" (rule 8). The IPP tax-year
-question stays open until wave 6. Every fact tagged *measured* was read off the real
+question is decided (2026-09-26, see Wave 6 below). Every fact tagged *measured* was read off the real
 file or a real GitHub Actions run on 2026-09-23, not inferred.
 
 **Reachability, measured.** A temporary probe on a real GitHub Actions runner (run `35830872431`,
@@ -1526,5 +1526,5 @@ below can run in the existing daily job; none needs a hand-download.
 | Publisher | SPF Finances — one XLSX per tax year for 2024, 2025 and 2026, e.g. `https://fin.belgium.be/sites/default/files/media/documents/taux-taxe-communale-2026.xlsx` (pointed out by the maintainer 2026-09-23; *measured:* one sheet "Liste communes", columns `VILLE OU COMMUNE` / `Taux (%)`, 581 rows for 2024 and 565 for 2025–2026, rates 0–9, no NIS codes). Earlier tax years exist only as PDFs (e.g. `taux-taxe-communale-2025_1.pdf`); the 2018–2023 XLSX URLs return 404 |
 | What | The additional communal rate on personal income tax (IPP), per commune, per tax year (*exercice d'imposition*) |
 | Matching | *Measured:* after accent/case normalisation every name matches exactly one commune on that tax year's 1 January map, except "Saint-Nicolas" (the Liège-province commune, while Sint-Niklaas is listed under its Dutch name), resolved by one explicit override. Knokke-Heist is a real 0 %. Any other unmatched or ambiguous name stops the load. First build: the three XLSX years only; the PDF years are a later step |
-| **Decision needed** | Any figure combining this rate with `FISCAL_TOT_MUNICIP_TAXES` (e.g. the yield of one IPP point) depends on how tax years line up with income years. The maintainer confirms the semantics before any code |
+| **Decided by the maintainer 2026-09-26** | The rate published for tax year T (exercice d'imposition T) applies to income earned in year T-1 -- tax year 2025's rate lines up with 2024 income, 2024 with 2023, 2026 with 2025 (no income data published yet). Written into `docs/features/ipp_rate.md`, the indicator definition and the finances-section blurb. Nothing combines the rate with `FISCAL_TOT_MUNICIP_TAXES` or any other fiscal-income indicator yet -- a combined figure (e.g. the yield of one IPP point) needs its own spec and ADR |
 | Licence | Same maintainer ruling as waves 4–5 |

@@ -2024,7 +2024,7 @@ Why: Who buys, who owns and how fast property changes hands -- per commune.
  ✅ [BUILD] Wave 6 -- Communal additional IPP rate, SPF Finances XLSX 2024-2026 (audited) (2026-09-23: in progress, builder started, stacked on #233. The maintainer pointed out the XLSX files; 2018-2023 exist only as PDFs and are left for later. Names only, no NIS: every name matches one commune except "Saint-Nicolas", resolved by one explicit override; Knokke-Heist is a real 0 %. Stored per tax year exactly as published; nothing combined with income until the maintainer confirms how tax years map to income years. PR #236. VERIFIED LIVE 2026-09-24 after daily update #251 (published site, public/data/communes/*.json): Knokke-Heist 31043 MUN_IPP_ADDITIONAL_RATE 2026 = 0 (a real 0 %). fin.belgium.be also CAPTCHAs runners: refreshed from the maintainer's PC)
 How: Name-to-NIS matching on each tax year's 1 January map, one declared override, any other unmatched name refuses the run; rate not aggregated.
 Why: The rate every local-finance comparison needs.
- [H] Decide how a tax year (exercice d'imposition) lines up with an income year
+ ✅ [H] Decide how a tax year (exercice d'imposition) lines up with an income year (2026-09-26, the maintainer: the tax year T rate applies to income year T-1; written into docs/features/ipp_rate.md, the indicator definition and the finances blurb; nothing combined yet)
 How: The maintainer states the rule once; it is written into the IPP spec before anything combines the rate with fiscal income.
 Why: A rate matched to the wrong income year is a wrong number a commune's finance officer spots at once.
  [SPEC] A real "not applicable" state for region-only indicators
