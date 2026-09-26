@@ -3,6 +3,10 @@ name:
   en: Unemployment rate, ILO definition (15-64)
   fr: Taux de chômage BIT (15-64 ans)
   nl: Werkloosheidsgraad IAB-definitie (15-64 jaar)
+definition:
+  en: "Share of the working-age (15-64) labour force who are unemployed, on the internationally comparable ILO survey definition (Walloon communes only)."
+  fr: "Part de la population active en âge de travailler (15-64 ans) qui est au chômage, selon la définition BIT internationalement comparable (communes wallonnes uniquement)."
+  nl: "Aandeel van de actieve bevolking op arbeidsleeftijd (15-64 jaar) dat werkloos is, volgens de internationaal vergelijkbare IAB-definitie (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 source_id: walstat

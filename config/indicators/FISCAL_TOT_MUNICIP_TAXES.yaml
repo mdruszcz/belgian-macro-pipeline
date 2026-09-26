@@ -3,6 +3,10 @@ name:
   en: Municipal income tax surcharge collected
   fr: Taxe communale additionnelle perçue
   nl: Aanvullende gemeentebelasting geïnd
+definition:
+  en: "Total additional municipal tax on personal income collected from residents of the commune during the year."
+  fr: "Total de la taxe communale additionnelle sur le revenu des personnes physiques perçue auprès des habitants de la commune au cours de l'année."
+  nl: "Totaal van de aanvullende gemeentebelasting op de personenbelasting geïnd bij inwoners van de gemeente tijdens het jaar."
 unit: eur
 frequency: A
 source_id: statbel

@@ -3,6 +3,10 @@ name:
   en: Consumer confidence (NBB)
   fr: Confiance des consommateurs (BNB)
   nl: Consumentenvertrouwen (NBB)
+definition:
+  en: "Monthly survey balance of Belgian household sentiment published by the National Bank of Belgium."
+  fr: "Solde mensuel d'enquête sur la confiance des ménages belges, publié par la Banque nationale de Belgique."
+  nl: "Maandelijkse enquêtesaldo van het Belgische consumentenvertrouwen, gepubliceerd door de Nationale Bank van België."
 unit: balance
 frequency: M
 source_id: nbb

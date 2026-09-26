@@ -3,6 +3,10 @@ name:
   en: Parcels tracked for ownership dynamics
   fr: Parcelles suivies pour la dynamique de propriété
   nl: Percelen gevolgd voor eigendomsdynamiek
+definition:
+  en: "Number of registered land parcels in the commune tracked for changes in ownership."
+  fr: "Nombre de parcelles cadastrées dans la commune suivies pour les changements de propriétaire."
+  nl: "Aantal kadastrale percelen in de gemeente gevolgd voor eigendomswisselingen."
 unit: count
 frequency: A
 source_id: spf_finances

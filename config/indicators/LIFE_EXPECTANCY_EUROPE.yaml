@@ -3,6 +3,10 @@ name:
   en: Life expectancy at birth
   fr: Espérance de vie à la naissance
   nl: Levensverwachting bij de geboorte
+definition:
+  en: "Expected number of years a newborn will live, for each European country tracked."
+  fr: "Nombre d'années qu'un nouveau-né peut espérer vivre, pour chaque pays européen suivi."
+  nl: "Aantal jaren dat een baby naar verwachting zal leven, voor elk gevolgd Europees land."
 unit: years
 frequency: A
 source_id: eurostat

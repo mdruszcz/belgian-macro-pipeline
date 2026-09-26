@@ -3,6 +3,10 @@ name:
   en: Net exports
   fr: Exportations nettes
   nl: Netto-export
+definition:
+  en: "Exports minus imports of goods and services, as a contribution to Belgium's GDP growth."
+  fr: "Exportations moins importations de biens et services, en contribution à la croissance du PIB belge."
+  nl: "Uitvoer minus invoer van goederen en diensten, als bijdrage tot de Belgische bbp-groei."
 unit: pp_contribution
 frequency: A
 source_id: nbb

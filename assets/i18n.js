@@ -633,6 +633,7 @@ I18N.STRINGS = {
     unitKtCo2eq: 'kt CO₂ eq.',
     unitFte: 'full-time equivalents',
     unitYears: 'years',
+    unitPersonsPerHousehold: 'persons/household',
     // MapUI.formatValue (assets/commune_map.js) / src/pages/resolve.py's
     // _format_value: the SPF Finances housing-leases batch's monthly rent
     // and charges medians, the first "€ per month" unit on the site.
@@ -1227,6 +1228,7 @@ I18N.STRINGS = {
     unitKtCo2eq: 'kt éq. CO₂',
     unitFte: 'équivalents temps plein',
     unitYears: 'ans',
+    unitPersonsPerHousehold: 'pers./ménage',
     // MapUI.formatValue (assets/commune_map.js) / _format_value de
     // src/pages/resolve.py : les médianes mensuelles de loyer et de charges
     // du lot des baux SPF Finances, la première unité "€ par mois" du site.
@@ -1807,6 +1809,7 @@ I18N.STRINGS = {
     unitKtCo2eq: 'kt CO₂-eq.',
     unitFte: 'voltijdequivalenten',
     unitYears: 'jaar',
+    unitPersonsPerHousehold: 'pers./huishouden',
     // MapUI.formatValue (assets/commune_map.js) / _format_value in
     // src/pages/resolve.py: de mediane maandelijkse huur- en kostencijfers
     // van het SPF Financiën-huurbatch, de eerste "€ per maand"-eenheid op de

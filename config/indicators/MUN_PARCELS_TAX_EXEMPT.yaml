@@ -3,6 +3,10 @@ name:
   en: Parcels exempt from property tax
   fr: Parcelles exonérées de précompte immobilier
   nl: Van onroerende voorheffing vrijgestelde percelen
+definition:
+  en: "Number of registered land parcels in the commune exempt from property tax."
+  fr: "Nombre de parcelles cadastrées dans la commune exonérées de précompte immobilier."
+  nl: "Aantal kadastrale percelen in de gemeente die zijn vrijgesteld van onroerende voorheffing."
 unit: count
 frequency: A
 source_id: spf_finances

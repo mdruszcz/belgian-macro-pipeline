@@ -3,6 +3,10 @@ name:
   en: Fiscal balance forecast (consensus)
   fr: Prévision solde budgétaire (consensus)
   nl: Begrotingssaldo prognose (consensus)
+definition:
+  en: "Average forecast of Belgium's government budget balance as a share of GDP, compiled from thirteen economic institutions."
+  fr: "Prévision moyenne du solde budgétaire des administrations publiques belges en pourcentage du PIB, établie à partir de treize institutions économiques."
+  nl: "Gemiddelde prognose van het Belgische overheidsbegrotingssaldo als aandeel van het bbp, opgesteld op basis van dertien economische instellingen."
 unit: percent_gdp
 frequency: F
 source_id: fpb

@@ -3,6 +3,10 @@ name:
   en: Age dependency ratio
   fr: Rapport de dépendance démographique
   nl: Demografische afhankelijkheidsratio
+definition:
+  en: "Number of children and retirement-age residents, as a percentage of the working-age population."
+  fr: "Nombre d'habitants jeunes et âgés, en pourcentage de la population en âge de travailler."
+  nl: "Aantal jonge en oudere inwoners, als percentage van de bevolking op arbeidsleeftijd."
 unit: percent
 frequency: A
 geo_levels: [municipal]

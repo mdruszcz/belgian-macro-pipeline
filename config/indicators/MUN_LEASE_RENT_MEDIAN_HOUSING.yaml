@@ -3,6 +3,10 @@ name:
   en: Median monthly rent, new housing leases
   fr: Loyer mensuel médian, nouveaux baux de logement
   nl: Mediane maandelijkse huur, nieuwe woninghuurcontracten
+definition:
+  en: "Median monthly rent, excluding charges, for new housing leases registered in the commune during the quarter."
+  fr: "Loyer mensuel médian, hors charges, pour les nouveaux baux de logement enregistrés dans la commune au cours du trimestre."
+  nl: "Mediane maandelijkse huurprijs, exclusief kosten, voor nieuwe woninghuurcontracten geregistreerd in de gemeente tijdens het kwartaal."
 unit: eur_per_month
 frequency: Q
 source_id: spf_finances

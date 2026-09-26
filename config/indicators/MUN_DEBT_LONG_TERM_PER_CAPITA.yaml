@@ -3,6 +3,10 @@ name:
   en: Long-term municipal debt per inhabitant
   fr: Dette communale à long terme par habitant
   nl: Gemeenteschuld op lange termijn per inwoner
+definition:
+  en: "Municipal debt due beyond one year, per inhabitant, at year end (Walloon communes only)."
+  fr: "Dette communale à échéance de plus d'un an, par habitant, en fin d'année (communes wallonnes uniquement)."
+  nl: "Gemeenteschuld die na meer dan een jaar vervalt, per inwoner, op het einde van het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

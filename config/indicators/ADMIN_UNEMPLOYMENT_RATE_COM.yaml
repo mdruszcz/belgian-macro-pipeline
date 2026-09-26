@@ -3,6 +3,10 @@ name:
   en: Administrative unemployment rate (15-64)
   fr: Taux de chômage administratif (15-64 ans)
   nl: Administratieve werkloosheidsgraad (15-64 jaar)
+definition:
+  en: "Share of residents aged 15 to 64 registered as unemployed with the Flemish employment service, at commune level."
+  fr: "Part des habitants de 15 à 64 ans inscrits comme demandeurs d'emploi auprès du service flamand de l'emploi, au niveau communal."
+  nl: "Aandeel inwoners van 15 tot 64 jaar dat bij de Vlaamse arbeidsbemiddelingsdienst als werkzoekende is ingeschreven, op gemeenteniveau."
 unit: percent
 frequency: A
 source_id: steunpunt_werk

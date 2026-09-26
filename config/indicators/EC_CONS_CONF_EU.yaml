@@ -3,6 +3,10 @@ name:
   en: Consumer confidence indicator, EU27
   fr: Indicateur de confiance des consommateurs, UE27
   nl: Consumentenvertrouwensindicator, EU27
+definition:
+  en: "Monthly EU harmonised consumer-confidence survey balance for the EU27."
+  fr: "Solde mensuel harmonisé de l'enquête européenne sur la confiance des consommateurs, pour l'UE27."
+  nl: "Maandelijkse geharmoniseerde EU-enquêtesaldo van het consumentenvertrouwen, voor de EU27."
 country: EU27_2020
 unit: balance
 frequency: M

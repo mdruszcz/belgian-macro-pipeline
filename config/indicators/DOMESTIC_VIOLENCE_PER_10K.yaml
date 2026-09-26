@@ -3,6 +3,10 @@ name:
   en: Domestic violence (per 10,000 households)
   fr: Violence intrafamiliale (par 10 000 ménages)
   nl: Intrafamiliaal geweld (per 10 000 huishoudens)
+definition:
+  en: "Domestic-violence incidents recorded by police in the commune during the year, per 10,000 households."
+  fr: "Faits de violence intrafamiliale enregistrés par la police dans la commune au cours de l'année, par 10 000 ménages."
+  nl: "Feiten van intrafamiliaal geweld geregistreerd door de politie in de gemeente tijdens het jaar, per 10 000 huishoudens."
 unit: per_10000_households
 frequency: A
 source_id: police

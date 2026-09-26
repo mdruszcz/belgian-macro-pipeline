@@ -3,6 +3,10 @@ name:
   en: Unemployment rate
   fr: Taux de chômage
   nl: Werkloosheidsgraad
+definition:
+  en: "Belgium's monthly unemployment rate, on the internationally harmonised definition."
+  fr: "Taux de chômage mensuel de la Belgique, selon la définition harmonisée internationale."
+  nl: "Maandelijkse werkloosheidsgraad van België, volgens de internationaal geharmoniseerde definitie."
 unit: percent
 frequency: M
 source_id: nbb

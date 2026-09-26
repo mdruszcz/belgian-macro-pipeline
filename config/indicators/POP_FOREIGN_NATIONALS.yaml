@@ -3,6 +3,10 @@ name:
   en: Population of foreign nationality
   fr: Population de nationalité étrangère
   nl: Bevolking met vreemde nationaliteit
+definition:
+  en: "Number of residents who do not hold Belgian citizenship, from the 2021 census."
+  fr: "Nombre d'habitants qui ne possèdent pas la nationalité belge, selon le recensement de 2021."
+  nl: "Aantal inwoners zonder de Belgische nationaliteit, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

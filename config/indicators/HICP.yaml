@@ -3,6 +3,10 @@ name:
   en: HICP (Harmonised Inflation)
   fr: IPCH (Inflation harmonisée)
   nl: GICP (Geharmoniseerde inflatie)
+definition:
+  en: "Year-on-year change in Belgium's harmonised consumer price index, the EU's standard measure of inflation."
+  fr: "Variation en glissement annuel de l'indice des prix à la consommation harmonisé belge, la mesure standard de l'inflation dans l'UE."
+  nl: "Jaar-op-jaar verandering van de Belgische geharmoniseerde consumentenprijsindex, de standaardmaatstaf van inflatie in de EU."
 unit: percent_yy
 frequency: M
 source_id: nbb

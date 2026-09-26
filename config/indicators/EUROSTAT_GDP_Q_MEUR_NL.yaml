@@ -3,6 +3,10 @@ name:
   en: GDP volume index, Netherlands (2010=100)
   fr: Indice de volume du PIB, Pays-Bas (2010=100)
   nl: Bbp-volume-index, Nederland (2010=100)
+definition:
+  en: "Quarterly index of the Netherlands' economic output (GDP), adjusted for seasonal effects, based on 2010 as 100."
+  fr: "Indice trimestriel de la production économique néerlandaise (PIB), corrigé des effets saisonniers, base 2010 = 100."
+  nl: "Kwartaalindex van de Nederlandse economische productie (bbp), gecorrigeerd voor seizoensinvloeden, met 2010 als 100."
 country: NL
 unit: index_2010
 transform:

@@ -3,6 +3,10 @@ name:
   en: Total cadastral income
   fr: Revenu cadastral total
   nl: Totaal kadastraal inkomen
+definition:
+  en: "Total notional rental value (cadastral income) assigned to all properties in the commune, the basis for property tax."
+  fr: "Revenu cadastral total (valeur locative théorique) attribué à l'ensemble des biens de la commune, base du précompte immobilier."
+  nl: "Totaal kadastraal inkomen (fictieve huurwaarde) toegekend aan alle goederen in de gemeente, de basis voor de onroerende voorheffing."
 unit: eur
 frequency: A
 source_id: spf_finances

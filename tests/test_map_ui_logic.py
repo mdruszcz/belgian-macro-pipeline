@@ -279,6 +279,33 @@ def test_unit_label_never_leaks_an_internal_unit_code():
         assert "_" not in value, f"unit label leaked an internal code: {value!r}"
 
 
+def test_persons_per_household_unit_is_trilingual_and_never_leaks_its_code():
+    """AVERAGE_HOUSEHOLD_SIZE (Indicator definitions batch): 'count' implied
+    a whole, non-negative tally, which a 2-decimal average like 2.14 is not.
+    persons_per_household is the replacement unit -- this proves its label
+    resolves in all three site languages and its suffix trails a formatted
+    number the same way 'years'/'fte' already do."""
+    out = _run_node("""
+        console.log(JSON.stringify({
+          label_en: MapUI.unitLabel('persons_per_household', 'en'),
+          label_fr: MapUI.unitLabel('persons_per_household', 'fr'),
+          label_nl: MapUI.unitLabel('persons_per_household', 'nl'),
+          suffix_en: MapUI.unitSuffix('persons_per_household', 'en'),
+          formatted: MapUI.formatValue(2.14, 'persons_per_household', 2, 'en'),
+        }));
+        """)
+    assert out["label_en"] == "persons/household"
+    assert out["label_fr"] == "pers./ménage"
+    assert out["label_nl"] == "pers./huishouden"
+    assert out["suffix_en"] == " persons/household"
+    # formatValue has no special case for this unit -- it is a plain number,
+    # not a currency, so it must fall through to the ordinary numeric path
+    # (declared decimals honoured, no prefix/suffix glued onto the digits).
+    assert out["formatted"] == "2.14"
+    for value in (out["label_en"], out["label_fr"], out["label_nl"]):
+        assert "_" not in value, f"unit label leaked an internal code: {value!r}"
+
+
 def test_projection_keeps_belgium_from_stretching_sideways():
     """Longitude must be scaled by cos(latitude); without it the country is
     drawn about 1.6x too wide."""

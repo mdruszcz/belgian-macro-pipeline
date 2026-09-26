@@ -3,6 +3,10 @@ name:
   en: Labour force (15-64)
   fr: Population active (15-64 ans)
   nl: Beroepsactieve bevolking (15-64 jaar)
+definition:
+  en: "Number of residents aged 15 to 64 who are employed or unemployed, from the 2021 census."
+  fr: "Nombre d'habitants de 15 à 64 ans en emploi ou au chômage, selon le recensement de 2021."
+  nl: "Aantal inwoners van 15 tot 64 jaar die werken of werkloos zijn, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

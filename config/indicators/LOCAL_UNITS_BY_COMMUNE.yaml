@@ -3,6 +3,10 @@ name:
   en: Local business units
   fr: Unités d'établissements
   nl: Vestigingseenheden
+definition:
+  en: "Number of business establishments (local units) located in the commune."
+  fr: "Nombre d'établissements d'entreprises (unités locales) situés dans la commune."
+  nl: "Aantal bedrijfsvestigingen (lokale eenheden) gelegen in de gemeente."
 unit: count
 frequency: Q
 # Staleness allowance for the Block H validation layer. This series is

@@ -3,6 +3,10 @@ name:
   en: Property sales transactions
   fr: Transactions de ventes immobilières
   nl: Vastgoedverkooptransacties
+definition:
+  en: "Number of property sale transactions recorded in the commune during the quarter, across all property types."
+  fr: "Nombre de transactions de vente immobilière enregistrées dans la commune au cours du trimestre, tous types de biens confondus."
+  nl: "Aantal vastgoedverkooptransacties geregistreerd in de gemeente tijdens het kwartaal, over alle goedertypes samen."
 unit: count
 frequency: Q
 source_id: spf_finances

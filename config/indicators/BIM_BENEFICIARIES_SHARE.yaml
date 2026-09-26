@@ -3,6 +3,10 @@ name:
   en: Increased-reimbursement (BIM) health-insurance beneficiaries, share of population
   fr: Bénéficiaires de l'intervention majorée (BIM), part de la population
   nl: Rechthebbenden op de verhoogde tegemoetkoming (RVV/BIM), aandeel van de bevolking
+definition:
+  en: "Share of residents entitled to increased reimbursement of health-care costs on account of low household income (Walloon communes only)."
+  fr: "Part des habitants bénéficiant de l'intervention majorée (BIM) sur les soins de santé en raison d'un faible revenu du ménage (communes wallonnes uniquement)."
+  nl: "Aandeel inwoners dat recht heeft op de verhoogde tegemoetkoming (RVV/BIM) voor gezondheidszorg wegens een laag huishoudinkomen (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 source_id: walstat

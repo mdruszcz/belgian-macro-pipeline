@@ -3,6 +3,10 @@ name:
   en: Short-term municipal debt per inhabitant
   fr: Dette communale à court terme par habitant
   nl: Gemeenteschuld op korte termijn per inwoner
+definition:
+  en: "Municipal debt due within one year, per inhabitant, at year end (Walloon communes only)."
+  fr: "Dette communale à échéance d'un an ou moins, par habitant, en fin d'année (communes wallonnes uniquement)."
+  nl: "Gemeenteschuld die binnen een jaar vervalt, per inwoner, op het einde van het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

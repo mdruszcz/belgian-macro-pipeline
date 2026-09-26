@@ -3,6 +3,10 @@ name:
   en: Annual GDP growth
   fr: Croissance annuelle du PIB
   nl: Jaarlijkse BBP-groei
+definition:
+  en: "Belgium's annual economic growth rate, year on year."
+  fr: "Taux de croissance économique annuel de la Belgique, en glissement annuel."
+  nl: "Jaarlijks economisch groeicijfer van België, jaar op jaar."
 unit: pp_contribution
 frequency: A
 source_id: nbb

@@ -3,6 +3,10 @@ name:
   en: Full unemployment benefit recipients (all statuses)
   fr: Chômeurs complets indemnisés (tous statuts)
   nl: Uitkeringsgerechtigde volledig werklozen (alle statuten)
+definition:
+  en: "Number of residents receiving a full unemployment benefit, of any status, averaged over the year."
+  fr: "Nombre d'habitants percevant une allocation de chômage complet, tous statuts confondus, en moyenne sur l'année."
+  nl: "Aantal inwoners dat een volledige werkloosheidsuitkering ontvangt, alle statuten samen, gemiddeld over het jaar."
 unit: count
 frequency: A
 source_id: onem

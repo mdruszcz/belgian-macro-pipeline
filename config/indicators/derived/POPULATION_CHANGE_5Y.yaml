@@ -3,6 +3,10 @@ name:
   en: Population change over 5 years
   fr: Évolution de la population sur 5 ans
   nl: Bevolkingsverandering over 5 jaar
+definition:
+  en: "Percentage change in the commune's population over the last five years."
+  fr: "Variation en pourcentage de la population de la commune au cours des cinq dernières années."
+  nl: "Procentuele verandering van de bevolking van de gemeente over de laatste vijf jaar."
 unit: percent
 frequency: A
 geo_levels: [municipal]

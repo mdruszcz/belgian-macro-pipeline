@@ -3,6 +3,10 @@ name:
   en: Deaths
   fr: Décès
   nl: Overlijdens
+definition:
+  en: "Number of deaths registered among residents of the commune during the calendar year."
+  fr: "Nombre de décès enregistrés parmi les habitants de la commune au cours de l'année civile."
+  nl: "Aantal overlijdens geregistreerd bij inwoners van de gemeente tijdens het kalenderjaar."
 unit: count
 frequency: A
 source_id: statbel

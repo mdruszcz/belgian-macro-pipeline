@@ -3,6 +3,10 @@ name:
   en: Population of non-EU nationality
   fr: Population de nationalité hors UE
   nl: Bevolking met niet-EU-nationaliteit
+definition:
+  en: "Number of residents holding the citizenship of a country outside the European Union, from the 2021 census."
+  fr: "Nombre d'habitants possédant la nationalité d'un pays hors de l'Union européenne, selon le recensement de 2021."
+  nl: "Aantal inwoners met de nationaliteit van een land buiten de Europese Unie, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

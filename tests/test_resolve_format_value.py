@@ -252,6 +252,37 @@ def test_map_ui_and_format_value_agree_for_eur_per_month():
         assert _numeric(py, lang) == _numeric(js, lang), (value, unit, py, js)
 
 
+# ── persons_per_household is a plain 2-decimal number, no unit glued on ────
+# AVERAGE_HOUSEHOLD_SIZE (Indicator definitions batch): replaces 'count',
+# which implied a whole, non-negative tally that a 2-decimal average like
+# 2.14 is not. Unlike eur_per_month or eur_per_inhabitant, this unit is not a
+# currency rate -- formatValue/_format_value must NOT glue anything onto the
+# number itself; the wording ("persons/household") belongs only to
+# unitLabel/unitSuffix, checked separately in test_map_ui_logic.py.
+
+
+def test_format_value_renders_persons_per_household_as_a_plain_number():
+    out = _format_value(2.14, {"unit": "persons_per_household", "decimals": 2}, "en")
+    assert out == "2.14"
+    assert "€" not in out
+    assert "%" not in out
+
+
+def test_map_ui_and_format_value_agree_for_persons_per_household():
+    cases = [
+        (2.14, "persons_per_household", 2, "en"),
+        (0.0, "persons_per_household", 2, "fr"),
+        (3.5, "persons_per_household", 2, "nl"),
+    ]
+    for value, unit, decimals, lang in cases:
+        py = _format_value(value, {"unit": unit, "decimals": decimals}, lang)
+        js = _run_node(
+            f"console.log(JSON.stringify("
+            f"MapUI.formatValue({value!r}, {unit!r}, {json.dumps(decimals)}, {lang!r})));"
+        )
+        assert py == js, (value, unit, py, js)
+
+
 # ── suppressed median renders withheld wording, never zero (rule 26) ───────
 # MUN_LEASE_RENT_MEDIAN_HOUSING / MUN_LEASE_CHARGES_MEDIAN_HOUSING are
 # 'suppressed' with value NULL below 5 leases in a commune-quarter, distinct

@@ -3,6 +3,10 @@ name:
   en: Cadastral income notifications
   fr: Notifications de revenu cadastral
   nl: Kennisgevingen kadastraal inkomen
+definition:
+  en: "Number of notifications issued during the year for a change to a property's cadastral income in the commune."
+  fr: "Nombre de notifications émises au cours de l'année pour une modification du revenu cadastral d'un bien dans la commune."
+  nl: "Aantal kennisgevingen uitgereikt tijdens het jaar voor een wijziging van het kadastraal inkomen van een goed in de gemeente."
 unit: count
 frequency: A
 source_id: spf_finances

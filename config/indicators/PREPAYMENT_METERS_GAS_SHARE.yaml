@@ -3,6 +3,10 @@ name:
   en: Gas meters with an active prepayment function, share of meters
   fr: Compteurs de gaz à fonction de prépaiement active, part des compteurs
   nl: Gasmeters met actieve vooruitbetalingsfunctie, aandeel van de meters
+definition:
+  en: "Share of household gas meters fitted with a prepayment function for households behind on payments (Walloon communes only)."
+  fr: "Part des compteurs de gaz des ménages équipés d'une fonction de prépaiement pour les ménages en retard de paiement (communes wallonnes uniquement)."
+  nl: "Aandeel gasmeters van huishoudens met een actieve vooruitbetalingsfunctie voor huishoudens met betalingsachterstand (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 source_id: walstat

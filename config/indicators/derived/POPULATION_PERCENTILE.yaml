@@ -3,6 +3,10 @@ name:
   en: Population percentile among Belgian communes
   fr: Percentile de population parmi les communes belges
   nl: Bevolkingspercentiel onder Belgische gemeenten
+definition:
+  en: "Where the commune's population ranks among all Belgian communes that existed the same year, from 0 (smallest) to 100 (largest)."
+  fr: "Rang de la population de la commune parmi toutes les communes belges existant la même année, de 0 (la plus petite) à 100 (la plus grande)."
+  nl: "Rangorde van de bevolking van de gemeente onder alle Belgische gemeenten die dat jaar bestonden, van 0 (kleinste) tot 100 (grootste)."
 unit: percent
 frequency: A
 geo_levels: [municipal]

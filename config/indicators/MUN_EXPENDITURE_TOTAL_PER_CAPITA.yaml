@@ -3,6 +3,10 @@ name:
   en: Municipal expenditure per inhabitant (total)
   fr: Dépenses communales par habitant (globales)
   nl: Gemeentelijke uitgaven per inwoner (totaal)
+definition:
+  en: "Total municipal spending per inhabitant during the year (Walloon communes only)."
+  fr: "Total des dépenses communales par habitant au cours de l'année (communes wallonnes uniquement)."
+  nl: "Totaal van de gemeentelijke uitgaven per inwoner tijdens het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

@@ -3,6 +3,10 @@ name:
   en: Population growth rate (crude rate)
   fr: Taux de croissance démographique (taux brut)
   nl: Bevolkingsgroeicijfer (brutocijfer)
+definition:
+  en: "Population growth per 1,000 inhabitants during the year, for each European country tracked."
+  fr: "Croissance démographique par 1 000 habitants au cours de l'année, pour chaque pays européen suivi."
+  nl: "Bevolkingsgroei per 1 000 inwoners tijdens het jaar, voor elk gevolgd Europees land."
 unit: per_mille
 frequency: A
 source_id: eurostat

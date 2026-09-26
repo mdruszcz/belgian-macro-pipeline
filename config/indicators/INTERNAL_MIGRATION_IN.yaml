@@ -3,6 +3,10 @@ name:
   en: Internal migration arrivals
   fr: Arrivées migratoires internes
   nl: Interne migratie aankomsten
+definition:
+  en: "Number of people who moved into the commune from elsewhere in Belgium during the calendar year."
+  fr: "Nombre de personnes ayant déménagé vers la commune depuis une autre partie de la Belgique au cours de l'année civile."
+  nl: "Aantal personen die tijdens het kalenderjaar vanuit de rest van België naar de gemeente verhuisden."
 unit: count
 frequency: A
 source_id: statbel

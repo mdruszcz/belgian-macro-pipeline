@@ -3,6 +3,10 @@ name:
   en: Municipal debt as a share of annual revenue
   fr: Dette communale en pourcentage des recettes annuelles
   nl: Gemeenteschuld als percentage van de jaarlijkse ontvangsten
+definition:
+  en: "Municipal debt as a percentage of the commune's annual revenue (Walloon communes only)."
+  fr: "Dette communale en pourcentage des recettes annuelles de la commune (communes wallonnes uniquement)."
+  nl: "Gemeenteschuld als percentage van de jaarlijkse ontvangsten van de gemeente (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 geo_levels: [municipal]

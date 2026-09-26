@@ -3,6 +3,10 @@ name:
   en: Population aged 65 and over
   fr: Population âgée de 65 ans et plus
   nl: Bevolking 65 jaar en ouder
+definition:
+  en: "Number of residents aged 65 and over in the commune on 1 January."
+  fr: "Nombre d'habitants de 65 ans et plus dans la commune au 1er janvier."
+  nl: "Aantal inwoners van 65 jaar en ouder in de gemeente op 1 januari."
 unit: count
 frequency: A
 source_id: statbel

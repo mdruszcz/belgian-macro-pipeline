@@ -3,6 +3,10 @@ name:
   en: Unemployment benefit claimants (% of residents aged 15-64)
   fr: Chômeurs complets indemnisés (% des 15-64 ans)
   nl: Uitkeringsgerechtigde volledig werklozen (% van de 15-64-jarigen)
+definition:
+  en: "Residents receiving a full unemployment benefit, as a percentage of residents aged 15 to 64."
+  fr: "Habitants percevant une allocation de chômage complet, en pourcentage des habitants de 15 à 64 ans."
+  nl: "Inwoners die een volledige werkloosheidsuitkering ontvangen, als percentage van de inwoners van 15 tot 64 jaar."
 unit: percent
 frequency: A
 geo_levels: [municipal]

@@ -3,6 +3,10 @@ name:
   en: GDP per capita, PPS
   fr: PIB par habitant, SPA
   nl: Bbp per inwoner, KKS
+definition:
+  en: "Economic output (GDP) per resident, adjusted for price-level differences between countries, for each European region tracked."
+  fr: "Production économique (PIB) par habitant, corrigée des écarts de niveau de prix entre pays, pour chaque région européenne suivie."
+  nl: "Economische productie (bbp) per inwoner, gecorrigeerd voor prijsverschillen tussen landen, voor elke gevolgde Europese regio."
 unit: pps_per_inhabitant
 frequency: A
 source_id: eurostat

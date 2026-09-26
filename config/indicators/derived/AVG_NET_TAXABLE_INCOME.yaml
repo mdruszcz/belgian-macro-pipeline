@@ -3,6 +3,10 @@ name:
   en: Average net taxable income per tax return
   fr: Revenu net imposable moyen par déclaration
   nl: Gemiddeld netto belastbaar inkomen per aangifte
+definition:
+  en: "Average net taxable income per tax return filed by residents of the commune."
+  fr: "Revenu net imposable moyen par déclaration fiscale des habitants de la commune."
+  nl: "Gemiddeld netto belastbaar inkomen per belastingaangifte van inwoners van de gemeente."
 unit: eur
 frequency: A
 geo_levels: [municipal]

@@ -3,6 +3,10 @@ name:
   en: General government net lending/borrowing (balance)
   fr: Capacité/besoin de financement des administrations publiques (solde)
   nl: Vorderingenoverschot/-tekort van de overheid (saldo)
+definition:
+  en: "Government budget balance as a share of GDP, for each European country tracked."
+  fr: "Solde budgétaire des administrations publiques en pourcentage du PIB, pour chaque pays européen suivi."
+  nl: "Overheidsbegrotingssaldo als aandeel van het bbp, voor elk gevolgd Europees land."
 unit: pct_of_gdp
 frequency: A
 source_id: eurostat

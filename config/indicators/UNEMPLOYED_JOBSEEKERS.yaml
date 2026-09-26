@@ -3,6 +3,10 @@ name:
   en: Unemployed benefit claimants seeking work
   fr: Chômeurs complets indemnisés demandeurs d'emploi
   nl: Uitkeringsgerechtigde volledig werklozen, werkzoekend
+definition:
+  en: "Number of residents receiving a full unemployment benefit while actively seeking work, averaged over the year."
+  fr: "Nombre d'habitants percevant une allocation de chômage complet tout en recherchant activement un emploi, en moyenne sur l'année."
+  nl: "Aantal inwoners dat een volledige werkloosheidsuitkering ontvangt en actief werk zoekt, gemiddeld over het jaar."
 unit: count
 frequency: A
 source_id: onem

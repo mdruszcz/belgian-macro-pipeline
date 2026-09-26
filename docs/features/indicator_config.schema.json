@@ -78,6 +78,22 @@
         }
       }
     },
+    "definition": {
+      "type": "object",
+      "description": "The PUBLIC, citizen-facing one-sentence definition (config/indicators/*.yaml), distinct from `description` above (developer-oriented pipeline notes, never published). Optional in the schema so it can be added indicator by indicator, but every indicator config in the repo currently carries one.",
+      "additionalProperties": false,
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        },
+        "nl": {
+          "type": "string"
+        }
+      }
+    },
     "unit": {
       "type": "string",
       "minLength": 1

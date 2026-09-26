@@ -3,6 +3,10 @@ name:
   en: Unemployed population (15-64)
   fr: Population au chômage (15-64 ans)
   nl: Werkloze bevolking (15-64 jaar)
+definition:
+  en: "Number of residents aged 15 to 64 recorded as unemployed, from the 2021 census."
+  fr: "Nombre d'habitants de 15 à 64 ans recensés comme chômeurs, selon le recensement de 2021."
+  nl: "Aantal inwoners van 15 tot 64 jaar geregistreerd als werkloos, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

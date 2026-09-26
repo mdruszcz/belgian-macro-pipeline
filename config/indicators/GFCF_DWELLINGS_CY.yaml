@@ -3,6 +3,10 @@ name:
   en: GFCF — Dwellings
   fr: FBCF — Logements
   nl: BIK — Woningen
+definition:
+  en: "Investment in new housing construction and major renovation, as a contribution to Belgium's GDP growth."
+  fr: "Investissements dans la construction de logements neufs et les grandes rénovations, en contribution à la croissance du PIB belge."
+  nl: "Investeringen in nieuwbouw en grote renovaties van woningen, als bijdrage tot de Belgische bbp-groei."
 unit: pp_contribution
 frequency: A
 source_id: nbb

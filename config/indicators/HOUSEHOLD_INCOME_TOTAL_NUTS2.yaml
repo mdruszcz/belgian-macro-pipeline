@@ -3,6 +3,10 @@ name:
   en: Total net disposable household income
   fr: Revenu disponible net total des ménages
   nl: Totaal netto beschikbaar inkomen van huishoudens
+definition:
+  en: "Total net disposable income of households, for each European region tracked."
+  fr: "Revenu disponible net total des ménages, pour chaque région européenne suivie."
+  nl: "Totaal netto beschikbaar inkomen van huishoudens, voor elke gevolgde Europese regio."
 unit: mio_pps_eu27_2020
 frequency: A
 source_id: eurostat

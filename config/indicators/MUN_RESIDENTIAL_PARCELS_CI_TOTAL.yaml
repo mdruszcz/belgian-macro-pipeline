@@ -3,6 +3,10 @@ name:
   en: Cadastral income, residential parcels
   fr: Revenu cadastral, parcelles résidentielles
   nl: Kadastraal inkomen, residentiële percelen
+definition:
+  en: "Total cadastral income of residential properties in the commune."
+  fr: "Revenu cadastral total des biens résidentiels de la commune."
+  nl: "Totaal kadastraal inkomen van de residentiële goederen in de gemeente."
 unit: eur
 frequency: A
 source_id: spf_finances

@@ -3,6 +3,10 @@ name:
   en: Median property ownership duration
   fr: Durée médiane de détention immobilière
   nl: Mediane eigendomsduur
+definition:
+  en: "Median number of years a property in the commune has been held by its current owner."
+  fr: "Nombre médian d'années pendant lesquelles un bien de la commune est détenu par son propriétaire actuel."
+  nl: "Mediaan aantal jaren dat een goed in de gemeente in het bezit is van de huidige eigenaar."
 unit: years
 source_id: spf_finances
 frequency: A

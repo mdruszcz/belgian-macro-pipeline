@@ -3,6 +3,10 @@ name:
   en: Unemployment rate
   fr: Taux de chômage
   nl: Werkloosheidsgraad
+definition:
+  en: "Share of the labour force aged 15 to 74 who are unemployed, for each European region tracked."
+  fr: "Part de la population active de 15 à 74 ans qui est au chômage, pour chaque région européenne suivie."
+  nl: "Aandeel van de actieve bevolking van 15 tot 74 jaar dat werkloos is, voor elke gevolgde Europese regio."
 unit: percent
 frequency: A
 source_id: eurostat

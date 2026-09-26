@@ -3,6 +3,10 @@ name:
   en: Municipal revenue per inhabitant (total)
   fr: Recettes communales par habitant (globales)
   nl: Gemeentelijke ontvangsten per inwoner (totaal)
+definition:
+  en: "Total municipal revenue per inhabitant during the year (Walloon communes only)."
+  fr: "Total des recettes communales par habitant au cours de l'année (communes wallonnes uniquement)."
+  nl: "Totaal van de gemeentelijke ontvangsten per inwoner tijdens het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

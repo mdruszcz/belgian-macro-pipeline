@@ -3,6 +3,10 @@ name:
   en: Vacant dwellings
   fr: Logements inoccupés
   nl: Onbewoonde woningen
+definition:
+  en: "Number of dwellings recorded as unoccupied on 1 January 2021, from the census."
+  fr: "Nombre de logements recensés comme inoccupés au 1er janvier 2021, selon le recensement."
+  nl: "Aantal woningen die op 1 januari 2021 als onbewoond werden geteld, volgens de volkstelling."
 unit: count
 frequency: A
 source_id: statbel

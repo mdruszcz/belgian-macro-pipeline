@@ -3,6 +3,10 @@ name:
   en: Employment and activation measures paid
   fr: Montants payés en emploi et mesures d'activation
   nl: Uitbetaalde bedragen werkgelegenheid en activeringsmaatregelen
+definition:
+  en: "Total euros paid to residents of the commune under federal employment and activation-support schemes over the year."
+  fr: "Montant total, en euros, versé aux habitants de la commune au titre des mesures fédérales d'emploi et d'activation au cours de l'année."
+  nl: "Totaal in euro uitbetaald aan inwoners van de gemeente via federale maatregelen voor werkgelegenheid en activering tijdens het jaar."
 unit: EUR
 frequency: A
 source_id: onem

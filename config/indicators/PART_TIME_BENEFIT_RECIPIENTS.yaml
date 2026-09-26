@@ -3,6 +3,10 @@ name:
   en: Part-time workers receiving an income guarantee
   fr: Travailleurs à temps partiel avec allocation de garantie de revenus
   nl: Deeltijdse werknemers met inkomensgarantie-uitkering
+definition:
+  en: "Number of residents working part time while receiving a top-up income-guarantee allowance, averaged over the year."
+  fr: "Nombre d'habitants travaillant à temps partiel tout en percevant une allocation de garantie de revenus, en moyenne sur l'année."
+  nl: "Aantal inwoners die deeltijds werken en daarbij een inkomensgarantie-uitkering ontvangen, gemiddeld over het jaar."
 unit: count
 frequency: A
 source_id: onem

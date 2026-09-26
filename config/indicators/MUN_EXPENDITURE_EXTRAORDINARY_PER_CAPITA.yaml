@@ -3,6 +3,10 @@ name:
   en: Extraordinary municipal expenditure per inhabitant
   fr: Dépenses extraordinaires communales par habitant
   nl: Buitengewone gemeentelijke uitgaven per inwoner
+definition:
+  en: "Municipal capital (investment-type) spending per inhabitant during the year (Walloon communes only)."
+  fr: "Dépenses communales extraordinaires (de type investissement) par habitant au cours de l'année (communes wallonnes uniquement)."
+  nl: "Buitengewone (investerings)uitgaven van de gemeente per inwoner tijdens het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

@@ -3,6 +3,10 @@ name:
   en: Total tax and social contribution receipts
   fr: Recettes totales des impôts et cotisations sociales
   nl: Totale ontvangsten uit belastingen en sociale bijdragen
+definition:
+  en: "Total government revenue from taxes and social contributions as a share of GDP, for each European country tracked."
+  fr: "Recettes publiques totales issues des impôts et cotisations sociales, en pourcentage du PIB, pour chaque pays européen suivi."
+  nl: "Totale overheidsontvangsten uit belastingen en sociale bijdragen als aandeel van het bbp, voor elk gevolgd Europees land."
 unit: pct_of_gdp
 frequency: A
 source_id: eurostat

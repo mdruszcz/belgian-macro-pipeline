@@ -3,6 +3,10 @@ name:
   en: Electricity meters with an active prepayment function, share of meters
   fr: Compteurs électriques à fonction de prépaiement active, part des compteurs
   nl: Elektriciteitsmeters met actieve vooruitbetalingsfunctie, aandeel van de meters
+definition:
+  en: "Share of household electricity meters fitted with a prepayment function for households behind on payments (Walloon communes only)."
+  fr: "Part des compteurs électriques des ménages équipés d'une fonction de prépaiement pour les ménages en retard de paiement (communes wallonnes uniquement)."
+  nl: "Aandeel elektriciteitsmeters van huishoudens met een actieve vooruitbetalingsfunctie voor huishoudens met betalingsachterstand (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 source_id: walstat

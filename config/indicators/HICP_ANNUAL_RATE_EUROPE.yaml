@@ -3,6 +3,10 @@ name:
   en: HICP, annual rate of change
   fr: IPCH, taux de variation annuel
   nl: GICP, jaarlijkse veranderingspercentage
+definition:
+  en: "Year-on-year change in the harmonised consumer price index, for each European country tracked."
+  fr: "Variation en glissement annuel de l'indice des prix à la consommation harmonisé, pour chaque pays européen suivi."
+  nl: "Jaar-op-jaar verandering van de geharmoniseerde consumentenprijsindex, voor elk gevolgd Europees land."
 unit: percent_yy
 frequency: M
 source_id: eurostat

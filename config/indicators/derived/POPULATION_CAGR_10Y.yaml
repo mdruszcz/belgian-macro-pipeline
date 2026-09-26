@@ -3,6 +3,10 @@ name:
   en: Population growth, 10-year annual average
   fr: Croissance de la population, moyenne annuelle sur 10 ans
   nl: Bevolkingsgroei, jaarlijks gemiddelde over 10 jaar
+definition:
+  en: "Average yearly population growth rate of the commune over the last ten years."
+  fr: "Taux de croissance annuel moyen de la population de la commune au cours des dix dernières années."
+  nl: "Gemiddeld jaarlijks bevolkingsgroeicijfer van de gemeente over de laatste tien jaar."
 unit: percent_per_year
 frequency: A
 geo_levels: [municipal]

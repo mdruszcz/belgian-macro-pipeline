@@ -3,6 +3,10 @@ name:
   en: R&D personnel, full-time equivalent
   fr: Personnel de R&D, équivalent temps plein
   nl: O&O-personeel, voltijdequivalent
+definition:
+  en: "Number of full-time-equivalent research and development staff, for each European country tracked."
+  fr: "Nombre d'équivalents temps plein occupés en recherche et développement, pour chaque pays européen suivi."
+  nl: "Aantal voltijdequivalenten tewerkgesteld in onderzoek en ontwikkeling, voor elk gevolgd Europees land."
 unit: fte
 frequency: A
 source_id: eurostat

@@ -3,6 +3,10 @@ name:
   en: Nominal compensation per employee, France (2010=100)
   fr: Rémunération nominale par salarié, France (2010=100)
   nl: Nominale beloning per werknemer, Frankrijk (2010=100)
+definition:
+  en: "Index of the cost of employing staff in France, based on 2010 as 100."
+  fr: "Indice du coût de la main-d'œuvre en France, base 2010 = 100."
+  nl: "Index van de loonkosten in Frankrijk, met 2010 als 100."
 country: FR
 unit: index_2010
 transform:

@@ -3,6 +3,10 @@ name:
   en: Inactive population (15-64)
   fr: Population inactive (15-64 ans)
   nl: Inactieve bevolking (15-64 jaar)
+definition:
+  en: "Number of residents aged 15 to 64 who are neither in employment nor unemployed, from the 2021 census."
+  fr: "Nombre d'habitants de 15 à 64 ans qui ne sont ni en emploi ni au chômage, selon le recensement de 2021."
+  nl: "Aantal inwoners van 15 tot 64 jaar die noch werken noch werkloos zijn, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

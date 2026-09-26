@@ -3,6 +3,10 @@ name:
   en: Nominal compensation per employee, Netherlands (2010=100)
   fr: Rémunération nominale par salarié, Pays-Bas (2010=100)
   nl: Nominale beloning per werknemer, Nederland (2010=100)
+definition:
+  en: "Index of the cost of employing staff in the Netherlands, based on 2010 as 100."
+  fr: "Indice du coût de la main-d'œuvre aux Pays-Bas, base 2010 = 100."
+  nl: "Index van de loonkosten in Nederland, met 2010 als 100."
 country: NL
 unit: index_2010
 transform:

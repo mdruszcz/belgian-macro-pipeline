@@ -3,6 +3,10 @@ name:
   en: Tax returns with non-zero income
   fr: Déclarations à revenu non nul
   nl: Aangiften met inkomen verschillend van nul
+definition:
+  en: "Number of tax returns filed by residents of the commune declaring a non-zero income."
+  fr: "Nombre de déclarations fiscales des habitants de la commune indiquant un revenu non nul."
+  nl: "Aantal belastingaangiften van inwoners van de gemeente met een inkomen dat niet nul is."
 unit: count
 frequency: A
 source_id: statbel

@@ -3,6 +3,10 @@ name:
   en: GDP, chain-linked volume
   fr: PIB, volume chaîné
   nl: Bbp, kettingvolume
+definition:
+  en: "Quarterly economic output (GDP), adjusted for seasonal effects, for each European country tracked."
+  fr: "Production économique trimestrielle (PIB), corrigée des effets saisonniers, pour chaque pays européen suivi."
+  nl: "Kwartaalcijfer van de economische productie (bbp), gecorrigeerd voor seizoensinvloeden, voor elk gevolgd Europees land."
 unit: meur_clv2010
 frequency: Q
 source_id: eurostat

@@ -3,7 +3,11 @@ name:
   en: Average household size
   fr: Taille moyenne des ménages
   nl: Gemiddelde huishoudgrootte
-unit: count
+definition:
+  en: "Average number of residents per private household in the commune, in 2021."
+  fr: "Nombre moyen d'habitants par ménage privé dans la commune, en 2021."
+  nl: "Gemiddeld aantal inwoners per particulier huishouden in de gemeente, in 2021."
+unit: persons_per_household
 frequency: A
 geo_levels: [municipal]
 preferred_direction: contextual
@@ -13,6 +17,16 @@ description:
     POPULATION_BY_COMMUNE divided by HOUSEHOLDS_PRIVATE at 2021. Slightly overstates the true
     private-household average, because the numerator includes residents of collective households
     (care homes, communities) whom the denominator does not count.
+
+    UNIT CHANGED FROM 'count' (Indicator definitions batch): the value is an average number of
+    persons per household (e.g. 2.14), not an integer tally, so 'count' -- which this pipeline's
+    counts_non_negative validation rule (src/validation/rules.py) reads as "a whole, non-negative
+    tally" -- was the wrong unit. No existing unit in this pipeline's vocabulary fit "a ratio of
+    persons to households", so 'persons_per_household' is a new one; see
+    MapUI.unitLabel/unitSuffix in assets/commune_map.js and the trilingual unitPersonsPerHousehold
+    string in assets/i18n.js for its display wording. This is a metadata-only change: the stored
+    value, its computation (mean_from_total, recomputed from the summed population and household
+    totals -- never averaged across communes) and its 2 decimal places are all unchanged.
 derived:
   function: mean_from_total
   inputs: [POPULATION_BY_COMMUNE, HOUSEHOLDS_PRIVATE]

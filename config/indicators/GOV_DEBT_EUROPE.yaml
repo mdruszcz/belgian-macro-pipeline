@@ -3,6 +3,10 @@ name:
   en: General government gross debt
   fr: Dette brute des administrations publiques
   nl: Brutoschuld van de overheid
+definition:
+  en: "Government gross debt as a share of GDP, for each European country tracked."
+  fr: "Dette publique brute en pourcentage du PIB, pour chaque pays européen suivi."
+  nl: "Overheidsbrutoschuld als aandeel van het bbp, voor elk gevolgd Europees land."
 unit: pct_of_gdp
 frequency: A
 source_id: eurostat

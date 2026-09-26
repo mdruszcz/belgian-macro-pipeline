@@ -3,6 +3,10 @@ name:
   en: Family nuclei
   fr: Noyaux familiaux
   nl: Familiekernen
+definition:
+  en: "Number of family units (a couple with or without children, or a lone parent with children) recorded in the commune, from the 2021 census."
+  fr: "Nombre de noyaux familiaux (couple avec ou sans enfants, ou parent seul avec enfants) recensés dans la commune, selon le recensement de 2021."
+  nl: "Aantal familiekernen (koppel met of zonder kinderen, of alleenstaande ouder met kinderen) geteld in de gemeente, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

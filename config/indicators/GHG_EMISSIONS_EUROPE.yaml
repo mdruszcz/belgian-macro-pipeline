@@ -3,6 +3,10 @@ name:
   en: Total greenhouse gas emissions
   fr: Émissions totales de gaz à effet de serre
   nl: Totale uitstoot van broeikasgassen
+definition:
+  en: "Total greenhouse gas emissions during the year, for each European country tracked."
+  fr: "Émissions totales de gaz à effet de serre au cours de l'année, pour chaque pays européen suivi."
+  nl: "Totale uitstoot van broeikasgassen tijdens het jaar, voor elk gevolgd Europees land."
 unit: kt_co2eq
 frequency: A
 source_id: eurostat

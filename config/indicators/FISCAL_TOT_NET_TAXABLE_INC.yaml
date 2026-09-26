@@ -3,6 +3,10 @@ name:
   en: Total net taxable income
   fr: Revenu net imposable total
   nl: Totaal netto belastbaar inkomen
+definition:
+  en: "Total net taxable income declared by residents of the commune during the year."
+  fr: "Revenu net imposable total déclaré par les habitants de la commune au cours de l'année."
+  nl: "Totaal netto belastbaar inkomen aangegeven door inwoners van de gemeente tijdens het jaar."
 unit: eur
 frequency: A
 source_id: statbel

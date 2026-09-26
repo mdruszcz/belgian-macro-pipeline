@@ -3,6 +3,10 @@ name:
   en: Owner occupants
   fr: Titulaires occupants
   nl: Bewonende eigenaars
+definition:
+  en: "Number of residents who own and live in their own home in the commune."
+  fr: "Nombre d'habitants de la commune propriétaires du logement qu'ils occupent."
+  nl: "Aantal inwoners van de gemeente die eigenaar zijn van de woning waarin ze wonen."
 unit: count
 frequency: A
 source_id: spf_finances

@@ -188,6 +188,16 @@ MapUI.unitLabel = function(unit, lang){
   if(u === 'fte') return MapUI.text(lang, 'unitFte');
   if(u === 'per_mille') return '‰';
   if(u === 'years') return MapUI.text(lang, 'unitYears');
+  // Indicator definitions batch: an average number of persons per
+  // household, e.g. 2.14 -- not an integer count, so 'count' (which implies
+  // a whole, non-negative tally -- see counts_non_negative in
+  // src/validation/rules.py) was the wrong unit for a household-size-style
+  // average. No existing entry in this vocabulary fit "a ratio of persons
+  // to households", so this is a new one, formatted through the plain
+  // numeric path in formatValue() (no currency-style prefix/suffix on the
+  // number itself) with only its label added here, the same as 'years' or
+  // 'fte' above.
+  if(u === 'persons_per_household') return MapUI.text(lang, 'unitPersonsPerHousehold');
   if(u === 'meur_clv2010') return MapUI.text(lang, 'unitMeurClv2010');
   if(u === 'index_0_100') return MapUI.text(lang, 'unitIndex0100');
   return unit.replace(/_/g, ' ');

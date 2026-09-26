@@ -3,6 +3,10 @@ name:
   en: Taxable cadastral income
   fr: Revenu cadastral imposable
   nl: Belastbaar kadastraal inkomen
+definition:
+  en: "Total notional rental value of properties in the commune actually subject to property tax."
+  fr: "Revenu cadastral total des biens de la commune réellement soumis au précompte immobilier."
+  nl: "Totaal kadastraal inkomen van de goederen in de gemeente dat effectief onderworpen is aan de onroerende voorheffing."
 unit: eur
 frequency: A
 source_id: spf_finances

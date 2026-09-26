@@ -3,6 +3,10 @@ name:
   en: Median monthly charges, new housing leases
   fr: Charges mensuelles médianes, nouveaux baux de logement
   nl: Mediane maandelijkse kosten, nieuwe woninghuurcontracten
+definition:
+  en: "Median monthly charges, on top of rent, for new housing leases registered in the commune during the quarter."
+  fr: "Charges mensuelles médianes, en sus du loyer, pour les nouveaux baux de logement enregistrés dans la commune au cours du trimestre."
+  nl: "Mediane maandelijkse kosten, bovenop de huur, voor nieuwe woninghuurcontracten geregistreerd in de gemeente tijdens het kwartaal."
 unit: eur_per_month
 frequency: Q
 source_id: spf_finances

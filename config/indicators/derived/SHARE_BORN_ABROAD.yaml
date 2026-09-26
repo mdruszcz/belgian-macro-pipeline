@@ -3,6 +3,10 @@ name:
   en: Share born abroad
   fr: Part de la population née à l’étranger
   nl: Aandeel in het buitenland geboren
+definition:
+  en: "Percentage of residents born outside Belgium, in 2021."
+  fr: "Pourcentage d'habitants nés hors de Belgique, en 2021."
+  nl: "Percentage inwoners geboren buiten België, in 2021."
 unit: percent
 frequency: A
 geo_levels: [municipal]

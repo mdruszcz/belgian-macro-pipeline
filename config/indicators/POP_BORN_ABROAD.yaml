@@ -3,6 +3,10 @@ name:
   en: Population born abroad
   fr: Population née à l’étranger
   nl: In het buitenland geboren bevolking
+definition:
+  en: "Number of residents born outside Belgium, whatever their current citizenship, from the 2021 census."
+  fr: "Nombre d'habitants nés hors de Belgique, quelle que soit leur nationalité actuelle, selon le recensement de 2021."
+  nl: "Aantal inwoners die buiten België zijn geboren, ongeacht hun huidige nationaliteit, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

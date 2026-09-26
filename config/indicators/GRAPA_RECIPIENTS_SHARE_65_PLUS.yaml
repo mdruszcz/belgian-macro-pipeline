@@ -3,6 +3,10 @@ name:
   en: GRAPA/income guarantee recipients, share of the 65+
   fr: Bénéficiaires GRAPA/RG, part des 65 ans et plus
   nl: GRAPA/IGO-gerechtigden, aandeel van de 65-plussers
+definition:
+  en: "Share of residents aged 65 and over receiving Belgium's guaranteed minimum income for the elderly (Walloon communes only)."
+  fr: "Part des habitants de 65 ans et plus bénéficiant de la garantie de revenus aux personnes âgées (GRAPA) en Belgique (communes wallonnes uniquement)."
+  nl: "Aandeel inwoners van 65 jaar en ouder dat de Belgische inkomensgarantie voor ouderen (IGO/GRAPA) ontvangt (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 source_id: walstat

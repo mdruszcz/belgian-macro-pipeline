@@ -3,6 +3,10 @@ name:
   en: Mean property ownership rotation
   fr: Rotation moyenne de la propriété immobilière
   nl: Gemiddelde eigendomsrotatie
+definition:
+  en: "Average number of years between ownership changes for a property in the commune."
+  fr: "Nombre moyen d'années entre deux changements de propriétaire pour un bien de la commune."
+  nl: "Gemiddeld aantal jaren tussen eigendomswisselingen voor een goed in de gemeente."
 unit: years
 source_id: spf_finances
 frequency: A

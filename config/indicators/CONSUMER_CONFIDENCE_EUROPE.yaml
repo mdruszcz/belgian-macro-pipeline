@@ -3,6 +3,10 @@ name:
   en: Consumer confidence indicator
   fr: Indicateur de confiance des consommateurs
   nl: Consumentenvertrouwensindicator
+definition:
+  en: "Monthly survey balance of household sentiment, for each European country tracked."
+  fr: "Solde mensuel d'enquête sur la confiance des ménages, pour chaque pays européen suivi."
+  nl: "Maandelijkse enquêtesaldo van het consumentenvertrouwen, voor elk gevolgd Europees land."
 unit: balance
 frequency: M
 source_id: eurostat

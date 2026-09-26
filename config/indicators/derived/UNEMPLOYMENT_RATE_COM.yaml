@@ -3,6 +3,10 @@ name:
   en: Unemployment rate (Census 2021, ages 15-64)
   fr: Taux de chômage (Census 2021, 15-64 ans)
   nl: Werkloosheidsgraad (Census 2021, 15-64 jaar)
+definition:
+  en: "Share of the working-age (15-64) labour force recorded as unemployed in the 2021 census."
+  fr: "Part de la population active en âge de travailler (15-64 ans) recensée comme chômeuse en 2021."
+  nl: "Aandeel van de actieve bevolking op arbeidsleeftijd (15-64 jaar) dat in de volkstelling van 2021 als werkloos werd geteld."
 unit: percent
 frequency: A
 geo_levels: [municipal]
