@@ -1104,6 +1104,18 @@ source, so the *output* is committed and CI reads it as data. `make boundaries` 
 should be run only when Statbel publishes a new boundary vintage — the script refuses any file
 not stamped `2026-01-01`, so a new vintage is a loud failure rather than a silent change of map.
 
+**2026-09-26 note — the same source will also give commune areas for the peer model.**
+`config/geography/geographies.csv` has no `area_km2` field at all today, and the peer-model spec
+(`docs/features/peer_model.md`, variable 2 "population density") needs one. The plan is to
+measure each commune's polygon area directly from
+`sh_statbel_statistical_sectors_3812_20260101.geojson` in its native EPSG:3812 (projected
+metres — never after the WGS84 re-projection `communes.geojson` uses for display), dissolved to
+the same 565 communes `build_commune_boundaries.py` already dissolves to, and commit the result
+as `config/geography/commune_area_km2.csv`. This is **not a new data source** — it is the same
+already-catalogued, already-licence-cleared Statbel geometry, read a second way. No new
+`data_catalog.md` row is needed; this paragraph is that disclosure. Not built as of this note;
+see [ADR 0015](decisions/0015-peer-model-v1.md), Decision 3.
+
 ### Licence — CC BY 4.0 (see also the 2015 open-data licence below — two documents, both from Statbel)
 
 > ⚠️ **Two Statbel licence documents exist and they do not say the same thing.** This section
