@@ -24,6 +24,14 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from src.analytics.ranking import rank_within
+
+#: Below this many of the 10 peers reporting a usable value in the same
+#: period as the commune's own value, the benchmark is withheld entirely
+#: (docs/features/peer_model.md, "Per-indicator benchmarks"). A withheld
+#: benchmark is not a benchmark of zero deviation (CLAUDE.md rule 26).
+MIN_PEERS_WITH_VALUE = 7
+
 #: Bumped on any change to the variable list, a variable's period, or the
 #: method (standardisation, distance, k, PCA threshold) -- ADR 0015
 #: "Versioning". Stays "1.0.0-rc.1" until the maintainer's 15-commune manual
@@ -340,3 +348,103 @@ def pca_reduce(
     columns = [f"pc{i + 1}" for i in range(n_components)]
     scores_df = pd.DataFrame(scores, index=Z.index, columns=columns)
     return scores_df, explained_ratio
+
+
+def peer_stats(value: float | None, peer_values: list[float | None]) -> dict:
+    """One commune's benchmark against its (up to 10) peers, for one
+    indicator at one period -- docs/features/peer_model.md, "Per-indicator
+    benchmarks" (defined there, built here and in scripts/export_peer_benchmarks.py).
+
+    `peer_values` holds one entry per peer in the commune's peer list (10
+    normally), each either a float (a usable value in the SAME period as
+    the commune's own value) or None (missing/suppressed/na for that
+    period -- CLAUDE.md rule 26: never a zero standing in for one of these).
+    The caller does the period alignment and the suppressed/na exclusion
+    before calling this function; this function only ever sees "usable" or
+    "absent", nothing in between.
+
+    Returns a dict with keys `peer_median`, `peers_with_value`, `position`,
+    `of`, `deviation_pct` -- every one of them `None` when the benchmark
+    must be withheld:
+
+    - `value` is None (the commune itself has no value this period);
+    - fewer than MIN_PEERS_WITH_VALUE (7) of the up-to-10 peers have a
+      usable value;
+    - the peer median is <= 0 (see below).
+
+    `position`/`of` rank the commune among itself plus its peers that have
+    a value (`src.analytics.ranking.rank_within`'s convention: 1 = highest,
+    ties share the best rank), so "3rd of 8" is possible when only 7 of 10
+    peers report. `deviation_pct = (value - peer_median) / peer_median * 100`.
+
+    Non-positive median: the spec states a median of exactly 0 must be
+    null (dividing by zero). A NEGATIVE median (possible for a signed
+    balance indicator such as INTERNAL_MIGRATION_NET) is not addressed by
+    the spec explicitly, so this is documented here as an assumption for
+    the maintainer to confirm: a percentage deviation from a negative base
+    is not a meaningful "+49%"-style sentence (a commune moving from -100
+    to -50 is an improvement, but naive deviation_pct arithmetic would call
+    it -50%, the wrong sign for what happened), so this function returns
+    None for deviation_pct (and for the whole benchmark) whenever the
+    median is <= 0, not only when it is exactly 0.
+
+    Worked example (docstring fixture, hand-computed, CLAUDE.md rule 5):
+
+        value = 1800
+        peer_values = [1000, 1100, 1210, 1300, 1400, 900, 800, 1250, 1500, 1600]
+        (10 peers, all usable -- the ordinary case)
+
+        sorted peers: 800, 900, 1000, 1100, 1210, 1250, 1300, 1400, 1500, 1600
+        peer_median (even count, mean of the two middle values,
+                     positions 5 and 6 of 10) = (1210 + 1250) / 2 = 1230.0
+        deviation_pct = (1800 - 1230) / 1230 * 100 = 46.34146341463415...
+        position: commune (1800) ranks 1st among itself + 10 peers (11
+                  values, nothing exceeds 1800) -> position=1, of=11
+        peers_with_value = 10
+
+        Exactly-7-peers variant (the floor, still computed):
+        peer_values = [1000, 1100, 1210, 1300, 1400, 900, 800]
+        sorted: 800, 900, 1000, 1100, 1210, 1300, 1400
+        peer_median (odd count, the middle value) = 1100
+        deviation_pct = (1800 - 1100) / 1100 * 100 = 63.63636363636363...
+        position=1, of=8, peers_with_value=7
+
+        Exactly-6-peers variant: same 6 of those 7 values (drop one) ->
+        peers_with_value=6 < MIN_PEERS_WITH_VALUE (7) -> every key is None.
+    """
+    null_result = {
+        "peer_median": None,
+        "peers_with_value": 0,
+        "position": None,
+        "of": None,
+        "deviation_pct": None,
+    }
+    if value is None:
+        return null_result
+
+    usable = [float(v) for v in peer_values if v is not None]
+    n_usable = len(usable)
+    if n_usable < MIN_PEERS_WITH_VALUE:
+        return {**null_result, "peers_with_value": n_usable}
+
+    peer_median = float(np.median(usable))
+    ranked = rank_within(value, [*usable, float(value)])
+    position_, of_ = ranked if ranked is not None else (None, None)
+
+    if peer_median <= 0:
+        return {
+            "peer_median": peer_median,
+            "peers_with_value": n_usable,
+            "position": position_,
+            "of": of_,
+            "deviation_pct": None,
+        }
+
+    deviation_pct = (float(value) - peer_median) / peer_median * 100.0
+    return {
+        "peer_median": peer_median,
+        "peers_with_value": n_usable,
+        "position": position_,
+        "of": of_,
+        "deviation_pct": deviation_pct,
+    }

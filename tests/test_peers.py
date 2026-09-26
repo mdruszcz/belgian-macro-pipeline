@@ -64,12 +64,14 @@ import pandas as pd
 import pytest
 
 from src.analytics.peers import (
+    MIN_PEERS_WITH_VALUE,
     PeerModelError,
     Variable,
     build_feature_matrix,
     nearest,
     pairwise_distances,
     pca_reduce,
+    peer_stats,
     similarity_score,
     standardise,
 )
@@ -318,3 +320,109 @@ def test_pca_deterministic_sign_convention():
     # component under the "largest-|loading| positive" convention, since
     # its z-values are the largest in magnitude and positive.
     assert scores1.loc["10004", "pc1"] > 0
+
+
+# ── peer_stats ───────────────────────────────────────────────────────────────
+#
+# FIXTURE (docstring of peer_stats itself repeats this; kept in sync by hand):
+# commune value = 1800, ten peers with usable values in the ordinary case:
+#     [1000, 1100, 1210, 1300, 1400, 900, 800, 1250, 1500, 1600]
+# sorted: 800, 900, 1000, 1100, 1210, 1250, 1300, 1400, 1500, 1600
+# peer_median (even count -> mean of the 5th and 6th) = (1210+1250)/2 = 1230.0
+# deviation_pct = (1800-1230)/1230*100 = 46.34146341463415...
+# position = 1 (nothing among itself+10 peers exceeds 1800), of = 11
+
+TEN_PEERS = [1000.0, 1100.0, 1210.0, 1300.0, 1400.0, 900.0, 800.0, 1250.0, 1500.0, 1600.0]
+SEVEN_PEERS = [1000.0, 1100.0, 1210.0, 1300.0, 1400.0, 900.0, 800.0]  # exactly the floor
+
+
+def test_peer_stats_even_peer_count_ten_peers():
+    result = peer_stats(1800.0, TEN_PEERS)
+    assert result["peer_median"] == pytest.approx(1230.0)
+    assert result["peers_with_value"] == 10
+    assert result["position"] == 1
+    assert result["of"] == 11
+    assert result["deviation_pct"] == pytest.approx(46.34146341463415)
+
+
+def test_peer_stats_odd_peer_count_exactly_seven_is_the_floor_and_still_computes():
+    # Exactly MIN_PEERS_WITH_VALUE (7) -- the floor is inclusive, not exclusive.
+    assert MIN_PEERS_WITH_VALUE == 7
+    result = peer_stats(1800.0, SEVEN_PEERS)
+    # sorted: 800, 900, 1000, 1100, 1210, 1300, 1400 -- odd count, middle value
+    assert result["peer_median"] == pytest.approx(1100.0)
+    assert result["peers_with_value"] == 7
+    assert result["position"] == 1
+    assert result["of"] == 8
+    assert result["deviation_pct"] == pytest.approx(63.63636363636363)
+
+
+def test_peer_stats_six_peers_is_below_the_floor_and_is_null():
+    six_peers = SEVEN_PEERS[:6]
+    result = peer_stats(1800.0, six_peers)
+    assert result["peers_with_value"] == 6
+    assert result["peer_median"] is None
+    assert result["position"] is None
+    assert result["of"] is None
+    assert result["deviation_pct"] is None
+
+
+def test_peer_stats_suppressed_peer_is_excluded_not_zeroed():
+    # A None among the ten peers (suppressed/na for this period) must be
+    # excluded from the median's inputs entirely -- never counted as a 0,
+    # which would pull the median toward zero (CLAUDE.md rule 26).
+    nine_plus_one_suppressed = TEN_PEERS + [None]
+    with_suppressed = peer_stats(1800.0, nine_plus_one_suppressed)
+    without_it = peer_stats(1800.0, TEN_PEERS)
+    assert with_suppressed == without_it
+    assert with_suppressed["peers_with_value"] == 10  # not 11
+
+
+def test_peer_stats_commune_has_no_value_is_null():
+    result = peer_stats(None, TEN_PEERS)
+    assert result["peer_median"] is None
+    assert result["peers_with_value"] == 0
+    assert result["position"] is None
+    assert result["of"] is None
+    assert result["deviation_pct"] is None
+
+
+def test_peer_stats_median_zero_is_null_deviation():
+    # Ten peers whose two middle sorted values (5th and 6th of 10, 0-indexed
+    # 4 and 5) are -50 and 50, averaging to a median of exactly 0.
+    peers = [-500.0, -400.0, -300.0, -200.0, -50.0, 50.0, 200.0, 300.0, 400.0, 500.0]
+    result = peer_stats(600.0, peers)
+    assert result["peer_median"] == pytest.approx(0.0)
+    assert result["peers_with_value"] == 10
+    assert result["deviation_pct"] is None
+    # Position/rank are still meaningful even though the deviation is withheld.
+    assert result["position"] is not None
+
+
+def test_peer_stats_negative_median_is_null_deviation_assumption():
+    # A signed-balance indicator (e.g. INTERNAL_MIGRATION_NET) can have a
+    # negative peer median. The spec does not state what deviation_pct means
+    # against a negative base; this test pins the assumption documented in
+    # peer_stats' own docstring: deviation_pct (and the whole benchmark) is
+    # null whenever the median is <= 0, not only when it is exactly 0,
+    # because a percentage-from-a-negative-base sentence is not meaningful.
+    peers = [-800.0, -700.0, -600.0, -500.0, -450.0, -450.0, -200.0, -100.0, -50.0, -10.0]
+    # sorted median (5th/6th of 10, 0-indexed 4 and 5) = (-450 + -450)/2 = -450
+    result = peer_stats(-100.0, peers)
+    assert result["peer_median"] == pytest.approx(-450.0)
+    assert result["peers_with_value"] == 10
+    assert result["deviation_pct"] is None
+    # Position is unaffected by the sign-of-median question -- -100 beats
+    # seven of its ten peers (-200,-450,-450,-500,-600,-700,-800) and loses
+    # to two (-50,-10), plus itself included -- rank among itself+10 peers.
+    assert result["position"] == 3
+    assert result["of"] == 11
+
+
+def test_peer_stats_ties_share_rank():
+    # Two peers equal to the commune's own value: rank_within's convention
+    # (a tie shares the best rank) applies unchanged.
+    peers = [1800.0, 1800.0, 900.0, 800.0, 700.0, 600.0, 500.0]
+    result = peer_stats(1800.0, peers)
+    assert result["position"] == 1
+    assert result["of"] == 8
