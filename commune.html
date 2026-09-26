@@ -305,6 +305,19 @@
   .pyramid-track.right i{background:var(--bp-chart-7); border-radius:0 4px 4px 0}
   .pyramid-note{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:var(--bp-space-3) 0 0}
 
+  /* ---- age-pyramid year slider (demography_history/<nis>.json) ---- */
+  .pyramid-history{display:none; margin-top:var(--bp-space-3); padding-top:var(--bp-space-3); border-top:1px solid var(--bp-border)}
+  .pyramid-history.is-active{display:block}
+  .pyramid-history-controls{display:flex; align-items:center; gap:10px}
+  .pyramid-history-play{flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; line-height:1; padding:0}
+  .pyramid-history-play:hover{background:var(--bp-surface-alt)}
+  .pyramid-history-play[aria-pressed="true"]{background:var(--bp-chart-1); border-color:var(--bp-chart-1); color:#fff}
+  .pyramid-history-range{flex:1; min-width:0}
+  .pyramid-history-year{flex:none; font-size:12px; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums; min-width:3.2em; text-align:right}
+  .pyramid-history-sub{font-size:10px; color:var(--bp-text-faint); margin:5px 0 0}
+  .pyramid-history-incomplete{display:none; font-size:10px; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-radius:6px; padding:5px 8px; margin-top:6px}
+  .pyramid-history-incomplete.is-visible{display:block}
+
   /* ---- buyers' origin flows (commune-flows PR 2) ---- */
   .flows-buckets{list-style:none; margin:0 0 var(--bp-space-4); padding:0; display:flex; flex-direction:column; gap:9px}
   .flows-buckets .barlist{margin:0}
@@ -608,6 +621,24 @@
           </div>
           <div class="bp-state-body">
             <div class="pyramid-chart" id="pyramidChart"></div>
+            <!-- Year slider/play, driven by public/data/demography_history/<nis>.json
+                 (PR #267 merged the data 2026-09-26). Hidden (`is-active` not set)
+                 whenever that payload is absent for this commune, so an existing
+                 visitor with no history file sees exactly today's single-year
+                 pyramid -- three distinct states, never collapsed (rule 26):
+                 history loaded / history absent / a given year incomplete. -->
+            <div class="pyramid-history" id="pyramidHistory">
+              <div class="pyramid-history-controls">
+                <button type="button" class="pyramid-history-play" id="pyramidPlay" aria-pressed="false">
+                  <span id="pyramidPlayIcon" aria-hidden="true">&#9654;</span>
+                  <span class="bp-sr-only" id="pyramidPlayLabel" data-t="cpPyramidPlay">Play</span>
+                </button>
+                <input type="range" class="pyramid-history-range" id="pyramidYear" min="0" max="0" step="1" value="0">
+                <span class="pyramid-history-year" id="pyramidYearOut">—</span>
+              </div>
+              <p class="pyramid-history-sub" id="pyramidHistorySub"></p>
+              <p class="pyramid-history-incomplete" id="pyramidIncomplete" role="status"></p>
+            </div>
             <p class="pyramid-note" data-t="cpPyramidNote">Five-year groups from Statbel's single-year ages. Sex is shown as recorded by the source (F/M); 100+ is top-coded.</p>
           </div>
           <div class="bp-state-message">
@@ -853,6 +884,9 @@
   var PHOTOS_URL      = 'assets/belpulse/commune/photos.json';
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
   var AGE_SEX_URL = function(nis){ return 'public/data/demography/' + nis + '.json'; };
+  // Every published Statbel year, per current commune (PR #267). Optional --
+  // its own fetch degrades to today's single-year pyramid, never breaks it.
+  var AGE_SEX_HISTORY_URL = function(nis){ return 'public/data/demography_history/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
   var FLOWS_URL = function(nis){ return 'public/data/flows/buyer_origin/' + nis + '.json'; };
 
@@ -866,6 +900,7 @@
     geojson: null, map: null, locator: null, manifest: {},
     geographies: {}, adjacency: {}, photos: {}, headlineValues: null, nbMap: null,
     ageSex: null, flows: null,
+    ageSexHistory: null,
   };
 
   /* The geography row for a NIS code, and the chain above it. geographies.json
@@ -1212,20 +1247,29 @@
      indicator: together they are dimensions of one population table. The
      exporter validates every commune's 42 cells against its published total
      before this page can receive them. */
-  function renderAgeSex(){
-    var panel = document.getElementById('pyramidPanel');
-    var chart = document.getElementById('pyramidChart');
-    var payload = state.ageSex;
-    chart.innerHTML = '';
-    if(!payload || payload.nis_code !== state.nis || !Array.isArray(payload.bands) || !payload.bands.length){
-      panel.dataset.state = 'unavailable';
-      document.getElementById('pyramidSub').textContent = T('mapNoData');
-      return;
-    }
+  // Slider/Play state for the age-pyramid history (demography_history/<nis>.json).
+  // Kept as its own object rather than folded into `state` because it is pure
+  // UI/animation state (current frame, timer handle), never document data --
+  // nothing here is read back to decide what to render on a fresh load.
+  var pyramidHistory = {
+    active: false, bands: null, years: [], max: 1, index: 0,
+    playing: false, timer: null,
+  };
 
-    var values = [];
-    payload.bands.forEach(function(band){ values.push(band.male || 0, band.female || 0); });
-    var max = Math.max.apply(null, values.concat([1]));
+  function pyramidAgeLabel(band){
+    return band.to === null || band.to === undefined ? band.from + '+' : band.from + '–' + band.to;
+  }
+
+  // Draws one frame -- either the default single-year payload's own bands
+  // (unchanged from before this batch) or one year's bands built from the
+  // history payload's `bands` (labels) + a `years[i]` row (male/female
+  // counts) -- onto #pyramidChart. `max` is passed in rather than computed
+  // per frame so the y/x scale stays FIXED across every year the slider can
+  // reach; recomputing it per frame would make the shape change partly a
+  // rescaling artefact instead of a real population change.
+  function drawPyramid(bands, referenceLabel, max){
+    var chart = document.getElementById('pyramidChart');
+    chart.innerHTML = '';
     var axis = document.createElement('div');
     axis.className = 'pyramid-axis';
     axis.innerHTML = '<span class="left"></span><span class="right"></span>';
@@ -1233,19 +1277,13 @@
     axis.querySelector('.right').textContent = T('cpPyramidFemale');
     chart.appendChild(axis);
 
-    // The reference date is read once here (rather than hand-typed) so every
-    // bar's tooltip can carry the exact date this population count is as-of,
-    // from the payload -- not the page's build date or today's date.
-    var reference = payload.reference_date || payload.period;
-    var referenceLabel = calendarDate(reference);
-
     // A bar is a hover/keyboard-operable data point, wired to the same
     // shared tooltip every chart on this site uses (assets/belpulse/charts.js
     // -- BPCharts.showTip/hideTip), not a second tooltip implementation. It
     // needs its own tabindex because the `<i>` element charts.js's
     // showTip/hideTip anchor to is otherwise inert markup: a <div> is not
     // reachable by keyboard and gets no accessible name on its own.
-    function wireBar(el, sexLabel, count){
+    function wireBar(el, age, sexLabel, count){
       el.tabIndex = 0;
       el.setAttribute('role', 'img');
       el.setAttribute('aria-label', T('cpPyramidBar', {
@@ -1260,10 +1298,9 @@
       el.addEventListener('blur', hide);
     }
 
-    var age;
-    payload.bands.slice().reverse().forEach(function(band){
+    bands.slice().reverse().forEach(function(band){
       var male = band.male || 0, female = band.female || 0;
-      age = band.to === null ? band.from + '+' : band.from + '–' + band.to;
+      var age = pyramidAgeLabel(band);
       var row = document.createElement('div');
       row.className = 'pyramid-row';
       row.setAttribute('aria-label', T('cpPyramidRow', {
@@ -1284,10 +1321,193 @@
       var rightBar = row.querySelector('.pyramid-track.right i');
       leftBar.style.width = (male / max * 100).toFixed(2) + '%';
       rightBar.style.width = (female / max * 100).toFixed(2) + '%';
-      wireBar(leftBar, T('cpPyramidMale'), male);
-      wireBar(rightBar, T('cpPyramidFemale'), female);
+      wireBar(leftBar, age, T('cpPyramidMale'), male);
+      wireBar(rightBar, age, T('cpPyramidFemale'), female);
       chart.appendChild(row);
     });
+  }
+
+  // Renders one history year (by index into pyramidHistory.years) -- the
+  // slider's input handler and the Play timer both call this, so the two
+  // controls can never disagree about what is on screen.
+  function renderPyramidYear(index){
+    var h = pyramidHistory;
+    if(!h.active || !h.years.length) return;
+    index = Math.max(0, Math.min(h.years.length - 1, index));
+    h.index = index;
+    var year = h.years[index];
+    var bands = h.bands.map(function(band, i){
+      return {from: band.from, to: band.to, male: year.male[i], female: year.female[i]};
+    });
+    var referenceLabel = calendarDate(year.reference_date || year.period);
+    drawPyramid(bands, referenceLabel, h.max);
+
+    var range = document.getElementById('pyramidYear');
+    var out = document.getElementById('pyramidYearOut');
+    if(range){
+      range.value = String(index);
+      range.setAttribute('aria-label', T('cpPyramidYearLabel', {year: year.period}));
+    }
+    if(out) out.textContent = year.period;
+
+    document.getElementById('pyramidSub').textContent = T('cpPyramidSub', {
+      date: referenceLabel,
+      updated: calendarDate(state.ageSexHistory && state.ageSexHistory.source_updated),
+    });
+
+    // Three distinct states (rule 26): a complete year says nothing extra; an
+    // incomplete one (a merged commune whose predecessor rows were missing
+    // that year) gets a visible note, never a silently zero-height pyramid --
+    // the payload does not fill the gap, so neither does this page.
+    var coverage = year.coverage || {};
+    var note = document.getElementById('pyramidIncomplete');
+    if(note){
+      if(typeof coverage.found === 'number' && typeof coverage.expected === 'number' &&
+         coverage.found < coverage.expected){
+        note.textContent = T('cpPyramidIncomplete', {found: coverage.found, expected: coverage.expected});
+        note.classList.add('is-visible');
+      } else {
+        note.textContent = '';
+        note.classList.remove('is-visible');
+      }
+    }
+  }
+
+  function pyramidStopPlaying(){
+    var h = pyramidHistory;
+    h.playing = false;
+    if(h.timer){ clearInterval(h.timer); h.timer = null; }
+    var btn = document.getElementById('pyramidPlay');
+    var icon = document.getElementById('pyramidPlayIcon');
+    var label = document.getElementById('pyramidPlayLabel');
+    if(btn) btn.setAttribute('aria-pressed', 'false');
+    if(icon) icon.innerHTML = '&#9654;';
+    if(label) label.textContent = T('cpPyramidPlay');
+  }
+
+  function pyramidStartPlaying(){
+    var h = pyramidHistory;
+    if(!h.active || h.years.length < 2) return;
+    h.playing = true;
+    var btn = document.getElementById('pyramidPlay');
+    var icon = document.getElementById('pyramidPlayIcon');
+    var label = document.getElementById('pyramidPlayLabel');
+    if(btn) btn.setAttribute('aria-pressed', 'true');
+    if(icon) icon.innerHTML = '&#10074;&#10074;';
+    if(label) label.textContent = T('cpPyramidPause');
+    // Loop back to the first year once the last one is reached, rather than
+    // stopping there, so Play always means "keep showing the sequence" --
+    // matching the brief's "loops".
+    h.timer = setInterval(function(){
+      var next = h.index + 1 >= h.years.length ? 0 : h.index + 1;
+      renderPyramidYear(next);
+    }, 700);
+  }
+
+  // prefers-reduced-motion: the slider itself (a native <input type="range">,
+  // always keyboard-operable) stays; only the *timed auto-advance* is an
+  // animation, so it alone is what a reduced-motion reader gets none of --
+  // the Play button is hidden rather than left to silently do nothing.
+  var PYRAMID_REDUCED_MOTION = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function wirePyramidHistoryControls(){
+    var range = document.getElementById('pyramidYear');
+    var play = document.getElementById('pyramidPlay');
+    if(!range || !play || range.dataset.wired) return;
+    range.dataset.wired = '1';
+    range.addEventListener('input', function(){
+      pyramidStopPlaying();
+      renderPyramidYear(parseInt(range.value, 10) || 0);
+    });
+    play.addEventListener('click', function(){
+      if(pyramidHistory.playing) pyramidStopPlaying();
+      else pyramidStartPlaying();
+    });
+    if(PYRAMID_REDUCED_MOTION) play.hidden = true;
+  }
+
+  /* ---- population pyramid ----------------------------------------------
+     A purpose-built payload preserves Statbel's real age × sex dimensions.
+     It is separate from scalar indicators because neither age nor sex is an
+     indicator: together they are dimensions of one population table. The
+     exporter validates every commune's 42 cells against its published total
+     before this page can receive them.
+
+     The optional demography_history/<nis>.json (every published Statbel
+     year, PR #267) drives a year slider under the same chart; when it is
+     absent or does not match this commune, the panel falls back exactly to
+     the single-year payload -- an existing visitor with no history file
+     sees precisely what they saw before this batch. */
+  function renderAgeSex(){
+    var panel = document.getElementById('pyramidPanel');
+    var chart = document.getElementById('pyramidChart');
+    var historyBox = document.getElementById('pyramidHistory');
+    var payload = state.ageSex;
+    var history = state.ageSexHistory;
+    chart.innerHTML = '';
+    pyramidStopPlaying();
+
+    if(!payload || payload.nis_code !== state.nis || !Array.isArray(payload.bands) || !payload.bands.length){
+      panel.dataset.state = 'unavailable';
+      document.getElementById('pyramidSub').textContent = T('mapNoData');
+      pyramidHistory.active = false;
+      if(historyBox) historyBox.classList.remove('is-active');
+      return;
+    }
+
+    var hasHistory = history && history.nis_code === state.nis &&
+      Array.isArray(history.bands) && history.bands.length &&
+      Array.isArray(history.years) && history.years.length;
+
+    if(hasHistory){
+      // Fixed scale (rule: shape change must be real, not a rescaling
+      // artefact) -- the max is taken over EVERY year the slider can reach,
+      // not just the one on screen.
+      var allValues = [];
+      history.years.forEach(function(year){
+        (year.male || []).forEach(function(v){ allValues.push(v); });
+        (year.female || []).forEach(function(v){ allValues.push(v); });
+      });
+      pyramidHistory.active = true;
+      pyramidHistory.bands = history.bands;
+      pyramidHistory.years = history.years;
+      pyramidHistory.max = Math.max.apply(null, allValues.concat([1]));
+
+      var range = document.getElementById('pyramidYear');
+      if(range){
+        range.min = '0';
+        range.max = String(history.years.length - 1);
+      }
+      if(historyBox) historyBox.classList.add('is-active');
+      var sub = document.getElementById('pyramidHistorySub');
+      if(sub) sub.textContent = T('cpPyramidHistorySub', {
+        from: history.years[0].period,
+        to: history.years[history.years.length - 1].period,
+      });
+      wirePyramidHistoryControls();
+      // Default frame is the LAST (most recent) year, matching what the
+      // single-year payload already shows today -- an existing visitor sees
+      // the same pyramid on first paint, only now with a slider beneath it.
+      renderPyramidYear(history.years.length - 1);
+      panel.dataset.state = 'ready';
+      return;
+    }
+
+    pyramidHistory.active = false;
+    if(historyBox) historyBox.classList.remove('is-active');
+
+    var values = [];
+    payload.bands.forEach(function(band){ values.push(band.male || 0, band.female || 0); });
+    var max = Math.max.apply(null, values.concat([1]));
+
+    // The reference date is read once here (rather than hand-typed) so every
+    // bar's tooltip can carry the exact date this population count is as-of,
+    // from the payload -- not the page's build date or today's date.
+    var reference = payload.reference_date || payload.period;
+    var referenceLabel = calendarDate(reference);
+
+    drawPyramid(payload.bands, referenceLabel, max);
 
     document.getElementById('pyramidSub').textContent = T('cpPyramidSub', {
       date: referenceLabel,
@@ -2257,6 +2477,7 @@
       fetch(MANIFEST_URL), fetch(COMMUNE_URL(state.nis)),
       fetch(GEOGRAPHIES_URL), fetch(ADJACENCY_URL), fetch(PHOTOS_URL),
       fetch(AGE_SEX_URL(state.nis)), fetch(FLOWS_URL(state.nis)),
+      fetch(AGE_SEX_HISTORY_URL(state.nis)),
     ]);
     // Each of these is optional and degrades to the honest state: no
     // geography metadata means English place names, no adjacency means the
@@ -2272,6 +2493,11 @@
     // a merged commune the exporter has not re-keyed) means the whole
     // section stays hidden (renderFlows()), never an "unavailable" panel.
     if(res[9].ok) state.flows = await res[9].json();
+    // Age-pyramid history (year slider): optional, same degrade-to-today's-
+    // view rule as the rest of this block. A payload for the WRONG nis (a
+    // stale response after a client-side nis change) is treated the same as
+    // absent -- renderAgeSex() re-checks nis_code before trusting it.
+    if(res[10] && res[10].ok) state.ageSexHistory = await res[10].json();
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
