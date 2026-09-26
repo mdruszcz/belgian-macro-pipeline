@@ -3,6 +3,10 @@ name:
   en: Internal migration departures
   fr: Départs migratoires internes
   nl: Interne migratie vertrekken
+definition:
+  en: "Number of people who moved out of the commune to elsewhere in Belgium during the calendar year."
+  fr: "Nombre de personnes ayant quitté la commune pour une autre partie de la Belgique au cours de l'année civile."
+  nl: "Aantal personen die tijdens het kalenderjaar de gemeente verlieten naar de rest van België."
 unit: count
 frequency: A
 source_id: statbel

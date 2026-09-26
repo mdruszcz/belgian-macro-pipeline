@@ -3,6 +3,10 @@ name:
   en: Employment rate (20-64)
   fr: Taux d'emploi (20-64 ans)
   nl: Werkzaamheidsgraad (20-64 jaar)
+definition:
+  en: "Share of residents aged 20 to 64 in employment, for each European region tracked."
+  fr: "Part des habitants de 20 à 64 ans en emploi, pour chaque région européenne suivie."
+  nl: "Aandeel inwoners van 20 tot 64 jaar met een job, voor elke gevolgde Europese regio."
 unit: percent
 frequency: A
 source_id: eurostat

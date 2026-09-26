@@ -3,6 +3,10 @@ name:
   en: Share of renewable energy in gross final energy consumption
   fr: Part des énergies renouvelables dans la consommation finale brute d'énergie
   nl: Aandeel hernieuwbare energie in het bruto-eindverbruik van energie
+definition:
+  en: "Share of renewable sources in final energy consumption, for each European country tracked."
+  fr: "Part des énergies renouvelables dans la consommation finale d'énergie, pour chaque pays européen suivi."
+  nl: "Aandeel hernieuwbare energie in het finale energieverbruik, voor elk gevolgd Europees land."
 unit: percent
 frequency: A
 source_id: eurostat

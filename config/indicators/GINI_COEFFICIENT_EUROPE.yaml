@@ -3,6 +3,10 @@ name:
   en: Gini coefficient of equivalised disposable income
   fr: Coefficient de Gini du revenu disponible équivalent
   nl: Gini-coëfficiënt van het equivalent beschikbaar inkomen
+definition:
+  en: "Measure of income inequality within the population, for each European country tracked, from 0 (everyone equal) to 100 (total inequality)."
+  fr: "Mesure de l'inégalité des revenus au sein de la population, pour chaque pays européen suivi, de 0 (égalité parfaite) à 100 (inégalité totale)."
+  nl: "Maatstaf voor inkomensongelijkheid binnen de bevolking, voor elk gevolgd Europees land, van 0 (volledige gelijkheid) tot 100 (volledige ongelijkheid)."
 unit: index_0_100
 frequency: A
 source_id: eurostat

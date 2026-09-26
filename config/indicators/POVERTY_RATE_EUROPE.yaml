@@ -3,6 +3,10 @@ name:
   en: At-risk-of-poverty rate (60% of median income)
   fr: Taux de risque de pauvreté (60 % du revenu médian)
   nl: Armoederisicopercentage (60% van het mediaan inkomen)
+definition:
+  en: "Share of the population living on less than 60% of the national median income, for each European country tracked."
+  fr: "Part de la population disposant de moins de 60 % du revenu médian national, pour chaque pays européen suivi."
+  nl: "Aandeel van de bevolking dat leeft van minder dan 60% van het nationale mediaan inkomen, voor elk gevolgd Europees land."
 unit: percent
 frequency: A
 source_id: eurostat

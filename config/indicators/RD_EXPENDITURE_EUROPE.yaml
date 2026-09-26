@@ -3,6 +3,10 @@ name:
   en: R&D expenditure (% of GDP)
   fr: Dépenses de R&D (% du PIB)
   nl: O&O-uitgaven (% van het bbp)
+definition:
+  en: "Spending on research and development as a share of GDP, for each European country tracked."
+  fr: "Dépenses de recherche et développement en pourcentage du PIB, pour chaque pays européen suivi."
+  nl: "Uitgaven aan onderzoek en ontwikkeling als aandeel van het bbp, voor elk gevolgd Europees land."
 unit: pct_of_gdp
 frequency: A
 source_id: eurostat

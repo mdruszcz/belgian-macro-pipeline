@@ -3,6 +3,10 @@ name:
   en: Municipal debt per inhabitant (total)
   fr: Dette communale par habitant (globale)
   nl: Gemeenteschuld per inwoner (totaal)
+definition:
+  en: "Total outstanding municipal debt per inhabitant at year end (Walloon communes only)."
+  fr: "Dette communale totale par habitant en fin d'année (communes wallonnes uniquement)."
+  nl: "Totale openstaande gemeenteschuld per inwoner op het einde van het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

@@ -3,6 +3,10 @@ name:
   en: Unemployment rate
   fr: Taux de chômage
   nl: Werkloosheidsgraad
+definition:
+  en: "Monthly unemployment rate, adjusted for seasonal effects, for each European country tracked."
+  fr: "Taux de chômage mensuel, corrigé des effets saisonniers, pour chaque pays européen suivi."
+  nl: "Maandelijkse werkloosheidsgraad, gecorrigeerd voor seizoensinvloeden, voor elk gevolgd Europees land."
 unit: percent
 frequency: M
 source_id: eurostat

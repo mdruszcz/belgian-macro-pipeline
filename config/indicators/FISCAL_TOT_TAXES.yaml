@@ -3,6 +3,10 @@ name:
   en: Total tax assessed
   fr: Total de l'impôt
   nl: Totaal belasting
+definition:
+  en: "Total personal income tax assessed on residents of the commune during the year."
+  fr: "Total de l'impôt des personnes physiques établi à charge des habitants de la commune au cours de l'année."
+  nl: "Totaal van de personenbelasting geheven van inwoners van de gemeente tijdens het jaar."
 unit: eur
 frequency: A
 source_id: statbel

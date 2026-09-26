@@ -3,6 +3,10 @@ name:
   en: Quarterly GDP growth (Y-Y)
   fr: Croissance trimestrielle du PIB (A-A)
   nl: Kwartaalgroei BBP (J-J)
+definition:
+  en: "Belgium's quarterly economic growth rate, compared with the same quarter one year earlier."
+  fr: "Taux de croissance économique trimestriel de la Belgique, comparé au même trimestre de l'année précédente."
+  nl: "Kwartaalgroeicijfer van de Belgische economie, vergeleken met hetzelfde kwartaal een jaar eerder."
 unit: percent_yy
 frequency: Q
 source_id: nbb

@@ -6,6 +6,7 @@ from src.validation.config_schema import (
     ConfigValidationError,
     is_multi_geo,
     load_and_validate_all,
+    validate_derived_config,
     validate_indicator_config,
     validate_source_config,
 )
@@ -54,6 +55,66 @@ def test_wrong_enum_value_rejected():
     errors = validate_indicator_config(bad, Path("bad.yaml"))
     assert errors
     assert any("frequency" in e for e in errors)
+
+
+# ── `definition`: the public, citizen-facing sentence (Indicator definitions
+# batch) -- distinct from `description`, which stays developer-oriented and
+# is never published. Optional in the schema so it can be added indicator by
+# indicator, but every indicator config in the repo now carries one.
+
+
+def test_definition_field_is_accepted_when_present():
+    with_definition = dict(
+        VALID_INDICATOR,
+        definition={
+            "en": "Test definition.",
+            "fr": "Définition de test.",
+            "nl": "Testdefinitie.",
+        },
+    )
+    assert validate_indicator_config(with_definition, Path(__file__)) == []
+
+
+def test_definition_field_is_optional():
+    # VALID_INDICATOR itself carries no `definition` -- proves the field is
+    # optional, not silently required by some other part of the schema.
+    assert "definition" not in VALID_INDICATOR
+    assert validate_indicator_config(VALID_INDICATOR, Path(__file__)) == []
+
+
+def test_definition_rejects_an_unknown_language_key():
+    bad = dict(VALID_INDICATOR, definition={"en": "ok", "de": "nicht erlaubt"})
+    errors = validate_indicator_config(bad, Path("bad.yaml"))
+    assert errors
+    assert any("definition" in e for e in errors)
+
+
+VALID_DERIVED = {
+    "id": "TEST_DERIVED",
+    "name": {"en": "Test derived", "fr": "Test dérivé", "nl": "Test afgeleid"},
+    "unit": "percent",
+    "frequency": "A",
+    "geo_levels": ["municipal"],
+    "preferred_direction": "contextual",
+    "derived": {"function": "share_of_total", "inputs": ["A", "B"]},
+}
+
+
+def test_derived_definition_field_is_accepted_when_present():
+    with_definition = dict(
+        VALID_DERIVED,
+        definition={
+            "en": "Test derived definition.",
+            "fr": "Définition dérivée de test.",
+            "nl": "Afgeleide testdefinitie.",
+        },
+    )
+    assert validate_derived_config(with_definition, Path(__file__)) == []
+
+
+def test_derived_definition_field_is_optional():
+    assert "definition" not in VALID_DERIVED
+    assert validate_derived_config(VALID_DERIVED, Path(__file__)) == []
 
 
 def test_valid_source_config_passes():

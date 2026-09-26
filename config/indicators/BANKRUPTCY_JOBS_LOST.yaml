@@ -3,6 +3,10 @@ name:
   en: Jobs lost to bankruptcy
   fr: Emplois perdus par faillite
   nl: Banenverlies door faillissement
+definition:
+  en: "Number of jobs at companies declared bankrupt in the commune during the month."
+  fr: "Nombre d'emplois dans des entreprises déclarées en faillite dans la commune au cours du mois."
+  nl: "Aantal banen bij bedrijven die in de gemeente tijdens de maand failliet werden verklaard."
 unit: count
 frequency: M
 source_id: statbel

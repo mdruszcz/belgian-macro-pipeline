@@ -3,6 +3,10 @@ name:
   en: Imports of goods and services, chain-linked volume
   fr: Importations de biens et de services, volume chaîné
   nl: Invoer van goederen en diensten, kettingvolume
+definition:
+  en: "Quarterly volume of goods and services imported, for each European country tracked."
+  fr: "Volume trimestriel des biens et services importés, pour chaque pays européen suivi."
+  nl: "Kwartaalvolume van ingevoerde goederen en diensten, voor elk gevolgd Europees land."
 unit: meur_clv2010
 frequency: Q
 source_id: eurostat

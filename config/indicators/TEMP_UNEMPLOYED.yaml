@@ -3,6 +3,10 @@ name:
   en: Temporarily unemployed
   fr: Chômeurs temporaires
   nl: Tijdelijk werklozen
+definition:
+  en: "Number of residents temporarily unemployed -- still employed but with work suspended -- averaged over the year."
+  fr: "Nombre d'habitants en chômage temporaire -- toujours en emploi mais avec suspension du travail -- en moyenne sur l'année."
+  nl: "Aantal inwoners in tijdelijke werkloosheid -- nog in dienst maar met geschorst werk -- gemiddeld over het jaar."
 unit: count
 frequency: A
 source_id: onem

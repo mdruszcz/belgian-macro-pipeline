@@ -3,6 +3,10 @@ name:
   en: CPI forecast (consensus)
   fr: Prévision IPC (consensus)
   nl: CPI-prognose (consensus)
+definition:
+  en: "Average consumer-price-inflation forecast, compiled from thirteen economic institutions."
+  fr: "Prévision moyenne d'inflation des prix à la consommation, établie à partir de treize institutions économiques."
+  nl: "Gemiddelde prognose van de consumentenprijsinflatie, opgesteld op basis van dertien economische instellingen."
 unit: percent
 frequency: F
 source_id: fpb

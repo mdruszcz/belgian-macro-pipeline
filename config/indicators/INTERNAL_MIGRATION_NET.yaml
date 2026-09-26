@@ -3,6 +3,10 @@ name:
   en: Net internal migration
   fr: Solde migratoire interne
   nl: Intern migratiesaldo
+definition:
+  en: "Difference between arrivals from and departures to the rest of Belgium for the commune during the calendar year."
+  fr: "Différence entre les arrivées depuis le reste de la Belgique et les départs vers celui-ci pour la commune au cours de l'année civile."
+  nl: "Verschil tussen aankomsten uit en vertrekken naar de rest van België voor de gemeente tijdens het kalenderjaar."
 unit: balance
 frequency: A
 source_id: statbel

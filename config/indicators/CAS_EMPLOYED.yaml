@@ -3,6 +3,10 @@ name:
   en: Employed population (15-64)
   fr: Population active occupée (15-64 ans)
   nl: Werkende bevolking (15-64 jaar)
+definition:
+  en: "Number of residents aged 15 to 64 in employment, from the 2021 census."
+  fr: "Nombre d'habitants de 15 à 64 ans occupant un emploi, selon le recensement de 2021."
+  nl: "Aantal inwoners van 15 tot 64 jaar met een job, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

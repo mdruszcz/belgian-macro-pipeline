@@ -3,6 +3,10 @@ name:
   en: Communal additional personal-income-tax rate
   fr: Taxe communale additionnelle à l'IPP
   nl: Aanvullende gemeentebelasting op de personenbelasting
+definition:
+  en: "Additional percentage the commune adds to residents' personal income tax bill, for the tax year."
+  fr: "Pourcentage additionnel que la commune ajoute à l'impôt des personnes physiques de ses habitants, pour l'exercice d'imposition."
+  nl: "Aanvullend percentage dat de gemeente heft op de personenbelasting van haar inwoners, voor het aanslagjaar."
 unit: percent
 frequency: A
 source_id: spf_finances

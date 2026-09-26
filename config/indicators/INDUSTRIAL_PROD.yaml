@@ -3,6 +3,10 @@ name:
   en: Industrial production
   fr: Production industrielle
   nl: Industriële productie
+definition:
+  en: "Monthly index of Belgian industrial output (mining, manufacturing, energy), adjusted for seasonal effects, based on 2021 as 100."
+  fr: "Indice mensuel de la production industrielle belge (mines, industrie manufacturière, énergie), corrigé des effets saisonniers, base 2021 = 100."
+  nl: "Maandelijkse index van de Belgische industriële productie (mijnbouw, industrie, energie), gecorrigeerd voor seizoensinvloeden, met 2021 als 100."
 unit: index_2021
 frequency: M
 source_id: nbb

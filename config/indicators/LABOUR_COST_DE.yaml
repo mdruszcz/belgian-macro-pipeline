@@ -3,6 +3,10 @@ name:
   en: Nominal compensation per employee, Germany (2010=100)
   fr: Rémunération nominale par salarié, Allemagne (2010=100)
   nl: Nominale beloning per werknemer, Duitsland (2010=100)
+definition:
+  en: "Index of the cost of employing staff in Germany, based on 2010 as 100."
+  fr: "Indice du coût de la main-d'œuvre en Allemagne, base 2010 = 100."
+  nl: "Index van de loonkosten in Duitsland, met 2010 als 100."
 country: DE
 unit: index_2010
 transform:

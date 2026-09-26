@@ -3,6 +3,10 @@ name:
   en: Residents on full unemployment benefit (% of population)
   fr: Habitants en chômage complet indemnisé (% de la population)
   nl: Inwoners met volledige werkloosheidsuitkering (% van de bevolking)
+definition:
+  en: "Residents receiving a full unemployment benefit, as a percentage of the whole population."
+  fr: "Habitants percevant une allocation de chômage complet, en pourcentage de la population totale."
+  nl: "Inwoners die een volledige werkloosheidsuitkering ontvangen, als percentage van de totale bevolking."
 unit: percent
 frequency: A
 geo_levels: [municipal]

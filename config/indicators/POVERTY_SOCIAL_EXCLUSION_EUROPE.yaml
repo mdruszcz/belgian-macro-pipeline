@@ -3,6 +3,10 @@ name:
   en: People at risk of poverty or social exclusion
   fr: Personnes exposées au risque de pauvreté ou d'exclusion sociale
   nl: Mensen met risico op armoede of sociale uitsluiting
+definition:
+  en: "Share of the population at risk of poverty or social exclusion, for each European country tracked."
+  fr: "Part de la population exposée au risque de pauvreté ou d'exclusion sociale, pour chaque pays européen suivi."
+  nl: "Aandeel van de bevolking met risico op armoede of sociale uitsluiting, voor elk gevolgd Europees land."
 unit: percent
 frequency: A
 source_id: eurostat

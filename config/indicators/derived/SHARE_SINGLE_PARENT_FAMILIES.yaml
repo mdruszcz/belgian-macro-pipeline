@@ -3,6 +3,10 @@ name:
   en: Share of single-parent families
   fr: Part des familles monoparentales
   nl: Aandeel eenoudergezinnen
+definition:
+  en: "Percentage of family units in the commune that are single-parent families, in 2021."
+  fr: "Pourcentage des noyaux familiaux de la commune qui sont des familles monoparentales, en 2021."
+  nl: "Percentage van de familiekernen in de gemeente dat een eenoudergezin is, in 2021."
 unit: percent
 frequency: A
 geo_levels: [municipal]

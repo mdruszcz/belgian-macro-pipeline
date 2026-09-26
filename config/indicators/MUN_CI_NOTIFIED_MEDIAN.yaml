@@ -3,6 +3,10 @@ name:
   en: Median notified cadastral income
   fr: Revenu cadastral notifié médian
   nl: Mediaan kennisgegeven kadastraal inkomen
+definition:
+  en: "Median cadastral income among the properties notified of a change during the year in the commune."
+  fr: "Revenu cadastral médian parmi les biens ayant fait l'objet d'une notification de modification au cours de l'année dans la commune."
+  nl: "Mediaan kadastraal inkomen onder de goederen waarvoor tijdens het jaar in de gemeente een wijziging werd gemeld."
 unit: eur
 frequency: A
 source_id: spf_finances

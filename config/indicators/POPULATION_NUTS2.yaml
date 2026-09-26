@@ -3,6 +3,10 @@ name:
   en: Population
   fr: Population
   nl: Bevolking
+definition:
+  en: "Total population on 1 January, for each European region tracked."
+  fr: "Population totale au 1er janvier, pour chaque région européenne suivie."
+  nl: "Totale bevolking op 1 januari, voor elke gevolgde Europese regio."
 unit: persons
 frequency: A
 source_id: eurostat

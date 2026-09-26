@@ -27,6 +27,16 @@
         "nl": { "type": "string" }
       }
     },
+    "definition": {
+      "type": "object",
+      "description": "The PUBLIC, citizen-facing one-sentence definition, distinct from `description` above (developer-oriented, never published). Optional in the schema, but every derived indicator config in the repo currently carries one.",
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string" },
+        "fr": { "type": "string" },
+        "nl": { "type": "string" }
+      }
+    },
     "unit": { "type": "string", "minLength": 1 },
     "frequency": { "type": "string", "enum": ["A", "Q", "M", "F"] },
     "geo_levels": {

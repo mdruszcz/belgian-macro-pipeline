@@ -3,6 +3,10 @@ name:
   en: Population aged 15 to 64
   fr: Population âgée de 15 à 64 ans
   nl: Bevolking 15 tot 64 jaar
+definition:
+  en: "Number of residents of working age (15 to 64) in the commune on 1 January."
+  fr: "Nombre d'habitants en âge de travailler (15 à 64 ans) dans la commune au 1er janvier."
+  nl: "Aantal inwoners op arbeidsleeftijd (15 tot 64 jaar) in de gemeente op 1 januari."
 unit: count
 frequency: A
 source_id: statbel

@@ -3,6 +3,10 @@ name:
   en: Employment, labour force survey (15-64)
   fr: Emploi, enquête sur les forces de travail (15-64 ans)
   nl: Werkgelegenheid, enquête naar de arbeidskrachten (15-64 jaar)
+definition:
+  en: "Number of employed people aged 15 to 64, from the labour force survey, for each European country tracked."
+  fr: "Nombre de personnes en emploi de 15 à 64 ans, selon l'enquête sur les forces de travail, pour chaque pays européen suivi."
+  nl: "Aantal werkende personen van 15 tot 64 jaar, volgens de enquête naar de arbeidskrachten, voor elk gevolgd Europees land."
 unit: thousand_persons
 frequency: A
 source_id: eurostat

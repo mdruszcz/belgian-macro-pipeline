@@ -3,6 +3,10 @@ name:
   en: Business confidence (NBB)
   fr: Confiance des entreprises (BNB)
   nl: Ondernemersvertrouwen (NBB)
+definition:
+  en: "Monthly survey balance of Belgian business sentiment published by the National Bank of Belgium."
+  fr: "Solde mensuel d'enquête sur le climat des affaires en Belgique, publié par la Banque nationale de Belgique."
+  nl: "Maandelijkse enquêtesaldo van het Belgische ondernemersvertrouwen, gepubliceerd door de Nationale Bank van België."
 unit: balance
 frequency: M
 source_id: nbb

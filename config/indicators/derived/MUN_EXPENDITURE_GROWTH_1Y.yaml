@@ -3,6 +3,10 @@ name:
   en: Ordinary municipal expenditure, change over one year
   fr: Dépenses ordinaires communales, évolution sur un an
   nl: Gewone gemeentelijke uitgaven, verandering over een jaar
+definition:
+  en: "Year-on-year change in the commune's ordinary spending per inhabitant (Walloon communes only)."
+  fr: "Évolution sur un an des dépenses ordinaires de la commune par habitant (communes wallonnes uniquement)."
+  nl: "Verandering over een jaar van de gewone uitgaven van de gemeente per inwoner (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 geo_levels: [municipal]

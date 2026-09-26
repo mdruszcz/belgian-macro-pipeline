@@ -3,6 +3,10 @@ name:
   en: Temporary unemployment benefit paid
   fr: Montants payés en chômage temporaire
   nl: Uitbetaalde bedragen tijdelijke werkloosheid
+definition:
+  en: "Total euros paid in temporary-unemployment benefit to residents of the commune during the year."
+  fr: "Montant total, en euros, versé en allocations de chômage temporaire aux habitants de la commune au cours de l'année."
+  nl: "Totaal in euro uitbetaald aan tijdelijke werkloosheidsuitkeringen aan inwoners van de gemeente tijdens het jaar."
 unit: EUR
 frequency: A
 source_id: onem

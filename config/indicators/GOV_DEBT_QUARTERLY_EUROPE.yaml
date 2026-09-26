@@ -3,6 +3,10 @@ name:
   en: General government gross debt, quarterly
   fr: Dette brute des administrations publiques, trimestrielle
   nl: Brutoschuld van de overheid, per kwartaal
+definition:
+  en: "Quarterly government gross debt as a share of GDP, for each European country tracked."
+  fr: "Dette publique brute trimestrielle en pourcentage du PIB, pour chaque pays européen suivi."
+  nl: "Kwartaalcijfer van de overheidsbrutoschuld als aandeel van het bbp, voor elk gevolgd Europees land."
 unit: pct_of_gdp
 frequency: Q
 source_id: eurostat

@@ -3,6 +3,10 @@ name:
   en: Unemployment rate (ONEM definition, annual average)
   fr: Taux de chômage (définition ONEM, moyenne annuelle)
   nl: Werkloosheidsgraad (RVA-definitie, jaargemiddelde)
+definition:
+  en: "Share of people insured against unemployment who are receiving a full unemployment benefit while seeking work, annual average, as published by RVA/ONEM."
+  fr: "Part des personnes assurées contre le chômage qui perçoivent une allocation de chômage complet tout en recherchant un emploi, moyenne annuelle, telle que publiée par l'ONEM."
+  nl: "Aandeel van de tegen werkloosheid verzekerde personen dat een volledige werkloosheidsuitkering ontvangt en werk zoekt, jaargemiddelde, zoals gepubliceerd door de RVA."
 unit: percent
 frequency: A
 source_id: onem

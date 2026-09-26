@@ -3,6 +3,10 @@ name:
   en: Nominal compensation per employee, euro area (2010=100)
   fr: Rémunération nominale par salarié, zone euro (2010=100)
   nl: Nominale beloning per werknemer, eurozone (2010=100)
+definition:
+  en: "Index of the cost of employing staff in the euro area, based on 2010 as 100."
+  fr: "Indice du coût de la main-d'œuvre dans la zone euro, base 2010 = 100."
+  nl: "Index van de loonkosten in de eurozone, met 2010 als 100."
 country: EA
 unit: index_2010
 transform:

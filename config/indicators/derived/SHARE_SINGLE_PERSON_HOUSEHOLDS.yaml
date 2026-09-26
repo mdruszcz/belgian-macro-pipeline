@@ -3,6 +3,10 @@ name:
   en: Share of one-person households
   fr: Part des ménages d’une personne
   nl: Aandeel eenpersoonshuishoudens
+definition:
+  en: "Percentage of private households in the commune made up of one person, in 2021."
+  fr: "Pourcentage des ménages privés de la commune composés d'une seule personne, en 2021."
+  nl: "Percentage van de particuliere huishoudens in de gemeente dat uit één persoon bestaat, in 2021."
 unit: percent
 frequency: A
 geo_levels: [municipal]

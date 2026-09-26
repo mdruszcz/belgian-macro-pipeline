@@ -3,6 +3,10 @@ name:
   en: New housing leases registered
   fr: Nouveaux baux de logement enregistrés
   nl: Nieuw geregistreerde woninghuurcontracten
+definition:
+  en: "Number of new residential lease agreements registered in the commune during the quarter."
+  fr: "Nombre de nouveaux baux de logement enregistrés dans la commune au cours du trimestre."
+  nl: "Aantal nieuwe woninghuurcontracten geregistreerd in de gemeente tijdens het kwartaal."
 unit: count
 frequency: Q
 source_id: spf_finances

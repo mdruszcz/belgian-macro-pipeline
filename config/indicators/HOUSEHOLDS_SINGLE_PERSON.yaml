@@ -3,6 +3,10 @@ name:
   en: One-person households
   fr: Ménages d’une personne
   nl: Eenpersoonshuishoudens
+definition:
+  en: "Number of households made up of one person, from the 2021 census."
+  fr: "Nombre de ménages composés d'une seule personne, selon le recensement de 2021."
+  nl: "Aantal huishoudens bestaande uit één persoon, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

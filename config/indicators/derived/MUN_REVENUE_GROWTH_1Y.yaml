@@ -3,6 +3,10 @@ name:
   en: Ordinary municipal revenue, change over one year
   fr: Recettes ordinaires communales, évolution sur un an
   nl: Gewone gemeentelijke ontvangsten, verandering over een jaar
+definition:
+  en: "Year-on-year change in the commune's ordinary revenue per inhabitant (Walloon communes only)."
+  fr: "Évolution sur un an des recettes ordinaires de la commune par habitant (communes wallonnes uniquement)."
+  nl: "Verandering over een jaar van de gewone ontvangsten van de gemeente per inwoner (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 geo_levels: [municipal]

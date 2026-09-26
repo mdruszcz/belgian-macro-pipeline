@@ -3,6 +3,10 @@ name:
   en: Labour cost index
   fr: Indice du coût de la main-d'œuvre
   nl: Loonkostenindex
+definition:
+  en: "Index of the cost of employing staff in Belgium, based on 2010 as 100."
+  fr: "Indice du coût de la main-d'œuvre en Belgique, base 2010 = 100."
+  nl: "Index van de loonkosten in België, met 2010 als 100."
 unit: index_2010
 transform:
   method: rebase

@@ -3,6 +3,10 @@ name:
   en: Consumer confidence indicator, Belgium
   fr: Indicateur de confiance des consommateurs, Belgique
   nl: Consumentenvertrouwensindicator, België
+definition:
+  en: "Monthly EU harmonised consumer-confidence survey balance for Belgium."
+  fr: "Solde mensuel harmonisé de l'enquête européenne sur la confiance des consommateurs, pour la Belgique."
+  nl: "Maandelijkse geharmoniseerde EU-enquêtesaldo van het consumentenvertrouwen, voor België."
 unit: balance
 frequency: M
 source_id: eurostat

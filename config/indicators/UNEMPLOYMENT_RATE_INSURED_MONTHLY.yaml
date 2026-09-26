@@ -3,6 +3,10 @@ name:
   en: Unemployment rate (ONEM definition, monthly)
   fr: Taux de chômage (définition ONEM, mensuel)
   nl: Werkloosheidsgraad (RVA-definitie, maandelijks)
+definition:
+  en: "Share of people insured against unemployment who are receiving a full unemployment benefit while seeking work, monthly, as published by RVA/ONEM."
+  fr: "Part des personnes assurées contre le chômage qui perçoivent une allocation de chômage complet tout en recherchant un emploi, mensuelle, telle que publiée par l'ONEM."
+  nl: "Aandeel van de tegen werkloosheid verzekerde personen dat een volledige werkloosheidsuitkering ontvangt en werk zoekt, maandelijks, zoals gepubliceerd door de RVA."
 unit: percent
 frequency: M
 source_id: onem

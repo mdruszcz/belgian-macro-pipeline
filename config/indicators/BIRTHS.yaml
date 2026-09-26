@@ -3,6 +3,10 @@ name:
   en: Births
   fr: Naissances
   nl: Geboorten
+definition:
+  en: "Number of live births registered among residents of the commune during the calendar year."
+  fr: "Nombre de naissances vivantes enregistrées parmi les habitants de la commune au cours de l'année civile."
+  nl: "Aantal levendgeborenen geregistreerd bij inwoners van de gemeente tijdens het kalenderjaar."
 unit: count
 frequency: A
 source_id: statbel

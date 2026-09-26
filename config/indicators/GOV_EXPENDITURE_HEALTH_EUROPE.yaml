@@ -3,6 +3,10 @@ name:
   en: General government expenditure on health
   fr: Dépenses publiques de santé
   nl: Overheidsuitgaven voor gezondheidszorg
+definition:
+  en: "Government spending on health care as a share of GDP, for each European country tracked."
+  fr: "Dépenses publiques de santé en pourcentage du PIB, pour chaque pays européen suivi."
+  nl: "Overheidsuitgaven voor gezondheidszorg als aandeel van het bbp, voor elk gevolgd Europees land."
 unit: pct_of_gdp
 frequency: A
 source_id: eurostat

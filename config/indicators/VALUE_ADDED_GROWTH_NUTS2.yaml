@@ -3,6 +3,10 @@ name:
   en: Gross value added, volume index (2020=100)
   fr: Valeur ajoutée brute, indice de volume (2020=100)
   nl: Bruto toegevoegde waarde, volume-index (2020=100)
+definition:
+  en: "Index of the value added by the economy, adjusted for price changes, for each European region tracked, based on 2020 as 100."
+  fr: "Indice de la valeur ajoutée de l'économie, corrigée des variations de prix, pour chaque région européenne suivie, base 2020 = 100."
+  nl: "Index van de toegevoegde waarde van de economie, gecorrigeerd voor prijsveranderingen, voor elke gevolgde Europese regio, met 2020 als 100."
 unit: index_2020
 frequency: A
 source_id: eurostat

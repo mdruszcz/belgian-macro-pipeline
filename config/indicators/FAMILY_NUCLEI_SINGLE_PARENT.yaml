@@ -3,6 +3,10 @@ name:
   en: Single-parent families
   fr: Familles monoparentales
   nl: Eenoudergezinnen
+definition:
+  en: "Number of single-parent families recorded in the commune, from the 2021 census."
+  fr: "Nombre de familles monoparentales recensées dans la commune, selon le recensement de 2021."
+  nl: "Aantal eenoudergezinnen geteld in de gemeente, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

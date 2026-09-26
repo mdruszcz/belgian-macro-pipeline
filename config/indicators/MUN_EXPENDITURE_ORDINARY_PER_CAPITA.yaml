@@ -3,6 +3,10 @@ name:
   en: Ordinary municipal expenditure per inhabitant
   fr: Dépenses ordinaires communales par habitant
   nl: Gewone gemeentelijke uitgaven per inwoner
+definition:
+  en: "Municipal running-cost spending (staff, operations, services) per inhabitant during the year (Walloon communes only)."
+  fr: "Dépenses communales ordinaires (personnel, fonctionnement, services) par habitant au cours de l'année (communes wallonnes uniquement)."
+  nl: "Gewone gemeentelijke werkingsuitgaven (personeel, werking, diensten) per inwoner tijdens het jaar (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

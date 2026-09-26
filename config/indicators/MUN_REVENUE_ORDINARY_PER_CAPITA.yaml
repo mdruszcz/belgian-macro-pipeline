@@ -3,6 +3,10 @@ name:
   en: Ordinary municipal revenue per inhabitant
   fr: Recettes ordinaires communales par habitant
   nl: Gewone gemeentelijke ontvangsten per inwoner
+definition:
+  en: "Municipal recurring revenue per inhabitant during the year, such as taxes and fees (Walloon communes only)."
+  fr: "Recettes communales ordinaires par habitant au cours de l'année, telles que taxes et redevances (communes wallonnes uniquement)."
+  nl: "Gewone terugkerende ontvangsten van de gemeente per inwoner tijdens het jaar, zoals belastingen en heffingen (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

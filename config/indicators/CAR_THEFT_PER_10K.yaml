@@ -3,6 +3,10 @@ name:
   en: Car theft (per 10,000 cars)
   fr: Vol de voiture (par 10 000 voitures)
   nl: Autodiefstal (per 10 000 auto's)
+definition:
+  en: "Cars reported stolen in the commune during the year, per 10,000 registered cars."
+  fr: "Voitures signalées volées dans la commune au cours de l'année, par 10 000 voitures immatriculées."
+  nl: "Auto's die in de gemeente tijdens het jaar als gestolen werden aangegeven, per 10 000 ingeschreven auto's."
 unit: per_10000_cars
 frequency: A
 source_id: police

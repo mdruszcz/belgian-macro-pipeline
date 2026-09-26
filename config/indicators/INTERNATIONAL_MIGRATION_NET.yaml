@@ -3,6 +3,10 @@ name:
   en: Net international migration
   fr: Solde migratoire international
   nl: Internationaal migratiesaldo
+definition:
+  en: "Difference between arrivals from and departures to another country for the commune during the calendar year."
+  fr: "Différence entre les arrivées depuis l'étranger et les départs vers celui-ci pour la commune au cours de l'année civile."
+  nl: "Verschil tussen aankomsten uit en vertrekken naar het buitenland voor de gemeente tijdens het kalenderjaar."
 unit: balance
 frequency: A
 source_id: statbel

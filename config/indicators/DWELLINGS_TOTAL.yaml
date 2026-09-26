@@ -3,6 +3,10 @@ name:
   en: Dwellings, total
   fr: Logements, total
   nl: Woningen, totaal
+definition:
+  en: "Total number of dwellings recorded in the commune on 1 January 2021, from the census."
+  fr: "Nombre total de logements recensés dans la commune au 1er janvier 2021, selon le recensement."
+  nl: "Totaal aantal woningen geteld in de gemeente op 1 januari 2021, volgens de volkstelling."
 unit: count
 frequency: A
 source_id: statbel

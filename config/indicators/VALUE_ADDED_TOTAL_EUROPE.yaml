@@ -3,6 +3,10 @@ name:
   en: Gross value added, total economy
   fr: Valeur ajoutée brute, ensemble de l'économie
   nl: Bruto toegevoegde waarde, totale economie
+definition:
+  en: "Value added by the whole economy, adjusted for price changes, for each European country tracked."
+  fr: "Valeur ajoutée de l'ensemble de l'économie, corrigée des variations de prix, pour chaque pays européen suivi."
+  nl: "Toegevoegde waarde van de gehele economie, gecorrigeerd voor prijsveranderingen, voor elk gevolgd Europees land."
 unit: meur_clv2010
 frequency: A
 source_id: eurostat

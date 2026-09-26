@@ -3,6 +3,10 @@ name:
   en: Cadastral parcels tracked for building condition
   fr: Parcelles cadastrales suivies pour l'état du bâti
   nl: Kadastrale percelen gevolgd voor bouwtoestand
+definition:
+  en: "Number of registered land parcels in the commune tracked for building condition."
+  fr: "Nombre de parcelles cadastrées dans la commune suivies pour l'état du bâti."
+  nl: "Aantal kadastrale percelen in de gemeente gevolgd voor de bouwtoestand."
 unit: count
 frequency: A
 source_id: spf_finances

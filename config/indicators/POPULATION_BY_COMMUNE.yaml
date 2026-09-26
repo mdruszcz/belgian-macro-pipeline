@@ -3,6 +3,10 @@ name:
   en: Population
   fr: Population
   nl: Bevolking
+definition:
+  en: "Total number of residents in the commune on 1 January of each year."
+  fr: "Nombre total d'habitants de la commune au 1er janvier de chaque année."
+  nl: "Totaal aantal inwoners van de gemeente op 1 januari van elk jaar."
 unit: count
 frequency: A
 source_id: statbel

@@ -3,6 +3,10 @@ name:
   en: Extraordinary municipal revenue per inhabitant
   fr: Recettes extraordinaires communales par habitant
   nl: Buitengewone gemeentelijke ontvangsten per inwoner
+definition:
+  en: "Municipal capital (investment-type) revenue per inhabitant during the year, such as loans and asset sales (Walloon communes only)."
+  fr: "Recettes communales extraordinaires (de type investissement) par habitant au cours de l'année, telles qu'emprunts et ventes d'actifs (communes wallonnes uniquement)."
+  nl: "Buitengewone (investerings)ontvangsten van de gemeente per inwoner tijdens het jaar, zoals leningen en verkoop van activa (enkel Waalse gemeenten)."
 unit: eur_per_inhabitant
 frequency: A
 source_id: walstat

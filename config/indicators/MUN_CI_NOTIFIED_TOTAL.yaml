@@ -3,6 +3,10 @@ name:
   en: Total notified cadastral income
   fr: Revenu cadastral total notifié
   nl: Totaal kennisgegeven kadastraal inkomen
+definition:
+  en: "Total cadastral income among the properties notified of a change during the year in the commune."
+  fr: "Revenu cadastral total parmi les biens ayant fait l'objet d'une notification de modification au cours de l'année dans la commune."
+  nl: "Totaal kadastraal inkomen onder de goederen waarvoor tijdens het jaar in de gemeente een wijziging werd gemeld."
 unit: eur
 frequency: A
 source_id: spf_finances

@@ -3,6 +3,10 @@ name:
   en: Share of dwellings unoccupied (census definition)
   fr: Part des logements inoccupés (définition du recensement)
   nl: Aandeel onbewoonde woningen (volkstellingsdefinitie)
+definition:
+  en: "Percentage of dwellings recorded as unoccupied on census day 2021, out of all dwellings in the commune."
+  fr: "Pourcentage de logements recensés comme inoccupés le jour du recensement 2021, sur l'ensemble des logements de la commune."
+  nl: "Percentage woningen die op de teldag van de volkstelling 2021 als onbewoond werden geteld, op het totaal aantal woningen in de gemeente."
 unit: percent
 frequency: A
 geo_levels: [municipal]

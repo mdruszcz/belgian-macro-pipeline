@@ -3,6 +3,10 @@ name:
   en: Median house sale price
   fr: Prix médian de vente des maisons
   nl: Mediane verkoopprijs woningen
+definition:
+  en: "Median sale price of houses (excluding apartments) sold in the commune during the quarter."
+  fr: "Prix médian de vente des maisons (hors appartements) vendues dans la commune au cours du trimestre."
+  nl: "Mediane verkoopprijs van huizen (exclusief appartementen) verkocht in de gemeente tijdens het kwartaal."
 unit: eur
 frequency: Q
 source_id: statbel

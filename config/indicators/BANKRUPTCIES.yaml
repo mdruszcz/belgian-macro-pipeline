@@ -3,6 +3,10 @@ name:
   en: Bankruptcies
   fr: Faillites
   nl: Faillissementen
+definition:
+  en: "Number of company bankruptcies declared in the commune during the month."
+  fr: "Nombre de faillites d'entreprises prononcées dans la commune au cours du mois."
+  nl: "Aantal faillissementen van bedrijven uitgesproken in de gemeente tijdens de maand."
 unit: count
 frequency: M
 source_id: statbel

@@ -3,6 +3,10 @@ name:
   en: Private final consumption
   fr: Consommation finale privée
   nl: Particuliere consumptie
+definition:
+  en: "Household spending on goods and services, as a contribution to Belgium's GDP growth."
+  fr: "Dépenses des ménages en biens et services, en contribution à la croissance du PIB belge."
+  nl: "Gezinsuitgaven aan goederen en diensten, als bijdrage tot de Belgische bbp-groei."
 unit: pp_contribution
 frequency: A
 source_id: nbb

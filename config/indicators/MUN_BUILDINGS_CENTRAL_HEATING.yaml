@@ -3,6 +3,10 @@ name:
   en: Parcels with central heating
   fr: Parcelles avec chauffage central
   nl: Percelen met centrale verwarming
+definition:
+  en: "Number of registered land parcels in the commune with central heating."
+  fr: "Nombre de parcelles cadastrées dans la commune équipées de chauffage central."
+  nl: "Aantal kadastrale percelen in de gemeente met centrale verwarming."
 unit: count
 frequency: A
 source_id: spf_finances

@@ -3,6 +3,10 @@ name:
   en: Cadastral parcels (all uses)
   fr: Parcelles cadastrales (tous usages)
   nl: Kadastrale percelen (alle bestemmingen)
+definition:
+  en: "Number of registered land parcels in the commune, of every use."
+  fr: "Nombre de parcelles cadastrées dans la commune, tous usages confondus."
+  nl: "Aantal kadastrale percelen in de gemeente, alle bestemmingen samen."
 unit: count
 frequency: A
 source_id: spf_finances

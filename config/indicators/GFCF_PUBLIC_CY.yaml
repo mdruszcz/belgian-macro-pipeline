@@ -3,6 +3,10 @@ name:
   en: GFCF — Public admin.
   fr: FBCF — Administrations publiques
   nl: BIK — Overheid
+definition:
+  en: "Public investment in infrastructure such as roads, rail and schools, as a contribution to Belgium's GDP growth."
+  fr: "Investissements publics en infrastructures telles que routes, rail et écoles, en contribution à la croissance du PIB belge."
+  nl: "Overheidsinvesteringen in infrastructuur zoals wegen, spoor en scholen, als bijdrage tot de Belgische bbp-groei."
 unit: pp_contribution
 frequency: A
 source_id: nbb

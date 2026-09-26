@@ -3,6 +3,10 @@ name:
   en: GFCF — Enterprises
   fr: FBCF — Entreprises
   nl: BIK — Bedrijven
+definition:
+  en: "Business investment in machinery, equipment and IT, as a contribution to Belgium's GDP growth."
+  fr: "Investissements des entreprises en machines, équipements et informatique, en contribution à la croissance du PIB belge."
+  nl: "Bedrijfsinvesteringen in machines, uitrusting en IT, als bijdrage tot de Belgische bbp-groei."
 unit: pp_contribution
 frequency: A
 source_id: nbb

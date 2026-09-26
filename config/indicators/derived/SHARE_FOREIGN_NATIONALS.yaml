@@ -3,6 +3,10 @@ name:
   en: Share of foreign nationals
   fr: Part de la population de nationalité étrangère
   nl: Aandeel vreemde nationaliteit
+definition:
+  en: "Percentage of residents who do not hold Belgian citizenship, in 2021."
+  fr: "Pourcentage d'habitants qui ne possèdent pas la nationalité belge, en 2021."
+  nl: "Percentage inwoners zonder de Belgische nationaliteit, in 2021."
 unit: percent
 frequency: A
 geo_levels: [municipal]

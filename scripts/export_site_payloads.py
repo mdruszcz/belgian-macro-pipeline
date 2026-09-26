@@ -362,6 +362,52 @@ def _indicator_names(db_path: Path, derived_dir: Path | None = None) -> dict[str
     return names
 
 
+CONFIG_INDICATORS_DIR = Path(__file__).resolve().parents[1] / "config" / "indicators"
+
+
+def _indicator_definitions(indicators_dir: Path | None = None) -> dict[str, dict]:
+    """indicator_id -> {en, fr, nl}, the PUBLIC one-sentence `definition` from
+    config/indicators/*.yaml (and config/indicators/derived/*.yaml).
+
+    Distinct from `_indicator_names`: names come from the `indicators` table
+    (and derived YAML) because the daily sync writes them there, but
+    `definition` is never written to the database -- it is authoring-time
+    metadata for a citizen-facing sentence, so it is read directly from the
+    YAML that is its only source of truth. Optional per indicator: an
+    indicator with no `definition` block is simply absent from the result,
+    and the page falls back the same way it already does for a missing
+    `names` entry.
+    """
+    base = indicators_dir or CONFIG_INDICATORS_DIR
+    definitions: dict[str, dict] = {}
+    if not base.is_dir():
+        return definitions
+
+    import yaml
+
+    for path in sorted(base.glob("*.yaml")):
+        cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(cfg, dict):
+            continue
+        ind_id = cfg.get("id")
+        definition = cfg.get("definition")
+        if isinstance(ind_id, str) and isinstance(definition, dict):
+            definitions[ind_id] = definition
+
+    derived_dir = base / "derived"
+    if derived_dir.is_dir():
+        for path in sorted(derived_dir.glob("*.yaml")):
+            cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+            if not isinstance(cfg, dict):
+                continue
+            ind_id = cfg.get("id")
+            definition = cfg.get("definition")
+            if isinstance(ind_id, str) and isinstance(definition, dict):
+                definitions[ind_id] = definition
+
+    return definitions
+
+
 def _display_metadata(db_path: Path) -> dict[str, dict]:
     """indicator_id -> {direction, decimals}, from the indicators table.
 
@@ -880,6 +926,7 @@ def _indicator_index(
     additive: set[str],
     db_path: Path,
     lineage: dict[str, dict] | None = None,
+    definitions: dict[str, dict] | None = None,
 ) -> list[dict]:
     """One row per municipal indicator, for a page that must not name any.
 
@@ -904,6 +951,7 @@ def _indicator_index(
         conn.close()
 
     lineage = lineage or {}
+    definitions = definitions or {}
     index = []
     for indicator_id, payload in sorted(indicators.items()):
         provenance = lineage.get(indicator_id, {})
@@ -912,6 +960,12 @@ def _indicator_index(
             {
                 "indicator_code": indicator_id,
                 "names": names.get(indicator_id, {"en": payload["name"]}),
+                # The PUBLIC one-sentence definition (config/indicators
+                # `definition:`), distinct from the developer-oriented
+                # `description` field, which is never published. Optional:
+                # absent entirely for an indicator whose config carries no
+                # `definition` block yet, same fallback shape as `names`.
+                "definition": definitions.get(indicator_id),
                 "unit": payload["unit"],
                 "additive": indicator_id in additive,
                 "direction": directions.get(indicator_id),
@@ -1067,7 +1121,11 @@ def export_site_payloads(
 
     _write_json(
         out_dir / "metadata" / "indicators.json",
-        {"indicators": _indicator_index(indicators, names, additive, db_path, lineage)},
+        {
+            "indicators": _indicator_index(
+                indicators, names, additive, db_path, lineage, _indicator_definitions()
+            )
+        },
     )
 
     # The source registry, fetched once by a page and referenced by id from

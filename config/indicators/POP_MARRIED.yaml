@@ -3,6 +3,10 @@ name:
   en: Married population
   fr: Population mariée
   nl: Gehuwde bevolking
+definition:
+  en: "Number of residents who are legally married, from the 2021 census."
+  fr: "Nombre d'habitants légalement mariés, selon le recensement de 2021."
+  nl: "Aantal inwoners die wettelijk gehuwd zijn, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

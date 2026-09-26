@@ -3,6 +3,10 @@ name:
   en: Dwellings in single-dwelling buildings
   fr: Logements dans un bâtiment à un seul logement
   nl: Woningen in eengezinswoningen
+definition:
+  en: "Number of dwellings in a building containing only one dwelling, from the 2021 census."
+  fr: "Nombre de logements situés dans un bâtiment ne comptant qu'un seul logement, selon le recensement de 2021."
+  nl: "Aantal woningen in een gebouw met slechts één woning, volgens de volkstelling van 2021."
 unit: count
 frequency: A
 source_id: statbel

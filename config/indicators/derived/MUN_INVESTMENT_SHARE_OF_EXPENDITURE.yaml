@@ -3,6 +3,10 @@ name:
   en: Extraordinary (investment) share of municipal expenditure
   fr: Part des dépenses extraordinaires (investissement) dans les dépenses communales
   nl: Aandeel buitengewone (investerings)uitgaven in de gemeentelijke uitgaven
+definition:
+  en: "Capital (investment-type) spending as a percentage of the commune's total spending (Walloon communes only)."
+  fr: "Dépenses extraordinaires (investissement) en pourcentage des dépenses totales de la commune (communes wallonnes uniquement)."
+  nl: "Buitengewone (investerings)uitgaven als percentage van de totale uitgaven van de gemeente (enkel Waalse gemeenten)."
 unit: percent
 frequency: A
 geo_levels: [municipal]

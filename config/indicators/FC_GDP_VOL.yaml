@@ -3,6 +3,10 @@ name:
   en: GDP forecast (consensus)
   fr: Prévision PIB (consensus)
   nl: BBP-prognose (consensus)
+definition:
+  en: "Average forecast of Belgium's economic growth, compiled from thirteen economic institutions."
+  fr: "Prévision moyenne de croissance économique de la Belgique, établie à partir de treize institutions économiques."
+  nl: "Gemiddelde prognose van de Belgische economische groei, opgesteld op basis van dertien economische instellingen."
 unit: percent
 frequency: F
 source_id: fpb
