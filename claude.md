@@ -81,6 +81,28 @@ replace rules 1-16.
 36. No indicator, commune or figure is ever hand-typed into a block, template or design asset.
     If a real value is needed to lay out a component, read it from a real payload.
 
+## Pipeline and data rules (added 2026-09-26)
+
+These come from mistakes made and fixed in September 2026. They extend rules 1-36.
+
+37. A new exporter that writes public/data/** must be part of the daily run's export job
+    (orchestration/definitions.py EXPORT_SELECTION and the mirrored EXPORTED list), not only
+    `make exports`. A merged feature is not live until the daily run has written its payload:
+    check the payload on develop after the next daily update before calling it live.
+    (PR #261 shipped a block whose export never ran; fixed in #266.)
+38. statbel.fgov.be and fin.belgium.be answer GitHub runners with a CAPTCHA page since
+    2026-09-23 (PR #242). Sources hosted there are refreshed by hand from the maintainer's PC
+    (`--from-file`, docs/features/manual_sources.md) and never fetched in CI. Never try to
+    solve, evade or work around a CAPTCHA. Raw bulk files stay under data/raw/ (gitignored);
+    only compact processed output is committed.
+39. No seed or placeholder values in a committed store or payload: a store is committed from a
+    real sync or not at all. (PR #237 shipped an invented value; removed in #239.)
+40. Every indicator config carries a one-sentence public `definition` in en/fr/nl, written only
+    from its own `description` and spec -- never an invented methodology. Wording the
+    maintainer has not confirmed is listed in the PR body.
+41. A unit describes what the number is: `count` only for whole, additive tallies; an average
+    or ratio gets its own unit (e.g. `persons_per_household`) and keeps its decimals.
+
 ## Definitions you must respect
 - period: YYYY, YYYY-Qn, YYYY-MM, or YYYY-MM-DD, matching the indicator's
   declared frequency.
@@ -244,3 +266,13 @@ Rules:
 
 Test before sending: would this make sense read aloud to someone who has
 never opened the repo? If not, rewrite it.
+
+### Showing design work (added 2026-09-26)
+
+- Before showing a mockup or redesign, write down what is wrong with the current page and
+  check, screen by screen, that the new version fixes it. Never forward a builder's "done"
+  without looking yourself. Do several review rounds before asking for his opinion.
+- Deliver page mockups as a folder he can open himself (the page plus its data and an
+  `Ouvrir.cmd` launcher), not as screenshots. He asked for no more screenshots.
+- A mockup lives outside the site (screenshots-review/, gitignored) until he says go; then it
+  is rebuilt in the real site through normal PRs.
