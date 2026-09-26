@@ -315,31 +315,35 @@ sections:
       en: >
         The commune's own additional percentage on personal income tax, plus — for Wallonia
         only — municipal debt, revenue and expenditure per capita. The tax-rate period is the
-        TAX YEAR (exercice d'imposition), not the income year it is assessed on; the
-        municipal-finance figures below it cover Wallonia only and do not appear on Flemish
-        or Brussels pages. The cadastral figures are the SPF's notional rental value used to
-        set property tax, as of 1 January; residential cadastral income covers residential
-        parcels only, so it is smaller than the all-parcel total below it — the two are
-        different figures, not an inconsistency.
+        TAX YEAR (exercice d'imposition), not the income year it is assessed on: the tax-year
+        T rate applies to income earned in year T-1 (e.g. the 2025 rate applies to 2024
+        income). The municipal-finance figures below it cover Wallonia only and do not
+        appear on Flemish or Brussels pages. The cadastral figures are the SPF's notional
+        rental value used to set property tax, as of 1 January; residential cadastral income
+        covers residential parcels only, so it is smaller than the all-parcel total below it
+        — the two are different figures, not an inconsistency.
       fr: >
         Le taux additionnel communal à l'impôt des personnes physiques, ainsi que — pour la
         Wallonie uniquement — la dette, les recettes et les dépenses communales par habitant.
         La période du taux est l'ANNÉE D'IMPOSITION (exercice d'imposition), pas l'année de
-        revenus sur laquelle il est calculé ; les chiffres de finances communales ci-dessous
-        ne couvrent que la Wallonie et n'apparaissent pas sur les pages flamandes ou
-        bruxelloises. Les chiffres cadastraux sont le revenu locatif théorique du SPF servant
-        de base au précompte immobilier, arrêtés au 1er janvier ; le revenu cadastral
-        résidentiel ne porte que sur les parcelles résidentielles, donc il est plus petit que
-        le total tous usages ci-dessous — ce sont deux chiffres différents, pas une
-        incohérence.
+        revenus sur laquelle il est calculé : le taux de l'exercice d'imposition T s'applique
+        aux revenus de l'année T-1 (par exemple, le taux de 2025 s'applique aux revenus de
+        2024). Les chiffres de finances communales ci-dessous ne couvrent que la Wallonie et
+        n'apparaissent pas sur les pages flamandes ou bruxelloises. Les chiffres cadastraux
+        sont le revenu locatif théorique du SPF servant de base au précompte immobilier,
+        arrêtés au 1er janvier ; le revenu cadastral résidentiel ne porte que sur les
+        parcelles résidentielles, donc il est plus petit que le total tous usages ci-dessous
+        — ce sont deux chiffres différents, pas une incohérence.
       nl: >
         Het eigen aanvullend gemeentelijk opcentiem op de personenbelasting, plus — enkel
         voor Wallonië — gemeentelijke schuld, ontvangsten en uitgaven per inwoner. De periode
         van het tarief is het AANSLAGJAAR (exercice d'imposition), niet het inkomstenjaar
-        waarop het wordt berekend; de gemeentefinanciën-cijfers hieronder dekken enkel
-        Wallonië en verschijnen niet op Vlaamse of Brusselse pagina's. De kadastrale cijfers
-        zijn het fictieve huurinkomen van de FOD dat als basis dient voor de onroerende
-        voorheffing, vastgesteld op 1 januari; het residentieel kadastraal inkomen dekt enkel
+        waarop het wordt berekend: het tarief van aanslagjaar T is van toepassing op de
+        inkomsten van jaar T-1 (bijvoorbeeld, het tarief van 2025 is van toepassing op de
+        inkomsten van 2024). De gemeentefinanciën-cijfers hieronder dekken enkel Wallonië en
+        verschijnen niet op Vlaamse of Brusselse pagina's. De kadastrale cijfers zijn het
+        fictieve huurinkomen van de FOD dat als basis dient voor de onroerende voorheffing,
+        vastgesteld op 1 januari; het residentieel kadastraal inkomen dekt enkel
         residentiële percelen, dus het is kleiner dan het totaal over alle percelen
         hieronder — dit zijn twee verschillende cijfers, geen tegenstrijdigheid.
     headline: MUN_IPP_ADDITIONAL_RATE

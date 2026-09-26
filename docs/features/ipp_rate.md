@@ -125,11 +125,29 @@ indicator_config.schema.json`'s properties are fixed); `is_additive = 0`,
 `indicators` reference row by `scripts/sync_ipp_rate.py`'s
 `_ensure_reference_rows`, the same `scripts/sync_walstat.py` pattern.
 
-**This rate is never combined with fiscal income or tax-amount figures** —
-no yield-of-an-IPP-point calculation, no revenue estimate, no derived
-indicator. The maintainer has not confirmed how a tax year maps to the
-income year it taxes, so `period` is stored as the tax year exactly as
-published and nothing further is asserted about it.
+**This rate is still not combined with fiscal income or tax-amount figures
+in this batch** — no yield-of-an-IPP-point calculation, no revenue estimate,
+no derived indicator. `period` is stored as the tax year exactly as
+published, unchanged.
+
+**Tax-year-to-income-year mapping — decided by the maintainer, 2026-09-26:**
+the rate published for tax year T (exercice d'imposition / aanslagjaar T)
+applies to income earned in year T-1. So tax year T on
+`MUN_IPP_ADDITIONAL_RATE` lines up with income year T-1 on the Statbel
+fiscal-income indicators (`FISCAL_TOT_NET_TAXABLE_INC`,
+`FISCAL_NBR_NON_ZERO_INC`, `FISCAL_TOT_TAXES`, `FISCAL_TOT_MUNICIP_TAXES`,
+`AVG_NET_TAXABLE_INCOME`):
+
+| Rate period (tax year T) | Income period (income year T-1) |
+|---|---|
+| 2024 | 2023 |
+| 2025 | 2024 |
+| 2026 | 2025 (no income data published yet) |
+
+This rule is recorded so a later batch can join the two series correctly.
+Nothing combines them yet — no yield calculation, no revenue estimate. Any
+combined figure (e.g. an estimated communal IPP yield) needs its own spec
+and its own ADR before it is built (CLAUDE.md rule 19).
 
 ## Store
 
@@ -156,3 +174,7 @@ PDF-only years (2018–2023). Any combination with fiscal income or tax-amount
 indicators. Commune-page surfacing (`config/local_sections.yaml`). Any
 change to `src/analytics/`, `resolve_geo()`, the schema, or an existing
 source/adapter.
+
+**2026-09-26 addendum**: the tax-year-to-income-year mapping is now decided
+(see above), but combining the rate with fiscal income is still out of
+scope — that remains its own future spec and ADR.
