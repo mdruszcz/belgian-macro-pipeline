@@ -322,7 +322,28 @@ MapUI.CommuneMap = class CommuneMap {
     this.view = null;
     this.home = null;
     this.drag = null;
-    this.ramp = Array.from({length: MapUI.BINS}, (_, i) => `var(--ramp-${i})`);
+    // PALETTE, optional. Every existing caller (map.html, communes.html,
+    // home.html, home2.html, profiles.html, commune.html) passes nothing and
+    // gets exactly the var(--ramp-N) lookup this always did -- the CSS
+    // variables live in commune_map.css and each page/theme already sets
+    // them. A caller that supplies `options.palette` (an array of CSS colour
+    // strings, light-to-dark, "more" at the high end) draws with those
+    // instead -- used by commune.html's own Portrait ink/slate ramp so it
+    // does not have to fork the shared component to change its look. Length
+    // need not be 7: colourIndex() below already spreads however many bands
+    // survive across whatever ramp it is given.
+    this.ramp = (options.palette && options.palette.length)
+      ? options.palette.slice()
+      : Array.from({length: MapUI.BINS}, (_, i) => `var(--ramp-${i})`);
+    // DIVERGING PALETTE, optional -- for signed indicators (a balance, or any
+    // value range that genuinely crosses zero) where "more" has no single
+    // direction: {neg: [...], zero: '#fff', pos: [...]}, negative values
+    // classified on their own quantiles below zero, positive above, zero
+    // itself always the given neutral colour. Undeclared (the default),
+    // every caller keeps the single sequential ramp above, unchanged.
+    this.divergingPalette = options.divergingPalette || null;
+    this.nodataColour = options.nodataColour || null; // null = var(--nodata), unchanged
+    this.strokeColour = options.strokeColour || null; // null = var(--map-stroke) via CSS, unchanged
     // HOW MANY CLASSES, AND WHERE THEY CUT. Defaults to the seven the ramp has
     // colours for and to the component's own choice of where to cut them, so a
     // caller that says nothing behaves exactly as before. A caller may ask for
@@ -406,6 +427,21 @@ MapUI.CommuneMap = class CommuneMap {
     return this;
   }
 
+  /* Swap the palette in place and repaint -- for a caller whose palette is
+     derived from the page's own light/dark theme (a JS colour array, not a
+     CSS var, so it does not repaint itself the way the shared var(--ramp-N)
+     default already does on a theme switch). Every field is optional and
+     only replaces what is given, so a caller can pass just the one thing
+     that changed. */
+  setPalette({palette, divergingPalette, nodataColour, strokeColour} = {}) {
+    if (palette) this.ramp = palette.slice();
+    if (divergingPalette !== undefined) this.divergingPalette = divergingPalette;
+    if (nodataColour !== undefined) this.nodataColour = nodataColour;
+    if (strokeColour !== undefined) this.strokeColour = strokeColour;
+    this.paint();
+    return this;
+  }
+
   setVisible(nisSet) {
     this.visible = nisSet;
     this.paint();
@@ -431,21 +467,62 @@ MapUI.CommuneMap = class CommuneMap {
     }
     nums.sort((a, b) => a - b);
 
-    // Manual cuts are used AS GIVEN -- that is what manual means -- but only
-    // the ones that fall inside the data, because a break above the maximum
-    // would print a class in the legend that no commune can ever be in.
-    let breaks, method;
-    if (this.manualBreaks && this.manualBreaks.length && nums.length) {
+    // Diverging path: only taken when the caller supplied a divergingPalette
+    // AND the data genuinely straddles zero (a balance can still be all
+    // positive or all negative for one indicator's current period, in which
+    // case the ordinary single-hue ramp already tells the right story and
+    // there is no "negative side" to give a different hue). Every caller
+    // that never passes divergingPalette skips this block entirely -- same
+    // classify()/colourFor() path as before.
+    const isDiverging = this.divergingPalette && nums.length && nums[0] < 0 && nums[nums.length - 1] > 0;
+
+    let breaks, method, colourFor;
+    if (isDiverging) {
+      const neg = nums.filter(v => v < 0).sort((a, b) => a - b);
+      const pos = nums.filter(v => v > 0).sort((a, b) => a - b);
+      const negBins = Math.max(1, Math.round(this.bins / 2));
+      const posBins = Math.max(1, this.bins - negBins);
+      const negBreaks = neg.length ? MapUI.quantileBreaks(neg, negBins) : [];
+      const posBreaks = pos.length ? MapUI.quantileBreaks(pos, posBins) : [];
+      // One combined breaks array crossing zero, so bandFor()'s existing
+      // half-open-upward rule still works unmodified: everything <0 falls
+      // into a "neg" band, exactly 0 its own band, everything >0 a "pos" band.
+      breaks = negBreaks.concat([0]).concat(posBreaks);
+      method = 'diverging';
+      const negRamp = this.divergingPalette.neg || [];
+      const posRamp = this.divergingPalette.pos || [];
+      const zeroColour = this.divergingPalette.zero || negRamp[negRamp.length - 1] || '#fff';
+      const zeroBandIndex = negBreaks.length; // the band whose lower edge is 0
+      colourFor = band => {
+        if (band === zeroBandIndex) return zeroColour;
+        if (band < zeroBandIndex) {
+          // darkest (most negative) at band 0, lightest near zero
+          const i = MapUI.colourIndex(negBreaks.length - band, negBreaks.length + 1, negRamp.length);
+          return negRamp[Math.min(negRamp.length - 1, Math.max(0, i))];
+        }
+        const posBand = band - zeroBandIndex - 1; // 0-based within the positive side
+        const posBandCount = posBreaks.length + 1;
+        const i = MapUI.colourIndex(posBand, posBandCount, posRamp.length);
+        return posRamp[Math.min(posRamp.length - 1, Math.max(0, i))];
+      };
+    } else if (this.manualBreaks && this.manualBreaks.length && nums.length) {
+      // Manual cuts are used AS GIVEN -- that is what manual means -- but only
+      // the ones that fall inside the data, because a break above the maximum
+      // would print a class in the legend that no commune can ever be in.
       breaks = this.manualBreaks
         .filter(v => v > nums[0] && v <= nums[nums.length - 1])
         .sort((a, b) => a - b);
       method = 'manual';
+      const bands = breaks.length + 1;
+      colourFor = band => this.ramp[MapUI.colourIndex(band, bands, this.ramp.length)];
     } else {
       ({breaks, method} = MapUI.classify(nums, this.bins));
+      const bands = breaks.length + 1;
+      colourFor = band => this.ramp[MapUI.colourIndex(band, bands, this.ramp.length)];
     }
     const bands = breaks.length + 1;
-    const colourFor = band => this.ramp[MapUI.colourIndex(band, bands, this.ramp.length)];
 
+    const nodataFill = this.nodataColour || 'var(--nodata)';
     let withValue = 0;
     for (const f of this.features) {
       const hidden = shownSet && !shownSet.has(f.nis);
@@ -455,8 +532,11 @@ MapUI.CommuneMap = class CommuneMap {
         f.el.setAttribute('fill', colourFor(MapUI.bandFor(row.value, breaks)));
         withValue++;
       } else {
-        f.el.setAttribute('fill', 'var(--nodata)');
+        f.el.setAttribute('fill', nodataFill);
       }
+    }
+    if (this.strokeColour) {
+      for (const f of this.features) f.el.setAttribute('stroke', this.strokeColour);
     }
 
     this.method = method;
