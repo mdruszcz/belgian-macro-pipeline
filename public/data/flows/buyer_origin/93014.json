@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.2",
+      "value": "7"
+    },
+    "origin_unknown": {
+      "share_pct": "0.9",
+      "value": "5"
+    },
+    "other_regions": {
+      "share_pct": "7.8",
+      "value": "43.63"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "10.0",
+      "value": "55.98"
+    },
+    "rest_of_region": {
+      "share_pct": "30.2",
+      "value": "169.7600000000"
+    },
+    "same_commune": {
+      "share_pct": "49.9",
+      "value": "280.04"
+    }
+  },
+  "coverage_pct": "95.8",
+  "dataset": "buyer_origin",
+  "denominator": "561.4100000000",
+  "dest_geo_id": "be:mun:93014",
+  "dest_name": {
+    "en": "Couvin",
+    "fr": "Couvin",
+    "nl": "Couvin"
+  },
+  "dest_nis": "93014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 586,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Couvin",
+        "fr": "Couvin",
+        "nl": "Couvin"
+      },
+      "nis": "93014",
+      "share_pct": "49.9",
+      "value": "280.04"
+    },
+    {
+      "name": {
+        "en": "Chimay",
+        "fr": "Chimay",
+        "nl": "Chimay"
+      },
+      "nis": "56016",
+      "share_pct": "13.0",
+      "value": "73.01"
+    },
+    {
+      "name": {
+        "en": "Viroinval",
+        "fr": "Viroinval",
+        "nl": "Viroinval"
+      },
+      "nis": "93090",
+      "share_pct": "3.5",
+      "value": "19.48"
+    },
+    {
+      "name": {
+        "en": "Doische",
+        "fr": "Doische",
+        "nl": "Doische"
+      },
+      "nis": "93018",
+      "share_pct": "2.0",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Gerpinnes",
+        "fr": "Gerpinnes",
+        "nl": "Gerpinnes"
+      },
+      "nis": "52025",
+      "share_pct": "1.8",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "1.7",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "1.6",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "1.5",
+      "value": "8.5"
+    }
+  ]
+}

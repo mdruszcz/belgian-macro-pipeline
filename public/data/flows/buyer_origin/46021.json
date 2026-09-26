@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "7.5178571429"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "2.0"
+    },
+    "other_regions": {
+      "share_pct": "0.5",
+      "value": "9.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.6",
+      "value": "329.130951372"
+    },
+    "rest_of_region": {
+      "share_pct": "17.3",
+      "value": "323.4629904759"
+    },
+    "same_commune": {
+      "share_pct": "64.1",
+      "value": "1197.4877533"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "1869.0995522908",
+  "dest_geo_id": "be:mun:46021",
+  "dest_name": {
+    "en": "Sint-Niklaas",
+    "fr": "Saint-Nicolas",
+    "nl": "Sint-Niklaas"
+  },
+  "dest_nis": "46021",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1924,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sint-Niklaas",
+        "fr": "Saint-Nicolas",
+        "nl": "Sint-Niklaas"
+      },
+      "nis": "46021",
+      "share_pct": "64.1",
+      "value": "1197.4877533"
+    },
+    {
+      "name": {
+        "en": "Temse",
+        "fr": "Tamise",
+        "nl": "Temse"
+      },
+      "nis": "46025",
+      "share_pct": "5.4",
+      "value": "101.06036639"
+    },
+    {
+      "name": {
+        "en": "Beveren-Kruibeke-Zwijndrecht",
+        "fr": "Beveren-Kruibeke-Zwijndrecht",
+        "nl": "Beveren-Kruibeke-Zwijndrecht"
+      },
+      "nis": "46030",
+      "share_pct": "4.3",
+      "value": "79.956923077"
+    },
+    {
+      "name": {
+        "en": "Sint-Gillis-Waas",
+        "fr": "Sint-Gillis-Waas",
+        "nl": "Sint-Gillis-Waas"
+      },
+      "nis": "46020",
+      "share_pct": "3.7",
+      "value": "69.6326"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "3.6",
+      "value": "66.601190476"
+    },
+    {
+      "name": {
+        "en": "Waasmunster",
+        "fr": "Waasmunster",
+        "nl": "Waasmunster"
+      },
+      "nis": "42023",
+      "share_pct": "2.9",
+      "value": "54.5"
+    },
+    {
+      "name": {
+        "en": "Stekene",
+        "fr": "Stekene",
+        "nl": "Stekene"
+      },
+      "nis": "46024",
+      "share_pct": "2.1",
+      "value": "39.981061905"
+    },
+    {
+      "name": {
+        "en": "Lokeren",
+        "fr": "Lokeren",
+        "nl": "Lokeren"
+      },
+      "nis": "46029",
+      "share_pct": "2.1",
+      "value": "38.5"
+    }
+  ]
+}

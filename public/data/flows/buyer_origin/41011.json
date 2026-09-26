@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "22.6",
+      "value": "102.98"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.4",
+      "value": "56.7"
+    },
+    "rest_of_region": {
+      "share_pct": "27.6",
+      "value": "125.92"
+    },
+    "same_commune": {
+      "share_pct": "36.4",
+      "value": "166.0587037"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "455.6587037",
+  "dest_geo_id": "be:mun:41011",
+  "dest_name": {
+    "en": "Denderleeuw",
+    "fr": "Denderleeuw",
+    "nl": "Denderleeuw"
+  },
+  "dest_nis": "41011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 464,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Denderleeuw",
+        "fr": "Denderleeuw",
+        "nl": "Denderleeuw"
+      },
+      "nis": "41011",
+      "share_pct": "36.4",
+      "value": "166.0587037"
+    },
+    {
+      "name": {
+        "en": "Liedekerke",
+        "fr": "Liedekerke",
+        "nl": "Liedekerke"
+      },
+      "nis": "23044",
+      "share_pct": "6.9",
+      "value": "31.5"
+    },
+    {
+      "name": {
+        "en": "Ninove",
+        "fr": "Ninove",
+        "nl": "Ninove"
+      },
+      "nis": "41048",
+      "share_pct": "4.7",
+      "value": "21.2"
+    },
+    {
+      "name": {
+        "en": "Affligem",
+        "fr": "Affligem",
+        "nl": "Affligem"
+      },
+      "nis": "23105",
+      "share_pct": "4.1",
+      "value": "18.51"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "3.6",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "3.5",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "3.3",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Haaltert",
+        "fr": "Haaltert",
+        "nl": "Haaltert"
+      },
+      "nis": "41024",
+      "share_pct": "2.9",
+      "value": "13"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "38.3",
+      "value": "290.02"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.0",
+      "value": "136.525"
+    },
+    "rest_of_region": {
+      "share_pct": "2.6",
+      "value": "20"
+    },
+    "same_commune": {
+      "share_pct": "40.4",
+      "value": "305.825"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "757.370",
+  "dest_geo_id": "be:mun:23077",
+  "dest_name": {
+    "en": "Sint-Pieters-Leeuw",
+    "fr": "Sint-Pieters-Leeuw",
+    "nl": "Sint-Pieters-Leeuw"
+  },
+  "dest_nis": "23077",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 777,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sint-Pieters-Leeuw",
+        "fr": "Sint-Pieters-Leeuw",
+        "nl": "Sint-Pieters-Leeuw"
+      },
+      "nis": "23077",
+      "share_pct": "40.4",
+      "value": "305.825"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "10.2",
+      "value": "77.02"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "7.0",
+      "value": "53"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "4.9",
+      "value": "37"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "4.6",
+      "value": "34.5"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "4.4",
+      "value": "33"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "3.8",
+      "value": "29"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "2.5",
+      "value": "19"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "38.6",
+      "value": "357.25"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.3",
+      "value": "169.51"
+    },
+    "rest_of_region": {
+      "share_pct": "4.4",
+      "value": "40.6833333333"
+    },
+    "same_commune": {
+      "share_pct": "38.3",
+      "value": "354.05733333"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "925.5006666633",
+  "dest_geo_id": "be:mun:23016",
+  "dest_name": {
+    "en": "Dilbeek",
+    "fr": "Dilbeek",
+    "nl": "Dilbeek"
+  },
+  "dest_nis": "23016",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 941,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "38.3",
+      "value": "354.05733333"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "10.2",
+      "value": "94.75"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "6.1",
+      "value": "56.75"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "3.3",
+      "value": "30.5"
+    },
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "2.9",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "2.9",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "2.8",
+      "value": "26"
+    },
+    {
+      "name": {
+        "en": "Ganshoren",
+        "fr": "Ganshoren",
+        "nl": "Ganshoren"
+      },
+      "nis": "21008",
+      "share_pct": "2.6",
+      "value": "24"
+    }
+  ]
+}

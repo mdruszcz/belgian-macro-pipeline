@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "40.2",
+      "value": "51"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.4",
+      "value": "14.5"
+    },
+    "rest_of_region": {
+      "share_pct": "27.2",
+      "value": "34.5"
+    },
+    "same_commune": {
+      "share_pct": "21.3",
+      "value": "27"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "127.0",
+  "dest_geo_id": "be:mun:91103",
+  "dest_name": {
+    "en": "Onhaye",
+    "fr": "Onhaye",
+    "nl": "Onhaye"
+  },
+  "dest_nis": "91103",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 127,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hamont-Achel",
+        "fr": "Hamont-Achel",
+        "nl": "Hamont-Achel"
+      },
+      "nis": "72037",
+      "share_pct": "32.3",
+      "value": "41"
+    },
+    {
+      "name": {
+        "en": "Onhaye",
+        "fr": "Onhaye",
+        "nl": "Onhaye"
+      },
+      "nis": "91103",
+      "share_pct": "21.3",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Dinant",
+        "fr": "Dinant",
+        "nl": "Dinant"
+      },
+      "nis": "91034",
+      "share_pct": "7.1",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Mettet",
+        "fr": "Mettet",
+        "nl": "Mettet"
+      },
+      "nis": "92087",
+      "share_pct": "5.1",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Florennes",
+        "fr": "Florennes",
+        "nl": "Florennes"
+      },
+      "nis": "93022",
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "3.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "2.4",
+      "value": "3"
+    }
+  ]
+}

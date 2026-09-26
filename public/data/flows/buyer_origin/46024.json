@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.5",
+      "value": "7.6428571429"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.0",
+      "value": "163.092857143"
+    },
+    "rest_of_region": {
+      "share_pct": "14.5",
+      "value": "76.1957142859"
+    },
+    "same_commune": {
+      "share_pct": "53.0",
+      "value": "278.80705367"
+    }
+  },
+  "coverage_pct": "96.1",
+  "dataset": "buyer_origin",
+  "denominator": "525.7384822418",
+  "dest_geo_id": "be:mun:46024",
+  "dest_name": {
+    "en": "Stekene",
+    "fr": "Stekene",
+    "nl": "Stekene"
+  },
+  "dest_nis": "46024",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 547,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Stekene",
+        "fr": "Stekene",
+        "nl": "Stekene"
+      },
+      "nis": "46024",
+      "share_pct": "53.0",
+      "value": "278.80705367"
+    },
+    {
+      "name": {
+        "en": "Sint-Gillis-Waas",
+        "fr": "Sint-Gillis-Waas",
+        "nl": "Sint-Gillis-Waas"
+      },
+      "nis": "46020",
+      "share_pct": "8.9",
+      "value": "46.761904762"
+    },
+    {
+      "name": {
+        "en": "Sint-Niklaas",
+        "fr": "Saint-Nicolas",
+        "nl": "Sint-Niklaas"
+      },
+      "nis": "46021",
+      "share_pct": "8.9",
+      "value": "46.604761905"
+    },
+    {
+      "name": {
+        "en": "Beveren-Kruibeke-Zwijndrecht",
+        "fr": "Beveren-Kruibeke-Zwijndrecht",
+        "nl": "Beveren-Kruibeke-Zwijndrecht"
+      },
+      "nis": "46030",
+      "share_pct": "7.3",
+      "value": "38.125"
+    },
+    {
+      "name": {
+        "en": "Lokeren",
+        "fr": "Lokeren",
+        "nl": "Lokeren"
+      },
+      "nis": "46029",
+      "share_pct": "4.5",
+      "value": "23.476190476"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "4.4",
+      "value": "23"
+    },
+    {
+      "name": {
+        "en": "Lochristi",
+        "fr": "Lochristi",
+        "nl": "Lochristi"
+      },
+      "nis": "44087",
+      "share_pct": "2.5",
+      "value": "13.022857143"
+    },
+    {
+      "name": {
+        "en": "Temse",
+        "fr": "Tamise",
+        "nl": "Temse"
+      },
+      "nis": "46025",
+      "share_pct": "1.5",
+      "value": "8.125"
+    }
+  ]
+}

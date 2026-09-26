@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "43.5",
+      "value": "171.052037037"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.8",
+      "value": "66"
+    },
+    "rest_of_region": {
+      "share_pct": "21.1",
+      "value": "83.03"
+    },
+    "same_commune": {
+      "share_pct": "16.5",
+      "value": "65.03"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "393.112037037",
+  "dest_geo_id": "be:mun:23099",
+  "dest_name": {
+    "en": "Kraainem",
+    "fr": "Kraainem",
+    "nl": "Kraainem"
+  },
+  "dest_nis": "23099",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 401,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kraainem",
+        "fr": "Kraainem",
+        "nl": "Kraainem"
+      },
+      "nis": "23099",
+      "share_pct": "16.5",
+      "value": "65.03"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "13.1",
+      "value": "51.515"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "12.3",
+      "value": "48.5"
+    },
+    {
+      "name": {
+        "en": "Zaventem",
+        "fr": "Zaventem",
+        "nl": "Zaventem"
+      },
+      "nis": "23094",
+      "share_pct": "5.3",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "3.3",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Wezembeek-Oppem",
+        "fr": "Wezembeek-Oppem",
+        "nl": "Wezembeek-Oppem"
+      },
+      "nis": "23103",
+      "share_pct": "3.3",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Tervuren",
+        "fr": "Tervuren",
+        "nl": "Tervuren"
+      },
+      "nis": "24104",
+      "share_pct": "2.5",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Ninove",
+        "fr": "Ninove",
+        "nl": "Ninove"
+      },
+      "nis": "41048",
+      "share_pct": "2.2",
+      "value": "8.5"
+    }
+  ]
+}

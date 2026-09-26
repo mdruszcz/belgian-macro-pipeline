@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.2",
+      "value": "152.6192212283"
+    },
+    "origin_unknown": {
+      "share_pct": "1.0",
+      "value": "36.375"
+    },
+    "other_regions": {
+      "share_pct": "23.5",
+      "value": "862.8454558610"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "36.6",
+      "value": "1345.755819095"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "34.8",
+      "value": "1278.6386541"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "3676.2341502843",
+  "dest_geo_id": "be:mun:21004",
+  "dest_name": {
+    "en": "Brussels",
+    "fr": "Bruxelles",
+    "nl": "Brussel"
+  },
+  "dest_nis": "21004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 3778,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "34.8",
+      "value": "1278.6386541"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "7.1",
+      "value": "261.67353333"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "6.0",
+      "value": "220.37818701"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "3.0",
+      "value": "109.56597403"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "2.8",
+      "value": "102.44208966"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "2.1",
+      "value": "78.666666667"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "2.0",
+      "value": "72.903333333"
+    },
+    {
+      "name": {
+        "en": "Saint-Gilles",
+        "fr": "Saint-Gilles",
+        "nl": "Sint-Gillis"
+      },
+      "nis": "21013",
+      "share_pct": "1.8",
+      "value": "65.012987013"
+    }
+  ]
+}

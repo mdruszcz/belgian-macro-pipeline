@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.6",
+      "value": "62.1"
+    },
+    "rest_of_region": {
+      "share_pct": "26.0",
+      "value": "110.416666666"
+    },
+    "same_commune": {
+      "share_pct": "58.2",
+      "value": "246.8"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "424.316666666",
+  "dest_geo_id": "be:mun:43002",
+  "dest_name": {
+    "en": "Assenede",
+    "fr": "Assenede",
+    "nl": "Assenede"
+  },
+  "dest_nis": "43002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 433,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Assenede",
+        "fr": "Assenede",
+        "nl": "Assenede"
+      },
+      "nis": "43002",
+      "share_pct": "58.2",
+      "value": "246.8"
+    },
+    {
+      "name": {
+        "en": "Evergem",
+        "fr": "Evergem",
+        "nl": "Evergem"
+      },
+      "nis": "44019",
+      "share_pct": "11.0",
+      "value": "46.833333333"
+    },
+    {
+      "name": {
+        "en": "Zelzate",
+        "fr": "Zelzate",
+        "nl": "Zelzate"
+      },
+      "nis": "43018",
+      "share_pct": "4.7",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "4.3",
+      "value": "18.333333333"
+    },
+    {
+      "name": {
+        "en": "Kaprijke",
+        "fr": "Kaprijke",
+        "nl": "Kaprijke"
+      },
+      "nis": "43007",
+      "share_pct": "3.3",
+      "value": "14.1"
+    },
+    {
+      "name": {
+        "en": "Sint-Laureins",
+        "fr": "Sint-Laureins",
+        "nl": "Sint-Laureins"
+      },
+      "nis": "43014",
+      "share_pct": "2.5",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Lochristi",
+        "fr": "Lochristi",
+        "nl": "Lochristi"
+      },
+      "nis": "44087",
+      "share_pct": "2.5",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Maldegem",
+        "fr": "Maldegem",
+        "nl": "Maldegem"
+      },
+      "nis": "43010",
+      "share_pct": "2.1",
+      "value": "9"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.6",
+      "value": "2.8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.1",
+      "value": "8.9"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.1",
+      "value": "54.1"
+    },
+    "rest_of_region": {
+      "share_pct": "27.2",
+      "value": "47.3333333333"
+    },
+    "same_commune": {
+      "share_pct": "35.1",
+      "value": "61.1"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "174.2333333333",
+  "dest_geo_id": "be:mun:53068",
+  "dest_name": {
+    "en": "Quiévrain",
+    "fr": "Quiévrain",
+    "nl": "Quiévrain"
+  },
+  "dest_nis": "53068",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 177,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Quiévrain",
+        "fr": "Quiévrain",
+        "nl": "Quiévrain"
+      },
+      "nis": "53068",
+      "share_pct": "35.1",
+      "value": "61.1"
+    },
+    {
+      "name": {
+        "en": "Dour",
+        "fr": "Dour",
+        "nl": "Dour"
+      },
+      "nis": "53020",
+      "share_pct": "6.9",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Honnelles",
+        "fr": "Honnelles",
+        "nl": "Honnelles"
+      },
+      "nis": "53083",
+      "share_pct": "5.2",
+      "value": "9.1"
+    },
+    {
+      "name": {
+        "en": "Chièvres",
+        "fr": "Chièvres",
+        "nl": "Chièvres"
+      },
+      "nis": "51014",
+      "share_pct": "4.6",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Saint-Ghislain",
+        "fr": "Saint-Ghislain",
+        "nl": "Saint-Ghislain"
+      },
+      "nis": "53070",
+      "share_pct": "3.4",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Bernissart",
+        "fr": "Bernissart",
+        "nl": "Bernissart"
+      },
+      "nis": "51009",
+      "share_pct": "2.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Boussu",
+        "fr": "Boussu",
+        "nl": "Boussu"
+      },
+      "nis": "53014",
+      "share_pct": "2.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Frameries",
+        "fr": "Frameries",
+        "nl": "Frameries"
+      },
+      "nis": "53028",
+      "share_pct": "2.9",
+      "value": "5"
+    }
+  ]
+}

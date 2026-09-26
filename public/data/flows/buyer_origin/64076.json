@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.0",
+      "value": "2.4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.3",
+      "value": "2.6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "32.5",
+      "value": "19.51"
+    },
+    "rest_of_region": {
+      "share_pct": "41.7",
+      "value": "25.01"
+    },
+    "same_commune": {
+      "share_pct": "17.5",
+      "value": "10.51"
+    }
+  },
+  "coverage_pct": "95.3",
+  "dataset": "buyer_origin",
+  "denominator": "60.03",
+  "dest_geo_id": "be:mun:64076",
+  "dest_name": {
+    "en": "Faimes",
+    "fr": "Faimes",
+    "nl": "Faimes"
+  },
+  "dest_nis": "64076",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 63,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Faimes",
+        "fr": "Faimes",
+        "nl": "Faimes"
+      },
+      "nis": "64076",
+      "share_pct": "17.5",
+      "value": "10.51"
+    },
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "14.2",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Berloz",
+        "fr": "Berloz",
+        "nl": "Berloz"
+      },
+      "nis": "64008",
+      "share_pct": "6.7",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "5.8",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Verlaine",
+        "fr": "Verlaine",
+        "nl": "Verlaine"
+      },
+      "nis": "61063",
+      "share_pct": "5.0",
+      "value": "3.01"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "5.0",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Amay",
+        "fr": "Amay",
+        "nl": "Amay"
+      },
+      "nis": "61003",
+      "share_pct": "3.3",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "3.3",
+      "value": "2"
+    }
+  ]
+}

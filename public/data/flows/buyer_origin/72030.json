@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "6.5",
+      "value": "32"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "1.3333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.0",
+      "value": "151.48"
+    },
+    "rest_of_region": {
+      "share_pct": "7.0",
+      "value": "34.3333333333"
+    },
+    "same_commune": {
+      "share_pct": "55.2",
+      "value": "269.49333333"
+    }
+  },
+  "coverage_pct": "98.3",
+  "dataset": "buyer_origin",
+  "denominator": "488.6399999966",
+  "dest_geo_id": "be:mun:72030",
+  "dest_name": {
+    "en": "Peer",
+    "fr": "Peer",
+    "nl": "Peer"
+  },
+  "dest_nis": "72030",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 497,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Peer",
+        "fr": "Peer",
+        "nl": "Peer"
+      },
+      "nis": "72030",
+      "share_pct": "55.2",
+      "value": "269.49333333"
+    },
+    {
+      "name": {
+        "en": "Bocholt",
+        "fr": "Bocholt",
+        "nl": "Bocholt"
+      },
+      "nis": "72003",
+      "share_pct": "6.5",
+      "value": "32"
+    },
+    {
+      "name": {
+        "en": "Pelt",
+        "fr": "Pelt",
+        "nl": "Pelt"
+      },
+      "nis": "72043",
+      "share_pct": "5.6",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Oudsbergen",
+        "fr": "Oudsbergen",
+        "nl": "Oudsbergen"
+      },
+      "nis": "72042",
+      "share_pct": "4.5",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Hechtel-Eksel",
+        "fr": "Hechtel-Eksel",
+        "nl": "Hechtel-Eksel"
+      },
+      "nis": "72038",
+      "share_pct": "4.0",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Houthalen-Helchteren",
+        "fr": "Houthalen-Helchteren",
+        "nl": "Houthalen-Helchteren"
+      },
+      "nis": "72039",
+      "share_pct": "3.5",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Bree",
+        "fr": "Bree",
+        "nl": "Bree"
+      },
+      "nis": "72004",
+      "share_pct": "2.6",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Hamont-Achel",
+        "fr": "Hamont-Achel",
+        "nl": "Hamont-Achel"
+      },
+      "nis": "72037",
+      "share_pct": "1.4",
+      "value": "7"
+    }
+  ]
+}

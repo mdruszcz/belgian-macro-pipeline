@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "23.50"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "27.8",
+      "value": "271.52503"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.7",
+      "value": "279.8928"
+    },
+    "rest_of_region": {
+      "share_pct": "4.5",
+      "value": "44.405"
+    },
+    "same_commune": {
+      "share_pct": "36.5",
+      "value": "356.20285714"
+    }
+  },
+  "coverage_pct": "95.5",
+  "dataset": "buyer_origin",
+  "denominator": "976.52568714",
+  "dest_geo_id": "be:mun:25014",
+  "dest_name": {
+    "en": "Braine-l’Alleud",
+    "fr": "Braine-l’Alleud",
+    "nl": "Eigenbrakel"
+  },
+  "dest_nis": "25014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1023,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "36.5",
+      "value": "356.20285714"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "12.0",
+      "value": "117.51"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "4.3",
+      "value": "41.51003"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "3.3",
+      "value": "32.62"
+    },
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "3.2",
+      "value": "31.49"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Château",
+        "fr": "Braine-le-Château",
+        "nl": "Kasteelbrakel"
+      },
+      "nis": "25015",
+      "share_pct": "2.3",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Lasne",
+        "fr": "Lasne",
+        "nl": "Lasne"
+      },
+      "nis": "25119",
+      "share_pct": "2.3",
+      "value": "22.12"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "1.8",
+      "value": "18"
+    }
+  ]
+}

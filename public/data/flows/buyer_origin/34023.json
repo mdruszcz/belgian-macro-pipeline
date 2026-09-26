@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "46.7",
+      "value": "147.4711111111"
+    },
+    "rest_of_region": {
+      "share_pct": "11.2",
+      "value": "35.2319999999"
+    },
+    "same_commune": {
+      "share_pct": "42.1",
+      "value": "132.81111111"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "315.5142222210",
+  "dest_geo_id": "be:mun:34023",
+  "dest_name": {
+    "en": "Kuurne",
+    "fr": "Kuurne",
+    "nl": "Kuurne"
+  },
+  "dest_nis": "34023",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 327,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kuurne",
+        "fr": "Kuurne",
+        "nl": "Kuurne"
+      },
+      "nis": "34023",
+      "share_pct": "42.1",
+      "value": "132.81111111"
+    },
+    {
+      "name": {
+        "en": "Harelbeke",
+        "fr": "Harelbeke",
+        "nl": "Harelbeke"
+      },
+      "nis": "34013",
+      "share_pct": "16.6",
+      "value": "52.5"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "14.1",
+      "value": "44.35"
+    },
+    {
+      "name": {
+        "en": "Waregem",
+        "fr": "Waregem",
+        "nl": "Waregem"
+      },
+      "nis": "34040",
+      "share_pct": "5.2",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Zwevegem",
+        "fr": "Zwevegem",
+        "nl": "Zwevegem"
+      },
+      "nis": "34042",
+      "share_pct": "3.2",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Deerlijk",
+        "fr": "Deerlijk",
+        "nl": "Deerlijk"
+      },
+      "nis": "34009",
+      "share_pct": "2.4",
+      "value": "7.51"
+    },
+    {
+      "name": {
+        "en": "Wevelgem",
+        "fr": "Wevelgem",
+        "nl": "Wevelgem"
+      },
+      "nis": "34041",
+      "share_pct": "2.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.4",
+      "value": "4.34"
+    }
+  ]
+}

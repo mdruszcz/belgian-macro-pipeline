@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.6",
+      "value": "13"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.2",
+      "value": "9"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "9.2",
+      "value": "26"
+    },
+    "rest_of_region": {
+      "share_pct": "16.9",
+      "value": "47.70"
+    },
+    "same_commune": {
+      "share_pct": "66.0",
+      "value": "185.8"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "281.50",
+  "dest_geo_id": "be:mun:84033",
+  "dest_name": {
+    "en": "Léglise",
+    "fr": "Léglise",
+    "nl": "Léglise"
+  },
+  "dest_nis": "84033",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 284,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Léglise",
+        "fr": "Léglise",
+        "nl": "Léglise"
+      },
+      "nis": "84033",
+      "share_pct": "66.0",
+      "value": "185.8"
+    },
+    {
+      "name": {
+        "en": "Neufchâteau",
+        "fr": "Neufchâteau",
+        "nl": "Neufchâteau"
+      },
+      "nis": "84043",
+      "share_pct": "3.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Habay",
+        "fr": "Habay",
+        "nl": "Habay"
+      },
+      "nis": "85046",
+      "share_pct": "3.7",
+      "value": "10.45"
+    },
+    {
+      "name": {
+        "en": "Vaux-sur-Sûre",
+        "fr": "Vaux-sur-Sûre",
+        "nl": "Vaux-sur-Sûre"
+      },
+      "nis": "82036",
+      "share_pct": "2.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "2.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Bastogne",
+        "fr": "Bastogne",
+        "nl": "Bastenaken"
+      },
+      "nis": "82039",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Herbeumont",
+        "fr": "Herbeumont",
+        "nl": "Herbeumont"
+      },
+      "nis": "84029",
+      "share_pct": "1.4",
+      "value": "4"
+    }
+  ]
+}

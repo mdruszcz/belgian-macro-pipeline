@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.9",
+      "value": "7.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.3",
+      "value": "187.240448025"
+    },
+    "rest_of_region": {
+      "share_pct": "21.8",
+      "value": "192.0366666667"
+    },
+    "same_commune": {
+      "share_pct": "55.4",
+      "value": "487.57466667"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "879.3517813617",
+  "dest_geo_id": "be:mun:45035",
+  "dest_name": {
+    "en": "Oudenaarde",
+    "fr": "Audenarde",
+    "nl": "Oudenaarde"
+  },
+  "dest_nis": "45035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 907,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "55.4",
+      "value": "487.57466667"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "4.8",
+      "value": "42.1"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "4.6",
+      "value": "40.568291163"
+    },
+    {
+      "name": {
+        "en": "Wortegem-Petegem",
+        "fr": "Wortegem-Petegem",
+        "nl": "Wortegem-Petegem"
+      },
+      "nis": "45061",
+      "share_pct": "4.4",
+      "value": "39"
+    },
+    {
+      "name": {
+        "en": "Zwalm",
+        "fr": "Zwalm",
+        "nl": "Zwalm"
+      },
+      "nis": "45065",
+      "share_pct": "2.7",
+      "value": "23.533333333"
+    },
+    {
+      "name": {
+        "en": "Maarkedal",
+        "fr": "Maarkedal",
+        "nl": "Maarkedal"
+      },
+      "nis": "45064",
+      "share_pct": "2.4",
+      "value": "21.48"
+    },
+    {
+      "name": {
+        "en": "Horebeke",
+        "fr": "Horebeke",
+        "nl": "Horebeke"
+      },
+      "nis": "45062",
+      "share_pct": "2.0",
+      "value": "17.2"
+    },
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "1.9",
+      "value": "16.4"
+    }
+  ]
+}

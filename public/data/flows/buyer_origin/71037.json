@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "34.9",
+      "value": "181.183333334"
+    },
+    "rest_of_region": {
+      "share_pct": "19.8",
+      "value": "102.89"
+    },
+    "same_commune": {
+      "share_pct": "44.7",
+      "value": "231.84"
+    }
+  },
+  "coverage_pct": "98.5",
+  "dataset": "buyer_origin",
+  "denominator": "518.913333334",
+  "dest_geo_id": "be:mun:71037",
+  "dest_name": {
+    "en": "Lummen",
+    "fr": "Lummen",
+    "nl": "Lummen"
+  },
+  "dest_nis": "71037",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 527,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lummen",
+        "fr": "Lummen",
+        "nl": "Lummen"
+      },
+      "nis": "71037",
+      "share_pct": "44.7",
+      "value": "231.84"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "7.2",
+      "value": "37.166666667"
+    },
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "6.8",
+      "value": "35.5"
+    },
+    {
+      "name": {
+        "en": "Diest",
+        "fr": "Diest",
+        "nl": "Diest"
+      },
+      "nis": "24020",
+      "share_pct": "5.1",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Herk-de-Stad",
+        "fr": "Herck-la-Ville",
+        "nl": "Herk-de-Stad"
+      },
+      "nis": "71024",
+      "share_pct": "4.5",
+      "value": "23.5"
+    },
+    {
+      "name": {
+        "en": "Heusden-Zolder",
+        "fr": "Heusden-Zolder",
+        "nl": "Heusden-Zolder"
+      },
+      "nis": "71070",
+      "share_pct": "4.0",
+      "value": "20.82"
+    },
+    {
+      "name": {
+        "en": "Geetbets",
+        "fr": "Geetbets",
+        "nl": "Geetbets"
+      },
+      "nis": "24028",
+      "share_pct": "2.6",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Halen",
+        "fr": "Halen",
+        "nl": "Halen"
+      },
+      "nis": "71020",
+      "share_pct": "2.5",
+      "value": "13.196666667"
+    }
+  ]
+}

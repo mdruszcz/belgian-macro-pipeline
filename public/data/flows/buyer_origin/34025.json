@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.7",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.0",
+      "value": "37.3333333333"
+    },
+    "rest_of_region": {
+      "share_pct": "30.8",
+      "value": "46.0"
+    },
+    "same_commune": {
+      "share_pct": "42.9",
+      "value": "64.18"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "149.5133333333",
+  "dest_geo_id": "be:mun:34025",
+  "dest_name": {
+    "en": "Lendelede",
+    "fr": "Lendelede",
+    "nl": "Lendelede"
+  },
+  "dest_nis": "34025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 152,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lendelede",
+        "fr": "Lendelede",
+        "nl": "Lendelede"
+      },
+      "nis": "34025",
+      "share_pct": "42.9",
+      "value": "64.18"
+    },
+    {
+      "name": {
+        "en": "Izegem",
+        "fr": "Izegem",
+        "nl": "Izegem"
+      },
+      "nis": "36008",
+      "share_pct": "7.7",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Kuurne",
+        "fr": "Kuurne",
+        "nl": "Kuurne"
+      },
+      "nis": "34023",
+      "share_pct": "6.4",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Harelbeke",
+        "fr": "Harelbeke",
+        "nl": "Harelbeke"
+      },
+      "nis": "34013",
+      "share_pct": "6.0",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Ledegem",
+        "fr": "Ledegem",
+        "nl": "Ledegem"
+      },
+      "nis": "36010",
+      "share_pct": "5.7",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "4.9",
+      "value": "7.3333333333"
+    },
+    {
+      "name": {
+        "en": "Deerlijk",
+        "fr": "Deerlijk",
+        "nl": "Deerlijk"
+      },
+      "nis": "34009",
+      "share_pct": "2.0",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Wevelgem",
+        "fr": "Wevelgem",
+        "nl": "Wevelgem"
+      },
+      "nis": "34041",
+      "share_pct": "2.0",
+      "value": "3"
+    }
+  ]
+}

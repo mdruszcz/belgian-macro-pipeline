@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.0",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.5",
+      "value": "2.0101748601"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "54.8",
+      "value": "211.7399266748"
+    },
+    "rest_of_region": {
+      "share_pct": "10.3",
+      "value": "39.666666667"
+    },
+    "same_commune": {
+      "share_pct": "33.4",
+      "value": "128.87166267"
+    }
+  },
+  "coverage_pct": "95.1",
+  "dataset": "buyer_origin",
+  "denominator": "386.2884308719",
+  "dest_geo_id": "be:mun:62038",
+  "dest_name": {
+    "en": "Fléron",
+    "fr": "Fléron",
+    "nl": "Fléron"
+  },
+  "dest_nis": "62038",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 406,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Fléron",
+        "fr": "Fléron",
+        "nl": "Fléron"
+      },
+      "nis": "62038",
+      "share_pct": "33.4",
+      "value": "128.87166267"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "12.0",
+      "value": "46.252116659"
+    },
+    {
+      "name": {
+        "en": "Soumagne",
+        "fr": "Soumagne",
+        "nl": "Soumagne"
+      },
+      "nis": "62099",
+      "share_pct": "9.2",
+      "value": "35.413932326"
+    },
+    {
+      "name": {
+        "en": "Beyne-Heusay",
+        "fr": "Beyne-Heusay",
+        "nl": "Beyne-Heusay"
+      },
+      "nis": "62015",
+      "share_pct": "8.4",
+      "value": "32.616636483"
+    },
+    {
+      "name": {
+        "en": "Blegny",
+        "fr": "Blegny",
+        "nl": "Blegny"
+      },
+      "nis": "62119",
+      "share_pct": "7.3",
+      "value": "28.03"
+    },
+    {
+      "name": {
+        "en": "Visé",
+        "fr": "Visé",
+        "nl": "Wezet"
+      },
+      "nis": "62108",
+      "share_pct": "4.3",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Chaudfontaine",
+        "fr": "Chaudfontaine",
+        "nl": "Chaudfontaine"
+      },
+      "nis": "62022",
+      "share_pct": "3.2",
+      "value": "12.50039968"
+    },
+    {
+      "name": {
+        "en": "Herve",
+        "fr": "Herve",
+        "nl": "Herve"
+      },
+      "nis": "63035",
+      "share_pct": "3.0",
+      "value": "11.666666667"
+    }
+  ]
+}

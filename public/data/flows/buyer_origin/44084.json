@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0.34425"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.2",
+      "value": "120.945238095"
+    },
+    "rest_of_region": {
+      "share_pct": "18.8",
+      "value": "149.15"
+    },
+    "same_commune": {
+      "share_pct": "66.0",
+      "value": "524.07283444"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "794.512322535",
+  "dest_geo_id": "be:mun:44084",
+  "dest_name": {
+    "en": "Aalter",
+    "fr": "Aalter",
+    "nl": "Aalter"
+  },
+  "dest_nis": "44084",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 823,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Aalter",
+        "fr": "Aalter",
+        "nl": "Aalter"
+      },
+      "nis": "44084",
+      "share_pct": "66.0",
+      "value": "524.07283444"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "8.0",
+      "value": "63.945238095"
+    },
+    {
+      "name": {
+        "en": "Maldegem",
+        "fr": "Maldegem",
+        "nl": "Maldegem"
+      },
+      "nis": "43010",
+      "share_pct": "3.7",
+      "value": "29.61"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "3.4",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Beernem",
+        "fr": "Beernem",
+        "nl": "Beernem"
+      },
+      "nis": "31003",
+      "share_pct": "2.0",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Wingene",
+        "fr": "Wingene",
+        "nl": "Wingene"
+      },
+      "nis": "37021",
+      "share_pct": "1.7",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "1.5",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Tielt",
+        "fr": "Tielt",
+        "nl": "Tielt"
+      },
+      "nis": "37022",
+      "share_pct": "1.4",
+      "value": "11"
+    }
+  ]
+}

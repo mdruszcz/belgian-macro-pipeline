@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "0.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "55.4",
+      "value": "106.3353090909"
+    },
+    "rest_of_region": {
+      "share_pct": "12.8",
+      "value": "24.5"
+    },
+    "same_commune": {
+      "share_pct": "31.5",
+      "value": "60.53"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "191.8653090909",
+  "dest_geo_id": "be:mun:11038",
+  "dest_name": {
+    "en": "Schelle",
+    "fr": "Schelle",
+    "nl": "Schelle"
+  },
+  "dest_nis": "11038",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 197,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Schelle",
+        "fr": "Schelle",
+        "nl": "Schelle"
+      },
+      "nis": "11038",
+      "share_pct": "31.5",
+      "value": "60.53"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "15.4",
+      "value": "29.5"
+    },
+    {
+      "name": {
+        "en": "Niel",
+        "fr": "Niel",
+        "nl": "Niel"
+      },
+      "nis": "11030",
+      "share_pct": "13.3",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Hemiksem",
+        "fr": "Hemiksem",
+        "nl": "Hemiksem"
+      },
+      "nis": "11018",
+      "share_pct": "8.3",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Aartselaar",
+        "fr": "Aartselaar",
+        "nl": "Aartselaar"
+      },
+      "nis": "11001",
+      "share_pct": "4.3",
+      "value": "8.3353090909"
+    },
+    {
+      "name": {
+        "en": "Rumst",
+        "fr": "Rumst",
+        "nl": "Rumst"
+      },
+      "nis": "11037",
+      "share_pct": "3.9",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "3.1",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Boom",
+        "fr": "Boom",
+        "nl": "Boom"
+      },
+      "nis": "11005",
+      "share_pct": "2.9",
+      "value": "5.5"
+    }
+  ]
+}

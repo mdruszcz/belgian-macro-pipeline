@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.2",
+      "value": "203.735011111"
+    },
+    "rest_of_region": {
+      "share_pct": "15.9",
+      "value": "152.487733333"
+    },
+    "same_commune": {
+      "share_pct": "61.8",
+      "value": "593.18447778"
+    }
+  },
+  "coverage_pct": "98.9",
+  "dataset": "buyer_origin",
+  "denominator": "959.907222224",
+  "dest_geo_id": "be:mun:71004",
+  "dest_name": {
+    "en": "Beringen",
+    "fr": "Beringen",
+    "nl": "Beringen"
+  },
+  "dest_nis": "71004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 971,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "61.8",
+      "value": "593.18447778"
+    },
+    {
+      "name": {
+        "en": "Heusden-Zolder",
+        "fr": "Heusden-Zolder",
+        "nl": "Heusden-Zolder"
+      },
+      "nis": "71070",
+      "share_pct": "7.2",
+      "value": "69.15"
+    },
+    {
+      "name": {
+        "en": "Tessenderlo-Ham",
+        "fr": "Tessenderlo-Ham",
+        "nl": "Tessenderlo-Ham"
+      },
+      "nis": "71071",
+      "share_pct": "3.3",
+      "value": "32.1"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "2.9",
+      "value": "27.5625"
+    },
+    {
+      "name": {
+        "en": "Leopoldsburg",
+        "fr": "Bourg-Léopold",
+        "nl": "Leopoldsburg"
+      },
+      "nis": "71034",
+      "share_pct": "2.6",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Diest",
+        "fr": "Diest",
+        "nl": "Diest"
+      },
+      "nis": "24020",
+      "share_pct": "2.4",
+      "value": "23.25"
+    },
+    {
+      "name": {
+        "en": "Houthalen-Helchteren",
+        "fr": "Houthalen-Helchteren",
+        "nl": "Houthalen-Helchteren"
+      },
+      "nis": "72039",
+      "share_pct": "1.9",
+      "value": "18.15"
+    },
+    {
+      "name": {
+        "en": "Lummen",
+        "fr": "Lummen",
+        "nl": "Lummen"
+      },
+      "nis": "71037",
+      "share_pct": "1.8",
+      "value": "17.255111111"
+    }
+  ]
+}

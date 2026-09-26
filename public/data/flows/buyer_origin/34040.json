@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "7.3721"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.5",
+      "value": "125.035714286"
+    },
+    "rest_of_region": {
+      "share_pct": "33.6",
+      "value": "335.583742690"
+    },
+    "same_commune": {
+      "share_pct": "53.0",
+      "value": "529.05594454"
+    }
+  },
+  "coverage_pct": "96.8",
+  "dataset": "buyer_origin",
+  "denominator": "998.047501516",
+  "dest_geo_id": "be:mun:34040",
+  "dest_name": {
+    "en": "Waregem",
+    "fr": "Waregem",
+    "nl": "Waregem"
+  },
+  "dest_nis": "34040",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1031,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Waregem",
+        "fr": "Waregem",
+        "nl": "Waregem"
+      },
+      "nis": "34040",
+      "share_pct": "53.0",
+      "value": "529.05594454"
+    },
+    {
+      "name": {
+        "en": "Zulte",
+        "fr": "Zulte",
+        "nl": "Zulte"
+      },
+      "nis": "44081",
+      "share_pct": "5.2",
+      "value": "52.003333333"
+    },
+    {
+      "name": {
+        "en": "Wielsbeke",
+        "fr": "Wielsbeke",
+        "nl": "Wielsbeke"
+      },
+      "nis": "37017",
+      "share_pct": "4.4",
+      "value": "44.011111111"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "3.9",
+      "value": "39.219298246"
+    },
+    {
+      "name": {
+        "en": "Deerlijk",
+        "fr": "Deerlijk",
+        "nl": "Deerlijk"
+      },
+      "nis": "34009",
+      "share_pct": "3.8",
+      "value": "38.285714286"
+    },
+    {
+      "name": {
+        "en": "Anzegem",
+        "fr": "Anzegem",
+        "nl": "Anzegem"
+      },
+      "nis": "34002",
+      "share_pct": "2.7",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "2.3",
+      "value": "22.75"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "1.7",
+      "value": "17.1"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.1",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "8.5",
+      "value": "12"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.5",
+      "value": "37.5"
+    },
+    "rest_of_region": {
+      "share_pct": "28.6",
+      "value": "40.5"
+    },
+    "same_commune": {
+      "share_pct": "34.3",
+      "value": "48.5"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "141.5",
+  "dest_geo_id": "be:mun:92097",
+  "dest_name": {
+    "en": "Ohey",
+    "fr": "Ohey",
+    "nl": "Ohey"
+  },
+  "dest_nis": "92097",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 145,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ohey",
+        "fr": "Ohey",
+        "nl": "Ohey"
+      },
+      "nis": "92097",
+      "share_pct": "34.3",
+      "value": "48.5"
+    },
+    {
+      "name": {
+        "en": "Andenne",
+        "fr": "Andenne",
+        "nl": "Andenne"
+      },
+      "nis": "92003",
+      "share_pct": "11.3",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Tervuren",
+        "fr": "Tervuren",
+        "nl": "Tervuren"
+      },
+      "nis": "24104",
+      "share_pct": "8.5",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Havelange",
+        "fr": "Havelange",
+        "nl": "Havelange"
+      },
+      "nis": "91064",
+      "share_pct": "4.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Houyet",
+        "fr": "Houyet",
+        "nl": "Houyet"
+      },
+      "nis": "91072",
+      "share_pct": "4.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Assesse",
+        "fr": "Assesse",
+        "nl": "Assesse"
+      },
+      "nis": "92006",
+      "share_pct": "4.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "4.6",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Marchin",
+        "fr": "Marchin",
+        "nl": "Marchin"
+      },
+      "nis": "61039",
+      "share_pct": "3.5",
+      "value": "5"
+    }
+  ]
+}

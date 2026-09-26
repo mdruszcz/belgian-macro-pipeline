@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "2.01"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.0",
+      "value": "46.532345679"
+    },
+    "rest_of_region": {
+      "share_pct": "46.7",
+      "value": "135.8831254057"
+    },
+    "same_commune": {
+      "share_pct": "36.7",
+      "value": "106.76199295"
+    }
+  },
+  "coverage_pct": "84.6",
+  "dataset": "buyer_origin",
+  "denominator": "291.1874640347",
+  "dest_geo_id": "be:mun:42023",
+  "dest_name": {
+    "en": "Waasmunster",
+    "fr": "Waasmunster",
+    "nl": "Waasmunster"
+  },
+  "dest_nis": "42023",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 344,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Waasmunster",
+        "fr": "Waasmunster",
+        "nl": "Waasmunster"
+      },
+      "nis": "42023",
+      "share_pct": "36.7",
+      "value": "106.76199295"
+    },
+    {
+      "name": {
+        "en": "Sint-Niklaas",
+        "fr": "Saint-Nicolas",
+        "nl": "Sint-Niklaas"
+      },
+      "nis": "46021",
+      "share_pct": "11.9",
+      "value": "34.725711111"
+    },
+    {
+      "name": {
+        "en": "Lokeren",
+        "fr": "Lokeren",
+        "nl": "Lokeren"
+      },
+      "nis": "46029",
+      "share_pct": "9.2",
+      "value": "26.923001949"
+    },
+    {
+      "name": {
+        "en": "Hamme",
+        "fr": "Hamme",
+        "nl": "Hamme"
+      },
+      "nis": "42008",
+      "share_pct": "7.2",
+      "value": "21.02"
+    },
+    {
+      "name": {
+        "en": "Temse",
+        "fr": "Tamise",
+        "nl": "Temse"
+      },
+      "nis": "46025",
+      "share_pct": "6.6",
+      "value": "19.33"
+    },
+    {
+      "name": {
+        "en": "Zele",
+        "fr": "Zele",
+        "nl": "Zele"
+      },
+      "nis": "42028",
+      "share_pct": "6.2",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "4.6",
+      "value": "13.3754"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "4.3",
+      "value": "12.5"
+    }
+  ]
+}

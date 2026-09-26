@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "21.4",
+      "value": "37.32"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "39.7",
+      "value": "69.03"
+    },
+    "rest_of_region": {
+      "share_pct": "8.5",
+      "value": "14.75"
+    },
+    "same_commune": {
+      "share_pct": "30.4",
+      "value": "52.949273"
+    }
+  },
+  "coverage_pct": "94.1",
+  "dataset": "buyer_origin",
+  "denominator": "174.049273",
+  "dest_geo_id": "be:mun:23104",
+  "dest_name": {
+    "en": "Lennik",
+    "fr": "Lennik",
+    "nl": "Lennik"
+  },
+  "dest_nis": "23104",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 185,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lennik",
+        "fr": "Lennik",
+        "nl": "Lennik"
+      },
+      "nis": "23104",
+      "share_pct": "30.4",
+      "value": "52.949273"
+    },
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "7.9",
+      "value": "13.7"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "7.8",
+      "value": "13.62"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "7.5",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "5.7",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Sint-Pieters-Leeuw",
+        "fr": "Sint-Pieters-Leeuw",
+        "nl": "Sint-Pieters-Leeuw"
+      },
+      "nis": "23077",
+      "share_pct": "5.5",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "5.2",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Destelbergen",
+        "fr": "Destelbergen",
+        "nl": "Destelbergen"
+      },
+      "nis": "44013",
+      "share_pct": "4.6",
+      "value": "8"
+    }
+  ]
+}

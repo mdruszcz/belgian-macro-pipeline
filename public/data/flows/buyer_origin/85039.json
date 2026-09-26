@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "2.2",
+      "value": "4"
+    },
+    "other_regions": {
+      "share_pct": "1.1",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.9",
+      "value": "42.5034"
+    },
+    "rest_of_region": {
+      "share_pct": "21.0",
+      "value": "39.0"
+    },
+    "same_commune": {
+      "share_pct": "51.7",
+      "value": "95.870733333"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "185.374133333",
+  "dest_geo_id": "be:mun:85039",
+  "dest_name": {
+    "en": "Tintigny",
+    "fr": "Tintigny",
+    "nl": "Tintigny"
+  },
+  "dest_nis": "85039",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 188,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tintigny",
+        "fr": "Tintigny",
+        "nl": "Tintigny"
+      },
+      "nis": "85039",
+      "share_pct": "51.7",
+      "value": "95.870733333"
+    },
+    {
+      "name": {
+        "en": "Habay",
+        "fr": "Habay",
+        "nl": "Habay"
+      },
+      "nis": "85046",
+      "share_pct": "8.1",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Etalle",
+        "fr": "Etalle",
+        "nl": "Etalle"
+      },
+      "nis": "85009",
+      "share_pct": "6.2",
+      "value": "11.5034"
+    },
+    {
+      "name": {
+        "en": "Messancy",
+        "fr": "Messancy",
+        "nl": "Messancy"
+      },
+      "nis": "81015",
+      "share_pct": "5.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "5.7",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Chiny",
+        "fr": "Chiny",
+        "nl": "Chiny"
+      },
+      "nis": "85007",
+      "share_pct": "4.6",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Léglise",
+        "fr": "Léglise",
+        "nl": "Léglise"
+      },
+      "nis": "84033",
+      "share_pct": "3.8",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Virton",
+        "fr": "Virton",
+        "nl": "Virton"
+      },
+      "nis": "85045",
+      "share_pct": "3.2",
+      "value": "6"
+    }
+  ]
+}

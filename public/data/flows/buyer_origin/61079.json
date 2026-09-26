@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.8",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.3",
+      "value": "6.0000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.9",
+      "value": "29.5"
+    },
+    "rest_of_region": {
+      "share_pct": "32.0",
+      "value": "36.5"
+    },
+    "same_commune": {
+      "share_pct": "35.1",
+      "value": "40"
+    }
+  },
+  "coverage_pct": "96.6",
+  "dataset": "buyer_origin",
+  "denominator": "114.0000",
+  "dest_geo_id": "be:mun:61079",
+  "dest_name": {
+    "en": "Anthisnes",
+    "fr": "Anthisnes",
+    "nl": "Anthisnes"
+  },
+  "dest_nis": "61079",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 118,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Anthisnes",
+        "fr": "Anthisnes",
+        "nl": "Anthisnes"
+      },
+      "nis": "61079",
+      "share_pct": "35.1",
+      "value": "40"
+    },
+    {
+      "name": {
+        "en": "Ouffet",
+        "fr": "Ouffet",
+        "nl": "Ouffet"
+      },
+      "nis": "61048",
+      "share_pct": "11.0",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Nandrin",
+        "fr": "Nandrin",
+        "nl": "Nandrin"
+      },
+      "nis": "61043",
+      "share_pct": "7.9",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "5.7",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Sprimont",
+        "fr": "Sprimont",
+        "nl": "Sprimont"
+      },
+      "nis": "62100",
+      "share_pct": "5.7",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Lanaken",
+        "fr": "Lanaken",
+        "nl": "Lanaken"
+      },
+      "nis": "73042",
+      "share_pct": "4.4",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Comblain-au-Pont",
+        "fr": "Comblain-au-Pont",
+        "nl": "Comblain-au-Pont"
+      },
+      "nis": "62026",
+      "share_pct": "3.9",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Esneux",
+        "fr": "Esneux",
+        "nl": "Esneux"
+      },
+      "nis": "62032",
+      "share_pct": "3.5",
+      "value": "4"
+    }
+  ]
+}

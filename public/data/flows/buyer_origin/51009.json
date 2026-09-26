@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.5",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.6",
+      "value": "53.54"
+    },
+    "rest_of_region": {
+      "share_pct": "39.5",
+      "value": "108.0699970584"
+    },
+    "same_commune": {
+      "share_pct": "39.1",
+      "value": "106.95337353"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "273.5633705884",
+  "dest_geo_id": "be:mun:51009",
+  "dest_name": {
+    "en": "Bernissart",
+    "fr": "Bernissart",
+    "nl": "Bernissart"
+  },
+  "dest_nis": "51009",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 281,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Bernissart",
+        "fr": "Bernissart",
+        "nl": "Bernissart"
+      },
+      "nis": "51009",
+      "share_pct": "39.1",
+      "value": "106.95337353"
+    },
+    {
+      "name": {
+        "en": "Beloeil",
+        "fr": "Beloeil",
+        "nl": "Beloeil"
+      },
+      "nis": "51008",
+      "share_pct": "16.8",
+      "value": "46.04"
+    },
+    {
+      "name": {
+        "en": "Péruwelz",
+        "fr": "Péruwelz",
+        "nl": "Péruwelz"
+      },
+      "nis": "57064",
+      "share_pct": "7.3",
+      "value": "20.058823529"
+    },
+    {
+      "name": {
+        "en": "Saint-Ghislain",
+        "fr": "Saint-Ghislain",
+        "nl": "Saint-Ghislain"
+      },
+      "nis": "53070",
+      "share_pct": "5.2",
+      "value": "14.20235"
+    },
+    {
+      "name": {
+        "en": "Leuze-en-Hainaut",
+        "fr": "Leuze-en-Hainaut",
+        "nl": "Leuze-en-Hainaut"
+      },
+      "nis": "57094",
+      "share_pct": "4.6",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Dour",
+        "fr": "Dour",
+        "nl": "Dour"
+      },
+      "nis": "53020",
+      "share_pct": "2.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "2.6",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "2.0",
+      "value": "5.5"
+    }
+  ]
+}

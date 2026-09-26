@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "41.1",
+      "value": "75.14"
+    },
+    "rest_of_region": {
+      "share_pct": "16.4",
+      "value": "30.0"
+    },
+    "same_commune": {
+      "share_pct": "41.3",
+      "value": "75.5"
+    }
+  },
+  "coverage_pct": "99.3",
+  "dataset": "buyer_origin",
+  "denominator": "182.64",
+  "dest_geo_id": "be:mun:71045",
+  "dest_name": {
+    "en": "Nieuwerkerken",
+    "fr": "Nieuwerkerken",
+    "nl": "Nieuwerkerken"
+  },
+  "dest_nis": "71045",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 184,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Nieuwerkerken",
+        "fr": "Nieuwerkerken",
+        "nl": "Nieuwerkerken"
+      },
+      "nis": "71045",
+      "share_pct": "41.3",
+      "value": "75.5"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "20.1",
+      "value": "36.65"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "9.8",
+      "value": "17.99"
+    },
+    {
+      "name": {
+        "en": "Herk-de-Stad",
+        "fr": "Herck-la-Ville",
+        "nl": "Herk-de-Stad"
+      },
+      "nis": "71024",
+      "share_pct": "4.7",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "4.7",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Alken",
+        "fr": "Alken",
+        "nl": "Alken"
+      },
+      "nis": "73001",
+      "share_pct": "2.7",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Diepenbeek",
+        "fr": "Diepenbeek",
+        "nl": "Diepenbeek"
+      },
+      "nis": "71011",
+      "share_pct": "2.2",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Gingelom",
+        "fr": "Gingelom",
+        "nl": "Gingelom"
+      },
+      "nis": "71017",
+      "share_pct": "1.4",
+      "value": "2.5"
+    }
+  ]
+}

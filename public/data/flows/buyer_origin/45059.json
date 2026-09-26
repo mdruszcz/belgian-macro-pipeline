@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.8",
+      "value": "8.6166666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.2",
+      "value": "72.85"
+    },
+    "rest_of_region": {
+      "share_pct": "29.1",
+      "value": "138.916666667"
+    },
+    "same_commune": {
+      "share_pct": "53.9",
+      "value": "257.35153333"
+    }
+  },
+  "coverage_pct": "98.9",
+  "dataset": "buyer_origin",
+  "denominator": "477.7348666637",
+  "dest_geo_id": "be:mun:45059",
+  "dest_name": {
+    "en": "Brakel",
+    "fr": "Brakel",
+    "nl": "Brakel"
+  },
+  "dest_nis": "45059",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 483,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "53.9",
+      "value": "257.35153333"
+    },
+    {
+      "name": {
+        "en": "Geraardsbergen",
+        "fr": "Grammont",
+        "nl": "Geraardsbergen"
+      },
+      "nis": "41018",
+      "share_pct": "8.7",
+      "value": "41.666666667"
+    },
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "5.7",
+      "value": "27.25"
+    },
+    {
+      "name": {
+        "en": "Lierde",
+        "fr": "Lierde",
+        "nl": "Lierde"
+      },
+      "nis": "45063",
+      "share_pct": "3.8",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Horebeke",
+        "fr": "Horebeke",
+        "nl": "Horebeke"
+      },
+      "nis": "45062",
+      "share_pct": "3.6",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Zwalm",
+        "fr": "Zwalm",
+        "nl": "Zwalm"
+      },
+      "nis": "45065",
+      "share_pct": "2.5",
+      "value": "12.1"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "2.3",
+      "value": "10.75"
+    },
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "2.0",
+      "value": "9.5"
+    }
+  ]
+}

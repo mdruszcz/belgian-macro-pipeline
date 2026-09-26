@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.5",
+      "value": "6.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "5.2",
+      "value": "20.75"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "7.7",
+      "value": "30.6333333337"
+    },
+    "rest_of_region": {
+      "share_pct": "31.6",
+      "value": "126.0750"
+    },
+    "same_commune": {
+      "share_pct": "53.7",
+      "value": "214.14166667"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "398.6000000037",
+  "dest_geo_id": "be:mun:33029",
+  "dest_name": {
+    "en": "Wervik",
+    "fr": "Wervik",
+    "nl": "Wervik"
+  },
+  "dest_nis": "33029",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 413,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Wervik",
+        "fr": "Wervik",
+        "nl": "Wervik"
+      },
+      "nis": "33029",
+      "share_pct": "53.7",
+      "value": "214.14166667"
+    },
+    {
+      "name": {
+        "en": "Menen",
+        "fr": "Menin",
+        "nl": "Menen"
+      },
+      "nis": "34027",
+      "share_pct": "11.2",
+      "value": "44.5625"
+    },
+    {
+      "name": {
+        "en": "Veurne",
+        "fr": "Furnes",
+        "nl": "Veurne"
+      },
+      "nis": "38025",
+      "share_pct": "5.0",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Comines-Warneton",
+        "fr": "Comines-Warneton",
+        "nl": "Komen-Waasten"
+      },
+      "nis": "57097",
+      "share_pct": "4.3",
+      "value": "17.25"
+    },
+    {
+      "name": {
+        "en": "Zonnebeke",
+        "fr": "Zonnebeke",
+        "nl": "Zonnebeke"
+      },
+      "nis": "33037",
+      "share_pct": "3.5",
+      "value": "14.066666667"
+    },
+    {
+      "name": {
+        "en": "Moorslede",
+        "fr": "Moorslede",
+        "nl": "Moorslede"
+      },
+      "nis": "36012",
+      "share_pct": "3.5",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Wevelgem",
+        "fr": "Wevelgem",
+        "nl": "Wevelgem"
+      },
+      "nis": "34041",
+      "share_pct": "2.5",
+      "value": "10.0125"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "2.1",
+      "value": "8.5666666667"
+    }
+  ]
+}

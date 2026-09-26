@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.3",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.8",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.8",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.4",
+      "value": "38.0"
+    },
+    "rest_of_region": {
+      "share_pct": "29.8",
+      "value": "38.5"
+    },
+    "same_commune": {
+      "share_pct": "36.9",
+      "value": "47.62"
+    }
+  },
+  "coverage_pct": "95.6",
+  "dataset": "buyer_origin",
+  "denominator": "129.12",
+  "dest_geo_id": "be:mun:56049",
+  "dest_name": {
+    "en": "Merbes-le-Château",
+    "fr": "Merbes-le-Château",
+    "nl": "Merbes-le-Château"
+  },
+  "dest_nis": "56049",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 135,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Merbes-le-Château",
+        "fr": "Merbes-le-Château",
+        "nl": "Merbes-le-Château"
+      },
+      "nis": "56049",
+      "share_pct": "36.9",
+      "value": "47.62"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "10.8",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Erquelinnes",
+        "fr": "Erquelinnes",
+        "nl": "Erquelinnes"
+      },
+      "nis": "56022",
+      "share_pct": "8.9",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Lobbes",
+        "fr": "Lobbes",
+        "nl": "Lobbes"
+      },
+      "nis": "56044",
+      "share_pct": "7.4",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Thuin",
+        "fr": "Thuin",
+        "nl": "Thuin"
+      },
+      "nis": "56078",
+      "share_pct": "4.6",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Beaumont",
+        "fr": "Beaumont",
+        "nl": "Beaumont"
+      },
+      "nis": "56005",
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "3.1",
+      "value": "4"
+    }
+  ]
+}

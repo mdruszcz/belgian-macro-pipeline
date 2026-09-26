@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "1.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "35.6",
+      "value": "84.04"
+    },
+    "rest_of_region": {
+      "share_pct": "13.8",
+      "value": "32.5"
+    },
+    "same_commune": {
+      "share_pct": "49.8",
+      "value": "117.53575758"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "236.07575758",
+  "dest_geo_id": "be:mun:13021",
+  "dest_name": {
+    "en": "Meerhout",
+    "fr": "Meerhout",
+    "nl": "Meerhout"
+  },
+  "dest_nis": "13021",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 243,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Meerhout",
+        "fr": "Meerhout",
+        "nl": "Meerhout"
+      },
+      "nis": "13021",
+      "share_pct": "49.8",
+      "value": "117.53575758"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "14.4",
+      "value": "33.94"
+    },
+    {
+      "name": {
+        "en": "Mol",
+        "fr": "Mol",
+        "nl": "Mol"
+      },
+      "nis": "13025",
+      "share_pct": "5.1",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "4.7",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Balen",
+        "fr": "Balen",
+        "nl": "Balen"
+      },
+      "nis": "13003",
+      "share_pct": "4.0",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Olen",
+        "fr": "Olen",
+        "nl": "Olen"
+      },
+      "nis": "13029",
+      "share_pct": "2.5",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "1.7",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Laakdal",
+        "fr": "Laakdal",
+        "nl": "Laakdal"
+      },
+      "nis": "13053",
+      "share_pct": "1.4",
+      "value": "3.4"
+    }
+  ]
+}

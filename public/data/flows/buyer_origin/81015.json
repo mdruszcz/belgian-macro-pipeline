@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "16.8",
+      "value": "54.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.9",
+      "value": "3.0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.8",
+      "value": "92.51"
+    },
+    "rest_of_region": {
+      "share_pct": "10.9",
+      "value": "35"
+    },
+    "same_commune": {
+      "share_pct": "42.6",
+      "value": "137"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "321.51",
+  "dest_geo_id": "be:mun:81015",
+  "dest_name": {
+    "en": "Messancy",
+    "fr": "Messancy",
+    "nl": "Messancy"
+  },
+  "dest_nis": "81015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 330,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Messancy",
+        "fr": "Messancy",
+        "nl": "Messancy"
+      },
+      "nis": "81015",
+      "share_pct": "42.6",
+      "value": "137"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "19.4",
+      "value": "62.51"
+    },
+    {
+      "name": {
+        "en": "Aubange",
+        "fr": "Aubange",
+        "nl": "Aubange"
+      },
+      "nis": "81004",
+      "share_pct": "8.4",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Etalle",
+        "fr": "Etalle",
+        "nl": "Etalle"
+      },
+      "nis": "85009",
+      "share_pct": "2.8",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Musson",
+        "fr": "Musson",
+        "nl": "Musson"
+      },
+      "nis": "85026",
+      "share_pct": "2.5",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Virton",
+        "fr": "Virton",
+        "nl": "Virton"
+      },
+      "nis": "85045",
+      "share_pct": "1.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "0.9",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Attert",
+        "fr": "Attert",
+        "nl": "Attert"
+      },
+      "nis": "81003",
+      "share_pct": "0.9",
+      "value": "3"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "27.2",
+      "value": "29.174933333"
+    },
+    "rest_of_region": {
+      "share_pct": "28.2",
+      "value": "30.2333333333"
+    },
+    "same_commune": {
+      "share_pct": "44.6",
+      "value": "47.768633333"
+    }
+  },
+  "coverage_pct": "94.0",
+  "dataset": "buyer_origin",
+  "denominator": "107.1768999993",
+  "dest_geo_id": "be:mun:33041",
+  "dest_name": {
+    "en": "Vleteren",
+    "fr": "Vleteren",
+    "nl": "Vleteren"
+  },
+  "dest_nis": "33041",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 114,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Vleteren",
+        "fr": "Vleteren",
+        "nl": "Vleteren"
+      },
+      "nis": "33041",
+      "share_pct": "44.6",
+      "value": "47.768633333"
+    },
+    {
+      "name": {
+        "en": "Poperinge",
+        "fr": "Poperinge",
+        "nl": "Poperinge"
+      },
+      "nis": "33021",
+      "share_pct": "18.5",
+      "value": "19.774933333"
+    },
+    {
+      "name": {
+        "en": "Alveringem",
+        "fr": "Alveringem",
+        "nl": "Alveringem"
+      },
+      "nis": "38002",
+      "share_pct": "8.1",
+      "value": "8.6333333333"
+    },
+    {
+      "name": {
+        "en": "Herenthout",
+        "fr": "Herenthout",
+        "nl": "Herenthout"
+      },
+      "nis": "13012",
+      "share_pct": "6.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "6.0",
+      "value": "6.4"
+    },
+    {
+      "name": {
+        "en": "Diksmuide",
+        "fr": "Dixmude",
+        "nl": "Diksmuide"
+      },
+      "nis": "32003",
+      "share_pct": "1.9",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Langemark-Poelkapelle",
+        "fr": "Langemark-Poelkapelle",
+        "nl": "Langemark-Poelkapelle"
+      },
+      "nis": "33040",
+      "share_pct": "1.9",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Gistel",
+        "fr": "Gistel",
+        "nl": "Gistel"
+      },
+      "nis": "35005",
+      "share_pct": "1.9",
+      "value": "2"
+    }
+  ]
+}

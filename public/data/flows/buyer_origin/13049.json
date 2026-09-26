@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "32.3",
+      "value": "159.803333333"
+    },
+    "rest_of_region": {
+      "share_pct": "14.6",
+      "value": "72.1346666667"
+    },
+    "same_commune": {
+      "share_pct": "52.3",
+      "value": "259.13"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "495.0679999997",
+  "dest_geo_id": "be:mun:13049",
+  "dest_name": {
+    "en": "Westerlo",
+    "fr": "Westerlo",
+    "nl": "Westerlo"
+  },
+  "dest_nis": "13049",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 502,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Westerlo",
+        "fr": "Westerlo",
+        "nl": "Westerlo"
+      },
+      "nis": "13049",
+      "share_pct": "52.3",
+      "value": "259.13"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "7.4",
+      "value": "36.57"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "6.8",
+      "value": "33.783333333"
+    },
+    {
+      "name": {
+        "en": "Herselt",
+        "fr": "Herselt",
+        "nl": "Herselt"
+      },
+      "nis": "13013",
+      "share_pct": "5.6",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Olen",
+        "fr": "Olen",
+        "nl": "Olen"
+      },
+      "nis": "13029",
+      "share_pct": "5.1",
+      "value": "25.45"
+    },
+    {
+      "name": {
+        "en": "Hulshout",
+        "fr": "Hulshout",
+        "nl": "Hulshout"
+      },
+      "nis": "13016",
+      "share_pct": "2.6",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Heist-op-den-Berg",
+        "fr": "Heist-op-den-Berg",
+        "nl": "Heist-op-den-Berg"
+      },
+      "nis": "12014",
+      "share_pct": "2.5",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Laakdal",
+        "fr": "Laakdal",
+        "nl": "Laakdal"
+      },
+      "nis": "13053",
+      "share_pct": "1.9",
+      "value": "9.5"
+    }
+  ]
+}

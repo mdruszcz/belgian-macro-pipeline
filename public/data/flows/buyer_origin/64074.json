@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "3.1",
+      "value": "13.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.0",
+      "value": "135.005"
+    },
+    "rest_of_region": {
+      "share_pct": "24.7",
+      "value": "107.505"
+    },
+    "same_commune": {
+      "share_pct": "40.8",
+      "value": "178.04347826"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "436.05347826",
+  "dest_geo_id": "be:mun:64074",
+  "dest_name": {
+    "en": "Waremme",
+    "fr": "Waremme",
+    "nl": "Borgworm"
+  },
+  "dest_nis": "64074",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 440,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "40.8",
+      "value": "178.04347826"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "5.6",
+      "value": "24.4"
+    },
+    {
+      "name": {
+        "en": "Faimes",
+        "fr": "Faimes",
+        "nl": "Faimes"
+      },
+      "nis": "64076",
+      "share_pct": "4.8",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "4.2",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Remicourt",
+        "fr": "Remicourt",
+        "nl": "Remicourt"
+      },
+      "nis": "64063",
+      "share_pct": "3.3",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Donceel",
+        "fr": "Donceel",
+        "nl": "Donceel"
+      },
+      "nis": "64023",
+      "share_pct": "3.2",
+      "value": "14.005"
+    },
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "3.1",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Braives",
+        "fr": "Braives",
+        "nl": "Braives"
+      },
+      "nis": "64015",
+      "share_pct": "3.0",
+      "value": "13"
+    }
+  ]
+}

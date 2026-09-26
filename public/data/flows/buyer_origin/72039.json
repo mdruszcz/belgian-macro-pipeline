@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "4.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "3.3333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "6.3",
+      "value": "34.0"
+    },
+    "rest_of_region": {
+      "share_pct": "41.2",
+      "value": "221.928333333"
+    },
+    "same_commune": {
+      "share_pct": "51.0",
+      "value": "274.79833333"
+    }
+  },
+  "coverage_pct": "99.2",
+  "dataset": "buyer_origin",
+  "denominator": "538.5599999963",
+  "dest_geo_id": "be:mun:72039",
+  "dest_name": {
+    "en": "Houthalen-Helchteren",
+    "fr": "Houthalen-Helchteren",
+    "nl": "Houthalen-Helchteren"
+  },
+  "dest_nis": "72039",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 543,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Houthalen-Helchteren",
+        "fr": "Houthalen-Helchteren",
+        "nl": "Houthalen-Helchteren"
+      },
+      "nis": "72039",
+      "share_pct": "51.0",
+      "value": "274.79833333"
+    },
+    {
+      "name": {
+        "en": "Heusden-Zolder",
+        "fr": "Heusden-Zolder",
+        "nl": "Heusden-Zolder"
+      },
+      "nis": "71070",
+      "share_pct": "8.4",
+      "value": "45.250033333"
+    },
+    {
+      "name": {
+        "en": "Genk",
+        "fr": "Genk",
+        "nl": "Genk"
+      },
+      "nis": "71016",
+      "share_pct": "7.6",
+      "value": "40.7"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "5.3",
+      "value": "28.75"
+    },
+    {
+      "name": {
+        "en": "Zonhoven",
+        "fr": "Zonhoven",
+        "nl": "Zonhoven"
+      },
+      "nis": "71066",
+      "share_pct": "3.5",
+      "value": "18.75"
+    },
+    {
+      "name": {
+        "en": "Maasmechelen",
+        "fr": "Maasmechelen",
+        "nl": "Maasmechelen"
+      },
+      "nis": "73107",
+      "share_pct": "2.2",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "2.2",
+      "value": "11.715"
+    },
+    {
+      "name": {
+        "en": "Peer",
+        "fr": "Peer",
+        "nl": "Peer"
+      },
+      "nis": "72030",
+      "share_pct": "1.4",
+      "value": "7.5"
+    }
+  ]
+}

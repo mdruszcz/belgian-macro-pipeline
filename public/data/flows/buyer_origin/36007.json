@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.7",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.7",
+      "value": "62.95"
+    },
+    "rest_of_region": {
+      "share_pct": "28.6",
+      "value": "87.000"
+    },
+    "same_commune": {
+      "share_pct": "49.7",
+      "value": "151.4"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "304.350",
+  "dest_geo_id": "be:mun:36007",
+  "dest_name": {
+    "en": "Ingelmunster",
+    "fr": "Ingelmunster",
+    "nl": "Ingelmunster"
+  },
+  "dest_nis": "36007",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 307,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ingelmunster",
+        "fr": "Ingelmunster",
+        "nl": "Ingelmunster"
+      },
+      "nis": "36007",
+      "share_pct": "49.7",
+      "value": "151.4"
+    },
+    {
+      "name": {
+        "en": "Izegem",
+        "fr": "Izegem",
+        "nl": "Izegem"
+      },
+      "nis": "36008",
+      "share_pct": "13.3",
+      "value": "40.45"
+    },
+    {
+      "name": {
+        "en": "Tielt",
+        "fr": "Tielt",
+        "nl": "Tielt"
+      },
+      "nis": "37022",
+      "share_pct": "7.8",
+      "value": "23.668"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "4.8",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Hooglede",
+        "fr": "Hooglede",
+        "nl": "Hooglede"
+      },
+      "nis": "36006",
+      "share_pct": "2.0",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Wielsbeke",
+        "fr": "Wielsbeke",
+        "nl": "Wielsbeke"
+      },
+      "nis": "37017",
+      "share_pct": "2.0",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Lendelede",
+        "fr": "Lendelede",
+        "nl": "Lendelede"
+      },
+      "nis": "34025",
+      "share_pct": "1.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Oostrozebeke",
+        "fr": "Oostrozebeke",
+        "nl": "Oostrozebeke"
+      },
+      "nis": "37010",
+      "share_pct": "1.6",
+      "value": "5"
+    }
+  ]
+}

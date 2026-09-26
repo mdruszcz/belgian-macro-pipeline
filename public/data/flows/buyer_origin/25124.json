@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "13.8",
+      "value": "21.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "41.3",
+      "value": "64.157833333"
+    },
+    "rest_of_region": {
+      "share_pct": "13.3",
+      "value": "20.65"
+    },
+    "same_commune": {
+      "share_pct": "31.6",
+      "value": "49.2255"
+    }
+  },
+  "coverage_pct": "96.6",
+  "dataset": "buyer_origin",
+  "denominator": "155.533333333",
+  "dest_geo_id": "be:mun:25124",
+  "dest_name": {
+    "en": "Walhain",
+    "fr": "Walhain",
+    "nl": "Walhain"
+  },
+  "dest_nis": "25124",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 161,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Walhain",
+        "fr": "Walhain",
+        "nl": "Walhain"
+      },
+      "nis": "25124",
+      "share_pct": "31.6",
+      "value": "49.2255"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "7.1",
+      "value": "11.1"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "7.0",
+      "value": "10.833333333"
+    },
+    {
+      "name": {
+        "en": "Chastre",
+        "fr": "Chastre",
+        "nl": "Chastre"
+      },
+      "nis": "25117",
+      "share_pct": "4.8",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "4.1",
+      "value": "6.4"
+    },
+    {
+      "name": {
+        "en": "Court-Saint-Etienne",
+        "fr": "Court-Saint-Etienne",
+        "nl": "Court-Saint-Etienne"
+      },
+      "nis": "25023",
+      "share_pct": "3.7",
+      "value": "5.75"
+    },
+    {
+      "name": {
+        "en": "Mont-Saint-Guibert",
+        "fr": "Mont-Saint-Guibert",
+        "nl": "Mont-Saint-Guibert"
+      },
+      "nis": "25068",
+      "share_pct": "3.5",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "3.4",
+      "value": "5.25"
+    }
+  ]
+}

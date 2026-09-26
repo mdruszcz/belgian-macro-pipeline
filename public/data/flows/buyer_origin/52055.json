@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.2",
+      "value": "4.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "11.0",
+      "value": "42.3333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.6",
+      "value": "75.410909091"
+    },
+    "rest_of_region": {
+      "share_pct": "35.9",
+      "value": "137.7624999996"
+    },
+    "same_commune": {
+      "share_pct": "32.3",
+      "value": "123.885"
+    }
+  },
+  "coverage_pct": "95.3",
+  "dataset": "buyer_origin",
+  "denominator": "383.8917424239",
+  "dest_geo_id": "be:mun:52055",
+  "dest_name": {
+    "en": "Pont-à-Celles",
+    "fr": "Pont-à-Celles",
+    "nl": "Pont-à-Celles"
+  },
+  "dest_nis": "52055",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 403,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Pont-à-Celles",
+        "fr": "Pont-à-Celles",
+        "nl": "Pont-à-Celles"
+      },
+      "nis": "52055",
+      "share_pct": "32.3",
+      "value": "123.885"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "9.3",
+      "value": "35.729166667"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "6.7",
+      "value": "25.590909091"
+    },
+    {
+      "name": {
+        "en": "Les Bons Villers",
+        "fr": "Les Bons Villers",
+        "nl": "Les Bons Villers"
+      },
+      "nis": "52075",
+      "share_pct": "6.0",
+      "value": "23.02"
+    },
+    {
+      "name": {
+        "en": "Villers-la-Ville",
+        "fr": "Villers-la-Ville",
+        "nl": "Villers-la-Ville"
+      },
+      "nis": "25107",
+      "share_pct": "3.5",
+      "value": "13.533333333"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "3.5",
+      "value": "13.333333333"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "3.5",
+      "value": "13.3"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "3.1",
+      "value": "12"
+    }
+  ]
+}

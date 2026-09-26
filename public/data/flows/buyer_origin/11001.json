@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "58.2",
+      "value": "175.65239726"
+    },
+    "rest_of_region": {
+      "share_pct": "7.1",
+      "value": "21.5000000000"
+    },
+    "same_commune": {
+      "share_pct": "34.4",
+      "value": "103.7825"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "301.9348972600",
+  "dest_geo_id": "be:mun:11001",
+  "dest_name": {
+    "en": "Aartselaar",
+    "fr": "Aartselaar",
+    "nl": "Aartselaar"
+  },
+  "dest_nis": "11001",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 308,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Aartselaar",
+        "fr": "Aartselaar",
+        "nl": "Aartselaar"
+      },
+      "nis": "11001",
+      "share_pct": "34.4",
+      "value": "103.7825"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "29.1",
+      "value": "88.01369863"
+    },
+    {
+      "name": {
+        "en": "Boom",
+        "fr": "Boom",
+        "nl": "Boom"
+      },
+      "nis": "11005",
+      "share_pct": "6.3",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "5.5",
+      "value": "16.63869863"
+    },
+    {
+      "name": {
+        "en": "Niel",
+        "fr": "Niel",
+        "nl": "Niel"
+      },
+      "nis": "11030",
+      "share_pct": "3.3",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "2.5",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Lint",
+        "fr": "Lint",
+        "nl": "Lint"
+      },
+      "nis": "11025",
+      "share_pct": "2.5",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Rumst",
+        "fr": "Rumst",
+        "nl": "Rumst"
+      },
+      "nis": "11037",
+      "share_pct": "1.8",
+      "value": "5.5"
+    }
+  ]
+}

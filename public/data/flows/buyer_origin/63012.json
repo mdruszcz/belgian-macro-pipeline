@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "7.2",
+      "value": "14.5"
+    },
+    "origin_unknown": {
+      "share_pct": "1.0",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "2.5",
+      "value": "5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.7",
+      "value": "25.5"
+    },
+    "rest_of_region": {
+      "share_pct": "1.0",
+      "value": "2.0486111111"
+    },
+    "same_commune": {
+      "share_pct": "75.6",
+      "value": "152"
+    }
+  },
+  "coverage_pct": "99.0",
+  "dataset": "buyer_origin",
+  "denominator": "201.0486111111",
+  "dest_geo_id": "be:mun:63012",
+  "dest_name": {
+    "en": "Büllingen",
+    "fr": "Bullange",
+    "nl": "Büllingen"
+  },
+  "dest_nis": "63012",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 203,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Büllingen",
+        "fr": "Bullange",
+        "nl": "Büllingen"
+      },
+      "nis": "63012",
+      "share_pct": "75.6",
+      "value": "152"
+    },
+    {
+      "name": {
+        "en": "Amel",
+        "fr": "Amblève",
+        "nl": "Amel"
+      },
+      "nis": "63001",
+      "share_pct": "3.2",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Sankt Vith",
+        "fr": "Saint-Vith",
+        "nl": "Sankt Vith"
+      },
+      "nis": "63067",
+      "share_pct": "2.5",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Waimes",
+        "fr": "Waimes",
+        "nl": "Weismes"
+      },
+      "nis": "63080",
+      "share_pct": "2.5",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Bütgenbach",
+        "fr": "Butgenbach",
+        "nl": "Bütgenbach"
+      },
+      "nis": "63013",
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Malmedy",
+        "fr": "Malmedy",
+        "nl": "Malmedy"
+      },
+      "nis": "63049",
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Duffel",
+        "fr": "Duffel",
+        "nl": "Duffel"
+      },
+      "nis": "12009",
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    {
+      "name": {
+        "en": "Nijlen",
+        "fr": "Nijlen",
+        "nl": "Nijlen"
+      },
+      "nis": "12026",
+      "share_pct": "0.5",
+      "value": "1"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.5",
+      "value": "38.000"
+    },
+    "rest_of_region": {
+      "share_pct": "27.8",
+      "value": "33.5"
+    },
+    "same_commune": {
+      "share_pct": "40.7",
+      "value": "49"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "120.500",
+  "dest_geo_id": "be:mun:61041",
+  "dest_name": {
+    "en": "Modave",
+    "fr": "Modave",
+    "nl": "Modave"
+  },
+  "dest_nis": "61041",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 124,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Modave",
+        "fr": "Modave",
+        "nl": "Modave"
+      },
+      "nis": "61041",
+      "share_pct": "40.7",
+      "value": "49"
+    },
+    {
+      "name": {
+        "en": "Nandrin",
+        "fr": "Nandrin",
+        "nl": "Nandrin"
+      },
+      "nis": "61043",
+      "share_pct": "12.0",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Huy",
+        "fr": "Huy",
+        "nl": "Hoei"
+      },
+      "nis": "61031",
+      "share_pct": "9.6",
+      "value": "11.625"
+    },
+    {
+      "name": {
+        "en": "Flémalle",
+        "fr": "Flémalle",
+        "nl": "Flémalle"
+      },
+      "nis": "62120",
+      "share_pct": "5.8",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Marchin",
+        "fr": "Marchin",
+        "nl": "Marchin"
+      },
+      "nis": "61039",
+      "share_pct": "5.5",
+      "value": "6.625"
+    },
+    {
+      "name": {
+        "en": "Braives",
+        "fr": "Braives",
+        "nl": "Braives"
+      },
+      "nis": "64015",
+      "share_pct": "5.0",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Neupré",
+        "fr": "Neupré",
+        "nl": "Neupré"
+      },
+      "nis": "62121",
+      "share_pct": "2.9",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "1.7",
+      "value": "2"
+    }
+  ]
+}

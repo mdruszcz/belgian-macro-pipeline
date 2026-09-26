@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1.84"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.4",
+      "value": "16.6819"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "10.3",
+      "value": "39.25"
+    },
+    "rest_of_region": {
+      "share_pct": "43.8",
+      "value": "167.3983333333"
+    },
+    "same_commune": {
+      "share_pct": "41.0",
+      "value": "156.64677857"
+    }
+  },
+  "coverage_pct": "78.7",
+  "dataset": "buyer_origin",
+  "denominator": "381.8170119033",
+  "dest_geo_id": "be:mun:55086",
+  "dest_name": {
+    "en": "Manage",
+    "fr": "Manage",
+    "nl": "Manage"
+  },
+  "dest_nis": "55086",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 485,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Manage",
+        "fr": "Manage",
+        "nl": "Manage"
+      },
+      "nis": "55086",
+      "share_pct": "41.0",
+      "value": "156.64677857"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "16.7",
+      "value": "63.84"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "4.9",
+      "value": "18.825"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "4.9",
+      "value": "18.75"
+    },
+    {
+      "name": {
+        "en": "Morlanwelz",
+        "fr": "Morlanwelz",
+        "nl": "Morlanwelz"
+      },
+      "nis": "58004",
+      "share_pct": "3.4",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "2.9",
+      "value": "10.9"
+    },
+    {
+      "name": {
+        "en": "Ecaussinnes",
+        "fr": "Ecaussinnes",
+        "nl": "Ecaussinnes"
+      },
+      "nis": "55050",
+      "share_pct": "2.4",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "2.2",
+      "value": "8.5"
+    }
+  ]
+}

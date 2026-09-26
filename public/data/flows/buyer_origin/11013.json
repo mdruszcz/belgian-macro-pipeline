@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.9",
+      "value": "6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "51.1",
+      "value": "352.1115141743"
+    },
+    "rest_of_region": {
+      "share_pct": "13.8",
+      "value": "95.46"
+    },
+    "same_commune": {
+      "share_pct": "33.6",
+      "value": "231.67565641"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "689.2471705843",
+  "dest_geo_id": "be:mun:11013",
+  "dest_name": {
+    "en": "Edegem",
+    "fr": "Edegem",
+    "nl": "Edegem"
+  },
+  "dest_nis": "11013",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 703,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "33.6",
+      "value": "231.67565641"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "28.0",
+      "value": "193.07333333"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "5.4",
+      "value": "37.378847511"
+    },
+    {
+      "name": {
+        "en": "Mortsel",
+        "fr": "Mortsel",
+        "nl": "Mortsel"
+      },
+      "nis": "11029",
+      "share_pct": "4.4",
+      "value": "30.535"
+    },
+    {
+      "name": {
+        "en": "Hove",
+        "fr": "Hove",
+        "nl": "Hove"
+      },
+      "nis": "11021",
+      "share_pct": "2.3",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Boechout",
+        "fr": "Boechout",
+        "nl": "Boechout"
+      },
+      "nis": "11004",
+      "share_pct": "1.7",
+      "value": "11.94"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "1.5",
+      "value": "10.2"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "1.3",
+      "value": "8.7"
+    }
+  ]
+}

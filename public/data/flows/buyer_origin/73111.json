@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "9.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1.5"
+    },
+    "other_regions": {
+      "share_pct": "7.8",
+      "value": "96.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.6",
+      "value": "179.833333333"
+    },
+    "rest_of_region": {
+      "share_pct": "17.8",
+      "value": "219.1166666667"
+    },
+    "same_commune": {
+      "share_pct": "59.0",
+      "value": "726.99617736"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "1232.4461773597",
+  "dest_geo_id": "be:mun:73111",
+  "dest_name": {
+    "en": "Tongeren-Borgloon",
+    "fr": "Tongres-Looz",
+    "nl": "Tongeren-Borgloon"
+  },
+  "dest_nis": "73111",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1267,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "59.0",
+      "value": "726.99617736"
+    },
+    {
+      "name": {
+        "en": "Bilzen-Hoeselt",
+        "fr": "Bilzen-Hoeselt",
+        "nl": "Bilzen-Hoeselt"
+      },
+      "nis": "73110",
+      "share_pct": "4.7",
+      "value": "57.5"
+    },
+    {
+      "name": {
+        "en": "Riemst",
+        "fr": "Riemst",
+        "nl": "Riemst"
+      },
+      "nis": "73066",
+      "share_pct": "4.4",
+      "value": "54"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "3.7",
+      "value": "45.066666667"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "3.3",
+      "value": "40.833333333"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "2.0",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Alken",
+        "fr": "Alken",
+        "nl": "Alken"
+      },
+      "nis": "73001",
+      "share_pct": "1.8",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Heers",
+        "fr": "Heers",
+        "nl": "Heers"
+      },
+      "nis": "73022",
+      "share_pct": "1.8",
+      "value": "21.833333333"
+    }
+  ]
+}

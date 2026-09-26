@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "2.4",
+      "value": "4.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "55.3",
+      "value": "102.5000000001"
+    },
+    "rest_of_region": {
+      "share_pct": "6.2",
+      "value": "11.550"
+    },
+    "same_commune": {
+      "share_pct": "35.0",
+      "value": "64.792110874"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "185.3421108741",
+  "dest_geo_id": "be:mun:24016",
+  "dest_name": {
+    "en": "Boutersem",
+    "fr": "Boutersem",
+    "nl": "Boutersem"
+  },
+  "dest_nis": "24016",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 193,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Boutersem",
+        "fr": "Boutersem",
+        "nl": "Boutersem"
+      },
+      "nis": "24016",
+      "share_pct": "35.0",
+      "value": "64.792110874"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "18.1",
+      "value": "33.5"
+    },
+    {
+      "name": {
+        "en": "Bierbeek",
+        "fr": "Bierbeek",
+        "nl": "Bierbeek"
+      },
+      "nis": "24011",
+      "share_pct": "7.0",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Lubbeek",
+        "fr": "Lubbeek",
+        "nl": "Lubbeek"
+      },
+      "nis": "24066",
+      "share_pct": "6.7",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "4.6",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Hoegaarden",
+        "fr": "Hoegaarden",
+        "nl": "Hoegaarden"
+      },
+      "nis": "24041",
+      "share_pct": "3.9",
+      "value": "7.1666666667"
+    },
+    {
+      "name": {
+        "en": "Bertem",
+        "fr": "Bertem",
+        "nl": "Bertem"
+      },
+      "nis": "24009",
+      "share_pct": "3.6",
+      "value": "6.6666666667"
+    },
+    {
+      "name": {
+        "en": "Herent",
+        "fr": "Herent",
+        "nl": "Herent"
+      },
+      "nis": "24038",
+      "share_pct": "2.5",
+      "value": "4.6666666667"
+    }
+  ]
+}

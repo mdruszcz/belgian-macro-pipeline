@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "15.5",
+      "value": "66.3333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.8",
+      "value": "50.5"
+    },
+    "rest_of_region": {
+      "share_pct": "15.0",
+      "value": "64.0"
+    },
+    "same_commune": {
+      "share_pct": "57.6",
+      "value": "246.13"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "427.4633333333",
+  "dest_geo_id": "be:mun:51065",
+  "dest_name": {
+    "en": "Frasnes-lez-Anvaing",
+    "fr": "Frasnes-lez-Anvaing",
+    "nl": "Frasnes-lez-Anvaing"
+  },
+  "dest_nis": "51065",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 438,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "57.6",
+      "value": "246.13"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "6.3",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "5.4",
+      "value": "23"
+    },
+    {
+      "name": {
+        "en": "Tournai",
+        "fr": "Tournai",
+        "nl": "Doornik"
+      },
+      "nis": "57081",
+      "share_pct": "3.6",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Leuze-en-Hainaut",
+        "fr": "Leuze-en-Hainaut",
+        "nl": "Leuze-en-Hainaut"
+      },
+      "nis": "57094",
+      "share_pct": "2.9",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Mont-de-l’Enclus",
+        "fr": "Mont-de-l’Enclus",
+        "nl": "Mont-de-l’Enclus"
+      },
+      "nis": "57095",
+      "share_pct": "2.6",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Ellezelles",
+        "fr": "Ellezelles",
+        "nl": "Elzele"
+      },
+      "nis": "51017",
+      "share_pct": "1.9",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Celles",
+        "fr": "Celles",
+        "nl": "Celles"
+      },
+      "nis": "57018",
+      "share_pct": "1.4",
+      "value": "6"
+    }
+  ]
+}

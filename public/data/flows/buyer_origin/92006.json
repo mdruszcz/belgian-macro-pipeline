@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.125"
+    },
+    "origin_unknown": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "4.3",
+      "value": "8.375"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.7",
+      "value": "52.1766666667"
+    },
+    "rest_of_region": {
+      "share_pct": "22.0",
+      "value": "42.99"
+    },
+    "same_commune": {
+      "share_pct": "46.4",
+      "value": "90.6"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "195.2666666667",
+  "dest_geo_id": "be:mun:92006",
+  "dest_name": {
+    "en": "Assesse",
+    "fr": "Assesse",
+    "nl": "Assesse"
+  },
+  "dest_nis": "92006",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 200,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Assesse",
+        "fr": "Assesse",
+        "nl": "Assesse"
+      },
+      "nis": "92006",
+      "share_pct": "46.4",
+      "value": "90.6"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "17.4",
+      "value": "34.01"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "5.6",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Hamois",
+        "fr": "Hamois",
+        "nl": "Hamois"
+      },
+      "nis": "91059",
+      "share_pct": "5.4",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Gesves",
+        "fr": "Gesves",
+        "nl": "Gesves"
+      },
+      "nis": "92054",
+      "share_pct": "4.7",
+      "value": "9.1666666667"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "2.8",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Ganshoren",
+        "fr": "Ganshoren",
+        "nl": "Ganshoren"
+      },
+      "nis": "21008",
+      "share_pct": "2.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Yvoir",
+        "fr": "Yvoir",
+        "nl": "Yvoir"
+      },
+      "nis": "91141",
+      "share_pct": "2.0",
+      "value": "4"
+    }
+  ]
+}

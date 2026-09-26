@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "5.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.4",
+      "value": "22.11"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "35.2",
+      "value": "329.453333333"
+    },
+    "rest_of_region": {
+      "share_pct": "16.9",
+      "value": "158.50"
+    },
+    "same_commune": {
+      "share_pct": "45.0",
+      "value": "421.53846154"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "937.101794873",
+  "dest_geo_id": "be:mun:24001",
+  "dest_name": {
+    "en": "Aarschot",
+    "fr": "Aarschot",
+    "nl": "Aarschot"
+  },
+  "dest_nis": "24001",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 963,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Aarschot",
+        "fr": "Aarschot",
+        "nl": "Aarschot"
+      },
+      "nis": "24001",
+      "share_pct": "45.0",
+      "value": "421.53846154"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "7.8",
+      "value": "73.5"
+    },
+    {
+      "name": {
+        "en": "Holsbeek",
+        "fr": "Holsbeek",
+        "nl": "Holsbeek"
+      },
+      "nis": "24043",
+      "share_pct": "4.7",
+      "value": "44.3"
+    },
+    {
+      "name": {
+        "en": "Tielt-Winge",
+        "fr": "Tielt-Winge",
+        "nl": "Tielt-Winge"
+      },
+      "nis": "24135",
+      "share_pct": "4.2",
+      "value": "39.5"
+    },
+    {
+      "name": {
+        "en": "Herselt",
+        "fr": "Herselt",
+        "nl": "Herselt"
+      },
+      "nis": "13013",
+      "share_pct": "3.5",
+      "value": "32.5"
+    },
+    {
+      "name": {
+        "en": "Rotselaar",
+        "fr": "Rotselaar",
+        "nl": "Rotselaar"
+      },
+      "nis": "24094",
+      "share_pct": "3.4",
+      "value": "32.033333333"
+    },
+    {
+      "name": {
+        "en": "Begijnendijk",
+        "fr": "Begijnendijk",
+        "nl": "Begijnendijk"
+      },
+      "nis": "24007",
+      "share_pct": "3.4",
+      "value": "31.5"
+    },
+    {
+      "name": {
+        "en": "Scherpenheuvel-Zichem",
+        "fr": "Montaigu-Zichem",
+        "nl": "Scherpenheuvel-Zichem"
+      },
+      "nis": "24134",
+      "share_pct": "2.9",
+      "value": "27.53"
+    }
+  ]
+}

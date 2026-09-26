@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "4.00"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.5",
+      "value": "11.02"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.2",
+      "value": "128.6628571429"
+    },
+    "rest_of_region": {
+      "share_pct": "18.7",
+      "value": "82.4761904762"
+    },
+    "same_commune": {
+      "share_pct": "48.7",
+      "value": "214.95"
+    }
+  },
+  "coverage_pct": "96.7",
+  "dataset": "buyer_origin",
+  "denominator": "441.1090476191",
+  "dest_geo_id": "be:mun:62009",
+  "dest_name": {
+    "en": "Aywaille",
+    "fr": "Aywaille",
+    "nl": "Aywaille"
+  },
+  "dest_nis": "62009",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 456,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Aywaille",
+        "fr": "Aywaille",
+        "nl": "Aywaille"
+      },
+      "nis": "62009",
+      "share_pct": "48.7",
+      "value": "214.95"
+    },
+    {
+      "name": {
+        "en": "Sprimont",
+        "fr": "Sprimont",
+        "nl": "Sprimont"
+      },
+      "nis": "62100",
+      "share_pct": "10.7",
+      "value": "47"
+    },
+    {
+      "name": {
+        "en": "Chaudfontaine",
+        "fr": "Chaudfontaine",
+        "nl": "Chaudfontaine"
+      },
+      "nis": "62022",
+      "share_pct": "5.9",
+      "value": "26.02"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "3.5",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Ferrières",
+        "fr": "Ferrières",
+        "nl": "Ferrières"
+      },
+      "nis": "61019",
+      "share_pct": "3.4",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Esneux",
+        "fr": "Esneux",
+        "nl": "Esneux"
+      },
+      "nis": "62032",
+      "share_pct": "3.2",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "1.9",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Trooz",
+        "fr": "Trooz",
+        "nl": "Trooz"
+      },
+      "nis": "62122",
+      "share_pct": "1.8",
+      "value": "8"
+    }
+  ]
+}

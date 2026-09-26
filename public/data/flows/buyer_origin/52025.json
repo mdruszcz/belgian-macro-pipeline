@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.9",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.2",
+      "value": "72.25"
+    },
+    "rest_of_region": {
+      "share_pct": "35.7",
+      "value": "115.9333333333"
+    },
+    "same_commune": {
+      "share_pct": "40.3",
+      "value": "130.89"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "325.0733333333",
+  "dest_geo_id": "be:mun:52025",
+  "dest_name": {
+    "en": "Gerpinnes",
+    "fr": "Gerpinnes",
+    "nl": "Gerpinnes"
+  },
+  "dest_nis": "52025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 331,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Gerpinnes",
+        "fr": "Gerpinnes",
+        "nl": "Gerpinnes"
+      },
+      "nis": "52025",
+      "share_pct": "40.3",
+      "value": "130.89"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "13.5",
+      "value": "43.75"
+    },
+    {
+      "name": {
+        "en": "Ham-sur-Heure-Nalinnes",
+        "fr": "Ham-sur-Heure-Nalinnes",
+        "nl": "Ham-sur-Heure-Nalinnes"
+      },
+      "nis": "56086",
+      "share_pct": "5.5",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Florennes",
+        "fr": "Florennes",
+        "nl": "Florennes"
+      },
+      "nis": "93022",
+      "share_pct": "5.1",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Walcourt",
+        "fr": "Walcourt",
+        "nl": "Walcourt"
+      },
+      "nis": "93088",
+      "share_pct": "4.0",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Châtelet",
+        "fr": "Châtelet",
+        "nl": "Châtelet"
+      },
+      "nis": "52012",
+      "share_pct": "3.2",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "2.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Mettet",
+        "fr": "Mettet",
+        "nl": "Mettet"
+      },
+      "nis": "92087",
+      "share_pct": "2.0",
+      "value": "6.5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.8",
+      "value": "9.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "11.6",
+      "value": "60.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.3",
+      "value": "64.105"
+    },
+    "rest_of_region": {
+      "share_pct": "21.3",
+      "value": "110.5"
+    },
+    "same_commune": {
+      "share_pct": "52.9",
+      "value": "274.75"
+    }
+  },
+  "coverage_pct": "91.1",
+  "dataset": "buyer_origin",
+  "denominator": "519.355",
+  "dest_geo_id": "be:mun:93056",
+  "dest_name": {
+    "en": "Philippeville",
+    "fr": "Philippeville",
+    "nl": "Philippeville"
+  },
+  "dest_nis": "93056",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 570,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Philippeville",
+        "fr": "Philippeville",
+        "nl": "Philippeville"
+      },
+      "nis": "93056",
+      "share_pct": "52.9",
+      "value": "274.75"
+    },
+    {
+      "name": {
+        "en": "Walcourt",
+        "fr": "Walcourt",
+        "nl": "Walcourt"
+      },
+      "nis": "93088",
+      "share_pct": "6.5",
+      "value": "34"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "4.8",
+      "value": "25"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "4.0",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Florennes",
+        "fr": "Florennes",
+        "nl": "Florennes"
+      },
+      "nis": "93022",
+      "share_pct": "2.2",
+      "value": "11.48"
+    },
+    {
+      "name": {
+        "en": "Viroinval",
+        "fr": "Viroinval",
+        "nl": "Viroinval"
+      },
+      "nis": "93090",
+      "share_pct": "1.8",
+      "value": "9.125"
+    },
+    {
+      "name": {
+        "en": "Chimay",
+        "fr": "Chimay",
+        "nl": "Chimay"
+      },
+      "nis": "56016",
+      "share_pct": "1.6",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Zemst",
+        "fr": "Zemst",
+        "nl": "Zemst"
+      },
+      "nis": "23096",
+      "share_pct": "1.5",
+      "value": "8"
+    }
+  ]
+}

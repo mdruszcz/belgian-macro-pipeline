@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "9.2",
+      "value": "23"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.2",
+      "value": "37.9"
+    },
+    "rest_of_region": {
+      "share_pct": "15.9",
+      "value": "39.5"
+    },
+    "same_commune": {
+      "share_pct": "57.7",
+      "value": "143.6"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "249.0",
+  "dest_geo_id": "be:mun:83049",
+  "dest_name": {
+    "en": "Tenneville",
+    "fr": "Tenneville",
+    "nl": "Tenneville"
+  },
+  "dest_nis": "83049",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 249,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Tenneville",
+        "fr": "Tenneville",
+        "nl": "Tenneville"
+      },
+      "nis": "83049",
+      "share_pct": "57.7",
+      "value": "143.6"
+    },
+    {
+      "name": {
+        "en": "La Roche-en-Ardenne",
+        "fr": "La Roche-en-Ardenne",
+        "nl": "La Roche-en-Ardenne"
+      },
+      "nis": "83031",
+      "share_pct": "7.6",
+      "value": "18.9"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Nassogne",
+        "fr": "Nassogne",
+        "nl": "Nassogne"
+      },
+      "nis": "83040",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Hamois",
+        "fr": "Hamois",
+        "nl": "Hamois"
+      },
+      "nis": "91059",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Marche-en-Famenne",
+        "fr": "Marche-en-Famenne",
+        "nl": "Marche-en-Famenne"
+      },
+      "nis": "83034",
+      "share_pct": "3.6",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Bastogne",
+        "fr": "Bastogne",
+        "nl": "Bastenaken"
+      },
+      "nis": "82039",
+      "share_pct": "2.8",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Ouffet",
+        "fr": "Ouffet",
+        "nl": "Ouffet"
+      },
+      "nis": "61048",
+      "share_pct": "2.4",
+      "value": "6"
+    }
+  ]
+}

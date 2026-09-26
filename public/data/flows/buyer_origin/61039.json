@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.5",
+      "value": "7"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "34.6",
+      "value": "54.0"
+    },
+    "rest_of_region": {
+      "share_pct": "19.7",
+      "value": "30.75"
+    },
+    "same_commune": {
+      "share_pct": "41.3",
+      "value": "64.5"
+    }
+  },
+  "coverage_pct": "99.5",
+  "dataset": "buyer_origin",
+  "denominator": "156.25",
+  "dest_geo_id": "be:mun:61039",
+  "dest_name": {
+    "en": "Marchin",
+    "fr": "Marchin",
+    "nl": "Marchin"
+  },
+  "dest_nis": "61039",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 157,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Marchin",
+        "fr": "Marchin",
+        "nl": "Marchin"
+      },
+      "nis": "61039",
+      "share_pct": "41.3",
+      "value": "64.5"
+    },
+    {
+      "name": {
+        "en": "Huy",
+        "fr": "Huy",
+        "nl": "Hoei"
+      },
+      "nis": "61031",
+      "share_pct": "14.1",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Tinlot",
+        "fr": "Tinlot",
+        "nl": "Tinlot"
+      },
+      "nis": "61081",
+      "share_pct": "6.4",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Saint-Gilles",
+        "fr": "Saint-Gilles",
+        "nl": "Sint-Gillis"
+      },
+      "nis": "21013",
+      "share_pct": "4.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Héron",
+        "fr": "Héron",
+        "nl": "Héron"
+      },
+      "nis": "61028",
+      "share_pct": "4.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Wanze",
+        "fr": "Wanze",
+        "nl": "Wanze"
+      },
+      "nis": "61072",
+      "share_pct": "3.2",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "2.9",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Clavier",
+        "fr": "Clavier",
+        "nl": "Clavier"
+      },
+      "nis": "61012",
+      "share_pct": "2.2",
+      "value": "3.5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.4",
+      "value": "3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.9",
+      "value": "8"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.1",
+      "value": "58.44"
+    },
+    "rest_of_region": {
+      "share_pct": "7.9",
+      "value": "16.5"
+    },
+    "same_commune": {
+      "share_pct": "58.6",
+      "value": "121.83"
+    }
+  },
+  "coverage_pct": "94.9",
+  "dataset": "buyer_origin",
+  "denominator": "207.77",
+  "dest_geo_id": "be:mun:45064",
+  "dest_name": {
+    "en": "Maarkedal",
+    "fr": "Maarkedal",
+    "nl": "Maarkedal"
+  },
+  "dest_nis": "45064",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 219,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Maarkedal",
+        "fr": "Maarkedal",
+        "nl": "Maarkedal"
+      },
+      "nis": "45064",
+      "share_pct": "58.6",
+      "value": "121.83"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "12.2",
+      "value": "25.25"
+    },
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "5.8",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Wortegem-Petegem",
+        "fr": "Wortegem-Petegem",
+        "nl": "Wortegem-Petegem"
+      },
+      "nis": "45061",
+      "share_pct": "5.6",
+      "value": "11.64"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "3.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "3.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Anzegem",
+        "fr": "Anzegem",
+        "nl": "Anzegem"
+      },
+      "nis": "34002",
+      "share_pct": "1.7",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "1.6",
+      "value": "3.25"
+    }
+  ]
+}

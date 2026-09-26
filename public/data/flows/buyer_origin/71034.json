@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "3.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.8",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "21.2",
+      "value": "110"
+    },
+    "rest_of_region": {
+      "share_pct": "36.3",
+      "value": "188.0625"
+    },
+    "same_commune": {
+      "share_pct": "41.0",
+      "value": "212.6625"
+    }
+  },
+  "coverage_pct": "99.5",
+  "dataset": "buyer_origin",
+  "denominator": "518.2250",
+  "dest_geo_id": "be:mun:71034",
+  "dest_name": {
+    "en": "Leopoldsburg",
+    "fr": "Bourg-Léopold",
+    "nl": "Leopoldsburg"
+  },
+  "dest_nis": "71034",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 521,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Leopoldsburg",
+        "fr": "Bourg-Léopold",
+        "nl": "Leopoldsburg"
+      },
+      "nis": "71034",
+      "share_pct": "41.0",
+      "value": "212.6625"
+    },
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "11.4",
+      "value": "59"
+    },
+    {
+      "name": {
+        "en": "Westerlo",
+        "fr": "Westerlo",
+        "nl": "Westerlo"
+      },
+      "nis": "13049",
+      "share_pct": "5.4",
+      "value": "28"
+    },
+    {
+      "name": {
+        "en": "Tessenderlo-Ham",
+        "fr": "Tessenderlo-Ham",
+        "nl": "Tessenderlo-Ham"
+      },
+      "nis": "71071",
+      "share_pct": "4.6",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Lommel",
+        "fr": "Lommel",
+        "nl": "Lommel"
+      },
+      "nis": "72020",
+      "share_pct": "4.5",
+      "value": "23.5"
+    },
+    {
+      "name": {
+        "en": "Balen",
+        "fr": "Balen",
+        "nl": "Balen"
+      },
+      "nis": "13003",
+      "share_pct": "4.1",
+      "value": "21.5"
+    },
+    {
+      "name": {
+        "en": "Mol",
+        "fr": "Mol",
+        "nl": "Mol"
+      },
+      "nis": "13025",
+      "share_pct": "3.5",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Hechtel-Eksel",
+        "fr": "Hechtel-Eksel",
+        "nl": "Hechtel-Eksel"
+      },
+      "nis": "72038",
+      "share_pct": "3.0",
+      "value": "15.5"
+    }
+  ]
+}

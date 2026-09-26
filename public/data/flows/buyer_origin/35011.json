@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.3",
+      "value": "23.3333333333"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.5",
+      "value": "95.8333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "4.3",
+      "value": "74.59"
+    },
+    "rest_of_region": {
+      "share_pct": "71.2",
+      "value": "1237.5989425414"
+    },
+    "same_commune": {
+      "share_pct": "17.6",
+      "value": "306.71625397"
+    }
+  },
+  "coverage_pct": "94.3",
+  "dataset": "buyer_origin",
+  "denominator": "1738.0718631780",
+  "dest_geo_id": "be:mun:35011",
+  "dest_name": {
+    "en": "Middelkerke",
+    "fr": "Middelkerke",
+    "nl": "Middelkerke"
+  },
+  "dest_nis": "35011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1843,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Middelkerke",
+        "fr": "Middelkerke",
+        "nl": "Middelkerke"
+      },
+      "nis": "35011",
+      "share_pct": "17.6",
+      "value": "306.71625397"
+    },
+    {
+      "name": {
+        "en": "Ostend",
+        "fr": "Ostende",
+        "nl": "Oostende"
+      },
+      "nis": "35013",
+      "share_pct": "2.2",
+      "value": "38"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.6",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "1.6",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "1.6",
+      "value": "27.12"
+    },
+    {
+      "name": {
+        "en": "Gistel",
+        "fr": "Gistel",
+        "nl": "Gistel"
+      },
+      "nis": "35005",
+      "share_pct": "1.1",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "1.1",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Geraardsbergen",
+        "fr": "Grammont",
+        "nl": "Geraardsbergen"
+      },
+      "nis": "41018",
+      "share_pct": "1.0",
+      "value": "18"
+    }
+  ]
+}

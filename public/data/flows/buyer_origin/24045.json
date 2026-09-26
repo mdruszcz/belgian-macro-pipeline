@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "17.4",
+      "value": "36.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.1",
+      "value": "40.084"
+    },
+    "rest_of_region": {
+      "share_pct": "27.6",
+      "value": "57.916"
+    },
+    "same_commune": {
+      "share_pct": "35.4",
+      "value": "74.25"
+    }
+  },
+  "coverage_pct": "98.9",
+  "dataset": "buyer_origin",
+  "denominator": "209.750",
+  "dest_geo_id": "be:mun:24045",
+  "dest_name": {
+    "en": "Huldenberg",
+    "fr": "Huldenberg",
+    "nl": "Huldenberg"
+  },
+  "dest_nis": "24045",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 212,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Huldenberg",
+        "fr": "Huldenberg",
+        "nl": "Huldenberg"
+      },
+      "nis": "24045",
+      "share_pct": "35.4",
+      "value": "74.25"
+    },
+    {
+      "name": {
+        "en": "Overijse",
+        "fr": "Overijse",
+        "nl": "Overijse"
+      },
+      "nis": "23062",
+      "share_pct": "16.6",
+      "value": "34.766"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "6.0",
+      "value": "12.6"
+    },
+    {
+      "name": {
+        "en": "Tervuren",
+        "fr": "Tervuren",
+        "nl": "Tervuren"
+      },
+      "nis": "24104",
+      "share_pct": "5.7",
+      "value": "11.984"
+    },
+    {
+      "name": {
+        "en": "Hoeilaart",
+        "fr": "Hoeilaart",
+        "nl": "Hoeilaart"
+      },
+      "nis": "23033",
+      "share_pct": "4.0",
+      "value": "8.4"
+    },
+    {
+      "name": {
+        "en": "Bertem",
+        "fr": "Bertem",
+        "nl": "Bertem"
+      },
+      "nis": "24009",
+      "share_pct": "3.6",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "2.1",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "1.9",
+      "value": "4"
+    }
+  ]
+}

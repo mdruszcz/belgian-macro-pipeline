@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "2.2666666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "1.7",
+      "value": "8.8666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "45.2",
+      "value": "240.660666667"
+    },
+    "rest_of_region": {
+      "share_pct": "8.4",
+      "value": "44.8726666667"
+    },
+    "same_commune": {
+      "share_pct": "44.1",
+      "value": "234.83571429"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "532.0023809571",
+  "dest_geo_id": "be:mun:11055",
+  "dest_name": {
+    "en": "Zoersel",
+    "fr": "Zoersel",
+    "nl": "Zoersel"
+  },
+  "dest_nis": "11055",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 554,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zoersel",
+        "fr": "Zoersel",
+        "nl": "Zoersel"
+      },
+      "nis": "11055",
+      "share_pct": "44.1",
+      "value": "234.83571429"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "14.0",
+      "value": "74.316666667"
+    },
+    {
+      "name": {
+        "en": "Malle",
+        "fr": "Malle",
+        "nl": "Malle"
+      },
+      "nis": "11057",
+      "share_pct": "7.7",
+      "value": "41"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "6.5",
+      "value": "34.61"
+    },
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "5.4",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Zandhoven",
+        "fr": "Zandhoven",
+        "nl": "Zandhoven"
+      },
+      "nis": "11054",
+      "share_pct": "1.8",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Wijnegem",
+        "fr": "Wijnegem",
+        "nl": "Wijnegem"
+      },
+      "nis": "11050",
+      "share_pct": "1.7",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "1.6",
+      "value": "8.5"
+    }
+  ]
+}

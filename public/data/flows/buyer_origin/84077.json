@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.8",
+      "value": "8.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.3",
+      "value": "6.0000000000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.9",
+      "value": "83.53"
+    },
+    "rest_of_region": {
+      "share_pct": "17.4",
+      "value": "81.07"
+    },
+    "same_commune": {
+      "share_pct": "61.7",
+      "value": "288.06630833"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "467.1663083300",
+  "dest_geo_id": "be:mun:84077",
+  "dest_name": {
+    "en": "Libramont-Chevigny",
+    "fr": "Libramont-Chevigny",
+    "nl": "Libramont-Chevigny"
+  },
+  "dest_nis": "84077",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 480,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "61.7",
+      "value": "288.06630833"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "4.7",
+      "value": "22.03"
+    },
+    {
+      "name": {
+        "en": "Vaux-sur-Sûre",
+        "fr": "Vaux-sur-Sûre",
+        "nl": "Vaux-sur-Sûre"
+      },
+      "nis": "82036",
+      "share_pct": "4.6",
+      "value": "21.5"
+    },
+    {
+      "name": {
+        "en": "Neufchâteau",
+        "fr": "Neufchâteau",
+        "nl": "Neufchâteau"
+      },
+      "nis": "84043",
+      "share_pct": "3.6",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Saint-Hubert",
+        "fr": "Saint-Hubert",
+        "nl": "Saint-Hubert"
+      },
+      "nis": "84059",
+      "share_pct": "3.4",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Rochefort",
+        "fr": "Rochefort",
+        "nl": "Rochefort"
+      },
+      "nis": "91114",
+      "share_pct": "2.8",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Libin",
+        "fr": "Libin",
+        "nl": "Libin"
+      },
+      "nis": "84035",
+      "share_pct": "2.2",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Sainte-Ode",
+        "fr": "Sainte-Ode",
+        "nl": "Sainte-Ode"
+      },
+      "nis": "82038",
+      "share_pct": "2.1",
+      "value": "10"
+    }
+  ]
+}

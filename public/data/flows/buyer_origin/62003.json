@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.5",
+      "value": "15.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "56.6",
+      "value": "356.636289746"
+    },
+    "rest_of_region": {
+      "share_pct": "11.1",
+      "value": "69.8666"
+    },
+    "same_commune": {
+      "share_pct": "29.8",
+      "value": "187.49756667"
+    }
+  },
+  "coverage_pct": "96.3",
+  "dataset": "buyer_origin",
+  "denominator": "630.000456416",
+  "dest_geo_id": "be:mun:62003",
+  "dest_name": {
+    "en": "Ans",
+    "fr": "Ans",
+    "nl": "Ans"
+  },
+  "dest_nis": "62003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 654,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ans",
+        "fr": "Ans",
+        "nl": "Ans"
+      },
+      "nis": "62003",
+      "share_pct": "29.8",
+      "value": "187.49756667"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "24.1",
+      "value": "151.99462308"
+    },
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "5.2",
+      "value": "32.558333333"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "2.9",
+      "value": "18.5"
+    },
+    {
+      "name": {
+        "en": "Saint-Nicolas",
+        "fr": "Saint-Nicolas",
+        "nl": "Saint-Nicolas"
+      },
+      "nis": "62093",
+      "share_pct": "2.9",
+      "value": "18.083333333"
+    },
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "2.9",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Seraing",
+        "fr": "Seraing",
+        "nl": "Seraing"
+      },
+      "nis": "62096",
+      "share_pct": "2.4",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Chaudfontaine",
+        "fr": "Chaudfontaine",
+        "nl": "Chaudfontaine"
+      },
+      "nis": "62022",
+      "share_pct": "2.2",
+      "value": "14"
+    }
+  ]
+}

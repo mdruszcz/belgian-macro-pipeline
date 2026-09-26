@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "5.1",
+      "value": "24"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "5.6",
+      "value": "26.50"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.0",
+      "value": "117.23"
+    },
+    "rest_of_region": {
+      "share_pct": "6.1",
+      "value": "28.6666666667"
+    },
+    "same_commune": {
+      "share_pct": "58.0",
+      "value": "272.19551282"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "469.5921794867",
+  "dest_geo_id": "be:mun:73066",
+  "dest_name": {
+    "en": "Riemst",
+    "fr": "Riemst",
+    "nl": "Riemst"
+  },
+  "dest_nis": "73066",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 489,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Riemst",
+        "fr": "Riemst",
+        "nl": "Riemst"
+      },
+      "nis": "73066",
+      "share_pct": "58.0",
+      "value": "272.19551282"
+    },
+    {
+      "name": {
+        "en": "Bilzen-Hoeselt",
+        "fr": "Bilzen-Hoeselt",
+        "nl": "Bilzen-Hoeselt"
+      },
+      "nis": "73110",
+      "share_pct": "14.5",
+      "value": "67.94"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "4.0",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Lanaken",
+        "fr": "Lanaken",
+        "nl": "Lanaken"
+      },
+      "nis": "73042",
+      "share_pct": "3.2",
+      "value": "14.81"
+    },
+    {
+      "name": {
+        "en": "Bassenge",
+        "fr": "Bassenge",
+        "nl": "Bitsingen"
+      },
+      "nis": "62011",
+      "share_pct": "2.5",
+      "value": "11.85"
+    },
+    {
+      "name": {
+        "en": "Voeren",
+        "fr": "Fourons",
+        "nl": "Voeren"
+      },
+      "nis": "73109",
+      "share_pct": "2.1",
+      "value": "9.98"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "1.2",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "1.1",
+      "value": "5"
+    }
+  ]
+}

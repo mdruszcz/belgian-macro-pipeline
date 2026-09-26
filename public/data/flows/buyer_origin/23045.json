@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "6.0",
+      "value": "28.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.3",
+      "value": "104.5000"
+    },
+    "rest_of_region": {
+      "share_pct": "16.0",
+      "value": "74.69"
+    },
+    "same_commune": {
+      "share_pct": "55.5",
+      "value": "259.56979536"
+    }
+  },
+  "coverage_pct": "98.5",
+  "dataset": "buyer_origin",
+  "denominator": "467.75979536",
+  "dest_geo_id": "be:mun:23045",
+  "dest_name": {
+    "en": "Londerzeel",
+    "fr": "Londerzeel",
+    "nl": "Londerzeel"
+  },
+  "dest_nis": "23045",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 475,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Londerzeel",
+        "fr": "Londerzeel",
+        "nl": "Londerzeel"
+      },
+      "nis": "23045",
+      "share_pct": "55.5",
+      "value": "259.56979536"
+    },
+    {
+      "name": {
+        "en": "Meise",
+        "fr": "Meise",
+        "nl": "Meise"
+      },
+      "nis": "23050",
+      "share_pct": "7.1",
+      "value": "33"
+    },
+    {
+      "name": {
+        "en": "Grimbergen",
+        "fr": "Grimbergen",
+        "nl": "Grimbergen"
+      },
+      "nis": "23025",
+      "share_pct": "4.4",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Puurs-Sint-Amands",
+        "fr": "Puurs-Sint-Amands",
+        "nl": "Puurs-Sint-Amands"
+      },
+      "nis": "12041",
+      "share_pct": "3.4",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Buggenhout",
+        "fr": "Buggenhout",
+        "nl": "Buggenhout"
+      },
+      "nis": "42004",
+      "share_pct": "3.3",
+      "value": "15.52"
+    },
+    {
+      "name": {
+        "en": "Kapelle-op-den-Bos",
+        "fr": "Kapelle-op-den-Bos",
+        "nl": "Kapelle-op-den-Bos"
+      },
+      "nis": "23039",
+      "share_pct": "2.7",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "2.6",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Willebroek",
+        "fr": "Willebroek",
+        "nl": "Willebroek"
+      },
+      "nis": "12040",
+      "share_pct": "2.4",
+      "value": "11"
+    }
+  ]
+}

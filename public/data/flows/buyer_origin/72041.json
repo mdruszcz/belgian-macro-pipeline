@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.5",
+      "value": "12.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.5",
+      "value": "62.81"
+    },
+    "rest_of_region": {
+      "share_pct": "29.9",
+      "value": "150.15"
+    },
+    "same_commune": {
+      "share_pct": "54.7",
+      "value": "274.91"
+    }
+  },
+  "coverage_pct": "97.5",
+  "dataset": "buyer_origin",
+  "denominator": "502.37",
+  "dest_geo_id": "be:mun:72041",
+  "dest_name": {
+    "en": "Dilsen-Stokkem",
+    "fr": "Dilsen-Stokkem",
+    "nl": "Dilsen-Stokkem"
+  },
+  "dest_nis": "72041",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 515,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Dilsen-Stokkem",
+        "fr": "Dilsen-Stokkem",
+        "nl": "Dilsen-Stokkem"
+      },
+      "nis": "72041",
+      "share_pct": "54.7",
+      "value": "274.91"
+    },
+    {
+      "name": {
+        "en": "Maasmechelen",
+        "fr": "Maasmechelen",
+        "nl": "Maasmechelen"
+      },
+      "nis": "73107",
+      "share_pct": "14.0",
+      "value": "70.5"
+    },
+    {
+      "name": {
+        "en": "As",
+        "fr": "As",
+        "nl": "As"
+      },
+      "nis": "71002",
+      "share_pct": "5.9",
+      "value": "29.5"
+    },
+    {
+      "name": {
+        "en": "Maaseik",
+        "fr": "Maaseik",
+        "nl": "Maaseik"
+      },
+      "nis": "72021",
+      "share_pct": "5.7",
+      "value": "28.4"
+    },
+    {
+      "name": {
+        "en": "Genk",
+        "fr": "Genk",
+        "nl": "Genk"
+      },
+      "nis": "71016",
+      "share_pct": "2.9",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Kinrooi",
+        "fr": "Kinrooi",
+        "nl": "Kinrooi"
+      },
+      "nis": "72018",
+      "share_pct": "2.4",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Bree",
+        "fr": "Bree",
+        "nl": "Bree"
+      },
+      "nis": "72004",
+      "share_pct": "2.3",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Oudsbergen",
+        "fr": "Oudsbergen",
+        "nl": "Oudsbergen"
+      },
+      "nis": "72042",
+      "share_pct": "1.1",
+      "value": "5.51"
+    }
+  ]
+}

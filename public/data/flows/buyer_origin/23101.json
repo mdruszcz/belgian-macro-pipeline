@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.3",
+      "value": "4.8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "42.9",
+      "value": "159.8983333337"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.1",
+      "value": "63.6733333333"
+    },
+    "rest_of_region": {
+      "share_pct": "1.3",
+      "value": "4.8333333333"
+    },
+    "same_commune": {
+      "share_pct": "37.3",
+      "value": "139.255"
+    }
+  },
+  "coverage_pct": "98.1",
+  "dataset": "buyer_origin",
+  "denominator": "372.9600000003",
+  "dest_geo_id": "be:mun:23101",
+  "dest_name": {
+    "en": "Sint-Genesius-Rode",
+    "fr": "Rhode-Saint-Genèse",
+    "nl": "Sint-Genesius-Rode"
+  },
+  "dest_nis": "23101",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 380,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "37.3",
+      "value": "139.255"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "12.5",
+      "value": "46.7"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "12.4",
+      "value": "46.28"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "7.8",
+      "value": "29.166666667"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "2.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "2.7",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Berchem-Sainte-Agathe",
+        "fr": "Berchem-Sainte-Agathe",
+        "nl": "Sint-Agatha-Berchem"
+      },
+      "nis": "21003",
+      "share_pct": "2.1",
+      "value": "8.005"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "2.1",
+      "value": "7.75"
+    }
+  ]
+}

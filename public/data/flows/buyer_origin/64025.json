@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.9",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.7",
+      "value": "9.0000000000"
+    },
+    "rest_of_region": {
+      "share_pct": "53.4",
+      "value": "41.20"
+    },
+    "same_commune": {
+      "share_pct": "31.1",
+      "value": "24"
+    }
+  },
+  "coverage_pct": "99.0",
+  "dataset": "buyer_origin",
+  "denominator": "77.2000000000",
+  "dest_geo_id": "be:mun:64025",
+  "dest_name": {
+    "en": "Fexhe-le-Haut-Clocher",
+    "fr": "Fexhe-le-Haut-Clocher",
+    "nl": "Fexhe-le-Haut-Clocher"
+  },
+  "dest_nis": "64025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 78,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Fexhe-le-Haut-Clocher",
+        "fr": "Fexhe-le-Haut-Clocher",
+        "nl": "Fexhe-le-Haut-Clocher"
+      },
+      "nis": "64025",
+      "share_pct": "31.1",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Seraing",
+        "fr": "Seraing",
+        "nl": "Seraing"
+      },
+      "nis": "62096",
+      "share_pct": "7.8",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Flémalle",
+        "fr": "Flémalle",
+        "nl": "Flémalle"
+      },
+      "nis": "62120",
+      "share_pct": "7.8",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "6.5",
+      "value": "5.05"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "5.2",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "5.2",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Berloz",
+        "fr": "Berloz",
+        "nl": "Berloz"
+      },
+      "nis": "64008",
+      "share_pct": "4.7",
+      "value": "3.6666666667"
+    },
+    {
+      "name": {
+        "en": "Verlaine",
+        "fr": "Verlaine",
+        "nl": "Verlaine"
+      },
+      "nis": "61063",
+      "share_pct": "3.9",
+      "value": "3"
+    }
+  ]
+}

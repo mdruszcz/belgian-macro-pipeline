@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.0",
+      "value": "14.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "13.5",
+      "value": "94.7069696973"
+    },
+    "rest_of_region": {
+      "share_pct": "30.4",
+      "value": "213.4200000000"
+    },
+    "same_commune": {
+      "share_pct": "53.8",
+      "value": "377.78603333"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "701.9130030273",
+  "dest_geo_id": "be:mun:41081",
+  "dest_name": {
+    "en": "Zottegem",
+    "fr": "Zottegem",
+    "nl": "Zottegem"
+  },
+  "dest_nis": "41081",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 717,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "53.8",
+      "value": "377.78603333"
+    },
+    {
+      "name": {
+        "en": "Herzele",
+        "fr": "Herzele",
+        "nl": "Herzele"
+      },
+      "nis": "41027",
+      "share_pct": "6.1",
+      "value": "42.753636364"
+    },
+    {
+      "name": {
+        "en": "Zwalm",
+        "fr": "Zwalm",
+        "nl": "Zwalm"
+      },
+      "nis": "45065",
+      "share_pct": "4.3",
+      "value": "30.5"
+    },
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "3.8",
+      "value": "26.77"
+    },
+    {
+      "name": {
+        "en": "Oosterzele",
+        "fr": "Oosterzele",
+        "nl": "Oosterzele"
+      },
+      "nis": "44052",
+      "share_pct": "3.8",
+      "value": "26.4"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "3.2",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Lierde",
+        "fr": "Lierde",
+        "nl": "Lierde"
+      },
+      "nis": "45063",
+      "share_pct": "2.6",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Sint-Lievens-Houtem",
+        "fr": "Sint-Lievens-Houtem",
+        "nl": "Sint-Lievens-Houtem"
+      },
+      "nis": "41063",
+      "share_pct": "1.9",
+      "value": "13.12"
+    }
+  ]
+}

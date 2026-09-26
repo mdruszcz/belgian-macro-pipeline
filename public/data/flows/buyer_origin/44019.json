@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "2.21875"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "5.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "27.9",
+      "value": "266.67693333"
+    },
+    "rest_of_region": {
+      "share_pct": "15.9",
+      "value": "152.267333333"
+    },
+    "same_commune": {
+      "share_pct": "55.3",
+      "value": "529.02259048"
+    }
+  },
+  "coverage_pct": "98.0",
+  "dataset": "buyer_origin",
+  "denominator": "956.685607143",
+  "dest_geo_id": "be:mun:44019",
+  "dest_name": {
+    "en": "Evergem",
+    "fr": "Evergem",
+    "nl": "Evergem"
+  },
+  "dest_nis": "44019",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 976,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Evergem",
+        "fr": "Evergem",
+        "nl": "Evergem"
+      },
+      "nis": "44019",
+      "share_pct": "55.3",
+      "value": "529.02259048"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "20.8",
+      "value": "198.76333333"
+    },
+    {
+      "name": {
+        "en": "Assenede",
+        "fr": "Assenede",
+        "nl": "Assenede"
+      },
+      "nis": "43002",
+      "share_pct": "7.1",
+      "value": "67.924"
+    },
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "3.4",
+      "value": "32.58"
+    },
+    {
+      "name": {
+        "en": "Eeklo",
+        "fr": "Eeklo",
+        "nl": "Eeklo"
+      },
+      "nis": "43005",
+      "share_pct": "1.1",
+      "value": "10.833333333"
+    },
+    {
+      "name": {
+        "en": "Maldegem",
+        "fr": "Maldegem",
+        "nl": "Maldegem"
+      },
+      "nis": "43010",
+      "share_pct": "1.0",
+      "value": "9.1"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "0.9",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "0.9",
+      "value": "9"
+    }
+  ]
+}

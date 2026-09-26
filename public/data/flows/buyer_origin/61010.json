@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.5",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "0.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "7.6",
+      "value": "10"
+    },
+    "rest_of_region": {
+      "share_pct": "45.8",
+      "value": "59.9285714288"
+    },
+    "same_commune": {
+      "share_pct": "44.7",
+      "value": "58.508692494"
+    }
+  },
+  "coverage_pct": "95.6",
+  "dataset": "buyer_origin",
+  "denominator": "130.9372639228",
+  "dest_geo_id": "be:mun:61010",
+  "dest_name": {
+    "en": "Burdinne",
+    "fr": "Burdinne",
+    "nl": "Burdinne"
+  },
+  "dest_nis": "61010",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 137,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Burdinne",
+        "fr": "Burdinne",
+        "nl": "Burdinne"
+      },
+      "nis": "61010",
+      "share_pct": "44.7",
+      "value": "58.508692494"
+    },
+    {
+      "name": {
+        "en": "Hannut",
+        "fr": "Hannut",
+        "nl": "Hannuit"
+      },
+      "nis": "64034",
+      "share_pct": "12.3",
+      "value": "16.142857143"
+    },
+    {
+      "name": {
+        "en": "Fernelmont",
+        "fr": "Fernelmont",
+        "nl": "Fernelmont"
+      },
+      "nis": "92138",
+      "share_pct": "6.1",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Héron",
+        "fr": "Héron",
+        "nl": "Héron"
+      },
+      "nis": "61028",
+      "share_pct": "3.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Ramillies",
+        "fr": "Ramillies",
+        "nl": "Ramillies"
+      },
+      "nis": "25122",
+      "share_pct": "3.6",
+      "value": "4.7142857143"
+    },
+    {
+      "name": {
+        "en": "Braives",
+        "fr": "Braives",
+        "nl": "Braives"
+      },
+      "nis": "64015",
+      "share_pct": "3.4",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Andenne",
+        "fr": "Andenne",
+        "nl": "Andenne"
+      },
+      "nis": "92003",
+      "share_pct": "3.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "2.3",
+      "value": "3"
+    }
+  ]
+}

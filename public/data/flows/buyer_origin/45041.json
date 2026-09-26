@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "4.066"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.1",
+      "value": "100.475"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "13.3",
+      "value": "110.0199333337"
+    },
+    "rest_of_region": {
+      "share_pct": "24.5",
+      "value": "202.7999333333"
+    },
+    "same_commune": {
+      "share_pct": "49.6",
+      "value": "410.67389825"
+    }
+  },
+  "coverage_pct": "95.9",
+  "dataset": "buyer_origin",
+  "denominator": "828.0347649170",
+  "dest_geo_id": "be:mun:45041",
+  "dest_name": {
+    "en": "Ronse",
+    "fr": "Renaix",
+    "nl": "Ronse"
+  },
+  "dest_nis": "45041",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 863,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ronse",
+        "fr": "Renaix",
+        "nl": "Ronse"
+      },
+      "nis": "45041",
+      "share_pct": "49.6",
+      "value": "410.67389825"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "4.9",
+      "value": "40.7"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "3.3",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "3.2",
+      "value": "26.5"
+    },
+    {
+      "name": {
+        "en": "Ellezelles",
+        "fr": "Ellezelles",
+        "nl": "Elzele"
+      },
+      "nis": "51017",
+      "share_pct": "2.8",
+      "value": "22.975"
+    },
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "2.4",
+      "value": "19.916666667"
+    },
+    {
+      "name": {
+        "en": "Maarkedal",
+        "fr": "Maarkedal",
+        "nl": "Maarkedal"
+      },
+      "nis": "45064",
+      "share_pct": "2.3",
+      "value": "19.01"
+    },
+    {
+      "name": {
+        "en": "Herzele",
+        "fr": "Herzele",
+        "nl": "Herzele"
+      },
+      "nis": "41027",
+      "share_pct": "1.7",
+      "value": "14"
+    }
+  ]
+}

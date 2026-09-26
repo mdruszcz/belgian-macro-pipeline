@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "7"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.5",
+      "value": "16.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.5",
+      "value": "134.640789474"
+    },
+    "rest_of_region": {
+      "share_pct": "25.7",
+      "value": "276.954047619"
+    },
+    "same_commune": {
+      "share_pct": "59.6",
+      "value": "642.25778947"
+    }
+  },
+  "coverage_pct": "96.4",
+  "dataset": "buyer_origin",
+  "denominator": "1077.352626563",
+  "dest_geo_id": "be:mun:71053",
+  "dest_name": {
+    "en": "Sint-Truiden",
+    "fr": "Saint-Trond",
+    "nl": "Sint-Truiden"
+  },
+  "dest_nis": "71053",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1118,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "59.6",
+      "value": "642.25778947"
+    },
+    {
+      "name": {
+        "en": "Gingelom",
+        "fr": "Gingelom",
+        "nl": "Gingelom"
+      },
+      "nis": "71017",
+      "share_pct": "3.8",
+      "value": "40.990789474"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "3.5",
+      "value": "38.02"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "3.1",
+      "value": "33.2"
+    },
+    {
+      "name": {
+        "en": "Zoutleeuw",
+        "fr": "Léau",
+        "nl": "Zoutleeuw"
+      },
+      "nis": "24130",
+      "share_pct": "3.0",
+      "value": "32.5"
+    },
+    {
+      "name": {
+        "en": "Landen",
+        "fr": "Landen",
+        "nl": "Landen"
+      },
+      "nis": "24059",
+      "share_pct": "2.7",
+      "value": "29.308333333"
+    },
+    {
+      "name": {
+        "en": "Nieuwerkerken",
+        "fr": "Nieuwerkerken",
+        "nl": "Nieuwerkerken"
+      },
+      "nis": "71045",
+      "share_pct": "2.4",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "1.8",
+      "value": "19.75"
+    }
+  ]
+}

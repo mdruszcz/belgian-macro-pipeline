@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.0",
+      "value": "16.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.8",
+      "value": "55.591983122"
+    },
+    "rest_of_region": {
+      "share_pct": "32.0",
+      "value": "106.0969160061"
+    },
+    "same_commune": {
+      "share_pct": "45.9",
+      "value": "152.20349005"
+    }
+  },
+  "coverage_pct": "87.7",
+  "dataset": "buyer_origin",
+  "denominator": "331.3923891781",
+  "dest_geo_id": "be:mun:33037",
+  "dest_name": {
+    "en": "Zonnebeke",
+    "fr": "Zonnebeke",
+    "nl": "Zonnebeke"
+  },
+  "dest_nis": "33037",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 378,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zonnebeke",
+        "fr": "Zonnebeke",
+        "nl": "Zonnebeke"
+      },
+      "nis": "33037",
+      "share_pct": "45.9",
+      "value": "152.20349005"
+    },
+    {
+      "name": {
+        "en": "Moorslede",
+        "fr": "Moorslede",
+        "nl": "Moorslede"
+      },
+      "nis": "36012",
+      "share_pct": "9.0",
+      "value": "29.811030741"
+    },
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "8.3",
+      "value": "27.591983122"
+    },
+    {
+      "name": {
+        "en": "Comines-Warneton",
+        "fr": "Comines-Warneton",
+        "nl": "Komen-Waasten"
+      },
+      "nis": "57097",
+      "share_pct": "4.4",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "4.2",
+      "value": "13.980769231"
+    },
+    {
+      "name": {
+        "en": "Staden",
+        "fr": "Staden",
+        "nl": "Staden"
+      },
+      "nis": "36019",
+      "share_pct": "3.9",
+      "value": "13.025316456"
+    },
+    {
+      "name": {
+        "en": "Langemark-Poelkapelle",
+        "fr": "Langemark-Poelkapelle",
+        "nl": "Langemark-Poelkapelle"
+      },
+      "nis": "33040",
+      "share_pct": "3.3",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Wervik",
+        "fr": "Wervik",
+        "nl": "Wervik"
+      },
+      "nis": "33029",
+      "share_pct": "3.0",
+      "value": "10"
+    }
+  ]
+}

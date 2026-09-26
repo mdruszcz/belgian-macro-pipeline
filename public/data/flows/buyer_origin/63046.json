@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "40.8",
+      "value": "52.5"
+    },
+    "rest_of_region": {
+      "share_pct": "10.5",
+      "value": "13.52"
+    },
+    "same_commune": {
+      "share_pct": "44.7",
+      "value": "57.5"
+    }
+  },
+  "coverage_pct": "98.9",
+  "dataset": "buyer_origin",
+  "denominator": "128.52",
+  "dest_geo_id": "be:mun:63046",
+  "dest_name": {
+    "en": "Limbourg",
+    "fr": "Limbourg",
+    "nl": "Limburg"
+  },
+  "dest_nis": "63046",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 130,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Limbourg",
+        "fr": "Limbourg",
+        "nl": "Limburg"
+      },
+      "nis": "63046",
+      "share_pct": "44.7",
+      "value": "57.5"
+    },
+    {
+      "name": {
+        "en": "Verviers",
+        "fr": "Verviers",
+        "nl": "Verviers"
+      },
+      "nis": "63079",
+      "share_pct": "12.8",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "5.1",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Jalhay",
+        "fr": "Jalhay",
+        "nl": "Jalhay"
+      },
+      "nis": "63038",
+      "share_pct": "4.7",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Malmedy",
+        "fr": "Malmedy",
+        "nl": "Malmedy"
+      },
+      "nis": "63049",
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Welkenraedt",
+        "fr": "Welkenraedt",
+        "nl": "Welkenraedt"
+      },
+      "nis": "63084",
+      "share_pct": "3.9",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Flémalle",
+        "fr": "Flémalle",
+        "nl": "Flémalle"
+      },
+      "nis": "62120",
+      "share_pct": "3.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Thimister-Clermont",
+        "fr": "Thimister-Clermont",
+        "nl": "Thimister-Clermont"
+      },
+      "nis": "63089",
+      "share_pct": "3.1",
+      "value": "4"
+    }
+  ]
+}

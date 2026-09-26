@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.8",
+      "value": "15.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "10.2",
+      "value": "41.5"
+    },
+    "rest_of_region": {
+      "share_pct": "30.3",
+      "value": "122.96"
+    },
+    "same_commune": {
+      "share_pct": "55.7",
+      "value": "225.91666667"
+    }
+  },
+  "coverage_pct": "98.5",
+  "dataset": "buyer_origin",
+  "denominator": "405.87666667",
+  "dest_geo_id": "be:mun:93022",
+  "dest_name": {
+    "en": "Florennes",
+    "fr": "Florennes",
+    "nl": "Florennes"
+  },
+  "dest_nis": "93022",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 412,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Florennes",
+        "fr": "Florennes",
+        "nl": "Florennes"
+      },
+      "nis": "93022",
+      "share_pct": "55.7",
+      "value": "225.91666667"
+    },
+    {
+      "name": {
+        "en": "Mettet",
+        "fr": "Mettet",
+        "nl": "Mettet"
+      },
+      "nis": "92087",
+      "share_pct": "10.2",
+      "value": "41.46"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "5.2",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Walcourt",
+        "fr": "Walcourt",
+        "nl": "Walcourt"
+      },
+      "nis": "93088",
+      "share_pct": "3.9",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Philippeville",
+        "fr": "Philippeville",
+        "nl": "Philippeville"
+      },
+      "nis": "93056",
+      "share_pct": "3.6",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Gerpinnes",
+        "fr": "Gerpinnes",
+        "nl": "Gerpinnes"
+      },
+      "nis": "52025",
+      "share_pct": "3.3",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Profondeville",
+        "fr": "Profondeville",
+        "nl": "Profondeville"
+      },
+      "nis": "92101",
+      "share_pct": "1.2",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Couvin",
+        "fr": "Couvin",
+        "nl": "Couvin"
+      },
+      "nis": "93014",
+      "share_pct": "1.2",
+      "value": "5"
+    }
+  ]
+}

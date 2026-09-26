@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.6",
+      "value": "36.1566666666"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "2.9",
+      "value": "67.12"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.8",
+      "value": "433.963176603"
+    },
+    "rest_of_region": {
+      "share_pct": "19.7",
+      "value": "454.1624228748"
+    },
+    "same_commune": {
+      "share_pct": "56.9",
+      "value": "1310.628057"
+    }
+  },
+  "coverage_pct": "96.4",
+  "dataset": "buyer_origin",
+  "denominator": "2303.0303231444",
+  "dest_geo_id": "be:mun:34022",
+  "dest_name": {
+    "en": "Kortrijk",
+    "fr": "Courtrai",
+    "nl": "Kortrijk"
+  },
+  "dest_nis": "34022",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2388,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "56.9",
+      "value": "1310.628057"
+    },
+    {
+      "name": {
+        "en": "Wevelgem",
+        "fr": "Wevelgem",
+        "nl": "Wevelgem"
+      },
+      "nis": "34041",
+      "share_pct": "3.2",
+      "value": "73.825"
+    },
+    {
+      "name": {
+        "en": "Harelbeke",
+        "fr": "Harelbeke",
+        "nl": "Harelbeke"
+      },
+      "nis": "34013",
+      "share_pct": "3.1",
+      "value": "71.5625"
+    },
+    {
+      "name": {
+        "en": "Zwevegem",
+        "fr": "Zwevegem",
+        "nl": "Zwevegem"
+      },
+      "nis": "34042",
+      "share_pct": "2.9",
+      "value": "66.512666667"
+    },
+    {
+      "name": {
+        "en": "Kuurne",
+        "fr": "Kuurne",
+        "nl": "Kuurne"
+      },
+      "nis": "34023",
+      "share_pct": "2.0",
+      "value": "47"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.9",
+      "value": "43.143333333"
+    },
+    {
+      "name": {
+        "en": "Menen",
+        "fr": "Menin",
+        "nl": "Menen"
+      },
+      "nis": "34027",
+      "share_pct": "1.9",
+      "value": "43.135"
+    },
+    {
+      "name": {
+        "en": "Mouscron",
+        "fr": "Mouscron",
+        "nl": "Moeskroen"
+      },
+      "nis": "57096",
+      "share_pct": "1.7",
+      "value": "39.63"
+    }
+  ]
+}

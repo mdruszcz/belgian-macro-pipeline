@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "4"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.2",
+      "value": "4.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.2",
+      "value": "113.7"
+    },
+    "rest_of_region": {
+      "share_pct": "14.5",
+      "value": "52.85"
+    },
+    "same_commune": {
+      "share_pct": "51.9",
+      "value": "188.88433333"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "363.93433333",
+  "dest_geo_id": "be:mun:44052",
+  "dest_name": {
+    "en": "Oosterzele",
+    "fr": "Oosterzele",
+    "nl": "Oosterzele"
+  },
+  "dest_nis": "44052",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 375,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Oosterzele",
+        "fr": "Oosterzele",
+        "nl": "Oosterzele"
+      },
+      "nis": "44052",
+      "share_pct": "51.9",
+      "value": "188.88433333"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "17.3",
+      "value": "63"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "9.1",
+      "value": "33.1"
+    },
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "2.2",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "2.2",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Knokke-Heist",
+        "fr": "Knokke-Heist",
+        "nl": "Knokke-Heist"
+      },
+      "nis": "31043",
+      "share_pct": "2.2",
+      "value": "7.9"
+    },
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "1.9",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Sint-Lievens-Houtem",
+        "fr": "Sint-Lievens-Houtem",
+        "nl": "Sint-Lievens-Houtem"
+      },
+      "nis": "41063",
+      "share_pct": "1.4",
+      "value": "5"
+    }
+  ]
+}

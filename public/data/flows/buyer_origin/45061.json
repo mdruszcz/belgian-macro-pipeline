@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.8",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.9",
+      "value": "1.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.5",
+      "value": "34.2528666667"
+    },
+    "rest_of_region": {
+      "share_pct": "32.8",
+      "value": "54.8772666667"
+    },
+    "same_commune": {
+      "share_pct": "41.0",
+      "value": "68.451666667"
+    }
+  },
+  "coverage_pct": "91.3",
+  "dataset": "buyer_origin",
+  "denominator": "167.0818000004",
+  "dest_geo_id": "be:mun:45061",
+  "dest_name": {
+    "en": "Wortegem-Petegem",
+    "fr": "Wortegem-Petegem",
+    "nl": "Wortegem-Petegem"
+  },
+  "dest_nis": "45061",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 183,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Wortegem-Petegem",
+        "fr": "Wortegem-Petegem",
+        "nl": "Wortegem-Petegem"
+      },
+      "nis": "45061",
+      "share_pct": "41.0",
+      "value": "68.451666667"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "9.3",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "7.2",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Anzegem",
+        "fr": "Anzegem",
+        "nl": "Anzegem"
+      },
+      "nis": "34002",
+      "share_pct": "5.7",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Dentergem",
+        "fr": "Dentergem",
+        "nl": "Dentergem"
+      },
+      "nis": "37002",
+      "share_pct": "4.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Brakel",
+        "fr": "Brakel",
+        "nl": "Brakel"
+      },
+      "nis": "45059",
+      "share_pct": "3.0",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "2.8",
+      "value": "4.6666666667"
+    },
+    {
+      "name": {
+        "en": "Nazareth-De Pinte",
+        "fr": "Nazareth-De Pinte",
+        "nl": "Nazareth-De Pinte"
+      },
+      "nis": "44086",
+      "share_pct": "2.4",
+      "value": "4.0742"
+    }
+  ]
+}

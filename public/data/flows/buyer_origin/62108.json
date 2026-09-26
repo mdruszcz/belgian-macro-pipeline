@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.4",
+      "value": "4.65"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.2",
+      "value": "14.288037037"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "43.7",
+      "value": "148.100667741"
+    },
+    "rest_of_region": {
+      "share_pct": "13.1",
+      "value": "44.277037037"
+    },
+    "same_commune": {
+      "share_pct": "37.6",
+      "value": "127.49511111"
+    }
+  },
+  "coverage_pct": "81.1",
+  "dataset": "buyer_origin",
+  "denominator": "338.810852925",
+  "dest_geo_id": "be:mun:62108",
+  "dest_name": {
+    "en": "Visé",
+    "fr": "Visé",
+    "nl": "Wezet"
+  },
+  "dest_nis": "62108",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 418,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Visé",
+        "fr": "Visé",
+        "nl": "Wezet"
+      },
+      "nis": "62108",
+      "share_pct": "37.6",
+      "value": "127.49511111"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "10.3",
+      "value": "34.787037037"
+    },
+    {
+      "name": {
+        "en": "Dalhem",
+        "fr": "Dalhem",
+        "nl": "Dalhem"
+      },
+      "nis": "62027",
+      "share_pct": "8.9",
+      "value": "30.310667741"
+    },
+    {
+      "name": {
+        "en": "Oupeye",
+        "fr": "Oupeye",
+        "nl": "Oupeye"
+      },
+      "nis": "62079",
+      "share_pct": "7.6",
+      "value": "25.601851852"
+    },
+    {
+      "name": {
+        "en": "Blegny",
+        "fr": "Blegny",
+        "nl": "Blegny"
+      },
+      "nis": "62119",
+      "share_pct": "4.3",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Voeren",
+        "fr": "Fourons",
+        "nl": "Voeren"
+      },
+      "nis": "73109",
+      "share_pct": "2.9",
+      "value": "9.788037037"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "2.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Soumagne",
+        "fr": "Soumagne",
+        "nl": "Soumagne"
+      },
+      "nis": "62099",
+      "share_pct": "2.3",
+      "value": "7.787037037"
+    }
+  ]
+}

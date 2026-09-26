@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.4",
+      "value": "75.410256410"
+    },
+    "rest_of_region": {
+      "share_pct": "29.1",
+      "value": "191.52"
+    },
+    "same_commune": {
+      "share_pct": "59.2",
+      "value": "390.34384615"
+    }
+  },
+  "coverage_pct": "96.1",
+  "dataset": "buyer_origin",
+  "denominator": "659.274102560",
+  "dest_geo_id": "be:mun:43010",
+  "dest_name": {
+    "en": "Maldegem",
+    "fr": "Maldegem",
+    "nl": "Maldegem"
+  },
+  "dest_nis": "43010",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 686,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Maldegem",
+        "fr": "Maldegem",
+        "nl": "Maldegem"
+      },
+      "nis": "43010",
+      "share_pct": "59.2",
+      "value": "390.34384615"
+    },
+    {
+      "name": {
+        "en": "Eeklo",
+        "fr": "Eeklo",
+        "nl": "Eeklo"
+      },
+      "nis": "43005",
+      "share_pct": "6.5",
+      "value": "43"
+    },
+    {
+      "name": {
+        "en": "Damme",
+        "fr": "Damme",
+        "nl": "Damme"
+      },
+      "nis": "31006",
+      "share_pct": "5.4",
+      "value": "35.5"
+    },
+    {
+      "name": {
+        "en": "Knokke-Heist",
+        "fr": "Knokke-Heist",
+        "nl": "Knokke-Heist"
+      },
+      "nis": "31043",
+      "share_pct": "4.0",
+      "value": "26.1"
+    },
+    {
+      "name": {
+        "en": "Aalter",
+        "fr": "Aalter",
+        "nl": "Aalter"
+      },
+      "nis": "44084",
+      "share_pct": "3.9",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Beernem",
+        "fr": "Beernem",
+        "nl": "Beernem"
+      },
+      "nis": "31003",
+      "share_pct": "3.2",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "2.3",
+      "value": "15.4"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "2.2",
+      "value": "14.6"
+    }
+  ]
+}

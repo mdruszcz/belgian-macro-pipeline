@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.9",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.8",
+      "value": "38.02"
+    },
+    "rest_of_region": {
+      "share_pct": "21.2",
+      "value": "48.17"
+    },
+    "same_commune": {
+      "share_pct": "61.1",
+      "value": "138.765"
+    }
+  },
+  "coverage_pct": "94.6",
+  "dataset": "buyer_origin",
+  "denominator": "226.955",
+  "dest_geo_id": "be:mun:36010",
+  "dest_name": {
+    "en": "Ledegem",
+    "fr": "Ledegem",
+    "nl": "Ledegem"
+  },
+  "dest_nis": "36010",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 240,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ledegem",
+        "fr": "Ledegem",
+        "nl": "Ledegem"
+      },
+      "nis": "36010",
+      "share_pct": "61.1",
+      "value": "138.765"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "8.8",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Wevelgem",
+        "fr": "Wevelgem",
+        "nl": "Wevelgem"
+      },
+      "nis": "34041",
+      "share_pct": "7.3",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "3.8",
+      "value": "8.67"
+    },
+    {
+      "name": {
+        "en": "Izegem",
+        "fr": "Izegem",
+        "nl": "Izegem"
+      },
+      "nis": "36008",
+      "share_pct": "3.7",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Moorslede",
+        "fr": "Moorslede",
+        "nl": "Moorslede"
+      },
+      "nis": "36012",
+      "share_pct": "3.5",
+      "value": "8.02"
+    },
+    {
+      "name": {
+        "en": "Lendelede",
+        "fr": "Lendelede",
+        "nl": "Lendelede"
+      },
+      "nis": "34025",
+      "share_pct": "2.9",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Harelbeke",
+        "fr": "Harelbeke",
+        "nl": "Harelbeke"
+      },
+      "nis": "34013",
+      "share_pct": "0.9",
+      "value": "2"
+    }
+  ]
+}

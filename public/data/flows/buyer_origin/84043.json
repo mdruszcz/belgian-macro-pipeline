@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.8",
+      "value": "7.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.8",
+      "value": "3.26"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.2",
+      "value": "105.9166666667"
+    },
+    "rest_of_region": {
+      "share_pct": "18.5",
+      "value": "77.5833333334"
+    },
+    "same_commune": {
+      "share_pct": "53.7",
+      "value": "225.76"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "420.0200000001",
+  "dest_geo_id": "be:mun:84043",
+  "dest_name": {
+    "en": "Neufchâteau",
+    "fr": "Neufchâteau",
+    "nl": "Neufchâteau"
+  },
+  "dest_nis": "84043",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 429,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Neufchâteau",
+        "fr": "Neufchâteau",
+        "nl": "Neufchâteau"
+      },
+      "nis": "84043",
+      "share_pct": "53.7",
+      "value": "225.76"
+    },
+    {
+      "name": {
+        "en": "Bertrix",
+        "fr": "Bertrix",
+        "nl": "Bertrix"
+      },
+      "nis": "84009",
+      "share_pct": "10.2",
+      "value": "43"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "5.2",
+      "value": "21.75"
+    },
+    {
+      "name": {
+        "en": "Léglise",
+        "fr": "Léglise",
+        "nl": "Léglise"
+      },
+      "nis": "84033",
+      "share_pct": "4.3",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Vaux-sur-Sûre",
+        "fr": "Vaux-sur-Sûre",
+        "nl": "Vaux-sur-Sûre"
+      },
+      "nis": "82036",
+      "share_pct": "3.1",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Herbeumont",
+        "fr": "Herbeumont",
+        "nl": "Herbeumont"
+      },
+      "nis": "84029",
+      "share_pct": "3.1",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "2.4",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "2.1",
+      "value": "9"
+    }
+  ]
+}

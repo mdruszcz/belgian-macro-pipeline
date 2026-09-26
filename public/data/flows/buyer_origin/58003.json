@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "2.5",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.0",
+      "value": "44.6268"
+    },
+    "rest_of_region": {
+      "share_pct": "34.7",
+      "value": "55.3333333334"
+    },
+    "same_commune": {
+      "share_pct": "34.1",
+      "value": "54.33"
+    }
+  },
+  "coverage_pct": "96.0",
+  "dataset": "buyer_origin",
+  "denominator": "159.2901333334",
+  "dest_geo_id": "be:mun:58003",
+  "dest_name": {
+    "en": "Estinnes",
+    "fr": "Estinnes",
+    "nl": "Estinnes"
+  },
+  "dest_nis": "58003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 166,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Estinnes",
+        "fr": "Estinnes",
+        "nl": "Estinnes"
+      },
+      "nis": "58003",
+      "share_pct": "34.1",
+      "value": "54.33"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "14.4",
+      "value": "23"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "12.9",
+      "value": "20.6268"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "11.0",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "2.5",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "2.5",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Erquelinnes",
+        "fr": "Erquelinnes",
+        "nl": "Erquelinnes"
+      },
+      "nis": "56022",
+      "share_pct": "2.5",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Lobbes",
+        "fr": "Lobbes",
+        "nl": "Lobbes"
+      },
+      "nis": "56044",
+      "share_pct": "2.2",
+      "value": "3.5"
+    }
+  ]
+}

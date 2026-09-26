@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "7.9",
+      "value": "22.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.1",
+      "value": "88.6"
+    },
+    "rest_of_region": {
+      "share_pct": "15.9",
+      "value": "45.3166666666"
+    },
+    "same_commune": {
+      "share_pct": "44.3",
+      "value": "126.07608696"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "284.4927536266",
+  "dest_geo_id": "be:mun:23097",
+  "dest_name": {
+    "en": "Roosdaal",
+    "fr": "Roosdaal",
+    "nl": "Roosdaal"
+  },
+  "dest_nis": "23097",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 289,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Roosdaal",
+        "fr": "Roosdaal",
+        "nl": "Roosdaal"
+      },
+      "nis": "23097",
+      "share_pct": "44.3",
+      "value": "126.07608696"
+    },
+    {
+      "name": {
+        "en": "Ninove",
+        "fr": "Ninove",
+        "nl": "Ninove"
+      },
+      "nis": "41048",
+      "share_pct": "9.8",
+      "value": "28"
+    },
+    {
+      "name": {
+        "en": "Ternat",
+        "fr": "Ternat",
+        "nl": "Ternat"
+      },
+      "nis": "23086",
+      "share_pct": "7.2",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Liedekerke",
+        "fr": "Liedekerke",
+        "nl": "Liedekerke"
+      },
+      "nis": "23044",
+      "share_pct": "6.9",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Lennik",
+        "fr": "Lennik",
+        "nl": "Lennik"
+      },
+      "nis": "23104",
+      "share_pct": "6.3",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "6.2",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "3.5",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "2.1",
+      "value": "5.8333333333"
+    }
+  ]
+}

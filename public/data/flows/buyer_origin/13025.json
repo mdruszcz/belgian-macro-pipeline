@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.9",
+      "value": "9.7942571429"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "3"
+    },
+    "other_regions": {
+      "share_pct": "1.0",
+      "value": "11"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "27.7",
+      "value": "298.151190477"
+    },
+    "rest_of_region": {
+      "share_pct": "13.7",
+      "value": "147.6209809524"
+    },
+    "same_commune": {
+      "share_pct": "56.3",
+      "value": "604.90571429"
+    }
+  },
+  "coverage_pct": "96.8",
+  "dataset": "buyer_origin",
+  "denominator": "1074.4721428623",
+  "dest_geo_id": "be:mun:13025",
+  "dest_name": {
+    "en": "Mol",
+    "fr": "Mol",
+    "nl": "Mol"
+  },
+  "dest_nis": "13025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1110,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Mol",
+        "fr": "Mol",
+        "nl": "Mol"
+      },
+      "nis": "13025",
+      "share_pct": "56.3",
+      "value": "604.90571429"
+    },
+    {
+      "name": {
+        "en": "Balen",
+        "fr": "Balen",
+        "nl": "Balen"
+      },
+      "nis": "13003",
+      "share_pct": "8.5",
+      "value": "91.75952381"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "7.4",
+      "value": "79.142857143"
+    },
+    {
+      "name": {
+        "en": "Lommel",
+        "fr": "Lommel",
+        "nl": "Lommel"
+      },
+      "nis": "72020",
+      "share_pct": "4.0",
+      "value": "42.49"
+    },
+    {
+      "name": {
+        "en": "Dessel",
+        "fr": "Dessel",
+        "nl": "Dessel"
+      },
+      "nis": "13006",
+      "share_pct": "2.8",
+      "value": "30.573809524"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.0",
+      "value": "21.5"
+    },
+    {
+      "name": {
+        "en": "Retie",
+        "fr": "Retie",
+        "nl": "Retie"
+      },
+      "nis": "13036",
+      "share_pct": "1.8",
+      "value": "19.55"
+    },
+    {
+      "name": {
+        "en": "Meerhout",
+        "fr": "Meerhout",
+        "nl": "Meerhout"
+      },
+      "nis": "13021",
+      "share_pct": "1.7",
+      "value": "18.125"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "13.0",
+      "value": "26.1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.2",
+      "value": "40.52"
+    },
+    "rest_of_region": {
+      "share_pct": "16.8",
+      "value": "33.5650017574"
+    },
+    "same_commune": {
+      "share_pct": "48.3",
+      "value": "96.6738"
+    }
+  },
+  "coverage_pct": "94.5",
+  "dataset": "buyer_origin",
+  "denominator": "200.3588017574",
+  "dest_geo_id": "be:mun:71067",
+  "dest_name": {
+    "en": "Zutendaal",
+    "fr": "Zutendaal",
+    "nl": "Zutendaal"
+  },
+  "dest_nis": "71067",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 212,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zutendaal",
+        "fr": "Zutendaal",
+        "nl": "Zutendaal"
+      },
+      "nis": "71067",
+      "share_pct": "48.3",
+      "value": "96.6738"
+    },
+    {
+      "name": {
+        "en": "Genk",
+        "fr": "Genk",
+        "nl": "Genk"
+      },
+      "nis": "71016",
+      "share_pct": "12.0",
+      "value": "24.02"
+    },
+    {
+      "name": {
+        "en": "Bilzen-Hoeselt",
+        "fr": "Bilzen-Hoeselt",
+        "nl": "Bilzen-Hoeselt"
+      },
+      "nis": "73110",
+      "share_pct": "4.2",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "4.0",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "As",
+        "fr": "As",
+        "nl": "As"
+      },
+      "nis": "71002",
+      "share_pct": "2.2",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Diepenbeek",
+        "fr": "Diepenbeek",
+        "nl": "Diepenbeek"
+      },
+      "nis": "71011",
+      "share_pct": "2.0",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Lanaken",
+        "fr": "Lanaken",
+        "nl": "Lanaken"
+      },
+      "nis": "73042",
+      "share_pct": "1.5",
+      "value": "3"
+    }
+  ]
+}

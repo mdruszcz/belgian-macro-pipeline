@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.9",
+      "value": "6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "5.0",
+      "value": "16"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "17.3",
+      "value": "55.166666666"
+    },
+    "rest_of_region": {
+      "share_pct": "6.1",
+      "value": "19.50"
+    },
+    "same_commune": {
+      "share_pct": "69.3",
+      "value": "220.84891775"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "318.515584416",
+  "dest_geo_id": "be:mun:63067",
+  "dest_name": {
+    "en": "Sankt Vith",
+    "fr": "Saint-Vith",
+    "nl": "Sankt Vith"
+  },
+  "dest_nis": "63067",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 330,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sankt Vith",
+        "fr": "Saint-Vith",
+        "nl": "Sankt Vith"
+      },
+      "nis": "63067",
+      "share_pct": "69.3",
+      "value": "220.84891775"
+    },
+    {
+      "name": {
+        "en": "Burg-Reuland",
+        "fr": "Burg-Reuland",
+        "nl": "Burg-Reuland"
+      },
+      "nis": "63087",
+      "share_pct": "8.6",
+      "value": "27.333333333"
+    },
+    {
+      "name": {
+        "en": "Amel",
+        "fr": "Amblève",
+        "nl": "Amel"
+      },
+      "nis": "63001",
+      "share_pct": "5.3",
+      "value": "16.833333333"
+    },
+    {
+      "name": {
+        "en": "Gouvy",
+        "fr": "Gouvy",
+        "nl": "Gouvy"
+      },
+      "nis": "82037",
+      "share_pct": "3.6",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Büllingen",
+        "fr": "Bullange",
+        "nl": "Büllingen"
+      },
+      "nis": "63012",
+      "share_pct": "1.9",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Sint-Niklaas",
+        "fr": "Saint-Nicolas",
+        "nl": "Sint-Niklaas"
+      },
+      "nis": "46021",
+      "share_pct": "0.9",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Bütgenbach",
+        "fr": "Butgenbach",
+        "nl": "Bütgenbach"
+      },
+      "nis": "63013",
+      "share_pct": "0.9",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Gingelom",
+        "fr": "Gingelom",
+        "nl": "Gingelom"
+      },
+      "nis": "71017",
+      "share_pct": "0.9",
+      "value": "3"
+    }
+  ]
+}

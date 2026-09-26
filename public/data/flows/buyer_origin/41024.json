@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "7.3",
+      "value": "37"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "37.7",
+      "value": "191.555"
+    },
+    "rest_of_region": {
+      "share_pct": "12.0",
+      "value": "61.0"
+    },
+    "same_commune": {
+      "share_pct": "43.1",
+      "value": "219.04070505"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "508.59570505",
+  "dest_geo_id": "be:mun:41024",
+  "dest_name": {
+    "en": "Haaltert",
+    "fr": "Haaltert",
+    "nl": "Haaltert"
+  },
+  "dest_nis": "41024",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 520,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Haaltert",
+        "fr": "Haaltert",
+        "nl": "Haaltert"
+      },
+      "nis": "41024",
+      "share_pct": "43.1",
+      "value": "219.04070505"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "13.3",
+      "value": "67.55"
+    },
+    {
+      "name": {
+        "en": "Ninove",
+        "fr": "Ninove",
+        "nl": "Ninove"
+      },
+      "nis": "41048",
+      "share_pct": "9.3",
+      "value": "47.5"
+    },
+    {
+      "name": {
+        "en": "Denderleeuw",
+        "fr": "Denderleeuw",
+        "nl": "Denderleeuw"
+      },
+      "nis": "41011",
+      "share_pct": "6.1",
+      "value": "31"
+    },
+    {
+      "name": {
+        "en": "Erpe-Mere",
+        "fr": "Erpe-Mere",
+        "nl": "Erpe-Mere"
+      },
+      "nis": "41082",
+      "share_pct": "4.3",
+      "value": "22.005"
+    },
+    {
+      "name": {
+        "en": "Herzele",
+        "fr": "Herzele",
+        "nl": "Herzele"
+      },
+      "nis": "41027",
+      "share_pct": "2.2",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "1.8",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Liedekerke",
+        "fr": "Liedekerke",
+        "nl": "Liedekerke"
+      },
+      "nis": "23044",
+      "share_pct": "1.8",
+      "value": "9"
+    }
+  ]
+}

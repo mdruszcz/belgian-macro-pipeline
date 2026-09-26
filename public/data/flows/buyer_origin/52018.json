@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.8",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "46.1",
+      "value": "102.0"
+    },
+    "rest_of_region": {
+      "share_pct": "22.6",
+      "value": "50.0"
+    },
+    "same_commune": {
+      "share_pct": "29.0",
+      "value": "64.071428571"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "221.071428571",
+  "dest_geo_id": "be:mun:52018",
+  "dest_name": {
+    "en": "Farciennes",
+    "fr": "Farciennes",
+    "nl": "Farciennes"
+  },
+  "dest_nis": "52018",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 226,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Farciennes",
+        "fr": "Farciennes",
+        "nl": "Farciennes"
+      },
+      "nis": "52018",
+      "share_pct": "29.0",
+      "value": "64.071428571"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "12.4",
+      "value": "27.5"
+    },
+    {
+      "name": {
+        "en": "Fleurus",
+        "fr": "Fleurus",
+        "nl": "Fleurus"
+      },
+      "nis": "52021",
+      "share_pct": "9.5",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Pont-à-Celles",
+        "fr": "Pont-à-Celles",
+        "nl": "Pont-à-Celles"
+      },
+      "nis": "52055",
+      "share_pct": "8.1",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Aiseau-Presles",
+        "fr": "Aiseau-Presles",
+        "nl": "Aiseau-Presles"
+      },
+      "nis": "52074",
+      "share_pct": "7.2",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Châtelet",
+        "fr": "Châtelet",
+        "nl": "Châtelet"
+      },
+      "nis": "52012",
+      "share_pct": "6.8",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Jemeppe-sur-Sambre",
+        "fr": "Jemeppe-sur-Sambre",
+        "nl": "Jemeppe-sur-Sambre"
+      },
+      "nis": "92140",
+      "share_pct": "6.1",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "2.3",
+      "value": "5"
+    }
+  ]
+}

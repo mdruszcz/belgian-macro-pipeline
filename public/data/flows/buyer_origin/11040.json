@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "5.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "2.5269230769"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "49.6",
+      "value": "440.31782051"
+    },
+    "rest_of_region": {
+      "share_pct": "3.7",
+      "value": "32.9283333333"
+    },
+    "same_commune": {
+      "share_pct": "45.6",
+      "value": "404.66543616"
+    }
+  },
+  "coverage_pct": "96.8",
+  "dataset": "buyer_origin",
+  "denominator": "886.9385130802",
+  "dest_geo_id": "be:mun:11040",
+  "dest_name": {
+    "en": "Schoten",
+    "fr": "Schoten",
+    "nl": "Schoten"
+  },
+  "dest_nis": "11040",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 916,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Schoten",
+        "fr": "Schoten",
+        "nl": "Schoten"
+      },
+      "nis": "11040",
+      "share_pct": "45.6",
+      "value": "404.66543616"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "27.2",
+      "value": "240.87782051"
+    },
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "5.1",
+      "value": "45.45"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "4.1",
+      "value": "36"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "3.5",
+      "value": "30.74"
+    },
+    {
+      "name": {
+        "en": "Wijnegem",
+        "fr": "Wijnegem",
+        "nl": "Wijnegem"
+      },
+      "nis": "11050",
+      "share_pct": "1.9",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Kapellen",
+        "fr": "Kapellen",
+        "nl": "Kapellen"
+      },
+      "nis": "11023",
+      "share_pct": "1.2",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Wommelgem",
+        "fr": "Wommelgem",
+        "nl": "Wommelgem"
+      },
+      "nis": "11052",
+      "share_pct": "1.1",
+      "value": "9.5"
+    }
+  ]
+}

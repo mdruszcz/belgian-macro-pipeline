@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "1.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "33.9",
+      "value": "187.42723333"
+    },
+    "rest_of_region": {
+      "share_pct": "11.1",
+      "value": "61.3433333337"
+    },
+    "same_commune": {
+      "share_pct": "54.6",
+      "value": "302.16535566"
+    }
+  },
+  "coverage_pct": "97.0",
+  "dataset": "buyer_origin",
+  "denominator": "552.9359223237",
+  "dest_geo_id": "be:mun:44085",
+  "dest_name": {
+    "en": "Lievegem",
+    "fr": "Lievegem",
+    "nl": "Lievegem"
+  },
+  "dest_nis": "44085",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 570,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "54.6",
+      "value": "302.16535566"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "19.9",
+      "value": "110.02723333"
+    },
+    {
+      "name": {
+        "en": "Evergem",
+        "fr": "Evergem",
+        "nl": "Evergem"
+      },
+      "nis": "44019",
+      "share_pct": "7.9",
+      "value": "43.8"
+    },
+    {
+      "name": {
+        "en": "Aalter",
+        "fr": "Aalter",
+        "nl": "Aalter"
+      },
+      "nis": "44084",
+      "share_pct": "2.4",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "2.2",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Eeklo",
+        "fr": "Eeklo",
+        "nl": "Eeklo"
+      },
+      "nis": "43005",
+      "share_pct": "2.0",
+      "value": "11.1"
+    },
+    {
+      "name": {
+        "en": "Maldegem",
+        "fr": "Maldegem",
+        "nl": "Maldegem"
+      },
+      "nis": "43010",
+      "share_pct": "1.9",
+      "value": "10.666666667"
+    },
+    {
+      "name": {
+        "en": "Assenede",
+        "fr": "Assenede",
+        "nl": "Assenede"
+      },
+      "nis": "43002",
+      "share_pct": "1.0",
+      "value": "5.5"
+    }
+  ]
+}

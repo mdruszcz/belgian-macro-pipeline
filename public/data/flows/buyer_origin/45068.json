@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "8.6",
+      "value": "28.0300000003"
+    },
+    "rest_of_region": {
+      "share_pct": "40.7",
+      "value": "133.500"
+    },
+    "same_commune": {
+      "share_pct": "50.4",
+      "value": "165.19336667"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "327.7233666703",
+  "dest_geo_id": "be:mun:45068",
+  "dest_name": {
+    "en": "Kruisem",
+    "fr": "Kruisem",
+    "nl": "Kruisem"
+  },
+  "dest_nis": "45068",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 337,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "50.4",
+      "value": "165.19336667"
+    },
+    {
+      "name": {
+        "en": "Nazareth-De Pinte",
+        "fr": "Nazareth-De Pinte",
+        "nl": "Nazareth-De Pinte"
+      },
+      "nis": "44086",
+      "share_pct": "6.0",
+      "value": "19.5"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "5.9",
+      "value": "19.407"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "5.8",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "4.8",
+      "value": "15.696666667"
+    },
+    {
+      "name": {
+        "en": "Zulte",
+        "fr": "Zulte",
+        "nl": "Zulte"
+      },
+      "nis": "44081",
+      "share_pct": "3.4",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Waregem",
+        "fr": "Waregem",
+        "nl": "Waregem"
+      },
+      "nis": "34040",
+      "share_pct": "2.3",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Gavere",
+        "fr": "Gavere",
+        "nl": "Gavere"
+      },
+      "nis": "44020",
+      "share_pct": "2.3",
+      "value": "7.5"
+    }
+  ]
+}

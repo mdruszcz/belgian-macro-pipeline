@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.8",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.0",
+      "value": "32.8233333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "30.2",
+      "value": "82.56"
+    },
+    "rest_of_region": {
+      "share_pct": "11.2",
+      "value": "30.6900000000"
+    },
+    "same_commune": {
+      "share_pct": "44.7",
+      "value": "122.01666667"
+    }
+  },
+  "coverage_pct": "95.2",
+  "dataset": "buyer_origin",
+  "denominator": "273.0900000033",
+  "dest_geo_id": "be:mun:25107",
+  "dest_name": {
+    "en": "Villers-la-Ville",
+    "fr": "Villers-la-Ville",
+    "nl": "Villers-la-Ville"
+  },
+  "dest_nis": "25107",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 287,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Villers-la-Ville",
+        "fr": "Villers-la-Ville",
+        "nl": "Villers-la-Ville"
+      },
+      "nis": "25107",
+      "share_pct": "44.7",
+      "value": "122.01666667"
+    },
+    {
+      "name": {
+        "en": "Genappe",
+        "fr": "Genappe",
+        "nl": "Genepiën"
+      },
+      "nis": "25031",
+      "share_pct": "7.0",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "3.7",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Court-Saint-Etienne",
+        "fr": "Court-Saint-Etienne",
+        "nl": "Court-Saint-Etienne"
+      },
+      "nis": "25023",
+      "share_pct": "3.1",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Rixensart",
+        "fr": "Rixensart",
+        "nl": "Rixensart"
+      },
+      "nis": "25091",
+      "share_pct": "2.7",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "2.7",
+      "value": "7.25"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "2.4",
+      "value": "6.6666666667"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "2.4",
+      "value": "6.5"
+    }
+  ]
+}

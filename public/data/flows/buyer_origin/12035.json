@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.8",
+      "value": "29.3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.6",
+      "value": "3.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "39.5",
+      "value": "240.157444444"
+    },
+    "rest_of_region": {
+      "share_pct": "26.3",
+      "value": "159.8333333333"
+    },
+    "same_commune": {
+      "share_pct": "28.8",
+      "value": "175.12"
+    }
+  },
+  "coverage_pct": "98.7",
+  "dataset": "buyer_origin",
+  "denominator": "607.9107777773",
+  "dest_geo_id": "be:mun:12035",
+  "dest_name": {
+    "en": "Sint-Katelijne-Waver",
+    "fr": "Sint-Katelijne-Waver",
+    "nl": "Sint-Katelijne-Waver"
+  },
+  "dest_nis": "12035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 616,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sint-Katelijne-Waver",
+        "fr": "Sint-Katelijne-Waver",
+        "nl": "Sint-Katelijne-Waver"
+      },
+      "nis": "12035",
+      "share_pct": "28.8",
+      "value": "175.12"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "26.8",
+      "value": "162.713"
+    },
+    {
+      "name": {
+        "en": "Bonheiden",
+        "fr": "Bonheiden",
+        "nl": "Bonheiden"
+      },
+      "nis": "12005",
+      "share_pct": "4.6",
+      "value": "28"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "4.3",
+      "value": "26"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "3.6",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Duffel",
+        "fr": "Duffel",
+        "nl": "Duffel"
+      },
+      "nis": "12009",
+      "share_pct": "3.2",
+      "value": "19.694444444"
+    },
+    {
+      "name": {
+        "en": "Putte",
+        "fr": "Putte",
+        "nl": "Putte"
+      },
+      "nis": "12029",
+      "share_pct": "2.5",
+      "value": "15.25"
+    },
+    {
+      "name": {
+        "en": "Rumst",
+        "fr": "Rumst",
+        "nl": "Rumst"
+      },
+      "nis": "11037",
+      "share_pct": "2.1",
+      "value": "12.5"
+    }
+  ]
+}

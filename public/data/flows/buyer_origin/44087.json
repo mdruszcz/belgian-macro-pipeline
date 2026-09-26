@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1.1"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "2.98"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.3",
+      "value": "197.36"
+    },
+    "rest_of_region": {
+      "share_pct": "19.0",
+      "value": "142.4141025641"
+    },
+    "same_commune": {
+      "share_pct": "53.5",
+      "value": "400.89339221"
+    }
+  },
+  "coverage_pct": "95.4",
+  "dataset": "buyer_origin",
+  "denominator": "749.7474947741",
+  "dest_geo_id": "be:mun:44087",
+  "dest_name": {
+    "en": "Lochristi",
+    "fr": "Lochristi",
+    "nl": "Lochristi"
+  },
+  "dest_nis": "44087",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 786,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lochristi",
+        "fr": "Lochristi",
+        "nl": "Lochristi"
+      },
+      "nis": "44087",
+      "share_pct": "53.5",
+      "value": "400.89339221"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "21.0",
+      "value": "157.46"
+    },
+    {
+      "name": {
+        "en": "Lokeren",
+        "fr": "Lokeren",
+        "nl": "Lokeren"
+      },
+      "nis": "46029",
+      "share_pct": "6.8",
+      "value": "50.75"
+    },
+    {
+      "name": {
+        "en": "Destelbergen",
+        "fr": "Destelbergen",
+        "nl": "Destelbergen"
+      },
+      "nis": "44013",
+      "share_pct": "3.6",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Zelzate",
+        "fr": "Zelzate",
+        "nl": "Zelzate"
+      },
+      "nis": "43018",
+      "share_pct": "2.1",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Berlare",
+        "fr": "Berlare",
+        "nl": "Berlare"
+      },
+      "nis": "42003",
+      "share_pct": "1.1",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Wetteren",
+        "fr": "Wetteren",
+        "nl": "Wetteren"
+      },
+      "nis": "42025",
+      "share_pct": "1.0",
+      "value": "7.125"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "0.7",
+      "value": "5"
+    }
+  ]
+}

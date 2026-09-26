@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "2.005"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.0",
+      "value": "14.3333333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.6",
+      "value": "74.5"
+    },
+    "rest_of_region": {
+      "share_pct": "41.2",
+      "value": "148.6716666667"
+    },
+    "same_commune": {
+      "share_pct": "33.7",
+      "value": "121.61090909"
+    }
+  },
+  "coverage_pct": "98.7",
+  "dataset": "buyer_origin",
+  "denominator": "361.1209090900",
+  "dest_geo_id": "be:mun:58004",
+  "dest_name": {
+    "en": "Morlanwelz",
+    "fr": "Morlanwelz",
+    "nl": "Morlanwelz"
+  },
+  "dest_nis": "58004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 366,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Morlanwelz",
+        "fr": "Morlanwelz",
+        "nl": "Morlanwelz"
+      },
+      "nis": "58004",
+      "share_pct": "33.7",
+      "value": "121.61090909"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "14.5",
+      "value": "52.5"
+    },
+    {
+      "name": {
+        "en": "Manage",
+        "fr": "Manage",
+        "nl": "Manage"
+      },
+      "nis": "55086",
+      "share_pct": "8.4",
+      "value": "30.5"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "6.1",
+      "value": "22"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "5.8",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "3.0",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Fontaine-l’Evêque",
+        "fr": "Fontaine-l’Evêque",
+        "nl": "Fontaine-l’Evêque"
+      },
+      "nis": "52022",
+      "share_pct": "2.8",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Anderlues",
+        "fr": "Anderlues",
+        "nl": "Anderlues"
+      },
+      "nis": "56001",
+      "share_pct": "2.5",
+      "value": "9"
+    }
+  ]
+}

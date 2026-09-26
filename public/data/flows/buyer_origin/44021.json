@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "60.9250238095"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "10.405"
+    },
+    "other_regions": {
+      "share_pct": "1.1",
+      "value": "79.033333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.5",
+      "value": "922.214954434"
+    },
+    "rest_of_region": {
+      "share_pct": "25.1",
+      "value": "1858.2577587313"
+    },
+    "same_commune": {
+      "share_pct": "60.4",
+      "value": "4476.415064"
+    }
+  },
+  "coverage_pct": "95.4",
+  "dataset": "buyer_origin",
+  "denominator": "7407.2511343078",
+  "dest_geo_id": "be:mun:44021",
+  "dest_name": {
+    "en": "Ghent",
+    "fr": "Gand",
+    "nl": "Gent"
+  },
+  "dest_nis": "44021",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 7766,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "60.4",
+      "value": "4476.415064"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "2.1",
+      "value": "153.96666667"
+    },
+    {
+      "name": {
+        "en": "Destelbergen",
+        "fr": "Destelbergen",
+        "nl": "Destelbergen"
+      },
+      "nis": "44013",
+      "share_pct": "1.6",
+      "value": "122.211"
+    },
+    {
+      "name": {
+        "en": "Lochristi",
+        "fr": "Lochristi",
+        "nl": "Lochristi"
+      },
+      "nis": "44087",
+      "share_pct": "1.5",
+      "value": "113.22223775"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "1.5",
+      "value": "109.72"
+    },
+    {
+      "name": {
+        "en": "Nazareth-De Pinte",
+        "fr": "Nazareth-De Pinte",
+        "nl": "Nazareth-De Pinte"
+      },
+      "nis": "44086",
+      "share_pct": "1.2",
+      "value": "87.055555556"
+    },
+    {
+      "name": {
+        "en": "Lievegem",
+        "fr": "Lievegem",
+        "nl": "Lievegem"
+      },
+      "nis": "44085",
+      "share_pct": "1.2",
+      "value": "85.969040404"
+    },
+    {
+      "name": {
+        "en": "Evergem",
+        "fr": "Evergem",
+        "nl": "Evergem"
+      },
+      "nis": "44019",
+      "share_pct": "1.0",
+      "value": "73.924054054"
+    }
+  ]
+}

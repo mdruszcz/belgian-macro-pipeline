@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "27.1",
+      "value": "55.7466666667"
+    },
+    "rest_of_region": {
+      "share_pct": "17.4",
+      "value": "35.6324285714"
+    },
+    "same_commune": {
+      "share_pct": "54.8",
+      "value": "112.48222222"
+    }
+  },
+  "coverage_pct": "95.1",
+  "dataset": "buyer_origin",
+  "denominator": "205.3613174581",
+  "dest_geo_id": "be:mun:36006",
+  "dest_name": {
+    "en": "Hooglede",
+    "fr": "Hooglede",
+    "nl": "Hooglede"
+  },
+  "dest_nis": "36006",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 216,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hooglede",
+        "fr": "Hooglede",
+        "nl": "Hooglede"
+      },
+      "nis": "36006",
+      "share_pct": "54.8",
+      "value": "112.48222222"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "14.9",
+      "value": "30.52"
+    },
+    {
+      "name": {
+        "en": "Lichtervelde",
+        "fr": "Lichtervelde",
+        "nl": "Lichtervelde"
+      },
+      "nis": "36011",
+      "share_pct": "6.4",
+      "value": "13.06"
+    },
+    {
+      "name": {
+        "en": "Staden",
+        "fr": "Staden",
+        "nl": "Staden"
+      },
+      "nis": "36019",
+      "share_pct": "4.2",
+      "value": "8.6666666667"
+    },
+    {
+      "name": {
+        "en": "Torhout",
+        "fr": "Torhout",
+        "nl": "Torhout"
+      },
+      "nis": "31033",
+      "share_pct": "3.4",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "2.7",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Kortemark",
+        "fr": "Kortemark",
+        "nl": "Kortemark"
+      },
+      "nis": "32011",
+      "share_pct": "2.0",
+      "value": "4.061"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.5",
+      "value": "3.0714285714"
+    }
+  ]
+}

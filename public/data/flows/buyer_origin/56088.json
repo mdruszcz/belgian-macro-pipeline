@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.8",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "9.9",
+      "value": "12"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "13.1",
+      "value": "16"
+    },
+    "rest_of_region": {
+      "share_pct": "16.6",
+      "value": "20.25"
+    },
+    "same_commune": {
+      "share_pct": "59.6",
+      "value": "72.53"
+    }
+  },
+  "coverage_pct": "95.1",
+  "dataset": "buyer_origin",
+  "denominator": "121.78",
+  "dest_geo_id": "be:mun:56088",
+  "dest_name": {
+    "en": "Sivry-Rance",
+    "fr": "Sivry-Rance",
+    "nl": "Sivry-Rance"
+  },
+  "dest_nis": "56088",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 128,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sivry-Rance",
+        "fr": "Sivry-Rance",
+        "nl": "Sivry-Rance"
+      },
+      "nis": "56088",
+      "share_pct": "59.6",
+      "value": "72.53"
+    },
+    {
+      "name": {
+        "en": "Beaumont",
+        "fr": "Beaumont",
+        "nl": "Beaumont"
+      },
+      "nis": "56005",
+      "share_pct": "5.7",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Froidchapelle",
+        "fr": "Froidchapelle",
+        "nl": "Froidchapelle"
+      },
+      "nis": "56029",
+      "share_pct": "4.9",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "4.1",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Havelange",
+        "fr": "Havelange",
+        "nl": "Havelange"
+      },
+      "nis": "91064",
+      "share_pct": "3.3",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "2.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Florennes",
+        "fr": "Florennes",
+        "nl": "Florennes"
+      },
+      "nis": "93022",
+      "share_pct": "2.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Walcourt",
+        "fr": "Walcourt",
+        "nl": "Walcourt"
+      },
+      "nis": "93088",
+      "share_pct": "2.5",
+      "value": "3"
+    }
+  ]
+}

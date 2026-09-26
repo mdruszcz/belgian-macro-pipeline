@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "9.5",
+      "value": "97.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.8",
+      "value": "151.081818182"
+    },
+    "rest_of_region": {
+      "share_pct": "20.5",
+      "value": "210.09"
+    },
+    "same_commune": {
+      "share_pct": "55.0",
+      "value": "562.72889831"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "1023.400716492",
+  "dest_geo_id": "be:mun:41048",
+  "dest_name": {
+    "en": "Ninove",
+    "fr": "Ninove",
+    "nl": "Ninove"
+  },
+  "dest_nis": "41048",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1042,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ninove",
+        "fr": "Ninove",
+        "nl": "Ninove"
+      },
+      "nis": "41048",
+      "share_pct": "55.0",
+      "value": "562.72889831"
+    },
+    {
+      "name": {
+        "en": "Pajottegem",
+        "fr": "Pajottegem",
+        "nl": "Pajottegem"
+      },
+      "nis": "23106",
+      "share_pct": "4.3",
+      "value": "44"
+    },
+    {
+      "name": {
+        "en": "Geraardsbergen",
+        "fr": "Grammont",
+        "nl": "Geraardsbergen"
+      },
+      "nis": "41018",
+      "share_pct": "3.4",
+      "value": "35"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "3.1",
+      "value": "31.5"
+    },
+    {
+      "name": {
+        "en": "Roosdaal",
+        "fr": "Roosdaal",
+        "nl": "Roosdaal"
+      },
+      "nis": "23097",
+      "share_pct": "3.0",
+      "value": "30.54"
+    },
+    {
+      "name": {
+        "en": "Denderleeuw",
+        "fr": "Denderleeuw",
+        "nl": "Denderleeuw"
+      },
+      "nis": "41011",
+      "share_pct": "2.7",
+      "value": "27.4"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "2.4",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Haaltert",
+        "fr": "Haaltert",
+        "nl": "Haaltert"
+      },
+      "nis": "41024",
+      "share_pct": "2.4",
+      "value": "24.431818182"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.2",
+      "value": "12.25"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "37.9",
+      "value": "144.96"
+    },
+    "rest_of_region": {
+      "share_pct": "29.4",
+      "value": "112.6000"
+    },
+    "same_commune": {
+      "share_pct": "28.9",
+      "value": "110.6155"
+    }
+  },
+  "coverage_pct": "97.6",
+  "dataset": "buyer_origin",
+  "denominator": "382.4255",
+  "dest_geo_id": "be:mun:12005",
+  "dest_name": {
+    "en": "Bonheiden",
+    "fr": "Bonheiden",
+    "nl": "Bonheiden"
+  },
+  "dest_nis": "12005",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 392,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Bonheiden",
+        "fr": "Bonheiden",
+        "nl": "Bonheiden"
+      },
+      "nis": "12005",
+      "share_pct": "28.9",
+      "value": "110.6155"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "27.3",
+      "value": "104.55"
+    },
+    {
+      "name": {
+        "en": "Keerbergen",
+        "fr": "Keerbergen",
+        "nl": "Keerbergen"
+      },
+      "nis": "24048",
+      "share_pct": "5.1",
+      "value": "19.6731"
+    },
+    {
+      "name": {
+        "en": "Sint-Katelijne-Waver",
+        "fr": "Sint-Katelijne-Waver",
+        "nl": "Sint-Katelijne-Waver"
+      },
+      "nis": "12035",
+      "share_pct": "4.2",
+      "value": "16.01"
+    },
+    {
+      "name": {
+        "en": "Zemst",
+        "fr": "Zemst",
+        "nl": "Zemst"
+      },
+      "nis": "23096",
+      "share_pct": "3.2",
+      "value": "12.1"
+    },
+    {
+      "name": {
+        "en": "Boortmeerbeek",
+        "fr": "Boortmeerbeek",
+        "nl": "Boortmeerbeek"
+      },
+      "nis": "24014",
+      "share_pct": "2.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Putte",
+        "fr": "Putte",
+        "nl": "Putte"
+      },
+      "nis": "12029",
+      "share_pct": "2.5",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Haacht",
+        "fr": "Haacht",
+        "nl": "Haacht"
+      },
+      "nis": "24033",
+      "share_pct": "2.2",
+      "value": "8.5"
+    }
+  ]
+}

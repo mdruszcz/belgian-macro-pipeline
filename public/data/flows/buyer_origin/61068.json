@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.0",
+      "value": "7"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.8",
+      "value": "41.3833333333"
+    },
+    "rest_of_region": {
+      "share_pct": "34.0",
+      "value": "47.1668666666"
+    },
+    "same_commune": {
+      "share_pct": "30.7",
+      "value": "42.6002"
+    }
+  },
+  "coverage_pct": "95.0",
+  "dataset": "buyer_origin",
+  "denominator": "138.6503999999",
+  "dest_geo_id": "be:mun:61068",
+  "dest_name": {
+    "en": "Villers-Le-Bouillet",
+    "fr": "Villers-Le-Bouillet",
+    "nl": "Villers-Le-Bouillet"
+  },
+  "dest_nis": "61068",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 146,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Villers-Le-Bouillet",
+        "fr": "Villers-Le-Bouillet",
+        "nl": "Villers-Le-Bouillet"
+      },
+      "nis": "61068",
+      "share_pct": "30.7",
+      "value": "42.6002"
+    },
+    {
+      "name": {
+        "en": "Wanze",
+        "fr": "Wanze",
+        "nl": "Wanze"
+      },
+      "nis": "61072",
+      "share_pct": "9.0",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Amay",
+        "fr": "Amay",
+        "nl": "Amay"
+      },
+      "nis": "61003",
+      "share_pct": "7.2",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "5.4",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Verlaine",
+        "fr": "Verlaine",
+        "nl": "Verlaine"
+      },
+      "nis": "61063",
+      "share_pct": "5.3",
+      "value": "7.3833333333"
+    },
+    {
+      "name": {
+        "en": "Huy",
+        "fr": "Huy",
+        "nl": "Hoei"
+      },
+      "nis": "61031",
+      "share_pct": "4.0",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Wezembeek-Oppem",
+        "fr": "Wezembeek-Oppem",
+        "nl": "Wezembeek-Oppem"
+      },
+      "nis": "23103",
+      "share_pct": "3.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Saint-Georges-sur-Meuse",
+        "fr": "Saint-Georges-sur-Meuse",
+        "nl": "Saint-Georges-sur-Meuse"
+      },
+      "nis": "64065",
+      "share_pct": "3.2",
+      "value": "4.5"
+    }
+  ]
+}

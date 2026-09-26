@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.5",
+      "value": "2.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.6",
+      "value": "9.5400000000"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.4",
+      "value": "45.0100000000"
+    },
+    "rest_of_region": {
+      "share_pct": "9.1",
+      "value": "15.5"
+    },
+    "same_commune": {
+      "share_pct": "57.5",
+      "value": "98.166666667"
+    }
+  },
+  "coverage_pct": "98.7",
+  "dataset": "buyer_origin",
+  "denominator": "170.7166666670",
+  "dest_geo_id": "be:mun:83028",
+  "dest_name": {
+    "en": "Hotton",
+    "fr": "Hotton",
+    "nl": "Hotton"
+  },
+  "dest_nis": "83028",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 173,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hotton",
+        "fr": "Hotton",
+        "nl": "Hotton"
+      },
+      "nis": "83028",
+      "share_pct": "57.5",
+      "value": "98.166666667"
+    },
+    {
+      "name": {
+        "en": "Marche-en-Famenne",
+        "fr": "Marche-en-Famenne",
+        "nl": "Marche-en-Famenne"
+      },
+      "nis": "83034",
+      "share_pct": "9.4",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Rendeux",
+        "fr": "Rendeux",
+        "nl": "Rendeux"
+      },
+      "nis": "83044",
+      "share_pct": "6.4",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Erezée",
+        "fr": "Erezée",
+        "nl": "Erezée"
+      },
+      "nis": "83013",
+      "share_pct": "4.9",
+      "value": "8.3433333333"
+    },
+    {
+      "name": {
+        "en": "Durbuy",
+        "fr": "Durbuy",
+        "nl": "Durbuy"
+      },
+      "nis": "83012",
+      "share_pct": "3.3",
+      "value": "5.6666666667"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "1.8",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Manhay",
+        "fr": "Manhay",
+        "nl": "Manhay"
+      },
+      "nis": "83055",
+      "share_pct": "1.8",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "1.4",
+      "value": "2.3333333333"
+    }
+  ]
+}

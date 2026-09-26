@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.5",
+      "value": "43.3"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1.4"
+    },
+    "other_regions": {
+      "share_pct": "20.6",
+      "value": "352.9683295265"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "2.7",
+      "value": "46.84"
+    },
+    "rest_of_region": {
+      "share_pct": "57.3",
+      "value": "980.1859783084"
+    },
+    "same_commune": {
+      "share_pct": "16.7",
+      "value": "285.32865909"
+    }
+  },
+  "coverage_pct": "94.5",
+  "dataset": "buyer_origin",
+  "denominator": "1710.0229669249",
+  "dest_geo_id": "be:mun:38014",
+  "dest_name": {
+    "en": "Koksijde",
+    "fr": "Koksijde",
+    "nl": "Koksijde"
+  },
+  "dest_nis": "38014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1810,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Koksijde",
+        "fr": "Koksijde",
+        "nl": "Koksijde"
+      },
+      "nis": "38014",
+      "share_pct": "16.7",
+      "value": "285.32865909"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.7",
+      "value": "46.3"
+    },
+    {
+      "name": {
+        "en": "Kortrijk",
+        "fr": "Courtrai",
+        "nl": "Kortrijk"
+      },
+      "nis": "34022",
+      "share_pct": "2.7",
+      "value": "45.5"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.7",
+      "value": "28.55"
+    },
+    {
+      "name": {
+        "en": "Menen",
+        "fr": "Menin",
+        "nl": "Menen"
+      },
+      "nis": "34027",
+      "share_pct": "1.4",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "1.3",
+      "value": "23.02"
+    },
+    {
+      "name": {
+        "en": "Dilbeek",
+        "fr": "Dilbeek",
+        "nl": "Dilbeek"
+      },
+      "nis": "23016",
+      "share_pct": "1.1",
+      "value": "19.0525"
+    },
+    {
+      "name": {
+        "en": "Poperinge",
+        "fr": "Poperinge",
+        "nl": "Poperinge"
+      },
+      "nis": "33021",
+      "share_pct": "1.1",
+      "value": "18"
+    }
+  ]
+}

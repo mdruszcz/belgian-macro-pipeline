@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.4",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.2",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.0",
+      "value": "171.651666667"
+    },
+    "rest_of_region": {
+      "share_pct": "6.2",
+      "value": "36.9485714282"
+    },
+    "same_commune": {
+      "share_pct": "63.3",
+      "value": "374.64694444"
+    }
+  },
+  "coverage_pct": "94.6",
+  "dataset": "buyer_origin",
+  "denominator": "592.2471825352",
+  "dest_geo_id": "be:mun:13017",
+  "dest_name": {
+    "en": "Kasterlee",
+    "fr": "Kasterlee",
+    "nl": "Kasterlee"
+  },
+  "dest_nis": "13017",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 626,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kasterlee",
+        "fr": "Kasterlee",
+        "nl": "Kasterlee"
+      },
+      "nis": "13017",
+      "share_pct": "63.3",
+      "value": "374.64694444"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "5.4",
+      "value": "32"
+    },
+    {
+      "name": {
+        "en": "Lille",
+        "fr": "Lille",
+        "nl": "Lille"
+      },
+      "nis": "13019",
+      "share_pct": "3.5",
+      "value": "20.726666667"
+    },
+    {
+      "name": {
+        "en": "Turnhout",
+        "fr": "Turnhout",
+        "nl": "Turnhout"
+      },
+      "nis": "13040",
+      "share_pct": "2.6",
+      "value": "15.125"
+    },
+    {
+      "name": {
+        "en": "Retie",
+        "fr": "Retie",
+        "nl": "Retie"
+      },
+      "nis": "13036",
+      "share_pct": "2.5",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "2.4",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.1",
+      "value": "12.323333333"
+    },
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "2.0",
+      "value": "12"
+    }
+  ]
+}

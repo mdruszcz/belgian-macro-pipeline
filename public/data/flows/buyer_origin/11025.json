@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.1",
+      "value": "0.25"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "46.5",
+      "value": "97.65"
+    },
+    "rest_of_region": {
+      "share_pct": "21.4",
+      "value": "45.0"
+    },
+    "same_commune": {
+      "share_pct": "32.0",
+      "value": "67.2174"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "210.1174",
+  "dest_geo_id": "be:mun:11025",
+  "dest_name": {
+    "en": "Lint",
+    "fr": "Lint",
+    "nl": "Lint"
+  },
+  "dest_nis": "11025",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 212,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lint",
+        "fr": "Lint",
+        "nl": "Lint"
+      },
+      "nis": "11025",
+      "share_pct": "32.0",
+      "value": "67.2174"
+    },
+    {
+      "name": {
+        "en": "Kontich",
+        "fr": "Kontich",
+        "nl": "Kontich"
+      },
+      "nis": "11024",
+      "share_pct": "13.8",
+      "value": "29.1"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "10.0",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Hove",
+        "fr": "Hove",
+        "nl": "Hove"
+      },
+      "nis": "11021",
+      "share_pct": "6.0",
+      "value": "12.55"
+    },
+    {
+      "name": {
+        "en": "Edegem",
+        "fr": "Edegem",
+        "nl": "Edegem"
+      },
+      "nis": "11013",
+      "share_pct": "5.0",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "5.0",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Mortsel",
+        "fr": "Mortsel",
+        "nl": "Mortsel"
+      },
+      "nis": "11029",
+      "share_pct": "3.6",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Duffel",
+        "fr": "Duffel",
+        "nl": "Duffel"
+      },
+      "nis": "12009",
+      "share_pct": "2.9",
+      "value": "6"
+    }
+  ]
+}

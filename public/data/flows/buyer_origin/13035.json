@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "8.5",
+      "value": "48.283333333"
+    },
+    "origin_unknown": {
+      "share_pct": "0.7",
+      "value": "4"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "23.5",
+      "value": "133.11"
+    },
+    "rest_of_region": {
+      "share_pct": "7.4",
+      "value": "42.0"
+    },
+    "same_commune": {
+      "share_pct": "59.8",
+      "value": "338.93456667"
+    }
+  },
+  "coverage_pct": "94.7",
+  "dataset": "buyer_origin",
+  "denominator": "566.327900003",
+  "dest_geo_id": "be:mun:13035",
+  "dest_name": {
+    "en": "Ravels",
+    "fr": "Ravels",
+    "nl": "Ravels"
+  },
+  "dest_nis": "13035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 598,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ravels",
+        "fr": "Ravels",
+        "nl": "Ravels"
+      },
+      "nis": "13035",
+      "share_pct": "59.8",
+      "value": "338.93456667"
+    },
+    {
+      "name": {
+        "en": "Turnhout",
+        "fr": "Turnhout",
+        "nl": "Turnhout"
+      },
+      "nis": "13040",
+      "share_pct": "8.5",
+      "value": "48.06"
+    },
+    {
+      "name": {
+        "en": "Oud-Turnhout",
+        "fr": "Oud-Turnhout",
+        "nl": "Oud-Turnhout"
+      },
+      "nis": "13031",
+      "share_pct": "5.4",
+      "value": "30.5"
+    },
+    {
+      "name": {
+        "en": "Zoersel",
+        "fr": "Zoersel",
+        "nl": "Zoersel"
+      },
+      "nis": "11055",
+      "share_pct": "2.1",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Hoogstraten",
+        "fr": "Hoogstraten",
+        "nl": "Hoogstraten"
+      },
+      "nis": "13014",
+      "share_pct": "1.8",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Merksplas",
+        "fr": "Merksplas",
+        "nl": "Merksplas"
+      },
+      "nis": "13023",
+      "share_pct": "1.7",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Arendonk",
+        "fr": "Arendonk",
+        "nl": "Arendonk"
+      },
+      "nis": "13001",
+      "share_pct": "1.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Beerse",
+        "fr": "Beerse",
+        "nl": "Beerse"
+      },
+      "nis": "13004",
+      "share_pct": "1.2",
+      "value": "7"
+    }
+  ]
+}

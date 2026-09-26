@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "5.1666666667"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "16.0",
+      "value": "40.6773972603"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "37.5",
+      "value": "95.3009175029"
+    },
+    "rest_of_region": {
+      "share_pct": "7.6",
+      "value": "19.265"
+    },
+    "same_commune": {
+      "share_pct": "36.9",
+      "value": "94.003966667"
+    }
+  },
+  "coverage_pct": "94.6",
+  "dataset": "buyer_origin",
+  "denominator": "254.4139480969",
+  "dest_geo_id": "be:mun:25018",
+  "dest_name": {
+    "en": "Chaumont-Gistoux",
+    "fr": "Chaumont-Gistoux",
+    "nl": "Chaumont-Gistoux"
+  },
+  "dest_nis": "25018",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 269,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "36.9",
+      "value": "94.003966667"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "8.4",
+      "value": "21.333333333"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "5.0",
+      "value": "12.73"
+    },
+    {
+      "name": {
+        "en": "Auderghem",
+        "fr": "Auderghem",
+        "nl": "Oudergem"
+      },
+      "nis": "21002",
+      "share_pct": "3.0",
+      "value": "7.6"
+    },
+    {
+      "name": {
+        "en": "Grez-Doiceau",
+        "fr": "Grez-Doiceau",
+        "nl": "Graven"
+      },
+      "nis": "25037",
+      "share_pct": "2.8",
+      "value": "7.135"
+    },
+    {
+      "name": {
+        "en": "Mont-Saint-Guibert",
+        "fr": "Mont-Saint-Guibert",
+        "nl": "Mont-Saint-Guibert"
+      },
+      "nis": "25068",
+      "share_pct": "2.5",
+      "value": "6.427027027"
+    },
+    {
+      "name": {
+        "en": "Court-Saint-Etienne",
+        "fr": "Court-Saint-Etienne",
+        "nl": "Court-Saint-Etienne"
+      },
+      "nis": "25023",
+      "share_pct": "2.5",
+      "value": "6.2428571429"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "2.2",
+      "value": "5.5"
+    }
+  ]
+}

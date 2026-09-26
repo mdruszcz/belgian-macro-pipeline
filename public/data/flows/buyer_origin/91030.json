@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.1",
+      "value": "14.1666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.7",
+      "value": "120.7166666667"
+    },
+    "rest_of_region": {
+      "share_pct": "18.4",
+      "value": "83.1666666673"
+    },
+    "same_commune": {
+      "share_pct": "51.4",
+      "value": "232.10703704"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "451.6570370407",
+  "dest_geo_id": "be:mun:91030",
+  "dest_name": {
+    "en": "Ciney",
+    "fr": "Ciney",
+    "nl": "Ciney"
+  },
+  "dest_nis": "91030",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 460,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "51.4",
+      "value": "232.10703704"
+    },
+    {
+      "name": {
+        "en": "Hamois",
+        "fr": "Hamois",
+        "nl": "Hamois"
+      },
+      "nis": "91059",
+      "share_pct": "10.6",
+      "value": "47.99"
+    },
+    {
+      "name": {
+        "en": "Dinant",
+        "fr": "Dinant",
+        "nl": "Dinant"
+      },
+      "nis": "91034",
+      "share_pct": "4.2",
+      "value": "19.06"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "3.2",
+      "value": "14.666666667"
+    },
+    {
+      "name": {
+        "en": "Houyet",
+        "fr": "Houyet",
+        "nl": "Houyet"
+      },
+      "nis": "91072",
+      "share_pct": "2.9",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Rochefort",
+        "fr": "Rochefort",
+        "nl": "Rochefort"
+      },
+      "nis": "91114",
+      "share_pct": "2.8",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Gesves",
+        "fr": "Gesves",
+        "nl": "Gesves"
+      },
+      "nis": "92054",
+      "share_pct": "2.3",
+      "value": "10.166666667"
+    },
+    {
+      "name": {
+        "en": "Assesse",
+        "fr": "Assesse",
+        "nl": "Assesse"
+      },
+      "nis": "92006",
+      "share_pct": "2.0",
+      "value": "9"
+    }
+  ]
+}

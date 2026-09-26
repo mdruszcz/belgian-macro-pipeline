@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.6",
+      "value": "1.05"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "6.1",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "15.9",
+      "value": "10.45"
+    },
+    "rest_of_region": {
+      "share_pct": "45.1",
+      "value": "29.59"
+    },
+    "same_commune": {
+      "share_pct": "31.3",
+      "value": "20.566190476"
+    }
+  },
+  "coverage_pct": "86.4",
+  "dataset": "buyer_origin",
+  "denominator": "65.656190476",
+  "dest_geo_id": "be:mun:64023",
+  "dest_name": {
+    "en": "Donceel",
+    "fr": "Donceel",
+    "nl": "Donceel"
+  },
+  "dest_nis": "64023",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 76,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Donceel",
+        "fr": "Donceel",
+        "nl": "Donceel"
+      },
+      "nis": "64023",
+      "share_pct": "31.3",
+      "value": "20.566190476"
+    },
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "6.9",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Flémalle",
+        "fr": "Flémalle",
+        "nl": "Flémalle"
+      },
+      "nis": "62120",
+      "share_pct": "6.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Saint-Georges-sur-Meuse",
+        "fr": "Saint-Georges-sur-Meuse",
+        "nl": "Saint-Georges-sur-Meuse"
+      },
+      "nis": "64065",
+      "share_pct": "6.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "6.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Verlaine",
+        "fr": "Verlaine",
+        "nl": "Verlaine"
+      },
+      "nis": "61063",
+      "share_pct": "4.7",
+      "value": "3.09"
+    },
+    {
+      "name": {
+        "en": "Awans",
+        "fr": "Awans",
+        "nl": "Awans"
+      },
+      "nis": "62006",
+      "share_pct": "4.6",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "4.6",
+      "value": "3"
+    }
+  ]
+}

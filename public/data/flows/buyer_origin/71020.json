@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.9",
+      "value": "65.74"
+    },
+    "rest_of_region": {
+      "share_pct": "36.9",
+      "value": "106.0"
+    },
+    "same_commune": {
+      "share_pct": "40.1",
+      "value": "115.14"
+    }
+  },
+  "coverage_pct": "98.9",
+  "dataset": "buyer_origin",
+  "denominator": "286.88",
+  "dest_geo_id": "be:mun:71020",
+  "dest_name": {
+    "en": "Halen",
+    "fr": "Halen",
+    "nl": "Halen"
+  },
+  "dest_nis": "71020",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 290,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Halen",
+        "fr": "Halen",
+        "nl": "Halen"
+      },
+      "nis": "71020",
+      "share_pct": "40.1",
+      "value": "115.14"
+    },
+    {
+      "name": {
+        "en": "Herk-de-Stad",
+        "fr": "Herck-la-Ville",
+        "nl": "Herk-de-Stad"
+      },
+      "nis": "71024",
+      "share_pct": "7.9",
+      "value": "22.74"
+    },
+    {
+      "name": {
+        "en": "Diest",
+        "fr": "Diest",
+        "nl": "Diest"
+      },
+      "nis": "24020",
+      "share_pct": "7.8",
+      "value": "22.5"
+    },
+    {
+      "name": {
+        "en": "Geetbets",
+        "fr": "Geetbets",
+        "nl": "Geetbets"
+      },
+      "nis": "24028",
+      "share_pct": "5.9",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Kortenaken",
+        "fr": "Kortenaken",
+        "nl": "Kortenaken"
+      },
+      "nis": "24054",
+      "share_pct": "4.0",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Lummen",
+        "fr": "Lummen",
+        "nl": "Lummen"
+      },
+      "nis": "71037",
+      "share_pct": "4.0",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Tessenderlo-Ham",
+        "fr": "Tessenderlo-Ham",
+        "nl": "Tessenderlo-Ham"
+      },
+      "nis": "71071",
+      "share_pct": "3.1",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Beringen",
+        "fr": "Beringen",
+        "nl": "Beringen"
+      },
+      "nis": "71004",
+      "share_pct": "2.8",
+      "value": "8"
+    }
+  ]
+}

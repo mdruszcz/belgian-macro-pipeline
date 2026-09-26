@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.9",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.9",
+      "value": "16.40"
+    },
+    "rest_of_region": {
+      "share_pct": "38.7",
+      "value": "23.6"
+    },
+    "same_commune": {
+      "share_pct": "29.5",
+      "value": "18"
+    }
+  },
+  "coverage_pct": "100.0",
+  "dataset": "buyer_origin",
+  "denominator": "61.00",
+  "dest_geo_id": "be:mun:45062",
+  "dest_name": {
+    "en": "Horebeke",
+    "fr": "Horebeke",
+    "nl": "Horebeke"
+  },
+  "dest_nis": "45062",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 61,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Horebeke",
+        "fr": "Horebeke",
+        "nl": "Horebeke"
+      },
+      "nis": "45062",
+      "share_pct": "29.5",
+      "value": "18"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "27.9",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Oudenaarde",
+        "fr": "Audenarde",
+        "nl": "Oudenaarde"
+      },
+      "nis": "45035",
+      "share_pct": "12.3",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Zwalm",
+        "fr": "Zwalm",
+        "nl": "Zwalm"
+      },
+      "nis": "45065",
+      "share_pct": "5.2",
+      "value": "3.15"
+    },
+    {
+      "name": {
+        "en": "Flobecq",
+        "fr": "Flobecq",
+        "nl": "Vloesberg"
+      },
+      "nis": "51019",
+      "share_pct": "4.9",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "3.4",
+      "value": "2.1"
+    },
+    {
+      "name": {
+        "en": "Kruisem",
+        "fr": "Kruisem",
+        "nl": "Kruisem"
+      },
+      "nis": "45068",
+      "share_pct": "3.3",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Maarkedal",
+        "fr": "Maarkedal",
+        "nl": "Maarkedal"
+      },
+      "nis": "45064",
+      "share_pct": "2.5",
+      "value": "1.5"
+    }
+  ]
+}

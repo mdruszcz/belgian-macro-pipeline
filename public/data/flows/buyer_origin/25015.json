@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "1.3333333333"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "24.5",
+      "value": "56.9866666663"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.7",
+      "value": "73.500000000"
+    },
+    "rest_of_region": {
+      "share_pct": "6.0",
+      "value": "14.0"
+    },
+    "same_commune": {
+      "share_pct": "37.2",
+      "value": "86.316"
+    }
+  },
+  "coverage_pct": "96.3",
+  "dataset": "buyer_origin",
+  "denominator": "232.1359999996",
+  "dest_geo_id": "be:mun:25015",
+  "dest_name": {
+    "en": "Braine-le-Château",
+    "fr": "Braine-le-Château",
+    "nl": "Kasteelbrakel"
+  },
+  "dest_nis": "25015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 241,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Braine-le-Château",
+        "fr": "Braine-le-Château",
+        "nl": "Kasteelbrakel"
+      },
+      "nis": "25015",
+      "share_pct": "37.2",
+      "value": "86.316"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "9.8",
+      "value": "22.666666667"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "6.0",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "5.7",
+      "value": "13.333333333"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "5.5",
+      "value": "12.833333333"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "3.7",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Vilvoorde",
+        "fr": "Vilvorde",
+        "nl": "Vilvoorde"
+      },
+      "nis": "23088",
+      "share_pct": "3.0",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "2.6",
+      "value": "6"
+    }
+  ]
+}

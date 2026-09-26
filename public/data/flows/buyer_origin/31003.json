@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.2",
+      "value": "103.3226"
+    },
+    "rest_of_region": {
+      "share_pct": "27.3",
+      "value": "111.9574"
+    },
+    "same_commune": {
+      "share_pct": "47.5",
+      "value": "194.43"
+    }
+  },
+  "coverage_pct": "99.0",
+  "dataset": "buyer_origin",
+  "denominator": "409.7100",
+  "dest_geo_id": "be:mun:31003",
+  "dest_name": {
+    "en": "Beernem",
+    "fr": "Beernem",
+    "nl": "Beernem"
+  },
+  "dest_nis": "31003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 414,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beernem",
+        "fr": "Beernem",
+        "nl": "Beernem"
+      },
+      "nis": "31003",
+      "share_pct": "47.5",
+      "value": "194.43"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "10.9",
+      "value": "44.5626"
+    },
+    {
+      "name": {
+        "en": "Oostkamp",
+        "fr": "Oostkamp",
+        "nl": "Oostkamp"
+      },
+      "nis": "31022",
+      "share_pct": "7.1",
+      "value": "29.26"
+    },
+    {
+      "name": {
+        "en": "Aalter",
+        "fr": "Aalter",
+        "nl": "Aalter"
+      },
+      "nis": "44084",
+      "share_pct": "5.4",
+      "value": "22.2"
+    },
+    {
+      "name": {
+        "en": "Maldegem",
+        "fr": "Maldegem",
+        "nl": "Maldegem"
+      },
+      "nis": "43010",
+      "share_pct": "5.0",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Eeklo",
+        "fr": "Eeklo",
+        "nl": "Eeklo"
+      },
+      "nis": "43005",
+      "share_pct": "4.1",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Wingene",
+        "fr": "Wingene",
+        "nl": "Wingene"
+      },
+      "nis": "37021",
+      "share_pct": "3.6",
+      "value": "14.7174"
+    },
+    {
+      "name": {
+        "en": "Damme",
+        "fr": "Damme",
+        "nl": "Damme"
+      },
+      "nis": "31006",
+      "share_pct": "2.8",
+      "value": "11.5"
+    }
+  ]
+}

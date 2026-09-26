@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.3",
+      "value": "7.7114285715"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "5.4",
+      "value": "17.9014285714"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "47.6",
+      "value": "157.5885714291"
+    },
+    "rest_of_region": {
+      "share_pct": "8.9",
+      "value": "29.3"
+    },
+    "same_commune": {
+      "share_pct": "35.8",
+      "value": "118.4268254"
+    }
+  },
+  "coverage_pct": "93.2",
+  "dataset": "buyer_origin",
+  "denominator": "330.9282539720",
+  "dest_geo_id": "be:mun:24011",
+  "dest_name": {
+    "en": "Bierbeek",
+    "fr": "Bierbeek",
+    "nl": "Bierbeek"
+  },
+  "dest_nis": "24011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 355,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Bierbeek",
+        "fr": "Bierbeek",
+        "nl": "Bierbeek"
+      },
+      "nis": "24011",
+      "share_pct": "35.8",
+      "value": "118.4268254"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "26.2",
+      "value": "86.762857143"
+    },
+    {
+      "name": {
+        "en": "Oud-Heverlee",
+        "fr": "Oud-Heverlee",
+        "nl": "Oud-Heverlee"
+      },
+      "nis": "24086",
+      "share_pct": "4.4",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Lubbeek",
+        "fr": "Lubbeek",
+        "nl": "Lubbeek"
+      },
+      "nis": "24066",
+      "share_pct": "3.6",
+      "value": "11.808571429"
+    },
+    {
+      "name": {
+        "en": "Boutersem",
+        "fr": "Boutersem",
+        "nl": "Boutersem"
+      },
+      "nis": "24016",
+      "share_pct": "3.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Kortenberg",
+        "fr": "Kortenberg",
+        "nl": "Kortenberg"
+      },
+      "nis": "24055",
+      "share_pct": "2.9",
+      "value": "9.5042857143"
+    },
+    {
+      "name": {
+        "en": "Holsbeek",
+        "fr": "Holsbeek",
+        "nl": "Holsbeek"
+      },
+      "nis": "24043",
+      "share_pct": "1.7",
+      "value": "5.5057142857"
+    },
+    {
+      "name": {
+        "en": "Herent",
+        "fr": "Herent",
+        "nl": "Herent"
+      },
+      "nis": "24038",
+      "share_pct": "1.5",
+      "value": "5"
+    }
+  ]
+}

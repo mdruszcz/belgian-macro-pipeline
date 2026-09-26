@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.7",
+      "value": "16.3095238096"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "16.1",
+      "value": "153.57"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "30.4",
+      "value": "290.2323"
+    },
+    "rest_of_region": {
+      "share_pct": "17.4",
+      "value": "166.569557143"
+    },
+    "same_commune": {
+      "share_pct": "34.4",
+      "value": "329.31493333"
+    }
+  },
+  "coverage_pct": "95.3",
+  "dataset": "buyer_origin",
+  "denominator": "955.9963142826",
+  "dest_geo_id": "be:mun:25072",
+  "dest_name": {
+    "en": "Nivelles",
+    "fr": "Nivelles",
+    "nl": "Nijvel"
+  },
+  "dest_nis": "25072",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1003,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "34.4",
+      "value": "329.31493333"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "10.1",
+      "value": "96.685"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "4.5",
+      "value": "42.642857143"
+    },
+    {
+      "name": {
+        "en": "Genappe",
+        "fr": "Genappe",
+        "nl": "Genepiën"
+      },
+      "nis": "25031",
+      "share_pct": "3.7",
+      "value": "35.52"
+    },
+    {
+      "name": {
+        "en": "Ittre",
+        "fr": "Ittre",
+        "nl": "Itter"
+      },
+      "nis": "25044",
+      "share_pct": "2.5",
+      "value": "24.025"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "2.5",
+      "value": "23.445"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Château",
+        "fr": "Braine-le-Château",
+        "nl": "Kasteelbrakel"
+      },
+      "nis": "25015",
+      "share_pct": "2.4",
+      "value": "23.02"
+    },
+    {
+      "name": {
+        "en": "Waterloo",
+        "fr": "Waterloo",
+        "nl": "Waterloo"
+      },
+      "nis": "25110",
+      "share_pct": "2.1",
+      "value": "20.4345"
+    }
+  ]
+}

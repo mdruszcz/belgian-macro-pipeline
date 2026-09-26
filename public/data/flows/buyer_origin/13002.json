@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "29.9",
+      "value": "20.00"
+    },
+    "origin_unknown": {
+      "share_pct": "0.7",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.7",
+      "value": "12.5"
+    },
+    "rest_of_region": {
+      "share_pct": "14.0",
+      "value": "9.38896"
+    },
+    "same_commune": {
+      "share_pct": "36.6",
+      "value": "24.5"
+    }
+  },
+  "coverage_pct": "89.2",
+  "dataset": "buyer_origin",
+  "denominator": "66.88896",
+  "dest_geo_id": "be:mun:13002",
+  "dest_name": {
+    "en": "Baarle-Hertog",
+    "fr": "Baerle-Duc",
+    "nl": "Baarle-Hertog"
+  },
+  "dest_nis": "13002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 75,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Baarle-Hertog",
+        "fr": "Baerle-Duc",
+        "nl": "Baarle-Hertog"
+      },
+      "nis": "13002",
+      "share_pct": "36.6",
+      "value": "24.5"
+    },
+    {
+      "name": {
+        "en": "Knokke-Heist",
+        "fr": "Knokke-Heist",
+        "nl": "Knokke-Heist"
+      },
+      "nis": "31043",
+      "share_pct": "8.1",
+      "value": "5.38896"
+    },
+    {
+      "name": {
+        "en": "Merksplas",
+        "fr": "Merksplas",
+        "nl": "Merksplas"
+      },
+      "nis": "13023",
+      "share_pct": "6.0",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Oud-Turnhout",
+        "fr": "Oud-Turnhout",
+        "nl": "Oud-Turnhout"
+      },
+      "nis": "13031",
+      "share_pct": "5.2",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Turnhout",
+        "fr": "Turnhout",
+        "nl": "Turnhout"
+      },
+      "nis": "13040",
+      "share_pct": "4.5",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "3.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Ravels",
+        "fr": "Ravels",
+        "nl": "Ravels"
+      },
+      "nis": "13035",
+      "share_pct": "3.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Lommel",
+        "fr": "Lommel",
+        "nl": "Lommel"
+      },
+      "nis": "72020",
+      "share_pct": "3.0",
+      "value": "2"
+    }
+  ]
+}

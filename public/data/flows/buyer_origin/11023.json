@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "8.51"
+    },
+    "origin_unknown": {
+      "share_pct": "0.8",
+      "value": "6.125"
+    },
+    "other_regions": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "55.0",
+      "value": "433.5430140169"
+    },
+    "rest_of_region": {
+      "share_pct": "5.5",
+      "value": "43.7444444444"
+    },
+    "same_commune": {
+      "share_pct": "37.5",
+      "value": "295.48464549"
+    }
+  },
+  "coverage_pct": "94.1",
+  "dataset": "buyer_origin",
+  "denominator": "788.4071039513",
+  "dest_geo_id": "be:mun:11023",
+  "dest_name": {
+    "en": "Kapellen",
+    "fr": "Kapellen",
+    "nl": "Kapellen"
+  },
+  "dest_nis": "11023",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 838,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Kapellen",
+        "fr": "Kapellen",
+        "nl": "Kapellen"
+      },
+      "nis": "11023",
+      "share_pct": "37.5",
+      "value": "295.48464549"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "21.3",
+      "value": "167.895"
+    },
+    {
+      "name": {
+        "en": "Stabroek",
+        "fr": "Stabroek",
+        "nl": "Stabroek"
+      },
+      "nis": "11044",
+      "share_pct": "11.3",
+      "value": "88.992107843"
+    },
+    {
+      "name": {
+        "en": "Brasschaat",
+        "fr": "Brasschaat",
+        "nl": "Brasschaat"
+      },
+      "nis": "11008",
+      "share_pct": "7.3",
+      "value": "57.216666667"
+    },
+    {
+      "name": {
+        "en": "Kalmthout",
+        "fr": "Kalmthout",
+        "nl": "Kalmthout"
+      },
+      "nis": "11022",
+      "share_pct": "5.0",
+      "value": "39.775"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "1.8",
+      "value": "14.020761246"
+    },
+    {
+      "name": {
+        "en": "Brecht",
+        "fr": "Brecht",
+        "nl": "Brecht"
+      },
+      "nis": "11009",
+      "share_pct": "1.7",
+      "value": "13.1"
+    },
+    {
+      "name": {
+        "en": "Essen",
+        "fr": "Essen",
+        "nl": "Essen"
+      },
+      "nis": "11016",
+      "share_pct": "1.5",
+      "value": "12"
+    }
+  ]
+}

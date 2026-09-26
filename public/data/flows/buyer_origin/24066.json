@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.9",
+      "value": "3.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "53.9",
+      "value": "212.1691666667"
+    },
+    "rest_of_region": {
+      "share_pct": "7.1",
+      "value": "28.0"
+    },
+    "same_commune": {
+      "share_pct": "37.6",
+      "value": "147.83333333"
+    }
+  },
+  "coverage_pct": "99.4",
+  "dataset": "buyer_origin",
+  "denominator": "393.5024999967",
+  "dest_geo_id": "be:mun:24066",
+  "dest_name": {
+    "en": "Lubbeek",
+    "fr": "Lubbeek",
+    "nl": "Lubbeek"
+  },
+  "dest_nis": "24066",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 396,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Lubbeek",
+        "fr": "Lubbeek",
+        "nl": "Lubbeek"
+      },
+      "nis": "24066",
+      "share_pct": "37.6",
+      "value": "147.83333333"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "30.8",
+      "value": "121.34"
+    },
+    {
+      "name": {
+        "en": "Tielt-Winge",
+        "fr": "Tielt-Winge",
+        "nl": "Tielt-Winge"
+      },
+      "nis": "24135",
+      "share_pct": "4.3",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Boutersem",
+        "fr": "Boutersem",
+        "nl": "Boutersem"
+      },
+      "nis": "24016",
+      "share_pct": "3.8",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Rotselaar",
+        "fr": "Rotselaar",
+        "nl": "Rotselaar"
+      },
+      "nis": "24094",
+      "share_pct": "2.8",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Herent",
+        "fr": "Herent",
+        "nl": "Herent"
+      },
+      "nis": "24038",
+      "share_pct": "2.7",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "2.7",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Holsbeek",
+        "fr": "Holsbeek",
+        "nl": "Holsbeek"
+      },
+      "nis": "24043",
+      "share_pct": "1.6",
+      "value": "6.4791666667"
+    }
+  ]
+}

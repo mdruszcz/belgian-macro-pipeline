@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "7.7",
+      "value": "32.7222222222"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.2",
+      "value": "107.0991762898"
+    },
+    "rest_of_region": {
+      "share_pct": "17.8",
+      "value": "75.6819348217"
+    },
+    "same_commune": {
+      "share_pct": "49.3",
+      "value": "209.24111111"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "424.7444444437",
+  "dest_geo_id": "be:mun:23060",
+  "dest_name": {
+    "en": "Opwijk",
+    "fr": "Opwijk",
+    "nl": "Opwijk"
+  },
+  "dest_nis": "23060",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 436,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Opwijk",
+        "fr": "Opwijk",
+        "nl": "Opwijk"
+      },
+      "nis": "23060",
+      "share_pct": "49.3",
+      "value": "209.24111111"
+    },
+    {
+      "name": {
+        "en": "Merchtem",
+        "fr": "Merchtem",
+        "nl": "Merchtem"
+      },
+      "nis": "23052",
+      "share_pct": "8.2",
+      "value": "34.65"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "5.8",
+      "value": "24.686666667"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "4.1",
+      "value": "17.5"
+    },
+    {
+      "name": {
+        "en": "Lebbeke",
+        "fr": "Lebbeke",
+        "nl": "Lebbeke"
+      },
+      "nis": "42011",
+      "share_pct": "3.4",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Buggenhout",
+        "fr": "Buggenhout",
+        "nl": "Buggenhout"
+      },
+      "nis": "42004",
+      "share_pct": "2.6",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Meise",
+        "fr": "Meise",
+        "nl": "Meise"
+      },
+      "nis": "23050",
+      "share_pct": "2.0",
+      "value": "8.5555555556"
+    },
+    {
+      "name": {
+        "en": "Dendermonde",
+        "fr": "Termonde",
+        "nl": "Dendermonde"
+      },
+      "nis": "42006",
+      "share_pct": "1.6",
+      "value": "7"
+    }
+  ]
+}

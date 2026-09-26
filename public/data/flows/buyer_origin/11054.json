@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.7",
+      "value": "2.1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "33.5",
+      "value": "107.46"
+    },
+    "rest_of_region": {
+      "share_pct": "18.5",
+      "value": "59.35"
+    },
+    "same_commune": {
+      "share_pct": "47.3",
+      "value": "151.63"
+    }
+  },
+  "coverage_pct": "94.8",
+  "dataset": "buyer_origin",
+  "denominator": "320.54",
+  "dest_geo_id": "be:mun:11054",
+  "dest_name": {
+    "en": "Zandhoven",
+    "fr": "Zandhoven",
+    "nl": "Zandhoven"
+  },
+  "dest_nis": "11054",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 338,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zandhoven",
+        "fr": "Zandhoven",
+        "nl": "Zandhoven"
+      },
+      "nis": "11054",
+      "share_pct": "47.3",
+      "value": "151.63"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "8.9",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Zoersel",
+        "fr": "Zoersel",
+        "nl": "Zoersel"
+      },
+      "nis": "11055",
+      "share_pct": "7.6",
+      "value": "24.26"
+    },
+    {
+      "name": {
+        "en": "Grobbendonk",
+        "fr": "Grobbendonk",
+        "nl": "Grobbendonk"
+      },
+      "nis": "13010",
+      "share_pct": "5.5",
+      "value": "17.55"
+    },
+    {
+      "name": {
+        "en": "Ranst",
+        "fr": "Ranst",
+        "nl": "Ranst"
+      },
+      "nis": "11035",
+      "share_pct": "5.4",
+      "value": "17.2"
+    },
+    {
+      "name": {
+        "en": "Schilde",
+        "fr": "Schilde",
+        "nl": "Schilde"
+      },
+      "nis": "11039",
+      "share_pct": "3.4",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Vorselaar",
+        "fr": "Vorselaar",
+        "nl": "Vorselaar"
+      },
+      "nis": "13044",
+      "share_pct": "2.7",
+      "value": "8.6"
+    },
+    {
+      "name": {
+        "en": "Malle",
+        "fr": "Malle",
+        "nl": "Malle"
+      },
+      "nis": "11057",
+      "share_pct": "2.3",
+      "value": "7.5"
+    }
+  ]
+}

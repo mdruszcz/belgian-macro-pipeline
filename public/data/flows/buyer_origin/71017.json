@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "15.5",
+      "value": "42.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.5",
+      "value": "39.166666667"
+    },
+    "rest_of_region": {
+      "share_pct": "32.2",
+      "value": "87.0"
+    },
+    "same_commune": {
+      "share_pct": "37.4",
+      "value": "101.20833333"
+    }
+  },
+  "coverage_pct": "99.4",
+  "dataset": "buyer_origin",
+  "denominator": "270.374999997",
+  "dest_geo_id": "be:mun:71017",
+  "dest_name": {
+    "en": "Gingelom",
+    "fr": "Gingelom",
+    "nl": "Gingelom"
+  },
+  "dest_nis": "71017",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 272,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Gingelom",
+        "fr": "Gingelom",
+        "nl": "Gingelom"
+      },
+      "nis": "71017",
+      "share_pct": "37.4",
+      "value": "101.20833333"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "10.4",
+      "value": "28.166666667"
+    },
+    {
+      "name": {
+        "en": "Landen",
+        "fr": "Landen",
+        "nl": "Landen"
+      },
+      "nis": "24059",
+      "share_pct": "7.4",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "4.1",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Waremme",
+        "fr": "Waremme",
+        "nl": "Borgworm"
+      },
+      "nis": "64074",
+      "share_pct": "3.0",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Riemst",
+        "fr": "Riemst",
+        "nl": "Riemst"
+      },
+      "nis": "73066",
+      "share_pct": "3.0",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Zoutleeuw",
+        "fr": "Léau",
+        "nl": "Zoutleeuw"
+      },
+      "nis": "24130",
+      "share_pct": "2.6",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Geer",
+        "fr": "Geer",
+        "nl": "Geer"
+      },
+      "nis": "64029",
+      "share_pct": "2.6",
+      "value": "7"
+    }
+  ]
+}

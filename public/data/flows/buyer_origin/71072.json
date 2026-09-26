@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "30.2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "3"
+    },
+    "other_regions": {
+      "share_pct": "1.5",
+      "value": "42.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.4",
+      "value": "468.2782331414"
+    },
+    "rest_of_region": {
+      "share_pct": "23.1",
+      "value": "657.0872895946"
+    },
+    "same_commune": {
+      "share_pct": "57.8",
+      "value": "1646.0109147"
+    }
+  },
+  "coverage_pct": "97.7",
+  "dataset": "buyer_origin",
+  "denominator": "2847.0764374360",
+  "dest_geo_id": "be:mun:71072",
+  "dest_name": {
+    "en": "Hasselt",
+    "fr": "Hasselt",
+    "nl": "Hasselt"
+  },
+  "dest_nis": "71072",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2913,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "57.8",
+      "value": "1646.0109147"
+    },
+    {
+      "name": {
+        "en": "Zonhoven",
+        "fr": "Zonhoven",
+        "nl": "Zonhoven"
+      },
+      "nis": "71066",
+      "share_pct": "2.6",
+      "value": "73.805133333"
+    },
+    {
+      "name": {
+        "en": "Heusden-Zolder",
+        "fr": "Heusden-Zolder",
+        "nl": "Heusden-Zolder"
+      },
+      "nis": "71070",
+      "share_pct": "2.3",
+      "value": "66.62"
+    },
+    {
+      "name": {
+        "en": "Bilzen-Hoeselt",
+        "fr": "Bilzen-Hoeselt",
+        "nl": "Bilzen-Hoeselt"
+      },
+      "nis": "73110",
+      "share_pct": "2.3",
+      "value": "64.25"
+    },
+    {
+      "name": {
+        "en": "Alken",
+        "fr": "Alken",
+        "nl": "Alken"
+      },
+      "nis": "73001",
+      "share_pct": "2.2",
+      "value": "63.04"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "2.1",
+      "value": "61.043"
+    },
+    {
+      "name": {
+        "en": "Diepenbeek",
+        "fr": "Diepenbeek",
+        "nl": "Diepenbeek"
+      },
+      "nis": "71011",
+      "share_pct": "1.9",
+      "value": "54.742857143"
+    },
+    {
+      "name": {
+        "en": "Genk",
+        "fr": "Genk",
+        "nl": "Genk"
+      },
+      "nis": "71016",
+      "share_pct": "1.8",
+      "value": "50.94"
+    }
+  ]
+}

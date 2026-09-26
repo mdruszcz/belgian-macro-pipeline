@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.6",
+      "value": "5.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.4",
+      "value": "105.33"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.8",
+      "value": "193.548223077"
+    },
+    "rest_of_region": {
+      "share_pct": "13.1",
+      "value": "111.0137"
+    },
+    "same_commune": {
+      "share_pct": "51.1",
+      "value": "433.325"
+    }
+  },
+  "coverage_pct": "98.7",
+  "dataset": "buyer_origin",
+  "denominator": "848.716923077",
+  "dest_geo_id": "be:mun:51004",
+  "dest_name": {
+    "en": "Ath",
+    "fr": "Ath",
+    "nl": "Aat"
+  },
+  "dest_nis": "51004",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 860,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "51.1",
+      "value": "433.325"
+    },
+    {
+      "name": {
+        "en": "Chièvres",
+        "fr": "Chièvres",
+        "nl": "Chièvres"
+      },
+      "nis": "51014",
+      "share_pct": "4.7",
+      "value": "40.01"
+    },
+    {
+      "name": {
+        "en": "Lessines",
+        "fr": "Lessines",
+        "nl": "Lessen"
+      },
+      "nis": "51069",
+      "share_pct": "4.5",
+      "value": "38.05"
+    },
+    {
+      "name": {
+        "en": "Frasnes-lez-Anvaing",
+        "fr": "Frasnes-lez-Anvaing",
+        "nl": "Frasnes-lez-Anvaing"
+      },
+      "nis": "51065",
+      "share_pct": "3.5",
+      "value": "29.288223077"
+    },
+    {
+      "name": {
+        "en": "Brugelette",
+        "fr": "Brugelette",
+        "nl": "Brugelette"
+      },
+      "nis": "51012",
+      "share_pct": "2.7",
+      "value": "23"
+    },
+    {
+      "name": {
+        "en": "Enghien",
+        "fr": "Enghien",
+        "nl": "Edingen"
+      },
+      "nis": "51067",
+      "share_pct": "2.4",
+      "value": "20"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "2.2",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "2.2",
+      "value": "18.5"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "11.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "6"
+    },
+    "other_regions": {
+      "share_pct": "7.6",
+      "value": "189.5740740741"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "12.0",
+      "value": "299.623823529"
+    },
+    "rest_of_region": {
+      "share_pct": "23.3",
+      "value": "578.6965955810"
+    },
+    "same_commune": {
+      "share_pct": "56.4",
+      "value": "1403.1950737"
+    }
+  },
+  "coverage_pct": "98.1",
+  "dataset": "buyer_origin",
+  "denominator": "2488.0895668841",
+  "dest_geo_id": "be:mun:41002",
+  "dest_name": {
+    "en": "Aalst",
+    "fr": "Alost",
+    "nl": "Aalst"
+  },
+  "dest_nis": "41002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2535,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "56.4",
+      "value": "1403.1950737"
+    },
+    {
+      "name": {
+        "en": "Denderleeuw",
+        "fr": "Denderleeuw",
+        "nl": "Denderleeuw"
+      },
+      "nis": "41011",
+      "share_pct": "2.8",
+      "value": "69.5"
+    },
+    {
+      "name": {
+        "en": "Affligem",
+        "fr": "Affligem",
+        "nl": "Affligem"
+      },
+      "nis": "23105",
+      "share_pct": "2.7",
+      "value": "67.4"
+    },
+    {
+      "name": {
+        "en": "Asse",
+        "fr": "Asse",
+        "nl": "Asse"
+      },
+      "nis": "23002",
+      "share_pct": "2.5",
+      "value": "62.676923077"
+    },
+    {
+      "name": {
+        "en": "Erpe-Mere",
+        "fr": "Erpe-Mere",
+        "nl": "Erpe-Mere"
+      },
+      "nis": "41082",
+      "share_pct": "2.5",
+      "value": "62.203823529"
+    },
+    {
+      "name": {
+        "en": "Haaltert",
+        "fr": "Haaltert",
+        "nl": "Haaltert"
+      },
+      "nis": "41024",
+      "share_pct": "2.2",
+      "value": "55.01"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.7",
+      "value": "42.84"
+    },
+    {
+      "name": {
+        "en": "Lede",
+        "fr": "Lede",
+        "nl": "Lede"
+      },
+      "nis": "41034",
+      "share_pct": "1.6",
+      "value": "40.5"
+    }
+  ]
+}

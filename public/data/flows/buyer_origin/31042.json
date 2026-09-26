@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "40.0",
+      "value": "27.409752941"
+    },
+    "rest_of_region": {
+      "share_pct": "37.2",
+      "value": "25.5"
+    },
+    "same_commune": {
+      "share_pct": "22.9",
+      "value": "15.69"
+    }
+  },
+  "coverage_pct": "83.7",
+  "dataset": "buyer_origin",
+  "denominator": "68.599752941",
+  "dest_geo_id": "be:mun:31042",
+  "dest_name": {
+    "en": "Zuienkerke",
+    "fr": "Zuienkerke",
+    "nl": "Zuienkerke"
+  },
+  "dest_nis": "31042",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 82,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Zuienkerke",
+        "fr": "Zuienkerke",
+        "nl": "Zuienkerke"
+      },
+      "nis": "31042",
+      "share_pct": "22.9",
+      "value": "15.69"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "20.9",
+      "value": "14.369752941"
+    },
+    {
+      "name": {
+        "en": "De Haan",
+        "fr": "De Haan",
+        "nl": "De Haan"
+      },
+      "nis": "35029",
+      "share_pct": "14.6",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Lichtervelde",
+        "fr": "Lichtervelde",
+        "nl": "Lichtervelde"
+      },
+      "nis": "36011",
+      "share_pct": "10.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Blankenberge",
+        "fr": "Blankenberge",
+        "nl": "Blankenberge"
+      },
+      "nis": "31004",
+      "share_pct": "8.7",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Damme",
+        "fr": "Damme",
+        "nl": "Damme"
+      },
+      "nis": "31006",
+      "share_pct": "4.4",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Zedelgem",
+        "fr": "Zedelgem",
+        "nl": "Zedelgem"
+      },
+      "nis": "31040",
+      "share_pct": "3.6",
+      "value": "2.5"
+    },
+    {
+      "name": {
+        "en": "Oudenburg",
+        "fr": "Oudenburg",
+        "nl": "Oudenburg"
+      },
+      "nis": "35014",
+      "share_pct": "2.9",
+      "value": "2"
+    }
+  ]
+}

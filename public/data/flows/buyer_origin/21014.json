@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.1",
+      "value": "16.5"
+    },
+    "origin_unknown": {
+      "share_pct": "1.0",
+      "value": "4"
+    },
+    "other_regions": {
+      "share_pct": "17.7",
+      "value": "70.5933333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "53.1",
+      "value": "211.6443"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "24.0",
+      "value": "95.466666667"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "398.2043000003",
+  "dest_geo_id": "be:mun:21014",
+  "dest_name": {
+    "en": "Saint-Josse-ten-Noode",
+    "fr": "Saint-Josse-ten-Noode",
+    "nl": "Sint-Joost-ten-Node"
+  },
+  "dest_nis": "21014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 410,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Saint-Josse-ten-Noode",
+        "fr": "Saint-Josse-ten-Noode",
+        "nl": "Sint-Joost-ten-Node"
+      },
+      "nis": "21014",
+      "share_pct": "24.0",
+      "value": "95.466666667"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "14.8",
+      "value": "59.01"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "10.2",
+      "value": "40.54"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "8.2",
+      "value": "32.5"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "4.8",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "3.2",
+      "value": "12.5643"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "2.8",
+      "value": "10.98"
+    },
+    {
+      "name": {
+        "en": "Molenbeek-Saint-Jean",
+        "fr": "Molenbeek-Saint-Jean",
+        "nl": "Sint-Jans-Molenbeek"
+      },
+      "nis": "21012",
+      "share_pct": "2.3",
+      "value": "9"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "34.6",
+      "value": "103.0"
+    },
+    "rest_of_region": {
+      "share_pct": "22.7",
+      "value": "67.51"
+    },
+    "same_commune": {
+      "share_pct": "42.3",
+      "value": "125.89545455"
+    }
+  },
+  "coverage_pct": "98.2",
+  "dataset": "buyer_origin",
+  "denominator": "297.40545455",
+  "dest_geo_id": "be:mun:35005",
+  "dest_name": {
+    "en": "Gistel",
+    "fr": "Gistel",
+    "nl": "Gistel"
+  },
+  "dest_nis": "35005",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 303,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Gistel",
+        "fr": "Gistel",
+        "nl": "Gistel"
+      },
+      "nis": "35005",
+      "share_pct": "42.3",
+      "value": "125.89545455"
+    },
+    {
+      "name": {
+        "en": "Ostend",
+        "fr": "Ostende",
+        "nl": "Oostende"
+      },
+      "nis": "35013",
+      "share_pct": "16.8",
+      "value": "50"
+    },
+    {
+      "name": {
+        "en": "Oudenburg",
+        "fr": "Oudenburg",
+        "nl": "Oudenburg"
+      },
+      "nis": "35014",
+      "share_pct": "4.5",
+      "value": "13.5"
+    },
+    {
+      "name": {
+        "en": "Ichtegem",
+        "fr": "Ichtegem",
+        "nl": "Ichtegem"
+      },
+      "nis": "35006",
+      "share_pct": "4.4",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Koekelare",
+        "fr": "Koekelare",
+        "nl": "Koekelare"
+      },
+      "nis": "32010",
+      "share_pct": "3.2",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Bredene",
+        "fr": "Bredene",
+        "nl": "Bredene"
+      },
+      "nis": "35002",
+      "share_pct": "3.0",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "De Haan",
+        "fr": "De Haan",
+        "nl": "De Haan"
+      },
+      "nis": "35029",
+      "share_pct": "3.0",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Middelkerke",
+        "fr": "Middelkerke",
+        "nl": "Middelkerke"
+      },
+      "nis": "35011",
+      "share_pct": "2.9",
+      "value": "8.5"
+    }
+  ]
+}

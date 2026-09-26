@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.7",
+      "value": "4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "22.9",
+      "value": "54.676666667"
+    },
+    "rest_of_region": {
+      "share_pct": "26.7",
+      "value": "63.7933333337"
+    },
+    "same_commune": {
+      "share_pct": "48.8",
+      "value": "116.70333333"
+    }
+  },
+  "coverage_pct": "97.2",
+  "dataset": "buyer_origin",
+  "denominator": "239.1733333307",
+  "dest_geo_id": "be:mun:73098",
+  "dest_name": {
+    "en": "Wellen",
+    "fr": "Wellen",
+    "nl": "Wellen"
+  },
+  "dest_nis": "73098",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 246,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Wellen",
+        "fr": "Wellen",
+        "nl": "Wellen"
+      },
+      "nis": "73098",
+      "share_pct": "48.8",
+      "value": "116.70333333"
+    },
+    {
+      "name": {
+        "en": "Tongeren-Borgloon",
+        "fr": "Tongres-Looz",
+        "nl": "Tongeren-Borgloon"
+      },
+      "nis": "73111",
+      "share_pct": "13.5",
+      "value": "32.176666667"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "8.7",
+      "value": "20.696666667"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "6.5",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Alken",
+        "fr": "Alken",
+        "nl": "Alken"
+      },
+      "nis": "73001",
+      "share_pct": "4.6",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Heers",
+        "fr": "Heers",
+        "nl": "Heers"
+      },
+      "nis": "73022",
+      "share_pct": "2.5",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Nieuwerkerken",
+        "fr": "Nieuwerkerken",
+        "nl": "Nieuwerkerken"
+      },
+      "nis": "71045",
+      "share_pct": "2.5",
+      "value": "5.93"
+    },
+    {
+      "name": {
+        "en": "Bilzen-Hoeselt",
+        "fr": "Bilzen-Hoeselt",
+        "nl": "Bilzen-Hoeselt"
+      },
+      "nis": "73110",
+      "share_pct": "2.1",
+      "value": "5"
+    }
+  ]
+}

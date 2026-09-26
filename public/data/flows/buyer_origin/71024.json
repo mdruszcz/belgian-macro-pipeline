@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.7",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.9",
+      "value": "87.9999999993"
+    },
+    "rest_of_region": {
+      "share_pct": "22.1",
+      "value": "67.265"
+    },
+    "same_commune": {
+      "share_pct": "47.9",
+      "value": "145.863"
+    }
+  },
+  "coverage_pct": "93.2",
+  "dataset": "buyer_origin",
+  "denominator": "304.6279999993",
+  "dest_geo_id": "be:mun:71024",
+  "dest_name": {
+    "en": "Herk-de-Stad",
+    "fr": "Herck-la-Ville",
+    "nl": "Herk-de-Stad"
+  },
+  "dest_nis": "71024",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 327,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Herk-de-Stad",
+        "fr": "Herck-la-Ville",
+        "nl": "Herk-de-Stad"
+      },
+      "nis": "71024",
+      "share_pct": "47.9",
+      "value": "145.863"
+    },
+    {
+      "name": {
+        "en": "Hasselt",
+        "fr": "Hasselt",
+        "nl": "Hasselt"
+      },
+      "nis": "71072",
+      "share_pct": "10.8",
+      "value": "32.833333333"
+    },
+    {
+      "name": {
+        "en": "Halen",
+        "fr": "Halen",
+        "nl": "Halen"
+      },
+      "nis": "71020",
+      "share_pct": "5.2",
+      "value": "15.833333333"
+    },
+    {
+      "name": {
+        "en": "Diest",
+        "fr": "Diest",
+        "nl": "Diest"
+      },
+      "nis": "24020",
+      "share_pct": "3.9",
+      "value": "12.015"
+    },
+    {
+      "name": {
+        "en": "Geetbets",
+        "fr": "Geetbets",
+        "nl": "Geetbets"
+      },
+      "nis": "24028",
+      "share_pct": "3.4",
+      "value": "10.25"
+    },
+    {
+      "name": {
+        "en": "Lummen",
+        "fr": "Lummen",
+        "nl": "Lummen"
+      },
+      "nis": "71037",
+      "share_pct": "3.2",
+      "value": "9.78"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "2.8",
+      "value": "8.5533333333"
+    },
+    {
+      "name": {
+        "en": "Diepenbeek",
+        "fr": "Diepenbeek",
+        "nl": "Diepenbeek"
+      },
+      "nis": "71011",
+      "share_pct": "2.3",
+      "value": "7"
+    }
+  ]
+}

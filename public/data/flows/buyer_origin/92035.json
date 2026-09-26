@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.1",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.4",
+      "value": "19.3091666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "23.4",
+      "value": "102.10"
+    },
+    "rest_of_region": {
+      "share_pct": "32.0",
+      "value": "139.4183333331"
+    },
+    "same_commune": {
+      "share_pct": "39.0",
+      "value": "170.24333333"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "436.0708333298",
+  "dest_geo_id": "be:mun:92035",
+  "dest_name": {
+    "en": "Eghezée",
+    "fr": "Eghezée",
+    "nl": "Eghezée"
+  },
+  "dest_nis": "92035",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 446,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Eghezée",
+        "fr": "Eghezée",
+        "nl": "Eghezée"
+      },
+      "nis": "92035",
+      "share_pct": "39.0",
+      "value": "170.24333333"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "9.2",
+      "value": "40"
+    },
+    {
+      "name": {
+        "en": "Fernelmont",
+        "fr": "Fernelmont",
+        "nl": "Fernelmont"
+      },
+      "nis": "92138",
+      "share_pct": "6.9",
+      "value": "30"
+    },
+    {
+      "name": {
+        "en": "Chaumont-Gistoux",
+        "fr": "Chaumont-Gistoux",
+        "nl": "Chaumont-Gistoux"
+      },
+      "nis": "25018",
+      "share_pct": "5.9",
+      "value": "25.847222222"
+    },
+    {
+      "name": {
+        "en": "Perwez",
+        "fr": "Perwez",
+        "nl": "Perwijs"
+      },
+      "nis": "25084",
+      "share_pct": "4.6",
+      "value": "20.06"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "4.0",
+      "value": "17.25"
+    },
+    {
+      "name": {
+        "en": "Court-Saint-Etienne",
+        "fr": "Court-Saint-Etienne",
+        "nl": "Court-Saint-Etienne"
+      },
+      "nis": "25023",
+      "share_pct": "2.2",
+      "value": "9.5138888889"
+    },
+    {
+      "name": {
+        "en": "Braine-l’Alleud",
+        "fr": "Braine-l’Alleud",
+        "nl": "Eigenbrakel"
+      },
+      "nis": "25014",
+      "share_pct": "1.8",
+      "value": "8.0138888889"
+    }
+  ]
+}

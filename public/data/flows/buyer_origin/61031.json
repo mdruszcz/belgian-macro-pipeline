@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "origin_unknown": {
+      "share_pct": "0.3",
+      "value": "2"
+    },
+    "other_regions": {
+      "share_pct": "2.9",
+      "value": "19.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.6",
+      "value": "196.262114646"
+    },
+    "rest_of_region": {
+      "share_pct": "25.5",
+      "value": "169.0181"
+    },
+    "same_commune": {
+      "share_pct": "41.4",
+      "value": "274.00702222"
+    }
+  },
+  "coverage_pct": "97.3",
+  "dataset": "buyer_origin",
+  "denominator": "662.287236866",
+  "dest_geo_id": "be:mun:61031",
+  "dest_name": {
+    "en": "Huy",
+    "fr": "Huy",
+    "nl": "Hoei"
+  },
+  "dest_nis": "61031",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 681,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Huy",
+        "fr": "Huy",
+        "nl": "Hoei"
+      },
+      "nis": "61031",
+      "share_pct": "41.4",
+      "value": "274.00702222"
+    },
+    {
+      "name": {
+        "en": "Amay",
+        "fr": "Amay",
+        "nl": "Amay"
+      },
+      "nis": "61003",
+      "share_pct": "8.1",
+      "value": "53.671414646"
+    },
+    {
+      "name": {
+        "en": "Wanze",
+        "fr": "Wanze",
+        "nl": "Wanze"
+      },
+      "nis": "61072",
+      "share_pct": "6.3",
+      "value": "42.037"
+    },
+    {
+      "name": {
+        "en": "Andenne",
+        "fr": "Andenne",
+        "nl": "Andenne"
+      },
+      "nis": "92003",
+      "share_pct": "4.1",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Marchin",
+        "fr": "Marchin",
+        "nl": "Marchin"
+      },
+      "nis": "61039",
+      "share_pct": "3.9",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Modave",
+        "fr": "Modave",
+        "nl": "Modave"
+      },
+      "nis": "61041",
+      "share_pct": "2.6",
+      "value": "17.037"
+    },
+    {
+      "name": {
+        "en": "Villers-Le-Bouillet",
+        "fr": "Villers-Le-Bouillet",
+        "nl": "Villers-Le-Bouillet"
+      },
+      "nis": "61068",
+      "share_pct": "2.6",
+      "value": "17.0167"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "2.3",
+      "value": "15.5"
+    }
+  ]
+}

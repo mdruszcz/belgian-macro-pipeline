@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.9",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.8",
+      "value": "10"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "27.1",
+      "value": "71.5"
+    },
+    "rest_of_region": {
+      "share_pct": "20.4",
+      "value": "53.6666666667"
+    },
+    "same_commune": {
+      "share_pct": "46.8",
+      "value": "123.33333333"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "263.4999999967",
+  "dest_geo_id": "be:mun:56005",
+  "dest_name": {
+    "en": "Beaumont",
+    "fr": "Beaumont",
+    "nl": "Beaumont"
+  },
+  "dest_nis": "56005",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 266,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Beaumont",
+        "fr": "Beaumont",
+        "nl": "Beaumont"
+      },
+      "nis": "56005",
+      "share_pct": "46.8",
+      "value": "123.33333333"
+    },
+    {
+      "name": {
+        "en": "Thuin",
+        "fr": "Thuin",
+        "nl": "Thuin"
+      },
+      "nis": "56078",
+      "share_pct": "17.6",
+      "value": "46.5"
+    },
+    {
+      "name": {
+        "en": "Sivry-Rance",
+        "fr": "Sivry-Rance",
+        "nl": "Sivry-Rance"
+      },
+      "nis": "56088",
+      "share_pct": "5.9",
+      "value": "15.5"
+    },
+    {
+      "name": {
+        "en": "Walcourt",
+        "fr": "Walcourt",
+        "nl": "Walcourt"
+      },
+      "nis": "93088",
+      "share_pct": "3.6",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Montigny-le-Tilleul",
+        "fr": "Montigny-le-Tilleul",
+        "nl": "Montigny-le-Tilleul"
+      },
+      "nis": "52048",
+      "share_pct": "2.8",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "1.7",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Momignies",
+        "fr": "Momignies",
+        "nl": "Momignies"
+      },
+      "nis": "56051",
+      "share_pct": "1.7",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Philippeville",
+        "fr": "Philippeville",
+        "nl": "Philippeville"
+      },
+      "nis": "93056",
+      "share_pct": "1.5",
+      "value": "4"
+    }
+  ]
+}

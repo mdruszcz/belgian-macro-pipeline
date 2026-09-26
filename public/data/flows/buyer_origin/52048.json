@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "1.9",
+      "value": "3.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.1",
+      "value": "7.51"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "39.4",
+      "value": "71.56"
+    },
+    "rest_of_region": {
+      "share_pct": "23.4",
+      "value": "42.44"
+    },
+    "same_commune": {
+      "share_pct": "31.2",
+      "value": "56.573333333"
+    }
+  },
+  "coverage_pct": "97.1",
+  "dataset": "buyer_origin",
+  "denominator": "181.583333333",
+  "dest_geo_id": "be:mun:52048",
+  "dest_name": {
+    "en": "Montigny-le-Tilleul",
+    "fr": "Montigny-le-Tilleul",
+    "nl": "Montigny-le-Tilleul"
+  },
+  "dest_nis": "52048",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 187,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Montigny-le-Tilleul",
+        "fr": "Montigny-le-Tilleul",
+        "nl": "Montigny-le-Tilleul"
+      },
+      "nis": "52048",
+      "share_pct": "31.2",
+      "value": "56.573333333"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "27.0",
+      "value": "49.06"
+    },
+    {
+      "name": {
+        "en": "Ham-sur-Heure-Nalinnes",
+        "fr": "Ham-sur-Heure-Nalinnes",
+        "nl": "Ham-sur-Heure-Nalinnes"
+      },
+      "nis": "56086",
+      "share_pct": "5.6",
+      "value": "10.24"
+    },
+    {
+      "name": {
+        "en": "Thuin",
+        "fr": "Thuin",
+        "nl": "Thuin"
+      },
+      "nis": "56078",
+      "share_pct": "5.5",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Anderlues",
+        "fr": "Anderlues",
+        "nl": "Anderlues"
+      },
+      "nis": "56001",
+      "share_pct": "3.3",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Fontaine-l’Evêque",
+        "fr": "Fontaine-l’Evêque",
+        "nl": "Fontaine-l’Evêque"
+      },
+      "nis": "52022",
+      "share_pct": "2.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Aiseau-Presles",
+        "fr": "Aiseau-Presles",
+        "nl": "Aiseau-Presles"
+      },
+      "nis": "52074",
+      "share_pct": "2.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Gerpinnes",
+        "fr": "Gerpinnes",
+        "nl": "Gerpinnes"
+      },
+      "nis": "52025",
+      "share_pct": "2.2",
+      "value": "4"
+    }
+  ]
+}

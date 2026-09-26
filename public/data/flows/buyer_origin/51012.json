@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.7",
+      "value": "17"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.7",
+      "value": "38.5"
+    },
+    "rest_of_region": {
+      "share_pct": "22.7",
+      "value": "30.5"
+    },
+    "same_commune": {
+      "share_pct": "36.0",
+      "value": "48.333333333"
+    }
+  },
+  "coverage_pct": "99.5",
+  "dataset": "buyer_origin",
+  "denominator": "134.333333333",
+  "dest_geo_id": "be:mun:51012",
+  "dest_name": {
+    "en": "Brugelette",
+    "fr": "Brugelette",
+    "nl": "Brugelette"
+  },
+  "dest_nis": "51012",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 135,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Brugelette",
+        "fr": "Brugelette",
+        "nl": "Brugelette"
+      },
+      "nis": "51012",
+      "share_pct": "36.0",
+      "value": "48.333333333"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "19.0",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Lens",
+        "fr": "Lens",
+        "nl": "Lens"
+      },
+      "nis": "53046",
+      "share_pct": "8.6",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "5.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Mons",
+        "fr": "Mons",
+        "nl": "Bergen"
+      },
+      "nis": "53053",
+      "share_pct": "5.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Jurbise",
+        "fr": "Jurbise",
+        "nl": "Jurbeke"
+      },
+      "nis": "53044",
+      "share_pct": "3.7",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Bever",
+        "fr": "Biévène",
+        "nl": "Bever"
+      },
+      "nis": "23009",
+      "share_pct": "2.2",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Wezembeek-Oppem",
+        "fr": "Wezembeek-Oppem",
+        "nl": "Wezembeek-Oppem"
+      },
+      "nis": "23103",
+      "share_pct": "2.2",
+      "value": "3"
+    }
+  ]
+}

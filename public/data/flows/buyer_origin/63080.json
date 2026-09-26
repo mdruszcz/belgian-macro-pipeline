@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "3.1",
+      "value": "8.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "15.1",
+      "value": "42.025"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "29.5",
+      "value": "81.8181318678"
+    },
+    "rest_of_region": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "same_commune": {
+      "share_pct": "52.0",
+      "value": "144.38333333"
+    }
+  },
+  "coverage_pct": "98.1",
+  "dataset": "buyer_origin",
+  "denominator": "277.7264651978",
+  "dest_geo_id": "be:mun:63080",
+  "dest_name": {
+    "en": "Waimes",
+    "fr": "Waimes",
+    "nl": "Weismes"
+  },
+  "dest_nis": "63080",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 283,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Waimes",
+        "fr": "Waimes",
+        "nl": "Weismes"
+      },
+      "nis": "63080",
+      "share_pct": "52.0",
+      "value": "144.38333333"
+    },
+    {
+      "name": {
+        "en": "Malmedy",
+        "fr": "Malmedy",
+        "nl": "Malmedy"
+      },
+      "nis": "63049",
+      "share_pct": "8.7",
+      "value": "24.214285714"
+    },
+    {
+      "name": {
+        "en": "Thimister-Clermont",
+        "fr": "Thimister-Clermont",
+        "nl": "Thimister-Clermont"
+      },
+      "nis": "63089",
+      "share_pct": "7.6",
+      "value": "21"
+    },
+    {
+      "name": {
+        "en": "Bütgenbach",
+        "fr": "Butgenbach",
+        "nl": "Bütgenbach"
+      },
+      "nis": "63013",
+      "share_pct": "4.3",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Sankt Vith",
+        "fr": "Saint-Vith",
+        "nl": "Sankt Vith"
+      },
+      "nis": "63067",
+      "share_pct": "2.3",
+      "value": "6.5"
+    },
+    {
+      "name": {
+        "en": "Riemst",
+        "fr": "Riemst",
+        "nl": "Riemst"
+      },
+      "nis": "73066",
+      "share_pct": "2.2",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Hoogstraten",
+        "fr": "Hoogstraten",
+        "nl": "Hoogstraten"
+      },
+      "nis": "13014",
+      "share_pct": "1.8",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Verviers",
+        "fr": "Verviers",
+        "nl": "Verviers"
+      },
+      "nis": "63079",
+      "share_pct": "1.5",
+      "value": "4.1538461538"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.0",
+      "value": "5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "40.5",
+      "value": "51.00"
+    },
+    "rest_of_region": {
+      "share_pct": "20.0",
+      "value": "25.22"
+    },
+    "same_commune": {
+      "share_pct": "35.5",
+      "value": "44.7"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "125.92",
+  "dest_geo_id": "be:mun:92141",
+  "dest_name": {
+    "en": "La Bruyère",
+    "fr": "La Bruyère",
+    "nl": "La Bruyère"
+  },
+  "dest_nis": "92141",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 128,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "La Bruyère",
+        "fr": "La Bruyère",
+        "nl": "La Bruyère"
+      },
+      "nis": "92141",
+      "share_pct": "35.5",
+      "value": "44.7"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "21.8",
+      "value": "27.51"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "10.3",
+      "value": "12.99"
+    },
+    {
+      "name": {
+        "en": "Ottignies-Louvain-la-Neuve",
+        "fr": "Ottignies-Louvain-la-Neuve",
+        "nl": "Ottignies-Louvain-la-Neuve"
+      },
+      "nis": "25121",
+      "share_pct": "4.0",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Morlanwelz",
+        "fr": "Morlanwelz",
+        "nl": "Morlanwelz"
+      },
+      "nis": "58004",
+      "share_pct": "3.2",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Eghezée",
+        "fr": "Eghezée",
+        "nl": "Eghezée"
+      },
+      "nis": "92035",
+      "share_pct": "3.2",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "2.8",
+      "value": "3.5"
+    },
+    {
+      "name": {
+        "en": "Jodoigne",
+        "fr": "Jodoigne",
+        "nl": "Geldenaken"
+      },
+      "nis": "25048",
+      "share_pct": "2.4",
+      "value": "3"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.0",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "11.2",
+      "value": "21.5"
+    },
+    "rest_of_region": {
+      "share_pct": "19.8",
+      "value": "37.905"
+    },
+    "same_commune": {
+      "share_pct": "67.9",
+      "value": "129.825"
+    }
+  },
+  "coverage_pct": "93.7",
+  "dataset": "buyer_origin",
+  "denominator": "191.230",
+  "dest_geo_id": "be:mun:38002",
+  "dest_name": {
+    "en": "Alveringem",
+    "fr": "Alveringem",
+    "nl": "Alveringem"
+  },
+  "dest_nis": "38002",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 204,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Alveringem",
+        "fr": "Alveringem",
+        "nl": "Alveringem"
+      },
+      "nis": "38002",
+      "share_pct": "67.9",
+      "value": "129.825"
+    },
+    {
+      "name": {
+        "en": "Veurne",
+        "fr": "Furnes",
+        "nl": "Veurne"
+      },
+      "nis": "38025",
+      "share_pct": "8.4",
+      "value": "16"
+    },
+    {
+      "name": {
+        "en": "Lo-Reninge",
+        "fr": "Lo-Reninge",
+        "nl": "Lo-Reninge"
+      },
+      "nis": "32030",
+      "share_pct": "4.2",
+      "value": "8.02"
+    },
+    {
+      "name": {
+        "en": "Oostkamp",
+        "fr": "Oostkamp",
+        "nl": "Oostkamp"
+      },
+      "nis": "31022",
+      "share_pct": "2.6",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Poperinge",
+        "fr": "Poperinge",
+        "nl": "Poperinge"
+      },
+      "nis": "33021",
+      "share_pct": "2.4",
+      "value": "4.51"
+    },
+    {
+      "name": {
+        "en": "De Panne",
+        "fr": "La Panne",
+        "nl": "De Panne"
+      },
+      "nis": "38008",
+      "share_pct": "1.3",
+      "value": "2.5"
+    },
+    {
+      "name": {
+        "en": "Bruges",
+        "fr": "Bruges",
+        "nl": "Brugge"
+      },
+      "nis": "31005",
+      "share_pct": "1.0",
+      "value": "2"
+    },
+    {
+      "name": {
+        "en": "Houthulst",
+        "fr": "Houthulst",
+        "nl": "Houthulst"
+      },
+      "nis": "32006",
+      "share_pct": "1.0",
+      "value": "2"
+    }
+  ]
+}

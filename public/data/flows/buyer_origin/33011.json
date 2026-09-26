@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.0",
+      "value": "19"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.8",
+      "value": "7.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "19.5",
+      "value": "189.610000000"
+    },
+    "rest_of_region": {
+      "share_pct": "14.4",
+      "value": "139.9239389158"
+    },
+    "same_commune": {
+      "share_pct": "63.2",
+      "value": "614.21255188"
+    }
+  },
+  "coverage_pct": "95.2",
+  "dataset": "buyer_origin",
+  "denominator": "971.2464907958",
+  "dest_geo_id": "be:mun:33011",
+  "dest_name": {
+    "en": "Ypres",
+    "fr": "Ypres",
+    "nl": "Ieper"
+  },
+  "dest_nis": "33011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1020,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Ypres",
+        "fr": "Ypres",
+        "nl": "Ieper"
+      },
+      "nis": "33011",
+      "share_pct": "63.2",
+      "value": "614.21255188"
+    },
+    {
+      "name": {
+        "en": "Heuvelland",
+        "fr": "Heuvelland",
+        "nl": "Heuvelland"
+      },
+      "nis": "33039",
+      "share_pct": "4.8",
+      "value": "47"
+    },
+    {
+      "name": {
+        "en": "Langemark-Poelkapelle",
+        "fr": "Langemark-Poelkapelle",
+        "nl": "Langemark-Poelkapelle"
+      },
+      "nis": "33040",
+      "share_pct": "4.7",
+      "value": "45.5"
+    },
+    {
+      "name": {
+        "en": "Poperinge",
+        "fr": "Poperinge",
+        "nl": "Poperinge"
+      },
+      "nis": "33021",
+      "share_pct": "3.5",
+      "value": "34.433333333"
+    },
+    {
+      "name": {
+        "en": "Zonnebeke",
+        "fr": "Zonnebeke",
+        "nl": "Zonnebeke"
+      },
+      "nis": "33037",
+      "share_pct": "2.6",
+      "value": "25.51"
+    },
+    {
+      "name": {
+        "en": "Vleteren",
+        "fr": "Vleteren",
+        "nl": "Vleteren"
+      },
+      "nis": "33041",
+      "share_pct": "1.8",
+      "value": "17.666666667"
+    },
+    {
+      "name": {
+        "en": "Lo-Reninge",
+        "fr": "Lo-Reninge",
+        "nl": "Lo-Reninge"
+      },
+      "nis": "32030",
+      "share_pct": "1.5",
+      "value": "15.0131"
+    },
+    {
+      "name": {
+        "en": "Wervik",
+        "fr": "Wervik",
+        "nl": "Wervik"
+      },
+      "nis": "33029",
+      "share_pct": "1.4",
+      "value": "14"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.8",
+      "value": "5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "40.8",
+      "value": "73.4394949495"
+    },
+    "rest_of_region": {
+      "share_pct": "13.6",
+      "value": "24.52"
+    },
+    "same_commune": {
+      "share_pct": "42.8",
+      "value": "77.069494949"
+    }
+  },
+  "coverage_pct": "93.3",
+  "dataset": "buyer_origin",
+  "denominator": "180.0289898985",
+  "dest_geo_id": "be:mun:37011",
+  "dest_name": {
+    "en": "Pittem",
+    "fr": "Pittem",
+    "nl": "Pittem"
+  },
+  "dest_nis": "37011",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 193,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Pittem",
+        "fr": "Pittem",
+        "nl": "Pittem"
+      },
+      "nis": "37011",
+      "share_pct": "42.8",
+      "value": "77.069494949"
+    },
+    {
+      "name": {
+        "en": "Tielt",
+        "fr": "Tielt",
+        "nl": "Tielt"
+      },
+      "nis": "37022",
+      "share_pct": "25.8",
+      "value": "46.49"
+    },
+    {
+      "name": {
+        "en": "Wingene",
+        "fr": "Wingene",
+        "nl": "Wingene"
+      },
+      "nis": "37021",
+      "share_pct": "7.8",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Ardooie",
+        "fr": "Ardooie",
+        "nl": "Ardooie"
+      },
+      "nis": "37020",
+      "share_pct": "5.0",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Roeselare",
+        "fr": "Roulers",
+        "nl": "Roeselare"
+      },
+      "nis": "36015",
+      "share_pct": "3.1",
+      "value": "5.52"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "1.7",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Izegem",
+        "fr": "Izegem",
+        "nl": "Izegem"
+      },
+      "nis": "36008",
+      "share_pct": "1.4",
+      "value": "2.5"
+    },
+    {
+      "name": {
+        "en": "Oostrozebeke",
+        "fr": "Oostrozebeke",
+        "nl": "Oostrozebeke"
+      },
+      "nis": "37010",
+      "share_pct": "1.1",
+      "value": "2"
+    }
+  ]
+}

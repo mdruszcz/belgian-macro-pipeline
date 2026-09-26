@@ -512,63 +512,63 @@ be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2023,79245307.16,19,19,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2024,85538576.73,19,19,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,ACTIVATION_MEASURES_PAID,Employment and activation measures paid,EUR,2025,92885122.92999999,19,19,100.0
-be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3027963671128107,30,30,100.0
-be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3607995339889998,12,12,100.0
-be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3467126150383795,27,27,100.0
-be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.181400421986196,19,19,100.0
-be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.500822580707304,35,35,100.0
-be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.307517227729898,30,30,100.0
-be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.4186045130993867,27,27,100.0
-be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.1731088305782587,10,10,100.0
-be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3553978435921934,5,5,100.0
-be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.320494376144389,8,8,100.0
-be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3105667362451263,12,12,100.0
-be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.0450113789179682,7,7,100.0
-be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.309520262216925,8,8,100.0
-be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.37437300501596,9,9,100.0
-be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,1.990712770743621,5,5,100.0
-be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2985308734004226,10,10,100.0
-be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.314643130010377,10,10,100.0
-be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.281321634653387,6,6,100.0
-be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2789036631942343,17,17,100.0
-be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.36507065700611,10,10,100.0
-be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3715677467749554,7,7,100.0
-be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.323913122041126,11,11,100.0
-be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.256031461058391,12,12,100.0
-be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.1976751092444107,13,13,100.0
-be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.4103932840587645,6,6,100.0
-be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.270870930261304,11,11,100.0
-be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2627877561345815,12,12,100.0
-be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.292337630746777,4,4,100.0
-be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.318551577239071,17,17,100.0
-be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.1701888090745123,24,24,100.0
-be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.284967392856576,29,29,100.0
-be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3626575554853715,14,14,100.0
-be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.355705372191403,17,17,100.0
-be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.388806971776404,12,12,100.0
-be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3673173259630333,13,13,100.0
-be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3106796116504853,5,5,100.0
-be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3994554647996886,8,8,100.0
-be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2640701225558244,9,9,100.0
-be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3414225941422595,12,12,100.0
-be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3725515857435764,10,10,100.0
-be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2550470927535646,15,15,100.0
-be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.297749571381233,16,16,100.0
-be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.223370002683123,7,7,100.0
-be:country,01000,country,Belgium,ROYAUME,HET RIJK,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2928516686365428,581,581,100.0
-be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3242421989243316,69,69,100.0
-be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.4116381144096377,65,65,100.0
-be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.4186045130993867,27,27,100.0
-be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2281740006369852,64,64,100.0
-be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3095335382908115,60,60,100.0
-be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2680843032612157,69,69,100.0
-be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.227395510532795,84,84,100.0
-be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.367836155077122,42,42,100.0
-be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.3342388228636106,44,44,100.0
-be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2778839412144793,38,38,100.0
-be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.323084921877264,300,300,100.0
-be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.2777086845226946,262,262,100.0
-be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,AVERAGE_HOUSEHOLD_SIZE,Average household size,count,2021,2.181400421986196,19,19,100.0
+be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3027963671128107,30,30,100.0
+be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3607995339889998,12,12,100.0
+be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3467126150383795,27,27,100.0
+be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.181400421986196,19,19,100.0
+be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.500822580707304,35,35,100.0
+be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.307517227729898,30,30,100.0
+be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.4186045130993867,27,27,100.0
+be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.1731088305782587,10,10,100.0
+be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3553978435921934,5,5,100.0
+be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.320494376144389,8,8,100.0
+be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3105667362451263,12,12,100.0
+be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.0450113789179682,7,7,100.0
+be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.309520262216925,8,8,100.0
+be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.37437300501596,9,9,100.0
+be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,1.990712770743621,5,5,100.0
+be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2985308734004226,10,10,100.0
+be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.314643130010377,10,10,100.0
+be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.281321634653387,6,6,100.0
+be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2789036631942343,17,17,100.0
+be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.36507065700611,10,10,100.0
+be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3715677467749554,7,7,100.0
+be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.323913122041126,11,11,100.0
+be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.256031461058391,12,12,100.0
+be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.1976751092444107,13,13,100.0
+be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.4103932840587645,6,6,100.0
+be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.270870930261304,11,11,100.0
+be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2627877561345815,12,12,100.0
+be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.292337630746777,4,4,100.0
+be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.318551577239071,17,17,100.0
+be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.1701888090745123,24,24,100.0
+be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.284967392856576,29,29,100.0
+be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3626575554853715,14,14,100.0
+be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.355705372191403,17,17,100.0
+be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.388806971776404,12,12,100.0
+be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3673173259630333,13,13,100.0
+be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3106796116504853,5,5,100.0
+be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3994554647996886,8,8,100.0
+be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2640701225558244,9,9,100.0
+be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3414225941422595,12,12,100.0
+be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3725515857435764,10,10,100.0
+be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2550470927535646,15,15,100.0
+be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.297749571381233,16,16,100.0
+be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.223370002683123,7,7,100.0
+be:country,01000,country,Belgium,ROYAUME,HET RIJK,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2928516686365428,581,581,100.0
+be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3242421989243316,69,69,100.0
+be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.4116381144096377,65,65,100.0
+be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.4186045130993867,27,27,100.0
+be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2281740006369852,64,64,100.0
+be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3095335382908115,60,60,100.0
+be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2680843032612157,69,69,100.0
+be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.227395510532795,84,84,100.0
+be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.367836155077122,42,42,100.0
+be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.3342388228636106,44,44,100.0
+be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2778839412144793,38,38,100.0
+be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.323084921877264,300,300,100.0
+be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.2777086845226946,262,262,100.0
+be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,AVERAGE_HOUSEHOLD_SIZE,Average household size,persons_per_household,2021,2.181400421986196,19,19,100.0
 be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,AVG_NET_TAXABLE_INCOME,Average net taxable income per tax return,eur,2005,25379.046193790866,30,30,100.0
 be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,AVG_NET_TAXABLE_INCOME,Average net taxable income per tax return,eur,2006,25868.495323084386,30,30,100.0
 be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,AVG_NET_TAXABLE_INCOME,Average net taxable income per tax return,eur,2007,26526.44915439758,30,30,100.0
@@ -59780,6 +59780,8 @@ be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’An
 be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,8555.0,28,28,100.0
 be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,8310.0,28,28,100.0
 be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,9554.0,28,28,100.0
+be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,8015.0,28,28,100.0
+be:arr:11000,11000,arrondissement,Arrondissement Antwerpen,Arrondissement d’Anvers,Arrondissement Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,9000.0,28,28,100.0
 be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1793.0,13,13,100.0
 be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2021.0,13,13,100.0
 be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1967.0,13,13,100.0
@@ -59820,6 +59822,8 @@ be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Mali
 be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,3134.0,12,12,100.0
 be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2874.0,12,12,100.0
 be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,3371.0,12,12,100.0
+be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,3009.0,12,12,100.0
+be:arr:12000,12000,arrondissement,Arrondissement Mechelen,Arrondissement de Malines,Arrondissement Mechelen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,3347.0,12,12,100.0
 be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,2104.0,27,27,100.0
 be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2606.0,27,27,100.0
 be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2409.0,27,27,100.0
@@ -59860,6 +59864,8 @@ be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turn
 be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4097.0,27,27,100.0
 be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,3870.0,27,27,100.0
 be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,4266.0,27,27,100.0
+be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,3843.0,27,27,100.0
+be:arr:13000,13000,arrondissement,Arrondissement Turnhout,Arrondissement de Turnhout,Arrondissement Turnhout,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,4049.0,27,27,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,4179.0,19,19,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,5046.0,19,19,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,4749.0,19,19,100.0
@@ -59900,6 +59906,8 @@ be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissemen
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,7603.0,19,19,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,8044.0,19,19,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,7961.0,19,19,100.0
+be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,6796.0,19,19,100.0
+be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,7173.0,19,19,100.0
 be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,2943.0,35,35,100.0
 be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,3410.0,35,35,100.0
 be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,3366.0,35,35,100.0
@@ -59940,6 +59948,8 @@ be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement 
 be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4488.0,33,33,100.0
 be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,4408.0,33,33,100.0
 be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,4888.0,33,33,100.0
+be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,4315.0,33,33,100.0
+be:arr:23000,23000,arrondissement,Arrondissement Halle-Vilvoorde,Arrondissement de Hal-Vilvorde,Arrondissement Halle-Vilvoorde,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,4532.0,33,33,100.0
 be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,2394.0,30,30,100.0
 be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2776.0,30,30,100.0
 be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2979.0,30,30,100.0
@@ -59980,6 +59990,8 @@ be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvai
 be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4002.0,30,30,100.0
 be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,4373.0,30,30,100.0
 be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,4441.0,30,30,100.0
+be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,4214.0,30,30,100.0
+be:arr:24000,24000,arrondissement,Arrondissement Leuven,Arrondissement de Louvain,Arrondissement Leuven,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,4021.0,30,30,100.0
 be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1523.0,27,27,100.0
 be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1950.0,27,27,100.0
 be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1904.0,27,27,100.0
@@ -60020,6 +60032,8 @@ be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivell
 be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,3059.0,27,27,100.0
 be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,3188.0,27,27,100.0
 be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,3181.0,27,27,100.0
+be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2832.0,27,27,100.0
+be:arr:25000,25000,arrondissement,Arrondissement Nijvel,Arrondissement de Nivelles,Arrondissement Nijvel,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2902.0,27,27,100.0
 be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1811.0,10,10,100.0
 be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2632.0,10,10,100.0
 be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2641.0,10,10,100.0
@@ -60060,6 +60074,8 @@ be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges
 be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,3490.0,10,10,100.0
 be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2916.0,10,10,100.0
 be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,3841.0,10,10,100.0
+be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,3080.0,10,10,100.0
+be:arr:31000,31000,arrondissement,Arrondissement Brugge,Arrondissement de Bruges,Arrondissement Brugge,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,3491.0,10,10,100.0
 be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,274.0,5,5,100.0
 be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,368.0,5,5,100.0
 be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,307.0,5,5,100.0
@@ -60100,6 +60116,8 @@ be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dix
 be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,541.0,5,5,100.0
 be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,553.0,5,5,100.0
 be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,655.0,5,5,100.0
+be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,436.0,5,5,100.0
+be:arr:32000,32000,arrondissement,Arrondissement Diksmuide,Arrondissement de Dixmude,Arrondissement Diksmuide,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,438.0,5,5,100.0
 be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,509.0,8,8,100.0
 be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,620.0,8,8,100.0
 be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,629.0,8,8,100.0
@@ -60140,6 +60158,8 @@ be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,
 be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,754.0,8,8,100.0
 be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,804.0,8,8,100.0
 be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1309.0,8,8,100.0
+be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,961.0,8,8,100.0
+be:arr:33000,33000,arrondissement,Arrondissement Ieper,Arrondissement d’Ypres,Arrondissement Ieper,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,820.0,8,8,100.0
 be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1516.0,12,12,100.0
 be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1890.0,12,12,100.0
 be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1878.0,12,12,100.0
@@ -60180,6 +60200,8 @@ be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Cour
 be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2378.0,12,12,100.0
 be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2290.0,12,12,100.0
 be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2983.0,12,12,100.0
+be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2177.0,12,12,100.0
+be:arr:34000,34000,arrondissement,Arrondissement Kortrijk,Arrondissement de Courtrai,Arrondissement Kortrijk,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2390.0,12,12,100.0
 be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1295.0,7,7,100.0
 be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1653.0,7,7,100.0
 be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1664.0,7,7,100.0
@@ -60220,6 +60242,8 @@ be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ost
 be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2197.0,7,7,100.0
 be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2100.0,7,7,100.0
 be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2661.0,7,7,100.0
+be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2130.0,7,7,100.0
+be:arr:35000,35000,arrondissement,Arrondissement Oostende,Arrondissement d’Ostende,Arrondissement Oostende,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2182.0,7,7,100.0
 be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,799.0,8,8,100.0
 be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1076.0,8,8,100.0
 be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,941.0,8,8,100.0
@@ -60260,6 +60284,8 @@ be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Rou
 be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1146.0,8,8,100.0
 be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1150.0,8,8,100.0
 be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1649.0,8,8,100.0
+be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1321.0,8,8,100.0
+be:arr:36000,36000,arrondissement,Arrondissement Roeselare,Arrondissement de Roulers,Arrondissement Roeselare,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1335.0,8,8,100.0
 be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,437.0,9,9,100.0
 be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,576.0,9,9,100.0
 be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,471.0,9,9,100.0
@@ -60300,6 +60326,8 @@ be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,A
 be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,797.0,7,7,100.0
 be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,764.0,7,7,100.0
 be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,986.0,7,7,100.0
+be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,750.0,7,7,100.0
+be:arr:37000,37000,arrondissement,Arrondissement Tielt,Arrondissement de Tielt,Arrondissement Tielt,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,675.0,7,7,100.0
 be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,852.0,5,5,100.0
 be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1000.0,5,5,100.0
 be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,964.0,5,5,100.0
@@ -60340,6 +60368,8 @@ be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes
 be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1383.0,5,5,100.0
 be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1298.0,5,5,100.0
 be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1876.0,5,5,100.0
+be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1397.0,5,5,100.0
+be:arr:38000,38000,arrondissement,Arrondissement Veurne,Arrondissement de Furnes,Arrondissement Veurne,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1604.0,5,5,100.0
 be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1546.0,10,10,100.0
 be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1851.0,10,10,100.0
 be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1943.0,10,10,100.0
@@ -60380,6 +60410,8 @@ be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,
 be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2537.0,10,10,100.0
 be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2382.0,10,10,100.0
 be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2621.0,10,10,100.0
+be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2331.0,10,10,100.0
+be:arr:41000,41000,arrondissement,Arrondissement Aalst,Arrondissement d’Alost,Arrondissement Aalst,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2720.0,10,10,100.0
 be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1065.0,10,10,100.0
 be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1342.0,10,10,100.0
 be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1394.0,10,10,100.0
@@ -60420,6 +60452,8 @@ be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de T
 be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1668.0,10,10,100.0
 be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1466.0,10,10,100.0
 be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1689.0,10,10,100.0
+be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1599.0,10,10,100.0
+be:arr:42000,42000,arrondissement,Arrondissement Dendermonde,Arrondissement de Termonde,Arrondissement Dendermonde,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1488.0,10,10,100.0
 be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,394.0,6,6,100.0
 be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,514.0,6,6,100.0
 be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,498.0,6,6,100.0
@@ -60460,6 +60494,8 @@ be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,
 be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,670.0,6,6,100.0
 be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,748.0,6,6,100.0
 be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,848.0,6,6,100.0
+be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,695.0,6,6,100.0
+be:arr:43000,43000,arrondissement,Arrondissement Eeklo,Arrondissement d’Eeklo,Arrondissement Eeklo,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,682.0,6,6,100.0
 be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,2600.0,21,21,100.0
 be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,3207.0,21,21,100.0
 be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2960.0,21,21,100.0
@@ -60500,6 +60536,8 @@ be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arr
 be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4520.0,13,13,100.0
 be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,4323.0,13,13,100.0
 be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,5095.0,13,13,100.0
+be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,4374.0,13,13,100.0
+be:arr:44000,44000,arrondissement,Arrondissement Gent,Arrondissement de Gand,Arrondissement Gent,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,4506.0,13,13,100.0
 be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,662.0,11,11,100.0
 be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,765.0,11,11,100.0
 be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,739.0,11,11,100.0
@@ -60540,6 +60578,8 @@ be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’A
 be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1035.0,10,10,100.0
 be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1091.0,10,10,100.0
 be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1143.0,10,10,100.0
+be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,973.0,10,10,100.0
+be:arr:45000,45000,arrondissement,Arrondissement Oudenaarde,Arrondissement d’Audenarde,Arrondissement Oudenaarde,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,994.0,10,10,100.0
 be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1359.0,7,7,100.0
 be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1667.0,7,7,100.0
 be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1285.0,7,7,100.0
@@ -60580,6 +60620,8 @@ be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de 
 be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2143.0,6,6,100.0
 be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2049.0,6,6,100.0
 be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2632.0,6,6,100.0
+be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2117.0,6,6,100.0
+be:arr:46000,46000,arrondissement,Arrondissement Sint-Niklaas,Arrondissement de Saint-Nicolas,Arrondissement Sint-Niklaas,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2240.0,6,6,100.0
 be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,494.0,8,8,100.0
 be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,637.0,8,8,100.0
 be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,476.0,8,8,100.0
@@ -60620,6 +60662,8 @@ be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arro
 be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1029.0,11,11,100.0
 be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1095.0,11,11,100.0
 be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1199.0,11,11,100.0
+be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,945.0,11,11,100.0
+be:arr:51000,51000,arrondissement,Arrondissement Aat,Arrondissement d’Ath,Arrondissement Aat,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,984.0,11,11,100.0
 be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1636.0,14,14,100.0
 be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2213.0,14,14,100.0
 be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1917.0,14,14,100.0
@@ -60660,6 +60704,8 @@ be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Cha
 be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2630.0,12,12,100.0
 be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2618.0,12,12,100.0
 be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2702.0,12,12,100.0
+be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2610.0,12,12,100.0
+be:arr:52000,52000,arrondissement,Arrondissement Charleroi,Arrondissement de Charleroi,Arrondissement Charleroi,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2477.0,12,12,100.0
 be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1141.0,13,13,100.0
 be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1450.0,13,13,100.0
 be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1331.0,13,13,100.0
@@ -60700,6 +60746,8 @@ be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,A
 be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1609.0,13,13,100.0
 be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1758.0,13,13,100.0
 be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1914.0,13,13,100.0
+be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1639.0,13,13,100.0
+be:arr:53000,53000,arrondissement,Arrondissement Bergen,Arrondissement de Mons,Arrondissement Bergen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1712.0,13,13,100.0
 be:arr:54000,54000,arrondissement,Arrondissement Moeskroen,Arrondissement de Mouscron,Arrondissement Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,390.0,2,2,100.0
 be:arr:54000,54000,arrondissement,Arrondissement Moeskroen,Arrondissement de Mouscron,Arrondissement Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,430.0,2,2,100.0
 be:arr:54000,54000,arrondissement,Arrondissement Moeskroen,Arrondissement de Mouscron,Arrondissement Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,406.0,2,2,100.0
@@ -60752,6 +60800,8 @@ be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soigni
 be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,621.0,6,6,100.0
 be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,624.0,6,6,100.0
 be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,670.0,6,6,100.0
+be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,787.0,6,6,100.0
+be:arr:55000,55000,arrondissement,Arrondissement Zinnik,Arrondissement de Soignies,Arrondissement Zinnik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,757.0,6,6,100.0
 be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,615.0,14,14,100.0
 be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,766.0,14,14,100.0
 be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,728.0,14,14,100.0
@@ -60792,6 +60842,8 @@ be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,A
 be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,687.0,11,11,100.0
 be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,767.0,11,11,100.0
 be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,817.0,11,11,100.0
+be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,569.0,11,11,100.0
+be:arr:56000,56000,arrondissement,Arrondissement Thuin,Arrondissement de Thuin,Arrondissement Thuin,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,893.0,11,11,100.0
 be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,846.0,10,10,100.0
 be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,889.0,10,10,100.0
 be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,827.0,10,10,100.0
@@ -60832,6 +60884,8 @@ be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissemen
 be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1520.0,12,12,100.0
 be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1611.0,12,12,100.0
 be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1777.0,12,12,100.0
+be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1605.0,12,12,100.0
+be:arr:57000,57000,arrondissement,Arrondissement Doornik-Moeskroen,Arrondissement de Tournai-Mouscron,Arrondissement Doornik-Moeskroen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1590.0,12,12,100.0
 be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2019-Q1,620.0,4,4,100.0
 be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2019-Q2,657.0,4,4,100.0
 be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2019-Q3,581.0,4,4,100.0
@@ -60860,6 +60914,8 @@ be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de 
 be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,657.0,4,4,100.0
 be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,681.0,4,4,100.0
 be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,757.0,4,4,100.0
+be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,611.0,4,4,100.0
+be:arr:58000,58000,arrondissement,Arrondissement La Louvière,Arrondissement de La Louvière,Arrondissement La Louvière,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,698.0,4,4,100.0
 be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,573.0,17,17,100.0
 be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,676.0,17,17,100.0
 be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,739.0,17,17,100.0
@@ -60900,6 +60956,8 @@ be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arro
 be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1059.0,17,17,100.0
 be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,858.0,17,17,100.0
 be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,988.0,17,17,100.0
+be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,832.0,17,17,100.0
+be:arr:61000,61000,arrondissement,Arrondissement Hoei,Arrondissement de Huy,Arrondissement Hoei,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,986.0,17,17,100.0
 be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,2858.0,24,24,100.0
 be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,3454.0,24,24,100.0
 be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,3030.0,24,24,100.0
@@ -60940,6 +60998,8 @@ be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,A
 be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4401.0,24,24,100.0
 be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,4465.0,24,24,100.0
 be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,4700.0,24,24,100.0
+be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,3990.0,24,24,100.0
+be:arr:62000,62000,arrondissement,Arrondissement Luik,Arrondissement de Liège,Arrondissement Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,4689.0,24,24,100.0
 be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1545.0,29,29,100.0
 be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2153.0,29,29,100.0
 be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1687.0,29,29,100.0
@@ -60980,6 +61040,8 @@ be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verv
 be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2289.0,29,29,100.0
 be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2421.0,29,29,100.0
 be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2752.0,29,29,100.0
+be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2297.0,29,29,100.0
+be:arr:63000,63000,arrondissement,Arrondissement Verviers,Arrondissement de Verviers,Arrondissement Verviers,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2198.0,29,29,100.0
 be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,441.0,14,14,100.0
 be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,493.0,14,14,100.0
 be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,428.0,14,14,100.0
@@ -61020,6 +61082,8 @@ be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Ware
 be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,670.0,14,14,100.0
 be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,730.0,14,14,100.0
 be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,657.0,14,14,100.0
+be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,574.0,14,14,100.0
+be:arr:64000,64000,arrondissement,Arrondissement Borgworm,Arrondissement de Waremme,Arrondissement Borgworm,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,651.0,14,14,100.0
 be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1800.0,18,18,100.0
 be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2283.0,18,18,100.0
 be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2203.0,18,18,100.0
@@ -61060,6 +61124,8 @@ be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasse
 be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,3759.0,16,16,100.0
 be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,3512.0,16,16,100.0
 be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,3994.0,16,16,100.0
+be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,3514.0,16,16,100.0
+be:arr:71000,71000,arrondissement,Arrondissement Hasselt,Arrondissement de Hasselt,Arrondissement Hasselt,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,3557.0,16,16,100.0
 be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1020.0,13,13,100.0
 be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1453.0,13,13,100.0
 be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1299.0,13,13,100.0
@@ -61100,6 +61166,8 @@ be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maase
 be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2112.0,12,12,100.0
 be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2004.0,12,12,100.0
 be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2446.0,12,12,100.0
+be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1988.0,12,12,100.0
+be:arr:72000,72000,arrondissement,Arrondissement Maaseik,Arrondissement de Maaseik,Arrondissement Maaseik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2138.0,12,12,100.0
 be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1053.0,13,13,100.0
 be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1439.0,13,13,100.0
 be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1253.0,13,13,100.0
@@ -61140,6 +61208,8 @@ be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tong
 be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1815.0,10,10,100.0
 be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1701.0,10,10,100.0
 be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2052.0,10,10,100.0
+be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1611.0,10,10,100.0
+be:arr:73000,73000,arrondissement,Arrondissement Tongeren,Arrondissement de Tongres,Arrondissement Tongeren,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1702.0,10,10,100.0
 be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,435.0,5,5,100.0
 be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,564.0,5,5,100.0
 be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,538.0,5,5,100.0
@@ -61180,6 +61250,8 @@ be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon
 be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,661.0,5,5,100.0
 be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,706.0,5,5,100.0
 be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,618.0,5,5,100.0
+be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,736.0,5,5,100.0
+be:arr:81000,81000,arrondissement,Arrondissement Aarlen,Arrondissement d’Arlon,Arrondissement Aarlen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,674.0,5,5,100.0
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,561.0,8,8,100.0
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,661.0,8,8,100.0
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,451.0,8,8,100.0
@@ -61220,6 +61292,8 @@ be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Ba
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,959.0,7,7,100.0
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,958.0,7,7,100.0
 be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,988.0,7,7,100.0
+be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1106.0,7,7,100.0
+be:arr:82000,82000,arrondissement,Arrondissement Bastenaken,Arrondissement de Bastogne,Arrondissement Bastenaken,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,943.0,7,7,100.0
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,805.0,9,9,100.0
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,877.0,9,9,100.0
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,761.0,9,9,100.0
@@ -61260,6 +61334,8 @@ be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissemen
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,936.0,9,9,100.0
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1176.0,9,9,100.0
 be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,950.0,9,9,100.0
+be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,795.0,9,9,100.0
+be:arr:83000,83000,arrondissement,Arrondissement Marche-en-Famenne,Arrondissement de Marche-en-Famenne,Arrondissement Marche-en-Famenne,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,780.0,9,9,100.0
 be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,644.0,12,12,100.0
 be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,489.0,12,12,100.0
 be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,449.0,12,12,100.0
@@ -61300,6 +61376,8 @@ be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de 
 be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1106.0,12,12,100.0
 be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,949.0,12,12,100.0
 be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1027.0,12,12,100.0
+be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1022.0,12,12,100.0
+be:arr:84000,84000,arrondissement,Arrondissement Neufchâteau,Arrondissement de Neufchâteau,Arrondissement Neufchâteau,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,960.0,12,12,100.0
 be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,661.0,10,10,100.0
 be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,611.0,10,10,100.0
 be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,506.0,10,10,100.0
@@ -61340,6 +61418,8 @@ be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton
 be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,691.0,10,10,100.0
 be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,740.0,10,10,100.0
 be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,736.0,10,10,100.0
+be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,675.0,10,10,100.0
+be:arr:85000,85000,arrondissement,Arrondissement Virton,Arrondissement de Virton,Arrondissement Virton,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,636.0,10,10,100.0
 be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,641.0,15,15,100.0
 be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,815.0,15,15,100.0
 be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,743.0,15,15,100.0
@@ -61380,6 +61460,8 @@ be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant
 be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,1191.0,15,15,100.0
 be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,1232.0,15,15,100.0
 be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,1563.0,15,15,100.0
+be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,1180.0,15,15,100.0
+be:arr:91000,91000,arrondissement,Arrondissement Dinant,Arrondissement de Dinant,Arrondissement Dinant,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,1148.0,15,15,100.0
 be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1129.0,16,16,100.0
 be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1399.0,16,16,100.0
 be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1307.0,16,16,100.0
@@ -61420,6 +61502,8 @@ be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,A
 be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,2130.0,16,16,100.0
 be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,2165.0,16,16,100.0
 be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,2425.0,16,16,100.0
+be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2071.0,16,16,100.0
+be:arr:92000,92000,arrondissement,Arrondissement Namen,Arrondissement de Namur,Arrondissement Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2256.0,16,16,100.0
 be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,311.0,7,7,100.0
 be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,372.0,7,7,100.0
 be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,355.0,7,7,100.0
@@ -61460,6 +61544,8 @@ be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de
 be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,681.0,7,7,100.0
 be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,607.0,7,7,100.0
 be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,659.0,7,7,100.0
+be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,535.0,7,7,100.0
+be:arr:93000,93000,arrondissement,Arrondissement Philippeville,Arrondissement de Philippeville,Arrondissement Philippeville,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,722.0,7,7,100.0
 be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,56658.0,589,589,100.0
 be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,69385.0,589,589,100.0
 be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,64971.0,589,589,100.0
@@ -61500,6 +61586,8 @@ be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sa
 be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,93410.0,565,565,100.0
 be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,92379.0,565,565,100.0
 be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,104041.0,565,565,100.0
+be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,89057.0,565,565,100.0
+be:country,01000,country,Belgium,ROYAUME,HET RIJK,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,93740.0,565,565,100.0
 be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,10059.0,70,70,100.0
 be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,11767.0,70,70,100.0
 be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,11154.0,70,70,100.0
@@ -61540,6 +61628,8 @@ be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN
 be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,15786.0,67,67,100.0
 be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,15054.0,67,67,100.0
 be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,17191.0,67,67,100.0
+be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,14867.0,67,67,100.0
+be:prov:10000,10000,province,Antwerp,Province d’Anvers,Provincie Antwerpen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,16396.0,67,67,100.0
 be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,5337.0,65,65,100.0
 be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,6186.0,65,65,100.0
 be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,6345.0,65,65,100.0
@@ -61580,6 +61670,8 @@ be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provinc
 be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,8490.0,63,63,100.0
 be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,8781.0,63,63,100.0
 be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,9329.0,63,63,100.0
+be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,8529.0,63,63,100.0
+be:prov:20001,20001,province,Flemish Brabant,Province du Brabant flamand,Provincie Vlaams-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,8553.0,63,63,100.0
 be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,1523.0,27,27,100.0
 be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,1950.0,27,27,100.0
 be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,1904.0,27,27,100.0
@@ -61620,6 +61712,8 @@ be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provinci
 be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,3059.0,27,27,100.0
 be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,3188.0,27,27,100.0
 be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,3181.0,27,27,100.0
+be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,2832.0,27,27,100.0
+be:prov:20002,20002,province,Walloon Brabant,Province du Brabant wallon,Provincie Waals-Brabant,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,2902.0,27,27,100.0
 be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,7493.0,64,64,100.0
 be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,9815.0,64,64,100.0
 be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,9495.0,64,64,100.0
@@ -61660,6 +61754,8 @@ be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provi
 be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,12686.0,62,62,100.0
 be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,11875.0,62,62,100.0
 be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,15960.0,62,62,100.0
+be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,12252.0,62,62,100.0
+be:prov:30000,30000,province,West Flanders,Province de Flandre occidentale,Provincie West-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,12935.0,62,62,100.0
 be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,7626.0,65,65,100.0
 be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,9346.0,65,65,100.0
 be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,8819.0,65,65,100.0
@@ -61700,6 +61796,8 @@ be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provinc
 be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,12573.0,55,55,100.0
 be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,12059.0,55,55,100.0
 be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,14028.0,55,55,100.0
+be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,12089.0,55,55,100.0
+be:prov:40000,40000,province,East Flanders,Province de Flandre orientale,Provincie Oost-Vlaanderen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,12630.0,55,55,100.0
 be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,5964.0,69,69,100.0
 be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,7536.0,69,69,100.0
 be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,6756.0,69,69,100.0
@@ -61740,6 +61838,8 @@ be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MU
 be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,8753.0,69,69,100.0
 be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,9154.0,69,69,100.0
 be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,9836.0,69,69,100.0
+be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,8766.0,69,69,100.0
+be:prov:50000,50000,province,Hainaut,Province du Hainaut,Provincie Henegouwen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,9111.0,69,69,100.0
 be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,5417.0,84,84,100.0
 be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,6776.0,84,84,100.0
 be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,5884.0,84,84,100.0
@@ -61780,6 +61880,8 @@ be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPER
 be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,8419.0,84,84,100.0
 be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,8474.0,84,84,100.0
 be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,9097.0,84,84,100.0
+be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,7693.0,84,84,100.0
+be:prov:60000,60000,province,Liège,Province de Liège,Provincie Luik,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,8524.0,84,84,100.0
 be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,3873.0,44,44,100.0
 be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,5175.0,44,44,100.0
 be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,4755.0,44,44,100.0
@@ -61820,6 +61922,8 @@ be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_
 be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,7686.0,38,38,100.0
 be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,7217.0,38,38,100.0
 be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,8492.0,38,38,100.0
+be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,7113.0,38,38,100.0
+be:prov:70000,70000,province,Limburg,Province du Limbourg,Provincie Limburg,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,7397.0,38,38,100.0
 be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,3106.0,44,44,100.0
 be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,3202.0,44,44,100.0
 be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2705.0,44,44,100.0
@@ -61860,6 +61964,8 @@ be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxembu
 be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4353.0,43,43,100.0
 be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,4529.0,43,43,100.0
 be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,4319.0,43,43,100.0
+be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,4334.0,43,43,100.0
+be:prov:80000,80000,province,Luxembourg,Province du Luxembourg,Provincie Luxemburg,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,3993.0,43,43,100.0
 be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,2081.0,38,38,100.0
 be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,2586.0,38,38,100.0
 be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,2405.0,38,38,100.0
@@ -61900,6 +62006,8 @@ be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERT
 be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,4002.0,38,38,100.0
 be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,4004.0,38,38,100.0
 be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,4647.0,38,38,100.0
+be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,3786.0,38,38,100.0
+be:prov:90000,90000,province,Namur,Province de Namur,Provincie Namen,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,4126.0,38,38,100.0
 be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,34388.0,308,308,100.0
 be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,42289.0,308,308,100.0
 be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,40568.0,308,308,100.0
@@ -61940,6 +62048,8 @@ be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_S
 be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,57221.0,285,285,100.0
 be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,54986.0,285,285,100.0
 be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,65000.0,285,285,100.0
+be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,54850.0,285,285,100.0
+be:reg:02000,02000,region,Flanders,Région flamande,Vlaams Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,57911.0,285,285,100.0
 be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,18091.0,262,262,100.0
 be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,22050.0,262,262,100.0
 be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,19654.0,262,262,100.0
@@ -61980,6 +62090,8 @@ be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SA
 be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,28586.0,261,261,100.0
 be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,29349.0,261,261,100.0
 be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,31080.0,261,261,100.0
+be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,27411.0,261,261,100.0
+be:reg:03000,03000,region,Wallonia,Région wallonne,Waals Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,28656.0,261,261,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q1,4179.0,19,19,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q2,5046.0,19,19,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2016-Q3,4749.0,19,19,100.0
@@ -62020,6 +62132,8 @@ be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q2,7603.0,19,19,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q3,8044.0,19,19,100.0
 be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2025-Q4,7961.0,19,19,100.0
+be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q1,6796.0,19,19,100.0
+be:reg:04000,04000,region,Brussels-Capital Region,Région de Bruxelles-Capitale,Brussels Hoofdstedelijk Gewest,MUN_PROPERTY_SALES,Property sales transactions,count,2026-Q2,7173.0,19,19,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_RESIDENTIAL_PARCELS_CI_TOTAL,"Cadastral income, residential parcels",eur,2011,590980501.0,18,19,94.7
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_RESIDENTIAL_PARCELS_CI_TOTAL,"Cadastral income, residential parcels",eur,2012,604252256.0,19,19,100.0
 be:arr:21000,21000,arrondissement,Arrondissement Brussel-Hoofdstad,Arrondissement de Bruxelles-Capitale,Arrondissement Brussel-Hoofdstad,MUN_RESIDENTIAL_PARCELS_CI_TOTAL,"Cadastral income, residential parcels",eur,2013,609261488.0,19,19,100.0

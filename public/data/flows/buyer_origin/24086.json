@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "6.6",
+      "value": "17.5523809524"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "44.0",
+      "value": "117.1035714288"
+    },
+    "rest_of_region": {
+      "share_pct": "10.3",
+      "value": "27.4060476191"
+    },
+    "same_commune": {
+      "share_pct": "39.1",
+      "value": "104.15465714"
+    }
+  },
+  "coverage_pct": "86.2",
+  "dataset": "buyer_origin",
+  "denominator": "266.2166571403",
+  "dest_geo_id": "be:mun:24086",
+  "dest_name": {
+    "en": "Oud-Heverlee",
+    "fr": "Oud-Heverlee",
+    "nl": "Oud-Heverlee"
+  },
+  "dest_nis": "24086",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 309,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Oud-Heverlee",
+        "fr": "Oud-Heverlee",
+        "nl": "Oud-Heverlee"
+      },
+      "nis": "24086",
+      "share_pct": "39.1",
+      "value": "104.15465714"
+    },
+    {
+      "name": {
+        "en": "Leuven",
+        "fr": "Louvain",
+        "nl": "Leuven"
+      },
+      "nis": "24062",
+      "share_pct": "22.4",
+      "value": "59.617857143"
+    },
+    {
+      "name": {
+        "en": "Bierbeek",
+        "fr": "Bierbeek",
+        "nl": "Bierbeek"
+      },
+      "nis": "24011",
+      "share_pct": "5.6",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Bertem",
+        "fr": "Bertem",
+        "nl": "Bertem"
+      },
+      "nis": "24009",
+      "share_pct": "2.8",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Huldenberg",
+        "fr": "Huldenberg",
+        "nl": "Huldenberg"
+      },
+      "nis": "24045",
+      "share_pct": "2.8",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Herent",
+        "fr": "Herent",
+        "nl": "Herent"
+      },
+      "nis": "24038",
+      "share_pct": "2.1",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Jette",
+        "fr": "Jette",
+        "nl": "Jette"
+      },
+      "nis": "21010",
+      "share_pct": "2.0",
+      "value": "5.4428571429"
+    },
+    {
+      "name": {
+        "en": "Boutersem",
+        "fr": "Boutersem",
+        "nl": "Boutersem"
+      },
+      "nis": "24016",
+      "share_pct": "1.9",
+      "value": "5"
+    }
+  ]
+}

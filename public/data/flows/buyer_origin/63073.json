@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "4.3",
+      "value": "8"
+    },
+    "origin_unknown": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "7.9",
+      "value": "14.8421379739"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "26.6",
+      "value": "49.71"
+    },
+    "rest_of_region": {
+      "share_pct": "7.9",
+      "value": "14.7"
+    },
+    "same_commune": {
+      "share_pct": "52.8",
+      "value": "98.904889879"
+    }
+  },
+  "coverage_pct": "95.0",
+  "dataset": "buyer_origin",
+  "denominator": "187.1570278529",
+  "dest_geo_id": "be:mun:63073",
+  "dest_name": {
+    "en": "Stavelot",
+    "fr": "Stavelot",
+    "nl": "Stavelot"
+  },
+  "dest_nis": "63073",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 197,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Stavelot",
+        "fr": "Stavelot",
+        "nl": "Stavelot"
+      },
+      "nis": "63073",
+      "share_pct": "52.8",
+      "value": "98.904889879"
+    },
+    {
+      "name": {
+        "en": "Malmedy",
+        "fr": "Malmedy",
+        "nl": "Malmedy"
+      },
+      "nis": "63049",
+      "share_pct": "5.5",
+      "value": "10.21"
+    },
+    {
+      "name": {
+        "en": "Jalhay",
+        "fr": "Jalhay",
+        "nl": "Jalhay"
+      },
+      "nis": "63038",
+      "share_pct": "5.1",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Verviers",
+        "fr": "Verviers",
+        "nl": "Verviers"
+      },
+      "nis": "63079",
+      "share_pct": "2.9",
+      "value": "5.5"
+    },
+    {
+      "name": {
+        "en": "Pepinster",
+        "fr": "Pepinster",
+        "nl": "Pepinster"
+      },
+      "nis": "63058",
+      "share_pct": "2.4",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Waimes",
+        "fr": "Waimes",
+        "nl": "Weismes"
+      },
+      "nis": "63080",
+      "share_pct": "2.4",
+      "value": "4.5"
+    },
+    {
+      "name": {
+        "en": "Stoumont",
+        "fr": "Stoumont",
+        "nl": "Stoumont"
+      },
+      "nis": "63075",
+      "share_pct": "2.1",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Trois-Ponts",
+        "fr": "Trois-Ponts",
+        "nl": "Trois-Ponts"
+      },
+      "nis": "63086",
+      "share_pct": "2.1",
+      "value": "4"
+    }
+  ]
+}

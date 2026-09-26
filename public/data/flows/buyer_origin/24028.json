@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "3.2",
+      "value": "6"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "28.4",
+      "value": "53.166666667"
+    },
+    "rest_of_region": {
+      "share_pct": "35.7",
+      "value": "66.8333333334"
+    },
+    "same_commune": {
+      "share_pct": "32.7",
+      "value": "61.333333333"
+    }
+  },
+  "coverage_pct": "98.6",
+  "dataset": "buyer_origin",
+  "denominator": "187.3333333334",
+  "dest_geo_id": "be:mun:24028",
+  "dest_name": {
+    "en": "Geetbets",
+    "fr": "Geetbets",
+    "nl": "Geetbets"
+  },
+  "dest_nis": "24028",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 190,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Geetbets",
+        "fr": "Geetbets",
+        "nl": "Geetbets"
+      },
+      "nis": "24028",
+      "share_pct": "32.7",
+      "value": "61.333333333"
+    },
+    {
+      "name": {
+        "en": "Zoutleeuw",
+        "fr": "Léau",
+        "nl": "Zoutleeuw"
+      },
+      "nis": "24130",
+      "share_pct": "8.4",
+      "value": "15.666666667"
+    },
+    {
+      "name": {
+        "en": "Herk-de-Stad",
+        "fr": "Herck-la-Ville",
+        "nl": "Herk-de-Stad"
+      },
+      "nis": "71024",
+      "share_pct": "5.6",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Linter",
+        "fr": "Linter",
+        "nl": "Linter"
+      },
+      "nis": "24133",
+      "share_pct": "5.3",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Tienen",
+        "fr": "Tirlemont",
+        "nl": "Tienen"
+      },
+      "nis": "24107",
+      "share_pct": "4.8",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Sint-Truiden",
+        "fr": "Saint-Trond",
+        "nl": "Sint-Truiden"
+      },
+      "nis": "71053",
+      "share_pct": "4.1",
+      "value": "7.6666666667"
+    },
+    {
+      "name": {
+        "en": "Halen",
+        "fr": "Halen",
+        "nl": "Halen"
+      },
+      "nis": "71020",
+      "share_pct": "4.0",
+      "value": "7.5"
+    },
+    {
+      "name": {
+        "en": "Nieuwerkerken",
+        "fr": "Nieuwerkerken",
+        "nl": "Nieuwerkerken"
+      },
+      "nis": "71045",
+      "share_pct": "3.7",
+      "value": "7"
+    }
+  ]
+}

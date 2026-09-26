@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.2",
+      "value": "2.0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.9",
+      "value": "8.9"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "16.0",
+      "value": "166.708888889"
+    },
+    "rest_of_region": {
+      "share_pct": "26.4",
+      "value": "275.2481111123"
+    },
+    "same_commune": {
+      "share_pct": "56.5",
+      "value": "589.304"
+    }
+  },
+  "coverage_pct": "98.4",
+  "dataset": "buyer_origin",
+  "denominator": "1042.6610000013",
+  "dest_geo_id": "be:mun:12014",
+  "dest_name": {
+    "en": "Heist-op-den-Berg",
+    "fr": "Heist-op-den-Berg",
+    "nl": "Heist-op-den-Berg"
+  },
+  "dest_nis": "12014",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 1060,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Heist-op-den-Berg",
+        "fr": "Heist-op-den-Berg",
+        "nl": "Heist-op-den-Berg"
+      },
+      "nis": "12014",
+      "share_pct": "56.5",
+      "value": "589.304"
+    },
+    {
+      "name": {
+        "en": "Putte",
+        "fr": "Putte",
+        "nl": "Putte"
+      },
+      "nis": "12029",
+      "share_pct": "4.7",
+      "value": "49.52"
+    },
+    {
+      "name": {
+        "en": "Keerbergen",
+        "fr": "Keerbergen",
+        "nl": "Keerbergen"
+      },
+      "nis": "24048",
+      "share_pct": "3.8",
+      "value": "39.541666667"
+    },
+    {
+      "name": {
+        "en": "Hulshout",
+        "fr": "Hulshout",
+        "nl": "Hulshout"
+      },
+      "nis": "13016",
+      "share_pct": "3.6",
+      "value": "37.055555556"
+    },
+    {
+      "name": {
+        "en": "Tremelo",
+        "fr": "Tremelo",
+        "nl": "Tremelo"
+      },
+      "nis": "24109",
+      "share_pct": "2.4",
+      "value": "25"
+    },
+    {
+      "name": {
+        "en": "Berlaar",
+        "fr": "Berlaar",
+        "nl": "Berlaar"
+      },
+      "nis": "12002",
+      "share_pct": "2.4",
+      "value": "24.833333333"
+    },
+    {
+      "name": {
+        "en": "Lier",
+        "fr": "Lierre",
+        "nl": "Lier"
+      },
+      "nis": "12021",
+      "share_pct": "2.4",
+      "value": "24.75"
+    },
+    {
+      "name": {
+        "en": "Mechelen",
+        "fr": "Malines",
+        "nl": "Mechelen"
+      },
+      "nis": "12025",
+      "share_pct": "2.2",
+      "value": "23.105555556"
+    }
+  ]
+}

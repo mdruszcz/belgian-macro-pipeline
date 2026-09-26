@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.1",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "0.3",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "24.8",
+      "value": "93.2940216817"
+    },
+    "rest_of_region": {
+      "share_pct": "27.5",
+      "value": "103.6934469694"
+    },
+    "same_commune": {
+      "share_pct": "46.9",
+      "value": "176.70557471"
+    }
+  },
+  "coverage_pct": "86.4",
+  "dataset": "buyer_origin",
+  "denominator": "376.6930433611",
+  "dest_geo_id": "be:mun:42003",
+  "dest_name": {
+    "en": "Berlare",
+    "fr": "Berlare",
+    "nl": "Berlare"
+  },
+  "dest_nis": "42003",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 436,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Berlare",
+        "fr": "Berlare",
+        "nl": "Berlare"
+      },
+      "nis": "42003",
+      "share_pct": "46.9",
+      "value": "176.70557471"
+    },
+    {
+      "name": {
+        "en": "Zele",
+        "fr": "Zele",
+        "nl": "Zele"
+      },
+      "nis": "42028",
+      "share_pct": "9.3",
+      "value": "35.137241379"
+    },
+    {
+      "name": {
+        "en": "Lokeren",
+        "fr": "Lokeren",
+        "nl": "Lokeren"
+      },
+      "nis": "46029",
+      "share_pct": "4.8",
+      "value": "17.95"
+    },
+    {
+      "name": {
+        "en": "Dendermonde",
+        "fr": "Termonde",
+        "nl": "Dendermonde"
+      },
+      "nis": "42006",
+      "share_pct": "4.7",
+      "value": "17.636363636"
+    },
+    {
+      "name": {
+        "en": "Aalst",
+        "fr": "Alost",
+        "nl": "Aalst"
+      },
+      "nis": "41002",
+      "share_pct": "4.1",
+      "value": "15.556363636"
+    },
+    {
+      "name": {
+        "en": "Wichelen",
+        "fr": "Wichelen",
+        "nl": "Wichelen"
+      },
+      "nis": "42026",
+      "share_pct": "3.7",
+      "value": "14.01"
+    },
+    {
+      "name": {
+        "en": "Laarne",
+        "fr": "Laarne",
+        "nl": "Laarne"
+      },
+      "nis": "42010",
+      "share_pct": "2.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Ghent",
+        "fr": "Gand",
+        "nl": "Gent"
+      },
+      "nis": "44021",
+      "share_pct": "2.5",
+      "value": "9.5"
+    }
+  ]
+}

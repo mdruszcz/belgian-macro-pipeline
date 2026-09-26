@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "19.6",
+      "value": "50.01"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.9",
+      "value": "53.5"
+    },
+    "rest_of_region": {
+      "share_pct": "24.5",
+      "value": "62.5000000001"
+    },
+    "same_commune": {
+      "share_pct": "34.6",
+      "value": "88.51"
+    }
+  },
+  "coverage_pct": "98.3",
+  "dataset": "buyer_origin",
+  "denominator": "255.5200000001",
+  "dest_geo_id": "be:mun:83040",
+  "dest_name": {
+    "en": "Nassogne",
+    "fr": "Nassogne",
+    "nl": "Nassogne"
+  },
+  "dest_nis": "83040",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 260,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Nassogne",
+        "fr": "Nassogne",
+        "nl": "Nassogne"
+      },
+      "nis": "83040",
+      "share_pct": "34.6",
+      "value": "88.51"
+    },
+    {
+      "name": {
+        "en": "Marche-en-Famenne",
+        "fr": "Marche-en-Famenne",
+        "nl": "Marche-en-Famenne"
+      },
+      "nis": "83034",
+      "share_pct": "20.5",
+      "value": "52.5"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "12.5",
+      "value": "32"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "5.9",
+      "value": "15"
+    },
+    {
+      "name": {
+        "en": "Rochefort",
+        "fr": "Rochefort",
+        "nl": "Rochefort"
+      },
+      "nis": "91114",
+      "share_pct": "4.9",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Vaux-sur-Sûre",
+        "fr": "Vaux-sur-Sûre",
+        "nl": "Vaux-sur-Sûre"
+      },
+      "nis": "82036",
+      "share_pct": "1.6",
+      "value": "4"
+    },
+    {
+      "name": {
+        "en": "Bornem",
+        "fr": "Bornem",
+        "nl": "Bornem"
+      },
+      "nis": "12007",
+      "share_pct": "1.2",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Deinze",
+        "fr": "Deinze",
+        "nl": "Deinze"
+      },
+      "nis": "44083",
+      "share_pct": "1.2",
+      "value": "3"
+    }
+  ]
+}

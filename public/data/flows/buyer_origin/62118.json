@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.2",
+      "value": "4.51"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "48.4",
+      "value": "185.711111111"
+    },
+    "rest_of_region": {
+      "share_pct": "19.6",
+      "value": "75.2962962962"
+    },
+    "same_commune": {
+      "share_pct": "30.9",
+      "value": "118.48592593"
+    }
+  },
+  "coverage_pct": "93.9",
+  "dataset": "buyer_origin",
+  "denominator": "384.0033333372",
+  "dest_geo_id": "be:mun:62118",
+  "dest_name": {
+    "en": "Grâce-Hollogne",
+    "fr": "Grâce-Hollogne",
+    "nl": "Grâce-Hollogne"
+  },
+  "dest_nis": "62118",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 409,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Grâce-Hollogne",
+        "fr": "Grâce-Hollogne",
+        "nl": "Grâce-Hollogne"
+      },
+      "nis": "62118",
+      "share_pct": "30.9",
+      "value": "118.48592593"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "15.0",
+      "value": "57.7"
+    },
+    {
+      "name": {
+        "en": "Saint-Nicolas",
+        "fr": "Saint-Nicolas",
+        "nl": "Saint-Nicolas"
+      },
+      "nis": "62093",
+      "share_pct": "9.2",
+      "value": "35.261111111"
+    },
+    {
+      "name": {
+        "en": "Seraing",
+        "fr": "Seraing",
+        "nl": "Seraing"
+      },
+      "nis": "62096",
+      "share_pct": "8.5",
+      "value": "32.5"
+    },
+    {
+      "name": {
+        "en": "Flémalle",
+        "fr": "Flémalle",
+        "nl": "Flémalle"
+      },
+      "nis": "62120",
+      "share_pct": "4.9",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Herstal",
+        "fr": "Herstal",
+        "nl": "Herstal"
+      },
+      "nis": "62051",
+      "share_pct": "4.3",
+      "value": "16.5"
+    },
+    {
+      "name": {
+        "en": "Engis",
+        "fr": "Engis",
+        "nl": "Engis"
+      },
+      "nis": "61080",
+      "share_pct": "2.9",
+      "value": "11"
+    },
+    {
+      "name": {
+        "en": "Saint-Georges-sur-Meuse",
+        "fr": "Saint-Georges-sur-Meuse",
+        "nl": "Saint-Georges-sur-Meuse"
+      },
+      "nis": "64065",
+      "share_pct": "2.5",
+      "value": "9.5"
+    }
+  ]
+}

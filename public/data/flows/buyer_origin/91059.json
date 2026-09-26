@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.3",
+      "value": "0.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.3",
+      "value": "7.1666666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "18.8",
+      "value": "31.16"
+    },
+    "rest_of_region": {
+      "share_pct": "34.9",
+      "value": "57.6866666667"
+    },
+    "same_commune": {
+      "share_pct": "41.7",
+      "value": "68.954083333"
+    }
+  },
+  "coverage_pct": "94.6",
+  "dataset": "buyer_origin",
+  "denominator": "165.4674166664",
+  "dest_geo_id": "be:mun:91059",
+  "dest_name": {
+    "en": "Hamois",
+    "fr": "Hamois",
+    "nl": "Hamois"
+  },
+  "dest_nis": "91059",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 175,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Hamois",
+        "fr": "Hamois",
+        "nl": "Hamois"
+      },
+      "nis": "91059",
+      "share_pct": "41.7",
+      "value": "68.954083333"
+    },
+    {
+      "name": {
+        "en": "Ciney",
+        "fr": "Ciney",
+        "nl": "Ciney"
+      },
+      "nis": "91030",
+      "share_pct": "13.7",
+      "value": "22.66"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "4.8",
+      "value": "8.02"
+    },
+    {
+      "name": {
+        "en": "Assesse",
+        "fr": "Assesse",
+        "nl": "Assesse"
+      },
+      "nis": "92006",
+      "share_pct": "4.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Profondeville",
+        "fr": "Profondeville",
+        "nl": "Profondeville"
+      },
+      "nis": "92101",
+      "share_pct": "4.8",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "4.2",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Dinant",
+        "fr": "Dinant",
+        "nl": "Dinant"
+      },
+      "nis": "91034",
+      "share_pct": "3.6",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Ramillies",
+        "fr": "Ramillies",
+        "nl": "Ramillies"
+      },
+      "nis": "25122",
+      "share_pct": "2.4",
+      "value": "4"
+    }
+  ]
+}

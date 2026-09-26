@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "1.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "25.4",
+      "value": "61.55"
+    },
+    "rest_of_region": {
+      "share_pct": "28.9",
+      "value": "70.0"
+    },
+    "same_commune": {
+      "share_pct": "45.3",
+      "value": "109.95125"
+    }
+  },
+  "coverage_pct": "97.4",
+  "dataset": "buyer_origin",
+  "denominator": "242.50125",
+  "dest_geo_id": "be:mun:41063",
+  "dest_name": {
+    "en": "Sint-Lievens-Houtem",
+    "fr": "Sint-Lievens-Houtem",
+    "nl": "Sint-Lievens-Houtem"
+  },
+  "dest_nis": "41063",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 249,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Sint-Lievens-Houtem",
+        "fr": "Sint-Lievens-Houtem",
+        "nl": "Sint-Lievens-Houtem"
+      },
+      "nis": "41063",
+      "share_pct": "45.3",
+      "value": "109.95125"
+    },
+    {
+      "name": {
+        "en": "Herzele",
+        "fr": "Herzele",
+        "nl": "Herzele"
+      },
+      "nis": "41027",
+      "share_pct": "6.3",
+      "value": "15.3"
+    },
+    {
+      "name": {
+        "en": "Wetteren",
+        "fr": "Wetteren",
+        "nl": "Wetteren"
+      },
+      "nis": "42025",
+      "share_pct": "6.0",
+      "value": "14.5"
+    },
+    {
+      "name": {
+        "en": "Merelbeke-Melle",
+        "fr": "Merelbeke-Melle",
+        "nl": "Merelbeke-Melle"
+      },
+      "nis": "44088",
+      "share_pct": "5.2",
+      "value": "12.5"
+    },
+    {
+      "name": {
+        "en": "Oosterzele",
+        "fr": "Oosterzele",
+        "nl": "Oosterzele"
+      },
+      "nis": "44052",
+      "share_pct": "4.9",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Lede",
+        "fr": "Lede",
+        "nl": "Lede"
+      },
+      "nis": "41034",
+      "share_pct": "4.7",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Zottegem",
+        "fr": "Zottegem",
+        "nl": "Zottegem"
+      },
+      "nis": "41081",
+      "share_pct": "4.2",
+      "value": "10.11"
+    },
+    {
+      "name": {
+        "en": "Erpe-Mere",
+        "fr": "Erpe-Mere",
+        "nl": "Erpe-Mere"
+      },
+      "nis": "41082",
+      "share_pct": "4.1",
+      "value": "10"
+    }
+  ]
+}

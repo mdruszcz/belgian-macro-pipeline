@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.5",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "12.8",
+      "value": "28.2583333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "31.6",
+      "value": "69.9166666663"
+    },
+    "rest_of_region": {
+      "share_pct": "18.4",
+      "value": "40.675"
+    },
+    "same_commune": {
+      "share_pct": "36.7",
+      "value": "81.186666667"
+    }
+  },
+  "coverage_pct": "96.9",
+  "dataset": "buyer_origin",
+  "denominator": "221.0366666666",
+  "dest_geo_id": "be:mun:92138",
+  "dest_name": {
+    "en": "Fernelmont",
+    "fr": "Fernelmont",
+    "nl": "Fernelmont"
+  },
+  "dest_nis": "92138",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 228,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Fernelmont",
+        "fr": "Fernelmont",
+        "nl": "Fernelmont"
+      },
+      "nis": "92138",
+      "share_pct": "36.7",
+      "value": "81.186666667"
+    },
+    {
+      "name": {
+        "en": "Namur",
+        "fr": "Namur",
+        "nl": "Namen"
+      },
+      "nis": "92094",
+      "share_pct": "9.5",
+      "value": "21.083333333"
+    },
+    {
+      "name": {
+        "en": "Eghezée",
+        "fr": "Eghezée",
+        "nl": "Eghezée"
+      },
+      "nis": "92035",
+      "share_pct": "8.6",
+      "value": "19"
+    },
+    {
+      "name": {
+        "en": "Gembloux",
+        "fr": "Gembloux",
+        "nl": "Gembloux"
+      },
+      "nis": "92142",
+      "share_pct": "4.8",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Wavre",
+        "fr": "Wavre",
+        "nl": "Waver"
+      },
+      "nis": "25112",
+      "share_pct": "4.1",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Andenne",
+        "fr": "Andenne",
+        "nl": "Andenne"
+      },
+      "nis": "92003",
+      "share_pct": "3.8",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "2.4",
+      "value": "5.25"
+    },
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "2.3",
+      "value": "5"
+    }
+  ]
+}

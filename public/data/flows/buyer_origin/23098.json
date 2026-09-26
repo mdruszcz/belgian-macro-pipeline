@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.5",
+      "value": "0.5"
+    },
+    "other_regions": {
+      "share_pct": "59.0",
+      "value": "55.4"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.4",
+      "value": "13.5"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "26.1",
+      "value": "24.51"
+    }
+  },
+  "coverage_pct": "97.8",
+  "dataset": "buyer_origin",
+  "denominator": "93.91",
+  "dest_geo_id": "be:mun:23098",
+  "dest_name": {
+    "en": "Drogenbos",
+    "fr": "Drogenbos",
+    "nl": "Drogenbos"
+  },
+  "dest_nis": "23098",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 96,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "26.6",
+      "value": "25"
+    },
+    {
+      "name": {
+        "en": "Drogenbos",
+        "fr": "Drogenbos",
+        "nl": "Drogenbos"
+      },
+      "nis": "23098",
+      "share_pct": "26.1",
+      "value": "24.51"
+    },
+    {
+      "name": {
+        "en": "Forest",
+        "fr": "Forest",
+        "nl": "Vorst"
+      },
+      "nis": "21007",
+      "share_pct": "9.6",
+      "value": "9"
+    },
+    {
+      "name": {
+        "en": "Beersel",
+        "fr": "Beersel",
+        "nl": "Beersel"
+      },
+      "nis": "23003",
+      "share_pct": "6.4",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "5.3",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Anderlecht",
+        "fr": "Anderlecht",
+        "nl": "Anderlecht"
+      },
+      "nis": "21001",
+      "share_pct": "3.2",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Auderghem",
+        "fr": "Auderghem",
+        "nl": "Oudergem"
+      },
+      "nis": "21002",
+      "share_pct": "3.2",
+      "value": "3"
+    },
+    {
+      "name": {
+        "en": "Sint-Genesius-Rode",
+        "fr": "Rhode-Saint-Genèse",
+        "nl": "Sint-Genesius-Rode"
+      },
+      "nis": "23101",
+      "share_pct": "3.2",
+      "value": "3"
+    }
+  ]
+}

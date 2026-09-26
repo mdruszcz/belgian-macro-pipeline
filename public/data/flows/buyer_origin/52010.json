@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1.5"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.8",
+      "value": "18.5"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "14.5",
+      "value": "55.5"
+    },
+    "rest_of_region": {
+      "share_pct": "45.1",
+      "value": "172.4"
+    },
+    "same_commune": {
+      "share_pct": "35.2",
+      "value": "134.6167"
+    }
+  },
+  "coverage_pct": "99.1",
+  "dataset": "buyer_origin",
+  "denominator": "382.5167",
+  "dest_geo_id": "be:mun:52010",
+  "dest_name": {
+    "en": "Chapelle-lez-Herlaimont",
+    "fr": "Chapelle-lez-Herlaimont",
+    "nl": "Chapelle-lez-Herlaimont"
+  },
+  "dest_nis": "52010",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 386,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "35.2",
+      "value": "134.6167"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "8.9",
+      "value": "34.2"
+    },
+    {
+      "name": {
+        "en": "Lasne",
+        "fr": "Lasne",
+        "nl": "Lasne"
+      },
+      "nis": "25119",
+      "share_pct": "7.1",
+      "value": "27"
+    },
+    {
+      "name": {
+        "en": "Seneffe",
+        "fr": "Seneffe",
+        "nl": "Seneffe"
+      },
+      "nis": "55085",
+      "share_pct": "6.8",
+      "value": "26"
+    },
+    {
+      "name": {
+        "en": "Manage",
+        "fr": "Manage",
+        "nl": "Manage"
+      },
+      "nis": "55086",
+      "share_pct": "5.4",
+      "value": "20.5"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "4.4",
+      "value": "17"
+    },
+    {
+      "name": {
+        "en": "Nivelles",
+        "fr": "Nivelles",
+        "nl": "Nijvel"
+      },
+      "nis": "25072",
+      "share_pct": "3.0",
+      "value": "11.5"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "2.9",
+      "value": "11"
+    }
+  ]
+}

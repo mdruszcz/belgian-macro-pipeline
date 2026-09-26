@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "1.2",
+      "value": "3"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "48.1",
+      "value": "119.4059235211"
+    },
+    "rest_of_region": {
+      "share_pct": "19.3",
+      "value": "48"
+    },
+    "same_commune": {
+      "share_pct": "28.9",
+      "value": "71.7"
+    }
+  },
+  "coverage_pct": "96.2",
+  "dataset": "buyer_origin",
+  "denominator": "248.1059235211",
+  "dest_geo_id": "be:mun:62122",
+  "dest_name": {
+    "en": "Trooz",
+    "fr": "Trooz",
+    "nl": "Trooz"
+  },
+  "dest_nis": "62122",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 258,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Trooz",
+        "fr": "Trooz",
+        "nl": "Trooz"
+      },
+      "nis": "62122",
+      "share_pct": "28.9",
+      "value": "71.7"
+    },
+    {
+      "name": {
+        "en": "Chaudfontaine",
+        "fr": "Chaudfontaine",
+        "nl": "Chaudfontaine"
+      },
+      "nis": "62022",
+      "share_pct": "15.6",
+      "value": "38.667828283"
+    },
+    {
+      "name": {
+        "en": "Liège",
+        "fr": "Liège",
+        "nl": "Luik"
+      },
+      "nis": "62063",
+      "share_pct": "11.5",
+      "value": "28.5"
+    },
+    {
+      "name": {
+        "en": "Theux",
+        "fr": "Theux",
+        "nl": "Theux"
+      },
+      "nis": "63076",
+      "share_pct": "5.6",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Sprimont",
+        "fr": "Sprimont",
+        "nl": "Sprimont"
+      },
+      "nis": "62100",
+      "share_pct": "4.6",
+      "value": "11.36"
+    },
+    {
+      "name": {
+        "en": "Esneux",
+        "fr": "Esneux",
+        "nl": "Esneux"
+      },
+      "nis": "62032",
+      "share_pct": "4.0",
+      "value": "10"
+    },
+    {
+      "name": {
+        "en": "Fléron",
+        "fr": "Fléron",
+        "nl": "Fléron"
+      },
+      "nis": "62038",
+      "share_pct": "3.8",
+      "value": "9.5"
+    },
+    {
+      "name": {
+        "en": "Olne",
+        "fr": "Olne",
+        "nl": "Olne"
+      },
+      "nis": "63057",
+      "share_pct": "2.4",
+      "value": "6"
+    }
+  ]
+}

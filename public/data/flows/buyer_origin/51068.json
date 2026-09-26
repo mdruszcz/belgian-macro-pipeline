@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "13.9",
+      "value": "39.6516666667"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "20.9",
+      "value": "59.416666667"
+    },
+    "rest_of_region": {
+      "share_pct": "17.3",
+      "value": "49.1666666667"
+    },
+    "same_commune": {
+      "share_pct": "47.9",
+      "value": "136.075"
+    }
+  },
+  "coverage_pct": "97.7",
+  "dataset": "buyer_origin",
+  "denominator": "284.3100000004",
+  "dest_geo_id": "be:mun:51068",
+  "dest_name": {
+    "en": "Silly",
+    "fr": "Silly",
+    "nl": "Opzullik"
+  },
+  "dest_nis": "51068",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 291,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Silly",
+        "fr": "Silly",
+        "nl": "Opzullik"
+      },
+      "nis": "51068",
+      "share_pct": "47.9",
+      "value": "136.075"
+    },
+    {
+      "name": {
+        "en": "Ath",
+        "fr": "Ath",
+        "nl": "Aat"
+      },
+      "nis": "51004",
+      "share_pct": "9.7",
+      "value": "27.666666667"
+    },
+    {
+      "name": {
+        "en": "Enghien",
+        "fr": "Enghien",
+        "nl": "Edingen"
+      },
+      "nis": "51067",
+      "share_pct": "7.3",
+      "value": "20.75"
+    },
+    {
+      "name": {
+        "en": "Soignies",
+        "fr": "Soignies",
+        "nl": "Zinnik"
+      },
+      "nis": "55040",
+      "share_pct": "4.9",
+      "value": "14"
+    },
+    {
+      "name": {
+        "en": "Tubize",
+        "fr": "Tubize",
+        "nl": "Tubeke"
+      },
+      "nis": "25105",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Lessines",
+        "fr": "Lessines",
+        "nl": "Lessen"
+      },
+      "nis": "51069",
+      "share_pct": "2.5",
+      "value": "7"
+    },
+    {
+      "name": {
+        "en": "Halle",
+        "fr": "Hal",
+        "nl": "Halle"
+      },
+      "nis": "23027",
+      "share_pct": "2.1",
+      "value": "6"
+    },
+    {
+      "name": {
+        "en": "Braine-le-Comte",
+        "fr": "Braine-le-Comte",
+        "nl": "’s Gravenbrakel"
+      },
+      "nis": "55004",
+      "share_pct": "2.1",
+      "value": "6"
+    }
+  ]
+}

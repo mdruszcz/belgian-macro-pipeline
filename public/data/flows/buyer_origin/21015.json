@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.4",
+      "value": "55.8501"
+    },
+    "origin_unknown": {
+      "share_pct": "0.2",
+      "value": "5"
+    },
+    "other_regions": {
+      "share_pct": "19.5",
+      "value": "455.3660333333"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "40.1",
+      "value": "937.183962362"
+    },
+    "rest_of_region": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "same_commune": {
+      "share_pct": "37.8",
+      "value": "883.43307273"
+    }
+  },
+  "coverage_pct": "97.9",
+  "dataset": "buyer_origin",
+  "denominator": "2336.8331684253",
+  "dest_geo_id": "be:mun:21015",
+  "dest_name": {
+    "en": "Schaerbeek",
+    "fr": "Schaerbeek",
+    "nl": "Schaarbeek"
+  },
+  "dest_nis": "21015",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 2387,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Schaerbeek",
+        "fr": "Schaerbeek",
+        "nl": "Schaarbeek"
+      },
+      "nis": "21015",
+      "share_pct": "37.8",
+      "value": "883.43307273"
+    },
+    {
+      "name": {
+        "en": "Brussels",
+        "fr": "Bruxelles",
+        "nl": "Brussel"
+      },
+      "nis": "21004",
+      "share_pct": "9.0",
+      "value": "209.438"
+    },
+    {
+      "name": {
+        "en": "Ixelles",
+        "fr": "Ixelles",
+        "nl": "Elsene"
+      },
+      "nis": "21009",
+      "share_pct": "5.5",
+      "value": "128.7321"
+    },
+    {
+      "name": {
+        "en": "Etterbeek",
+        "fr": "Etterbeek",
+        "nl": "Etterbeek"
+      },
+      "nis": "21005",
+      "share_pct": "5.1",
+      "value": "120"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Lambert",
+        "fr": "Woluwe-Saint-Lambert",
+        "nl": "Sint-Lambrechts-Woluwe"
+      },
+      "nis": "21018",
+      "share_pct": "4.4",
+      "value": "101.83333333"
+    },
+    {
+      "name": {
+        "en": "Evere",
+        "fr": "Evere",
+        "nl": "Evere"
+      },
+      "nis": "21006",
+      "share_pct": "3.0",
+      "value": "70.8344"
+    },
+    {
+      "name": {
+        "en": "Woluwe-Saint-Pierre",
+        "fr": "Woluwe-Saint-Pierre",
+        "nl": "Sint-Pieters-Woluwe"
+      },
+      "nis": "21019",
+      "share_pct": "2.1",
+      "value": "48.63"
+    },
+    {
+      "name": {
+        "en": "Uccle",
+        "fr": "Uccle",
+        "nl": "Ukkel"
+      },
+      "nis": "21016",
+      "share_pct": "2.0",
+      "value": "46"
+    }
+  ]
+}

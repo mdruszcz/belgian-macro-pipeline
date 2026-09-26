@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.7",
+      "value": "2"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "7.2",
+      "value": "19.5"
+    },
+    "rest_of_region": {
+      "share_pct": "59.5",
+      "value": "160.107142857"
+    },
+    "same_commune": {
+      "share_pct": "32.1",
+      "value": "86.5"
+    }
+  },
+  "coverage_pct": "99.7",
+  "dataset": "buyer_origin",
+  "denominator": "269.107142857",
+  "dest_geo_id": "be:mun:56001",
+  "dest_name": {
+    "en": "Anderlues",
+    "fr": "Anderlues",
+    "nl": "Anderlues"
+  },
+  "dest_nis": "56001",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 270,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Anderlues",
+        "fr": "Anderlues",
+        "nl": "Anderlues"
+      },
+      "nis": "56001",
+      "share_pct": "32.1",
+      "value": "86.5"
+    },
+    {
+      "name": {
+        "en": "Fontaine-l’Evêque",
+        "fr": "Fontaine-l’Evêque",
+        "nl": "Fontaine-l’Evêque"
+      },
+      "nis": "52022",
+      "share_pct": "11.2",
+      "value": "30.166666667"
+    },
+    {
+      "name": {
+        "en": "Charleroi",
+        "fr": "Charleroi",
+        "nl": "Charleroi"
+      },
+      "nis": "52011",
+      "share_pct": "10.3",
+      "value": "27.833333333"
+    },
+    {
+      "name": {
+        "en": "La Louvière",
+        "fr": "La Louvière",
+        "nl": "La Louvière"
+      },
+      "nis": "58001",
+      "share_pct": "8.9",
+      "value": "24"
+    },
+    {
+      "name": {
+        "en": "Binche",
+        "fr": "Binche",
+        "nl": "Binche"
+      },
+      "nis": "58002",
+      "share_pct": "8.6",
+      "value": "23.097142857"
+    },
+    {
+      "name": {
+        "en": "Lobbes",
+        "fr": "Lobbes",
+        "nl": "Lobbes"
+      },
+      "nis": "56044",
+      "share_pct": "4.8",
+      "value": "13"
+    },
+    {
+      "name": {
+        "en": "Chapelle-lez-Herlaimont",
+        "fr": "Chapelle-lez-Herlaimont",
+        "nl": "Chapelle-lez-Herlaimont"
+      },
+      "nis": "52010",
+      "share_pct": "3.2",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Courcelles",
+        "fr": "Courcelles",
+        "nl": "Courcelles"
+      },
+      "nis": "52015",
+      "share_pct": "3.0",
+      "value": "8"
+    }
+  ]
+}

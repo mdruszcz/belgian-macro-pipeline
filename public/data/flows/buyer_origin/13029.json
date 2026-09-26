@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "origin_unknown": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "other_regions": {
+      "share_pct": "0.4",
+      "value": "1"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "33.1",
+      "value": "79.9226"
+    },
+    "rest_of_region": {
+      "share_pct": "11.2",
+      "value": "27.03"
+    },
+    "same_commune": {
+      "share_pct": "54.4",
+      "value": "131.35536667"
+    }
+  },
+  "coverage_pct": "96.5",
+  "dataset": "buyer_origin",
+  "denominator": "241.30796667",
+  "dest_geo_id": "be:mun:13029",
+  "dest_name": {
+    "en": "Olen",
+    "fr": "Olen",
+    "nl": "Olen"
+  },
+  "dest_nis": "13029",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 250,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Olen",
+        "fr": "Olen",
+        "nl": "Olen"
+      },
+      "nis": "13029",
+      "share_pct": "54.4",
+      "value": "131.35536667"
+    },
+    {
+      "name": {
+        "en": "Herentals",
+        "fr": "Herentals",
+        "nl": "Herentals"
+      },
+      "nis": "13011",
+      "share_pct": "10.6",
+      "value": "25.5"
+    },
+    {
+      "name": {
+        "en": "Kasterlee",
+        "fr": "Kasterlee",
+        "nl": "Kasterlee"
+      },
+      "nis": "13017",
+      "share_pct": "4.7",
+      "value": "11.4226"
+    },
+    {
+      "name": {
+        "en": "Geel",
+        "fr": "Geel",
+        "nl": "Geel"
+      },
+      "nis": "13008",
+      "share_pct": "4.4",
+      "value": "10.5"
+    },
+    {
+      "name": {
+        "en": "Westerlo",
+        "fr": "Westerlo",
+        "nl": "Westerlo"
+      },
+      "nis": "13049",
+      "share_pct": "3.3",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Antwerp",
+        "fr": "Anvers",
+        "nl": "Antwerpen"
+      },
+      "nis": "11002",
+      "share_pct": "2.1",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Dessel",
+        "fr": "Dessel",
+        "nl": "Dessel"
+      },
+      "nis": "13006",
+      "share_pct": "2.1",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Grobbendonk",
+        "fr": "Grobbendonk",
+        "nl": "Grobbendonk"
+      },
+      "nis": "13010",
+      "share_pct": "1.7",
+      "value": "4"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "buckets": {
+    "abroad": {
+      "share_pct": "2.6",
+      "value": "6"
+    },
+    "origin_unknown": {
+      "share_pct": "0.0",
+      "value": "0"
+    },
+    "other_regions": {
+      "share_pct": "4.7",
+      "value": "11.0"
+    },
+    "rest_of_arrondissement": {
+      "share_pct": "23.8",
+      "value": "55.5"
+    },
+    "rest_of_region": {
+      "share_pct": "20.4",
+      "value": "47.666666667"
+    },
+    "same_commune": {
+      "share_pct": "48.6",
+      "value": "113.5"
+    }
+  },
+  "coverage_pct": "99.4",
+  "dataset": "buyer_origin",
+  "denominator": "233.666666667",
+  "dest_geo_id": "be:mun:82036",
+  "dest_name": {
+    "en": "Vaux-sur-Sûre",
+    "fr": "Vaux-sur-Sûre",
+    "nl": "Vaux-sur-Sûre"
+  },
+  "dest_nis": "82036",
+  "fetched_at": "2026-09-24T19:31:19.438375+00:00",
+  "parcels_number": 235,
+  "period": "2025",
+  "schema_version": 1,
+  "source_id": "spf_finances",
+  "source_uuid": "b90b50be-9dfc-11f0-99e9-00be432db085",
+  "state": "final",
+  "top_origins": [
+    {
+      "name": {
+        "en": "Vaux-sur-Sûre",
+        "fr": "Vaux-sur-Sûre",
+        "nl": "Vaux-sur-Sûre"
+      },
+      "nis": "82036",
+      "share_pct": "48.6",
+      "value": "113.5"
+    },
+    {
+      "name": {
+        "en": "Bastogne",
+        "fr": "Bastogne",
+        "nl": "Bastenaken"
+      },
+      "nis": "82039",
+      "share_pct": "17.3",
+      "value": "40.5"
+    },
+    {
+      "name": {
+        "en": "Sainte-Ode",
+        "fr": "Sainte-Ode",
+        "nl": "Sainte-Ode"
+      },
+      "nis": "82038",
+      "share_pct": "5.1",
+      "value": "12"
+    },
+    {
+      "name": {
+        "en": "Léglise",
+        "fr": "Léglise",
+        "nl": "Léglise"
+      },
+      "nis": "84033",
+      "share_pct": "5.0",
+      "value": "11.666666667"
+    },
+    {
+      "name": {
+        "en": "Arlon",
+        "fr": "Arlon",
+        "nl": "Aarlen"
+      },
+      "nis": "81001",
+      "share_pct": "3.6",
+      "value": "8.5"
+    },
+    {
+      "name": {
+        "en": "Libramont-Chevigny",
+        "fr": "Libramont-Chevigny",
+        "nl": "Libramont-Chevigny"
+      },
+      "nis": "84077",
+      "share_pct": "3.4",
+      "value": "8"
+    },
+    {
+      "name": {
+        "en": "Wezembeek-Oppem",
+        "fr": "Wezembeek-Oppem",
+        "nl": "Wezembeek-Oppem"
+      },
+      "nis": "23103",
+      "share_pct": "2.1",
+      "value": "5"
+    },
+    {
+      "name": {
+        "en": "Paliseul",
+        "fr": "Paliseul",
+        "nl": "Paliseul"
+      },
+      "nis": "84050",
+      "share_pct": "1.9",
+      "value": "4.5"
+    }
+  ]
+}
