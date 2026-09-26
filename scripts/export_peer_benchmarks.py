@@ -16,11 +16,19 @@ public/data/metadata/peers.json:
   peers_with_value    how many of the (up to 10) peers that was
   position / of       the commune's rank among itself + those peers
                       (1 = highest, ties share the best rank)
-  deviation_pct       (value - peer_median) / peer_median * 100
+  deviation_pct       (value - peer_median) / peer_median * 100 -- null
+                      when peer_median <= 0 (see deviation_withheld)
+  deviation_withheld  "median_zero" or "median_negative" when deviation_pct
+                      is null because the peer median is <= 0 (peer_median,
+                      position and of are still shown -- the rank still
+                      means something); omitted (key absent) when
+                      deviation_pct is a real number
   selection_variable  true when this indicator IS, or is the NUMERATOR of,
                       one of the eleven peer-selection variables (ADR 0015
                       "Circularity") -- the page marks these "peers were
-                      chosen partly on this figure"
+                      chosen partly on this figure". Derived from
+                      src.analytics.peers.VARIABLES, not hand-maintained --
+                      see SELECTION_VARIABLE_INDICATORS below.
 
 All the arithmetic is src.analytics.peers.peer_stats; this script only
 assembles the per-(indicator, commune) inputs and writes the payload.
@@ -29,13 +37,16 @@ Suppressed ("S") and na ("N") peer values are excluded from the peer set
 entirely, never treated as zero (CLAUDE.md rule 26) -- same USABLE_STATUSES
 set as scripts/export_peer_model.py. A benchmark whose result is entirely
 null (peer_median is None) is OMITTED from the indicator's block rather than
-written as a block of nulls, per the handoff.
+written as a block of nulls, per the handoff. A median <= 0 is NOT entirely
+null -- peer_median/position/of are kept and only deviation_pct is withheld
+(see deviation_withheld above), so those entries are written, not omitted.
 
 Writes public/data/peers/<nis>.json, one per current commune:
 
   {model_version, variant, nis_code,
    lists: {national: {IND: {period, value, peer_median, peers_with_value,
-                             position, of, deviation_pct, selection_variable}},
+                             position, of, deviation_pct,
+                             [deviation_withheld], selection_variable}},
            region: {...}}}
 
 Deterministic: sorted keys, compact JSON, ensure_ascii=False, no embedded
@@ -64,7 +75,10 @@ from scripts.export_peer_model import (  # noqa: E402
     _read_all_history_rows,
 )
 from src.analytics.engine import ObservationSet, compute  # noqa: E402
-from src.analytics.peers import peer_stats  # noqa: E402
+from src.analytics.peers import (  # noqa: E402
+    SELECTION_VARIABLE_INDICATOR_IDS,
+    peer_stats,
+)
 from src.validation.config_schema import load_and_validate_derived  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -87,41 +101,17 @@ USABLE_STATUSES = {"A", "P", "derived", "reconstructed"}
 CROSS_SECTIONAL_FUNCTIONS = {"percentile", "z_score"}
 
 # The eleven peer-selection variables (docs/features/peer_model.md, "The
-# variable list"), each mapped to every indicator id that IS that variable
-# or is its NUMERATOR -- ADR 0015's "Circularity" note: showing either
-# variable's own deviation must carry "peers were chosen partly on this
-# figure". Density (variable 2) has no published municipal indicator_code
-# of its own (it is a peers.py-only feature computed from population/area)
-# so it contributes nothing here; the other ten each name their raw
-# numerator indicator(s) alongside the derived id itself where one exists.
-SELECTION_VARIABLE_INDICATORS: frozenset[str] = frozenset(
-    {
-        # 1. Population
-        "POPULATION_BY_COMMUNE",
-        # 3. Share aged 65+ (numerator)
-        "POPULATION_AGE_65_PLUS",
-        # 4. Share aged 0-14 (numerator)
-        "POPULATION_AGE_0_14",
-        # 5. Population change over 5 years
-        "POPULATION_CHANGE_5Y",
-        # 6. Average net taxable income per tax return (+ numerator) --
-        #    disclosed circularity risk named explicitly in the spec.
-        "AVG_NET_TAXABLE_INCOME",
-        "FISCAL_TOT_NET_TAXABLE_INC",
-        # 7. Insured unemployment rate -- disclosed circularity risk named
-        #    explicitly in the spec.
-        "UNEMPLOYMENT_RATE_INSURED",
-        # 8. Share of foreign nationals (+ numerator)
-        "SHARE_FOREIGN_NATIONALS",
-        "POP_FOREIGN_NATIONALS",
-        # 9. Average household size (+ numerator)
-        "AVERAGE_HOUSEHOLD_SIZE",
-        # 10. Enterprise density (numerator)
-        "LOCAL_UNITS_BY_COMMUNE",
-        # 11. Property tax base per resident (numerator)
-        "MUN_CADASTRAL_INCOME_TOTAL",
-    }
-)
+# variable list"), each contributing every indicator id that IS that
+# variable or is its NUMERATOR -- ADR 0015's "Circularity" note: showing
+# either variable's own deviation must carry "peers were chosen partly on
+# this figure". Derived from src.analytics.peers.VARIABLES's
+# `indicator_ids` (the single source of truth), NOT hand-maintained here --
+# adding a variable to VARIABLES with its indicator_ids set is the only way
+# to change this set. Any indicator id that should be flagged WITHOUT being
+# a selection variable or its numerator (there is none today) would go in a
+# separate, explicitly named additive constant, never folded back into this
+# derived set.
+SELECTION_VARIABLE_INDICATORS: frozenset[str] = SELECTION_VARIABLE_INDICATOR_IDS
 
 
 class BenchmarksExportError(ValueError):
@@ -251,7 +241,7 @@ def build_benchmarks(
                 stats = peer_stats(own_value, peer_values)
                 if stats["peer_median"] is None:
                     continue  # entirely null result -- omit rather than write nulls
-                lists_payload[list_name][indicator_id] = {
+                entry = {
                     "period": period,
                     "value": own_value,
                     "peer_median": stats["peer_median"],
@@ -263,6 +253,13 @@ def build_benchmarks(
                     ),
                     "selection_variable": indicator_id in SELECTION_VARIABLE_INDICATORS,
                 }
+                # deviation_withheld ("median_zero" / "median_negative") is
+                # only present when deviation_pct is null for that reason --
+                # key omitted (not written as null) when deviation_pct is a
+                # real number, per docs/features/peer_model.md.
+                if stats["deviation_withheld"] is not None:
+                    entry["deviation_withheld"] = stats["deviation_withheld"]
+                lists_payload[list_name][indicator_id] = entry
 
         result[nis] = {
             "model_version": model_version,

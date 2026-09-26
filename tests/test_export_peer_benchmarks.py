@@ -102,6 +102,55 @@ def test_selection_variable_true_for_income_false_for_a_finance_indicator(payloa
         assert namur_region["MUN_DEBT_TOTAL_PER_CAPITA"]["selection_variable"] is False
 
 
+def test_negative_peer_median_entry_is_kept_with_reason_not_omitted(payloads):
+    # Antwerpen (11002), INTERNAL_MIGRATION_NET, national list, 2025: value
+    # -4085 against a peer median of -85 (both real, read from the payload,
+    # not hand-typed -- CLAUDE.md rule 36). The entry must be KEPT (rank
+    # still means something) with deviation_pct null and deviation_withheld
+    # naming why, never omitted as if the whole benchmark were unavailable.
+    entry = payloads["11002"]["lists"]["national"]["INTERNAL_MIGRATION_NET"]
+    assert entry["peer_median"] < 0
+    assert entry["deviation_pct"] is None
+    assert entry["deviation_withheld"] == "median_negative"
+    assert entry["position"] is not None
+    assert entry["of"] is not None
+    assert entry["peers_with_value"] >= 7
+
+
+def test_deviation_withheld_key_absent_when_deviation_is_computed(payloads):
+    # The ordinary case (a real, positive median): deviation_withheld is
+    # omitted entirely, not written as null, per docs/features/peer_model.md.
+    entry = payloads["92094"]["lists"]["national"]["AVG_NET_TAXABLE_INCOME"]
+    assert entry["deviation_pct"] is not None
+    assert "deviation_withheld" not in entry
+
+
+def test_selection_variable_indicators_equals_the_derived_set_from_peers_py(payloads):
+    # scripts/export_peer_benchmarks.py's SELECTION_VARIABLE_INDICATORS must
+    # be exactly src.analytics.peers.SELECTION_VARIABLE_INDICATOR_IDS -- no
+    # separate hand-maintained constant that can drift from the model
+    # (audit should-fix 2). Pinning today's known set of 12 ids as a second,
+    # independent check: if this fails while the identity check above still
+    # passes, the drift is in peers.py's VARIABLES, not in the export script.
+    from src.analytics.peers import SELECTION_VARIABLE_INDICATOR_IDS
+
+    assert export_peer_benchmarks.SELECTION_VARIABLE_INDICATORS is SELECTION_VARIABLE_INDICATOR_IDS
+    assert SELECTION_VARIABLE_INDICATOR_IDS == {
+        "POPULATION_BY_COMMUNE",
+        "POPULATION_AGE_65_PLUS",
+        "POPULATION_AGE_0_14",
+        "POPULATION_CHANGE_5Y",
+        "AVG_NET_TAXABLE_INCOME",
+        "FISCAL_TOT_NET_TAXABLE_INC",
+        "UNEMPLOYMENT_RATE_INSURED",
+        "SHARE_FOREIGN_NATIONALS",
+        "POP_FOREIGN_NATIONALS",
+        "AVERAGE_HOUSEHOLD_SIZE",
+        "LOCAL_UNITS_BY_COMMUNE",
+        "MUN_CADASTRAL_INCOME_TOTAL",
+    }
+
+
 def test_selection_variable_true_for_unemployment(payloads):
     for payload in payloads.values():
         entry = payload["lists"]["national"].get("UNEMPLOYMENT_RATE_INSURED")
@@ -141,11 +190,35 @@ def test_no_indicator_is_written_as_an_entirely_null_block(payloads):
                 assert entry["peer_median"] is not None, (nis, list_name, indicator_id)
 
 
-def test_two_runs_produce_byte_identical_json(tmp_path, payloads):
+def test_two_runs_produce_byte_identical_json(tmp_path):
+    # Rebuilds the whole payload from scratch twice, independently, rather
+    # than writing the same already-built `payloads` dict to disk twice --
+    # that would only prove json.dumps is deterministic, not that a real
+    # rerun of the exporter (re-reading the CSVs, re-indexing, rebuilding
+    # every commune's benchmarks) is byte-identical (CLAUDE.md rule 35).
+    if not PEERS_JSON.exists():
+        pytest.skip(f"{PEERS_JSON} not built -- run scripts/export_peer_model.py first")
+
+    def rebuild():
+        communes = export_peer_model._current_municipality_nis(
+            export_peer_model.DEFAULT_GEOGRAPHIES
+        )
+        peers_model = export_peer_benchmarks._load_peers(PEERS_JSON)
+        raw_rows = export_peer_benchmarks._read_all_history_rows(
+            export_peer_benchmarks.DEFAULT_HISTORY_DIR, export_peer_benchmarks.DEFAULT_HISTORY_CSV
+        )
+        derived_rows, _names = export_peer_benchmarks.build_derived_rows(
+            raw_rows, export_peer_benchmarks.DEFAULT_DERIVED_DIR
+        )
+        all_rows = raw_rows + derived_rows
+        index = export_peer_benchmarks._index_rows(all_rows)
+        latest_period = export_peer_benchmarks._latest_period_per_indicator(index)
+        return export_peer_benchmarks.build_benchmarks(communes, index, latest_period, peers_model)
+
     out1 = tmp_path / "run1"
     out2 = tmp_path / "run2"
-    export_peer_benchmarks.write_payloads(payloads, out1)
-    export_peer_benchmarks.write_payloads(payloads, out2)
+    export_peer_benchmarks.write_payloads(rebuild(), out1)
+    export_peer_benchmarks.write_payloads(rebuild(), out2)
 
     files1 = sorted(out1.glob("*.json"))
     files2 = sorted(out2.glob("*.json"))
