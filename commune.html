@@ -648,6 +648,28 @@
           </div>
         </section>
 
+        <!-- ── schools ISE panel (Schools ISE batch) ─────────────────────────
+             docs/features/schools_ise.md. Same bp-state shape as #pyramidPanel:
+             "unavailable" (Wallonia/Brussels commune with zero assigned sites),
+             "not-applicable" (Flanders -- this directory covers the FWB network
+             only), or "ready". Decided from the commune payload's own `region`
+             field (rule 26), never from mere absence of a row. -->
+        <section class="panel bp-state" id="schoolsPanel" data-state="loading">
+          <h3 data-t="cpSchoolsTitle">Schools</h3>
+          <div class="psub" id="schoolsSub">—</div>
+          <div class="bp-state-body">
+            <div class="fin4" id="schoolsSummary"></div>
+            <p class="pyramid-note" data-t="cpSchoolsCaveat"></p>
+            <h4 id="schoolsListTitle" data-t="cpSchoolsListTitle" style="margin:var(--bp-space-4) 0 var(--bp-space-2)"></h4>
+            <ul class="flows-origins" id="schoolsList" style="list-style:none;padding:0"></ul>
+            <p class="flows-source" id="schoolsSource"></p>
+          </div>
+          <div class="bp-state-message">
+            <span class="headline" id="schoolsMsgHeadline">—</span>
+            <span class="why" id="schoolsMsgWhy">—</span>
+          </div>
+        </section>
+
         <section>
           <div class="sechead">
             <h2 data-t="cpMaps">Commune maps</h2>
@@ -855,6 +877,12 @@
   var AGE_SEX_URL = function(nis){ return 'public/data/demography/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
   var FLOWS_URL = function(nis){ return 'public/data/flows/buyer_origin/' + nis + '.json'; };
+  // Schools ISE (docs/features/schools_ise.md) -- both fetched once for the
+  // whole country (not per-commune like FLOWS_URL): the per-commune summary
+  // (~90 KB) and the full per-site snapshot it was built from, filtered
+  // client-side to this commune's own site_ids for the site list.
+  var SCHOOLS_URL = 'public/data/schools/by_commune.json';
+  var SCHOOLS_SITES_URL = 'public/data/schools_ise_2025.json';
 
   var LANG = I18N.initial();
   var T = function(k, v){ return I18N.t(LANG, k, v); };
@@ -865,7 +893,7 @@
     sections: {headlines: [], sections: []}, sources: {}, grades: {},
     geojson: null, map: null, locator: null, manifest: {},
     geographies: {}, adjacency: {}, photos: {}, headlineValues: null, nbMap: null,
-    ageSex: null, flows: null,
+    ageSex: null, flows: null, schools: null, schoolSites: null,
   };
 
   /* The geography row for a NIS code, and the chain above it. geographies.json
@@ -1433,6 +1461,101 @@
       sourceEl.textContent = '';
       sourceEl.hidden = true;
     }
+  }
+
+  /* ---- schools (ISE classes) ---------------------------------------------
+     docs/features/schools_ise.md. state.schools is the WHOLE by_commune.json
+     (fetched once, not per-commune), so this reads state.schools.communes[nis]
+     itself. Three data-state outcomes, all decided here rather than left to
+     "row present or not": ready (a row exists), unavailable (no row, but the
+     commune IS in the FWB area -- Wallonia or Brussels-Capital), not-applicable
+     (Flanders -- this directory has never covered that region at all). rule 26:
+     these three must never collapse into each other. */
+  function fmtClass(v){
+    return (typeof v === 'number' && isFinite(v)) ? v.toLocaleString(LANG, {minimumFractionDigits: 1, maximumFractionDigits: 1}) : null;
+  }
+  function schoolTile(label, value){
+    var tile = document.createElement('div');
+    tile.className = 'ftile';
+    tile.innerHTML = '<div><div class="lbl"></div><div class="why"></div></div>';
+    tile.querySelector('.lbl').textContent = label;
+    tile.querySelector('.why').textContent = value;
+    return tile;
+  }
+  function renderSchools(){
+    var panel = document.getElementById('schoolsPanel');
+    var payload = state.schools;
+    var region = state.profile && state.profile.region;
+
+    // A row in the payload wins over the region check below, in EITHER
+    // direction: a Flanders commune can genuinely carry an FWB site (e.g.
+    // Ronse 45041, a Flemish commune with a French-speaking-network school),
+    // and showing "not applicable" there would contradict this page's own
+    // data. So the payload is checked FIRST; the region only decides what
+    // "no row" means (rule 26 -- not-applicable and zero-sites must not
+    // collapse into each other, but neither may override a real row).
+    var entry = payload && payload.communes && payload.communes[state.nis];
+    if(!entry && region === 'Flanders'){
+      panel.dataset.state = 'not-applicable';
+      document.getElementById('schoolsMsgHeadline').textContent = T('cpSchoolsNotApplicable');
+      document.getElementById('schoolsMsgWhy').textContent = T('cpSchoolsNotApplicableWhy');
+      return;
+    }
+    if(!entry){
+      // Either the whole payload failed to load (network/404), or this is a
+      // Wallonia/Brussels-Capital commune with zero FWB sites assigned to it
+      // (e.g. a German-speaking community commune) -- both are shown the
+      // same way, since there is nothing more specific to say without data.
+      panel.dataset.state = 'unavailable';
+      document.getElementById('schoolsMsgHeadline').textContent = T('cpSchoolsUnavailable');
+      document.getElementById('schoolsMsgWhy').textContent = T('cpSchoolsUnavailableWhy');
+      return;
+    }
+
+    document.getElementById('schoolsSub').textContent = T('cpSchoolsSub', {year: payload.year});
+
+    var summary = document.getElementById('schoolsSummary');
+    summary.innerHTML = '';
+    summary.appendChild(schoolTile(T('cpSchoolsSites', {n: entry.sites}), String(entry.sites)));
+    var foMean = fmtClass(entry.FO.mean_class);
+    summary.appendChild(schoolTile(T('cpSchoolsMeanFO'), foMean === null ? T('cpSchoolsNoClass') : foMean));
+    var soMean = fmtClass(entry.SO.mean_class);
+    summary.appendChild(schoolTile(T('cpSchoolsMeanSO'), soMean === null ? T('cpSchoolsNoClass') : soMean));
+
+    // The full per-site list, straight from schools_ise_2025.json (fetched
+    // once, filtered client-side by this commune's own site_ids -- the same
+    // "one shared payload, filtered per commune" shape as ageSex/flows use
+    // their own per-commune payload instead, chosen here because splitting
+    // the ISE file into 565 tiny per-commune files would be 565 network
+    // round trips for a page most readers load once).
+    var listHost = document.getElementById('schoolsList');
+    listHost.innerHTML = '';
+    var siteIdSet = {};
+    entry.site_ids.forEach(function(id){ siteIdSet[id] = true; });
+    var sites = (state.schoolSites || []).filter(function(r){ return siteIdSet[r.site]; });
+    sites.sort(function(a, b){ return a.school.localeCompare(b.school, LANG); });
+    sites.forEach(function(r){
+      var li = document.createElement('li');
+      li.style.padding = '6px 0';
+      li.style.borderBottom = '1px solid var(--bp-border)';
+      var classLabel = r.ed == null ? '—' : r.ed;
+      li.innerHTML =
+        '<strong></strong><br><span class="p" style="font-size:12px;color:var(--bp-text-muted)"></span>';
+      li.querySelector('strong').textContent = r.school;
+      li.querySelector('.p').textContent =
+        r.formula + ' · ' + (r.network || '—') + ' · ' + T('cpSchoolsClassLabel') + ' ' + classLabel;
+      listHost.appendChild(li);
+    });
+    document.getElementById('schoolsListTitle').style.display = sites.length ? '' : 'none';
+
+    var sourceEl = document.getElementById('schoolsSource');
+    sourceEl.textContent = T('cpSchoolsSource', {
+      source: 'Fédération Wallonie-Bruxelles (ODWB)',
+      year: payload.year,
+      registerYear: payload.register_year,
+    });
+
+    panel.dataset.state = 'ready';
   }
 
   function renderCompositions(){
@@ -2214,6 +2337,7 @@
     renderAgeSex();
     renderFinances();
     renderFlows();
+    renderSchools();
     renderComparison();
     renderRanks();
     renderFocus();
@@ -2257,6 +2381,7 @@
       fetch(MANIFEST_URL), fetch(COMMUNE_URL(state.nis)),
       fetch(GEOGRAPHIES_URL), fetch(ADJACENCY_URL), fetch(PHOTOS_URL),
       fetch(AGE_SEX_URL(state.nis)), fetch(FLOWS_URL(state.nis)),
+      fetch(SCHOOLS_URL), fetch(SCHOOLS_SITES_URL),
     ]);
     // Each of these is optional and degrades to the honest state: no
     // geography metadata means English place names, no adjacency means the
@@ -2272,6 +2397,11 @@
     // a merged commune the exporter has not re-keyed) means the whole
     // section stays hidden (renderFlows()), never an "unavailable" panel.
     if(res[9].ok) state.flows = await res[9].json();
+    // Schools ISE: both optional, same as the rest of this block -- a missing
+    // payload degrades renderSchools() to its own "unavailable" state rather
+    // than breaking the page.
+    if(res[10].ok) state.schools = await res[10].json();
+    if(res[11].ok) state.schoolSites = (await res[11].json()).records || [];
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });

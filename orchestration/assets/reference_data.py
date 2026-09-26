@@ -57,4 +57,37 @@ commune_flows_export = script_asset(
     ),
 )
 
-ASSETS = [staging_db, commune_adjacency, commune_typology, commune_flows_export]
+# Schools ISE (docs/features/schools_ise.md). schools_ise_export fetches both ODWB
+# datasets live and resolves each site's commune -- no dependency on site_payloads,
+# unlike commune_flows_export, since it needs no geographies.json (the commune
+# display names come straight from geographies.csv inside the script itself).
+# schools_by_commune_export reads schools_ise_export's own output, so it depends on it.
+schools_ise_export = script_asset(
+    "schools_ise_export",
+    group="reference_data",
+    deps=[],
+    kinds={"json"},
+    description=(
+        "The FWB school-site ISE-class snapshot, joined to each site's commune NIS "
+        "code (scripts/export_schools_ise.py)."
+    ),
+)
+schools_by_commune_export = script_asset(
+    "schools_by_commune_export",
+    group="reference_data",
+    deps=["schools_ise_export"],
+    kinds={"json"},
+    description=(
+        "Per-commune summary of the ISE-class snapshot -- site counts and mean "
+        "class per formula (scripts/export_schools_by_commune.py)."
+    ),
+)
+
+ASSETS = [
+    staging_db,
+    commune_adjacency,
+    commune_typology,
+    commune_flows_export,
+    schools_ise_export,
+    schools_by_commune_export,
+]
