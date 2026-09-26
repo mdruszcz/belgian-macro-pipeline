@@ -1,0 +1,27 @@
+id: BIRTH_RATE_PER_1000
+name:
+  en: Birth rate (per 1,000 residents)
+  fr: Taux de natalité (par 1 000 habitants)
+  nl: Geboortecijfer (per 1 000 inwoners)
+definition:
+  en: "Births during the calendar year per 1,000 residents on 1 January of the same year."
+  fr: "Naissances au cours de l'année civile, par 1 000 habitants au 1er janvier de la même année."
+  nl: "Geboorten tijdens het kalenderjaar, per 1 000 inwoners op 1 januari van hetzelfde jaar."
+unit: per_mille
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    BIRTHS over POPULATION_BY_COMMUNE, both at the same year, times 1,000 (ADR 0014). One
+    denominator -- the 1 January population BIRTHS's own commune-map resolution already
+    matches -- rather than an invented mid-year average; Statbel's own published crude birth
+    rate uses the mid-year population instead, so ours can differ slightly from theirs by
+    construction (see the ADR). Available 2016-2025 only, where both POPULATION_BY_COMMUNE and
+    BIRTHS exist for the same commune and year; null (never 0) for the 31 communes merged in
+    2019 or 2025, whose BIRTHS row is absent for 2018 or 2024 respectively. preferred_direction
+    is 'contextual': a higher or lower birth rate is neither good nor bad for a commune profile.
+derived:
+  function: per_thousand
+  inputs: [BIRTHS, POPULATION_BY_COMMUNE]

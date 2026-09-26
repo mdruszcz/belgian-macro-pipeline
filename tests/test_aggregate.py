@@ -258,6 +258,48 @@ def test_the_real_belgian_average_income_figure_from_the_spec():
     assert result.value("AVG", "be:prov:a", "2023") != pytest.approx(265_000.0)
 
 
+RATE_CONFIG = {
+    "RATE": {
+        "name": {"en": "Birth rate per 1,000"},
+        "unit": "per_mille",
+        "derived": {"function": "per_thousand", "inputs": ["BIRTHS", "POP"]},
+    }
+}
+
+
+def test_a_per_thousand_rate_is_recomputed_from_the_sums_not_averaged():
+    """ADR 0014's aggregation rule for the six per-1,000 rates, same shape as
+    the mean_from_total test above but with per_thousand and a x1000 scale.
+
+    Deliberately unequal populations and a lopsided split so the correct
+    province rate and the naive mean of commune rates visibly differ:
+
+    Commune a1:  50 births over 10,000 population -> rate  5.0
+    Commune a2:  40 births over  1,000 population -> rate 40.0
+
+    Correct province rate = (50 + 40) / (10,000 + 1,000) * 1000 = 8.181818...
+    Unweighted mean of the two commune rates      = (5.0 + 40.0) / 2 = 22.5  (WRONG)
+    """
+    obs = _obs(
+        [
+            ("BIRTHS", "be:mun:a1", "2023", 50.0),
+            ("BIRTHS", "be:mun:a2", "2023", 40.0),
+            ("POP", "be:mun:a1", "2023", 10_000.0),
+            ("POP", "be:mun:a2", "2023", 1_000.0),
+        ]
+    )
+    methods = {"BIRTHS": SUM, "POP": SUM, "RATE": RECOMPUTE}
+    result = aggregate(
+        obs, methods, PARENTS, LEVELS, per_period_universe(UNIVERSE), RATE_CONFIG, min_coverage=0.0
+    )
+
+    assert result.value("BIRTHS", "be:prov:a", "2023") == 90.0
+    assert result.value("POP", "be:prov:a", "2023") == 11_000.0
+    assert result.value("RATE", "be:prov:a", "2023") == pytest.approx(8.181818, rel=1e-6)
+    # The specific wrong answer this rule exists to prevent.
+    assert result.value("RATE", "be:prov:a", "2023") != pytest.approx(22.5)
+
+
 def test_a_recomputed_ratio_inherits_its_weakest_inputs_coverage():
     """A ratio must not look better covered than the numbers it came from."""
     obs = _obs(
@@ -366,6 +408,8 @@ def test_methods_come_from_metadata_not_a_hardcoded_list():
         "DEP": {"derived": {"function": "dependency_ratio", "inputs": ["A", "B", "C"]}},
         "PCT": {"derived": {"function": "percentile", "inputs": ["POP"]}},
         "CAGR": {"derived": {"function": "cagr", "inputs": ["POP"]}},
+        # ADR 0014's six per-1,000 rates all use this function.
+        "RATE": {"derived": {"function": "per_thousand", "inputs": ["A", "POP"]}},
     }
     methods = methods_from_metadata(meta, derived)
 
@@ -373,6 +417,7 @@ def test_methods_come_from_metadata_not_a_hardcoded_list():
     assert methods["GDP_INDEX"] == REFUSE
     assert methods["AVG"] == RECOMPUTE
     assert methods["DEP"] == RECOMPUTE
+    assert methods["RATE"] == RECOMPUTE
     # A percentile ranks against peers -- a province ranked against communes
     # is a category error, not an arithmetic problem.
     assert methods["PCT"] == REFUSE

@@ -1,0 +1,26 @@
+id: INTERNAL_MIGRATION_IN_RATE_PER_1000
+name:
+  en: Internal migration arrivals (per 1,000 residents)
+  fr: Arrivées migratoires internes (par 1 000 habitants)
+  nl: Interne migratie aankomsten (per 1 000 inwoners)
+definition:
+  en: "Arrivals from elsewhere in Belgium during the calendar year, per 1,000 residents on 1 January of the same year."
+  fr: "Arrivées depuis le reste de la Belgique au cours de l'année civile, par 1 000 habitants au 1er janvier de la même année."
+  nl: "Aankomsten uit de rest van België tijdens het kalenderjaar, per 1 000 inwoners op 1 januari van hetzelfde jaar."
+unit: per_mille
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    INTERNAL_MIGRATION_IN over POPULATION_BY_COMMUNE, both at the same year, times 1,000
+    (ADR 0014). One denominator -- the 1 January population INTERNAL_MIGRATION_IN's own
+    commune-map resolution already matches -- rather than an invented mid-year average.
+    Available 2016-2025 only, where both indicators exist for the same commune and year; null
+    (never 0) for the 31 communes merged in 2019 or 2025, whose INTERNAL_MIGRATION_IN row is
+    absent for 2018 or 2024 respectively. preferred_direction is 'contextual': a higher
+    arrivals rate is neither good nor bad for a commune profile.
+derived:
+  function: per_thousand
+  inputs: [INTERNAL_MIGRATION_IN, POPULATION_BY_COMMUNE]

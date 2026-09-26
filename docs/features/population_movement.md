@@ -184,11 +184,14 @@ Not observed in the real file (verified: 622 codes, 622 distinct, in the largest
 2025), but the workbook is out of this pipeline's control and a future republish could
 introduce one.
 
-## Rates: out of scope, pending an ADR
+## Rates: Decided, ADR 0014
 
-Per-1,000 birth/death/migration rates would need `src/analytics/derived.py`, gated behind an
-ADR per CLAUDE.md rule 19 (touches the analytical-formula surface). This batch writes only
-the four raw counts/balances Statbel publishes directly.
+Per-1,000 birth/death/migration rates needed `src/analytics/derived.py`, gated behind an ADR
+per CLAUDE.md rule 19 (touches the analytical-formula surface). Decided in
+`docs/decisions/0014-rates-per-1000-residents.md`: `per_thousand(value, population)`, one
+denominator (POPULATION_BY_COMMUNE on 1 January of the SAME year), coverage 2016-2025 only
+(null, never 0, for the 31 merged communes' 2018/2024 gap), aggregated by summing both sides
+and recomputing, never by averaging a commune rate.
 
 ## Store
 

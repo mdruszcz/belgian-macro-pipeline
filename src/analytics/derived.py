@@ -136,6 +136,21 @@ def per_capita(value: float | None, population: float | None) -> float | None:
     return value / population
 
 
+def per_thousand(value: float | None, population: float | None) -> float | None:
+    """Value per 1,000 residents -- births, deaths and migration rates
+    (ADR 0014).
+
+    Same null and divide-by-zero policy as per_capita, scaled by 1,000
+    instead of 1: a null input or a zero population yields null, never an
+    infinite or fabricated rate. `value` may be signed (the two NET migration
+    balances), and a negative input simply yields a negative rate -- there is
+    nothing to clamp.
+    """
+    if value is None or population is None or population == 0:
+        return None
+    return value / population * 1000.0
+
+
 def mean_from_total(total: float | None, count: float | None) -> float | None:
     """Arithmetic mean reconstructed from a total and the count it covers.
 
