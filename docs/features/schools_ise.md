@@ -66,14 +66,23 @@ nothing above commune level is published for it.
 
 ## States
 
-Three, kept distinct end to end:
+Three, kept distinct end to end, decided in this order — a real row always wins, region only
+decides what "no row" means:
 
-- **Has sites** — the commune has an entry in `by_commune.json`.
-- **In the FWB area, zero sites** — a Wallonia or Brussels-Capital Region commune (per its own
-  `public/data/communes/<nis>.json` `region` field) absent from `by_commune.json`. Not the same
-  as suppressed or unavailable; it means no FWB school site was assigned to this commune.
-- **Not applicable** — a Flanders commune. Decided from the commune payload's own `region`
-  field, never from the mere absence of a row (CLAUDE.md rule 26).
+1. **Has sites** — the commune has an entry in `by_commune.json`, checked FIRST, regardless of
+   region. A Flanders commune can genuinely carry an FWB site (Ronse 45041, a Flemish commune
+   with one French-speaking-network school site); its page must show that row, not "not
+   applicable" — a region check run before the payload check would contradict this page's own
+   data.
+2. **Not applicable** — no row, and the commune's region (`public/data/communes/<nis>.json`'s
+   own `region` field) is Flanders.
+3. **In the FWB area, zero sites** — no row, and the region is Wallonia or Brussels-Capital
+   Region (e.g. the German-speaking Community communes, legally in Wallonia but outside the FWB
+   network). Not the same as suppressed or not-applicable; it means no FWB school site was
+   assigned to this commune.
+
+Decided from the commune payload's own `region` field, never from the mere absence of a row
+alone (CLAUDE.md rule 26).
 
 ## Pages
 
@@ -82,10 +91,11 @@ Three, kept distinct end to end:
   mean FO class, mean SO class) and the FO/SO/rank caveat in fr/en/nl. Sites with no NIS appear
   under "commune unknown".
 - `commune.html`: a new Schools panel (`assets/i18n.js` keys `cpSchools*`), following the
-  `pyramidPanel`/`renderAgeSex` `bp-state` pattern: `data-state` is `unavailable` when
-  `by_commune.json` has no row for the commune's NIS and the commune's region is Wallonia or
-  Brussels-Capital, `not-applicable` when the region is Flanders, and `ready` otherwise. Fetches
-  `public/data/schools/by_commune.json` once, alongside the other side payloads.
+  `pyramidPanel`/`renderAgeSex` `bp-state` pattern: `data-state` is `ready` whenever
+  `by_commune.json` has a row for the commune's NIS (checked first); otherwise `not-applicable`
+  when the region is Flanders, and `unavailable` when the region is Wallonia or Brussels-Capital
+  (or the whole payload failed to load). Fetches `public/data/schools/by_commune.json` once,
+  alongside the other side payloads.
 
 ## Not done in this batch
 

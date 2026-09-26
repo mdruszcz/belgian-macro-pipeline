@@ -305,19 +305,6 @@
   .pyramid-track.right i{background:var(--bp-chart-7); border-radius:0 4px 4px 0}
   .pyramid-note{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:var(--bp-space-3) 0 0}
 
-  /* ---- age-pyramid year slider (demography_history/<nis>.json) ---- */
-  .pyramid-history{display:none; margin-top:var(--bp-space-3); padding-top:var(--bp-space-3); border-top:1px solid var(--bp-border)}
-  .pyramid-history.is-active{display:block}
-  .pyramid-history-controls{display:flex; align-items:center; gap:10px}
-  .pyramid-history-play{flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; line-height:1; padding:0}
-  .pyramid-history-play:hover{background:var(--bp-surface-alt)}
-  .pyramid-history-play[aria-pressed="true"]{background:var(--bp-chart-1); border-color:var(--bp-chart-1); color:#fff}
-  .pyramid-history-range{flex:1; min-width:0}
-  .pyramid-history-year{flex:none; font-size:12px; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums; min-width:3.2em; text-align:right}
-  .pyramid-history-sub{font-size:10px; color:var(--bp-text-faint); margin:5px 0 0}
-  .pyramid-history-incomplete{display:none; font-size:10px; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-radius:6px; padding:5px 8px; margin-top:6px}
-  .pyramid-history-incomplete.is-visible{display:block}
-
   /* ---- buyers' origin flows (commune-flows PR 2) ---- */
   .flows-buckets{list-style:none; margin:0 0 var(--bp-space-4); padding:0; display:flex; flex-direction:column; gap:9px}
   .flows-buckets .barlist{margin:0}
@@ -621,25 +608,6 @@
           </div>
           <div class="bp-state-body">
             <div class="pyramid-chart" id="pyramidChart"></div>
-            <!-- Year slider/play, driven by public/data/demography_history/<nis>.json
-                 (docs/features/schools_ise.md sibling batch; PR #267 merged the data
-                 2026-09-26). Hidden (`is-active` not set) whenever that payload is
-                 absent for this commune, so an existing visitor with no history file
-                 sees exactly today's single-year pyramid -- three distinct states,
-                 never collapsed (rule 26): history loaded / history absent / a given
-                 year incomplete. -->
-            <div class="pyramid-history" id="pyramidHistory">
-              <div class="pyramid-history-controls">
-                <button type="button" class="pyramid-history-play" id="pyramidPlay" aria-pressed="false">
-                  <span id="pyramidPlayIcon" aria-hidden="true">&#9654;</span>
-                  <span class="bp-sr-only" id="pyramidPlayLabel" data-t="cpPyramidPlay">Play</span>
-                </button>
-                <input type="range" class="pyramid-history-range" id="pyramidYear" min="0" max="0" step="1" value="0">
-                <span class="pyramid-history-year" id="pyramidYearOut">—</span>
-              </div>
-              <p class="pyramid-history-sub" id="pyramidHistorySub"></p>
-              <p class="pyramid-history-incomplete" id="pyramidIncomplete" role="status"></p>
-            </div>
             <p class="pyramid-note" data-t="cpPyramidNote">Five-year groups from Statbel's single-year ages. Sex is shown as recorded by the source (F/M); 100+ is top-coded.</p>
           </div>
           <div class="bp-state-message">
@@ -907,9 +875,6 @@
   var PHOTOS_URL      = 'assets/belpulse/commune/photos.json';
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
   var AGE_SEX_URL = function(nis){ return 'public/data/demography/' + nis + '.json'; };
-  // Every published Statbel year, per current commune (PR #267). Optional --
-  // its own fetch degrades to today's single-year pyramid, never breaks it.
-  var AGE_SEX_HISTORY_URL = function(nis){ return 'public/data/demography_history/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
   var FLOWS_URL = function(nis){ return 'public/data/flows/buyer_origin/' + nis + '.json'; };
   // Schools ISE (docs/features/schools_ise.md) -- both fetched once for the
@@ -929,7 +894,6 @@
     geojson: null, map: null, locator: null, manifest: {},
     geographies: {}, adjacency: {}, photos: {}, headlineValues: null, nbMap: null,
     ageSex: null, flows: null, schools: null, schoolSites: null,
-    ageSexHistory: null,
   };
 
   /* The geography row for a NIS code, and the chain above it. geographies.json
@@ -1523,23 +1487,25 @@
     var payload = state.schools;
     var region = state.profile && state.profile.region;
 
-    if(region === 'Flanders'){
+    // A row in the payload wins over the region check below, in EITHER
+    // direction: a Flanders commune can genuinely carry an FWB site (e.g.
+    // Ronse 45041, a Flemish commune with a French-speaking-network school),
+    // and showing "not applicable" there would contradict this page's own
+    // data. So the payload is checked FIRST; the region only decides what
+    // "no row" means (rule 26 -- not-applicable and zero-sites must not
+    // collapse into each other, but neither may override a real row).
+    var entry = payload && payload.communes && payload.communes[state.nis];
+    if(!entry && region === 'Flanders'){
       panel.dataset.state = 'not-applicable';
       document.getElementById('schoolsMsgHeadline').textContent = T('cpSchoolsNotApplicable');
       document.getElementById('schoolsMsgWhy').textContent = T('cpSchoolsNotApplicableWhy');
       return;
     }
-    if(!payload){
-      // The whole payload failed to load (network/404) -- distinct from a
-      // real "no row for this commune" below, but shown the same way: there
-      // is nothing more specific to say without the data.
-      panel.dataset.state = 'unavailable';
-      document.getElementById('schoolsMsgHeadline').textContent = T('cpSchoolsUnavailable');
-      document.getElementById('schoolsMsgWhy').textContent = T('cpSchoolsUnavailableWhy');
-      return;
-    }
-    var entry = payload.communes && payload.communes[state.nis];
     if(!entry){
+      // Either the whole payload failed to load (network/404), or this is a
+      // Wallonia/Brussels-Capital commune with zero FWB sites assigned to it
+      // (e.g. a German-speaking community commune) -- both are shown the
+      // same way, since there is nothing more specific to say without data.
       panel.dataset.state = 'unavailable';
       document.getElementById('schoolsMsgHeadline').textContent = T('cpSchoolsUnavailable');
       document.getElementById('schoolsMsgWhy').textContent = T('cpSchoolsUnavailableWhy');
@@ -2416,7 +2382,6 @@
       fetch(GEOGRAPHIES_URL), fetch(ADJACENCY_URL), fetch(PHOTOS_URL),
       fetch(AGE_SEX_URL(state.nis)), fetch(FLOWS_URL(state.nis)),
       fetch(SCHOOLS_URL), fetch(SCHOOLS_SITES_URL),
-      fetch(AGE_SEX_HISTORY_URL(state.nis)),
     ]);
     // Each of these is optional and degrades to the honest state: no
     // geography metadata means English place names, no adjacency means the
@@ -2437,11 +2402,6 @@
     // than breaking the page.
     if(res[10].ok) state.schools = await res[10].json();
     if(res[11].ok) state.schoolSites = (await res[11].json()).records || [];
-    // Age-pyramid history (year slider): optional, same degrade-to-today's-
-    // view rule as the rest of this block. A payload for the WRONG nis (a
-    // stale response after a client-side nis change) is treated the same as
-    // absent -- renderAgeSex() re-checks nis_code before trusting it.
-    if(res[12] && res[12].ok) state.ageSexHistory = await res[12].json();
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
