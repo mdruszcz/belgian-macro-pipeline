@@ -138,6 +138,11 @@ exports:
 	# fails loudly (rule 13) if the flows store is missing, and that must
 	# never stop the explorer/Europe steps above, which do not depend on it.
 	$(PYTHON) scripts/export_commune_flows.py
+	# Schools ISE (docs/features/schools_ise.md): fetches both ODWB datasets live
+	# and resolves each site's commune, then summarizes per commune. No $(DB)
+	# involved. The second step reads the first's own output, so it must follow it.
+	$(PYTHON) scripts/export_schools_ise.py
+	$(PYTHON) scripts/export_schools_by_commune.py
 	$(MAKE) pages
 	$(MAKE) shell-sync
 	$(MAKE) page-documents

@@ -1536,6 +1536,19 @@ below can run in the existing daily job; none needs a hand-download.
 | Publisher | Fédération Wallonie-Bruxelles, Direction générale du Pilotage du Système éducatif, via [ODWB](https://www.odwb.be/explore/dataset/fwb-age_classes-dise-pour-les-implantations-scolaires/) |
 | What | The 2025 differentiated-support (ED) and specialised-education (HED) regulatory class for each school site. The source is not a count of pupils, a school quality score, or a commune-level socioeconomic index. |
 | Coverage | 4,005 site/formula records in the 2025 export; Brussels and Wallonia. FO and SO are different calculation formulas and their class numbers are not comparable. |
-| Keys | FASE site ID, school name and postal address. No NIS commune code; no automatic commune assignment or aggregation. |
+| Keys | FASE site ID, school name and postal address. No NIS commune code on its own -- commune assignment (below) is a join against the FWB AGE site register. |
 | Licence | CC BY, as declared in the dataset API. Attribute the Fédération Wallonie-Bruxelles and link the dataset. |
-| Implementation | `scripts/export_schools_ise.py` validates the exact schema and writes the deterministic 2025 snapshot `public/data/schools_ise_2025.json`; the v5 local preview offers a searchable site-level view. |
+| Implementation | `scripts/export_schools_ise.py` validates the exact schema, joins each site to its commune NIS code via the site register below, and writes the deterministic 2025 snapshot `public/data/schools_ise_2025.json`; `scripts/export_schools_by_commune.py` summarizes it into `public/data/schools/by_commune.json` (mean ED class per commune per formula). `ecoles-ise.html` offers a searchable site-level view with a commune filter; `commune.html` carries a Schools panel. |
+
+### FWB AGE site register (FASE) — user-requested 2026-09-26
+
+| Field | Value |
+|---|---|
+| Publisher | Fédération Wallonie-Bruxelles, via [ODWB](https://www.odwb.be/explore/dataset/fwb-age-fichier-signaletique-des-etablissements-d-enseignement-de-la-federation-/) — "FASE 2026" edition |
+| What | One row per school site × education level: the site's commune name (French), education network (`reseau`), level (`niveau`) and coordinates. No NIS code, no ISE class of its own -- this dataset exists in this catalogue solely to supply the commune name the ISE-class dataset above lacks. |
+| Coverage | 8,378 rows, 5,539 distinct site IDs (`ndeg_fase_de_l_implantation`), none with two different commune names. 275 distinct commune names. Measured 2026-09-26: 3,957 of the 4,005 ISE sites (98.8%) have a matching register row; 48 (1.2%) do not and are published with `nis: null`. |
+| Keys | FASE site ID (`ndeg_fase_de_l_implantation`), joined to the ISE-class dataset's own `numero_fase_de_l_implantation` on the integer value. |
+| Commune name resolution | The register's commune name is resolved to a NIS code against the 1 January 2026 municipality map in `config/geography/geographies.csv`, the same accent/case-fold pattern `scripts/sync_ipp_rate.py` already uses, plus typographic-apostrophe folding and one merger-lineage fallback via `config/geography/municipality_crosswalk.csv` (for communes, like Bertogne, absorbed since that map was drawn). One explicit override: "Saint-Nicolas" resolves to the Liège-province commune (NIS 62093), not Sint-Niklaas, which the register lists under its own Dutch name — the same override `sync_ipp_rate.py` already uses for the same ambiguity. No fuzzy matching. |
+| Licence | CC BY, as declared in the dataset API. Attribute the Fédération Wallonie-Bruxelles and link the dataset. |
+| Approval | Requested by the maintainer 2026-09-26; approval recorded in the PR that added this row (CLAUDE.md rule 8). |
+| Implementation | `scripts/export_schools_ise.py` (the join and name resolution live in this one script, alongside the ISE-class export it feeds). |

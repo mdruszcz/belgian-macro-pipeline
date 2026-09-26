@@ -27,6 +27,14 @@
  * "no data" to a reader) but are two distinct HTML/data states underneath,
  * because rule 26 forbids collapsing them at the DATA layer even where the
  * visual treatment is deliberately the same.
+ *
+ * "not-applicable" (Schools ISE panel, commune.html) is the same idea one
+ * level more specific than "unavailable" above: not "the section doesn't
+ * apply to ANY commune right now" but "this commune is outside the area this
+ * particular dataset covers at all" (a Flemish commune and the FWB school
+ * directory). Rendered identically to missing/unavailable -- still "no data"
+ * to a reader -- but CLAUDE.md rule 26 requires it stay a third, distinct
+ * value in the data/DOM layer rather than collapsing into "unavailable".
  */
 
 /* ---- state wrapper, used by every data component below -------------------- */
@@ -46,9 +54,11 @@
 .bp-state-message{display:none; padding:var(--bp-space-4); text-align:left}
 .bp-state[data-state="missing"] .bp-state-message,
 .bp-state[data-state="unavailable"] .bp-state-message,
+.bp-state[data-state="not-applicable"] .bp-state-message,
 .bp-state[data-state="error"] .bp-state-message{display:block}
 .bp-state[data-state="missing"] .bp-state-body,
 .bp-state[data-state="unavailable"] .bp-state-body,
+.bp-state[data-state="not-applicable"] .bp-state-body,
 .bp-state[data-state="error"] .bp-state-body,
 .bp-state[data-state="loading"] .bp-state-message{display:none}
 
