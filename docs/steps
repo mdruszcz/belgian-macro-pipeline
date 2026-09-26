@@ -1553,34 +1553,34 @@ How: Tag, Release, tick Phase I in roadmap.md.
 Why: Marks the frozen reference point for Phase II, and gives you a visible win at the moment motivation usually dips.
 PHASE II — 50% → 80%
 Block M — Peer model
- [SPEC] Write /docs/features/peer_model.md (2026-09-26: PR #276 open, awaiting the maintainer's variable approval)
+ ✅ [SPEC] Write /docs/features/peer_model.md (2026-09-26: PR #276 merged -- spec + ADR 0015; 11 variables, z-scores ddof=0, Euclidean, k=10, two lists per commune (Belgium-wide and same region), version 1.0.0-rc.1)
 How: Variable list, standardization, distance metric, k, exclusions, version number.
 Why: This becomes a versioned commercial asset. It has to be a document before it is an algorithm.
- [H] Approve the variable list personally
+ ✅ [H] Approve the variable list personally (2026-09-26: the maintainer kept all 11 -- he answered "continue" to the keep-all recommendation and merged #276. Density was kept although commune areas had to be derived first)
 How: Cross out anything you cannot justify to a directeur financier in one sentence.
 Why: The variable list is the proprietary value. Delegating it means selling someone else's judgement.
- [BUILD] Build the feature matrix
+ ✅ [BUILD] Build the feature matrix (2026-09-26/27: #277 + audit fix re-landed in #281. 565 x 11, no imputation -- a missing value refuses the run. Commune areas derived from the simplified Statbel geometry: Belgium 30,689.7 km2 vs 30,689 official; Antwerp +1.7 %, recorded as a strict xfail. VERIFIED LIVE 2026-09-27: public/data/metadata/peers.json on the site carries the corrected enterprise density (NIS 81013 ln = 4.1495, 127 units / 2,003 residents in 2023). The first merge of #277 had shipped the pre-fix denominator (2026 population, 101 of 565 lists different) -- see #281)
 How: Population, density, income, age structure, employment, urbanization, housing, enterprise density, social indicators, tax base; impute or exclude missing explicitly.
 Why: Structural similarity is the basis of every "versus comparable communes" claim in the product.
- [BUILD] StandardScaler + Euclidean distance as v1
+ ✅ [BUILD] StandardScaler + Euclidean distance as v1 (2026-09-26: numpy/pandas, no scikit-learn, by the maintainer's choice; equivalence to StandardScaler (ddof=0) proven on a hand-computed fixture; audit reproduced all 11 means/stds to 1e-9)
 How: Plain scikit-learn, deterministic, seeded.
 Why: You must be able to explain it in a meeting. Interpretability beats accuracy when the buyer is a public administration.
- [BUILD] Optional PCA variant behind a flag
+ ✅ [BUILD] Optional PCA variant behind a flag (2026-09-27: `export_peer_model.py --pca`, off by default, writes peers_pca.json only on demand. Checked by the lead: plain vs PCA national top-10 overlap 0.630 -- PCA changes about a third of each list, so it is NOT a cosmetic variant; v1 stays plain)
 How: Same interface, off by default.
 Why: Lets you measure whether sophistication actually changes the peer sets, rather than assuming it does.
- [BUILD] Output ten nearest peers per commune with distances
+ ✅ [BUILD] Output ten nearest peers per commune with distances (2026-09-27: public/data/metadata/peers.json + data/peers.csv, 11,300 rows, model_version on every row; live after #281. Only 55 % of peer pairs are mutual -- a nearest-neighbour list, not clusters)
 How: Store as a table with the model version stamped on each row.
 Why: Versioned output is what lets you reproduce an old report after you improve the model.
- [BUILD] Peer median, peer percentile and deviation for every indicator
+ ✅ [BUILD] Peer median, peer percentile and deviation for every indicator (2026-09-27: public/data/peers/<nis>.json, 565 files, 19 MB, both lists; audited -- every figure recomputed exactly. VERIFIED LIVE: Namur 92094 average income 37,749 vs peer median 40,886, -7.7 %, 8th of 11. Follow-up #282 (reason field when the peer median is <= 0, selection set derived from the model) open)
 How: Derived layer, computed from the peer table.
 Why: "€1,800 vs peer median €1,210, +49%" is the sentence that makes this sellable. Everything else supports it.
- [BUILD] Stability test across two data vintages
+ ✅ [BUILD] Stability test across two data vintages (PARTIAL, 2026-09-26: population, income and census stores hold ONE vintage, so the test is a stand-in -- every variable shifted one period back. Mean overlap of the national top-10: 0.667, above the 0.5 threshold; least stable: Lens, Mont-de-l'Enclus. Redo as a true two-vintage test once a second vintage exists)
 How: Assert peer-set overlap stays above a threshold between runs.
 Why: If a commune's peers change wholesale after a routine data update, clients lose faith immediately.
- [REVIEW] Check circularity, scaling artefacts and small-commune distortion
+ ✅ [REVIEW] Check circularity, scaling artefacts and small-commune distortion (2026-09-26 audit of #277: no finance/debt variable selects peers, so Block P is not circular; income and unemployment are both selection variables and benchmarks -- flagged "peers were chosen partly on this figure". No variable dominates (each 7-11 % of distance). 8 cells beyond |z|>5 (Koksijde 65+, Herstappe size, some foreign-national shares). Herstappe's peers are small rural communes, not an outlier club. Hubs: Beernem appears in 35 lists; 7 communes are nobody's peer -- for the RED step)
 How: Ask explicitly whether any benchmarked metric is also a peer-selection variable.
 Why: Benchmarking debt against peers selected partly on debt is circular and will be spotted by exactly the person you are selling to.
- [H] Read the peer lists for fifteen communes you know
+ (PENDING) [H] Read the peer lists for fifteen communes you know (2026-09-27: review folder screenshots-review/peer-benchmarks/ in the main checkout, opens with Ouvrir.cmd; waiting for the maintainer's notes)
 How: Eyeball them and note absurdities.
 Why: Local knowledge is the only available ground truth. There is no labelled dataset of "correct peers".
  [RED] "Break this peer model. Find where it produces nonsense."
