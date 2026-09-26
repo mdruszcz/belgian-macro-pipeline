@@ -43,6 +43,26 @@ commune_typology = script_asset(
     kinds={"json"},
     description="Belfius socio-economic clusters (scripts/export_commune_typology.py).",
 )
+# Peer model v1 (Block M, docs/features/peer_model.md, ADR 0015). Reads
+# data/communes_history.csv + data/communes_history/*.csv (written earlier
+# in `make exports`, before site_payloads even, by
+# export_communes_history_csv.py) plus the committed, one-off
+# config/geography/commune_area_km2.csv (scripts/derive_commune_area.py --
+# not built by any asset). deps=["site_payloads"] only for the same ordering
+# reason commune_adjacency/commune_typology declare it -- placed after it in
+# the Makefile -- not because this exporter reads anything site_payloads
+# writes. Writes the plain "standardised" variant only; --pca is a separate,
+# on-demand invocation of the same script, never part of this asset.
+peer_model_export = script_asset(
+    "peer_model_export",
+    group="reference_data",
+    deps=["site_payloads"],
+    kinds={"json"},
+    description=(
+        "Peer model v1 peer lists (national/region top-10 per commune), "
+        "scripts/export_peer_model.py."
+    ),
+)
 # Depends on site_payloads (for geographies.json's trilingual names) AND
 # commune_flows_buyer_origin (the committed flows store PR 1 writes) --
 # docs/features/commune_flows.md, PR 2.
@@ -87,6 +107,7 @@ ASSETS = [
     staging_db,
     commune_adjacency,
     commune_typology,
+    peer_model_export,
     commune_flows_export,
     schools_ise_export,
     schools_by_commune_export,

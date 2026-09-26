@@ -61,6 +61,18 @@ COMMANDS: dict[str, Command] = {
         outputs=("public/data/metadata/typology.json",),
         writes_repo_only=True,
     ),
+    # Peer model v1 (Block M, docs/features/peer_model.md, ADR 0015). Reads
+    # data/communes_history.csv + data/communes_history/*.csv (written by
+    # export_communes_history_csv.py) plus the committed
+    # config/geography/commune_area_km2.csv -- no --db needed. Writes the
+    # plain "standardised" variant only; --pca is a separate, on-demand run
+    # (scripts/export_peer_model.py's own --pca flag), never part of this
+    # daily asset.
+    "peer_model_export": Command(
+        ("scripts/export_peer_model.py",),
+        outputs=("public/data/metadata/peers.json", "data/peers.csv"),
+        writes_repo_only=True,
+    ),
     # Commune-flows PR 2 (docs/features/commune_flows.md). Reads the committed
     # data/flows/buyer_origin_<year>.json store (commune_flows_buyer_origin, below)
     # plus public/data/metadata/geographies.json (site_payloads) and writes one

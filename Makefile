@@ -113,6 +113,14 @@ exports:
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
 	$(PYTHON) scripts/export_commune_adjacency.py
 	$(PYTHON) scripts/export_commune_typology.py
+	# Peer model v1 (Block M, docs/features/peer_model.md, ADR 0015). Reads
+	# data/communes_history.csv + data/communes_history/*.csv (written above)
+	# plus the committed config/geography/commune_area_km2.csv (a one-off,
+	# `make boundaries`-style derivation -- see scripts/derive_commune_area.py
+	# -- not rebuilt by this target). Writes the plain "standardised" variant
+	# only; --pca is a separate, on-demand comparison run, never part of the
+	# daily job.
+	$(PYTHON) scripts/export_peer_model.py
 	# Reads the CSVs written above -- data/communes_history.csv (the trimmed
 	# core file) PLUS every data/communes_history/*.csv shard, and
 	# data/belgian_macro_export.csv -- and shards them one file per indicator
