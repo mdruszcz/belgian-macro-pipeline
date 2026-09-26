@@ -64,23 +64,25 @@ sections:
         Population, how it has moved, and its age structure. Births and deaths are annual
         counts; internal migration is shown both as arrivals and departures (counts) and as
         the net balance Statbel publishes (arrivals minus departures, signed) — none of these
-        cover the 31 communes that merged, for 2018 or 2024 respectively. Each count is
-        followed by its rate per 1,000 residents (ADR 0014), which the same 31 communes also
-        lack for those two years.
+        cover the 18 communes merged in 2019 for 2018, or the 13 communes merged in 2025 for
+        2024. Each count is followed by its rate per 1,000 residents (ADR 0014), which the
+        same communes also lack for those same years.
       fr: >
         La population, son évolution et sa structure par âge. Les naissances et décès sont
         des totaux annuels ; la migration interne est présentée à la fois en arrivées et en
         départs (des totaux) et comme le solde net publié par Statbel (arrivées moins départs,
-        avec son signe) — aucun de ces chiffres ne couvre les 31 communes fusionnées, pour
-        2018 ou 2024 respectivement. Chaque total est suivi de son taux par 1 000 habitants
-        (ADR 0014), que les mêmes 31 communes n'ont pas non plus pour ces deux années.
+        avec son signe) — aucun de ces chiffres ne couvre les 18 communes fusionnées en 2019
+        pour 2018, ni les 13 communes fusionnées en 2025 pour 2024. Chaque total est suivi de
+        son taux par 1 000 habitants (ADR 0014), que ces mêmes communes n'ont pas non plus
+        pour ces mêmes années.
       nl: >
         Bevolking, evolutie en leeftijdsstructuur. Geboorten en overlijdens zijn jaarlijkse
         totalen; interne migratie wordt getoond als zowel aankomsten als vertrekken (totalen)
         en als het nettosaldo dat Statbel publiceert (aankomsten min vertrekken, met teken) —
-        geen van beide dekt de 31 fusiegemeenten, voor 2018 of 2024 respectievelijk. Elk totaal
-        wordt gevolgd door zijn cijfer per 1 000 inwoners (ADR 0014), dat diezelfde 31
-        gemeenten evenmin hebben voor die twee jaren.
+        geen van beide dekt de 18 gemeenten die in 2019 fuseerden, voor 2018, of de 13
+        gemeenten die in 2025 fuseerden, voor 2024. Elk totaal wordt gevolgd door zijn cijfer
+        per 1 000 inwoners (ADR 0014), dat diezelfde gemeenten evenmin hebben voor die
+        dezelfde jaren.
     headline: POPULATION_BY_COMMUNE
     indicators:
       - POPULATION_AGE_0_14

@@ -18,9 +18,10 @@ description:
     denominator -- the 1 January population BIRTHS's own commune-map resolution already
     matches -- rather than an invented mid-year average; Statbel's own published crude birth
     rate uses the mid-year population instead, so ours can differ slightly from theirs by
-    construction (see the ADR). Available 2016-2025 only, where both POPULATION_BY_COMMUNE and
-    BIRTHS exist for the same commune and year; null (never 0) for the 31 communes merged in
-    2019 or 2025, whose BIRTHS row is absent for 2018 or 2024 respectively. preferred_direction
+    construction (see the ADR). Available 2017-2025 only, where both POPULATION_BY_COMMUNE and
+    BIRTHS exist for the same commune and year; null (never 0) for the 18 communes merged in
+    2019, whose BIRTHS row is absent for 2018, and for the 13 communes merged in 2025, whose
+    BIRTHS row is absent for 2024. preferred_direction
     is 'contextual': a higher or lower birth rate is neither good nor bad for a commune profile.
 derived:
   function: per_thousand

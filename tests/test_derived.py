@@ -166,12 +166,12 @@ def test_per_capita_is_null_without_a_denominator():
 
 
 def test_per_thousand():
-    """Boechout (NIS 11004), 2025, INTERNAL_MIGRATION_IN over
-    POPULATION_BY_COMMUNE, both read live from the committed store and
-    verified in ADR 0014's worked example: 838 / 13,500 * 1000 =
-    62.074074074... (a fixture denominator, not the real 14,084 population,
-    chosen so the hand-computed decimal is easy to check by long division)."""
-    assert per_thousand(838.0, 13_500.0) == pytest.approx(62.074074)
+    """Boechout (NIS 11004), 2025: INTERNAL_MIGRATION_IN = 838,
+    POPULATION_BY_COMMUNE = 14,084, both read live from the committed store
+    (data/communes_history/population_movement.csv and population.csv) and
+    matching ADR 0014's worked example exactly: 838 / 14,084 * 1000 =
+    59.500142..."""
+    assert per_thousand(838.0, 14_084.0) == pytest.approx(59.500142)
 
 
 def test_per_thousand_zero_numerator_is_a_measured_zero():

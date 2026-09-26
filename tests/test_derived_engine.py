@@ -229,8 +229,9 @@ def test_per_thousand_does_not_cross_wire_two_communes():
 
 
 def test_per_thousand_is_absent_not_zero_when_the_movement_row_is_missing():
-    """The 31 communes merged in 2019 or 2025 have no BIRTHS row for 2018 or
-    2024 respectively (docs/features/population_movement.md). The engine
+    """The 18 communes merged in 2019 have no BIRTHS row for 2018, and the 13
+    communes merged in 2025 have no BIRTHS row for 2024
+    (docs/features/population_movement.md). The engine
     iterates result.cells(inputs[0]), so a period the numerator has no cell
     for never produces a rate cell at all -- absent, never a computed 0."""
     obs = ObservationSet(

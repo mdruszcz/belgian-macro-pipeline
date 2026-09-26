@@ -17,9 +17,10 @@ description:
     INTERNAL_MIGRATION_IN over POPULATION_BY_COMMUNE, both at the same year, times 1,000
     (ADR 0014). One denominator -- the 1 January population INTERNAL_MIGRATION_IN's own
     commune-map resolution already matches -- rather than an invented mid-year average.
-    Available 2016-2025 only, where both indicators exist for the same commune and year; null
-    (never 0) for the 31 communes merged in 2019 or 2025, whose INTERNAL_MIGRATION_IN row is
-    absent for 2018 or 2024 respectively. preferred_direction is 'contextual': a higher
+    Available 2017-2025 only, where both indicators exist for the same commune and year; null
+    (never 0) for the 18 communes merged in 2019, whose INTERNAL_MIGRATION_IN row is absent for
+    2018, and for the 13 communes merged in 2025, whose row is absent for 2024. preferred_direction
+    is 'contextual': a higher
     arrivals rate is neither good nor bad for a commune profile.
 derived:
   function: per_thousand

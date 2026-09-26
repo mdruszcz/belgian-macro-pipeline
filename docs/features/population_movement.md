@@ -189,9 +189,10 @@ introduce one.
 Per-1,000 birth/death/migration rates needed `src/analytics/derived.py`, gated behind an ADR
 per CLAUDE.md rule 19 (touches the analytical-formula surface). Decided in
 `docs/decisions/0014-rates-per-1000-residents.md`: `per_thousand(value, population)`, one
-denominator (POPULATION_BY_COMMUNE on 1 January of the SAME year), coverage 2016-2025 only
-(null, never 0, for the 31 merged communes' 2018/2024 gap), aggregated by summing both sides
-and recomputing, never by averaging a commune rate.
+denominator (POPULATION_BY_COMMUNE on 1 January of the SAME year), coverage 2017-2025 only
+(null, never 0, for the 18 communes merged in 2019's 2018 gap and the 13 communes merged in
+2025's 2024 gap), aggregated by summing both sides and recomputing, never by averaging a
+commune rate.
 
 ## Store
 

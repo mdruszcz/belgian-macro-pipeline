@@ -18,9 +18,10 @@ description:
     denominator -- the 1 January population DEATHS's own commune-map resolution already
     matches -- rather than an invented mid-year average; Statbel's own published crude death
     rate uses the mid-year population instead, so ours can differ slightly from theirs by
-    construction (see the ADR). Available 2016-2025 only, where both POPULATION_BY_COMMUNE and
-    DEATHS exist for the same commune and year; null (never 0) for the 31 communes merged in
-    2019 or 2025, whose DEATHS row is absent for 2018 or 2024 respectively. preferred_direction
+    construction (see the ADR). Available 2017-2025 only, where both POPULATION_BY_COMMUNE and
+    DEATHS exist for the same commune and year; null (never 0) for the 18 communes merged in
+    2019, whose DEATHS row is absent for 2018, and for the 13 communes merged in 2025, whose
+    DEATHS row is absent for 2024. preferred_direction
     is 'contextual': a higher death rate mostly reflects a commune's age structure, not
     something to optimise.
 derived:

@@ -19,9 +19,10 @@ description:
     residents left the country than arrived from abroad, and per_thousand preserves the sign
     rather than clamping it. One denominator -- the 1 January population
     INTERNATIONAL_MIGRATION_NET's own commune-map resolution already matches -- rather than an
-    invented mid-year average. Available 2016-2025 only, where both indicators exist for the
-    same commune and year; null (never 0) for the 31 communes merged in 2019 or 2025, whose
-    INTERNATIONAL_MIGRATION_NET row is absent for 2018 or 2024 respectively. preferred_direction
+    invented mid-year average. Available 2017-2025 only, where both indicators exist for the
+    same commune and year; null (never 0) for the 18 communes merged in 2019, whose
+    INTERNATIONAL_MIGRATION_NET row is absent for 2018, and for the 13 communes merged in 2025,
+    whose row is absent for 2024. preferred_direction
     is 'contextual': a positive or negative net migration rate is neither better nor worse on
     its own.
 derived:

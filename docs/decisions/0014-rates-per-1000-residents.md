@@ -53,15 +53,17 @@ The two NET rates carry the sign of their input balance through unchanged: `per_
 not clamp a negative numerator, so a commune losing more residents to internal migration than
 it gains gets a negative rate, exactly as its NET balance is itself negative.
 
-**3. Coverage: only where both inputs exist for the same commune and year → 2016-2025.**
+**3. Coverage: only where both inputs exist for the same commune and year → 2017-2025.**
 
-POPULATION_BY_COMMUNE starts in 2016; the movement counts start in 1992 but resolve
-per-row against the commune map in effect at the start of their own year
-(`docs/features/population_movement.md` §Geography). A rate needs both, so it exists only
-2016-2025. Within that range, the 31 communes merged in 2019 or 2025 have no movement row for
-2018 or 2024 respectively (the transition sheet carries the post-merger codes the following
-year), so every one of the six rates is **null**, never 0, for those cells (CLAUDE.md rule 26:
-a withheld figure is not a measured zero). The engine already enforces this without extra
+POPULATION_BY_COMMUNE starts in 2017 (committed store, verified 2026-09-26: 2017-2026 with
+nothing in 2016); the movement counts start in 1992 but resolve per-row against the commune map
+in effect at the start of their own year (`docs/features/population_movement.md` §Geography). A
+rate needs both, so it exists only 2017-2025. Within that range, 18 of the 31 communes merged in
+2019 have no movement row for 2018 (verified: 565 communes with a BIRTHS row in 2017, 547 in
+2018), and 13 of the 31 communes merged in 2025 have no movement row for 2024 (565 in 2023, 552
+in 2024) — the transition sheet carries the post-merger codes the following year — so every one
+of the six rates is **null**, never 0, for exactly those cells (CLAUDE.md rule 26: a withheld
+figure is not a measured zero). The engine already enforces this without extra
 code: `compute()` iterates `result.cells(inputs[0])`, so a (geo_id, period) cell absent for the
 numerator never produces a row at all.
 
@@ -127,10 +129,10 @@ just Boechout's).
 - **A reader could mistake our rate for Statbel's own published crude rate** and flag a
   discrepancy. Decision 1's plain statement of the denominator difference, repeated in each
   config's `definition`, is the mitigation.
-- **The 2018/2024 null gap for 31 communes could look like a bug** rather than the documented
-  consequence of the transition-sheet timing already described in
-  `docs/features/population_movement.md`. Tests assert null, not 0, for exactly these cells so
-  a future edit cannot quietly convert one into the other.
+- **The null gap for the 18 communes merged in 2019 (2018) and the 13 merged in 2025 (2024)
+  could look like a bug** rather than the documented consequence of the transition-sheet timing
+  already described in `docs/features/population_movement.md`. Tests assert null, not 0, for
+  exactly these cells so a future edit cannot quietly convert one into the other.
 - **A future aggregate consumer could average commune rates instead of recomputing from sums**,
   reintroducing the exact error ADR 0003 exists to prevent. `RECOMPUTABLE_FUNCTIONS` in both
   `aggregate.py` and `backaggregate.py` is the single point of truth for which functions may be
