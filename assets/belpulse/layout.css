@@ -358,6 +358,22 @@
 .bp-shell--navy .bp-btn--outline,
 .bp-cta-band .bp-btn--outline{border-color:var(--bp-navy-border); color:var(--bp-navy-text)}
 .bp-btn--outline:hover{background:var(--bp-surface-alt)}
+/* Moved here from a page-local style block profiles.html still carries its
+   own copy of (identical declaration, but with a raw white literal instead
+   of the token below -- that page-local copy is never checked by this
+   file's own token-discipline test, so the drift was invisible until this
+   rule moved somewhere that IS checked). The commune profile page's own
+   download link referenced this class with no matching rule anywhere after
+   a prior batch replaced the page that used to define it locally, so it
+   rendered as a bare, unstyled link. --bp-navy-bg/--bp-navy-text are theme
+   tokens (tokens.css) already used together for the same navy surface just
+   above (.bp-shell--navy .bp-btn--outline) -- --bp-navy-text is
+   specifically the text colour FOR a --bp-navy-bg surface in every theme
+   (near-white in light/dark, a dark, high-contrast tone in paper), so this
+   also fixes a real bug a raw white literal would not have: white text on
+   the paper theme's cream fill is barely legible, which profiles.html's
+   own untouched copy still has. */
+.bp-btn--dark{background:var(--bp-navy-bg); color:var(--bp-navy-text)}
 
 /* ---- theme toggle (matches the pattern every existing page already uses) --- */
 .bp-theme-toggle{display:flex; gap:1px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden}

@@ -106,7 +106,13 @@ def _page(name: str) -> str:
     weakened.
     """
     text = (REPO / name).read_text(encoding="utf-8")
-    if 'src="assets/i18n.js"' in text:
+    # Matches an optional ?v=... content-hash query too (commune.html now
+    # versions its local asset URLs, tests/test_commune_asset_versioning.py)
+    # -- this check gates whether the module's rendered strings get appended
+    # below, so a silent mismatch here would silently stop testing the real
+    # attribution notice for any page that adds a query string, not merely
+    # fail to detect one.
+    if re.search(r'src="assets/i18n\.js(\?[^"]*)?"', text):
         text += "\n" + _rendered_strings()
     return re.sub(r"\s+", " ", text)
 

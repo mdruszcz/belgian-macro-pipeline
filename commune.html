@@ -42,10 +42,10 @@
 </script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
-<link rel="stylesheet" href="assets/belpulse/tokens.css">
-<link rel="stylesheet" href="assets/belpulse/layout.css">
-<link rel="stylesheet" href="assets/belpulse/components.css">
-<link rel="stylesheet" href="assets/commune_map.css">
+<link rel="stylesheet" href="assets/belpulse/tokens.css?v=9bb5cb4cd8">
+<link rel="stylesheet" href="assets/belpulse/layout.css?v=27eb9024ef">
+<link rel="stylesheet" href="assets/belpulse/components.css?v=2f28cc340f">
+<link rel="stylesheet" href="assets/commune_map.css?v=dd8f1ee885">
 <style>
   *{box-sizing:border-box}
   body{background:var(--bp-bg); color:var(--bp-text)}
@@ -333,6 +333,13 @@
   .pyramid-legend .f i,.pyramid-legend .female i{background:color-mix(in srgb, var(--bp-accent) 70%, var(--bp-text) 5%)}
   .pyramid-legend .earliest i{background:none; border:1.5px dashed var(--bp-text-faint); border-radius:2px}
   .pyramid-wrap{display:flex; flex-direction:column; gap:1px}
+  /* #pyramidChart is the positioning root for .pyramid-gridlines below --
+     one overlay spanning every row, never a mark injected into each of the
+     17+ individual (opaque-background) tracks. */
+  .pyramid-chart{position:relative}
+  .pyramid-gridlines{position:absolute; inset:0; pointer-events:none; z-index:1}
+  .pyramid-gridline{position:absolute; top:16px; bottom:14px; width:1px; background:var(--bp-border); opacity:.7}
+  .pyramid-gridline-label{position:absolute; top:0; transform:translateX(-50%); font-size:9px; font-variant-numeric:tabular-nums; color:var(--bp-text-faint); background:var(--bp-surface); padding:0 3px; white-space:nowrap}
   .pyramid-axis,.pyramid-row{display:grid; grid-template-columns:48px minmax(0,1fr) 40px minmax(0,1fr) 48px; gap:5px; align-items:center}
   .pyramid-axis{font-size:10px; color:var(--bp-text-faint); margin-bottom:3px}
   .pyramid-axis .left{text-align:right; grid-column:1/span 2}
@@ -362,12 +369,22 @@
   .pyramid-history-play{flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; line-height:1; padding:0}
   .pyramid-history-play:hover{background:var(--bp-surface-alt)}
   .pyramid-history-play[aria-pressed="true"]{background:var(--th); border-color:var(--th); color:#fff}
-  .pyramid-history-range{flex:1; min-width:0}
+  /* #pyramidTicks lives INSIDE this wrapper now (same width as the input
+     it sits under), not as a sibling of the whole controls row -- a tick
+     row as wide as Play+range+year-readout together could never line up
+     with the range's own value axis. */
+  .pyramid-history-range{flex:1; min-width:0; position:relative}
+  .pyramid-history-range input[type="range"]{width:100%; display:block; margin:0}
+  /* A fixed, explicit thumb size in every engine -- the unstyled OS default
+     is not queryable from CSS, and renderPyramidTicks() below needs a known
+     width to place each tick under the thumb's actual travel range (a
+     thumb's centre runs from half-its-width to width-minus-half-its-width,
+     never edge to edge). PYRAMID_THUMB_PX must match this value. */
+  .pyramid-history-range input[type="range"]::-webkit-slider-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer; -webkit-appearance:none}
+  .pyramid-history-range input[type="range"]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer}
   .pyramid-history-year{flex:none; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; min-width:3.4em; text-align:right}
-  .pyramid-history-ticks{display:grid; font-size:10px; color:var(--bp-text-faint); margin-top:2px; position:relative; height:14px}
+  .pyramid-history-ticks{display:grid; font-size:10px; color:var(--bp-text-faint); margin-top:2px; position:relative; height:14px; width:100%}
   .pyramid-history-ticks span{position:absolute; transform:translateX(-50%); white-space:nowrap}
-  .pyramid-history-ticks span:first-child{transform:none}
-  .pyramid-history-ticks span:last-child{transform:translateX(-100%)}
   .pyramid-history-sub{font-size:10px; color:var(--bp-text-faint); margin:5px 0 0}
   .pyramid-history-incomplete{display:none; font-size:10px; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-radius:6px; padding:5px 8px; margin-top:6px}
   .pyramid-history-incomplete.is-visible{display:block}
@@ -686,11 +703,11 @@
   </div>
 </div>
 
-<script src="assets/i18n.js"></script>
-<script src="assets/belpulse/shell.js"></script>
-<script src="assets/belpulse/components.js"></script>
-<script src="assets/commune_map.js"></script>
-<script src="assets/belpulse/charts.js"></script>
+<script src="assets/i18n.js?v=b391223801"></script>
+<script src="assets/belpulse/shell.js?v=50299961dc"></script>
+<script src="assets/belpulse/components.js?v=c46caeab4b"></script>
+<script src="assets/commune_map.js?v=37e2927a33"></script>
+<script src="assets/belpulse/charts.js?v=07848344d8"></script>
 <script>
 /* BelPulse commune profile -- "Portrait".
  *
@@ -784,25 +801,6 @@
     }
     return 0;
   }
-  /* Page-local UI strings (fr/nl/en -- rule 7). */
-  var V4C = {
-    tileHint: {fr: "Afficher cet indicateur dans le graphique et la carte du chapitre", nl: "Deze indicator in de grafiek en de kaart van het hoofdstuk tonen", en: "Show this indicator in the chapter's chart and map"},
-    mapHint: {fr: "Survolez une commune · cliquez pour ouvrir son portrait · molette pour zoomer", nl: "Beweeg over een gemeente · klik om haar portret te openen · scrol om te zoomen", en: "Hover a commune · click to open its portrait · scroll to zoom"},
-    nbHint: {fr: "Cliquez une commune voisine pour ouvrir son portrait", nl: "Klik op een buurgemeente om haar portret te openen", en: "Click a neighbouring commune to open its portrait"},
-    legendNeighbours: {fr: "Communes voisines", nl: "Buurgemeenten", en: "Neighbouring communes"},
-    mapIndicator: {fr: "Indicateur de la carte", nl: "Indicator van de kaart", en: "Map indicator"},
-    legendCommune: {fr: "Commune", nl: "Gemeente", en: "Commune"},
-    showAll: {fr: "Afficher les {n} autres indicateurs", nl: "De {n} andere indicatoren tonen", en: "Show the {n} other indicators"},
-    showLess: {fr: "Réduire le tableau", nl: "Tabel inklappen", en: "Show fewer rows"},
-    openHint: {fr: "Cliquer pour ouvrir le portrait", nl: "Klik om het portret te openen", en: "Click to open the portrait"},
-  };
-  function TT(key, vars){
-    var d = V4C[key] || {};
-    var s = d[LANG] || d.en || key;
-    if(vars) Object.keys(vars).forEach(function(k){ s = s.split('{' + k + '}').join(String(vars[k])); });
-    return s;
-  }
-
   /* ---- this page's own map palette --------------------------------------
      Passed to MapUI.CommuneMap as options so the shared engine (assets/
      commune_map.js) keeps its own default brown ramp for every other page
@@ -1018,6 +1016,19 @@
     return new Intl.DateTimeFormat(LANG, {day:'numeric', month:'short', year:'numeric', timeZone:'UTC'}).format(date);
   }
   function localeTag(){ return LANG === 'fr' ? 'fr-BE' : (LANG === 'nl' ? 'nl-BE' : 'en-GB'); }
+
+  /* cpPyramidSub's {date} · Statbel update {updated} -- but never prints
+     the "update —" wording when no source_updated date resolves anywhere
+     (the history payload does not carry one at all; the single-year
+     payload does). Falls back to state.ageSex.source_updated when the
+     history-active call site's own updatedIso is absent, and omits the
+     whole "Statbel update" clause (a DIFFERENT i18n string, not a filled-
+     in blank) rather than ever rendering calendarDate's '—' placeholder. */
+  function pyramidSubtitle(dateLabel, updatedIso){
+    var resolved = updatedIso || (state.ageSex && state.ageSex.source_updated);
+    if(!resolved) return T('cpPyramidSubNoUpdate', {date: dateLabel});
+    return T('cpPyramidSub', {date: dateLabel, updated: calendarDate(resolved)});
+  }
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
   }
@@ -1217,13 +1228,19 @@
     document.getElementById('downloadLink').href = COMMUNE_URL(state.nis);
     document.getElementById('linkCsv').href = 'data/communes_history.csv';
     document.getElementById('linkMap').href = 'map.html';
+    // cpLinkMap takes {name} -- applyStrings()'s generic [data-t] pass calls
+    // T(key) with no vars, so this placeholder is filled here instead, the
+    // same way the previous layout did. renderHero() re-runs on 'bp:lang'
+    // (see renderAll() in the bp:lang listener below), so this re-fills on
+    // every language switch too.
+    document.getElementById('linkMap').querySelector('span').textContent = T('cpLinkMap', {name: name});
   }
 
   function placeTipHtml(f){
     var row = geoOf(f.nis);
     var name = (row && placeName(row)) || f.name_fr || f.name || f.nis;
     var prov = levelOf(f.nis, 'province') || levelOf(f.nis, 'region');
-    var hint = f.nis === state.nis ? '' : TT('openHint');
+    var hint = f.nis === state.nis ? '' : T('cpOpenHint');
     return '<span class="n">' + escapeHtml(name) + '</span>' +
       (prov ? '<span class="m">' + escapeHtml(placeName(prov)) + '</span>' : '') +
       (hint ? '<span class="m">' + escapeHtml(hint) + '</span>' : '');
@@ -1260,8 +1277,8 @@
     legend.innerHTML = '';
     [[region, 'sw-region', T('cpLegendRegion')],
      [province, 'sw-province', T('cpLegendProvince')],
-     [neighbours.length ? {} : null, 'sw-neighbour', TT('legendNeighbours')],
-     [{name: state.profile.name}, 'sw-commune', TT('legendCommune')]].forEach(function(row){
+     [neighbours.length ? {} : null, 'sw-neighbour', T('cpLegendNeighbours')],
+     [{name: state.profile.name}, 'sw-commune', T('cpLegendCommune')]].forEach(function(row){
       if(!row[0]) return;
       var it = document.createElement('span');
       var sw = document.createElement('i'); sw.className = row[1]; it.appendChild(sw);
@@ -2127,7 +2144,7 @@
         active = d; d.el.classList.add('on');
         var r = d.el.getBoundingClientRect();
         floatTip('<span>' + escapeHtml(d.r.name) + '</span><span class="bp-chart-tip-value">' + escapeHtml(fmt(d.r.value, meta) + unitSuffix(meta)) + '</span>' +
-          (d.r.self ? '' : '<span>' + escapeHtml(TT('openHint')) + '</span>'), r.left + r.width / 2, r.top);
+          (d.r.self ? '' : '<span>' + escapeHtml(T('cpOpenHint')) + '</span>'), r.left + r.width / 2, r.top);
       });
       track.addEventListener('pointerleave', function(){ if(active) active.el.classList.remove('on'); active = null; hideFloatTip(); });
       track.addEventListener('click', function(ev){
@@ -2284,7 +2301,7 @@
     var sel = null;
     if(codes.length > 1){
       sel = document.createElement('select');
-      sel.setAttribute('aria-label', TT('mapIndicator'));
+      sel.setAttribute('aria-label', T('cpMapIndicatorLabel'));
       codes.forEach(function(c){
         var o = document.createElement('option');
         o.value = c; o.textContent = nameOf(c);
@@ -2327,7 +2344,7 @@
     var caption = document.createElement('div');
     caption.className = 'leadmap-caption';
     caption.innerHTML = '<span class="src"></span><span class="hint"></span>';
-    if(!hintsShown.map){ caption.querySelector('.hint').textContent = TT('mapHint'); hintsShown.map = true; }
+    if(!hintsShown.map){ caption.querySelector('.hint').textContent = T('cpMapHint'); hintsShown.map = true; }
     mapCol.appendChild(caption);
     row.appendChild(mapCol);
 
@@ -2498,7 +2515,7 @@
       tile.dataset.code = code;
       tile.tabIndex = 0;
       tile.setAttribute('role', 'button');
-      tile.title = TT('tileHint');
+      tile.title = T('cpTileHint');
       var labelBlock = document.createElement('div');
       labelBlock.className = 'mtile-labelblock';
       var eyebrow = document.createElement('div');
@@ -2510,7 +2527,7 @@
       var descText = indicatorDescription(code);
       if(descText){
         labelBlock.title = descText;
-        tile.title = descText + ' · ' + TT('tileHint');
+        tile.title = descText + ' · ' + T('cpTileHint');
       }
       tile.appendChild(labelBlock);
 
@@ -2680,7 +2697,7 @@
           indicator: nameOf(headlineCode),
           period: hLatest.period,
           source: sourceLabelOf(hMeta.source || (hMeta.input_sources && hMeta.input_sources[0])),
-        }) + (hintsShown.nb ? '' : ' ' + TT('nbHint'));
+        }) + (hintsShown.nb ? '' : ' ' + T('cpNbHint'));
         hintsShown.nb = true;
         host.appendChild(explain);
       }
@@ -2909,6 +2926,79 @@
       wireBar(rightBar, age, T('cpPyramidFemale'), female);
       chart.appendChild(row);
     });
+
+    renderPyramidGridlines(chart, max);
+  }
+
+  //: One ResizeObserver per chart lifetime -- see the identical comment on
+  //: pyramidTicksResizeObserver above (drawPyramid() re-runs on every
+  //: slider move, so a stale observer from a previous frame's now-removed
+  //: track element must be disconnected before observing the new one).
+  var pyramidGridlineResizeObserver = null;
+
+  /* 2-3 vertical gridlines with count labels, mirrored on both sides of the
+     pyramid, at "nice" round values derived from `max` (BPCharts.niceSteps,
+     the same nice-round-number helper the line/bar charts already use --
+     rule 36: never a hand-typed scale). `max` is fixed across every year
+     the slider can reach (drawPyramid()'s own doc comment above), so these
+     labels are identical in every frame -- the maintainer's actual
+     complaint was that nothing on screen proved the scale wasn't
+     rescaling underneath the animation. */
+  function renderPyramidGridlines(chart, max){
+    var old = chart.querySelector('.pyramid-gridlines');
+    if(old) old.remove();
+    if(pyramidGridlineResizeObserver) pyramidGridlineResizeObserver.disconnect();
+    if(!max || max <= 0) return;
+
+    var steps = (BPCharts.niceSteps(0, max, 2) || []).filter(function(v){ return v > 0; }).slice(0, 3);
+    if(!steps.length) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'pyramid-gridlines';
+    overlay.setAttribute('aria-hidden', 'true');
+    chart.appendChild(overlay);
+
+    // Measured from a REAL row's track -- the grid's own column widths are
+    // responsive (minmax(0,1fr)), never assumed from the chart's overall
+    // width (which also includes the age-label gutter and axis captions).
+    var sampleLeft = chart.querySelector('.pyramid-track.left');
+    var sampleRight = chart.querySelector('.pyramid-track.right');
+    if(!sampleLeft || !sampleRight) return;
+
+    function draw(){
+      overlay.innerHTML = '';
+      var chartBox = chart.getBoundingClientRect();
+      var leftBox = sampleLeft.getBoundingClientRect();
+      var rightBox = sampleRight.getBoundingClientRect();
+      if(!leftBox.width || !rightBox.width) return; // not laid out yet -- the ResizeObserver below redraws once it is
+      steps.forEach(function(v){
+        var pct = Math.min(1, v / max);
+        var label = v.toLocaleString(LANG);
+        // Male track grows from its RIGHT edge (the centre axis) outward
+        // to the left -- see .pyramid-track.left{justify-content:flex-end}
+        // above -- so a gridline at value v sits pct*trackWidth in from
+        // that same right edge.
+        var leftX = leftBox.right - pct * leftBox.width - chartBox.left;
+        var rightX = rightBox.left + pct * rightBox.width - chartBox.left;
+        [leftX, rightX].forEach(function(x){
+          var line = document.createElement('i');
+          line.className = 'pyramid-gridline';
+          line.style.left = x.toFixed(2) + 'px';
+          overlay.appendChild(line);
+          var tag = document.createElement('span');
+          tag.className = 'pyramid-gridline-label';
+          tag.textContent = label;
+          tag.style.left = x.toFixed(2) + 'px';
+          overlay.appendChild(tag);
+        });
+      });
+    }
+
+    draw();
+    if('ResizeObserver' in window){
+      pyramidGridlineResizeObserver = new ResizeObserver(draw);
+      pyramidGridlineResizeObserver.observe(chart);
+    }
   }
 
   function renderPyramidYear(index){
@@ -2937,10 +3027,10 @@
     }
     if(out) out.textContent = year.period;
 
-    document.getElementById('pyramidSub').textContent = T('cpPyramidSub', {
-      date: referenceLabel,
-      updated: calendarDate(state.ageSexHistory && state.ageSexHistory.source_updated),
-    });
+    document.getElementById('pyramidSub').textContent = pyramidSubtitle(
+      referenceLabel,
+      state.ageSexHistory && state.ageSexHistory.source_updated
+    );
 
     var coverage = year.coverage || {};
     var note = document.getElementById('pyramidIncomplete');
@@ -3005,27 +3095,78 @@
     if(PYRAMID_REDUCED_MOTION) play.hidden = true;
   }
 
+  //: Must match the thumb width set in the ::-webkit-slider-thumb/
+  //: ::-moz-range-thumb rules above -- a range thumb's own CENTRE never
+  //: reaches the track's edges, it travels from half-its-width in from the
+  //: left to half-its-width in from the right, so a tick placed at a plain
+  //: linear 0%/100% is always off by half a thumb width at both ends.
+  var PYRAMID_THUMB_PX = 16;
+
+  //: One ResizeObserver per pyramid card lifetime, disconnected and
+  //: replaced on every renderPyramidTicks() call (a new commune, or a
+  //: language switch, rebuilds the card and calls this again) -- never
+  //: left dangling on the previous commune's now-detached input.
+  var pyramidTicksResizeObserver = null;
+
   /* Year ticks under the slider: first year, roughly every 4 years, last
-     year -- drawn once per history load (positions are proportional to the
-     slider's own min/max, so they never drift out of sync with it). */
+     year -- positioned in PIXELS (not a plain linear %) so each tick's
+     centre lines up with the thumb's actual centre for that year,
+     accounting for the thumb-width inset above. Lives INSIDE
+     .pyramid-history-range now (same element the input fills), so its own
+     width IS the input's width.
+
+     The input can be attached to the document with isConnected=true for
+     several animation frames while still measuring 0-width (CSS/fonts not
+     yet applied, or an ancestor mid-layout) -- true even under the single
+     requestAnimationFrame buildPyramidCard() already waits one of, which is
+     why draw() below is not just called once inline: a ResizeObserver on
+     the input itself is the one reliable "it now has a real size" signal,
+     and placing ticks from a still-zero width silently produces the exact
+     misalignment bug this function exists to fix (every tick lands at its
+     plain linear 0/25/50/75/100%, ignoring the thumb inset entirely). */
   function renderPyramidTicks(years){
     var host = document.getElementById('pyramidTicks');
-    if(!host) return;
-    host.innerHTML = '';
+    var input = document.getElementById('pyramidYear');
+    if(!host || !input) return;
     var n = years.length;
-    if(n < 2){ host.hidden = true; return; }
+    if(n < 2){ host.hidden = true; host.innerHTML = ''; return; }
     host.hidden = false;
     var idxs = [0];
     var step = 4;
     for(var i = step; i < n - 1; i += step) idxs.push(i);
     idxs.push(n - 1);
     idxs = Array.from(new Set(idxs));
-    idxs.forEach(function(i){
-      var span = document.createElement('span');
-      span.textContent = years[i].period;
-      span.style.left = (i / (n - 1) * 100).toFixed(2) + '%';
-      host.appendChild(span);
-    });
+    var half = PYRAMID_THUMB_PX / 2;
+
+    function draw(trackWidth){
+      host.innerHTML = '';
+      // A zero/undersized read -- fall back to the untouched linear %
+      // rather than divide-by-zero math that would stack every tick on
+      // top of one another. draw() is called again once the
+      // ResizeObserver below reports a real width, so this branch is only
+      // ever the frame or two before that.
+      var usable = trackWidth > PYRAMID_THUMB_PX ? trackWidth - PYRAMID_THUMB_PX : 0;
+      idxs.forEach(function(i){
+        var span = document.createElement('span');
+        span.textContent = years[i].period;
+        var fraction = i / (n - 1);
+        span.style.left = usable
+          ? (half + fraction * usable).toFixed(2) + 'px'
+          : (fraction * 100).toFixed(2) + '%';
+        host.appendChild(span);
+      });
+    }
+
+    draw(input.getBoundingClientRect().width);
+
+    if(pyramidTicksResizeObserver) pyramidTicksResizeObserver.disconnect();
+    if('ResizeObserver' in window){
+      pyramidTicksResizeObserver = new ResizeObserver(function(entries){
+        var w = entries[0] && entries[0].contentRect ? entries[0].contentRect.width : input.getBoundingClientRect().width;
+        draw(w);
+      });
+      pyramidTicksResizeObserver.observe(input);
+    }
   }
 
   function renderAgeSex(){
@@ -3087,10 +3228,7 @@
     var reference = payload.reference_date || payload.period;
     var referenceLabel = calendarDate(reference);
     drawPyramid(payload.bands, referenceLabel, max, null);
-    document.getElementById('pyramidSub').textContent = T('cpPyramidSub', {
-      date: referenceLabel,
-      updated: calendarDate(payload.source_updated),
-    });
+    document.getElementById('pyramidSub').textContent = pyramidSubtitle(referenceLabel, payload.source_updated);
     panel.dataset.state = 'ready';
   }
 
@@ -3192,10 +3330,12 @@
               '<span id="pyramidPlayIcon" aria-hidden="true">&#9654;</span>' +
               '<span class="visually-hidden" id="pyramidPlayLabel">' + escapeHtml(T('cpPyramidPlay')) + '</span>' +
             '</button>' +
-            '<div class="pyramid-history-range"><input type="range" id="pyramidYear" min="0" max="0" step="1" value="0"></div>' +
+            '<div class="pyramid-history-range">' +
+              '<input type="range" id="pyramidYear" min="0" max="0" step="1" value="0">' +
+              '<div class="pyramid-history-ticks" id="pyramidTicks"></div>' +
+            '</div>' +
             '<span class="pyramid-history-year" id="pyramidYearOut">—</span>' +
           '</div>' +
-          '<div class="pyramid-history-ticks" id="pyramidTicks"></div>' +
           '<p class="pyramid-history-sub" id="pyramidHistorySub"></p>' +
           '<p class="pyramid-history-incomplete" id="pyramidIncomplete" role="status"></p>' +
         '</div>' +
@@ -3226,17 +3366,31 @@
      null) rather than an empty or "unavailable" card -- the maintainer's
      rule, carried over unchanged from the previous layout.
   ========================================================================= */
+  // Bucket ids as the payload (public/data/flows/buyer_origin/<nis>.json)
+  // and its exporter (scripts/export_commune_flows.py) actually name them --
+  // #278 shipped ids that exist nowhere in the payload (same_province,
+  // same_region, other_region, unknown), so 4 of 6 buckets silently never
+  // matched a row and "cpFlowsBucketSame" (a raw, unresolved i18n key)
+  // rendered instead of its translated label for the one bucket id ('same_
+  // commune') that DID happen to still exist. Restored to match develop
+  // before #278 (6abc5298a) exactly.
   var FLOWS_BUCKET_ORDER = [
-    ['same_commune', 'cpFlowsBucketSame'],
-    ['same_province', 'cpFlowsBucketProvince'],
-    ['same_region', 'cpFlowsBucketRegion'],
-    ['other_region', 'cpFlowsBucketOtherRegion'],
+    ['same_commune', 'cpFlowsBucketSameCommune'],
+    ['rest_of_arrondissement', 'cpFlowsBucketRestArr'],
+    ['rest_of_region', 'cpFlowsBucketRestRegion'],
+    ['other_regions', 'cpFlowsBucketOtherRegions'],
     ['abroad', 'cpFlowsBucketAbroad'],
-    ['unknown', 'cpFlowsBucketUnknown'],
+    ['origin_unknown', 'cpFlowsBucketUnknown'],
   ];
   function flowsPct(v){
+    // French/Dutch number formatting (a comma decimal separator, LANG-driven)
+    // for a share already rounded to one decimal by the exporter -- this
+    // function only re-renders the same digits in the reader's locale, it
+    // does not round or recompute the figure (rule 27). No space before the
+    // '%' -- restored to match develop before #278 exactly; #278 introduced
+    // ' %' (a space) here, drift this batch's line-by-line diff caught.
     var n = parseFloat(v);
-    return isFinite(n) ? n.toLocaleString(LANG, {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' %' : '—';
+    return isFinite(n) ? n.toLocaleString(LANG, {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%' : '—';
   }
   function buildFlowsCard(){
     var payload = state.flows;
@@ -3405,13 +3559,31 @@
     var sites = (state.schoolSites || []).filter(function(r){ return siteIdSet[r.site]; });
     sites.sort(function(a, b){ return a.school.localeCompare(b.school, LANG); });
     if(sites.length){
+      // Maintainer's request: the summary tiles above stay visible, but the
+      // full list of sites is long on some communes and collapses behind a
+      // toggle, CLOSED by default -- same disclosure pattern the allData
+      // table's own per-indicator history already uses (.history-toggle,
+      // aria-expanded/aria-controls, plain hidden on the target).
+      var listHead = document.createElement('div');
+      listHead.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 6px; flex-wrap:wrap';
       var listTitle = document.createElement('h4');
       listTitle.id = 'schoolsListTitle';
-      listTitle.style.margin = '12px 0 6px';
+      listTitle.style.margin = '0';
       listTitle.textContent = T('cpSchoolsListTitle');
-      body.appendChild(listTitle);
+      listHead.appendChild(listTitle);
+      var listId = 'schoolsList';
+      var listToggle = document.createElement('button');
+      listToggle.type = 'button';
+      listToggle.id = 'schoolsListToggle';
+      listToggle.className = 'history-toggle';
+      listToggle.setAttribute('aria-expanded', 'false');
+      listToggle.setAttribute('aria-controls', listId);
+      listToggle.textContent = T('cpSchoolsShowList', {n: sites.length});
+      listHead.appendChild(listToggle);
+      body.appendChild(listHead);
       var listHost = document.createElement('ul');
-      listHost.id = 'schoolsList';
+      listHost.id = listId;
+      listHost.hidden = true;
       listHost.style.listStyle = 'none';
       listHost.style.padding = '0';
       listHost.style.margin = '0';
@@ -3427,6 +3599,12 @@
         listHost.appendChild(li);
       });
       body.appendChild(listHost);
+      listToggle.addEventListener('click', function(){
+        var open = listToggle.getAttribute('aria-expanded') === 'true';
+        listToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+        listHost.hidden = open;
+        listToggle.textContent = open ? T('cpSchoolsShowList', {n: sites.length}) : T('cpSchoolsHideList');
+      });
     }
 
     var sourceEl = document.createElement('p');

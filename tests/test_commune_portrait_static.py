@@ -96,35 +96,43 @@ def test_every_t_key_the_page_calls_exists_in_all_three_languages():
             ), f"{lang} is missing v4ScopeRegion_{region_key}"
 
 
-def test_every_tt_key_the_page_calls_exists_in_the_page_local_table():
-    """`TT('key'` calls resolve against this page's own V4C table (page-
-    local UI strings, still fr/nl/en per rule 7 -- never a second i18n.js)."""
+def test_no_second_page_local_i18n_table_exists():
+    """commune.html used to carry its own V4C table + TT() accessor -- a
+    second, page-local i18n system alongside assets/i18n.js, for 9 strings
+    that had no functional reason to live outside it. Both were removed
+    (every former TT('key') call site is now a plain T('cpKey') call
+    against assets/i18n.js, covered like every other T() call by
+    test_every_t_key_the_page_calls_exists_in_all_three_languages above) --
+    this is a regression guard against that split reappearing, not a test
+    of behaviour."""
     text = _page_text()
-    v4c_match = re.search(r"var V4C = \{(.*?)\n  \};", text, re.DOTALL)
-    assert v4c_match, "V4C page-local string table not found"
-    v4c_body = v4c_match.group(1)
-    keys = sorted(set(re.findall(r"""TT\(\s*['"]([A-Za-z0-9_]+)['"]""", text)))
-    assert keys, "no TT() calls found"
-    for key in keys:
-        assert f"{key}:" in v4c_body, f"TT() key {key!r} has no entry in the page's own V4C table"
-        entry_match = re.search(rf"{key}:\s*\{{([^}}]*)\}}", v4c_body)
-        assert entry_match, f"V4C.{key} is not an object literal"
-        for lang in ("fr", "nl", "en"):
-            assert f"{lang}:" in entry_match.group(1), f"V4C.{key} has no {lang} entry"
+    assert "var V4C" not in text, "a page-local V4C string table has come back"
+    assert re.search(r"(?<!T)TT\(", text) is None, "a TT(...) call has come back"
 
 
 def test_no_raw_i18n_key_or_english_leftover_pattern_in_markup():
     """A defensive static guard: the raw markup must never show a key name
     where a translated string belongs (would appear as e.g. `>v4HeroEyebrow<`
     if a T() call were ever left unresolved in static HTML rather than
-    filled by JS)."""
+    filled by JS), and must never show a literal `{placeholder}` hand-typed
+    into static tag content (the class of bug PR #278 shipped: cpLinkMap's
+    fallback text is static markup, and an earlier version of this regex
+    excluded `{}` from the character class, so it could never have caught
+    a stray `{name}` if one had been typed directly into the HTML here --
+    it stayed silent while the REAL leftover, produced by JS at runtime,
+    was caught only by the browser test in
+    tests/test_commune_portrait_browser.py)."""
     text = _page_text()
     # Only checks literal markup between tags, not JS string/variable names
     # (which legitimately contain these substrings as object keys).
-    for tag_text in re.findall(r">([^<>{}\n]{2,80})<", text):
+    for tag_text in re.findall(r">([^<>\n]{2,80})<", text):
+        stripped = tag_text.strip()
         assert not re.match(
-            r"^(v4|cp|pf)[A-Za-z0-9_]+$", tag_text.strip()
+            r"^(v4|cp|pf)[A-Za-z0-9_]+$", stripped
         ), f"unresolved i18n key left in static markup: {tag_text!r}"
+        assert not re.search(
+            r"\{[A-Za-z0-9_]+\}", stripped
+        ), f"unresolved i18n placeholder left in static markup: {tag_text!r}"
 
 
 def test_parse_from_is_byte_identical_to_the_version_the_destination_tests_pin():
