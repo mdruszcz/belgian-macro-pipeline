@@ -41,6 +41,7 @@ FUNCTIONS = {
         "cagr",
         "five_year_change",
         "per_capita",
+        "per_thousand",
         "share_of_total",
         "index_base_100",
         "dependency_ratio",
@@ -58,6 +59,7 @@ CROSS_SECTIONAL = {"percentile", "z_score"}
 # Functions taking several distinct indicators as positional inputs.
 MULTI_INPUT = {
     "per_capita",
+    "per_thousand",
     "share_of_total",
     "regional_share",
     "dependency_ratio",

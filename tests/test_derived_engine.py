@@ -207,6 +207,47 @@ def test_multi_input_does_not_cross_wire_two_communes():
     assert out.value("DR", "be:mun:B", "2026") == 1800.0
 
 
+def test_per_thousand_does_not_cross_wire_two_communes():
+    """Same guard as test_multi_input_does_not_cross_wire_two_communes, for
+    the ADR 0014 rate function specifically: a birth-rate-shaped config must
+    read each commune's OWN population, never a neighbour's."""
+    obs = ObservationSet(
+        [
+            ("BIRTHS", "be:mun:A", "2025", 100.0),
+            ("POP", "be:mun:A", "2025", 10_000.0),
+            ("BIRTHS", "be:mun:B", "2025", 100.0),
+            ("POP", "be:mun:B", "2025", 1_000.0),
+        ]
+    )
+    configs = {"RATE": _cfg("RATE", "per_thousand", ["BIRTHS", "POP"])}
+    out = compute(obs, configs, {"BIRTHS", "POP"})
+    # A: 100 / 10,000 * 1000 = 10.0. B: 100 / 1,000 * 1000 = 100.0.
+    # If B's small POP leaked into A's denominator, A would come back as
+    # 100.0 too.
+    assert out.value("RATE", "be:mun:A", "2025") == 10.0
+    assert out.value("RATE", "be:mun:B", "2025") == 100.0
+
+
+def test_per_thousand_is_absent_not_zero_when_the_movement_row_is_missing():
+    """The 31 communes merged in 2019 or 2025 have no BIRTHS row for 2018 or
+    2024 respectively (docs/features/population_movement.md). The engine
+    iterates result.cells(inputs[0]), so a period the numerator has no cell
+    for never produces a rate cell at all -- absent, never a computed 0."""
+    obs = ObservationSet(
+        [
+            ("BIRTHS", "be:mun:A", "2023", 100.0),
+            ("POP", "be:mun:A", "2023", 10_000.0),
+            ("POP", "be:mun:A", "2024", 10_100.0),
+            # BIRTHS has no 2024 row for be:mun:A -- the merger-year gap.
+        ]
+    )
+    configs = {"RATE": _cfg("RATE", "per_thousand", ["BIRTHS", "POP"])}
+    out = compute(obs, configs, {"BIRTHS", "POP"})
+    assert out.value("RATE", "be:mun:A", "2023") == 10.0
+    assert out.value("RATE", "be:mun:A", "2024") is None
+    assert ("be:mun:A", "2024") not in out.cells("RATE")
+
+
 def test_a_single_period_indicator_derives_to_null_not_zero():
     """LOCAL_UNITS_BY_COMMUNE has exactly one period, so a five-year change
     over it is undefined. Zero would read as 'no growth', which is a claim the
@@ -266,6 +307,14 @@ def test_the_committed_derived_configs_load_and_order():
         # rate; tests/test_unemployment_rates.py holds the four "unemployment"
         # figures apart from each other.
         "UNEMPLOYMENT_CLAIMANT_RATE_WORKING_AGE",
+        # ADR 0014: births, deaths and the four migration counts/balances,
+        # each over POPULATION_BY_COMMUNE at the same year, times 1,000.
+        "BIRTH_RATE_PER_1000",
+        "DEATH_RATE_PER_1000",
+        "INTERNAL_MIGRATION_IN_RATE_PER_1000",
+        "INTERNAL_MIGRATION_OUT_RATE_PER_1000",
+        "INTERNAL_MIGRATION_NET_RATE_PER_1000",
+        "INTERNATIONAL_MIGRATION_NET_RATE_PER_1000",
     }
     assert resolve_order(derived, SOURCE_IDS)
 

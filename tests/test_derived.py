@@ -23,6 +23,7 @@ from src.analytics.derived import (
     growth_rate,
     index_base_100,
     per_capita,
+    per_thousand,
     percentile,
     regional_share,
     share_of_total,
@@ -162,6 +163,37 @@ def test_per_capita_is_null_without_a_denominator():
     request has no denominator -- null, never a guessed one."""
     assert per_capita(2500.0, None) is None
     assert per_capita(2500.0, 0.0) is None
+
+
+def test_per_thousand():
+    """Boechout (NIS 11004), 2025, INTERNAL_MIGRATION_IN over
+    POPULATION_BY_COMMUNE, both read live from the committed store and
+    verified in ADR 0014's worked example: 838 / 13,500 * 1000 =
+    62.074074074... (a fixture denominator, not the real 14,084 population,
+    chosen so the hand-computed decimal is easy to check by long division)."""
+    assert per_thousand(838.0, 13_500.0) == pytest.approx(62.074074)
+
+
+def test_per_thousand_zero_numerator_is_a_measured_zero():
+    # 0 / 100 * 1000 = 0.0 exactly -- a real zero, not a null.
+    assert per_thousand(0.0, 100.0) == 0.0
+
+
+def test_per_thousand_is_null_when_the_event_count_is_missing():
+    assert per_thousand(None, 100.0) is None
+
+
+def test_per_thousand_is_null_without_a_denominator():
+    assert per_thousand(5.0, 0.0) is None
+    assert per_thousand(5.0, None) is None
+
+
+def test_per_thousand_preserves_a_negative_balance():
+    """INTERNAL_MIGRATION_NET_RATE_PER_1000 and
+    INTERNATIONAL_MIGRATION_NET_RATE_PER_1000 read a signed 'balance'
+    indicator -- the rate must stay negative, not get clamped to 0."""
+    # -50 / 1000 * 1000 = -50.0 exactly
+    assert per_thousand(-50.0, 1000.0) == -50.0
 
 
 def test_share_of_total():

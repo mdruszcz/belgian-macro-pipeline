@@ -1,0 +1,29 @@
+id: INTERNATIONAL_MIGRATION_NET_RATE_PER_1000
+name:
+  en: Net international migration (per 1,000 residents)
+  fr: Solde migratoire international (par 1 000 habitants)
+  nl: Internationaal migratiesaldo (per 1 000 inwoners)
+definition:
+  en: "Net international migration during the calendar year, per 1,000 residents on 1 January of the same year."
+  fr: "Solde migratoire international au cours de l'année civile, par 1 000 habitants au 1er janvier de la même année."
+  nl: "Internationaal migratiesaldo tijdens het kalenderjaar, per 1 000 inwoners op 1 januari van hetzelfde jaar."
+unit: per_mille
+frequency: A
+geo_levels: [municipal]
+preferred_direction: contextual
+decimals: 1
+description:
+  en: >
+    INTERNATIONAL_MIGRATION_NET over POPULATION_BY_COMMUNE, both at the same year, times 1,000
+    (ADR 0014). INTERNATIONAL_MIGRATION_NET is signed ('balance'): a negative rate means more
+    residents left the country than arrived from abroad, and per_thousand preserves the sign
+    rather than clamping it. One denominator -- the 1 January population
+    INTERNATIONAL_MIGRATION_NET's own commune-map resolution already matches -- rather than an
+    invented mid-year average. Available 2016-2025 only, where both indicators exist for the
+    same commune and year; null (never 0) for the 31 communes merged in 2019 or 2025, whose
+    INTERNATIONAL_MIGRATION_NET row is absent for 2018 or 2024 respectively. preferred_direction
+    is 'contextual': a positive or negative net migration rate is neither better nor worse on
+    its own.
+derived:
+  function: per_thousand
+  inputs: [INTERNATIONAL_MIGRATION_NET, POPULATION_BY_COMMUNE]

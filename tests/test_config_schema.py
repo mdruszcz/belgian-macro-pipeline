@@ -100,6 +100,16 @@ VALID_DERIVED = {
 }
 
 
+def test_derived_config_accepts_per_thousand_function():
+    """ADR 0014 added per_thousand to the schema's closed function enum."""
+    rate = dict(
+        VALID_DERIVED,
+        unit="per_mille",
+        derived={"function": "per_thousand", "inputs": ["A", "B"]},
+    )
+    assert validate_derived_config(rate, Path(__file__)) == []
+
+
 def test_derived_definition_field_is_accepted_when_present():
     with_definition = dict(
         VALID_DERIVED,
