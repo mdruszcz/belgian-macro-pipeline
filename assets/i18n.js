@@ -693,6 +693,15 @@ I18N.STRINGS = {
     // tooltip target rather than only the whole row carrying a combined
     // male+female label (cpPyramidRow, kept for the row itself).
     cpPyramidBar: 'Age {age}, {sex}: {count}',
+    // Year slider/Play over demography_history/<nis>.json (every published
+    // Statbel year, per current commune). cpPyramidYearLabel is the range
+    // input's own accessible name, re-set on every frame so a screen reader
+    // announces which year moving the slider landed on.
+    cpPyramidPlay: 'Play',
+    cpPyramidPause: 'Pause',
+    cpPyramidYearLabel: 'Year: {year}',
+    cpPyramidHistorySub: 'Move the slider to see {from}–{to}.',
+    cpPyramidIncomplete: 'Incomplete year: {found} of {expected} former communes reported.',
   },
   fr: {
     language: 'Langue',
@@ -1274,6 +1283,11 @@ I18N.STRINGS = {
     pfNoPeriods: 'Aucune période publiée',
     sourcesDetailTechnicalName: 'Nom technique / API',
     cpPyramidBar: 'Âge {age}, {sex} : {count}',
+    cpPyramidPlay: 'Lecture',
+    cpPyramidPause: 'Pause',
+    cpPyramidYearLabel: 'Année : {year}',
+    cpPyramidHistorySub: 'Déplacez le curseur pour voir {from}–{to}.',
+    cpPyramidIncomplete: 'Année incomplète : {found} ancienne(s) commune(s) sur {expected} ont transmis leurs données.',
   },
   nl: {
     language: 'Taal',
@@ -1856,6 +1870,11 @@ I18N.STRINGS = {
     pfNoPeriods: 'Geen periode gepubliceerd',
     sourcesDetailTechnicalName: 'Technische naam / API',
     cpPyramidBar: 'Leeftijd {age}, {sex}: {count}',
+    cpPyramidPlay: 'Afspelen',
+    cpPyramidPause: 'Pauze',
+    cpPyramidYearLabel: 'Jaar: {year}',
+    cpPyramidHistorySub: 'Verplaats de schuifregelaar om {from}–{to} te zien.',
+    cpPyramidIncomplete: 'Onvolledig jaar: {found} van {expected} vroegere gemeenten hebben gerapporteerd.',
   },
 };
 
