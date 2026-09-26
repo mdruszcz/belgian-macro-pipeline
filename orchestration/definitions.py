@@ -59,6 +59,7 @@ EXPORT_SELECTION = AssetSelection.assets(
     "revisions_report",
     "commune_adjacency",
     "commune_typology",
+    "commune_flows_export",
 ) | AssetSelection.groups("derived", "website")
 
 validate_and_export = define_asset_job("validate_and_export", selection=EXPORT_SELECTION)
