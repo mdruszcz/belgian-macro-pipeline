@@ -23,7 +23,11 @@ COMPONENT_JS = REPO / "assets" / "commune_map.js"
 # (docs/features/site_unification.md) -- its language menu is
 # assets/belpulse/shell.js's `.bp-lang-switch`, the same component home2.html
 # and macro.html already use, not the legacy #langSeg these two still have.
-LANGSEG_PAGES = ["communes.html", "local.html"]
+#
+# communes.html and local.html were on this list; the repo cleanup turned
+# both into redirect stubs with no #langSeg of their own, so they were
+# dropped.
+LANGSEG_PAGES: list[str] = []
 TRANSLATED_PAGES = LANGSEG_PAGES + ["map.html"]
 
 LANGS = ("en", "fr", "nl")
@@ -162,7 +166,7 @@ def test_a_translated_page_loads_the_shared_strings(page):
         assert f'data-lang="{lang}"' in text, f"{page} cannot switch to {lang}"
 
 
-@pytest.mark.parametrize("page", ["communes.html", "map.html"])
+@pytest.mark.parametrize("page", ["map.html"])
 def test_every_key_a_page_asks_for_actually_exists(page, strings):
     """A typo in a data-t attribute renders the key itself on screen. Silent in
     English too, because the fallback is the key."""
@@ -177,7 +181,7 @@ def test_every_key_a_page_asks_for_actually_exists(page, strings):
     assert not unknown, f"{page} asks for keys that do not exist: {unknown}"
 
 
-@pytest.mark.parametrize("page", ["communes.html", "map.html"])
+@pytest.mark.parametrize("page", ["map.html"])
 def test_the_english_stays_in_the_markup(page):
     """A reader whose JavaScript never runs must still get a complete page --
     including the licence notice, which is a condition of publishing at all.
@@ -209,28 +213,13 @@ def test_the_map_component_holds_no_english_of_its_own():
 
 # --- one language for the whole site ---------------------------------------
 
-
-LEGACY_PAGES = ["dashboard.html"]
-
-
-@pytest.mark.parametrize("page", LEGACY_PAGES)
-def test_the_older_pages_write_the_canonical_language_key(page):
-    """THE BUG THIS FIXES, reproduced in a browser before it was fixed.
-
-    dashboard.html has its own translation table and switcher from before the
-    shared module existed, persisting to plain `lang` while the redesigned
-    pages use `belpulse-lang`. index.html is no longer listed here: it is a
-    redirect with no language control of its own.
-    """
-    text = (REPO / page).read_text(encoding="utf-8")
-    assert "belpulse-lang" in text, f"{page} does not write the site-wide language key"
-    assert not re.search(
-        r"setItem\(\s*['\"]lang['\"]", text
-    ), f"{page} still writes the old key, so its choice will not carry"
-    # ...and still READS the old one, so nobody loses a choice they made.
-    assert re.search(
-        r"getItem\(\s*['\"]lang['\"]", text
-    ), f"{page} no longer reads the legacy key, so existing readers are reset"
+# dashboard.html used to be tested here (it had its own translation table and
+# switcher from before the shared module existed, persisting to plain `lang`
+# while the redesigned pages use `belpulse-lang`). The repo cleanup turned it
+# into a redirect stub with no language control of its own -- like
+# index.html, which was never on this list for the same reason -- so there is
+# no longer a page here to hold that invariant. `I.initial`'s handling of the
+# legacy key is still covered directly below.
 
 
 def test_a_language_already_chosen_under_the_old_key_is_honoured():
@@ -248,22 +237,12 @@ def test_a_language_already_chosen_under_the_old_key_is_honoured():
     assert out["canonicalWins"] == "fr", "the canonical key must win when both exist"
 
 
-@pytest.mark.parametrize("page", ["all_data.html"])
-def test_the_thin_pages_are_translated_too(page):
-    """Pages translated IN THE BROWSER: one URL, strings swapped by i18n.js.
-
-    about.html was in this list until Batch 15d cut it over. It is still
-    trilingual -- more so than before, since its body prose used to sit in a
-    private `translations` table this test never checked -- but it is now
-    trilingual by a DIFFERENT MECHANISM, three server-rendered URLs, so these
-    assertions no longer describe it. The property is asserted for it below
-    rather than dropped: a test removed because the page changed shape is how
-    a guarantee quietly disappears.
-    """
-    text = (REPO / page).read_text(encoding="utf-8")
-    assert 'src="assets/i18n.js"' in text, f"{page} does not load the shared strings"
-    assert 'id="langSeg"' in text, f"{page} has no language switcher"
-    assert "data-t=" in text, f"{page} marks nothing for translation"
+# all_data.html was on this list ("pages translated IN THE BROWSER: one URL,
+# strings swapped by i18n.js"). The repo cleanup turned it into a redirect
+# stub to explorer.html, so it no longer carries a langSeg switcher or any
+# data-t markup of its own -- there is no page here left to hold that
+# invariant. explorer.html's own translation coverage is a separate,
+# pre-existing gap, out of this cleanup's scope.
 
 
 @pytest.mark.parametrize("page", ["about.html"])

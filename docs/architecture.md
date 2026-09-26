@@ -11,7 +11,6 @@
 ├── fetch_stocks.py                     Separate script: market data → data/stocks.json
 ├── dashboard.html                      Static dashboard, reads CSV/JSON via raw GitHub URL
 ├── index.html, about.html              Static pages
-├── shared-styles.css
 ├── data/
 │   ├── belgian_macro.db                SQLite database (committed to git)
 │   ├── belgian_macro_export.csv

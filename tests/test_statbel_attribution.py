@@ -27,11 +27,18 @@ REPO = Path(__file__).resolve().parents[1]
 # Pages that render municipal (Statbel-derived) figures. all_data.html and
 # dashboard.html are national-only (NBB / Eurostat / FPB) and so are not
 # listed; add a page here the moment it starts showing commune data.
+#
+# local.html, home.html and communes.html were on this list. The repo cleanup
+# turned all three into redirect stubs with no figures of their own, so a
+# reader never sees a figure on any of them to be owed a notice about.
+# communes.html's own obligation is narrower now: scripts/export_local_pages.py
+# still lifts its .attribution block, unchanged, to build the notice on all
+# 565 static /local/{nis}/ pages, so that block is held to the letter by
+# test_every_page_carries_the_one_canonical_licence_notice below
+# (HTML_ATTRIBUTION_PAGES) and by tests/test_export_local_pages.py, which
+# covers the pages an actual reader lands on.
 MUNICIPAL_PAGES = [
-    "communes.html",
-    "local.html",
     "sources.html",
-    "home.html",
     "home2.html",
     "commune.html",
     "profiles.html",
@@ -427,16 +434,11 @@ def test_the_statement_exists_in_all_three_languages():
     assert "waarop de BRONCIJFERS voor het laatst zijn bijgewerkt" in text
 
 
-def test_the_commune_app_renders_the_notice_from_the_shared_module():
-    """local.html held the notice three times, once per language. It now holds
-    it zero times and renders it from assets/i18n.js, so the wording cannot
-    differ between the app and the pages around it."""
-    text = (REPO / "local.html").read_text(encoding="utf-8")
-    assert "I18N.t(LANG, 'attribution')" in text, "the app does not render the shared notice"
-    assert 'src="assets/i18n.js"' in text, "the app does not load the shared strings"
-    # And keeps no copy of its own.
-    assert "attribution: '" not in text, "local.html still carries its own copy of the notice"
-    assert "Licentie open data" not in text, "licence prose is still inlined in local.html"
+# local.html used to be tested here (test_the_commune_app_renders_the_notice_
+# from_the_shared_module): it held the notice three times, once per language,
+# then rendered it from assets/i18n.js instead. The repo cleanup turned it
+# into a redirect stub to commune.html with no rendering of its own, so
+# there is no longer an app here to hold that invariant against.
 
 
 # ── delegated attribution ───────────────────────────────────────────────────
