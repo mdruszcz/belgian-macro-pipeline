@@ -340,24 +340,3 @@ def pca_reduce(
     columns = [f"pc{i + 1}" for i in range(n_components)]
     scores_df = pd.DataFrame(scores, index=Z.index, columns=columns)
     return scores_df, explained_ratio
-
-
-def region_of(geo_id: str, by_geo_id: dict[str, dict], region_by_geo_id: dict[str, str]) -> str:
-    """WAL / VLA / BXL for a municipality row, walking up its parents.
-
-    Same pattern as scripts/export_commune_typology.py's region_of: `by_geo_id`
-    maps geo_id -> its geographies.csv row (dict with at least "geo_id" and
-    "parent_geo_id"), and `region_by_geo_id` maps the region-level geo_id to
-    a label. Raises PeerModelError if no region is found within 6 hops
-    (deliberately generous -- municipality -> region is normally 1 hop).
-    """
-    current = by_geo_id.get(geo_id)
-    if current is None:
-        raise PeerModelError(f"{geo_id} not found in geographies")
-    for _ in range(6):
-        if current["geo_id"] in region_by_geo_id:
-            return region_by_geo_id[current["geo_id"]]
-        current = by_geo_id.get(current.get("parent_geo_id") or "")
-        if current is None:
-            break
-    raise PeerModelError(f"{geo_id} has no region above it")
