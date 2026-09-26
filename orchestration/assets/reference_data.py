@@ -63,6 +63,20 @@ peer_model_export = script_asset(
         "scripts/export_peer_model.py."
     ),
 )
+# Per-indicator peer benchmarks (docs/features/peer_model.md "Per-indicator
+# benchmarks", ADR 0015). Depends on peer_model_export for its own output
+# (public/data/metadata/peers.json), which this exporter reads to get each
+# commune's national/region peer lists.
+peer_benchmarks_export = script_asset(
+    "peer_benchmarks_export",
+    group="reference_data",
+    deps=["peer_model_export"],
+    kinds={"json"},
+    description=(
+        "Peer median, position and deviation per commune indicator, "
+        "scripts/export_peer_benchmarks.py."
+    ),
+)
 # Depends on site_payloads (for geographies.json's trilingual names) AND
 # commune_flows_buyer_origin (the committed flows store PR 1 writes) --
 # docs/features/commune_flows.md, PR 2.
@@ -108,6 +122,7 @@ ASSETS = [
     commune_adjacency,
     commune_typology,
     peer_model_export,
+    peer_benchmarks_export,
     commune_flows_export,
     schools_ise_export,
     schools_by_commune_export,
