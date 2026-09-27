@@ -42,6 +42,7 @@ def test_portrait_retains_figures_and_chart_navigation(chromium, portrait_site, 
         assert all(value.strip() for value in before)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth")
         expect(page.locator(".portrait-hero h1")).to_be_visible()
+        expect(page.locator("#sideUpdate")).to_be_visible()
         assert page.locator(".bp-sidebar").evaluate("e => getComputedStyle(e).position") == "sticky"
         page.locator('#sideNav a[href="#croissance"]').click()
         expect(page.locator("#croissance")).to_be_visible()

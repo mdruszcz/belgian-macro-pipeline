@@ -65,3 +65,5 @@
 .macro .hero-name{overflow-wrap:anywhere}
 .macro .portrait-hero > div{min-width:0}
 .macro .kpi-top .bp-kpi-label .name{overflow-wrap:anywhere}
+.macro .portrait-hero .skyline{display:flex}
+.macro .portrait-hero .side-update{display:block}
