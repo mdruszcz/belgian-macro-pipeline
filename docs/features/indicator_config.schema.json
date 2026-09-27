@@ -139,6 +139,14 @@
         "contextual"
       ]
     },
+    "peer_deviation": {
+      "type": "string",
+      "description": "Whether commune.html's comparable-communes layer may show a % deviation from the median of comparable communes for this indicator. Omit for the default ('relative'); set to 'none' when the figure is itself a growth/change rate, where a relative deviation would read as a nonsensical percentage of a percentage (docs/features/peer_model.md).",
+      "enum": [
+        "relative",
+        "none"
+      ]
+    },
     "country": {
       "type": "string",
       "description": "Country/aggregate this series describes (informational, not a strict ISO code -- 'EA' etc. are allowed). Omit for Belgium; the loader defaults to 'BE'. This is what determines canonical-schema/dashboard eligibility, not whether `display` is null -- e.g. EC_CONS_CONF_BE is Belgian data with no dashboard row of its own, and is still eligible."

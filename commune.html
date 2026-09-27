@@ -397,6 +397,46 @@
   .mtile-donut .donut-legend .it b{padding-left:6px; flex:none}
   .mtile-donut .donut-centre{font-size:16px}
 
+  /* ---------------------------------------------------------------------
+     Comparable communes (PR C, docs/features/peer_model.md). "peer"
+     already means province mates elsewhere on this page -- everything
+     here is `sim` / `.sim-` only (see assets/belpulse/similar.js).
+  --------------------------------------------------------------------- */
+  .sim-toggle{display:flex; align-items:stretch; gap:0; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden; height:28px; margin:8px 0 4px; padding:0; width:max-content; max-width:100%}
+  .sim-toggle legend{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)}
+  .sim-toggle label{display:flex; align-items:center; justify-content:center; padding:0 12px; font:600 11px/1 var(--bp-font-ui); color:var(--bp-text-muted); background:var(--bp-surface); cursor:pointer; white-space:nowrap; user-select:none}
+  .sim-toggle label + label{border-left:1px solid var(--bp-border)}
+  .sim-toggle input{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)}
+  .sim-toggle input:checked + label{background:var(--bp-surface-alt); color:var(--bp-text)}
+  .sim-toggle input:focus-visible + label{outline:2px solid var(--th); outline-offset:-2px}
+  .sim-prov{font:600 10px/1 var(--bp-font-ui); color:var(--bp-text-faint); border:1px solid var(--bp-border); border-radius:3px; padding:3px 6px; margin-left:8px; align-self:center; cursor:help}
+  @media (max-width:640px){
+    .sim-toggle{width:100%}
+    .sim-toggle label{flex:1 1 33%; height:36px}
+  }
+  .sim-badge{flex-basis:100%; margin-top:2px}
+  .sim-badge .l1{font:600 13px/1.35 var(--bp-font-ui); color:var(--bp-text)}
+  .sim-badge .l1.muted{color:var(--bp-text-muted); font-weight:500}
+  .sim-badge .l2{font-size:12px; color:var(--bp-text-muted); margin-top:1px}
+  .sim-badge .note{font-size:12px; font-style:italic; color:var(--bp-text-muted); margin-top:1px; display:block}
+  .sim-badge .tryother{font:600 12px/1.3 var(--bp-font-ui); color:var(--bp-text-muted); background:none; border:0; padding:2px 0; margin-top:2px; text-decoration:underline; cursor:pointer; display:inline-block}
+  .sim-badge .tryother:hover{color:var(--bp-text)}
+  path.sim-line{stroke:var(--bp-text-faint); stroke-width:1.1; stroke-opacity:.55; fill:none; stroke-linejoin:round; stroke-linecap:round}
+  circle.sim-dot{r:1.6; fill:var(--bp-text-faint); fill-opacity:.55}
+  path.sim-line.is-hot, circle.sim-dot.is-hot{stroke:var(--bp-text-muted); fill:var(--bp-text-muted); stroke-width:2; opacity:1}
+  :root[data-theme="paper"] path.sim-line{stroke-opacity:.75}
+  :root[data-theme="paper"] circle.sim-dot{fill-opacity:.75}
+  .sim-legend{display:flex; align-items:center; gap:8px; margin-top:8px; font-size:11px; color:var(--bp-text-faint)}
+  .sim-legend .bar{display:inline-block; width:14px; height:4px; border-radius:2px; background:var(--th); flex:none}
+  .sim-which{margin-top:10px; font-size:12px}
+  .sim-which summary{cursor:pointer; font-weight:600; color:var(--bp-text-muted)}
+  .sim-which summary:hover{color:var(--bp-text)}
+  .sim-which p{color:var(--bp-text-faint); margin:6px 0}
+  .sim-which ol{margin:6px 0 0; padding-left:20px; display:flex; flex-direction:column; gap:3px}
+  .sim-which li a{color:var(--th)}
+  .sim-which li a.is-hot{text-decoration:underline}
+  .mtile-sim{margin-top:4px; min-height:2.6em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+
   /* context row: pyramid | neighbours (map + bars) */
   .contextrow{margin-top:14px; display:grid; grid-template-columns:7fr 5fr; gap:10px; align-items:stretch}
   .contextrow > div{min-width:0; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:14px 16px 12px}
@@ -739,11 +779,12 @@
   </div>
 </div>
 
-<script src="assets/i18n.js?v=8c8ecddd9f"></script>
+<script src="assets/i18n.js?v=8073da3487"></script>
 <script src="assets/belpulse/shell.js?v=50299961dc"></script>
 <script src="assets/belpulse/components.js?v=c46caeab4b"></script>
 <script src="assets/commune_map.js?v=37e2927a33"></script>
 <script src="assets/belpulse/charts.js?v=07848344d8"></script>
+<script src="assets/belpulse/similar.js?v=208ab95007"></script>
 <script>
 /* BelPulse commune profile -- "Portrait".
  *
@@ -774,6 +815,9 @@
   var AGE_SEX_HISTORY_URL = function(nis){ return 'public/data/demography_history/' + nis + '.json'; };
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
   var FLOWS_URL = function(nis){ return 'public/data/flows/buyer_origin/' + nis + '.json'; };
+  // Comparable communes (PR C, docs/features/peer_model.md): the benchmark
+  // file another export job publishes, never computed here (rule 4/27).
+  var SIM_URL = function(nis){ return 'public/data/peers/' + nis + '.json'; };
 
   var LANG = I18N.initial();
   /* English ordinal suffix: 1st, 2nd, 3rd, 4th ... 11th, 12th, 13th (the
@@ -904,7 +948,7 @@
     sections: {headlines: [], sections: []}, sources: {}, manifest: {},
     geojson: null, geographies: {}, adjacency: {}, photos: {}, ageSex: null,
     ageSexHistory: null, flows: null, schools: null, schoolSites: null,
-    attrUpdated: '',
+    attrUpdated: '', sim: null,
   };
 
   /* ---- geography helpers ------------------------------------------------- */
@@ -1528,7 +1572,13 @@
     var padL = 8, padR = hasCompare ? (W < 500 ? 104 : 150) : 8, padT = 16, padB = 26;
     var innerW = W - padL - padR, innerH = H - padT - padB;
     var pts = opts.points;
-    var allSeries = [{points: pts, main: true}].concat((opts.compareSeries || []).map(function(s){ return {points: s.points, label: s.label}; }));
+    /* Comparable-communes grey lines (PR C, spec 4.4). Included in the
+       y-range up front so a peer's extreme value is never clipped -- the
+       page reads the number, it never redraws the axis to hide it. */
+    var simSeries = opts.simSeries || [];
+    var allSeries = [{points: pts, main: true}]
+      .concat((opts.compareSeries || []).map(function(s){ return {points: s.points, label: s.label}; }))
+      .concat(simSeries.map(function(s){ return {points: s.points}; }));
     var allVals = [];
     allSeries.forEach(function(s){ s.points.forEach(function(p){ if(typeof p.value === 'number') allVals.push(p.value); }); });
     if(!allVals.length) return '';
@@ -1637,6 +1687,53 @@
       var anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
       svg.push('<text x="' + xOf(i).toFixed(1) + '" y="' + (H - 6) + '" font-family="Inter,sans-serif" font-size="11" fill="var(--bp-text-faint)" text-anchor="' + anchor + '">' + escapeHtml(String(pts[i].period)) + '</text>');
     });
+
+    /* ---- comparable-communes grey lines (spec 4.4) -----------------------
+       Drawn after the gridlines/axis text and BEFORE the scope-comparison
+       markers, so the commune's own line and end dot always paint on top.
+       No peer runs and no peer values enter the y-range above if
+       !timesOk -- xOfTime has no meaning without a real time axis, so a
+       grey line would be pixel-meaningless rather than merely absent. */
+    var simHits = [];
+    var simDrawn = 0;
+    if(simSeries.length && timesOk){
+      var xOfTime = function(period){
+        var t = periodToTime(period);
+        if(t === null || t < tMin || t > tMax) return null;
+        return padL + (innerW * (t - tMin)) / (tSpan || 1);
+      };
+      // BPSimilar.peerRuns compares consecutive gaps in whatever units
+      // xOfTime returns (pixels here, not raw time) -- medianStep must be
+      // converted to that same pixel space, or every step looks like an
+      // axis-break-sized gap (innerW/tSpan pixels per time unit vs. 1).
+      var pxPerTimeUnit = tSpan > 0 ? innerW / tSpan : 0;
+      var medianStepPx = medianStep * pxPerTimeUnit;
+      svg.push('<g class="sim-lines" aria-hidden="true">');
+      simSeries.forEach(function(s){
+        var runs = BPSimilar.peerRuns(s.points, xOfTime, medianStepPx);
+        var drawnAny = false;
+        runs.forEach(function(run){
+          if(run.length < 2){
+            if(run.length === 1){
+              var p0 = run[0];
+              var x0 = xOfTime(p0.period), y0 = yOf(p0.value);
+              svg.push('<circle class="sim-dot" data-nis="' + escapeHtml(s.nis) + '" data-first="' + escapeHtml(String(p0.period)) + '" data-last="' + escapeHtml(String(p0.period)) + '" cx="' + x0.toFixed(1) + '" cy="' + y0.toFixed(1) + '" r="1.6"/>');
+              simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: x0, y: y0, period: p0.period, value: p0.value, status: p0.status, valueText: fmtAxisNum(p0.value, opts.decimals) + (opts.unitSuffix || '')});
+              drawnAny = true;
+            }
+            return;
+          }
+          var d = run.map(function(p, k){ return (k === 0 ? 'M' : 'L') + xOfTime(p.period).toFixed(1) + ',' + yOf(p.value).toFixed(1); }).join(' ');
+          svg.push('<path class="sim-line" data-nis="' + escapeHtml(s.nis) + '" data-first="' + escapeHtml(String(run[0].period)) + '" data-last="' + escapeHtml(String(run[run.length-1].period)) + '" d="' + d + '"/>');
+          run.forEach(function(p){
+            simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: xOfTime(p.period), y: yOf(p.value), period: p.period, value: p.value, status: p.status, valueText: fmtAxisNum(p.value, opts.decimals) + (opts.unitSuffix || '')});
+          });
+          drawnAny = true;
+        });
+        if(drawnAny) simDrawn++;
+      });
+      svg.push('</g>');
+    }
 
     var markers = (opts.compareSeries || [])
       .map(function(s){
@@ -1755,7 +1852,12 @@
     }
     svg.push('</g>');
     svg.push('</svg>');
-    return {svg: svg.join(''), hits: hits};
+    var out = svg.join('');
+    if(simDrawn > 0){
+      var ariaSuffix = ' — ' + T('simAria', {n: simDrawn});
+      out = out.replace(/(aria-label="[^"]*)(")/, function(m, p1, p2){ return p1 + escapeHtml(ariaSuffix) + p2; });
+    }
+    return {svg: out, hits: hits, simHits: simHits, simDrawn: simDrawn};
   }
 
   /* A4: end-of-line comparison labels ("Région de Bruxelles-Capitale
@@ -1802,6 +1904,7 @@
     if(!svg) return;
     fitEndLabels(svg);
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fitEndLabels(svg); });
+    var noAnim = opts && opts.noAnim;
     svg.querySelectorAll('path.bp-line-draw').forEach(function(path){
       armLineDraw(path);
       observeLineDraw(path);
@@ -1821,6 +1924,19 @@
       obs.observe(g);
     });
     svg.querySelectorAll('g.bp-anim-fade').forEach(observeReveal);
+    // Comparable-communes grey lines (spec 4.4's opts.noAnim): a redraw on
+    // a list switch shows the final state immediately -- no draw-in, fade
+    // or clip reveal -- while the FIRST paint (profiles finish loading
+    // after the chart already exists) fades in over 180ms.
+    var simLinesG = svg.querySelector('g.sim-lines');
+    if(simLinesG){
+      if(noAnim || REDUCE_MOTION){ simLinesG.style.opacity = '1'; }
+      else {
+        simLinesG.style.opacity = '0';
+        simLinesG.style.transition = 'opacity .18s ease-out';
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ simLinesG.style.opacity = '1'; }); });
+      }
+    }
 
     if(!hits.length) return;
     var crosshair = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1835,6 +1951,7 @@
     var live = makeLiveRegion(container);
     wireChartInteraction(svg, crosshair, dot, hits, {
       title: opts && opts.title, ariaBase: (opts && opts.ariaBase) || svg.getAttribute('aria-label'), live: live,
+      simHits: opts && opts.simHits,
     });
   }
 
@@ -2202,13 +2319,31 @@
     }
     return best;
   }
-  function tipHtmlFor(hit, opts){
+  function tipHtmlFor(hit, opts, hot){
     var rows = [];
     if(opts.title) rows.push('<span>' + escapeHtml(opts.title) + '</span>');
     rows.push('<span>' + escapeHtml(String(hit.period)) + '</span>');
+    if(hot){
+      // A hot comparable commune replaces the commune's own value line with
+      // the peer's own name and value -- never both at once, so a reader
+      // never has to guess which figure belongs to which place.
+      rows.push('<span>' + escapeHtml(hot.name) + '</span>');
+      rows.push('<span class="bp-chart-tip-value">' + escapeHtml(hot.valueText != null ? hot.valueText : (typeof hot.value === 'number' ? String(hot.value) : '—')) + '</span>');
+      if(hot.status && hot.status !== 'final') rows.push('<span>' + escapeHtml((T('v4Status_' + hot.status) || hot.status).toLocaleLowerCase(localeTag())) + '</span>');
+      rows.push('<span>' + escapeHtml(T('cpOpenHint')) + '</span>');
+      return rows.join('');
+    }
     rows.push('<span class="bp-chart-tip-value">' + escapeHtml(hit.valueText != null ? hit.valueText : '—') + '</span>');
     (hit.compareLines || []).forEach(function(line){ rows.push('<span>' + escapeHtml(line) + '</span>'); });
+    if(opts.simTipMedianText) rows.push('<span>' + escapeHtml(opts.simTipMedianText) + '</span>');
     return rows.join('');
+  }
+  function svgPointY(svg, evt){
+    var rect = svg.getBoundingClientRect();
+    var vb = svg.viewBox.baseVal;
+    var scaleY = vb.height / rect.height;
+    var clientY = (evt.touches && evt.touches[0]) ? evt.touches[0].clientY : evt.clientY;
+    return vb.y + (clientY - rect.top) * scaleY;
   }
   function wireChartInteraction(svg, crosshairLine, crosshairDot, hits, opts){
     opts = opts || {};
@@ -2224,25 +2359,44 @@
     svg.setAttribute('aria-label', ariaFor(lastHit));
     var activeIndex = -1;
     var live = opts.live;
+    // Comparable-communes hover/touch/keyboard (spec 4.9): opts.simHits is
+    // only present on a line lead with the layer switched on. Every OTHER
+    // caller of wireChartInteraction passes no simHits and is unaffected.
+    var simHits = opts.simHits || [];
+    var hotNis = null;
+    function setHot(nis){
+      if(hotNis === nis) return;
+      if(hotNis !== null){
+        svg.querySelectorAll('[data-nis="' + hotNis + '"]').forEach(function(el){ el.classList.remove('is-hot'); });
+      }
+      hotNis = nis;
+      if(hotNis !== null){
+        svg.querySelectorAll('[data-nis="' + hotNis + '"]').forEach(function(el){
+          el.classList.add('is-hot');
+          if(el.parentNode && el.tagName === 'path') el.parentNode.appendChild(el);
+        });
+      }
+    }
 
-    function show(hit){
+    function show(hit, hot){
       crosshairLine.setAttribute('x1', hit.x); crosshairLine.setAttribute('x2', hit.x);
       crosshairLine.classList.add('on');
+      var dotHit = hot || hit;
       if(crosshairDot){
-        crosshairDot.setAttribute('cx', hit.x);
-        if(typeof hit.y === 'number') crosshairDot.setAttribute('cy', hit.y);
+        crosshairDot.setAttribute('cx', dotHit.x);
+        if(typeof dotHit.y === 'number') crosshairDot.setAttribute('cy', dotHit.y);
         crosshairDot.classList.add('on');
       }
       var tipEl = document.querySelector('.bp-chart-tip') || (function(){
         var d = document.createElement('div'); d.className = 'bp-chart-tip'; d.setAttribute('role', 'tooltip'); d.hidden = true;
         document.body.appendChild(d); return d;
       })();
-      tipEl.innerHTML = tipHtmlFor(hit, opts);
+      tipEl.innerHTML = tipHtmlFor(hit, opts, hot);
       tipEl.hidden = false;
       var rect = svg.getBoundingClientRect();
       var vb = svg.viewBox.baseVal;
-      var px = rect.left + (hit.x - vb.x) * (rect.width / vb.width);
-      var py = rect.top + ((typeof hit.y === 'number' ? hit.y : vb.height / 2) - vb.y) * (rect.height / vb.height);
+      var px = rect.left + (dotHit.x - vb.x) * (rect.width / vb.width);
+      var py = rect.top + ((typeof dotHit.y === 'number' ? dotHit.y : vb.height / 2) - vb.y) * (rect.height / vb.height);
       tipEl.style.left = '0px'; tipEl.style.top = '0px';
       var tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
       var margin = 8, vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
@@ -2254,36 +2408,80 @@
       if(top + th > vh - margin) top = Math.max(margin, vh - th - margin);
       tipEl.style.left = (left + window.scrollX) + 'px';
       tipEl.style.top = (top + window.scrollY) + 'px';
-      if(live) live.textContent = hit.period + ', ' + (hit.valueText || '');
+      if(live){
+        live.textContent = hot ? (hot.name + ', ' + hot.period + ': ' + (hot.valueText || '')) : (hit.period + ', ' + (hit.valueText || ''));
+      }
     }
     function hide(){
       crosshairLine.classList.remove('on');
       if(crosshairDot) crosshairDot.classList.remove('on');
       var tipEl = document.querySelector('.bp-chart-tip');
       if(tipEl) tipEl.hidden = true;
+      setHot(null);
+    }
+    function candidatesAt(hit){
+      return simHits.filter(function(h){ return h.period === hit.period; });
     }
     svg.addEventListener('pointermove', function(ev){
       if(ev.pointerType === 'touch') return;
       var x = svgPoint(svg, ev);
       var hit = nearestSvgHit(hits, x);
-      if(hit){ activeIndex = hits.indexOf(hit); show(hit); }
+      if(!hit) return;
+      activeIndex = hits.indexOf(hit);
+      var pointerY = svgPointY(svg, ev);
+      var hot = simHits.length ? BPSimilar.nearestPeer(candidatesAt(hit), pointerY, 8, hit.y) : null;
+      setHot(hot ? hot.nis : null);
+      show(hit, hot);
     });
     svg.addEventListener('pointerleave', function(ev){ if(ev.pointerType !== 'touch') hide(); });
     svg.addEventListener('pointerdown', function(ev){
-      if(ev.pointerType !== 'touch') return;
-      var x = svgPoint(svg, ev);
-      var hit = nearestSvgHit(hits, x);
-      if(hit){ activeIndex = hits.indexOf(hit); show(hit); ev.preventDefault(); }
+      if(ev.pointerType === 'touch'){
+        var x = svgPoint(svg, ev);
+        var hit = nearestSvgHit(hits, x);
+        if(hit){
+          activeIndex = hits.indexOf(hit);
+          var pointerY = svgPointY(svg, ev);
+          var hot = simHits.length ? BPSimilar.nearestPeer(candidatesAt(hit), pointerY, 14, hit.y) : null;
+          setHot(hot ? hot.nis : null);
+          show(hit, hot);
+          ev.preventDefault();
+        }
+        return;
+      }
+      if(hotNis !== null){
+        // A click with a hot peer opens that commune; the tap/touch path
+        // above never navigates (spec 4.9) -- that is the list links' job.
+        window.location.search = '?nis=' + hotNis;
+      }
     });
     svg.addEventListener('keydown', function(ev){
       if(ev.key === 'ArrowRight'){
         activeIndex = activeIndex < 0 ? 0 : Math.min(hits.length - 1, activeIndex + 1);
-        show(hits[activeIndex]); ev.preventDefault();
+        setHot(null); show(hits[activeIndex]); ev.preventDefault();
       } else if(ev.key === 'ArrowLeft'){
         activeIndex = activeIndex < 0 ? hits.length - 1 : Math.max(0, activeIndex - 1);
-        show(hits[activeIndex]); ev.preventDefault();
+        setHot(null); show(hits[activeIndex]); ev.preventDefault();
+      } else if(simHits.length && activeIndex >= 0 && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')){
+        var hit = hits[activeIndex];
+        var cands = candidatesAt(hit).slice().sort(function(a, b){
+          return (b.value - a.value) || (a.rank - b.rank);
+        });
+        var order = [null].concat(cands.map(function(c){ return c.nis; }));
+        var curPos = order.indexOf(hotNis);
+        var nextPos;
+        if(ev.key === 'ArrowDown') nextPos = (curPos + 1) % order.length;
+        else nextPos = (curPos - 1 + order.length) % order.length;
+        var nextNis = order[nextPos];
+        setHot(nextNis);
+        show(hit, nextNis ? cands.filter(function(c){ return c.nis === nextNis; })[0] : null);
+        ev.preventDefault();
+      } else if(ev.key === 'Enter' && hotNis !== null){
+        window.location.search = '?nis=' + hotNis;
+        ev.preventDefault();
       } else if(ev.key === 'Escape'){
-        activeIndex = -1; hide(); if(live) live.textContent = ''; ev.preventDefault();
+        if(hotNis !== null){ setHot(null); if(activeIndex >= 0) show(hits[activeIndex]); }
+        else { activeIndex = -1; hide(); if(live) live.textContent = ''; }
+        ev.preventDefault();
       }
     });
     svg.addEventListener('blur', hide);
@@ -2507,6 +2705,476 @@
   }
 
   /* =========================================================================
+     Comparable communes (PR C, docs/features/peer_model.md /
+     docs/features/commune_portrait.md). "peer" already means province
+     mates elsewhere on this page (peerGeographies, buildPeerStrip,
+     loadLeadPeerChart, .peerstrip, .leadpeer, v4PeerChartTitle) -- every
+     new identifier here is `sim` / `.sim-` / `simXxx` only, and no
+     user-facing string contains "peer". The page computes no statistic:
+     every number below is read straight from public/data/peers/<nis>.json
+     (rule 4/27).
+  ========================================================================= */
+  function validateSim(json, nis){
+    if(!json || typeof json.model_version !== 'string' || !json.model_version) return false;
+    if(json.nis_code !== nis) return false;
+    if(!json.lists || typeof json.lists.national !== 'object' || typeof json.lists.region !== 'object') return false;
+    if(!json.peers || !Array.isArray(json.peers.national) || !Array.isArray(json.peers.region)) return false;
+    if(typeof json.min_peers_with_value !== 'number') return false;
+    if(!json.withheld) json.withheld = {national: {}, region: {}};
+    return true;
+  }
+
+  var SIM_STORAGE_KEY = 'belpulse-similar';
+  var simState = {list: 'region'};
+  (function initSimState(){
+    var stored = null;
+    try{ stored = window.localStorage.getItem(SIM_STORAGE_KEY); }catch(e){}
+    var saveData = !!(navigator.connection && navigator.connection.saveData);
+    simState.list = BPSimilar.resolveList(stored, saveData);
+  })();
+  function saveSimList(list){
+    simState.list = list;
+    try{ window.localStorage.setItem(SIM_STORAGE_KEY, list); }catch(e){}
+  }
+
+  /* module-level cache: nis -> Promise<profile|null>, survives language and
+     list switches (spec 4.10). */
+  var simProfiles = {};
+  function fetchSimProfile(nis){
+    if(!simProfiles[nis]){
+      simProfiles[nis] = (function(){
+        var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
+        return fetch(COMMUNE_URL(nis), ctrl ? {signal: ctrl.signal} : {})
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(json){
+            if(!json || json.nis_code !== nis) return null;
+            return json;
+          })
+          .catch(function(){ return null; })
+          .finally(function(){ if(timer) clearTimeout(timer); });
+      })();
+    }
+    return simProfiles[nis];
+  }
+  function simMembers(list){
+    if(!state.sim) return [];
+    return (state.sim.peers && state.sim.peers[list]) || [];
+  }
+  /* Loads every member of `list`, once, and resolves with
+     {nis, name, rank, profile}[] -- members with no geography row or a
+     failed fetch are dropped (never a raw NIS shown -- spec 4.1). */
+  function loadSimProfiles(list){
+    var members = simMembers(list);
+    return Promise.allSettled(members.map(function(m){
+      return fetchSimProfile(m.nis).then(function(profile){ return {member: m, profile: profile}; });
+    })).then(function(results){
+      var out = [];
+      var failed = 0;
+      results.forEach(function(r){
+        if(r.status !== 'fulfilled'){ failed++; return; }
+        var m = r.value.member, profile = r.value.profile;
+        if(!profile){ failed++; return; }
+        var geo = geoOf(m.nis);
+        if(!geo){ return; }
+        out.push({nis: m.nis, name: placeName(geo), rank: m.rank, profile: profile});
+      });
+      document.dispatchEvent(new CustomEvent('bp:sim-loaded', {detail: {list: list}}));
+      return {rows: out, total: members.length, failed: failed};
+    });
+  }
+  /* One loaded peer's cell for a given code, at P = entry.period, else
+     withheld.period, else the commune's own latest period -- four distinct
+     states (rule 26): suppressed, na, "no figure for P" (no cell at all)
+     and "not loaded" (fetch failed), never collapsed into one blank. */
+  function simMemberCell(row, code, entry, withheld, ownLatestPeriod){
+    var period = (entry && entry.period) || (withheld && withheld.period) || ownLatestPeriod;
+    var entryData = row.profile.indicators && row.profile.indicators[code];
+    var periods = (entryData && entryData.periods) || {};
+    var cell = periods[period];
+    if(!cell){
+      return {value: null, status: null, fallbackPeriod: period};
+    }
+    return {value: cell.value, status: cell.status, entryPeriod: period};
+  }
+
+  function unitSuffixForSim(meta){ return unitSuffix(meta); }
+  function simFmt(v, meta){ return fmt(v, meta) + unitSuffixForSim(meta); }
+
+  function simPositionSentence(e){
+    var parts = BPSimilar.positionParts(e, LANG);
+    var pos = parts.ord ? T(parts.key, {ord: parts.ord, of: e.of}) : T(parts.key, {of: e.of});
+    return T('simPosition', {name: communeName(), pos: pos});
+  }
+  function simDetailLine(e, meta){
+    return T('simDetail', {
+      median: simFmt(e.peer_median, meta),
+      position: simPositionSentence(e),
+      period: e.period,
+    });
+  }
+  function simListShort(list){
+    return list === 'national' ? T('simListNationalShort') : T('simListRegionShort');
+  }
+  function simPctText(dp){
+    if(dp.tiny) return '<' + fmt(dp.magnitude, {unit: 'percent', decimals: dp.decimals, additive: false}) + unitSuffix({unit: 'percent'});
+    return fmt(dp.magnitude, {unit: 'percent', decimals: dp.decimals, additive: false}) + unitSuffix({unit: 'percent'});
+  }
+
+  /* ---- the switch (fieldset of 3 radios) --------------------------------
+     One per lead chapter (chapterIndex distinguishes the `name` attribute
+     so each chapter's radios operate independently), but every chapter's
+     switch stays in sync: on change, every OTHER chapter's radios only get
+     `.checked` set -- the nodes are never rebuilt, so focus never jumps
+     (spec 4.3). */
+  var simToggles = [];
+  function buildSimToggle(chapterIndex, version){
+    var fs = document.createElement('fieldset');
+    fs.className = 'sim-toggle';
+    var legend = document.createElement('legend');
+    legend.textContent = T('simSwitchLabel');
+    fs.appendChild(legend);
+    var opts = [['off', 'simOff'], ['region', 'simRegion'], ['national', 'simNational']];
+    opts.forEach(function(pair){
+      var id = 'sim-' + chapterIndex + '-' + pair[0];
+      var input = document.createElement('input');
+      input.type = 'radio'; input.name = 'sim-' + chapterIndex; input.id = id; input.value = pair[0];
+      input.checked = simState.list === pair[0];
+      var label = document.createElement('label');
+      label.htmlFor = id; label.textContent = T(pair[1]);
+      input.addEventListener('change', function(){
+        if(!input.checked) return;
+        saveSimList(pair[0]);
+        simToggles.forEach(function(t){
+          if(!t.fs || t.fs === fs) return;
+          t.fs.querySelectorAll('input').forEach(function(inp){ inp.checked = inp.value === pair[0]; });
+        });
+        simToggles.forEach(function(t){ if(t.refresh) t.refresh(); });
+      });
+      fs.appendChild(input);
+      fs.appendChild(label);
+    });
+    if(simState.list !== 'off' && BPSimilar.isProvisional(version)){
+      var prov = document.createElement('span');
+      prov.className = 'sim-prov';
+      prov.title = T('simProvisionalTitle', {version: version});
+      prov.textContent = T('simProvisional');
+      fs.appendChild(prov);
+    }
+    simToggles.push({fs: fs, refresh: null});
+    return fs;
+  }
+
+  /* ---- the % badge ------------------------------------------------------- */
+  function buildSimBadge(code, meta, latest, entry, list){
+    var wrap = document.createElement('div');
+    wrap.className = 'sim-badge';
+    var r = BPSimilar.benchmarkState(state.sim, list, code, latest, meta);
+    if(r.state === 'none' || r.state === 'excluded') return null;
+
+    function addSelectionNote(){
+      if(entry_selection(r.entry)){
+        var note = document.createElement('span');
+        note.className = 'note';
+        note.textContent = T('simSelection');
+        wrap.appendChild(note);
+      }
+    }
+    function entry_selection(e){ return !!(e && e.selection_variable === true); }
+    function addRelativeNote(){
+      var u = (meta.unit || '').toLowerCase();
+      if(/^percent/.test(u)){
+        var note = document.createElement('span');
+        note.className = 'note';
+        note.textContent = T('simRelative');
+        wrap.appendChild(note);
+      }
+    }
+    function addTryOther(){
+      if(!r.other) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tryother';
+      var otherList = list === 'region' ? 'national' : 'region';
+      btn.textContent = T(otherList === 'national' ? 'simTryNational' : 'simTryRegion');
+      btn.addEventListener('click', function(){
+        saveSimList(otherList);
+        simToggles.forEach(function(t){
+          if(!t.fs) return;
+          t.fs.querySelectorAll('input').forEach(function(inp){ inp.checked = inp.value === otherList; });
+        });
+        simToggles.forEach(function(t){ if(t.refresh) t.refresh(); });
+      });
+      wrap.appendChild(btn);
+    }
+
+    if(r.state === 'ok'){
+      var dp = BPSimilar.deviationParts(r.entry.deviation_pct);
+      var l1 = document.createElement('div');
+      l1.className = 'l1';
+      var key = dp.direction === 'equal' ? 'simEqual' : (dp.direction === 'above' ? 'simAbove' : 'simBelow');
+      var text = dp.direction === 'equal' ? T('simEqual') : T(key, {pct: simPctText(dp)});
+      l1.textContent = text + ' (' + simListShort(list) + ')';
+      wrap.appendChild(l1);
+      var l2 = document.createElement('div');
+      l2.className = 'l2';
+      l2.textContent = simDetailLine(r.entry, meta) + simFewerSuffix(r.entry, list);
+      wrap.appendChild(l2);
+      addRelativeNote();
+      addSelectionNote();
+    } else if(r.state === 'no_pct_zero' || r.state === 'no_pct_negative' || r.state === 'no_pct_other'){
+      var l1b = document.createElement('div');
+      l1b.className = 'l1 muted';
+      l1b.textContent = T(r.state === 'no_pct_zero' ? 'simNoPctZero' : r.state === 'no_pct_negative' ? 'simNoPctNegative' : 'simNoPctOther');
+      wrap.appendChild(l1b);
+      var l2b = document.createElement('div');
+      l2b.className = 'l2';
+      l2b.textContent = simDetailLine(r.entry, meta) + simFewerSuffix(r.entry, list);
+      wrap.appendChild(l2b);
+      addSelectionNote();
+    } else if(r.state === 'no_pct_config'){
+      // Spec 4.5: "No line 1. Line 2: the detail line. Then simNoPctConfig,
+      // and simSelection if the flag is set." -- simNoPctConfig is a NOTE
+      // after line 2, never an .l1 (which the badge's "above/below" states
+      // reserve for the coloured headline sentence).
+      var l2c = document.createElement('div');
+      l2c.className = 'l2';
+      l2c.textContent = simDetailLine(r.entry, meta) + simFewerSuffix(r.entry, list);
+      wrap.appendChild(l2c);
+      var noteC = document.createElement('span');
+      noteC.className = 'note';
+      noteC.textContent = T('simNoPctConfig');
+      wrap.appendChild(noteC);
+      addSelectionNote();
+    } else if(r.state === 'few_peers'){
+      var w = r.withheld || {};
+      var lfew = document.createElement('div');
+      lfew.className = 'l1 muted';
+      lfew.textContent = T('simWithheldFew', {period: w.period, n: w.peers_with_value, total: simMembers(list).length, min: state.sim.min_peers_with_value});
+      wrap.appendChild(lfew);
+      addTryOther();
+    } else if(r.state === 'stale'){
+      var w2 = r.withheld || {};
+      var lstale = document.createElement('div');
+      lstale.className = 'l1 muted';
+      lstale.textContent = T('simWithheldStale', {name: communeName(), own: w2.own_period, period: w2.period});
+      wrap.appendChild(lstale);
+      addTryOther();
+    } else if(r.state === 'suppressed'){
+      var w3 = r.withheld || {};
+      var lsupp = document.createElement('div');
+      lsupp.className = 'l1 muted';
+      lsupp.textContent = T('simWithheldSuppressed', {name: communeName(), period: w3.period});
+      wrap.appendChild(lsupp);
+      addTryOther();
+    } else if(r.state === 'na'){
+      var w4 = r.withheld || {};
+      var lna = document.createElement('div');
+      lna.className = 'l1 muted';
+      lna.textContent = T('simWithheldNa', {name: communeName(), period: w4.period});
+      wrap.appendChild(lna);
+      addTryOther();
+    } else if(r.state === 'generic'){
+      var lgen = document.createElement('div');
+      lgen.className = 'l1 muted';
+      lgen.textContent = T('simWithheldGeneric');
+      wrap.appendChild(lgen);
+      addTryOther();
+    } else if(r.state === 'mismatch'){
+      var lmis = document.createElement('div');
+      lmis.className = 'l1 muted';
+      lmis.textContent = T('simMismatch');
+      wrap.appendChild(lmis);
+      console.warn('BelPulse comparable-communes: mismatch for ' + code + ' (' + list + '), nis ' + state.nis);
+    }
+    return wrap;
+  }
+  function simFewerSuffix(e, list){
+    var total = simMembers(list).length;
+    if(e.peers_with_value >= total) return '';
+    return ' · ' + T('simFewer', {n: e.peers_with_value, total: total});
+  }
+
+  /* ---- tiles -------------------------------------------------------------- */
+  function buildSimTile(code, meta, latest){
+    if(meta.additive !== false || simState.list === 'off' || !state.sim) return null;
+    var r = BPSimilar.benchmarkState(state.sim, simState.list, code, latest, meta);
+    var div = document.createElement('div');
+    div.className = 'mtile-sim';
+    if(r.state === 'ok'){
+      var dp = BPSimilar.deviationParts(r.entry.deviation_pct);
+      var key = dp.direction === 'equal' ? 'simEqual' : (dp.direction === 'above' ? 'simAbove' : 'simBelow');
+      div.textContent = dp.direction === 'equal' ? T('simEqual') : T(key, {pct: simPctText(dp)});
+      if(r.entry.selection_variable === true){
+        div.appendChild(document.createTextNode(' *'));
+        var sr = document.createElement('span');
+        sr.className = 'bp-sr-only';
+        sr.textContent = T('simSelection');
+        div.appendChild(sr);
+      }
+      div.title = T('simTileTitle', {list: simListShort(simState.list), period: r.entry.period, median: simFmt(r.entry.peer_median, meta)});
+    } else if(r.state === 'no_pct_zero' || r.state === 'no_pct_negative' || r.state === 'no_pct_other' || r.state === 'no_pct_config'){
+      div.textContent = T('simTipMedian', {median: simFmt(r.entry.peer_median, meta)});
+      div.title = T('simTileTitle', {list: simListShort(simState.list), period: r.entry.period, median: simFmt(r.entry.peer_median, meta)});
+    } else {
+      return null;
+    }
+    return div;
+  }
+
+  /* ---- legend ------------------------------------------------------------- */
+  function buildSimLegend(list, simDrawn, total, loading, allFailed, someFailed){
+    var div = document.createElement('div');
+    div.className = 'sim-legend';
+    var bar = document.createElement('span'); bar.className = 'bar'; div.appendChild(bar);
+    var name = document.createElement('span'); name.textContent = communeName(); div.appendChild(name);
+    var sep = document.createElement('span'); sep.textContent = '—'; div.appendChild(sep);
+    var txt = document.createElement('span');
+    if(loading) txt.textContent = T('simLoading');
+    else if(allFailed) txt.textContent = T('simLoadFailed');
+    else txt.textContent = simDrawn === total ? T('simLegendLines', {n: simDrawn, list: simListShort(list)}) : T('simLegendPartial', {n: simDrawn, total: total, list: simListShort(list)});
+    if(someFailed > 0) txt.textContent += ' · ' + T('simSomeFailed', {k: someFailed});
+    div.appendChild(txt);
+    return div;
+  }
+
+  /* ---- "Which communes?" -------------------------------------------------- */
+  function buildSimWhich(code, meta, list, entryByList, withheldByList, ownLatestPeriod){
+    var det = document.createElement('details');
+    det.className = 'sim-which';
+    var open = false;
+    try{ open = window.sessionStorage.getItem('belpulse-simwhich-' + code) === '1'; }catch(e){}
+    det.open = open;
+    var summary = document.createElement('summary');
+    summary.textContent = T('simWhich');
+    det.appendChild(summary);
+    var note = document.createElement('p');
+    note.textContent = T('simWhichNote');
+    det.appendChild(note);
+    var ol = document.createElement('ol');
+    var members = simMembers(list);
+    members.forEach(function(m){
+      var geo = geoOf(m.nis);
+      if(!geo) return;
+      var li = document.createElement('li');
+      li.dataset.nis = m.nis;
+      var a = document.createElement('a');
+      a.href = '?nis=' + m.nis;
+      a.textContent = placeName(geo);
+      a.dataset.nis = m.nis;
+      li.appendChild(a);
+      li.appendChild(document.createTextNode(' · '));
+      var valueSpan = document.createElement('span');
+      valueSpan.className = 'sim-which-val';
+      valueSpan.textContent = T('simLoading');
+      li.appendChild(valueSpan);
+      li.addEventListener('mouseenter', function(){ simHighlight(m.nis, true); });
+      li.addEventListener('mouseleave', function(){ simHighlight(m.nis, false); });
+      a.addEventListener('focus', function(){ simHighlight(m.nis, true); });
+      a.addEventListener('blur', function(){ simHighlight(m.nis, false); });
+      ol.appendChild(li);
+    });
+    det.appendChild(ol);
+    var modelNote = document.createElement('p');
+    modelNote.textContent = T('simModelNote', {version: (state.sim && state.sim.model_version) || ''});
+    if(state.sim && BPSimilar.isProvisional(state.sim.model_version)) modelNote.textContent += ' ' + T('simModelProvisional');
+    det.appendChild(modelNote);
+    var fullLinkP = document.createElement('p');
+    var fullLink = document.createElement('a');
+    fullLink.href = 'comparables.html?nis=' + encodeURIComponent(state.nis);
+    fullLink.textContent = T('simFullComparisonLink');
+    fullLinkP.appendChild(fullLink);
+    det.appendChild(fullLinkP);
+
+    function fillCells(){
+      loadSimProfiles(list).then(function(result){
+        var byNis = {};
+        result.rows.forEach(function(row){ byNis[row.nis] = row; });
+        var entry = entryByList[list], withheld = withheldByList[list];
+        ol.querySelectorAll('li').forEach(function(li){
+          var nis = li.dataset.nis;
+          var span = li.querySelector('.sim-which-val');
+          var row = byNis[nis];
+          if(!row){ span.textContent = T('simCellFailed'); return; }
+          var cell = simMemberCell(row, code, entry, withheld, ownLatestPeriod);
+          if(cell.status === 'suppressed'){ span.textContent = T('v4Status_suppressed'); return; }
+          if(cell.status === 'na'){ span.textContent = T('v4Status_na'); return; }
+          if(cell.value === null || cell.value === undefined){
+            span.textContent = T('simCellNone', {period: cell.fallbackPeriod || cell.entryPeriod || ''});
+            return;
+          }
+          var txt = simFmt(cell.value, meta);
+          if(cell.status && cell.status !== 'final') txt += ' (' + T('v4Status_' + cell.status).toLocaleLowerCase(localeTag()) + ')';
+          span.textContent = txt;
+        });
+      });
+    }
+    det.addEventListener('toggle', function(){
+      try{ window.sessionStorage.setItem('belpulse-simwhich-' + code, det.open ? '1' : '0'); }catch(e){}
+      if(det.open) fillCells();
+    });
+    if(det.open) fillCells();
+    return det;
+  }
+  function simHighlight(nis, on){
+    document.querySelectorAll('[data-nis="' + nis + '"]').forEach(function(el){
+      el.classList.toggle('is-hot', on);
+    });
+  }
+
+  /* Loads every member of `list`, extracts this code's own series from
+     each profile, and redraws the line chart with the grey lines filled in
+     -- a SECOND paint after the commune's own line is already on screen
+     (spec 4.10: "render once, after all files have settled"). Triggered by
+     an IntersectionObserver on svgWrap (rootMargin 300px) so a chart far
+     down the page never fetches 10-14 files before it is even scrolled
+     to. */
+  function loadSimGreyLines(svgWrap, code, meta, pts, list, chartW, chartH, compareSeries, title, latest, onLoaded){
+    var token = svgWrap.dataset.simToken = code + ':' + list;
+    function run(){
+      if(svgWrap.dataset.simToken !== token) return;
+      loadSimProfiles(list).then(function(result){
+        if(svgWrap.dataset.simToken !== token) return;
+        var simSeriesArg = result.rows.map(function(row){
+          return {nis: row.nis, name: row.name, rank: row.rank, points: numericPoints(row.profile.indicators && row.profile.indicators[code])};
+        });
+        var lineResult = buildLineChartSVG({
+          points: pts, compareSeries: compareSeries, decimals: meta.decimals, unitSuffix: unitSuffix(meta), width: chartW, height: chartH,
+          ariaLabel: title + ', ' + (latest ? latest.period + ': ' + fmt(latest.value, meta) : ''),
+          simSeries: simSeriesArg, noAnim: true,
+        });
+        svgWrap.innerHTML = lineResult.svg;
+        wireLineChart(svgWrap, lineResult.hits, {title: title, noAnim: true, simHits: lineResult.simHits});
+        if(onLoaded) onLoaded({simDrawn: lineResult.simDrawn});
+      });
+    }
+    // svgWrap is not yet attached to the document when renderChart calls
+    // this (it is appended to chartCol a few lines further down, and
+    // chartCol/the chapter itself may not be in the DOM yet either) -- an
+    // IntersectionObserver.observe() on a still-detached target can miss
+    // its own later attachment. Two rAFs let the current render finish and
+    // the browser lay it out before observing, so intersection is judged
+    // against real geometry.
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        if(!svgWrap.isConnected){ run(); return; }
+        if('IntersectionObserver' in window){
+          var obs = new IntersectionObserver(function(entries){
+            entries.forEach(function(entry){
+              if(!entry.isIntersecting) return;
+              obs.disconnect();
+              run();
+            });
+          }, {rootMargin: '300px 0px'});
+          obs.observe(svgWrap);
+        } else {
+          run();
+        }
+      });
+    });
+  }
+
+  /* =========================================================================
      Chapters
   ========================================================================= */
   var chapterCounter = 0;
@@ -2560,7 +3228,7 @@
      clicking a small-multiple tile, or picking another indicator in the
      map's own dropdown, brings that indicator into BOTH the chart and the
      map. */
-  function buildLeadRow(sec){
+  function buildLeadRow(sec, chapterIndex){
     var headline = sec.headline && state.byCode[sec.headline] && state.profile.indicators[sec.headline] ? sec.headline : themeCodesWithData(sec)[0];
     if(!headline) return {row: null, headlineCode: null, api: null};
     var row = document.createElement('div');
@@ -2712,6 +3380,22 @@
         chartCol.appendChild(defEl);
       }
 
+      var isLineLead = !isDonutLead && pts.length > 2 && meta.additive !== true;
+      var simEligible = !!state.sim && meta.additive === false;
+
+      // The switch: rendered once per chapter, before svgWrap, whenever
+      // the layer is valid and this lead is non-additive (spec 4.3). Never
+      // rebuilt on a list change -- only its `.checked` state is touched,
+      // so keyboard focus never jumps.
+      if(simEligible){
+        var toggle = buildSimToggle(chapterIndex, state.sim.model_version);
+        chartCol.appendChild(toggle);
+      }
+
+      var badgeHost = document.createElement('div');
+      badgeHost.className = 'leadchart-head';
+      chartCol.appendChild(badgeHost);
+
       var svgWrap = document.createElement('div');
       svgWrap.className = 'leadchart-svgwrap';
       var compareSeries = [];
@@ -2738,6 +3422,28 @@
       }
       var showBars = useBarCompare && meta.additive !== true;
       var chartW = leadChartWidth();
+      var legendHost = document.createElement('div');
+      var whichHost = document.createElement('div');
+
+      function renderBadge(){
+        badgeHost.innerHTML = '';
+        if(!simEligible || simState.list === 'off' || !latest) return;
+        var badge = buildSimBadge(code, meta, latest, entry, simState.list);
+        if(badge) badgeHost.appendChild(badge);
+      }
+      function renderLegendAndWhich(simResult){
+        legendHost.innerHTML = '';
+        whichHost.innerHTML = '';
+        if(!simEligible || simState.list === 'off') return;
+        var total = simMembers(simState.list).length;
+        var drawn = simResult ? simResult.simDrawn : 0;
+        var loading = !simResult;
+        legendHost.appendChild(buildSimLegend(simState.list, drawn, total, loading, false, 0));
+        var entryByList = {region: (state.sim.lists.region || {})[code], national: (state.sim.lists.national || {})[code]};
+        var withheldByList = {region: (state.sim.withheld.region || {})[code], national: (state.sim.withheld.national || {})[code]};
+        whichHost.appendChild(buildSimWhich(code, meta, simState.list, entryByList, withheldByList, latest && latest.period));
+      }
+
       if(isDonutLead){
         svgWrap.appendChild(buildDonut(latest.value, meta, entry.comparison, {code: code, size: 190, strokeMain: 18, legendOnlyWithRings: true}));
       } else if(showBars && latest){
@@ -2747,6 +3453,17 @@
           if(!c || typeof c.value !== 'number') return;
           barRows.push({label: scopeShortLabel(scope, c), value: c.value, valueText: fmt(c.value, meta) + unitSuffix(meta)});
         });
+        if(simEligible && simState.list !== 'off'){
+          var barState = BPSimilar.benchmarkState(state.sim, simState.list, code, latest, meta);
+          if((barState.state === 'ok' || /^no_pct/.test(barState.state)) && barState.entry){
+            barRows.push({
+              label: T('simBarMedian', {list: simListShort(simState.list)}),
+              value: barState.entry.peer_median,
+              valueText: simFmt(barState.entry.peer_median, meta),
+              muted: true,
+            });
+          }
+        }
         var barResult = buildComparisonBarSVG(barRows, {width: chartW, height: 200, ariaLabel: nameOf(code) + ', ' + latest.period + ': ' + fmt(latest.value, meta)});
         svgWrap.innerHTML = barResult.svg;
         wireBarChart(svgWrap, barResult.hits, {title: nameOf(code)});
@@ -2763,14 +3480,32 @@
         });
         svgWrap.innerHTML = lineResult.svg;
         wireLineChart(svgWrap, lineResult.hits, {title: nameOf(code)});
+        // Grey lines (spec 4.4): a SECOND paint once the peer profiles have
+        // loaded, lazily (IntersectionObserver, 300px rootMargin) so a
+        // chart far down the page never fetches 10-14 files unseen.
+        if(isLineLead && simEligible && simState.list !== 'off'){
+          loadSimGreyLines(svgWrap, code, meta, pts, simState.list, chartW, chartW < 500 ? 220 : 270, compareSeries, nameOf(code), latest, renderLegendAndWhich);
+        }
       } else {
         svgWrap.innerHTML = '<p class="cp-unavail">' + T('v4NoHistory') + '</p>';
       }
       chartCol.appendChild(svgWrap);
+      if(simEligible && isLineLead) chartCol.appendChild(legendHost);
       var para = buildLeadParagraph(sec, code);
       if(para) chartCol.appendChild(para);
       if(peerChartCode) loadLeadPeerChart(chartCol, peerChartCode);
       else { var strip = buildPeerStrip(code, false); if(strip) chartCol.appendChild(strip); }
+      // "Which communes?" appears for every non-additive lead type this
+      // layer covers (line, bar, donut) -- spec 4.6/4.8 -- never only line.
+      if(simEligible) chartCol.appendChild(whichHost);
+      renderBadge();
+      // The which-list and legend render immediately (legend shows
+      // simLoading for a line lead until loadSimGreyLines' callback
+      // supplies the real count).
+      renderLegendAndWhich(null);
+      if(simEligible){
+        simToggles[simToggles.length - 1].refresh = function(){ renderChart(code); };
+      }
     }
     function select(code, source){
       if(!code || !state.byCode[code] || !state.profile.indicators[code]) return;
@@ -2840,6 +3575,14 @@
         per.appendChild(chip);
       }
       tile.appendChild(per);
+
+      // Comparable-communes chip (spec 4.7): non-additive only, and only
+      // while the list is not 'off'. Chips update in place on a list
+      // switch -- see simToggles' tile-refresh pass below.
+      if(meta.additive === false && simState.list !== 'off' && state.sim){
+        var simTile = buildSimTile(code, meta, latest);
+        if(simTile) tile.appendChild(simTile);
+      }
 
       var cmp = entry.comparison || {};
       if(latest && isShareOfWholeIndicator(meta, latest.value)){
@@ -2921,6 +3664,37 @@
         Array.prototype.forEach.call(grid.children, function(t){ t.classList.toggle('selected', t.dataset.code === e.detail.code); });
       });
     }
+    // Chips update in place on a list switch (spec 4.7), never a full
+    // grid rebuild -- that would drop tile keyboard focus the same way a
+    // full lead-chart rebuild would.
+    function refreshTileChips(){
+      Array.prototype.forEach.call(grid.children, function(t){
+        var code = t.dataset.code;
+        var meta = state.byCode[code];
+        var old = t.querySelector('.mtile-sim');
+        if(old) old.remove();
+        if(!meta || meta.additive !== false || simState.list === 'off' || !state.sim) return;
+        var latest = latestNumeric(state.profile.indicators[code]);
+        var simTile = buildSimTile(code, meta, latest);
+        var per = t.querySelector('.mtile-period');
+        if(simTile && per) per.insertAdjacentElement('afterend', simTile);
+      });
+      var anyText = Array.prototype.some.call(grid.children, function(t){
+        var s = t.querySelector('.mtile-sim');
+        return s && s.textContent.trim();
+      });
+      Array.prototype.forEach.call(grid.children, function(t){
+        var s = t.querySelector('.mtile-sim');
+        if(anyText && !s){
+          var filler = document.createElement('div');
+          filler.className = 'mtile-sim';
+          filler.setAttribute('aria-hidden', 'true');
+          var per = t.querySelector('.mtile-period');
+          if(per) per.insertAdjacentElement('afterend', filler);
+        }
+      });
+    }
+    if(state.sim) simToggles.push({fs: null, refresh: refreshTileChips});
     return grid;
   }
 
@@ -4101,7 +4875,7 @@
     var num = (chapterCounter < 10 ? '0' : '') + chapterCounter;
     section.appendChild(buildChapterHeader(sec, num));
 
-    var lead = buildLeadRow(sec);
+    var lead = buildLeadRow(sec, secIndex);
     var headlineCode = lead.headlineCode;
     if(lead.row) section.appendChild(lead.row);
 
@@ -4220,6 +4994,10 @@
      Init
   ========================================================================= */
   function renderAll(){
+    // Every chapter's switch/tile-grid re-registers itself below; without
+    // this the array would grow across every language switch and hold
+    // references to DOM nodes the previous render already discarded.
+    simToggles.length = 0;
     renderHero();
     renderEssentiel();
     renderChapters();
@@ -4237,6 +5015,7 @@
       fetch(AGE_SEX_URL(state.nis)), fetch(GEO_URL),
       fetch(FLOWS_URL(state.nis)), fetch(SCHOOLS_URL), fetch(SCHOOLS_SITES_URL),
       fetch(AGE_SEX_HISTORY_URL(state.nis)),
+      fetch(SIM_URL(state.nis)).catch(function(){ return {ok: false}; }),
     ]);
     if(res[5].ok){
       var geo = await res[5].json();
@@ -4259,6 +5038,17 @@
     // response after a client-side nis change) is treated the same as
     // absent -- renderAgeSex() re-checks nis_code before trusting it.
     if(res[13] && res[13].ok) state.ageSexHistory = await res[13].json();
+    // Comparable communes (S0 = "no layer at all"): accepted only if every
+    // shape check in validateSim() holds. A missing, malformed or wrong-nis
+    // payload degrades the WHOLE layer silently -- no switch, badge, chip,
+    // legend or list anywhere -- never a half-drawn one (spec 4.1).
+    if(res[14] && res[14].ok){
+      try{
+        var simJson = await res[14].json();
+        state.sim = validateSim(simJson, state.nis) ? simJson : null;
+      }catch(e){ state.sim = null; }
+    }
+    if(!state.sim) console.info('BelPulse: comparable-communes layer unavailable for ' + state.nis);
     var idx = res[0].ok ? await res[0].json() : {indicators: []};
     state.index = idx.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });

@@ -198,3 +198,63 @@ def test_the_all_data_accordion_is_removed():
         "function filterAllData(",
     ):
         assert needle not in text, f"should be removed: {needle}"
+
+
+# --- comparable communes (PR C, docs/features/peer_model.md) --------------
+# "peer" already means province mates elsewhere in this page (peerGeographies,
+# buildPeerStrip, loadLeadPeerChart, .peerstrip, .leadpeer, v4PeerChartTitle),
+# so every new identifier this layer adds must use sim/.sim-/simXxx only, and
+# no user-facing string may say "peer".
+
+SIMILAR_JS = REPO / "assets" / "belpulse" / "similar.js"
+
+
+def test_similar_js_contains_no_indicator_code():
+    """Same check as test_no_indicator_code_appears_anywhere_in_the_page,
+    against the new module -- rule 24 extended to assets/belpulse/similar.js."""
+    import json
+
+    if not INDICATORS_JSON.is_file():
+        return
+    codes = {
+        row["indicator_code"]
+        for row in json.loads(INDICATORS_JSON.read_text(encoding="utf-8"))["indicators"]
+    }
+    assert codes, "the indicator index is empty, so this test would prove nothing"
+    text = SIMILAR_JS.read_text(encoding="utf-8")
+    named = sorted(code for code in codes if code in text)
+    assert not named, f"similar.js names indicators directly: {named}"
+
+
+def test_similar_js_is_in_the_versioning_list_with_a_matching_v():
+    """tests/test_commune_asset_versioning.py is the load-bearing check; this
+    is a fast source-level guard that the entry actually exists in both
+    places, so a future edit to one without the other fails immediately
+    rather than only under the (slower) hash comparison."""
+    versioning_text = (REPO / "tests" / "test_commune_asset_versioning.py").read_text(
+        encoding="utf-8"
+    )
+    assert "assets/belpulse/similar.js" in versioning_text
+    page_text = _page_text()
+    assert re.search(
+        r'<script src="assets/belpulse/similar\.js\?v=[0-9a-f]+"></script>', page_text
+    ), "similar.js has no versioned <script> tag in commune.html"
+
+
+def test_no_sim_string_reads_as_average_total_or_peer():
+    """Wording is always 'median of comparable communes', never 'average' or
+    'total', and the page never uses the word 'peer' in a user-facing
+    string (rule: 'No user-facing string contains "peer"')."""
+    blocks = _i18n_language_blocks()
+    forbidden = re.compile(r"average|moyenne|gemiddeld|total|totaal|peer", re.IGNORECASE)
+    scanned = 0
+    offending = []
+    for lang, block in blocks.items():
+        for m in re.finditer(r"(sim[A-Za-z0-9_]*): '((?:[^'\\]|\\.)*)'", block):
+            key, value = m.group(1), m.group(2)
+            scanned += 1
+            stripped = re.sub(r"\{[A-Za-z0-9_]+\}", "", value)
+            if forbidden.search(stripped):
+                offending.append(f"{lang}.{key}: {value!r}")
+    assert scanned > 0, "expected at least one sim* string to scan -- the regex above found none"
+    assert not offending, f"forbidden word in a sim* string: {offending}"
