@@ -31,9 +31,12 @@ pytestmark = pytest.mark.slow  # rebuilds all 565 commune benchmark payloads
 
 def _rebuild():
     """Runs the whole exporter pipeline exactly as scripts/export_peer_benchmarks.py's
-    main() does, and returns (payloads, candidate_ids, excluded_ids) -- one place so
-    every test and the byte-identical-rerun check exercise the real call sequence,
-    not a hand-abbreviated one that could drift from main()."""
+    main() does, and returns (payloads, candidate_ids, excluded_ids, derived_meta,
+    index) -- one place so every test and the byte-identical-rerun check exercise the
+    real call sequence, not a hand-abbreviated one that could drift from main().
+    `index` (the (indicator, period) -> {nis: (value, status)} map) is returned too so
+    status-dependent withheld-reason tests (suppressed/na) can look up a real row's
+    status directly, the same way the exporter itself does."""
     communes = export_peer_model._current_municipality_nis(export_peer_model.DEFAULT_GEOGRAPHIES)
     peers_model = export_peer_benchmarks._load_peers(PEERS_JSON)
     raw_rows = export_peer_benchmarks._read_all_history_rows(
@@ -49,9 +52,9 @@ def _rebuild():
     index = export_peer_benchmarks._index_rows(all_rows)
     latest_period = export_peer_benchmarks._latest_period_per_indicator(index)
     payloads = export_peer_benchmarks.build_benchmarks(
-        communes, index, latest_period, peers_model, candidate_ids, excluded_ids, meta
+        communes, index, latest_period, peers_model, candidate_ids, excluded_ids
     )
-    return payloads, candidate_ids, excluded_ids
+    return payloads, candidate_ids, excluded_ids, meta, index
 
 
 @pytest.fixture(scope="module")
@@ -68,8 +71,18 @@ def payloads(_built):
 
 @pytest.fixture(scope="module")
 def universe(_built):
-    _payloads, candidate_ids, excluded_ids = _built
+    _payloads, candidate_ids, excluded_ids, _meta, _index = _built
     return candidate_ids, excluded_ids
+
+
+@pytest.fixture(scope="module")
+def derived_meta(_built):
+    return _built[3]
+
+
+@pytest.fixture(scope="module")
+def history_index(_built):
+    return _built[4]
 
 
 def test_exactly_565_communes(payloads):
@@ -451,6 +464,47 @@ def test_withheld_no_current_value_reason_shape(payloads):
     assert found, "no no_current_value withheld entry found anywhere to check the shape of"
 
 
+def test_withheld_suppressed_and_na_reasons_have_the_same_shape_as_no_current_value(payloads):
+    # "suppressed" ("S") and "na" ("N") are the two additional reasons this
+    # batch adds so a privacy suppression or an explicit not-applicable row
+    # is never reported to the reader as a plain missing value (rule 26).
+    # Same shape as "no_current_value": {reason, period, own_period}.
+    found = {"suppressed": False, "na": False}
+    for payload in payloads.values():
+        for list_name in ("national", "region"):
+            for entry in payload["withheld"][list_name].values():
+                if entry["reason"] in found:
+                    found[entry["reason"]] = True
+                    assert set(entry) == {"reason", "period", "own_period"}
+    assert found["suppressed"], "no suppressed withheld entry found anywhere in the real data"
+    assert found["na"], "no na withheld entry found anywhere in the real data"
+
+
+def test_antwerpen_11001_part_time_benefit_recipients_2026_is_withheld_as_suppressed(
+    payloads, history_index
+):
+    # Concrete case from the review: Antwerpen (11001)'s PART_TIME_BENEFIT_
+    # RECIPIENTS row for the indicator's current period (2026) is status "S"
+    # in the committed history (an ONEM privacy suppression), with the last
+    # usable value in 2024. Before this fix it was withheld as
+    # "no_current_value" -- a suppression reported as a plain data gap.
+    period = export_peer_benchmarks._latest_period_per_indicator(history_index).get(
+        "PART_TIME_BENEFIT_RECIPIENTS"
+    )
+    assert period is not None, "PART_TIME_BENEFIT_RECIPIENTS has no rows at all -- data drifted"
+    _value, status = history_index[("PART_TIME_BENEFIT_RECIPIENTS", period)].get(
+        "11001", (None, None)
+    )
+    assert status == "S", (
+        "fixture assumption stale: 11001/PART_TIME_BENEFIT_RECIPIENTS/"
+        f"{period} is no longer status S in the committed history (got {status!r})"
+    )
+    entry = payloads["11001"]["withheld"]["national"]["PART_TIME_BENEFIT_RECIPIENTS"]
+    assert entry["reason"] == "suppressed"
+    assert entry["period"] == period
+    assert entry["own_period"] == "2024"
+
+
 def test_withheld_few_peers_reason_shape_and_below_the_floor(payloads):
     from src.analytics.peers import MIN_PEERS_WITH_VALUE
 
@@ -474,16 +528,23 @@ def test_antwerpen_internal_migration_net_is_withheld_no_current_value_for_11002
     # same commune reads as "no_current_value", never silently dropped.
     withheld = payloads["11002"]["withheld"]["national"]
     # Every indicator not in lists must be in withheld -- pick one at random
-    # from withheld itself to check the reason vocabulary is one of the three.
+    # from withheld itself to check the reason vocabulary is one of the five.
     assert withheld, "11002 has no withheld entries at all -- fixture likely stale"
     for entry in withheld.values():
-        assert entry["reason"] in ("excluded", "no_current_value", "few_peers")
+        assert entry["reason"] in ("excluded", "no_current_value", "suppressed", "na", "few_peers")
 
 
 # --- indicator_meta: engine-only derived indicators never in indicators.json -----
+#
+# P2 fix, this batch: indicator_meta is no longer duplicated into every one
+# of the 565 per-commune payloads (it was identical everywhere and cost
+# ~0.76 MB of pure duplication). It is now written ONCE to
+# public/data/peers/indicator_meta.json by write_indicator_meta(), and these
+# tests check that shared file / the derived_meta the exporter builds it
+# from, not payload["indicator_meta"] (removed from the payload schema).
 
 
-def test_indicator_meta_carries_the_engine_only_derived_indicators_trilingually(payloads):
+def test_indicator_meta_carries_the_engine_only_derived_indicators_trilingually(derived_meta):
     # BIRTH_RATE_PER_1000 and its siblings are never in
     # public/data/metadata/indicators.json (that file is built from the
     # canonical database, which a benchmark-only engine indicator never
@@ -496,20 +557,24 @@ def test_indicator_meta_carries_the_engine_only_derived_indicators_trilingually(
             encoding="utf-8"
         )
     )
-    meta = payloads["92094"]["indicator_meta"]
-    entry = meta["BIRTH_RATE_PER_1000"]
+    entry = derived_meta["BIRTH_RATE_PER_1000"]
     assert entry["names"] == cfg["name"]
     assert set(entry["names"]) == {"en", "fr", "nl"}
     assert entry["unit"] == cfg["unit"]
     assert entry["decimals"] == cfg["decimals"]
 
 
-def test_indicator_meta_is_identical_across_every_commune(payloads):
-    # A property of the model, not of the commune -- every payload carries
-    # the same block.
-    first = next(iter(payloads.values()))["indicator_meta"]
+def test_indicator_meta_json_is_written_once_and_matches_derived_meta(tmp_path, derived_meta):
+    export_peer_benchmarks.write_indicator_meta(derived_meta, tmp_path)
+    written = json.loads((tmp_path / "indicator_meta.json").read_text(encoding="utf-8"))
+    assert written == derived_meta
+
+
+def test_payloads_no_longer_carry_an_indicator_meta_key(payloads):
+    # Schema change, this batch: indicator_meta moved out of the per-commune
+    # payload into the shared public/data/peers/indicator_meta.json file.
     for nis, payload in payloads.items():
-        assert payload["indicator_meta"] == first, nis
+        assert "indicator_meta" not in payload, nis
 
 
 def test_indicator_meta_never_covers_an_already_published_indicator():

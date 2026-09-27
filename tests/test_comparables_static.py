@@ -68,7 +68,13 @@ def _inline_strings_table() -> dict[str, dict[str, str]]:
 
 #: Keys reached only through a lookup table (titleKey / devWithheld*), not by
 #: a literal T('key') call -- found by reading renderWithheld/formatDeviation.
-_INDIRECT_KEYS = {"reasonExcluded", "reasonNoCurrentValue", "reasonFewPeers"}
+_INDIRECT_KEYS = {
+    "reasonExcluded",
+    "reasonNoCurrentValue",
+    "reasonSuppressed",
+    "reasonNa",
+    "reasonFewPeers",
+}
 
 
 def _direct_t_calls() -> set[str]:
@@ -98,6 +104,30 @@ def test_ordinal_suffix_keys_are_present_for_every_language():
     for lang, table in tables.items():
         for key in ("ord1", "ord2", "ord3", "ordN"):
             assert key in table, f"{lang} is missing {key}"
+
+
+def test_positionof_template_has_no_double_suffix_and_no_stray_placeholder():
+    # Browser/wording finding (P1, blocker): ordinal() already appends the
+    # language's suffix (ord1/ord2/ord3/ordN) to {pos} before positionOf is
+    # composed, so the template itself must carry NEITHER a literal '{ord}'
+    # placeholder (which T() never substitutes -- it is only ever called
+    # with {pos, of}) NOR its own trailing ordinal letter, which would
+    # double the suffix ordinal() already added (e.g. French '1ere', '10ee').
+    tables = _inline_strings_table()
+    text = _page_text()
+    for lang in ("en", "fr", "nl"):
+        m = re.search(rf"\n  {lang}:\s*\{{(.*?)\n  \}}\s*,?\s*\n", text, re.DOTALL)
+        assert m, f"no {lang} table found"
+        pos_m = re.search(r"positionOf:\s*'([^']*)'", m.group(1))
+        assert pos_m, f"{lang} has no positionOf template"
+        template = pos_m.group(1)
+        assert "{ord}" not in template, f"{lang} positionOf still has a stray {{ord}}: {template!r}"
+        assert template in (
+            "{pos} of {of}",
+            "{pos} sur {of}",
+            "{pos} van {of}",
+        ), f"{lang} positionOf changed shape unexpectedly: {template!r}"
+    assert tables  # keeps the fixture call meaningful if the loop above is edited
 
 
 def test_no_similarity_score_or_distance_is_rendered():
