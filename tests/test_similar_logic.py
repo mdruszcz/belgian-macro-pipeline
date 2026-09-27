@@ -279,6 +279,39 @@ def test_benchmark_state_by_withheld_reason_when_no_entry_exists():
     assert state_for(None) == "generic"
 
 
+def test_benchmark_state_suppressed_and_na_reasons_from_pr_287():
+    """PR #287 (peer model, not yet merged as of this writing) adds two more
+    specific reasons for the commune's OWN row existing at the current
+    period but not being usable: 'suppressed' (status suppressed -- the
+    source withholds it, e.g. statistical confidentiality) and 'na' (status
+    na -- no figure at all). Both are distinct from 'stale' (an older period
+    IS available, no_current_value with an own_period) and from 'generic'
+    (nothing else fits) -- rule 26, missing/suppressed/na never collapse.
+    similar.js must keep working whether or not #287 has merged: an
+    unrecognised reason string still falls back to 'generic' (covered by
+    test_benchmark_state_by_withheld_reason_when_no_entry_exists' state_for
+    (None) case and the 'generic' no_current_value case above)."""
+    latest = {"period": "2024", "value": 1}
+
+    def state_for(withheld):
+        sim = _sim_fixture(None, extra_withheld={"X": withheld} if withheld else {})
+        return _run_node(
+            "console.log(JSON.stringify(BPSimilar.benchmarkState("
+            + json.dumps(sim)
+            + ", 'region', 'X', "
+            + json.dumps(latest)
+            + ", {additive: false}).state));"
+        )
+
+    assert (
+        state_for({"reason": "suppressed", "period": "2026", "own_period": "2024"}) == "suppressed"
+    )
+    assert state_for({"reason": "na", "period": "2026", "own_period": "2024"}) == "na"
+    # An unrecognised reason (e.g. a future addition this module doesn't
+    # know about yet) still falls back to 'generic', never crashes.
+    assert state_for({"reason": "some_future_reason", "period": "2026"}) == "generic"
+
+
 def test_benchmark_state_none_when_additive_or_list_off_or_no_sim():
     latest = {"period": "2023", "value": 37748.548378031905}
     sim = _sim_fixture(NAMUR_INCOME_REGION_ENTRY)

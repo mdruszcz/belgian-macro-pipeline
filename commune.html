@@ -745,12 +745,12 @@
   </div>
 </div>
 
-<script src="assets/i18n.js?v=211e16014c"></script>
+<script src="assets/i18n.js?v=8073da3487"></script>
 <script src="assets/belpulse/shell.js?v=50299961dc"></script>
 <script src="assets/belpulse/components.js?v=c46caeab4b"></script>
 <script src="assets/commune_map.js?v=37e2927a33"></script>
 <script src="assets/belpulse/charts.js?v=07848344d8"></script>
-<script src="assets/belpulse/similar.js?v=dbaaee0f57"></script>
+<script src="assets/belpulse/similar.js?v=208ab95007"></script>
 <script>
 /* BelPulse commune profile -- "Portrait".
  *
@@ -2910,6 +2910,20 @@
       lstale.className = 'l1 muted';
       lstale.textContent = T('simWithheldStale', {name: communeName(), own: w2.own_period, period: w2.period});
       wrap.appendChild(lstale);
+      addTryOther();
+    } else if(r.state === 'suppressed'){
+      var w3 = r.withheld || {};
+      var lsupp = document.createElement('div');
+      lsupp.className = 'l1 muted';
+      lsupp.textContent = T('simWithheldSuppressed', {name: communeName(), period: w3.period});
+      wrap.appendChild(lsupp);
+      addTryOther();
+    } else if(r.state === 'na'){
+      var w4 = r.withheld || {};
+      var lna = document.createElement('div');
+      lna.className = 'l1 muted';
+      lna.textContent = T('simWithheldNa', {name: communeName(), period: w4.period});
+      wrap.appendChild(lna);
       addTryOther();
     } else if(r.state === 'generic'){
       var lgen = document.createElement('div');

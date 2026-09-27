@@ -70,6 +70,16 @@
     if (withheld.reason === 'no_current_value') {
       return withheld.own_period ? 'stale' : 'generic';
     }
+    // PR #287 (peer model, not yet merged as of this writing): two more
+    // specific reasons for the commune's OWN row existing at the current
+    // period but not being usable -- distinct from 'stale' (no_current_value
+    // with an own_period, i.e. an older period is available) and from
+    // 'generic' (nothing else fits). Both carry {reason, period, own_period}
+    // the same shape as no_current_value. An unrecognised reason still
+    // falls back to 'generic' below, so this module works whether or not
+    // #287 has merged (rule 26: suppressed/na/missing/zero never collapse).
+    if (withheld.reason === 'suppressed') return 'suppressed';
+    if (withheld.reason === 'na') return 'na';
     return 'generic';
   }
 
