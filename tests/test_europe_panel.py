@@ -697,6 +697,9 @@ def test_country_mode_requests_only_same_origin_or_fonts(browser, site):
         page.goto(f"{site}/macro.html", wait_until="load")
         page.click('.bp-sidebar-nav a[href="#europe"]')
         page.wait_for_selector("#europe:not([hidden])")
+        # Every chapter is now visible from load, so "#europe not hidden" no
+        # longer means the panel is ready; wait for its region map first.
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
         page.wait_for_timeout(300)
         origin = urlparse(site).netloc
