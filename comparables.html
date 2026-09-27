@@ -266,7 +266,12 @@ function formatValue(value, meta){
   if(value === null || value === undefined) return '—';
   var unit = meta ? meta.unit : null;
   var decimals = meta ? meta.decimals : null;
-  var s = (typeof MapUI !== 'undefined') ? MapUI.formatValue(value, unit, decimals, LANG) : String(value);
+  var s;
+  if(typeof MapUI !== 'undefined'){
+    s = MapUI.formatValue(value, unit, decimals, LANG) + MapUI.unitSuffix(unit, LANG);
+  } else {
+    s = String(value);
+  }
   if(s.charAt(0) === '-') s = '−' + s.slice(1);
   return s;
 }
