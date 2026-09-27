@@ -411,8 +411,13 @@
   .sim-toggle input:focus-visible + label{outline:2px solid var(--th); outline-offset:-2px}
   .sim-prov{font:600 10px/1 var(--bp-font-ui); color:var(--bp-text-faint); border:1px solid var(--bp-border); border-radius:3px; padding:3px 6px; margin-left:8px; align-self:center; cursor:help}
   @media (max-width:640px){
-    .sim-toggle{width:100%}
-    .sim-toggle label{flex:1 1 33%; height:36px}
+    /* min-width:0 -- a fieldset defaults to min-inline-size:min-content, so
+       width:100% alone let the switch + "provisional" badge run past a 342px
+       column at 390px (clipped by overflow:hidden). The badge gets its own
+       row inside the box instead: fr needs ~370px for all four on one line. */
+    .sim-toggle{width:100%; min-width:0; flex-wrap:wrap; height:auto}
+    .sim-toggle label{flex:1 1 auto; height:36px}
+    .sim-toggle .sim-prov{flex-basis:100%; margin:0; border:0; border-top:1px solid var(--bp-border); border-radius:0; padding:5px 6px; text-align:center}
   }
   .sim-badge{flex-basis:100%; margin-top:2px}
   .sim-badge .l1{font:600 13px/1.35 var(--bp-font-ui); color:var(--bp-text)}
