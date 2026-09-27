@@ -73,15 +73,36 @@ class PeerModelError(ValueError):
 
 
 class Variable:
-    __slots__ = ("id", "period", "transform", "description")
+    """`indicator_ids` -- every published municipal indicator_code that IS
+    this variable itself or is a raw NUMERATOR it is built from (never a
+    denominator such as FISCAL_NBR_NON_ZERO_INC or HOUSEHOLDS_PRIVATE --
+    docs/features/peer_model.md, "Circularity"). Empty for a variable with
+    no published indicator_code of its own, such as population_density
+    (a peers.py-only feature computed from population/area).
 
-    def __init__(self, id: str, period: str, transform: str, description: str):
+    This is the single source of truth export_peer_benchmarks.py's
+    SELECTION_VARIABLE_INDICATORS is derived from (never hand-maintained
+    separately -- CLAUDE.md rule 2/24 extended: an indicator id lives in one
+    place, not duplicated into a second constant that can drift from it).
+    """
+
+    __slots__ = ("id", "period", "transform", "description", "indicator_ids")
+
+    def __init__(
+        self,
+        id: str,
+        period: str,
+        transform: str,
+        description: str,
+        indicator_ids: tuple[str, ...] = (),
+    ):
         if transform not in ("none", "log"):
             raise PeerModelError(f"variable {id!r}: unknown transform {transform!r}")
         self.id = id
         self.period = period
         self.transform = transform
         self.description = description
+        self.indicator_ids = indicator_ids
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid only
         return f"Variable({self.id!r}, period={self.period!r}, transform={self.transform!r})"
@@ -95,67 +116,92 @@ VARIABLES: tuple[Variable, ...] = (
         period="2026",
         transform="log",
         description="POPULATION_BY_COMMUNE 2026",
+        indicator_ids=("POPULATION_BY_COMMUNE",),
     ),
     Variable(
         "population_density",
         period="2026",
         transform="log",
         description="POPULATION_BY_COMMUNE 2026 / area_km2 (config/geography/commune_area_km2.csv)",
+        # No published indicator_code of its own -- a peers.py-only feature.
+        # POPULATION_BY_COMMUNE is already flagged via the "population"
+        # variable above; area_km2 is not a published indicator.
+        indicator_ids=(),
     ),
     Variable(
         "share_65_plus",
         period="2026",
         transform="none",
         description="POPULATION_AGE_65_PLUS / POPULATION_BY_COMMUNE, 2026",
+        indicator_ids=("POPULATION_AGE_65_PLUS",),
     ),
     Variable(
         "share_0_14",
         period="2026",
         transform="none",
         description="POPULATION_AGE_0_14 / POPULATION_BY_COMMUNE, 2026",
+        indicator_ids=("POPULATION_AGE_0_14",),
     ),
     Variable(
         "population_change_5y",
         period="2026",
         transform="none",
         description="POPULATION_CHANGE_5Y (derived), 2026",
+        indicator_ids=("POPULATION_CHANGE_5Y",),
     ),
     Variable(
         "avg_net_taxable_income",
         period="2023",
         transform="none",
         description="AVG_NET_TAXABLE_INCOME (derived), 2023",
+        indicator_ids=("AVG_NET_TAXABLE_INCOME", "FISCAL_TOT_NET_TAXABLE_INC"),
     ),
     Variable(
         "unemployment_rate_insured",
         period="2026",
         transform="none",
         description="UNEMPLOYMENT_RATE_INSURED, 2026 (provisional)",
+        indicator_ids=("UNEMPLOYMENT_RATE_INSURED",),
     ),
     Variable(
         "share_foreign_nationals",
         period="2021",
         transform="none",
         description="SHARE_FOREIGN_NATIONALS (derived), 2021 census",
+        indicator_ids=("SHARE_FOREIGN_NATIONALS", "POP_FOREIGN_NATIONALS"),
     ),
     Variable(
         "average_household_size",
         period="2021",
         transform="none",
         description="AVERAGE_HOUSEHOLD_SIZE (derived), 2021 census",
+        indicator_ids=("AVERAGE_HOUSEHOLD_SIZE",),
     ),
     Variable(
         "enterprise_density",
         period="2023-Q4",
         transform="log",
         description="LOCAL_UNITS_BY_COMMUNE 2023-Q4 per 1,000 residents (POPULATION_BY_COMMUNE 2023)",
+        # The ratio itself has no published indicator_code; its numerator does.
+        indicator_ids=("LOCAL_UNITS_BY_COMMUNE",),
     ),
     Variable(
         "property_tax_base_per_resident",
         period="2026",
         transform="log",
         description="MUN_CADASTRAL_INCOME_TOTAL 2026 / POPULATION_BY_COMMUNE 2026",
+        # The ratio itself has no published indicator_code; its numerator does.
+        indicator_ids=("MUN_CADASTRAL_INCOME_TOTAL",),
     ),
+)
+
+#: Every indicator_code that IS, or is a raw numerator of, one of the eleven
+#: peer-selection variables above -- derived, not hand-maintained (see
+#: Variable.indicator_ids). scripts/export_peer_benchmarks.py's
+#: SELECTION_VARIABLE_INDICATORS is exactly this set; any hand-written
+#: extras belong in a separate, explicitly named additive constant there.
+SELECTION_VARIABLE_INDICATOR_IDS: frozenset[str] = frozenset(
+    indicator_id for variable in VARIABLES for indicator_id in variable.indicator_ids
 )
 
 VARIABLE_IDS: tuple[str, ...] = tuple(v.id for v in VARIABLES)
@@ -364,29 +410,36 @@ def peer_stats(value: float | None, peer_values: list[float | None]) -> dict:
     "absent", nothing in between.
 
     Returns a dict with keys `peer_median`, `peers_with_value`, `position`,
-    `of`, `deviation_pct` -- every one of them `None` when the benchmark
-    must be withheld:
+    `of`, `deviation_pct`, `deviation_withheld`.
+
+    The whole benchmark is null (every key `None` except `peers_with_value`)
+    when:
 
     - `value` is None (the commune itself has no value this period);
     - fewer than MIN_PEERS_WITH_VALUE (7) of the up-to-10 peers have a
-      usable value;
-    - the peer median is <= 0 (see below).
+      usable value.
+
+    When the peer median is <= 0 (see below), `peer_median`, `position` and
+    `of` are still returned -- the rank among peers stays meaningful even
+    when a percentage does not -- but `deviation_pct` is `None` and
+    `deviation_withheld` names why: `"median_zero"` or `"median_negative"`.
+    In every other case (a real, positive median) `deviation_pct` is a
+    number and `deviation_withheld` is `None`.
 
     `position`/`of` rank the commune among itself plus its peers that have
     a value (`src.analytics.ranking.rank_within`'s convention: 1 = highest,
     ties share the best rank), so "3rd of 8" is possible when only 7 of 10
     peers report. `deviation_pct = (value - peer_median) / peer_median * 100`.
 
-    Non-positive median: the spec states a median of exactly 0 must be
-    null (dividing by zero). A NEGATIVE median (possible for a signed
-    balance indicator such as INTERNAL_MIGRATION_NET) is not addressed by
-    the spec explicitly, so this is documented here as an assumption for
-    the maintainer to confirm: a percentage deviation from a negative base
-    is not a meaningful "+49%"-style sentence (a commune moving from -100
-    to -50 is an improvement, but naive deviation_pct arithmetic would call
-    it -50%, the wrong sign for what happened), so this function returns
-    None for deviation_pct (and for the whole benchmark) whenever the
-    median is <= 0, not only when it is exactly 0.
+    Non-positive median (lead decision 2026-09-26): a median of exactly 0
+    withholds the percentage (dividing by zero). A NEGATIVE median (possible
+    for a signed balance indicator such as INTERNAL_MIGRATION_NET) withholds
+    it too: a percentage against a negative base reads backwards -- Antwerp's
+    internal migration balance of -4,085 against a peer median of -85 would
+    compute as roughly +4700%, which looks like a huge improvement in the
+    wrong direction. The rank ("3rd of 11") and the peer median itself are
+    still shown; only the percentage is withheld, and `deviation_withheld`
+    tells the caller which of the two non-positive cases applies.
 
     Worked example (docstring fixture, hand-computed, CLAUDE.md rule 5):
 
@@ -418,6 +471,7 @@ def peer_stats(value: float | None, peer_values: list[float | None]) -> dict:
         "position": None,
         "of": None,
         "deviation_pct": None,
+        "deviation_withheld": None,
     }
     if value is None:
         return null_result
@@ -431,13 +485,23 @@ def peer_stats(value: float | None, peer_values: list[float | None]) -> dict:
     ranked = rank_within(value, [*usable, float(value)])
     position_, of_ = ranked if ranked is not None else (None, None)
 
-    if peer_median <= 0:
+    if peer_median == 0:
         return {
             "peer_median": peer_median,
             "peers_with_value": n_usable,
             "position": position_,
             "of": of_,
             "deviation_pct": None,
+            "deviation_withheld": "median_zero",
+        }
+    if peer_median < 0:
+        return {
+            "peer_median": peer_median,
+            "peers_with_value": n_usable,
+            "position": position_,
+            "of": of_,
+            "deviation_pct": None,
+            "deviation_withheld": "median_negative",
         }
 
     deviation_pct = (float(value) - peer_median) / peer_median * 100.0
@@ -447,4 +511,5 @@ def peer_stats(value: float | None, peer_values: list[float | None]) -> dict:
         "position": position_,
         "of": of_,
         "deviation_pct": deviation_pct,
+        "deviation_withheld": None,
     }

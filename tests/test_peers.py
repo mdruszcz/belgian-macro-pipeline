@@ -65,6 +65,8 @@ import pytest
 
 from src.analytics.peers import (
     MIN_PEERS_WITH_VALUE,
+    SELECTION_VARIABLE_INDICATOR_IDS,
+    VARIABLES,
     PeerModelError,
     Variable,
     build_feature_matrix,
@@ -343,6 +345,7 @@ def test_peer_stats_even_peer_count_ten_peers():
     assert result["position"] == 1
     assert result["of"] == 11
     assert result["deviation_pct"] == pytest.approx(46.34146341463415)
+    assert result["deviation_withheld"] is None
 
 
 def test_peer_stats_odd_peer_count_exactly_seven_is_the_floor_and_still_computes():
@@ -365,6 +368,7 @@ def test_peer_stats_six_peers_is_below_the_floor_and_is_null():
     assert result["position"] is None
     assert result["of"] is None
     assert result["deviation_pct"] is None
+    assert result["deviation_withheld"] is None
 
 
 def test_peer_stats_suppressed_peer_is_excluded_not_zeroed():
@@ -385,33 +389,41 @@ def test_peer_stats_commune_has_no_value_is_null():
     assert result["position"] is None
     assert result["of"] is None
     assert result["deviation_pct"] is None
+    assert result["deviation_withheld"] is None
 
 
-def test_peer_stats_median_zero_is_null_deviation():
+def test_peer_stats_median_zero_withholds_deviation_only():
     # Ten peers whose two middle sorted values (5th and 6th of 10, 0-indexed
-    # 4 and 5) are -50 and 50, averaging to a median of exactly 0.
+    # 4 and 5) are -50 and 50, averaging to a median of exactly 0. Lead
+    # decision 2026-09-26: the entry is KEPT (peer_median, position, of all
+    # still meaningful -- the rank stays meaningful even when a percentage
+    # against a zero base does not); only deviation_pct is withheld, and
+    # deviation_withheld names why.
     peers = [-500.0, -400.0, -300.0, -200.0, -50.0, 50.0, 200.0, 300.0, 400.0, 500.0]
     result = peer_stats(600.0, peers)
     assert result["peer_median"] == pytest.approx(0.0)
     assert result["peers_with_value"] == 10
     assert result["deviation_pct"] is None
+    assert result["deviation_withheld"] == "median_zero"
     # Position/rank are still meaningful even though the deviation is withheld.
     assert result["position"] is not None
+    assert result["of"] is not None
 
 
-def test_peer_stats_negative_median_is_null_deviation_assumption():
+def test_peer_stats_negative_median_withholds_deviation_only():
     # A signed-balance indicator (e.g. INTERNAL_MIGRATION_NET) can have a
-    # negative peer median. The spec does not state what deviation_pct means
-    # against a negative base; this test pins the assumption documented in
-    # peer_stats' own docstring: deviation_pct (and the whole benchmark) is
-    # null whenever the median is <= 0, not only when it is exactly 0,
-    # because a percentage-from-a-negative-base sentence is not meaningful.
+    # negative peer median. Lead decision 2026-09-26: the entry is KEPT
+    # (peer_median, position, of all still meaningful); only deviation_pct
+    # is withheld, because a percentage-from-a-negative-base sentence reads
+    # backwards (see peer_stats' docstring for the Antwerpen/INTERNAL_
+    # MIGRATION_NET worked example). deviation_withheld == "median_negative".
     peers = [-800.0, -700.0, -600.0, -500.0, -450.0, -450.0, -200.0, -100.0, -50.0, -10.0]
     # sorted median (5th/6th of 10, 0-indexed 4 and 5) = (-450 + -450)/2 = -450
     result = peer_stats(-100.0, peers)
     assert result["peer_median"] == pytest.approx(-450.0)
     assert result["peers_with_value"] == 10
     assert result["deviation_pct"] is None
+    assert result["deviation_withheld"] == "median_negative"
     # Position is unaffected by the sign-of-median question -- -100 beats
     # seven of its ten peers (-200,-450,-450,-500,-600,-700,-800) and loses
     # to two (-50,-10), plus itself included -- rank among itself+10 peers.
@@ -426,3 +438,53 @@ def test_peer_stats_ties_share_rank():
     result = peer_stats(1800.0, peers)
     assert result["position"] == 1
     assert result["of"] == 8
+
+
+def test_selection_variable_indicator_ids_is_derived_from_variables_indicator_ids():
+    # SELECTION_VARIABLE_INDICATOR_IDS must be exactly the union of every
+    # VARIABLES entry's indicator_ids -- not a separately hand-maintained
+    # set that could silently drift from the model (audit should-fix 2).
+    expected = frozenset(
+        indicator_id for variable in VARIABLES for indicator_id in variable.indicator_ids
+    )
+    assert SELECTION_VARIABLE_INDICATOR_IDS == expected
+
+
+def test_adding_a_variable_without_indicator_ids_changes_nothing_but_a_new_id_does():
+    # Guards against the derivation silently not deriving: a fabricated
+    # extra Variable with indicator_ids=() must NOT appear in the recomputed
+    # set, while one with a real-looking new id MUST. If SELECTION_VARIABLE_
+    # INDICATOR_IDS were hand-maintained instead of derived, this test would
+    # still pass (it recomputes locally) -- it is the "would fail if a
+    # variable were added without its ids reaching the set" guard for the
+    # derivation logic itself, independent of the module-level constant.
+    baseline = frozenset(
+        indicator_id for variable in VARIABLES for indicator_id in variable.indicator_ids
+    )
+
+    no_op_addition = (
+        *VARIABLES,
+        Variable(
+            "extra_no_ids", period="2026", transform="none", description="test", indicator_ids=()
+        ),
+    )
+    recomputed_no_op = frozenset(
+        indicator_id for variable in no_op_addition for indicator_id in variable.indicator_ids
+    )
+    assert recomputed_no_op == baseline
+
+    real_addition = (
+        *VARIABLES,
+        Variable(
+            "extra_with_id",
+            period="2026",
+            transform="none",
+            description="test",
+            indicator_ids=("SOME_NEW_INDICATOR",),
+        ),
+    )
+    recomputed_real = frozenset(
+        indicator_id for variable in real_addition for indicator_id in variable.indicator_ids
+    )
+    assert recomputed_real == baseline | {"SOME_NEW_INDICATOR"}
+    assert recomputed_real != baseline

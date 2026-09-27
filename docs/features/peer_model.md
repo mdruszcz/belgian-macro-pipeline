@@ -208,8 +208,18 @@ For any municipal indicator (not only the eleven feature variables) and any comm
 - **Position** = the commune's rank among itself plus its peers that have a value in that
   period (so "3rd of 8" is possible when only 7 of 10 peers report).
 - **`deviation_pct = (value − median) / median × 100`.**
-- **Null, not zero, when:** the peer median is 0, or fewer than 7 of the 10 peers have a value
-  in that period. A withheld benchmark is not a benchmark of zero deviation (CLAUDE.md rule 26).
+- **Null, not zero, when:** fewer than 7 of the 10 peers have a value in that period (the whole
+  benchmark is withheld), or the peer median is 0 or negative (only `deviation_pct` is withheld —
+  see below). A withheld benchmark is not a benchmark of zero deviation (CLAUDE.md rule 26).
+- **A zero or negative median withholds only the percentage, not the whole entry.** The peer
+  median, position and rank ("nth of m") still mean something — a commune's rank among peers is
+  well-defined even when the base is zero or negative — but a percentage against a zero or
+  negative median is not shown because it reads backwards. Example, national list, `nis=11002`
+  (Antwerpen), `INTERNAL_MIGRATION_NET`, 2025 (`public/data/peers/11002.json`): the commune's
+  value is −4,085 against a peer median of −85; naive `deviation_pct` arithmetic would compute
+  roughly +4700%, which looks like a huge improvement in the wrong direction, so `deviation_pct`
+  is null and the entry carries `deviation_withheld: "median_negative"` (or `"median_zero"` when
+  the median is exactly 0) instead.
 - Suppressed and `na` peers are **excluded from the median's inputs entirely** — never treated
   as zero, which would pull every median toward zero for indicators (like police rates on
   merged communes) with real suppression.
@@ -224,6 +234,13 @@ For any municipal indicator (not only the eleven feature variables) and any comm
   of," "total for," or any phrasing that could be read as an aggregate.
 
 ### Circularity — any of the eleven selection variables can also be a headline
+
+The flagged set is derived, not hand-maintained: an indicator id is flagged when it IS a
+selection variable's own published indicator or IS one of the raw numerators named in that
+variable's `description` in `src/analytics/peers.py`'s `VARIABLES` — never a denominator such
+as `FISCAL_NBR_NON_ZERO_INC` or `HOUSEHOLDS_PRIVATE`, which the peer is not selected "on" in the
+same sense — so adding or changing a variable in `VARIABLES` is the only way to change which
+indicators carry the caveat.
 
 `AVG_NET_TAXABLE_INCOME` (variable 6) and `UNEMPLOYMENT_RATE_INSURED` (variable 7) are the two
 most obvious cases, but the same risk applies to **any of the eleven selection variables** that
