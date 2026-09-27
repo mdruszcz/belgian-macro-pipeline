@@ -152,9 +152,9 @@ def test_antwerpen_internal_migration_net_shows_an_em_dash_on_the_national_scope
     a percentage computed against a negative or zero median."""
     payload = json.loads(PEERS_11002.read_text(encoding="utf-8"))
     entry = payload["lists"]["national"]["INTERNAL_MIGRATION_NET"]
-    assert entry["deviation_pct"] is None and entry["deviation_withheld"] == "median_negative", (
-        "fixture assumption changed -- re-check public/data/peers/11002.json"
-    )
+    assert (
+        entry["deviation_pct"] is None and entry["deviation_withheld"] == "median_negative"
+    ), "fixture assumption changed -- re-check public/data/peers/11002.json"
     indicators = json.loads(
         (REPO / "public" / "data" / "metadata" / "indicators.json").read_text(encoding="utf-8")
     )

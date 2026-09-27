@@ -332,7 +332,8 @@ def test_a_national_peers_population_change_5y_value_also_matches_its_csv_row(pa
         for row in raw_rows
         if row["indicator_code"] == "POPULATION_CHANGE_5Y"
         and row["nis_code"] == peer_nis
-        and row["period"] == payloads["11002"]["lists"]["national"]["POPULATION_CHANGE_5Y"]["period"]
+        and row["period"]
+        == payloads["11002"]["lists"]["national"]["POPULATION_CHANGE_5Y"]["period"]
     ]
     if not csv_rows:
         pytest.skip(f"peer {peer_nis} has no published POPULATION_CHANGE_5Y row at this period")

@@ -252,7 +252,9 @@ def _index_rows(rows: list[dict]) -> dict[tuple[str, str], dict[str, tuple[float
     """
     duplicates = find_duplicate_rows(rows)
     if duplicates:
-        sample = ", ".join(f"{i}/{p}/{n} (x{c})" for (i, p, n), c in sorted(duplicates.items())[:10])
+        sample = ", ".join(
+            f"{i}/{p}/{n} (x{c})" for (i, p, n), c in sorted(duplicates.items())[:10]
+        )
         raise BenchmarksExportError(
             f"{len(duplicates)} (indicator, period, commune) key(s) have more than one row "
             f"in the committed history -- refusing rather than silently picking one: {sample}"
@@ -401,7 +403,9 @@ def build_benchmark_universe(
     survive filtering".
     """
     published_ids = _published_indicator_ids(raw_rows)
-    all_derived = load_and_validate_derived(derived_dir, published_ids) if derived_dir.is_dir() else {}
+    all_derived = (
+        load_and_validate_derived(derived_dir, published_ids) if derived_dir.is_dir() else {}
+    )
     cross_sectional_ids = frozenset(
         indicator_id
         for indicator_id, cfg in all_derived.items()

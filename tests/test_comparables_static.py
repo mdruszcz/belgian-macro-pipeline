@@ -62,7 +62,7 @@ def _inline_strings_table() -> dict[str, dict[str, str]]:
         assert lang_m, f"no {lang} table found in comparables.html's STRINGS"
         keys = re.findall(r"(\w+):\s*'", lang_m.group(1))
         assert keys, f"{lang} table parsed as empty"
-        blocks[lang] = {k: "" for k in keys}
+        blocks[lang] = dict.fromkeys(keys, "")
     return blocks
 
 
