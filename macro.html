@@ -328,6 +328,7 @@
     .kpi-row{grid-template-columns:1fr}
   }
 </style>
+<link rel="stylesheet" href="assets/belpulse/macro_portrait.css">
 </head>
 <body class="bp-shell macro">
 
@@ -337,55 +338,17 @@
 
 <div class="bp-body bp-body--analytical">
 
-  <aside class="bp-sidebar" aria-label="Sections">
-    <div class="side-title">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M5 16l4-6 4 3 6-8"/></svg>
-      <h2 data-t="macroSidebarTitle">Macroeconomics</h2>
-    </div>
-    <!-- BATCH A1.4: seven panels, French anchors per docs/features/site_unification.md.
-         English text is real markup (a no-JS reader still gets it); the
-         translated label from config/national_sections.yaml `panels[].label`
-         is applied over it at init, the same way `kpis_note` already is. -->
-    <ul class="bp-sidebar-nav" id="sideNav">
-      <li><a href="#apercu" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-panel-label="apercu">Overview</span></a></li>
-      <li><a href="#croissance"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-panel-label="croissance">Growth</span></a></li>
-      <li><a href="#prix"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9h4.5a2 2 0 1 1 0 4H9m0 0h5m-5 0v2m2-8v2"/></svg><span data-panel-label="prix">Prices</span></a></li>
-      <li><a href="#emploi"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 21v-1.5A6.5 6.5 0 0 1 11.5 13h1A6.5 6.5 0 0 1 19 19.5V21"/></svg><span data-panel-label="emploi">Employment</span></a></li>
-      <li><a href="#conjoncture"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2.5 7L13 5l2 7h6"/></svg><span data-panel-label="conjoncture">Business cycle</span></a></li>
-      <li><a href="#finances-publiques"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/></svg><span data-panel-label="finances-publiques">Public finances</span></a></li>
-      <li><a href="#europe"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-panel-label="europe">Europe</span></a></li>
-    </ul>
+      <header class="portrait-hero" id="overview">
+        <div>
+          <div class="hero-eyebrow" data-t="macroSidebarTitle">Macroeconomics</div>
+          <h1 class="hero-name" data-t="macroTitle">The Belgian macroeconomy</h1>
+          <p class="hero-tagline" data-t="macroLead">The headline indicators for reading Belgium's economic situation, updated automatically from official sources.</p>
     <div class="side-update" id="sideUpdate" data-status="other">
       <div class="lbl" data-t="macroLastUpdate">Last data update</div>
       <div class="when"><span class="dot"></span><span id="updateDate">—</span></div>
       <div class="status" id="updateStatus"></div>
       <div class="status" data-t="macroAutoUpdate">Automatic update</div>
     </div>
-    <p class="side-quote">« <span data-t="macroQuote">Reliable data for a stronger Belgium.</span> »<small>BelPulse</small></p>
-  </aside>
-
-  <main class="macro-main" id="bp-main">
-    <!-- BATCH A1.4: mobile panel picker, shown only under the sidebar
-         breakpoint (macro.html's own <style>, @media max-width:768px). -->
-    <div class="bp-panel-select-wrap">
-      <select id="panelPick" data-t-aria="macroPanelPickLabel" aria-label="Section">
-        <option value="apercu">Overview</option>
-        <option value="croissance">Growth</option>
-        <option value="prix">Prices</option>
-        <option value="emploi">Employment</option>
-        <option value="conjoncture">Business cycle</option>
-        <option value="finances-publiques">Public finances</option>
-        <option value="europe">Europe</option>
-      </select>
-    </div>
-
-    <!-- ==================== panel: apercu (overview, key, map, news) ==================== -->
-    <section class="bp-panel" id="apercu" data-panel>
-      <h2 class="bp-sr-only" data-panel-label="apercu">Overview</h2>
-      <header class="page-head" id="overview">
-        <div>
-          <h1 data-t="macroTitle">The Belgian macroeconomy</h1>
-          <p class="lead" data-t="macroLead">The headline indicators for reading Belgium's economic situation, updated automatically from official sources.</p>
         </div>
         <div class="skyline" aria-hidden="true">
           <span class="script" data-t="macroScript">Today's data for tomorrow's decisions.</span>
@@ -406,6 +369,42 @@
           </svg>
         </div>
       </header>
+
+  <aside class="bp-sidebar" aria-label="Sections">
+    <!-- BATCH A1.4: seven panels, French anchors per docs/features/site_unification.md.
+         English text is real markup (a no-JS reader still gets it); the
+         translated label from config/national_sections.yaml `panels[].label`
+         is applied over it at init, the same way `kpis_note` already is. -->
+    <ul class="bp-sidebar-nav" id="sideNav">
+      <li><a href="#apercu" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg><span data-panel-label="apercu">Overview</span></a></li>
+      <li><a href="#croissance"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg><span data-panel-label="croissance">Growth</span></a></li>
+      <li><a href="#prix"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9h4.5a2 2 0 1 1 0 4H9m0 0h5m-5 0v2m2-8v2"/></svg><span data-panel-label="prix">Prices</span></a></li>
+      <li><a href="#emploi"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 21v-1.5A6.5 6.5 0 0 1 11.5 13h1A6.5 6.5 0 0 1 19 19.5V21"/></svg><span data-panel-label="emploi">Employment</span></a></li>
+      <li><a href="#conjoncture"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2.5 7L13 5l2 7h6"/></svg><span data-panel-label="conjoncture">Business cycle</span></a></li>
+      <li><a href="#finances-publiques"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/></svg><span data-panel-label="finances-publiques">Public finances</span></a></li>
+      <li><a href="#europe"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-panel-label="europe">Europe</span></a></li>
+    </ul>
+  </aside>
+
+  <main class="macro-main" id="bp-main">
+    <!-- BATCH A1.4: mobile panel picker, shown only under the sidebar
+         breakpoint (macro.html's own <style>, @media max-width:768px). -->
+    <div class="bp-panel-select-wrap">
+      <select id="panelPick" data-t-aria="macroPanelPickLabel" aria-label="Section">
+        <option value="apercu">Overview</option>
+        <option value="croissance">Growth</option>
+        <option value="prix">Prices</option>
+        <option value="emploi">Employment</option>
+        <option value="conjoncture">Business cycle</option>
+        <option value="finances-publiques">Public finances</option>
+        <option value="europe">Europe</option>
+      </select>
+    </div>
+
+    <!-- ==================== panel: apercu (overview, key, map, news) ==================== -->
+    <section class="bp-panel" id="apercu" data-panel>
+      <h2 class="bp-sr-only" data-panel-label="apercu">Overview</h2>
+
 
       <section class="kpi-row bp-kpi-grid" id="kpiRow" aria-live="polite"></section>
       <p class="kpi-note" id="kpiNote"></p>
@@ -746,17 +745,19 @@
       card.className = 'bp-kpi macro-kpi bp-state';
       card.dataset.state = latest ? 'ready' : 'missing';
       var tint = TINTS[i % TINTS.length];
+      card.style.setProperty('--th', 'var(--bp-chart-' + ((i % 6) + 1) + ')');
       card.innerHTML =
         '<div class="kpi-top">' +
           '<span class="bp-kpi-icon" style="background:var(--bp-icon-' + tint + '-bg);color:var(--bp-icon-' + tint + '-ink)">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>' +
           '</span>' +
-          '<div class="bp-kpi-label"><span class="name"></span><span class="period"></span></div>' +
+          '<div class="bp-kpi-label"><span class="name"></span></div>' +
         '</div>' +
         '<div class="bp-state-body"><div class="bp-value"><span class="num"></span><span class="unit"></span></div>' +
         '<div class="bp-delta" data-direction="neutral"></div></div>' +
         '<div class="bp-state-message"><span class="headline"></span></div>' +
-        '<div class="mini-canvas"><canvas></canvas></div>';
+        '<div class="mini-canvas"><canvas></canvas></div>' +
+        '<span class="period kpi-period"></span>';
       card.querySelector('.name').textContent = nameOf(code);
       card.querySelector('.name').title = nameOf(code);
       card.querySelector('.period').textContent = latest ? fmtPeriod(latest.period) : '';
