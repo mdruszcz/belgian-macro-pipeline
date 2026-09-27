@@ -89,6 +89,31 @@ def test_definition_rejects_an_unknown_language_key():
     assert any("definition" in e for e in errors)
 
 
+# ── `peer_deviation`: whether commune.html's comparable-communes layer may
+# show a % deviation from the median of comparable communes for this
+# indicator (A4, PR C's config side). Optional; absent means "relative".
+# Any value other than "relative"/"none" must raise (rule 13), never be
+# silently coerced or dropped.
+
+
+def test_peer_deviation_field_is_optional():
+    assert "peer_deviation" not in VALID_INDICATOR
+    assert validate_indicator_config(VALID_INDICATOR, Path(__file__)) == []
+
+
+def test_peer_deviation_accepts_relative_and_none():
+    for value in ("relative", "none"):
+        cfg = dict(VALID_INDICATOR, peer_deviation=value)
+        assert validate_indicator_config(cfg, Path(__file__)) == []
+
+
+def test_peer_deviation_rejects_any_other_value():
+    bad = dict(VALID_INDICATOR, peer_deviation="sometimes")
+    errors = validate_indicator_config(bad, Path("bad.yaml"))
+    assert errors
+    assert any("peer_deviation" in e for e in errors)
+
+
 VALID_DERIVED = {
     "id": "TEST_DERIVED",
     "name": {"en": "Test derived", "fr": "Test dérivé", "nl": "Test afgeleid"},
@@ -125,6 +150,18 @@ def test_derived_definition_field_is_accepted_when_present():
 def test_derived_definition_field_is_optional():
     assert "definition" not in VALID_DERIVED
     assert validate_derived_config(VALID_DERIVED, Path(__file__)) == []
+
+
+def test_derived_peer_deviation_accepts_none():
+    cfg = dict(VALID_DERIVED, peer_deviation="none")
+    assert validate_derived_config(cfg, Path(__file__)) == []
+
+
+def test_derived_peer_deviation_rejects_any_other_value():
+    bad = dict(VALID_DERIVED, peer_deviation="always")
+    errors = validate_derived_config(bad, Path("bad.yaml"))
+    assert errors
+    assert any("peer_deviation" in e for e in errors)
 
 
 def test_valid_source_config_passes():

@@ -430,6 +430,46 @@ def _indicator_definitions(indicators_dir: Path | None = None) -> dict[str, dict
     return definitions
 
 
+def _indicator_peer_deviation(indicators_dir: Path | None = None) -> dict[str, str]:
+    """indicator_id -> "none", for every config/indicators/*.yaml (and
+    config/indicators/derived/*.yaml) whose optional `peer_deviation` key is
+    set to "none".
+
+    Read directly from the YAML, the same way `_indicator_definitions` reads
+    `definition`: this is authoring-time metadata, never written to the
+    database. Absent means the default ("relative") applies, so ONLY "none"
+    entries are collected -- the metadata row omits the key entirely for
+    every other indicator (A4's own instruction: "writes peer_deviation:
+    none into the metadata/indicators.json row only when it is 'none'").
+    `config_schema.py` already rejects any other value at load time (rule
+    13), so by the time this runs the key is either absent or "none" or
+    "relative".
+    """
+    base = indicators_dir or CONFIG_INDICATORS_DIR
+    overrides: dict[str, str] = {}
+    if not base.is_dir():
+        return overrides
+
+    import yaml
+
+    def _scan(paths):
+        for path in paths:
+            cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+            if not isinstance(cfg, dict):
+                continue
+            ind_id = cfg.get("id")
+            peer_deviation = cfg.get("peer_deviation")
+            if isinstance(ind_id, str) and peer_deviation == "none":
+                overrides[ind_id] = "none"
+
+    _scan(sorted(base.glob("*.yaml")))
+    derived_dir = base / "derived"
+    if derived_dir.is_dir():
+        _scan(sorted(derived_dir.glob("*.yaml")))
+
+    return overrides
+
+
 def _display_metadata(db_path: Path) -> dict[str, dict]:
     """indicator_id -> {direction, decimals}, from the indicators table.
 
@@ -949,6 +989,7 @@ def _indicator_index(
     db_path: Path,
     lineage: dict[str, dict] | None = None,
     definitions: dict[str, dict] | None = None,
+    peer_deviation: dict[str, str] | None = None,
 ) -> list[dict]:
     """One row per municipal indicator, for a page that must not name any.
 
@@ -974,56 +1015,62 @@ def _indicator_index(
 
     lineage = lineage or {}
     definitions = definitions or {}
+    peer_deviation = peer_deviation or {}
     index = []
     for indicator_id, payload in sorted(indicators.items()):
         provenance = lineage.get(indicator_id, {})
         inputs = provenance.get("derived_from") or []
-        index.append(
-            {
-                "indicator_code": indicator_id,
-                "names": names.get(indicator_id, {"en": payload["name"]}),
-                # The PUBLIC one-sentence definition (config/indicators
-                # `definition:`), distinct from the developer-oriented
-                # `description` field, which is never published. Optional:
-                # absent entirely for an indicator whose config carries no
-                # `definition` block yet, same fallback shape as `names`.
-                "definition": definitions.get(indicator_id),
-                "unit": payload["unit"],
-                "additive": indicator_id in additive,
-                "direction": directions.get(indicator_id),
-                "decimals": decimals.get(indicator_id),
-                # How many communes actually carry a NUMBER. A choropleth over
-                # an indicator covering 40 communes is a map of the gaps, so
-                # the page shows this before drawing rather than after.
-                #
-                # Counts values, not keys: withheld cells are now published
-                # (with a null value and status "suppressed"), and counting
-                # them as coverage would tell a reader the map has data it
-                # cannot draw. They are reported separately instead, because
-                # "the source masked 13 communes" and "13 communes were never
-                # measured" are different facts about an indicator.
-                "coverage": sum(
-                    1 for cell in payload["communes"].values() if cell["value"] is not None
-                ),
-                "suppressed": sum(
-                    1
-                    for cell in payload["communes"].values()
-                    if cell["value"] is None and cell.get("status") == "suppressed"
-                ),
-                # How the figure was MADE, and by whom. Grade is per indicator
-                # because lineage is a property of the series, not of any one
-                # commune or period -- which is also why it lives here rather
-                # than in all 565 commune payloads, where the same source name
-                # would be repeated some 29,000 times.
-                "grade": provenance.get("grade"),
-                "source": provenance.get("source"),
-                "transform": provenance.get("transform"),
-                "derived_from": inputs or None,
-                "input_sources": provenance.get("input_sources") or None,
-                "inputs_updated": _inputs_updated(inputs, indicators) if inputs else None,
-                "updated": payload.get("updated"),
-            }
-        )
+        row = {
+            "indicator_code": indicator_id,
+            "names": names.get(indicator_id, {"en": payload["name"]}),
+            # The PUBLIC one-sentence definition (config/indicators
+            # `definition:`), distinct from the developer-oriented
+            # `description` field, which is never published. Optional:
+            # absent entirely for an indicator whose config carries no
+            # `definition` block yet, same fallback shape as `names`.
+            "definition": definitions.get(indicator_id),
+            "unit": payload["unit"],
+            "additive": indicator_id in additive,
+            "direction": directions.get(indicator_id),
+            "decimals": decimals.get(indicator_id),
+            # How many communes actually carry a NUMBER. A choropleth over
+            # an indicator covering 40 communes is a map of the gaps, so
+            # the page shows this before drawing rather than after.
+            #
+            # Counts values, not keys: withheld cells are now published
+            # (with a null value and status "suppressed"), and counting
+            # them as coverage would tell a reader the map has data it
+            # cannot draw. They are reported separately instead, because
+            # "the source masked 13 communes" and "13 communes were never
+            # measured" are different facts about an indicator.
+            "coverage": sum(
+                1 for cell in payload["communes"].values() if cell["value"] is not None
+            ),
+            "suppressed": sum(
+                1
+                for cell in payload["communes"].values()
+                if cell["value"] is None and cell.get("status") == "suppressed"
+            ),
+            # How the figure was MADE, and by whom. Grade is per indicator
+            # because lineage is a property of the series, not of any one
+            # commune or period -- which is also why it lives here rather
+            # than in all 565 commune payloads, where the same source name
+            # would be repeated some 29,000 times.
+            "grade": provenance.get("grade"),
+            "source": provenance.get("source"),
+            "transform": provenance.get("transform"),
+            "derived_from": inputs or None,
+            "input_sources": provenance.get("input_sources") or None,
+            "inputs_updated": _inputs_updated(inputs, indicators) if inputs else None,
+            "updated": payload.get("updated"),
+        }
+        # Only written when "none": the comparable-communes layer's default
+        # is "relative", so an omitted key IS the default, exactly like
+        # `definition` above being absent for an indicator with no config
+        # block -- never a hand-typed "relative" on every other row.
+        if peer_deviation.get(indicator_id) == "none":
+            row["peer_deviation"] = "none"
+        index.append(row)
     return index
 
 
@@ -1145,7 +1192,13 @@ def export_site_payloads(
         out_dir / "metadata" / "indicators.json",
         {
             "indicators": _indicator_index(
-                indicators, names, additive, db_path, lineage, _indicator_definitions()
+                indicators,
+                names,
+                additive,
+                db_path,
+                lineage,
+                _indicator_definitions(),
+                _indicator_peer_deviation(),
             )
         },
     )

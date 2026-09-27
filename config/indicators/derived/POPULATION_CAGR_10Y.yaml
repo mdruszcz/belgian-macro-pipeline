@@ -11,12 +11,15 @@ unit: percent_per_year
 frequency: A
 geo_levels: [municipal]
 preferred_direction: contextual
+peer_deviation: none
 decimals: 2
 description:
   en: >
     Compound annual growth rate of population over ten years. Requires both
     endpoints to be strictly positive; a commune with no 10-years-earlier
     figure returns null rather than a fabricated rate.
+    peer_deviation: none (choice not confirmed by the maintainer) -- this is
+    itself a % change, so a relative deviation would read as a % of a %.
 derived:
   function: cagr
   inputs: [POPULATION_BY_COMMUNE]

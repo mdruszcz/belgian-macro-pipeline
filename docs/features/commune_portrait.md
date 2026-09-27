@@ -96,6 +96,52 @@ pieces are the earliest-year outline layer and the tick row.
 - `assets/i18n.js`: every `v4*` key the page uses, plus `cpNeighboursValue`, added in fr/nl/en,
   merged alongside the existing keys (nothing removed or reworded).
 
+## Comparable communes (PR C, feat/commune-comparables)
+
+Adds the "comparable communes" layer to every non-additive chapter's lead chart and small
+multiples, from `public/data/peers/<nis>.json` (docs/features/peer_model.md) -- the page
+computes no statistic; every median, position and deviation shown is read straight from that
+file (rule 4/27).
+
+- **The switch.** A per-chapter `<fieldset class="sim-toggle">` (Hide / Same region / All of
+  Belgium), default "Same region" (maintainer decision, 2026-09-27). Persisted to
+  `localStorage.belpulse-similar`; every chapter's switch stays in sync without a rebuild, so
+  clicking one never drops keyboard focus elsewhere on the page.
+- **Grey lines.** Line-mode leads only, drawn from every member of the active list whose profile
+  has loaded, behind the commune's own line (`assets/belpulse/similar.js`'s `peerRuns`, reusing
+  the chart's own `medianStep` converted to pixel space). Loaded lazily (IntersectionObserver,
+  300px rootMargin) and cached module-wide across language/list switches
+  (`simProfiles`/`loadSimProfiles`).
+- **The % badge.** `.sim-badge`, a full-width row under the lead's header: "X% above/below the
+  median of comparable communes (list)", or one of six withheld states (no_pct_zero/negative/
+  other/config, few_peers, stale, generic, mismatch) -- never a computed value, never "average",
+  never green/red or better/worse wording.
+- **Tiles.** `.mtile-sim` under `.mtile-period` on every non-additive small-multiple, updated in
+  place on a list switch (never a tile-grid rebuild).
+- **"Quelles communes ?"** (`.sim-which`, `simWhich`/`simWhichNote` -- the page never uses the
+  word "peer") -- every member of the active list, in rank order, each linking to `?nis=<nis>`;
+  a peer cell distinguishes suppressed, na, "no figure for this period" and "not loaded" as four
+  states (rule 26), never collapsed. `comparables.html?nis=<nis>` is not linked from this PR
+  (out of scope; the Block M session's own page covers it).
+- **Hover/touch/keyboard.** `nearestPeer` (assets/belpulse/similar.js) picks the closest peer
+  point within tolerance and closer than the commune's own point; ArrowDown/ArrowUp cycle
+  commune -> peers by value -> commune; Enter/click opens the hot peer; touch never navigates.
+- **Naming.** "peer" already means province mates elsewhere on this page (`peerGeographies`,
+  `buildPeerStrip`, `v4PeerChartTitle`) -- every new class, id and function here is `sim-`/
+  `simXxx` only, checked by `tests/test_similar_logic.py`'s static word scan.
+
+Not built in this PR (see the build spec's "Explicitly not done"): no peer-median line over
+time, no median diamond, no points difference, no similarity score, no lines in sparklines or on
+additive indicators, no map overlays, no red/green or better/worse wording.
+
+Depends on PR A (`peer_model.md`) having merged and a daily run having published `peers`,
+`min_peers_with_value` and `withheld` on `public/data/peers/<nis>.json`, and on A4's
+`peer_deviation: none` override (POPULATION_CHANGE_5Y, POPULATION_CAGR_10Y,
+MUN_EXPENDITURE_GROWTH_1Y, MUN_REVENUE_GROWTH_1Y) having been exported into
+`metadata/indicators.json` -- until then this PR's CI cannot pass and its browser tests for
+those four indicators route the flag onto the fixture directly (see
+`tests/test_commune_comparable_browser.py`'s `test_92094_population_change_5y_has_no_pct_line`).
+
 ## Rules kept
 
 No indicator id appears anywhere in this file (rule 24, `tests/test_map_ui_logic.py::

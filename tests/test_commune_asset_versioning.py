@@ -40,6 +40,7 @@ VERSIONED_ASSET_PATHS = (
     "assets/belpulse/components.js",
     "assets/commune_map.js",
     "assets/belpulse/charts.js",
+    "assets/belpulse/similar.js",
 )
 
 

@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from export_site_payloads import (  # noqa: E402
     _check_national_sections,
     _indicator_definitions,
+    _indicator_peer_deviation,
     _national_sections,
     _read_communes_latest,
     export_site_payloads,
@@ -759,6 +760,63 @@ def test_indicator_index_carries_definition_through_to_the_published_index(tmp_p
     # BIRTHS has no entry in the fixture `definitions` map -- must be None,
     # never a fabricated fallback and never a KeyError.
     assert by_code["BIRTHS"]["definition"] is None
+
+
+def test_indicator_peer_deviation_is_read_from_config_yaml(tmp_path):
+    """_indicator_peer_deviation() reads the optional `peer_deviation` key
+    straight from config/indicators/*.yaml (and its derived/ subdirectory),
+    the same way _indicator_definitions() reads `definition` -- authoring-time
+    metadata, never written to the database. Only "none" entries are
+    collected; an indicator with no key, or an explicit "relative", is simply
+    absent from the result (the default), never a fabricated "relative"."""
+    indicators_dir = tmp_path / "indicators"
+    indicators_dir.mkdir()
+    (indicators_dir / "AVG_NET_TAXABLE_INCOME.yaml").write_text(
+        "id: AVG_NET_TAXABLE_INCOME\n", encoding="utf-8"
+    )
+    (indicators_dir / "EXPLICIT_RELATIVE.yaml").write_text(
+        "id: EXPLICIT_RELATIVE\npeer_deviation: relative\n", encoding="utf-8"
+    )
+    derived_dir = indicators_dir / "derived"
+    derived_dir.mkdir()
+    (derived_dir / "POPULATION_CHANGE_5Y.yaml").write_text(
+        "id: POPULATION_CHANGE_5Y\npeer_deviation: none\n", encoding="utf-8"
+    )
+
+    overrides = _indicator_peer_deviation(indicators_dir)
+    assert overrides == {"POPULATION_CHANGE_5Y": "none"}
+
+
+def test_indicator_index_writes_peer_deviation_only_when_none(tmp_path):
+    """The exporter's public output must thread `peer_deviation` through to
+    metadata/indicators.json, and ONLY write the key for indicators the
+    config marks "none" -- every other row (the default, "relative") must
+    have no such key at all, never a hand-typed "relative"."""
+    from export_site_payloads import _indicator_index
+
+    indicators = {
+        "POPULATION_CHANGE_5Y": {
+            "name": "Population change over 5 years",
+            "unit": "percent",
+            "communes": {"11001": {"value": 1.0}},
+        },
+        "AVG_NET_TAXABLE_INCOME": {
+            "name": "Average net taxable income",
+            "unit": "eur",
+            "communes": {"11001": {"value": 30000.0}},
+        },
+    }
+    names = {}
+    peer_deviation = {"POPULATION_CHANGE_5Y": "none"}
+
+    db_path = tmp_path / "db.sqlite"
+    _geo_db(db_path)
+
+    index = _indicator_index(indicators, names, set(), db_path, {}, {}, peer_deviation)
+    by_code = {row["indicator_code"]: row for row in index}
+
+    assert by_code["POPULATION_CHANGE_5Y"]["peer_deviation"] == "none"
+    assert "peer_deviation" not in by_code["AVG_NET_TAXABLE_INCOME"]
 
 
 def test_a_withheld_cell_is_published_not_dropped(tmp_path):

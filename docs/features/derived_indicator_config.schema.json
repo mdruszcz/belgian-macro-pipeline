@@ -48,6 +48,11 @@
       "type": "string",
       "enum": ["lower_is_better", "higher_is_better", "neutral", "contextual"]
     },
+    "peer_deviation": {
+      "type": "string",
+      "description": "Whether commune.html's comparable-communes layer may show a % deviation from the median of comparable communes for this indicator. Omit for the default ('relative'); set to 'none' when the figure is itself a growth/change rate, where a relative deviation would read as a nonsensical percentage of a percentage (docs/features/peer_model.md).",
+      "enum": ["relative", "none"]
+    },
     "decimals": { "type": "integer", "minimum": 0, "maximum": 6 },
     "derived": {
       "type": "object",
