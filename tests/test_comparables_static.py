@@ -122,9 +122,11 @@ def test_positionof_template_has_no_double_suffix_and_no_stray_placeholder():
         assert pos_m, f"{lang} has no positionOf template"
         template = pos_m.group(1)
         assert "{ord}" not in template, f"{lang} positionOf still has a stray {{ord}}: {template!r}"
-        assert template in ("{pos} of {of}", "{pos} sur {of}", "{pos} van {of}"), (
-            f"{lang} positionOf changed shape unexpectedly: {template!r}"
-        )
+        assert template in (
+            "{pos} of {of}",
+            "{pos} sur {of}",
+            "{pos} van {of}",
+        ), f"{lang} positionOf changed shape unexpectedly: {template!r}"
     assert tables  # keeps the fixture call meaningful if the loop above is edited
 
 

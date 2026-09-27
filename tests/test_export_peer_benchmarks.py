@@ -492,7 +492,9 @@ def test_antwerpen_11001_part_time_benefit_recipients_2026_is_withheld_as_suppre
         "PART_TIME_BENEFIT_RECIPIENTS"
     )
     assert period is not None, "PART_TIME_BENEFIT_RECIPIENTS has no rows at all -- data drifted"
-    _value, status = history_index[("PART_TIME_BENEFIT_RECIPIENTS", period)].get("11001", (None, None))
+    _value, status = history_index[("PART_TIME_BENEFIT_RECIPIENTS", period)].get(
+        "11001", (None, None)
+    )
     assert status == "S", (
         "fixture assumption stale: 11001/PART_TIME_BENEFIT_RECIPIENTS/"
         f"{period} is no longer status S in the committed history (got {status!r})"
