@@ -76,16 +76,28 @@ the indicator's code appears in withheld.<list> with a reason:
                       (or a raw rank/percentile indicator) -- structurally
                       excluded from ever being benchmarked, same for every
                       commune.
-  "no_current_value"  the commune has no usable value in P, the indicator's
-                      own newest period across all communes. `own_period` is
-                      the commune's own newest period with a usable value
+  "no_current_value"  the commune has no row at all for (indicator, P), the
+                      indicator's own newest period across all communes --
+                      a genuine gap, not a suppression or an na. `own_period`
+                      is the commune's own newest period with a usable value
                       BELOW P, or null if it has never had one. KNOWN GAP
                       (stated, not fixed, per the handoff): a Walloon-only
                       indicator on a Flemish commune reads this way too, with
                       own_period null -- indistinguishable here from a
                       genuine gap, because nothing in the committed data
                       marks "not applicable to this commune" as a fifth
-                      state yet (docs/steps has an open [SPEC] for it).
+                      state yet (docs/steps has an open [SPEC] for it). This
+                      is a DIFFERENT thing from the "na" reason below, which
+                      is a per-row status the source itself sets.
+  "suppressed"        the commune HAS a row for (indicator, P), but its
+                      status is "S" -- the source (e.g. ONEM, Statbel)
+                      withheld the figure for privacy (small-sample
+                      suppression). Never treated as zero or as a plain
+                      gap (rule 26); `own_period` is filled the same way as
+                      for "no_current_value".
+  "na"                the commune HAS a row for (indicator, P), but its
+                      status is "N" -- the source marked it explicitly
+                      not-applicable. `own_period` is filled the same way.
   "few_peers"         the commune has a usable value in P, but fewer than
                       `MIN_PEERS_WITH_VALUE` (peers.py's constant, read from
                       code, never re-typed) of its 10 peers do.
@@ -100,18 +112,22 @@ Writes public/data/peers/<nis>.json, one per current commune:
    lists: {national: {IND: {period, value, peer_median, peers_with_value,
                              position, of, deviation_pct,
                              [deviation_withheld], selection_variable}},
-           region: {...}},
-   indicator_meta: {IND: {names: {en, fr, nl}, unit, decimals}}}
+           region: {...}}}
 
-`indicator_meta` is identical on every payload (a property of the model, not
-of the commune) and carries a name/unit ONLY for the handful of ENGINE-ONLY
-derived indicators (build_derived_rows's `meta`) that never get a row in
+Also writes public/data/peers/indicator_meta.json ONCE (not one per
+commune -- P2 fix, this batch: the block is identical for all 565 communes,
+so writing it into every payload cost ~0.76 MB of pure duplication):
+
+  {IND: {names: {en, fr, nl}, unit, decimals}}
+
+carrying a name/unit ONLY for the handful of ENGINE-ONLY derived indicators
+(build_derived_rows's `meta`) that never get a row in
 public/data/metadata/indicators.json -- that file is built from the
 canonical database, which an indicator this exporter alone computes never
 reaches. Every other candidate already has a name and unit there;
-comparables.html reads that first and falls back to this only for the ids it
-is missing from (rule 24's spirit: a reader must never see a bare
-indicator_code or an unformatted number where a unit belongs).
+comparables.html reads that first and falls back to this shared file only
+for the ids it is missing from (rule 24's spirit: a reader must never see a
+bare indicator_code or an unformatted number where a unit belongs).
 
 `peers` carries no name and no distance/similarity -- just the nis code and
 its rank in that list, read straight from public/data/metadata/peers.json.
@@ -441,11 +457,10 @@ def build_benchmarks(
     peers_model: dict,
     candidate_ids: frozenset[str],
     excluded_ids: frozenset[str],
-    engine_only_meta: dict[str, dict] | None = None,
 ) -> dict[str, dict]:
     """nis -> {model_version, variant, nis_code, peers, min_peers_with_value,
     withheld: {national: {...}, region: {...}}, lists: {national: {...},
-    region: {...}}, indicator_meta: {...}}.
+    region: {...}}}.
 
     For every commune and every list, EXACTLY ONE of `lists[list][IND]` or
     `withheld[list][IND]` exists for every IND in `candidate_ids` --
@@ -456,14 +471,16 @@ def build_benchmarks(
     and re-checked by test_export_peer_benchmarks.py's exhaustiveness test
     over the real 565 files.
 
-    `indicator_meta` (identical on every payload, since it is a property of
-    the model, not of the commune) carries {"names": {en,fr,nl}, "unit",
-    "decimals"} ONLY for the engine-only derived indicators
-    (build_derived_rows's `meta`) -- every other candidate already has a name
-    and unit in public/data/metadata/indicators.json, which the page reads
-    first; this is a fallback for the handful of ids (measured 2026-09-27: 6
-    -- see the PR body) that exist only inside this exporter's own universe
-    and would otherwise render as a bare code with no unit.
+    Does NOT carry `indicator_meta` (P2 fix, this batch): that block is
+    identical on every payload -- a property of the model, not of the
+    commune -- so writing it into all 565 files cost ~0.76 MB of duplication
+    for no benefit. It is now written once by write_indicator_meta() to
+    public/data/peers/indicator_meta.json, and comparables.html fetches it
+    as a third metadata source alongside geographies.json/indicators.json.
+    SCHEMA CHANGE: any consumer of public/data/peers/<nis>.json that read
+    payload.indicator_meta must switch to that shared file instead -- see
+    the PR body's schema_changed note. commune.html (the Portrait session's
+    file) does not read this key, confirmed by grep before this change.
     """
     model_version = peers_model["model_version"]
     variant = peers_model["variant"]
@@ -499,12 +516,24 @@ def build_benchmarks(
                     }
                     continue
                 bucket = index.get((indicator_id, period), {})
-                own_value, _own_status = bucket.get(nis, (None, None))
+                own_value, own_status = bucket.get(nis, (None, None))
                 if own_value is None:
                     own_history = own_periods.get((indicator_id, nis), [])
                     own_period = next((p for p in reversed(own_history) if p < period), None)
+                    # own_status distinguishes WHY there is no usable value
+                    # (rule 26): "S" (suppressed, e.g. ONEM/Statbel privacy
+                    # withholding) and "N" (na, not applicable) are real,
+                    # named states, never collapsed into a plain "the row
+                    # is missing" gap. own_status is None only when the
+                    # commune has no row at all for (indicator, period).
+                    if own_status == "S":
+                        reason = "suppressed"
+                    elif own_status == "N":
+                        reason = "na"
+                    else:
+                        reason = "no_current_value"
                     withheld_payload[list_name][indicator_id] = {
-                        "reason": "no_current_value",
+                        "reason": reason,
                         "period": period,
                         "own_period": own_period,
                     }
@@ -548,7 +577,6 @@ def build_benchmarks(
             "min_peers_with_value": MIN_PEERS_WITH_VALUE,
             "withheld": withheld_payload,
             "lists": lists_payload,
-            "indicator_meta": engine_only_meta or {},
         }
     return result
 
@@ -558,6 +586,17 @@ def write_payloads(payloads: dict[str, dict], out_dir: Path) -> None:
     for nis, payload in payloads.items():
         text = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         (out_dir / f"{nis}.json").write_text(text + "\n", encoding="utf-8", newline="\n")
+
+
+def write_indicator_meta(engine_only_meta: dict[str, dict], out_dir: Path) -> None:
+    """Writes public/data/peers/indicator_meta.json ONCE (a property of the
+    model, not of the commune -- identical for all 565 communes, so it no
+    longer needs to be duplicated into every per-commune payload; P2 fix,
+    this batch). comparables.html fetches this file alongside the other
+    metadata fetches instead of reading payload.indicator_meta."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(engine_only_meta, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    (out_dir / "indicator_meta.json").write_text(text + "\n", encoding="utf-8", newline="\n")
 
 
 def main() -> None:
@@ -590,9 +629,10 @@ def main() -> None:
     latest_period = _latest_period_per_indicator(index)
 
     payloads = build_benchmarks(
-        communes, index, latest_period, peers_model, candidate_ids, excluded_ids, derived_meta
+        communes, index, latest_period, peers_model, candidate_ids, excluded_ids
     )
     write_payloads(payloads, args.out_dir)
+    write_indicator_meta(derived_meta, args.out_dir)
 
     total_bytes = sum((args.out_dir / f"{nis}.json").stat().st_size for nis in communes)
     largest = max(communes, key=lambda nis: (args.out_dir / f"{nis}.json").stat().st_size)

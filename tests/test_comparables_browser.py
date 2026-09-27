@@ -84,6 +84,39 @@ def test_92094_renders_ten_peers_and_the_table_with_zero_console_errors(chromium
     not (REPO / "public" / "data" / "peers").is_dir(),
     reason="public/data/peers/ not built -- run scripts/export_peer_benchmarks.py first",
 )
+@pytest.mark.parametrize(
+    "locale,pattern",
+    [
+        ("en-US", re.compile(r"^\d+(st|nd|rd|th) of \d+$")),
+        ("fr-BE", re.compile(r"^\d+(er|e) sur \d+$")),
+        ("nl-BE", re.compile(r"^\d+e van \d+$")),
+    ],
+)
+def test_position_column_has_no_broken_ordinal_in_any_language(chromium, site, locale, pattern):
+    """Browser finding (P1, blocker): the Position column used to render a
+    literal '{ord}' placeholder in English and a doubled ordinal letter in
+    French/Dutch (e.g. '4th{ord} of 11', '1ere sur 11', '3ee van 11') on
+    every single row. Every Position cell must now match a clean
+    '<n><suffix> of/sur/van <n>' shape, with no stray '{' and no doubled
+    letter, in each of the three languages."""
+    ctx = chromium.new_context(viewport={"width": 1200, "height": 900}, locale=locale)
+    try:
+        page = ctx.new_page()
+        page.goto(f"{site}/comparables.html?nis=92094", wait_until="load")
+        page.wait_for_selector('#bp-main[data-page-state="ready"]')
+        cells = page.locator("#tableBody td:last-child").all_inner_texts()
+        assert cells, "no Position cells rendered -- fixture likely stale"
+        bad = [c for c in cells if c != "—" and not pattern.match(c)]
+        assert not bad, f"[{locale}] Position cells do not match {pattern.pattern}: {bad[:10]}"
+        assert not any("{" in c for c in cells), f"[{locale}] stray placeholder: {cells[:10]}"
+    finally:
+        ctx.close()
+
+
+@pytest.mark.skipif(
+    not (REPO / "public" / "data" / "peers").is_dir(),
+    reason="public/data/peers/ not built -- run scripts/export_peer_benchmarks.py first",
+)
 def test_units_with_a_known_shared_map_gap_render_without_leaking_or_duplicating(chromium, site):
     """Regression test for two real rendering bugs found while reviewing this
     page: eur_per_month (MUN_LEASE_CHARGES_MEDIAN_HOUSING) used to render as
@@ -206,13 +239,30 @@ def test_a_missing_payload_shows_the_unavailable_state(chromium, site):
         ctx.close()
 
 
-def test_no_nis_at_all_shows_the_unavailable_state(chromium, site):
+@pytest.mark.skipif(
+    not (REPO / "public" / "data" / "peers").is_dir(),
+    reason="public/data/peers/ not built -- run scripts/export_peer_benchmarks.py first",
+)
+def test_no_nis_at_all_shows_the_unavailable_state_but_still_offers_a_working_picker(
+    chromium, site
+):
+    """Browser finding (P2, should-fix): landing on the bare URL (no ?nis)
+    used to leave the commune picker empty -- it sits outside the hidden
+    .cp-body, so a reader saw a visible but non-functional <select>. The
+    unavailable state must still show, but the picker must now be populated
+    and choosing a commune from it must leave the unavailable state."""
     ctx = _context(chromium)
     try:
         page = ctx.new_page()
         page.goto(f"{site}/comparables.html", wait_until="load")
         page.wait_for_selector('#bp-main[data-page-state="unavailable"]')
         assert page.locator("#cpUnavail").is_visible()
+        page.wait_for_function("document.getElementById('communeSelect').options.length > 0")
+        options = page.locator("#communeSelect option")
+        assert options.count() > 0
+        page.select_option("#communeSelect", "92094")
+        page.wait_for_selector('#bp-main[data-page-state="ready"]')
+        assert page.locator("#peerStrip .peer-chip").count() == 10
     finally:
         ctx.close()
 
