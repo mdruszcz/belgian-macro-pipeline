@@ -145,7 +145,12 @@ jobs:
 
   generated-site:
     # The sweeps over the generated local/ and preview/ output -- one case per
-    # route or page -- plus anything marked slow.
+    # route or page -- plus anything marked slow. Since 2026-09-27 (maintainer's
+    # decision) it does not run on pull requests, only after every push to
+    # develop/main: it took ~20-23 min per PR, and a data-shape assertion in it
+    # held back the daily data PR #289. A failure now shows as a red run on
+    # develop right after the merge instead of blocking the merge.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # Raised from 15 to 25: this tier ran 14m53s on 2026-09-23 (PR #238) and
     # grows with the committed stores -- the spf_agdp real backfill (94,783
@@ -221,13 +226,14 @@ jobs:
     # "some of it ran". A tier that ran its own docs-only short-circuit
     # still reports `success` here (see the jobs above), so this gate's
     # meaning is unchanged by it.
+    # Since 2026-09-27 it gates on the fast and browser tiers only; the
+    # generated-site tier reports on its own after the merge.
     runs-on: ubuntu-latest
-    needs: [fast, browser, generated-site]
+    needs: [fast, browser]
     if: always()
     steps:
-      - name: Every tier must have passed
+      - name: Every required tier must have passed
         run: |
-          echo "fast=${{ needs.fast.result }} browser=${{ needs.browser.result }} generated-site=${{ needs.generated-site.result }}"
+          echo "fast=${{ needs.fast.result }} browser=${{ needs.browser.result }}"
           test "${{ needs.fast.result }}" = "success" || exit 1
           test "${{ needs.browser.result }}" = "success" || exit 1
-          test "${{ needs.generated-site.result }}" = "success" || exit 1
