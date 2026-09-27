@@ -44,6 +44,7 @@ MUNICIPAL_PAGES = [
     "profiles.html",
     "micro.html",
     "explorer.html",
+    "comparables.html",
 ]
 
 # Pages that show municipal figures but are too small to carry the whole notice

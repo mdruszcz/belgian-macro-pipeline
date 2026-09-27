@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BelPulse — Communes comparables</title>
+<meta name="description" content="Chaque indicateur d'une commune belge comparé à la médiane de ses dix communes structurellement les plus proches.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/belpulse/tokens.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/components.css">
+<style>
+:root{--bp-font-ui:'Inter',system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+body{margin:0; font-family:var(--bp-font-ui); background:var(--bp-bg); color:var(--bp-text)}
+.wrap{max-width:1080px; margin:0 auto; padding:0 24px}
+@media (max-width:640px){ .wrap{padding:0 16px} }
+main{padding-bottom:60px}
+h1{font:600 clamp(24px,4vw,34px)/1.2 var(--bp-font-ui); margin:20px 0 6px}
+.lead{color:var(--bp-text-muted); max-width:70ch; margin:0 0 18px; font-size:14px; line-height:1.55}
+.commune-picker{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:18px 0}
+.commune-picker select{border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); background:var(--bp-surface); color:inherit; padding:9px 12px; font:inherit; min-width:220px}
+.scope-switch{display:inline-flex; border:1px solid var(--bp-border); border-radius:999px; padding:3px; gap:2px; background:var(--bp-surface)}
+.scope-switch button{border:0; background:transparent; color:inherit; padding:7px 16px; border-radius:999px; font:inherit; font-size:13px; cursor:pointer}
+.scope-switch button[aria-pressed="true"]{background:var(--bp-accent); color:var(--bp-on-accent)}
+.peer-strip{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px; margin:18px 0 26px}
+.peer-chip{border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); padding:10px 12px; background:var(--bp-surface); text-decoration:none; color:inherit; display:block}
+.peer-chip:hover{background:var(--bp-surface-alt)}
+.peer-chip .rank{display:block; font-size:11px; color:var(--bp-text-faint); font-variant-numeric:tabular-nums}
+.peer-chip .name{display:block; font-weight:var(--bp-weight-medium); font-size:14px; margin-top:2px}
+.filter-row{margin:22px 0 10px}
+.filter-row input{width:100%; max-width:360px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); background:var(--bp-surface); color:inherit; padding:9px 12px; font:inherit}
+.count-line{color:var(--bp-text-muted); font-size:12px; margin:8px 0 4px}
+table.bp-compare-table td.num,table.bp-compare-table th.num{font-variant-numeric:tabular-nums}
+table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; white-space:nowrap}
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -16px; padding:0 16px}
+@media (min-width:641px){ .table-scroll{margin:0; padding:0} }
+.table-scroll table.bp-compare-table{min-width:640px}
+.sel-note{display:inline-block; margin-left:6px; color:var(--bp-text-faint); cursor:help; border-bottom:1px dotted var(--bp-text-faint)}
+.dev-cell{cursor:default}
+.dev-cell abbr{text-decoration:none; border-bottom:1px dotted var(--bp-text-faint); cursor:help}
+.withheld-block{margin-top:34px}
+.withheld-block summary{cursor:pointer; font-weight:var(--bp-weight-medium); padding:10px 0; color:var(--bp-text-muted)}
+.withheld-group{margin:12px 0 20px}
+.withheld-group h3{font-size:13px; font-weight:var(--bp-weight-semibold); margin:0 0 8px; color:var(--bp-text)}
+.withheld-group ul{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:4px 14px}
+.withheld-group li{font-size:13px; color:var(--bp-text-muted); padding:3px 0}
+.model-footnote{margin-top:30px; font-size:11px; color:var(--bp-text-faint)}
+[data-page-state="unavailable"] .cp-body{display:none}
+[data-page-state="ready"] .cp-unavail{display:none}
+.cp-unavail{padding:40px 0; color:var(--bp-text-muted); font-size:14px}
+.attribution{padding:28px 0; font-size:11px; line-height:1.6; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border); margin-top:44px}
+.attribution strong{color:var(--bp-text)}
+</style>
+</head>
+<body class="bp-shell">
+
+<a class="bp-skip-link" href="#bp-main" data-t="skipToContent">Skip to content</a><header class="bp-topbar"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" id="bp-nav" aria-label="Main navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><div class="bp-topbar-actions"><div class="bp-menu bp-theme-menu" data-menu="theme"><button type="button" class="bp-menu-btn" id="bp-theme-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-theme-menu-panel" aria-label="Colour theme" data-t-aria="theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-menu-panel bp-theme-switch" id="bp-theme-menu-panel" role="menu" aria-label="Colour theme" data-t-aria="theme"><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="light" aria-checked="false" data-t="themeLight">Light</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="dark" aria-checked="false" data-t="themeDark">Dark</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="paper" aria-checked="false" data-t="themePaper">Paper</button></div></div><div class="bp-menu bp-lang-menu" data-menu="lang"><button type="button" class="bp-menu-btn" id="bp-lang-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-lang-menu-panel" aria-label="Language" data-t-aria="language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="bp-menu-current">EN</span><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-lang-switch" id="bp-lang-menu-panel" role="menu" aria-label="Language" data-t-aria="language"><button type="button" role="menuitemradio" data-lang="en" aria-checked="false">English</button><button type="button" role="menuitemradio" data-lang="fr" aria-checked="false">Français</button><button type="button" role="menuitemradio" data-lang="nl" aria-checked="false">Nederlands</button></div></div><button type="button" class="bp-nav-toggle" aria-expanded="false" aria-controls="bp-nav" aria-label="Menu" data-t-aria="navMenu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div></header>
+
+<nav class="bp-breadcrumb" aria-label="Breadcrumb">
+  <div class="wrap">
+    <a href="home2.html" data-t="navHome">Home</a><span class="sep">/</span>
+    <a href="profiles.html" data-t="navProfiles">Commune profiles</a><span class="sep">/</span>
+    <span id="crumbName">—</span>
+  </div>
+</nav>
+
+<main id="bp-main" data-page-state="loading">
+  <div class="wrap">
+    <h1 id="pageTitle">Communes comparables</h1>
+    <p class="lead" id="pageLead">Chaque indicateur de la commune comparé à la médiane de ses dix communes structurellement les plus proches (Peer Model v1). La médiane est une statistique de classement, pas un agrégat : elle ne représente ni un total ni une moyenne des communes comparables.</p>
+
+    <div class="commune-picker">
+      <label for="communeSelect" id="communeSelectLabel" style="font-size:13px;color:var(--bp-text-muted)">Commune</label>
+      <select id="communeSelect"></select>
+    </div>
+
+    <div id="cpBody" class="cp-body">
+      <div class="scope-switch" role="group" id="scopeSwitch" aria-label="Périmètre de comparaison">
+        <button type="button" data-scope="national" aria-pressed="false" id="scopeNational">Belgique</button>
+        <button type="button" data-scope="region" aria-pressed="true" id="scopeRegion">Même région</button>
+      </div>
+
+      <div class="peer-strip" id="peerStrip" aria-live="polite"></div>
+
+      <div class="filter-row">
+        <input type="search" id="filterInput" placeholder="Filtrer par nom d'indicateur…" autocomplete="off">
+      </div>
+      <p class="count-line" id="countLine" aria-live="polite"></p>
+
+      <div class="table-scroll">
+      <table class="bp-compare-table" id="compareTable">
+        <thead>
+          <tr>
+            <th id="thIndicator">Indicateur</th>
+            <th id="thPeriod">Période</th>
+            <th class="num" id="thValue">Valeur</th>
+            <th class="num" id="thMedian">Médiane des comparables</th>
+            <th class="num" id="thCoverage">Comparables</th>
+            <th class="num" id="thDeviation">Écart</th>
+            <th id="thPosition">Position</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      </div>
+
+      <details class="withheld-block" id="withheldBlock">
+        <summary id="withheldSummary">Indicateurs non comparés</summary>
+        <div id="withheldGroups"></div>
+      </details>
+
+      <p class="model-footnote" id="modelFootnote"></p>
+    </div>
+
+    <div class="cp-unavail" id="cpUnavail">Aucune donnée de comparaison n'est disponible pour cette commune.</div>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" aria-label="Footer navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><p class="bp-footer-credit" data-t="footerCredit">Official public sources — see Sources.</p></div></footer>
+
+<div class="attribution" id="attribution">
+  <div class="wrap">
+  <span id="attrValues"><!-- values-attribution:start — copied verbatim from communes.html and held
+       identical to it by test_statbel_attribution.py. Reword on both or neither. -->
+  <strong>Source:</strong> <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a> and Statbel’s <em>Licentie open data</em> of 22 October 2015. <strong>Data last updated:</strong> <span id="attrUpdated">—</span>. A figure computed from these data carries the date its INPUTS were last updated, labelled as theirs and not as its own — it was computed, not retrieved. <strong>Changes were made:</strong> the published files are reshaped into a canonical indicator model, re-keyed to internal geography identifiers, corrected across the 2019 and 2025 commune mergers, and used to compute derived figures, including the peer-median comparisons on this page. Statbel does not endorse this product or how its data is used here. English commune names are unofficial translations, not official Statbel labels. <br><br><strong>Source:</strong> <a href="https://www.onem.be/" rel="noopener">ONEM/RVA</a> (Office National de l'Emploi — Rijksdienst voor Arbeidsvoorziening), for the employment section's unemployment, temporary-unemployment, part-time-benefit and activation figures. <strong>Date of the information used:</strong> the files fetched for this build, covering 2017 onwards; the current year is a part-year average, marked provisional. Reused under ONEM's own conditions, which permit commercial reuse and require the source and this date — <em>not</em> under CC BY 4.0, which does not apply to this source. Figures ONEM withholds for privacy (fewer than 10 people) are shown as suppressed, never as zero. <br><br><strong>Source:</strong> <a href="https://www.police.be/statistiques/" rel="noopener">Police Fédérale / Federale Politie</a> (Direction de l'information policière et des moyens ICT), for the house-burglary, car-theft, vehicle-theft and domestic-violence rates. Reused under the federal police's own condition: correctly credit the source as stated here. That condition says nothing about permitted uses beyond attribution — <em>not</em> under CC BY 4.0, and not a stated grant of commercial reuse either, unlike Statbel and ONEM above. Every one of these rates is resolved onto the commune boundaries in force through 2024, not the current map, for every year shown — including years long before that map existed, since that is how the source itself publishes its own history. The most recent year of each series is marked provisional.
+  <!-- values-attribution:end --></span>
+  <br><br><span id="attrVar"><strong>Source:</strong> <a href="https://www.steunpuntwerk.be/cijfers/vlaamse-arbeidsrekening" rel="noopener">Steunpunt Werk</a> — Vlaamse Arbeidsrekening based on DWH AM&amp;SB - KSZ, BISA, for the administrative unemployment rate for ages 15–64. Required source credit is given here. The source page offers export and distribution with attribution but names no standard open-data licence; <em>not</em> under Statbel’s CC BY 4.0. Values use the source’s current 565-municipality grid. Cells based on fewer than four people are shown as suppressed, never as zero.</span>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/belpulse/shell.js"></script>
+<script src="assets/commune_map.js"></script>
+<script>
+(function(){
+'use strict';
+
+var STRINGS = {
+  en: {
+    title: 'Comparable communes',
+    lead: 'Every indicator of the commune compared against the median of its ten most structurally similar communes (Peer Model v1). The median is a ranking statistic, not an aggregate: it stands for neither a total nor an average of the comparable communes.',
+    communeLabel: 'Municipality',
+    scopeNational: 'Belgium',
+    scopeRegion: 'Same region',
+    filterPlaceholder: 'Filter by indicator name…',
+    thIndicator: 'Indicator', thPeriod: 'Period', thValue: 'Value', thMedian: 'Median of comparables',
+    thCoverage: 'Comparables', thDeviation: 'Deviation', thPosition: 'Position',
+    withheldSummary: 'Indicators not compared',
+    selectionNote: 'communes chosen partly on this figure',
+    devTooltip: 'The percentage deviation is withheld: the median of comparable communes is {reason} for this indicator, so a percentage against it would be misleading. The rank shown alongside is still meaningful.',
+    devWithheldZero: 'zero', devWithheldNegative: 'negative',
+    positionOf: '{pos}{ord} of {of}',
+    ord1: 'st', ord2: 'nd', ord3: 'rd', ordN: 'th',
+    countLine: '{shown} / {total} indicators',
+    reasonExcluded: 'Excluded', reasonNoCurrentValue: 'No current-period value', reasonFewPeers: 'Too few comparable communes',
+    reasonExcludedBody: 'This indicator is itself a rank or a percentile among communes, so comparing it to a different set of ten communes would not mean anything.',
+    reasonNoCurrentValueBody: 'This commune has no usable value for the period this indicator is currently published for.',
+    reasonNoCurrentValueOwn: ' Its own most recent usable value is from {period}.',
+    reasonFewPeersBody: 'Fewer than {min} of the 10 comparable communes ({k} of 10) have a usable value for this period, so no median could be computed.',
+    modelFootnote: 'Peer Model {version} ({variant}). Comparable communes are chosen by structural similarity (population, age structure, income, unemployment and related variables) — not by geography alone.',
+    unavailable: 'No comparison data is available for this commune.',
+    skipToContent: 'Skip to content',
+    peerRank: 'Comparable #{rank}',
+  },
+  fr: {
+    title: 'Communes comparables',
+    lead: 'Chaque indicateur de la commune comparé à la médiane de ses dix communes structurellement les plus proches (Peer Model v1). La médiane est une statistique de classement, pas un agrégat : elle ne représente ni un total ni une moyenne des communes comparables.',
+    communeLabel: 'Commune',
+    scopeNational: 'Belgique',
+    scopeRegion: 'Même région',
+    filterPlaceholder: 'Filtrer par nom d’indicateur…',
+    thIndicator: 'Indicateur', thPeriod: 'Période', thValue: 'Valeur', thMedian: 'Médiane des comparables',
+    thCoverage: 'Comparables', thDeviation: 'Écart', thPosition: 'Position',
+    withheldSummary: 'Indicateurs non comparés',
+    selectionNote: 'communes choisies notamment sur ce chiffre',
+    devTooltip: 'L’écart en pourcentage est masqué : la médiane des communes comparables est {reason} pour cet indicateur, un pourcentage par rapport à elle serait trompeur. Le rang affiché à côté reste, lui, significatif.',
+    devWithheldZero: 'nulle', devWithheldNegative: 'négative',
+    positionOf: '{pos}e sur {of}',
+    ord1: 'er', ord2: 'e', ord3: 'e', ordN: 'e',
+    countLine: '{shown} / {total} indicateurs',
+    reasonExcluded: 'Exclus', reasonNoCurrentValue: 'Pas de valeur pour la période en cours', reasonFewPeers: 'Trop peu de communes comparables',
+    reasonExcludedBody: 'Cet indicateur est lui-même un rang ou un percentile entre communes ; le comparer à un autre ensemble de dix communes n’aurait pas de sens.',
+    reasonNoCurrentValueBody: 'Cette commune n’a pas de valeur exploitable pour la période actuellement publiée de cet indicateur.',
+    reasonNoCurrentValueOwn: ' Sa propre valeur exploitable la plus récente date de {period}.',
+    reasonFewPeersBody: 'Moins de {min} des 10 communes comparables ({k} sur 10) ont une valeur exploitable pour cette période ; aucune médiane n’a pu être calculée.',
+    modelFootnote: 'Peer Model {version} ({variant}). Les communes comparables sont choisies par similarité structurelle (population, structure d’âge, revenus, chômage et variables associées) — pas seulement par géographie.',
+    unavailable: 'Aucune donnée de comparaison n’est disponible pour cette commune.',
+    skipToContent: 'Aller au contenu',
+    peerRank: 'Comparable n° {rank}',
+  },
+  nl: {
+    title: 'Vergelijkbare gemeenten',
+    lead: 'Elke indicator van de gemeente vergeleken met de mediaan van haar tien structureel meest gelijkende gemeenten (Peer Model v1). De mediaan is een rangschikkingsstatistiek, geen aggregaat: ze staat niet voor een totaal en ook niet voor een gemiddelde van de vergelijkbare gemeenten.',
+    communeLabel: 'Gemeente',
+    scopeNational: 'België',
+    scopeRegion: 'Zelfde gewest',
+    filterPlaceholder: 'Filter op naam van de indicator…',
+    thIndicator: 'Indicator', thPeriod: 'Periode', thValue: 'Waarde', thMedian: 'Mediaan van vergelijkbare gemeenten',
+    thCoverage: 'Vergelijkbare gemeenten', thDeviation: 'Afwijking', thPosition: 'Positie',
+    withheldSummary: 'Niet-vergeleken indicatoren',
+    selectionNote: 'gemeenten mede op dit cijfer geselecteerd',
+    devTooltip: 'Het percentageverschil wordt niet getoond: de mediaan van de vergelijkbare gemeenten is {reason} voor deze indicator, een percentage daartegenover zou misleidend zijn. De rangorde ernaast blijft wel betekenisvol.',
+    devWithheldZero: 'nul', devWithheldNegative: 'negatief',
+    positionOf: '{pos}e van {of}',
+    ord1: 'e', ord2: 'e', ord3: 'e', ordN: 'e',
+    countLine: '{shown} / {total} indicatoren',
+    reasonExcluded: 'Uitgesloten', reasonNoCurrentValue: 'Geen waarde voor de huidige periode', reasonFewPeers: 'Te weinig vergelijkbare gemeenten',
+    reasonExcludedBody: 'Deze indicator is zelf een rang of percentiel tussen gemeenten; vergelijken met een andere set van tien gemeenten zou niets betekenen.',
+    reasonNoCurrentValueBody: 'Deze gemeente heeft geen bruikbare waarde voor de periode waarvoor deze indicator momenteel gepubliceerd is.',
+    reasonNoCurrentValueOwn: ' Haar eigen meest recente bruikbare waarde dateert van {period}.',
+    reasonFewPeersBody: 'Minder dan {min} van de 10 vergelijkbare gemeenten ({k} van de 10) hebben een bruikbare waarde voor deze periode; er kon geen mediaan worden berekend.',
+    modelFootnote: 'Peer Model {version} ({variant}). Vergelijkbare gemeenten worden gekozen op structurele gelijkenis (bevolking, leeftijdsstructuur, inkomen, werkloosheid en verwante variabelen) — niet enkel op geografie.',
+    unavailable: 'Er zijn geen vergelijkingsgegevens beschikbaar voor deze gemeente.',
+    skipToContent: 'Naar de inhoud',
+    peerRank: 'Vergelijkbare #{rank}',
+  }
+};
+
+var $ = function(s){ return document.querySelector(s); };
+var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+
+var LANG = (typeof I18N !== 'undefined') ? I18N.initial() : 'fr';
+var params = new URLSearchParams(location.search);
+var nis = params.get('nis') || '';
+
+var state = {
+  geographies: null,
+  indicators: null,
+  payload: null,
+  // Same-region is the default view (maintainer decision, 2026-09-27); the
+  // switch lets a reader widen it to all of Belgium. commune.html follows
+  // the same default, per that decision.
+  scope: 'region',
+  filter: ''
+};
+
+function T(key, vars){
+  var table = STRINGS[LANG] || STRINGS.fr;
+  var s = (table[key] !== undefined) ? table[key] : (STRINGS.en[key] !== undefined ? STRINGS.en[key] : key);
+  for(var k in (vars || {})) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+}
+
+function ordinal(n){
+  var mod100 = n % 100;
+  if(mod100 >= 11 && mod100 <= 13) return n + T('ordN');
+  var mod10 = n % 10;
+  if(mod10 === 1) return n + T('ord1');
+  if(mod10 === 2) return n + T('ord2');
+  if(mod10 === 3) return n + T('ord3');
+  return n + T('ordN');
+}
+
+function communeName(nisCode){
+  if(!state.geographies) return nisCode;
+  var g = state.geographies[nisCode];
+  if(!g) return nisCode;
+  return g[LANG] || g.en || g.fr || nisCode;
+}
+
+function fallbackMeta(code){
+  // Fallback for the handful of engine-only derived indicators (e.g. the
+  // demographic per-1000 rates) that never get a row in
+  // public/data/metadata/indicators.json -- their name/unit travel instead
+  // on the peer payload itself (payload.indicator_meta), read straight from
+  // config/indicators/derived/*.yaml by the exporter (rule 36). A reader
+  // must never see a bare indicator code or an unformatted number where a
+  // unit belongs (rule 24's spirit).
+  return (state.payload && state.payload.indicator_meta && state.payload.indicator_meta[code]) || null;
+}
+
+function indicatorMeta(code){
+  var meta = state.indicators && state.indicators[code];
+  if(meta) return meta;
+  var fallback = fallbackMeta(code);
+  if(!fallback) return null;
+  return {names: fallback.names, unit: fallback.unit, decimals: fallback.decimals};
+}
+
+function indicatorName(code){
+  var meta = indicatorMeta(code);
+  if(!meta || !meta.names) return code;
+  return meta.names[LANG] || meta.names.en || code;
+}
+
+function unitSuffix(unit){
+  // MapUI.formatValue already embeds these units INTO the number itself
+  // (e.g. "€75 /mo."), so appending MapUI.unitSuffix's own label on top
+  // would duplicate it ("€75 /mo. eur per month") -- same gap commune.html's
+  // own local unitSuffix() wrapper patches around (assets/commune_map.js's
+  // shared vocabulary, rule 29: reused, not forked, but its two known gaps
+  // are worked around here exactly as commune.html already works around
+  // them, rather than being duplicated a second time as a fix).
+  var u = (unit || '').toLowerCase();
+  if(u === 'balance') return '';
+  if(u === 'eur_per_month' || u === 'eur_per_inhabitant') return '';
+  if(/^per_10000_(dwellings|vehicles|cars|households)$/.test(u)) return '';
+  return (typeof MapUI !== 'undefined') ? MapUI.unitSuffix(unit, LANG) : '';
+}
+
+function formatValue(value, meta){
+  if(value === null || value === undefined) return '—';
+  var unit = meta ? meta.unit : null;
+  var decimals = meta ? meta.decimals : null;
+  var s;
+  if(typeof MapUI !== 'undefined'){
+    s = MapUI.formatValue(value, unit, decimals, LANG) + unitSuffix(unit);
+  } else {
+    s = String(value);
+  }
+  if(s.charAt(0) === '-') s = '−' + s.slice(1);
+  return s;
+}
+
+function formatDeviation(pct){
+  if(pct === null || pct === undefined) return null;
+  var sign = pct > 0 ? '+' : (pct < 0 ? '−' : '');
+  var abs = Math.abs(pct);
+  var body = abs.toLocaleString(LANG === 'nl' ? 'nl-BE' : (LANG === 'en' ? 'en-GB' : 'fr-BE'), {minimumFractionDigits:1, maximumFractionDigits:1});
+  return sign + body + ' %';
+}
+
+function translateChrome(){
+  document.documentElement.lang = LANG;
+  document.title = 'BelPulse — ' + T('title');
+  $('#pageTitle').textContent = T('title');
+  $('#pageLead').textContent = T('lead');
+  $('#communeSelectLabel').textContent = T('communeLabel');
+  $('#scopeNational').textContent = T('scopeNational');
+  $('#scopeRegion').textContent = T('scopeRegion');
+  $('#filterInput').placeholder = T('filterPlaceholder');
+  $('#thIndicator').textContent = T('thIndicator');
+  $('#thPeriod').textContent = T('thPeriod');
+  $('#thValue').textContent = T('thValue');
+  $('#thMedian').textContent = T('thMedian');
+  $('#thCoverage').textContent = T('thCoverage');
+  $('#thDeviation').textContent = T('thDeviation');
+  $('#thPosition').textContent = T('thPosition');
+  $('#withheldSummary').textContent = T('withheldSummary');
+  $('#cpUnavail').textContent = T('unavailable');
+  var skip = document.querySelector('.bp-skip-link');
+  if(skip) skip.textContent = T('skipToContent');
+}
+
+function renderPeerStrip(){
+  var strip = $('#peerStrip');
+  var entries = (state.payload && state.payload.peers && state.payload.peers[state.scope]) || [];
+  strip.innerHTML = entries.map(function(e){
+    return '<a class="peer-chip" href="commune.html?nis=' + encodeURIComponent(e.nis) + '">' +
+      '<span class="rank">' + esc(T('peerRank', {rank: e.rank})) + '</span>' +
+      '<span class="name">' + esc(communeName(e.nis)) + '</span></a>';
+  }).join('');
+}
+
+function withheldReasonBody(entry){
+  if(entry.reason === 'excluded') return T('reasonExcludedBody');
+  if(entry.reason === 'no_current_value'){
+    var body = T('reasonNoCurrentValueBody');
+    if(entry.own_period) body += T('reasonNoCurrentValueOwn', {period: entry.own_period});
+    return body;
+  }
+  if(entry.reason === 'few_peers'){
+    var minPeers = (state.payload && state.payload.min_peers_with_value) || 7;
+    return T('reasonFewPeersBody', {min: minPeers, k: entry.peers_with_value});
+  }
+  return '';
+}
+
+function renderTable(){
+  var lists = (state.payload && state.payload.lists && state.payload.lists[state.scope]) || {};
+  var codes = Object.keys(lists).sort(function(a, b){ return indicatorName(a).localeCompare(indicatorName(b), LANG); });
+  var q = state.filter.trim().toLocaleLowerCase();
+  var shown = codes.filter(function(code){
+    return !q || indicatorName(code).toLocaleLowerCase().indexOf(q) >= 0;
+  });
+
+  $('#tableBody').innerHTML = shown.map(function(code){
+    var entry = lists[code];
+    var meta = indicatorMeta(code);
+    var name = esc(indicatorName(code));
+    if(entry.selection_variable){
+      name += ' <abbr class="sel-note" title="' + esc(T('selectionNote')) + '">*</abbr>';
+    }
+    var devCell;
+    if(entry.deviation_pct !== null && entry.deviation_pct !== undefined){
+      devCell = esc(formatDeviation(entry.deviation_pct));
+    } else if(entry.deviation_withheld){
+      var reasonWord = entry.deviation_withheld === 'median_zero' ? T('devWithheldZero') : T('devWithheldNegative');
+      devCell = '<abbr title="' + esc(T('devTooltip', {reason: reasonWord})) + '">—</abbr>';
+    } else {
+      devCell = '—';
+    }
+    var posCell = (entry.position != null && entry.of != null)
+      ? esc(T('positionOf', {pos: ordinal(entry.position), of: entry.of}))
+      : '—';
+    return '<tr>' +
+      '<td>' + name + '</td>' +
+      '<td class="period">' + esc(entry.period) + '</td>' +
+      '<td class="num">' + esc(formatValue(entry.value, meta)) + '</td>' +
+      '<td class="num">' + esc(formatValue(entry.peer_median, meta)) + '</td>' +
+      '<td class="num">' + esc(entry.peers_with_value) + '/10</td>' +
+      '<td class="num dev-cell">' + devCell + '</td>' +
+      '<td>' + posCell + '</td>' +
+      '</tr>';
+  }).join('');
+
+  $('#countLine').textContent = T('countLine', {shown: shown.length, total: codes.length});
+}
+
+function renderWithheld(){
+  var withheld = (state.payload && state.payload.withheld && state.payload.withheld[state.scope]) || {};
+  var groups = {excluded: [], no_current_value: [], few_peers: []};
+  Object.keys(withheld).forEach(function(code){
+    var entry = withheld[code];
+    if(groups[entry.reason]) groups[entry.reason].push([code, entry]);
+  });
+  var order = ['no_current_value', 'few_peers', 'excluded'];
+  var titleKey = {no_current_value: 'reasonNoCurrentValue', few_peers: 'reasonFewPeers', excluded: 'reasonExcluded'};
+  var html = '';
+  order.forEach(function(reason){
+    var items = groups[reason];
+    if(!items.length) return;
+    items.sort(function(a, b){ return indicatorName(a[0]).localeCompare(indicatorName(b[0]), LANG); });
+    html += '<div class="withheld-group"><h3>' + esc(T(titleKey[reason])) + ' (' + items.length + ')</h3><ul>' +
+      items.map(function(pair){
+        var code = pair[0], entry = pair[1];
+        return '<li title="' + esc(withheldReasonBody(entry)) + '">' + esc(indicatorName(code)) + '</li>';
+      }).join('') + '</ul></div>';
+  });
+  $('#withheldGroups').innerHTML = html;
+}
+
+function renderFootnote(){
+  if(!state.payload) return;
+  $('#modelFootnote').textContent = T('modelFootnote', {version: state.payload.model_version, variant: state.payload.variant});
+}
+
+function render(){
+  renderPeerStrip();
+  renderTable();
+  renderWithheld();
+  renderFootnote();
+}
+
+function setScope(scope){
+  state.scope = scope;
+  $('#scopeNational').setAttribute('aria-pressed', String(scope === 'national'));
+  $('#scopeRegion').setAttribute('aria-pressed', String(scope === 'region'));
+  render();
+}
+
+function populateCommuneSelect(){
+  var sel = $('#communeSelect');
+  if(!state.geographies) return;
+  var entries = Object.keys(state.geographies).map(function(code){
+    return {nis: code, name: communeName(code)};
+  });
+  entries.sort(function(a, b){ return a.name.localeCompare(b.name, LANG); });
+  sel.innerHTML = entries.map(function(e){
+    return '<option value="' + esc(e.nis) + '">' + esc(e.name) + '</option>';
+  }).join('');
+  sel.value = nis;
+}
+
+function setUnavailable(){
+  $('#bp-main').setAttribute('data-page-state', 'unavailable');
+}
+
+function setReady(){
+  $('#bp-main').setAttribute('data-page-state', 'ready');
+}
+
+function loadPayload(nisCode){
+  return fetch('public/data/peers/' + encodeURIComponent(nisCode) + '.json').then(function(r){
+    if(!r.ok) throw new Error('status ' + r.status);
+    return r.json();
+  });
+}
+
+function switchCommune(nisCode){
+  nis = nisCode;
+  var url = new URL(location.href);
+  url.searchParams.set('nis', nisCode);
+  history.replaceState(null, '', url);
+  $('#crumbName').textContent = communeName(nisCode);
+  loadPayload(nisCode).then(function(payload){
+    state.payload = payload;
+    setReady();
+    render();
+  }).catch(function(){
+    state.payload = null;
+    setUnavailable();
+  });
+}
+
+$('#scopeNational').addEventListener('click', function(){ setScope('national'); });
+$('#scopeRegion').addEventListener('click', function(){ setScope('region'); });
+$('#filterInput').addEventListener('input', function(e){ state.filter = e.target.value; renderTable(); });
+$('#communeSelect').addEventListener('change', function(e){ switchCommune(e.target.value); });
+document.addEventListener('bp:lang', function(e){
+  LANG = e.detail.lang;
+  translateChrome();
+  populateCommuneSelect();
+  if(nis) $('#crumbName').textContent = communeName(nis);
+  render();
+});
+
+translateChrome();
+
+if(!nis){
+  setUnavailable();
+} else {
+  Promise.all([
+    fetch('public/data/metadata/geographies.json').then(function(r){ return r.json(); }),
+    fetch('public/data/metadata/indicators.json').then(function(r){ return r.json(); })
+  ]).then(function(results){
+    var geoData = results[0], indData = results[1];
+    var geographies = {};
+    geoData.geographies.forEach(function(g){
+      if(g.level === 'municipality') geographies[g.nis_code] = g.name;
+    });
+    var indicators = {};
+    indData.indicators.forEach(function(i){ indicators[i.indicator_code] = i; });
+    state.geographies = geographies;
+    state.indicators = indicators;
+
+    var updateDates = indData.indicators.map(function(i){ return i.updated; }).filter(Boolean).sort();
+    var lastUpdated = updateDates[updateDates.length - 1] || '';
+    var attrUpdatedEl = document.getElementById('attrUpdated');
+    if(attrUpdatedEl && lastUpdated) attrUpdatedEl.textContent = lastUpdated;
+
+    populateCommuneSelect();
+    switchCommune(nis);
+  }).catch(function(){
+    setUnavailable();
+  });
+}
+})();
+</script>
+</body>
+</html>

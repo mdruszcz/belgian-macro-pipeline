@@ -93,6 +93,7 @@ ROUTE_EXACT = frozenset(
         "/commune.html",
         "/profiles.html",
         "/explorer.html",
+        "/comparables.html",
         # PREVIEW routes, added one at a time as Batch 15 converts a page.
         #
         # Batches 3 and 4 established the pattern -- ship the rebuilt page
