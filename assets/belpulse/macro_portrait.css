@@ -649,26 +649,52 @@
 .macro .essentiel-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:0;border-top:0;border-bottom:1px solid var(--bp-border)}
 .macro .essentiel-item{display:flex;flex-direction:column;grid-row:auto;padding:22px 18px;cursor:default}
 .macro .essentiel-eyebrow{min-height:62px;text-transform:uppercase;overflow-wrap:anywhere}
-/* overflow stays hidden (the base rule, assets/belpulse/macro_portrait.css
-   line ~143) -- macro.html's shrinkEssentielValuesToFit() (copied from
-   commune.html) shrinks the font until scrollWidth fits, and overflow:
-   visible would let a value that hits the 14px floor spill into the next
-   card again (the bug that shrink-to-fit exists to prevent), not just
-   look unclipped for values that already fit. */
-.macro .essentiel-value{font-size:clamp(18px,2vw,30px);height:36px}
+/* Lead review of commit 4f2da786f (2026-09-27): shrink-then-clip was not
+   the fix for a value like "87,7 2021=100" or "-16,3 solde" not fitting
+   its cell -- the unit needs to read SMALLER than the number, on its own
+   line, not the same size crammed onto one. macro.html's
+   renderValueWithUnit() now builds two spans, .value-num and .value-unit,
+   instead of one concatenated string; shrinkEssentielValuesToFit() (still
+   called, still copied from commune.html) is the fallback for a genuinely
+   long NUMBER, not what carries the unit's length any more. height:auto
+   (was a fixed 36px) because the cell can now be one line (no unit, e.g.
+   a plain percent) or two (number + unit hint). */
+.macro .essentiel-value{font-size:clamp(18px,2vw,30px);height:auto;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.macro .essentiel-value .value-num{line-height:1.1}
+.macro .essentiel-value .value-unit{font-size:12px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
 .macro .essentiel-meta{align-self:auto}
 .macro .essentiel-spark{width:100%;max-width:none;height:40px}
-.macro .bp-chart-card{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;min-width:0}
+/* Lead review of commit 4f2da786f (2026-09-27): every chart still sat
+   bare on the page background -- commune.html wraps each tile/chart in a
+   soft white rounded card, a 1px border, and a short coloured dash at the
+   top in the chapter hue (its own .multiple-tile rule, assets/belpulse/
+   macro_portrait.css's un-scoped copy above at ~line 304). .bp-chart-card
+   is macro's equivalent wrapper (every chart card, the growth chapter's
+   "Les moteurs de la croissance" contribution list, each Indicateurs
+   clés tile): same background/border/radius/dash treatment as
+   .multiple-tile, not the transparent/border:0 strip this rule used to
+   apply. --th (the chapter hue custom property) is already set on every
+   .chapter/.essentiel-item via portrait.theme() -- .bp-chart-card just
+   needs to inherit and use it, the same way .multiple-tile::before
+   already does. */
+.macro .bp-chart-card{background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;box-shadow:none;padding:20px 22px;min-width:0;position:relative}
+.macro .bp-chart-card::before{content:"";display:block;position:absolute;left:22px;top:0;width:28px;height:3px;border-radius:0 0 2px 2px;background:var(--th);opacity:.9}
 .macro .bp-chart-head{margin-bottom:16px;display:flex;justify-content:space-between;gap:12px;align-items:start}
 .macro .bp-chart-head h3{font:600 18px/1.3 var(--bp-font-display)}
 .macro .bp-chart-head .subtitle,.macro .provenance,.macro .kpi-note{font-size:12px;line-height:1.6;color:var(--bp-text-faint)}
 .macro .metric-date{font-size:12px;color:var(--bp-text-faint);margin:8px 0}
 .macro .leadchart-head{align-items:start}
 .macro .leadchart-eyebrow{max-width:55%;overflow-wrap:anywhere}
-.macro .leadchart-lastval{font-size:32px;white-space:normal;text-align:right}
-.macro .portrait-metrics{display:grid;grid-template-columns:1fr;list-style:none;padding:0;margin:0;gap:26px}
-.macro .portrait-metrics .portrait-metric{display:block;border:0;border-top:1px solid var(--bp-border);padding:16px 0;min-width:0}
+.macro .leadchart-lastval{font-size:32px;white-space:normal;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.macro .leadchart-lastval .value-num{line-height:1.1}
+.macro .leadchart-lastval .value-unit{font-size:13px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
+.macro .portrait-metrics{display:grid;grid-template-columns:repeat(var(--mcols,3),minmax(0,1fr));list-style:none;padding:0;margin:0;gap:16px}
+@media (max-width:900px){.macro .portrait-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.macro .portrait-metrics{grid-template-columns:1fr}}
+.macro .portrait-metrics .portrait-metric{display:block;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px 14px;min-width:0;position:relative}
+.macro .portrait-metrics .portrait-metric::before{content:"";display:block;position:absolute;left:18px;top:0;width:26px;height:3px;border-radius:0 0 2px 2px;background:var(--th);opacity:.9}
 .macro .portrait-metric .leadchart-lastval{font-size:24px}
+.macro .portrait-metric .leadchart-lastval .value-unit{font-size:12px}
 .macro .portrait-series+.portrait-series{margin-top:28px}
 .macro #keyList{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 .macro #apercu .row-3{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}

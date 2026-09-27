@@ -464,7 +464,7 @@
       card.className='essentiel-item macro-kpi';card.dataset.state=latest?'ready':'missing';portrait.theme(card,chapterIndexFor(code));
       card.innerHTML='<div class="essentiel-eyebrow name"></div><div class="essentiel-value num"></div><div class="essentiel-spark"></div><div class="essentiel-meta"><span class="essentiel-period"></span></div>';
       card.querySelector('.name').textContent=nameOf(code);
-      card.querySelector('.num').textContent=latest?displayValue(latest.value,entry):'?';
+      renderValueWithUnit(card.querySelector('.num'),latest?latest.value:null,entry);
       card.querySelector('.essentiel-period').textContent=latest?fmtPeriod(latest.period):T('macroUnavailable');
       card.title=provenance(entry,latest);host.appendChild(card);
       var pts=portrait.sparkPoints(panelSeriesPoints(entry,10000));
@@ -510,12 +510,51 @@
     var formatted=fmtValue(value,entry);
     return formatted+(/^percent/.test((entry.unit||'').toLowerCase())?'':displayUnit(entry));
   }
+  /* Lead review of commit 4f2da786f (2026-09-27): the essentials band and
+     the chapter chart headline figures still clipped/overflowed at some
+     widths for a multi-character unit hint ("2021=100", "solde") -- a
+     shrink-then-clip single string is not the fix; the unit needs to read
+     SMALLER than the number, on its own line, the way commune.html's
+     design generally sets a number apart from a longer qualifier (see the
+     essentiel-period/essentiel-posline split already below a value).
+     `percent` stays attached to the number inline ("5,7%", not "5,7" +
+     small "%" on its own line) -- unlike every other unit hint, a percent
+     sign is compact enough to read naturally on the same line, and
+     splitting it off would look wrong, not clearer. Every other unit
+     ("2021=100", "solde", "pp") gets its own smaller line below the
+     number. Two spans, not one string with a shrink-to-fit font size:
+     .value-num (the number, at the card's full headline size) and
+     .value-unit (the hint, always rendered at a fixed, smaller size
+     regardless of how long it is -- CSS wraps it onto its own line via
+     display:block, so it never needs to shrink OR clip). No indicator id
+     or figure lives here: same displayValue()/displayUnit() every other
+     caller already used, just building two elements instead of
+     concatenating one string. */
+  function renderValueWithUnit(container,value,entry){
+    container.innerHTML='';
+    if(value==null){container.textContent='?';return;}
+    var isPercent=/^percent/.test((entry.unit||'').toLowerCase());
+    var numEl=document.createElement('span');numEl.className='value-num';
+    // fmtValue() already appends "%" itself for a percent unit
+    // (MapUI.formatValue) -- displayValue()'s own percent branch below
+    // relies on the exact same fact, so this stays consistent with it.
+    numEl.textContent=fmtValue(value,entry);
+    container.appendChild(numEl);
+    if(!isPercent){
+      var hint=unitHint(entry.unit);
+      if(hint){
+        var unitEl=document.createElement('span');unitEl.className='value-unit';
+        unitEl.textContent=hint;
+        container.appendChild(unitEl);
+      }
+    }
+  }
   function drawPortraitChart(host,code,compact){
     host.innerHTML='';var entry=state.national[code];if(!entry)return;
     var pts=panelSeriesPoints(entry,10000);var latest=latestNumeric(entry);
     var head=document.createElement('div');head.className='leadchart-head';
     var label=document.createElement('div');label.className='leadchart-eyebrow';label.textContent=nameOf(code);
-    var val=document.createElement('div');val.className='leadchart-lastval num';val.textContent=latest?displayValue(latest.value,entry):'?';
+    var val=document.createElement('div');val.className='leadchart-lastval num';renderValueWithUnit(val,latest?latest.value:null,entry);
     head.append(label,val);host.appendChild(head);
     var definition=state.definitions && text(state.definitions[code]);
     if(definition){var para=document.createElement('p');para.className='leadchart-para';para.textContent=definition;host.appendChild(para);}
