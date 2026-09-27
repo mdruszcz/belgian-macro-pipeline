@@ -368,8 +368,7 @@ def test_a_derived_indicator_with_a_published_row_is_never_recomputed_by_the_eng
     # build_derived_rows must exclude every derived indicator id that has at
     # least one row in the raw history CSVs -- POPULATION_CHANGE_5Y among
     # them (measured 2026-09-27: 3,390 published rows). Only a derived
-    # indicator with ZERO published rows anywhere (e.g. BIRTH_RATE_PER_1000)
-    # may reach the engine here.
+    # indicator with ZERO published rows anywhere may reach the engine here.
     raw_rows = export_peer_benchmarks._read_all_history_rows(
         export_peer_benchmarks.DEFAULT_HISTORY_DIR, export_peer_benchmarks.DEFAULT_HISTORY_CSV
     )
@@ -379,10 +378,19 @@ def test_a_derived_indicator_with_a_published_row_is_never_recomputed_by_the_eng
     published_ids = export_peer_benchmarks._published_indicator_ids(raw_rows)
     assert "POPULATION_CHANGE_5Y" in published_ids
     assert "POPULATION_CHANGE_5Y" not in engine_only_ids
-    # At least one genuinely engine-only derived indicator still gets
-    # computed (the fix must not have accidentally excluded everything).
-    assert engine_only_ids, "no derived indicator was computed by the engine at all"
     assert engine_only_ids.isdisjoint(published_ids)
+    # The fix must not have excluded everything: a derived indicator with no
+    # published row must still be computed. Whether the committed data has
+    # one changes over time -- the six *_RATE_PER_1000 rates were engine-only
+    # until the 2026-09-27 daily run published them, which left the set empty
+    # and broke this test's first version (daily data PR #289) -- so prove it
+    # on a copy of the real rows with BIRTH_RATE_PER_1000's rows removed.
+    stripped = [r for r in raw_rows if r["indicator_code"] != "BIRTH_RATE_PER_1000"]
+    stripped_rows, _meta, stripped_engine_only = export_peer_benchmarks.build_derived_rows(
+        stripped, export_peer_benchmarks.DEFAULT_DERIVED_DIR
+    )
+    assert "BIRTH_RATE_PER_1000" in stripped_engine_only
+    assert any(r["indicator_code"] == "BIRTH_RATE_PER_1000" for r in stripped_rows)
 
 
 # --- Bug 2: percentile/rank-shaped indicators must never be benchmarked ----------
@@ -544,20 +552,30 @@ def test_antwerpen_internal_migration_net_is_withheld_no_current_value_for_11002
 # from, not payload["indicator_meta"] (removed from the payload schema).
 
 
-def test_indicator_meta_carries_the_engine_only_derived_indicators_trilingually(derived_meta):
-    # BIRTH_RATE_PER_1000 and its siblings are never in
+def test_indicator_meta_carries_the_engine_only_derived_indicators_trilingually():
+    # An engine-only derived indicator has no row in
     # public/data/metadata/indicators.json (that file is built from the
     # canonical database, which a benchmark-only engine indicator never
     # reaches) -- comparables.html would otherwise show the bare code with no
-    # unit. Checked against the real YAML, not hand-typed (rule 36).
+    # unit. Checked against the real YAML, not hand-typed (rule 36). Proven on
+    # a copy of the real rows with BIRTH_RATE_PER_1000's published rows
+    # removed, so it does not depend on which derived indicators happen to be
+    # published today (since the 2026-09-27 daily run, none is engine-only).
     import yaml
 
+    raw_rows = export_peer_benchmarks._read_all_history_rows(
+        export_peer_benchmarks.DEFAULT_HISTORY_DIR, export_peer_benchmarks.DEFAULT_HISTORY_CSV
+    )
+    stripped = [r for r in raw_rows if r["indicator_code"] != "BIRTH_RATE_PER_1000"]
+    _rows, stripped_meta, _ids = export_peer_benchmarks.build_derived_rows(
+        stripped, export_peer_benchmarks.DEFAULT_DERIVED_DIR
+    )
     cfg = yaml.safe_load(
         (export_peer_benchmarks.DEFAULT_DERIVED_DIR / "BIRTH_RATE_PER_1000.yaml").read_text(
             encoding="utf-8"
         )
     )
-    entry = derived_meta["BIRTH_RATE_PER_1000"]
+    entry = stripped_meta["BIRTH_RATE_PER_1000"]
     assert entry["names"] == cfg["name"]
     assert set(entry["names"]) == {"en", "fr", "nl"}
     assert entry["unit"] == cfg["unit"]
