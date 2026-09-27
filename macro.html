@@ -626,19 +626,13 @@
         card.hidden=!any;
         var row=card.parentElement;
         row.classList.toggle('single-lead',!any);
-        // Lead review of bc29f7a90 (2026-09-27): Emploi's list (3 tiles
-        // remaining once the lead chart's own series is excluded) squeezed
-        // into the leadrow's 5fr column left each tile too narrow to read
-        // and stacked the whole column roughly 3x taller than the chart
-        // beside it -- a large empty gap under the shorter chart.
-        // Conjoncture (2 tiles remaining) does not have this problem: its
-        // list and its chart come out close enough in height already
-        // (confirmed live: chart 965px, list 787px at 1440px). Three or
-        // more tiles is where the narrow column stops working -- stack the
-        // row instead (chart full width, then the list's own 3-column
-        // .portrait-metrics grid gets the FULL row width to lay out in,
-        // not a squeezed 5fr slice of it).
-        row.classList.toggle('stacked-lead',extra.length>=3);
+        // Two or more tiles beside the lead chart squeeze each tile into
+        // the row's narrow 5fr column (Emploi's 3 left a tall empty gap;
+        // Conjoncture's 2 broke their labels mid-word and shrank the chart
+        // text). Stack the row instead: chart full width, then the tiles
+        // get the full row width, the way commune.html lays tiles out
+        // under a lead chart.
+        row.classList.toggle('stacked-lead',extra.length>=2);
         if(card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';
       }
     });

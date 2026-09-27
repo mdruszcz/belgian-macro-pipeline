@@ -709,8 +709,8 @@
    of their label. auto-fit with a sensible minimum tile width adapts to
    however many tiles actually exist AND to the column's real width,
    correctly giving #keyList (6 tiles, 1152px full-width card) 3 columns,
-   Emploi's now-stacked, now-full-width list (3 tiles) 3 columns, and
-   Conjoncture's un-stacked list (2 tiles, ~420px column) exactly 2 --
+   Emploi's stacked, full-width list (3 tiles) 3 columns, and
+   Conjoncture's stacked list (2 tiles) exactly 2 --
    without a per-list --mcols override anywhere. */
 .macro .portrait-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));list-style:none;padding:0;margin:0;gap:16px}
 @media (max-width:560px){.macro .portrait-metrics{grid-template-columns:1fr}}
