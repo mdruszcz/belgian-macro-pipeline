@@ -21,6 +21,7 @@ from export_site_payloads import (  # noqa: E402
     _check_national_sections,
     _indicator_definitions,
     _national_sections,
+    _read_communes_latest,
     export_site_payloads,
 )
 
@@ -535,6 +536,88 @@ def test_derived_indicators_get_a_cross_section_payload(tmp_path):
     # The stored indicator is untouched by the backfill.
     stored = json.loads((out_dir / "indicators" / "POP.json").read_text())
     assert set(stored["communes"]) == {"11001", "11002"}
+
+
+def test_read_communes_latest_raises_on_duplicate_commune_indicator_row(tmp_path):
+    """`communes_export.csv` promises exactly one row per (commune,
+    indicator) -- `_read_communes_latest` must enforce that promise, not
+    assume it, and name both the commune and the indicator rather than
+    silently keeping whichever row the CSV lists last (CLAUDE.md rule 13).
+    This is exactly the shape of the 2026-09-16 regression: a stale
+    reconstructed row and a real row both present for the same
+    (nis_code, indicator_code)."""
+    latest = tmp_path / "communes_export.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11002",
+                "be:mun:11002",
+                "Antwerp",
+                "POP",
+                "Population",
+                "count",
+                "2024",
+                "11379",
+                status="reconstructed",
+            ),
+            _history_row(
+                "11002",
+                "be:mun:11002",
+                "Antwerp",
+                "POP",
+                "Population",
+                "count",
+                "2026",
+                "565615",
+            ),
+        ],
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        _read_communes_latest(latest)
+
+    message = str(exc_info.value)
+    assert "11002" in message
+    assert "Antwerp" in message
+    assert "POP" in message
+
+
+def test_read_communes_latest_allows_distinct_indicators_for_the_same_commune(tmp_path):
+    """The duplicate check is keyed on (nis_code, indicator_code), not
+    nis_code alone -- a commune legitimately has many indicators."""
+    latest = tmp_path / "communes_export.csv"
+    _write(
+        latest,
+        LATEST_HEADER,
+        [
+            _history_row(
+                "11002",
+                "be:mun:11002",
+                "Antwerp",
+                "POP",
+                "Population",
+                "count",
+                "2026",
+                "565615",
+            ),
+            _history_row(
+                "11002",
+                "be:mun:11002",
+                "Antwerp",
+                "LOCAL_UNITS",
+                "Local units",
+                "count",
+                "2023",
+                "66381",
+            ),
+        ],
+    )
+
+    indicators = _read_communes_latest(latest)
+    assert indicators["POP"]["communes"]["11002"]["value"] == 565615.0
+    assert indicators["LOCAL_UNITS"]["communes"]["11002"]["value"] == 66381.0
 
 
 def test_indicator_index_lists_every_mappable_indicator(tmp_path):
