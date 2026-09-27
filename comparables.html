@@ -34,6 +34,9 @@ h1{font:600 clamp(24px,4vw,34px)/1.2 var(--bp-font-ui); margin:20px 0 6px}
 .count-line{color:var(--bp-text-muted); font-size:12px; margin:8px 0 4px}
 table.bp-compare-table td.num,table.bp-compare-table th.num{font-variant-numeric:tabular-nums}
 table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; white-space:nowrap}
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -16px; padding:0 16px}
+@media (min-width:641px){ .table-scroll{margin:0; padding:0} }
+.table-scroll table.bp-compare-table{min-width:640px}
 .sel-note{display:inline-block; margin-left:6px; color:var(--bp-text-faint); cursor:help; border-bottom:1px dotted var(--bp-text-faint)}
 .dev-cell{cursor:default}
 .dev-cell abbr{text-decoration:none; border-bottom:1px dotted var(--bp-text-faint); cursor:help}
@@ -75,8 +78,8 @@ table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; whi
 
     <div id="cpBody" class="cp-body">
       <div class="scope-switch" role="group" id="scopeSwitch" aria-label="Périmètre de comparaison">
-        <button type="button" data-scope="national" aria-pressed="true" id="scopeNational">Belgique</button>
-        <button type="button" data-scope="region" aria-pressed="false" id="scopeRegion">Même région</button>
+        <button type="button" data-scope="national" aria-pressed="false" id="scopeNational">Belgique</button>
+        <button type="button" data-scope="region" aria-pressed="true" id="scopeRegion">Même région</button>
       </div>
 
       <div class="peer-strip" id="peerStrip" aria-live="polite"></div>
@@ -86,6 +89,7 @@ table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; whi
       </div>
       <p class="count-line" id="countLine" aria-live="polite"></p>
 
+      <div class="table-scroll">
       <table class="bp-compare-table" id="compareTable">
         <thead>
           <tr>
@@ -100,6 +104,7 @@ table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; whi
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
+      </div>
 
       <details class="withheld-block" id="withheldBlock">
         <summary id="withheldSummary">Indicateurs non comparés</summary>
@@ -224,7 +229,10 @@ var state = {
   geographies: null,
   indicators: null,
   payload: null,
-  scope: 'national',
+  // Same-region is the default view (maintainer decision, 2026-09-27); the
+  // switch lets a reader widen it to all of Belgium. commune.html follows
+  // the same default, per that decision.
+  scope: 'region',
   filter: ''
 };
 
@@ -252,14 +260,44 @@ function communeName(nisCode){
   return g[LANG] || g.en || g.fr || nisCode;
 }
 
+function fallbackMeta(code){
+  // Fallback for the handful of engine-only derived indicators (e.g. the
+  // demographic per-1000 rates) that never get a row in
+  // public/data/metadata/indicators.json -- their name/unit travel instead
+  // on the peer payload itself (payload.indicator_meta), read straight from
+  // config/indicators/derived/*.yaml by the exporter (rule 36). A reader
+  // must never see a bare indicator code or an unformatted number where a
+  // unit belongs (rule 24's spirit).
+  return (state.payload && state.payload.indicator_meta && state.payload.indicator_meta[code]) || null;
+}
+
 function indicatorMeta(code){
-  return (state.indicators && state.indicators[code]) || null;
+  var meta = state.indicators && state.indicators[code];
+  if(meta) return meta;
+  var fallback = fallbackMeta(code);
+  if(!fallback) return null;
+  return {names: fallback.names, unit: fallback.unit, decimals: fallback.decimals};
 }
 
 function indicatorName(code){
   var meta = indicatorMeta(code);
-  if(!meta) return code;
-  return (meta.names && (meta.names[LANG] || meta.names.en)) || code;
+  if(!meta || !meta.names) return code;
+  return meta.names[LANG] || meta.names.en || code;
+}
+
+function unitSuffix(unit){
+  // MapUI.formatValue already embeds these units INTO the number itself
+  // (e.g. "€75 /mo."), so appending MapUI.unitSuffix's own label on top
+  // would duplicate it ("€75 /mo. eur per month") -- same gap commune.html's
+  // own local unitSuffix() wrapper patches around (assets/commune_map.js's
+  // shared vocabulary, rule 29: reused, not forked, but its two known gaps
+  // are worked around here exactly as commune.html already works around
+  // them, rather than being duplicated a second time as a fix).
+  var u = (unit || '').toLowerCase();
+  if(u === 'balance') return '';
+  if(u === 'eur_per_month' || u === 'eur_per_inhabitant') return '';
+  if(/^per_10000_(dwellings|vehicles|cars|households)$/.test(u)) return '';
+  return (typeof MapUI !== 'undefined') ? MapUI.unitSuffix(unit, LANG) : '';
 }
 
 function formatValue(value, meta){
@@ -268,7 +306,7 @@ function formatValue(value, meta){
   var decimals = meta ? meta.decimals : null;
   var s;
   if(typeof MapUI !== 'undefined'){
-    s = MapUI.formatValue(value, unit, decimals, LANG) + MapUI.unitSuffix(unit, LANG);
+    s = MapUI.formatValue(value, unit, decimals, LANG) + unitSuffix(unit);
   } else {
     s = String(value);
   }
