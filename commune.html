@@ -173,18 +173,45 @@
   .essentiel-item:first-child{border-left:0; padding-left:0}
   .essentiel-item:first-child::before{left:0}
   .essentiel-item:hover{background:color-mix(in srgb, var(--th) 5%, transparent)}
-  .essentiel-eyebrow{font:600 11px/1.35 var(--bp-font-ui); letter-spacing:.05em; color:var(--bp-text-muted); align-self:start; padding-top:6px}
+  /* C3-adjacent (stage 2 containment sweep): a long eyebrow ("Average net
+     taxable income per tax return", "Population change over 5 years") is a
+     grid-row child of .essentiel-item's own subgrid, with no min-width:0 of
+     its own -- a grid item's default min-width is its max-content size in
+     several auto-sizing paths, so at 1024px/6 columns (~116px content width
+     per column after padding) the eyebrow rendered ~140px wide, 7px past
+     its own item's right edge and into the next column. min-width:0 lets it
+     actually shrink to the column and wrap by word, which its default
+     white-space (normal) already allows. overflow-wrap:anywhere on top --
+     a Dutch compound ("Bevolkingsverandering over 5 jaar") is one
+     unbreakable word with no space for min-width:0's word-wrap to use, so
+     it still overflowed at 1024px/6 columns until a break was allowed
+     mid-word, same fix as the hero name's own overflow-wrap:anywhere. */
+  .essentiel-eyebrow{font:600 11px/1.35 var(--bp-font-ui); letter-spacing:.05em; color:var(--bp-text-muted); align-self:start; padding-top:6px; min-width:0; overflow-wrap:anywhere}
   .essentiel-value{font-family:var(--bp-font-ui); font-weight:600; font-size:clamp(16px,2vw,26px); line-height:1.15; font-variant-numeric:tabular-nums; margin:8px 0 2px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:clip; height:30px; display:flex; align-items:center; flex:none; color:var(--bp-text)}
   .essentiel-spark{height:34px; margin:2px 0 6px; max-width:150px}
   .essentiel-spark svg{display:block; width:100%; height:100%; overflow:visible}
   .essentiel-spark.none{height:34px}
-  .essentiel-meta{display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--bp-text-muted); min-height:16px; align-self:end}
+  /* min-width:0: the same subgrid-child sizing gap as .essentiel-eyebrow
+     above -- without it, .essentiel-meta (and everything inside it,
+     including .essentiel-posline/.essentiel-rank) sized to its own
+     max-content width rather than the grid column's, so .essentiel-rank's
+     flex:1/min-width:0/ellipsis fix had no narrower box to actually shrink
+     into. */
+  .essentiel-meta{display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--bp-text-muted); min-height:16px; min-width:0; align-self:end}
   .essentiel-period{white-space:nowrap; min-height:15px; display:block}
   .essentiel-posline{display:flex; align-items:center; gap:8px; min-width:0; min-height:6px}
   .posstrip{position:relative; width:56px; height:6px; flex:none}
   .posstrip .track{position:absolute; top:2px; left:0; right:0; height:2px; background:var(--bp-border); border-radius:2px}
   .posstrip .dot{position:absolute; top:0; width:6px; height:6px; border-radius:50%; background:var(--th); transform:translateX(-50%)}
-  .essentiel-rank{white-space:nowrap; flex:none; font-variant-numeric:tabular-nums}
+  /* Stage 2 containment sweep: "253rd of 552" (worst case, English -- the
+     fr/nl v4RankOf strings are shorter) plus the fixed-width .posstrip
+     (56px) and its 8px gap add up to more than the ~116px of content width
+     left in a column at 1024px/6 columns. flex:none kept the rank at its
+     full intrinsic width regardless, pushing it past the item's own right
+     edge. Now flex:1 1 auto with min-width:0 lets it actually shrink and
+     ellipsise (title carries the untouched text, the same pattern this
+     batch already uses for a bar-chart row label and a scope button). */
+  .essentiel-rank{white-space:nowrap; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
   .essentiel-item.row-start{border-top:1px solid var(--bp-border); padding-top:16px}
   @media (max-width:900px){ .essentiel-row{grid-template-columns:repeat(3,minmax(0,1fr))} .essentiel-item:nth-child(4){border-left:0; padding-left:0} .essentiel-item:nth-child(4)::before{left:0} }
   @media (max-width:640px){
@@ -393,7 +420,14 @@
   .pyramid-chart{position:relative}
   .pyramid-gridlines{position:absolute; inset:0; pointer-events:none; z-index:1}
   .pyramid-gridline{position:absolute; top:16px; bottom:14px; width:1px; background:var(--bp-border); opacity:.7}
-  .pyramid-gridline-label{position:absolute; top:0; transform:translateX(-50%); font-size:9px; font-variant-numeric:tabular-nums; color:var(--bp-text-faint); background:var(--bp-surface); padding:0 3px; white-space:nowrap}
+  /* C3: this label used to sit at top:0 -- the very top of #pyramidChart,
+     i.e. right on top of .pyramid-axis's "Hommes"/"Femmes" text, which lives
+     in the same row (the axis has no reserved height of its own, so the
+     absolutely-positioned overlay's inset:0 starts exactly where the axis
+     text starts). Moved down to align with .pyramid-gridline's own top
+     (16px, already clear of the axis row at every width down to 320px)
+     instead of guessing a width-specific offset. */
+  .pyramid-gridline-label{position:absolute; top:16px; transform:translate(-50%,-100%); font-size:9px; font-variant-numeric:tabular-nums; color:var(--bp-text-faint); background:var(--bp-surface); padding:0 3px; white-space:nowrap}
   .pyramid-axis,.pyramid-row{display:grid; grid-template-columns:48px minmax(0,1fr) 40px minmax(0,1fr) 48px; gap:5px; align-items:center}
   .pyramid-axis{font-size:10px; color:var(--bp-text-faint); margin-bottom:3px}
   .pyramid-axis .left{text-align:right; grid-column:1/span 2}
@@ -1219,19 +1253,30 @@
   /* =========================================================================
      Hero
   ========================================================================= */
-  /* The locator's height must equal the photo's (A1): grid `align-items:
-     stretch` alone does not guarantee that -- it stretches every hero-row
-     column to the row's tallest column, which can be the name block's own
-     content, not the photo. Set explicitly instead, right after the photo's
-     own height is known. Cleared below 1100px, where the layout stacks and
-     the locator's natural height is what's wanted. */
+  /* The locator's height must be AT LEAST the photo's (A1): grid
+     `align-items:stretch` alone does not guarantee that -- it stretches
+     every hero-row column to the row's tallest column, which can be the
+     name block's own content, not the photo. Set explicitly instead, right
+     after the photo's own height is known. Cleared below 1100px, where the
+     layout stacks and the locator's natural height is what's wanted.
+
+     min-height, never height (stage 2 fix, live-site finding on Farciennes
+     52021/desktop): the locator's own content -- the map box (min-height
+     210px) PLUS the legend below it, which wraps to two lines for a commune
+     whose province/region/neighbour names are long ("Province du Hainaut",
+     "Communes voisines - Commune - Farciennes") -- can need more height
+     than the photo does. A fixed `height` clipped nothing (.hero-locator has
+     no overflow:hidden) but let the legend's overflow spill downward past
+     the card's own bottom edge and get drawn under the chips row
+     (#heroQuick) that follows right after in normal flow, since a fixed
+     height does not grow to fit content the way min-height does. */
   function syncLocatorHeight(){
     var locator = document.querySelector('.hero-locator');
     var box = document.getElementById('heroPhotobox');
     if(!locator || !box) return;
-    if(window.matchMedia('(max-width:1100px)').matches){ locator.style.height = ''; return; }
+    if(window.matchMedia('(max-width:1100px)').matches){ locator.style.minHeight = ''; return; }
     var h = box.getBoundingClientRect().height;
-    if(h) locator.style.height = Math.round(h) + 'px';
+    if(h) locator.style.minHeight = Math.round(h) + 'px';
   }
   function fitHeroImage(img){
     var nw = img.naturalWidth, nh = img.naturalHeight;
@@ -1386,7 +1431,11 @@
       valEl.textContent = latest ? fmt(latest.value, meta) + unitSuffix(meta) : '—';
       valEl.title = valEl.textContent;
       item.querySelector('.essentiel-period').textContent = latest ? latest.period : '';
-      if(rankText) item.querySelector('.essentiel-rank').textContent = rankText;
+      if(rankText){
+        var rankEl = item.querySelector('.essentiel-rank');
+        rankEl.textContent = rankText;
+        rankEl.title = rankText;
+      }
       var pts = sparkPoints(numericPoints(entry));
       var numeric = pts.filter(function(p){ return typeof p.value === 'number'; });
       var sparkEl = item.querySelector('.essentiel-spark');
@@ -3040,7 +3089,15 @@
           // Rough label box: text-anchor middle / dominant-baseline middle,
           // width estimated from character count -- exact glyph metrics
           // are not needed to decide "clearly overlaps or clearly doesn't".
-          var w = name.length * fontSize * 0.58, h = fontSize * 1.15;
+          // A small margin (PAD) is added on every side: the 0.58
+          // per-character estimate is an AVERAGE glyph width, so a name
+          // whose actual letters render wider than average (found on a
+          // real dense map: "Saint-Josse-ten-Noode" next to "Schaerbeek"
+          // in Brussels, which the plain estimate judged clear by under a
+          // pixel) still gets a box wide/tall enough to be judged
+          // intersecting instead of just barely, invisibly overlapping.
+          var PAD = fontSize * 0.12;
+          var w = name.length * fontSize * 0.58 + PAD * 2, h = fontSize * 1.15 + PAD * 2;
           var cx = b.x + b.width / 2, cy = b.y + b.height / 2;
           return {nis: nis, name: name, area: b.width * b.height, cx: cx, cy: cy,
             x0: cx - w / 2, x1: cx + w / 2, y0: cy - h / 2, y1: cy + h / 2};
