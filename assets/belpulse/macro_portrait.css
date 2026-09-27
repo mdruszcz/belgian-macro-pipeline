@@ -539,6 +539,18 @@
      hidden, matching what components.css already does for
      missing/unavailable/not-applicable/error. */
   .bp-state[data-state="ready"] .bp-state-body{display:block}
+  /* Lead review of bc29f7a90 (2026-09-27): a list host (e.g.
+     #employmentList) carries BOTH .bp-state-body (this state machine) and
+     .portrait-metrics (macro.html's own 3-column tile grid, .macro
+     .portrait-metrics{display:grid} below) -- the rule above's two-class
+     selector out-specificities that one, so every ready list silently
+     fell back to plain block flow and its tiles stacked one per row
+     instead of laying out in columns (found live: #keyList never hits
+     this, since #key carries no data-state at all -- only a card with
+     the compact-empty/unavailable state machine AND a tile grid inside
+     it collides). This three-class override wins regardless of source
+     order and keeps the grid the moment both classes are present. */
+  .bp-state[data-state="ready"] .bp-state-body.portrait-metrics{display:grid}
   .bp-state[data-state="ready"] .bp-state-message{display:none}
   .bp-state[data-state="unavailable"] .bp-state-body{display:none}
   .bp-state[data-state="unavailable"] .bp-state-message{display:block; padding:24px 0}
@@ -688,8 +700,19 @@
 .macro .leadchart-lastval{font-size:32px;white-space:normal;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
 .macro .leadchart-lastval .value-num{line-height:1.1}
 .macro .leadchart-lastval .value-unit{font-size:13px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
-.macro .portrait-metrics{display:grid;grid-template-columns:repeat(var(--mcols,3),minmax(0,1fr));list-style:none;padding:0;margin:0;gap:16px}
-@media (max-width:900px){.macro .portrait-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Lead review of bc29f7a90 (2026-09-27), Conjoncture at 1440px, found
+   while fixing Emploi's own layout: a FIXED repeat(3,...) breaks the
+   opposite way once a list has fewer than 3 tiles AND sits in the
+   leadrow's narrow 5fr column (not stacked-lead -- 2 tiles is fine
+   beside its chart, see the stacked-lead comment above) -- 2 tiles
+   forced into 3 columns squeezed each to ~130px and wrapped every word
+   of their label. auto-fit with a sensible minimum tile width adapts to
+   however many tiles actually exist AND to the column's real width,
+   correctly giving #keyList (6 tiles, 1152px full-width card) 3 columns,
+   Emploi's now-stacked, now-full-width list (3 tiles) 3 columns, and
+   Conjoncture's un-stacked list (2 tiles, ~420px column) exactly 2 --
+   without a per-list --mcols override anywhere. */
+.macro .portrait-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));list-style:none;padding:0;margin:0;gap:16px}
 @media (max-width:560px){.macro .portrait-metrics{grid-template-columns:1fr}}
 .macro .portrait-metrics .portrait-metric{display:block;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px 14px;min-width:0;position:relative}
 .macro .portrait-metrics .portrait-metric::before{content:"";display:block;position:absolute;left:18px;top:0;width:26px;height:3px;border-radius:0 0 2px 2px;background:var(--th);opacity:.9}
@@ -744,6 +767,20 @@
    hidden -- HICP is its one series and the chart above already draws it --
    so .single-lead correctly switches the row to one column, but the plot
    itself was still capped narrower than that now-full-width column). */
+/* Lead review of bc29f7a90 (2026-09-27): Emploi's chart+list row left a
+   large empty area under the shorter chart, because its list (3 tiles)
+   was squeezed into the row's 5fr column -- too narrow for 3 real
+   columns to read, so the tiles effectively stacked instead. Same fix
+   idea as .single-lead above: give the row's SECOND child (the list
+   card) the full row width once it needs 3+ tiles, so .portrait-metrics
+   (set on #employmentList etc. by renderListInto -- see macro.html) gets
+   real width to lay its own 3-column grid out in, the way commune.html
+   lays tiles out UNDER a lead chart rather than squeezed beside it.
+   grid-column:1/-1 on the second child only -- the chart itself stays in
+   its normal first-column position, just no longer sharing the row with
+   a cramped second column. */
+.macro .leadrow.stacked-lead{grid-template-columns:1fr}
+.macro .leadrow.stacked-lead>:nth-child(2){margin-top:8px}
 .macro .contrib li{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;row-gap:8px}
 .macro .contrib .name{font-size:13px;line-height:1.4}
 .macro .contrib .val{grid-column:2;grid-row:1;font-size:13px;font-variant-numeric:tabular-nums}

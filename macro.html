@@ -560,7 +560,7 @@
     if(definition){var para=document.createElement('p');para.className='leadchart-para';para.textContent=definition;host.appendChild(para);}
     if(!latest){var empty=document.createElement('p');empty.textContent=T('macroUnavailable');host.appendChild(empty);return;}
     var date=document.createElement('div');date.className='metric-date';date.textContent=fmtPeriod(latest.period);host.appendChild(date);
-    var wrap=document.createElement('div');wrap.className='leadchart-svgwrap';host.appendChild(wrap);
+    var wrap=document.createElement('div');wrap.className='leadchart-svgwrap';wrap.dataset.code=code;wrap.dataset.compact=compact?'1':'0';host.appendChild(wrap);
     var result=portrait.line({width:Math.max(280,Math.round(host.clientWidth)||640),height:compact?200:280,points:pts,decimals:entry.decimals,unitSuffix:displayUnit(entry),ariaLabel:nameOf(code)});
     wrap.innerHTML=result.svg||'';portrait.wireLine(wrap,result.hits||[],{title:nameOf(code)});
     var source=document.createElement('p');source.className='provenance';source.textContent=provenance(entry,latest);host.appendChild(source);
@@ -622,7 +622,25 @@
       var extra = (item.series || []).filter(function(code){return !lead || lead.series.indexOf(code) < 0;});
       var any = renderListInto(base + 'List', extra);
       var card = document.getElementById(item.id);
-      if(card){card.hidden=!any;card.parentElement.classList.toggle('single-lead',!any); if(card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';}
+      if(card){
+        card.hidden=!any;
+        var row=card.parentElement;
+        row.classList.toggle('single-lead',!any);
+        // Lead review of bc29f7a90 (2026-09-27): Emploi's list (3 tiles
+        // remaining once the lead chart's own series is excluded) squeezed
+        // into the leadrow's 5fr column left each tile too narrow to read
+        // and stacked the whole column roughly 3x taller than the chart
+        // beside it -- a large empty gap under the shorter chart.
+        // Conjoncture (2 tiles remaining) does not have this problem: its
+        // list and its chart come out close enough in height already
+        // (confirmed live: chart 965px, list 787px at 1440px). Three or
+        // more tiles is where the narrow column stops working -- stack the
+        // row instead (chart full width, then the list's own 3-column
+        // .portrait-metrics grid gets the FULL row width to lay out in,
+        // not a squeezed 5fr slice of it).
+        row.classList.toggle('stacked-lead',extra.length>=3);
+        if(card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';
+      }
     });
   }
 
@@ -810,11 +828,34 @@
     renderContributions();
     renderUnavailable();
     renderPanelChrome();
-    // The chart's card is as tall as the list panel beside it, and that
-    // height is only known once every card in the row has rendered -- so
-    // the currently-visible panel's chart(s) are drawn a second time, at
-    // the height they actually got.
-
+    // Lead review of bc29f7a90 (2026-09-27), Emploi at 1440px: the right
+    // column's own charts (drawn by renderListInto -> drawPortraitChart,
+    // "compact" mode) stayed pinned at the 280px MINIMUM width
+    // drawPortraitChart falls back to when host.clientWidth reads 0 or
+    // unset -- true here, since renderKeyList/renderExtraLists/
+    // renderContributions run synchronously, before CSS Grid has settled
+    // each card's real width (a card's width depends on how tall its ROW
+    // neighbour made the row, a genuine layout dependency, not a timing
+    // fluke). A 280px-wide SVG stretched by CSS to fill its real,
+    // much-wider card scales every fixed font-size in it up along with
+    // it -- the axis text this batch's lead review found visibly larger
+    // in the right column than everywhere else. Same fix as
+    // reapplyHashScroll/shrinkEssentielValuesToFit above: redraw once,
+    // via afterLayoutSettles, now that the browser has actually laid the
+    // grid out and every card's clientWidth means something.
+    afterLayoutSettles(redrawLeadCharts);
+  }
+  function redrawLeadCharts(){
+    document.querySelectorAll('.leadchart-svgwrap').forEach(function(wrap){
+      var host=wrap.parentElement;var code=wrap.dataset.code;
+      if(!host||!code) return;
+      var svg=wrap.querySelector('svg');
+      var drawnWidth=svg?Math.round(parseFloat(svg.getAttribute('viewBox').split(' ')[2])):0;
+      var realWidth=Math.round(host.clientWidth);
+      if(realWidth>0 && Math.abs(realWidth-drawnWidth)>4){
+        drawPortraitChart(host,code,wrap.dataset.compact==='1');
+      }
+    });
   }
 
   async function boot(){
