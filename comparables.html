@@ -44,8 +44,10 @@ table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; whi
 .withheld-block summary{cursor:pointer; font-weight:var(--bp-weight-medium); padding:10px 0; color:var(--bp-text-muted)}
 .withheld-group{margin:12px 0 20px}
 .withheld-group h3{font-size:13px; font-weight:var(--bp-weight-semibold); margin:0 0 8px; color:var(--bp-text)}
-.withheld-group ul{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:4px 14px}
-.withheld-group li{font-size:13px; color:var(--bp-text-muted); padding:3px 0}
+.withheld-group ul{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:2px 14px}
+.withheld-group li{font-size:13px; color:var(--bp-text-muted); padding:4px 0 8px}
+.withheld-name{display:block; color:var(--bp-text)}
+.withheld-reason-body{display:block; font-size:12px; color:var(--bp-text-faint)}
 .model-footnote{margin-top:30px; font-size:11px; color:var(--bp-text-faint)}
 [data-page-state="unavailable"] .cp-body{display:none}
 [data-page-state="ready"] .cp-unavail{display:none}
@@ -111,7 +113,9 @@ table.bp-compare-table td.period{color:var(--bp-text-muted); font-size:12px; whi
         <div id="withheldGroups"></div>
       </details>
 
+      <p class="model-footnote" id="positionNote"></p>
       <p class="model-footnote" id="modelFootnote"></p>
+      <p class="model-footnote" id="selectionFootnote"></p>
     </div>
 
     <div class="cp-unavail" id="cpUnavail">Aucune donnée de comparaison n'est disponible pour cette commune.</div>
@@ -149,15 +153,20 @@ var STRINGS = {
     thCoverage: 'Comparables', thDeviation: 'Deviation', thPosition: 'Position',
     withheldSummary: 'Indicators not compared',
     selectionNote: 'communes chosen partly on this figure',
+    selectionFootnote: '* Communes on this list were chosen partly by their own value on this figure, which mechanically narrows how large a deviation among them can ever look for it.',
+    positionNote: 'Position: 1 = highest value of the eleven. A high or a low value is not, by itself, better or worse.',
     devTooltip: 'The percentage deviation is withheld: the median of comparable communes is {reason} for this indicator, so a percentage against it would be misleading. The rank shown alongside is still meaningful.',
     devWithheldZero: 'zero', devWithheldNegative: 'negative',
-    positionOf: '{pos}{ord} of {of}',
+    positionOf: '{pos} of {of}',
     ord1: 'st', ord2: 'nd', ord3: 'rd', ordN: 'th',
     countLine: '{shown} / {total} indicators',
     reasonExcluded: 'Excluded', reasonNoCurrentValue: 'No current-period value', reasonFewPeers: 'Too few comparable communes',
+    reasonSuppressed: 'Suppressed for privacy', reasonNa: 'Not applicable',
     reasonExcludedBody: 'This indicator is itself a rank or a percentile among communes, so comparing it to a different set of ten communes would not mean anything.',
     reasonNoCurrentValueBody: 'This commune has no usable value for the period this indicator is currently published for.',
     reasonNoCurrentValueOwn: ' Its own most recent usable value is from {period}.',
+    reasonSuppressedBody: 'The source withheld this commune’s figure for privacy (a small-sample suppression), so no comparison can be shown. This is not a missing value.',
+    reasonNaBody: 'The source marked this figure as not applicable to this commune for the period, so no comparison can be shown.',
     reasonFewPeersBody: 'Fewer than {min} of the 10 comparable communes ({k} of 10) have a usable value for this period, so no median could be computed.',
     modelFootnote: 'Peer Model {version} ({variant}). Comparable communes are chosen by structural similarity (population, age structure, income, unemployment and related variables) — not by geography alone.',
     unavailable: 'No comparison data is available for this commune.',
@@ -175,15 +184,20 @@ var STRINGS = {
     thCoverage: 'Comparables', thDeviation: 'Écart', thPosition: 'Position',
     withheldSummary: 'Indicateurs non comparés',
     selectionNote: 'communes choisies notamment sur ce chiffre',
+    selectionFootnote: '* Les communes de cette liste ont été choisies en partie sur leur propre valeur pour ce chiffre, ce qui réduit mécaniquement l’écart qu’elles peuvent jamais afficher entre elles pour ce chiffre.',
+    positionNote: 'Position : 1 = valeur la plus élevée des onze. Une valeur haute ou basse n’est pas, en elle-même, meilleure ou moins bonne.',
     devTooltip: 'L’écart en pourcentage est masqué : la médiane des communes comparables est {reason} pour cet indicateur, un pourcentage par rapport à elle serait trompeur. Le rang affiché à côté reste, lui, significatif.',
     devWithheldZero: 'nulle', devWithheldNegative: 'négative',
-    positionOf: '{pos}e sur {of}',
+    positionOf: '{pos} sur {of}',
     ord1: 'er', ord2: 'e', ord3: 'e', ordN: 'e',
     countLine: '{shown} / {total} indicateurs',
     reasonExcluded: 'Exclus', reasonNoCurrentValue: 'Pas de valeur pour la période en cours', reasonFewPeers: 'Trop peu de communes comparables',
+    reasonSuppressed: 'Masqué pour préserver la confidentialité', reasonNa: 'Non applicable',
     reasonExcludedBody: 'Cet indicateur est lui-même un rang ou un percentile entre communes ; le comparer à un autre ensemble de dix communes n’aurait pas de sens.',
     reasonNoCurrentValueBody: 'Cette commune n’a pas de valeur exploitable pour la période actuellement publiée de cet indicateur.',
     reasonNoCurrentValueOwn: ' Sa propre valeur exploitable la plus récente date de {period}.',
+    reasonSuppressedBody: 'La source a masqué le chiffre de cette commune pour préserver la confidentialité (échantillon trop petit) ; aucune comparaison ne peut être affichée. Ce n’est pas une valeur manquante.',
+    reasonNaBody: 'La source a marqué ce chiffre comme non applicable à cette commune pour cette période ; aucune comparaison ne peut être affichée.',
     reasonFewPeersBody: 'Moins de {min} des 10 communes comparables ({k} sur 10) ont une valeur exploitable pour cette période ; aucune médiane n’a pu être calculée.',
     modelFootnote: 'Peer Model {version} ({variant}). Les communes comparables sont choisies par similarité structurelle (population, structure d’âge, revenus, chômage et variables associées) — pas seulement par géographie.',
     unavailable: 'Aucune donnée de comparaison n’est disponible pour cette commune.',
@@ -201,15 +215,20 @@ var STRINGS = {
     thCoverage: 'Vergelijkbare gemeenten', thDeviation: 'Afwijking', thPosition: 'Positie',
     withheldSummary: 'Niet-vergeleken indicatoren',
     selectionNote: 'gemeenten mede op dit cijfer geselecteerd',
+    selectionFootnote: '* Gemeenten in deze lijst zijn mede geselecteerd op hun eigen waarde voor dit cijfer, wat mechanisch beperkt hoe groot een afwijking tussen hen voor dit cijfer ooit kan lijken.',
+    positionNote: 'Positie: 1 = hoogste waarde van de elf. Een hoge of lage waarde is op zich niet beter of slechter.',
     devTooltip: 'Het percentageverschil wordt niet getoond: de mediaan van de vergelijkbare gemeenten is {reason} voor deze indicator, een percentage daartegenover zou misleidend zijn. De rangorde ernaast blijft wel betekenisvol.',
     devWithheldZero: 'nul', devWithheldNegative: 'negatief',
-    positionOf: '{pos}e van {of}',
+    positionOf: '{pos} van {of}',
     ord1: 'e', ord2: 'e', ord3: 'e', ordN: 'e',
     countLine: '{shown} / {total} indicatoren',
     reasonExcluded: 'Uitgesloten', reasonNoCurrentValue: 'Geen waarde voor de huidige periode', reasonFewPeers: 'Te weinig vergelijkbare gemeenten',
+    reasonSuppressed: 'Afgeschermd voor privacy', reasonNa: 'Niet van toepassing',
     reasonExcludedBody: 'Deze indicator is zelf een rang of percentiel tussen gemeenten; vergelijken met een andere set van tien gemeenten zou niets betekenen.',
     reasonNoCurrentValueBody: 'Deze gemeente heeft geen bruikbare waarde voor de periode waarvoor deze indicator momenteel gepubliceerd is.',
     reasonNoCurrentValueOwn: ' Haar eigen meest recente bruikbare waarde dateert van {period}.',
+    reasonSuppressedBody: 'De bron heeft het cijfer van deze gemeente afgeschermd om privacyredenen (te kleine steekproef); er kan geen vergelijking worden getoond. Dit is geen ontbrekende waarde.',
+    reasonNaBody: 'De bron heeft dit cijfer voor deze gemeente en periode als niet van toepassing gemarkeerd; er kan geen vergelijking worden getoond.',
     reasonFewPeersBody: 'Minder dan {min} van de 10 vergelijkbare gemeenten ({k} van de 10) hebben een bruikbare waarde voor deze periode; er kon geen mediaan worden berekend.',
     modelFootnote: 'Peer Model {version} ({variant}). Vergelijkbare gemeenten worden gekozen op structurele gelijkenis (bevolking, leeftijdsstructuur, inkomen, werkloosheid en verwante variabelen) — niet enkel op geografie.',
     unavailable: 'Er zijn geen vergelijkingsgegevens beschikbaar voor deze gemeente.',
@@ -228,6 +247,7 @@ var nis = params.get('nis') || '';
 var state = {
   geographies: null,
   indicators: null,
+  indicatorMeta: null,
   payload: null,
   // Same-region is the default view (maintainer decision, 2026-09-27); the
   // switch lets a reader widen it to all of Belgium. commune.html follows
@@ -264,11 +284,13 @@ function fallbackMeta(code){
   // Fallback for the handful of engine-only derived indicators (e.g. the
   // demographic per-1000 rates) that never get a row in
   // public/data/metadata/indicators.json -- their name/unit travel instead
-  // on the peer payload itself (payload.indicator_meta), read straight from
+  // in the shared public/data/peers/indicator_meta.json (identical for
+  // every commune, so it is fetched once rather than duplicated into each
+  // per-commune payload -- P2 fix, this batch), read straight from
   // config/indicators/derived/*.yaml by the exporter (rule 36). A reader
   // must never see a bare indicator code or an unformatted number where a
   // unit belongs (rule 24's spirit).
-  return (state.payload && state.payload.indicator_meta && state.payload.indicator_meta[code]) || null;
+  return (state.indicatorMeta && state.indicatorMeta[code]) || null;
 }
 
 function indicatorMeta(code){
@@ -361,6 +383,16 @@ function withheldReasonBody(entry){
     if(entry.own_period) body += T('reasonNoCurrentValueOwn', {period: entry.own_period});
     return body;
   }
+  if(entry.reason === 'suppressed'){
+    var sBody = T('reasonSuppressedBody');
+    if(entry.own_period) sBody += T('reasonNoCurrentValueOwn', {period: entry.own_period});
+    return sBody;
+  }
+  if(entry.reason === 'na'){
+    var nBody = T('reasonNaBody');
+    if(entry.own_period) nBody += T('reasonNoCurrentValueOwn', {period: entry.own_period});
+    return nBody;
+  }
   if(entry.reason === 'few_peers'){
     var minPeers = (state.payload && state.payload.min_peers_with_value) || 7;
     return T('reasonFewPeersBody', {min: minPeers, k: entry.peers_with_value});
@@ -411,13 +443,19 @@ function renderTable(){
 
 function renderWithheld(){
   var withheld = (state.payload && state.payload.withheld && state.payload.withheld[state.scope]) || {};
-  var groups = {excluded: [], no_current_value: [], few_peers: []};
+  var groups = {excluded: [], no_current_value: [], suppressed: [], na: [], few_peers: []};
   Object.keys(withheld).forEach(function(code){
     var entry = withheld[code];
     if(groups[entry.reason]) groups[entry.reason].push([code, entry]);
   });
-  var order = ['no_current_value', 'few_peers', 'excluded'];
-  var titleKey = {no_current_value: 'reasonNoCurrentValue', few_peers: 'reasonFewPeers', excluded: 'reasonExcluded'};
+  var order = ['suppressed', 'na', 'no_current_value', 'few_peers', 'excluded'];
+  var titleKey = {
+    no_current_value: 'reasonNoCurrentValue',
+    suppressed: 'reasonSuppressed',
+    na: 'reasonNa',
+    few_peers: 'reasonFewPeers',
+    excluded: 'reasonExcluded'
+  };
   var html = '';
   order.forEach(function(reason){
     var items = groups[reason];
@@ -426,7 +464,9 @@ function renderWithheld(){
     html += '<div class="withheld-group"><h3>' + esc(T(titleKey[reason])) + ' (' + items.length + ')</h3><ul>' +
       items.map(function(pair){
         var code = pair[0], entry = pair[1];
-        return '<li title="' + esc(withheldReasonBody(entry)) + '">' + esc(indicatorName(code)) + '</li>';
+        var body = withheldReasonBody(entry);
+        return '<li title="' + esc(body) + '"><span class="withheld-name">' + esc(indicatorName(code)) +
+          '</span><span class="withheld-reason-body">' + esc(body) + '</span></li>';
       }).join('') + '</ul></div>';
   });
   $('#withheldGroups').innerHTML = html;
@@ -435,6 +475,10 @@ function renderWithheld(){
 function renderFootnote(){
   if(!state.payload) return;
   $('#modelFootnote').textContent = T('modelFootnote', {version: state.payload.model_version, variant: state.payload.variant});
+  $('#positionNote').textContent = T('positionNote');
+  var lists = (state.payload.lists && state.payload.lists[state.scope]) || {};
+  var hasSelectionVariable = Object.keys(lists).some(function(code){ return lists[code].selection_variable; });
+  $('#selectionFootnote').textContent = hasSelectionVariable ? T('selectionFootnote') : '';
 }
 
 function render(){
@@ -509,34 +553,38 @@ document.addEventListener('bp:lang', function(e){
 
 translateChrome();
 
-if(!nis){
-  setUnavailable();
-} else {
-  Promise.all([
-    fetch('public/data/metadata/geographies.json').then(function(r){ return r.json(); }),
-    fetch('public/data/metadata/indicators.json').then(function(r){ return r.json(); })
-  ]).then(function(results){
-    var geoData = results[0], indData = results[1];
-    var geographies = {};
-    geoData.geographies.forEach(function(g){
-      if(g.level === 'municipality') geographies[g.nis_code] = g.name;
-    });
-    var indicators = {};
-    indData.indicators.forEach(function(i){ indicators[i.indicator_code] = i; });
-    state.geographies = geographies;
-    state.indicators = indicators;
-
-    var updateDates = indData.indicators.map(function(i){ return i.updated; }).filter(Boolean).sort();
-    var lastUpdated = updateDates[updateDates.length - 1] || '';
-    var attrUpdatedEl = document.getElementById('attrUpdated');
-    if(attrUpdatedEl && lastUpdated) attrUpdatedEl.textContent = lastUpdated;
-
-    populateCommuneSelect();
-    switchCommune(nis);
-  }).catch(function(){
-    setUnavailable();
+// Load the commune picker's data unconditionally -- a reader landing on
+// the bare URL (no ?nis) still gets a working picker rather than an
+// unexplained empty <select> sitting outside the "unavailable" state's
+// hidden .cp-body (browser lens P2). Only the commune-specific payload
+// fetch below is conditional on `nis` being present.
+if(!nis) setUnavailable();
+Promise.all([
+  fetch('public/data/metadata/geographies.json').then(function(r){ return r.json(); }),
+  fetch('public/data/metadata/indicators.json').then(function(r){ return r.json(); }),
+  fetch('public/data/peers/indicator_meta.json').then(function(r){ return r.json(); })
+]).then(function(results){
+  var geoData = results[0], indData = results[1], indicatorMeta = results[2];
+  var geographies = {};
+  geoData.geographies.forEach(function(g){
+    if(g.level === 'municipality') geographies[g.nis_code] = g.name;
   });
-}
+  var indicators = {};
+  indData.indicators.forEach(function(i){ indicators[i.indicator_code] = i; });
+  state.geographies = geographies;
+  state.indicators = indicators;
+  state.indicatorMeta = indicatorMeta;
+
+  var updateDates = indData.indicators.map(function(i){ return i.updated; }).filter(Boolean).sort();
+  var lastUpdated = updateDates[updateDates.length - 1] || '';
+  var attrUpdatedEl = document.getElementById('attrUpdated');
+  if(attrUpdatedEl && lastUpdated) attrUpdatedEl.textContent = lastUpdated;
+
+  populateCommuneSelect();
+  if(nis) switchCommune(nis);
+}).catch(function(){
+  setUnavailable();
+});
 })();
 </script>
 </body>
