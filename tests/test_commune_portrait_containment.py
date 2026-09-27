@@ -159,6 +159,11 @@ _CHECK_JS = """
         if (!r || r.width === 0 || r.height === 0) return false;
         const style = window.getComputedStyle(el instanceof Element ? el : el.parentElement);
         if (style && (style.visibility === 'hidden' || style.display === 'none')) return false;
+        // The contents of a closed <details> (e.g. .sim-which) still report a
+        // non-zero layout box in Chromium, just below the summary, but are not
+        // rendered; checkVisibility() knows this, the two checks above do not.
+        const target = el instanceof Element ? el : el.parentElement;
+        if (target && target.checkVisibility && !target.checkVisibility()) return false;
         return true;
     }
 
@@ -280,6 +285,13 @@ _CHECK_JS = """
 def test_no_text_overflows_its_layout_box(chromium, site, nis, width, lang):
     ctx, page = _load(chromium, site, nis, width, lang)
     try:
+        # Expand every "Which communes?" disclosure so its list is measured as
+        # a reader sees it once opened (closed, its contents are not visible
+        # and are skipped by isVisible()).
+        page.evaluate(
+            "document.querySelectorAll('details.sim-which').forEach(d => { d.open = true; })"
+        )
+        page.wait_for_timeout(400)
         result = page.evaluate(
             _CHECK_JS, {"containerSelectors": CONTAINER_SELECTORS, "tolerance": TOLERANCE_PX}
         )
