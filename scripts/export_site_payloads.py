@@ -180,18 +180,40 @@ def _read_communes_latest(csv_path: Path) -> dict[str, dict]:
     """One entry per indicator, holding every current commune's latest value
     -- the cross-sectional shape `indicators/{id}.json` publishes directly.
     `communes_export.csv` already restricts to current communes and the most
-    recent period per (commune, indicator), so no filtering happens here."""
+    recent period per (commune, indicator), so no filtering happens here --
+    but that promise is enforced here, not assumed: a second row for the same
+    (nis_code, indicator_code) raises rather than silently keeping whichever
+    one the CSV happened to list last (CLAUDE.md rule 13 -- fail loudly on a
+    schema/contract violation instead of coercing it away). This is exactly
+    the shape the 2026-09-16 regression took: export_communes_csv.py once
+    emitted both a stale reconstructed row and a real one for the same
+    commune and indicator, and this reader picked whichever came last with
+    no error at all.
+    """
     indicators: dict[str, dict] = {}
+    seen: dict[str, set[str]] = {}
     with csv_path.open(encoding="utf-8", newline="") as fh:
         for row in csv.DictReader(fh):
+            nis_code = row["nis_code"]
+            indicator_code = row["indicator_code"]
+            already = seen.setdefault(indicator_code, set())
+            if nis_code in already:
+                raise ValueError(
+                    f"{csv_path.name} has more than one row for commune {nis_code} "
+                    f"({row['name_en']}) and indicator {indicator_code} -- expected "
+                    "exactly one row per (commune, indicator). Refusing to silently "
+                    "keep whichever row came last."
+                )
+            already.add(nis_code)
+
             indicator = indicators.setdefault(
-                row["indicator_code"],
+                indicator_code,
                 {"name": row["indicator_name"], "unit": row["unit"], "communes": {}},
             )
             cell = _cell(row)
             if cell is None:
                 continue
-            indicator["communes"][row["nis_code"]] = {**cell, "period": row["period"]}
+            indicator["communes"][nis_code] = {**cell, "period": row["period"]}
             if cell["value"] is not None:
                 _note_updated(indicator, row["fetched_at"])
     return indicators
