@@ -38,6 +38,7 @@ def test_portrait_retains_figures_and_chart_navigation(chromium, portrait_site, 
     try:
         page.goto(f"{portrait_site}/macro.html#apercu", wait_until="domcontentloaded")
         expect(page.locator(".macro-kpi[data-state=ready]")).to_have_count(6)
+        expect(page.locator("#apercu #overview")).to_have_count(1)
         before = page.locator(".macro-kpi .num").all_text_contents()
         assert all(value.strip() for value in before)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth")
