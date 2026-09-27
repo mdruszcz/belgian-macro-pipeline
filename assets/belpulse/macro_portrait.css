@@ -1,69 +1,730 @@
-/* Portrait styles copied from commune.html, scoped to macro. */
-  .macro .hero-eyebrow{font:600 11px/1.4 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.08em; color:var(--bp-text-muted); margin-bottom:6px}
-  .macro .hero-name{font-family:var(--bp-font-display); font-weight:600; font-size:56px; line-height:1.02; letter-spacing:-.01em; margin:0; color:var(--bp-text)}
-  .macro .hero-tagline{font-family:var(--bp-font-display); font-style:italic; font-weight:500; font-size:18px; color:var(--bp-text-muted); margin-top:8px}
-  .macro .hero-date{font:500 12px/1.4 var(--bp-font-ui); color:var(--bp-text-faint); margin-top:12px}
-  .macro .hero-actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
-  .macro .macro-kpi{display:grid; grid-template-rows:subgrid; grid-row:span 4; padding:16px 18px 14px; border-left:1px solid var(--bp-border); min-width:0; text-decoration:none; color:inherit; position:relative; cursor:pointer}
-  .macro .macro-kpi .bp-value{font-family:var(--bp-font-ui); font-weight:600; font-size:clamp(16px,2vw,26px); line-height:1.15; font-variant-numeric:tabular-nums; margin:8px 0 2px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:clip; height:30px; display:flex; align-items:center; flex:none; color:var(--bp-text)}
-  .macro .kpi-top .bp-kpi-label .name{font:600 11px/1.35 var(--bp-font-ui); letter-spacing:.05em; color:var(--bp-text-muted); align-self:start; padding-top:6px}
-  .macro .bp-sidebar-nav a{font:600 11px/1 var(--bp-font-ui); letter-spacing:.02em; color:var(--bp-text-muted); text-decoration:none; border:1px solid var(--bp-border); border-radius:999px; padding:6px 10px; background:var(--bp-surface); display:inline-flex; align-items:center; gap:6px}
-  .macro .bp-sidebar-nav a i{width:8px; height:8px; border-radius:50%; background:var(--th); display:block}
-  .macro .bp-sidebar-nav a:hover{border-color:var(--th); color:var(--bp-text)}
-/* Composition only: existing payloads, canvases and panel switcher are retained. */
-.macro .bp-body--analytical{display:block; max-width:1200px; padding:0 24px; margin:0 auto}
-.macro .bp-body--analytical::before{display:none}
-.macro .macro-main{margin:0; padding:0; width:100%; gap:24px}
-.macro .portrait-hero{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:center; padding:36px 0 28px}
-.macro .portrait-hero .skyline{grid-column:1; grid-row:1; height:280px; border-radius:12px; background:var(--bp-surface); border:1px solid var(--bp-border); padding:24px; overflow:hidden}
-.macro .portrait-hero .skyline svg{opacity:.7}
-.macro .portrait-hero .skyline .script{top:28px; right:24px}
-.macro .hero-name{font-size:48px}
-.macro .hero-tagline{line-height:1.5; max-width:46ch}
-.macro .side-update{padding:0; margin:16px 0 0; border:0; color:var(--bp-text-muted)}
-.macro .side-update .when{color:var(--bp-text)}
-.macro .side-update .status:empty{display:none}
-.macro .bp-sidebar{position:sticky; top:var(--macro-topbar-h,56px); left:auto; width:100%; min-height:0; height:auto; display:block; padding:10px 0; margin:0 0 24px; z-index:25; background:var(--bp-bg); border:0; border-bottom:1px solid var(--bp-border)}
-.macro .bp-sidebar-nav{display:flex; flex-direction:row; gap:8px; overflow-x:auto; margin:0; padding:0; list-style:none}
-.macro .bp-sidebar-nav li{flex:none; --th:var(--bp-blue)}
-.macro .bp-sidebar-nav li:nth-child(3n+2){--th:var(--bp-green)}
-.macro .bp-sidebar-nav li:nth-child(3n){--th:var(--bp-chart-4)}
-.macro .bp-sidebar-nav a{padding:8px 12px; white-space:nowrap}
-.macro .bp-sidebar-nav a::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--th); flex:none}
-.macro .bp-sidebar-nav a .icon{display:none}
-.macro .bp-sidebar-nav a[aria-current="page"]{border-color:var(--th); color:var(--bp-text); background:var(--bp-surface-alt)}
-.macro .kpi-row{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:0; border-top:1px solid var(--bp-border); border-bottom:1px solid var(--bp-border)}
-.macro .macro-kpi{display:flex; flex-direction:column; padding:20px 18px; border:0; border-left:1px solid var(--bp-border); border-radius:0; box-shadow:none; background:transparent; cursor:default; --th:var(--bp-blue)}
-.macro .macro-kpi:first-child{border-left:0}
-.macro .macro-kpi::before{content:""; position:absolute; left:18px; top:0; width:28px; height:3px; background:var(--th); border-radius:0 0 2px 2px}
-.macro .kpi-top .bp-kpi-icon{display:none}
-.macro .kpi-top .bp-kpi-label .name{display:block; text-transform:uppercase; min-height:72px; overflow:visible}
-.macro .macro-kpi .bp-value{font-size:clamp(20px,2.2vw,32px); height:auto; overflow:visible}
-.macro .macro-kpi .mini-canvas{order:3}
-.macro .macro-kpi .kpi-period{order:4; font-size:12px; color:var(--bp-text-muted)}
-.macro .macro-kpi .bp-delta{font-size:11px; white-space:normal}
-.macro .bp-panel > h2:not(.bp-sr-only){font-family:var(--bp-font-display); font-size:32px; border-top:3px solid var(--bp-blue); padding-top:14px}
-.macro .bp-chart-card{border-radius:10px; box-shadow:none}
+/* Copied from commune.html Portrait; macro adaptations follow. */
+
+  *{box-sizing:border-box}
+  body{background:var(--bp-bg); color:var(--bp-text)}
+  .wrap{max-width:1200px; margin:0 auto; padding:0 24px}
+  @media (max-width:640px){ .wrap{padding:0 16px} }
+
+  h1,h2,h3{font-family:var(--bp-font-display); font-weight:600; margin:0}
+
+  /* ---------------------------------------------------------------------
+     Vocabulary: eyebrows, hairlines, big numbers. Every chapter carries
+     its own hue in --th (set inline by JS from the chapter's POSITION in
+     sections.json -- never from an indicator id, rule 2/24).
+  --------------------------------------------------------------------- */
+  :root{--th:var(--bp-text); --th-soft:var(--bp-surface-alt); --th-ink:var(--bp-text)}
+  .eyebrow{font:600 11px/1.4 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.08em; color:var(--bp-text-muted)}
+  .eyebrow.accent{color:var(--bp-accent)}
+  .hr{border:0; border-top:1px solid var(--bp-border); margin:0}
+  .num{font-variant-numeric:tabular-nums}
+  .card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px}
+  .skel{position:relative; overflow:hidden; background:var(--bp-surface-alt); border-radius:6px}
+  .skel::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--bp-text) 6%, transparent), transparent); animation:skel-sweep 1.4s ease-in-out infinite}
+  @keyframes skel-sweep{ 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+  [data-loading="1"] .skel{display:block}
+  [data-loading="0"] .skel{display:none}
+  .visually-hidden{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+
+  .searchbox{display:flex; align-items:center; gap:8px; max-width:340px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:7px 12px; background:var(--bp-surface); position:relative}
+  .searchbox input{border:0; background:transparent; outline:0; font:inherit; font-size:13px; color:inherit; flex:1; min-width:0}
+  .searchbox svg{color:var(--bp-text-faint); flex:none}
+
+  /* ---------------------------------------------------------------------
+     Hero: photo | name block | locator (a real map, 300px wide, tinted
+     region/province, legend, zoom, hover names, click to open a commune).
+  --------------------------------------------------------------------- */
+  .hero-row{display:grid; grid-template-columns:auto minmax(240px,1fr) 300px; gap:20px 28px; align-items:stretch; margin-top:12px; padding-bottom:20px}
+  .hero-photocol{min-width:0; display:flex; flex-direction:column}
+  .hero-photobox{position:relative; height:320px; width:520px; max-width:100%; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center}
+  .hero-photobox:not(.has-photo){background:linear-gradient(160deg,#20344f,#38506e 55%,#5b7290)}
+  .hero-photobox img{width:100%; height:100%; object-fit:cover; display:none}
+  .hero-photobox.has-photo img{display:block}
+  .hero-credit{font-size:11px; color:var(--bp-text-faint); margin:6px 0 0}
+  .hero-text-col{min-width:0; display:flex; flex-direction:column; justify-content:center}
+  .hero-namebox{min-width:0; display:flex; flex-direction:column; gap:2px}
+  .hero-eyebrow{font:600 11px/1.4 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.08em; color:var(--bp-text-muted); margin-bottom:6px}
+  /* Back-to-directory link (A1): hidden by default, shown by
+     resolveBreadcrumbBack() only once a `from=` on the URL is revalidated
+     against real metadata. Sits above the eyebrow, inside the name block. */
+  .hero-crumb-back{display:inline-flex; align-items:center; gap:4px; font:600 12px/1.3 var(--bp-font-ui); color:var(--bp-text-muted); text-decoration:none; margin-bottom:8px}
+  .hero-crumb-back:hover{color:var(--bp-text); text-decoration:underline}
+  .hero-crumb-back[hidden]{display:none}
+  /* The name must never overflow its column (A1): the sweep measured
+     Auderghem, Anderlecht, Schaerbeek, Herstappe,
+     Ottignies-Louvain-la-Neuve and Beveren-Kruibeke-Zwijndrecht overflowing
+     by up to 52px at 1180-1440px with the old 56px size. Shrunk by
+     measurement to 34px (clamp keeps it larger when the column has real
+     room), and wrapping is now allowed at any width rather than relying on
+     size alone -- a name that is still too long for its column wraps
+     instead of spilling out of it. */
+  .hero-name{font-family:var(--bp-font-display); font-weight:600; font-size:clamp(26px,3.6vw,34px); line-height:1.08; letter-spacing:-.01em; margin:0; color:var(--bp-text); overflow-wrap:anywhere; hyphens:auto; max-width:100%}
+  .hero-tagline{font-family:var(--bp-font-display); font-style:italic; font-weight:500; font-size:18px; color:var(--bp-text-muted); margin-top:8px}
+  .hero-date{font:500 12px/1.4 var(--bp-font-ui); color:var(--bp-text-faint); margin-top:12px}
+  .hero-switcher{margin-top:10px}
+  .hero-switcher .searchbox{max-width:300px}
+  .hero-actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+  .hero-quick{display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:12px}
+  .hero-quick a{font:600 11px/1 var(--bp-font-ui); letter-spacing:.02em; color:var(--bp-text-muted); text-decoration:none; border:1px solid var(--bp-border); border-radius:999px; padding:6px 10px; background:var(--bp-surface); display:inline-flex; align-items:center; gap:6px}
+  .hero-quick a i{width:8px; height:8px; border-radius:50%; background:var(--th); display:block}
+  .hero-quick a:hover{border-color:var(--th); color:var(--bp-text)}
+  /* Chapter chip row (A1): now a full-width row under the hero, not a
+     column of the hero grid, so it no longer forces the photo column
+     (whose width already tracks the photo itself) any taller than the
+     photo, and the name block can sit directly next to the photo. */
+  .hero-quick-row{margin-top:14px; padding-top:0}
+  .hero-locator{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px; padding:12px 12px 10px; display:flex; flex-direction:column; min-width:0; --nodata:#ece9e1}
+  :root[data-theme="dark"] .hero-locator{--nodata:#2a2933}
+  .loc-head{font:600 11px/1.3 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-muted); margin-bottom:6px}
+  .hero-locator .mapbox{position:relative; width:100%; flex:1; min-height:210px; overflow:hidden; border-radius:8px}
+  .hero-locator .mapbox svg.map{width:100%; height:100%; max-height:100%}
+  .hero-locator svg.map path{stroke:var(--bp-surface); stroke-width:.35}
+  .hero-locator svg.map path.locate-me{fill:var(--bp-accent); stroke:var(--bp-accent-ink); stroke-width:1.2}
+  .hero-locator svg.map path.in-region:not(.locate-me){fill:var(--bp-icon-blue-bg)}
+  .hero-locator svg.map path.in-province:not(.locate-me){fill:#aec3e6}
+  .hero-locator svg.map path.is-neighbour:not(.locate-me){fill:#7e9dd0}
+  :root[data-theme="dark"] .hero-locator svg.map path.in-province:not(.locate-me){fill:#3b4f78}
+  :root[data-theme="dark"] .hero-locator svg.map path.is-neighbour:not(.locate-me){fill:#5f78a8}
+  .loczoom{position:absolute; top:6px; right:6px; display:flex; flex-direction:column; gap:3px; z-index:2}
+  .loczoom button{width:24px; height:24px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface); color:var(--bp-text); font:inherit; font-size:14px; line-height:1; cursor:pointer}
+  .loczoom button:hover{border-color:var(--bp-accent); color:var(--bp-accent)}
+  .loc-legend{display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11px; color:var(--bp-text-muted); margin-top:8px}
+  .loc-legend span{display:inline-flex; align-items:center; gap:5px; white-space:nowrap}
+  .loc-legend i{width:10px; height:10px; border-radius:2px; display:inline-block}
+  .loc-legend .sw-region{background:var(--bp-icon-blue-bg); border:1px solid var(--bp-border)}
+  .loc-legend .sw-province{background:#aec3e6}
+  .loc-legend .sw-neighbour{background:#7e9dd0}
+  .loc-legend .sw-commune{background:var(--bp-accent)}
+  :root[data-theme="dark"] .loc-legend .sw-province{background:#3b4f78}
+  :root[data-theme="dark"] .loc-legend .sw-neighbour{background:#5f78a8}
+  @media (max-width:1100px){
+    .hero-row{grid-template-columns:minmax(0,1fr) 280px}
+    .hero-photocol{display:contents}
+    .hero-photobox{grid-column:1 / -1; width:100% !important; height:auto !important; aspect-ratio:16/7}
+    .hero-credit{grid-column:1 / -1; margin-top:-14px}
+    .hero-text-col{order:3}
+    .hero-locator{order:4}
+    .hero-photobox img{width:100%; height:100%}
+  }
+  @media (max-width:700px){
+    .hero-row{grid-template-columns:1fr; margin-left:-16px; margin-right:-16px; width:calc(100% + 32px)}
+    .hero-photobox{border-radius:0; aspect-ratio:4/3}
+    .hero-text-col,.hero-locator,.hero-quick{margin:0 16px}
+    .hero-locator{order:4}
+    .hero-credit{padding:0 16px}
+    .hero-switcher .searchbox{max-width:none; width:100%}
+    .hero-quick-row{margin:14px 16px 0}
+  }
+
+  /* ---------------------------------------------------------------------
+     L'essentiel band: headline figures, each with its chapter colour, a
+     mini sparkline and the national position. Click = jump to the chapter.
+  --------------------------------------------------------------------- */
+  .essentiel{border-top:1px solid var(--bp-border); border-bottom:1px solid var(--bp-border); background:var(--bp-surface)}
+  .essentiel-row{max-width:1200px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:repeat(var(--ecols,6),minmax(0,1fr)); grid-template-rows:repeat(var(--essentiel-rows,1), auto auto auto 1fr); gap:0}
+  .essentiel-item{display:grid; grid-template-rows:subgrid; grid-row:span 4; padding:16px 18px 14px; border-left:1px solid var(--bp-border); min-width:0; text-decoration:none; color:inherit; position:relative; cursor:pointer}
+  .essentiel-item::before{content:""; position:absolute; left:18px; top:0; width:28px; height:3px; background:var(--th); border-radius:0 0 2px 2px}
+  .essentiel-item:first-child{border-left:0; padding-left:0}
+  .essentiel-item:first-child::before{left:0}
+  .essentiel-item:hover{background:color-mix(in srgb, var(--th) 5%, transparent)}
+  /* C3-adjacent (stage 2 containment sweep): a long eyebrow ("Average net
+     taxable income per tax return", "Population change over 5 years") is a
+     grid-row child of .essentiel-item's own subgrid, with no min-width:0 of
+     its own -- a grid item's default min-width is its max-content size in
+     several auto-sizing paths, so at 1024px/6 columns (~116px content width
+     per column after padding) the eyebrow rendered ~140px wide, 7px past
+     its own item's right edge and into the next column. min-width:0 lets it
+     actually shrink to the column and wrap by word, which its default
+     white-space (normal) already allows. overflow-wrap:anywhere on top --
+     a Dutch compound ("Bevolkingsverandering over 5 jaar") is one
+     unbreakable word with no space for min-width:0's word-wrap to use, so
+     it still overflowed at 1024px/6 columns until a break was allowed
+     mid-word, same fix as the hero name's own overflow-wrap:anywhere. */
+  .essentiel-eyebrow{font:600 11px/1.35 var(--bp-font-ui); letter-spacing:.05em; color:var(--bp-text-muted); align-self:start; padding-top:6px; min-width:0; overflow-wrap:anywhere}
+  .essentiel-value{font-family:var(--bp-font-ui); font-weight:600; font-size:clamp(16px,2vw,26px); line-height:1.15; font-variant-numeric:tabular-nums; margin:8px 0 2px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:clip; height:30px; display:flex; align-items:center; flex:none; color:var(--bp-text)}
+  .essentiel-spark{height:34px; margin:2px 0 6px; max-width:150px}
+  .essentiel-spark svg{display:block; width:100%; height:100%; overflow:visible}
+  .essentiel-spark.none{height:34px}
+  /* min-width:0: the same subgrid-child sizing gap as .essentiel-eyebrow
+     above -- without it, .essentiel-meta (and everything inside it,
+     including .essentiel-posline/.essentiel-rank) sized to its own
+     max-content width rather than the grid column's, so .essentiel-rank's
+     flex:1/min-width:0/ellipsis fix had no narrower box to actually shrink
+     into. */
+  .essentiel-meta{display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--bp-text-muted); min-height:16px; min-width:0; align-self:end}
+  .essentiel-period{white-space:nowrap; min-height:15px; display:block}
+  .essentiel-posline{display:flex; align-items:center; gap:8px; min-width:0; min-height:6px}
+  .posstrip{position:relative; width:56px; height:6px; flex:none}
+  .posstrip .track{position:absolute; top:2px; left:0; right:0; height:2px; background:var(--bp-border); border-radius:2px}
+  .posstrip .dot{position:absolute; top:0; width:6px; height:6px; border-radius:50%; background:var(--th); transform:translateX(-50%)}
+  /* Stage 2 containment sweep: "253rd of 552" (worst case, English -- the
+     fr/nl v4RankOf strings are shorter) plus the fixed-width .posstrip
+     (56px) and its 8px gap add up to more than the ~116px of content width
+     left in a column at 1024px/6 columns. flex:none kept the rank at its
+     full intrinsic width regardless, pushing it past the item's own right
+     edge. Now flex:1 1 auto with min-width:0 lets it actually shrink and
+     ellipsise (title carries the untouched text, the same pattern this
+     batch already uses for a bar-chart row label and a scope button). */
+  .essentiel-rank{white-space:nowrap; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
+  .essentiel-item.row-start{border-top:1px solid var(--bp-border); padding-top:16px}
+  @media (max-width:900px){ .essentiel-row{grid-template-columns:repeat(3,minmax(0,1fr))} .essentiel-item:nth-child(4){border-left:0; padding-left:0} .essentiel-item:nth-child(4)::before{left:0} }
+  @media (max-width:640px){
+    .essentiel-row{grid-template-columns:repeat(2,minmax(0,1fr)); padding:0 16px}
+    .essentiel-item{padding:14px 14px 12px}
+    .essentiel-item::before{left:14px}
+    .essentiel-item:nth-child(2n+1){border-left:0; padding-left:0}
+    .essentiel-item:nth-child(2n+1)::before{left:0}
+    .posstrip{width:44px}
+  }
+
+  /* ---------------------------------------------------------------------
+     Chapter nav (sticky)
+  --------------------------------------------------------------------- */
+  .chapternav{position:sticky; top:0; z-index:20; height:44px; display:none; align-items:center; background:color-mix(in srgb, var(--bp-bg) 92%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--bp-border)}
+  .chapternav.show{display:flex}
+  .chapternav .wrap{display:flex; gap:22px; align-items:center; white-space:nowrap; overflow-x:auto; scrollbar-width:none; height:100%}
+  .chapternav .wrap::-webkit-scrollbar{display:none}
+  .chapternav::before, .chapternav::after{content:""; position:absolute; top:0; bottom:0; width:32px; z-index:1; pointer-events:none}
+  .chapternav::before{left:0; background:linear-gradient(90deg, var(--bp-bg), transparent)}
+  .chapternav::after{right:0; background:linear-gradient(270deg, var(--bp-bg), transparent)}
+  .chapternav a{font:600 12px/1 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.03em; color:var(--bp-text-muted); text-decoration:none; padding:5px 0; border-bottom:2px solid transparent; flex:none; display:inline-flex; align-items:center; gap:6px}
+  .chapternav a i{width:7px; height:7px; border-radius:50%; background:var(--th); display:block; opacity:.85}
+  .chapternav a.active{color:var(--bp-text); border-bottom-color:var(--th)}
+  .chapternav a:hover{color:var(--bp-text)}
+
+  /* ---------------------------------------------------------------------
+     Chapters
+  --------------------------------------------------------------------- */
+  .chapter{padding-top:36px; scroll-margin-top:44px}
+  .chapter:first-of-type{padding-top:36px}
+  .chapter-head{display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:4px; padding-top:14px; border-top:3px solid var(--th)}
+  .chapter-num{font:700 12px/1 var(--bp-font-ui); letter-spacing:.08em; color:var(--th); margin-bottom:6px; display:block}
+  .chapter-title{font-size:32px; line-height:1.08}
+  .chapter-sowhat{font-family:var(--bp-font-display); font-size:17px; line-height:1.35; color:var(--bp-text); text-align:right; max-width:34ch; flex:none; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding-top:4px}
+  .chapter-sowhat b{color:var(--th); font-weight:600}
+  .nowrap-rank{white-space:nowrap}
+  .chapter-blurb{font-size:14px; color:var(--bp-text-muted); line-height:1.5; max-width:80ch; margin-top:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .chapter-more{font:600 12px/1 var(--bp-font-ui); color:var(--th); text-decoration:none; margin-top:4px; display:inline-block}
+  .chapter-more:hover{text-decoration:underline}
+  @media (max-width:1100px){ .chapter-head{flex-direction:column; gap:6px} .chapter-sowhat{text-align:left; max-width:none} }
+  @media (max-width:800px){ .chapter-title{font-size:26px} }
+
+  .leadrow{display:grid; grid-template-columns:7fr 5fr; gap:28px; margin-top:16px; align-items:start}
+  .leadrow > div{min-width:0}
+  @media (max-width:900px){ .leadrow{grid-template-columns:1fr; gap:20px} }
+
+  .leadchart-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:2px; flex-wrap:wrap}
+  .leadchart-eyebrow{font:600 11px/1.3 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-muted); min-width:0}
+  .leadchart-lastval{font-family:var(--bp-font-ui); font-weight:600; font-size:clamp(24px,4vw,38px); line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.01em; white-space:nowrap; color:var(--th)}
+  .leadchart-svgwrap{position:relative; margin-top:6px}
+  .leadchart-svgwrap svg{display:block; width:100%; height:auto; overflow:visible}
+  .leadchart-svgwrap .donut-tile svg{width:auto; height:auto; max-width:220px; max-height:220px}
+  .leadchart-rankstrip{padding:20px 0; display:flex; flex-direction:column; align-items:flex-start; gap:12px}
+  .leadchart-rankstrip .posstrip{width:160px; height:8px}
+  .leadchart-rankstrip .posstrip .dot{width:8px; height:8px}
+  .leadchart-para{font-size:14px; line-height:1.5; color:var(--bp-text-muted); margin-top:10px; max-width:70ch}
+  .leadchart-para b{color:var(--bp-text)}
+  .leadpeer{margin-top:14px}
+  .leadpeer-title{font:600 11px/1.3 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-muted); margin-bottom:8px}
+  .leadpeer-rows{display:flex; flex-direction:column; gap:5px}
+  .leadpeer-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; font-size:12px}
+  .leadpeer-row.self{font-weight:600}
+  .leadpeer-name{color:var(--bp-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .leadpeer-row.self .leadpeer-name{color:var(--bp-text)}
+  .leadpeer-trackwrap{display:flex; align-items:center; gap:8px}
+  .leadpeer-track{flex:1; height:8px; background:var(--bp-surface-alt); border-radius:2px; overflow:hidden; min-width:60px}
+  .leadpeer-fill{display:block; height:100%; background:color-mix(in srgb, var(--th) 40%, var(--bp-surface-alt)); border-radius:2px}
+  .leadpeer-row.self .leadpeer-fill{background:var(--th)}
+  .leadpeer-val{font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right; min-width:64px}
+
+  /* map column: select + view toggles + zoom, the map in a soft card */
+  .leadmap-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap}
+  .leadmap-select{min-width:0; flex:1 1 170px}
+  .leadmap-select select{font:500 12px/1.3 var(--bp-font-ui); border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:6px 8px; background:var(--bp-surface); color:var(--bp-text); max-width:100%; width:100%}
+  .peerstrip{margin-top:12px}
+  .peerstrip-title{font:600 11px/1.3 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-muted); margin-bottom:2px}
+  .peerstrip-title b{color:var(--th); font-weight:700; text-transform:none; letter-spacing:0}
+  .peerstrip-track{position:relative; height:56px; cursor:pointer; touch-action:pan-y}
+  .ps-axis{position:absolute; left:0; right:0; top:34px; height:1px; background:var(--bp-border)}
+  .ps-dot{position:absolute; width:8px; height:8px; border-radius:50%; transform:translate(-50%,-50%); background:color-mix(in srgb, var(--th) 40%, var(--bp-surface)); border:1px solid var(--bp-surface); opacity:0; transition:opacity .35s ease-out var(--d, 0ms), transform .12s, background .12s}
+  .peerstrip.bp-anim-ready .ps-dot{opacity:1}
+  .ps-dot.on{background:var(--th); transform:translate(-50%,-50%) scale(1.6); z-index:2}
+  .ps-dot.self{width:14px; height:14px; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1.5px var(--th); z-index:3}
+  .ps-label{position:absolute; top:4px; font:700 12px/1.2 var(--bp-font-ui); color:var(--th); white-space:nowrap}
+  .peerstrip-ends{display:flex; justify-content:space-between; gap:12px; font-size:11px; color:var(--bp-text-faint); margin-top:1px}
+  .peerstrip.compact{margin-top:10px}
+  .peerstrip.compact .peerstrip-title{font-size:10px; margin-bottom:0}
+  .peerstrip.compact .peerstrip-track{height:26px}
+  .peerstrip.compact .ps-axis{top:13px}
+  .peerstrip.compact .ps-dot{width:6px; height:6px}
+  .peerstrip.compact .ps-dot.self{width:11px; height:11px}
+  .peerstrip.compact .peerstrip-ends{font-size:10px}
+  .mapbtns{display:inline-flex; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden; flex:none}
+  .mapbtns button{font:600 11px/1 var(--bp-font-ui); padding:7px 9px; border:0; background:var(--bp-surface); color:var(--bp-text-muted); cursor:pointer; white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis}
+  .mapbtns button + button{border-left:1px solid var(--bp-border)}
+  .mapbtns button.active{background:var(--th); color:#fff}
+  :root[data-theme="dark"] .mapbtns button.active{color:#14131a}
+  .mapbtns button:hover:not(.active){color:var(--bp-text)}
+  .leadmap-card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:8px 8px 6px}
+  /* A7: map hover tooltips (chapter maps below, the hero locator, the
+     neighbours map, and the province dot-strip tooltips further down all
+     share this ".tip" element and the shared engine's own
+     name/value/meta span markup -- .n/.v/.m). They rendered as one run-on
+     line with no visible separation between the name, the value and the
+     period/status. Page-level only: the shared engine's CSS
+     (assets/commune_map.css) has no rule for ".tip" itself (only the
+     unrelated, unused ".map-tip"), so this does not touch its default for
+     any other page. */
+  .tip{position:absolute; z-index:5; pointer-events:none; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:8px; padding:8px 10px; box-shadow:0 4px 16px rgba(0,0,0,.14); font-size:12px; line-height:1.4; max-width:220px}
+  .tip .n{display:block; font-weight:700; color:var(--bp-text)}
+  .tip .v{display:block; margin-top:4px; font-variant-numeric:tabular-nums; color:var(--th); font-size:14px; font-weight:600}
+  .tip .m{display:block; margin-top:2px; color:var(--bp-text-muted); font-size:11px}
+  .leadmap-box{position:relative; min-height:230px}
+  .leadmap-box svg.map{width:100%}
+  svg.map path.locate-me{fill:var(--bp-accent) !important; stroke:var(--bp-surface); stroke-width:2.4}
+  /* B3: the shared engine's swatches are a fixed 64px each
+     (assets/commune_map.css, .swatches div) -- 7 bands = 448px, wider than
+     this card at 1024px, so the last tick used to sit clipped past the
+     card edge. Page-level only (rule 29: the shared engine's own default,
+     used elsewhere, is untouched): swatches flex to the card's width here,
+     and fixLegendWidth() below rescales the ticks' own (still
+     pixel-positioned by the engine) left/width to match every time the
+     legend is (re)built. */
+  .leadmap-legend{margin-top:6px}
+  .leadmap-legend .swatches{width:100%}
+  .leadmap-legend .swatches div{flex:1 1 0; width:auto !important; min-width:0}
+  .leadmap-legend .ticks{font-family:var(--bp-font-ui) !important; font-variant-numeric:tabular-nums; width:100% !important}
+  .leadmap-legend .ticks span{font-size:11px}
+  .leadmap-caption{font-size:11px; color:var(--bp-text-faint); margin-top:4px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap}
+  .leadmap-caption .hint{color:var(--bp-text-faint)}
+
+  /* ---------------------------------------------------------------------
+     Small multiples: soft cards, coloured tick, a chart in every tile.
+  --------------------------------------------------------------------- */
+  .multiples{margin-top:14px; display:grid; grid-template-columns:repeat(var(--mcols,4),minmax(0,1fr)); gap:10px}
+  .multiple-tile{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:12px 14px 10px; min-width:0; display:flex; flex-direction:column; cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s; position:relative; text-align:left; font:inherit; color:inherit}
+  .multiple-tile::before{content:""; display:block; width:26px; height:3px; border-radius:2px; background:var(--th); margin-bottom:8px; opacity:.85}
+  .multiple-tile:hover{border-color:var(--th); box-shadow:0 2px 10px color-mix(in srgb, var(--th) 14%, transparent)}
+  .multiple-tile.selected{border-color:var(--th); box-shadow:inset 0 0 0 1px var(--th)}
+  .multiple-tile.selected::after{content:"●"; position:absolute; top:8px; right:10px; font-size:9px; color:var(--th)}
+  .multiple-tile:focus-visible{outline:2px solid var(--th); outline-offset:2px}
+  @media (max-width:900px){ .multiples{grid-template-columns:repeat(2,minmax(0,1fr)) !important} }
+  @media (max-width:560px){ .multiples{grid-template-columns:1fr !important} }
+  .mtile-labelblock{min-height:26px}
+  .mtile-eyebrow{font:600 11px/1.3 var(--bp-font-ui); letter-spacing:.04em; color:var(--bp-text-muted); min-height:26px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .mtile-desc{font-size:12px; line-height:1.4; color:var(--bp-text-faint); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .mtile-chip{display:inline-block; font:600 10px/1 var(--bp-font-ui); letter-spacing:.02em; color:var(--bp-text-faint); background:var(--bp-surface-alt); border-radius:3px; padding:2px 5px; vertical-align:middle}
+  .mtile-value{font:600 23px/1.1 var(--bp-font-ui); font-variant-numeric:tabular-nums; margin-top:6px; color:var(--bp-text)}
+  .mtile-period{font-size:12px; color:var(--bp-text-faint); margin-top:1px}
+  .mtile-spark{height:44px; margin-top:8px}
+  .mtile-spark svg{display:block; width:100%; height:100%; overflow:visible}
+  .mtile-share{margin-top:8px; font-size:11px; line-height:1.35; color:var(--bp-text-muted)}
+  .mtile-sharebar{margin-top:8px; font-size:11px; color:var(--bp-text-muted)}
+  .mtile-sharebar .track{display:block; height:8px; background:var(--bp-surface-alt); border-radius:3px; overflow:hidden; margin-bottom:4px}
+  .mtile-sharebar .fill{display:block; height:100%; background:var(--th); border-radius:3px}
+  /* B1: the label used to share a hard 58px grid column with the bar and
+     value, so every geography name over ~9 characters was ellipsised (e.g.
+     "Beveren-…", "Région de Bruxell…" at 1024-1440px in fr; nl names run
+     even longer -- "Brussels Hoofdstedelijk Gewest"). The label now gets
+     its own full-width line above the bar+value, which can wrap instead of
+     ever truncating. */
+  .mtile-bars{margin-top:8px; display:flex; flex-direction:column; gap:6px}
+  .mtile-bar-row{display:flex; flex-direction:column; gap:2px; font-size:10.5px; color:var(--bp-text-muted)}
+  .mtile-bar-row .lb{overflow-wrap:anywhere}
+  .mtile-bar-row.self{color:var(--bp-text); font-weight:600}
+  .mtile-bar-line{display:flex; align-items:center; gap:6px}
+  .mtile-bar-track{flex:1; min-width:0; height:6px; background:var(--bp-surface-alt); border-radius:3px; overflow:hidden}
+  .mtile-bar-fill{display:block; height:100%; background:var(--bp-text-faint); border-radius:3px}
+  .mtile-bar-row.self .mtile-bar-fill{background:var(--th)}
+  .mtile-bar-val{flex:none; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+  .mtile-pos{display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:8px; font-size:11px; color:var(--bp-text-muted)}
+  /* A6: donut grew from 78px/9px stroke to 104px/12px so the centre label
+     (16px, up from 14px) fits without crowding the ring. In a narrow tile
+     the legend wraps below the donut (flex-wrap) rather than clipping past
+     the card edge -- the sweep found legend values 21px past the card at
+     1024px with the old fixed layout. */
+  .mtile-donut{margin-top:6px; gap:8px; align-items:center; flex-wrap:wrap}
+  .mtile-donut svg{max-width:104px; max-height:104px; flex:none}
+  .mtile-donut .donut-legend{font-size:10.5px; gap:2px; line-height:1.2; min-width:0; flex:1 1 auto}
+  .mtile-donut .donut-legend .it{display:flex; justify-content:space-between; gap:6px}
+  .mtile-donut .donut-legend .it span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+  .mtile-donut .donut-legend .it b{padding-left:6px; flex:none}
+  .mtile-donut .donut-centre{font-size:16px}
+
+  /* ---------------------------------------------------------------------
+     Comparable communes (PR C, docs/features/peer_model.md). "peer"
+     already means province mates elsewhere on this page -- everything
+     here is `sim` / `.sim-` only (see assets/belpulse/similar.js).
+  --------------------------------------------------------------------- */
+  .sim-toggle{display:flex; align-items:stretch; gap:0; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); overflow:hidden; height:28px; margin:8px 0 4px; padding:0; width:max-content; max-width:100%}
+  .sim-toggle legend{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)}
+  .sim-toggle label{display:flex; align-items:center; justify-content:center; padding:0 12px; font:600 11px/1 var(--bp-font-ui); color:var(--bp-text-muted); background:var(--bp-surface); cursor:pointer; white-space:nowrap; user-select:none}
+  .sim-toggle label + label{border-left:1px solid var(--bp-border)}
+  .sim-toggle input{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)}
+  .sim-toggle input:checked + label{background:var(--bp-surface-alt); color:var(--bp-text)}
+  .sim-toggle input:focus-visible + label{outline:2px solid var(--th); outline-offset:-2px}
+  .sim-prov{font:600 10px/1 var(--bp-font-ui); color:var(--bp-text-faint); border:1px solid var(--bp-border); border-radius:3px; padding:3px 6px; margin-left:8px; align-self:center; cursor:help}
+  @media (max-width:640px){
+    /* min-width:0 -- a fieldset defaults to min-inline-size:min-content, so
+       width:100% alone let the switch + "provisional" badge run past a 342px
+       column at 390px (clipped by overflow:hidden). The badge gets its own
+       row inside the box instead: fr needs ~370px for all four on one line. */
+    .sim-toggle{width:100%; min-width:0; flex-wrap:wrap; height:auto}
+    .sim-toggle label{flex:1 1 auto; height:36px}
+    .sim-toggle .sim-prov{flex-basis:100%; margin:0; border:0; border-top:1px solid var(--bp-border); border-radius:0; padding:5px 6px; text-align:center}
+  }
+  .sim-badge{flex-basis:100%; margin-top:2px}
+  .sim-badge .l1{font:600 13px/1.35 var(--bp-font-ui); color:var(--bp-text)}
+  .sim-badge .l1.muted{color:var(--bp-text-muted); font-weight:500}
+  .sim-badge .l2{font-size:12px; color:var(--bp-text-muted); margin-top:1px}
+  .sim-badge .note{font-size:12px; font-style:italic; color:var(--bp-text-muted); margin-top:1px; display:block}
+  .sim-badge .tryother{font:600 12px/1.3 var(--bp-font-ui); color:var(--bp-text-muted); background:none; border:0; padding:2px 0; margin-top:2px; text-decoration:underline; cursor:pointer; display:inline-block}
+  .sim-badge .tryother:hover{color:var(--bp-text)}
+  path.sim-line{stroke:var(--bp-text-faint); stroke-width:1.1; stroke-opacity:.55; fill:none; stroke-linejoin:round; stroke-linecap:round}
+  circle.sim-dot{r:1.6; fill:var(--bp-text-faint); fill-opacity:.55}
+  path.sim-line.is-hot, circle.sim-dot.is-hot{stroke:var(--bp-text-muted); fill:var(--bp-text-muted); stroke-width:2; opacity:1}
+  :root[data-theme="paper"] path.sim-line{stroke-opacity:.75}
+  :root[data-theme="paper"] circle.sim-dot{fill-opacity:.75}
+  .sim-legend{display:flex; align-items:center; gap:8px; margin-top:8px; font-size:11px; color:var(--bp-text-faint)}
+  .sim-legend .bar{display:inline-block; width:14px; height:4px; border-radius:2px; background:var(--th); flex:none}
+  .sim-which{margin-top:10px; font-size:12px}
+  .sim-which summary{cursor:pointer; font-weight:600; color:var(--bp-text-muted)}
+  .sim-which summary:hover{color:var(--bp-text)}
+  .sim-which p{color:var(--bp-text-faint); margin:6px 0}
+  .sim-which ol{margin:6px 0 0; padding-left:20px; display:flex; flex-direction:column; gap:3px}
+  .sim-which li a{color:var(--th)}
+  .sim-which li a.is-hot{text-decoration:underline}
+  .mtile-sim{margin-top:4px; min-height:2.6em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+
+  /* context row: pyramid | neighbours (map + bars) */
+  .contextrow{margin-top:14px; display:grid; grid-template-columns:7fr 5fr; gap:10px; align-items:stretch}
+  .contextrow > div{min-width:0; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:14px 16px 12px}
+  .contextrow.full{grid-template-columns:1fr}
+  @media (max-width:900px){ .contextrow{grid-template-columns:1fr} }
+  .context-eyebrow{font:600 11px/1.3 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-muted); margin-bottom:2px}
+  .context-explain{font-size:12px; color:var(--bp-text-faint); margin-bottom:8px; line-height:1.4}
+
+  /* ---- population pyramid (ported from the previous layout, PR #275) --- */
+  .pyramid-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:8px; flex-wrap:wrap}
+  .pyramid-legend{display:flex; gap:14px; flex:none; font-size:11px; color:var(--bp-text-muted)}
+  .pyramid-legend span{display:flex; align-items:center; gap:5px}
+  .pyramid-legend i{display:block; width:10px; height:10px; border-radius:3px}
+  .pyramid-legend .m i,.pyramid-legend .male i{background:var(--th)}
+  .pyramid-legend .f i,.pyramid-legend .female i{background:color-mix(in srgb, var(--bp-accent) 70%, var(--bp-text) 5%)}
+  .pyramid-legend .earliest i{background:none; border:1.5px dashed var(--bp-text-faint); border-radius:2px}
+  .pyramid-wrap{display:flex; flex-direction:column; gap:1px}
+  /* #pyramidChart is the positioning root for .pyramid-gridlines below --
+     one overlay spanning every row, never a mark injected into each of the
+     17+ individual (opaque-background) tracks. */
+  .pyramid-chart{position:relative}
+  .pyramid-gridlines{position:absolute; inset:0; pointer-events:none; z-index:1}
+  .pyramid-gridline{position:absolute; top:16px; bottom:14px; width:1px; background:var(--bp-border); opacity:.7}
+  /* C3: this label used to sit at top:0 -- the very top of #pyramidChart,
+     i.e. right on top of .pyramid-axis's "Hommes"/"Femmes" text, which lives
+     in the same row (the axis has no reserved height of its own, so the
+     absolutely-positioned overlay's inset:0 starts exactly where the axis
+     text starts). Moved down to align with .pyramid-gridline's own top
+     (16px, already clear of the axis row at every width down to 320px)
+     instead of guessing a width-specific offset. */
+  .pyramid-gridline-label{position:absolute; top:16px; transform:translate(-50%,-100%); font-size:9px; font-variant-numeric:tabular-nums; color:var(--bp-text-faint); background:var(--bp-surface); padding:0 3px; white-space:nowrap}
+  .pyramid-axis,.pyramid-row{display:grid; grid-template-columns:48px minmax(0,1fr) 40px minmax(0,1fr) 48px; gap:5px; align-items:center}
+  .pyramid-axis{font-size:10px; color:var(--bp-text-faint); margin-bottom:3px}
+  .pyramid-axis .left{text-align:right; grid-column:1/span 2}
+  .pyramid-axis .right{grid-column:4/span 2}
+  .pyramid-row{min-height:14px; font-size:10px}
+  .pyramid-value{color:var(--bp-text-muted); font-variant-numeric:tabular-nums}
+  .pyramid-value.left{text-align:right}
+  .pyramid-age{text-align:center; color:var(--bp-text); font-weight:500; white-space:nowrap}
+  .pyramid-track{height:11px; background:var(--bp-surface-alt); overflow:hidden; display:flex; position:relative; border-radius:2px}
+  .pyramid-track.left{justify-content:flex-end}
+  .pyramid-track.right{justify-content:flex-start}
+  .pyramid-track i{display:block; height:100%; min-width:1px; background:var(--th); position:relative; z-index:1; transition:width .5s cubic-bezier(.16,.84,.44,1)}
+  .pyramid-track.right i{background:color-mix(in srgb, var(--bp-accent) 70%, var(--bp-text) 5%)}
+  @media (prefers-reduced-motion: reduce){ .pyramid-track i{transition:none} }
+  /* The earliest year's own bar, drawn as a thin outline BEHIND the current
+     bars (item: "history since 2010 reads at a glance") -- never filled, so
+     the current bar always reads on top of it. */
+  .pyramid-track .earliest-outline{position:absolute; top:0; height:100%; border:1px solid var(--bp-text-faint); box-sizing:border-box; z-index:0; pointer-events:none}
+  .pyramid-track.left .earliest-outline{right:0; border-right:0}
+  .pyramid-track.right .earliest-outline{left:0; border-left:0}
+  .pyramid-note{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:8px 0 0}
+
+  /* ---- age-pyramid year slider/play (demography_history/<nis>.json) ---- */
+  .pyramid-history{display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--bp-border)}
+  .pyramid-history.is-active{display:block}
+  .pyramid-history-controls{display:flex; align-items:center; gap:10px}
+  .pyramid-history-play{flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; line-height:1; padding:0}
+  .pyramid-history-play:hover{background:var(--bp-surface-alt)}
+  .pyramid-history-play[aria-pressed="true"]{background:var(--th); border-color:var(--th); color:#fff}
+  /* prefers-reduced-motion sets [hidden] on this button (see the media query
+     near renderPyramidHistory below); [hidden]'s default display:none was
+     being overridden by the display:flex two lines up, so the button stayed
+     visible for a reduced-motion viewer (independent review of #280, finding
+     C4). This selector wins on specificity over the plain-class rule. */
+  .pyramid-history-play[hidden]{display:none}
+  /* #pyramidTicks lives INSIDE this wrapper now (same width as the input
+     it sits under), not as a sibling of the whole controls row -- a tick
+     row as wide as Play+range+year-readout together could never line up
+     with the range's own value axis. */
+  .pyramid-history-range{flex:1; min-width:0; position:relative}
+  /* appearance:none on the input itself (not just the pseudo-thumb) is
+     required for the custom ::-webkit-slider-thumb/::-moz-range-thumb rules
+     below to apply at all in most engines; without it the OS's own thumb
+     renders instead and PYRAMID_THUMB_PX (16) only matched the custom size
+     by coincidence in engines that happened to use a 16px native thumb
+     (independent review of #280, finding C5). An explicit track style keeps
+     the slider's visual centreline consistent across engines now that the
+     native track is no longer implied. */
+  .pyramid-history-range input[type="range"]{width:100%; display:block; margin:0; -webkit-appearance:none; -moz-appearance:none; appearance:none; background:transparent}
+  .pyramid-history-range input[type="range"]::-webkit-slider-runnable-track{height:4px; border-radius:2px; background:var(--bp-border)}
+  .pyramid-history-range input[type="range"]::-moz-range-track{height:4px; border-radius:2px; background:var(--bp-border)}
+  /* A fixed, explicit thumb size in every engine -- the unstyled OS default
+     is not queryable from CSS, and renderPyramidTicks() below needs a known
+     width to place each tick under the thumb's actual travel range (a
+     thumb's centre runs from half-its-width to width-minus-half-its-width,
+     never edge to edge). PYRAMID_THUMB_PX must match this value. */
+  .pyramid-history-range input[type="range"]::-webkit-slider-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer; -webkit-appearance:none; margin-top:0}
+  .pyramid-history-range input[type="range"]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer}
+  .pyramid-history-year{flex:none; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; min-width:3.4em; text-align:right}
+  .pyramid-history-ticks{display:grid; font-size:10px; color:var(--bp-text-faint); margin-top:2px; position:relative; height:14px; width:100%}
+  .pyramid-history-ticks span{position:absolute; transform:translateX(-50%); white-space:nowrap}
+  .pyramid-history-sub{font-size:10px; color:var(--bp-text-faint); margin:5px 0 0}
+  .pyramid-history-incomplete{display:none; font-size:10px; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-radius:6px; padding:5px 8px; margin-top:6px}
+  .pyramid-history-incomplete.is-visible{display:block}
+
+  .nbmap-box{position:relative; height:210px; border:1px solid var(--bp-border); border-radius:8px; overflow:hidden; background:var(--bp-bg); margin-bottom:10px; --nodata:color-mix(in srgb, var(--th) 14%, var(--bp-surface))}
+  .nbmap-box svg.map{width:100%; height:100%}
+  .nbmap-box svg.map path{stroke:var(--bp-surface); stroke-width:.6}
+  .nbmap-box svg.map path.filtered-out{opacity:.12}
+  .nbmap-box svg.map path.nb-hover{fill:color-mix(in srgb, var(--th) 45%, var(--bp-surface)) !important}
+  .nbmap-box svg.map text{font-family:var(--bp-font-ui); font-weight:600; fill:var(--bp-text); paint-order:stroke; stroke:var(--bp-surface); stroke-linejoin:round; pointer-events:none}
+  .nbbars{display:flex; flex-direction:column; gap:5px}
+  .nbbars.twocol{display:grid; grid-template-columns:1fr 1fr; gap:5px 24px}
+  @media (max-width:640px){ .nbbars.twocol{grid-template-columns:1fr} .nbbar-track{width:80px} }
+  .nbbar-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:start; font-size:12px; border-radius:4px; padding:2px 4px; margin:0 -4px}
+  .nbbar-row .nbbar-track-wrap{margin-top:2px}
+  .nbbar-row:hover{background:color-mix(in srgb, var(--th) 8%, transparent)}
+  .nbbar-row.self{font-weight:600}
+  /* B5: a long name (Beveren-Kruibeke-Zwijndrecht, or a Dutch region/
+     province name in a comparison row) used to ellipsise at 1024px. It now
+     wraps to (at most) two lines instead of truncating -- the row's grid
+     stretches to fit, so the bar+value column is unaffected. */
+  .nbbar-name{color:var(--bp-text-muted); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer}
+  .nbbar-row.self .nbbar-name{color:var(--bp-text)}
+  .nbbar-name:hover{color:var(--th)}
+  .nbbar-track-wrap{display:flex; align-items:center; gap:8px}
+  .nbbar-track{flex:1; height:7px; background:var(--bp-surface-alt); border-radius:2px; overflow:hidden; min-width:40px; width:110px}
+  .nbbar-fill{display:block; height:100%; background:color-mix(in srgb, var(--th) 40%, var(--bp-surface-alt)); border-radius:2px}
+  .nbbar-row.self .nbbar-fill{background:var(--th)}
+  .nbbar-val{font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right; min-width:64px}
+
+  .chapter-footer{margin-top:12px; padding-top:8px; border-top:1px solid var(--bp-border); font-size:11px; color:var(--bp-text-faint); line-height:1.5}
+
+  /* ---------------------------------------------------------------------
+     Ported context rows: local finances / buyers' origin / schools --
+     same class names and states as the previous layout so the same tests
+     and same rendering functions apply, styled to sit inside a chapter
+     context row rather than the previous panel grid.
+  --------------------------------------------------------------------- */
+  /* Scoped to the exact states macro.html's own JS ever sets on a card
+     (ready / loading / unavailable -- see renderPanelCharts/
+     renderExtraLists/renderUnavailable), never a bare `:not([data-state=
+     "ready"])`: that collapsed EVERY non-ready state into "message
+     shown", including "loading" (a flash of "Not available yet" on every
+     page load, before data even arrives) and "suppressed" (which
+     components.css already renders as a dash + reason, not this
+     message) -- distinct states collapsing into one, CLAUDE.md rule 26.
+     "loading"/"suppressed" keep components.css's own, correct rules
+     (a hidden message either way, just for different reasons); only
+     "unavailable" needs its message shown here, and only its body
+     hidden, matching what components.css already does for
+     missing/unavailable/not-applicable/error. */
+  .bp-state[data-state="ready"] .bp-state-body{display:block}
+  .bp-state[data-state="ready"] .bp-state-message{display:none}
+  .bp-state[data-state="unavailable"] .bp-state-body{display:none}
+  .bp-state[data-state="unavailable"] .bp-state-message{display:block; padding:24px 0}
+  .bp-state-message{color:var(--bp-text-muted); font-size:13px}
+  .bp-state-message .headline{display:block; font-weight:600; color:var(--bp-text); margin-bottom:4px}
+  .bp-state-message .why{display:block; font-size:12px}
+  .fin4{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+  .ftile{display:flex; align-items:center; gap:10px; background:var(--bp-surface-alt); border-radius:8px; padding:10px 12px; min-width:0}
+  .ftile .lbl{font-size:11px; font-weight:600; line-height:1.3}
+  .ftile .why{font-size:15px; color:var(--bp-text); margin-top:2px; font-variant-numeric:tabular-nums}
+  .barlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .barlist li{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:11px}
+  .barlist .lbl{color:var(--bp-text-muted); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .barlist .bar{height:9px; border-radius:5px; background:var(--bp-surface-alt); overflow:hidden}
+  .barlist .bar i{display:block; height:100%; border-radius:5px; background:var(--bp-text-muted)}
+  .barlist .pct{text-align:right; font-weight:600; font-variant-numeric:tabular-nums}
+  .flows-origins{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .flows-origins li{display:grid; grid-template-columns:18px minmax(0,1.15fr) minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:11px}
+  .flows-origins .rk{color:var(--bp-text-faint); font-variant-numeric:tabular-nums; text-align:right}
+  .flows-origins .lbl{color:var(--bp-text-muted); line-height:1.3}
+  .flows-origins .lbl.self{color:var(--bp-text); font-weight:600}
+  .flows-origins .bar{height:8px; border-radius:4px; background:var(--bp-surface-alt); overflow:hidden}
+  .flows-origins .bar i{display:block; height:100%; border-radius:4px; background:var(--bp-text-muted)}
+  .flows-origins li.self .bar i{background:var(--th)}
+  .flows-origins .pct{text-align:right; font-weight:600; font-variant-numeric:tabular-nums}
+  .flows-note{font-size:11px; color:var(--bp-text-muted); line-height:1.5; margin:10px 0 0}
+  .flows-pronote{font-size:10px; color:var(--bp-text-faint); line-height:1.45; margin:6px 0 0}
+  .flows-source{font-size:12px; color:var(--bp-text-muted); line-height:1.4; margin:6px 0 0}
+  .flows-zero{font-size:13px; color:var(--bp-text-muted); padding:12px 0}
+
+  /* ---------------------------------------------------------------------
+     .history-toggle is the one survivor of the "Toutes les données"
+     accordion removed at the maintainer's request, 2026-09-27 (A2): the
+     schools-list disclosure (buildSchoolsCard() below) reuses the same
+     button style, same disclosure pattern.
+  --------------------------------------------------------------------- */
+  .history-toggle{font-size:11px; color:var(--bp-accent); background:none; border:1px solid var(--bp-border); border-radius:999px; padding:3px 10px; cursor:pointer; white-space:nowrap}
+  .history-toggle[aria-expanded="true"]{background:var(--bp-surface-alt)}
+
+  [data-cp-state="unavailable"] .cp-body{display:none}
+  [data-cp-state="ready"] .cp-unavail{display:none}
+  .cp-unavail{padding:24px 0; color:var(--bp-text-muted); font-size:13px}
+
+  .attribution{padding:28px 0; font-size:11px; line-height:1.6; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border); margin-top:44px}
+  .attribution strong{color:var(--bp-text)}
+  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
+
+  section[data-lazy]{min-height:200px}
+
+  /* ---------------------------------------------------------------------
+     Interactive charts: crosshair + tooltip, draw-in, donuts
+  --------------------------------------------------------------------- */
+  .bp-ichart{cursor:crosshair}
+  .bp-ichart:focus-visible{outline:2px solid var(--th); outline-offset:3px; border-radius:2px}
+  .bp-crosshair{stroke:var(--bp-text-faint); stroke-width:1; pointer-events:none; opacity:0; transition:opacity .1s}
+  .bp-crosshair.on{opacity:1}
+  .bp-crosshair-dot{fill:var(--th); stroke:var(--bp-bg); stroke-width:1.5; pointer-events:none; opacity:0; transition:opacity .1s}
+  .bp-crosshair-dot.on{opacity:1}
+  .bp-anim-line{transition:stroke-dashoffset .7s cubic-bezier(.16,.84,.44,1)}
+  .bp-anim-line.bp-spark-duration{transition-duration:.5s}
+  .bp-anim-fade{opacity:0; transition:opacity .3s ease-out .4s}
+  .bp-anim-ready.bp-anim-fade{opacity:1}
+  .bp-anim-grow{transform:scaleX(0); transition:transform .5s cubic-bezier(.16,.84,.44,1)}
+  .bp-anim-grow.vert{transform:scaleY(0)}
+  .bp-anim-ready.bp-anim-grow{transform:scaleX(1)}
+  .bp-anim-ready.bp-anim-grow.vert{transform:scaleY(1)}
+  .bp-anim-clip{transition:clip-path .7s cubic-bezier(.16,.84,.44,1)}
+  @media (prefers-reduced-motion: reduce){ .bp-anim-line, .bp-anim-fade, .bp-anim-grow, .bp-anim-clip, .ps-dot{transition:none !important} }
+
+  .donut-tile{display:flex; align-items:center; gap:14px; margin-top:6px; flex-wrap:wrap}
+  .donut-tile svg{flex:none}
+  @media (max-width:480px){ .donut-tile{justify-content:center} .donut-legend{width:100%} }
+  .donut-arc-track{fill:none; stroke:var(--bp-border)}
+  .donut-arc-value{fill:none; stroke:var(--th); stroke-linecap:butt; transition:stroke-dashoffset 1s cubic-bezier(.16,.84,.44,1)}
+  .donut-ring-track{fill:none; stroke:var(--bp-border)}
+  .donut-ring-value{fill:none; stroke-linecap:butt; transition:stroke-dashoffset 1s cubic-bezier(.16,.84,.44,1)}
+  @media (prefers-reduced-motion: reduce){ .donut-arc-value, .donut-ring-value{transition:none !important} }
+  .donut-centre{font:600 20px/1.1 var(--bp-font-ui); font-variant-numeric:tabular-nums; fill:var(--bp-text); text-anchor:middle; dominant-baseline:middle}
+  .donut-legend{display:flex; flex-direction:column; justify-content:center; gap:5px; font-size:12px; color:var(--bp-text-muted); min-width:0}
+  .donut-legend .it{display:flex; align-items:center; gap:7px; white-space:nowrap}
+  .leadchart-svgwrap .donut-tile{align-items:center; min-height:180px}
+  .donut-legend .it b{color:var(--bp-text); font-weight:600; margin-left:auto; font-variant-numeric:tabular-nums; padding-left:10px}
+  .donut-legend i{display:block; width:9px; height:9px; border-radius:50%; flex:none}
+/* Macro composition: Portrait chapters on one continuous page. */
+.macro .bp-body--analytical{display:block;max-width:1200px;margin:0 auto;padding:0 24px}
+.macro .macro-main{display:block;min-width:0;padding:0}
+.macro .bp-topbar{position:sticky;top:0;z-index:40}
+.macro .portrait-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:28px;padding:32px 0}
+.macro .portrait-hero>div{min-width:0}
+.macro .hero-name{font-size:48px;overflow-wrap:anywhere}
+.macro .hero-tagline{line-height:1.5;max-width:46ch}
+.macro .skyline{grid-column:1;grid-row:1;position:relative;height:300px;display:flex;align-items:flex-end;padding:24px;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:12px}
+.macro .skyline svg{width:100%;color:var(--bp-text-muted)}
+.macro .skyline .script{position:absolute;right:24px;top:24px;max-width:18ch;text-align:right;font:500 20px/1.3 var(--bp-font-display);font-style:italic;color:var(--bp-text-muted)}
+.macro .side-update{font-size:12px;color:var(--bp-text-faint);margin-top:16px;line-height:1.7}
+.macro .side-update .when{font-weight:600;color:var(--bp-text-muted)}
+.macro .bp-sidebar{position:sticky;top:var(--macro-topbar-h,56px);z-index:30;background:var(--bp-bg);border-radius:0;padding:10px 0;border-bottom:1px solid var(--bp-border);margin:0}
+.macro .bp-sidebar-nav{display:flex;flex-direction:row;gap:8px;overflow-x:auto;padding:0;margin:0;list-style:none}
+.macro .bp-sidebar-nav li{flex:none}
+.macro .bp-sidebar-nav a{font:600 12px/1 var(--bp-font-ui);color:var(--bp-text-muted);background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:999px;padding:8px 12px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.macro .bp-sidebar-nav a::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--th)}
+.macro .bp-sidebar-nav .icon{display:none}
+.macro .bp-sidebar-nav a[aria-current=page],.macro .bp-sidebar-nav a:hover{border-color:var(--th);background:var(--bp-surface);color:var(--bp-text)}
+.macro .chapter{scroll-margin-top:calc(var(--macro-topbar-h,56px) + 64px);padding-top:40px}
+.macro .chapter-head{display:block;margin-bottom:20px}
+.macro .chapter-title{font-size:32px}
+.macro #apercu{padding-top:0}
+.macro .essentiel-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:0;border-top:0;border-bottom:1px solid var(--bp-border)}
+.macro .essentiel-item{display:flex;flex-direction:column;grid-row:auto;padding:22px 18px;cursor:default}
+.macro .essentiel-eyebrow{min-height:62px;text-transform:uppercase;overflow-wrap:anywhere}
+/* overflow stays hidden (the base rule, assets/belpulse/macro_portrait.css
+   line ~143) -- macro.html's shrinkEssentielValuesToFit() (copied from
+   commune.html) shrinks the font until scrollWidth fits, and overflow:
+   visible would let a value that hits the 14px floor spill into the next
+   card again (the bug that shrink-to-fit exists to prevent), not just
+   look unclipped for values that already fit. */
+.macro .essentiel-value{font-size:clamp(18px,2vw,30px);height:36px}
+.macro .essentiel-meta{align-self:auto}
+.macro .essentiel-spark{width:100%;max-width:none;height:40px}
+.macro .bp-chart-card{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;min-width:0}
+.macro .bp-chart-head{margin-bottom:16px;display:flex;justify-content:space-between;gap:12px;align-items:start}
+.macro .bp-chart-head h3{font:600 18px/1.3 var(--bp-font-display)}
+.macro .bp-chart-head .subtitle,.macro .provenance,.macro .kpi-note{font-size:12px;line-height:1.6;color:var(--bp-text-faint)}
+.macro .metric-date{font-size:12px;color:var(--bp-text-faint);margin:8px 0}
+.macro .leadchart-head{align-items:start}
+.macro .leadchart-eyebrow{max-width:55%;overflow-wrap:anywhere}
+.macro .leadchart-lastval{font-size:32px;white-space:normal;text-align:right}
+.macro .portrait-metrics{display:grid;grid-template-columns:1fr;list-style:none;padding:0;margin:0;gap:26px}
+.macro .portrait-metrics .portrait-metric{display:block;border:0;border-top:1px solid var(--bp-border);padding:16px 0;min-width:0}
+.macro .portrait-metric .leadchart-lastval{font-size:24px}
+.macro .portrait-series+.portrait-series{margin-top:28px}
+.macro #keyList{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.macro #apercu .row-3{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
+.macro #key{grid-column:1/-1}
+.macro #map,.macro #news{padding:16px;border:1px solid var(--bp-border);border-radius:10px}
+.macro .portrait-data{font-size:12px;color:var(--bp-text-muted);margin-top:12px}
+.macro .portrait-data summary{cursor:pointer}
+.macro .portrait-data table{border-collapse:collapse;width:100%;margin-top:12px;font-variant-numeric:tabular-nums}
+.macro .portrait-data td,.macro .portrait-data th{padding:6px;text-align:left;border-bottom:1px solid var(--bp-border);font-weight:400}
+.macro .portrait-data[open]{max-height:340px;overflow:auto}
+.macro .contrib{list-style:none;padding:0;margin:0}
+.macro .contrib li{padding:12px 0;border-bottom:1px solid var(--bp-border)}
+.macro .contrib .head{display:flex;justify-content:space-between;gap:16px;font-size:13px}
+.macro .contrib .bar{height:5px;background:var(--bp-border);margin-top:8px;border-radius:3px}
+.macro .contrib .fill{display:block;height:100%;background:var(--th);border-radius:3px}
+.macro .contrib-total{margin-top:16px;font-size:14px}
+.macro .pill{font-size:12px;color:var(--bp-text-muted)}
+.macro #public-finance .placeholder{display:none}
+.macro #europe{padding-bottom:48px}
+.macro .bp-state-message .why{display:block}
 .macro .foot{margin-left:0}
-@media(max-width:1000px){
- .macro .kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}
- .macro .macro-kpi:nth-child(3n+1){border-left:0}
- .macro .macro-kpi:nth-child(n+4){border-top:1px solid var(--bp-border)}
-}
+@media(max-width:1000px){.macro .essentiel-row{grid-template-columns:repeat(3,minmax(0,1fr))}.macro .essentiel-item:nth-child(3n+1){border-left:0}.macro #keyList{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){
  .macro .bp-body--analytical{padding:0 16px}
- .macro .portrait-hero{grid-template-columns:1fr; gap:20px; padding-top:16px}
- .macro .portrait-hero .skyline{height:180px}
+ .macro .portrait-hero{grid-template-columns:1fr;gap:20px;padding-top:16px}
+ .macro .skyline{height:220px}
  .macro .hero-name{font-size:38px}
- .macro .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
- .macro .macro-kpi{padding:16px 12px}
- .macro .macro-kpi:nth-child(n){border-left:1px solid var(--bp-border)}
- .macro .macro-kpi:nth-child(2n+1){border-left:0}
- .macro .macro-kpi:nth-child(n+3){border-top:1px solid var(--bp-border)}
+ .macro .essentiel-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .macro .essentiel-item{padding:16px 12px}
+ .macro .essentiel-item:nth-child(n){border-left:1px solid var(--bp-border)}
+ .macro .essentiel-item:nth-child(2n+1){border-left:0}
+ .macro .essentiel-item:nth-child(n+3){border-top:1px solid var(--bp-border)}
+ .macro #keyList{grid-template-columns:1fr}
+ .macro #apercu .row-3{grid-template-columns:1fr}
+ .macro .leadchart-lastval{font-size:26px}
+ .macro .leadrow{grid-template-columns:1fr}
 }
-@media print{.macro .bp-sidebar,.macro .portrait-hero .skyline{display:none}}
-.macro .hero-name{overflow-wrap:anywhere}
-.macro .portrait-hero > div{min-width:0}
-.macro .kpi-top .bp-kpi-label .name{overflow-wrap:anywhere}
-.macro .portrait-hero .skyline{display:flex}
-.macro .portrait-hero .side-update{display:block}
+@media print{.macro .bp-sidebar{display:none}.macro .chapter{break-inside:avoid}.macro .bp-anim-line{stroke-dashoffset:0!important}.macro .bp-anim-fade{opacity:1}}
+.macro{margin:0}
+.macro a{color:var(--bp-accent)}
+.macro .bp-nav a,.macro .bp-logo{color:inherit}
+.macro .leadrow.single-lead{grid-template-columns:1fr}
+/* No max-width cap on the plot: commune.html's own equivalent
+   (.leadchart-svgwrap svg{width:100%}) always fills its container, and a
+   fixed 900px cap left an empty ~250px gap on the right of a lone lead
+   chart (Prix's only real problem: its list card, #prices, is legitimately
+   hidden -- HICP is its one series and the chart above already draws it --
+   so .single-lead correctly switches the row to one column, but the plot
+   itself was still capped narrower than that now-full-width column). */
+.macro .contrib li{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;row-gap:8px}
+.macro .contrib .name{font-size:13px;line-height:1.4}
+.macro .contrib .val{grid-column:2;grid-row:1;font-size:13px;font-variant-numeric:tabular-nums}
+.macro .contrib .bar{grid-column:1/-1;grid-row:2;display:block;position:relative;height:8px;margin:0;background:var(--bp-surface-alt)}
+.macro .contrib .bar::before{content:"";position:absolute;left:50%;top:-3px;height:14px;width:1px;background:var(--bp-border)}
+.macro .contrib .bar span{position:absolute;top:0;height:100%;border-radius:2px;background:var(--th)}
+.macro .contrib .bar span.neg{opacity:.65}
+.macro .contrib-total{display:flex;flex-direction:column;gap:8px}
+.macro .leadchart-para{font-size:13px;margin:10px 0;display:block;max-width:75ch}
+.macro .chapter .bp-state[data-state=unavailable]{border:1px solid var(--bp-border);border-radius:10px;padding:20px}

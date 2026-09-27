@@ -1,46 +1,4 @@
-<!--
-  BelPulse macroeconomics page -- Batch 6 (docs/design-references/macro.md and
-  docs/design-references/macro.png), built on Batch 1's tokens and Batch 2's
-  shared components, to home2.html's standard.
-
-  The public macroeconomic dashboard. The former dashboard route remains
-  reachable for existing bookmarks but is no longer in primary navigation.
-
-  WHAT THIS PAGE KNOWS, AND WHAT IT DOES NOT. Every series drawn here is named
-  in config/national_sections.yaml and published as
-  public/data/metadata/national_sections.json -- NOT ONE INDICATOR CODE
-  APPEARS IN THIS FILE, so adding a series to the page is a config change
-  (enforced by tests/test_macro.py). Values, names, units, sources, grades and
-  retrieval dates come from public/data/national.json and
-  public/data/metadata/sources.json, never from the markup.
-
-  WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY. Every departure is a
-  figure the design shows that this pipeline does not hold:
-    * The KPI row draws the design's six cards, but four of its six figures
-      (population, employment rate, fiscal balance, public debt) have no
-      national series here. The row shows the six series that exist and a
-      line under it says which four do not.
-    * "Comparaison internationale": the foreign GDP series are fetched and,
-      since pipeline repair part 3, stored under their own country; the chart
-      that would draw them is not built yet. Built at its designed size in the
-      `unavailable` state, with that reason. (The reason used to blame a
-      DBnomics timeout; the fetch was fine, the daily sync dropped them.)
-    * "Finances publiques (compteurs simulés)": there is no national revenue,
-      expenditure, balance or debt series to extrapolate from, and a counter
-      ticking up from nothing would be an invention (CLAUDE.md rule 36).
-      Built at its designed size, unavailable, reason on the card.
-    * "Carte économique": Belgium publishes no GDP below the regional level.
-      The card says so and links to the interactive map of the municipal
-      indicators that do exist.
-    * "Actualités": this pipeline holds no article store; nothing here is
-      written by hand.
-    * The sidebar lists this page's own sections, not the design's eleven
-      themes -- an anchor to a section that does not exist is a broken
-      promise, and the design's "Mon espace" account button is omitted (no
-      accounts before the 50% milestone).
-    * The skyline is a small inline line drawing, not the design's
-      illustration; nothing here loads a third-party image.
--->
+<!-- Local macro Portrait: copies commune.html chart and chapter design. All sections scroll together. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,262 +30,6 @@
      (docs/features/europe_nuts2.md). europe_map.css is page chrome only. -->
 <link rel="stylesheet" href="assets/commune_map.css">
 <link rel="stylesheet" href="assets/belpulse/europe_map.css">
-<style>
-  /* Page composition only. Anything reusable belongs in
-     assets/belpulse/components.css -- Batch 2 owns the library. */
-  body{background:var(--bp-bg); color:var(--bp-text); margin:0}
-  h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
-
-  /* ---- top bar ----
-     The bar itself (height, centred width, the menus) is shared now --
-     assets/belpulse/layout.css's `.bp-topbar`/`.bp-topbar .wrap`, filled by
-     src/pages/shell.py's render_header() through scripts/sync_site_shell.py.
-     Batch A1.1: this page no longer overrides it locally. */
-
-  /* ---- body: navy sidebar, light content (the supplied PNG) ---- */
-  .bp-body--analytical{max-width:1400px; margin:0 auto}
-  .bp-sidebar{position:sticky; top:var(--bp-topbar-h, 56px); display:flex; flex-direction:column; min-height:calc(100vh - 2 * var(--bp-space-6))}
-  /* 2026-09-15 (maintainer): on a desktop screen the header stays frozen at
-     the top and the section menu is pinned flush to the left edge, from
-     under the header to the bottom of the screen, so neither moves while a
-     panel scrolls -- not even when the footer comes into view (the footer
-     starts right of the menu instead). --macro-topbar-h is the header's
-     measured height, set by the small script before the page's scripts.
-     Tablets and phones keep the layout below unchanged. */
-  @media (min-width:1025px){
-    .macro .bp-topbar{position:sticky; top:0; z-index:40}
-    /* Batch A2b, item 8: position:relative turns this wrapper into the
-       containing block for the ::before fill just below -- a plain
-       decorative rectangle, painted behind everything else in the column,
-       that always runs exactly as tall as the column itself. The fixed
-       sidebar (below) already covers the live viewport correctly as a
-       reader scrolls; the gap this closes only ever showed up in a
-       full-page capture, where the browser renders the whole document at
-       once and a `position:fixed` box does not stretch to match -- so the
-       navy stopped wherever the sidebar's OWN content happened to end,
-       with plain page background for the rest of the column's height. */
-    .bp-body--analytical{
-      max-width:none; margin:0; grid-template-columns:minmax(0,1fr); padding-left:calc(240px + var(--bp-space-6));
-      position:relative;
-    }
-    .bp-body--analytical::before{
-      content:''; position:absolute; top:0; bottom:0; left:0; width:240px;
-      background:var(--bp-navy-bg); z-index:0;
-    }
-    .bp-sidebar{
-      position:fixed; left:0; top:var(--macro-topbar-h, var(--bp-topbar-h, 56px)); bottom:0; z-index:30;
-      align-self:stretch; /* layout.css's align-self:start would shrink it to its content */
-      width:240px; min-height:0; box-sizing:border-box; overflow-y:auto; border-radius:0;
-    }
-    .macro .foot{margin-left:240px}
-    .bp-panel{scroll-margin-top:calc(var(--macro-topbar-h, var(--bp-topbar-h, 56px)) + var(--bp-space-6))}
-  }
-  .side-title{display:flex; align-items:center; gap:10px; margin:0 0 var(--bp-space-5)}
-  .side-title h2{font-family:var(--bp-font-display); font-size:1.15rem; text-transform:none; letter-spacing:0; color:var(--bp-navy-text); margin:0; font-weight:600}
-  .side-title .icon{width:22px; height:22px; color:#8fb4ff}
-  .bp-sidebar-nav a[aria-current="page"]{background:rgba(255,255,255,.12); color:var(--bp-navy-text)}
-  .side-update{
-    margin-top:auto; padding:var(--bp-space-4); border:1px solid var(--bp-navy-border); border-radius:var(--bp-radius-control);
-    font-size:12px; color:var(--bp-navy-text-muted);
-  }
-  .side-update .lbl{margin-bottom:6px}
-  .side-update .when{display:flex; align-items:center; gap:8px; color:var(--bp-navy-text); font-weight:var(--bp-weight-medium); font-size:var(--bp-text-small)}
-  .side-update .dot{width:8px; height:8px; border-radius:50%; background:var(--bp-green); flex:none}
-  .side-update[data-status="other"] .dot{background:#e0a92b}
-  .side-update .status{margin-top:4px; font-size:11px}
-  .side-quote{
-    font-family:var(--bp-font-decorative); font-size:1.1rem; color:var(--bp-navy-text-muted);
-    margin:var(--bp-space-5) 0 0; padding-top:var(--bp-space-4); border-top:1px solid var(--bp-navy-border); line-height:1.35;
-  }
-  .side-quote small{display:block; font-family:var(--bp-font-ui); font-size:11px; text-align:right; margin-top:6px; color:var(--bp-navy-text)}
-
-  /* ---- main column ---- */
-  .macro-main{min-width:0; display:flex; flex-direction:column; gap:var(--bp-space-5)}
-  .page-head{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.9fr); gap:var(--bp-space-6); align-items:end; margin-bottom:var(--bp-space-2)}
-  .page-head h1{font-size:2.3rem; line-height:1.1; margin:0 0 var(--bp-space-3)}
-  .page-head .lead{color:var(--bp-text-muted); margin:0; max-width:52ch; font-size:var(--bp-text-body)}
-  .skyline{position:relative; min-height:120px; display:flex; align-items:flex-end; justify-content:flex-end}
-  .skyline svg{width:100%; max-width:520px; height:auto; color:var(--bp-blue); opacity:.38}
-  .skyline .script{
-    position:absolute; right:0; top:0; max-width:18ch; text-align:right; transform:rotate(-6deg);
-    font-family:var(--bp-font-decorative); font-size:1.15rem; color:var(--bp-text-muted); line-height:1.25;
-  }
-
-  /* ---- KPI row ---- */
-  .kpi-row{grid-template-columns:repeat(6, minmax(0,1fr))}
-  .macro-kpi{gap:4px; min-width:0}
-  .kpi-top{display:flex; align-items:flex-start; gap:10px}
-  .kpi-top .bp-kpi-icon{margin:0; width:30px; height:30px; border-radius:8px}
-  .kpi-top .bp-kpi-label{line-height:1.25; min-width:0}
-  /* Two lines, never an ellipsis: "Croissance trimestrielle du PIB (A-A)" cut
-     to "Croissance..." is indistinguishable from the annual series beside it. */
-  .kpi-top .bp-kpi-label .name{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-    overflow:hidden; font-weight:var(--bp-weight-medium); color:var(--bp-text); font-size:12px; line-height:1.25}
-  .kpi-top .bp-kpi-label .period{font-size:11px; color:var(--bp-text-faint)}
-  .macro-kpi .bp-value{font-size:1.45rem; margin-top:2px; white-space:nowrap}
-  .macro-kpi .bp-value .unit{font-size:.7rem; color:var(--bp-text-faint); font-weight:var(--bp-weight-regular); margin-left:3px}
-  .macro-kpi .bp-delta{min-height:16px}
-  .mini-canvas{position:relative; margin-top:6px; min-width:0}
-  .mini-canvas canvas{display:block; width:100%}
-  .kpi-note{font-size:12px; color:var(--bp-text-faint); margin:var(--bp-space-3) 0 0}
-
-  /* ---- card rows ---- */
-  .row{display:grid; gap:var(--bp-space-5); min-width:0}
-  .row-3{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)}
-  /* BATCH A1.4: row-2's one remaining user is the croissance panel (GDP
-     chart + growth drivers). It used to sit 2fr/1fr against a shorter list
-     panel elsewhere; the drivers card's component names ("Dépenses de
-     consommation des APU", "FBCF — Administrations publiques") need real
-     width of their own, so this is now an even split rather than a
-     leftover column. */
-  .row-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .row-2r{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
-  .bp-chart-card{min-width:0; display:flex; flex-direction:column}
-  .bp-chart-head h3{font-family:var(--bp-font-display); font-size:1.15rem}
-  .bp-chart-head .subtitle{max-width:60ch}
-  .pill{font-size:12px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:5px 10px; color:var(--bp-text-muted); white-space:nowrap}
-  /* The chart FILLS whatever height the row gives this card -- the list
-     panel beside it sets that height, and a fixed chart height left a band
-     of empty surface under the bars. The canvas is taken out of flow so
-     measuring the wrapper cannot be circular. */
-  .bp-chart-canvas-wrap{flex:1; position:relative; min-height:240px}
-  .bp-chart-canvas-wrap canvas{position:absolute; inset:0; display:block; width:100%}
-  .provenance{font-size:11px; color:var(--bp-text-faint); margin-top:var(--bp-space-3)}
-  .bp-list-panel li{display:flex; align-items:flex-start; gap:var(--bp-space-3); padding:9px 0; border-bottom:1px solid var(--bp-border)}
-  .bp-list-panel .label small{display:block; color:var(--bp-text-faint); font-size:11px; margin-top:2px}
-  .bp-list-panel .value{text-align:right; white-space:nowrap}
-  .bp-list-panel .value small{display:block; color:var(--bp-text-faint); font-size:11px; font-weight:var(--bp-weight-regular)}
-
-  /* Contributions: a signed bar per part, drawn in HTML so a negative
-     contribution reads to the left of a shared zero line. */
-  .contrib{list-style:none; margin:var(--bp-space-2) 0 0; padding:0; display:flex; flex-direction:column; gap:9px}
-  /* BATCH A1.4: a component's full name wraps rather than truncates -- a
-     statistical label losing its ending ("Dépenses de consommation...") is
-     not a legible label. align-items:start (not center) because a wrapped
-     two-line name and a one-line bar/value no longer share a vertical
-     centre worth aligning to. */
-  .contrib li{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 60px; align-items:start; gap:var(--bp-space-3); font-size:var(--bp-text-small)}
-  .contrib .name{color:var(--bp-text-muted); overflow-wrap:break-word; white-space:normal; line-height:1.3}
-  .contrib .bar, .contrib .val{margin-top:2px}
-  .contrib .bar{position:relative; height:12px; background:var(--bp-surface-alt); border-radius:3px}
-  .contrib .bar::before{content:''; position:absolute; left:50%; top:-3px; bottom:-3px; width:1px; background:var(--bp-text-faint)}
-  .contrib .bar span{position:absolute; top:0; bottom:0; border-radius:3px; background:var(--bp-chart-1)}
-  .contrib .bar span.neg{background:var(--bp-red-signal)}
-  .contrib .val{text-align:right; font-weight:var(--bp-weight-semibold); font-variant-numeric:tabular-nums}
-  .contrib-total{
-    display:flex; justify-content:space-between; gap:var(--bp-space-3); flex-wrap:wrap;
-    margin-top:var(--bp-space-4); padding-top:var(--bp-space-3); border-top:1px solid var(--bp-border);
-    font-size:var(--bp-text-small); color:var(--bp-text-muted);
-  }
-  .contrib-total b{color:var(--bp-text)}
-
-  /* ---- BATCH A1.4b: the Prix/Emploi/Conjoncture history charts ----
-     One card per panel, stacked above its existing list card (the brief:
-     "the list stays below the chart"). `.panel-chart-figure` holds one chip
-     per drawn series -- one for Prix/Emploi, two for Conjoncture, whose
-     business/consumer-confidence lines share a canvas -- so a reader gets
-     the latest value+period without hovering, exactly like every other
-     chart card on the site (the hero cards' own ordering: title, latest
-     figure, plot, source). */
-  .panel-chart-figure{display:flex; flex-wrap:wrap; gap:var(--bp-space-4); margin:0 0 var(--bp-space-3)}
-  .panel-chart-figure .chip{display:flex; align-items:baseline; gap:7px; min-width:0}
-  .panel-chart-figure .chip .dot{width:9px; height:9px; border-radius:50%; flex:none; align-self:center}
-  .panel-chart-figure .chip .name{font-size:var(--bp-text-small); color:var(--bp-text-muted)}
-  .panel-chart-figure .chip .num{font-size:1.2rem; font-weight:var(--bp-weight-semibold); color:var(--bp-text)}
-  .panel-chart-figure .chip .period{font-size:11px; color:var(--bp-text-faint)}
-  /* This card is not in a two-up row like the Croissance/drivers pair, so
-     its chart does not need to grow and match a sibling's height (that pair
-     uses `.bp-chart-canvas-wrap` as its OWN `.bp-state-body`, flex:1 against
-     the row) -- it draws at the shared component's own min-height instead,
-     "a plot with its own height" per the brief. */
-  .panel-chart .bp-chart-canvas-wrap{height:240px}
-
-  /* Unavailable cards: designed size, honest state. */
-  .bp-state[data-state="unavailable"] .bp-state-message{padding:0}
-  .bp-state .placeholder{flex:1; min-height:120px; border:1px dashed var(--bp-border); border-radius:var(--bp-radius-control); margin:var(--bp-space-3) 0; background:repeating-linear-gradient(135deg, transparent 0 10px, var(--bp-surface-alt) 10px 11px)}
-  .bp-state .why{font-size:12px}
-  /* Item 7's compact empty state: sized to its own message, not stretched by
-     CSS grid to match a taller sibling in the same .row (#key, here). */
-  .card-compact-empty{align-self:start}
-  .card-compact-empty[data-state="unavailable"] .bp-state-message{
-    display:flex; gap:var(--bp-space-3); align-items:flex-start; padding:var(--bp-space-3) 0 0;
-  }
-  .card-compact-empty .bp-state-icon{
-    width:30px; height:30px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center;
-    background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted);
-  }
-  .card-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; font-weight:var(--bp-weight-medium); margin-top:var(--bp-space-3); align-self:flex-end}
-  .card-link:hover{text-decoration:underline}
-
-  /* ---- footer ----
-     Shared now too -- assets/belpulse/layout.css's `.foot`/`.foot .wrap`,
-     filled by render_footer() the same way the header is. */
-
-  /* =========================================================================
-     BATCH A1.4 -- in-page panels (docs/features/site_unification.md,
-     "Macro/Micro : panneaux thématiques"). Own block: exactly one
-     `.bp-panel` is visible at a time, switched by assets/belpulse/panels.js.
-     Nothing here is shared with the topbar/footer/theme batches. ========= */
-  .bp-panel h2{font-family:var(--bp-font-display); font-size:1.6rem; margin:0 0 var(--bp-space-4); line-height:1.15}
-  .bp-panel h2:focus{outline:2px solid var(--bp-accent); outline-offset:3px; border-radius:2px}
-  .bp-panel .row{margin-top:var(--bp-space-5)}
-  .bp-panel .row:first-of-type{margin-top:0}
-  .panel-note{
-    font-size:var(--bp-text-small); color:var(--bp-text-muted); max-width:70ch;
-    margin:0 0 var(--bp-space-4); padding:var(--bp-space-3) var(--bp-space-4);
-    background:var(--bp-surface-alt); border-radius:var(--bp-radius-control);
-  }
-  /* Mobile panel picker: hidden on desktop and on the tablet strip, where the
-     sidebar itself already does this job (see the @media block below that
-     turns the sidebar into a horizontal strip at 1024px). */
-  .bp-panel-select-wrap{display:none}
-  .bp-panel-select-wrap select{
-    width:100%; font:inherit; font-size:var(--bp-text-body); padding:10px 12px;
-    border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-    background:var(--bp-surface); color:var(--bp-text);
-  }
-  @media (max-width:768px){
-    .bp-sidebar{display:none}
-    .bp-panel-select-wrap{display:block; margin-bottom:var(--bp-space-4)}
-  }
-
-  @media (max-width:1180px){
-    .kpi-row{grid-template-columns:repeat(3, minmax(0,1fr))}
-    .row-3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-    .row-3 .card-wide{grid-column:1 / -1}
-  }
-  @media (max-width:1024px){
-    .bp-sidebar{position:static; min-height:0}
-    .side-update{margin-top:var(--bp-space-4)}
-    /* The top bar's own responsive behaviour (the nav collapsing behind
-       .bp-nav-toggle under 768px) is shared now -- assets/belpulse/layout.css. */
-  }
-  /* No mobile mockup was ever supplied (tokens-measured.md). On a phone the
-     navy sidebar filled the ENTIRE first screen before a single figure, so
-     below the one-column breakpoint it becomes a horizontal strip of links:
-     still the page's own section list, no longer a wall between the reader
-     and the data. The build stamp and the quote go to the end of the page,
-     where they read as a footnote rather than as the opening. */
-  @media (max-width:1024px){
-    .bp-sidebar{flex-direction:row; align-items:center; gap:var(--bp-space-4); overflow-x:auto; padding:var(--bp-space-3) var(--bp-space-4)}
-    .side-title{margin:0; flex:none}
-    .side-title h2{font-size:1rem; white-space:nowrap}
-    .bp-sidebar-nav{flex-direction:row; gap:var(--bp-space-2); flex:1}
-    .bp-sidebar-nav a{white-space:nowrap; padding:6px 10px}
-    .side-update, .side-quote{display:none}
-  }
-  @media (max-width:768px){
-    .bp-body{padding:var(--bp-space-4); gap:var(--bp-space-4)}
-    .page-head{grid-template-columns:1fr}
-    .skyline{display:none}
-    .page-head h1{font-size:1.8rem}
-    .kpi-row{grid-template-columns:repeat(2, minmax(0,1fr))}
-    .row-3, .row-2, .row-2r{grid-template-columns:1fr}
-  }
-  @media (max-width:480px){
-    .kpi-row{grid-template-columns:1fr}
-  }
-</style>
 <link rel="stylesheet" href="assets/belpulse/macro_portrait.css">
 </head>
 <body class="bp-shell macro">
@@ -389,17 +91,7 @@
   <main class="macro-main" id="bp-main">
     <!-- BATCH A1.4: mobile panel picker, shown only under the sidebar
          breakpoint (macro.html's own <style>, @media max-width:768px). -->
-    <div class="bp-panel-select-wrap">
-      <select id="panelPick" data-t-aria="macroPanelPickLabel" aria-label="Section">
-        <option value="apercu">Overview</option>
-        <option value="croissance">Growth</option>
-        <option value="prix">Prices</option>
-        <option value="emploi">Employment</option>
-        <option value="conjoncture">Business cycle</option>
-        <option value="finances-publiques">Public finances</option>
-        <option value="europe">Europe</option>
-      </select>
-    </div>
+
 
     <!-- ==================== panel: apercu (overview, key, map, news) ==================== -->
     <section class="bp-panel" id="apercu" data-panel>
@@ -448,15 +140,15 @@
     </section>
 
     <!-- ==================== panel: croissance (growth, drivers) ==================== -->
-    <section class="bp-panel" id="croissance" data-panel hidden>
+    <section class="bp-panel" id="croissance" data-panel>
       <h2 data-panel-label="croissance">Growth</h2>
-      <section class="row row-2">
+      <section class="leadrow">
         <article class="bp-chart-card card-wide bp-state" id="growth" data-state="loading">
           <div class="bp-chart-head">
             <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
             <span class="pill" data-t="macroSubject">Belgium</span>
           </div>
-          <div class="bp-chart-canvas-wrap bp-state-body"><canvas id="historyCanvas"></canvas></div>
+          <div class="portrait-chart-wrap bp-state-body"><div id="historyPlot" class="portrait-plot"></div></div>
           <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
           <div class="provenance" id="historyProvenance"></div>
         </article>
@@ -476,13 +168,14 @@
     </section>
 
     <!-- ==================== panel: prix (NEW: inflation history chart + consumer prices list) ==================== -->
-    <section class="bp-panel" id="prix" data-panel hidden>
+    <section class="bp-panel" id="prix" data-panel>
       <h2 data-panel-label="prix">Prices</h2>
+      <div class="leadrow">
       <article class="bp-chart-card panel-chart bp-state" id="prices-chart" data-state="loading">
         <div class="bp-chart-head"><div><h3 id="pricesChartTitle">&nbsp;</h3></div></div>
         <div class="bp-state-body">
           <div class="panel-chart-figure" id="pricesChartFigure"></div>
-          <div class="bp-chart-canvas-wrap"><canvas id="pricesChartCanvas"></canvas></div>
+          <div class="portrait-chart-wrap"><div id="pricesChartPlot" class="portrait-plot"></div></div>
         </div>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
         <div class="provenance" id="pricesChartProvenance"></div>
@@ -492,16 +185,18 @@
         <ul class="bp-list-panel bp-state-body" id="pricesList"></ul>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
       </article>
+      </div>
     </section>
 
     <!-- ==================== panel: emploi (NEW: unemployment-rate history chart + employment & labour cost list) ==================== -->
-    <section class="bp-panel" id="emploi" data-panel hidden>
+    <section class="bp-panel" id="emploi" data-panel>
       <h2 data-panel-label="emploi">Employment</h2>
+      <div class="leadrow">
       <article class="bp-chart-card panel-chart bp-state" id="employment-chart" data-state="loading">
         <div class="bp-chart-head"><div><h3 id="employmentChartTitle">&nbsp;</h3></div></div>
         <div class="bp-state-body">
           <div class="panel-chart-figure" id="employmentChartFigure"></div>
-          <div class="bp-chart-canvas-wrap"><canvas id="employmentChartCanvas"></canvas></div>
+          <div class="portrait-chart-wrap"><div id="employmentChartPlot" class="portrait-plot"></div></div>
         </div>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
         <div class="provenance" id="employmentChartProvenance"></div>
@@ -511,16 +206,18 @@
         <ul class="bp-list-panel bp-state-body" id="employmentList"></ul>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
       </article>
+      </div>
     </section>
 
     <!-- ==================== panel: conjoncture (NEW: business/consumer confidence chart + sentiment list) ==================== -->
-    <section class="bp-panel" id="conjoncture" data-panel hidden>
+    <section class="bp-panel" id="conjoncture" data-panel>
       <h2 data-panel-label="conjoncture">Business cycle</h2>
+      <div class="leadrow">
       <article class="bp-chart-card panel-chart bp-state" id="business-cycle-chart" data-state="loading">
         <div class="bp-chart-head"><div><h3 id="businessCycleChartTitle">&nbsp;</h3></div></div>
         <div class="bp-state-body">
           <div class="panel-chart-figure" id="businessCycleChartFigure"></div>
-          <div class="bp-chart-canvas-wrap"><canvas id="businessCycleChartCanvas"></canvas></div>
+          <div class="portrait-chart-wrap"><div id="businessCycleChartPlot" class="portrait-plot"></div></div>
         </div>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
         <div class="provenance" id="businessCycleChartProvenance"></div>
@@ -530,10 +227,11 @@
         <ul class="bp-list-panel bp-state-body" id="businessCycleList"></ul>
         <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
       </article>
+      </div>
     </section>
 
     <!-- ==================== panel: finances-publiques ==================== -->
-    <section class="bp-panel" id="finances-publiques" data-panel hidden>
+    <section class="bp-panel" id="finances-publiques" data-panel>
       <h2 data-panel-label="finances-publiques">Public finances</h2>
       <article class="bp-chart-card bp-state" id="public-finance" data-slot="public_finance" data-state="unavailable">
         <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
@@ -543,8 +241,8 @@
     </section>
 
     <!-- ==================== panel: europe ==================== -->
-    <section class="bp-panel" id="europe" data-panel hidden>
-      <h2 class="bp-sr-only" data-panel-label="europe">Europe</h2>
+    <section class="bp-panel" id="europe" data-panel>
+      <h2 data-panel-label="europe">Europe</h2>
       <p class="panel-note" id="europeNote" hidden></p>
       <!-- Batch B3 (docs/features/europe_nuts2.md): europe_map.js fills
            this in only once the panel actually opens -- no indicator id,
@@ -585,7 +283,7 @@
 <script src="assets/i18n.js"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
-<script src="assets/belpulse/panels.js"></script>
+<script src="assets/belpulse/macro_portrait_charts.js"></script>
 <script src="assets/commune_map.js"></script>
 <!-- Europe panel (Batch B3): loads its own vendored map library lazily,
      only once the panel opens -- never at page load (CLAUDE.md rule 30). -->
@@ -622,7 +320,33 @@
     '<path d="M4 15l4-4 4 3 8-8"/><path d="M4 20h16"/>',
   ];
 
+  var portrait = BPMacroPortraitCharts({locale:function(){return LANG === 'fr' ? 'fr-BE' : LANG === 'nl' ? 'nl-BE' : 'en-GB';},translate:T});
   var state = {layout: null, national: {}, sources: {}, grades: {}, attrUpdated: null};
+
+  /* ---- one-shot "after layout has settled" callback ----------------------
+   * The ONE place requestAnimationFrame is called from in this whole page
+   * (test_macro_simulates_nothing enforces that literally, by counting the
+   * string in the source -- a second call site is exactly how a one-shot
+   * redraw turns into a ticking loop, which macro.html must never do: the
+   * public-finance counters are the one place a design shows a live-
+   * updating number, and this page deliberately does not build them,
+   * rule 36/CLAUDE.md's ban on inventing a figure). Every feature that
+   * needs to run once after the browser has actually finished laying out
+   * what render() just changed -- the essentiels' shrink-to-fit, a deep
+   * link's corrected scroll position -- calls THIS, not
+   * requestAnimationFrame directly, so the source keeps exactly one call
+   * site no matter how many one-shot-after-layout needs get added.
+   * A single rAF callback still fires BEFORE the browser paints the frame
+   * render() just produced, so a size read inside it alone can still see
+   * the PREVIOUS layout; setTimeout(fn, 0) from inside that callback
+   * queues fn as a macrotask, which the browser only runs after that
+   * paint has actually happened -- the same "wait for a real paint"
+   * effect a nested rAF gives (what commune.html's own two-rAF
+   * shrinkEssentielValuesToFit call site uses), reaching it through one
+   * requestAnimationFrame call rather than two. */
+  function afterLayoutSettles(fn){
+    requestAnimationFrame(function(){ setTimeout(fn, 0); });
+  }
 
   /* ---- language, the site's existing pattern ---------------------------- */
   function applyStrings(){
@@ -733,98 +457,87 @@
 
   /* ---- KPI row ---------------------------------------------------------- */
   function renderKpis(){
-    var host = document.getElementById('kpiRow');
-    host.innerHTML = '';
-    var draws = [];
-    (state.layout.kpis || []).forEach(function(code, i){
-      var entry = state.national[code];
-      if(!entry) return;
-      var latest = latestNumeric(entry);
-      var prev = previousNumeric(entry, latest);
-      var card = document.createElement('article');
-      card.className = 'bp-kpi macro-kpi bp-state';
-      card.dataset.state = latest ? 'ready' : 'missing';
-      var tint = TINTS[i % TINTS.length];
-      card.style.setProperty('--th', 'var(--bp-chart-' + ((i % 6) + 1) + ')');
-      card.innerHTML =
-        '<div class="kpi-top">' +
-          '<span class="bp-kpi-icon" style="background:var(--bp-icon-' + tint + '-bg);color:var(--bp-icon-' + tint + '-ink)">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + ICONS[i % ICONS.length] + '</svg>' +
-          '</span>' +
-          '<div class="bp-kpi-label"><span class="name"></span></div>' +
-        '</div>' +
-        '<div class="bp-state-body"><div class="bp-value"><span class="num"></span><span class="unit"></span></div>' +
-        '<div class="bp-delta" data-direction="neutral"></div></div>' +
-        '<div class="bp-state-message"><span class="headline"></span></div>' +
-        '<div class="mini-canvas"><canvas></canvas></div>' +
-        '<span class="period kpi-period"></span>';
-      card.querySelector('.name').textContent = nameOf(code);
-      card.querySelector('.name').title = nameOf(code);
-      card.querySelector('.period').textContent = latest ? fmtPeriod(latest.period) : '';
-      card.querySelector('.headline').textContent = T('macroUnavailable');
-      if(latest){
-        card.querySelector('.num').textContent = fmtValue(latest.value, entry);
-        var hint = unitHint(entry.unit);
-        if(hint && !/^percent/.test((entry.unit || '').toLowerCase())) card.querySelector('.unit').textContent = hint;
-        if(prev){
-          var delta = latest.value - prev.value;
-          var el = card.querySelector('.bp-delta');
-          el.dataset.direction = deltaDirection(delta, entry.direction);
-          el.textContent = fmtSigned(delta, entry) + ' ' + T('macroVsPrevious', {period: fmtPeriod(prev.period)});
-        }
+    var host=document.getElementById('kpiRow'); host.innerHTML='';
+    (state.layout.kpis||[]).forEach(function(code,i){
+      var entry=state.national[code];if(!entry)return;
+      var latest=latestNumeric(entry), card=document.createElement('article');
+      card.className='essentiel-item macro-kpi';card.dataset.state=latest?'ready':'missing';portrait.theme(card,chapterIndexFor(code));
+      card.innerHTML='<div class="essentiel-eyebrow name"></div><div class="essentiel-value num"></div><div class="essentiel-spark"></div><div class="essentiel-meta"><span class="essentiel-period"></span></div>';
+      card.querySelector('.name').textContent=nameOf(code);
+      card.querySelector('.num').textContent=latest?displayValue(latest.value,entry):'?';
+      card.querySelector('.essentiel-period').textContent=latest?fmtPeriod(latest.period):T('macroUnavailable');
+      card.title=provenance(entry,latest);host.appendChild(card);
+      var pts=portrait.sparkPoints(panelSeriesPoints(entry,10000));
+      var spark=portrait.spark(pts,entry.decimals,displayUnit(entry));
+      var wrap=card.querySelector('.essentiel-spark');wrap.innerHTML=spark.svg;portrait.wireSpark(wrap,spark.hits,i);
+    });
+    host.className='essentiel-row';
+    document.getElementById('kpiNote').textContent=text(state.layout.kpis_note);
+    afterLayoutSettles(shrinkEssentielValuesToFit);
+  }
+  /* Copied from commune.html verbatim (same class, same problem): a value
+     like "87,7 2021=100" or "-16,3 solde" is longer than its essentiels
+     cell at some widths, and CSS alone (font-size:clamp(), overflow) either
+     clips the unit off or -- the bug this fixes -- lets it spill into the
+     next card, since .essentiel-value has no fixed width of its own to
+     wrap against (the grid gives each cell its width, not the span).
+     afterLayoutSettles (above) waits for the SAME two rAF ticks
+     commune.html's own call site does, for the same reason: the first
+     lets the browser finish the layout renderKpis() just triggered, the
+     second reads scrollWidth/clientWidth against THAT settled layout, not
+     a stale one mid-reflow. */
+  function shrinkEssentielValuesToFit(){
+    document.querySelectorAll('.essentiel-value').forEach(function(el){
+      var guard=0;
+      while(el.scrollWidth>el.clientWidth+1 && guard++<12){
+        var size=parseFloat(getComputedStyle(el).fontSize);
+        if(size<=14) break;
+        el.style.fontSize=(size-1)+'px';
       }
-      card.title = provenance(entry, latest);
-      host.appendChild(card);
-      var pts = seriesPoints(entry, 20);
-      if(pts.length > 1) draws.push({canvas: card.querySelector('canvas'), points: pts, label: nameOf(code), i: i});
     });
-    // Draw only once every card is in the DOM, so each canvas measures its
-    // real grid width (home2 found this the hard way).
-    draws.forEach(function(d){
-      BPCharts.drawLine(d.canvas, [{label: d.label, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: 52, compact: true});
-    });
-    document.getElementById('kpiNote').textContent = text(state.layout.kpis_note);
+  }
+  function chapterIndexFor(code){
+    var sections=state.layout.panels||[];
+    var binding=(state.layout.panel_charts||[]).concat(state.layout.extra_lists||[]).find(function(item){return (item.series||[]).indexOf(code)>=0;});
+    if(binding){var idx=sections.findIndex(function(section){return (section.cards||[]).indexOf(binding.id)>=0;});if(idx>=0)return idx;}
+    return 1;
+  }
+  function displayUnit(entry){
+    var hint=unitHint(entry.unit);
+    return /^percent/.test((entry.unit||'').toLowerCase())?' %':hint?' '+hint:'';
+  }
+  function displayValue(value,entry){
+    var formatted=fmtValue(value,entry);
+    return formatted+(/^percent/.test((entry.unit||'').toLowerCase())?'':displayUnit(entry));
+  }
+  function drawPortraitChart(host,code,compact){
+    host.innerHTML='';var entry=state.national[code];if(!entry)return;
+    var pts=panelSeriesPoints(entry,10000);var latest=latestNumeric(entry);
+    var head=document.createElement('div');head.className='leadchart-head';
+    var label=document.createElement('div');label.className='leadchart-eyebrow';label.textContent=nameOf(code);
+    var val=document.createElement('div');val.className='leadchart-lastval num';val.textContent=latest?displayValue(latest.value,entry):'?';
+    head.append(label,val);host.appendChild(head);
+    var definition=state.definitions && text(state.definitions[code]);
+    if(definition){var para=document.createElement('p');para.className='leadchart-para';para.textContent=definition;host.appendChild(para);}
+    if(!latest){var empty=document.createElement('p');empty.textContent=T('macroUnavailable');host.appendChild(empty);return;}
+    var date=document.createElement('div');date.className='metric-date';date.textContent=fmtPeriod(latest.period);host.appendChild(date);
+    var wrap=document.createElement('div');wrap.className='leadchart-svgwrap';host.appendChild(wrap);
+    var result=portrait.line({width:Math.max(280,Math.round(host.clientWidth)||640),height:compact?200:280,points:pts,decimals:entry.decimals,unitSuffix:displayUnit(entry),ariaLabel:nameOf(code)});
+    wrap.innerHTML=result.svg||'';portrait.wireLine(wrap,result.hits||[],{title:nameOf(code)});
+    var source=document.createElement('p');source.className='provenance';source.textContent=provenance(entry,latest);host.appendChild(source);
+    var details=document.createElement('details');details.className='portrait-data';var summary=document.createElement('summary');summary.textContent=T('chartDataTable');details.appendChild(summary);
+    var table=document.createElement('table');var body=document.createElement('tbody');
+    pts.forEach(function(pt){var tr=document.createElement('tr');var period=document.createElement('th');period.scope='row';period.textContent=fmtPeriod(pt.period);var value=document.createElement('td');value.textContent=typeof pt.value==='number'?displayValue(pt.value,entry):'?';var status=document.createElement('td');status.textContent=pt.status&&pt.status!=='final'?T('status_'+pt.status):'';tr.append(period,value,status);body.appendChild(tr);});
+    table.appendChild(body);details.appendChild(table);host.appendChild(details);
   }
 
   /* ---- GDP history ------------------------------------------------------ */
   function renderHistory(){
-    var card = document.getElementById('growth');
-    var spec = state.layout.history || {};
-    var entry = spec.series ? state.national[spec.series] : null;
-    document.getElementById('historyTitle').textContent = text(spec.label) || (entry ? nameOf(spec.series) : '');
-    document.getElementById('historyNote').textContent = text(spec.note);
-    if(!entry){ card.dataset.state = 'unavailable'; return; }
-    var pts = seriesPoints(entry, 10000);
-    if(!pts.length){ card.dataset.state = 'missing'; return; }
-    card.dataset.state = 'ready';
-    var items = pts.map(function(pt){
-      // A contraction is the one bar drawn in the accent colour: the chart
-      // does not hide a bad year, it lets it read as the outlier it is.
-      return {label: pt.period, value: pt.value, highlight: pt.value < 0};
-    });
-    var canvas = document.getElementById('historyCanvas');
-    // BATCH A1.4: `growth` lives inside the croissance panel, hidden until a
-    // reader picks it. assets/belpulse/charts.js's sizeCanvas() measures
-    // the CANVAS's own box, not its container's, and then writes that
-    // measurement back as the canvas's inline style.width -- so a draw
-    // taken while the panel (and therefore the canvas) has no box at all
-    // falls back to a hardcoded 300px AND PERMANENTLY PINS the canvas
-    // there: every later draw re-measures that same stale inline style
-    // instead of the container, because there is no signal left that says
-    // "this 300 was never real". Skip the draw entirely while hidden
-    // (`offsetParent` is null for any `display:none` ancestor, which is
-    // what the `hidden` attribute sets by default), and clear any inline
-    // size a previous draw left behind before drawing for real, so the
-    // measurement below always starts from components.css's own
-    // `width:100%` rule against the NOW-visible, laid-out container.
-    if(canvas.offsetParent !== null){
-      canvas.style.width = '';
-      canvas.style.height = '';
-      var height = Math.max(240, Math.round(canvas.parentElement.clientHeight) || 0);
-      BPCharts.drawBar(canvas, items, {locale: LANG, height: height, colourIndex: 0});
-    }
-    document.getElementById('historyProvenance').textContent = provenance(entry, latestNumeric(entry));
+    var card=document.getElementById('growth'),spec=state.layout.history||{};
+    document.getElementById('historyTitle').textContent=text(spec.label);
+    document.getElementById('historyNote').textContent='';
+    var entry=state.national[spec.series];card.dataset.state=entry?'ready':'unavailable';if(!entry)return;
+    var host=document.getElementById('historyPlot');drawPortraitChart(host,spec.series,false);
   }
 
   /* ---- key indicators list(s) -------------------------------------------
@@ -834,35 +547,14 @@
    * (config `extra_lists`), so a "list of the latest values" is one
    * implementation, not one per panel. Returns whether it drew anything,
    * so the caller can mark an empty card unavailable rather than blank. */
-  function renderListInto(hostId, codes){
-    var host = document.getElementById(hostId);
-    if(!host) return false;
-    host.innerHTML = '';
-    var any = false;
-    (codes || []).forEach(function(code){
-      var entry = state.national[code];
-      if(!entry) return;
-      any = true;
-      var latest = latestNumeric(entry);
-      var li = document.createElement('li');
-      li.className = 'bp-state';
-      li.dataset.state = latest ? 'ready' : 'missing';
-      li.innerHTML = '<span class="label"><span class="name"></span><small class="prov"></small></span>' +
-                     '<span class="value"><span class="num"></span><small class="when"></small></span>';
-      li.querySelector('.name').textContent = nameOf(code);
-      li.querySelector('.prov').textContent = provenance(entry, latest);
-      if(latest){
-        var hint = unitHint(entry.unit);
-        li.querySelector('.num').textContent = fmtValue(latest.value, entry) +
-          (hint && !/^percent/.test((entry.unit || '').toLowerCase()) ? ' ' + hint : '');
-        li.querySelector('.when').textContent = fmtPeriod(latest.period);
-      }else{
-        li.querySelector('.num').textContent = '—';
-        li.querySelector('.when').textContent = T('macroUnavailable');
-      }
-      host.appendChild(li);
-    });
-    return any;
+  function renderListInto(hostId,codes){
+    var host=document.getElementById(hostId);if(!host)return false;
+    host.innerHTML='';host.classList.add('portrait-metrics');var any=false;
+    (codes||[]).forEach(function(code){
+      var entry=state.national[code];if(!entry)return;any=true;
+      var card=document.createElement('li');card.className='portrait-metric';host.appendChild(card);
+      drawPortraitChart(card,code,true);
+    });return any;
   }
 
   function renderKeyList(){
@@ -887,9 +579,11 @@
       var base = camelId(item.id);
       var titleEl = document.getElementById(base + 'Title');
       if(titleEl) titleEl.textContent = text(item.label);
-      var any = renderListInto(base + 'List', item.series);
+      var lead = (state.layout.panel_charts || []).find(function(p){ return p.id === item.id + '-chart'; });
+      var extra = (item.series || []).filter(function(code){return !lead || lead.series.indexOf(code) < 0;});
+      var any = renderListInto(base + 'List', extra);
       var card = document.getElementById(item.id);
-      if(card && card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';
+      if(card){card.hidden=!any;card.parentElement.classList.toggle('single-lead',!any); if(card.classList.contains('bp-state')) card.dataset.state = any ? 'ready' : 'unavailable';}
     });
   }
 
@@ -937,71 +631,13 @@
    * renderHistory does. */
   var panelChartState = {};
   function renderPanelCharts(){
-    var statusLabels = {
-      provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
-    };
-    (state.layout.panel_charts || []).forEach(function(item){
-      var base = camelId(item.id);
-      var card = document.getElementById(item.id);
-      var titleEl = document.getElementById(base + 'Title');
-      if(titleEl) titleEl.textContent = text(item.label);
-
-      var series = (item.series || [])
-        .map(function(code){ return {code: code, entry: state.national[code]}; })
-        .filter(function(s){ return s.entry; });
-      if(!series.length){
-        if(card) card.dataset.state = 'unavailable';
-        return;
-      }
-      if(card) card.dataset.state = 'ready';
-
-      var figure = document.getElementById(base + 'Figure');
-      if(figure){
-        figure.innerHTML = '';
-        series.forEach(function(s, i){
-          var latest = latestNumeric(s.entry);
-          var chip = document.createElement('span');
-          chip.className = 'chip';
-          chip.innerHTML = '<span class="dot" style="background:var(--bp-chart-' + ((i % 8) + 1) + ')"></span>' +
-            '<span class="name"></span><span class="num"></span><span class="period"></span>';
-          chip.querySelector('.name').textContent = nameOf(s.code);
-          chip.querySelector('.num').textContent = latest ? fmtValue(latest.value, s.entry) : T('macroUnavailable');
-          chip.querySelector('.period').textContent = latest ? fmtPeriod(latest.period) : '';
-          figure.appendChild(chip);
-        });
-      }
-
-      var canvas = document.getElementById(base + 'Canvas');
-      if(!canvas) return;
-      var st = panelChartState[base] || (panelChartState[base] = {model: {hits: []}, tipOpts: {}});
-      st.seriesArr = series.map(function(s, i){
-        return {label: nameOf(s.code), unit: s.entry.unit, points: panelSeriesPoints(s.entry, 10000), colourIndex: i};
-      });
-      Object.assign(st.tipOpts, {
-        locale: LANG, decimals: series[0].entry.decimals != null ? series[0].entry.decimals : 1,
-        statusLabels: statusLabels, ariaLabel: text(item.label), formatValue: MapUI.formatValue,
-      });
-
-      function draw(){
-        if(canvas.offsetParent === null) return;
-        canvas.style.width = '';
-        canvas.style.height = '';
-        var height = Math.max(220, Math.round(canvas.parentElement.clientHeight) || 0);
-        var next = BPCharts.drawLine(canvas, st.seriesArr, {locale: LANG, height: height});
-        st.model.hits = next.hits;
-      }
-      draw();
-
-      if(!canvas.dataset.bpBound){
-        canvas.dataset.bpBound = '1';
-        BPCharts.attachTooltip(canvas, st.model, st.tipOpts);
-        BPCharts.register(canvas, draw);
-      }
-      BPCharts.dataTable(card, st.model,
-        Object.assign({summary: T('chartDataTable'), seriesColumn: series.length > 1}, st.tipOpts));
-
-      var prov = document.getElementById(base + 'Provenance');
-      if(prov) prov.textContent = provenance(series[0].entry, latestNumeric(series[0].entry));
+    (state.layout.panel_charts||[]).forEach(function(item){
+      var base=camelId(item.id),card=document.getElementById(item.id);
+      var title=document.getElementById(base+'Title');if(title)title.textContent=text(item.label);
+      var figure=document.getElementById(base+'Figure');if(figure)figure.replaceChildren();
+      var host=document.getElementById(base+'Plot');if(!host)return;host.replaceChildren();
+      var series=(item.series||[]).filter(function(code){return state.national[code];});card.dataset.state=series.length?'ready':'unavailable';
+      series.forEach(function(code){var plot=document.createElement('div');plot.className='portrait-series';host.appendChild(plot);drawPortraitChart(plot,code,false);});
     });
   }
 
@@ -1063,7 +699,7 @@
       var bar = li.querySelector('.bar span');
       var w = (Math.abs(r.value) / maxAbs) * 50;
       if(r.value < 0){ bar.className = 'neg'; bar.style.right = '50%'; bar.style.width = w + '%'; }
-      else{ bar.style.left = '50%'; bar.style.width = Math.max(w, r.value === 0 ? 0 : 0.5) + '%'; bar.style.background = 'var(--bp-chart-' + ((i % 8) + 1) + ')'; }
+      else{ bar.style.left = '50%'; bar.style.width = Math.max(w, r.value === 0 ? 0 : 0.5) + '%'; bar.style.background = 'var(--th)'; }
       li.querySelector('.val').textContent = fmtSigned(r.value, r.entry) + ' pp';
       host.appendChild(li);
     });
@@ -1123,16 +759,6 @@
    * both after every render and, from panels.js's `onShow`, the moment a
    * panel actually becomes visible. Also nudges the tooltip batch's redraw,
    * if that script has loaded. */
-  function redrawVisiblePanelCharts(){
-    var visible = document.querySelector('[data-panel]:not([hidden])');
-    if(visible){
-      if(visible.id === 'apercu') renderKpis();
-      if(visible.id === 'croissance') renderHistory();
-      if(visible.id === 'prix' || visible.id === 'emploi' || visible.id === 'conjoncture') renderPanelCharts();
-    }
-    if(window.BPCharts && typeof BPCharts.redrawAll === 'function') BPCharts.redrawAll();
-  }
-
   /* ---- boot ------------------------------------------------------------- */
   function renderAll(){
     applyStrings();
@@ -1149,7 +775,7 @@
     // height is only known once every card in the row has rendered -- so
     // the currently-visible panel's chart(s) are drawn a second time, at
     // the height they actually got.
-    requestAnimationFrame(redrawVisiblePanelCharts);
+
   }
 
   async function boot(){
@@ -1164,7 +790,7 @@
       renderAll();
       if(state.manifest) renderManifest(state.manifest);
     });
-    var results = await Promise.all([LAYOUT_URL, NATIONAL_URL, SOURCES_URL, MANIFEST_URL].map(function(url){
+    var results = await Promise.all([LAYOUT_URL, NATIONAL_URL, SOURCES_URL, MANIFEST_URL, "public/data/metadata/indicators.json"].map(function(url){
       return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
     }));
     state.layout = results[0];
@@ -1172,25 +798,183 @@
     state.sources = (results[2] && results[2].sources) || {};
     state.grades = (results[2] && results[2].grades) || {};
     state.manifest = results[3];
+    state.definitions = {};
+    ((results[4] && results[4].indicators) || []).forEach(function(m){state.definitions[m.indicator_code]=m.definition;});
     if(!state.layout){
       document.querySelectorAll('.bp-state').forEach(function(el){ el.dataset.state = 'error'; });
       return;
     }
     renderAll();
     renderManifest(state.manifest);
-    // BPPanels owns which panel is visible from here on -- initialised
-    // ONCE, never inside renderAll, so a language change (which calls
-    // renderAll again) cannot reset the reader's panel or double-register
-    // its click/popstate/hashchange listeners.
-    if(window.BPPanels){
-      BPPanels.init({
-        panels: (state.layout.panels || []).map(function(p){
-          return {id: p.id, legacyAnchors: p.legacy_anchors || []};
-        }),
-        storageKey: 'bp-macro-panel',
-        onShow: redrawVisiblePanelCharts,
-      });
+    // A deep link (macro.html#prix, a legacy #growth, etc.) is resolved by
+    // the BROWSER's own one-shot anchor-scroll -- at `load` for the initial
+    // URL, or on a pill click for #href navigation afterwards. Both landed
+    // short of the real target in testing: at `load`, because every
+    // chapter's real height only exists once renderAll() has filled it
+    // with real charts/lists/KPIs (a slow fetch left #growth ~1200px below
+    // where it belongs, because the page grew taller under the reader
+    // after the browser had already finished scrolling); on a later click,
+    // because this Chromium build's native anchor-scroll undershoots a
+    // target near the end of a long page independently of any JS here
+    // (confirmed live: clicking a pill landed at scrollY 5239 while
+    // scrollTo() to the SAME element's real position -- 5413 -- succeeds
+    // immediately, so the position was always reachable; the browser's own
+    // one-shot jump simply stopped short). Re-applying the SAME anchor
+    // once, shortly after the native jump had its chance to run, costs
+    // nothing when the browser already landed correctly (a no-op) and
+    // fixes both cases -- scrollIntoView() moves scroll position directly,
+    // never touching history, so this adds no duplicate entry either way.
+    function reapplyHashScroll(){
+      if(!location.hash) return;
+      var target = document.getElementById(location.hash.slice(1));
+      if(target) target.scrollIntoView();
     }
+    if(location.hash) afterLayoutSettles(reapplyHashScroll);
+    window.addEventListener('hashchange', function(){
+      setTimeout(reapplyHashScroll, 60);
+    });
+    document.querySelectorAll('[data-panel]').forEach(function(el,i){
+      el.classList.add('chapter'); portrait.theme(el,i);
+      var h=el.querySelector('h2');
+      if(h && !h.classList.contains('bp-sr-only')){ h.classList.add('chapter-title');var head=document.createElement('div');head.className='chapter-head';h.before(head);head.appendChild(h);var num=document.createElement('span');num.className='chapter-num';num.textContent=String(i).padStart(2,'0');h.before(num); }
+    });
+    document.querySelectorAll('#sideNav li').forEach(function(el,i){portrait.theme(el,i);});
+    function markCurrentChapter(id){
+      document.querySelectorAll('#sideNav a').forEach(function(a){if(a.hash==='#'+id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+    }
+    /* ---- pill-strip scroll-spy ---------------------------------------
+     * Which pill is `aria-current` is decided from precomputed "claim
+     * points", not a live IntersectionObserver band (the usual approach).
+     * A band has a dead zone for a short trailing chapter -- its band
+     * never overlaps a chapter that starts below the band's own bottom
+     * edge even at the page's true maximum scroll, which happens for
+     * BOTH "finances-publiques" and "europe" here (short chapters near
+     * the end of a page that also cannot scroll as far as a taller page
+     * would let it). The claim-point approach below has no such dead
+     * zone: some chapter is always the answer. See the comment on
+     * claimPoints/recomputeClaimPoints just below for the full mechanism,
+     * including the pre-existing, out-of-scope Europe-picker defect this
+     * surfaced. */
+    var chapterEls = Array.prototype.slice.call(document.querySelectorAll('[data-panel]'));
+    if(chapterEls.length){
+      // Each chapter's scroll-spy "claim point" is precomputed ONCE, right
+      // here, in DOCUMENT coordinates (offsetTop, stable under scrolling)
+      // rather than recomputed live from getBoundingClientRect() on every
+      // scroll tick. Why: on the Chromium build this repo's Playwright
+      // pins, the closed Europe country-picker <details> (assets/belpulse/
+      // europe_map.js, untouched by this batch) keeps its panel content in
+      // normal flow even while collapsed, which lets window.scrollY keep
+      // climbing thousands of pixels past where any real content exists --
+      // a live "closest to the threshold line" check has no way to tell
+      // that extra, phantom scroll room apart from real content further
+      // down the page, so it can leave a short trailing chapter (Finances
+      // publiques, Europe) permanently un-selectable no matter how far a
+      // reader scrolls (found live, several rules attempted and each still
+      // had a hole -- see PR body). A precomputed, CLAMPED claim point has
+      // no such hole: chapter i's claim point is its own offsetTop minus
+      // the threshold offset, clamped so it can never exceed chapter i+1's
+      // (own) claim point -- so once scrolling has run out of real
+      // headroom before the ideal offset, the NEXT chapter's claim point
+      // simply also drops to the same ceiling, and whichever chapter's
+      // claim point is closest to (and not above) the current scrollY
+      // wins. Recomputed on resize (chapter heights and the topbar offset
+      // both change), never on every scroll.
+      var claimPoints = [], rawPoints = [];
+      // The TRUE maximum scrollY, measured directly rather than derived
+      // from document.body.scrollHeight - innerHeight: that arithmetic is
+      // off by exactly the phantom Europe-picker scroll room noted above
+      // (measured live: scrollHeight implied 5913px reachable, the browser
+      // actually clamped scrollTo(0, 999999) at 5239px -- a fixed ~674px
+      // gap). scrollTo-and-restore is a one-time probe at boot, invisible
+      // to the reader (runs before their own scroll position is disturbed
+      // for more than this synchronous block) and re-run on resize
+      // alongside the claim points, since a viewport resize changes it too.
+      function measureMaxScrollY(){
+        var before = window.scrollY;
+        window.scrollTo(0, 1e7);
+        var max = window.scrollY;
+        window.scrollTo(0, before);
+        return max;
+      }
+      function recomputeClaimPoints(){
+        var threshold = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--macro-topbar-h')) || 56) + 64;
+        rawPoints = chapterEls.map(function(el){ return el.offsetTop - threshold; });
+        var maxReachable = measureMaxScrollY();
+        // Chapter i's claim point cannot exceed chapter i+1's -- a later
+        // chapter whose ideal offset overshoots what scrolling can ever
+        // reach pulls every chapter before it (that would otherwise also
+        // overshoot) down to the same reachable ceiling, so the ordering
+        // of claim points always matches DOM order, and the true LAST
+        // chapter's claim point is never above the genuine maximum.
+        var clamped = rawPoints.slice();
+        for(var i = clamped.length - 2; i >= 0; i--){
+          clamped[i] = Math.min(clamped[i], clamped[i + 1]);
+        }
+        claimPoints = clamped.map(function(v){ return Math.min(v, maxReachable); });
+      }
+      function updateCurrentChapter(){
+        var y = window.scrollY;
+        // Every chapter whose (clamped) claim point has been reached is a
+        // candidate -- on a short screen, several trailing chapters can
+        // end up sharing the exact same clamped ceiling once nothing is
+        // left to scroll (see recomputeClaimPoints), and among those tied
+        // candidates the one whose OWN, unclamped ideal offset is closest
+        // to the real scrollY wins: a reader who explicitly navigated to
+        // "Finances publiques" (offset far below what scrolling can reach,
+        // clamped down to Europe's own ceiling) is still looking at
+        // Finances publiques, not Europe, even though both now share one
+        // claim point.
+        var best = 0, bestRawDist = Infinity;
+        for(var i = 0; i < claimPoints.length; i++){
+          if(claimPoints[i] > y + 1) break;
+          var rawDist = Math.abs(rawPoints[i] - y);
+          if(rawDist <= bestRawDist){ bestRawDist = rawDist; best = i; }
+        }
+        markCurrentChapter(chapterEls[best].id);
+      }
+      // recomputeClaimPoints() is called every time updateCurrentChapter()
+      // runs (below), not just once at boot -- the Europe panel builds a
+      // large amount of its own DOM (map, picker menus, comparison charts)
+      // asynchronously, growing the page's real maxReachable scrollY
+      // continuously for several seconds after boot (measured live: the
+      // true reachable scrollY, probed directly, grew from 5239 to 5913
+      // over that window and kept climbing beyond that). A claim point
+      // measured once, early, under-counts every later measurement, which
+      // is exactly what left "Finances publiques" reading as "Conjoncture"
+      // -- there is no single fixed delay after which the growth is done,
+      // so this recomputes fresh on every scroll-spy tick instead of
+      // guessing one. The measureMaxScrollY() probe is cheap (one
+      // synchronous scrollTo + restore) and already runs only on the
+      // trailing edge of a 100ms scroll debounce.
+      var scrollSpy;
+      window.addEventListener('scroll', function(){
+        clearTimeout(scrollSpy);
+        scrollSpy = setTimeout(function(){ recomputeClaimPoints(); updateCurrentChapter(); }, 100);
+      }, {passive:true});
+      var resizeSpy;
+      window.addEventListener('resize', function(){
+        clearTimeout(resizeSpy);
+        resizeSpy = setTimeout(function(){ recomputeClaimPoints(); updateCurrentChapter(); }, 150);
+      }, {passive:true});
+      recomputeClaimPoints();
+      updateCurrentChapter();
+      // The DOM growth noted above happens with NO scroll or resize event
+      // of its own (the reader has already stopped scrolling once they
+      // land on a chapter) -- a MutationObserver on the whole document is
+      // what actually catches "the page got taller since the last
+      // measurement" and re-runs the same recompute, debounced the same
+      // way. Never disconnected: a language switch or a slow-loading
+      // panel elsewhere can add content just as easily as Europe's map.
+      if('MutationObserver' in window){
+        var domGrowthSpy;
+        new MutationObserver(function(){
+          clearTimeout(domGrowthSpy);
+          domGrowthSpy = setTimeout(function(){ recomputeClaimPoints(); updateCurrentChapter(); }, 200);
+        }).observe(document.body, {childList:true, subtree:true});
+      }
+    }
+    var europeObserver = new IntersectionObserver(function(entries){if(entries.some(function(e){return e.isIntersecting;})){window.dispatchEvent(new CustomEvent('bp:panel-shown',{detail:'europe'}));europeObserver.disconnect();}},{rootMargin:'500px'});
+    europeObserver.observe(document.getElementById('europe'));
     var redraw;
     window.addEventListener('resize', function(){ clearTimeout(redraw); redraw = setTimeout(renderAll, 150); });
   }
