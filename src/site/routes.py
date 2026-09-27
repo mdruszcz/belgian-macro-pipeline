@@ -170,6 +170,16 @@ ROOT_PAGES: tuple[Page, ...] = (
         "all_data.html -- all_data.html is left exactly as it is until the "
         "canonical route switches",
     ),
+    Page(
+        "/comparables.html",
+        False,
+        "Peer Model v1 (Block M): every indicator of a commune against the "
+        "median of its ten comparable communes, comparables.html?nis=NNNNN. "
+        "Linked from commune.html's 'Communes comparables' section, same "
+        "reason commune.html itself is not submitted -- its bare URL carries "
+        "no NIS for a crawler to index, and the page carries its own "
+        "noindex meta tag",
+    ),
 )
 
 #: Routes whose pages must tell crawlers not to index them. The block-built
