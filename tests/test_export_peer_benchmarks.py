@@ -39,7 +39,7 @@ def _rebuild():
     raw_rows = export_peer_benchmarks._read_all_history_rows(
         export_peer_benchmarks.DEFAULT_HISTORY_DIR, export_peer_benchmarks.DEFAULT_HISTORY_CSV
     )
-    derived_rows, _names, _engine_only_ids = export_peer_benchmarks.build_derived_rows(
+    derived_rows, meta, _engine_only_ids = export_peer_benchmarks.build_derived_rows(
         raw_rows, export_peer_benchmarks.DEFAULT_DERIVED_DIR
     )
     candidate_ids, excluded_ids = export_peer_benchmarks.build_benchmark_universe(
@@ -49,7 +49,7 @@ def _rebuild():
     index = export_peer_benchmarks._index_rows(all_rows)
     latest_period = export_peer_benchmarks._latest_period_per_indicator(index)
     payloads = export_peer_benchmarks.build_benchmarks(
-        communes, index, latest_period, peers_model, candidate_ids, excluded_ids
+        communes, index, latest_period, peers_model, candidate_ids, excluded_ids, meta
     )
     return payloads, candidate_ids, excluded_ids
 
@@ -477,6 +477,53 @@ def test_antwerpen_internal_migration_net_is_withheld_no_current_value_for_11002
     assert withheld, "11002 has no withheld entries at all -- fixture likely stale"
     for entry in withheld.values():
         assert entry["reason"] in ("excluded", "no_current_value", "few_peers")
+
+
+# --- indicator_meta: engine-only derived indicators never in indicators.json -----
+
+
+def test_indicator_meta_carries_the_engine_only_derived_indicators_trilingually(payloads):
+    # BIRTH_RATE_PER_1000 and its siblings are never in
+    # public/data/metadata/indicators.json (that file is built from the
+    # canonical database, which a benchmark-only engine indicator never
+    # reaches) -- comparables.html would otherwise show the bare code with no
+    # unit. Checked against the real YAML, not hand-typed (rule 36).
+    import yaml
+
+    cfg = yaml.safe_load(
+        (export_peer_benchmarks.DEFAULT_DERIVED_DIR / "BIRTH_RATE_PER_1000.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    meta = payloads["92094"]["indicator_meta"]
+    entry = meta["BIRTH_RATE_PER_1000"]
+    assert entry["names"] == cfg["name"]
+    assert set(entry["names"]) == {"en", "fr", "nl"}
+    assert entry["unit"] == cfg["unit"]
+    assert entry["decimals"] == cfg["decimals"]
+
+
+def test_indicator_meta_is_identical_across_every_commune(payloads):
+    # A property of the model, not of the commune -- every payload carries
+    # the same block.
+    first = next(iter(payloads.values()))["indicator_meta"]
+    for nis, payload in payloads.items():
+        assert payload["indicator_meta"] == first, nis
+
+
+def test_indicator_meta_never_covers_an_already_published_indicator():
+    # A derived indicator that IS published (e.g. POPULATION_CHANGE_5Y) has
+    # its own row in indicators.json already; indicator_meta must not
+    # duplicate or shadow it.
+    raw_rows = export_peer_benchmarks._read_all_history_rows(
+        export_peer_benchmarks.DEFAULT_HISTORY_DIR, export_peer_benchmarks.DEFAULT_HISTORY_CSV
+    )
+    _rows, meta, _ids = export_peer_benchmarks.build_derived_rows(
+        raw_rows, export_peer_benchmarks.DEFAULT_DERIVED_DIR
+    )
+    published_ids = export_peer_benchmarks._published_indicator_ids(raw_rows)
+    assert set(meta).isdisjoint(published_ids)
+    assert "POPULATION_CHANGE_5Y" not in meta
 
 
 # --- Duplicate rows (measured, not assumed) --------------------------------------

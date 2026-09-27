@@ -100,7 +100,18 @@ Writes public/data/peers/<nis>.json, one per current commune:
    lists: {national: {IND: {period, value, peer_median, peers_with_value,
                              position, of, deviation_pct,
                              [deviation_withheld], selection_variable}},
-           region: {...}}}
+           region: {...}},
+   indicator_meta: {IND: {names: {en, fr, nl}, unit, decimals}}}
+
+`indicator_meta` is identical on every payload (a property of the model, not
+of the commune) and carries a name/unit ONLY for the handful of ENGINE-ONLY
+derived indicators (build_derived_rows's `meta`) that never get a row in
+public/data/metadata/indicators.json -- that file is built from the
+canonical database, which an indicator this exporter alone computes never
+reaches. Every other candidate already has a name and unit there;
+comparables.html reads that first and falls back to this only for the ids it
+is missing from (rule 24's spirit: a reader must never see a bare
+indicator_code or an unformatted number where a unit belongs).
 
 `peers` carries no name and no distance/similarity -- just the nis code and
 its rank in that list, read straight from public/data/metadata/peers.json.
@@ -281,7 +292,7 @@ def _indicator_names(rows: list[dict]) -> dict[str, str]:
 
 def build_derived_rows(
     rows: list[dict], derived_dir: Path
-) -> tuple[list[dict], dict[str, str], frozenset[str]]:
+) -> tuple[list[dict], dict[str, dict], frozenset[str]]:
     """Every derived indicator's (nis, period, value) as history-row-shaped
     dicts, computed by the Block G engine over the raw rows -- same pattern
     export_percentiles_csv.py's _derived_values uses, cross-sectional
@@ -296,16 +307,23 @@ def build_derived_rows(
     publish and letting it overwrite that published row (the pre-fix bug --
     see module docstring) is exactly what this guards against.
 
-    Returns (rows, names, engine_only_ids) where `rows` have status "derived"
+    Returns (rows, meta, engine_only_ids) where `rows` have status "derived"
     (a real value) for every cell the engine produced (missing/None cells are
-    omitted, not written as a null row), `names` maps each derived indicator
-    id actually computed to its English name from its own YAML
-    (config/indicators/derived's "name.en"), and `engine_only_ids` is exactly
-    the set of derived indicator ids this function was willing to compute
-    (cross-sectional functions and already-published indicators excluded) --
-    the caller needs this set again to classify the *withheld* universe (an
-    excluded derived indicator is withheld with reason "excluded" even where
-    the engine never produces a row for it).
+    omitted, not written as a null row), `meta` maps each derived indicator
+    id actually computed to {"names": {en, fr, nl}, "unit": ..., "decimals":
+    ...} straight from its own YAML (config/indicators/derived's "name:",
+    "unit:" and "decimals:" fields -- rule 7, every user-facing string in all
+    three languages), and `engine_only_ids` is exactly the set of derived
+    indicator ids this function was willing to compute (cross-sectional
+    functions and already-published indicators excluded) -- the caller needs
+    this set again to classify the *withheld* universe (an excluded derived
+    indicator is withheld with reason "excluded" even where the engine never
+    produces a row for it), AND to publish a name/unit for these indicators
+    in the peer payload -- they have no row anywhere else on the site
+    (public/data/metadata/indicators.json is built from the canonical
+    database, which an engine-only, benchmark-only indicator never reaches),
+    so comparables.html would otherwise show the bare indicator_code with no
+    unit to a reader (rule 24's spirit) for exactly these ids.
     """
     published_ids = _published_indicator_ids(rows)
     present = published_ids
@@ -342,8 +360,11 @@ def build_derived_rows(
                     "status": "derived",
                 }
             )
-    names = {i: cfg["name"]["en"] for i, cfg in configs.items()}
-    return derived_rows, names, frozenset(configs)
+    meta = {
+        i: {"names": dict(cfg["name"]), "unit": cfg["unit"], "decimals": cfg["decimals"]}
+        for i, cfg in configs.items()
+    }
+    return derived_rows, meta, frozenset(configs)
 
 
 def _latest_period_per_indicator(
@@ -416,10 +437,11 @@ def build_benchmarks(
     peers_model: dict,
     candidate_ids: frozenset[str],
     excluded_ids: frozenset[str],
+    engine_only_meta: dict[str, dict] | None = None,
 ) -> dict[str, dict]:
     """nis -> {model_version, variant, nis_code, peers, min_peers_with_value,
     withheld: {national: {...}, region: {...}}, lists: {national: {...},
-    region: {...}}}.
+    region: {...}}, indicator_meta: {...}}.
 
     For every commune and every list, EXACTLY ONE of `lists[list][IND]` or
     `withheld[list][IND]` exists for every IND in `candidate_ids` --
@@ -429,6 +451,15 @@ def build_benchmarks(
     unconditionally, even when it happens to have no row in `index` at all),
     and re-checked by test_export_peer_benchmarks.py's exhaustiveness test
     over the real 565 files.
+
+    `indicator_meta` (identical on every payload, since it is a property of
+    the model, not of the commune) carries {"names": {en,fr,nl}, "unit",
+    "decimals"} ONLY for the engine-only derived indicators
+    (build_derived_rows's `meta`) -- every other candidate already has a name
+    and unit in public/data/metadata/indicators.json, which the page reads
+    first; this is a fallback for the handful of ids (measured 2026-09-27: 6
+    -- see the PR body) that exist only inside this exporter's own universe
+    and would otherwise render as a bare code with no unit.
     """
     model_version = peers_model["model_version"]
     variant = peers_model["variant"]
@@ -513,6 +544,7 @@ def build_benchmarks(
             "min_peers_with_value": MIN_PEERS_WITH_VALUE,
             "withheld": withheld_payload,
             "lists": lists_payload,
+            "indicator_meta": engine_only_meta or {},
         }
     return result
 
@@ -546,7 +578,7 @@ def main() -> None:
         )
 
     raw_rows = _read_all_history_rows(args.history_dir, args.history_csv)
-    derived_rows, _derived_names, _engine_only_ids = build_derived_rows(raw_rows, args.derived_dir)
+    derived_rows, derived_meta, _engine_only_ids = build_derived_rows(raw_rows, args.derived_dir)
     candidate_ids, excluded_ids = build_benchmark_universe(raw_rows, args.derived_dir)
 
     all_rows = raw_rows + derived_rows
@@ -554,7 +586,7 @@ def main() -> None:
     latest_period = _latest_period_per_indicator(index)
 
     payloads = build_benchmarks(
-        communes, index, latest_period, peers_model, candidate_ids, excluded_ids
+        communes, index, latest_period, peers_model, candidate_ids, excluded_ids, derived_meta
     )
     write_payloads(payloads, args.out_dir)
 
