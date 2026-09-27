@@ -112,12 +112,13 @@ def test_the_real_layout_declares_the_age_bands_and_not_the_activity_statuses():
     assert groups["age_structure"]["whole"]
     assert len(groups["age_structure"]["parts"]) == 3
     for group in groups.values():
-        for field in ("label", "note"):
-            assert set(group[field]) == {
-                "en",
-                "fr",
-                "nl",
-            }, f"{group['id']}.{field} is not trilingual"
+        assert set(group["label"]) == {"en", "fr", "nl"}, f"{group['id']}.label is not trilingual"
+    # `note` (the "three bands, not the four the design shows" caveat) was
+    # removed from config/local_sections.yaml at the maintainer's request,
+    # 2026-09-27 (Commune Portrait polish, A3): it read as an implementation
+    # note left in reader-facing copy. Asserted as an ABSENCE, same pattern
+    # as activity_status above, so re-adding it is a deliberate act.
+    assert "note" not in groups["age_structure"]
 
 
 def test_the_published_sections_carry_the_compositions():

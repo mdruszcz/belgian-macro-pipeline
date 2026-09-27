@@ -46,10 +46,11 @@ headlines:
 compositions:
   - id: age_structure
     label: {en: Age structure, fr: Répartition par âge, nl: Leeftijdsstructuur}
-    note:
-      en: Three bands, not the four the design shows — that is how the source publishes them.
-      fr: Trois tranches, et non les quatre de la maquette — c’est ainsi que la source les publie.
-      nl: Drie groepen, niet de vier van het ontwerp — zo publiceert de bron ze.
+    # The internal "three bands, not the four the design shows" caveat was
+    # removed at the maintainer's request, 2026-09-27 (Commune Portrait
+    # polish, A3): it read as an implementation note left in reader-facing
+    # copy, not information a reader of the profile needs. The three shares
+    # themselves are unchanged.
     chart: donut
     whole: POPULATION_BY_COMMUNE
     parts:

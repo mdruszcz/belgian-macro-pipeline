@@ -163,19 +163,32 @@ def test_the_history_url_is_actually_fetched_in_init():
 
 
 def test_the_carried_over_header_actions_keep_their_destinations():
-    """Compare/Share/Download/linkMap/linkCsv -- item e/carry-over checklist:
-    ids and href targets a test elsewhere pins must survive verbatim."""
+    """Compare/Share/Download -- item e/carry-over checklist: ids a test
+    elsewhere pins must survive verbatim.
+
+    #linkMap and #linkCsv (the links row) were removed at the maintainer's
+    request, 2026-09-27 (Commune Portrait polish, A2), along with the whole
+    "Toutes les données" section below -- see
+    test_the_all_data_accordion_is_removed just below. #downloadLink is kept
+    (same id) but now builds a CSV client-side instead of linking to raw
+    JSON, wired by wireDownloadLink() rather than an href set in
+    renderHero()."""
     text = _page_text()
     assert 'id="shareLink"' in text
     assert 'id="downloadLink"' in text
-    assert 'id="linkMap"' in text
-    assert 'id="linkCsv"' in text
+    assert 'id="linkMap"' not in text
+    assert 'id="linkCsv"' not in text
     assert "document.getElementById('shareLink').href = window.location.href" in text
+    assert "function wireDownloadLink(){" in text
 
 
-def test_the_all_data_accordion_keeps_its_pinned_ids():
-    """tests/test_a4_finishing_fixes.py's selectors, restated here as a fast
-    source-level guard against a future accidental rename."""
+def test_the_all_data_accordion_is_removed():
+    """The "Toutes les données" accordion (tests/test_a4_finishing_fixes.py's
+    old selectors) was removed at the maintainer's request, 2026-09-27
+    (Commune Portrait polish, A2). Asserted as an ABSENCE, same pattern
+    tests/test_compositions.py uses for the retired activity_status group,
+    so re-adding it is a deliberate act that has to change this test and
+    read this reason first."""
     text = _page_text()
     for needle in (
         'id="allData"',
@@ -183,6 +196,5 @@ def test_the_all_data_accordion_keeps_its_pinned_ids():
         "function allDataIndicatorRows(",
         "function allDataGroups(",
         "function filterAllData(",
-        "row.className = 'indicator-row'",
     ):
-        assert needle in text, f"missing: {needle}"
+        assert needle not in text, f"should be removed: {needle}"

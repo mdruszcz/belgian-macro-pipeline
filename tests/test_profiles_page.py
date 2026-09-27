@@ -30,24 +30,20 @@ def test_full_profile_renders_the_payload_not_a_fixed_indicator_list():
     """New indicators must appear after a data build without editing the page.
 
     Re-pointed at commune.html by A3.2: the every-indicator-every-period
-    renderer moved there outright, so this is now commune.html's contract,
-    not profiles.html's."""
+    view moved there outright. The "All data" accordion this test used to
+    pin was removed at the maintainer's request, 2026-09-27 (Commune
+    Portrait polish, A2); #downloadLink's CSV export (buildDownloadCsv())
+    is now what walks every real payload key with no hardcoded indicator
+    list, so this test follows that contract there instead."""
     page = COMMUNE_HTML.read_text(encoding="utf-8")
 
     assert "'public/data/communes/' + nis + '.json'" in page
-    assert "var codes = Object.keys(indicators);" in page
-    assert "(state.sections.sections || []).forEach(function(section){" in page
-    assert "Object.keys(remaining)" in page, "unsectioned indicators would disappear"
-    assert "entry.periods" in page
-    assert "entry.comparison" in page
-    assert "entry.percentile" in page
-    # A3.9/A4: the per-indicator card grid became a compact table
-    # (allDataIndicatorCard -> allDataIndicatorRows), but the contract this
-    # assertion protects is unchanged -- one row built per real payload key,
-    # not a hardcoded list.
-    assert "allDataIndicatorRows(code, indicators[code])" in page
-    assert 'id="allData"' in page
-    assert 'id="allDataSections"' in page
+    assert "Object.keys(indicators).sort().forEach(function(code){" in page
+    assert "Object.keys(entry.periods || {}).sort();" in page
+    assert "state.profile = await res[4].json();" in page
+    # The CSV builder reads whatever the payload happens to carry, not a
+    # hardcoded list -- one row per real (indicator, period) pair.
+    assert "function buildDownloadCsv(){" in page
 
 
 def test_profiles_nis_redirects_to_commune_html_before_anything_renders():
