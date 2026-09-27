@@ -66,15 +66,25 @@ def _ancestor_names(conn: sqlite3.Connection, geo_id: str) -> dict:
     return names
 
 
-def _latest_rows_from_any_csv(
-    csv_path: Path, indicator_meta: dict[str, tuple[str, str]]
-) -> list[tuple]:
-    """Every geo_id's most recent is_latest=1 period per indicator, with NO
-    current-communes filter -- a predecessor commune's own latest snapshot
-    included, so merger back-aggregation has something to reconstruct from.
-    `_latest_rows_from_csv` applies the current-communes restriction on top of
-    this for the rows that get published as-is; reconstruction runs on the
-    unrestricted set first.
+def _all_rows_from_csv(csv_path: Path, indicator_meta: dict[str, tuple[str, str]]) -> list[tuple]:
+    """Every is_latest=1 row in a committed observations CSV -- every period,
+    every geo_id, no current-communes filter and no per-indicator "most
+    recent period" collapse.
+
+    `reconstruct()` needs this full-history shape (see its docstring at
+    src/analytics/backaggregate.py:547-551): it reads a successor's own rows
+    at every period to decide whether a cell is a genuine gap, not just its
+    single latest snapshot. Handing it a latest-only view hides a real older
+    row behind a newer one from ANOTHER indicator-period, which is exactly
+    the Antwerp/Borsbeek bug this function exists to avoid: Antwerp kept its
+    own pre-merger geo_id (be:mun:11002), so with a latest-only input its
+    2024 real population (544,759) was invisible to the gap-fill check and
+    Borsbeek's 11,379 was reconstructed and published in its place.
+
+    Mirrors export_communes_history_csv.py's `_all_rows_from_csv` exactly
+    (same row shape, same is_latest filter) -- kept as a separate copy here
+    rather than imported, since the two scripts have no shared module today
+    and this one is five lines.
     """
     if not csv_path.is_file():
         raise FileNotFoundError(
@@ -82,58 +92,70 @@ def _latest_rows_from_any_csv(
             "export a commune file missing that source's indicators."
         )
 
-    best: dict[tuple[str, str], dict] = {}
+    out = []
+    missing: set[str] = set()
     with csv_path.open(encoding="utf-8", newline="") as fh:
         for row in csv.DictReader(fh):
             if row["is_latest"] != "1":
                 continue
-            key = (row["geo_id"], row["indicator_id"])
-            if key not in best or row["period"] > best[key]["period"]:
-                best[key] = row
-
-    missing = sorted({k[1] for k in best if k[1] not in indicator_meta})
+            indicator_id = row["indicator_id"]
+            if indicator_id not in indicator_meta:
+                missing.add(indicator_id)
+                continue
+            name_en, unit = indicator_meta[indicator_id]
+            out.append(
+                (
+                    row["geo_id"],
+                    indicator_id,
+                    name_en,
+                    unit,
+                    row["period"],
+                    float(row["value"]) if row["value"] != "" else None,
+                    row["status"],
+                    row["created_at"],
+                )
+            )
     if missing:
         raise ValueError(
             f"{csv_path.name} references indicator(s) absent from the `indicators` "
-            f"table: {missing}. Refusing to guess their name and unit."
-        )
-
-    out = []
-    for (geo_id, indicator_id), row in best.items():
-        name_en, unit = indicator_meta[indicator_id]
-        out.append(
-            (
-                geo_id,
-                indicator_id,
-                name_en,
-                unit,
-                row["period"],
-                float(row["value"]) if row["value"] != "" else None,
-                row["status"],
-                row["created_at"],
-            )
+            f"table: {sorted(missing)}. Refusing to guess their name and unit."
         )
     return out
 
 
-def _latest_rows_from_csv(
-    csv_path: Path, current_communes: set[str], indicator_meta: dict[str, tuple[str, str]]
-) -> list[tuple]:
-    """Rows from a committed observations CSV, filtered by the same two rules
-    the SQL query applies: current communes only, and only the most recent
-    period per (geo_id, indicator).
+def _latest_per_cell(rows: list[tuple]) -> list[tuple]:
+    """Collapse a list of (geo_id, indicator_id, ..., period, value, status,
+    created_at) rows to one per (geo_id, indicator_id): the most recent
+    period, and a real (non-reconstructed) row beating a reconstructed one
+    at the SAME period -- never sort/insertion order.
 
-    Manual-only sources live in CSV rather than in the daily-committed
-    database (docs/decisions/0002-split-committed-stores.md), so this export
-    has to read both. Indicator name/unit still come from the `indicators`
-    table -- those reference rows stay in the database even when their
-    observations do not, so there is exactly one metadata path.
+    This is the "most recent period per (geo_id, indicator)" contract
+    communes_export.csv promises (module docstring, line 6) applied AFTER
+    merger reconstruction adds its own rows to the set, not just to the raw
+    per-source rows before reconstruction runs. Without this second pass, a
+    reconstructed row for an old gap-filled period could still sort after a
+    successor's own newer real row and win on insertion order alone.
     """
-    return [
-        row
-        for row in _latest_rows_from_any_csv(csv_path, indicator_meta)
-        if row[0] in current_communes
-    ]
+    best: dict[tuple[str, str], tuple] = {}
+    for row in rows:
+        key = (row[0], row[1])
+        period = row[4]
+        current = best.get(key)
+        if current is None:
+            best[key] = row
+            continue
+        current_period = current[4]
+        if period > current_period:
+            best[key] = row
+        elif period == current_period:
+            # Real beats reconstructed at the same period, regardless of
+            # which one arrived first.
+            if current[6] == "reconstructed" and row[6] != "reconstructed":
+                best[key] = row
+    # Deterministic order: by geo_id then indicator_id, never dict/insertion
+    # order (rule 35 -- identical inputs must keep producing byte-identical
+    # output).
+    return [best[key] for key in sorted(best)]
 
 
 def export_communes_csv(
@@ -191,16 +213,20 @@ def export_communes_csv(
             "WHERE valid_to IS NOT NULL AND successor_geo_id IS NOT NULL"
         ).fetchall()
 
-        # Merger back-aggregation reads the UNRESTRICTED latest rows -- a
-        # predecessor's own latest snapshot included -- from each extra CSV,
-        # since that is the only place these four sources' observations live
-        # (src/analytics/backaggregate.py never opens a file itself). Only
-        # the gap-filled result is added to `obs`; a successor's own value is
-        # never touched (see reconstruct()'s gap-fill contract).
+        # Merger back-aggregation reads EVERY is_latest=1 row (every period,
+        # not just each geo_id's newest) from each extra CSV, since that is
+        # the only place these four sources' observations live
+        # (src/analytics/backaggregate.py never opens a file itself).
+        # reconstruct() needs the successor's own full history to tell a
+        # genuine gap from a period a latest-only view would have hidden --
+        # see `_all_rows_from_csv`'s docstring for the Antwerp/Borsbeek bug
+        # this avoids. Only the gap-filled result is added to `obs`; a
+        # successor's own value is never touched (see reconstruct()'s
+        # gap-fill contract).
         for csv_path in extra_observations:
-            all_latest = _latest_rows_from_any_csv(csv_path, indicator_meta)
+            all_rows = _all_rows_from_csv(csv_path, indicator_meta)
             reconstructed = reconstruct(
-                all_latest,
+                all_rows,
                 lineage_rows,
                 indicator_is_additive=indicator_is_additive,
                 indicator_meta=indicator_meta,
@@ -210,7 +236,14 @@ def export_communes_csv(
                 # this CSV carries are reconstructable from it.
                 derived_configs=None,
             )
-            obs = obs + [row for row in all_latest if row[0] in commune_by_id] + reconstructed
+            obs = obs + [row for row in all_rows if row[0] in commune_by_id] + reconstructed
+        # Re-apply "most recent period per (geo_id, indicator)" across own +
+        # reconstructed rows together, now that a CSV can contribute more
+        # than one period per cell -- a real row wins over a reconstructed
+        # one at the same period, never sort/insertion order (see
+        # `_latest_per_cell`).
+        obs = _latest_per_cell(obs)
+    else:
         obs.sort(key=lambda r: (r[0], r[1]))
 
     conn.close()
