@@ -122,7 +122,12 @@
     color:inherit; font:inherit; font-size:var(--bp-text-small); padding:8px 10px; max-width:240px;
   }
   .toolbar .bp-btn{font-size:var(--bp-text-small); white-space:nowrap}
-  .bp-btn--dark{background:var(--bp-navy-bg); color:#fff}
+  /* .bp-btn--dark used to be redeclared here with color:#fff, overriding the
+     shared rule in assets/belpulse/layout.css (color:var(--bp-navy-text))
+     and keeping the paper theme's low-contrast text (1.31:1) that #280 had
+     already fixed centrally. Deleted at the maintainer's request, 2026-09-27
+     (independent review of #280, finding C6): the shared rule now applies
+     here too. */
   .bp-btn--red{background:var(--bp-red-signal); color:#fff}
 
   /* ---- cards and rows ---- */

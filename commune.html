@@ -90,7 +90,21 @@
   .hero-text-col{min-width:0; display:flex; flex-direction:column; justify-content:center}
   .hero-namebox{min-width:0; display:flex; flex-direction:column; gap:2px}
   .hero-eyebrow{font:600 11px/1.4 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.08em; color:var(--bp-text-muted); margin-bottom:6px}
-  .hero-name{font-family:var(--bp-font-display); font-weight:600; font-size:56px; line-height:1.02; letter-spacing:-.01em; margin:0; color:var(--bp-text)}
+  /* Back-to-directory link (A1): hidden by default, shown by
+     resolveBreadcrumbBack() only once a `from=` on the URL is revalidated
+     against real metadata. Sits above the eyebrow, inside the name block. */
+  .hero-crumb-back{display:inline-flex; align-items:center; gap:4px; font:600 12px/1.3 var(--bp-font-ui); color:var(--bp-text-muted); text-decoration:none; margin-bottom:8px}
+  .hero-crumb-back:hover{color:var(--bp-text); text-decoration:underline}
+  .hero-crumb-back[hidden]{display:none}
+  /* The name must never overflow its column (A1): the sweep measured
+     Auderghem, Anderlecht, Schaerbeek, Herstappe,
+     Ottignies-Louvain-la-Neuve and Beveren-Kruibeke-Zwijndrecht overflowing
+     by up to 52px at 1180-1440px with the old 56px size. Shrunk by
+     measurement to 34px (clamp keeps it larger when the column has real
+     room), and wrapping is now allowed at any width rather than relying on
+     size alone -- a name that is still too long for its column wraps
+     instead of spilling out of it. */
+  .hero-name{font-family:var(--bp-font-display); font-weight:600; font-size:clamp(26px,3.6vw,34px); line-height:1.08; letter-spacing:-.01em; margin:0; color:var(--bp-text); overflow-wrap:anywhere; hyphens:auto; max-width:100%}
   .hero-tagline{font-family:var(--bp-font-display); font-style:italic; font-weight:500; font-size:18px; color:var(--bp-text-muted); margin-top:8px}
   .hero-date{font:500 12px/1.4 var(--bp-font-ui); color:var(--bp-text-faint); margin-top:12px}
   .hero-switcher{margin-top:10px}
@@ -100,6 +114,11 @@
   .hero-quick a{font:600 11px/1 var(--bp-font-ui); letter-spacing:.02em; color:var(--bp-text-muted); text-decoration:none; border:1px solid var(--bp-border); border-radius:999px; padding:6px 10px; background:var(--bp-surface); display:inline-flex; align-items:center; gap:6px}
   .hero-quick a i{width:8px; height:8px; border-radius:50%; background:var(--th); display:block}
   .hero-quick a:hover{border-color:var(--th); color:var(--bp-text)}
+  /* Chapter chip row (A1): now a full-width row under the hero, not a
+     column of the hero grid, so it no longer forces the photo column
+     (whose width already tracks the photo itself) any taller than the
+     photo, and the name block can sit directly next to the photo. */
+  .hero-quick-row{margin-top:14px; padding-top:0}
   .hero-locator{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px; padding:12px 12px 10px; display:flex; flex-direction:column; min-width:0; --nodata:#ece9e1}
   :root[data-theme="dark"] .hero-locator{--nodata:#2a2933}
   .loc-head{font:600 11px/1.3 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.06em; color:var(--bp-text-muted); margin-bottom:6px}
@@ -131,18 +150,16 @@
     .hero-credit{grid-column:1 / -1; margin-top:-14px}
     .hero-text-col{order:3}
     .hero-locator{order:4}
-    .hero-quick{order:5; grid-column:1 / -1; padding-top:0}
     .hero-photobox img{width:100%; height:100%}
   }
   @media (max-width:700px){
     .hero-row{grid-template-columns:1fr; margin-left:-16px; margin-right:-16px; width:calc(100% + 32px)}
     .hero-photobox{border-radius:0; aspect-ratio:4/3}
     .hero-text-col,.hero-locator,.hero-quick{margin:0 16px}
-    .hero-quick{order:4}
-    .hero-locator{order:5}
+    .hero-locator{order:4}
     .hero-credit{padding:0 16px}
-    .hero-name{font-size:38px}
     .hero-switcher .searchbox{max-width:none; width:100%}
+    .hero-quick-row{margin:14px 16px 0}
   }
 
   /* ---------------------------------------------------------------------
@@ -268,11 +285,34 @@
   :root[data-theme="dark"] .mapbtns button.active{color:#14131a}
   .mapbtns button:hover:not(.active){color:var(--bp-text)}
   .leadmap-card{background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:8px 8px 6px}
+  /* A7: map hover tooltips (chapter maps below, the hero locator, the
+     neighbours map, and the province dot-strip tooltips further down all
+     share this ".tip" element and the shared engine's own
+     name/value/meta span markup -- .n/.v/.m). They rendered as one run-on
+     line with no visible separation between the name, the value and the
+     period/status. Page-level only: the shared engine's CSS
+     (assets/commune_map.css) has no rule for ".tip" itself (only the
+     unrelated, unused ".map-tip"), so this does not touch its default for
+     any other page. */
+  .tip{position:absolute; z-index:5; pointer-events:none; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:8px; padding:8px 10px; box-shadow:0 4px 16px rgba(0,0,0,.14); font-size:12px; line-height:1.4; max-width:220px}
+  .tip .n{display:block; font-weight:700; color:var(--bp-text)}
+  .tip .v{display:block; margin-top:4px; font-variant-numeric:tabular-nums; color:var(--th); font-size:14px; font-weight:600}
+  .tip .m{display:block; margin-top:2px; color:var(--bp-text-muted); font-size:11px}
   .leadmap-box{position:relative; min-height:230px}
   .leadmap-box svg.map{width:100%}
   svg.map path.locate-me{fill:var(--bp-accent) !important; stroke:var(--bp-surface); stroke-width:2.4}
-  .leadmap-legend{margin-top:6px; overflow-x:auto}
-  .leadmap-legend .ticks{font-family:var(--bp-font-ui) !important; font-variant-numeric:tabular-nums}
+  /* B3: the shared engine's swatches are a fixed 64px each
+     (assets/commune_map.css, .swatches div) -- 7 bands = 448px, wider than
+     this card at 1024px, so the last tick used to sit clipped past the
+     card edge. Page-level only (rule 29: the shared engine's own default,
+     used elsewhere, is untouched): swatches flex to the card's width here,
+     and fixLegendWidth() below rescales the ticks' own (still
+     pixel-positioned by the engine) left/width to match every time the
+     legend is (re)built. */
+  .leadmap-legend{margin-top:6px}
+  .leadmap-legend .swatches{width:100%}
+  .leadmap-legend .swatches div{flex:1 1 0; width:auto !important; min-width:0}
+  .leadmap-legend .ticks{font-family:var(--bp-font-ui) !important; font-variant-numeric:tabular-nums; width:100% !important}
   .leadmap-legend .ticks span{font-size:11px}
   .leadmap-caption{font-size:11px; color:var(--bp-text-faint); margin-top:4px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap}
   .leadmap-caption .hint{color:var(--bp-text-faint)}
@@ -301,20 +341,34 @@
   .mtile-sharebar{margin-top:8px; font-size:11px; color:var(--bp-text-muted)}
   .mtile-sharebar .track{display:block; height:8px; background:var(--bp-surface-alt); border-radius:3px; overflow:hidden; margin-bottom:4px}
   .mtile-sharebar .fill{display:block; height:100%; background:var(--th); border-radius:3px}
-  .mtile-bars{margin-top:8px; display:flex; flex-direction:column; gap:4px}
-  .mtile-bar-row{display:grid; grid-template-columns:58px minmax(0,1fr) auto; gap:6px; align-items:center; font-size:10.5px; color:var(--bp-text-muted)}
-  .mtile-bar-row .lb{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  /* B1: the label used to share a hard 58px grid column with the bar and
+     value, so every geography name over ~9 characters was ellipsised (e.g.
+     "Beveren-…", "Région de Bruxell…" at 1024-1440px in fr; nl names run
+     even longer -- "Brussels Hoofdstedelijk Gewest"). The label now gets
+     its own full-width line above the bar+value, which can wrap instead of
+     ever truncating. */
+  .mtile-bars{margin-top:8px; display:flex; flex-direction:column; gap:6px}
+  .mtile-bar-row{display:flex; flex-direction:column; gap:2px; font-size:10.5px; color:var(--bp-text-muted)}
+  .mtile-bar-row .lb{overflow-wrap:anywhere}
   .mtile-bar-row.self{color:var(--bp-text); font-weight:600}
-  .mtile-bar-track{height:6px; background:var(--bp-surface-alt); border-radius:3px; overflow:hidden}
+  .mtile-bar-line{display:flex; align-items:center; gap:6px}
+  .mtile-bar-track{flex:1; min-width:0; height:6px; background:var(--bp-surface-alt); border-radius:3px; overflow:hidden}
   .mtile-bar-fill{display:block; height:100%; background:var(--bp-text-faint); border-radius:3px}
   .mtile-bar-row.self .mtile-bar-fill{background:var(--th)}
-  .mtile-bar-val{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+  .mtile-bar-val{flex:none; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
   .mtile-pos{display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:8px; font-size:11px; color:var(--bp-text-muted)}
-  .mtile-donut{margin-top:6px; gap:8px; align-items:center}
-  .mtile-donut svg{max-width:78px; max-height:78px}
-  .mtile-donut .donut-legend{font-size:10.5px; gap:2px; line-height:1.2}
-  .mtile-donut .donut-legend .it b{padding-left:6px}
-  .mtile-donut .donut-centre{font-size:14px}
+  /* A6: donut grew from 78px/9px stroke to 104px/12px so the centre label
+     (16px, up from 14px) fits without crowding the ring. In a narrow tile
+     the legend wraps below the donut (flex-wrap) rather than clipping past
+     the card edge -- the sweep found legend values 21px past the card at
+     1024px with the old fixed layout. */
+  .mtile-donut{margin-top:6px; gap:8px; align-items:center; flex-wrap:wrap}
+  .mtile-donut svg{max-width:104px; max-height:104px; flex:none}
+  .mtile-donut .donut-legend{font-size:10.5px; gap:2px; line-height:1.2; min-width:0; flex:1 1 auto}
+  .mtile-donut .donut-legend .it{display:flex; justify-content:space-between; gap:6px}
+  .mtile-donut .donut-legend .it span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+  .mtile-donut .donut-legend .it b{padding-left:6px; flex:none}
+  .mtile-donut .donut-centre{font-size:16px}
 
   /* context row: pyramid | neighbours (map + bars) */
   .contextrow{margin-top:14px; display:grid; grid-template-columns:7fr 5fr; gap:10px; align-items:stretch}
@@ -369,18 +423,34 @@
   .pyramid-history-play{flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; line-height:1; padding:0}
   .pyramid-history-play:hover{background:var(--bp-surface-alt)}
   .pyramid-history-play[aria-pressed="true"]{background:var(--th); border-color:var(--th); color:#fff}
+  /* prefers-reduced-motion sets [hidden] on this button (see the media query
+     near renderPyramidHistory below); [hidden]'s default display:none was
+     being overridden by the display:flex two lines up, so the button stayed
+     visible for a reduced-motion viewer (independent review of #280, finding
+     C4). This selector wins on specificity over the plain-class rule. */
+  .pyramid-history-play[hidden]{display:none}
   /* #pyramidTicks lives INSIDE this wrapper now (same width as the input
      it sits under), not as a sibling of the whole controls row -- a tick
      row as wide as Play+range+year-readout together could never line up
      with the range's own value axis. */
   .pyramid-history-range{flex:1; min-width:0; position:relative}
-  .pyramid-history-range input[type="range"]{width:100%; display:block; margin:0}
+  /* appearance:none on the input itself (not just the pseudo-thumb) is
+     required for the custom ::-webkit-slider-thumb/::-moz-range-thumb rules
+     below to apply at all in most engines; without it the OS's own thumb
+     renders instead and PYRAMID_THUMB_PX (16) only matched the custom size
+     by coincidence in engines that happened to use a 16px native thumb
+     (independent review of #280, finding C5). An explicit track style keeps
+     the slider's visual centreline consistent across engines now that the
+     native track is no longer implied. */
+  .pyramid-history-range input[type="range"]{width:100%; display:block; margin:0; -webkit-appearance:none; -moz-appearance:none; appearance:none; background:transparent}
+  .pyramid-history-range input[type="range"]::-webkit-slider-runnable-track{height:4px; border-radius:2px; background:var(--bp-border)}
+  .pyramid-history-range input[type="range"]::-moz-range-track{height:4px; border-radius:2px; background:var(--bp-border)}
   /* A fixed, explicit thumb size in every engine -- the unstyled OS default
      is not queryable from CSS, and renderPyramidTicks() below needs a known
      width to place each tick under the thumb's actual travel range (a
      thumb's centre runs from half-its-width to width-minus-half-its-width,
      never edge to edge). PYRAMID_THUMB_PX must match this value. */
-  .pyramid-history-range input[type="range"]::-webkit-slider-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer; -webkit-appearance:none}
+  .pyramid-history-range input[type="range"]::-webkit-slider-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer; -webkit-appearance:none; margin-top:0}
   .pyramid-history-range input[type="range"]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--th); border:2px solid var(--bp-surface); box-shadow:0 0 0 1px var(--bp-border); cursor:pointer}
   .pyramid-history-year{flex:none; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; min-width:3.4em; text-align:right}
   .pyramid-history-ticks{display:grid; font-size:10px; color:var(--bp-text-faint); margin-top:2px; position:relative; height:14px; width:100%}
@@ -398,10 +468,15 @@
   .nbbars{display:flex; flex-direction:column; gap:5px}
   .nbbars.twocol{display:grid; grid-template-columns:1fr 1fr; gap:5px 24px}
   @media (max-width:640px){ .nbbars.twocol{grid-template-columns:1fr} .nbbar-track{width:80px} }
-  .nbbar-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; font-size:12px; border-radius:4px; padding:1px 4px; margin:0 -4px}
+  .nbbar-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:start; font-size:12px; border-radius:4px; padding:2px 4px; margin:0 -4px}
+  .nbbar-row .nbbar-track-wrap{margin-top:2px}
   .nbbar-row:hover{background:color-mix(in srgb, var(--th) 8%, transparent)}
   .nbbar-row.self{font-weight:600}
-  .nbbar-name{color:var(--bp-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer}
+  /* B5: a long name (Beveren-Kruibeke-Zwijndrecht, or a Dutch region/
+     province name in a comparison row) used to ellipsise at 1024px. It now
+     wraps to (at most) two lines instead of truncating -- the row's grid
+     stretches to fit, so the bar+value column is unaffected. */
+  .nbbar-name{color:var(--bp-text-muted); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer}
   .nbbar-row.self .nbbar-name{color:var(--bp-text)}
   .nbbar-name:hover{color:var(--th)}
   .nbbar-track-wrap{display:flex; align-items:center; gap:8px}
@@ -450,62 +525,13 @@
   .flows-zero{font-size:13px; color:var(--bp-text-muted); padding:12px 0}
 
   /* ---------------------------------------------------------------------
-     Toutes les données -- the previous layout's every-indicator-every-period
-     accordion, ported outright (same ids/classes, same five data states,
-     tests/test_a4_finishing_fixes.py and tests/test_belgium_refnis_label
-     hold this structure). Wrapped in the Portrait chapter shell only.
+     .history-toggle is the one survivor of the "Toutes les données"
+     accordion removed at the maintainer's request, 2026-09-27 (A2): the
+     schools-list disclosure (buildSchoolsCard() below) reuses the same
+     button style, same disclosure pattern.
   --------------------------------------------------------------------- */
-  #allData{border:0; background:none; padding:0}
-  #allData summary{cursor:pointer; font-family:var(--bp-font-display); font-size:1.05rem; font-weight:600; list-style-position:inside; color:var(--bp-text-muted)}
-  .alldata-lead{color:var(--bp-text-muted); font-size:13px; margin:10px 0 16px; max-width:80ch}
-  .profile-counts{display:flex; flex-wrap:wrap; gap:24px; margin-bottom:16px}
-  .profile-counts b{display:block; font-family:var(--bp-font-display); font-size:1.3rem}
-  .profile-counts span{display:block; color:var(--bp-text-muted); font-size:11px}
-  .profile-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px}
-  .profile-tools .searchbox{margin:0; max-width:360px; flex:1 1 280px}
-  .profile-tools .shown{font-size:12px; color:var(--bp-text-muted); margin-right:auto}
-  .indicator-group{margin-bottom:20px}
-  .indicator-group[hidden]{display:none}
-  .indicator-group-head{margin-bottom:10px}
-  .indicator-group-head h3{font-size:1.05rem; margin:0 0 2px}
-  .indicator-group-head p{font-size:13px; color:var(--bp-text-muted); margin:0; max-width:80ch}
-  .indicator-table-wrap{overflow-x:auto; border:1px solid var(--bp-border); border-radius:10px}
-  .indicator-table{width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed}
-  .indicator-table th{text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:var(--bp-text-muted); background:var(--bp-surface-alt); padding:7px 10px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:0}
-  .indicator-table td{padding:5px 10px; border-bottom:1px solid var(--bp-border); vertical-align:middle; overflow:hidden}
-  .indicator-table tbody tr:last-child td{border-bottom:0}
-  .indicator-table th:nth-child(2),.indicator-table td:nth-child(2){width:100px}
-  .indicator-table th:nth-child(3),.indicator-table td:nth-child(3){width:80px}
-  .indicator-table th:nth-child(4),.indicator-table td:nth-child(4){width:80px}
-  .indicator-table th:nth-child(5),.indicator-table td:nth-child(5){width:140px}
-  .indicator-table th:nth-child(6),.indicator-table td:nth-child(6){width:120px}
-  .indicator-table td:nth-child(6){overflow:visible}
-  .ind-name-wrap{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
-  .indicator-table .ind-name{font-weight:600}
-  .indicator-code{font:10px/1.3 "IBM Plex Mono",monospace; color:var(--bp-text-faint); margin-left:6px}
-  .indicator-table td.ind-value{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; font-weight:500; text-overflow:clip}
-  .indicator-table td.ind-period,.indicator-table td.ind-status{white-space:nowrap; color:var(--bp-text-muted)}
-  .indicator-table td.ind-source{color:var(--bp-text-muted); white-space:nowrap; text-overflow:ellipsis}
-  .indicator-table [data-state="suppressed"],.indicator-table [data-state="unavailable"],.indicator-table [data-state="missing"]{color:var(--bp-text-faint); font-style:italic}
-  .indicator-row[hidden]{display:none}
   .history-toggle{font-size:11px; color:var(--bp-accent); background:none; border:1px solid var(--bp-border); border-radius:999px; padding:3px 10px; cursor:pointer; white-space:nowrap}
   .history-toggle[aria-expanded="true"]{background:var(--bp-surface-alt)}
-  .indicator-history-row td{background:var(--bp-surface-alt); padding:0}
-  .indicator-history-row[hidden]{display:none}
-  .indicator-history{padding:8px 14px; max-height:260px; overflow:auto}
-  .indicator-ranks{display:flex; flex-wrap:wrap; gap:4px 12px; margin-bottom:4px}
-  .indicator-rank{font-size:11px; color:var(--bp-accent-ink)}
-  .indicator-history-line{display:grid; grid-template-columns:minmax(70px,.6fr) minmax(0,1fr) auto; gap:8px; padding:4px 0; border-top:1px solid var(--bp-border); font-size:11px; font-variant-numeric:tabular-nums}
-  .indicator-history-line:first-child{border-top:0}
-  .indicator-history-line .hv{text-align:right; font-weight:500}
-  .indicator-history-line .hs{color:var(--bp-text-faint); text-align:right}
-  .indicator-comparisons{margin:6px 0 10px; padding-top:6px; border-top:1px dashed var(--bp-border)}
-  .indicator-comparison-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:5px 0; border-top:1px solid var(--bp-border); font-size:11px}
-  .indicator-comparison-row:first-child{border-top:0}
-  .indicator-comparison-row b{font-variant-numeric:tabular-nums; text-align:right}
-  .indicator-comparison-row small{display:block; color:var(--bp-text-faint); margin-top:1px}
-  .alldata-error{padding:24px; text-align:center; color:var(--bp-text-muted)}
-  @media (max-width:480px){ .profile-tools .searchbox{max-width:none} }
 
   [data-cp-state="unavailable"] .cp-body{display:none}
   [data-cp-state="ready"] .cp-unavail{display:none}
@@ -559,15 +585,14 @@
 <a class="bp-skip-link" href="#bp-main" data-t="skipToContent">Skip to content</a><header class="bp-topbar"><div class="wrap"><a class="bp-logo" href="home2.html"><span class="bp-logo-mark"><span></span><span></span><span></span></span><span class="bp-wordmark">BelPulse</span></a><nav class="bp-nav" id="bp-nav" aria-label="Main navigation"><a href="home2.html" data-t="navHome">Home</a><a href="profiles.html" aria-current="page" data-t="navProfiles">Commune profiles</a><a href="macro.html" data-t="navMacro">Macro</a><a href="micro.html" data-t="navMicro">Micro</a><a href="map.html" data-t="navMaps">Maps</a><a href="sources.html" data-t="navSources">Sources</a></nav><div class="bp-topbar-actions"><div class="bp-menu bp-theme-menu" data-menu="theme"><button type="button" class="bp-menu-btn" id="bp-theme-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-theme-menu-panel" aria-label="Colour theme" data-t-aria="theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-menu-panel bp-theme-switch" id="bp-theme-menu-panel" role="menu" aria-label="Colour theme" data-t-aria="theme"><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="light" aria-checked="false" data-t="themeLight">Light</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="dark" aria-checked="false" data-t="themeDark">Dark</button><button type="button" class="bp-menu-item" role="menuitemradio" data-theme-choice="paper" aria-checked="false" data-t="themePaper">Paper</button></div></div><div class="bp-menu bp-lang-menu" data-menu="lang"><button type="button" class="bp-menu-btn" id="bp-lang-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bp-lang-menu-panel" aria-label="Language" data-t-aria="language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="bp-menu-current">EN</span><svg class="bp-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bp-lang-switch" id="bp-lang-menu-panel" role="menu" aria-label="Language" data-t-aria="language"><button type="button" role="menuitemradio" data-lang="en" aria-checked="false">English</button><button type="button" role="menuitemradio" data-lang="fr" aria-checked="false">Français</button><button type="button" role="menuitemradio" data-lang="nl" aria-checked="false">Nederlands</button></div></div><button type="button" class="bp-nav-toggle" aria-expanded="false" aria-controls="bp-nav" aria-label="Menu" data-t-aria="navMenu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div></header>
 <!-- bp-shell:header:end -->
 
-<nav class="bp-breadcrumb" aria-label="Breadcrumb">
-  <div class="wrap">
-    <a href="home2.html" data-t="navHome">Home</a><span class="sep">/</span>
-    <a href="profiles.html" data-t="navCommunes" id="crumbDirectory">Commune profiles</a><span class="sep">/</span>
-    <span id="crumbName">—</span>
-  </div>
-</nav>
+<!-- The breadcrumb bar ("Home / Commune profiles / <name>") was removed at
+     the maintainer's request, 2026-09-27 (A1): it added a full row for one
+     piece of information the hero already repeats. The `from=` feature it
+     used to carry survives as a small "back to the list" link at the top of
+     the name block (#crumbDirectory below), shown only when a valid `from=`
+     is present -- resolveBreadcrumbBack() below is unchanged. -->
 
-<nav class="chapternav" id="chapterNav" aria-label="Chapitres">
+<nav class="chapternav" id="chapterNav" aria-label="Chapters" data-t-aria="v4ChaptersAria">
   <div class="wrap" id="chapterNavItems"></div>
 </nav>
 
@@ -582,10 +607,17 @@
           <img id="heroImg" alt="">
         </div>
         <div class="hero-credit" id="heroCredit"></div>
-        <nav class="hero-quick" id="heroQuick" aria-label="Chapitres"></nav>
       </div>
       <div class="hero-text-col">
         <div class="hero-namebox">
+          <!-- Back-to-directory link (A1): hidden unless a valid `from=` is
+               present on the URL. resolveBreadcrumbBack() below (unchanged)
+               revalidates `from=` against real metadata and, only then,
+               points this at the filtered directory view and reveals it;
+               tests/test_commune_destinations.py::
+               test_breadcrumb_returns_to_the_filtered_directory reads its
+               href after arriving from profiles.html?family=… . -->
+          <a class="hero-crumb-back" id="crumbDirectory" href="profiles.html" hidden data-t="cpBackToDirectory">&larr; Retour à la liste</a>
           <div class="hero-eyebrow" id="heroEyebrow">&nbsp;</div>
           <h1 class="hero-name" id="heroName">—</h1>
           <div class="hero-tagline" id="heroTagline"></div>
@@ -610,7 +642,7 @@
       <div class="hero-locator">
         <div class="loc-head" id="locHead">&nbsp;</div>
         <div class="mapbox" id="locBox">
-          <svg id="locSvg" class="map" role="img" aria-label="Localisation"></svg>
+          <svg id="locSvg" class="map" role="img" aria-label="Location" data-t-aria="v4LocationAria"></svg>
           <div class="tip map-hidden" id="locTip"></div>
           <div class="loczoom">
             <button type="button" id="locZoomIn" data-t-aria="cpZoomIn" aria-label="Zoom in">+</button>
@@ -620,6 +652,12 @@
         <div class="loc-legend" id="locLegend"></div>
       </div>
     </div>
+
+    <!-- Chapter chip row (A1): moved out of the photo column into its own
+         full-width row under the hero, so the photo column is exactly the
+         photo's width and the name block sits right next to the photo with
+         a normal gap instead of an empty band under a narrower photo. -->
+    <nav class="hero-quick hero-quick-row" id="heroQuick" aria-label="Chapters" data-t-aria="v4ChaptersAria"></nav>
 
   </div>
 
@@ -633,48 +671,12 @@
   <div class="wrap">
     <div id="chapters"></div>
 
-    <!-- ── links row, before "Toutes les données" (carried over from the
-         previous layout's sidebar: #linkMap/#linkCsv, methodology, compare
-         another commune) ─────────────────────────────────────────────── -->
-    <div class="hero-quick" style="margin:24px 0; padding-top:0">
-      <a class="linkbtn-inline" id="linkMap" href="map.html"><span data-t="cpLinkMap">See on the map</span></a>
-      <a class="linkbtn-inline" id="linkCsv" href="profiles.html"><span data-t="cpLinkCsv">Export the data (CSV)</span></a>
-      <a class="linkbtn-inline" href="about.html"><span data-t="cpLinkMethod">Read the methodology</span></a>
-      <a class="linkbtn-inline" href="profiles.html" data-t="cpCtaCompare">Compare another commune</a>
-    </div>
-
-    <!-- ── Toutes les données ───────────────────────────────────────────── -->
-    <section class="chapter" id="chapter-alldata">
-      <div class="chapter-head">
-        <div>
-          <span class="chapter-num" id="alldataNum">—</span>
-          <h2 class="chapter-title" data-t="v4AllDataTitle">Toutes les données</h2>
-        </div>
-      </div>
-      <!-- Ported outright from the previous layout's <details id="allData">
-           (A3.2): same ids/classes, same renderer (allDataGroups/
-           allDataIndicatorRows/filterAllData/renderAllData below), same five
-           data states -- tests/test_a4_finishing_fixes.py and
-           tests/test_belgium_refnis_label_never_appears pin this structure. -->
-      <details id="allData">
-        <summary data-t="cpAllDataSummary">All data for this commune</summary>
-        <p class="alldata-lead" data-t="pfAllDataLead">Every indicator in this commune's published payload, including unavailable and source-suppressed cells. Open an indicator to inspect its full history.</p>
-        <div class="profile-counts">
-          <div><b id="allDataIndicatorCount">—</b><span data-t="pfAvailableIndicators">available indicators</span></div>
-          <div><b id="allDataPeriodCount">—</b><span data-t="pfPublishedPeriods">published observations</span></div>
-          <div><b id="allDataSourceCount">—</b><span data-t="pfDataSources">data sources</span></div>
-        </div>
-        <div class="profile-tools">
-          <label class="searchbox">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-            <input id="allDataSearch" type="search" data-t-placeholder="pfIndicatorSearch" placeholder="Filter by indicator, source or code…" autocomplete="off">
-          </label>
-          <span class="shown" id="allDataShown"></span>
-        </div>
-        <div id="allDataSections"></div>
-        <p class="alldata-error" id="allDataError" hidden></p>
-      </details>
-    </section>
+    <!-- The links row (map link, CSV link, methodology, "compare another
+         commune") and the whole "Toutes les données" section/#allData
+         accordion were removed at the maintainer's request, 2026-09-27
+         (A2). The header's "Télécharger le profil" button (#downloadLink,
+         id kept) now does what "Export the data (CSV)" used to promise:
+         see buildDownloadCsv() / wireDownloadLink() below. -->
   </div>
 </main>
 
@@ -703,7 +705,7 @@
   </div>
 </div>
 
-<script src="assets/i18n.js?v=b391223801"></script>
+<script src="assets/i18n.js?v=8c8ecddd9f"></script>
 <script src="assets/belpulse/shell.js?v=50299961dc"></script>
 <script src="assets/belpulse/components.js?v=c46caeab4b"></script>
 <script src="assets/commune_map.js?v=37e2927a33"></script>
@@ -740,10 +742,35 @@
   var FLOWS_URL = function(nis){ return 'public/data/flows/buyer_origin/' + nis + '.json'; };
 
   var LANG = I18N.initial();
+  /* English ordinal suffix: 1st, 2nd, 3rd, 4th ... 11th, 12th, 13th (the
+     11-13 exception applies regardless of the trailing digit), 21st, 101st.
+     v4RankOf's English string is '{rank}th of {peers}' -- a plain '{rank}'
+     substitution always yields "th", so every rank read "1th", "2th", "21th"
+     (independent review of #280, finding C1). Fixed centrally in T() rather
+     than per call site, the same way the French "1e"->"1re" fix below is
+     centralised. */
+  function englishOrdinalSuffix(n){
+    var abs = Math.abs(n);
+    var mod100 = abs % 100;
+    if(mod100 >= 11 && mod100 <= 13) return 'th';
+    switch(abs % 10){
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  }
   /* French ordinal for 1 is "1re" (commune is feminine), never "1e". */
   var T = function(k, v){
     var s = I18N.t(LANG, k, v);
-    return (LANG === 'fr' && typeof s === 'string') ? s.replace(/(^|[^\d])1e(?=[\s /]|$)/g, '$11re') : s;
+    if(LANG === 'fr' && typeof s === 'string'){
+      return s.replace(/(^|[^\d])1e(?=[\s /]|$)/g, '$11re');
+    }
+    if(LANG === 'en' && typeof s === 'string' && v && typeof v.rank === 'number'){
+      var correctSuffix = englishOrdinalSuffix(v.rank);
+      return s.replace(new RegExp('\\b' + v.rank + 'th\\b'), v.rank + correctSuffix);
+    }
+    return s;
   };
   var DEFAULT_NIS = '92094';
 
@@ -998,6 +1025,27 @@
       else s.textContent = '€' + body;
     });
   }
+  /* B3: the shared engine positions each tick at a FIXED
+     (i+1)*MapUI.SWATCH_PX (64px) from the legend's left edge, matching its
+     own fixed 64px swatches (assets/commune_map.js/.css). The CSS above
+     lets the swatches flex to the card's real width instead of staying
+     448px wide for 7 bands, so the ticks' pixel positions need rescaling
+     to the same proportion of the container's ACTUAL width -- e.g. tick 3
+     of 7 sits at 3/7 of the card, not at a fixed 192px. Page-level only;
+     the shared engine's own pixel-based layout, used by every other page
+     that reuses it, is untouched. */
+  function fixLegendWidth(ticksEl){
+    if(!ticksEl) return;
+    var spans = Array.prototype.slice.call(ticksEl.querySelectorAll('span'));
+    if(!spans.length) return;
+    var assumedWidth = parseFloat(ticksEl.style.width) || ticksEl.getBoundingClientRect().width;
+    var actualWidth = ticksEl.parentElement ? ticksEl.parentElement.getBoundingClientRect().width : 0;
+    if(!assumedWidth || !actualWidth) return;
+    spans.forEach(function(s){
+      var pxLeft = parseFloat(s.style.left) || 0;
+      s.style.left = (pxLeft / assumedWidth * 100) + '%';
+    });
+  }
   function numericPoints(entry){
     if(!entry || !entry.periods) return [];
     return Object.keys(entry.periods).sort().map(function(p){
@@ -1171,11 +1219,25 @@
   /* =========================================================================
      Hero
   ========================================================================= */
+  /* The locator's height must equal the photo's (A1): grid `align-items:
+     stretch` alone does not guarantee that -- it stretches every hero-row
+     column to the row's tallest column, which can be the name block's own
+     content, not the photo. Set explicitly instead, right after the photo's
+     own height is known. Cleared below 1100px, where the layout stacks and
+     the locator's natural height is what's wanted. */
+  function syncLocatorHeight(){
+    var locator = document.querySelector('.hero-locator');
+    var box = document.getElementById('heroPhotobox');
+    if(!locator || !box) return;
+    if(window.matchMedia('(max-width:1100px)').matches){ locator.style.height = ''; return; }
+    var h = box.getBoundingClientRect().height;
+    if(h) locator.style.height = Math.round(h) + 'px';
+  }
   function fitHeroImage(img){
     var nw = img.naturalWidth, nh = img.naturalHeight;
     if(!nw || !nh) return;
     var box = document.getElementById('heroPhotobox');
-    if(window.matchMedia('(max-width:1100px)').matches){ box.style.width = ''; box.style.height = ''; return; }
+    if(window.matchMedia('(max-width:1100px)').matches){ box.style.width = ''; box.style.height = ''; syncLocatorHeight(); return; }
     var row = document.getElementById('hero');
     var rowW = row.getBoundingClientRect().width || window.innerWidth;
     var maxW = Math.max(240, Math.min(600, rowW - 300 - 280 - 56));
@@ -1186,16 +1248,17 @@
     if(h < minH){ h = minH; w = Math.min(maxW, h * nw / nh); }
     box.style.width = Math.round(w) + 'px';
     box.style.height = Math.round(h) + 'px';
+    syncLocatorHeight();
   }
   window.addEventListener('resize', function(){
     var img = document.getElementById('heroImg');
     if(img && img.naturalWidth) fitHeroImage(img);
+    else syncLocatorHeight();
   });
 
   function renderHero(){
     var name = communeName();
     document.title = 'BelPulse — ' + name;
-    document.getElementById('crumbName').textContent = name;
     document.getElementById('heroName').textContent = name;
     var region = placeName(levelOf(state.nis, 'region')) || state.profile.region;
     var province = placeName(levelOf(state.nis, 'province')) || state.profile.province;
@@ -1225,15 +1288,10 @@
     document.getElementById('heroDate').textContent = T('v4DataAsOf', {date: dates[dates.length - 1] || '—'});
 
     document.getElementById('shareLink').href = window.location.href;
-    document.getElementById('downloadLink').href = COMMUNE_URL(state.nis);
-    document.getElementById('linkCsv').href = 'data/communes_history.csv';
-    document.getElementById('linkMap').href = 'map.html';
-    // cpLinkMap takes {name} -- applyStrings()'s generic [data-t] pass calls
-    // T(key) with no vars, so this placeholder is filled here instead, the
-    // same way the previous layout did. renderHero() re-runs on 'bp:lang'
-    // (see renderAll() in the bp:lang listener below), so this re-fills on
-    // every language switch too.
-    document.getElementById('linkMap').querySelector('span').textContent = T('cpLinkMap', {name: name});
+    // #downloadLink's click handler (wireDownloadLink(), wired once at
+    // startup) builds the CSV from state.profile fresh on every click, so
+    // it needs no href kept in sync here across commune switches or
+    // language changes (A2).
   }
 
   function placeTipHtml(f){
@@ -1435,22 +1493,57 @@
     var n = pts.length;
     var times = pts.map(function(p){ return periodToTime(p.period); });
     var timesOk = times.every(function(t){ return t !== null; });
-    var tMin = timesOk ? Math.min.apply(null, times) : 0;
-    var tMax = timesOk ? Math.max.apply(null, times) : (n - 1);
-    var tSpan = tMax - tMin;
-    var xOf = function(i){
-      if(n <= 1) return padL + innerW / 2;
-      if(!timesOk || tSpan === 0) return padL + (innerW * i) / (n - 1);
-      return padL + (innerW * (times[i] - tMin)) / tSpan;
-    };
-    var yOf = function(v){ return padT + innerH - ((v - vMin) / (vMax - vMin)) * innerH; };
     var steps = [];
     if(timesOk) for(var si = 1; si < times.length; si++) steps.push(times[si] - times[si-1]);
     steps.sort(function(a,b){ return a-b; });
     var medianStep = steps.length ? steps[Math.floor(steps.length/2)] : 0;
+    /* isBigGap: the pre-existing dashed-bridge threshold (>1.9x median),
+       UNCHANGED for a gap under 3x -- above 3x the gap is compressed
+       instead (isCompressedBreak below) and gets a break marker, not a
+       dashed bridge, so isBigGap excludes that range now. */
     var isBigGap = function(i, j){
-      return timesOk && medianStep > 0 && (times[j] - times[i]) > medianStep * 1.9;
+      return timesOk && medianStep > 0 && (times[j] - times[i]) > medianStep * 1.9 && (times[j] - times[i]) <= medianStep * 3;
     };
+    /* A5: axis breaks. A gap of more than 3x the median step (e.g. the
+       empty 2000-2017 stretch on the Sécurité/burglary chart the maintainer
+       drew "BREAK" over) is compressed to exactly 2x the median step in a
+       COMPRESSED-TIME x-scale -- not just a dashed bridge, which still
+       spends most of the chart's width on years with no data. A gap
+       between 1.9x and 3x keeps today's dashed-bridge behaviour unchanged
+       (isBigGap above), with no compression and no break marker: only a
+       genuinely long empty stretch is shortened. compressedTimes[i] is the
+       x-axis coordinate actually used below; realTimes[i] (== times[i])
+       stays what tooltips/hits report, so a reader still sees the true
+       year, just not spaced proportionally to it.
+       Rule 35 (byte-identical rebuilds): this is a pure function of the
+       series' own periods, so it stays deterministic across runs. */
+    var isCompressedBreak = function(i, j){
+      return timesOk && medianStep > 0 && (times[j] - times[i]) > medianStep * 3;
+    };
+    var compressedTimes = times;
+    var breaks = [];
+    if(timesOk && medianStep > 0){
+      compressedTimes = times.slice();
+      var shift = 0;
+      for(var ci = 1; ci < times.length; ci++){
+        var realGap = times[ci] - times[ci - 1];
+        if(realGap > medianStep * 3){
+          var compressedGap = medianStep * 2;
+          shift += (realGap - compressedGap);
+          breaks.push({fromIdx: ci - 1, toIdx: ci, fromPeriod: pts[ci-1].period, toPeriod: pts[ci].period});
+        }
+        compressedTimes[ci] = times[ci] - shift;
+      }
+    }
+    var tMin = timesOk ? Math.min.apply(null, compressedTimes) : 0;
+    var tMax = timesOk ? Math.max.apply(null, compressedTimes) : (n - 1);
+    var tSpan = tMax - tMin;
+    var xOf = function(i){
+      if(n <= 1) return padL + innerW / 2;
+      if(!timesOk || tSpan === 0) return padL + (innerW * i) / (n - 1);
+      return padL + (innerW * (compressedTimes[i] - tMin)) / tSpan;
+    };
+    var yOf = function(v){ return padT + innerH - ((v - vMin) / (vMax - vMin)) * innerH; };
 
     var svg = [];
     svg.push('<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + escapeHtml(opts.ariaLabel || '') + '">');
@@ -1473,11 +1566,25 @@
         escapeHtml(fmtAxisNum(v, opts.decimals)) + '</text>');
     });
 
+    /* A5 tick order: first, last, each segment's start (the point right
+       after a compressed break, so a reader can see the axis picks back up
+       there), THEN the usual intermediate picks -- skipping any label
+       whose x sits within 44px of one already kept, so a break's own
+       nearby tick can't double up with the 33%/66% picks. */
     var xIdx = [0];
-    if(n > 2) xIdx.push(Math.round((n - 1) * 0.33), Math.round((n - 1) * 0.66));
     if(n > 1) xIdx.push(n - 1);
-    xIdx = Array.from(new Set(xIdx)).sort(function(a,b){ return a-b; });
+    breaks.forEach(function(b){ xIdx.push(b.fromIdx, b.toIdx); });
+    if(n > 2) xIdx.push(Math.round((n - 1) * 0.33), Math.round((n - 1) * 0.66));
+    xIdx = Array.from(new Set(xIdx));
+    var keptX = [];
+    var keptIdx = [];
     xIdx.forEach(function(i){
+      var x = xOf(i);
+      if(keptX.some(function(kx){ return Math.abs(kx - x) < 44; })) return;
+      keptX.push(x); keptIdx.push(i);
+    });
+    keptIdx.sort(function(a, b){ return a - b; });
+    keptIdx.forEach(function(i){
       var anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
       svg.push('<text x="' + xOf(i).toFixed(1) + '" y="' + (H - 6) + '" font-family="Inter,sans-serif" font-size="11" fill="var(--bp-text-faint)" text-anchor="' + anchor + '">' + escapeHtml(String(pts[i].period)) + '</text>');
     });
@@ -1486,7 +1593,10 @@
       .map(function(s){
         var v = null;
         for(var i = s.points.length - 1; i >= 0; i--){ if(typeof s.points[i].value === 'number'){ v = s.points[i].value; break; } }
-        return v === null ? null : {label: s.label, scope: s.scope, dotY: yOf(v), labelY: yOf(v)};
+        return v === null ? null : {
+          label: s.label, nameLabel: s.nameLabel || s.label, valueLabel: s.valueLabel || '',
+          scope: s.scope, dotY: yOf(v), labelY: yOf(v),
+        };
       })
       .filter(Boolean)
       .sort(function(a, b){ return a.dotY - b.dotY; });
@@ -1495,8 +1605,25 @@
       var minY = markers[mi-1].labelY + MIN_GAP;
       if(markers[mi].labelY < minY) markers[mi].labelY = minY;
     }
+    /* A4: the downward pass above can push the LAST label below the plot
+       area (padT..H-padB) when several markers cluster near the bottom --
+       there is nothing further down to push it into. An upward pass fixes
+       that by pulling labels back up from the bottom, then both passes are
+       clamped inside the plot so no label sits outside it either way. */
+    for(var mj = markers.length - 2; mj >= 0; mj--){
+      var maxY = markers[mj+1].labelY - MIN_GAP;
+      if(markers[mj].labelY > maxY) markers[mj].labelY = maxY;
+    }
+    markers.forEach(function(m){
+      m.labelY = Math.max(padT + 4, Math.min(H - padB - 4, m.labelY));
+    });
     var markerX = xOf(n - 1);
-    svg.push('<g class="bp-anim-fade bp-cmpmarkers">');
+    // A4: the space actually left in the viewBox for a label starting at
+    // markerX+8 -- fitEndLabels() (wireLineChart, below) needs this to know
+    // when a label overflows the chart's own width, not just an arbitrary
+    // guess.
+    var endLabelBudget = Math.max(0, W - (markerX + 8) - 4);
+    svg.push('<g class="bp-anim-fade bp-cmpmarkers" data-label-budget="' + endLabelBudget.toFixed(1) + '">');
     markers.forEach(function(m){
       var mk = SCOPE_MARK[m.scope] || SCOPE_MARK.region;
       var mx = markerX, my = m.dotY;
@@ -1508,14 +1635,23 @@
           ' L' + (markerX + 6).toFixed(1) + ',' + m.labelY.toFixed(1) +
           '" fill="none" stroke="var(--bp-text-faint)" stroke-width="1"/>');
       }
-      svg.push('<text x="' + (markerX + 8).toFixed(1) + '" y="' + (m.labelY + 3.5).toFixed(1) + '" font-family="Inter,sans-serif" font-size="11" fill="' + mk.colour + '">' + escapeHtml(m.label) + '</text>');
+      // A4: name and value as separate tspans (measured/shortened
+      // independently after mount by fitEndLabels() below, since a string's
+      // rendered width is not knowable from the markup alone) plus a
+      // <title> carrying the untouched full text for anyone who cannot see
+      // the shortened version (a screen reader, or a hover).
+      svg.push('<text class="bp-endlabel" data-full="' + escapeHtml(m.label) + '" x="' + (markerX + 8).toFixed(1) + '" y="' + (m.labelY + 3.5).toFixed(1) + '" font-family="Inter,sans-serif" font-size="11" fill="' + mk.colour + '">' +
+        '<title>' + escapeHtml(m.label) + '</title>' +
+        '<tspan class="bp-endlabel-name">' + escapeHtml(m.nameLabel) + (m.valueLabel ? ' ' : '') + '</tspan>' +
+        (m.valueLabel ? '<tspan class="bp-endlabel-value">' + escapeHtml(m.valueLabel) + '</tspan>' : '') +
+        '</text>');
     });
     svg.push('</g>');
 
     var runs = [], cur = [];
     pts.forEach(function(p, i){
       if(typeof p.value === 'number'){
-        if(cur.length && isBigGap(cur[cur.length - 1], i)) { runs.push(cur); cur = []; }
+        if(cur.length && (isBigGap(cur[cur.length - 1], i) || isCompressedBreak(cur[cur.length - 1], i))) { runs.push(cur); cur = []; }
         cur.push(i);
       } else { if(cur.length) runs.push(cur); cur = []; }
     });
@@ -1535,7 +1671,24 @@
       var endI = runs[r][runs[r].length - 1], startI = runs[r+1][0];
       var gapX0 = Math.min(xOf(endI), xOf(startI)) - 4, gapX1 = Math.max(xOf(endI), xOf(startI)) + 4;
       svg.push('<g class="bp-anim-clip bp-gapclip" data-x0="' + gapX0.toFixed(1) + '" data-x1="' + gapX1.toFixed(1) + '" style="clip-path:inset(0 ' + (W - gapX0).toFixed(1) + 'px 0 0)">');
-      if(isBigGap(endI, startI)){
+      if(isCompressedBreak(endI, startI)){
+        /* A5: no dashed bridge across a compressed break -- two short
+           slanted strokes on the x baseline, a faint dotted vertical line
+           through the plot, and a <title> naming the real years the axis
+           skipped (v4AxisBreak). */
+        var breakMidX = (xOf(endI) + xOf(startI)) / 2;
+        var baseline = H - padB;
+        var slant = 5;
+        svg.push('<g class="bp-axis-break">');
+        svg.push('<title>' + escapeHtml(T('v4AxisBreak', {from: pts[endI].period, to: pts[startI].period})) + '</title>');
+        svg.push('<line x1="' + breakMidX.toFixed(1) + '" y1="' + padT.toFixed(1) + '" x2="' + breakMidX.toFixed(1) + '" y2="' + baseline.toFixed(1) + '" stroke="var(--bp-border)" stroke-width="1" stroke-dasharray="1 3"/>');
+        [-3, 3].forEach(function(dx){
+          svg.push('<line x1="' + (breakMidX + dx - slant/2).toFixed(1) + '" y1="' + (baseline + slant/2).toFixed(1) +
+            '" x2="' + (breakMidX + dx + slant/2).toFixed(1) + '" y2="' + (baseline - slant/2).toFixed(1) +
+            '" stroke="var(--bp-text-muted)" stroke-width="1.4" stroke-linecap="round"/>');
+        });
+        svg.push('</g>');
+      } else if(isBigGap(endI, startI)){
         svg.push('<path d="M' + xOf(endI).toFixed(1) + ',' + yOf(pts[endI].value).toFixed(1) +
           ' L' + xOf(startI).toFixed(1) + ',' + yOf(pts[startI].value).toFixed(1) +
           '" fill="none" stroke="var(--bp-text-faint)" stroke-width="1.4" stroke-dasharray="3 3"/>');
@@ -1556,9 +1709,50 @@
     return {svg: svg.join(''), hits: hits};
   }
 
+  /* A4: end-of-line comparison labels ("Région de Bruxelles-Capitale
+     34 926 €") measured up to 57px outside the chart column. A string's
+     rendered width cannot be known from the markup alone (font metrics
+     vary by engine/OS), so this runs after mount -- and again once webfonts
+     finish loading, since a fallback-font measurement taken before that can
+     under- or over-estimate the eventual width. */
+  function fitEndLabels(svg){
+    var group = svg.querySelector('g.bp-cmpmarkers');
+    if(!group) return;
+    var budget = parseFloat(group.dataset.labelBudget);
+    if(!budget || !isFinite(budget)) return;
+    group.querySelectorAll('text.bp-endlabel').forEach(function(text){
+      var nameTspan = text.querySelector('.bp-endlabel-name');
+      var valueTspan = text.querySelector('.bp-endlabel-value');
+      if(!nameTspan) return;
+      var fullName = (nameTspan.textContent || '').replace(/\s+$/, '');
+      var sep = valueTspan ? ' ' : '';
+      var valueText = valueTspan ? valueTspan.textContent : '';
+      function totalWidth(){ return text.getComputedTextLength(); }
+      nameTspan.textContent = fullName + sep;
+      if(totalWidth() <= budget) return;
+      // Shorten the NAME first, keeping the value intact, down to nothing;
+      // only if the value ALONE still does not fit does it disappear too
+      // (the <title> above always keeps the untouched full text).
+      var lo = 0, hi = fullName.length, best = 0;
+      while(lo <= hi){
+        var mid = Math.floor((lo + hi) / 2);
+        nameTspan.textContent = (mid > 0 ? fullName.slice(0, mid) + '…' : '') + sep;
+        if(totalWidth() <= budget){ best = mid; lo = mid + 1; } else { hi = mid - 1; }
+      }
+      nameTspan.textContent = (best > 0 ? fullName.slice(0, best) + '…' : '') + sep;
+      if(best === 0 && valueTspan && totalWidth() > budget){
+        // Even the value alone does not fit: show the value alone (no
+        // name, no ellipsis for a name that isn't there).
+        nameTspan.textContent = '';
+        if(totalWidth() > budget) valueTspan.style.display = 'none';
+      }
+    });
+  }
   function wireLineChart(container, hits, opts){
     var svg = container.querySelector('svg');
     if(!svg) return;
+    fitEndLabels(svg);
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fitEndLabels(svg); });
     svg.querySelectorAll('path.bp-line-draw').forEach(function(path){
       armLineDraw(path);
       observeLineDraw(path);
@@ -1604,6 +1798,18 @@
     var n = rows.length;
     var rowH = Math.min(56, (H - 8) / n);
     var barH = Math.max(10, rowH * 0.38);
+    /* A4: the value column used to reserve a flat 90px regardless of the
+       actual text -- a wide value ("2,42 pers./ménage") could still end
+       past the chart's own width. The bars now shrink to reserve however
+       much the WIDEST value in this chart actually needs (a 13px/600-weight
+       monospace-figure estimate: exact glyph metrics are not knowable
+       before the SVG is in the DOM, and this chart is built as a string,
+       not measured after mount the way fitEndLabels() above is). */
+    var widestValueChars = Math.max.apply(null, rows.map(function(r){
+      return typeof r.value === 'number' ? (r.valueText || '').length : 1;
+    }).concat([1]));
+    var valueColumnW = Math.max(36, widestValueChars * 7.6);
+    var barMaxW = Math.max(20, W - padX * 2 - valueColumnW - 10);
     var svg = [];
     var hits = [];
     svg.push('<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + escapeHtml(opts.ariaLabel || '') + '">');
@@ -1611,9 +1817,15 @@
       var cy = 8 + rowH * i + rowH / 2;
       var labelY = cy - barH / 2 - 6;
       var barY = cy - barH / 2;
-      var w = typeof r.value === 'number' ? (Math.abs(r.value) / maxV) * (W - padX * 2 - 90) : 0;
+      var w = typeof r.value === 'number' ? (Math.abs(r.value) / maxV) * barMaxW : 0;
       var color = r.self ? 'var(--th)' : 'var(--bp-text-faint)';
-      svg.push('<text x="' + padX + '" y="' + labelY.toFixed(1) + '" font-family="Inter,sans-serif" font-size="12" font-weight="' + (r.self ? '600' : '500') + '" fill="var(--bp-text)">' + escapeHtml(r.label) + '</text>');
+      // A4: the row label ellipsised with a <title> holding the full name,
+      // rather than letting it run past the chart -- textLength clamps the
+      // rendered width without needing a post-mount measurement pass.
+      var labelMaxLen = 30;
+      var labelShort = r.label.length > labelMaxLen ? r.label.slice(0, labelMaxLen - 1) + '…' : r.label;
+      svg.push('<text x="' + padX + '" y="' + labelY.toFixed(1) + '" font-family="Inter,sans-serif" font-size="12" font-weight="' + (r.self ? '600' : '500') + '" fill="var(--bp-text)">' +
+        (labelShort !== r.label ? '<title>' + escapeHtml(r.label) + '</title>' : '') + escapeHtml(labelShort) + '</text>');
       svg.push('<rect class="bp-anim-grow" style="transform-box:fill-box; transform-origin:0 50%" x="' + padX + '" y="' + barY.toFixed(1) + '" width="' + Math.max(2, w).toFixed(1) + '" height="' + barH.toFixed(1) + '" rx="3" fill="' + color + '"/>');
       var valText = typeof r.value === 'number' ? r.valueText : '—';
       svg.push('<text class="bp-anim-fade" x="' + (padX + w + 10).toFixed(1) + '" y="' + (barY + barH / 2).toFixed(1) + '" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" font-variant-numeric="tabular-nums" fill="var(--bp-text)">' + escapeHtml(valText) + '</text>');
@@ -1623,9 +1835,25 @@
     return {svg: svg.join(''), hits: hits};
   }
 
+  /* A4 backstop: buildComparisonBarSVG's value column is sized from an
+     estimated character width (the SVG is built as a string, before it is
+     in the DOM to measure). After mount, getComputedTextLength() gives the
+     REAL width; if a value text still ends past the viewBox despite the
+     estimate, it is nudged left just enough to stay inside. */
+  function fitBarValueLabels(svg){
+    var vb = svg.viewBox.baseVal;
+    if(!vb || !vb.width) return;
+    svg.querySelectorAll('text.bp-anim-fade').forEach(function(text){
+      var x = parseFloat(text.getAttribute('x'));
+      var right = x + text.getComputedTextLength();
+      var overflow = right - vb.width;
+      if(overflow > 0) text.setAttribute('x', (x - overflow - 2).toFixed(1));
+    });
+  }
   function wireBarChart(container, hits, opts){
     var svg = container.querySelector('svg');
     if(!svg) return;
+    fitBarValueLabels(svg);
     svg.querySelectorAll('.bp-anim-grow, .bp-anim-fade').forEach(observeReveal);
     if(!hits.length) return;
     var crosshair = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -2322,7 +2550,15 @@
     var bScope = null;
     if(peers.scope){
       bScope = document.createElement('button'); bScope.type = 'button';
-      bScope.textContent = placeName(peers.scope); bScope.title = placeName(peers.scope);
+      // B4: "Région de Bruxelles-Capitale" / "Province de Flandre
+      // orientale" truncated inside the button. The button now shows the
+      // short scope word (Province/Région/Belgique, the same
+      // v4ScopeWord* keys used elsewhere on this page); the full name
+      // stays available on hover/for a screen reader via title/aria-label.
+      var scopeFullName = placeName(peers.scope);
+      bScope.textContent = scopeWord(peers.scopeLevel);
+      bScope.title = scopeFullName;
+      bScope.setAttribute('aria-label', scopeFullName);
       btns.appendChild(bScope);
     }
     var bIn = document.createElement('button'); bIn.type = 'button'; bIn.textContent = '+'; bIn.setAttribute('aria-label', T('cpZoomIn'));
@@ -2385,6 +2621,7 @@
         mapInstance.setData(payload.communes || {}, {unit: m.unit, decimals: m.decimals, direction: m.direction});
         fixLegendTicks(legendRow.querySelector('.ticks'), m, mapInstance);
         fixLegendCurrency(legendRow.querySelector('.ticks'), m, mapInstance);
+        fixLegendWidth(legendRow.querySelector('.ticks'));
         var srcRow = state.sources[m.source] || {};
         var srcLabel = (srcRow.label && (srcRow.label[LANG] || srcRow.label.en)) || m.source || '';
         caption.querySelector('.src').textContent = [nameOf(indCode), srcLabel, m.updated || m.inputs_updated].filter(Boolean).join(' · ');
@@ -2436,9 +2673,16 @@
         ['province','region','country'].forEach(function(scope){
           var c = cmp[scope];
           if(!c || typeof c.value !== 'number') return;
+          var nameLabel = leadChartWidth() < 500 ? scopeWord(scope) : scopeShortLabel(scope, c);
+          var valueLabel = fmt(c.value, meta) + unitSuffix(meta);
           compareSeries.push({
             scope: scope,
-            label: (leadChartWidth() < 500 ? scopeWord(scope) : scopeShortLabel(scope, c)) + ' ' + fmt(c.value, meta) + unitSuffix(meta),
+            label: nameLabel + ' ' + valueLabel,
+            // A4: the name and value are kept separate so the end-of-line
+            // label can shorten just the NAME with an ellipsis when the
+            // combined text overflows the chart's own width -- `label`
+            // above stays the full text for the compareLines tooltip.
+            nameLabel: nameLabel, valueLabel: valueLabel,
             points: pts.map(function(){ return {value: c.value}; }),
           });
         });
@@ -2550,7 +2794,7 @@
 
       var cmp = entry.comparison || {};
       if(latest && isShareOfWholeIndicator(meta, latest.value)){
-        var mtileDonut = buildDonut(latest.value, meta, entry.comparison, {code: code, size: 78, strokeMain: 9, legendOnlyWithRings: true});
+        var mtileDonut = buildDonut(latest.value, meta, entry.comparison, {code: code, size: 104, strokeMain: 12, legendOnlyWithRings: true});
         mtileDonut.classList.add('mtile-donut');
         tile.appendChild(mtileDonut);
       } else if(numeric.length > 1){
@@ -2572,7 +2816,12 @@
           rowsSpec.forEach(function(r){
             var line = document.createElement('div');
             line.className = 'mtile-bar-row' + (r.self ? ' self' : '');
-            line.innerHTML = '<span class="lb"></span><span class="mtile-bar-track"><span class="mtile-bar-fill"></span></span><span class="mtile-bar-val"></span>';
+            // B1: the label sits on its own line above the bar+value, never
+            // truncated -- the label column used to be a hard 58px, which
+            // ellipsised every geography name over ~9 characters (e.g.
+            // "Beveren-…", "Région de Bruxell…"). Full name still in the
+            // title for a pointer hover; nothing to truncate any more.
+            line.innerHTML = '<span class="lb"></span><span class="mtile-bar-line"><span class="mtile-bar-track"><span class="mtile-bar-fill"></span></span><span class="mtile-bar-val"></span></span>';
             line.querySelector('.lb').textContent = r.label; line.querySelector('.lb').title = r.label;
             line.querySelector('.mtile-bar-fill').style.width = (Math.abs(r.value) / maxV * 100).toFixed(1) + '%';
             line.querySelector('.mtile-bar-val').textContent = fmt(r.value, meta);
@@ -2776,18 +3025,42 @@
         if(own) own.classList.add('locate-me');
         var view = m.view;
         var fontSize = view.w / 30, halo = view.w / 380;
-        codes.forEach(function(nis){
+        /* B2: in a dense area (Brussels' 19 communes) these labels used to
+           collide -- the sweep measured 38px overlaps. Placed greedily from
+           the LARGEST commune's own area down, skipping any label whose
+           box would intersect one already placed; a skipped commune is
+           still reachable by hovering its shape (the shared tip mechanism
+           wired above, m._tipHtml/placeTipHtml, is unaffected by whether
+           its text label was drawn). */
+        var candidates = codes.map(function(nis){
           var p = pathFor(nis);
-          if(!p) return;
+          if(!p) return null;
           var b = p.getBBox();
+          var name = placeName(geoOf(nis)) || nis;
+          // Rough label box: text-anchor middle / dominant-baseline middle,
+          // width estimated from character count -- exact glyph metrics
+          // are not needed to decide "clearly overlaps or clearly doesn't".
+          var w = name.length * fontSize * 0.58, h = fontSize * 1.15;
+          var cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+          return {nis: nis, name: name, area: b.width * b.height, cx: cx, cy: cy,
+            x0: cx - w / 2, x1: cx + w / 2, y0: cy - h / 2, y1: cy + h / 2};
+        }).filter(Boolean);
+        candidates.sort(function(a, b){ return b.area - a.area; });
+        var placed = [];
+        function intersects(a, b){
+          return a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+        }
+        candidates.forEach(function(c){
+          if(placed.some(function(p){ return intersects(c, p); })) return;
+          placed.push(c);
           var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          t.setAttribute('x', b.x + b.width / 2);
-          t.setAttribute('y', b.y + b.height / 2);
+          t.setAttribute('x', c.cx);
+          t.setAttribute('y', c.cy);
           t.setAttribute('text-anchor', 'middle');
           t.setAttribute('dominant-baseline', 'middle');
           t.setAttribute('font-size', fontSize.toFixed(5));
           t.setAttribute('stroke-width', halo.toFixed(5));
-          t.textContent = placeName(geoOf(nis)) || nis;
+          t.textContent = c.name;
           nbSvg.appendChild(t);
         });
       });
@@ -3578,7 +3851,10 @@
       listToggle.className = 'history-toggle';
       listToggle.setAttribute('aria-expanded', 'false');
       listToggle.setAttribute('aria-controls', listId);
-      listToggle.textContent = T('cpSchoolsShowList', {n: sites.length});
+      function schoolsShowListLabel(n){
+        return n === 1 ? T('cpSchoolsShowListOne') : T('cpSchoolsShowList', {n: n});
+      }
+      listToggle.textContent = schoolsShowListLabel(sites.length);
       listHead.appendChild(listToggle);
       body.appendChild(listHead);
       var listHost = document.createElement('ul');
@@ -3603,7 +3879,7 @@
         var open = listToggle.getAttribute('aria-expanded') === 'true';
         listToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
         listHost.hidden = open;
-        listToggle.textContent = open ? T('cpSchoolsShowList', {n: sites.length}) : T('cpSchoolsHideList');
+        listToggle.textContent = open ? schoolsShowListLabel(sites.length) : T('cpSchoolsHideList');
       });
     }
 
@@ -3621,20 +3897,10 @@
     return wrap;
   }
 
-  /* =========================================================================
-     Toutes les données -- ported OUTRIGHT from the previous layout's
-     <details id="allData"> (A3.2), same ids/classes, same renderer, same
-     five distinct data states (rule 26). tests/test_a4_finishing_fixes.py
-     (#allDataSections .indicator-group / .indicator-row / .history-toggle /
-     td.ind-value[data-state]) and tests/test_belgium_refnis_label_never_
-     appears pin this structure -- it is NOT the mockup's own flat sortable
-     table, which would drop the per-indicator history disclosure these
-     tests require.
-  ========================================================================= */
-  function allDataLatestPeriod(entry){
-    var periods = Object.keys((entry && entry.periods) || {}).sort();
-    return periods.length ? periods[periods.length - 1] : null;
-  }
+  /* Retained after the "Toutes les données" section's removal (A2, 2026-09-
+     27): the CSV download (buildDownloadCsv() below) still needs a status
+     label per cell, in the reader's own language, and that's what this
+     used to provide the removed accordion. */
   function allDataStatusLabel(status){
     if(!status) return '';
     if(status === 'final') return T('pfStatusFinal');
@@ -3643,240 +3909,73 @@
     var translated = MapUI.text ? MapUI.text(LANG, 'status_' + status) : null;
     return translated && translated !== 'status_' + status ? translated : status;
   }
-  function allDataSourceLabels(meta){
-    var ids = [];
-    if(meta && meta.source) ids.push(meta.source);
-    (meta && meta.input_sources || []).forEach(function(id){ if(ids.indexOf(id) < 0) ids.push(id); });
-    return ids.map(function(id){
-      var source = state.sources[id];
-      return source && source.label ? mlText(source.label) : id;
-    }).filter(Boolean);
+
+  /* ---- CSV download (A2) ---------------------------------------------
+     #downloadLink used to open the commune's raw JSON payload with no
+     download at all. It now builds a CSV client-side from that same
+     already-fetched payload (state.profile) -- no second fetch, no
+     indicator id in generic logic beyond reading the code as data (rule
+     24), no hand-typed figure (rule 36): every value comes straight from
+     the payload's own periods[period].value. */
+  function csvSlug(s){
+    return String(s || '')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'commune';
   }
-  function comparisonScopeLabel(scope, comparison){
-    if(scope === 'country') return T('cpColCountry');
-    return mlText(comparison.name) || scope;
+  function csvField(v){
+    var s = v === null || v === undefined ? '' : String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
-  function allDataRowId(code, suffix){
-    return 'ad-' + suffix + '-' + code.replace(/[^A-Za-z0-9_-]/g, '_');
-  }
-  function allDataIndicatorRows(code, entry){
-    var meta = state.byCode[code] || {unit: entry.unit, decimals: null};
-    var period = allDataLatestPeriod(entry);
-    var cell = period ? entry.periods[period] : null;
-
-    var row = document.createElement('tr');
-    row.className = 'indicator-row';
-    row.dataset.search = [nameOf(code), code, meta.unit || entry.unit]
-      .concat(allDataSourceLabels(meta)).join(' ').toLocaleLowerCase(LANG);
-
-    var nameCell = dom('td', '');
-    var nameWrap = dom('div', 'ind-name-wrap');
-    nameWrap.title = nameOf(code) + ' (' + code + ')';
-    nameWrap.appendChild(dom('span', 'ind-name', nameOf(code)));
-    nameWrap.appendChild(dom('span', 'indicator-code', code));
-    nameCell.appendChild(nameWrap);
-    row.appendChild(nameCell);
-
-    var valueCell = dom('td', 'ind-value');
-    var periodCell = dom('td', 'ind-period');
-    var statusCell = dom('td', 'ind-status');
-    // FIVE STATES, NEVER COLLAPSED (rule 26).
-    if(cell && typeof cell.value === 'number'){
-      valueCell.textContent = fmt(cell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals});
-      periodCell.textContent = period || '—';
-      statusCell.textContent = allDataStatusLabel(cell.status);
-    }else if(cell && cell.status === 'suppressed'){
-      valueCell.textContent = T('pfSuppressed');
-      valueCell.dataset.state = 'suppressed';
-      periodCell.textContent = period || '—';
-      statusCell.textContent = allDataStatusLabel(cell.status);
-      statusCell.dataset.state = 'suppressed';
-    }else if(cell){
-      valueCell.textContent = '—';
-      valueCell.dataset.state = 'missing';
-      periodCell.textContent = period || '—';
-      statusCell.textContent = allDataStatusLabel(cell.status) || '—';
-      statusCell.dataset.state = 'missing';
-    }else{
-      valueCell.textContent = T('pfNoPeriods');
-      valueCell.dataset.state = 'unavailable';
-      periodCell.textContent = '—';
-      statusCell.textContent = '—';
-      statusCell.dataset.state = 'unavailable';
-    }
-    row.appendChild(valueCell);
-    row.appendChild(periodCell);
-    row.appendChild(statusCell);
-    row.appendChild(dom('td', 'ind-source', allDataSourceLabels(meta).join(' · ') || '—'));
-
-    var periods = Object.keys(entry.periods || {}).sort().reverse();
-    var toggleCell = document.createElement('td');
-    var histId = allDataRowId(code, 'hist');
-    var toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'history-toggle';
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-controls', histId);
-    toggle.textContent = T('pfHistory', {n: periods.length});
-    toggleCell.appendChild(toggle);
-    row.appendChild(toggleCell);
-
-    var historyRow = document.createElement('tr');
-    historyRow.className = 'indicator-history-row';
-    historyRow.id = histId;
-    historyRow.hidden = true;
-    var historyTd = document.createElement('td');
-    historyTd.colSpan = 6;
-    var historyBody = dom('div', 'indicator-history');
-
-    var percentiles = entry.percentile || {};
-    var ranks = dom('div', 'indicator-ranks');
-    if(percentiles.national && percentiles.national.rank && percentiles.national.peers){
-      ranks.appendChild(dom('span', 'indicator-rank', T('pfNationalRank', {
-        rank: percentiles.national.rank, peers: percentiles.national.peers
-      })));
-    }
-    if(percentiles.regional && percentiles.regional.rank && percentiles.regional.peers){
-      ranks.appendChild(dom('span', 'indicator-rank', T('pfRegionalRank', {
-        rank: percentiles.regional.rank, peers: percentiles.regional.peers
-      })));
-    }
-    if(ranks.children.length) historyBody.appendChild(ranks);
-
-    var comparisonKeys = ['province', 'region', 'country'].filter(function(scope){
-      return entry.comparison && entry.comparison[scope];
-    });
-    if(comparisonKeys.length){
-      var comparisons = dom('div', 'indicator-comparisons');
-      comparisonKeys.forEach(function(scope){
-        var comparison = entry.comparison[scope];
-        var comparisonRow = dom('div', 'indicator-comparison-row');
-        var comparisonLabel = dom('span', '', comparisonScopeLabel(scope, comparison));
-        if(comparison.coverage && comparison.coverage.of){
-          comparisonLabel.appendChild(dom('small', '', T('pfCoverage', {
-            n: comparison.coverage.n, of: comparison.coverage.of
-          })));
-        }
-        comparisonRow.appendChild(comparisonLabel);
-        var comparisonValue = typeof comparison.value === 'number'
-          ? fmt(comparison.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
-          : '—';
-        comparisonRow.appendChild(dom('b', '', [comparisonValue, comparison.period].filter(Boolean).join(' · ')));
-        comparisons.appendChild(comparisonRow);
-      });
-      historyBody.appendChild(comparisons);
-    }
-
-    periods.forEach(function(p){
-      var historyCell = entry.periods[p];
-      var line = dom('div', 'indicator-history-line');
-      line.appendChild(dom('span', '', p));
-      var historyValue = typeof historyCell.value === 'number'
-        ? fmt(historyCell.value, {unit: meta.unit || entry.unit, decimals: meta.decimals})
-        : (historyCell.status === 'suppressed' ? T('pfSuppressed') : '—');
-      line.appendChild(dom('span', 'hv', historyValue));
-      line.appendChild(dom('span', 'hs', allDataStatusLabel(historyCell.status)));
-      historyBody.appendChild(line);
-    });
-    historyTd.appendChild(historyBody);
-    historyRow.appendChild(historyTd);
-
-    toggle.addEventListener('click', function(){
-      var open = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
-      historyRow.hidden = open;
-    });
-
-    return [row, historyRow];
-  }
-  function allDataGroups(indicators){
-    var remaining = {};
-    Object.keys(indicators || {}).forEach(function(code){ remaining[code] = true; });
-    var groups = [];
-    (state.sections.sections || []).forEach(function(section){
-      if(section.unavailable) return;
-      var declared = [section.headline].concat(section.indicators || []).filter(Boolean);
-      var codes = [];
-      declared.forEach(function(code){
-        if(remaining[code] && codes.indexOf(code) < 0){ codes.push(code); delete remaining[code]; }
-      });
-      if(codes.length) groups.push({label: section.label, blurb: section.blurb, codes: codes});
-    });
-    var other = Object.keys(remaining).sort(function(a, b){
-      return nameOf(a).localeCompare(nameOf(b), LANG);
-    });
-    if(other.length) groups.push({label: T('pfOtherData'), blurb: null, codes: other});
-    return groups;
-  }
-  function filterAllData(){
-    var input = document.getElementById('allDataSearch');
-    if(!input) return;
-    var query = (input.value || '').trim().toLocaleLowerCase(LANG);
-    var shown = 0;
-    document.querySelectorAll('#allDataSections .indicator-row').forEach(function(rowEl){
-      var hide = !!query && rowEl.dataset.search.indexOf(query) < 0;
-      rowEl.hidden = hide;
-      var hist = document.getElementById(rowEl.querySelector('.history-toggle').getAttribute('aria-controls'));
-      if(hide && hist) hist.hidden = true;
-      if(!hide) shown += 1;
-    });
-    document.querySelectorAll('#allDataSections .indicator-group').forEach(function(group){
-      group.hidden = !group.querySelector('.indicator-row:not([hidden])');
-    });
-    var shownEl = document.getElementById('allDataShown');
-    if(shownEl) shownEl.textContent = T('pfIndicatorsShown', {n: shown});
-  }
-  function renderAllData(){
-    var host = document.getElementById('allDataSections');
-    var error = document.getElementById('allDataError');
-    if(!host) return;
+  function buildDownloadCsv(){
     var payload = state.profile;
-    if(!payload){
-      if(error){ error.hidden = false; error.textContent = T('pfProfileUnavailable'); }
-      return;
-    }
-    if(error) error.hidden = true;
+    if(!payload) return null;
     var indicators = payload.indicators || {};
-    var codes = Object.keys(indicators);
-    var periods = codes.reduce(function(total, code){
-      return total + Object.keys(indicators[code].periods || {}).length;
-    }, 0);
-    var sources = {};
-    codes.forEach(function(code){
-      var meta = state.byCode[code] || {};
-      if(meta.source) sources[meta.source] = true;
-      (meta.input_sources || []).forEach(function(id){ sources[id] = true; });
-    });
-    document.getElementById('allDataIndicatorCount').textContent = codes.length.toLocaleString(LANG);
-    document.getElementById('allDataPeriodCount').textContent = periods.toLocaleString(LANG);
-    document.getElementById('allDataSourceCount').textContent = Object.keys(sources).length.toLocaleString(LANG);
-
-    host.innerHTML = '';
-    allDataGroups(indicators).forEach(function(group){
-      var section = dom('section', 'indicator-group');
-      var head = dom('div', 'indicator-group-head');
-      head.appendChild(dom('h3', '', mlText(group.label)));
-      if(group.blurb) head.appendChild(dom('p', '', mlText(group.blurb)));
-      section.appendChild(head);
-      var wrap = dom('div', 'indicator-table-wrap');
-      var table = document.createElement('table');
-      table.className = 'indicator-table';
-      var thead = document.createElement('thead');
-      var headRow = document.createElement('tr');
-      [T('cpColIndicator'), T('colValue'), T('colPeriod'), T('colStatus'), T('colSource'), '']
-        .forEach(function(label){ headRow.appendChild(dom('th', '', label)); });
-      thead.appendChild(headRow);
-      table.appendChild(thead);
-      var tbody = document.createElement('tbody');
-      group.codes.forEach(function(code){
-        allDataIndicatorRows(code, indicators[code]).forEach(function(tr){ tbody.appendChild(tr); });
+    var header = [
+      T('cpCsvColCode'), T('cpCsvColName'), T('cpCsvColPeriod'),
+      T('cpCsvColValue'), T('cpCsvColStatus'), T('cpCsvColUnit')
+    ];
+    var rows = [header];
+    Object.keys(indicators).sort().forEach(function(code){
+      var entry = indicators[code];
+      var name = nameOf(code);
+      var unit = (state.byCode[code] || {}).unit || entry.unit || '';
+      var periods = Object.keys(entry.periods || {}).sort();
+      periods.forEach(function(period){
+        var cell = entry.periods[period];
+        // FIVE STATES, NEVER COLLAPSED (rule 26): a missing/unavailable
+        // cell has no `value` key at all (never a stand-in zero or blank
+        // that reads the same as a real one), so the raw value is written
+        // only when it truly is a number -- otherwise the column is empty
+        // and the status column alone carries which of the five it is.
+        var rawValue = cell && typeof cell.value === 'number' ? cell.value : '';
+        rows.push([code, name, period, rawValue, allDataStatusLabel(cell && cell.status), unit]);
       });
-      table.appendChild(tbody);
-      wrap.appendChild(table);
-      section.appendChild(wrap);
-      host.appendChild(section);
     });
-    filterAllData();
+    var csv = rows.map(function(r){ return r.map(csvField).join(','); }).join('\r\n');
+    // UTF-8 BOM so Excel opens accented labels correctly rather than as
+    // mojibake.
+    return '﻿' + csv;
+  }
+  function wireDownloadLink(){
+    var link = document.getElementById('downloadLink');
+    if(!link) return;
+    link.removeAttribute('href');
+    link.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var csv = buildDownloadCsv();
+      if(!csv) return;
+      var blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = state.nis + '_' + csvSlug(communeName()) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 0);
+    });
   }
 
   /* ---- breadcrumb "from": the directory query to return to ---------------
@@ -3914,7 +4013,10 @@
     }
     if(!valid) return;
     var link = document.getElementById('crumbDirectory');
-    if(link) link.href = 'profiles.html?' + parsed.key + '=' + encodeURIComponent(parsed.value);
+    if(!link) return;
+    link.href = 'profiles.html?' + parsed.key + '=' + encodeURIComponent(parsed.value);
+    /* Hidden by default (A1): only reveal it once `from=` is revalidated. */
+    link.hidden = false;
   }
 
   /* =========================================================================
@@ -4007,7 +4109,6 @@
       applyThemeVars(chip, built.secIndex);
       quick.appendChild(chip);
     });
-    document.getElementById('alldataNum').textContent = (chapterCounter + 1 < 10 ? '0' : '') + (chapterCounter + 1);
     wireChapterNav(navLinks);
     markMultipleRowStarts();
   }
@@ -4065,7 +4166,6 @@
     renderHero();
     renderEssentiel();
     renderChapters();
-    renderAllData();
     requestAnimationFrame(function(){ requestAnimationFrame(markMultipleRowStarts); });
   }
 
@@ -4124,6 +4224,7 @@
 
     renderAll();
     resolveBreadcrumbBack();
+    wireDownloadLink();
     await renderLocator();
     wireSearch();
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(markMultipleRowStarts); }

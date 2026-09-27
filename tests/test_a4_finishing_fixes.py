@@ -99,7 +99,7 @@ def test_fixture_92094_has_a_country_row_carrying_the_refnis_label():
     [
         ("home2.html", "#heroMini .glass canvas"),
         ("macro.html", "#kpiRow .macro-kpi"),
-        ("commune.html?nis=92094", "#allDataSections .indicator-group"),
+        ("commune.html?nis=92094", "#essentielRow .essentiel-item"),
         ("profiles.html", "#communeList option"),
         ("map.html", '#scope option[value="be:country"]'),
         ("sources.html", "#srcTableBody tr.src-row"),
@@ -111,14 +111,15 @@ def test_belgium_refnis_label_never_appears(chromium, site, path, ready_selector
         page = ctx.new_page()
         page.goto(f"{site}/{path}", wait_until="load")
         # "attached", not the default "visible": the readiness probe is
-        # sometimes a <datalist> <option> (never rendered with a box) or
-        # content inside commune.html's closed-by-default #allData <details>
-        # -- neither becomes Playwright-"visible", but both prove the data
-        # actually loaded and rendered, which is all this readiness wait needs.
+        # sometimes a <datalist> <option>, which never gets a rendered box
+        # but still proves the data actually loaded and rendered, which is
+        # all this readiness wait needs.
         page.wait_for_selector(ready_selector, state="attached")
         # page.content() -- the full serialized HTML -- not body.inner_text(),
-        # which silently skips a closed <details> (commune.html's #allData
-        # starts collapsed) and would let a leak hide there undetected.
+        # which would silently skip anything not currently painted and let a
+        # leak hide there undetected (commune.html used to have a
+        # closed-by-default <details id="allData">; removed 2026-09-27, but
+        # page.content() is kept as the belt-and-suspenders check here).
         html = page.content()
         for forbidden in FORBIDDEN_COUNTRY_LABELS:
             assert forbidden not in html, f"{path} shows the raw REFNIS label {forbidden!r}"
@@ -185,99 +186,9 @@ def test_pyramid_bars_are_keyboard_focusable(chromium, site):
         ctx.close()
 
 
-# --- fix 9: the compact "All data" table -------------------------------------
-
-
-def test_all_data_is_one_row_per_indicator_and_stays_compact(chromium, site):
-    payload = json.loads(COMMUNE_92094_JSON.read_text(encoding="utf-8"))
-    indicator_count = len(payload["indicators"])
-    assert indicator_count > 0
-
-    ctx = _context(chromium)
-    try:
-        page = ctx.new_page()
-        page.goto(f"{site}/commune.html?nis=92094", wait_until="load")
-        page.wait_for_selector("#allDataSections .indicator-group", state="attached")
-        page.click("#allData summary")
-        page.wait_for_selector("#allData[open]")
-
-        rows = page.locator("#allDataSections .indicator-row")
-        assert (
-            rows.count() == indicator_count
-        ), f"expected {indicator_count} rows (one per indicator), found {rows.count()}"
-
-        box = page.locator("#allData").bounding_box()
-        assert box is not None
-        # Compactness per row, not in total: 4000px was the budget when Namur
-        # carried 70 indicators (#189, 2026-09-14), i.e. ~57px a row. A total
-        # cap fails every time a source is added (89 indicators on 2026-09-24)
-        # without the table getting any less compact.
-        per_row = box["height"] / indicator_count
-        assert per_row < 4000 / 70, (
-            f"#allData is {box['height']}px for {indicator_count} rows "
-            f"({per_row:.1f}px a row), expected under {4000 / 70:.1f}px a row"
-        )
-    finally:
-        ctx.close()
-
-
-def test_all_data_history_disclosure_reveals_every_period(chromium, site):
-    payload = json.loads(COMMUNE_92094_JSON.read_text(encoding="utf-8"))
-    code, entry = next(iter(payload["indicators"].items()))
-    period_count = len(entry.get("periods") or {})
-
-    ctx = _context(chromium)
-    try:
-        page = ctx.new_page()
-        page.goto(f"{site}/commune.html?nis=92094", wait_until="load")
-        page.wait_for_selector("#allDataSections .indicator-group", state="attached")
-        page.click("#allData summary")
-        page.wait_for_selector("#allData[open]")
-
-        row = page.locator(f'.indicator-row:has(.indicator-code:has-text("{code}"))').first
-        toggle = row.locator(".history-toggle")
-        assert toggle.get_attribute("aria-expanded") == "false"
-        toggle.click()
-        assert toggle.get_attribute("aria-expanded") == "true"
-
-        hist_id = toggle.get_attribute("aria-controls")
-        history_lines = page.locator(f"#{hist_id} .indicator-history-line")
-        assert (
-            history_lines.count() == period_count
-        ), f"expected {period_count} history lines for {code}, found {history_lines.count()}"
-    finally:
-        ctx.close()
-
-
-def test_all_data_five_states_stay_distinct(chromium, site):
-    """A real number (zero included), a suppressed cell and an indicator with
-    no published period at all must never render the same way (rule 26)."""
-    payload = json.loads(COMMUNE_92094_JSON.read_text(encoding="utf-8"))
-    # Find one indicator whose latest period is a real number, if any.
-    numeric_code = None
-    for code, entry in payload["indicators"].items():
-        periods = entry.get("periods") or {}
-        if not periods:
-            continue
-        latest = periods[sorted(periods)[-1]]
-        if isinstance(latest.get("value"), (int, float)):
-            numeric_code = code
-            break
-    assert numeric_code, "fixture drift: no indicator in 92094.json has a numeric latest value"
-
-    ctx = _context(chromium)
-    try:
-        page = ctx.new_page()
-        page.goto(f"{site}/commune.html?nis=92094", wait_until="load")
-        page.wait_for_selector("#allDataSections .indicator-group", state="attached")
-        page.click("#allData summary")
-        page.wait_for_selector("#allData[open]")
-
-        row = page.locator(f'.indicator-row:has(.indicator-code:has-text("{numeric_code}"))').first
-        value_cell = row.locator("td.ind-value")
-        assert (
-            value_cell.get_attribute("data-state") is None
-        ), "a real numeric value must not carry a non-ready data-state"
-        assert value_cell.inner_text().strip() not in ("", "—")
-    finally:
-        ctx.close()
+# --- A2 (2026-09-27): the "All data" accordion was removed at the
+# maintainer's request. Its compactness/history-disclosure/five-states
+# coverage above (fix 9) is retired with it -- #downloadLink's CSV export
+# (see tests/test_commune_csv_download.py) is what now carries the
+# indicator/period/value/status data out of the page, and rule 26 (five
+# distinct states, never collapsed) is covered there.
