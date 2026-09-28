@@ -52,7 +52,7 @@ _DETERMINISM_FLAGS = ["-map_metadata", "-1", "-fflags", "+bitexact"]
 
 def _run(ffmpeg: str, args: list[str]) -> None:
     cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error"] + args
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
     if result.returncode != 0:
         raise RuntimeError("ffmpeg failed: " + " ".join(cmd) + "\n" + result.stderr)
 
