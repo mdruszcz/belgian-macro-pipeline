@@ -640,6 +640,31 @@
    * @param items [{label, value, highlight?, status?}]  pre-sorted by caller
    * @returns {hits} -- see the file header.
    */
+  /** Left/right gutters for drawRanking, from measured text widths (px).
+   * The label gutter grows to fit the longest label (never below the old
+   * fixed 120px, never above half the width); the value gutter always
+   * fits the widest value plus its 6px gap, so a value is never clipped at
+   * the right edge. Pure: plain numbers in, plain numbers out. */
+  function rankingLayout(labelWidths, valueWidths, W) {
+    var maxLabel = labelWidths.length ? Math.max.apply(null, labelWidths) : 0;
+    var maxValue = valueWidths.length ? Math.max.apply(null, valueWidths) : 0;
+    var pL = Math.max(120, Math.min(Math.ceil(maxLabel) + 12, Math.floor(W * 0.5)));
+    var pR = Math.max(46, Math.ceil(maxValue) + 10);
+    return { pL: pL, pR: pR };
+  }
+
+  /** A label that still does not fit its gutter is shortened from the
+   * START with an ellipsis rather than cut off at the canvas edge: labels
+   * like "Province de Flandre occidentale" / "... orientale" share their
+   * beginning and differ at the end, so the end is what must stay
+   * readable. The tooltip carries the full label. */
+  function fitLabel(ctx, text, maxW) {
+    if (ctx.measureText(text).width <= maxW) return text;
+    var s = text;
+    while (s.length > 1 && ctx.measureText('…' + s).width > maxW) s = s.slice(1);
+    return '…' + s.replace(/^\s+/, '');
+  }
+
   function drawRanking(canvas, items, opts) {
     opts = opts || {};
     if (!items.length) return { hits: [] };
@@ -655,8 +680,19 @@
         return typeof v === 'number';
       });
     var vMax = vals.length ? Math.max.apply(null, vals) : 0;
-    var pL = 120,
-      pR = 46;
+    var LABEL_FONT = '11px "Inter","IBM Plex Sans",sans-serif',
+      VALUE_FONT = '11px "IBM Plex Mono",monospace';
+    ctx.font = LABEL_FONT;
+    var labelWidths = items.map(function (d) {
+      return ctx.measureText(String(d.label)).width;
+    });
+    ctx.font = VALUE_FONT;
+    var valueWidths = items.map(function (d) {
+      return typeof d.value === 'number' ? ctx.measureText(fmtNum(d.value, opts.locale)).width : 0;
+    });
+    var layout = rankingLayout(labelWidths, valueWidths, W);
+    var pL = layout.pL,
+      pR = layout.pR;
     var barMaxW = W - pL - pR;
     var labelC = gc('--bp-text-muted'),
       valueC = gc('--bp-text');
@@ -666,17 +702,17 @@
       var y = i * rowH + 6;
       var hasVal = typeof d.value === 'number';
       var w = hasVal && vMax > 0 ? (d.value / vMax) * barMaxW : 0;
-      ctx.font = '11px "Inter","IBM Plex Sans",sans-serif';
+      ctx.font = LABEL_FONT;
       ctx.fillStyle = labelC;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillText(d.label, pL - 10, y + rowH / 2 - 3);
+      ctx.fillText(fitLabel(ctx, String(d.label), pL - 10), pL - 10, y + rowH / 2 - 3);
 
       if (hasVal) {
         ctx.fillStyle = d.highlight ? gc('--bp-accent') : chartColour(i);
         ctx.fillRect(pL, y, Math.max(w, 2), rowH - 12);
 
-        ctx.font = '11px "IBM Plex Mono",monospace';
+        ctx.font = VALUE_FONT;
         ctx.fillStyle = valueC;
         ctx.textAlign = 'left';
         ctx.fillText(fmtNum(d.value, opts.locale), pL + w + 6, y + rowH / 2 - 3);
@@ -1044,6 +1080,7 @@
     drawBar: drawBar,
     drawDonut: drawDonut,
     drawRanking: drawRanking,
+    rankingLayout: rankingLayout,
     alignPeriods: alignPeriods,
     computeLineLayout: computeLineLayout,
     nearestHit: nearestHit,

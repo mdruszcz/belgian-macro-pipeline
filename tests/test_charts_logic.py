@@ -164,3 +164,33 @@ def test_single_series_alignment_is_a_no_op_so_existing_single_series_charts_are
         console.log(JSON.stringify(BPCharts.alignPeriods(one)));
         """)
     assert result == ["2019", "2020", "2021"]
+
+
+def test_ranking_layout_fits_the_longest_label_and_the_widest_value():
+    """The micro page's province ranking cut "Province du Brabant wallon" to
+    "ce du Brabant wallon" and "47 480,1" to "47 480,": the gutters were a
+    fixed 120px / 46px. Hand-computed: label gutter = ceil(151.3) + 12 = 164
+    (between the 120px floor and half of 1100 = 550); value gutter =
+    ceil(52.8) + 10 = 63."""
+    result = _run_node("""
+        console.log(JSON.stringify(BPCharts.rankingLayout([60, 151.3, 90], [40, 52.8], 1100)));
+        """)
+    assert result == {"pL": 164, "pR": 63}
+
+
+def test_ranking_layout_keeps_the_old_gutters_when_everything_already_fits():
+    """Short labels and values keep the previous fixed 120px / 46px layout,
+    so pages whose labels already fitted do not move."""
+    result = _run_node("""
+        console.log(JSON.stringify(BPCharts.rankingLayout([50, 70], [20, 30], 800)));
+        """)
+    assert result == {"pL": 120, "pR": 46}
+
+
+def test_ranking_layout_caps_the_label_gutter_at_half_the_width():
+    """On a 390px phone a 300px label may take at most floor(0.5 * 390) = 195px;
+    the rest of that label is shortened with an ellipsis, not the bars."""
+    result = _run_node("""
+        console.log(JSON.stringify(BPCharts.rankingLayout([300], [30], 390)));
+        """)
+    assert result == {"pL": 195, "pR": 46}
