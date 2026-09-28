@@ -1577,3 +1577,15 @@ below can run in the existing daily job; none needs a hand-download.
 | Licence | CC BY, as declared in the dataset API. Attribute the Fédération Wallonie-Bruxelles and link the dataset. |
 | Approval | Requested by the maintainer 2026-09-26; approval recorded in the PR that added this row (CLAUDE.md rule 8). |
 | Implementation | `scripts/export_schools_ise.py` (the join and name resolution live in this one script, alongside the ISE-class export it feeds). |
+
+### Natural Earth — film geometry only, not a statistics source (approved 2026-09-28)
+
+| Field | Value |
+|---|---|
+| Publisher | [Natural Earth](https://www.naturalearthdata.com/), public domain. |
+| What | Country and coastline vector geometry used to draw the animated map in the BelPulse brand film (docs/features/home_film.md), the home page hero background. It supplies shapes only -- no statistic, indicator, boundary used for any published figure, or commune-level geometry comes from this source. Belgium's own commune boundaries, used everywhere else on the site, remain `data/geo/communes.geojson` (build_commune_boundaries.py), unrelated to and unaffected by this entry. |
+| Coverage | Not applicable -- this is not an observations source and carries no coverage figure. |
+| Keys | Not applicable. |
+| Licence | Public domain (no attribution legally required; Natural Earth is credited here as a courtesy and in the film's production notes). |
+| Approval | Approved by the maintainer 2026-09-28, film geometry only. |
+| Implementation | Consumed only by the film's own render pipeline (outside this repository); no exporter, adapter or public/data/** payload in this pipeline reads it. |
