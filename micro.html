@@ -183,15 +183,22 @@
       </section>
     </section>
 
-    <!-- ==================== chapter: population (households, demographics) ==================== -->
+    <!-- ==================== chapter: population (households, demographics) ====================
+         Each card below holds a GROUP of tiles (4 household tiles, 4 age-group
+         cards) -- never squeezed to half-width beside another card (lead
+         review, item 2): each gets its own full-width row so its own
+         auto-fit grid can balance the tiles instead of collapsing to a
+         narrow orphan column. -->
     <section class="bp-panel" id="population" data-panel>
       <h2 data-panel-label="population">Population</h2>
-      <section class="row row-2">
-        <article class="bp-chart-card" id="households">
+      <section class="row">
+        <article class="bp-chart-card card-wide" id="households">
           <div class="bp-chart-head"><div><h3 id="tilesTitle">&nbsp;</h3></div></div>
           <div class="tile-grid" id="tileGrid"></div>
         </article>
-        <article class="bp-chart-card bp-state" id="demographics" data-state="loading">
+      </section>
+      <section class="row">
+        <article class="bp-chart-card card-wide bp-state" id="demographics" data-state="loading">
           <div class="bp-chart-head"><div><h3 id="demographicsTitle">&nbsp;</h3></div></div>
           <ul class="bp-list-panel bp-state-body portrait-metrics" id="demographicsList"></ul>
           <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
@@ -219,22 +226,36 @@
       </article>
     </section>
 
-    <!-- ==================== chapter: logement (housing stock, apartment price, sales history, region table) ==================== -->
+    <!-- ==================== chapter: logement (housing stock, apartment price, sales history, region table) ====================
+         housing-stock holds a GROUP of tiles (4 census figures) -- own
+         full-width row, same reasoning as Population's tile cards above
+         (lead review, item 2). apartment_price is a genuinely compact
+         unavailable card, so it keeps a row of its own rather than
+         stretching a mostly-empty half-width column beside the tiles. -->
     <section class="bp-panel" id="logement" data-panel>
       <h2 data-panel-label="logement">Housing</h2>
-      <section class="row row-2">
-        <article class="bp-chart-card bp-state" id="housing-stock" data-state="loading">
+      <section class="row">
+        <article class="bp-chart-card card-wide bp-state" id="housing-stock" data-state="loading">
           <div class="bp-chart-head"><div><h3 id="housingStockTitle">&nbsp;</h3></div></div>
           <ul class="bp-list-panel bp-state-body portrait-metrics" id="housingStockList"></ul>
           <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
           <a class="card-link" href="#comparaisons"><span data-t="microSeeHousingMap">See median house price by commune on the map</span> →</a>
         </article>
-        <article class="bp-chart-card bp-state" id="apartment_price" data-slot="apartment_price" data-state="unavailable">
+      </section>
+      <section class="row">
+        <article class="bp-chart-card card-wide bp-state card-compact-empty" id="apartment_price" data-slot="apartment_price" data-state="unavailable">
           <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
           <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
         </article>
       </section>
-      <section class="leadrow">
+      <!-- #housing is card-wide (spans the full row) so #housing-region was
+           never actually beside it -- it fell onto leadrow's own second
+           (5fr) column on the next grid row, alone, with the 7fr column
+           beside it empty (lead review, item 2). Both cards are full width
+           on their own now, in plain .row sections (no explicit columns, so
+           a single child simply stacks), matching the housing-stock/
+           apartment_price fix above. -->
+      <section class="row">
         <article class="bp-chart-card card-wide bp-state" id="housing" data-state="loading">
           <div class="bp-chart-head">
             <div><h3 id="historyTitle">&nbsp;</h3><div class="subtitle" id="historyNote"></div></div>
@@ -244,7 +265,9 @@
           <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
           <div class="provenance" id="historyProvenance"></div>
         </article>
-        <article class="bp-chart-card region-table-card bp-state" id="housing-region" data-state="loading">
+      </section>
+      <section class="row">
+        <article class="bp-chart-card region-table-card card-wide bp-state" id="housing-region" data-state="loading">
           <div class="bp-chart-head"><div><h3 id="regionalHousingTitle">&nbsp;</h3></div><span class="pill" id="regionalHousingPeriod"></span></div>
           <div class="bp-state-body">
             <div class="region-table-wrap">
@@ -550,7 +573,12 @@
     if(u === 'pp_contribution' || u === 'balance' || /^index_\d{4}$/.test(u)){
       return MapUI.unitLabel(unit, LANG);
     }
-    return MapUI.unitSuffix(unit).trim();
+    // Bug fix (Micro Portrait review): LANG was never passed through here,
+    // so MapUI.unitSuffix() fell back on unitLabel()'s own English default
+    // for every trilingual unit word (e.g. 'persons_per_household' always
+    // read "persons/household", even on the fr/nl page). Pass LANG like
+    // every other call in this file already does.
+    return MapUI.unitSuffix(unit, LANG).trim();
   }
 
   function fmtValue(v, entry){
@@ -660,14 +688,42 @@
     if(definition){ var para = document.createElement('p'); para.className = 'leadchart-para'; para.textContent = definition; host.appendChild(para); }
     if(!latest){ var empty = document.createElement('p'); empty.textContent = T('macroUnavailable'); host.appendChild(empty); return; }
     var date = document.createElement('div'); date.className = 'metric-date'; date.textContent = fmtPeriod(latest.period); host.appendChild(date);
-    var wrap = document.createElement('div'); wrap.className = 'leadchart-svgwrap'; wrap.dataset.code = code; wrap.dataset.compact = compact ? '1' : '0'; host.appendChild(wrap);
-    var result = portrait.line({width: Math.max(280, Math.round(host.clientWidth) || 640), height: compact ? 200 : 280, points: pts, decimals: entry.decimals, unitSuffix: displayUnit(entry), ariaLabel: nameOf(code)});
-    wrap.innerHTML = result.svg || ''; portrait.wireLine(wrap, result.hits || [], {title: nameOf(code)});
+    // A single-observation series (the 2021 census tiles: one period, one
+    // value) has nothing to draw a trend from -- buildLineChartSVG's own
+    // domain padding (+-1 around a single point) still produces 5 gridlines,
+    // but at these indicators' magnitudes (millions) they all round to the
+    // SAME displayed label, an axis that lies about having a scale (lead
+    // review, item 4). Below 2 real values, skip the chart entirely and show
+    // only the figure, its period and its provenance, same as commune.html
+    // does for a single-period value -- never a fabricated one-point plot.
+    var numericCount = pts.filter(function(pt){ return typeof pt.value === 'number'; }).length;
+    if(numericCount >= 2){
+      var wrap = document.createElement('div'); wrap.className = 'leadchart-svgwrap'; wrap.dataset.code = code; wrap.dataset.compact = compact ? '1' : '0'; host.appendChild(wrap);
+      // Copied from macro.html's own Math.max(280, host.clientWidth) sizing,
+      // then fixed twice for micro's narrower tile cards (lead review, item
+      // 6): (1) host.clientWidth is the CARD's width, padding included
+      // (16-18px each side on a portrait-metric tile), not wrap's own,
+      // smaller content-box width -- drawing to the wider, padded figure
+      // always produced a viewBox bigger than the space actually available,
+      // and the SVG's width:100%/preserveAspectRatio=none CSS then scaled
+      // that oversized viewBox back down to fit, shrinking every axis label
+      // with it (11px drawn, ~9px rendered); (2) the 280 floor made the same
+      // mistake even after using wrap's own width, on any tile narrower than
+      // 280px (macro's cards never go below 280px, so its own floor never
+      // actually engages -- this bug is micro-only). wrap is measured AFTER
+      // insertion, and only a truly unmeasured (0) width falls back to a
+      // fixed size, never a real, narrow, already-accurate one.
+      var measuredWidth = Math.round(wrap.clientWidth);
+      var result = portrait.line({width: measuredWidth > 0 ? measuredWidth : 640, height: compact ? 200 : 280, points: pts, decimals: entry.decimals, unitSuffix: displayUnit(entry), ariaLabel: nameOf(code)});
+      wrap.innerHTML = result.svg || ''; portrait.wireLine(wrap, result.hits || [], {title: nameOf(code)});
+    }
     var source = document.createElement('p'); source.className = 'provenance'; source.textContent = provenance(entry, latest); host.appendChild(source);
-    var details = document.createElement('details'); details.className = 'portrait-data'; var summary = document.createElement('summary'); summary.textContent = T('chartDataTable'); details.appendChild(summary);
-    var table = document.createElement('table'); var body = document.createElement('tbody');
-    pts.forEach(function(pt){ var tr = document.createElement('tr'); var period = document.createElement('th'); period.scope = 'row'; period.textContent = fmtPeriod(pt.period); var value = document.createElement('td'); value.textContent = typeof pt.value === 'number' ? displayValue(pt.value, entry) : '?'; var status = document.createElement('td'); status.textContent = pt.status && pt.status !== 'final' ? T('status_' + pt.status) : ''; tr.append(period, value, status); body.appendChild(tr); });
-    table.appendChild(body); details.appendChild(table); host.appendChild(details);
+    if(numericCount >= 2){
+      var details = document.createElement('details'); details.className = 'portrait-data'; var summary = document.createElement('summary'); summary.textContent = T('chartDataTable'); details.appendChild(summary);
+      var table = document.createElement('table'); var body = document.createElement('tbody');
+      pts.forEach(function(pt){ var tr = document.createElement('tr'); var period = document.createElement('th'); period.scope = 'row'; period.textContent = fmtPeriod(pt.period); var value = document.createElement('td'); value.textContent = typeof pt.value === 'number' ? displayValue(pt.value, entry) : '?'; var status = document.createElement('td'); status.textContent = pt.status && pt.status !== 'final' ? T('status_' + pt.status) : ''; tr.append(period, value, status); body.appendChild(tr); });
+      table.appendChild(body); details.appendChild(table); host.appendChild(details);
+    }
   }
 
   /* ---- KPI row (the essentials band) ------------------------------------- */
@@ -688,14 +744,24 @@
     });
     host.className = 'essentiel-row';
     document.getElementById('kpiNote').textContent = text(state.layout.kpis_note);
-    afterLayoutSettles(shrinkEssentielValuesToFit);
   }
   /* Copied from macro.html verbatim (itself copied from commune.html): a
      value like "87,7 2021=100" is longer than its essentiels cell at some
      widths -- shrink the font size down to a 14px floor, then let
-     overflow:hidden clip cleanly rather than spill into the next card. */
+     overflow:hidden clip cleanly rather than spill into the next card.
+     Extended beyond macro.html's own version (lead review, item 3): a big
+     euro total in a 5-wide Revenus tile row ("EUR274 707 991 587") clipped
+     past its card edge, because the thousands separator toLocaleString()
+     uses (U+202F, narrow no-break space) cannot wrap like a normal space --
+     the browser has nowhere to break the string. Also runs against
+     .leadchart-lastval (every portrait-metrics tile: demographics, income,
+     employment, housing-stock) and .bp-stat-tile .bp-value (the household
+     tile-grid), not just the essentiels band, since every one of them can
+     carry an unwrapped run this long. Run once after every render pass
+     settles (renderAll's own afterLayoutSettles call), not per-card, so a
+     card that redraws later (a chart width recalculation) is covered too. */
   function shrinkEssentielValuesToFit(){
-    document.querySelectorAll('.essentiel-value').forEach(function(el){
+    document.querySelectorAll('.essentiel-value, .leadchart-lastval, .bp-stat-tile .bp-value').forEach(function(el){
       var guard = 0;
       while(el.scrollWidth > el.clientWidth + 1 && guard++ < 12){
         var size = parseFloat(getComputedStyle(el).fontSize);
@@ -1104,7 +1170,11 @@
       if(!host || !code) return;
       var svg = wrap.querySelector('svg');
       var drawnWidth = svg ? Math.round(parseFloat(svg.getAttribute('viewBox').split(' ')[2])) : 0;
-      var realWidth = Math.round(host.clientWidth);
+      // wrap's own width, matching what drawPortraitChart's redraw actually
+      // measures (item 6 fix above) -- comparing against host.clientWidth
+      // here (the padded CARD, not the chart's own content box) would keep
+      // finding a ~36px gap forever and redraw on every pass for no reason.
+      var realWidth = Math.round(wrap.clientWidth);
       if(realWidth > 0 && Math.abs(realWidth - drawnWidth) > 4){
         drawPortraitChart(host, code, wrap.dataset.compact === '1');
       }
@@ -1125,7 +1195,7 @@
     renderRegionalHousing();
     renderUnavailable();
     renderPanelChrome();
-    afterLayoutSettles(redrawLeadCharts);
+    afterLayoutSettles(function(){ redrawLeadCharts(); shrinkEssentielValuesToFit(); });
   }
 
   async function boot(){

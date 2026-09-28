@@ -832,7 +832,17 @@
 .micro #apercu{padding-top:0}
 .micro .essentiel-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:0;border-top:0;border-bottom:1px solid var(--bp-border)}
 .micro .essentiel-item{display:flex;flex-direction:column;grid-row:auto;padding:22px 18px;cursor:default}
-.micro .essentiel-eyebrow{min-height:62px;text-transform:uppercase;overflow-wrap:anywhere}
+/* overflow-wrap was "anywhere" (word-break:anywhere included), which broke
+   inside a word whenever a label was merely tight for space instead of
+   wrapping at the nearest space -- "POPULATI/ON", "ADDITIONNELL/E" (lead
+   review, item 1). break-word only breaks mid-word as a last resort, when a
+   single word truly cannot fit its line at all; word-break:normal (the
+   default, stated explicitly here so a future edit cannot silently
+   reintroduce break-all/anywhere) keeps every ordinary wrap at a space. The
+   real fix is giving these labels a wide enough box in the first place
+   (item 2 below); this is the backstop for the rare label CSS still can't
+   size for. */
+.micro .essentiel-eyebrow{min-height:62px;text-transform:uppercase;overflow-wrap:break-word;word-break:normal}
 .micro .essentiel-value{font-size:clamp(18px,2vw,30px);height:auto;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
 .micro .essentiel-value .value-num{line-height:1.1}
 .micro .essentiel-value .value-unit{font-size:12px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
@@ -845,11 +855,28 @@
 .micro .bp-chart-head .subtitle,.micro .provenance,.micro .kpi-note{font-size:12px;line-height:1.6;color:var(--bp-text-faint)}
 .micro .metric-date{font-size:12px;color:var(--bp-text-faint);margin:8px 0}
 .micro .leadchart-head{align-items:start}
-.micro .leadchart-eyebrow{max-width:55%;overflow-wrap:anywhere}
+.micro .leadchart-eyebrow{max-width:55%;overflow-wrap:break-word;word-break:normal}
 .micro .leadchart-lastval{font-size:32px;white-space:normal;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+/* Inside a portrait-metric TILE (a ~220-280px column, not a full-width lead
+   chart), the 55%-beside-45% side-by-side head above squeezed a long label
+   into a sliver next to its value ("POPULATION AGEE DE 0 A 14 ANS" broke
+   mid-word even with the wrap fix, item 1) -- stack label above value
+   instead, each given the tile's full width, same as .essentiel-item
+   already does for the KPI band. */
+.micro .portrait-metric .leadchart-head{flex-direction:column;align-items:flex-start;gap:4px}
+.micro .portrait-metric .leadchart-eyebrow{max-width:100%}
+.micro .portrait-metric .leadchart-lastval{align-items:flex-start;text-align:left}
 .micro .leadchart-lastval .value-num{line-height:1.1}
 .micro .leadchart-lastval .value-unit{font-size:13px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
-.micro .portrait-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));list-style:none;padding:0;margin:0;gap:16px}
+/* 220px (not macro's 160px, a deliberate micro-only difference): micro's
+   own tiles carry Belgium-wide totals -- five and six-figure counts, and
+   Revenus' big EUR totals ("274 707 991 587") -- which need more room than
+   macro's own KPI tiles before shrinkEssentielValuesToFit() has to kick in
+   (lead review, item 3: 160px let 5 columns squeeze so tight the fit-to-cell
+   shrink alone could not save every value from clipping). 220px naturally
+   gives Revenus' 5 tiles 3 columns then 2 as the card narrows, instead of
+   forcing 5-across at any width above ~800px. */
+.micro .portrait-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));list-style:none;padding:0;margin:0;gap:16px}
 @media (max-width:560px){.micro .portrait-metrics{grid-template-columns:1fr}}
 .micro .portrait-metrics .portrait-metric{display:block;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px 14px;min-width:0;position:relative}
 .micro .portrait-metrics .portrait-metric::before{content:"";display:block;position:absolute;left:18px;top:0;width:26px;height:3px;border-radius:0 0 2px 2px;background:var(--th);opacity:.9}
@@ -883,11 +910,17 @@
 .micro .leadchart-para{font-size:13px;margin:10px 0;display:block;max-width:75ch}
 .micro .chapter .bp-state[data-state=unavailable]{border:1px solid var(--bp-border);border-radius:10px;padding:20px}
 
-/* ---- household tile grid (2x2), Population chapter ---- */
-.micro .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+/* ---- household tile grid, Population chapter ----
+   Now that #households is a full-width card (lead review, item 2: a group
+   of tiles never shares a row with another card), auto-fit with a sensible
+   minimum gives its 4 tiles 4 columns at full width and folds to 2x2 only
+   once the card itself narrows below ~2*220px -- the same auto-fit pattern
+   as .portrait-metrics above, not a fixed 2-column track that would leave
+   the row half-empty at 1440px. */
+.micro .tile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .micro .bp-stat-tile{display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid var(--bp-border);border-radius:10px;background:var(--bp-surface-alt);min-width:0}
 .micro .bp-stat-tile .bp-kpi-label{display:flex;flex-direction:column;gap:2px;min-width:0}
-.micro .bp-stat-tile .name{font-size:11px;color:var(--bp-text-muted);overflow-wrap:anywhere}
+.micro .bp-stat-tile .name{font-size:11px;color:var(--bp-text-muted);overflow-wrap:break-word;word-break:normal}
 .micro .bp-stat-tile .bp-value{font-size:1.1rem;font-weight:600;white-space:nowrap;color:var(--bp-text)}
 .micro .bp-stat-tile .bp-value .unit{font-size:.7rem;color:var(--bp-text-faint);font-weight:400;margin-left:3px}
 .micro .bp-stat-tile .period{font-size:10px;color:var(--bp-text-faint)}
