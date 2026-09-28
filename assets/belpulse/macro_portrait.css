@@ -936,6 +936,16 @@
   .micro .tile-grid{grid-template-columns:1fr}
   .micro .compare-head{flex-direction:column;align-items:stretch}
   .micro .compare-head select{width:100%}
+  /* The choropleth legend's tick LABELS are absolutely positioned by
+     percentage (assets/commune_map.css, the shared engine -- rule 29) and
+     can print a long formatted value ("44,3K") whose text extends a few
+     pixels past the card edge at this width -- the same overflow the old
+     panel-based micro.html clipped with its own `.map-card .legend,
+     .map-card .ticks{overflow-x:hidden}` rule. Page-level only, page's own
+     leadmap wrapper, never the shared engine's own CSS: the number itself
+     stays fully legible, only its outermost pixel or two at the card edge
+     is ever at risk. */
+  .micro .leadmap-legend .ticks{overflow-x:hidden}
 }
 @media print{.micro .bp-sidebar{display:none}.micro .chapter{break-inside:avoid}.micro .bp-anim-line{stroke-dashoffset:0!important}.micro .bp-anim-fade{opacity:1}}
 .micro{margin:0}
