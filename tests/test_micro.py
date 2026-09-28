@@ -363,15 +363,21 @@ def test_every_extra_list_id_is_used_by_exactly_one_panel_card():
     assert not missing, f"extra_lists with no panel card: {missing}"
 
 
-def test_panels_js_is_loaded_and_carries_no_indicator_id():
+def test_panels_js_is_no_longer_loaded_by_micro_html():
+    """Micro Portrait redesign (docs/features/micro_portrait.md), copying
+    macro.html's own Portrait redesign (docs/features/macro_portrait.md,
+    test_macro.py::test_panels_js_is_no_longer_loaded_by_macro_html): the
+    one-panel-at-a-time layout panels.js drove (show/hide + its own `onShow`
+    hook) is gone -- every chapter now scrolls on one page, and micro.html's
+    own inline script (boot/renderAll, the scroll-spy-driven #sideNav pills)
+    owns navigation instead. panels.js stays on disk (still used by other
+    pages) but micro.html no longer loads it. The invariant the old test
+    checked -- no indicator id hardcoded into the page's navigation logic --
+    is still enforced, now against the inline script, by
+    test_micro_names_no_indicator_anywhere above, which scans the whole of
+    micro.html."""
     html = _html()
-    assert 'src="assets/belpulse/panels.js"' in html
-    panels_js = (REPO / "assets" / "belpulse" / "panels.js").read_text(encoding="utf-8")
-    codes = _universe()
-    if codes is None:
-        pytest.skip("site payloads not built")
-    named = sorted(code for code in codes if code in panels_js)
-    assert not named, f"panels.js names indicators directly: {named}"
+    assert 'src="assets/belpulse/panels.js"' not in html
 
 
 def test_a_slot_exists_for_the_apartment_price_card():
