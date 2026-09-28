@@ -78,6 +78,36 @@
       radial-gradient(760px 520px at 8% 88%, rgba(30,60,120,.5), transparent 60%),
       linear-gradient(140deg, #0b1730 0%, #12274b 52%, #0d1c39 100%);
   }
+  /* ---- hero film (docs/features/home_film.md) ----------------------------
+     The film/poster sits behind .wrap as its own absolutely-positioned layer,
+     covering the hero band; the scrim gradient on top of it is what keeps the
+     real HTML headline/lead/CTA readable from frame 0, so nobody waits on the
+     video to read the page. aria-hidden: the film is decorative (a text
+     alternative already exists as the real heading/lead), never a source of
+     data claims. */
+  .hero-film{position:absolute; inset:0; z-index:0; overflow:hidden; background:#0b1730}
+  .hero-film video,.hero-film .hero-poster{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;
+  }
+  .hero-film::after{
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(100deg, rgba(6,16,34,.92) 0%, rgba(9,24,48,.78) 38%, rgba(10,27,52,.5) 68%, rgba(8,20,40,.38) 100%),
+      linear-gradient(0deg, rgba(6,15,32,.55) 0%, rgba(6,15,32,0) 26%);
+  }
+  .hero .wrap{position:relative; z-index:1}
+  .hero-replay{
+    position:absolute; z-index:2; top:var(--bp-space-5); right:var(--bp-space-5);
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(8,20,40,.68); border:1px solid rgba(255,255,255,.28); color:#fff;
+    border-radius:999px; padding:7px 14px; font:inherit; font-size:12px; font-weight:var(--bp-weight-medium);
+    cursor:pointer; backdrop-filter:blur(3px);
+  }
+  .hero-replay:hover{background:rgba(255,255,255,.16)}
+  .hero-replay[hidden]{display:none}
+  /* prefers-reduced-motion / Save-Data / slow connections (JS decides which):
+     no <video> is ever requested; the poster covers .hero-film with no replay
+     control offered (there is nothing to replay). */
   .hero .wrap{
     display:grid; grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
     gap:var(--bp-space-8); padding-top:var(--bp-space-10); padding-bottom:var(--bp-space-10);
@@ -356,12 +386,13 @@
   .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
 
   .home2 .hero{
-    min-height:390px;
-    background-image:
-      linear-gradient(90deg,rgba(5,22,45,.97) 0%,rgba(7,28,55,.89) 42%,rgba(8,31,57,.78) 72%,rgba(6,25,48,.66) 100%),
-      url('assets/belpulse/home2/home2-hero-brussels.png');
-    background-size:cover; background-position:center right;
+    min-height:75vh;
+    display:flex; flex-direction:column; justify-content:center;
   }
+  /* Batch: brand-film hero (docs/features/home_film.md) replaced the static
+     AI-illustrated background (assets/belpulse/home2/home2-hero-brussels.png,
+     still used elsewhere on this page) with the film/poster layer above; the
+     next section still peeks below the ~75vh band on every viewport. */
   .home2 .hero .wrap{
     grid-template-columns:minmax(0,1.18fr) minmax(0,.98fr) minmax(0,.94fr);
     gap:14px; padding-top:11px; padding-bottom:11px; align-items:stretch;
@@ -515,8 +546,33 @@
 
   <!-- ── hero ────────────────────────────────────────────────────────────── -->
   <section class="hero">
+    <!-- Brand film layer (docs/features/home_film.md). Decorative only: no
+         data claims are made in it, aria-hidden, and the real heading/lead
+         below are the text alternative -- so this whole block can be missing
+         or fail to load with nothing lost but the visual. No JS: the poster
+         <img> alone still renders the hero band and the real HTML headline
+         and CTA on top of it (progressive enhancement, not a requirement).
+         heroFilmInit() (below, in the page script) decides at runtime
+         whether to swap the poster for the <video>: never on
+         prefers-reduced-motion or a Save-Data/2G-3G connection, and only
+         once per browser session (sessionStorage) after that. -->
+    <div class="hero-film" id="heroFilm" aria-hidden="true">
+      <img class="hero-poster" id="heroPoster"
+           src="assets/belpulse/home-film/poster.jpg"
+           alt="" width="1920" height="1080" fetchpriority="high">
+      <video id="heroVideo" muted playsinline preload="none" poster="assets/belpulse/home-film/poster.jpg" hidden>
+        <source data-src="assets/belpulse/home-film/film-1440.webm" type="video/webm" data-variant="desktop">
+        <source data-src="assets/belpulse/home-film/film-1080.mp4" type="video/mp4" data-variant="desktop">
+        <source data-src="assets/belpulse/home-film/film-720.mp4" type="video/mp4" data-variant="mobile">
+      </video>
+    </div>
+    <button type="button" class="hero-replay" id="heroReplay" hidden data-t-aria="homeFilmReplay">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      <span data-t="homeFilmReplay">Replay</span>
+    </button>
     <div class="wrap">
       <div>
+        <span class="featured-meta" data-t="homeFilmAlt">Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.</span>
         <div class="eyebrow" data-t="homeEyebrow">DATA · TERRITORIES · PROSPERITY</div>
         <h1 data-t="homeTitle">Belgium’s economic data, updated automatically.</h1>
         <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
@@ -1340,6 +1396,163 @@
     if(opening && state.byCode[opening]) drawIndicator(opening);
     else document.getElementById('mapCard').dataset.state = 'unavailable';
   }
+
+  /* ---- brand-film hero (docs/features/home_film.md) ---------------------
+     Runs independently of init()'s network fetches -- the film has nothing
+     to do with the published payloads and must not wait on them.
+
+     Rules encoded here (all from the approved plan in the batch handoff):
+       * muted, playsinline, never fullscreen; plays once per session
+         (sessionStorage flag) -- a later page view in the same session shows
+         the poster with no autoplay and a visible Replay button instead;
+       * prefers-reduced-motion, or a Save-Data / 2G-3G connection: the
+         poster is shown and no <video> element is ever unhidden or given a
+         src, so no video byte is ever requested;
+       * <= 768px: the mobile (720p) source, requested only after the page
+         is interactive (load, then idle), so it cannot cost first paint;
+       * pauses via IntersectionObserver when scrolled out of view, and
+         resumes only if it scrolled back out during its first, one-time
+         session play (never resumes after a Replay-triggered play that has
+         already finished, and never once the once-per-session flag is set). */
+  function initHeroFilm(){
+    var SESSION_KEY = 'belpulse-home-film-played';
+    var film   = document.getElementById('heroFilm');
+    var poster = document.getElementById('heroPoster');
+    var video  = document.getElementById('heroVideo');
+    var replay = document.getElementById('heroReplay');
+    if(!film || !video) return;
+
+    function prefersReducedMotion(){
+      try{ return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+      catch(e){ return false; }
+    }
+    function isSlowConnection(){
+      try{
+        var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if(!c) return false;
+        if(c.saveData) return true;
+        return /^(slow-2g|2g|3g)$/.test(c.effectiveType || '');
+      }catch(e){ return false; }
+    }
+    function alreadyPlayedThisSession(){
+      try{ return sessionStorage.getItem(SESSION_KEY) === '1'; }
+      catch(e){ return false; }
+    }
+    function markPlayedThisSession(){
+      try{ sessionStorage.setItem(SESSION_KEY, '1'); }catch(e){}
+    }
+    function isMobileViewport(){
+      return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    }
+
+    if(prefersReducedMotion() || isSlowConnection()){
+      // Poster only. The <video> element is left with no src on any of its
+      // <source> children (data-src, never src, until wired below), so it
+      // never issues a network request -- this function simply returns
+      // before that wiring happens.
+      return;
+    }
+
+    var wiredSrc = false;
+    function wireSources(){
+      if(wiredSrc) return;
+      wiredSrc = true;
+      var mobile = isMobileViewport();
+      Array.prototype.forEach.call(video.querySelectorAll('source'), function(src){
+        var wantsMobile = src.getAttribute('data-variant') === 'mobile';
+        if(wantsMobile === mobile) src.src = src.getAttribute('data-src');
+      });
+      video.load();
+    }
+
+    var everPlayedThisLoad = false; // this particular <video> element's own first play
+    var sessionAlreadyDone = alreadyPlayedThisSession();
+
+    function showPoster(){
+      video.hidden = true;
+      poster.hidden = false;
+      if(!video.paused) video.pause();
+    }
+    function showVideo(){
+      poster.hidden = true;
+      video.hidden = false;
+    }
+
+    function playOnce(){
+      wireSources();
+      showVideo();
+      var p = video.play();
+      if(p && typeof p.catch === 'function') p.catch(function(){ showPoster(); });
+    }
+
+    // preload="none" on the <video> element (markup) already keeps it from
+    // fetching anything until wireSources()+load() run. On desktop that
+    // happens immediately -- the film IS the first impression. On mobile,
+    // the plan asks for the (lighter, 720p) source to be requested only
+    // after the page is interactive, so LCP is never held up by it; the
+    // poster is what paints first there regardless.
+    function startAutoplay(){
+      if(!isMobileViewport()){ playOnce(); return; }
+      var kickoff = function(){
+        if('requestIdleCallback' in window) window.requestIdleCallback(playOnce, {timeout: 2000});
+        else window.setTimeout(playOnce, 0);
+      };
+      if(document.readyState === 'complete') kickoff();
+      else window.addEventListener('load', kickoff, {once: true});
+    }
+
+    if(sessionAlreadyDone){
+      // A later page view in the same session: poster, no autoplay, and a
+      // visible Replay button (en/fr/nl) instead of the film playing again.
+      showPoster();
+      if(replay) replay.hidden = false;
+    }else{
+      startAutoplay();
+      video.addEventListener('ended', function(){
+        everPlayedThisLoad = true;
+        markPlayedThisSession();
+        showPoster();
+        if(replay) replay.hidden = false;
+      });
+    }
+
+    if(replay){
+      replay.addEventListener('click', function(){
+        replay.hidden = true;
+        everPlayedThisLoad = false;
+        playOnce();
+        video.addEventListener('ended', function onEnded(){
+          video.removeEventListener('ended', onEnded);
+          showPoster();
+          replay.hidden = false;
+        });
+      });
+    }
+
+    // Pause when scrolled out of view; resume only mid-way through the one
+    // automatic session play (never after Replay has already finished, and
+    // never once the poster is showing with nothing left to resume).
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(video.hidden) return;
+          if(entry.isIntersecting){
+            if(!everPlayedThisLoad && video.paused && video.currentTime > 0 && !video.ended){
+              var p = video.play();
+              if(p && typeof p.catch === 'function') p.catch(function(){});
+            }
+          }else if(!video.paused){
+            video.pause();
+          }
+        });
+      }, {threshold: 0.25});
+      io.observe(film);
+    }
+  }
+
+  // Fires on DOMContentLoaded (script is at the end of body, so the DOM is
+  // already parsed) and does not wait on init()'s network fetches.
+  initHeroFilm();
 
   init();
 })();

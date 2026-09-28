@@ -239,6 +239,12 @@ I18N.STRINGS = {
     homeWatchVideo: 'Watch the video',
     homeLogoTagline: 'The data moving Belgium forward',
     homeSeeMore: 'See more',
+    // Brand-film hero (docs/features/home_film.md): the film is decorative
+    // (aria-hidden), so this alt text is the section's real text
+    // alternative, and homeFilmReplay labels the replay control shown after
+    // the film has already played once this session.
+    homeFilmAlt: "Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.",
+    homeFilmReplay: 'Replay',
     // The <summary> of a chart's data table (assets/belpulse/charts.js
     // BPCharts.dataTable) -- short on purpose, the chart's own title is
     // already printed right above it, so repeating it here would be noise.
@@ -1019,6 +1025,8 @@ I18N.STRINGS = {
     homeWatchVideo: 'Voir la vidéo',
     homeLogoTagline: 'Les données qui font avancer la Belgique',
     homeSeeMore: 'Voir plus',
+    homeFilmAlt: "Arrière-plan : un film animé de la carte de la Belgique et de ses 565 communes, purement décoratif, sans chiffre propre.",
+    homeFilmReplay: 'Revoir',
     chartDataTable: 'Voir les données',
     homeFinanceLead: 'Chiffres indisponibles dans le pipeline actuel',
     homeFinanceSpending: 'Dépenses de l’État',
@@ -1749,6 +1757,8 @@ I18N.STRINGS = {
     homeWatchVideo: 'Bekijk de video',
     homeLogoTagline: 'De gegevens die België vooruit helpen',
     homeSeeMore: 'Meer bekijken',
+    homeFilmAlt: 'Achtergrond: een geanimeerde film van de kaart van België en haar 565 gemeenten, louter decoratief, zonder eigen cijfers.',
+    homeFilmReplay: 'Opnieuw afspelen',
     chartDataTable: 'Gegevens bekijken',
     homeFinanceLead: 'Cijfers niet beschikbaar in de huidige pijplijn',
     homeFinanceSpending: 'Overheidsuitgaven',
