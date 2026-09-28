@@ -990,3 +990,9 @@
 .micro{margin:0}
 .micro a{color:var(--bp-accent)}
 .micro .bp-nav a,.micro .bp-logo{color:inherit}
+/* Five tiles (Revenus) would fill four columns and leave one orphan on its
+   own row; lay them out 3 + 2 instead where three columns still fit. */
+@media (min-width:900px){
+  .micro .portrait-metrics:has(> :nth-child(5):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+.micro .panel-note{margin:0 0 20px}
