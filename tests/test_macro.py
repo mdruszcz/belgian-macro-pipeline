@@ -175,9 +175,16 @@ def test_every_panel_chart_id_is_used_by_exactly_one_panel_card():
     assert not missing, f"panel_charts with no panel card: {missing}"
 
 
-def test_every_panel_chart_has_a_canvas_in_its_own_article_in_macro_html():
+def test_every_panel_chart_has_a_plot_host_in_its_own_article_in_macro_html():
     """Each `panel_charts[].id` must both exist as its own `<article>` and
-    carry a `<canvas>` -- the chart could not otherwise draw at all."""
+    carry a plot host element -- the chart could not otherwise draw at all.
+
+    Was a `<canvas>` check: the Portrait redesign replaced the canvas/
+    charts.js line charts with the SVG renderer copied from commune.html
+    (assets/belpulse/macro_portrait_charts.js, `portrait.line`), which
+    draws into a `.portrait-plot` host div, same as commune.html's own
+    `.leadchart-svgwrap` (see tests/test_commune_comparable_browser.py).
+    No `<canvas>` element remains anywhere in the page's chart markup."""
     html = _html()
     for item in _layout().get("panel_charts") or []:
         assert f'id="{item["id"]}"' in html, f"no element for panel chart {item['id']!r}"
@@ -185,7 +192,9 @@ def test_every_panel_chart_has_a_canvas_in_its_own_article_in_macro_html():
             r'<article\b[^>]*id="' + re.escape(item["id"]) + r'"[^>]*>([\s\S]*?)</article>', html
         )
         assert m, f"no <article id={item['id']!r}> in macro.html"
-        assert "<canvas" in m.group(1), f"panel chart {item['id']!r} has no <canvas>"
+        assert 'class="portrait-plot"' in m.group(
+            1
+        ), f"panel chart {item['id']!r} has no .portrait-plot host"
 
 
 def test_panel_charts_sit_above_their_matching_list_card():
@@ -343,16 +352,19 @@ def test_every_extra_list_id_is_used_by_exactly_one_panel_card():
     assert not missing, f"extra_lists with no panel card: {missing}"
 
 
-def test_panels_js_is_loaded_and_carries_no_indicator_id():
+def test_panels_js_is_no_longer_loaded_by_macro_html():
+    """The Portrait redesign dropped the one-panel-at-a-time layout
+    panels.js drove (show/hide + its own `onShow` hook): every chapter now
+    scrolls on one page, and macro.html's own inline script (boot/
+    renderAll, the IntersectionObserver-driven #sideNav pills, #panelPick)
+    owns navigation instead. panels.js stays on disk (still used by other
+    pages) but macro.html no longer loads it. The invariant the old test
+    checked -- no indicator id hardcoded into the page's navigation logic
+    -- is still enforced, now against the inline script, by
+    test_macro_names_no_indicator_anywhere above, which scans the whole of
+    macro.html."""
     html = _html()
-    assert 'src="assets/belpulse/panels.js"' in html
-    panels_js = (REPO / "assets" / "belpulse" / "panels.js").read_text(encoding="utf-8")
-    national = REPO / "public" / "data" / "national.json"
-    if not national.exists():
-        pytest.skip("site payloads not built")
-    codes = set(json.loads(national.read_text(encoding="utf-8"))["indicators"])
-    named = sorted(code for code in codes if code in panels_js)
-    assert not named, f"panels.js names indicators directly: {named}"
+    assert 'src="assets/belpulse/panels.js"' not in html
 
 
 def test_the_page_renders_a_slot_for_every_unavailable_section():
@@ -400,63 +412,63 @@ def test_the_two_named_unavailable_cards_are_compact_not_a_designed_size_box():
 def test_the_compact_empty_cards_do_not_stretch_to_match_a_taller_sibling():
     """Removing the placeholder alone would still leave a tall, mostly blank
     card: CSS grid stretches row items to the row's tallest member (#key,
-    the real 'Indicateurs clés' list) by default."""
-    rule = re.search(r"\.card-compact-empty\{([^}]+)\}", _html())
-    assert rule, "no .card-compact-empty rule"
-    assert "align-self:start" in rule.group(1).replace(" ", "")
+    the real 'Indicateurs clés' list) by default.
 
-
-def test_the_desktop_rail_background_fills_the_whole_column():
-    """Batch A2b, item 8: the fixed sidebar (position:fixed, pinned since
-    #201) always covers the live viewport correctly as a reader scrolls, but
-    a `position:fixed` box does not stretch to match a full-page capture
-    rendered at the whole document's height in one shot -- the navy stopped
-    wherever the sidebar's own content happened to end, with plain page
-    background for the rest of the column. A plain absolutely-positioned
-    fill, behind the fixed nav and sized to the column's real content height,
-    closes that gap. Desktop-only, inside the same >=1025px block #201 added
-    -- tablet/phone layouts (the media queries below it) are untouched.
-
-    The fill must resolve to the SAME token the sidebar itself actually
-    renders with, or the fix just relocates the visible seam instead of
-    closing it (A2b audit, Finding 1). macro.html's <body> carries no
-    bp-shell--navy class, so the sidebar takes layout.css's un-scoped
-    .bp-sidebar rule, not the --navy-shell-scoped one -- this test resolves
-    that the same way the cascade does, from the body's own classes, so it
-    keeps failing if the fill and the sidebar ever disagree again, including
-    if the sidebar's OWN token changes later."""
-    html = _html()
-    body_class = re.search(r'<body class="([^"]*)"', html)
-    assert body_class, "no <body class=...> on macro.html"
-    is_navy_shell = "bp-shell--navy" in body_class.group(1).split()
-
-    layout_css = (REPO / "assets" / "belpulse" / "layout.css").read_text(encoding="utf-8")
-    base_rule = re.search(r"(?<!\.bp-shell--navy )\.bp-sidebar\{([^}]+)\}", layout_css)
-    navy_rule = re.search(r"\.bp-shell--navy \.bp-sidebar\{([^}]+)\}", layout_css)
-    assert base_rule and navy_rule, "layout.css's .bp-sidebar background rules moved"
-
-    def _bg_token(rule_body):
-        token = re.search(r"background:(var\([^)]+\))", rule_body)
-        assert token, rule_body
-        return token.group(1)
-
-    expected_token = _bg_token(navy_rule.group(1) if is_navy_shell else base_rule.group(1))
-
-    block = re.search(r"@media \(min-width:1025px\)\{(.*?)\n  \}\n", html, re.DOTALL)
-    assert block, "no @media (min-width:1025px) block"
-    body = block.group(1)
-    assert ".bp-body--analytical{" in body and "position:relative" in body
-    assert ".bp-body--analytical::before{" in body
-    fill = re.search(r"\.bp-body--analytical::before\{([^}]+)\}", body)
-    assert fill, "no .bp-body--analytical::before rule"
-    fill_body = fill.group(1).replace(" ", "")
-    assert "position:absolute" in fill_body
-    assert f"background:{expected_token}" in fill_body, (
-        "fill paints a different token than the sidebar actually renders "
-        f"with ({expected_token}) -- the seam just moved, it didn't close"
+    Portrait redesign: the fix moved from an `align-self:start` rule on
+    `.card-compact-empty` (an inline <style> macro.html no longer carries;
+    all layout moved to the external assets/belpulse/macro_portrait.css,
+    same as commune.html) to `#key{grid-column:1/-1}` forcing the real list
+    onto its own full-width grid row, so #map/#news -- on the row below --
+    are never in the same grid row as #key and so never stretch to match
+    it. Confirmed live: at 1440px #map/#news render 223px tall side by
+    side while #key renders 851px tall (see PR body for the measured
+    boxes)."""
+    css = (REPO / "assets" / "belpulse" / "macro_portrait.css").read_text(encoding="utf-8")
+    assert "#key{grid-column:1/-1}" in css.replace(" ", ""), (
+        "#key is no longer pinned to its own grid row -- #map/#news would "
+        "stretch to match it again"
     )
-    # Still inside the >=1025px block, alongside the fixed sidebar it backs.
-    assert ".bp-sidebar{" in body and "position:fixed" in body
+    row_rule = re.search(r"#apercu \.row-3\{([^}]+)\}", css)
+    assert row_rule, "no #apercu .row-3 rule"
+    assert "grid" in row_rule.group(1), row_rule.group(1)
+
+
+def test_macro_has_no_fixed_full_height_sidebar_to_seam():
+    """Batch A2b, item 8 fixed a seam specific to the OLD layout: a fixed,
+    full-height left column (.bp-sidebar, position:fixed) whose navy
+    background stopped wherever the sidebar's own content happened to end,
+    leaving plain page background for the rest of a full-page screenshot.
+    The fix was a `.bp-body--analytical::before` fill painted in the same
+    token, inside macro.html's own >=1025px inline <style> block.
+
+    Portrait redesign: macro.html no longer has a two-column shell at all.
+    `.macro .bp-body--analytical{display:block}` (assets/belpulse/
+    macro_portrait.css) drops layout.css's `260px 1fr` grid entirely, and
+    `.macro .bp-sidebar{position:sticky}` replaces the fixed full-height
+    rail with commune.html's horizontal, sticky-at-top topic-pills strip
+    (confirmed live: getComputedStyle(.bp-sidebar).position === 'sticky',
+    .bp-body--analytical display === 'block', at 1440px). There is no
+    fixed full-height column left to desync from a full-page capture, so
+    the seam this test guarded against cannot occur, and the ::before fill
+    hack -- and its whole >=1025px inline <style> block -- were correctly
+    removed rather than carried forward as dead code. This test now pins
+    the two rules that make the seam structurally impossible, so it fails
+    again if either regresses back toward a fixed rail."""
+    css = (REPO / "assets" / "belpulse" / "macro_portrait.css").read_text(encoding="utf-8")
+    sidebar_rule = re.search(r"\.macro \.bp-sidebar\{([^}]+)\}", css)
+    assert sidebar_rule and "position:sticky" in sidebar_rule.group(1).replace(
+        " ", ""
+    ), "macro's .bp-sidebar is no longer position:sticky -- check for a reintroduced fixed rail"
+    shell_rule = re.search(r"\.macro \.bp-body--analytical\{([^}]+)\}", css)
+    assert shell_rule and "display:block" in shell_rule.group(1).replace(" ", ""), (
+        "macro's .bp-body--analytical is no longer a single block column -- "
+        "check for a reintroduced two-column sidebar grid"
+    )
+    html = _html()
+    assert "position:fixed" not in html.replace(" ", ""), (
+        "macro.html's inline <style> carries a position:fixed rule again -- "
+        "the seam this test protects against only existed because of one"
+    )
 
 
 def test_every_label_in_the_layout_is_trilingual():

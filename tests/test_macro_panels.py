@@ -1,12 +1,44 @@
-"""Browser contract for macro.html's panel switcher -- Batch A1.4
-(docs/features/site_unification.md, "Macro/Micro : panneaux thématiques").
+"""Browser contract for macro.html's chapter navigation -- originally
+Batch A1.4 (docs/features/site_unification.md, "Macro/Micro : panneaux
+thematiques"), rewritten for the Portrait redesign
+(docs/features/macro_portrait.md).
 
 Served over real HTTP (not file://) for the same reason
-tests/site/test_iframe_contract.py is: `history.pushState`/`replaceState`
-and `location.hash` behave the same either way here, but a relative fetch of
-public/data/*.json -- which this page needs for its layout and its
-localStorage-backed "last panel" behaviour -- is friendlier to reason about
-against a real origin, and it matches every other browser test in this repo.
+tests/site/test_iframe_contract.py is: `location.hash`/scroll behave the
+same either way here, but a relative fetch of public/data/*.json -- which
+this page needs for its layout -- is friendlier to reason about against a
+real origin, and it matches every other browser test in this repo.
+
+Portrait redesign, why this file changed so much: macro.html used to show
+exactly one `[data-panel]` section at a time (panels.js toggling `hidden`,
+rewriting the URL to the panel's own id, moving focus to the panel's
+heading on every switch) with a `<select id="panelPick">` standing in for
+the sidebar on phones. The redesign drops all of that in favour of
+commune.html's own shipped pattern, verbatim: every chapter scrolls on ONE
+page, a sticky horizontal pill strip (`.bp-sidebar`, `.bp-sidebar-nav`,
+still that class name) is plain anchor links, a scroll listener keeps
+`aria-current` on the pill for whichever chapter's heading is closest to
+the line just below the sticky strip (macro.html's own
+`updateCurrentChapter`, a direct getBoundingClientRect comparison, not an
+IntersectionObserver band -- a band has a dead zone for a short trailing
+chapter that native anchor-scroll cannot fully bring up to the line), and
+there is no separate phone picker -- the pill strip is the nav at every
+width, exactly like commune.html's own chapter strip. panels.js is no
+longer loaded by
+macro.html at all (see tests/test_macro.py::
+test_panels_js_is_no_longer_loaded_by_macro_html). Charts moved from
+`<canvas>` (assets/belpulse/charts.js) to the SVG renderer copied from
+commune.html (assets/belpulse/macro_portrait_charts.js) -- `<canvas
+id="...Canvas">` is gone; `.portrait-plot` SVG hosts replace it.
+
+Every invariant this file protected still holds and is still checked here
+-- old anchors resolve, a chart fills its card at real width (not a stale
+canvas-fallback size), no growth-driver label truncates, a reload keeps
+the hash, a chart's hover tooltip shows the real value, its data table
+lists every period, and the compact-empty state machine still collapses
+correctly -- only the MECHANICS of navigating to a chapter changed (native
+anchor scroll instead of a JS panel switch), and canvas measurements
+became SVG measurements.
 """
 
 from __future__ import annotations
@@ -27,7 +59,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DESKTOP_VIEWPORT = {"width": 1280, "height": 900}
 PHONE_VIEWPORT = {"width": 390, "height": 844}
 
-#: Every panel this batch adds, in sidebar order.
+#: Every chapter this page has, in pill-strip order.
 PANEL_IDS = [
     "apercu",
     "croissance",
@@ -86,81 +118,64 @@ def _panel_chart(chart_id: str) -> dict:
     return charts[chart_id]
 
 
-def test_a_legacy_anchor_resolves_to_its_panel_and_rewrites_the_url(browser, site):
+def test_a_legacy_anchor_still_lands_on_its_chapter(browser, site):
     """#growth was the GDP-history section's own anchor before this batch;
-    it is now inside the "croissance" panel, and CLAUDE.md rule 31 says the
-    old link must still work."""
+    it is now inside the "croissance" chapter's `#growth` sub-element, and
+    CLAUDE.md rule 31 says the old link must still work. Every chapter
+    scrolls on one page now, so "still works" means the browser's native
+    anchor navigation lands inside view of the right chapter -- there is
+    no separate panel to reveal or URL to rewrite any more."""
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
         page.goto(f"{site}/macro.html#growth", wait_until="load")
-        page.wait_for_selector("#croissance:not([hidden])")
-        assert page.evaluate("location.hash") == "#croissance"
-        assert not page.is_visible("#apercu")
+        page.wait_for_timeout(400)
+        assert page.evaluate("location.hash") == "#growth"
+        assert page.is_visible("#growth")
+        # The whole page scrolls together now -- #croissance (the chapter
+        # #growth lives in) is not hidden the way an old, unselected panel
+        # used to be.
+        assert page.get_attribute("#croissance", "hidden") is None
+        # #growth is actually the element the browser scrolled to, not just
+        # present somewhere off-screen.
+        box = page.locator("#growth").bounding_box()
+        assert (
+            box and box["y"] < DESKTOP_VIEWPORT["height"]
+        ), f"#growth is not in the initial viewport after a #growth deep link: {box}"
     finally:
         context.close()
 
 
-def test_clicking_a_panel_then_going_back_shows_the_previous_one(browser, site):
+def test_a_chapter_charts_svg_fills_its_cards_inner_width(browser, site):
+    """The regression this used to guard against a canvas for: measuring a
+    chart's plot host while its ancestor chapter was `hidden` produced a
+    permanently-stale width. There is no `hidden` chapter to race any more
+    (every chapter is always in the DOM and unhidden -- scrolling is the
+    only thing that changes), but the SVG plot must still actually fill
+    its card rather than falling back to some default size."""
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
         page.goto(f"{site}/macro.html", wait_until="load")
         page.wait_for_selector("#apercu:not([hidden])")
-        page.click('.bp-sidebar-nav a[href="#prix"]')
-        page.wait_for_selector("#prix:not([hidden])")
-        page.go_back()
-        page.wait_for_selector("#apercu:not([hidden])")
-    finally:
-        context.close()
-
-
-def test_a_shown_panels_first_canvas_has_real_width(browser, site):
-    """The regression this whole switching mechanism exists to avoid: a
-    canvas measured while its panel is `hidden` is 0px wide -- or, worse,
-    PERMANENTLY pinned to assets/belpulse/charts.js's fallback (300px):
-    that fallback gets written back as the canvas's own inline style, so a
-    later, correctly-timed redraw still measures the stale value rather
-    than the container. `width > 0` alone would not have caught 300px
-    sitting inside a ~500px card, which is exactly what the lead's review
-    of PR #170's screenshots found -- so this also checks the canvas fills
-    (at least 90% of) the wrapper that gives it its size."""
-    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
-    page = context.new_page()
-    try:
-        page.goto(f"{site}/macro.html", wait_until="load")
-        page.wait_for_selector("#apercu:not([hidden])")
-        page.click('.bp-sidebar-nav a[href="#croissance"]')
-        page.wait_for_selector("#croissance:not([hidden])")
-        page.wait_for_function("document.getElementById('historyCanvas').width > 0")
-        # The onShow redraw is deferred one animation frame (panels.js) on
-        # top of that -- wait for the canvas's OWN rendered width to reach
-        # something close to its wrapper's, not just for the first non-zero
-        # value, which the stale-300px bug would also produce immediately.
-        page.wait_for_function(
-            "(function(){"
-            "var c = document.getElementById('historyCanvas');"
-            "var wrap = c.parentElement;"
-            "return c.getBoundingClientRect().width >= wrap.clientWidth * 0.9;"
-            "})()"
+        page.eval_on_selector("#croissance", "el => el.scrollIntoView()")
+        svg = page.locator("#historyPlot svg")
+        expect(svg).to_have_count(1)
+        svg_width = page.eval_on_selector(
+            "#historyPlot svg", "el => el.getBoundingClientRect().width"
         )
-        canvas_width = page.evaluate(
-            "document.getElementById('historyCanvas').getBoundingClientRect().width"
-        )
-        wrap_width = page.evaluate(
-            "document.getElementById('historyCanvas').parentElement.clientWidth"
-        )
-        assert canvas_width >= wrap_width * 0.9, (
-            f"the GDP history canvas is {canvas_width}px wide inside a {wrap_width}px card "
-            "-- looks like the stale-300px-fallback bug, not a real fit"
+        wrap_width = page.eval_on_selector("#historyPlot", "el => el.clientWidth")
+        assert svg_width >= wrap_width * 0.9, (
+            f"the GDP history chart is {svg_width}px wide inside a {wrap_width}px card "
+            "-- looks like a stale fallback size, not a real fit"
         )
     finally:
         context.close()
 
 
 def test_no_growth_driver_label_is_truncated(browser, site):
-    """The lead's review of PR #170's screenshots: "Dépenses de
-    consommation des APU" was rendered as "Dépen...". A statistical label
+    """The lead's review of PR #170's screenshots: "Depenses de
+    consommation des APU" was rendered as "Depen...". A statistical label
     losing its ending is not the same label -- CLAUDE.md's own rule that a
     reader must never be shown a number (or a name) that isn't real.
     Checks BOTH the CSS (no `text-overflow: ellipsis` computed on the
@@ -171,8 +186,7 @@ def test_no_growth_driver_label_is_truncated(browser, site):
     try:
         page.goto(f"{site}/macro.html", wait_until="load")
         page.wait_for_selector("#apercu:not([hidden])")
-        page.click('.bp-sidebar-nav a[href="#croissance"]')
-        page.wait_for_selector("#croissance:not([hidden])")
+        page.eval_on_selector("#croissance", "el => el.scrollIntoView()")
         page.wait_for_selector("#contribList li .name")
         names = page.locator("#contribList li .name")
         count = names.count()
@@ -187,102 +201,107 @@ def test_no_growth_driver_label_is_truncated(browser, site):
         context.close()
 
 
-def test_reload_keeps_the_panel_the_hash_names(browser, site):
+def test_reload_keeps_the_hash_and_the_chapter_in_view(browser, site):
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
         page.goto(f"{site}/macro.html#prix", wait_until="load")
-        page.wait_for_selector("#prix:not([hidden])")
+        page.wait_for_timeout(400)
         page.reload(wait_until="load")
-        page.wait_for_selector("#prix:not([hidden])")
+        page.wait_for_timeout(400)
         assert page.evaluate("location.hash") == "#prix"
+        box = page.locator("#prix").bounding_box()
+        assert (
+            box and box["y"] < DESKTOP_VIEWPORT["height"]
+        ), f"#prix is not in view after a reload with #prix in the URL: {box}"
     finally:
         context.close()
 
 
-def test_at_phone_width_the_select_replaces_the_sidebar(browser, site):
-    context = browser.new_context(viewport=PHONE_VIEWPORT)
-    page = context.new_page()
-    try:
-        page.goto(f"{site}/macro.html", wait_until="load")
-        page.wait_for_selector("#apercu:not([hidden])")
-        assert page.is_visible("#panelPick")
-        assert not page.is_visible(".bp-sidebar")
-        page.select_option("#panelPick", "emploi")
-        page.wait_for_selector("#emploi:not([hidden])")
-        assert page.evaluate("location.hash") == "#emploi"
-    finally:
-        context.close()
+def test_the_pill_strip_is_the_nav_at_every_width_and_scroll_spy_tracks_it(browser, site):
+    """Portrait redesign: there is no separate phone `<select>` any more --
+    commune.html's own pattern has no such picker either, and one page
+    that scrolls does not need a mode-switch to "jump to a section" that a
+    plain anchor link already does. The pill strip (`.bp-sidebar`) is
+    visible and is the nav at both desktop and phone width; scrolling a
+    chapter into view marks its own pill `aria-current`."""
+    for viewport in (DESKTOP_VIEWPORT, PHONE_VIEWPORT):
+        context = browser.new_context(viewport=viewport)
+        page = context.new_page()
+        try:
+            page.goto(f"{site}/macro.html", wait_until="load")
+            page.wait_for_selector("#apercu:not([hidden])")
+            assert page.is_visible(".bp-sidebar"), f"pill strip hidden at {viewport}"
+            assert page.is_visible(
+                '.bp-sidebar-nav a[href="#emploi"]'
+            ), f"no #emploi pill link at {viewport}"
+            page.eval_on_selector("#emploi", "el => el.scrollIntoView()")
+            page.wait_for_function(
+                "document.querySelector('.bp-sidebar-nav a[aria-current=\"page\"]')"
+                "?.getAttribute('href') === '#emploi'"
+            )
+        finally:
+            context.close()
 
 
 @pytest.mark.parametrize("panel_id", PANEL_IDS)
-def test_exactly_one_panel_is_visible_after_choosing_each_one(browser, site, panel_id):
+def test_every_chapter_is_reachable_and_becomes_the_current_pill(browser, site, panel_id):
+    """Replaces the old one-panel-visible-at-a-time check: every chapter
+    now coexists on the page (nothing is ever `hidden`), so what a reader
+    actually needs is that clicking its pill scrolls it into view and the
+    pill strip agrees on which chapter that is.
+
+    Parametrized over every chapter INCLUDING the last two ("finances-
+    publiques", "europe"): both are short enough, this close to the end of
+    the page, that native anchor-scroll cannot bring their heading all the
+    way up to the sticky strip's own line -- real bug found writing this
+    batch, where an IntersectionObserver-band scroll-spy left "europe"
+    permanently stuck on "finances-publiques"'s pill (and that in turn
+    stuck on "conjoncture"'s) no matter how far a reader scrolled, because
+    the band's trigger zone could never overlap either heading. Fixed in
+    macro.html's `updateCurrentChapter` (closest-heading-to-the-line, not
+    a band) -- this parametrization is what would catch a regression back
+    to a band-shaped rule."""
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
         page.goto(f"{site}/macro.html", wait_until="load")
         page.wait_for_selector("#apercu:not([hidden])")
         page.click(f'.bp-sidebar-nav a[href="#{panel_id}"]')
-        page.wait_for_selector(f"#{panel_id}:not([hidden])")
-        visible = page.eval_on_selector_all(
-            "[data-panel]", "els => els.filter(e => !e.hidden).map(e => e.id)"
-        )
-        assert visible == [panel_id], visible
-        # The sidebar agrees with what is actually shown.
-        current = page.eval_on_selector_all(
-            '.bp-sidebar-nav a[aria-current="page"]', "els => els.map(e => e.getAttribute('href'))"
-        )
-        assert current == [f"#{panel_id}"], current
-    finally:
-        context.close()
-
-
-def test_choosing_a_panel_moves_focus_to_its_heading(browser, site):
-    """Keyboard/screen-reader users need to land somewhere after a panel
-    switch, not stay wherever the sidebar link was."""
-    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
-    page = context.new_page()
-    try:
-        page.goto(f"{site}/macro.html", wait_until="load")
-        page.wait_for_selector("#apercu:not([hidden])")
-        page.click('.bp-sidebar-nav a[href="#conjoncture"]')
-        page.wait_for_selector("#conjoncture:not([hidden])")
         page.wait_for_function(
-            "document.activeElement && document.activeElement.closest('#conjoncture') !== null"
+            "document.querySelector('.bp-sidebar-nav a[aria-current=\"page\"]')"
+            f"?.getAttribute('href') === '#{panel_id}'"
         )
-        focused_tag = page.evaluate("document.activeElement.tagName")
-        assert focused_tag == "H2", focused_tag
-    finally:
-        context.close()
-
-
-def test_loading_the_page_fresh_does_not_move_focus(browser, site):
-    """`onShow` fires for the default panel too (macro.html's chart redraw
-    needs it), but a first load must not steal focus from the address bar --
-    only a user CHOICE does."""
-    context = browser.new_context(viewport=DESKTOP_VIEWPORT)
-    page = context.new_page()
-    try:
-        page.goto(f"{site}/macro.html", wait_until="load")
-        page.wait_for_selector("#apercu:not([hidden])")
-        focused_tag = page.evaluate("document.activeElement && document.activeElement.tagName")
-        assert focused_tag != "H2", "the default panel's heading stole focus on load"
+        # Nothing is ever hidden any more -- every chapter section exists,
+        # unhidden, on the one scrolling page.
+        hidden = page.eval_on_selector_all(
+            "[data-panel]", "els => els.filter(e => e.hidden).map(e => e.id)"
+        )
+        assert hidden == [], f"chapter(s) unexpectedly hidden: {hidden}"
+        box = page.locator(f"#{panel_id}").bounding_box()
+        assert (
+            box and box["y"] < DESKTOP_VIEWPORT["height"] and box["y"] > -50
+        ), f"#{panel_id} did not scroll into view: {box}"
     finally:
         context.close()
 
 
 # --- BATCH A1.4b: history charts inside Prix/Emploi/Conjoncture ---------------
 
-#: {panel id: (chart card id, canvas id)}, matching macro.html's camelId() of
-#: each config/national_sections.yaml `panel_charts[].id`.
+#: {panel id: (chart card id, plot host id)}, matching macro.html's
+#: camelId() of each config/national_sections.yaml `panel_charts[].id`.
+#: The plot host used to be a `<canvas id="...Canvas">`; the Portrait
+#: redesign's SVG renderer draws into a `<div id="...Plot">` instead
+#: (macro.html's renderPanelCharts(), assets/belpulse/
+#: macro_portrait_charts.js).
 PANEL_CHARTS = {
-    "prix": ("prices-chart", "pricesChartCanvas"),
-    "emploi": ("employment-chart", "employmentChartCanvas"),
-    "conjoncture": ("business-cycle-chart", "businessCycleChartCanvas"),
+    "prix": ("prices-chart", "pricesChartPlot"),
+    "emploi": ("employment-chart", "employmentChartPlot"),
+    "conjoncture": ("business-cycle-chart", "businessCycleChartPlot"),
 }
 
 
-def _open_panel_chart(browser, site, panel_id, canvas_id, lang=None):
+def _open_panel_chart(browser, site, panel_id, plot_id, lang=None):
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     if lang:
         # Pinned rather than left to the browser's own locale, the same way
@@ -296,35 +315,37 @@ def _open_panel_chart(browser, site, panel_id, canvas_id, lang=None):
     page.goto(f"{site}/macro.html", wait_until="load")
     page.wait_for_selector("#apercu:not([hidden])")
     page.click(f'.bp-sidebar-nav a[href="#{panel_id}"]')
-    page.wait_for_selector(f"#{panel_id}:not([hidden])")
-    page.wait_for_function(f"document.getElementById('{canvas_id}').width > 0")
-    # Same "wait for the real rendered width, not just a non-zero one" as the
-    # GDP-history canvas test above -- the stale-300px-fallback bug would
-    # also produce an early non-zero width.
+    page.wait_for_function(
+        "document.querySelector('.bp-sidebar-nav a[aria-current=\"page\"]')"
+        f"?.getAttribute('href') === '#{panel_id}'"
+    )
+    page.wait_for_selector(f"#{plot_id} svg")
+    # Same "wait for the real rendered width, not just present" caution the
+    # old canvas version had -- the SVG's viewBox is fixed at build time
+    # (buildLineChartSVG), so what actually needs to settle is its CSS
+    # width filling the host.
     page.wait_for_function(
         "(function(){"
-        f"var c = document.getElementById('{canvas_id}');"
-        "var wrap = c.parentElement;"
-        "return c.getBoundingClientRect().width >= wrap.clientWidth * 0.9;"
+        f"var svg = document.querySelector('#{plot_id} svg');"
+        f"var wrap = document.getElementById('{plot_id}');"
+        "return svg && svg.getBoundingClientRect().width >= wrap.clientWidth * 0.9;"
         "})()"
     )
     return context, page
 
 
 @pytest.mark.parametrize("panel_id", ["prix", "emploi", "conjoncture"])
-def test_a_panel_charts_canvas_fills_its_cards_inner_width(browser, site, panel_id):
-    chart_id, canvas_id = PANEL_CHARTS[panel_id]
-    context, page = _open_panel_chart(browser, site, panel_id, canvas_id)
+def test_a_panel_charts_svg_fills_its_cards_inner_width(browser, site, panel_id):
+    chart_id, plot_id = PANEL_CHARTS[panel_id]
+    context, page = _open_panel_chart(browser, site, panel_id, plot_id)
     try:
-        canvas_width = page.evaluate(
-            f"document.getElementById('{canvas_id}').getBoundingClientRect().width"
+        svg_width = page.eval_on_selector(
+            f"#{plot_id} svg", "el => el.getBoundingClientRect().width"
         )
-        wrap_width = page.evaluate(
-            f"document.getElementById('{canvas_id}').parentElement.clientWidth"
-        )
+        wrap_width = page.eval_on_selector(f"#{plot_id}", "el => el.clientWidth")
         assert (
-            canvas_width >= wrap_width * 0.9
-        ), f"{chart_id}'s canvas is {canvas_width}px wide inside a {wrap_width}px wrapper"
+            svg_width >= wrap_width * 0.9
+        ), f"{chart_id}'s chart is {svg_width}px wide inside a {wrap_width}px wrapper"
     finally:
         context.close()
 
@@ -357,7 +378,7 @@ def _hover_until_tip(page, x, y, budget_ms=5000, step_ms=200):
 
 
 def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, site):
-    chart_id, canvas_id = PANEL_CHARTS["prix"]
+    chart_id, plot_id = PANEL_CHARTS["prix"]
     series = _panel_chart(chart_id)["series"]
     assert series == ["HICP"], series
     entry = _national()["HICP"]
@@ -366,31 +387,18 @@ def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, s
     last_value = entry["periods"][last_period]["value"]
     assert last_value is not None, "fixture assumption broken: HICP's last period has no value"
 
-    context, page = _open_panel_chart(browser, site, "prix", canvas_id, lang="en")
+    context, page = _open_panel_chart(browser, site, "prix", plot_id, lang="en")
     try:
-        canvas = page.locator(f"#{canvas_id}")
-        box = canvas.bounding_box()
-        assert box, "HICP canvas has no layout box"
-        # Failed twice on 2026-09-16 in CI (develop push after #209, then the
-        # bot PR #216) with "Timeout 5000ms exceeded", 186 others passing,
-        # and passed on rerun both times -- a race, not a regression.
-        # _open_panel_chart waits for the canvas to have its LAYOUT (width
-        # >= 90% of its wrapper), not for the chart's DATA to be drawn or its
-        # hover layer to be attached: macro.html draws the series and calls
-        # BPCharts.attachTooltip only once national.json has arrived, and on
-        # a loaded runner that lands AFTER a single mouse.move. One mousemove
-        # fires once; nothing re-fires it when the hover layer appears later,
-        # so the wait expires. Two fixes, both on real conditions rather than
-        # a longer sleep: (1) wait for the hover layer to be bound -- macro.html
-        # sets canvas.dataset.bpBound = '1' in the same synchronous block that
-        # calls attachTooltip after the first draw; (2) re-nudge the mouse
-        # while polling, so a redraw that lands after the first move (the
-        # ResizeObserver redraw is rAF-coalesced, i.e. asynchronous) still gets
-        # a mousemove to answer. Same 5 s budget as before.
-        page.wait_for_function(
-            f"document.getElementById('{canvas_id}').dataset.bpBound === '1'",
-            timeout=15000,
-        )
+        svg = page.locator(f"#{plot_id} svg")
+        box = svg.bounding_box()
+        assert box, "HICP chart has no layout box"
+        # wireLine (assets/belpulse/macro_portrait_charts.js) attaches its
+        # hover layer once the SVG exists; the SVG is already confirmed
+        # present and real-width by _open_panel_chart's wait_for_function
+        # above, so a nudge-and-poll hover is enough here (same rationale
+        # as the old canvas version's comment: a mousemove that lands
+        # before the layer attaches gets nothing to answer, so poll rather
+        # than sleep once).
         _hover_until_tip(page, box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
         tip_text = page.locator(".bp-chart-tip").inner_text()
         assert last_period in tip_text, f"tooltip missing period: {tip_text!r}"
@@ -399,14 +407,21 @@ def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, s
         # uses (pinned to 'en' above), the same way MapUI.formatValue does
         # it (assets/commune_map.js): a DECLARED decimals count is a
         # minimum as well as a maximum, and HICP's unit is "percent_yy" --
-        # a trailing "%" MapUI adds, not a raw unit code (rule 7).
+        # a trailing " %" (WITH the leading space) the renderer adds, not
+        # a raw unit code (rule 7). The space matches commune.html's own
+        # displayUnit()/pctText convention verbatim (commune.html has a
+        # comment noting a past batch caught exactly this space going
+        # missing) -- the Portrait SVG renderer's `displayUnit()` in
+        # macro.html was copied from the same convention, so "2.2 %" is
+        # the correct, intentional format, not a regression from the old
+        # canvas tooltip's "2.2%".
         decimals = entry.get("decimals", 1)
         expected_value_text = (
             page.evaluate(
                 "([v, d]) => v.toLocaleString('en', {minimumFractionDigits: d, maximumFractionDigits: d})",
                 [last_value, decimals],
             )
-            + "%"
+            + " %"
         )
         assert (
             expected_value_text in tip_text
@@ -417,39 +432,56 @@ def test_hovering_the_last_hicp_point_shows_the_real_value_and_period(browser, s
 
 @pytest.mark.parametrize("panel_id", ["prix", "emploi", "conjoncture"])
 def test_a_panel_charts_data_table_lists_every_drawn_period(browser, site, panel_id):
-    chart_id, canvas_id = PANEL_CHARTS[panel_id]
+    chart_id, plot_id = PANEL_CHARTS[panel_id]
     series = _panel_chart(chart_id)["series"]
     national = _national()
-    # All the periods any drawn series carries -- BPCharts aligns every
-    # series on the UNION of their periods, so a period only one of the two
-    # Conjoncture series has still gets a row (the other becomes a gap).
-    all_periods: set[str] = set()
-    for code in series:
-        all_periods |= set(national[code]["periods"].keys())
-    assert all_periods, f"{chart_id}: no periods to check against"
-
-    context, page = _open_panel_chart(browser, site, panel_id, canvas_id)
+    # All the periods any drawn series carries. Unlike the old canvas
+    # renderer (BPCharts, which aligned every series on the union of their
+    # periods in one chart), the Portrait SVG renderer draws each series in
+    # `panel_charts[].series` as its OWN separate chart+table inside the
+    # card (macro.html's renderPanelCharts() creates one `.portrait-series`
+    # per code) -- so the expected row count is per-series periods, summed
+    # across the series sharing this card, not a period union times series
+    # count.
+    context, page = _open_panel_chart(browser, site, panel_id, plot_id)
     try:
+        # The table renders each row's period through macro.html's own
+        # fmtPeriod() -- a localized "MMM YYYY" (or "Qn YYYY"), never the
+        # raw ISO string ("2026-02" becomes "févr. 2026" in French,
+        # the language this context defaults to) -- so the check below
+        # asks the PAGE to format the same way it would, in whatever
+        # language it actually booted in, rather than assuming the raw
+        # period string appears verbatim (it never does; this was the
+        # test's own bug, not the page's -- caught because the real
+        # UNEMPLOYMENT_RATE/BUSINESS_CONFIDENCE fixtures happened to
+        # include a period the naive check couldn't find).
+        current_lang = page.evaluate("document.documentElement.lang")
         card = page.locator(f"#{chart_id}")
-        details = card.locator("details.bp-chart-data")
-        assert details.count() == 1, f"no data table for {chart_id}"
-        rows = details.locator("tbody tr")
-        expected_rows = len(all_periods) * len(series)
-        # The table is rebuilt whenever BPCharts redraws the chart (resize,
-        # theme, language, panel shown), so a single count() can land in the
-        # instant between clearing and refilling it: CI once read 0 rows and
-        # then 192 while formatting the failure message. Wait for the settled
-        # count instead of sampling it once.
-        try:
-            expect(rows).to_have_count(expected_rows, timeout=10_000)
-        except AssertionError as exc:
-            raise AssertionError(
-                f"{chart_id}: table has {rows.count()} rows, expected {expected_rows} "
-                f"({len(series)} series x {len(all_periods)} aligned periods)"
-            ) from exc
-        table_text = details.locator("table").text_content()
-        for period in all_periods:
-            assert period in table_text, f"{chart_id}: period {period} missing from its data table"
+        details = card.locator("details.portrait-data")
+        expect(details).to_have_count(len(series), timeout=10_000)
+        for i, code in enumerate(series):
+            code_periods = sorted(national[code]["periods"].keys())
+            assert code_periods, f"{chart_id}: no periods for {code} to check against"
+            table = details.nth(i).locator("table")
+            rows = details.nth(i).locator("tbody tr")
+            expect(rows).to_have_count(len(code_periods), timeout=10_000)
+            table_text = table.text_content()
+            for period in code_periods:
+                expected = page.evaluate(
+                    """([p, lang]) => {
+                        var m = /^(\\d{4})-(\\d{2})$/.exec(p);
+                        if (m) return new Date(Number(m[1]), Number(m[2]) - 1, 1)
+                            .toLocaleDateString(lang, {month: 'short', year: 'numeric'});
+                        var q = /^(\\d{4})-Q([1-4])$/.exec(p);
+                        if (q) return ({en: 'Q', fr: 'T', nl: 'K'}[lang] || 'Q') + q[2] + ' ' + q[1];
+                        return p;
+                    }""",
+                    [period, current_lang],
+                )
+                assert expected in table_text, (
+                    f"{chart_id}/{code}: period {period} (rendered {expected!r}) "
+                    f"missing from its data table: {table_text!r}"
+                )
     finally:
         context.close()
 
@@ -464,11 +496,26 @@ def test_a_compact_empty_cards_message_only_renders_for_the_state_that_owns_it(b
     either slot carries real data and moves to another state (`loading` while
     it fetches, `ready` once drawn), "Not available yet" would render right
     next to it -- collapsing distinct states into one, which CLAUDE.md rule
-    26 forbids. The fix scopes the override to
-    `.card-compact-empty[data-state="unavailable"]` instead of `!important`,
-    so this drives the card through the OTHER real state names the page
-    itself uses (assets/belpulse/components.css) and checks the message
-    actually disappears, the way it does for every other card on the page."""
+    26 forbids. The original fix scoped the override to
+    `.card-compact-empty[data-state="unavailable"]` instead of `!important`.
+
+    Portrait redesign found the SAME bug reintroduced in a new form: the
+    whole `.card-compact-empty` rule moved out of macro.html's inline
+    <style> to assets/belpulse/macro_portrait.css (all layout did, same
+    as commune.html), and on the way its narrow, state-specific override
+    was rewritten as a blanket `.bp-state:not([data-state="ready"])`
+    rule -- which put "Not available yet" back on EVERY non-ready state,
+    on EVERY `.bp-state` card on the page, not just #map/#news: a flash
+    of that message on every card while it is still `loading` (present in
+    the markup as the initial state, before data arrives), and it also
+    overrode `suppressed`'s own dash-and-reason rendering
+    (components.css). Fixed by scoping macro_portrait.css's override to
+    `[data-state="unavailable"]` specifically (the only state macro.html's
+    own JS ever needs this message for) rather than `:not([data-state=
+    "ready"])`, so `loading` and `suppressed` fall back to
+    components.css's own correct, more granular rules. The message is
+    `display:block` now, not `flex` -- unrelated to this bug, just how
+    the ported card CSS lays it out (icon above text, not beside it)."""
     context = browser.new_context(viewport=DESKTOP_VIEWPORT)
     page = context.new_page()
     try:
@@ -481,7 +528,7 @@ def test_a_compact_empty_cards_message_only_renders_for_the_state_that_owns_it(b
         shown = page.eval_on_selector(
             "#map .bp-state-message", "el => getComputedStyle(el).display"
         )
-        assert shown == "flex", "message should render while #map is unavailable"
+        assert shown == "block", "message should render while #map is unavailable"
 
         for other_state in ("loading", "ready", "suppressed"):
             page.evaluate(
@@ -492,7 +539,7 @@ def test_a_compact_empty_cards_message_only_renders_for_the_state_that_owns_it(b
             )
             assert hidden == "none", (
                 f"#map still renders 'Not available yet' with data-state={other_state!r} "
-                "-- the !important override is back"
+                "-- a state is collapsing into 'unavailable' again"
             )
     finally:
         context.close()

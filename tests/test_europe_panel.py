@@ -697,6 +697,9 @@ def test_country_mode_requests_only_same_origin_or_fonts(browser, site):
         page.goto(f"{site}/macro.html", wait_until="load")
         page.click('.bp-sidebar-nav a[href="#europe"]')
         page.wait_for_selector("#europe:not([hidden])")
+        # Every chapter is now visible from load, so "#europe not hidden" no
+        # longer means the panel is ready; wait for its region map first.
+        page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
         _switch_to_country_mode(page)
         page.wait_for_timeout(300)
         origin = urlparse(site).netloc
@@ -1060,11 +1063,22 @@ def test_map_sits_left_and_every_control_sits_in_the_rail_beside_it(browser, sit
         assert abs(rail["y"] - mapcol["y"]) <= 2, (mapcol, rail)
         assert 0.55 < mapcol["width"] / (mapcol["width"] + rail["width"]) < 0.72
         # Nothing of the panel sits above the map: no breadcrumb, no search
-        # box, no visible panel title.
+        # box.
         assert page.locator(".bp-breadcrumb").count() == 0
         assert page.locator("#communeSearch").count() == 0
+        # Portrait redesign: #europe's <h2> lost its `bp-sr-only` class --
+        # every chapter on the page now gets a real, visible numbered
+        # heading ("01 Croissance", "02 Prix", ... "06 Europe"), matching
+        # commune.html's own chapter-heading pattern verbatim, and Europe
+        # is no longer a special case that hides its title above the map.
+        # The panel's actual layout requirement -- nothing else (no
+        # breadcrumb, no search box) sits above the map -- is unchanged
+        # and still checked above; only the heading's own visibility
+        # changed, deliberately.
         heading = _box(page, "#europe h2")
-        assert heading["width"] <= 1 and heading["height"] <= 1
+        assert (
+            heading["width"] > 1 and heading["height"] > 1
+        ), "expected #europe's chapter heading to be visible like every other chapter's"
         for selector in (
             "#europeModeRegion",
             "#europePaletteSelect",
@@ -1081,6 +1095,17 @@ def test_map_sits_left_and_every_control_sits_in_the_rail_beside_it(browser, sit
         assert page.is_visible("#europeRegionPickerSearch")
         page.keyboard.press("Escape")
         assert page.eval_on_selector("#europeRegionPickerMenu", "el => el.open") is False
+        # Re-measured, not the `mapcol` from before the click above: opening
+        # the region picker (even briefly) can grow the page's real
+        # scrollable height -- its search results list is real content, not
+        # yet filtered -- and the browser scrolls the newly-visible summary
+        # into view on click, which moves `.bp-europe-map__mapcol` by
+        # hundreds of pixels in page coordinates. Comparing the OLD mapcol
+        # box against boxes measured after the click compares two different
+        # scroll positions, not two elements' real relationship (found
+        # live: the same real 13px gap between the map and its legend read
+        # as "537px" this way -- not a layout bug, a stale-snapshot one).
+        mapcol = _box(page, ".bp-europe-map__mapcol")
         # The legend is a small box in the map's bottom-left corner, the
         # source a short link in its bottom-right corner.
         legend = _box(page, "#europeRegionMapWrap .bp-europe-map__legend")
@@ -1138,14 +1163,14 @@ def test_first_three_charts_sit_in_the_rail_and_the_rest_below_the_map(browser, 
         context.close()
 
 
-def test_header_stays_frozen_and_the_section_menu_stays_pinned_left(browser, site):
+def test_header_and_portrait_topic_strip_stay_accessible_when_scrolling(browser, site):
     context = browser.new_context(viewport={"width": 1440, "height": 900})
     page = context.new_page()
     try:
         page.goto(f"{site}/macro.html#europe", wait_until="load")
         page.wait_for_selector('#bpEuropeStage svg path[id^="em-nutsrg-"]', timeout=15000)
-        # Opening on #europe does not tuck the panel under the frozen header.
-        assert page.evaluate("window.scrollY") == 0
+        # The hero precedes the panel; a deep link may scroll past it.
+        assert page.is_visible("#europe")
         _switch_to_country_mode(page)  # the charts below the map make it scroll
         page.wait_for_selector("#international .bp-europe-compare__card canvas", timeout=15000)
         for where in ("600", "document.documentElement.scrollHeight"):
@@ -1155,11 +1180,13 @@ def test_header_stays_frozen_and_the_section_menu_stays_pinned_left(browser, sit
             header = _box(page, ".bp-topbar")
             sidebar = _box(page, ".bp-sidebar")
             assert abs(header["y"]) <= 1, (where, header)
-            assert sidebar["x"] == 0, (where, sidebar)
-            assert abs(sidebar["y"] - header["height"]) <= 2, (where, header, sidebar)
-            assert abs(sidebar["y"] + sidebar["height"] - 900) <= 2, (where, sidebar)
+            assert sidebar["x"] > 0, (where, sidebar)
+            assert sidebar["width"] > 900, (where, sidebar)
+            assert sidebar["height"] < 100, (where, sidebar)
+            if where == "600":
+                assert abs(sidebar["y"] - header["height"]) <= 2, (where, header, sidebar)
             footer = _box(page, ".foot")
-            assert footer["x"] >= sidebar["x"] + sidebar["width"] - 1, (where, footer)
+            assert footer["x"] == 0, (where, footer)
     finally:
         context.close()
 
