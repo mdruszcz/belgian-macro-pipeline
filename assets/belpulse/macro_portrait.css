@@ -791,3 +791,153 @@
 .macro .contrib-total{display:flex;flex-direction:column;gap:8px}
 .macro .leadchart-para{font-size:13px;margin:10px 0;display:block;max-width:75ch}
 .macro .chapter .bp-state[data-state=unavailable]{border:1px solid var(--bp-border);border-radius:10px;padding:20px}
+
+/* =========================================================================
+   Micro composition: docs/features/micro_portrait.md. Same Portrait
+   chapters-on-one-page pattern as .macro above -- every selector that names
+   a class the two pages share (hero, pill strip, essentials band, chart
+   cards, portrait-metrics tiles, chapter numbering) is copied verbatim from
+   the .macro block, so the two pages read as one family. Only what is
+   genuinely different about micro.html gets its own rule here: the KPI row
+   still has 6 cards like macro's, but the chapter grid uses row-2/row-2r/
+   row-3 (macro only ever used row-3 in its overview chapter), a 2x2
+   household tile grid, a home-sales region table, and a leadmap card for
+   the shared choropleth (assets/commune_map.js, rule 29) that macro.html
+   has no equivalent of. Nothing here touches a `.macro` selector, so
+   macro.html is unaffected by this addition (verified: macro's own tests
+   and screenshots, taken before and after, are unchanged). ========= */
+.micro .bp-body--analytical{display:block;max-width:1200px;margin:0 auto;padding:0 24px}
+.micro .micro-main{display:block;min-width:0;padding:0;gap:0}
+.micro .bp-topbar{position:sticky;top:0;z-index:40}
+.micro .portrait-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:28px;padding:32px 0}
+.micro .portrait-hero>div{min-width:0}
+.micro .hero-name{font-size:48px;overflow-wrap:anywhere}
+.micro .hero-tagline{line-height:1.5;max-width:46ch}
+.micro .skyline{grid-column:1;grid-row:1;position:relative;height:300px;display:flex;align-items:flex-end;padding:24px;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:12px}
+.micro .skyline svg{width:100%;color:var(--bp-text-muted)}
+.micro .skyline .script{position:absolute;right:24px;top:24px;max-width:18ch;text-align:right;font:500 20px/1.3 var(--bp-font-display);font-style:italic;color:var(--bp-text-muted)}
+.micro .side-update{font-size:12px;color:var(--bp-text-faint);margin-top:16px;line-height:1.7}
+.micro .side-update .when{font-weight:600;color:var(--bp-text-muted)}
+.micro .bp-sidebar{position:sticky;top:var(--macro-topbar-h,56px);z-index:30;background:var(--bp-bg);border-radius:0;padding:10px 0;border-bottom:1px solid var(--bp-border);margin:0;min-height:0;flex-direction:row}
+.micro .bp-sidebar-nav{display:flex;flex-direction:row;gap:8px;overflow-x:auto;padding:0;margin:0;list-style:none}
+.micro .bp-sidebar-nav li{flex:none}
+.micro .bp-sidebar-nav a{font:600 12px/1 var(--bp-font-ui);color:var(--bp-text-muted);background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:999px;padding:8px 12px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.micro .bp-sidebar-nav a::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--th)}
+.micro .bp-sidebar-nav .icon{display:none}
+.micro .bp-sidebar-nav a[aria-current=page],.micro .bp-sidebar-nav a:hover{border-color:var(--th);background:var(--bp-surface);color:var(--bp-text)}
+.micro .micro-search{margin:20px 0 0}
+.micro .chapter{scroll-margin-top:calc(var(--macro-topbar-h,56px) + 64px);padding-top:40px}
+.micro .chapter-head{display:block;margin-bottom:20px}
+.micro .chapter-title{font-size:32px}
+.micro #apercu{padding-top:0}
+.micro .essentiel-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:0;border-top:0;border-bottom:1px solid var(--bp-border)}
+.micro .essentiel-item{display:flex;flex-direction:column;grid-row:auto;padding:22px 18px;cursor:default}
+.micro .essentiel-eyebrow{min-height:62px;text-transform:uppercase;overflow-wrap:anywhere}
+.micro .essentiel-value{font-size:clamp(18px,2vw,30px);height:auto;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.micro .essentiel-value .value-num{line-height:1.1}
+.micro .essentiel-value .value-unit{font-size:12px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
+.micro .essentiel-meta{align-self:auto}
+.micro .essentiel-spark{width:100%;max-width:none;height:40px}
+.micro .bp-chart-card{background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;box-shadow:none;padding:20px 22px;min-width:0;position:relative}
+.micro .bp-chart-card::before{content:"";display:block;position:absolute;left:22px;top:0;width:28px;height:3px;border-radius:0 0 2px 2px;background:var(--th);opacity:.9}
+.micro .bp-chart-head{margin-bottom:16px;display:flex;justify-content:space-between;gap:12px;align-items:start}
+.micro .bp-chart-head h3{font:600 18px/1.3 var(--bp-font-display)}
+.micro .bp-chart-head .subtitle,.micro .provenance,.micro .kpi-note{font-size:12px;line-height:1.6;color:var(--bp-text-faint)}
+.micro .metric-date{font-size:12px;color:var(--bp-text-faint);margin:8px 0}
+.micro .leadchart-head{align-items:start}
+.micro .leadchart-eyebrow{max-width:55%;overflow-wrap:anywhere}
+.micro .leadchart-lastval{font-size:32px;white-space:normal;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.micro .leadchart-lastval .value-num{line-height:1.1}
+.micro .leadchart-lastval .value-unit{font-size:13px;font-weight:500;line-height:1.3;color:var(--bp-text-faint);letter-spacing:0}
+.micro .portrait-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));list-style:none;padding:0;margin:0;gap:16px}
+@media (max-width:560px){.micro .portrait-metrics{grid-template-columns:1fr}}
+.micro .portrait-metrics .portrait-metric{display:block;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px 14px;min-width:0;position:relative}
+.micro .portrait-metrics .portrait-metric::before{content:"";display:block;position:absolute;left:18px;top:0;width:26px;height:3px;border-radius:0 0 2px 2px;background:var(--th);opacity:.9}
+.micro .portrait-metric .leadchart-lastval{font-size:24px}
+.micro .portrait-metric .leadchart-lastval .value-unit{font-size:12px}
+.micro .portrait-series+.portrait-series{margin-top:28px}
+.micro #keyList{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.micro .row{display:grid;gap:24px;margin-top:28px;min-width:0}
+.micro .row:first-of-type{margin-top:0}
+.micro .row-3{grid-template-columns:1fr 1fr}
+.micro .row-2{grid-template-columns:1fr 1fr}
+.micro .row-2r{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}
+.micro #key{grid-column:1/-1}
+.micro #news{padding:16px;border:1px solid var(--bp-border);border-radius:10px}
+.micro .portrait-data{font-size:12px;color:var(--bp-text-muted);margin-top:12px}
+.micro .portrait-data summary{cursor:pointer}
+.micro .portrait-data table{border-collapse:collapse;width:100%;margin-top:12px;font-variant-numeric:tabular-nums}
+.micro .portrait-data td,.micro .portrait-data th{padding:6px;text-align:left;border-bottom:1px solid var(--bp-border);font-weight:400}
+.micro .portrait-data[open]{max-height:340px;overflow:auto}
+.micro .pill{font-size:12px;color:var(--bp-text-muted)}
+.micro .bp-state-message .why{display:block}
+.micro .foot{margin-left:0}
+.micro .leadrow{display:grid;grid-template-columns:7fr 5fr;gap:24px;margin-top:0;align-items:start}
+.micro .leadrow>div{min-width:0}
+.micro .leadchart-para{font-size:13px;margin:10px 0;display:block;max-width:75ch}
+.micro .chapter .bp-state[data-state=unavailable]{border:1px solid var(--bp-border);border-radius:10px;padding:20px}
+
+/* ---- household tile grid (2x2), Population chapter ---- */
+.micro .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.micro .bp-stat-tile{display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid var(--bp-border);border-radius:10px;background:var(--bp-surface-alt);min-width:0}
+.micro .bp-stat-tile .bp-kpi-label{display:flex;flex-direction:column;gap:2px;min-width:0}
+.micro .bp-stat-tile .name{font-size:11px;color:var(--bp-text-muted);overflow-wrap:anywhere}
+.micro .bp-stat-tile .bp-value{font-size:1.1rem;font-weight:600;white-space:nowrap;color:var(--bp-text)}
+.micro .bp-stat-tile .bp-value .unit{font-size:.7rem;color:var(--bp-text-faint);font-weight:400;margin-left:3px}
+.micro .bp-stat-tile .period{font-size:10px;color:var(--bp-text-faint)}
+
+/* ---- Logement chapter's region table ---- */
+.micro .region-table-wrap{overflow-x:auto}
+.micro .region-table{width:100%;border-collapse:collapse;font-size:13px}
+.micro .region-table th,.micro .region-table td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--bp-border)}
+.micro .region-table td:last-child,.micro .region-table th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.micro .region-table tr.highlight td{font-weight:600;color:var(--bp-text)}
+.micro .panel-note{font-size:12px;color:var(--bp-text-muted);max-width:70ch;margin:10px 0 0;padding:10px 12px;background:var(--bp-surface-alt);border-radius:8px}
+
+/* ---- Comparaisons chapter: ranking bar chart + explore card + map ---- */
+.micro .compare-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.micro .compare-head select{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-control);background:var(--bp-surface);color:var(--bp-text)}
+.micro .compare-canvas-wrap{position:relative;min-height:280px;margin-top:12px}
+.micro .compare-canvas-wrap canvas{display:block;width:100%}
+.micro .explore-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.micro .explore-actions a{font-size:13px;font-weight:500;text-decoration:none;color:var(--bp-accent)}
+.micro .explore-actions a:hover{text-decoration:underline}
+.micro .explore-search{margin-top:12px;display:flex;align-items:center;gap:8px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-control);padding:7px 12px}
+.micro .explore-search input{border:0;background:transparent;outline:0;font:inherit;font-size:13px;color:inherit;flex:1;min-width:0}
+/* leadmap-card/-head/-box/-legend/-select/-caption already come from the
+   unscoped copy above (~line 239) -- this page's map is the same shared
+   engine (assets/commune_map.js, rule 29) commune.html's own hero locator
+   and neighbours map use, so it needs no rule of its own beyond fitting it
+   into a Portrait chart card (the border/dash/padding .bp-chart-card
+   already gives it via the `leadmap-card card-wide` classes on #map). */
+.micro #map .leadmap-box{min-height:320px}
+.micro .card-wide{grid-column:1/-1}
+.micro .row-2r .card-wide{grid-column:auto}
+
+@media(max-width:1000px){
+  .micro .essentiel-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .micro .essentiel-item:nth-child(3n+1){border-left:0}
+  .micro #keyList{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .micro .row-3,.micro .row-2,.micro .row-2r{grid-template-columns:1fr}
+  .micro .leadrow{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .micro .bp-body--analytical{padding:0 16px}
+  .micro .portrait-hero{grid-template-columns:1fr;gap:20px;padding-top:16px}
+  .micro .skyline{height:220px}
+  .micro .hero-name{font-size:38px}
+  .micro .essentiel-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .micro .essentiel-item{padding:16px 12px}
+  .micro .essentiel-item:nth-child(n){border-left:1px solid var(--bp-border)}
+  .micro .essentiel-item:nth-child(2n+1){border-left:0}
+  .micro .essentiel-item:nth-child(n+3){border-top:1px solid var(--bp-border)}
+  .micro #keyList{grid-template-columns:1fr}
+  .micro .leadchart-lastval{font-size:26px}
+  .micro .tile-grid{grid-template-columns:1fr}
+  .micro .compare-head{flex-direction:column;align-items:stretch}
+  .micro .compare-head select{width:100%}
+}
+@media print{.micro .bp-sidebar{display:none}.micro .chapter{break-inside:avoid}.micro .bp-anim-line{stroke-dashoffset:0!important}.micro .bp-anim-fade{opacity:1}}
+.micro{margin:0}
+.micro a{color:var(--bp-accent)}
+.micro .bp-nav a,.micro .bp-logo{color:inherit}
