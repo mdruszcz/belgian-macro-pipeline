@@ -859,7 +859,13 @@
 .micro #keyList{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 .micro .row{display:grid;gap:24px;margin-top:28px;min-width:0}
 .micro .row:first-of-type{margin-top:0}
-.micro .row-3{grid-template-columns:1fr 1fr}
+/* .row-3 holds a variable number of cards across this page's two usages --
+   Overview's key+news (2 cards) and Entreprises' three unavailable cards
+   (3 cards) -- so a fixed 2- or 3-column track is wrong for one of them
+   every time. auto-fit with a wide minimum gives 2 columns naturally when
+   there are 2 children and 3 when there are 3, at the same width, with no
+   per-row override needed. */
+.micro .row-3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .micro .row-2{grid-template-columns:1fr 1fr}
 .micro .row-2r{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}
 .micro #key{grid-column:1/-1}
