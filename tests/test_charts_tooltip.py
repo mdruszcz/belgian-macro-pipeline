@@ -31,8 +31,18 @@ def site():
     production actually is, and costs nothing extra."""
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(REPO))
 
-    class Quiet(socketserver.TCPServer):
+    # ThreadingMixIn: this module's own film hero leaves an in-flight
+    # film-1080.mp4 request open past a "Passer" click (pausing playback does
+    # not cancel the underlying network request), and this file opens a
+    # SECOND page/navigation (the `mobile` fixture, or `desktop`+`mobile`
+    # together) on the same module-scoped server while that request may
+    # still be in flight. A single-threaded server then blocks the second
+    # page's GETs behind that multi-MB response -- a server-fixture
+    # artifact, not real behaviour: a real static host serves both
+    # concurrently.
+    class Quiet(socketserver.ThreadingMixIn, http.server.HTTPServer):
         allow_reuse_address = True
+        daemon_threads = True
 
         def log_message(self, *args):  # pragma: no cover - silence the server
             pass
@@ -69,18 +79,42 @@ def _national() -> dict:
 def _open_home2(chromium, site, width, height, lang="fr"):
     """A fresh context+page at the given viewport, light theme (home2's own
     pre-paint script always forces light), and the given language via the
-    same localStorage key the language picker itself writes."""
+    same localStorage key the language picker itself writes.
+
+    The hero mini-charts (`#heroMini .hcard`) are the film-first redesign's
+    renamed card class (`.glass` -- the old dark hero's card -- became
+    `.hcard`, the commune-Portrait-styled light card). They render
+    regardless of which film-hero phase is showing: `.datahero` (which holds
+    `#heroMini`) is a normal sibling section below `.filmhero` in the DOM,
+    not hidden behind or inside it, and init()'s data fetch/render runs
+    independently of initHero()'s phase state."""
     context = chromium.new_context(viewport={"width": width, "height": height})
     context.add_init_script(f"try{{localStorage.setItem('belpulse-lang', '{lang}');}}catch(e){{}}")
     page = context.new_page()
     page.goto(f"{site}/home2.html")
+    # Reach phase 2 (the data hero) deterministically via "Passer" rather
+    # than relying on the scroll-triggered transition: this suite scrolls
+    # canvases into view itself later, and racing that against the film
+    # hero's OWN scroll-driven phase transition (which changes #filmHero's
+    # height out from under an in-flight scroll) left elements measured at a
+    # stale, off-screen position. Clicking Skip settles the layout up front.
+    page.wait_for_selector("#filmSkip:not([hidden])", timeout=15000)
+    page.click("#filmSkip")
+    page.wait_for_function(
+        "(() => document.getElementById('filmHero').dataset.phase === '2')()", timeout=15000
+    )
+    # Skip also triggers a smooth scrollIntoView() on #dataHero; let it
+    # settle before any bounding-box measurement, otherwise two elements'
+    # boxes can be read a frame apart, mid-scroll, and appear to overlap by
+    # however far the page moved between the two reads.
+    page.wait_for_timeout(600)
     # Wait on a real condition, never a duration: the hero mini-charts exist
     # once init()'s fetches resolve and renderHeroMini() has run.
     page.wait_for_function(
-        "document.querySelectorAll('#heroMini .glass canvas').length >= 1", timeout=15000
+        "document.querySelectorAll('#heroMini .hcard canvas').length >= 1", timeout=15000
     )
     page.wait_for_function(
-        "(() => { const c = document.querySelector('#heroMini .glass canvas');"
+        "(() => { const c = document.querySelector('#heroMini .hcard canvas');"
         " return c && c.getBoundingClientRect().width > 10; })()",
         timeout=15000,
     )
@@ -110,7 +144,7 @@ def test_hovering_the_last_point_shows_its_real_value_and_period(desktop):
     assert len(hero) >= 1
     national = _national()
 
-    cards = desktop.locator("#heroMini .glass")
+    cards = desktop.locator("#heroMini .hcard")
     count = cards.count()
     assert count == len(hero[:2]) or count >= 1
 
@@ -126,6 +160,11 @@ def test_hovering_the_last_point_shows_its_real_value_and_period(desktop):
         assert last_value is not None, f"fixture assumption broken for {code}"
 
         canvas = cards.nth(i).locator("canvas")
+        # The film-first redesign put #heroMini inside .datahero, below the
+        # ~92vh film band -- well past the fold at this viewport height, so
+        # mouse.move (page/viewport coordinates, no auto-scroll) would land
+        # outside the visible window without this.
+        canvas.scroll_into_view_if_needed()
         box = canvas.bounding_box()
         assert box, f"canvas {i} has no layout box"
         desktop.mouse.move(box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
@@ -151,7 +190,7 @@ def test_hovering_the_last_point_shows_its_real_value_and_period(desktop):
 def test_hero_cards_are_compact_no_data_table_no_see_more(desktop):
     """The hero cards follow the compact design: title, latest value, plot,
     source -- no "see data" table and no "see more" link."""
-    cards = desktop.locator("#heroMini .glass")
+    cards = desktop.locator("#heroMini .hcard")
     assert cards.count() >= 1
     for i in range(cards.count()):
         card = cards.nth(i)
@@ -162,12 +201,14 @@ def test_hero_cards_are_compact_no_data_table_no_see_more(desktop):
 
 def test_hero_tooltip_does_not_repeat_the_indicator_name(desktop):
     national = _national()
-    cards = desktop.locator("#heroMini .glass")
+    cards = desktop.locator("#heroMini .hcard")
     for i in range(cards.count()):
         code = _hero_codes()[i]
         title = cards.nth(i).locator("h3").inner_text().strip()
         assert title
-        box = cards.nth(i).locator("canvas").bounding_box()
+        canvas = cards.nth(i).locator("canvas")
+        canvas.scroll_into_view_if_needed()
+        box = canvas.bounding_box()
         assert box
         desktop.mouse.move(box["x"] + box["width"] - 3, box["y"] + box["height"] / 2)
         desktop.wait_for_function(
@@ -181,17 +222,17 @@ def test_hero_tooltip_does_not_repeat_the_indicator_name(desktop):
 
 
 def test_canvas_is_focusable_and_arrow_left_changes_the_announced_point(desktop):
-    canvas = desktop.locator("#heroMini .glass").first.locator("canvas")
+    canvas = desktop.locator("#heroMini .hcard").first.locator("canvas")
     assert canvas.get_attribute("tabindex") == "0"
 
-    live = desktop.locator("#heroMini .glass").first.locator(".bp-sr-only")
+    live = desktop.locator("#heroMini .hcard").first.locator(".bp-sr-only")
     assert live.count() == 1
     before = live.inner_text()
 
     canvas.focus()
     desktop.keyboard.press("ArrowLeft")
     desktop.wait_for_function(
-        "document.querySelectorAll('#heroMini .glass')[0].querySelector('.bp-sr-only').textContent.length > 0",
+        "document.querySelectorAll('#heroMini .hcard')[0].querySelector('.bp-sr-only').textContent.length > 0",
         timeout=5000,
     )
     after = live.inner_text()

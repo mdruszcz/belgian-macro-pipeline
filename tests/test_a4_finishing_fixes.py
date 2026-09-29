@@ -97,7 +97,10 @@ def test_fixture_92094_has_a_country_row_carrying_the_refnis_label():
 @pytest.mark.parametrize(
     "path,ready_selector",
     [
-        ("home2.html", "#heroMini .glass canvas"),
+        # .glass (the old dark hero's card) was renamed .hcard when the
+        # film-first redesign restyled the data hero into the commune
+        # Portrait's light-card language.
+        ("home2.html", "#heroMini .hcard canvas"),
         ("macro.html", "#kpiRow .macro-kpi"),
         ("commune.html?nis=92094", "#essentielRow .essentiel-item"),
         ("profiles.html", "#communeList option"),

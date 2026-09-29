@@ -1,24 +1,36 @@
 <!--
-  BelPulse homepage redesign -- Batch 3 (docs/design-references/homepage.md),
-  built on Batch 1's tokens and Batch 2's shared components.
+  BelPulse homepage redesign -- film-first hero + commune-Portrait data hero
+  (redesign of the previous Batch 3 homepage; docs/design-references/homepage.md
+  for the original brief, superseded here for the hero only).
 
-  The public BelPulse homepage. index.html redirects here so this editorial
-  design is the first page a visitor sees.
+  The public BelPulse homepage. index.html and home.html both redirect here.
 
-  WHERE THIS DEPARTS FROM THE SUPPLIED DESIGN, AND WHY. Every departure is a
-  figure the design shows that this pipeline does not hold. None of them is a
-  layout choice:
+  Two-phase hero (maintainer-approved mockup, screenshots-review/home-v5/):
+  phase 1 is the brand film ALONE in a full-width ~92vh band -- no cards, no
+  map, nothing competing with it (the previous PR #300 cut played the film
+  BEHIND the map/chart cards, where it was covered and hard to follow; the
+  maintainer rejected that). Phase 2, triggered by the film ending, "Passer",
+  or a scroll, is the data hero: headline, lead, commune search, the national
+  choropleth map and the two NBB mini-charts, laid out in the commune
+  Portrait's own visual language (white cards, a chapter-colour hairline per
+  section, uppercase eyebrows) rather than the old dark "glass" cards on a
+  navy gradient. A later visit in the same session (sessionStorage) opens
+  straight into phase 2, with the film's last frame as a slim banner and a
+  "Revoir le film" control. prefers-reduced-motion / Save-Data: poster only,
+  phase 2 immediately, zero video bytes ever requested.
+
+  WHERE THIS DEPARTS FROM THE ORIGINAL SUPPLIED DESIGN, AND WHY. Every
+  departure is a figure the design shows that this pipeline does not hold.
+  None of them is a layout choice:
     * Public-finance tiles (spending / revenue / balance / debt in billions):
       this pipeline's government series are CONTRIBUTIONS TO GDP GROWTH, not
-      levels in euro. The four tiles are built and laid out exactly as
-      designed, then rendered in the component library's `unavailable` state
-      rather than filled with a plausible number.
+      levels in euro. Rendered as one honest "not published" line rather than
+      filled with a plausible number.
     * The commune card, hero and CTA use temporary local AI-generated
-      illustrations. They are disclosed as illustrative rather than
-      documentary photographs and cause no third-party image requests.
+      illustrations, disclosed as illustrative rather than documentary.
     * "581 communes / 200+ indicateurs" in the CTA: the real figures are read
-      live from manifest.json (565 / 52). The design's numbers are
-      aspirational; these are true.
+      live from manifest.json. The design's numbers were aspirational; these
+      are true.
     * "PIB par habitant" on the hero map: Belgium publishes no GDP below the
       regional level and this pipeline holds none. The map opens on the first
       indicator the pipeline's own config lists as a headline, and its picker
@@ -51,7 +63,7 @@
   })();
 </script>
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Caveat:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/belpulse/tokens.css">
 <link rel="stylesheet" href="assets/belpulse/layout.css">
 <link rel="stylesheet" href="assets/belpulse/components.css">
@@ -60,480 +72,240 @@
   /* Page composition only. Anything reusable belongs in
      assets/belpulse/components.css -- Batch 2 owns the library. */
   body{background:var(--bp-bg)}
-  .wrap{max-width:1180px; margin:0 auto; padding:0 var(--bp-space-6)}
+  .wrap{max-width:1200px; margin:0 auto; padding:0 var(--bp-space-6)}
+  @media (max-width:640px){ .wrap{padding:0 16px} }
 
   h1,h2,.display{font-family:var(--bp-font-display); font-weight:600; letter-spacing:-.01em}
+  .num{font-variant-numeric:tabular-nums}
+  .visually-hidden{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
 
-  /* ---- top bar ----
-     The bar itself (height, centred width, the menus) is now shared --
-     assets/belpulse/layout.css's `.bp-topbar`/`.bp-topbar .wrap`, filled by
-     src/pages/shell.py's render_header() through scripts/sync_site_shell.py.
-     Batch A1.1: this page no longer overrides it locally. */
-
-  /* ---- hero ---- */
-  .hero{
-    position:relative; overflow:hidden; color:#fff;
-    background:
-      radial-gradient(1100px 420px at 82% 12%, rgba(70,110,175,.42), transparent 62%),
-      radial-gradient(760px 520px at 8% 88%, rgba(30,60,120,.5), transparent 60%),
-      linear-gradient(140deg, #0b1730 0%, #12274b 52%, #0d1c39 100%);
+  /* =====================================================================
+     PHASE 1 -- the brand film, full width, nothing on top of it but the
+     wordmark and two tiny controls. No card, no headline, no scrim of text
+     to protect: the film gets the whole band to itself (the diagnosis on
+     PR #300 was that the film played BEHIND cards fighting for the same
+     space). object-fit:contain on black so the film's own baked-in HUD/
+     wordmark is never cropped, unlike a cover-fit background layer.
+     ===================================================================== */
+  .filmhero{
+    position:relative; width:100%; height:92vh; min-height:520px; max-height:920px;
+    overflow:hidden; background:#05070c;
   }
-  /* ---- hero film (docs/features/home_film.md) ----------------------------
-     The film/poster sits behind .wrap as its own absolutely-positioned layer,
-     covering the hero band; the scrim gradient on top of it is what keeps the
-     real HTML headline/lead/CTA readable from frame 0, so nobody waits on the
-     video to read the page. aria-hidden: the film is decorative (a text
-     alternative already exists as the real heading/lead), never a source of
-     data claims. */
-  .hero-film{position:absolute; inset:0; z-index:0; overflow:hidden; background:#0b1730}
-  .hero-film video,.hero-film .hero-poster{
-    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;
+  .filmhero video, .filmhero img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; background:#000;
   }
-  .hero-film::after{
-    content:''; position:absolute; inset:0;
-    background:
-      linear-gradient(100deg, rgba(6,16,34,.92) 0%, rgba(9,24,48,.78) 38%, rgba(10,27,52,.5) 68%, rgba(8,20,40,.38) 100%),
-      linear-gradient(0deg, rgba(6,15,32,.55) 0%, rgba(6,15,32,0) 26%);
+  /* A thin vignette only, never a text scrim -- there is no text over the
+     film in phase 1 to protect. Just enough to keep the wordmark and
+     controls legible over a bright frame. */
+  .filmhero::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(5,7,12,.55) 0%, rgba(5,7,12,0) 16%, rgba(5,7,12,0) 72%, rgba(5,7,12,.7) 100%);
   }
-  .hero .wrap{position:relative; z-index:1}
-  .hero-replay{
-    position:absolute; z-index:2; top:var(--bp-space-5); right:var(--bp-space-5);
+  .filmhero-controls{
+    position:absolute; z-index:2; bottom:22px; right:24px; display:flex; gap:8px;
+  }
+  .filmhero-controls button{
     display:inline-flex; align-items:center; gap:6px;
-    background:rgba(8,20,40,.68); border:1px solid rgba(255,255,255,.28); color:#fff;
-    border-radius:999px; padding:7px 14px; font:inherit; font-size:12px; font-weight:var(--bp-weight-medium);
+    background:rgba(5,10,20,.55); border:1px solid rgba(255,255,255,.3); color:#fff;
+    border-radius:999px; padding:8px 15px; font:inherit; font-size:12px; font-weight:600;
     cursor:pointer; backdrop-filter:blur(3px);
   }
-  .hero-replay:hover{background:rgba(255,255,255,.16)}
-  .hero-replay[hidden]{display:none}
-  /* prefers-reduced-motion / Save-Data / slow connections (JS decides which):
-     no <video> is ever requested; the poster covers .hero-film with no replay
-     control offered (there is nothing to replay). */
-  .hero .wrap{
-    display:grid; grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
-    gap:var(--bp-space-8); padding-top:var(--bp-space-10); padding-bottom:var(--bp-space-10);
-    align-items:start;
+  .filmhero-controls button:hover{background:rgba(255,255,255,.16)}
+  .filmhero-controls button[hidden]{display:none}
+  .filmhero-scrollcue{
+    position:absolute; z-index:2; bottom:22px; left:24px; color:rgba(255,255,255,.78);
+    font:600 11px/1 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.08em;
+    display:flex; align-items:center; gap:8px;
   }
-  .hero .eyebrow{
-    font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold);
-    letter-spacing:.14em; color:rgba(255,255,255,.62); margin-bottom:var(--bp-space-5);
+  .filmhero-scrollcue svg{animation:bp-filmhero-bounce 1.6s ease-in-out infinite}
+  @keyframes bp-filmhero-bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+  @media (prefers-reduced-motion: reduce){ .filmhero-scrollcue svg{animation:none} }
+  /* Phase-2 state (any trigger -- Passer, the film ending, a second-session
+     visit, or a play() rejection): the film band collapses to a slim banner
+     carrying the poster (the film's last frame) and a replay control --
+     never autoplays again in the same session. Every JS transition into
+     phase 2 always adds .banner alongside data-phase="2" (goPhase2()), so
+     .filmhero[data-phase="2"] alone, without .banner, is never reached --
+     .filmhero's poster/video are position:absolute, so height:auto with no
+     min-height would otherwise collapse the band to 0. */
+  .filmhero.banner{ height:34vh; min-height:220px; max-height:360px; }
+  @media (max-width:640px){
+    /* Phones: the 16:9 film is shown whole (object-fit:contain), so the band
+       takes the film's own proportions plus room for the controls -- a 78vh
+       band left two thirds of the screen as black bars. */
+    .filmhero{ height:auto; min-height:0; aspect-ratio:16/10.5 }
+    .filmhero.banner{ height:auto; min-height:0; aspect-ratio:16/9 }
+    .filmhero-controls{ right:16px; bottom:16px }
+    .filmhero-scrollcue{ left:16px; bottom:16px }
   }
-  .hero h1{font-size:2.6rem; line-height:1.14; margin:0 0 var(--bp-space-5); max-width:15ch}
-  .hero .lead{color:rgba(255,255,255,.72); max-width:46ch; margin:0 0 var(--bp-space-6); font-size:var(--bp-text-body)}
-  .hero-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap; align-items:center}
-  .hero .bp-btn--outline{border-color:rgba(255,255,255,.3); color:#fff; background:rgba(255,255,255,.06)}
-  .hero .bp-btn--outline:hover{background:rgba(255,255,255,.12)}
-  .hero-script{
-    font-family:var(--bp-font-decorative); font-size:1.15rem; color:rgba(255,255,255,.82);
-    margin-top:var(--bp-space-8); display:flex; align-items:center; gap:10px;
-  }
-  .flagbar{display:inline-flex; height:11px; width:26px; border-radius:2px; overflow:hidden; flex:none}
-  .flagbar i{flex:1}
-  .flagbar i:nth-child(1){background:#000}
-  .flagbar i:nth-child(2){background:#fdda24}
-  .flagbar i:nth-child(3){background:#ef3340}
 
-  /* hero card cluster: big map + two stacked mini charts */
-  .hero-cards{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:var(--bp-space-4)}
-  .glass{
-    background:rgba(11,23,48,.62); border:1px solid rgba(255,255,255,.14);
-    border-radius:var(--bp-radius-card); backdrop-filter:blur(4px); color:#fff;
-  }
-  .glass h3{font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0}
-  .glass .sub{font-size:11px; color:rgba(255,255,255,.55)}
-  .hero-mini{display:flex; flex-direction:column; gap:var(--bp-space-4)}
-  .hero-mini .glass{padding:var(--bp-space-4); display:flex; flex-direction:column; min-height:0; overflow:hidden}
-  /* Card head: title + unit on the left, latest value + period on the right,
-     on one row -- the plot takes the rest of the card. */
-  .mini-head{display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
-  .mini-label{min-width:0; padding-right:4px}
-  .mini-reading{flex:none; text-align:right; line-height:1}
-  .mini-reading b{display:block; font-size:1.5rem; font-weight:var(--bp-weight-bold)}
-  .mini-reading .period{display:block; margin-top:5px}
-  /* A canvas with no CSS width keeps its 300px intrinsic size, so
-     sizeCanvas() measures 300 and the drawing spills straight out of a
-     narrower card into its neighbours. components.css only stretches
-     canvases inside .bp-chart-canvas-wrap; this is the same rule for this
-     page's own smaller chart slot. */
-  .mini-canvas{position:relative; margin-top:4px; min-width:0}
-  .mini-canvas canvas{display:block; width:100%}
-  .hero-mini .mini-canvas{margin-top:auto; padding-top:6px}
-  .hero-mini .provenance{margin-top:2px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  /* =====================================================================
+     PHASE 2 -- data hero, commune-Portrait styling: chapter-colour hairline
+     over each card, eyebrows, .card surfaces instead of dark "glass".
+     ===================================================================== */
+  :root{ --v5-hero-th: var(--bp-chart-2); --v5-commune-th: var(--bp-chart-1); --v5-maps-th: var(--bp-chart-3);
+         --v5-indicators-th: var(--bp-chart-5); --v5-how-th: var(--bp-chart-6); }
+  .datahero{ padding-top:32px; padding-bottom:8px; }
+  .datahero-top{ display:grid; grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr); gap:40px; align-items:start; margin-bottom:28px }
+  .datahero .eyebrow{ font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold); letter-spacing:.14em; color:var(--v5-hero-th); margin-bottom:10px; text-transform:uppercase }
+  .datahero h1{ font-size:2.3rem; line-height:1.12; max-width:18ch; text-wrap:balance; margin:0 0 14px }
+  .datahero .lead{ color:var(--bp-text-muted); max-width:48ch; margin:0 0 20px; font-size:var(--bp-text-body) }
+  .datahero-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+  .datahero-search{ margin-top:22px; max-width:340px }
+  .datahero-search .searchbox{ display:flex; align-items:center; gap:8px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:9px 13px; background:var(--bp-surface) }
+  .datahero-search input{ border:0; background:transparent; outline:0; font:inherit; font-size:13px; color:inherit; flex:1; min-width:0 }
+  .datahero-search svg{ color:var(--bp-text-faint); flex:none }
 
-  .hero-map{padding:var(--bp-space-4); position:relative; display:flex; flex-direction:column}
-  /* Zone 1: title + indicator picker, its own row. */
-  .hero-map .maphead{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--bp-space-3); gap:8px}
-  /* Zone 2: the map, with the zoom controls confined to it (mapbox is the
-     positioning context for .zoombtns, not the card) so they can never
-     overlap the picker in zone 1. */
-  .hero-map .mapzone{position:relative; flex:1 1 auto; min-height:0}
-  .hero-map .mapbox{position:relative; min-height:210px; height:100%}
-  /* Zone 3: legend + source. */
-  .hero-map .mapfoot{margin-top:var(--bp-space-3)}
-  .hero-map .legend{overflow-x:auto}
-  /* The shared map component styles its own legend/tooltip for a light card;
-     inside the dark hero those need the dark treatment, which is what
-     .bp-shell--navy already means elsewhere in layout.css. */
-  .hero-map .swatches div{border-color:rgba(255,255,255,.2)}
-  .hero-map .ticks, .hero-map .legend-note, .hero-map .coverage, .hero-map .legend-caption{color:rgba(255,255,255,.6)}
-  .legend-caption{font-size:11px; margin-bottom:3px}
-  /* The shared .map-tip is tuned for a light page; over the hero's photo it
-     was hard to read. Opaque navy surface with the navy theme's text colours. */
-  .hero-map .map-tip{
-    background:var(--bp-navy-surface); border-color:var(--bp-navy-border);
-    color:var(--bp-navy-text); box-shadow:0 8px 24px rgba(0,0,0,.32);
-  }
-  .hero-map .map-tip .v{color:var(--bp-navy-text)}
-  .hero-map .map-tip .m{color:var(--bp-navy-text-muted)}
-  .zoombtns{display:flex; flex-direction:column; gap:4px; position:absolute; top:8px; right:8px; z-index:2}
-  .zoombtns button{
-    width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
-    background:rgba(11,23,48,.75); color:#fff; font:inherit; font-size:14px; line-height:1; cursor:pointer;
-  }
-  .zoombtns button:hover{background:rgba(255,255,255,.16)}
+  .hero-cards{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:16px }
+  .hcard{ background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:16px; border-top:3px solid var(--v5-hero-th) }
+  .hcard h3{ font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:600; margin:0 }
+  .hcard .sub{ font-size:11px; color:var(--bp-text-muted) }
+  .hero-mini{ display:flex; flex-direction:column; gap:16px }
+  .hero-mini .hcard{ display:flex; flex-direction:column; min-height:0; overflow:hidden }
+  .mini-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px }
+  .mini-label{ min-width:0; padding-right:4px }
+  .mini-reading{ flex:none; text-align:right; line-height:1 }
+  .mini-reading b{ display:block; font-size:1.5rem; font-weight:700; color:var(--bp-text) }
+  .mini-reading .period{ display:block; margin-top:5px }
+  .mini-canvas{ position:relative; margin-top:4px; min-width:0 }
+  .mini-canvas canvas{ display:block; width:100% }
+  .hero-mini .mini-canvas{ margin-top:auto; padding-top:6px }
+  .hero-mini .provenance{ margin-top:2px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 
-  /* ---- finance strip ----
-     Batch A2b, item 2/3: this used to be a grid of four cards, each reading
-     "Not published by this pipeline yet" -- the widest, loudest band on the
-     page, immediately under the hero, saying nothing four times over. The
-     absence itself is real and stays honest (see the JS below, and the
-     header comment further down); only the SHAPE changes, to one compact
-     line with the "see national data" link inline instead of squeezed
-     against the card edge on three lines. */
+  .hero-map{ display:flex; flex-direction:column }
+  .hero-map .maphead{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:8px }
+  .hero-map .mapzone{ position:relative; flex:1 1 auto; min-height:0 }
+  .hero-map .mapbox{ position:relative; min-height:260px; height:100% }
+  .hero-map .mapfoot{ margin-top:10px }
+  .hero-map .legend{ overflow-x:auto }
+  .legend-caption{ font-size:11px; margin-bottom:3px; color:var(--bp-text-muted) }
+  .zoombtns{ display:flex; flex-direction:column; gap:4px; position:absolute; top:8px; right:8px; z-index:2 }
+  .zoombtns button{ width:26px; height:26px; border-radius:6px; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); font:inherit; font-size:14px; line-height:1; cursor:pointer }
+  .zoombtns button:hover{ border-color:var(--v5-hero-th); color:var(--v5-hero-th) }
+
+  @media (max-width:1024px){
+    .datahero-top{ grid-template-columns:minmax(0,1fr) }
+    .hero-cards{ grid-template-columns:minmax(0,1fr) }
+  }
+  @media (max-width:900px){
+    .hero-mini{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)) }
+  }
+  @media (max-width:640px){
+    .datahero h1{ font-size:1.8rem }
+    .hero-mini{ grid-template-columns:minmax(0,1fr) }
+  }
+
+  /* ---- finance strip ---- */
   .finance{
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
     box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4) var(--bp-space-6);
-    display:flex; align-items:center; gap:var(--bp-space-4); flex-wrap:wrap;
-    margin:calc(-1 * var(--bp-space-8)) 0 0;
-    position:relative; z-index:3;
+    display:flex; align-items:center; gap:var(--bp-space-4); flex-wrap:wrap; margin-top:22px;
   }
-  .ficon{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none}
-  .fin-icon{width:32px; height:32px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center;
-    background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted)}
-  .fin-text{flex:1 1 320px; min-width:0; margin:0; font-size:12px; line-height:1.45; color:var(--bp-text-muted)}
-  .fin-title{display:inline; margin:0 4px 0 0; font:inherit; font-weight:var(--bp-weight-semibold); color:var(--bp-text)}
-  .fin-link{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium); flex:none}
-  .fin-link:hover{text-decoration:underline}
+  .fin-icon{ width:32px; height:32px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted) }
+  .fin-text{ flex:1 1 320px; min-width:0; margin:0; font-size:12px; line-height:1.45; color:var(--bp-text-muted) }
+  .fin-title{ display:inline; margin:0 4px 0 0; font:inherit; font-weight:var(--bp-weight-semibold); color:var(--bp-text) }
+  .fin-link{ font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium); flex:none }
+  .fin-link:hover{ text-decoration:underline }
 
-  /* ---- two-column mid band ---- */
-  .duo{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-8); margin-top:var(--bp-space-10)}
-  .sechead{display:flex; align-items:baseline; justify-content:space-between; gap:var(--bp-space-4); margin-bottom:4px}
-  .sechead h2{font-size:1.5rem; margin:0}
-  .sechead a{font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium)}
-  .sechead a:hover{text-decoration:underline}
-  .secsub{color:var(--bp-text-muted); font-size:var(--bp-text-small); margin:0 0 var(--bp-space-5)}
+  /* ---- section header, chapter-nav vocabulary (commune.html's own) ---- */
+  .section{ padding-top:44px; scroll-margin-top:16px }
+  .section-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:4px; padding-top:14px; border-top:3px solid var(--th) }
+  .section-eyebrow{ font:700 11px/1 var(--bp-font-ui); letter-spacing:.08em; color:var(--th); margin-bottom:6px; display:block; text-transform:uppercase }
+  .section-head h2{ font-size:1.5rem; margin:0 }
+  .section-head a{ font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium) }
+  .section-head a:hover{ text-decoration:underline }
+  .section-sub{ color:var(--bp-text-muted); font-size:var(--bp-text-small); margin:8px 0 18px }
 
-  .commune-card{
-    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
-    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-5);
-    display:grid; grid-template-columns:200px 1fr; gap:var(--bp-space-5);
-  }
-  .cc-photo{
-    border-radius:var(--bp-radius-control); min-height:120px; display:flex; align-items:flex-end; padding:10px;
-    background:linear-gradient(150deg,#dfe4ec,#c3ccda 60%,#aeb9cc); color:#4a5464; font-size:10px;
-  }
-  .cc-name{font-family:var(--bp-font-display); font-size:1.25rem; font-weight:600; margin:var(--bp-space-3) 0 2px}
-  .cc-region{font-size:11px; color:var(--bp-text-muted); margin-bottom:var(--bp-space-3)}
-  .cc-stats{display:grid; grid-template-columns:1fr 1fr; gap:var(--bp-space-4) var(--bp-space-5)}
-  .cc-stat{display:flex; gap:10px; align-items:flex-start}
-  .cc-stat .ficon{width:30px; height:30px; border-radius:8px}
-  .cc-stat .lbl{font-size:10px; color:var(--bp-text-muted); line-height:1.3}
-  .cc-stat .val{font-size:.95rem; font-weight:var(--bp-weight-semibold)}
-  .cc-stat .sub{font-size:10px; color:var(--bp-text-faint)}
+  .duo{ display:grid; grid-template-columns:1fr 1fr; gap:32px }
+  @media (max-width:900px){ .duo{ grid-template-columns:minmax(0,1fr) } }
 
-  .pilltabs{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:var(--bp-space-4)}
-  .pilltabs button{
-    border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text-muted);
-    border-radius:var(--bp-radius-control); padding:6px 13px; font:inherit; font-size:var(--bp-text-small); cursor:pointer;
-  }
-  .pilltabs button[aria-selected="true"]{background:var(--bp-navy-bg); border-color:var(--bp-navy-bg); color:#fff}
-  .thumbs{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--bp-space-4)}
-  .thumb{
-    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
-    overflow:hidden; text-align:left; padding:0; font:inherit; color:inherit; cursor:pointer; display:block;
-  }
-  .thumb:hover{border-color:var(--bp-accent)}
-  .thumb .tmap{height:118px; position:relative; background:var(--bp-surface-alt)}
-  .thumb .tmap svg{width:100%; height:100%; display:block}
-  /* Batch A2b, item 5: an explicit, uniform background + divider on every
-     caption, not just whatever colour happened to be transparent through to
-     the card. Each thumbnail's own ramp runs a different hue (see the
-     nth-child overrides below) and its lowest band sits close to white --
-     with no real boundary here, the caption read as if it sat on a tint that
-     differed thumbnail to thumbnail, when the three were already identical.
-     This makes the identical treatment visible instead of accidental. */
-  .thumb .tcap{
-    padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:6px;
-    background:var(--bp-surface-alt); border-top:1px solid var(--bp-border);
-  }
-  .thumb .tcap b{font-size:11px; font-weight:var(--bp-weight-semibold); display:block; line-height:1.3}
-  .thumb .tcap span{font-size:10px; color:var(--bp-text-faint)}
+  .commune-card{ background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); border-top:3px solid var(--v5-commune-th); padding:18px; display:grid; grid-template-columns:200px 1fr; gap:18px }
+  .cc-photo{ border-radius:var(--bp-radius-control); height:100%; min-height:190px; overflow:hidden; background:var(--bp-surface-alt) }
+  .cc-photo img{ display:block; width:100%; height:100%; object-fit:cover }
+  .cc-name{ font-family:var(--bp-font-display); font-size:1.25rem; font-weight:600; margin:0 0 2px }
+  .cc-region{ font-size:11px; color:var(--bp-text-muted); margin-bottom:10px }
+  .cc-stats{ display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; margin-top:12px }
+  .cc-stat{ display:flex; gap:10px; align-items:flex-start }
+  .cc-stat .ficon{ width:30px; height:30px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center }
+  .cc-stat .lbl{ font-size:10px; color:var(--bp-text-muted); line-height:1.3 }
+  .cc-stat .val{ font-size:.95rem; font-weight:600; color:var(--bp-text) }
+  @media (max-width:640px){ .commune-card{ grid-template-columns:minmax(0,1fr) } .cc-photo{ min-height:160px } }
 
-  /* ---- national indicator row ---- */
-  .kpirow{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--bp-space-4); margin-top:var(--bp-space-5)}
-  .kpicard{
-    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
-    box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4); display:flex; flex-direction:column;
-  }
-  .kpicard h3{font-family:var(--bp-font-ui); font-size:11px; font-weight:var(--bp-weight-semibold); margin:0; line-height:1.3}
-  .kpicard .unitline{font-size:10px; color:var(--bp-text-faint); margin-bottom:6px}
-  .kpicard .figure{display:flex; align-items:baseline; justify-content:flex-end; gap:6px; margin-top:6px}
-  .kpicard .figure b{font-size:1.15rem; font-weight:var(--bp-weight-bold)}
-  .kpicard .period{font-size:10px; color:var(--bp-text-faint); text-align:right}
+  .pilltabs{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px }
+  .pilltabs button{ border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text-muted); border-radius:var(--bp-radius-control); padding:6px 13px; font:inherit; font-size:var(--bp-text-small); cursor:pointer }
+  .pilltabs button[aria-selected="true"]{ background:var(--v5-maps-th); border-color:var(--v5-maps-th); color:#fff }
+  .thumbs{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px }
+  @media (max-width:640px){ .thumbs{ grid-template-columns:minmax(0,1fr) } }
+  .thumb{ background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); overflow:hidden; text-align:left; padding:0; font:inherit; color:inherit; cursor:pointer; display:block }
+  .thumb:hover{ border-color:var(--v5-maps-th) }
+  .thumb .tmap{ height:130px; position:relative; background:var(--bp-surface-alt) }
+  .thumb .tmap svg{ width:100%; height:100%; display:block }
+  .thumb .tcap{ padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:6px; background:var(--bp-surface-alt); border-top:1px solid var(--bp-border) }
+  .thumb .tcap b{ font-size:11px; font-weight:var(--bp-weight-semibold); display:block; line-height:1.3 }
+  .thumb .tcap span{ font-size:10px; color:var(--bp-text-faint) }
+  .thumb:nth-child(1){ --ramp-0:#fff5eb; --ramp-1:#fee6ce; --ramp-2:#fdd0a2; --ramp-3:#fdae6b; --ramp-4:#fd8d3c; --ramp-5:#e6550d; --ramp-6:#a63603 }
+  .thumb:nth-child(2){ --ramp-0:#f7fbff; --ramp-1:#deebf7; --ramp-2:#c6dbef; --ramp-3:#9ecae1; --ramp-4:#6baed6; --ramp-5:#3182bd; --ramp-6:#08519c }
+  .thumb:nth-child(3){ --ramp-0:#f7fcf5; --ramp-1:#e5f5e0; --ramp-2:#c7e9c0; --ramp-3:#a1d99b; --ramp-4:#74c476; --ramp-5:#31a354; --ramp-6:#006d2c }
 
-  /* ---- feature band ---- */
-  .features{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:var(--bp-space-6);
-    background:var(--bp-surface-alt); border:1px solid var(--bp-border);
-    border-radius:var(--bp-radius-card); padding:var(--bp-space-6); margin-top:var(--bp-space-10);
-  }
-  .feat{display:flex; gap:var(--bp-space-3); align-items:flex-start}
-  .feat .circ{
-    width:42px; height:42px; border-radius:50%; background:var(--bp-surface); flex:none;
-    display:flex; align-items:center; justify-content:center; color:var(--bp-text);
-    border:1px solid var(--bp-border);
-  }
-  /* Fixed post-audit: this used to be var(--bp-navy-bg), a token that never
-     changes between themes by design (tokens.css: the navy surface is a
-     deliberate look a page opts into, not a light/dark response). That is
-     correct for the analytical shell's own navy sidebar, but wrong here --
-     home2.html forced light unconditionally until this batch, so a dark-navy
-     icon on this circle's OWN background (--bp-surface, which DOES flip to a
-     near-black in dark mode) was never visibly broken until dark mode became
-     reachable. --bp-text tracks the circle's background the way every other
-     icon-on-a-neutral-surface pairing in this file already does. */
-  .feat h4{font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0 0 3px}
-  .feat p{font-size:11px; color:var(--bp-text-muted); margin:0; line-height:1.5}
+  .kpirow{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:14px; margin-top:16px }
+  @media (max-width:1024px){ .kpirow{ grid-template-columns:repeat(3,minmax(0,1fr)) } }
+  @media (max-width:640px){ .kpirow{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+  .kpicard{ background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:14px; display:flex; flex-direction:column; border-top:3px solid var(--v5-indicators-th) }
+  .kpicard h3{ font-family:var(--bp-font-ui); font-size:11px; font-weight:var(--bp-weight-semibold); margin:0; line-height:1.3 }
+  .kpicard .unitline{ font-size:10px; color:var(--bp-text-faint); margin-bottom:6px }
+  .kpicard .figure{ display:flex; align-items:baseline; justify-content:flex-end; gap:6px; margin-top:6px }
+  .kpicard .figure b{ font-size:1.15rem; font-weight:var(--bp-weight-bold) }
+  .kpicard .period{ font-size:10px; color:var(--bp-text-faint); text-align:right }
+  .kpicard .national-provenance{ font-size:9px; color:var(--bp-text-faint); margin-top:4px }
 
-  /* ---- CTA ---- */
-  .cta{
-    margin-top:var(--bp-space-10); color:#fff; position:relative; overflow:hidden;
-    background:
-      radial-gradient(900px 400px at 78% 20%, rgba(70,110,175,.4), transparent 60%),
-      linear-gradient(135deg,#0b1730,#14284c 60%,#0c1c38);
-  }
-  .cta .wrap{
-    display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--bp-space-8);
-    align-items:center; padding-top:var(--bp-space-10); padding-bottom:var(--bp-space-10);
-  }
-  .cta h2{font-size:1.9rem; margin:0 0 var(--bp-space-3); line-height:1.2; max-width:16ch}
-  .cta p{color:rgba(255,255,255,.72); margin:0; max-width:42ch; font-size:var(--bp-text-small)}
-  .cta-actions{display:flex; gap:var(--bp-space-3); flex-wrap:wrap}
-  .cta .bp-btn--outline{border-color:rgba(255,255,255,.32); color:#fff; background:rgba(255,255,255,.06)}
-  .cta-stats{display:flex; gap:var(--bp-space-8); text-align:left}
-  .cta-stats b{display:block; font-family:var(--bp-font-display); font-size:1.7rem; font-weight:600; line-height:1.1}
-  .cta-stats span{font-size:11px; color:rgba(255,255,255,.66)}
+  .features{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; background:var(--bp-surface-alt); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); padding:22px; border-top:3px solid var(--v5-how-th) }
+  @media (max-width:1024px){ .features{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+  @media (max-width:640px){ .features{ grid-template-columns:minmax(0,1fr) } }
+  .feat{ display:flex; gap:12px; align-items:flex-start }
+  .feat .circ{ width:40px; height:40px; border-radius:50%; background:var(--bp-surface); flex:none; display:flex; align-items:center; justify-content:center; color:var(--v5-how-th); border:1px solid var(--bp-border) }
+  .feat h4{ font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); margin:0 0 4px }
+  .feat p{ font-size:11px; color:var(--bp-text-muted); margin:0; line-height:1.5 }
 
-  /* ---- footer ---- */
-  .foot{background:var(--bp-surface); border-top:1px solid var(--bp-border); margin-top:0}
-  .foot .wrap{display:flex; align-items:center; gap:var(--bp-space-6); flex-wrap:wrap; padding-top:var(--bp-space-6); padding-bottom:var(--bp-space-6)}
-  .foot nav{display:flex; gap:var(--bp-space-5); flex-wrap:wrap}
-  .foot a{font-size:var(--bp-text-small); color:var(--bp-text-muted); text-decoration:none}
-  .foot a:hover{color:var(--bp-text)}
-  .foot-script{font-family:var(--bp-font-decorative); font-size:.95rem; color:var(--bp-text-muted); display:flex; align-items:center; gap:8px; margin-left:auto}
+  .cta{ margin-top:44px; color:#fff; position:relative; overflow:hidden; border-radius:14px;
+    background:linear-gradient(90deg,rgba(4,22,44,.94),rgba(7,32,59,.78)),url('assets/belpulse/home2/home2-namur-cta.png'); background-size:cover; background-position:center; }
+  .cta-inner{ display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:32px; align-items:center; padding:36px 32px }
+  @media (max-width:1024px){ .cta-inner{ grid-template-columns:minmax(0,1fr) } }
+  .cta h2{ font-size:1.7rem; margin:0 0 8px; line-height:1.2; max-width:18ch }
+  .cta p{ color:rgba(255,255,255,.75); margin:0; max-width:42ch; font-size:var(--bp-text-small) }
+  .cta-actions{ display:flex; gap:10px; flex-wrap:wrap }
+  .cta .bp-btn--outline{ border-color:rgba(255,255,255,.32); color:#fff; background:rgba(255,255,255,.08) }
+  .cta-stats{ display:flex; gap:28px; text-align:left }
+  .cta-stats b{ display:block; font-family:var(--bp-font-display); font-size:1.6rem; font-weight:600; line-height:1.1 }
+  .cta-stats span{ font-size:11px; color:rgba(255,255,255,.68) }
+  @media (max-width:640px){ .cta-inner{ padding:26px 20px } .cta-stats{ gap:20px; flex-wrap:wrap } }
 
-  .attribution{
-    padding:var(--bp-space-4) 0; font-size:11px; line-height:1.6;
-    color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border);
-  }
-  .attribution strong{color:var(--bp-text)}
-  .attribution code{font-family:"IBM Plex Mono",monospace; font-size:.9em}
-  /* Item 6's disclosure: collapsed by default (no `open` attribute), a
-     one-line summary the reader can act on without expanding anything, and
-     the full notice unchanged underneath. Native <details>, so all of this
-     works with no script running. */
-  .attr-disclosure summary{cursor:pointer; list-style:none}
-  .attr-disclosure summary::-webkit-details-marker{display:none}
-  .attr-summary{display:flex; flex-wrap:wrap; align-items:center; gap:5px 12px}
-  .attr-links{display:inline-flex; flex-wrap:wrap; gap:2px 10px}
-  .attr-links a,.attr-toggle{color:var(--bp-accent)}
-  .attr-toggle{margin-left:auto; white-space:nowrap; font-weight:var(--bp-weight-medium); display:inline-flex; align-items:center; gap:4px}
-  .attr-toggle::after{content:'▸'; font-size:9px; display:inline-block; transition:transform .15s}
-  .attr-disclosure[open] .attr-toggle::after{transform:rotate(90deg)}
-  .attr-body{padding-top:var(--bp-space-4)}
+  .foot{ background:var(--bp-surface); border-top:1px solid var(--bp-border); margin-top:0 }
+  .foot .wrap{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; padding-top:20px; padding-bottom:20px }
+  .foot nav{ display:flex; gap:20px; flex-wrap:wrap }
+  .foot a{ font-size:var(--bp-text-small); color:var(--bp-text-muted); text-decoration:none }
+  .foot a:hover{ color:var(--bp-text) }
 
-  /* Every collapsed track is minmax(0,1fr), never plain 1fr. A `1fr` track's
-     implied minimum is min-content, so a wide child (the map card, a long
-     nav) refuses to shrink and pushes the whole PAGE sideways instead --
-     which is exactly what it did here at 390px. */
-  @media (max-width:1024px){
-    .hero .wrap{grid-template-columns:minmax(0,1fr)}
-    .hero-cards{grid-template-columns:minmax(0,1fr)}
-    .finance{margin-top:var(--bp-space-6)}
-    .duo{grid-template-columns:minmax(0,1fr)}
-    .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .features{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-    .cta .wrap{grid-template-columns:minmax(0,1fr)}
-  }
-  @media (max-width:680px){
-    .hero h1{font-size:2rem}
-    .commune-card{grid-template-columns:minmax(0,1fr)}
-    .thumbs{grid-template-columns:minmax(0,1fr)}
-    .kpirow{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .features{grid-template-columns:minmax(0,1fr)}
-    .cc-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-    .cta-stats{gap:var(--bp-space-5); flex-wrap:wrap}
-  }
+  .attribution{ padding:16px 0; font-size:11px; line-height:1.6; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-top:1px solid var(--bp-border) }
+  .attribution strong{ color:var(--bp-text) }
+  .attribution code{ font-family:"IBM Plex Mono",monospace; font-size:.9em }
+  .attr-disclosure summary{ cursor:pointer; list-style:none }
+  .attr-disclosure summary::-webkit-details-marker{ display:none }
+  .attr-summary{ display:flex; flex-wrap:wrap; align-items:center; gap:5px 12px }
+  .attr-links{ display:inline-flex; flex-wrap:wrap; gap:2px 10px }
+  .attr-links a,.attr-toggle{ color:var(--bp-accent) }
+  .attr-toggle{ margin-left:auto; white-space:nowrap; font-weight:var(--bp-weight-medium); display:inline-flex; align-items:center; gap:4px }
+  .attr-toggle::after{ content:'\25b8'; font-size:9px; display:inline-block; transition:transform .15s }
+  .attr-disclosure[open] .attr-toggle::after{ transform:rotate(90deg) }
+  .attr-body{ padding-top:16px }
+  .ai-image-note{ font-size:11px; color:var(--bp-text-faint); margin:8px 0 0; padding-top:16px }
 
-  /* ---- home2 high-fidelity composition ---------------------------------
-     Values and map geometry come from the published payloads; only
-     composition and presentation are specialised here. */
-  .home2 .wrap{max-width:1400px; padding-left:14px; padding-right:14px}
-  /* The top bar's own height and width are shared now (--bp-topbar-h,
-     --bp-content-max in assets/belpulse/tokens.css) -- this page no longer
-     forces its own 51px. Batch A1.1 removed the override that conflicted
-     with the maquette's 56px bar. */
-  .home2 .bp-logo-mark{width:24px; height:28px}
-  .home2 .bp-wordmark{font-size:1.28rem; line-height:1}
+  .bp-state[data-state="loading"] .skel{ display:block }
+  .bp-state:not([data-state="loading"]) .skel{ display:none }
 
-  .home2 .hero{
-    min-height:75vh;
-    display:flex; flex-direction:column; justify-content:center;
-  }
-  /* Batch: brand-film hero (docs/features/home_film.md) replaced the static
-     AI-illustrated background (assets/belpulse/home2/home2-hero-brussels.png,
-     still used elsewhere on this page) with the film/poster layer above; the
-     next section still peeks below the ~75vh band on every viewport. */
-  .home2 .hero .wrap{
-    grid-template-columns:minmax(0,1.18fr) minmax(0,.98fr) minmax(0,.94fr);
-    gap:14px; padding-top:11px; padding-bottom:11px; align-items:stretch;
-  }
-  .home2 .hero-cards{display:contents}
-  .home2 .hero .eyebrow{font-size:8px; margin:3px 0 14px}
-  .home2 .hero h1{font-size:2.15rem; line-height:1.08; max-width:24ch; text-wrap:balance; margin-bottom:13px}
-  .home2 .hero .lead{font-size:12px; line-height:1.45; max-width:48ch; margin-bottom:16px}
-  .home2 .hero .bp-btn{font-size:10px; padding:8px 13px}
-  .home2 .hero-script{margin-top:17px; font-size:1rem}
-  .home2 .glass{border-radius:6px; background:rgba(5,25,50,.78); backdrop-filter:blur(3px)}
-  .home2 .hero-map{
-    padding:11px; display:flex; flex-direction:column;
-    --ramp-0:#c92535; --ramp-1:#ef6548; --ramp-2:#fdae61;
-    --ramp-3:#fff4bd; --ramp-4:#abd9e9; --ramp-5:#5aa6d1; --ramp-6:#2166ac;
-    --nodata:#dbe5e8; --map-stroke:rgba(255,255,255,.75);
-  }
-  .home2 .hero-map .maphead{margin-bottom:4px}
-  .home2 .hero-map .mapzone{min-height:240px}
-  .home2 .hero-map .mapbox{height:100%; background:transparent}
-  .home2 .hero-map .mapbox > svg{width:100%; height:100%}
-  .home2 .hero-map .mapfoot{margin-top:4px}
-  .home2 .hero-map .legend{overflow:hidden}
-  .home2 .hero-map .ticks{width:100%!important; overflow:hidden}
-  .home2 .hero-map .swatches div{height:8px; width:35px}
-  .home2 .hero-map .ticks{font-size:8px}
-  .home2 .hero-map .sub{font-size:8px}
-  .home2 .legend-caption{font-size:8px; margin-bottom:2px}
-  .home2 .hero-mini{gap:9px; min-width:0}
-  .home2 .hero-mini .glass{padding:10px; min-height:0; flex:1}
-  .home2 .hero-mini .glass h3{font-size:10px; line-height:1.2}
-  .home2 .hero-mini .sub{font-size:8px}
-  .home2 .hero-mini .provenance,.home2 .national-provenance{font-size:7px; line-height:1.25; color:rgba(255,255,255,.58)}
-  .home2 .mini-reading b{font-size:1.45rem}
-  .home2 .mini-canvas{margin-top:0}
-  .home2 .hero-mini .mini-canvas{margin-top:auto; padding-top:5px}
-
-  .home2 .finance{
-    min-height:0; margin-top:10px; padding:10px 14px;
-    border-radius:6px; box-shadow:none; gap:10px;
-  }
-  .home2 .fin-text,.home2 .fin-link{font-size:10px}
-
-  .home2 .duo{gap:26px; margin-top:25px}
-  .home2 .duo > section{min-width:0}
-  .home2 .sechead{margin-bottom:2px}
-  .home2 .sechead h2{font-size:1.25rem}
-  .home2 .sechead a,.home2 .secsub{font-size:9px}
-  .home2 .secsub{margin-bottom:11px}
-  .home2 .commune-card{padding:10px; grid-template-columns:195px 1fr; gap:12px; min-height:204px; box-shadow:none}
-  .home2 .cc-photo{min-height:117px; padding:0; overflow:hidden; background:var(--bp-surface-alt)}
-  .home2 .cc-photo img{display:block; width:100%; height:117px; object-fit:cover; object-position:center}
-  .home2 .cc-name{font-size:1rem; margin:6px 0 0}
-  .home2 .cc-region{font-size:8px; margin-bottom:7px}
-  .home2 .cc-stats{gap:10px 13px}
-  .home2 .cc-stat{gap:7px}
-  .home2 .cc-stat .ficon{width:26px; height:26px}
-  .home2 .cc-stat .lbl{font-size:8px}
-  .home2 .cc-stat .val{font-size:.78rem}
-  .home2 .pilltabs{gap:4px; margin-bottom:9px; width:100%; max-width:100%; min-width:0; flex-wrap:wrap; overflow:hidden}
-  .home2 .pilltabs button{padding:5px 10px; font-size:9px; white-space:nowrap}
-  .home2 .thumbs{gap:8px}
-  .home2 .thumb{border-radius:5px}
-  .home2 .thumb .tmap{height:111px}
-  .home2 .thumb .tcap{padding:7px 8px}
-  .home2 .thumb .tcap b{font-size:9px}
-  .home2 .thumb .tcap span{font-size:8px}
-  .home2 .thumb:nth-child(1){--ramp-0:#fff5eb;--ramp-1:#fee6ce;--ramp-2:#fdd0a2;--ramp-3:#fdae6b;--ramp-4:#fd8d3c;--ramp-5:#e6550d;--ramp-6:#a63603}
-  .home2 .thumb:nth-child(2){--ramp-0:#f7fbff;--ramp-1:#deebf7;--ramp-2:#c6dbef;--ramp-3:#9ecae1;--ramp-4:#6baed6;--ramp-5:#3182bd;--ramp-6:#08519c}
-  .home2 .thumb:nth-child(3){--ramp-0:#f7fcf5;--ramp-1:#e5f5e0;--ramp-2:#c7e9c0;--ramp-3:#a1d99b;--ramp-4:#74c476;--ramp-5:#31a354;--ramp-6:#006d2c}
-
-  .home2 .national-section{margin-top:24px!important}
-  .home2 .kpirow{gap:8px; margin-top:10px}
-  .home2 .kpicard{padding:9px; min-height:151px; border-radius:5px; box-shadow:none}
-  .home2 .kpicard h3{font-size:9px; min-height:22px}
-  .home2 .kpicard .unitline,.home2 .kpicard .period{font-size:8px}
-  .home2 .kpicard .national-provenance{color:var(--bp-text-faint); margin-top:3px}
-  .home2 .kpicard .figure b{font-size:.95rem}
-  .home2 .features{gap:14px; padding:13px; margin-top:23px; border-radius:5px}
-  .home2 .feat{gap:8px}
-  .home2 .feat .circ{width:34px; height:34px}
-  .home2 .feat h4{font-size:9px}
-  .home2 .feat p{font-size:8px; line-height:1.35}
-
-  .home2 .cta{
-    margin-top:21px;
-    background-image:linear-gradient(90deg,rgba(4,22,44,.94),rgba(7,32,59,.76)),url('assets/belpulse/home2/home2-namur-cta.png');
-    background-size:cover; background-position:center;
-  }
-  .home2 .cta .wrap{grid-template-columns:minmax(0,1.2fr) auto minmax(0,1fr); gap:22px; padding-top:27px; padding-bottom:27px; min-height:169px}
-  .home2 .cta h2{font-size:1.55rem; margin-bottom:7px}
-  .home2 .cta p{font-size:9px}
-  .home2 .cta .bp-btn{font-size:9px; padding:8px 12px}
-  .home2 .cta-stats{gap:25px}
-  .home2 .cta-stats b{font-size:1.25rem}
-  .home2 .cta-stats span{font-size:8px}
-  .home2 .foot .wrap{padding-top:12px; padding-bottom:12px; min-height:65px}
-  .home2 .foot a{font-size:9px}
-  .home2 .foot-script{font-size:.82rem}
-  .home2 .ai-image-note{font-size:8px; color:var(--bp-text-faint); margin:5px 0 0}
-  .home2 .featured-meta{position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important}
-  .home2 .attribution{font-size:9px; padding:8px 0}
-  .home2 .attr-summary{gap:4px 8px}
-
-  @media (max-width:1024px){
-    .home2 .bp-topbar{height:auto; min-height:51px}
-    .home2 .finance{margin-top:12px}
-    .home2 .duo{grid-template-columns:minmax(0,1fr)}
-    .home2 .kpirow{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .home2 .features{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .home2 .cta .wrap{grid-template-columns:minmax(0,1fr)}
-  }
-  /* Hero composition (docs/features/site_unification.md, "Home2 : corriger
-     la composition"): the text column stacks above the visual cluster, and
-     the map stacks above the two charts -- .home2 .hero-cards is
-     `display:contents` (see the base rule above), so with `.wrap` down to
-     one column its children (the map card, then #heroMini) simply take
-     that column in DOM order; no extra override is needed to put the map
-     first, only to keep the two charts themselves side by side here. */
-  @media (max-width:900px){
-    .home2 .hero .wrap{grid-template-columns:minmax(0,1fr)}
-    .home2 .hero-mini{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
-  }
   @media (max-width:768px){
-    .home2 .bp-topbar .wrap{flex-wrap:wrap}
-    .home2 .bp-nav{order:3; flex-basis:100%}
+    .bp-topbar .wrap{ flex-wrap:wrap }
+    .bp-nav{ order:3; flex-basis:100% }
   }
-  /* Everything becomes one column, including the two hero charts. */
-  @media (max-width:600px){
-    .home2 .hero h1{font-size:2rem}
-    .home2 .hero-mini{grid-template-columns:minmax(0,1fr)}
-    .home2 .finance{flex-direction:column; align-items:flex-start}
-    .home2 .fin-text{flex:none; width:100%}
-    .home2 .fin-link{white-space:normal}
-    .home2 .commune-card{grid-template-columns:minmax(0,1fr)}
-    .home2 .cc-photo img{height:160px}
-    .home2 .thumbs{grid-template-columns:minmax(0,1fr)}
-    .home2 .kpirow{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .home2 .features{grid-template-columns:minmax(0,1fr)}
-  }
-  @media (max-width:420px){.home2 .kpirow{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body class="bp-shell home2">
@@ -544,224 +316,205 @@
 
 <main id="bp-main">
 
-  <!-- ── hero ────────────────────────────────────────────────────────────── -->
-  <section class="hero">
-    <!-- Brand film layer (docs/features/home_film.md). Decorative only: no
-         data claims are made in it, aria-hidden, and the real heading/lead
-         below are the text alternative -- so this whole block can be missing
-         or fail to load with nothing lost but the visual. No JS: the poster
-         <img> alone still renders the hero band and the real HTML headline
-         and CTA on top of it (progressive enhancement, not a requirement).
-         heroFilmInit() (below, in the page script) decides at runtime
-         whether to swap the poster for the <video>: never on
-         prefers-reduced-motion or a Save-Data/2G-3G connection, and only
-         once per browser session (sessionStorage) after that. -->
-    <div class="hero-film" id="heroFilm" aria-hidden="true">
-      <img class="hero-poster" id="heroPoster"
-           src="assets/belpulse/home-film/poster.jpg"
-           alt="" width="1920" height="1080" fetchpriority="high">
-      <video id="heroVideo" muted playsinline preload="none" poster="assets/belpulse/home-film/poster.jpg" hidden>
-        <source data-src="assets/belpulse/home-film/film-1440.webm" type="video/webm" data-variant="desktop">
-        <source data-src="assets/belpulse/home-film/film-1080.mp4" type="video/mp4" data-variant="desktop">
-        <source data-src="assets/belpulse/home-film/film-720.mp4" type="video/mp4" data-variant="mobile">
-      </video>
+  <!-- ── PHASE 1: the film, full width, nothing else ─────────────────── -->
+  <section class="filmhero" id="filmHero" data-phase="1">
+    <img id="filmPoster" src="assets/belpulse/home-film/poster.jpg" alt="" width="1920" height="1080" fetchpriority="high">
+    <video id="filmVideo" muted playsinline preload="none" poster="assets/belpulse/home-film/poster.jpg" hidden>
+      <source data-src="assets/belpulse/home-film/film-1080.mp4" type="video/mp4" data-variant="desktop">
+      <source data-src="assets/belpulse/home-film/film-720.mp4" type="video/mp4" data-variant="mobile">
+    </video>
+
+    <span class="visually-hidden" data-t="homeFilmAlt">Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.</span>
+    <div class="filmhero-scrollcue" id="filmScrollCue"><span data-t="v5ScrollCue">Scroll for the data</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <button type="button" class="hero-replay" id="heroReplay" hidden data-t-aria="homeFilmReplay">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-      <span data-t="homeFilmReplay">Replay</span>
-    </button>
-    <div class="wrap">
-      <div>
-        <span class="featured-meta" data-t="homeFilmAlt">Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.</span>
-        <div class="eyebrow" data-t="homeEyebrow">DATA · TERRITORIES · PROSPERITY</div>
-        <h1 data-t="homeTitle">Belgium’s economic data, updated automatically.</h1>
-        <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
-        <div class="hero-actions">
-          <a class="bp-btn bp-btn--primary" href="profiles.html">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-            <span data-t="homeExplore">Explore the data</span>
-          </a>
-          <!-- A4: the "Watch the video" button removed here (docs review pass)
-               linked to about.html, the methodology page -- there is no video,
-               and about.html is already reachable from the Methodology nav
-               link. A button pointing nowhere useful is worse than no button
-               (home.html still has the identical, still-unfixed button --
-               out of this batch's scope, flagged in the PR). homeWatchVideo
-               stays in assets/i18n.js: home.html still reads it. -->
-        </div>
-        <div class="hero-script">
-          <span data-t="homePullQuote">A better-informed Belgium</span>
-          <span class="flagbar"><i></i><i></i><i></i></span>
-        </div>
-      </div>
-
-      <div class="hero-cards">
-        <!-- Three materially separate zones (docs/features/site_unification.md,
-             "Home2 : corriger la composition"): (1) maphead -- title + the
-             indicator picker, its own row so the picker never sits under the
-             zoom buttons; (2) mapzone -- the map itself, with the zoom
-             controls confined to THIS zone (position:relative on mapbox, not
-             on the whole card) so they can never overlap the picker in zone
-             1 regardless of viewport width; (3) mapfoot -- legend + source. -->
-        <div class="glass hero-map bp-state" id="mapCard" data-state="loading">
-          <div class="maphead">
-            <div>
-              <h3 id="mapTitle">—</h3>
-              <div class="sub" id="mapSubtitle" data-t="homeMapSubtitle">Pick an indicator; every commune this pipeline covers is drawn.</div>
-            </div>
-            <select class="bp-chart-select" id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map" style="background:rgba(11,23,48,.8); color:#fff; border-color:rgba(255,255,255,.22); max-width:120px"></select>
-          </div>
-          <div class="mapzone">
-            <div class="mapbox" id="mapbox">
-              <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
-              <div class="map-tip map-hidden" id="tip"></div>
-              <div class="zoombtns">
-                <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
-                <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
-              </div>
-            </div>
-          </div>
-          <!-- Swatches and ticks only. The shared component also writes a
-               full prose explanation of its own classification (how the bands
-               were chosen, what "no data" means, the direction of the
-               indicator) into #legendNote and #coverage -- several sentences,
-               which is right on map.html where the map IS the page, and
-               swamps a hero card. Those elements are deliberately not passed
-               to the component here; map.html, one click away and linked
-               below, carries the full explanation. -->
-          <div class="mapfoot">
-            <!-- Batch A2b, item 4: what the bare ticks below are counting.
-                 Built in drawIndicator() from the SAME state.byCode name and
-                 MapUI.unitLabel(meta.unit, LANG) the map title and every
-                 other unit hint on this page already use -- never a literal
-                 indicator name/unit typed here (claude.md rule 2/24). -->
-            <div class="legend-caption" id="legendCaption"></div>
-            <div class="legend">
-              <div class="swatches" id="swatches"></div>
-              <div class="ticks" id="ticks"></div>
-            </div>
-            <div class="sub" id="mapProvenance" style="margin-top:6px"></div>
-          </div>
-        </div>
-
-        <div class="hero-mini" id="heroMini"></div>
-      </div>
+    <div class="filmhero-controls">
+      <button type="button" id="filmSkip" data-t="v5SkipFilm">Skip &darr;</button>
+      <button type="button" id="filmReplay" hidden data-t-aria="homeFilmReplay" data-t="v5ReplayFilm">&#8635; Watch again</button>
     </div>
   </section>
 
-  <!-- ── public finances: built as designed, honestly unavailable ─────────
-       Batch A2b, item 2/3: was four cards, each repeating "Not published by
-       this pipeline yet" -- the widest band on the page and the reader's
-       second impression of the whole site. The absence is still stated (see
-       renderFinance() below, which builds the sentence from the same
-       homeFinance* strings the old cards used -- no new fact, no indicator
-       id, just fewer pixels), now as one line with the link inline instead
-       of wrapping onto three lines squeezed against the card edge. -->
+  <!-- ── PHASE 2: the data hero, commune-Portrait styling ────────────── -->
   <div class="wrap">
-    <section class="finance" id="financeStrip">
-      <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
-      <div class="fin-text"><h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2> <span id="financeCompactText"></span></div>
-      <a class="fin-link" href="macro.html" data-t="homeAllIndicators">See all national data →</a>
+    <section class="datahero" id="dataHero">
+      <div class="datahero-top">
+        <div>
+          <div class="eyebrow" data-t="homeEyebrow">DATA · TERRITORIES · PROSPERITY</div>
+          <h1 data-t="homeTitle">Belgium's economic data, updated automatically.</h1>
+          <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
+          <div class="datahero-actions">
+            <a class="bp-btn bp-btn--primary" href="profiles.html">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <span data-t="homeExplore">Explore the data</span>
+            </a>
+          </div>
+          <div class="datahero-search">
+            <label class="searchbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input id="communeSearch" list="communeList" type="text" data-t-placeholder="v4SwitcherPlaceholder" placeholder="Search a commune…" autocomplete="off">
+              <datalist id="communeList"></datalist>
+            </label>
+          </div>
+        </div>
+
+        <div class="hero-cards">
+          <div class="hcard hero-map bp-state" id="mapCard" data-state="loading">
+            <div class="maphead">
+              <div>
+                <h3 id="mapTitle">—</h3>
+                <div class="sub" id="mapSubtitle" data-t="homeMapSubtitle">Pick an indicator; every commune this pipeline covers is drawn.</div>
+              </div>
+              <select class="bp-chart-select" id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map" style="max-width:130px"></select>
+            </div>
+            <div class="mapzone">
+              <div class="mapbox" id="mapbox">
+                <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+                <div class="map-tip map-hidden" id="tip"></div>
+                <div class="zoombtns">
+                  <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
+                  <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
+                </div>
+              </div>
+            </div>
+            <div class="mapfoot">
+              <div class="legend-caption" id="legendCaption"></div>
+              <div class="legend">
+                <div class="swatches" id="swatches"></div>
+                <div class="ticks" id="ticks"></div>
+              </div>
+              <div class="sub" id="mapProvenance" style="margin-top:6px"></div>
+            </div>
+          </div>
+
+          <div class="hero-mini" id="heroMini"></div>
+        </div>
+      </div>
+
+      <section class="finance" id="financeStrip">
+        <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
+        <div class="fin-text"><h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2> <span id="financeCompactText"></span></div>
+        <a class="fin-link" href="macro.html" data-t="homeAllIndicators">See all national data →</a>
+      </section>
     </section>
   </div>
 
-  <!-- ── commune profiles | Belgium in maps ─────────────────────────────── -->
+  <!-- ── commune profiles | Belgium in maps ──────────────────────────── -->
   <div class="wrap">
     <div class="duo">
-      <section>
-        <div class="sechead">
-          <h2 data-t="homeCommunesTitle">Commune profiles</h2>
+      <section class="section" id="communeSection" style="--th:var(--v5-commune-th)">
+        <div class="section-head">
+          <div>
+            <span class="section-eyebrow" data-t="v5SectionCommune">Commune profile</span>
+            <h2 data-t="homeCommunesTitle">Commune profiles</h2>
+          </div>
           <a href="profiles.html" data-t="homeAllCommunes">Explore every commune →</a>
         </div>
-        <p class="secsub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
+        <p class="section-sub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
         <div class="commune-card bp-state" id="featuredCard" data-state="loading">
           <div class="bp-state-skeleton"></div>
+          <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur"></div>
           <div>
-            <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur"></div>
             <div class="cc-name" id="featuredName">—</div>
             <div class="cc-region" id="featuredRegion">—</div>
-            <a class="bp-btn bp-btn--outline" id="featuredLink" href="profiles.html" style="border-color:var(--bp-accent); color:var(--bp-accent); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
+            <a class="bp-btn bp-btn--outline" id="featuredLink" href="profiles.html" style="border-color:var(--v5-commune-th); color:var(--v5-commune-th); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
+            <div class="cc-stats" id="featuredStats"></div>
           </div>
-          <div class="cc-stats" id="featuredStats"></div>
         </div>
         <p class="featured-meta" id="featuredCaption"></p>
       </section>
 
-      <section>
-        <div class="sechead">
-          <h2 data-t="homeMapsTitle">Belgium in maps</h2>
+      <section class="section" id="mapsSection" style="--th:var(--v5-maps-th)">
+        <div class="section-head">
+          <div>
+            <span class="section-eyebrow" data-t="v5SectionMaps">Belgium in maps</span>
+            <h2 data-t="homeMapsTitle">Belgium in maps</h2>
+          </div>
           <a href="map.html" data-t="homeAllMaps">See the full-page map →</a>
         </div>
-        <p class="secsub" data-t="homeMapsSub">Explore regional dynamics through interactive maps built on official data.</p>
+        <p class="section-sub" data-t="homeMapsSub">Explore regional dynamics through interactive maps built on official data.</p>
         <div class="pilltabs" id="themeTabs" role="tablist" aria-label="Map themes"></div>
         <div class="thumbs" id="themeThumbs"></div>
       </section>
     </div>
   </div>
 
-  <!-- ── national key indicators ─────────────────────────────────────────── -->
-  <div class="wrap national-section" style="margin-top:var(--bp-space-10)">
-    <div class="sechead">
-      <h2 data-t="homeIndicatorsTitle">Key indicators for the Belgian economy</h2>
-      <a href="macro.html" data-t="homeAllIndicators">See all national data →</a>
-    </div>
-    <p class="secsub" data-t="homeIndicatorsLead">National series, each with the period it describes.</p>
-    <div class="kpirow" id="nationalGrid"></div>
-  </div>
-
-  <!-- ── how this site works ─────────────────────────────────────────────── -->
-  <div class="wrap">
-    <section class="features">
-      <div class="feat">
-        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg></span>
-        <div><h4 data-t="homeFeatureAutoTitle">Updated automatically</h4>
-        <p data-t="homeFeatureAutoBody">A scheduled job fetches every source and rebuilds the site. No figure is typed in by hand.</p></div>
+  <!-- ── national key indicators ──────────────────────────────────────── -->
+  <div class="wrap national-section">
+    <section class="section" id="indicatorsSection" style="--th:var(--v5-indicators-th)">
+      <div class="section-head">
+        <div>
+          <span class="section-eyebrow" data-t="v5SectionIndicators">National indicators</span>
+          <h2 data-t="homeIndicatorsTitle">Key indicators for the Belgian economy</h2>
+        </div>
+        <a href="macro.html" data-t="homeAllIndicators">See all national data →</a>
       </div>
-      <div class="feat">
-        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
-        <div><h4 data-t="homeFeatureSourcesTitle">Official sources</h4>
-        <p data-t="homeFeatureSourcesBody">Statbel, the NBB, ONEM/RVA, the federal police and Eurostat — each credited under its own licence.</p></div>
-      </div>
-      <div class="feat">
-        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6v20h12V6z"/><path d="M14 2v4h4"/><path d="M9 13h6M9 17h6"/></svg></span>
-        <div><h4 data-t="homeFeatureTraceTitle">Traceable and transparent</h4>
-        <p data-t="homeFeatureTraceBody">Every figure states its source, the period it covers, when it was retrieved and whether it was measured or computed.</p></div>
-      </div>
-      <div class="feat">
-        <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 14c2.8 0 5 2.2 5 5"/></svg></span>
-        <div><h4 data-t="homeFeatureCitizensTitle">For citizens and decision-makers</h4>
-        <p data-t="homeFeatureCitizensBody">Open data, open code, no account required, and every underlying file downloadable.</p></div>
-      </div>
+      <p class="section-sub" data-t="homeIndicatorsLead">National series, each with the period it describes.</p>
+      <div class="kpirow" id="nationalGrid"></div>
     </section>
   </div>
 
-  <!-- ── CTA ─────────────────────────────────────────────────────────────── -->
-  <section class="cta">
-    <div class="wrap">
-      <div>
-        <h2 data-t="homeCtaTitle">Explore your commune’s data</h2>
-        <p data-t="homeCtaLead">Every commune this pipeline covers, with its own indicators and its own map.</p>
+  <!-- ── how this site works ──────────────────────────────────────────── -->
+  <div class="wrap">
+    <section class="section" id="howSection" style="--th:var(--v5-how-th)">
+      <div class="section-head" style="border-top:0; padding-top:0">
+        <div>
+          <span class="section-eyebrow" data-t="v5SectionHow">How this site works</span>
+        </div>
       </div>
-      <div class="cta-actions">
-        <a class="bp-btn bp-btn--primary" href="profiles.html" data-t="homeCtaStart">Start exploring</a>
-        <a class="bp-btn bp-btn--outline" href="about.html" data-t="homeCtaAbout">Learn more about BelPulse</a>
+      <section class="features" style="margin-top:12px">
+        <div class="feat">
+          <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg></span>
+          <div><h4 data-t="homeFeatureAutoTitle">Updated automatically</h4>
+          <p data-t="homeFeatureAutoBody">A scheduled job fetches every source and rebuilds the site. No figure is typed in by hand.</p></div>
+        </div>
+        <div class="feat">
+          <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+          <div><h4 data-t="homeFeatureSourcesTitle">Official sources</h4>
+          <p data-t="homeFeatureSourcesBody">Statbel, the NBB, ONEM/RVA, the federal police and Eurostat — each credited under its own licence.</p></div>
+        </div>
+        <div class="feat">
+          <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6v20h12V6z"/><path d="M14 2v4h4"/><path d="M9 13h6M9 17h6"/></svg></span>
+          <div><h4 data-t="homeFeatureTraceTitle">Traceable and transparent</h4>
+          <p data-t="homeFeatureTraceBody">Every figure states its source, the period it covers, when it was retrieved and whether it was measured or computed.</p></div>
+        </div>
+        <div class="feat">
+          <span class="circ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 14c2.8 0 5 2.2 5 5"/></svg></span>
+          <div><h4 data-t="homeFeatureCitizensTitle">For citizens and decision-makers</h4>
+          <p data-t="homeFeatureCitizensBody">Open data, open code, no account required, and every underlying file downloadable.</p></div>
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <!-- ── CTA ───────────────────────────────────────────────────────────── -->
+  <div class="wrap">
+    <section class="cta">
+      <div class="cta-inner">
+        <div>
+          <h2 data-t="homeCtaTitle">Explore your commune's data</h2>
+          <p data-t="homeCtaLead">Every commune this pipeline covers, with its own indicators and its own map.</p>
+        </div>
+        <div class="cta-actions">
+          <a class="bp-btn bp-btn--primary" href="profiles.html" data-t="homeCtaStart">Start exploring</a>
+          <a class="bp-btn bp-btn--outline" href="about.html" data-t="homeCtaAbout">Learn more about BelPulse</a>
+        </div>
+        <div class="cta-stats">
+          <div><b id="statCommunes">—</b><span data-t="homeStatCommunes">communes</span></div>
+          <div><b id="statIndicators">—</b><span data-t="homeStatIndicators">municipal indicators</span></div>
+          <div><b data-t="homeStatSources">Official sources</b><span data-t="homeStatSourcesSub">updated regularly</span></div>
+        </div>
       </div>
-      <div class="cta-stats">
-        <div><b id="statCommunes">—</b><span data-t="homeStatCommunes">communes</span></div>
-        <div><b id="statIndicators">—</b><span data-t="homeStatIndicators">municipal indicators</span></div>
-        <div><b data-t="homeStatSources">Official sources</b><span data-t="homeStatSourcesSub">updated regularly</span></div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
 </main>
 
 <!-- The AI-generated-imagery disclosure. Not part of the shared footer
      (docs/features/site_unification.md section 2: logo, the six links, the
-     credit line -- nothing else), so Batch A1.1 moved it here rather than
-     dropping it: the hero and commune-card images it discloses are real
-     features of this page and the note is a real disclosure requirement (see
-     the file header), not decoration that belongs in generic chrome. -->
+     credit line -- nothing else), so this stays here rather than dropping
+     it: the hero and commune-card images it discloses are real features of
+     this page and the note is a real disclosure requirement, not decoration
+     that belongs in generic chrome. -->
 <p class="wrap ai-image-note" data-t="homeAiImageNote">Temporary AI-generated illustrative imagery — not documentary photography.</p>
 
 <!-- bp-shell:footer:start -->
@@ -775,16 +528,13 @@
      tests/test_statbel_attribution.py. English stays in the markup so a
      reader whose JavaScript never runs still gets the complete notice.
 
-     Batch A2b, item 6: this used to render as a dense wall of legal text
-     immediately under the page's content, outweighing everything above it.
      The <details>/<summary> below is native HTML -- no script required to
      open it -- so the full notice stays in the DOM, unedited and reachable
-     without JavaScript, exactly as before; only the box it sits in starts
-     collapsed, with a one-line summary and the source/licence links (the
-     same hrefs used in the full notice below, not new ones) visible without
-     opening it. Nothing here may reword, truncate or hide the notice itself
-     -- see tests/test_statbel_attribution.py, which reads this page's raw
-     markup. -->
+     without JavaScript; only the box it sits in starts collapsed, with a
+     one-line summary and the source/licence links (the same hrefs used in
+     the full notice below, not new ones) visible without opening it. Nothing
+     here may reword, truncate or hide the notice itself -- see
+     tests/test_statbel_attribution.py, which reads this page's raw markup. -->
 <div class="attribution" id="attribution">
   <div class="wrap">
   <details class="attr-disclosure">
@@ -819,11 +569,11 @@
 <script src="assets/belpulse/components.js"></script>
 <script src="assets/commune_map.js"></script>
 <script>
-/* BelPulse homepage — Batch 3 (docs/design-references/homepage.md).
+/* BelPulse homepage -- film-first hero + commune-Portrait data hero.
  *
  * Indicators come from metadata/sections.json. The featured commune and its
  * six tiles come from the published commune-profile page configuration, so
- * this temporary composition cannot drift from the profile it previews.
+ * this composition cannot drift from the profile it previews.
  *
  * The map is assets/commune_map.js -- the same component map.html and
  * communes.html use (claude.md rule 29). No second implementation.
@@ -837,9 +587,9 @@
   var SOURCES_URL = 'public/data/metadata/sources.json';
   var NATIONAL_URL= 'public/data/national.json';
   // The hero's two mini-charts, and no other indicator id, come from
-  // config/national_sections.yaml's `hero:` list (Batch A1.3) -- the same
-  // premise as macro.html's own national_sections.json, so this page holds
-  // no indicator id of its own either (rule 2/24).
+  // config/national_sections.yaml's `hero:` list -- the same premise as
+  // macro.html's own national_sections.json, so this page holds no
+  // indicator id of its own either (rule 2/24).
   var NATIONAL_SECTIONS_URL = 'public/data/metadata/national_sections.json';
   var MANIFEST_URL= 'public/data/manifest.json';
   var FEATURED_CONFIG_URL = 'config/pages/commune-profile/published.json';
@@ -965,10 +715,10 @@
     if(!meta || !state.map) return;
     var name = nameOf(code);
     document.getElementById('mapTitle').textContent = name;
-    // The legend had bare ticks (5,5 k … 31,7 k) with nothing saying what
-    // was counted. MapUI.unitLabel is the same shared unit vocabulary the
-    // national KPI cards use (rule 2/24: no unit or indicator name literal
-    // here, only the payload's own name and unit code).
+    // The legend had bare ticks with nothing saying what was counted.
+    // MapUI.unitLabel is the same shared unit vocabulary the national KPI
+    // cards use (rule 2/24: no unit or indicator name literal here, only the
+    // payload's own name and unit code).
     var unit = MapUI.unitLabel(meta.unit, LANG);
     document.getElementById('legendCaption').textContent = unit ? name + ' (' + unit + ')' : name;
     var payload = await loadValues(code);
@@ -996,10 +746,7 @@
      year-on-year without knowing a base), then the rest, so the row fills
      with real series and grows on its own when a national series is added.
 
-     Labels come from the payload's `names{en,fr,nl}` (claude.md rule 2/7) --
-     national.json was the one monolingual payload on the site; the exporter
-     now carries the other two languages the same way every commune payload
-     already does (docs/features/site_unification.md, Batch A1.3). */
+     Labels come from the payload's `names{en,fr,nl}` (claude.md rule 2/7). */
   function nationalName(entry, code){
     return (entry.names && (entry.names[LANG] || entry.names.en)) || entry.name || code;
   }
@@ -1062,7 +809,7 @@
       var name = nationalName(entry, code);
       var latest = latestNumeric(entry);
       var el = document.createElement('div');
-      el.className = 'glass';
+      el.className = 'hcard';
       // Title and latest value + period share the head row, then the plot,
       // then its source -- the plot never sits above the figure it illustrates.
       el.innerHTML =
@@ -1087,7 +834,7 @@
     });
     // Draw only once every card is in the DOM: .hero-mini is a flex column
     // whose children size against the grid, and a canvas measured mid-append
-    // bakes in the wrong width (found the hard way in this batch's first pass).
+    // bakes in the wrong width (found the hard way in the original batch).
     var statusLabels = {
       provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
     };
@@ -1146,11 +893,11 @@
   }
 
   /* ---- finance strip: designed shape, honest state ----------------------
-     Batch A2b, item 2/3: one compact line instead of four cards. Still
-     built from FINANCE_KEYS/homeFinanceUnavailable/homeFinanceWhy -- the
-     same fixed editorial group and the same honest "unavailable" state as
-     before (see the file header for why this pipeline holds no public-
-     finance levels), just not one card and one repeated sentence per item. */
+     One compact line instead of four cards. Still built from
+     FINANCE_KEYS/homeFinanceUnavailable/homeFinanceWhy -- the same fixed
+     editorial group and the same honest "unavailable" state as before (see
+     the file header for why this pipeline holds no public-finance levels),
+     just not one card and one repeated sentence per item. */
   function renderFinance(){
     var span = document.getElementById('financeCompactText');
     var names = FINANCE_KEYS.map(function(key){ return T(key); });
@@ -1231,7 +978,8 @@
 
   /* ---- featured commune -------------------------------------------------
      Both the commune and tile bindings come from the existing published
-     commune-profile document. No NIS or indicator code is duplicated here. */
+     commune-profile page configuration. No NIS or indicator code is
+     duplicated here. */
   function featuredUnavailable(){
     var card = document.getElementById('featuredCard');
     card.dataset.state = 'unavailable';
@@ -1294,20 +1042,36 @@
     });
   }
 
-  /* ---- boot ------------------------------------------------------------- */
+  /* ---- commune search (hero) -- lists every commune from the geojson;
+     picking one (or typing its name and pressing enter/change) navigates to
+     the real commune.html?nis=... profile, exactly like commune.html's own
+     switcher. */
+  function wireSearch(){
+    var input = document.getElementById('communeSearch');
+    var list = document.getElementById('communeList');
+    if(!input || !list || !state.geojson) return;
+    list.innerHTML = '';
+    (state.geojson.features || []).forEach(function(f){
+      var p = f.properties || {};
+      var name = LANG === 'nl' ? p.name_nl : p.name_fr;
+      var o = document.createElement('option');
+      o.value = (name || p.name_fr || p.nis) + ' (' + p.nis + ')';
+      list.appendChild(o);
+    });
+    input.addEventListener('change', function(){
+      var m = /\((\d{4,5})\)\s*$/.exec(input.value);
+      if(m) window.location.href = 'commune.html?nis=' + m[1];
+    });
+  }
+
+  /* ---- boot -------------------------------------------------------------- */
   async function init(){
-    // The shared header's language menu (assets/belpulse/shell.js) is what a
-    // reader actually clicks now -- it already writes I18N.STORAGE_KEY and
-    // re-translates every [data-t*] element itself, and dispatches 'bp:lang'
-    // for exactly this: everything on the page that is NOT a plain
-    // translated string (the map, the finance strip) and has to be rebuilt
-    // from fresh data in the new language.
     document.addEventListener('bp:lang', function(e){
       LANG = e.detail.lang;
       applyStrings();
       renderFinance(); renderHeroMini(); renderNational();
       renderThemes(); renderThumbs(); renderFeatured();
-      populateIndicatorPicker();
+      populateIndicatorPicker(); wireSearch();
       if(state.map) state.map.setLang(LANG);
       if(state.drawnIndicator) document.getElementById('mapTitle').textContent = nameOf(state.drawnIndicator);
     });
@@ -1390,6 +1154,7 @@
     document.getElementById('zoomOut').onclick = function(){ state.map.zoomBy(1.4); };
     document.getElementById('mapIndicator').addEventListener('change', function(e){ drawIndicator(e.target.value); });
 
+    wireSearch();
     renderThumbs();
 
     var opening = (state.sections.headlines || [])[0];
@@ -1397,30 +1162,27 @@
     else document.getElementById('mapCard').dataset.state = 'unavailable';
   }
 
-  /* ---- brand-film hero (docs/features/home_film.md) ---------------------
-     Runs independently of init()'s network fetches -- the film has nothing
-     to do with the published payloads and must not wait on them.
-
-     Rules encoded here (all from the approved plan in the batch handoff):
-       * muted, playsinline, never fullscreen; plays once per session
-         (sessionStorage flag) -- a later page view in the same session shows
-         the poster with no autoplay and a visible Replay button instead;
-       * prefers-reduced-motion, or a Save-Data / 2G-3G connection: the
-         poster is shown and no <video> element is ever unhidden or given a
-         src, so no video byte is ever requested;
-       * <= 768px: the mobile (720p) source, requested only after the page
-         is interactive (load, then idle), so it cannot cost first paint;
-       * pauses via IntersectionObserver when scrolled out of view, and
-         resumes only if it scrolled back out during its first, one-time
-         session play (never resumes after a Replay-triggered play that has
-         already finished, and never once the once-per-session flag is set). */
-  function initHeroFilm(){
+  /* =========================================================================
+     Two-phase hero: phase 1 is the film alone (full width, nothing on top);
+     phase 2 is the data hero. Transition triggers: the film ending, the
+     visitor scrolling past ~40% of the film band, or clicking "Passer".
+     Session repeat: sessionStorage flag -- a later view in the same session
+     opens straight into phase 2 with the film's last frame as a slim banner
+     ("Revoir le film" replays it in place, without leaving phase 2).
+     prefers-reduced-motion / Save-Data: no video is ever requested; the
+     poster shows and the page opens directly in phase 2 (no film band,
+     nothing to skip).
+     ========================================================================= */
+  function initHero(){
     var SESSION_KEY = 'belpulse-home-film-played';
-    var film   = document.getElementById('heroFilm');
-    var poster = document.getElementById('heroPoster');
-    var video  = document.getElementById('heroVideo');
-    var replay = document.getElementById('heroReplay');
-    if(!film || !video) return;
+    var filmHero = document.getElementById('filmHero');
+    var poster   = document.getElementById('filmPoster');
+    var video    = document.getElementById('filmVideo');
+    var skipBtn  = document.getElementById('filmSkip');
+    var replayBtn= document.getElementById('filmReplay');
+    var scrollCue= document.getElementById('filmScrollCue');
+    var dataHero = document.getElementById('dataHero');
+    if(!filmHero || !video) return;
 
     function prefersReducedMotion(){
       try{ return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
@@ -1445,11 +1207,45 @@
       return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     }
 
-    if(prefersReducedMotion() || isSlowConnection()){
-      // Poster only. The <video> element is left with no src on any of its
-      // <source> children (data-src, never src, until wired below), so it
-      // never issues a network request -- this function simply returns
-      // before that wiring happens.
+    // Every phase-2 transition -- Passer, the film ending naturally, a
+    // second-session visit, or a play() rejection -- collapses the band to
+    // the same slim banner showing the frozen last frame: .filmhero's
+    // poster/video are position:absolute, so with no min-height the band
+    // would otherwise have no in-flow content to give it any height at all.
+    function goPhase2(){
+      filmHero.dataset.phase = '2';
+      filmHero.classList.add('banner');
+      video.hidden = true;
+      poster.hidden = false;
+      if(!video.paused) video.pause();
+      scrollCue.style.display = 'none';
+      skipBtn.hidden = true;
+    }
+
+    var reduced = prefersReducedMotion() || isSlowConnection();
+
+    if(reduced){
+      // No video ever requested. Straight into phase 2, poster as a slim
+      // banner (there is nothing to play, so no replay control either).
+      goPhase2();
+      replayBtn.hidden = true;
+      return;
+    }
+
+    if(alreadyPlayedThisSession()){
+      // Later view in the same session: slim banner with the last frame,
+      // "Revoir le film" replays the film in place (still full-band while
+      // replaying, same as the first visit).
+      goPhase2();
+      replayBtn.hidden = false;
+      replayBtn.addEventListener('click', function(){
+        filmHero.classList.remove('banner');
+        filmHero.dataset.phase = '1';
+        replayBtn.hidden = true;
+        skipBtn.hidden = false;
+        scrollCue.style.display = '';
+        playOnce();
+      });
       return;
     }
 
@@ -1465,95 +1261,77 @@
       video.load();
     }
 
-    var everPlayedThisLoad = false; // this particular <video> element's own first play
-    var sessionAlreadyDone = alreadyPlayedThisSession();
-
-    function showPoster(){
-      video.hidden = true;
-      poster.hidden = false;
-      if(!video.paused) video.pause();
-    }
-    function showVideo(){
-      poster.hidden = true;
-      video.hidden = false;
-    }
-
     function playOnce(){
       wireSources();
-      showVideo();
+      poster.hidden = true;
+      video.hidden = false;
       var p = video.play();
-      if(p && typeof p.catch === 'function') p.catch(function(){ showPoster(); });
+      if(p && typeof p.catch === 'function') p.catch(function(){ goPhase2(); });
     }
 
-    // preload="none" on the <video> element (markup) already keeps it from
-    // fetching anything until wireSources()+load() run. On desktop that
-    // happens immediately -- the film IS the first impression. On mobile,
-    // the plan asks for the (lighter, 720p) source to be requested only
-    // after the page is interactive, so LCP is never held up by it; the
-    // poster is what paints first there regardless.
-    function startAutoplay(){
-      if(!isMobileViewport()){ playOnce(); return; }
-      var kickoff = function(){
-        if('requestIdleCallback' in window) window.requestIdleCallback(playOnce, {timeout: 2000});
-        else window.setTimeout(playOnce, 0);
-      };
-      if(document.readyState === 'complete') kickoff();
-      else window.addEventListener('load', kickoff, {once: true});
-    }
-
-    if(sessionAlreadyDone){
-      // A later page view in the same session: poster, no autoplay, and a
-      // visible Replay button (en/fr/nl) instead of the film playing again.
-      showPoster();
-      if(replay) replay.hidden = false;
-    }else{
-      startAutoplay();
-      video.addEventListener('ended', function(){
-        everPlayedThisLoad = true;
-        markPlayedThisSession();
-        showPoster();
-        if(replay) replay.hidden = false;
-      });
-    }
-
-    if(replay){
-      replay.addEventListener('click', function(){
-        replay.hidden = true;
-        everPlayedThisLoad = false;
+    function endFilm(){
+      markPlayedThisSession();
+      // asBanner:true -- the film freezes on its last frame as a visible
+      // slim banner (per the plan), not a collapsed 0-height band: the
+      // poster/video are position:absolute inside .filmhero, so with no
+      // min-height the band would otherwise have no in-flow content to give
+      // it any height at all once data-phase="2" removes the 92vh rule.
+      goPhase2();
+      replayBtn.hidden = false;
+      replayBtn.onclick = function(){
+        replayBtn.hidden = true;
+        filmHero.dataset.phase = '1';
+        filmHero.classList.remove('banner');
+        scrollCue.style.display = 'none';
         playOnce();
         video.addEventListener('ended', function onEnded(){
           video.removeEventListener('ended', onEnded);
-          showPoster();
-          replay.hidden = false;
+          endFilm();
         });
-      });
+      };
     }
 
-    // Pause when scrolled out of view; resume only mid-way through the one
-    // automatic session play (never after Replay has already finished, and
-    // never once the poster is showing with nothing left to resume).
+    playOnce();
+    video.addEventListener('ended', endFilm);
+
+    skipBtn.addEventListener('click', function(){
+      endFilm();
+      dataHero.scrollIntoView({behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start'});
+    });
+
+    // Scrolling past ~40% of the film band also counts as "seen it" -- the
+    // visitor asked to move on by scrolling, same intent as Passer.
+    var triggered = false;
+    window.addEventListener('scroll', function onScroll(){
+      if(triggered || filmHero.dataset.phase === '2') { window.removeEventListener('scroll', onScroll); return; }
+      var rect = filmHero.getBoundingClientRect();
+      if(rect.bottom < window.innerHeight * 0.6){
+        triggered = true;
+        endFilm();
+        window.removeEventListener('scroll', onScroll);
+      }
+    }, {passive: true});
+
+    // Pause when scrolled fully out of view during phase 1 (rare -- the
+    // band is ~92vh -- but keeps the same courtesy the previous cut had).
     if('IntersectionObserver' in window){
       var io = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          if(video.hidden) return;
-          if(entry.isIntersecting){
-            if(!everPlayedThisLoad && video.paused && video.currentTime > 0 && !video.ended){
-              var p = video.play();
-              if(p && typeof p.catch === 'function') p.catch(function(){});
-            }
-          }else if(!video.paused){
-            video.pause();
+          if(filmHero.dataset.phase === '2' || video.hidden) return;
+          if(!entry.isIntersecting && !video.paused) video.pause();
+          else if(entry.isIntersecting && video.paused && !video.ended && video.currentTime > 0){
+            var p = video.play();
+            if(p && typeof p.catch === 'function') p.catch(function(){});
           }
         });
-      }, {threshold: 0.25});
-      io.observe(film);
+      }, {threshold: 0.15});
+      io.observe(filmHero);
     }
   }
 
   // Fires on DOMContentLoaded (script is at the end of body, so the DOM is
   // already parsed) and does not wait on init()'s network fetches.
-  initHeroFilm();
-
+  initHero();
   init();
 })();
 </script>
