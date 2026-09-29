@@ -7,8 +7,13 @@ from src.site.routes import is_indexable, sitemap_routes
 
 REPO = Path(__file__).resolve().parents[1]
 PAGE = REPO / "home2.html"
+# home2-hero-brussels.png (the old static hero background, from before the
+# brand film existed at all) is NOT in this list: the film-first redesign
+# replaced the dark `.hero` section it decorated with `.filmhero`, so
+# home2.html no longer references it. The file on disk is left alone here --
+# removing an asset unrelated to this batch's own scope is a separate
+# cleanup, flagged in the PR rather than done inline.
 ASSETS = (
-    "assets/belpulse/home2/home2-hero-brussels.png",
     "assets/belpulse/home2/home2-namur-card.png",
     "assets/belpulse/home2/home2-namur-cta.png",
 )
@@ -19,9 +24,15 @@ def _html() -> str:
 
 
 def test_home2_has_the_reference_sections_and_generated_assets():
+    """The film-first redesign (home-v5) replaced the single dark `.hero`
+    section with a two-phase hero: `.filmhero` (phase 1, the brand film
+    alone) and `.datahero` (phase 2, the commune-Portrait-styled data hero,
+    holding the map/chart cards the old `.hero` used to carry directly).
+    Every other reference section/asset below the hero is unchanged."""
     html = _html()
     for marker in (
-        'class="hero"',
+        'class="filmhero"',
+        'id="dataHero"',
         'id="financeStrip"',
         'id="featuredCard"',
         'id="themeThumbs"',
@@ -37,15 +48,20 @@ def test_home2_has_the_reference_sections_and_generated_assets():
 
 
 def test_home2_reuses_the_shared_map_and_has_page_scoped_seven_band_palettes():
+    """The three map-theme thumbnails still carry their own page-scoped
+    7-band palette (unchanged from before). The hero map card itself no
+    longer overrides the palette (the old dark `.home2 .hero-map` navy-tuned
+    ramp went away with the dark hero) -- it now draws with the shared
+    component's own default ramp, the same as every other light-card map on
+    the site."""
     html = _html()
     assert '<script src="assets/commune_map.js"></script>' in html
     assert "new MapUI.CommuneMap" in html
     assert "class CommuneMap" not in html
     for palette_owner in (
-        ".home2 .hero-map",
-        ".home2 .thumb:nth-child(1)",
-        ".home2 .thumb:nth-child(2)",
-        ".home2 .thumb:nth-child(3)",
+        ".thumb:nth-child(1)",
+        ".thumb:nth-child(2)",
+        ".thumb:nth-child(3)",
     ):
         rule = re.search(re.escape(palette_owner) + r"\s*\{([^}]+)\}", html)
         assert rule, palette_owner
@@ -135,12 +151,21 @@ def test_home2_hero_series_come_from_national_sections_config_not_the_page():
     assert "heroOrder" in html
 
 
-def test_home2_has_no_search_box_and_uses_the_wide_layout():
+def test_home2_has_a_commune_search_wired_to_the_real_commune_page():
+    """The film-first redesign (home-v5) added a commune search to the data
+    hero, matching commune.html's own switcher pattern: every commune in
+    view-src/geojson goes into the <datalist> as 'Name (nis)', and picking one
+    (or typing the name and pressing enter, which fires `change`) navigates to
+    the REAL commune.html?nis=... profile -- not a dead link, since this is
+    the real site page, not the self-contained mockup that first proved the
+    interaction. This replaces the old 'no search box' assertion: the old
+    dark-hero layout deliberately had none, the new commune-Portrait-styled
+    hero deliberately does."""
     html = _html()
-    assert 'id="communeSearch"' not in html
-    assert "wireSearch" not in html
-    assert "searchbox" not in html
-    assert ".home2 .wrap{max-width:1400px;" in html
+    assert 'id="communeSearch"' in html
+    assert 'id="communeList"' in html
+    assert "wireSearch" in html
+    assert "commune.html?nis=" in html
 
 
 def test_home2_nav_uses_the_shared_header_typography():
@@ -149,25 +174,19 @@ def test_home2_nav_uses_the_shared_header_typography():
     assert not re.search(r"\.home2 \.bp-nav\{[^}]*font-size", _html())
 
 
-def test_home2_hero_map_tooltip_is_opaque_navy():
-    rule = re.search(r"\.hero-map \.map-tip\{([^}]+)\}", _html())
-    assert rule, "no hero-map tooltip rule"
-    assert "background:var(--bp-navy-surface)" in rule.group(1)
-    assert "color:var(--bp-navy-text)" in rule.group(1)
-
-
 # --- Batch A2b: visual polish -------------------------------------------------
 
 
 def test_home2_headline_wraps_with_a_balanced_measure_not_a_tight_character_cap():
     """Item 1: 'mises à jour automatiquement' used to leave 'jour' alone on
-    its own line in every theme, because the h1 was capped to 17ch -- tighter
-    than the column it sits in actually allows. text-wrap:balance lets the
-    browser choose break points that avoid an orphan; the widened cap gives
-    it room to do that instead of being forced back to the same four lines."""
+    its own line in every theme, because the h1 was capped too tight for the
+    column it sits in. text-wrap:balance lets the browser choose break points
+    that avoid an orphan. The film-first redesign moved the headline from
+    `.home2 .hero h1` into the phase-2 data hero's own `.datahero h1`; the
+    same balanced-wrap contract still applies there."""
     html = _html()
-    rule = re.search(r"\.home2 \.hero h1\{([^}]+)\}", html)
-    assert rule, "no .home2 .hero h1 rule"
+    rule = re.search(r"\.datahero h1\{([^}]+)\}", html)
+    assert rule, "no .datahero h1 rule"
     body = rule.group(1).replace(" ", "")
     assert "text-wrap:balance" in body
     assert "max-width:17ch" not in body, "still capped to the width that produced the orphan"

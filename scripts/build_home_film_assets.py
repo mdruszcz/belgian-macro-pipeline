@@ -9,6 +9,9 @@ under assets/belpulse/home-film/, so the page never needs to know a version numb
                        deterministically; re-encoded only if a --source-1080 differs
                        from --source is not given).
   film-1440.webm   -- desktop AV1/WebM, preferred source when the browser supports it.
+                       Only built if --source-1440 is given (an actual AV1/VP9 render --
+                       -c:v copy into .webm cannot remux an H.264 source). Optional tier;
+                       omit --source-1440 when the only render available is 1080p H.264.
   film-720.mp4      -- mobile-weight H.264, CRF ~30, target <= 3 MB.
   poster.jpg        -- last frame of the film, JPEG q~82.
   poster.webp       -- same frame, WebP.
@@ -71,6 +74,42 @@ def _remux_copy(ffmpeg: str, source: Path, dest: Path) -> None:
             *_DETERMINISM_FLAGS,
             "-c:v",
             "copy",
+            str(dest),
+        ],
+    )
+
+
+def build_1080(ffmpeg: str, source: Path, dest: Path) -> None:
+    """Desktop H.264 at the source's own 1920x1080, re-encoded with CRF (not
+    a bitstream copy): a raw render from the animation tool ships at a high
+    enough bitrate that -c:v copy alone routinely blows the 12 MB budget (and
+    can exceed the 25 MB hard limit outright on a ~27s clip). CRF 31 is the
+    same quality/size point the approved home-v5 mockup cut used."""
+    _run(
+        ffmpeg,
+        [
+            "-i",
+            str(source),
+            "-an",
+            *_DETERMINISM_FLAGS,
+            "-vf",
+            "scale=-2:1080",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryslow",
+            "-crf",
+            "31",
+            "-profile:v",
+            "high",
+            "-pix_fmt",
+            "yuv420p",
+            "-r",
+            "30",
+            "-fps_mode",
+            "cfr",
+            "-movflags",
+            "+faststart",
             str(dest),
         ],
     )
@@ -160,13 +199,26 @@ def main(argv: list[str] | None = None) -> int:
         "--source-1080",
         type=Path,
         default=None,
-        help="Pre-rendered 1080p H.264 file to remux (defaults to --source).",
+        help=(
+            "Pre-encoded, web-ready 1080p H.264 file to remux byte-for-byte "
+            "(-c:v copy, metadata stripped only). If omitted, film-1080.mp4 "
+            "is instead ENCODED from --source at CRF 31 -- the common case, "
+            "since a raw render is rarely already at a web-ready bitrate."
+        ),
     )
     parser.add_argument(
         "--source-1440",
         type=Path,
         default=None,
-        help="Pre-rendered 1440p AV1/WebM file to remux (defaults to --source).",
+        help=(
+            "Pre-rendered 1440p AV1/WebM file to remux. Optional: unlike "
+            "--source-1080, this is NOT defaulted from --source, because "
+            "-c:v copy into a .webm container requires an actual AV1/VP9 "
+            "elementary stream -- remuxing an H.264 source into .webm fails "
+            "outright. If omitted, film-1440.webm is not built (and any "
+            "stale copy already in --out-dir is left untouched by this run; "
+            "delete it by hand if the new cut should drop the 1440p tier)."
+        ),
     )
     parser.add_argument("--ffmpeg", default="ffmpeg", help="Path to ffmpeg.exe.")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
@@ -176,35 +228,44 @@ def main(argv: list[str] | None = None) -> int:
     if not source.is_file():
         print(f"source not found: {source}", file=sys.stderr)
         return 1
-    source_1080 = args.source_1080 or source
-    source_1440 = args.source_1440 or source
-    for label, path in (
-        ("--source", source),
-        ("--source-1080", source_1080),
-        ("--source-1440", source_1440),
-    ):
-        if not path.is_file():
-            print(f"{label} not found: {path}", file=sys.stderr)
-            return 1
+    source_1080 = args.source_1080
+    source_1440 = args.source_1440
+    if source_1080 is not None and not source_1080.is_file():
+        print(f"--source-1080 not found: {source_1080}", file=sys.stderr)
+        return 1
+    if source_1440 is not None and not source_1440.is_file():
+        print(f"--source-1440 not found: {source_1440}", file=sys.stderr)
+        return 1
 
     out_dir: Path = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     ffmpeg = args.ffmpeg
 
-    print(f"building film-1080.mp4 from {source_1080.name} ...")
-    _remux_copy(ffmpeg, source_1080, out_dir / "film-1080.mp4")
+    if source_1080 is not None:
+        print(f"remuxing film-1080.mp4 from pre-encoded {source_1080.name} ...")
+        _remux_copy(ffmpeg, source_1080, out_dir / "film-1080.mp4")
+    else:
+        print(f"encoding film-1080.mp4 from {source.name} (CRF 31) ...")
+        build_1080(ffmpeg, source, out_dir / "film-1080.mp4")
 
-    print(f"building film-1440.webm from {source_1440.name} ...")
-    _remux_copy(ffmpeg, source_1440, out_dir / "film-1440.webm")
+    built = ["film-1080.mp4"]
+    if source_1440 is not None:
+        print(f"building film-1440.webm from {source_1440.name} ...")
+        _remux_copy(ffmpeg, source_1440, out_dir / "film-1440.webm")
+        built.append("film-1440.webm")
+    else:
+        print("no --source-1440 given: skipping film-1440.webm")
 
     print(f"building film-720.mp4 from {source.name} ...")
     build_720(ffmpeg, source, out_dir / "film-720.mp4")
+    built.append("film-720.mp4")
 
     print(f"building poster.jpg / poster.webp from {source.name} (last frame) ...")
     build_poster(ffmpeg, source, out_dir / "poster.jpg", out_dir / "poster.webp")
+    built.extend(["poster.jpg", "poster.webp"])
 
     print("\nWritten to", out_dir)
-    for name in ("film-1080.mp4", "film-1440.webm", "film-720.mp4", "poster.jpg", "poster.webp"):
+    for name in built:
         f = out_dir / name
         size_mb = f.stat().st_size / (1024 * 1024)
         flag = " *** OVER 25 MB ***" if size_mb > 25 else ""

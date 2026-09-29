@@ -245,6 +245,17 @@ I18N.STRINGS = {
     // the film has already played once this session.
     homeFilmAlt: "Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.",
     homeFilmReplay: 'Replay',
+    // Two-phase film hero (home2.html): v5SkipFilm/v5ReplayFilm label the
+    // phase-1 controls, v5ScrollCue the scroll-down hint, and v5Section*
+    // are the chapter-nav-style eyebrows over each restyled section below
+    // the data hero.
+    v5SkipFilm: 'Skip ↓',
+    v5ReplayFilm: '↺ Watch again',
+    v5ScrollCue: 'Scroll for the data',
+    v5SectionCommune: 'Commune profile',
+    v5SectionMaps: 'Belgium in maps',
+    v5SectionIndicators: 'National indicators',
+    v5SectionHow: 'How this site works',
     // The <summary> of a chart's data table (assets/belpulse/charts.js
     // BPCharts.dataTable) -- short on purpose, the chart's own title is
     // already printed right above it, so repeating it here would be noise.
@@ -1027,6 +1038,13 @@ I18N.STRINGS = {
     homeSeeMore: 'Voir plus',
     homeFilmAlt: "Arrière-plan : un film animé de la carte de la Belgique et de ses 565 communes, purement décoratif, sans chiffre propre.",
     homeFilmReplay: 'Revoir',
+    v5SkipFilm: 'Passer ↓',
+    v5ReplayFilm: '↺ Revoir le film',
+    v5ScrollCue: 'Faites défiler pour les données',
+    v5SectionCommune: 'Portrait de commune',
+    v5SectionMaps: 'La Belgique en cartes',
+    v5SectionIndicators: 'Indicateurs nationaux',
+    v5SectionHow: 'Comment fonctionne ce site',
     chartDataTable: 'Voir les données',
     homeFinanceLead: 'Chiffres indisponibles dans le pipeline actuel',
     homeFinanceSpending: 'Dépenses de l’État',
@@ -1759,6 +1777,13 @@ I18N.STRINGS = {
     homeSeeMore: 'Meer bekijken',
     homeFilmAlt: 'Achtergrond: een geanimeerde film van de kaart van België en haar 565 gemeenten, louter decoratief, zonder eigen cijfers.',
     homeFilmReplay: 'Opnieuw afspelen',
+    v5SkipFilm: 'Overslaan ↓',
+    v5ReplayFilm: '↺ Bekijk opnieuw',
+    v5ScrollCue: 'Scroll voor de gegevens',
+    v5SectionCommune: 'Gemeenteprofiel',
+    v5SectionMaps: 'België in kaarten',
+    v5SectionIndicators: 'Nationale indicatoren',
+    v5SectionHow: 'Hoe deze site werkt',
     chartDataTable: 'Gegevens bekijken',
     homeFinanceLead: 'Cijfers niet beschikbaar in de huidige pijplijn',
     homeFinanceSpending: 'Overheidsuitgaven',
