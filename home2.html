@@ -101,12 +101,6 @@
     content:''; position:absolute; inset:0; pointer-events:none;
     background:linear-gradient(180deg, rgba(5,7,12,.55) 0%, rgba(5,7,12,0) 16%, rgba(5,7,12,0) 72%, rgba(5,7,12,.7) 100%);
   }
-  .filmhero-mark{
-    position:absolute; z-index:2; top:20px; left:24px;
-    display:flex; align-items:center; gap:8px; color:#fff; font-family:var(--bp-font-display); font-weight:600; font-size:1.05rem;
-    text-decoration:none;
-  }
-  .filmhero-mark .dot{width:9px; height:9px; border-radius:50%; background:var(--bp-accent, #d94f2b)}
   .filmhero-controls{
     position:absolute; z-index:2; bottom:22px; right:24px; display:flex; gap:8px;
   }
@@ -136,9 +130,11 @@
      min-height would otherwise collapse the band to 0. */
   .filmhero.banner{ height:34vh; min-height:220px; max-height:360px; }
   @media (max-width:640px){
-    .filmhero{ height:78vh; min-height:420px }
-    .filmhero.banner{ height:26vh; min-height:180px }
-    .filmhero-mark{ font-size:.95rem; top:14px; left:16px }
+    /* Phones: the 16:9 film is shown whole (object-fit:contain), so the band
+       takes the film's own proportions plus room for the controls -- a 78vh
+       band left two thirds of the screen as black bars. */
+    .filmhero{ height:auto; min-height:0; aspect-ratio:16/10.5 }
+    .filmhero.banner{ height:auto; min-height:0; aspect-ratio:16/9 }
     .filmhero-controls{ right:16px; bottom:16px }
     .filmhero-scrollcue{ left:16px; bottom:16px }
   }
@@ -328,7 +324,6 @@
       <source data-src="assets/belpulse/home-film/film-720.mp4" type="video/mp4" data-variant="mobile">
     </video>
 
-    <a class="filmhero-mark" href="home2.html" aria-hidden="true" tabindex="-1"><span class="dot"></span>BelPulse</a>
     <span class="visually-hidden" data-t="homeFilmAlt">Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.</span>
     <div class="filmhero-scrollcue" id="filmScrollCue"><span data-t="v5ScrollCue">Scroll for the data</span>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
