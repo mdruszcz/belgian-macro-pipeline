@@ -43,7 +43,7 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
 <link rel="stylesheet" href="assets/belpulse/tokens.css?v=9bb5cb4cd8">
-<link rel="stylesheet" href="assets/belpulse/layout.css?v=27eb9024ef">
+<link rel="stylesheet" href="assets/belpulse/layout.css?v=b7e2905909">
 <link rel="stylesheet" href="assets/belpulse/components.css?v=2f28cc340f">
 <link rel="stylesheet" href="assets/commune_map.css?v=dd8f1ee885">
 <style>
@@ -341,7 +341,13 @@
   .leadmap-legend .swatches div{flex:1 1 0; width:auto !important; min-width:0}
   .leadmap-legend .ticks{font-family:var(--bp-font-ui) !important; font-variant-numeric:tabular-nums; width:100% !important}
   .leadmap-legend .ticks span{font-size:11px}
+  /* .src (the source + freshness line) carries a fact and needs
+     --bp-text-muted's contrast; .hint (the map interaction hint, e.g.
+     "click a commune") is decoration restated elsewhere and keeps
+     --bp-text-faint, so the base rule sets the faint colour and only .src
+     is overridden back up to muted. */
   .leadmap-caption{font-size:11px; color:var(--bp-text-faint); margin-top:4px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap}
+  .leadmap-caption .src{color:var(--bp-text-muted)}
   .leadmap-caption .hint{color:var(--bp-text-faint)}
 
   /* ---------------------------------------------------------------------
@@ -359,9 +365,9 @@
   .mtile-labelblock{min-height:26px}
   .mtile-eyebrow{font:600 11px/1.3 var(--bp-font-ui); letter-spacing:.04em; color:var(--bp-text-muted); min-height:26px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
   .mtile-desc{font-size:12px; line-height:1.4; color:var(--bp-text-faint); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .mtile-chip{display:inline-block; font:600 10px/1 var(--bp-font-ui); letter-spacing:.02em; color:var(--bp-text-faint); background:var(--bp-surface-alt); border-radius:3px; padding:2px 5px; vertical-align:middle}
+  .mtile-chip{display:inline-block; font:600 10px/1 var(--bp-font-ui); letter-spacing:.02em; color:var(--bp-text-muted); background:var(--bp-surface-alt); border-radius:3px; padding:2px 5px; vertical-align:middle}
   .mtile-value{font:600 23px/1.1 var(--bp-font-ui); font-variant-numeric:tabular-nums; margin-top:6px; color:var(--bp-text)}
-  .mtile-period{font-size:12px; color:var(--bp-text-faint); margin-top:1px}
+  .mtile-period{font-size:12px; color:var(--bp-text-muted); margin-top:1px}
   .mtile-spark{height:44px; margin-top:8px}
   .mtile-spark svg{display:block; width:100%; height:100%; overflow:visible}
   .mtile-share{margin-top:8px; font-size:11px; line-height:1.35; color:var(--bp-text-muted)}
@@ -784,10 +790,10 @@
   </div>
 </div>
 
-<script src="assets/i18n.js?v=f1ac8f5d46"></script>
+<script src="assets/i18n.js?v=faf5e7970a"></script>
 <script src="assets/belpulse/shell.js?v=50299961dc"></script>
 <script src="assets/belpulse/components.js?v=c46caeab4b"></script>
-<script src="assets/commune_map.js?v=37e2927a33"></script>
+<script src="assets/commune_map.js?v=1d427705b8"></script>
 <script src="assets/belpulse/charts.js?v=380e50fa95"></script>
 <script src="assets/belpulse/similar.js?v=208ab95007"></script>
 <script>
@@ -855,6 +861,22 @@
     }
     return s;
   };
+  /* A period status ('provisional', 'estimate', 'reconstructed', ...) as a
+     lowercase, localized word -- never the raw i18n key. I18N.t() falls back
+     to returning the KEY ITSELF when a language table has no entry for it
+     (assets/i18n.js's I18N.t), which is truthy, so a naive `T(key) || raw`
+     never reaches its own fallback: a status with no v4Status_* entry (or a
+     future one added to the data but not yet to i18n.js) rendered the raw
+     key text ("v4status_reconstructed") on Pajottegem (23106) and Antwerp
+     (11002) until this was added. Detecting the "key echoed back" case
+     explicitly is what makes the raw-status fallback actually reachable. */
+  function statusLabel(status){
+    if(!status) return status;
+    var key = 'v4Status_' + status;
+    var s = T(key);
+    if(!s || s === key) return status;
+    return s.toLocaleLowerCase(localeTag());
+  }
   var DEFAULT_NIS = '92094';
 
   /* ---- one hue per chapter -------------------------------------------
@@ -1020,18 +1042,12 @@
     var s = MapUI.formatValue(v, meta.unit, decimals, LANG);
     if(s.charAt(0) === '-') s = '−' + s.slice(1);
     if(LANG === 'en') return s;
-    if(s.charAt(0) === '€'){
-      s = s.slice(1);
-      var slashIdx = s.indexOf('/');
-      if(slashIdx >= 0){
-        var monthWord = LANG === 'nl' ? 'maand' : 'mois';
-        var isMonth = /mo\.?$/.test(s.slice(slashIdx));
-        var isHab = /hab\.?$/.test(s.slice(slashIdx));
-        s = s.slice(0, slashIdx).trim() + NNBSP + '€/' + (isMonth ? monthWord : (isHab ? 'hab.' : s.slice(slashIdx + 1)));
-      } else {
-        s = s + NNBSP + '€';
-      }
-    } else if(/%$/.test(s)){
+    // MapUI.formatValue() now builds the fr/nl "number NBSP €" euro shape
+    // itself (assets/commune_map.js), the same shape this function used to
+    // build by hand from its English-style "€..." output -- every euro unit
+    // is already correct by the time it gets here, so only the percent
+    // sign's own NBSP still needs handling on this side.
+    if(/%$/.test(s)){
       s = s.slice(0, -1) + NNBSP + '%';
     }
     return s;
@@ -1103,8 +1119,11 @@
     if(!spans.length || !raw || raw.length !== spans.length) return;
     spans.forEach(function(s, i){
       var body = s.textContent.replace(/^€\s*/, '').replace(/€\s*$/, '').trim();
-      if(LANG === 'fr') s.textContent = body + NNBSP + '€';
-      else if(LANG === 'nl') s.textContent = '€ ' + body;
+      // fr AND nl both place € after the number (Belgian typographic
+      // convention for both languages, matching fmt() above and
+      // MapUI.formatValue() -- nl used to put the symbol first ('€ ' +
+      // body), the one place on this page that still disagreed).
+      if(LANG === 'fr' || LANG === 'nl') s.textContent = body + NNBSP + '€';
       else s.textContent = '€' + body;
     });
   }
@@ -2334,7 +2353,7 @@
       // never has to guess which figure belongs to which place.
       rows.push('<span>' + escapeHtml(hot.name) + '</span>');
       rows.push('<span class="bp-chart-tip-value">' + escapeHtml(hot.valueText != null ? hot.valueText : (typeof hot.value === 'number' ? String(hot.value) : '—')) + '</span>');
-      if(hot.status && hot.status !== 'final') rows.push('<span>' + escapeHtml((T('v4Status_' + hot.status) || hot.status).toLocaleLowerCase(localeTag())) + '</span>');
+      if(hot.status && hot.status !== 'final') rows.push('<span>' + escapeHtml(statusLabel(hot.status)) + '</span>');
       rows.push('<span>' + escapeHtml(T('cpOpenHint')) + '</span>');
       return rows.join('');
     }
@@ -3109,7 +3128,7 @@
             return;
           }
           var txt = simFmt(cell.value, meta);
-          if(cell.status && cell.status !== 'final') txt += ' (' + T('v4Status_' + cell.status).toLocaleLowerCase(localeTag()) + ')';
+          if(cell.status && cell.status !== 'final') txt += ' (' + statusLabel(cell.status) + ')';
           span.textContent = txt;
         });
       });
@@ -3575,7 +3594,7 @@
       if(statusLatest && statusLatest !== 'final'){
         var chip = document.createElement('span');
         chip.className = 'mtile-chip';
-        chip.textContent = (T('v4Status_' + statusLatest) || statusLatest).toLocaleLowerCase(localeTag());
+        chip.textContent = statusLabel(statusLatest);
         per.appendChild(document.createTextNode(' · '));
         per.appendChild(chip);
       }

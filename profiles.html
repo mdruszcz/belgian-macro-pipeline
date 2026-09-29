@@ -50,8 +50,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BelPulse — Commune profiles</title>
-<meta name="description" content="Every Belgian commune by region, province and socio-economic type, each with its profile of official indicators.">
+<title data-t-doctitle="pageTitle_profiles">BelPulse — Commune profiles</title>
+<meta name="description" data-t-content="pageDesc_profiles" content="Every Belgian commune by region, province and socio-economic type, each with its profile of official indicators.">
+<link rel="canonical" href="https://mdruszcz.github.io/belgian-macro-pipeline/profiles.html">
 
 <!-- A3.2: every commune selection opens commune.html?nis=; this legacy
      ?nis= view is retired in favour of it (rule 31 keeps the URL itself
@@ -120,6 +121,7 @@
   .toolbar select{
     border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); background:var(--bp-surface);
     color:inherit; font:inherit; font-size:var(--bp-text-small); padding:8px 10px; max-width:240px;
+    min-width:0;
   }
   .toolbar .bp-btn{font-size:var(--bp-text-small); white-space:nowrap}
   /* .bp-btn--dark used to be redeclared here with color:#fff, overriding the
@@ -291,7 +293,14 @@
   }
   @media (max-width:480px){
     .regions,.families,.province-map-block,.communes,.communes.list{grid-template-columns:minmax(0,1fr)}
-    .toolbar select{flex:1 1 100%; max-width:none}
+    /* min-width:0 is the load-bearing part: a flex item's default min-width
+       is auto (its content's intrinsic width), so a <select> with a long
+       option string (e.g. "Anvers, Anvers" the province + region pair) grew
+       to 618px inside its flex row regardless of max-width:none, pushing the
+       toolbar wider than the 390px viewport and causing sideways page
+       scroll. text-overflow:ellipsis has no effect on a <select> itself
+       (only inside its dropdown), so it is not a fix here. */
+    .toolbar select{flex:1 1 100%; max-width:none; min-width:0}
   }
 </style>
 </head>

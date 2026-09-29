@@ -179,6 +179,25 @@
 .bp-lang-switch a:focus-visible, .bp-lang-switch button:focus-visible{
   outline:2px solid var(--bp-accent); outline-offset:-2px;
 }
+
+/* ---- search/text input focus ring ------------------------------------
+   Every page's own `.searchbox` (home2.html, commune.html, profiles.html --
+   #communeSearch, #pfSearch) wraps its <input> in a bordered box and sets
+   the input itself to outline:0, so a keyboard user tabbing to it saw no
+   focus indicator at all: the box's border never changes on :focus, and the
+   browser's own default ring was the one thing suppressed. :focus-within on
+   the wrapper (rather than :focus-visible on the input) is deliberate --
+   Safari does not support :focus-visible on a text input consistently, and
+   the ring needs to sit on the BOX (border-radius already matches it) for
+   it to read as "this control is focused" rather than a 1px line clipped by
+   the box's own border. Any other bare text/search input without a
+   `.searchbox` wrapper still gets its outline restored directly. */
+.searchbox:focus-within{
+  outline:2px solid var(--bp-accent); outline-offset:1px;
+}
+input[type="text"]:focus-visible, input[type="search"]:focus-visible{
+  outline:2px solid var(--bp-accent); outline-offset:1px;
+}
 /* Inside someone else's frame, the FRAME owns theme and language --
    index.html pushes both in by postMessage on every load, so a reader's
    click on either menu here would be visibly undone a moment later. Same

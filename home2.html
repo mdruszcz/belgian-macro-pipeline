@@ -44,8 +44,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BelPulse — Belgium's economic data, updated automatically</title>
-<meta name="description" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
+<title data-t-doctitle="pageTitle_home2">BelPulse — Belgium's economic data, updated automatically</title>
+<meta name="description" data-t-content="pageDesc_home2" content="Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.">
+<link rel="canonical" href="https://mdruszcz.github.io/belgian-macro-pipeline/home2.html">
 
 <!-- bp-shell:bootstrap:start -->
 <script>(function(){try{var KEY='belpulse-theme',LEGACY_KEY='theme',LEGACY={day:'light',soft:'light',night:'dark'};var v=localStorage.getItem(KEY);if(v===null){var legacy=localStorage.getItem(LEGACY_KEY);if(legacy&&Object.prototype.hasOwnProperty.call(LEGACY,legacy))v=LEGACY[legacy];}if(v==='auto'){v=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';try{localStorage.setItem(KEY,v);}catch(e){}}if(v!=='light'&&v!=='dark'&&v!=='paper')v='light';document.documentElement.setAttribute('data-theme',v);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
@@ -318,7 +319,10 @@
 
   <!-- ── PHASE 1: the film, full width, nothing else ─────────────────── -->
   <section class="filmhero" id="filmHero" data-phase="1">
-    <img id="filmPoster" src="assets/belpulse/home-film/poster.jpg" alt="" width="1920" height="1080" fetchpriority="high">
+    <picture>
+      <source srcset="assets/belpulse/home-film/poster.webp" type="image/webp">
+      <img id="filmPoster" src="assets/belpulse/home-film/poster.jpg" alt="" width="1920" height="1080" fetchpriority="high">
+    </picture>
     <video id="filmVideo" muted playsinline preload="none" poster="assets/belpulse/home-film/poster.jpg" hidden>
       <source data-src="assets/belpulse/home-film/film-1080.mp4" type="video/mp4" data-variant="desktop">
       <source data-src="assets/belpulse/home-film/film-720.mp4" type="video/mp4" data-variant="mobile">
@@ -412,7 +416,7 @@
         <p class="section-sub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
         <div class="commune-card bp-state" id="featuredCard" data-state="loading">
           <div class="bp-state-skeleton"></div>
-          <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur"></div>
+          <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur" loading="lazy" decoding="async"></div>
           <div>
             <div class="cc-name" id="featuredName">—</div>
             <div class="cc-region" id="featuredRegion">—</div>
