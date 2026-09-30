@@ -140,6 +140,17 @@ def test_micro_loads_no_third_party_asset():
     resources = re.findall(
         r"<(?:script|link)\b[^>]*\s(?:src|href)=[\"'](https?://[^\"']+)", html, re.IGNORECASE
     )
+    # A <link rel="canonical"> is metadata a crawler reads, never a resource
+    # the BROWSER fetches -- added by the 2026-09-29 site-audit batch,
+    # self-referencing micro.html's own https://.../micro.html, which is not
+    # third-party at all. Excluded here rather than weakening the check for
+    # an actually-loaded resource (a real rel="stylesheet"/script src would
+    # still be caught).
+    resources = [
+        url
+        for url in resources
+        if url != "https://mdruszcz.github.io/belgian-macro-pipeline/micro.html"
+    ]
     assert all(url.startswith("https://fonts.googleapis.com/") for url in resources), resources
 
 

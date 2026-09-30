@@ -109,6 +109,49 @@ def test_the_licence_notice_is_complete_in_every_language(strings):
         assert notice.count("CC BY 4.0") >= 3, f"{lang} does not disclaim CC BY for the other two"
 
 
+def test_v4status_reconstructed_exists_in_every_language(strings):
+    """Site audit fix (2026-09-29): commune.html builds the key
+    'v4Status_' + status for a period's status word (~lines 2337, 3112, 3578),
+    but 'reconstructed' -- a real status value in the payload, used for a
+    commune reconstituted from its pre-merger predecessors (the
+    reconstructedSuffix/reconstructedNote strings already describe this) --
+    had no v4Status_reconstructed entry in any language table. I18N.t()
+    falls back to returning the raw KEY ITSELF for a missing entry (not
+    undefined, not the English string), so 'v4status_reconstructed' rendered
+    as literal text on-screen: reproduced on Pajottegem (NIS 23106, 26
+    times) and Antwerp (11002). The generic completeness test above already
+    guarantees en/fr/nl parity for every key; this test guarantees the key
+    itself exists and is a real, non-placeholder word in each language."""
+    for lang in LANGS:
+        word = strings[lang]["v4Status_reconstructed"]
+        assert word, f"{lang} has no v4Status_reconstructed word"
+        assert (
+            word.lower() != "v4status_reconstructed"
+        ), f"{lang}'s v4Status_reconstructed just echoes the raw key back"
+    assert strings["en"]["v4Status_reconstructed"] == "reconstructed"
+    assert strings["fr"]["v4Status_reconstructed"] == "reconstitué"
+    assert strings["nl"]["v4Status_reconstructed"] == "gereconstrueerd"
+
+
+def test_commune_html_never_prints_a_raw_v4status_key():
+    """Static guard on the statusLabel() helper commune.html uses at its three
+    T('v4Status_' + status) call sites: a naive `T(key) || fallback` never
+    reaches its own fallback, because I18N.t() returns the KEY ITSELF (a
+    truthy string) for any status commune.html asks for that has no entry --
+    today's three call sites, and any FUTURE status value added to the data
+    with no matching i18n.js entry yet. statusLabel() must detect "the
+    lookup echoed the key back" explicitly rather than relying on `||`."""
+    source = (REPO / "commune.html").read_text(encoding="utf-8")
+    assert "function statusLabel(status)" in source
+    # The three original call sites must route through the shared helper,
+    # not repeat the bug pattern (a bare `T('v4Status_' + x) || x`) locally.
+    assert re.search(r"\(T\('v4Status_'\s*\+\s*\w+\)\s*\|\|\s*\w+\)", source) is None, (
+        "a v4Status_* lookup still uses the unreachable `T(key) || raw` "
+        "fallback pattern instead of statusLabel()"
+    )
+    assert source.count("statusLabel(") >= 4  # the definition + 3 call sites
+
+
 # --- language selection ----------------------------------------------------
 
 

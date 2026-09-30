@@ -240,6 +240,65 @@ def test_units_are_formatted_the_way_communes_html_formats_them():
     assert out["suffix_count"] == ""
 
 
+def test_euro_placement_follows_belgian_typographic_convention_by_language():
+    """Site audit fix (2026-09-29): MapUI.formatValue('eur'/'eur_per_inhabitant'/
+    'eur_per_month', ...) ignored its own `lang` argument and always put the
+    euro sign BEFORE the number, English-style ('€40,125.7'). commune.html's
+    own fmt() always post-processed that into the fr/nl convention (number,
+    a narrow no-break space, then the sign: '40 125,7 €') -- but it was the
+    ONLY caller that did, so micro.html, which calls MapUI.formatValue()
+    directly, printed the English form even when the page itself was in
+    French or Dutch. Fixed by building the fr/nl shape inside formatValue()
+    itself, once, for every caller. en is unchanged: the sign stays in
+    front. fr and nl are the same shape as each other (Belgian convention
+    for both), not an EN-vs-non-EN split."""
+    out = _run_node("""
+        console.log(JSON.stringify({
+          en_eur: MapUI.formatValue(40125.7, 'eur', 1, 'en'),
+          fr_eur: MapUI.formatValue(40125.7, 'eur', 1, 'fr'),
+          nl_eur: MapUI.formatValue(40125.7, 'eur', 1, 'nl'),
+          en_inhabitant: MapUI.formatValue(2319.7, 'eur_per_inhabitant', 1, 'en'),
+          fr_inhabitant: MapUI.formatValue(2319.7, 'eur_per_inhabitant', 1, 'fr'),
+          nl_inhabitant: MapUI.formatValue(2319.7, 'eur_per_inhabitant', 1, 'nl'),
+          fr_month: MapUI.formatValue(850, 'eur_per_month', 0, 'fr'),
+          nl_month: MapUI.formatValue(850, 'eur_per_month', 0, 'nl'),
+          fr_negative: MapUI.formatValue(-120.5, 'eur', 1, 'fr'),
+        }));
+        """)
+    assert out["en_eur"] == "€40,125.7"
+    assert out["fr_eur"] == "40 125,7 €"
+    assert out["nl_eur"] == "40.125,7 €"
+    # en keeps the symbol in front for the rate units too.
+    assert out["en_inhabitant"].startswith("€")
+    # fr/nl: the sign sits right against the number and right against the
+    # rate suffix -- no extra space around the slash.
+    assert out["fr_inhabitant"] == "2 319,7 €/hab."
+    assert out["nl_inhabitant"] == "2.319,7 €/hab."
+    assert out["fr_month"].endswith("€/mois")
+    assert out["nl_month"].endswith("€/maand")
+    # The euro sign moving to the end must not eat the minus sign: it has to
+    # stay at the very front of the string either way.
+    assert out["fr_negative"].startswith("-")
+    assert out["fr_negative"].endswith("€")
+
+
+def test_tick_label_euro_placement_matches_format_value():
+    """MapUI.tickLabel() (chart axis ticks) had the same English-only euro
+    placement as formatValue() and needed the same fix -- a chart axis on a
+    French or Dutch page showing '€40 126' beside every other number on the
+    same page written the other way round would be its own small
+    inconsistency."""
+    out = _run_node("""
+        console.log(JSON.stringify({
+          en: MapUI.tickLabel(40126, 'eur', false, 'en'),
+          fr: MapUI.tickLabel(40126, 'eur', false, 'fr'),
+        }));
+        """)
+    assert out["en"].startswith("€")
+    assert not out["fr"].startswith("€")
+    assert out["fr"].endswith("€")
+
+
 def test_unit_label_never_leaks_an_internal_unit_code():
     """MapUI.unitLabel is the standalone-word reading of a unit -- a chart
     subtitle or a tooltip's value column, where there is no number for a

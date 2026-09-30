@@ -40,6 +40,26 @@ I18N.LEGACY_STORAGE_KEY = 'lang';
 
 I18N.STRINGS = {
   en: {
+    /* <title>/<meta name="description"> for the six pages that switch
+       language client-side (home2, macro, micro, sources, profiles, map --
+       docs/features/i18n.md) rather than by URL, so the tags in the raw
+       HTML must be re-translated the same way every data-t element already
+       is. Written from each page's own existing English title/description
+       (never invented), one key pair per page; I18N.applyStrings() (below)
+       applies pageTitle_* to <title data-t-doctitle="..."> and
+       pageDesc_* to <meta data-t-content="..." name="description">. */
+    pageTitle_home2: "BelPulse — Belgium's economic data, updated automatically",
+    pageDesc_home2: 'Every Belgian commune and the national economy, from official sources, with the date each figure was retrieved and how it was made.',
+    pageTitle_macro: 'BelPulse — Belgian macroeconomy',
+    pageDesc_macro: 'The headline indicators of the Belgian economy from official sources, with the date each figure was retrieved and how it was made.',
+    pageTitle_micro: 'BelPulse — Belgian microeconomy',
+    pageDesc_micro: 'The local indicators of the Belgian economy, commune by commune, from official sources, with the date each figure was retrieved and how it was made.',
+    pageTitle_sources: 'BelPulse — Sources and updates',
+    pageDesc_sources: 'Every source behind these figures: what it publishes, the period it covers, when it was last fetched and its reuse conditions.',
+    pageTitle_profiles: 'BelPulse — Commune profiles',
+    pageDesc_profiles: 'Every Belgian commune by region, province and socio-economic type, each with its profile of official indicators.',
+    pageTitle_map: 'Commune Map',
+    pageDesc_map: 'Every municipal indicator in this pipeline, drawn on the 565 Belgian communes.',
     language: 'Language',
     theme: 'Colour theme',
     themeLight: 'Light',
@@ -783,6 +803,7 @@ I18N.STRINGS = {
     v4Status_suppressed: 'suppressed',
     v4Status_na: 'not available',
     v4Status_derived: 'derived',
+    v4Status_reconstructed: 'reconstructed',
     v4SourceUpdated: '{source} (updated {date})',
     v4AllDataTitle: 'All the data',
     v4AllDataSearch: 'Filter indicators…',
@@ -877,6 +898,21 @@ I18N.STRINGS = {
     simAria: 'with {n} comparable communes in grey',
   },
   fr: {
+    /* Translated from the English pageTitle_ / pageDesc_ keys above -- see
+       that block's own comment. Wording not yet confirmed by the
+       maintainer (listed in the PR body). */
+    pageTitle_home2: 'BelPulse — Les données économiques de la Belgique, mises à jour automatiquement',
+    pageDesc_home2: 'Chaque commune belge et l’économie nationale, à partir de sources officielles, avec la date à laquelle chaque chiffre a été récupéré et la manière dont il a été calculé.',
+    pageTitle_macro: 'BelPulse — Macroéconomie belge',
+    pageDesc_macro: 'Les grands indicateurs de l’économie belge, à partir de sources officielles, avec la date à laquelle chaque chiffre a été récupéré et la manière dont il a été calculé.',
+    pageTitle_micro: 'BelPulse — Microéconomie belge',
+    pageDesc_micro: 'Les indicateurs locaux de l’économie belge, commune par commune, à partir de sources officielles, avec la date à laquelle chaque chiffre a été récupéré et la manière dont il a été calculé.',
+    pageTitle_sources: 'BelPulse — Sources et mises à jour',
+    pageDesc_sources: 'Chaque source derrière ces chiffres : ce qu’elle publie, la période couverte, la date de sa dernière récupération et ses conditions de réutilisation.',
+    pageTitle_profiles: 'BelPulse — Profils communaux',
+    pageDesc_profiles: 'Chaque commune belge par région, province et type socio-économique, avec son profil d’indicateurs officiels.',
+    pageTitle_map: 'Carte des communes',
+    pageDesc_map: 'Chaque indicateur communal de ce pipeline, représenté sur les 565 communes belges.',
     language: 'Langue',
     theme: 'Thème',
     themeLight: 'Clair',
@@ -1525,6 +1561,7 @@ I18N.STRINGS = {
     v4Status_suppressed: 'secret statistique',
     v4Status_na: 'non disponible',
     v4Status_derived: 'dérivé',
+    v4Status_reconstructed: 'reconstitué',
     v4SourceUpdated: '{source} (mis à jour {date})',
     v4AllDataTitle: 'Toutes les données',
     v4AllDataSearch: 'Filtrer les indicateurs…',
@@ -1616,6 +1653,21 @@ I18N.STRINGS = {
     simAria: 'avec {n} communes comparables en gris',
   },
   nl: {
+    /* Translated from the English pageTitle_ / pageDesc_ keys above -- see
+       that block's own comment. Wording not yet confirmed by the
+       maintainer (listed in the PR body). */
+    pageTitle_home2: 'BelPulse — De economische gegevens van België, automatisch bijgewerkt',
+    pageDesc_home2: 'Elke Belgische gemeente en de nationale economie, uit officiële bronnen, met de datum waarop elk cijfer werd opgehaald en hoe het werd berekend.',
+    pageTitle_macro: 'BelPulse — Belgische macro-economie',
+    pageDesc_macro: 'De kernindicatoren van de Belgische economie, uit officiële bronnen, met de datum waarop elk cijfer werd opgehaald en hoe het werd berekend.',
+    pageTitle_micro: 'BelPulse — Belgische micro-economie',
+    pageDesc_micro: 'De lokale indicatoren van de Belgische economie, gemeente per gemeente, uit officiële bronnen, met de datum waarop elk cijfer werd opgehaald en hoe het werd berekend.',
+    pageTitle_sources: 'BelPulse — Bronnen en updates',
+    pageDesc_sources: 'Elke bron achter deze cijfers: wat ze publiceert, de periode die ze dekt, de datum van de laatste ophaling en de voorwaarden voor hergebruik.',
+    pageTitle_profiles: 'BelPulse — Gemeenteprofielen',
+    pageDesc_profiles: 'Elke Belgische gemeente per gewest, provincie en sociaaleconomisch type, telkens met haar profiel van officiële indicatoren.',
+    pageTitle_map: 'Gemeentekaart',
+    pageDesc_map: 'Elke gemeentelijke indicator in deze pipeline, weergegeven op de 565 Belgische gemeenten.',
     language: 'Taal',
     theme: 'Thema',
     themeLight: 'Licht',
@@ -2265,6 +2317,7 @@ I18N.STRINGS = {
     v4Status_suppressed: 'geheim',
     v4Status_na: 'niet beschikbaar',
     v4Status_derived: 'afgeleid',
+    v4Status_reconstructed: 'gereconstrueerd',
     v4SourceUpdated: '{source} (bijgewerkt {date})',
     v4AllDataTitle: 'Alle gegevens',
     v4AllDataSearch: 'Indicatoren filteren…',
@@ -2404,6 +2457,18 @@ I18N.applyStrings = function(lang, root){
   root.querySelectorAll('[data-t-aria]').forEach(function(el){ el.setAttribute('aria-label', T(el.dataset.tAria)); });
   root.querySelectorAll('[data-t-alt]').forEach(function(el){ el.alt = T(el.dataset.tAlt); });
   root.querySelectorAll('[data-t-placeholder]').forEach(function(el){ el.placeholder = T(el.dataset.tPlaceholder); });
+  /* <title> and <meta name="description"> for the six client-language-switch
+     pages (home2, macro, micro, sources, profiles, map): before this, only
+     the visible page content re-translated on a language switch -- the
+     browser tab title and the text a search engine or a shared link preview
+     shows stayed in English on every page, in every language, forever
+     (nothing ever calls applyStrings a second time for these two elements
+     otherwise). <title> is not matched by the '[data-t]' textContent rule
+     above because querySelectorAll('[data-t]') would also need a
+     document-wide selector change to reach into <head> the same way -- kept
+     as its own explicit rule instead so it is obviously deliberate. */
+  root.querySelectorAll('title[data-t-doctitle]').forEach(function(el){ el.textContent = T(el.dataset.tDoctitle); });
+  root.querySelectorAll('[data-t-content]').forEach(function(el){ el.setAttribute('content', T(el.dataset.tContent)); });
 };
 
 if (typeof module !== 'undefined') module.exports = I18N;

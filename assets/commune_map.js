@@ -92,15 +92,37 @@ MapUI.formatValue = function(num, unit, decimals, lang){
     ? {minimumFractionDigits: digits, maximumFractionDigits: digits}
     : {maximumFractionDigits: digits});
   const u = (unit || '').toLowerCase();
-  if(u === 'eur') return '\u20ac' + body;
+  /* Euro placement is LANGUAGE-specific, not just a symbol substitution:
+     English reads a currency symbol before the number ("\u20ac40,125.7"), French
+     and Dutch both read the symbol AFTER the number with a non-breaking
+     space ("40 125,7 \u20ac") -- this is Belgian typographic convention for
+     both languages alike, not an EN-vs-non-EN split. commune.html's own
+     fmt() has always post-processed MapUI.formatValue()'s English-style
+     output this same way for fr/nl (stripping a leading '\u20ac' and
+     re-appending 'number NBSP \u20ac'); this was the ONLY caller doing that
+     work, so a page that calls MapUI.formatValue() directly (micro.html's
+     fmtValue()) printed the English form even on the fr/nl page. Built
+     here instead, once, so every caller gets it for free -- and
+     commune.html's fmt() below no longer needs to redo it. U+202F is a
+     NARROW no-break space, matching commune.html's own NNBSP constant. */
+  const NNBSP = '\u202f';
+  const euro = function(withBody){ return (lang === 'fr' || lang === 'nl') ? (withBody + NNBSP + '\u20ac') : ('\u20ac' + withBody); };
+  if(u === 'eur') return euro(body);
   /* Euros PER INHABITANT (WalStat's municipal accounts), written as a rate so
      it can never be read as a total: Namur's 2 319,7 is what the commune
-     raises per resident, not its budget. Mirrored in src/pages/resolve.py. */
-  if(u === 'eur_per_inhabitant') return '\u20ac' + body + '\u202f/\u202fhab.';
+     raises per resident, not its budget. Mirrored in src/pages/resolve.py.
+     fr/nl: the '/hab.' rate suffix sits directly against the euro sign, no
+     extra space before the slash -- "2 319,7 \u20ac/hab." -- matching
+     commune.html's own fmt() (which builds this by slicing its raw
+     "\u20ac2,319.7/hab." apart at the '/' and reassembling), not the
+     "number NBSP \u20ac" + " / hab." shape a naive concatenation would give. */
+  if(u === 'eur_per_inhabitant') return (lang === 'fr' || lang === 'nl') ? (body + NNBSP + '\u20ac/hab.') : ('\u20ac' + body + '\u202f/\u202fhab.');
   /* Euros PER MONTH (SPF Finances housing-leases batch: median rent and
      charges on new residential leases), same on-number rate treatment as
-     eur_per_inhabitant above. Mirrored in src/pages/resolve.py. */
-  if(u === 'eur_per_month') return '\u20ac' + body + '\u202f/\u202fmo.';
+     eur_per_inhabitant above. Mirrored in src/pages/resolve.py. Dutch's
+     rate word is 'maand', not the English 'mo.' abbreviation -- matching
+     commune.html's fmt(), which picks the word by LANG the same way. */
+  if(u === 'eur_per_month') return (lang === 'fr' || lang === 'nl') ? (body + NNBSP + '\u20ac/' + (lang === 'nl' ? 'maand' : 'mois')) : ('\u20ac' + body + '\u202f/\u202fmo.');
   // pct_of_gdp (Europe countries batch, docs/features/europe_countries.md,
   // GOV_DEBT_EUROPE): deliberately not spelled "percent*" in the indicator
   // config (percent_bounded validation fails above 100, and several
@@ -115,7 +137,7 @@ MapUI.tickLabel = function(num, unit, compactAxis, lang){
   const body = compactAxis
     ? num.toLocaleString(lang || undefined, {notation: 'compact', maximumFractionDigits: 1})
     : num.toLocaleString(lang || undefined, {maximumFractionDigits: Math.abs(num) < 100 ? 1 : 0});
-  if(u === 'eur' || u === 'eur_per_inhabitant') return '\u20ac' + body;
+  if(u === 'eur' || u === 'eur_per_inhabitant') return (lang === 'fr' || lang === 'nl') ? (body + '\u202f\u20ac') : ('\u20ac' + body);
   if(u.startsWith('percent')) return body + '%';
   return body;
 };
