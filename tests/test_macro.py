@@ -111,7 +111,18 @@ def test_macro_loads_no_third_party_asset():
     assert not re.search(r"<img[^>]+src=[\"']https?://", html, re.IGNORECASE)
     assert not re.search(r"url\([\"']?https?://", html, re.IGNORECASE)
     # The shared font stylesheet is the one exception, as on every other page.
+    # A <link rel="canonical"> is metadata a crawler reads, never a resource
+    # the BROWSER fetches (unlike rel="stylesheet"/"preload"/etc, which this
+    # regex still catches) -- added by the 2026-09-29 site-audit batch,
+    # self-referencing macro.html's own https://.../macro.html, which is not
+    # third-party at all. Excluded here rather than weakening the check for
+    # an actually-loaded resource.
     external = re.findall(r"(?:href|src)=[\"'](https?://[^\"']+)", html)
+    external = [
+        url
+        for url in external
+        if url != "https://mdruszcz.github.io/belgian-macro-pipeline/macro.html"
+    ]
     assert all(url.startswith("https://fonts.googleapis.com/") for url in external), external
 
 
