@@ -111,6 +111,47 @@ def test_named_part_names_come_from_its_own_indicator_not_hand_typed(
     assert pit["names"] == national["indicators"]["GOV_TAX_PIT_BE"]["names"]
 
 
+# ── short_label (issue #309) ─────────────────────────────────────────────────
+
+
+def test_breakdown_parts_emit_the_configured_short_label(national, aggregates, metadata, config):
+    # Every part in the real, committed config now carries a short_label
+    # (issue #309) -- the exporter must carry it through verbatim, from
+    # config/live_counters.yaml, never inventing its own wording (rule 36).
+    payload = build_payload(national, aggregates, metadata, config)
+    revenue_cfg = next(c for c in config["counters"] if c["id"] == "revenue")
+    revenue = next(c for c in payload["counters"] if c["id"] == "revenue")
+    part_cfg_by_id = {p["id"]: p for p in revenue_cfg["breakdown"]["parts"]}
+    for part in revenue["breakdown"]["parts"]:
+        assert part["short_label"] == part_cfg_by_id[part["id"]]["short_label"]
+    pit = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "pit")
+    assert pit["short_label"] == {
+        "en": "Personal income tax",
+        "fr": "Impôt sur le revenu des personnes physiques",
+        "nl": "Personenbelasting",
+    }
+
+
+def test_a_part_with_no_configured_short_label_omits_the_key(
+    national, aggregates, metadata, config
+):
+    # The engine stays generic (CLAUDE.md rule 2/24): a part with no
+    # `short_label` in config must not get an emitted null/empty one --
+    # missing is a distinct state from present-but-empty (rule 26).
+    stripped_config = copy.deepcopy(config)
+    revenue_cfg = next(c for c in stripped_config["counters"] if c["id"] == "revenue")
+    pit_cfg = next(p for p in revenue_cfg["breakdown"]["parts"] if p["id"] == "pit")
+    del pit_cfg["short_label"]
+    payload = build_payload(national, aggregates, metadata, stripped_config)
+    revenue = next(c for c in payload["counters"] if c["id"] == "revenue")
+    pit = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "pit")
+    assert "short_label" not in pit
+    social_contributions = next(
+        p for p in revenue["breakdown"]["parts"] if p["id"] == "social_contributions"
+    )
+    assert "short_label" in social_contributions
+
+
 # ── D.995 fix: other_taxes' `plus` wiring (audit P2-1) ──────────────────────
 
 

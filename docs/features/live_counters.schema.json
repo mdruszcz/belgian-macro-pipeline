@@ -61,7 +61,8 @@
           "minItems": 1,
           "items": { "type": "string" }
         },
-        "label": { "$ref": "#/$defs/trilingual_label" }
+        "label": { "$ref": "#/$defs/trilingual_label" },
+        "short_label": { "$ref": "#/$defs/trilingual_label" }
       },
       "oneOf": [
         { "required": ["indicator"] },

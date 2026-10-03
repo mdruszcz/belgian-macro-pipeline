@@ -70,6 +70,12 @@ browser (PR 2) only evaluates the precomputed segments.
 - New payload `public/data/live_counters.json` -- see the `docs/features/
   site_payloads.md` entry added alongside this one. Additive; no existing payload's
   shape changes.
+- Issue #309: each breakdown part may carry an optional, config-driven `short_label`
+  (`en`/`fr`/`nl`, all three or none -- `docs/features/live_counters.schema.json`'s
+  `trilingual_label`) for a narrower legend/chip UI slot than the part's own full
+  `names`/`label`; `placements.home_strip` now lists all five counters (population,
+  debt, deficit, revenue, spending), not just debt/deficit. Data-only change; no PR 2
+  page/UI wiring yet.
 
 ## New data sources
 
