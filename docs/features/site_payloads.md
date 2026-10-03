@@ -151,6 +151,51 @@ second "latest value" computation — filtered to one indicator and reshaped, th
 the same way as a commune payload. One file rather than one-per-indicator because there is only one
 national geography — splitting it further would multiply file count for no fetch-size benefit.
 
+### `live_counters.json` (added for the public-finance live counters)
+
+The segment parameters for the simulated public-finance "live counters" (population,
+debt, deficit, revenue and spending with named parts) -- written by
+`scripts/export_live_counters.py`, computed by `src/analytics/live_counters.py`.
+Reads `national.json`, `aggregates.json` and `metadata/indicators.json` (all three
+already written by the time this runs), never SQLite. See
+`docs/features/public_finance_live.md` and
+`docs/decisions/0016-simulated-live-counters.md` for the method; this entry only
+records the file's shape.
+
+```json
+{
+  "schema_version": 1,
+  "simulated": true,
+  "method": {"trend_window_years": 3, "horizon_years": 2, "remainder_tolerance_meur": 0.5},
+  "valid_from_ms": 1767222000000,
+  "valid_until_ms": 1830294000000,
+  "updated": "2026-10-03",
+  "counters": [
+    {
+      "id": "revenue", "kind": "flow", "unit": "meur",
+      "label": {"en": "Government revenue", "fr": "...", "nl": "..."},
+      "basis": [{"indicator": "GOV_REVENUE_BE", "period": "2025", "value": 314736.4,
+                 "status": "provisional", "source": "eurostat", "updated": "2026-10-03"}],
+      "state": "available", "growth_rate": 0.0461895754,
+      "annual_meur": {"2026": 329273.9, "2027": 344483.0},
+      "segments": [{"start_ms": 1767222000000, "end_ms": 1798758000000,
+                     "v0": 0.0, "v1": 329273940678.92, "rate_per_ms": 10.441208164602994}],
+      "breakdown": {"state": "available", "year": "2025", "within": "GOV_REVENUE_BE",
+                     "parts": [{"id": "pit", "names": {"en": "...", "...": "..."},
+                                "share": 0.240808, "basis": [...], "segments": [...]}]}
+    }
+  ],
+  "placements": {"macro_strip": ["population", "revenue", "spending", "deficit", "debt"],
+                  "macro_breakdowns": ["revenue", "spending"], "home_strip": ["debt", "deficit"]}
+}
+```
+
+A counter (or a breakdown alone, leaving its parent counter's own totals untouched)
+publishes `"state": "unavailable"` plus a `"reason"` string instead of its numeric
+fields when a DATA condition — not a config one — makes it impossible to compute for
+this run (ADR 0016's own failure policy). `placements` is config-driven
+(`config/live_counters.yaml`), never hand-typed per page.
+
 ### `aggregates.json` (added Batch 7)
 
 The province/region/country cross-section micro.html's territorial comparison and any future
