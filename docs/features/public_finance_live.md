@@ -135,6 +135,19 @@ changed file.
   `deficit`'s own basis one level down for ITS TR/TE citation. Both were empty/
   anchor-only gaps the audit flagged (P3), now filled so PR 2's UI always has a source
   citation to show.
+- **`deficit` is computed as TE − TR (GOV_EXPENDITURE_BE − GOV_REVENUE_BE), not read
+  from Eurostat's own published balance series (`GOV_BALANCE_MEUR_BE`, na_item `B9`).**
+  For 2025 that gives 347,956.3 − 314,736.4 = 33,219.9 (a deficit of that size), against
+  B9's own published −33,220.7 for the same year (docs/data_catalog.md) -- an 0.8 M EUR
+  gap, inside Eurostat's own stated rounding for the two releases, not a bug in this
+  engine. The counter is deliberately computed this way (the `minuend`/`subtrahend` config
+  in `config/live_counters.yaml`) so a reader can trace it to the same two flow counters
+  (`revenue`/`spending`) already ticking above it, rather than to a third series with no
+  visible counter of its own. Only PROJECTED years (beyond `latest_year`) are ever
+  published as `deficit` segments -- the 2025 TE/TR values above feed the trend and
+  appear in `deficit`'s own `basis`, but 2025 itself is never shown as a `deficit`
+  segment, so this 0.8 M EUR gap against B9 never reaches the published payload as a
+  visible figure.
 - **The top-level `valid_from_ms`/`valid_until_ms` are only an envelope** (min/max
   across every counter's own segment bounds), not each counter's own window -- `debt`
   in particular starts at its own quarterly anchor, not the envelope's 1 January. PR 2's

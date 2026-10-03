@@ -9,7 +9,7 @@ config/live_counters.yaml is the real, committed config.
 
 import copy
 import json
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal, localcontext
 from pathlib import Path
 
 import pytest
@@ -109,6 +109,89 @@ def test_named_part_names_come_from_its_own_indicator_not_hand_typed(
     revenue = next(c for c in payload["counters"] if c["id"] == "revenue")
     pit = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "pit")
     assert pit["names"] == national["indicators"]["GOV_TAX_PIT_BE"]["names"]
+
+
+# ── D.995 fix: other_taxes' `plus` wiring (audit P2-1) ──────────────────────
+
+
+def test_other_taxes_plus_wiring_adds_back_uncollected_tax(national, aggregates, metadata, config):
+    """config/live_counters.yaml's `other_taxes` part reads
+    `remainder_of: GOV_TAX_SSC_TOTAL_BE` `plus: [GOV_TAX_UNCOLLECTED_BE]` --
+    GOV_TAX_SSC_TOTAL_BE is Eurostat's D2_D5_D91_D61_M_D995 series, NET of
+    the D.995 write-off, while GOV_REVENUE_BE (TR) is not, so other_taxes'
+    own `whole` must be the GROSS total (SSC_TOTAL + UNCOLLECTED) or the
+    write-off silently lands in non_tax_revenue instead (docs/data_catalog.md,
+    "D.995" note). This pins the wiring AND the arithmetic end to end, using
+    this PR's real 2025 fixture values (tests/fixtures/live_counters/national.json,
+    trimmed from the real 2026-10-03 payload, rule 36/39) -- it fails if
+    `plus` is ever removed from the config, because the code would then use
+    GOV_TAX_SSC_TOTAL_BE alone (282517.4, not 283412.6) as the whole and
+    produce a different share and a different 2026 value than hand-computed
+    here.
+    """
+    payload = build_payload(national, aggregates, metadata, config)
+    revenue = next(c for c in payload["counters"] if c["id"] == "revenue")
+    assert revenue["breakdown"]["year"] == "2025"
+    other_taxes = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "other_taxes")
+
+    # basis must name BOTH series the gross total is built from, not just
+    # remainder_of -- a reader has to be able to see the write-off was added
+    # back, not just infer it (scripts/export_live_counters.py's
+    # _breakdown_entry, the `plus` basis-entries loop).
+    basis_indicators = [b["indicator"] for b in other_taxes["basis"]]
+    assert basis_indicators == ["GOV_TAX_SSC_TOTAL_BE", "GOV_TAX_UNCOLLECTED_BE"]
+
+    # Hand-computed arithmetic, all real 2025 fixture values (public/data/
+    # national.json periods."2025"):
+    #   social_contributions = 97512.6   (GOV_TAX_SOCIAL_CONTRIB_BE)
+    #   pit                  = 75791.1   (GOV_TAX_PIT_BE)
+    #   cit                  = 26308.0   (GOV_TAX_CIT_BE)
+    #   vat                  = 39796.6   (GOV_TAX_VAT_BE)
+    #   excise               = 11186.1   (GOV_TAX_EXCISE_BE)
+    #   covered = 97512.6 + 75791.1 + 26308.0 + 39796.6 + 11186.1 = 250594.4
+    #
+    #   ssc_total   = 282517.4   (GOV_TAX_SSC_TOTAL_BE, NET of D.995)
+    #   uncollected =    895.2   (GOV_TAX_UNCOLLECTED_BE, the D.995 write-off)
+    #   gross = ssc_total + uncollected = 282517.4 + 895.2 = 283412.6
+    #   (this `gross` is exactly the 283412.6 the audit's handoff names)
+    #
+    #   other_taxes_2025 = gross - covered = 283412.6 - 250594.4 = 32818.2
+    #   share = other_taxes_2025 / GOV_REVENUE_BE_2025 = 32818.2 / 314736.4
+    #         = 0.10427201937875631798546339095192040069086384669838
+    #           (shares_from_breakdown uses Decimal at 50-digit precision;
+    #           reproduced here the same way so the two agree to the last
+    #           digit before rounding)
+    #
+    #   other_taxes_2026_v1 = money_round(share * revenue_2026_v1), where
+    #   revenue_2026_v1 is revenue's OWN already-cent-rounded 2026 segment
+    #   total (flow_segments() rounds every flow to the cent) -- apply_shares_
+    #   rounded() multiplies the share against that same rounded total, not
+    #   the unrounded one, so the parts always sum to the published total.
+    covered = (
+        Decimal("97512.6")
+        + Decimal("75791.1")
+        + Decimal("26308.0")
+        + Decimal("39796.6")
+        + Decimal("11186.1")
+    )
+    assert covered == Decimal("250594.4")
+    gross = Decimal("282517.4") + Decimal("895.2")
+    assert gross == Decimal("283412.6")
+    other_taxes_2025 = gross - covered
+    assert other_taxes_2025 == Decimal("32818.2")
+
+    with localcontext() as ctx:
+        ctx.prec = 50
+        share = other_taxes_2025 / Decimal("314736.4")
+        revenue_2026_v1 = Decimal(str(revenue["segments"][0]["v1"]))
+        expected_2026_v1 = (share * revenue_2026_v1).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+
+    assert revenue["segments"][0]["v1"] == pytest.approx(329273940678.92, abs=0.01)
+    assert other_taxes["segments"][0]["v1"] == pytest.approx(float(expected_2026_v1), abs=0.001)
+    # = 34334058723.39 EUR -- i.e. "other taxes" paces toward roughly
+    # EUR 34,334.1 million in 2026, the gross (D.995-inclusive) share of TR.
 
 
 # ── determinism (rule 35) ───────────────────────────────────────────────────

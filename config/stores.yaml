@@ -339,7 +339,7 @@ stores:
       - POPULATION_GROWTH_RATE_EUROPE
       - RD_EXPENDITURE_EUROPE
       - RD_PERSONNEL_EUROPE
-      # Belgian general government finance in euros -- 25 indicators,
+      # Belgian general government finance in euros -- 26 indicators,
       # APPROVED by the maintainer 2026-10-03 (docs/data_catalog.md). Single-
       # country Eurostat fetches (fetch.filters.geo: BE), same shape as
       # EC_CONS_CONF_BE above, same `international` store, same

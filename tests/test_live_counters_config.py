@@ -135,6 +135,39 @@ def test_a_covers_entry_must_name_a_real_sibling_part(tmp_path, base):
         load_and_validate_live_counters(_write(tmp_path, base))
 
 
+# ── `plus` (D.995 fix) cross-field checks (audit P2-1) ──────────────────────
+
+
+def test_plus_without_remainder_of_is_refused(tmp_path, base):
+    # `plus` only means anything next to a `remainder_of` part -- the
+    # schema's `oneOf` does not forbid it on a plain `indicator` part, so
+    # this module closes that gap itself (src/validation/
+    # live_counters_config.py, the `plus` branch).
+    revenue = next(c for c in base["counters"] if c["id"] == "revenue")
+    pit = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "pit")
+    pit["plus"] = ["GOV_TAX_UNCOLLECTED_BE"]
+    with pytest.raises(LiveCounterError, match="has `plus` without `remainder_of`"):
+        load_and_validate_live_counters(_write(tmp_path, base))
+
+
+def test_plus_with_duplicate_indicators_is_refused(tmp_path, base):
+    revenue = next(c for c in base["counters"] if c["id"] == "revenue")
+    other_taxes = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "other_taxes")
+    other_taxes["plus"] = ["GOV_TAX_UNCOLLECTED_BE", "GOV_TAX_UNCOLLECTED_BE"]
+    with pytest.raises(LiveCounterError, match="duplicate `plus` indicator"):
+        load_and_validate_live_counters(_write(tmp_path, base))
+
+
+def test_plus_naming_its_own_remainder_of_again_is_refused(tmp_path, base):
+    # `plus` adds EXTRA series to `remainder_of`'s own value -- naming
+    # `remainder_of` again inside `plus` would double-count it.
+    revenue = next(c for c in base["counters"] if c["id"] == "revenue")
+    other_taxes = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "other_taxes")
+    other_taxes["plus"] = [other_taxes["remainder_of"]]
+    with pytest.raises(LiveCounterError, match="names its own `remainder_of`"):
+        load_and_validate_live_counters(_write(tmp_path, base))
+
+
 def test_a_remainder_part_with_no_label_is_refused_by_the_schema(tmp_path, base):
     revenue = next(c for c in base["counters"] if c["id"] == "revenue")
     non_tax = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "non_tax_revenue")
