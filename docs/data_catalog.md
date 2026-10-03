@@ -1038,14 +1038,14 @@ figure named in this batch's own handoff before this row was written.
 | `GOV_REVENUE_BE` | meur | A | `na_item=TR, sector=S13, unit=MIO_EUR, geo=BE` | 2025p 314,736.4 |
 | `GOV_EXPENDITURE_BE` | meur | A | `na_item=TE, sector=S13, unit=MIO_EUR, geo=BE` | 2025p 347,956.3 |
 | `GOV_BALANCE_MEUR_BE` | meur | A | `na_item=B9, sector=S13, unit=MIO_EUR, geo=BE` | 2025p -33,220.7 |
-| `GOV_BALANCE_PCT_GDP_BE` | pct_of_gdp | A | `na_item=B9, sector=S13, unit=PC_GDP, geo=BE` | see live-fetch report |
+| `GOV_BALANCE_PCT_GDP_BE` | pct_of_gdp | A | `na_item=B9, sector=S13, unit=PC_GDP, geo=BE` | 2025p -5.2 |
 
 ### `gov_10dd_edpt1` — EDP gross debt, annual (2 built)
 
 | Indicator | Unit | Freq | Filters | Latest value (2026-10-03 live fetch) |
 |---|---|---|---|---|
 | `GOV_DEBT_MEUR_BE` | meur | A | `na_item=GD, sector=S13, unit=MIO_EUR, geo=BE` | 2025 692,460.8 |
-| `GOV_DEBT_PCT_GDP_BE` | pct_of_gdp | A | `na_item=GD, sector=S13, unit=PC_GDP, geo=BE` | see live-fetch report |
+| `GOV_DEBT_PCT_GDP_BE` | pct_of_gdp | A | `na_item=GD, sector=S13, unit=PC_GDP, geo=BE` | 2025 107.9 |
 
 ### `gov_10q_ggdebt` — gross debt, quarterly (1 built)
 
@@ -1076,6 +1076,20 @@ table has no mapping for (same class of gap as `EMPLOYMENT_NATACCOUNTS_EUROPE` a
 config hitting this flag would abort the whole `international` store's daily fetch, not just its
 own, so none of these six narrower items were ever written as configs.
 
+**Known residual in `GOV_TAX_SSC_TOTAL_BE` (audit P2-1, 2026-10-03).** Its own `na_item`,
+`D2_D5_D91_D61_M_D995`, nets out `D995` (capital transfers for taxes/SSC assessed but unlikely to
+be collected — live-verified 2026-10-03, BE/S13/`gov_10a_taxag`: **895.2 M EUR for 2025p**, flags
+`b`/`p` only, no `'m'`). `GOV_REVENUE_BE` (`TR`) is **not** net of `D995`. The public-finance live
+counter's `non_tax_revenue` breakdown part (`config/live_counters.yaml`) is computed as
+`TR - taxag_total`, which therefore silently folds that 895.2 M EUR write-off into what would
+otherwise read as pure non-tax revenue. Fetching `D995` as its own series would fix the arithmetic
+exactly, but it is a 26th indicator outside the 25 the maintainer approved by name on 2026-10-03
+(rule 8) — not added here. Instead `non_tax_revenue`'s label was corrected to "Non-tax revenue and
+adjustments" (en/fr/nl) so it does not assert a precision the number does not have. If the
+maintainer wants the two separated exactly, add `GOV_TAX_D995_ADJUSTMENT_BE`
+(`gov_10a_taxag`, `na_item=D995, sector=S13, unit=MIO_EUR, geo=BE`) as its own approved row here
+first.
+
 ### `gov_10a_exp` — expenditure by COFOG function (12 built)
 
 | Indicator | cofog99 | Latest value (2024, 2026-10-03 live fetch) |
@@ -1104,8 +1118,9 @@ release date. Spending shares for the live-counter breakdown are therefore alway
 one dataset (the COFOG total and its 12 named/remainder parts), never mixed with
 `GOV_EXPENDITURE_BE`.
 
-See `docs/implementation/batches/` (this PR's own report) for the full set of 25 live-fetched
-latest values actually loaded 2026-10-03, compared line by line against the table above.
+The full set of 25 live-fetched latest values actually loaded 2026-10-03 was compared line by line
+against the table above in this feature's own PR description (branch `feat/public-finance-data`) —
+every value matched exactly; see `docs/features/public_finance_live.md` for the feature writeup.
 
 ## Approved sources
 

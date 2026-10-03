@@ -40,6 +40,19 @@ counters:
   # dataset's own total (GOV_TAX_SSC_TOTAL_BE), one level down -- see
   # docs/data_catalog.md's note on why COFOG/TE below are never mixed this
   # same way.
+  #
+  # KNOWN RESIDUAL (audit P2-1, docs/data_catalog.md): GOV_TAX_SSC_TOTAL_BE
+  # is Eurostat na_item D2_D5_D91_D61_M_D995 -- taxes/SSC net of D.995
+  # (capital transfers for assessed-but-uncollectible tax, ~895 M EUR for
+  # 2025). TR is NOT net of D.995. So non_tax_revenue (= TR - taxag_total)
+  # silently ABSORBS that ~895 M EUR -- it is really "non-tax revenue plus
+  # the D.995 write-off", not non-tax revenue alone. Fixing the arithmetic
+  # needs a 26th fetched series (D995, confirmed fetchable: gov_10a_taxag,
+  # na_item D995, flags b/p only, no OBS_FLAG "m") that is NOT in the
+  # maintainer's 2026-10-03 approved list of 25 (rule 8) -- out of scope for
+  # an unsupervised fix. The label below is corrected instead to not claim
+  # a precision the number does not have; the exact euro amount is PR 2's
+  # to decide whether to split out.
   - id: revenue
     kind: flow
     method: trend
@@ -72,9 +85,9 @@ counters:
         - id: non_tax_revenue
           remainder: true
           label:
-            en: Non-tax revenue
-            fr: Recettes non fiscales
-            nl: Niet-fiscale ontvangsten
+            en: Non-tax revenue and adjustments
+            fr: Recettes non fiscales et ajustements
+            nl: Niet-fiscale ontvangsten en aanpassingen
 
   # Spending's `indicator` (what actually ticks, trended from TE) is
   # DELIBERATELY NOT the same dataset as its breakdown `within`

@@ -111,6 +111,23 @@ changed file.
   this PR's config gives it a neutral label ("Budget balance").
 - Population's own coverage/anchor is refreshed by hand (rule 38, Statbel), so the 1
   January anchor moves only when the maintainer next loads it -- not on every daily run.
+- **`non_tax_revenue` is not pure non-tax revenue.** `GOV_TAX_SSC_TOTAL_BE` nets out
+  Eurostat's `D995` (uncollectible tax write-offs, ~895 M EUR for 2025); `GOV_REVENUE_BE`
+  does not. `non_tax_revenue = TR - taxag_total` therefore folds that write-off in (audit
+  P2-1; full arithmetic in `docs/data_catalog.md`'s public-finance section). Fixing it
+  exactly needs a 26th fetched series (`D995` itself, confirmed live-fetchable, no `'m'`
+  flag) that is outside the 25 the maintainer named and approved 2026-10-03 -- not added
+  without that sign-off. This PR instead relabelled the part ("Non-tax revenue and
+  adjustments") rather than publish a falsely precise number. Open question for the
+  maintainer: approve `GOV_TAX_D995_ADJUSTMENT_BE` so PR 2 can show the two split exactly,
+  or keep the merged bucket.
+- **`deficit`'s own `basis` is empty** (`scripts/export_live_counters.py`'s
+  `_difference_entry`): it is computed from `spending`'s and `revenue`'s segments, not
+  from a series lookup of its own, so it carries no source citation for PR 2's UI to
+  show. `debt`'s `basis` likewise names only its anchor series, not the TR/TE pair
+  setting its post-anchor pace. Both are pre-existing gaps the audit flagged (P3); left
+  for PR 2 to decide how to surface, since filling them changes the payload shape a UI
+  would then depend on.
 
 ## Rollout / risks
 

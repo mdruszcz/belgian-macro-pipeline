@@ -137,7 +137,16 @@ def test_export_live_counters_never_touches_the_wall_clock(tmp_path, monkeypatch
     """datetime.now()/time.time() both raise -- if the export still succeeds,
     nothing in it read the wall clock. fromtimestamp() (used to find the
     calendar year of a fixed anchor ms) is deliberately left alone: it is
-    pure given its argument, not a clock read."""
+    pure given its argument, not a clock read.
+
+    Both src/analytics/live_counters.py and scripts/export_live_counters.py
+    did `from datetime import datetime`, which binds the class directly into
+    each module's OWN globals at import time. Patching the `datetime` module's
+    `datetime` attribute (as this test used to do) never reaches either of
+    those already-bound names -- the patch lands on an attribute nothing
+    reads, so a real `datetime.now()` call in either module would sail
+    straight through undetected (audit P2-2). Patching each module's own
+    `datetime` name directly is the only way this guard can actually fail."""
     import datetime as datetime_module
     import time as time_module
 
@@ -146,7 +155,8 @@ def test_export_live_counters_never_touches_the_wall_clock(tmp_path, monkeypatch
         def now(cls, tz=None):
             raise AssertionError("export_live_counters must never call datetime.now()")
 
-    monkeypatch.setattr(datetime_module, "datetime", _NoNow)
+    monkeypatch.setattr("src.analytics.live_counters.datetime", _NoNow)
+    monkeypatch.setattr("scripts.export_live_counters.datetime", _NoNow)
     monkeypatch.setattr(time_module, "time", lambda: (_ for _ in ()).throw(AssertionError("no")))
 
     out = tmp_path / "out.json"

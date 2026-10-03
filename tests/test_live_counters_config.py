@@ -98,6 +98,35 @@ def test_a_stocks_paced_by_must_be_a_real_difference_counter(tmp_path, base):
         load_and_validate_live_counters(_write(tmp_path, base))
 
 
+def test_a_difference_counters_minuend_must_be_defined_earlier_in_the_list(tmp_path, base):
+    # build_payload (scripts/export_live_counters.py) builds counters in
+    # config-list order, resolving minuend/subtrahend from a dict populated
+    # only by EARLIER iterations -- moving "deficit" ahead of its own
+    # revenue/spending must be refused here, not silently degrade the
+    # deficit counter to "unavailable" at export time (audit P2-3).
+    counters = base["counters"]
+    reordered = [c for c in counters if c["id"] == "deficit"] + [
+        c for c in counters if c["id"] != "deficit"
+    ]
+    base["counters"] = reordered
+    with pytest.raises(LiveCounterError, match="must be defined BEFORE"):
+        load_and_validate_live_counters(_write(tmp_path, base))
+
+
+def test_a_stocks_paced_by_must_be_defined_earlier_in_the_list(tmp_path, base):
+    # Same build-order contract for debt.paced_by: deficit -- reordering
+    # "debt" ahead of "deficit" is exactly the regression the audit found
+    # (debt silently vanishes from the published payload, no error raised).
+    counters = base["counters"]
+    without_debt = [c for c in counters if c["id"] != "debt"]
+    debt = next(c for c in counters if c["id"] == "debt")
+    deficit_pos = next(i for i, c in enumerate(without_debt) if c["id"] == "deficit")
+    reordered = without_debt[:deficit_pos] + [debt] + without_debt[deficit_pos:]
+    base["counters"] = reordered
+    with pytest.raises(LiveCounterError, match="must be defined BEFORE"):
+        load_and_validate_live_counters(_write(tmp_path, base))
+
+
 def test_a_covers_entry_must_name_a_real_sibling_part(tmp_path, base):
     revenue = next(c for c in base["counters"] if c["id"] == "revenue")
     other_taxes = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "other_taxes")
