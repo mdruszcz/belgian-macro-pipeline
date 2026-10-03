@@ -1,0 +1,26 @@
+id: GOV_TAX_CIT_BE
+name:
+  en: Corporate income tax receipts, Belgium
+  fr: Recettes de l'impôt des sociétés, Belgique
+  nl: Ontvangsten uit de vennootschapsbelasting, België
+definition:
+  en: "Belgian corporate income tax receipts, in euro."
+  fr: "Recettes de l'impôt belge des sociétés, en euros."
+  nl: "Belgische ontvangsten uit de vennootschapsbelasting, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) taxes on income, current, corporations (na_item D51B_C2), million EUR -- one named part of the revenue breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D51B_C2
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

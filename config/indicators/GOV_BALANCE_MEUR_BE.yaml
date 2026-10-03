@@ -1,0 +1,26 @@
+id: GOV_BALANCE_MEUR_BE
+name:
+  en: General government net lending/borrowing (balance), Belgium
+  fr: Capacité/besoin de financement des administrations publiques (solde), Belgique
+  nl: Vorderingenoverschot/-tekort van de overheid (saldo), België
+definition:
+  en: "Belgian general government net lending (+) / net borrowing (-), the budget balance, in euro."
+  fr: "Capacité (+) / besoin (-) de financement des administrations publiques belges, le solde budgétaire, en euros."
+  nl: "Vorderingenoverschot (+) / -tekort (-) van de Belgische overheid, het begrotingssaldo, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: "Belgian general government (S13) net lending/borrowing (na_item B9), million EUR current prices -- negative is a deficit. Overlaps GOV_BALANCE_EUROPE conceptually (same concept and dataset, different unit/scope: that one is percent of GDP, multi-country; this one is a Belgium-only euro level for the public-finance counters, docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_main
+  filters:
+    na_item: B9
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

@@ -339,6 +339,41 @@ stores:
       - POPULATION_GROWTH_RATE_EUROPE
       - RD_EXPENDITURE_EUROPE
       - RD_PERSONNEL_EUROPE
+      # Belgian general government finance in euros -- 25 indicators,
+      # APPROVED by the maintainer 2026-10-03 (docs/data_catalog.md). Single-
+      # country Eurostat fetches (fetch.filters.geo: BE), same shape as
+      # EC_CONS_CONF_BE above, same `international` store, same
+      # scripts/sync_international.py loader -- no new store. Feeds the
+      # simulated public-finance live counters (docs/features/
+      # public_finance_live.md); the counters themselves are computed by
+      # src/analytics/live_counters.py and exported by
+      # scripts/export_live_counters.py, neither of which reads this store
+      # directly (they read the published public/data/national.json).
+      - GOV_REVENUE_BE
+      - GOV_EXPENDITURE_BE
+      - GOV_BALANCE_MEUR_BE
+      - GOV_BALANCE_PCT_GDP_BE
+      - GOV_DEBT_MEUR_BE
+      - GOV_DEBT_PCT_GDP_BE
+      - GOV_DEBT_Q_MEUR_BE
+      - GOV_TAX_SSC_TOTAL_BE
+      - GOV_TAX_SOCIAL_CONTRIB_BE
+      - GOV_TAX_PIT_BE
+      - GOV_TAX_CIT_BE
+      - GOV_TAX_VAT_BE
+      - GOV_TAX_EXCISE_BE
+      - GOV_EXP_COFOG_TOTAL_BE
+      - GOV_EXP_OLD_AGE_BE
+      - GOV_EXP_SURVIVORS_BE
+      - GOV_EXP_HEALTH_BE
+      - GOV_EXP_EDUCATION_BE
+      - GOV_EXP_DEFENCE_BE
+      - GOV_EXP_UNEMPLOYMENT_BE
+      - GOV_EXP_SICKNESS_DISABILITY_BE
+      - GOV_EXP_FAMILY_BE
+      - GOV_EXP_DEBT_TRANSACTIONS_BE
+      - GOV_EXP_ECONOMIC_AFFAIRS_BE
+      - GOV_EXP_PUBLIC_ORDER_BE
     reference_rows:
       script: scripts/sync_international.py
       args: ["--reference-rows-only"]

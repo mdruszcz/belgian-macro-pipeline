@@ -1,0 +1,26 @@
+id: GOV_TAX_EXCISE_BE
+name:
+  en: Excise duty receipts, Belgium
+  fr: Recettes des droits d'accise, Belgique
+  nl: Ontvangsten uit accijnzen, België
+definition:
+  en: "Belgian excise duty receipts, in euro."
+  fr: "Recettes belges des droits d'accise, en euros."
+  nl: "Belgische ontvangsten uit accijnzen, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) excise duties (na_item D214A), million EUR -- one named part of the revenue breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D214A
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

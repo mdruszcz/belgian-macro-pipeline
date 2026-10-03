@@ -1,0 +1,27 @@
+id: GOV_EXP_EDUCATION_BE
+name:
+  en: General government expenditure on education, Belgium
+  fr: Dépenses publiques d'éducation, Belgique
+  nl: Overheidsuitgaven voor onderwijs, België
+definition:
+  en: "Belgian general government expenditure on education (COFOG function GF09), in euro."
+  fr: "Dépenses des administrations publiques belges liées à l'éducation (fonction COFOG GF09), en euros."
+  nl: "Uitgaven van de Belgische overheid voor onderwijs (COFOG-functie GF09), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) expenditure, COFOG function GF09 (education), million EUR -- one named part of the spending breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: GF09
+  since: "2008"
+display: null

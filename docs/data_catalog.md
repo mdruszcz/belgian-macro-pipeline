@@ -1007,6 +1007,106 @@ built now.
 | `nrg_pc_204` | Semi-annual frequency the schema/period model does not support without a wider change (rule 18) |
 | `pat_ep_ntot` | 9 years stale; noted as a future check |
 
+## Belgian general government finance in euros — 25 indicators, APPROVED by the maintainer 2026-10-03
+
+Live-verified against the real Eurostat API 2026-10-03 (dataset codes, filters and the real
+Belgian figure for each series checked before this row was written), then approved by the
+maintainer on that scoped, live-verified proposal — the same catalog sign-off convention as the
+Eurostat additional domains batch above (CLAUDE.md rule 8). All 25 use the same `eurostat` source,
+adapter (`src/fetchers/eurostat.py`) and licence already covering `GOV_DEBT_EUROPE` etc. above —
+**no new licence decision needed**. Unlike that batch, every one of these 25 is a **single-country
+Belgian fetch** (`fetch.filters.geo: BE`, the same shape as `EC_CONS_CONF_BE`), loaded into the
+existing `international` store (`data/international/{ID}.csv`) — no new store.
+
+Built to feed the simulated public-finance "live counters" (population, debt, deficit, revenue and
+spending, each ticking once a second in the browser from parameters Python computes --
+`src/analytics/live_counters.py`, `scripts/export_live_counters.py`,
+`docs/features/public_finance_live.md`, `docs/decisions/0016-simulated-live-counters.md`). These
+are euro-denominated **levels** (unit `meur`, except the two `pct_of_gdp` ratios), the Belgium-only
+counterparts of the existing `GOV_DEBT_EUROPE` / `GOV_BALANCE_EUROPE` / `GOV_DEBT_QUARTERLY_EUROPE`
+/ `TAX_RECEIPTS_EUROPE` / `GOV_EXPENDITURE_HEALTH_EUROPE` rows above — same concepts, same
+datasets, deliberately kept as separate ids rather than one replacing the other (same precedent as
+`EC_CONS_CONF_BE` vs `CONSUMER_CONFIDENCE_EUROPE`).
+
+**Every value below is real, loaded data**, live-verified 2026-10-03 against the exact Belgian
+figure named in this batch's own handoff before this row was written.
+
+### `gov_10a_main` — revenue, expenditure, balance (4 built)
+
+| Indicator | Unit | Freq | Filters | Latest value (2026-10-03 live fetch) |
+|---|---|---|---|---|
+| `GOV_REVENUE_BE` | meur | A | `na_item=TR, sector=S13, unit=MIO_EUR, geo=BE` | 2025p 314,736.4 |
+| `GOV_EXPENDITURE_BE` | meur | A | `na_item=TE, sector=S13, unit=MIO_EUR, geo=BE` | 2025p 347,956.3 |
+| `GOV_BALANCE_MEUR_BE` | meur | A | `na_item=B9, sector=S13, unit=MIO_EUR, geo=BE` | 2025p -33,220.7 |
+| `GOV_BALANCE_PCT_GDP_BE` | pct_of_gdp | A | `na_item=B9, sector=S13, unit=PC_GDP, geo=BE` | see live-fetch report |
+
+### `gov_10dd_edpt1` — EDP gross debt, annual (2 built)
+
+| Indicator | Unit | Freq | Filters | Latest value (2026-10-03 live fetch) |
+|---|---|---|---|---|
+| `GOV_DEBT_MEUR_BE` | meur | A | `na_item=GD, sector=S13, unit=MIO_EUR, geo=BE` | 2025 692,460.8 |
+| `GOV_DEBT_PCT_GDP_BE` | pct_of_gdp | A | `na_item=GD, sector=S13, unit=PC_GDP, geo=BE` | see live-fetch report |
+
+### `gov_10q_ggdebt` — gross debt, quarterly (1 built)
+
+| Indicator | Unit | Freq | Filters | Latest value (2026-10-03 live fetch) |
+|---|---|---|---|---|
+| `GOV_DEBT_Q_MEUR_BE` | meur | Q | `na_item=GD, sector=S13, unit=MIO_EUR, geo=BE` | 2026-Q1p 706,581.0 |
+
+**Deliberately overlaps `GOV_DEBT_MEUR_BE`** (same concept, different cadence), same precedent as
+`GOV_DEBT_QUARTERLY_EUROPE` vs `GOV_DEBT_EUROPE`. The debt live-counter anchors on whichever of the
+two has the later period end (`docs/features/public_finance_live.md`).
+
+### `gov_10a_taxag` — taxes and social contributions (6 built)
+
+| Indicator | na_item | Latest value (2025, 2026-10-03 live fetch) |
+|---|---|---|
+| `GOV_TAX_SSC_TOTAL_BE` | `D2_D5_D91_D61_M_D995` | 2025p 282,517.4 |
+| `GOV_TAX_SOCIAL_CONTRIB_BE` | `D61` | 2025p 97,512.6 |
+| `GOV_TAX_PIT_BE` | `D51A_C1` | 2025p 75,791.1 |
+| `GOV_TAX_CIT_BE` | `D51B_C2` | 2025p 26,308.0 |
+| `GOV_TAX_VAT_BE` | `D211` | 2025p 39,796.6 |
+| `GOV_TAX_EXCISE_BE` | `D214A` | 2025p 11,186.1 |
+
+All six: `sector=S13, unit=MIO_EUR, geo=BE`, dataset `gov_10a_taxag`. **Deliberately NOT fetched**:
+`D51C*` and several `D995B/D/F/FE/FN/FS/G` sub-items the handoff's own candidate list named —
+Eurostat publishes these with `OBS_FLAG` `'m'`, which `src/fetchers/eurostat.py`'s `FLAG_STATUS`
+table has no mapping for (same class of gap as `EMPLOYMENT_NATACCOUNTS_EUROPE` above). Extending
+`FLAG_STATUS` is a source-adapter change needing its own ADR (rule 19) — out of scope here, and a
+config hitting this flag would abort the whole `international` store's daily fetch, not just its
+own, so none of these six narrower items were ever written as configs.
+
+### `gov_10a_exp` — expenditure by COFOG function (12 built)
+
+| Indicator | cofog99 | Latest value (2024, 2026-10-03 live fetch) |
+|---|---|---|
+| `GOV_EXP_COFOG_TOTAL_BE` | `TOTAL` | 2024p 335,287.9 |
+| `GOV_EXP_OLD_AGE_BE` | `GF1002` | 2024p 62,983.9 |
+| `GOV_EXP_SURVIVORS_BE` | `GF1003` | 2024p 8,808.3 |
+| `GOV_EXP_HEALTH_BE` | `GF07` | 2024p 49,579.9 |
+| `GOV_EXP_EDUCATION_BE` | `GF09` | 2024p 39,283.6 |
+| `GOV_EXP_DEFENCE_BE` | `GF02` | 2024p 7,946.4 |
+| `GOV_EXP_UNEMPLOYMENT_BE` | `GF1005` | 2024p 6,574.9 |
+| `GOV_EXP_SICKNESS_DISABILITY_BE` | `GF1001` | 2024p 24,254.6 |
+| `GOV_EXP_FAMILY_BE` | `GF1004` | 2024p 13,508.8 |
+| `GOV_EXP_DEBT_TRANSACTIONS_BE` | `GF0107` | 2024p 14,475.6 |
+| `GOV_EXP_ECONOMIC_AFFAIRS_BE` | `GF04` | 2024p 39,854.2 |
+| `GOV_EXP_PUBLIC_ORDER_BE` | `GF03` | 2024p 10,647.7 |
+
+All twelve: `na_item=TE, sector=S13, unit=MIO_EUR, geo=BE`, dataset `gov_10a_exp`.
+`GOV_EXP_DEBT_TRANSACTIONS_BE` is labelled **"public debt transactions"**, deliberately NOT
+"interest" — that is COFOG function GF0107's own name, and this batch does not assert the function
+holds interest alone without checking its full coverage.
+
+**`GOV_EXP_COFOG_TOTAL_BE` 2024 (335,287.9) is NOT the same figure as `GOV_EXPENDITURE_BE`'s own
+2024 value (335,100.1)** — different Eurostat dataset (`gov_10a_exp` vs `gov_10a_main`), different
+release date. Spending shares for the live-counter breakdown are therefore always computed within
+one dataset (the COFOG total and its 12 named/remainder parts), never mixed with
+`GOV_EXPENDITURE_BE`.
+
+See `docs/implementation/batches/` (this PR's own report) for the full set of 25 live-fetched
+latest values actually loaded 2026-10-03, compared line by line against the table above.
+
 ## Approved sources
 
 These five are already in production use; rows here formalize existing fetches, not new

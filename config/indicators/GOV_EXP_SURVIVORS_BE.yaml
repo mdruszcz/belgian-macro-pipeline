@@ -1,0 +1,27 @@
+id: GOV_EXP_SURVIVORS_BE
+name:
+  en: General government expenditure on survivors, Belgium
+  fr: Dépenses publiques liées aux survivants, Belgique
+  nl: Overheidsuitgaven voor nagelaten betrekkingen, België
+definition:
+  en: "Belgian general government expenditure on survivors (COFOG function GF1003), in euro."
+  fr: "Dépenses des administrations publiques belges liées aux survivants (fonction COFOG GF1003), en euros."
+  nl: "Uitgaven van de Belgische overheid voor nagelaten betrekkingen (COFOG-functie GF1003), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) expenditure, COFOG function GF1003 (survivors, within social protection), million EUR -- one named part of the spending breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: GF1003
+  since: "2008"
+display: null

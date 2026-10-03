@@ -1,0 +1,27 @@
+id: GOV_EXP_DEFENCE_BE
+name:
+  en: General government expenditure on defence, Belgium
+  fr: Dépenses publiques de défense, Belgique
+  nl: Overheidsuitgaven voor defensie, België
+definition:
+  en: "Belgian general government expenditure on defence (COFOG function GF02), in euro."
+  fr: "Dépenses des administrations publiques belges liées à la défense (fonction COFOG GF02), en euros."
+  nl: "Uitgaven van de Belgische overheid voor defensie (COFOG-functie GF02), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) expenditure, COFOG function GF02 (defence), million EUR -- one named part of the spending breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: GF02
+  since: "2008"
+display: null

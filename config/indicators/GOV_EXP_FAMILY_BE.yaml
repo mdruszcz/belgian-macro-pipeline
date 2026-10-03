@@ -1,0 +1,27 @@
+id: GOV_EXP_FAMILY_BE
+name:
+  en: General government expenditure on family and children, Belgium
+  fr: Dépenses publiques liées à la famille et aux enfants, Belgique
+  nl: Overheidsuitgaven voor gezin en kinderen, België
+definition:
+  en: "Belgian general government expenditure on family and children (COFOG function GF1004), in euro."
+  fr: "Dépenses des administrations publiques belges liées à la famille et aux enfants (fonction COFOG GF1004), en euros."
+  nl: "Uitgaven van de Belgische overheid voor gezin en kinderen (COFOG-functie GF1004), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) expenditure, COFOG function GF1004 (family and children, within social protection), million EUR -- one named part of the spending breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: GF1004
+  since: "2008"
+display: null

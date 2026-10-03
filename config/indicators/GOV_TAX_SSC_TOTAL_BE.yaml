@@ -1,0 +1,26 @@
+id: GOV_TAX_SSC_TOTAL_BE
+name:
+  en: Total tax and social contribution receipts, Belgium
+  fr: Recettes totales des impôts et cotisations sociales, Belgique
+  nl: Totale ontvangsten uit belastingen en sociale bijdragen, België
+definition:
+  en: "Total Belgian general government receipts from taxes and net social contributions, in euro."
+  fr: "Recettes totales des administrations publiques belges issues des impôts et cotisations sociales nettes, en euros."
+  nl: "Totale ontvangsten van de Belgische overheid uit belastingen en netto sociale bijdragen, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) total taxes and net social contributions (na_item D2_D5_D91_D61_M_D995, the Eurostat aggregate code -- the trailing M_D995 nets out an imputed memo item, not an OBS_FLAG), million EUR. The revenue-breakdown whole for the public-finance counter's revenue parts (docs/features/public_finance_live.md): named taxes + \"other taxes\" sum to this; TR minus this is \"non-tax revenue\". Narrower sub-items this pipeline does NOT fetch (D51C*, several D995 memo items) carry Eurostat OBS_FLAG \"m\", which src/fetchers/eurostat.py's FLAG_STATUS table has no mapping for -- extending it is a source-adapter change needing its own ADR (rule 19), out of scope here."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D2_D5_D91_D61_M_D995
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

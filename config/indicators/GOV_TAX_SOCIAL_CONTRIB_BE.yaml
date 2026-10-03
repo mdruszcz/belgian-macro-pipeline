@@ -1,0 +1,26 @@
+id: GOV_TAX_SOCIAL_CONTRIB_BE
+name:
+  en: Net social contributions received, Belgium
+  fr: Cotisations sociales nettes perçues, Belgique
+  nl: Ontvangen netto sociale bijdragen, België
+definition:
+  en: "Net social contributions received by Belgian general government, in euro."
+  fr: "Cotisations sociales nettes perçues par les administrations publiques belges, en euros."
+  nl: "Netto sociale bijdragen ontvangen door de Belgische overheid, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) net social contributions (na_item D61), million EUR -- one named part of the revenue breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D61
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

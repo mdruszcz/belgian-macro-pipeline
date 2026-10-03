@@ -1,0 +1,26 @@
+id: GOV_TAX_VAT_BE
+name:
+  en: Value added tax receipts, Belgium
+  fr: Recettes de la taxe sur la valeur ajoutée, Belgique
+  nl: Ontvangsten uit de belasting over de toegevoegde waarde, België
+definition:
+  en: "Belgian value added tax receipts, in euro."
+  fr: "Recettes belges de la taxe sur la valeur ajoutée, en euros."
+  nl: "Belgische ontvangsten uit de belasting over de toegevoegde waarde, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) value added type taxes (na_item D211), million EUR -- one named part of the revenue breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D211
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

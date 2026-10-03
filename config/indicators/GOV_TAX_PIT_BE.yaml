@@ -1,0 +1,26 @@
+id: GOV_TAX_PIT_BE
+name:
+  en: Personal income tax receipts, Belgium
+  fr: Recettes de l'impôt sur le revenu des personnes physiques, Belgique
+  nl: Ontvangsten uit de personenbelasting, België
+definition:
+  en: "Belgian personal income tax receipts, in euro."
+  fr: "Recettes de l'impôt belge sur le revenu des personnes physiques, en euros."
+  nl: "Belgische ontvangsten uit de personenbelasting, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) taxes on income, current, individual/households (na_item D51A_C1), million EUR -- one named part of the revenue breakdown (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D51A_C1
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

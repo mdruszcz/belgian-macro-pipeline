@@ -221,6 +221,13 @@ MapUI.unitLabel = function(unit, lang){
   // 'fte' above.
   if(u === 'persons_per_household') return MapUI.text(lang, 'unitPersonsPerHousehold');
   if(u === 'meur_clv2010') return MapUI.text(lang, 'unitMeurClv2010');
+  // meur (public-finance batch, docs/features/public_finance_live.md): a
+  // million-euro LEVEL at current prices -- unlike meur_clv2010's 2010-
+  // volumes measure, this is nominal. Same plain-number treatment as
+  // meur_clv2010 in formatValue() above (no inline currency symbol, no
+  // percent branch): only the label differs. CLAUDE.md rule 41, a level is
+  // never a count.
+  if(u === 'meur') return MapUI.text(lang, 'unitMeur');
   if(u === 'index_0_100') return MapUI.text(lang, 'unitIndex0100');
   return unit.replace(/_/g, ' ');
 };
