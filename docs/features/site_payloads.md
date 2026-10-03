@@ -196,6 +196,19 @@ fields when a DATA condition — not a config one — makes it impossible to com
 this run (ADR 0016's own failure policy). `placements` is config-driven
 (`config/live_counters.yaml`), never hand-typed per page.
 
+**The top-level `valid_from_ms`/`valid_until_ms` are an ENVELOPE, not every counter's
+own window.** They are `min`/`max` over every available counter's own first/last
+segment boundary (`build_payload`, `scripts/export_live_counters.py`) — useful only to
+know the payload's outer bounds. Each counter's OWN window is its own
+`segments[0].start_ms` / `segments[-1].end_ms`, and these genuinely differ: `debt`
+anchors on whichever of its two configured series has the later period end (e.g.
+2026-Q1, starting mid-quarter), while `revenue`/`spending`/`deficit`/`population` all
+start at the next full calendar year after the latest annual figure. A fixed real
+example: envelope `valid_from_ms` 1767222000000 (1 Jan 2026) while `debt`'s own first
+segment starts at 1774998000000 (2026-Q1's own start, later). PR 2's browser code must
+read each counter's own `segments[0].start_ms`/`segments[-1].end_ms` to know when ITS
+line is valid, never assume every counter shares the envelope.
+
 ### `aggregates.json` (added Batch 7)
 
 The province/region/country cross-section micro.html's territorial comparison and any future

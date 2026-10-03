@@ -34,10 +34,12 @@ and is reproducible: identical inputs produce byte-identical output
 
 ## Proposed approach
 
-**25 new Eurostat indicators** (`config/indicators/GOV_*_BE.yaml`, approved by the
+**26 new Eurostat indicators** (`config/indicators/GOV_*_BE.yaml`, approved by the
 maintainer 2026-10-03, `docs/data_catalog.md`): Belgian general-government revenue,
-expenditure, balance and debt (annual and quarterly), six tax/social-contribution
-components, and twelve COFOG expenditure functions. Single-country fetches (`geo: BE`),
+expenditure, balance and debt (annual and quarterly), seven tax/social-contribution
+components (the 7th, D.995, added in the fix round to fix a revenue-breakdown
+misallocation -- see "Assumptions and open questions" below), and twelve COFOG
+expenditure functions. Single-country fetches (`geo: BE`),
 same `eurostat` source/adapter/licence as the existing Europe rows -- no new licence
 decision, no new store (loaded into the existing `international` store).
 
@@ -57,7 +59,7 @@ browser (PR 2) only evaluates the precomputed segments.
 
 ## Data / schema changes
 
-- 25 new rows in `config/indicators/*.yaml`, registered in `config/stores.yaml`'s
+- 26 new rows in `config/indicators/*.yaml`, registered in `config/stores.yaml`'s
   `international` store. No canonical schema change (rule 18).
 - New unit `meur` (a million-EUR level at current prices, distinct from
   `meur_clv2010`'s 2010-volumes measure) -- `assets/commune_map.js` / `assets/i18n.js`
@@ -71,9 +73,9 @@ browser (PR 2) only evaluates the precomputed segments.
 
 ## New data sources
 
-No new source. All 25 series use the `eurostat` source already approved
+No new source. All 26 series use the `eurostat` source already approved
 (`docs/data_catalog.md`'s "Approved sources" table); the new catalogue section
-("Belgian general government finance in euros") records the 25 series themselves,
+("Belgian general government finance in euros") records the 26 series themselves (the 26th, GOV_TAX_UNCOLLECTED_BE, added in the fix round),
 approved by the maintainer 2026-10-03.
 
 ## Tests
@@ -93,7 +95,7 @@ approved by the maintainer 2026-10-03.
   `live_counters_payloads` is in the daily export job's asset selection.
 - Existing `tests/test_stores.py`, `tests/test_orchestration.py`,
   `tests/test_map_ui_logic.py` / `test_resolve_format_value.py` re-run unchanged and
-  green with the 25 new configs and the `meur` unit present.
+  green with the 26 new configs and the `meur` unit present.
 
 Run with `pytest tests/test_live_counters.py tests/test_live_counters_config.py
 tests/test_export_live_counters.py -q`, plus `ruff check` / `black --check` on every
@@ -102,7 +104,7 @@ changed file.
 ## Assumptions and open questions
 
 - **Wording not yet confirmed by the maintainer**: the French/Dutch translations of the
-  25 indicators' `name`/`definition` fields, and the three remainder parts' labels
+  26 indicators' `name`/`definition` fields, and the three remainder parts' labels
   (`other_taxes`, `non_tax_revenue`, `other_functions`) -- written by this batch from
   the English description only (rule 40), in the same style as the existing
   `GOV_DEBT_EUROPE`-family configs, never invented methodology. Listed in full in this
@@ -111,23 +113,27 @@ changed file.
   this PR's config gives it a neutral label ("Budget balance").
 - Population's own coverage/anchor is refreshed by hand (rule 38, Statbel), so the 1
   January anchor moves only when the maintainer next loads it -- not on every daily run.
-- **`non_tax_revenue` is not pure non-tax revenue.** `GOV_TAX_SSC_TOTAL_BE` nets out
-  Eurostat's `D995` (uncollectible tax write-offs, ~895 M EUR for 2025); `GOV_REVENUE_BE`
-  does not. `non_tax_revenue = TR - taxag_total` therefore folds that write-off in (audit
-  P2-1; full arithmetic in `docs/data_catalog.md`'s public-finance section). Fixing it
-  exactly needs a 26th fetched series (`D995` itself, confirmed live-fetchable, no `'m'`
-  flag) that is outside the 25 the maintainer named and approved 2026-10-03 -- not added
-  without that sign-off. This PR instead relabelled the part ("Non-tax revenue and
-  adjustments") rather than publish a falsely precise number. Open question for the
-  maintainer: approve `GOV_TAX_D995_ADJUSTMENT_BE` so PR 2 can show the two split exactly,
-  or keep the merged bucket.
-- **`deficit`'s own `basis` is empty** (`scripts/export_live_counters.py`'s
-  `_difference_entry`): it is computed from `spending`'s and `revenue`'s segments, not
-  from a series lookup of its own, so it carries no source citation for PR 2's UI to
-  show. `debt`'s `basis` likewise names only its anchor series, not the TR/TE pair
-  setting its post-anchor pace. Both are pre-existing gaps the audit flagged (P3); left
-  for PR 2 to decide how to surface, since filling them changes the payload shape a UI
-  would then depend on.
+- **D.995 fix (resolved in the fix round, 2026-10-03).** An independent audit (P2-1)
+  found that `GOV_TAX_SSC_TOTAL_BE` nets Eurostat's `D995` out (capital transfer for tax
+  assessed but unlikely to be collected, 895.2 M EUR for 2025) while `GOV_REVENUE_BE`
+  (`TR`) does not, so `non_tax_revenue = TR - taxag_total` was silently folding that
+  write-off in as if it were ordinary non-tax revenue. The maintainer approved a 26th
+  series, `GOV_TAX_UNCOLLECTED_BE` (`D995` itself), the same day; `other_taxes`'s own
+  `remainder_of` now carries a `plus: [GOV_TAX_UNCOLLECTED_BE]` (config/live_counters.yaml,
+  validated by src/validation/live_counters_config.py) so its `whole` is the GROSS tax
+  total (taxag_total + D995), and `non_tax_revenue` is now `TR - gross_total` with no
+  residual folded in. Full arithmetic in `docs/data_catalog.md`'s public-finance section.
+- **`deficit`'s own `basis`** now names the two flow counters (spending/revenue, i.e.
+  TE/TR) it is computed from, each tagged `role: "minuend"`/`"subtrahend"`. **`debt`'s
+  `basis`** names its anchor series (`role: "anchor"`) and, when the anchor year is
+  already official, the TR/TE pair setting its post-anchor pace (`role:
+  "pace_minuend"`/`"pace_subtrahend"`) -- both were empty/anchor-only gaps the audit
+  flagged (P3), now filled so PR 2's UI always has a source citation to show.
+- **The top-level `valid_from_ms`/`valid_until_ms` are only an envelope** (min/max
+  across every counter's own segment bounds), not each counter's own window -- `debt`
+  in particular starts at its own quarterly anchor, not the envelope's 1 January. PR 2's
+  browser code must read each counter's own `segments[0].start_ms`/`segments[-1].end_ms`.
+  Full detail in `docs/features/site_payloads.md`'s `live_counters.json` entry.
 
 ## Rollout / risks
 

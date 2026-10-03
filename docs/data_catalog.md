@@ -1007,16 +1007,19 @@ built now.
 | `nrg_pc_204` | Semi-annual frequency the schema/period model does not support without a wider change (rule 18) |
 | `pat_ep_ntot` | 9 years stale; noted as a future check |
 
-## Belgian general government finance in euros — 25 indicators, APPROVED by the maintainer 2026-10-03
+## Belgian general government finance in euros — 26 indicators, APPROVED by the maintainer 2026-10-03
 
 Live-verified against the real Eurostat API 2026-10-03 (dataset codes, filters and the real
 Belgian figure for each series checked before this row was written), then approved by the
 maintainer on that scoped, live-verified proposal — the same catalog sign-off convention as the
-Eurostat additional domains batch above (CLAUDE.md rule 8). All 25 use the same `eurostat` source,
+Eurostat additional domains batch above (CLAUDE.md rule 8). All 26 use the same `eurostat` source,
 adapter (`src/fetchers/eurostat.py`) and licence already covering `GOV_DEBT_EUROPE` etc. above —
-**no new licence decision needed**. Unlike that batch, every one of these 25 is a **single-country
+**no new licence decision needed**. Unlike that batch, every one of these 26 is a **single-country
 Belgian fetch** (`fetch.filters.geo: BE`, the same shape as `EC_CONS_CONF_BE`), loaded into the
 existing `international` store (`data/international/{ID}.csv`) — no new store.
+
+The 26th, `GOV_TAX_UNCOLLECTED_BE`, was approved the same day as the other 25, after an
+independent audit of the first 25 found a misallocation: see the `gov_10a_taxag` section below.
 
 Built to feed the simulated public-finance "live counters" (population, debt, deficit, revenue and
 spending, each ticking once a second in the browser from parameters Python computes --
@@ -1057,38 +1060,39 @@ figure named in this batch's own handoff before this row was written.
 `GOV_DEBT_QUARTERLY_EUROPE` vs `GOV_DEBT_EUROPE`. The debt live-counter anchors on whichever of the
 two has the later period end (`docs/features/public_finance_live.md`).
 
-### `gov_10a_taxag` — taxes and social contributions (6 built)
+### `gov_10a_taxag` — taxes and social contributions (7 built)
 
 | Indicator | na_item | Latest value (2025, 2026-10-03 live fetch) |
 |---|---|---|
 | `GOV_TAX_SSC_TOTAL_BE` | `D2_D5_D91_D61_M_D995` | 2025p 282,517.4 |
+| `GOV_TAX_UNCOLLECTED_BE` | `D995` | 2025p 895.2 |
 | `GOV_TAX_SOCIAL_CONTRIB_BE` | `D61` | 2025p 97,512.6 |
 | `GOV_TAX_PIT_BE` | `D51A_C1` | 2025p 75,791.1 |
 | `GOV_TAX_CIT_BE` | `D51B_C2` | 2025p 26,308.0 |
 | `GOV_TAX_VAT_BE` | `D211` | 2025p 39,796.6 |
 | `GOV_TAX_EXCISE_BE` | `D214A` | 2025p 11,186.1 |
 
-All six: `sector=S13, unit=MIO_EUR, geo=BE`, dataset `gov_10a_taxag`. **Deliberately NOT fetched**:
-`D51C*` and several `D995B/D/F/FE/FN/FS/G` sub-items the handoff's own candidate list named —
-Eurostat publishes these with `OBS_FLAG` `'m'`, which `src/fetchers/eurostat.py`'s `FLAG_STATUS`
-table has no mapping for (same class of gap as `EMPLOYMENT_NATACCOUNTS_EUROPE` above). Extending
-`FLAG_STATUS` is a source-adapter change needing its own ADR (rule 19) — out of scope here, and a
-config hitting this flag would abort the whole `international` store's daily fetch, not just its
-own, so none of these six narrower items were ever written as configs.
+All seven: `sector=S13, unit=MIO_EUR, geo=BE`, dataset `gov_10a_taxag`. **Deliberately NOT
+fetched**: `D51C*` and several `D995B/D/F/FE/FN/FS/G` sub-items the handoff's own candidate list
+named — Eurostat publishes these with `OBS_FLAG` `'m'`, which `src/fetchers/eurostat.py`'s
+`FLAG_STATUS` table has no mapping for (same class of gap as `EMPLOYMENT_NATACCOUNTS_EUROPE`
+above). Extending `FLAG_STATUS` is a source-adapter change needing its own ADR (rule 19) — out of
+scope here, and a config hitting this flag would abort the whole `international` store's daily
+fetch, not just its own, so none of these six narrower items were ever written as configs.
 
-**Known residual in `GOV_TAX_SSC_TOTAL_BE` (audit P2-1, 2026-10-03).** Its own `na_item`,
-`D2_D5_D91_D61_M_D995`, nets out `D995` (capital transfers for taxes/SSC assessed but unlikely to
-be collected — live-verified 2026-10-03, BE/S13/`gov_10a_taxag`: **895.2 M EUR for 2025p**, flags
-`b`/`p` only, no `'m'`). `GOV_REVENUE_BE` (`TR`) is **not** net of `D995`. The public-finance live
-counter's `non_tax_revenue` breakdown part (`config/live_counters.yaml`) is computed as
-`TR - taxag_total`, which therefore silently folds that 895.2 M EUR write-off into what would
-otherwise read as pure non-tax revenue. Fetching `D995` as its own series would fix the arithmetic
-exactly, but it is a 26th indicator outside the 25 the maintainer approved by name on 2026-10-03
-(rule 8) — not added here. Instead `non_tax_revenue`'s label was corrected to "Non-tax revenue and
-adjustments" (en/fr/nl) so it does not assert a precision the number does not have. If the
-maintainer wants the two separated exactly, add `GOV_TAX_D995_ADJUSTMENT_BE`
-(`gov_10a_taxag`, `na_item=D995, sector=S13, unit=MIO_EUR, geo=BE`) as its own approved row here
-first.
+**D.995 fix (audit P2-1, resolved 2026-10-03, maintainer approved the 26th series the same day).**
+`GOV_TAX_SSC_TOTAL_BE`'s own `na_item`, `D2_D5_D91_D61_M_D995`, nets out `D995` (capital transfers
+for taxes/SSC assessed but unlikely to be collected — live-verified 2026-10-03, BE/S13/
+`gov_10a_taxag`: **895.2 M EUR for 2025p**, flags `b`/`p` only, no `'m'`, confirmed live on the
+exact `sector=S13, unit=MIO_EUR, geo=BE` filtered query). `GOV_REVENUE_BE` (`TR`) is **not** net of
+`D995`. Before this fix, the public-finance live counter's `non_tax_revenue` breakdown part
+(`config/live_counters.yaml`) was computed as `TR - taxag_total`, which silently folded that
+895.2 M EUR write-off into what would otherwise read as pure non-tax revenue. Fetching `D995` as
+its own series (`GOV_TAX_UNCOLLECTED_BE`, approved as the 26th indicator) fixes the arithmetic
+exactly: the revenue breakdown's `other_taxes` part now uses the config's own `plus:
+[GOV_TAX_UNCOLLECTED_BE]` to add `D995` back onto `GOV_TAX_SSC_TOTAL_BE` before computing shares,
+giving the GROSS tax total (282,517.4 + 895.2 = 283,412.6 for 2025); `non_tax_revenue` is then
+`TR - gross_total` (314,736.4 - 283,412.6 = 31,323.8), no longer absorbing the write-off.
 
 ### `gov_10a_exp` — expenditure by COFOG function (12 built)
 
@@ -1118,9 +1122,10 @@ release date. Spending shares for the live-counter breakdown are therefore alway
 one dataset (the COFOG total and its 12 named/remainder parts), never mixed with
 `GOV_EXPENDITURE_BE`.
 
-The full set of 25 live-fetched latest values actually loaded 2026-10-03 was compared line by line
-against the table above in this feature's own PR description (branch `feat/public-finance-data`) —
-every value matched exactly; see `docs/features/public_finance_live.md` for the feature writeup.
+The full set of 26 live-fetched latest values actually loaded 2026-10-03 (the original 25, plus
+`GOV_TAX_UNCOLLECTED_BE` added in the fix round the same day) was compared line by line against
+the table above in this feature's own PR description (branch `feat/public-finance-data`) — every
+value matched exactly; see `docs/features/public_finance_live.md` for the feature writeup.
 
 ## Approved sources
 
