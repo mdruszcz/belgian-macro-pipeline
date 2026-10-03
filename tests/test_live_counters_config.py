@@ -43,6 +43,19 @@ def test_every_placement_names_only_real_counter_ids():
         assert set(members) <= ids
 
 
+def test_home_strip_lists_all_five_counters():
+    # Issue #309: the home-page strip now shows all five counters, not just
+    # debt/deficit.
+    data = load_and_validate_live_counters(CONFIG_PATH)
+    assert data["placements"]["home_strip"] == [
+        "population",
+        "debt",
+        "deficit",
+        "revenue",
+        "spending",
+    ]
+
+
 def test_every_named_part_has_an_indicator_and_no_label_of_its_own():
     # Named parts take their label from the indicator config (rule 2/24
     # extended) -- this config must never hand-type one.
@@ -180,6 +193,32 @@ def test_a_label_missing_a_language_is_refused(tmp_path, base):
     base["counters"][0]["label"].pop("nl")
     with pytest.raises(LiveCounterError):
         load_and_validate_live_counters(_write(tmp_path, base))
+
+
+# ── short_label (issue #309) ─────────────────────────────────────────────────
+
+
+def test_a_short_label_missing_a_language_is_refused(tmp_path, base):
+    revenue = next(c for c in base["counters"] if c["id"] == "revenue")
+    pit = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "pit")
+    pit["short_label"].pop("nl")
+    with pytest.raises(LiveCounterError):
+        load_and_validate_live_counters(_write(tmp_path, base))
+
+
+def test_a_part_with_no_short_label_still_validates(tmp_path, base):
+    # short_label is optional -- a part configured without one at all must
+    # still pass (only "present but missing a language" is refused).
+    revenue = next(c for c in base["counters"] if c["id"] == "revenue")
+    pit = next(p for p in revenue["breakdown"]["parts"] if p["id"] == "pit")
+    del pit["short_label"]
+    data = load_and_validate_live_counters(_write(tmp_path, base))
+    pit_out = next(
+        p
+        for p in next(c for c in data["counters"] if c["id"] == "revenue")["breakdown"]["parts"]
+        if p["id"] == "pit"
+    )
+    assert "short_label" not in pit_out
 
 
 def test_missing_schema_version_is_refused(tmp_path, base):

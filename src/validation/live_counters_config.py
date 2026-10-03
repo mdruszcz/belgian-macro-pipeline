@@ -12,6 +12,12 @@ src/validation/config_schema.py does for config/indicators/*.yaml:
     likewise defined earlier;
   * a nested remainder's `covers` names real sibling part ids.
 
+A breakdown part's optional `short_label` needs NO cross-field check of its
+own here: like `label`, it is a `trilingual_label` in the schema (`en`/
+`fr`/`nl` all required, `additionalProperties: false`), so "present but
+missing a language" is already a schema violation on its own -- the schema
+validator above catches it before this module's own checks ever run.
+
 Raises `LiveCounterError` (src/analytics/live_counters.py's own exception,
 imported rather than duplicated) for any of the above -- a config problem,
 never a data one, so it fails the build loudly (CLAUDE.md rule 13).

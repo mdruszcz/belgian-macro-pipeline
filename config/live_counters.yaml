@@ -14,6 +14,14 @@
 # in the payload, never hand-typed into this file. Only the per-counter
 # labels and the three REMAINDER parts (which have no indicator of their
 # own) carry a `label` here.
+#
+# `short_label` (optional, every language or none -- docs/features/
+# live_counters.schema.json's trilingual_label, same rule as `label`) is a
+# SEPARATE, shorter wording for a breakdown part, for a narrow legend/chip
+# UI slot a part's own full `names` (the indicator config's name, or a
+# remainder's `label` above) is too long for. It never replaces `names`/
+# `label` and is additive only -- the exporter emits it on a part only when
+# configured here (scripts/export_live_counters.py), never invents one.
 schema_version: 1
 
 method:
@@ -69,14 +77,34 @@ counters:
       parts:
         - id: social_contributions
           indicator: GOV_TAX_SOCIAL_CONTRIB_BE
+          short_label:
+            en: Social contributions
+            fr: Cotisations sociales
+            nl: Sociale bijdragen
         - id: pit
           indicator: GOV_TAX_PIT_BE
+          short_label:
+            en: Personal income tax
+            fr: Impôt sur le revenu des personnes physiques
+            nl: Personenbelasting
         - id: cit
           indicator: GOV_TAX_CIT_BE
+          short_label:
+            en: Corporate income tax
+            fr: Impôt des sociétés
+            nl: Vennootschapsbelasting
         - id: vat
           indicator: GOV_TAX_VAT_BE
+          short_label:
+            en: VAT
+            fr: TVA
+            nl: Btw
         - id: excise
           indicator: GOV_TAX_EXCISE_BE
+          short_label:
+            en: Excise duties
+            fr: Droits d'accise
+            nl: Accijnzen
         - id: other_taxes
           remainder_of: GOV_TAX_SSC_TOTAL_BE
           plus: [GOV_TAX_UNCOLLECTED_BE]
@@ -85,9 +113,17 @@ counters:
             en: Other taxes
             fr: Autres impôts
             nl: Overige belastingen
+          short_label:
+            en: Other taxes
+            fr: Autres impôts
+            nl: Overige belastingen
         - id: non_tax_revenue
           remainder: true
           label:
+            en: Non-tax revenue
+            fr: Recettes non fiscales
+            nl: Niet-fiscale ontvangsten
+          short_label:
             en: Non-tax revenue
             fr: Recettes non fiscales
             nl: Niet-fiscale ontvangsten
@@ -113,29 +149,77 @@ counters:
       parts:
         - id: old_age
           indicator: GOV_EXP_OLD_AGE_BE
+          short_label:
+            en: Old age (pensions)
+            fr: Vieillesse (pensions)
+            nl: Ouderdom (pensioenen)
         - id: survivors
           indicator: GOV_EXP_SURVIVORS_BE
+          short_label:
+            en: Survivors
+            fr: Survie
+            nl: Nabestaanden
         - id: health
           indicator: GOV_EXP_HEALTH_BE
+          short_label:
+            en: Health
+            fr: Santé
+            nl: Gezondheid
         - id: education
           indicator: GOV_EXP_EDUCATION_BE
+          short_label:
+            en: Education
+            fr: Éducation
+            nl: Onderwijs
         - id: defence
           indicator: GOV_EXP_DEFENCE_BE
+          short_label:
+            en: Defence
+            fr: Défense
+            nl: Defensie
         - id: unemployment
           indicator: GOV_EXP_UNEMPLOYMENT_BE
+          short_label:
+            en: Unemployment
+            fr: Chômage
+            nl: Werkloosheid
         - id: sickness_disability
           indicator: GOV_EXP_SICKNESS_DISABILITY_BE
+          short_label:
+            en: Sickness & disability
+            fr: Maladie et invalidité
+            nl: Ziekte en invaliditeit
         - id: family
           indicator: GOV_EXP_FAMILY_BE
+          short_label:
+            en: Family & children
+            fr: Famille et enfants
+            nl: Gezin en kinderen
         - id: debt_transactions
           indicator: GOV_EXP_DEBT_TRANSACTIONS_BE
+          short_label:
+            en: Public debt transactions
+            fr: Opérations de la dette publique
+            nl: Overheidsschuldverrichtingen
         - id: economic_affairs
           indicator: GOV_EXP_ECONOMIC_AFFAIRS_BE
+          short_label:
+            en: Economic affairs
+            fr: Affaires économiques
+            nl: Economische zaken
         - id: public_order
           indicator: GOV_EXP_PUBLIC_ORDER_BE
+          short_label:
+            en: Public order & safety
+            fr: Ordre et sécurité publics
+            nl: Openbare orde en veiligheid
         - id: other_functions
           remainder: true
           label:
+            en: Other functions
+            fr: Autres fonctions
+            nl: Overige functies
+          short_label:
             en: Other functions
             fr: Autres fonctions
             nl: Overige functies
@@ -171,4 +255,4 @@ counters:
 placements:
   macro_strip: [population, revenue, spending, deficit, debt]
   macro_breakdowns: [revenue, spending]
-  home_strip: [debt, deficit]
+  home_strip: [population, debt, deficit, revenue, spending]

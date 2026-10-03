@@ -283,19 +283,26 @@ def _breakdown_entry(
                 _basis_entry(national, extra, str(breakdown_year))
                 for extra in part_cfg.get("plus", [])
             ]
-        parts_out.append(
-            {
-                "id": pid,
-                "names": names,
-                "share": float(shares[pid]),
-                "basis": basis,
-                "segments": (
-                    None
-                    if isinstance(part_segments, Unavailable)
-                    else [s.as_dict() for s in part_segments]
-                ),
-            }
-        )
+        part_entry = {
+            "id": pid,
+            "names": names,
+            "share": float(shares[pid]),
+            "basis": basis,
+            "segments": (
+                None
+                if isinstance(part_segments, Unavailable)
+                else [s.as_dict() for s in part_segments]
+            ),
+        }
+        # Optional, config-driven only (config/live_counters.yaml) -- the
+        # engine stays generic and never invents a short label of its own;
+        # a part with none configured omits the key entirely, never emits
+        # a null/empty one (rule 26: missing is not a distinct emitted
+        # state here).
+        short_label = part_cfg.get("short_label")
+        if short_label is not None:
+            part_entry["short_label"] = short_label
+        parts_out.append(part_entry)
     return {
         "state": "available",
         "year": str(breakdown_year),
