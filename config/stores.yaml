@@ -357,6 +357,12 @@ stores:
       - GOV_DEBT_PCT_GDP_BE
       - GOV_DEBT_Q_MEUR_BE
       - GOV_TAX_SSC_TOTAL_BE
+      # D.995 fix (fix round, 2026-10-03, maintainer-approved, docs/data_catalog.md's
+      # "26 indicators" revision): GOV_TAX_SSC_TOTAL_BE's own na_item nets D.995 out,
+      # TR does not -- this is the 26th series, fetched so the revenue breakdown's
+      # gross tax total (config/live_counters.yaml) can add it back rather than let
+      # non_tax_revenue silently absorb it.
+      - GOV_TAX_UNCOLLECTED_BE
       - GOV_TAX_SOCIAL_CONTRIB_BE
       - GOV_TAX_PIT_BE
       - GOV_TAX_CIT_BE
