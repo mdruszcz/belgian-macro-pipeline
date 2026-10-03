@@ -1399,6 +1399,24 @@ GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2022,
 GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2023,263265.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
 GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2024,275996.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
 GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2025,282517.4,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2008,768.3,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2009,993.4,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2010,596.6,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2011,755.2,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2012,830.8,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2013,729.9,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2014,482.9,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2015,547.0,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2016,618.5,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2017,643.3,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2018,613.9,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2019,611.3,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2020,617.0,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2021,524.2,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2022,513.3,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2023,547.5,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2024,666.7,A,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
+GOV_TAX_UNCOLLECTED_BE,"Taxes and social contributions assessed but unlikely to be collected, Belgium",2025,895.2,P,meur,Eurostat,2026-10-03T13:05:23.805647+00:00
 GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2008,24746.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
 GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2009,24390.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
 GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2010,25628.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
