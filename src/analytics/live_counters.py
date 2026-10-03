@@ -97,7 +97,12 @@ def _ms(dt: datetime) -> int:
     return round(dt.timestamp() * 1000)
 
 
-def _money(x: Decimal) -> Decimal:
+def money_round(x: Decimal) -> Decimal:
+    """Round EUR to the cent, half up. Public: the exporter needs the exact
+    same rounding this module uses internally, to round a breakdown's parts
+    so they sum to the counter's own already-rounded total (see
+    apply_shares_rounded below) -- rounding each independently and summing
+    can land a cent off the total's own rounding."""
     return x.quantize(CENT, rounding=ROUND_HALF_UP)
 
 
@@ -214,7 +219,7 @@ def flow_segments(
         if isinstance(v1, Unavailable):
             return v1
         if round_cents:
-            v1 = _money(v1)
+            v1 = money_round(v1)
         start_ms, end_ms = year_bounds(year)
         segments.append(_segment(start_ms, end_ms, Decimal(0), v1))
     return segments
@@ -256,7 +261,7 @@ def stock_segments(
         return Unavailable("anchor_beyond_horizon")
     anchor_year = datetime.fromtimestamp(anchor_ms / 1000, tz=CET).year
     segments: list[Segment] = []
-    value = _money(anchor_value) if round_cents else anchor_value
+    value = money_round(anchor_value) if round_cents else anchor_value
     cursor_ms = anchor_ms
     year = anchor_year
     while cursor_ms < horizon_end_ms:
@@ -272,7 +277,7 @@ def stock_segments(
             fraction = Decimal(segment_end_ms - cursor_ms) / Decimal(year_end_ms - year_start_ms)
             next_value = value + pace * fraction
         if round_cents:
-            next_value = _money(next_value)
+            next_value = money_round(next_value)
         segments.append(_segment(cursor_ms, segment_end_ms, value, next_value))
         value = next_value
         cursor_ms = segment_end_ms
@@ -380,4 +385,22 @@ def apply_shares(shares: Mapping[str, Decimal], whole: Decimal, last_id: str) ->
         ctx.prec = 50
         others = {k: v * whole for k, v in shares.items() if k != last_id}
         last = whole - sum(others.values())
+    return {**others, last_id: last}
+
+
+def apply_shares_rounded(
+    shares: Mapping[str, Decimal], whole_cents: Decimal, last_id: str
+) -> dict[str, Decimal]:
+    """Like apply_shares(), but for publishing a part next to a counter
+    whose OWN total is already rounded to cents (money_round). Rounding
+    apply_shares()'s exact, unrounded parts independently can land their
+    SUM a cent away from the total's own rounding (observed: two real
+    breakdowns, off by one cent each way) -- this rounds every part
+    except `last_id` first, then gives `last_id` whatever is left, so the
+    published parts always sum to EXACTLY `whole_cents`, never a cent off
+    in either direction."""
+    with localcontext() as ctx:
+        ctx.prec = 50
+        others = {k: money_round(v * whole_cents) for k, v in shares.items() if k != last_id}
+        last = whole_cents - sum(others.values())
     return {**others, last_id: last}

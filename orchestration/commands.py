@@ -356,6 +356,35 @@ COMMANDS: dict[str, Command] = {
         ),
         outputs=("{public_data}",),
     ),
+    # Simulated public-finance live counters (docs/features/
+    # public_finance_live.md, ADR 0016). Reads ONLY public/data/national.json +
+    # aggregates.json + metadata/indicators.json (site_payloads' own output,
+    # hence the dep in orchestration/assets/website.py) and
+    # config/live_counters.yaml -- no {db}. All arithmetic lives in
+    # src/analytics/live_counters.py; this script only reads published
+    # payloads and writes the one output file.
+    # `refusal="LiveCounterError"`: this script's own main() catches it and
+    # exits non-zero the same way scripts/offload_stores.py's main() catches
+    # OffloadError -- not consumed by run.call_function (this is a
+    # script_asset, not a function_asset), but declared here anyway for the
+    # same reason every other script with its own error class declares one.
+    "live_counters_payloads": Command(
+        (
+            "scripts/export_live_counters.py",
+            "--national",
+            "{public_data}/national.json",
+            "--aggregates",
+            "{public_data}/aggregates.json",
+            "--metadata",
+            "{public_data}/metadata/indicators.json",
+            "--config",
+            "config/live_counters.yaml",
+            "--out",
+            "{public_data}/live_counters.json",
+        ),
+        outputs=("{public_data}/live_counters.json",),
+        refusal="LiveCounterError",
+    ),
     "explorer_payloads": Command(
         ("scripts/export_explorer_payloads.py",),
         outputs=("public/data/explorer",),

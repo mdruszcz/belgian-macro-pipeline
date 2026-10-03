@@ -111,6 +111,17 @@ exports:
 		--aggregates data/aggregates.csv \
 		--percentiles data/percentiles.csv \
 		--out-dir public/data --build-id "$${BUILD_ID:-local}" --validation-status unknown
+	# Simulated public-finance live counters (docs/features/public_finance_live.md,
+	# ADR 0016). Reads ONLY public/data/national.json + aggregates.json +
+	# metadata/indicators.json (just written above) and config/live_counters.yaml --
+	# no $(DB) involved. Must run AFTER site_payloads, which is what writes those
+	# three files; all arithmetic lives in src/analytics/live_counters.py, never here.
+	$(PYTHON) scripts/export_live_counters.py \
+		--national public/data/national.json \
+		--aggregates public/data/aggregates.json \
+		--metadata public/data/metadata/indicators.json \
+		--config config/live_counters.yaml \
+		--out public/data/live_counters.json
 	$(PYTHON) scripts/export_commune_adjacency.py
 	$(PYTHON) scripts/export_commune_typology.py
 	# Peer model v1 (Block M, docs/features/peer_model.md, ADR 0015). Reads

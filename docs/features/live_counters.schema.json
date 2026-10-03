@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://belgian-macro-pipeline/live_counters.schema.json",
+  "title": "Live counters configuration",
+  "type": "object",
+  "required": ["schema_version", "method", "counters", "placements"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "method": {
+      "type": "object",
+      "required": ["trend_window_years", "horizon_years", "remainder_tolerance_meur"],
+      "additionalProperties": false,
+      "properties": {
+        "trend_window_years": { "type": "integer", "minimum": 1 },
+        "horizon_years": { "type": "integer", "minimum": 1 },
+        "remainder_tolerance_meur": { "type": "number", "minimum": 0 }
+      }
+    },
+    "counters": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/counter" }
+    },
+    "placements": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "trilingual_label": {
+      "type": "object",
+      "required": ["en", "fr", "nl"],
+      "additionalProperties": false,
+      "properties": {
+        "en": { "type": "string", "minLength": 1 },
+        "fr": { "type": "string", "minLength": 1 },
+        "nl": { "type": "string", "minLength": 1 }
+      }
+    },
+    "breakdown_part": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "indicator": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "remainder": { "const": true },
+        "remainder_of": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "covers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "label": { "$ref": "#/$defs/trilingual_label" }
+      },
+      "oneOf": [
+        { "required": ["indicator"] },
+        { "required": ["remainder", "label"] },
+        { "required": ["remainder_of", "covers", "label"] }
+      ]
+    },
+    "breakdown": {
+      "type": "object",
+      "required": ["within", "parts"],
+      "additionalProperties": false,
+      "properties": {
+        "within": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "parts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/breakdown_part" }
+        }
+      }
+    },
+    "counter": {
+      "type": "object",
+      "required": ["id", "kind", "unit", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "kind": { "enum": ["stock", "flow", "difference"] },
+        "unit": { "type": "string", "minLength": 1 },
+        "label": { "$ref": "#/$defs/trilingual_label" },
+        "source": { "const": "aggregate" },
+        "aggregate_indicator": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "geo_id": { "type": "string", "minLength": 1 },
+        "method": { "const": "trend" },
+        "indicator": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "breakdown": { "$ref": "#/$defs/breakdown" },
+        "minuend": { "type": "string" },
+        "subtrahend": { "type": "string" },
+        "anchors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" }
+        },
+        "paced_by": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "stock" } }, "required": ["kind"] },
+          "then": {
+            "oneOf": [
+              { "required": ["source", "aggregate_indicator", "geo_id"] },
+              { "required": ["anchors", "paced_by"] }
+            ]
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "flow" } }, "required": ["kind"] },
+          "then": { "required": ["method", "indicator"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "difference" } }, "required": ["kind"] },
+          "then": { "required": ["minuend", "subtrahend"] }
+        }
+      ]
+    }
+  }
+}

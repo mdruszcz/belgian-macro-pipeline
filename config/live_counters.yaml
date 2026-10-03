@@ -1,0 +1,158 @@
+# The simulated public-finance "live counters" (docs/features/
+# public_finance_live.md, docs/decisions/0016-simulated-live-counters.md).
+# Validated against docs/features/live_counters.schema.json plus the
+# cross-field checks in src/validation/live_counters_config.py (duplicate
+# ids, unknown placement references, malformed remainders, missing
+# languages -- the things one JSON Schema file cannot express alone,
+# same split as config/indicators/*.yaml's own
+# docs/features/indicator_config.schema.json +
+# src/validation/config_schema.py).
+#
+# A named part carries no `label` here -- CLAUDE.md rule 2/24 extended:
+# its label is the indicator config's OWN trilingual `name`
+# (public/data/national.json's `names`), read by the exporter and carried
+# in the payload, never hand-typed into this file. Only the per-counter
+# labels and the three REMAINDER parts (which have no indicator of their
+# own) carry a `label` here.
+schema_version: 1
+
+method:
+  trend_window_years: 3
+  horizon_years: 2
+  remainder_tolerance_meur: 0.5
+
+counters:
+  - id: population
+    kind: stock
+    unit: count
+    source: aggregate
+    aggregate_indicator: POPULATION_BY_COMMUNE
+    geo_id: "be:country"
+    label:
+      en: Population
+      fr: Population
+      nl: Bevolking
+
+  # Revenue's breakdown whole is its OWN flow indicator (GOV_REVENUE_BE /
+  # TR) -- unlike spending below, there is no separate "total revenue by
+  # source" dataset, so the outer remainder (non_tax_revenue) sits directly
+  # against TR. The inner remainder (other_taxes) sits against the taxag
+  # dataset's own total (GOV_TAX_SSC_TOTAL_BE), one level down -- see
+  # docs/data_catalog.md's note on why COFOG/TE below are never mixed this
+  # same way.
+  - id: revenue
+    kind: flow
+    method: trend
+    unit: meur
+    indicator: GOV_REVENUE_BE
+    label:
+      en: Government revenue
+      fr: Recettes publiques
+      nl: Overheidsontvangsten
+    breakdown:
+      within: GOV_REVENUE_BE
+      parts:
+        - id: social_contributions
+          indicator: GOV_TAX_SOCIAL_CONTRIB_BE
+        - id: pit
+          indicator: GOV_TAX_PIT_BE
+        - id: cit
+          indicator: GOV_TAX_CIT_BE
+        - id: vat
+          indicator: GOV_TAX_VAT_BE
+        - id: excise
+          indicator: GOV_TAX_EXCISE_BE
+        - id: other_taxes
+          remainder_of: GOV_TAX_SSC_TOTAL_BE
+          covers: [social_contributions, pit, cit, vat, excise]
+          label:
+            en: Other taxes
+            fr: Autres impôts
+            nl: Overige belastingen
+        - id: non_tax_revenue
+          remainder: true
+          label:
+            en: Non-tax revenue
+            fr: Recettes non fiscales
+            nl: Niet-fiscale ontvangsten
+
+  # Spending's `indicator` (what actually ticks, trended from TE) is
+  # DELIBERATELY NOT the same dataset as its breakdown `within`
+  # (GOV_EXP_COFOG_TOTAL_BE): COFOG total 2024 (335,287.9) != gov_10a_main
+  # TE 2024 (335,100.1) -- different Eurostat release. The breakdown's
+  # SHARES (computed once, from COFOG) are reused against each projected
+  # year's own TE-based total; the two totals are never summed or compared
+  # directly (docs/data_catalog.md).
+  - id: spending
+    kind: flow
+    method: trend
+    unit: meur
+    indicator: GOV_EXPENDITURE_BE
+    label:
+      en: Government spending
+      fr: Dépenses publiques
+      nl: Overheidsuitgaven
+    breakdown:
+      within: GOV_EXP_COFOG_TOTAL_BE
+      parts:
+        - id: old_age
+          indicator: GOV_EXP_OLD_AGE_BE
+        - id: survivors
+          indicator: GOV_EXP_SURVIVORS_BE
+        - id: health
+          indicator: GOV_EXP_HEALTH_BE
+        - id: education
+          indicator: GOV_EXP_EDUCATION_BE
+        - id: defence
+          indicator: GOV_EXP_DEFENCE_BE
+        - id: unemployment
+          indicator: GOV_EXP_UNEMPLOYMENT_BE
+        - id: sickness_disability
+          indicator: GOV_EXP_SICKNESS_DISABILITY_BE
+        - id: family
+          indicator: GOV_EXP_FAMILY_BE
+        - id: debt_transactions
+          indicator: GOV_EXP_DEBT_TRANSACTIONS_BE
+        - id: economic_affairs
+          indicator: GOV_EXP_ECONOMIC_AFFAIRS_BE
+        - id: public_order
+          indicator: GOV_EXP_PUBLIC_ORDER_BE
+        - id: other_functions
+          remainder: true
+          label:
+            en: Other functions
+            fr: Autres fonctions
+            nl: Overige functies
+
+  # Label is neutral on purpose: spending - revenue is negative in every
+  # year this pipeline has loaded (a deficit), but the UI picks
+  # "deficit"/"surplus" wording from the computed sign (PR 2), never from
+  # this config.
+  - id: deficit
+    kind: difference
+    unit: meur
+    minuend: spending
+    subtrahend: revenue
+    label:
+      en: Budget balance
+      fr: Solde budgétaire
+      nl: Begrotingssaldo
+
+  # Anchors in priority order is NOT how ties/latest are picked -- the
+  # engine (src/analytics/live_counters.py) picks whichever anchor's own
+  # period ends LATER, annual EDP breaking a tie (docs/features/
+  # public_finance_live.md). Listed here only as the two eligible series.
+  - id: debt
+    kind: stock
+    unit: meur
+    anchors: [GOV_DEBT_MEUR_BE, GOV_DEBT_Q_MEUR_BE]
+    paced_by: deficit
+    label:
+      en: Government debt
+      fr: Dette publique
+      nl: Overheidsschuld
+
+placements:
+  macro_strip: [population, revenue, spending, deficit, debt]
+  macro_breakdowns: [revenue, spending]
+  home_strip: [debt, deficit]
