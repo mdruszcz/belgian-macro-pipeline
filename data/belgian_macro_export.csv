@@ -904,6 +904,42 @@ GFCF_PUBLIC_CY,GFCF — Public admin.,2022,0.0,A,pp_contribution,NBB,2026-09-05T
 GFCF_PUBLIC_CY,GFCF — Public admin.,2023,0.1,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 GFCF_PUBLIC_CY,GFCF — Public admin.,2024,0.4,P,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 GFCF_PUBLIC_CY,GFCF — Public admin.,2025,0.0,P,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2008,-3852.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2009,-18943.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2010,-15013.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2011,-16822.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2012,-16869.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2013,-12483.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2014,-12858.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2015,-10286.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2016,-10415.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2017,-3384.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2018,-4817.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2019,-9819.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2020,-41898.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2021,-27336.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2022,-19883.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2023,-24720.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2024,-27056.3,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_MEUR_BE,"General government net lending/borrowing (balance), Belgium",2025,-33220.7,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2008,-1.1,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2009,-5.4,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2010,-4.1,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2011,-4.4,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2012,-4.3,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2013,-3.2,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2014,-3.2,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2015,-2.5,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2016,-2.4,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2017,-0.8,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2018,-1.0,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2019,-2.0,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2020,-9.0,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2021,-5.4,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2022,-3.5,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2023,-4.1,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2024,-4.4,P,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_BALANCE_PCT_GDP_BE,"General government net lending/borrowing (balance), Belgium (% of GDP)",2025,-5.2,P,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
 GOV_CONSUMPTION_CY,Gov. consumption expenditure,2006,0.2,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 GOV_CONSUMPTION_CY,Gov. consumption expenditure,2007,0.4,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 GOV_CONSUMPTION_CY,Gov. consumption expenditure,2008,0.7,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
@@ -924,6 +960,463 @@ GOV_CONSUMPTION_CY,Gov. consumption expenditure,2022,0.7,A,pp_contribution,NBB,2
 GOV_CONSUMPTION_CY,Gov. consumption expenditure,2023,0.6,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 GOV_CONSUMPTION_CY,Gov. consumption expenditure,2024,0.4,P,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 GOV_CONSUMPTION_CY,Gov. consumption expenditure,2025,0.4,P,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2008,327722.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2009,347317.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2010,364352.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2011,389535.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2012,404898.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2013,414629.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2014,431863.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2015,439193.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2016,453193.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2017,455075.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2018,460209.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2019,468384.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2020,516438.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2021,550285.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2022,580354.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2023,617175.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2024,644198.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_MEUR_BE,"General government gross debt, Belgium",2025,692460.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2008,93.2,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2009,99.9,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2010,100.3,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2011,102.8,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2012,104.4,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2013,105.1,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2014,106.6,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2015,105.7,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2016,105.8,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2017,102.6,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2018,100.2,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2019,97.7,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2020,111.4,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2021,108.7,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2022,103.3,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2023,102.5,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2024,103.9,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_PCT_GDP_BE,"General government gross debt, Belgium (% of GDP)",2025,107.9,A,pct_of_gdp,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2008-Q1,314470.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2008-Q2,313634.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2008-Q3,319176.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2008-Q4,327723.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2009-Q1,346006.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2009-Q2,348347.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2009-Q3,353349.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2009-Q4,347318.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2010-Q1,364083.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2010-Q2,369249.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2010-Q3,368998.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2010-Q4,364352.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2011-Q1,381301.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2011-Q2,380323.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2011-Q3,386367.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2011-Q4,389536.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2012-Q1,404809.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2012-Q2,410858.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2012-Q3,410178.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2012-Q4,404898.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2013-Q1,424198.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2013-Q2,428227.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2013-Q3,425922.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2013-Q4,414630.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2014-Q1,435401.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2014-Q2,439170.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2014-Q3,439591.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2014-Q4,431864.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2015-Q1,450656.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2015-Q2,447151.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2015-Q3,447781.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2015-Q4,439193.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2016-Q1,454432.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2016-Q2,459662.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2016-Q3,460005.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2016-Q4,453193.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2017-Q1,462914.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2017-Q2,460888.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2017-Q3,467835.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2017-Q4,455076.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2018-Q1,470547.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2018-Q2,470771.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2018-Q3,471520.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2018-Q4,460210.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2019-Q1,478544.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2019-Q2,478193.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2019-Q3,481190.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2019-Q4,468385.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2020-Q1,492794.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2020-Q2,525073.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2020-Q3,516918.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2020-Q4,516438.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2021-Q1,538402.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2021-Q2,547907.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2021-Q3,549751.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2021-Q4,550285.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2022-Q1,563909.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2022-Q2,575484.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2022-Q3,576979.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2022-Q4,580354.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2023-Q1,601580.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2023-Q2,606094.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2023-Q3,625669.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2023-Q4,617175.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2024-Q1,639849.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2024-Q2,644302.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2024-Q3,644251.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2024-Q4,644199.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2025-Q1,662922.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2025-Q2,670217.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2025-Q3,680801.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2025-Q4,692460.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_DEBT_Q_MEUR_BE,"General government gross debt, quarterly, Belgium",2026-Q1,706581.0,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2008,178598.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2009,189621.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2010,195796.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2011,208413.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2012,218194.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2013,220598.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2014,224414.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2015,223895.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2016,228708.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2017,231699.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2018,241008.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2019,248119.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2020,271076.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2021,278017.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2022,294745.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2023,318050.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2024,335100.1,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXPENDITURE_BE,"General government total expenditure, Belgium",2025,347956.3,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2008,178599.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2009,189621.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2010,195796.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2011,208412.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2012,218194.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2013,220599.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2014,224413.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2015,223895.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2016,228709.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2017,231699.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2018,241008.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2019,248119.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2020,271075.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2021,278017.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2022,294710.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2023,318074.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_COFOG_TOTAL_BE,"Total general government expenditure by function (COFOG), Belgium",2024,335287.9,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2008,14390.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2009,14198.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2010,13782.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2011,14285.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2012,14643.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2013,14016.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2014,14054.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2015,13160.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2016,12700.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2017,11595.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2018,10902.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2019,10487.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2020,10041.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2021,9464.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2022,9454.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2023,12273.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEBT_TRANSACTIONS_BE,"General government expenditure on public debt transactions, Belgium",2024,14475.6,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2008,3730.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2009,3484.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2010,3529.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2011,3561.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2012,3574.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2013,3630.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2014,3530.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2015,3449.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2016,3457.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2017,3520.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2018,3481.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2019,3769.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2020,4138.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2021,4372.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2022,5418.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2023,5666.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_DEFENCE_BE,"General government expenditure on defence, Belgium",2024,7946.4,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2008,21425.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2009,23469.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2010,24799.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2011,28396.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2012,30143.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2013,27630.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2014,29685.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2015,28548.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2016,28811.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2017,28687.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2018,30644.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2019,31876.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2020,35834.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2021,35553.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2022,35658.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2023,39160.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_ECONOMIC_AFFAIRS_BE,"General government expenditure on economic affairs, Belgium",2024,39854.2,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2008,20132.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2009,21030.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2010,21910.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2011,23368.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2012,24166.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2013,25033.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2014,25393.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2015,26222.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2016,26798.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2017,27686.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2018,28526.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2019,29340.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2020,30244.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2021,31481.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2022,34822.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2023,37751.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_EDUCATION_BE,"General government expenditure on education, Belgium",2024,39283.6,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2008,7601.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2009,8350.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2010,8649.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2011,9205.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2012,9534.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2013,9178.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2014,9459.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2015,9460.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2016,9442.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2017,9656.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2018,9933.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2019,10405.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2020,10778.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2021,11060.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2022,12023.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2023,12747.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_FAMILY_BE,"General government expenditure on family and children, Belgium",2024,13508.8,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2008,25650.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2009,27150.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2010,28170.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2011,29087.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2012,30646.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2013,31443.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2014,32344.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2015,32576.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2016,32667.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2017,33553.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2018,34764.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2019,35752.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2020,39669.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2021,42484.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2022,43766.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2023,47001.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_HEALTH_BE,"General government expenditure on health, Belgium",2024,49579.9,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2008,26142.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2009,27610.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2010,29033.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2011,30637.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2012,32654.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2013,34926.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2014,35990.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2015,37069.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2016,38619.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2017,40630.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2018,42467.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2019,44755.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2020,46770.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2021,48387.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2022,53740.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2023,59078.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_OLD_AGE_BE,"General government expenditure on old age, Belgium",2024,62983.9,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2008,6258.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2009,6432.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2010,6592.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2011,6856.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2012,7075.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2013,7220.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2014,7278.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2015,7041.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2016,7247.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2017,7469.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2018,7868.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2019,7979.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2020,8220.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2021,8586.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2022,9492.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2023,10177.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_PUBLIC_ORDER_BE,"General government expenditure on public order and safety, Belgium",2024,10647.7,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2008,8838.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2009,9460.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2010,9742.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2011,10239.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2012,10972.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2013,11985.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2014,12466.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2015,13108.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2016,13876.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2017,14461.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2018,15389.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2019,16393.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2020,17222.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2021,18519.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2022,20318.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2023,22169.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SICKNESS_DISABILITY_BE,"General government expenditure on sickness and disability, Belgium",2024,24254.6,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2008,6625.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2009,6863.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2010,6963.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2011,7165.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2012,7359.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2013,7459.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2014,7353.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2015,7380.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2016,7416.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2017,7454.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2018,7487.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2019,7500.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2020,7538.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2021,7538.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2022,8184.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2023,8615.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_SURVIVORS_BE,"General government expenditure on survivors, Belgium",2024,8808.3,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2008,7894.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2009,9156.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2010,9082.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2011,8950.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2012,9160.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2013,9462.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2014,8981.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2015,8164.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2016,7809.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2017,7223.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2018,6758.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2019,6266.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2020,14164.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2021,10308.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2022,6693.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2023,6322.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_EXP_UNEMPLOYMENT_BE,"General government expenditure on unemployment, Belgium",2024,6574.9,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2008,174745.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2009,170677.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2010,180783.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2011,191591.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2012,201324.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2013,208114.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2014,211555.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2015,213609.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2016,218293.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2017,228314.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2018,236191.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2019,238300.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2020,229177.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2021,250681.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2022,274862.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2023,293330.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2024,308044.6,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_REVENUE_BE,"General government total revenue, Belgium",2025,314736.4,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2008,11590.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2009,8107.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2010,9248.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2011,10670.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2012,11623.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2013,12192.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2014,12582.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2015,13643.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2016,14636.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2017,18094.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2018,19788.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2019,17728.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2020,15001.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2021,19019.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2022,21681.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2023,23264.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2024,27026.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_CIT_BE,"Corporate income tax receipts, Belgium",2025,26308.0,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2008,6905.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2009,6843.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2010,7470.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2011,7865.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2012,8169.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2013,8576.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2014,8861.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2015,9320.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2016,10205.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2017,10629.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2018,10974.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2019,10931.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2020,10020.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2021,11000.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2022,10061.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2023,10876.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2024,11433.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_EXCISE_BE,"Excise duty receipts, Belgium",2025,11186.1,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2008,42999.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2009,41501.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2010,43822.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2011,46367.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2012,48164.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2013,50767.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2014,51752.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2015,51493.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2016,51064.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2017,52860.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2018,54131.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2019,53857.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2020,54002.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2021,56806.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2022,65901.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2023,69524.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2024,73712.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_PIT_BE,"Personal income tax receipts, Belgium",2025,75791.1,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2008,56169.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2009,57574.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2010,58920.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2011,61911.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2012,64488.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2013,66143.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2014,66892.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2015,68119.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2016,67725.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2017,69774.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2018,71356.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2019,73674.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2020,73100.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2021,76662.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2022,83522.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2023,90443.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2024,94416.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SOCIAL_CONTRIB_BE,"Net social contributions received, Belgium",2025,97512.6,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2008,160361.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2009,155959.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2010,164487.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2011,173556.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2012,182183.9,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2013,188559.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2014,191713.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2015,194364.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2016,197047.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2017,206251.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2018,213323.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2019,215035.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2020,207320.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2021,226593.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2022,247507.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2023,263265.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2024,275996.6,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_SSC_TOTAL_BE,"Total tax and social contribution receipts, Belgium",2025,282517.4,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2008,24746.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2009,24390.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2010,25628.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2011,26504.4,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2012,27420.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2013,27738.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2014,27804.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2015,27951.5,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2016,29179.2,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2017,30254.7,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2018,31545.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2019,32181.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2020,29537.8,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2021,34713.1,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2022,36744.0,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2023,37173.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2024,37832.3,A,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
+GOV_TAX_VAT_BE,"Value added tax receipts, Belgium",2025,39796.6,P,meur,Eurostat,2026-10-03T09:34:55.699694+00:00
 HICP,HICP (Harmonised Inflation),2010-01,0.8,A,percent_yy,NBB,2026-09-05T12:48:35.250844+00:00
 HICP,HICP (Harmonised Inflation),2010-02,0.8,A,percent_yy,NBB,2026-09-05T12:48:35.250844+00:00
 HICP,HICP (Harmonised Inflation),2010-03,1.9,A,percent_yy,NBB,2026-09-05T12:48:35.250844+00:00
