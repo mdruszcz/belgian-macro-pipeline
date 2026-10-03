@@ -51,6 +51,11 @@
         "indicator": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
         "remainder": { "const": true },
         "remainder_of": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "plus": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" }
+        },
         "covers": {
           "type": "array",
           "minItems": 1,

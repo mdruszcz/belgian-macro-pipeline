@@ -273,6 +273,13 @@ _NAMED_TAXES = {
     "excise": Decimal("11186.1"),
 }
 _TAXAG_TOTAL = Decimal("282517.4")
+# D.995 fix (fix round, 2026-10-03): GOV_TAX_SSC_TOTAL_BE's own na_item nets
+# D.995 (taxes/SSC assessed but unlikely to be collected) out; TR does not.
+# The GROSS tax total other_taxes computes against is taxag_total + D995,
+# never taxag_total alone -- real fetched 2025 D995 value (live-checked,
+# docs/data_catalog.md).
+_D995_2025 = Decimal("895.2")
+_GROSS_TAXAG_TOTAL = _TAXAG_TOTAL + _D995_2025  # 282517.4 + 895.2 = 283412.6
 _TR_2025 = Decimal("314736.4")
 _TOLERANCE = Decimal("0.5")
 
@@ -292,21 +299,29 @@ _NAMED_COFOG = {
 _COFOG_TOTAL = Decimal("335287.9")
 
 
-def test_taxag_total_does_not_exceed_total_revenue_for_the_breakdown_year():
-    # Sanity the engine's two-level revenue breakdown depends on: taxag's
-    # own total (282,517.4) must not exceed TR (314,736.4), or
-    # "non_tax_revenue" would be negative beyond what clamping can absorb.
-    assert _TAXAG_TOTAL <= _TR_2025
+def test_gross_taxag_total_does_not_exceed_total_revenue_for_the_breakdown_year():
+    # Sanity the engine's two-level revenue breakdown depends on: the GROSS
+    # taxag total (282,517.4 + 895.2 = 283,412.6) must not exceed TR
+    # (314,736.4), or "non_tax_revenue" would be negative beyond what
+    # clamping can absorb. This is the same compute_breakdown clamp/refuse
+    # behaviour the handoff calls "the whole >= sum of parts / taxag <= TR
+    # sanity check" -- now asserted against the gross total, not the
+    # narrower one that used to silently absorb D.995.
+    assert _GROSS_TAXAG_TOTAL <= _TR_2025
 
 
 def test_revenue_breakdown_other_taxes_and_non_tax_revenue():
-    # other_taxes = taxag_total - sum(5 named) = 282517.4 - 250594.4 = 31923.0
-    # (sum of named: 97512.6+75791.1+26308.0+39796.6+11186.1 = 250,594.4)
-    inner = compute_breakdown(_TAXAG_TOTAL, _NAMED_TAXES, "other_taxes", _TOLERANCE)
-    assert inner["other_taxes"] == Decimal("31923.0")
-    # non_tax_revenue = TR - taxag_total = 314736.4 - 282517.4 = 32219.0
+    # other_taxes = GROSS taxag total - sum(5 named)
+    #             = 283412.6 - 250594.4 = 32818.2
+    # (gross taxag total: 282517.4 + 895.2 = 283,412.6 -- GOV_TAX_SSC_TOTAL_BE
+    # nets D.995 out, so it must be added back here, D.995 fix, fix round
+    # 2026-10-03; sum of named: 97512.6+75791.1+26308.0+39796.6+11186.1 =
+    # 250,594.4)
+    inner = compute_breakdown(_GROSS_TAXAG_TOTAL, _NAMED_TAXES, "other_taxes", _TOLERANCE)
+    assert inner["other_taxes"] == Decimal("32818.2")
+    # non_tax_revenue = TR - GROSS taxag total = 314736.4 - 283412.6 = 31323.8
     outer = compute_breakdown(_TR_2025, inner, "non_tax_revenue", _TOLERANCE)
-    assert outer["non_tax_revenue"] == Decimal("32219.0")
+    assert outer["non_tax_revenue"] == Decimal("31323.8")
     assert sum(outer.values()) == _TR_2025
 
     shares = shares_from_breakdown(outer, _TR_2025)

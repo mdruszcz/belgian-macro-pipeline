@@ -96,10 +96,12 @@ def _annual_series(national: dict, indicator_id: str) -> dict[int, float]:
     return out
 
 
-def _basis_entry(national: dict, indicator_id: str, period: str) -> dict:
+def _basis_entry(
+    national: dict, indicator_id: str, period: str, *, role: str | None = None
+) -> dict:
     entry = national["indicators"][indicator_id]
     cell = entry["periods"][period]
-    return {
+    out = {
         "indicator": indicator_id,
         "names": entry.get("names"),
         "period": period,
@@ -109,6 +111,14 @@ def _basis_entry(national: dict, indicator_id: str, period: str) -> dict:
         "source": entry.get("source"),
         "updated": entry.get("updated"),
     }
+    # `role` distinguishes WHY a basis row is cited -- e.g. debt's own
+    # anchor value vs. the series that set its post-anchor pace -- so a
+    # reader (or PR 2's UI) never has to guess which basis row is which.
+    # Omitted (not even "null") when the caller has nothing to disambiguate,
+    # same shape every existing basis row already had before this fix.
+    if role is not None:
+        out["role"] = role
+    return out
 
 
 def _period_sort_key(period: str) -> int:
@@ -197,7 +207,10 @@ def _breakdown_entry(
     top_remainder = next(p for p in parts_cfg if p.get("remainder") is True)
 
     required_ids = (
-        [within_id] + [p["indicator"] for p in named_parts] + [p["remainder_of"] for p in nested]
+        [within_id]
+        + [p["indicator"] for p in named_parts]
+        + [p["remainder_of"] for p in nested]
+        + [extra for p in nested for extra in p.get("plus", [])]
     )
     series_by_id = {i: _annual_series(national, i) for i in required_ids}
     common_years = set.intersection(*(set(s) for s in series_by_id.values()))
@@ -210,7 +223,15 @@ def _breakdown_entry(
         p["id"]: Decimal(str(series_by_id[p["indicator"]][breakdown_year])) for p in named_parts
     }
     for part in nested:
-        whole = Decimal(str(series_by_id[part["remainder_of"]][breakdown_year]))
+        # D.995 fix: `whole` is `remainder_of`'s own value PLUS every series
+        # named in `plus` (e.g. GOV_TAX_UNCOLLECTED_BE), never just
+        # `remainder_of` alone -- GOV_TAX_SSC_TOTAL_BE nets D.995 out, TR
+        # does not, so the gross total other_taxes computes against must add
+        # it back (docs/features/public_finance_live.md, docs/data_catalog.md).
+        whole = Decimal(str(series_by_id[part["remainder_of"]][breakdown_year])) + sum(
+            (Decimal(str(series_by_id[extra][breakdown_year])) for extra in part.get("plus", [])),
+            start=Decimal(0),
+        )
         covered = {pid: resolved[pid] for pid in part["covers"]}
         result = compute_breakdown(whole, covered, part["id"], tolerance)
         if isinstance(result, Unavailable):
@@ -255,6 +276,13 @@ def _breakdown_entry(
             names = part_cfg["label"]
             source_id = part_cfg.get("remainder_of")
             basis = [_basis_entry(national, source_id, str(breakdown_year))] if source_id else []
+            # D.995 fix: a nested remainder's `whole` is remainder_of PLUS
+            # every `plus` series -- its basis names all of them, not just
+            # remainder_of, so a reader can see exactly what was added back.
+            basis += [
+                _basis_entry(national, extra, str(breakdown_year))
+                for extra in part_cfg.get("plus", [])
+            ]
         parts_out.append(
             {
                 "id": pid,
@@ -280,16 +308,30 @@ def _breakdown_entry(
 
 
 def _difference_entry(
-    counter: dict, segments_by_id: dict[str, list | None]
+    counter: dict,
+    segments_by_id: dict[str, list | None],
+    national: dict,
+    minuend_indicator: str,
+    subtrahend_indicator: str,
+    latest_year: int,
 ) -> tuple[dict, list | None]:
     minuend = segments_by_id.get(counter["minuend"])
     subtrahend = segments_by_id.get(counter["subtrahend"])
+    # A `difference` counter has no series lookup of its own -- its basis
+    # names the two flow counters' own latest-year figures it is computed
+    # from (TE and TR for `deficit`), so a reader always sees what a
+    # "-33,220.7" deficit figure traces back to, same as every other
+    # counter already does for its own basis.
+    basis = [
+        _basis_entry(national, minuend_indicator, str(latest_year), role="minuend"),
+        _basis_entry(national, subtrahend_indicator, str(latest_year), role="subtrahend"),
+    ]
     entry = {
         "id": counter["id"],
         "kind": "difference",
         "unit": counter["unit"],
         "label": counter["label"],
-        "basis": [],
+        "basis": basis,
     }
     if minuend is None or subtrahend is None:
         entry["state"] = "unavailable"
@@ -409,7 +451,15 @@ def _debt_entry(
         "value"
     ]
     anchor_value_eur = Decimal(str(anchor_value_native)) * scale
-    entry["basis"] = [_basis_entry(national, anchor_indicator, anchor_period)]
+    # Basis names BOTH roles a reader needs to trust this figure: the
+    # anchor itself (where the line starts) and, if the anchor is already
+    # in the past relative to latest_year, the TR/TE pair whose difference
+    # sets its pace from the anchor onward (fix round, 2026-10-03 -- debt's
+    # basis previously named only the anchor, docs/features/
+    # public_finance_live.md). When the anchor year is itself beyond
+    # latest_year (not the case today, but config-shape allows it), no
+    # official TR/TE pace year applies yet, so only the anchor is cited.
+    entry["basis"] = [_basis_entry(national, anchor_indicator, anchor_period, role="anchor")]
 
     if anchor_ms >= horizon_end_ms:
         entry["state"] = "unavailable"
@@ -417,6 +467,19 @@ def _debt_entry(
         return entry
 
     anchor_year = datetime.fromtimestamp(anchor_ms / 1000, tz=CET).year
+    # If the anchor year is already official (<= latest_year), the TR/TE
+    # pair whose difference sets debt's pace from the anchor onward is
+    # itself latest_year's own official figure -- cite it. When the anchor
+    # is itself beyond latest_year (not the case today, but config-shape
+    # allows it), no official TR/TE pace year applies yet, so only the
+    # anchor is cited.
+    if anchor_year <= latest_year:
+        entry["basis"].append(
+            _basis_entry(national, spending_indicator, str(latest_year), role="pace_minuend")
+        )
+        entry["basis"].append(
+            _basis_entry(national, revenue_indicator, str(latest_year), role="pace_subtrahend")
+        )
 
     revenue_series = _annual_series(national, revenue_indicator)
     spending_series = _annual_series(national, spending_indicator)
@@ -497,8 +560,16 @@ def build_payload(national: dict, aggregates: dict, metadata: dict, config: dict
             counters_out.append(entry)
             _note_updated(entry)
         elif kind == "difference":
-            entry, segments = _difference_entry(counter, flow_segments_by_id)
+            entry, segments = _difference_entry(
+                counter,
+                flow_segments_by_id,
+                national,
+                minuend_indicator=by_id[counter["minuend"]]["indicator"],
+                subtrahend_indicator=by_id[counter["subtrahend"]]["indicator"],
+                latest_year=latest_year,
+            )
             counters_out.append(entry)
+            _note_updated(entry)
             if entry["state"] == "available":
                 for offset, seg in enumerate(segments):
                     deficit_pace_by_year[latest_year + 1 + offset] = seg.v1

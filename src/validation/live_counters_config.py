@@ -72,6 +72,35 @@ def load_and_validate_live_counters(path: Path) -> dict:
                         f"{path.name}: counter {counter['id']!r} part {part['id']!r} "
                         f"covers unknown sibling part {covered!r}"
                     )
+            # `plus` (D.995 fix, docs/features/public_finance_live.md) names
+            # extra indicator(s) ADDED to `remainder_of`'s own value to build
+            # a nested remainder's `whole` (scripts/export_live_counters.py's
+            # _breakdown_entry) -- it only means anything next to a
+            # `remainder_of` part. The schema's `oneOf` does not forbid it on
+            # a plain `indicator` part or the top-level `remainder` part (it
+            # only requires ONE of the three shapes' own keys), so that gap
+            # is closed explicitly here, same split as every other
+            # cross-field check in this module.
+            plus = part.get("plus")
+            if plus is not None:
+                if "remainder_of" not in part:
+                    raise LiveCounterError(
+                        f"{path.name}: counter {counter['id']!r} part {part['id']!r} "
+                        f"has `plus` without `remainder_of` -- `plus` only extends a "
+                        f"nested remainder's own whole"
+                    )
+                if len(plus) != len(set(plus)):
+                    dupes = sorted({i for i in plus if plus.count(i) > 1})
+                    raise LiveCounterError(
+                        f"{path.name}: counter {counter['id']!r} part {part['id']!r} "
+                        f"has duplicate `plus` indicator(s) {dupes}"
+                    )
+                if part["remainder_of"] in plus:
+                    raise LiveCounterError(
+                        f"{path.name}: counter {counter['id']!r} part {part['id']!r} "
+                        f"names its own `remainder_of` ({part['remainder_of']!r}) again "
+                        f"inside `plus`"
+                    )
 
     # A SEPARATE loop, deliberately -- `deficit` has no `breakdown` at all,
     # so gating this check behind the loop above's `if not breakdown:
