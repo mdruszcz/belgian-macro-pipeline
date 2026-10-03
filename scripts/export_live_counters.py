@@ -452,13 +452,10 @@ def _debt_entry(
     ]
     anchor_value_eur = Decimal(str(anchor_value_native)) * scale
     # Basis names BOTH roles a reader needs to trust this figure: the
-    # anchor itself (where the line starts) and, if the anchor is already
-    # in the past relative to latest_year, the TR/TE pair whose difference
-    # sets its pace from the anchor onward (fix round, 2026-10-03 -- debt's
-    # basis previously named only the anchor, docs/features/
-    # public_finance_live.md). When the anchor year is itself beyond
-    # latest_year (not the case today, but config-shape allows it), no
-    # official TR/TE pace year applies yet, so only the anchor is cited.
+    # Basis names BOTH roles a reader needs to trust this figure: the
+    # anchor itself (where the line starts) and the series that sets its
+    # pace from the anchor onward (fix round, 2026-10-03 -- debt's basis
+    # previously named only the anchor, docs/features/public_finance_live.md).
     entry["basis"] = [_basis_entry(national, anchor_indicator, anchor_period, role="anchor")]
 
     if anchor_ms >= horizon_end_ms:
@@ -468,11 +465,15 @@ def _debt_entry(
 
     anchor_year = datetime.fromtimestamp(anchor_ms / 1000, tz=CET).year
     # If the anchor year is already official (<= latest_year), the TR/TE
-    # pair whose difference sets debt's pace from the anchor onward is
-    # itself latest_year's own official figure -- cite it. When the anchor
-    # is itself beyond latest_year (not the case today, but config-shape
-    # allows it), no official TR/TE pace year applies yet, so only the
-    # anchor is cited.
+    # pair whose difference sets debt's pace for that year IS itself
+    # latest_year's own official figure -- cite it directly. Every pace
+    # year after that (including every year today's anchor is itself
+    # beyond latest_year, e.g. a 2026-Q1 anchor against a 2025 latest_year)
+    # uses the already-computed, PROJECTED `deficit` counter's own segment
+    # instead -- citing TR/TE there directly would overstate precision
+    # (that pace is a trend extrapolation, not an official figure), so the
+    # sibling counter itself is named instead: a reader follows `deficit`'s
+    # own basis for ITS source citation one level down.
     if anchor_year <= latest_year:
         entry["basis"].append(
             _basis_entry(national, spending_indicator, str(latest_year), role="pace_minuend")
@@ -480,6 +481,16 @@ def _debt_entry(
         entry["basis"].append(
             _basis_entry(national, revenue_indicator, str(latest_year), role="pace_subtrahend")
         )
+    # Every pace year beyond latest_year (always true when the anchor
+    # itself is already beyond latest_year, e.g. a 2026-Q1 anchor against a
+    # 2025 latest_year; otherwise true for the later part of the horizon)
+    # uses the already-computed, PROJECTED `deficit` counter's own segment
+    # -- cited structurally by counter id, since a reader follows
+    # `deficit`'s own basis for the TR/TE pair behind THAT trend
+    # extrapolation one level down, rather than this entry re-citing TR/TE
+    # directly and overstating the pace's precision.
+    if horizon_end_ms > year_bounds(max(anchor_year, latest_year))[1]:
+        entry["basis"].append({"counter": counter["paced_by"], "role": "pace_counter"})
 
     revenue_series = _annual_series(national, revenue_indicator)
     spending_series = _annual_series(national, spending_indicator)

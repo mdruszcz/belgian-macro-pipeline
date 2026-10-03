@@ -125,10 +125,16 @@ changed file.
   residual folded in. Full arithmetic in `docs/data_catalog.md`'s public-finance section.
 - **`deficit`'s own `basis`** now names the two flow counters (spending/revenue, i.e.
   TE/TR) it is computed from, each tagged `role: "minuend"`/`"subtrahend"`. **`debt`'s
-  `basis`** names its anchor series (`role: "anchor"`) and, when the anchor year is
-  already official, the TR/TE pair setting its post-anchor pace (`role:
-  "pace_minuend"`/`"pace_subtrahend"`) -- both were empty/anchor-only gaps the audit
-  flagged (P3), now filled so PR 2's UI always has a source citation to show.
+  `basis`** names its anchor series (`role: "anchor"`); when the anchor year is already
+  official, it also names the TR/TE pair setting that year's own pace (`role:
+  "pace_minuend"`/`"pace_subtrahend"`); for every pace year beyond `latest_year` (today,
+  that is every year -- the 2026-Q1 anchor is already past the 2025 latest_year), the
+  pace is `deficit`'s own PROJECTED segment, cited structurally by counter id
+  (`{"counter": "deficit", "role": "pace_counter"}`) rather than re-citing TR/TE
+  directly, which would overstate a trend extrapolation's precision -- a reader follows
+  `deficit`'s own basis one level down for ITS TR/TE citation. Both were empty/
+  anchor-only gaps the audit flagged (P3), now filled so PR 2's UI always has a source
+  citation to show.
 - **The top-level `valid_from_ms`/`valid_until_ms` are only an envelope** (min/max
   across every counter's own segment bounds), not each counter's own window -- `debt`
   in particular starts at its own quarterly anchor, not the envelope's 1 January. PR 2's
