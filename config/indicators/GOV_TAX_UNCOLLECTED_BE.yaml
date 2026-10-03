@@ -1,0 +1,26 @@
+id: GOV_TAX_UNCOLLECTED_BE
+name:
+  en: Taxes and social contributions assessed but unlikely to be collected, Belgium
+  fr: Impôts et cotisations sociales évalués mais peu susceptibles d'être perçus, Belgique
+  nl: Belastingen en sociale bijdragen die zijn vastgesteld maar onwaarschijnlijk te innen zijn, België
+definition:
+  en: "D.995, Eurostat ESA 2010 memo item: Belgian general government (S13) capital transfer representing taxes and net social contributions assessed as receivable but unlikely to ever be collected, in euro."
+  fr: "D.995, poste pour mémoire ESA 2010 d'Eurostat : transfert en capital des administrations publiques belges (S13) représentant les impôts et cotisations sociales nettes évalués comme à recevoir mais peu susceptibles d'être jamais perçus, en euros."
+  nl: "D.995, ESA 2010-memoposten van Eurostat: kapitaaloverdracht van de Belgische overheid (S13) die belastingen en netto sociale bijdragen voorstelt die als te ontvangen zijn vastgesteld maar waarschijnlijk nooit zullen worden geïnd, in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) D.995 (na_item D995, million EUR) -- the memo item GOV_TAX_SSC_TOTAL_BE's own na_item (D2_D5_D91_D61_M_D995) nets OUT of taxes/social-contribution receipts. Added 2026-10-03 (maintainer-approved, docs/data_catalog.md, the 26th indicator in that batch) to fix a misallocation the independent audit found in the public-finance live counter (docs/features/public_finance_live.md): GOV_REVENUE_BE (TR) is NOT net of D.995, so the revenue breakdown's non_tax_revenue remainder (= TR - taxag_total) was silently absorbing this write-off (895.2 M EUR for 2025) as if it were ordinary non-tax revenue. The gross tax total used by config/live_counters.yaml's revenue breakdown is GOV_TAX_SSC_TOTAL_BE + this series; live-checked 2026-10-03 against the real Eurostat API (geo=BE, sector=S13, unit=MIO_EUR) that every year since 2008 carries only OBS_FLAG 'b' or 'p' -- never 'm' (unlike the narrower D995B/D/F/FE/FN/FS/G sub-items GOV_TAX_SSC_TOTAL_BE's own description already excludes for that reason)."
+fetch:
+  dataset: gov_10a_taxag
+  filters:
+    na_item: D995
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

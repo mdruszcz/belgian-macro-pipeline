@@ -1,0 +1,26 @@
+id: GOV_BALANCE_PCT_GDP_BE
+name:
+  en: General government net lending/borrowing (balance), Belgium (% of GDP)
+  fr: Capacité/besoin de financement des administrations publiques (solde), Belgique (% du PIB)
+  nl: Vorderingenoverschot/-tekort van de overheid (saldo), België (% van het bbp)
+definition:
+  en: "Belgian general government budget balance as a share of GDP."
+  fr: "Solde budgétaire des administrations publiques belges, en pourcentage du PIB."
+  nl: "Begrotingssaldo van de Belgische overheid, als aandeel van het bbp."
+unit: pct_of_gdp
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: higher_is_better
+description:
+  en: "Belgian general government (S13) net lending/borrowing (na_item B9), percentage of GDP -- the Belgium-only point of the series GOV_BALANCE_EUROPE also tracks. Unit deliberately does not start with \"percent\" -- matches GOV_BALANCE_EUROPE's own convention (the percent_bounded validation rule fails above 100, and this ratio is signed)."
+fetch:
+  dataset: gov_10a_main
+  filters:
+    na_item: B9
+    sector: S13
+    unit: PC_GDP
+    geo: BE
+  since: "2008"
+display: null

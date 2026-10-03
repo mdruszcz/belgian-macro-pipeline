@@ -1,0 +1,26 @@
+id: GOV_DEBT_Q_MEUR_BE
+name:
+  en: General government gross debt, quarterly, Belgium
+  fr: Dette brute des administrations publiques, trimestrielle, Belgique
+  nl: Brutoschuld van de overheid, per kwartaal, België
+definition:
+  en: "Quarterly Belgian general government consolidated gross debt, in euro."
+  fr: "Dette publique brute consolidée des administrations publiques belges, trimestrielle, en euros."
+  nl: "Kwartaalcijfer van de geconsolideerde brutoschuld van de Belgische overheid, in euro."
+unit: meur
+frequency: Q
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: "Belgian general government (S13) consolidated gross debt (na_item GD), million EUR, quarterly -- OVERLAPS GOV_DEBT_MEUR_BE conceptually (same underlying concept, different cadence -- this is quarterly, GOV_DEBT_MEUR_BE is annual EDP). Both kept, deliberately, as different ids, same convention as GOV_DEBT_QUARTERLY_EUROPE vs GOV_DEBT_EUROPE. The debt counter (docs/features/public_finance_live.md) anchors on whichever of the two has the latest period end."
+fetch:
+  dataset: gov_10q_ggdebt
+  filters:
+    na_item: GD
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

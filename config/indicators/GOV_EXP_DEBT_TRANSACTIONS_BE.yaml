@@ -1,0 +1,27 @@
+id: GOV_EXP_DEBT_TRANSACTIONS_BE
+name:
+  en: General government expenditure on public debt transactions, Belgium
+  fr: Dépenses publiques liées aux opérations de la dette publique, Belgique
+  nl: Overheidsuitgaven voor verrichtingen op de overheidsschuld, België
+definition:
+  en: "Belgian general government expenditure on public debt transactions (COFOG function GF0107), in euro."
+  fr: "Dépenses des administrations publiques belges liées aux opérations de la dette publique (fonction COFOG GF0107), en euros."
+  nl: "Uitgaven van de Belgische overheid voor verrichtingen op de overheidsschuld (COFOG-functie GF0107), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) expenditure, COFOG function GF0107 (public debt transactions, within general public services), million EUR -- one named part of the spending breakdown (docs/features/public_finance_live.md). Labelled \"public debt transactions\" deliberately, NOT \"interest\": that is the COFOG function's own name, and this batch does not assert it is interest alone without checking the function's full coverage."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: GF0107
+  since: "2008"
+display: null

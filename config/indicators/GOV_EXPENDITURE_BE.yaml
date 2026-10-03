@@ -1,0 +1,26 @@
+id: GOV_EXPENDITURE_BE
+name:
+  en: General government total expenditure, Belgium
+  fr: Dépenses totales des administrations publiques, Belgique
+  nl: Totale overheidsuitgaven, België
+definition:
+  en: "Total expenditure of Belgian general government (S13), in euro, current prices."
+  fr: "Dépenses totales des administrations publiques belges (S13), en euros, prix courants."
+  nl: "Totale uitgaven van de Belgische overheid (S13), in euro, lopende prijzen."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) total expenditure (na_item TE), million EUR current prices. Base series for the spending public-finance counter (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_main
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

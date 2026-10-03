@@ -1,0 +1,27 @@
+id: GOV_EXP_COFOG_TOTAL_BE
+name:
+  en: Total general government expenditure by function (COFOG), Belgium
+  fr: Dépenses totales des administrations publiques par fonction (COFOG), Belgique
+  nl: Totale overheidsuitgaven per functie (COFOG), België
+definition:
+  en: "Total Belgian general government expenditure by function (COFOG), in euro."
+  fr: "Dépenses totales des administrations publiques belges par fonction (COFOG), en euros."
+  nl: "Totale uitgaven van de Belgische overheid per functie (COFOG), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) total expenditure (na_item TE), COFOG classification (cofog99 TOTAL), million EUR. The spending-breakdown whole for the public-finance counter's spending parts (docs/features/public_finance_live.md): the 11 named functions + \"other functions\" sum to this. NOTE: this COFOG total for a given year is NOT the same figure as GOV_EXPENDITURE_BE (na_item TE) for that same year -- different dataset, different release date (2024 COFOG TOTAL 335287.9 vs 2024 gov_10a_main TE 335100.1, live-verified 2026-10-03) -- so spending shares are always computed within this one dataset, never mixed with GOV_EXPENDITURE_BE."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: TOTAL
+  since: "2008"
+display: null

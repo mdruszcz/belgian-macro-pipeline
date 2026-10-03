@@ -723,6 +723,10 @@ I18N.STRINGS = {
     // and charges medians, the first "€ per month" unit on the site.
     unitEurPerMonth: '€ / month',
     unitMeurClv2010: '€ million (2010 volumes)',
+    // Public-finance batch (docs/features/public_finance_live.md): a
+    // million-euro LEVEL at current prices -- see unitMeurClv2010 above for
+    // the (different) volume measure.
+    unitMeur: '€ million',
     unitIndex0100: 'score 0–100',
     europeCompareFilterLabel: 'Charts shown',
     europeCompareFilterAll: 'All',
@@ -1499,6 +1503,7 @@ I18N.STRINGS = {
     // du lot des baux SPF Finances, la première unité "€ par mois" du site.
     unitEurPerMonth: '€ / mois',
     unitMeurClv2010: 'millions € (volumes 2010)',
+    unitMeur: 'millions €',
     unitIndex0100: 'score 0–100',
     europeCompareFilterLabel: 'Graphiques affichés',
     europeCompareFilterAll: 'Tous',
@@ -2255,6 +2260,7 @@ I18N.STRINGS = {
     // site.
     unitEurPerMonth: '€ / maand',
     unitMeurClv2010: 'miljoen € (volumes 2010)',
+    unitMeur: 'miljoen €',
     unitIndex0100: 'score 0–100',
     europeCompareFilterLabel: 'Getoonde grafieken',
     europeCompareFilterAll: 'Alle',

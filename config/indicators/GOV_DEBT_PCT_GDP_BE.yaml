@@ -1,0 +1,26 @@
+id: GOV_DEBT_PCT_GDP_BE
+name:
+  en: General government gross debt, Belgium (% of GDP)
+  fr: Dette brute des administrations publiques, Belgique (% du PIB)
+  nl: Brutoschuld van de overheid, België (% van het bbp)
+definition:
+  en: "Belgian general government consolidated gross debt as a share of GDP."
+  fr: "Dette publique brute consolidée des administrations publiques belges, en pourcentage du PIB."
+  nl: "Geconsolideerde brutoschuld van de Belgische overheid, als aandeel van het bbp."
+unit: pct_of_gdp
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: lower_is_better
+description:
+  en: "Belgian general government (S13) consolidated gross debt (na_item GD, EDP table), percentage of GDP -- the Belgium-only point of the series GOV_DEBT_EUROPE also tracks. Unit deliberately does not start with \"percent\" -- see GOV_DEBT_EUROPE's own note on the percent_bounded rule."
+fetch:
+  dataset: gov_10dd_edpt1
+  filters:
+    na_item: GD
+    sector: S13
+    unit: PC_GDP
+    geo: BE
+  since: "2008"
+display: null

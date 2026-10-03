@@ -93,6 +93,21 @@ explorer_payloads = script_asset(
     kinds={"json"},
     description="explorer.html's per-indicator shards (scripts/export_explorer_payloads.py).",
 )
+# Simulated public-finance live counters (docs/features/public_finance_live.md,
+# ADR 0016). Reads ONLY public/data/national.json + aggregates.json +
+# metadata/indicators.json -- all three written by site_payloads, hence the
+# one real dependency -- and config/live_counters.yaml. No {db} involved,
+# same shape as europe_countries_payloads below.
+live_counters_payloads = script_asset(
+    "live_counters_payloads",
+    group="website",
+    deps=["site_payloads"],
+    kinds={"json"},
+    description=(
+        "public/data/live_counters.json -- segment parameters for the simulated "
+        "public-finance counters (scripts/export_live_counters.py)."
+    ),
+)
 # Europe countries batch (docs/features/europe_countries.md): the macro.html
 # Europe panel's country map + "Comparaison internationale" payloads
 # (scripts/export_europe_countries.py). Reads only the committed
@@ -148,6 +163,7 @@ ASSETS = [
     indicator_metadata_json,
     site_payloads,
     explorer_payloads,
+    live_counters_payloads,
     europe_countries_payloads,
     local_pages,
     page_documents,

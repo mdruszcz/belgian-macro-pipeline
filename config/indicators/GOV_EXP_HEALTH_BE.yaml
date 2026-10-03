@@ -1,0 +1,27 @@
+id: GOV_EXP_HEALTH_BE
+name:
+  en: General government expenditure on health, Belgium
+  fr: Dépenses publiques de santé, Belgique
+  nl: Overheidsuitgaven voor gezondheidszorg, België
+definition:
+  en: "Belgian general government expenditure on health (COFOG function GF07), in euro."
+  fr: "Dépenses des administrations publiques belges liées à la santé (fonction COFOG GF07), en euros."
+  nl: "Uitgaven van de Belgische overheid voor gezondheidszorg (COFOG-functie GF07), in euro."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) expenditure, COFOG function GF07 (health), million EUR -- one named part of the spending breakdown (docs/features/public_finance_live.md). Overlaps GOV_EXPENDITURE_HEALTH_EUROPE conceptually (same function, that one is percent of GDP, multi-country)."
+fetch:
+  dataset: gov_10a_exp
+  filters:
+    na_item: TE
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+    cofog99: GF07
+  since: "2008"
+display: null

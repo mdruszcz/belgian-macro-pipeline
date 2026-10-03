@@ -1,0 +1,26 @@
+id: GOV_REVENUE_BE
+name:
+  en: General government total revenue, Belgium
+  fr: Recettes totales des administrations publiques, Belgique
+  nl: Totale overheidsontvangsten, België
+definition:
+  en: "Total revenue of Belgian general government (S13), in euro, current prices."
+  fr: "Recettes totales des administrations publiques belges (S13), en euros, prix courants."
+  nl: "Totale ontvangsten van de Belgische overheid (S13), in euro, lopende prijzen."
+unit: meur
+frequency: A
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: "Belgian general government (S13) total revenue (na_item TR), million EUR current prices. Base series for the revenue public-finance counter (docs/features/public_finance_live.md)."
+fetch:
+  dataset: gov_10a_main
+  filters:
+    na_item: TR
+    sector: S13
+    unit: MIO_EUR
+    geo: BE
+  since: "2008"
+display: null

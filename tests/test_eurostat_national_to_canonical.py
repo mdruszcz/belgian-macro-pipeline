@@ -30,6 +30,21 @@ from belgian_macro_db import MacroDatabase  # noqa: E402
 
 FIXTURE = REPO / "tests" / "fixtures" / "eurostat" / "ei_bssi_m_r2_BE.json"
 
+#: Belgian general-government finance (PR 1/2, feat/public-finance-data).
+#: GOV_REVENUE_BE's own real Belgium-only response -- gov_10a_main,
+#: na_item=TR, sector=S13, unit=MIO_EUR, geo=BE -- fetched live 2026-10-03,
+#: same geo=BE-filtered shape as FIXTURE above. 2025's own cell carries
+#: OBS_FLAG 'p' and value 314736.4, matching the maintainer-approved
+#: catalogue entry (docs/data_catalog.md) byte for byte.
+GOV_FIXTURE = REPO / "tests" / "fixtures" / "eurostat" / "gov_10a_main_TR_BE.json"
+
+#: Captured at import time, before `one_real_eurostat_indicator` (autouse,
+#: below) replaces `bmdb.SOURCES` for every test in this file -- by the time
+#: a test function body runs, `bmdb.SOURCES` is already scoped down to
+#: EC_CONS_CONF_BE alone, so GOV_REVENUE_BE's own entry has to be grabbed
+#: here first.
+_GOV_REVENUE_SOURCE = bmdb.SOURCES["GOV_REVENUE_BE"]
+
 
 class _FakeResponse:
     def __init__(self, content: bytes, status_code: int = 200):
@@ -104,3 +119,44 @@ def test_fetch_all_then_sync_to_canonical_does_not_raise_and_writes_final(
         conn.close()
     assert rows, "the canonical sync must have written EC_CONS_CONF_BE's rows"
     assert all(status == "final" for _period, _value, status in rows)
+
+
+def test_a_public_finance_series_p_flag_lands_as_provisional_end_to_end(db, monkeypatch):
+    """Audit P2-4: the 25 new Belgium-only public-finance configs (PR 1/2)
+    went through this PR's own fixtures-only exporter tests, never through
+    this real fetch_all -> sync_to_canonical path a live Eurostat 'p' flag
+    actually takes. GOV_REVENUE_BE here stands in for all 25 -- same
+    dataset family (gov_10a_main), same single-country fetch shape, same
+    adapter code path as every other one of them."""
+    fake_sources = {"GOV_REVENUE_BE": _GOV_REVENUE_SOURCE}
+    monkeypatch.setattr(bmdb, "SOURCES", fake_sources)
+    monkeypatch.setattr(sync_mod, "SOURCES", fake_sources)
+
+    raw = GOV_FIXTURE.read_bytes()
+    monkeypatch.setattr("src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(raw))
+
+    assert bmdb.fetch_all(db) is True
+
+    row = db.conn.execute(
+        "SELECT value, obs_status FROM legacy_observations "
+        "WHERE indicator_code = 'GOV_REVENUE_BE' AND period = '2025'"
+    ).fetchone()
+    assert row is not None
+    assert row[0] == 314736.4, "must match the live-verified catalogue value exactly, never coerced"
+    assert row[1] == "P", f"legacy_observations.obs_status must be SDMX-lettered, got {row[1]!r}"
+    db.close()
+
+    checked, changed = sync_mod.sync(db.db_path, vintage="v1")
+    assert checked > 0
+    assert changed == checked
+
+    conn = sqlite3.connect(str(db.db_path))
+    try:
+        canonical = conn.execute(
+            "SELECT value, status FROM observations WHERE indicator_id = 'GOV_REVENUE_BE' "
+            "AND geo_id = 'be:country' AND period = '2025'"
+        ).fetchone()
+    finally:
+        conn.close()
+    assert canonical is not None, "the canonical sync must have written GOV_REVENUE_BE's 2025 row"
+    assert canonical == (314736.4, "provisional")
