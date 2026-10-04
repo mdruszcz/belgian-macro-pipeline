@@ -77,15 +77,31 @@ def test_layout_css_gives_searchbox_and_text_inputs_a_focus_ring():
 def test_every_page_search_input_lives_inside_a_searchbox_wrapper():
     """The :focus-within fix only reaches an input whose wrapper actually
     carries the .searchbox class -- guards against a page's search input
-    silently falling outside the fixed selector."""
-    for page, input_id in (
-        ("home2.html", "communeSearch"),
-        ("commune.html", "communeSearch"),
-        ("profiles.html", "pfSearch"),
+    silently falling outside the fixed selector.
+
+    Issue #312 batch 2: home2.html's commune search was rebuilt as a real
+    ARIA 1.2 combobox (a visible label, a submit button, a listbox of
+    suggestions) -- the old bare `<label class="searchbox"><input></label>`
+    is gone, replaced by `<div class="herosearch-field">`, which carries
+    the SAME focus-ring contract this test exists to guard
+    (`.herosearch-field:focus-within` in home2.html's own <style>, the same
+    border-colour + box-shadow treatment `.searchbox:focus-within` gives
+    the other two pages). commune.html and profiles.html are unchanged."""
+    for page, input_id, wrapper_open in (
+        ("home2.html", "communeSearch", '<div class="herosearch-field">'),
+        ("commune.html", "communeSearch", '<label class="searchbox">'),
+        ("profiles.html", "pfSearch", '<label class="searchbox">'),
     ):
         text = (REPO / page).read_text(encoding="utf-8")
-        m = re.search(r'<label class="searchbox">.*?id="' + input_id + r'"', text, re.S)
-        assert m, f'{page}\'s #{input_id} is not inside a <label class="searchbox">'
+        m = re.search(re.escape(wrapper_open) + r'.*?id="' + input_id + r'"', text, re.S)
+        assert m, f"{page}'s #{input_id} is not inside {wrapper_open!r}"
+
+    # And home2.html's new wrapper really does carry its own focus-within
+    # ring -- the property this test is actually guarding, not just the
+    # wrapper's name.
+    home2 = (REPO / "home2.html").read_text(encoding="utf-8")
+    rule = re.search(r"\.herosearch-field:focus-within\{([^}]+)\}", home2)
+    assert rule, "no .herosearch-field:focus-within rule in home2.html"
 
 
 # --- fix 4: --bp-text-faint reserved for decoration, never a fact ---------
@@ -319,28 +335,28 @@ def test_namur_card_is_lazy_and_async():
     assert 'decoding="async"' in tag
 
 
-def test_film_poster_prefers_webp_with_jpg_fallback():
-    """poster.webp already exists on disk (238KB) alongside poster.jpg
-    (243KB) but was never referenced -- only #filmPoster's <img src=...jpg>
-    and <video poster=...jpg> (the video's own poster attribute cannot take
-    a <picture>, so it stays jpg -- universally supported, and already the
-    fallback). #filmPoster keeps its id on the <img> itself (not moved to
-    the new <picture> wrapper), so every existing `getElementById('filmPoster')`
-    / `poster.hidden = ...` reference in initHero() keeps working unchanged."""
+def test_home2_no_longer_carries_a_film_poster_at_all():
+    """Issue #312 batch 2: the film -- and its poster -- left home2.html
+    entirely (it now plays only on request, on about.html). The
+    <picture>/<source webp>/<img id=filmPoster jpg> construct this file
+    used to guard (and the #filmPoster id with it) has no reason to exist
+    here any more; this test now pins its ABSENCE, the same reversal
+    tests/test_home_film_hero.py's own rewrite documents in full."""
     text = (REPO / "home2.html").read_text(encoding="utf-8")
-    picture = re.search(
-        r"<picture>\s*<source srcset=\"assets/belpulse/home-film/poster\.webp\" type=\"image/webp\">\s*"
-        r'<img id="filmPoster"[^>]*src="assets/belpulse/home-film/poster\.jpg"[^>]*>\s*</picture>',
-        text,
-    )
-    assert picture, "no <picture>/<source webp>/<img id=filmPoster jpg> block found"
+    assert 'id="filmPoster"' not in text
+    assert "<picture>" not in text
+
+
+def test_about_film_block_reuses_poster_webp_with_no_new_binary():
+    """The poster.webp this file's own history is about (238KB, alongside
+    poster.jpg, 243KB) is still reused -- just from its new home, the
+    about.html film block's <video poster=...> (a video's own poster
+    attribute cannot take a <picture>, so there is no webp/jpg fallback
+    pair to guard here any more; render.py's _render_film() simply writes
+    whatever the block's own `poster` prop says, and the approved mockup's
+    own markup uses poster.webp directly). No new binary added (rule 12)."""
+    for page, prefix in (("about.html", ""), ("fr/about.html", "../"), ("nl/about.html", "../")):
+        text = (REPO / page).read_text(encoding="utf-8")
+        assert f'poster="{prefix}assets/belpulse/home-film/poster.webp"' in text
     assert (REPO / "assets" / "belpulse" / "home-film" / "poster.webp").is_file()
-
-
-def test_film_poster_still_has_exactly_one_filmposter_id():
-    """A duplicate id (one on <picture>, one on <img>) would make
-    getElementById ambiguous in practice (it returns the first match, which
-    happens to still work here, but a second id="filmPoster" would be a
-    silent footgun for the next edit)."""
-    text = (REPO / "home2.html").read_text(encoding="utf-8")
-    assert text.count('id="filmPoster"') == 1
+    assert (REPO / "assets" / "belpulse" / "home-film" / "poster.jpg").is_file()

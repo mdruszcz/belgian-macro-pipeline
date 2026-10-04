@@ -43,16 +43,23 @@ def test_every_placement_names_only_real_counter_ids():
         assert set(members) <= ids
 
 
-def test_home_strip_lists_all_five_counters():
+def test_home_strip_lists_all_five_counters_in_the_same_order_as_macro_strip():
     # Issue #309: the home-page strip now shows all five counters, not just
-    # debt/deficit.
+    # debt/deficit. Issue #312 batch 2: the order changed from
+    # [population, debt, deficit, revenue, spending] to match
+    # macro_strip's own order exactly -- the maintainer approved
+    # macro_strip's order in the public-finance-live mockup, and a reader
+    # moving between home2.html and macro.html now sees the same five
+    # counters in the same order on both pages, not two different
+    # orderings of the same five things.
     data = load_and_validate_live_counters(CONFIG_PATH)
+    assert data["placements"]["home_strip"] == data["placements"]["macro_strip"]
     assert data["placements"]["home_strip"] == [
         "population",
-        "debt",
-        "deficit",
         "revenue",
         "spending",
+        "deficit",
+        "debt",
     ]
 
 
