@@ -33,7 +33,18 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 SDMX_CSV = "TIME_PERIOD,OBS_VALUE,OBS_STATUS\r\n2023-Q1,1.5,A\r\n"
 
-DBNOMICS_JSON = json.dumps({"series": {"docs": [{"period": ["2020-Q1"], "value": [1.5]}]}}).encode()
+#: indexed_at is required since ADR 0017 (docs/decisions/0017-ameco-forecast-
+#: periods.md): DBnomicsSource._parse now derives AMECO's last outturn year
+#: from it and raises if it is absent. 2022-05-01 keeps 2020-Q1 well inside
+#: the outturn window (last_outturn_year 2021), so this contract fixture's
+#: one row is unaffected -- this is not what ADR 0017 is about.
+DBNOMICS_JSON = json.dumps(
+    {
+        "series": {
+            "docs": [{"indexed_at": "2022-05-01T00:00:00Z", "period": ["2020-Q1"], "value": [1.5]}]
+        }
+    }
+).encode()
 
 
 class _FakeResponse:
