@@ -145,13 +145,32 @@
 .bp-menu-caret{transition:transform .15s ease}
 .bp-menu-btn[aria-expanded="true"] .bp-menu-caret{transform:rotate(180deg)}
 
+/* ISSUE 312 BATCH 2 -- the header CLS fix. Before this fix `position` here
+   was gated on `:root.bp-js` (a second, separate rule below this one): the
+   panel rendered IN-FLOW (a plain flex column inside `.bp-menu`) until
+   shell.js added `.bp-js` to <html>, then snapped to `position:absolute`
+   and dropped out of flow. shell.js runs after first paint (it is not a
+   blocking head script), so on every page, for the gap between first
+   paint and shell.js executing, both the theme and language panels
+   rendered open and in-flow, inflating the header's height, then collapsed
+   the instant `.bp-js` landed -- measured with Playwright
+   (screenshots-review/home-front-door/LISEZMOI.md) at CLS ~0.14-0.19 on
+   desktop and ~0.57 on mobile, IDENTICAL on every page this shell covers
+   (confirmed on a page this batch does not otherwise touch), so the shell
+   owned the bug, not any one page.
+
+   Fix: `position:absolute` applies UNCONDITIONALLY now, never gated on
+   `.bp-js`, so the panel never occupies flow space at any point -- whether
+   JS has not run yet, is slow to run, or never runs at all. The no-JS
+   progressive-enhancement case above still SHOWS the panel's real links
+   and buttons; they now float over the page instead of pushing it down,
+   which keeps them reachable and keyboard-focusable while removing the
+   layout jump instead of only hiding it once `.bp-js` arrives. */
 .bp-menu-panel, .bp-theme-switch, .bp-lang-switch{
   display:flex; flex-direction:column; gap:1px; min-width:170px;
   background:var(--bp-surface); color:var(--bp-text);
   border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
-  margin:var(--bp-space-2) 0 0; padding:var(--bp-space-2);
-}
-:root.bp-js .bp-menu-panel, :root.bp-js .bp-theme-switch, :root.bp-js .bp-lang-switch{
+  padding:var(--bp-space-2);
   position:absolute; right:0; top:calc(100% + var(--bp-space-2)); z-index:30;
   box-shadow:var(--bp-shadow-card); margin:0;
 }
@@ -239,17 +258,35 @@ input[type="text"]:focus-visible, input[type="search"]:focus-visible{
      a bounding-box check is what actually catches it, not a visibility
      check alone. `flex-basis:100%` then puts the nav on its own full-width
      line once it wraps, so its OWN children get the whole row to wrap
-     across rather than a leftover sliver. */
+     across rather than a leftover sliver.
+
+     ISSUE 312 BATCH 2 FIX -- the SECOND, larger source of the shared
+     header's CLS at phone widths, found while measuring the menu-panel
+     fix above: `#bp-nav` was IN-FLOW here (a real multi-line wrapped row,
+     `flex-basis:100%`, taking real height) until `:root.bp-js` switched it
+     to `position:absolute` and `display:none` -- so for the gap between
+     first paint and shell.js executing, the nav's wrapped height inflated
+     the WHOLE topbar (pushing the logo and everything in `<main>` down
+     with it), then collapsed the instant `.bp-js` landed. Measured with
+     Playwright: this is the dominant layout-shift source at 390px, larger
+     than the menu-panel fix above on its own. Same fix, same reasoning:
+     `position:absolute` applies UNCONDITIONALLY now, so the nav never
+     occupies flow space at any point. The no-JS case keeps every link
+     visible and reachable (no `hidden` attribute, same progressive
+     enhancement as the two menus) -- it now floats below the topbar as an
+     always-open panel instead of pushing the page down. */
   .bp-topbar .wrap{flex-wrap:wrap}
-  #bp-nav{flex-wrap:wrap; flex-basis:100%; row-gap:var(--bp-space-2)}
-  :root.bp-js .bp-nav-toggle{display:inline-flex}
-  :root.bp-js #bp-nav{
-    display:none; flex-direction:column; align-items:stretch; gap:0;
+  #bp-nav{
+    flex-wrap:wrap; row-gap:var(--bp-space-2);
     position:absolute; left:0; right:0; top:100%; z-index:30;
     background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
     padding:var(--bp-space-2) var(--bp-space-6);
   }
-  :root.bp-js .bp-shell--navy #bp-nav{background:var(--bp-navy-bg); border-color:var(--bp-navy-border)}
+  .bp-shell--navy #bp-nav{background:var(--bp-navy-bg); border-color:var(--bp-navy-border)}
+  :root.bp-js .bp-nav-toggle{display:inline-flex}
+  :root.bp-js #bp-nav{
+    display:none; flex-direction:column; align-items:stretch; gap:0;
+  }
   :root.bp-js[data-nav-open="1"] #bp-nav{display:flex}
   :root.bp-js #bp-nav a{
     display:flex; align-items:center; min-height:44px;

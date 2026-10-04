@@ -207,13 +207,33 @@ panel_charts:
 # alphabetical). Declaring the two ids here means home2.html contains no
 # indicator id of its own (rule 2/24), and a future change to which two
 # series lead the homepage is a one-line config edit, not a page edit.
-# These are the two ids `nationalOrder()` already lands on today (quarterly
-# real GDP growth year-on-year, and HICP inflation year-on-year) -- verified
-# by running that exact logic against the published national.json before
-# writing this list, not guessed.
+# Issue #312 batch 2 (docs/features/site_clarity.md): REPLACED the growth/
+# inflation pair above with the two figures the maintainer approved in the
+# front-door mockup on 2026-10-04 -- public debt and the budget balance, both
+# % of GDP, both already published in national.json (GOV_DEBT_PCT_GDP_BE,
+# GOV_BALANCE_PCT_GDP_BE; verified against the real payload before writing
+# this). Grepped for every other reader of `hero` before replacing it
+# (tests/test_charts_tooltip.py, tests/test_home2.py,
+# scripts/export_site_payloads.py): none hardcodes GDP_QUARTERLY_YY or HICP,
+# all read this list generically, so nothing else breaks.
+#
+# Each entry is now an OBJECT, not a bare id: `short_label` is a short,
+# trilingual title for the homepage's hero card (the full indicator name ran
+# to seven lines on a two-column hero), and `format` tells home2.html how to
+# render the card's own sign word -- "signed_label" for the balance, whose
+# card prints "Deficit"/"Surplus" from the series' own sign, never a word
+# hand-typed on the page (rule 26: the page cannot know in advance which one
+# applies). `_check_national_sections` in scripts/export_site_payloads.py
+# refuses to publish an entry whose short_label is missing or incomplete in
+# any of en/fr/nl. A bare string is still accepted for compatibility (reads
+# as `format: plain`, `short_label: null`) -- see `_hero_entries`.
 hero:
-  - GDP_QUARTERLY_YY
-  - HICP
+  - code: GOV_DEBT_PCT_GDP_BE
+    format: plain
+    short_label: {en: "Public debt", fr: "Dette publique", nl: "Overheidsschuld"}
+  - code: GOV_BALANCE_PCT_GDP_BE
+    format: signed_label
+    short_label: {en: "Balance", fr: "Solde", nl: "Saldo"}
 
 # =============================================================================
 # Issue #309 PR 2 -- the #finances-publiques chapter's own cards/charts and

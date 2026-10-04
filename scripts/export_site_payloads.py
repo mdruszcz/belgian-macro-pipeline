@@ -589,9 +589,14 @@ def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
         # Conjoncture list cards -- same {id, label, series} shape as
         # extra_lists, validated the same way below.
         "panel_charts": layout.get("panel_charts") or [],
-        # Batch A1.3: the two indicator ids home2.html's hero draws, so that
-        # page carries no indicator id of its own either (rule 2/24).
-        "hero": layout.get("hero") or [],
+        # Batch A1.3, extended in issue #312 batch 2: the indicator ids
+        # home2.html's hero draws, so that page carries no indicator id of
+        # its own either (rule 2/24). Normalised to {code, format,
+        # short_label} -- see `_hero_entries` -- so a bare string (the
+        # pre-batch-2 shape) and the richer object batch 2 needs (a short,
+        # trilingual title per card, since the full indicator name ran to
+        # seven lines on the homepage's two-column hero) both work.
+        "hero": _hero_entries(layout),
         # Issue #309 PR 2: the #finances-publiques chapter's own cards/
         # charts and the live-counter placements/breakdowns macro.html and
         # home2.html iterate -- folded into this one file (rather than the
@@ -600,6 +605,36 @@ def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
         # for what gets cross-checked.
         "finances_publiques": layout.get("finances_publiques") or {},
     }
+
+
+def _hero_entries(layout: dict) -> list[dict]:
+    """Normalise `hero:` entries to `{code, format, short_label}` dicts.
+
+    Issue #312 batch 2: the homepage's two hero figure cards need a SHORT
+    title (`short_label`, trilingual) rather than each indicator's full
+    name, which ran the card's heading to seven lines. An entry may still be
+    a bare indicator id (string) for backward compatibility with the shape
+    this key carried before batch 2 -- `format` defaults to "plain" and
+    `short_label` to `None`, and `_check_national_sections` below refuses to
+    publish a `None` short_label (a page cannot show a title it was never
+    given). `format` is read by home2.html's own `heroOrder()`, e.g.
+    "signed_label" for a balance whose sign flips between "Deficit" and
+    "Surplus" (rule 26: a card never prints a sign word hand-typed on the
+    page itself, so the flip has to come from somewhere, and this is it).
+    """
+    out = []
+    for entry in layout.get("hero") or []:
+        if isinstance(entry, str):
+            out.append({"code": entry, "format": "plain", "short_label": None})
+        elif isinstance(entry, dict) and entry.get("code"):
+            out.append(
+                {
+                    "code": entry["code"],
+                    "format": entry.get("format") or "plain",
+                    "short_label": entry.get("short_label"),
+                }
+            )
+    return out
 
 
 def _check_national_sections(layout: dict, known: set[str]) -> None:
@@ -624,7 +659,7 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
         *(contributions.get("parts") or []),
         *extra_series,
         *panel_chart_series,
-        *(layout.get("hero") or []),
+        *(entry["code"] for entry in layout.get("hero") or []),
     ]
     unknown = sorted({i for i in named if i not in known})
     if unknown:
@@ -632,6 +667,23 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
             f"config/national_sections.yaml names indicator(s) the national payload does "
             f"not carry: {unknown}. They would render as empty cards on macro.html. Remove "
             "them from the layout, or load the data they need."
+        )
+
+    # Issue #312 batch 2: a hero card with no short_label, or one missing a
+    # language, renders an empty heading on home2.html's two-column hero --
+    # the exact kind of silent empty box this exporter refuses everywhere
+    # else (rule 7: every user-facing string is en/fr/nl, no exceptions).
+    bad_label = sorted(
+        entry["code"]
+        for entry in layout.get("hero") or []
+        if not isinstance(entry.get("short_label"), dict)
+        or any(not (entry["short_label"] or {}).get(lang) for lang in ("en", "fr", "nl"))
+    )
+    if bad_label:
+        raise ValueError(
+            f"config/national_sections.yaml's hero entries are missing a short_label, or "
+            f"one missing en/fr/nl: {bad_label}. home2.html's hero figure cards need a "
+            "short title in every language; add short_label to each entry."
         )
 
     fp = layout.get("finances_publiques") or {}

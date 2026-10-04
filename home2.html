@@ -1,37 +1,48 @@
 <!--
-  BelPulse homepage redesign -- film-first hero + commune-Portrait data hero
-  (redesign of the previous Batch 3 homepage; docs/design-references/homepage.md
-  for the original brief, superseded here for the hero only).
+  BelPulse homepage -- data-first, search-first hero (issue #312 batch 2,
+  docs/features/site_clarity.md). Redesign of the previous film-first hero
+  (Batch 3 homepage, then the two-phase film/data hero that followed it).
 
   The public BelPulse homepage. index.html and home.html both redirect here.
 
-  Two-phase hero (maintainer-approved mockup, screenshots-review/home-v5/):
-  phase 1 is the brand film ALONE in a full-width ~92vh band -- no cards, no
-  map, nothing competing with it (the previous PR #300 cut played the film
-  BEHIND the map/chart cards, where it was covered and hard to follow; the
-  maintainer rejected that). Phase 2, triggered by the film ending, "Passer",
-  or a scroll, is the data hero: headline, lead, commune search, the national
-  choropleth map and the two NBB mini-charts, laid out in the commune
-  Portrait's own visual language (white cards, a chapter-colour hairline per
-  section, uppercase eyebrows) rather than the old dark "glass" cards on a
-  navy gradient. A later visit in the same session (sessionStorage) opens
-  straight into phase 2, with the film's last frame as a slim banner and a
-  "Revoir le film" control. prefers-reduced-motion / Save-Data: poster only,
-  phase 2 immediately, zero video bytes ever requested.
+  THE FILM LEFT THIS PAGE ENTIRELY, 2026-10-04. The previous hero opened on
+  an 11.3 MB brand film and the first Belgian figure did not appear for
+  28,377 ms (screenshots-review/site-audit-2026-10-04/home.md and ux.md).
+  There is no `<video>` element and no film request anywhere on this page
+  now -- the film moved to about.html, where it plays only on a click
+  (preload="none", no autoplay). This page's first screen is five things
+  only: a one-line headline, a one-sentence lead, the commune search, two
+  real national figures (debt and the budget balance, both % of GDP, both
+  already in national.json), and one quiet link to the map. Two columns from
+  ~1024px (text+search left, the two figure cards right); one column,
+  stacked, below it. The interactive map card, the featured commune and the
+  simulated finance strip are unchanged, just one screen further down.
+
+  THE COMMUNE SEARCH WAS REBUILT. The previous control was a bare
+  `<input list=datalist>` with no visible label, no submit button and no
+  keyboard navigation of its own, and it only matched the French name --
+  typing an English or Dutch name and pressing Enter did nothing
+  (site-audit-2026-10-04/ux.md, section 6a). It is now a real ARIA 1.2
+  combobox: a visible trilingual label, a text field, a submit button, and a
+  listbox of suggestions. Matching is against the French name, the Dutch
+  name AND (where geographies.json carries one) the English name, plus the
+  NIS code, case- and accent-insensitively, in every interface language --
+  never only the language the page happens to be showing. Exactly one match
+  (typed, chosen from the list, or submitted) goes to
+  `commune.html?nis=...`; several matches or none go to the commune
+  directory (`profiles.html?q=...`), which shows a filtered list or an
+  honest "no commune matches" message -- never a dead end. Works with
+  JavaScript disabled too: the form is a real `GET` to profiles.html.
 
   WHERE THIS DEPARTS FROM THE ORIGINAL SUPPLIED DESIGN, AND WHY. Every
   departure is a figure the design shows that this pipeline does not hold.
   None of them is a layout choice:
-    * Public-finance tiles (spending / revenue / balance / debt in billions):
-      this pipeline's government series are CONTRIBUTIONS TO GDP GROWTH, not
-      levels in euro. Rendered as one honest "not published" line rather than
-      filled with a plausible number.
-    * The commune card, hero and CTA use temporary local AI-generated
+    * The commune card and CTA use temporary local AI-generated
       illustrations, disclosed as illustrative rather than documentary.
     * "581 communes / 200+ indicateurs" in the CTA: the real figures are read
       live from manifest.json. The design's numbers were aspirational; these
       are true.
-    * "PIB par habitant" on the hero map: Belgium publishes no GDP below the
+    * "PIB par habitant" on the map card: Belgium publishes no GDP below the
       regional level and this pipeline holds none. The map opens on the first
       indicator the pipeline's own config lists as a headline, and its picker
       holds every municipal indicator actually published.
@@ -82,119 +93,190 @@
   .visually-hidden{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
 
   /* =====================================================================
-     PHASE 1 -- the brand film, full width, nothing on top of it but the
-     wordmark and two tiny controls. No card, no headline, no scrim of text
-     to protect: the film gets the whole band to itself (the diagnosis on
-     PR #300 was that the film played BEHIND cards fighting for the same
-     space). object-fit:contain on black so the film's own baked-in HUD/
-     wordmark is never cropped, unlike a cover-fit background layer.
-     ===================================================================== */
-  .filmhero{
-    position:relative; width:100%; height:92vh; min-height:520px; max-height:920px;
-    overflow:hidden; background:#05070c;
-  }
-  .filmhero video, .filmhero img{
-    position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center; background:#000;
-  }
-  /* A thin vignette only, never a text scrim -- there is no text over the
-     film in phase 1 to protect. Just enough to keep the wordmark and
-     controls legible over a bright frame. */
-  .filmhero::after{
-    content:''; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(180deg, rgba(5,7,12,.55) 0%, rgba(5,7,12,0) 16%, rgba(5,7,12,0) 72%, rgba(5,7,12,.7) 100%);
-  }
-  .filmhero-controls{
-    position:absolute; z-index:2; bottom:22px; right:24px; display:flex; gap:8px;
-  }
-  .filmhero-controls button{
-    display:inline-flex; align-items:center; gap:6px;
-    background:rgba(5,10,20,.55); border:1px solid rgba(255,255,255,.3); color:#fff;
-    border-radius:999px; padding:8px 15px; font:inherit; font-size:12px; font-weight:600;
-    cursor:pointer; backdrop-filter:blur(3px);
-  }
-  .filmhero-controls button:hover{background:rgba(255,255,255,.16)}
-  .filmhero-controls button[hidden]{display:none}
-  .filmhero-scrollcue{
-    position:absolute; z-index:2; bottom:22px; left:24px; color:rgba(255,255,255,.78);
-    font:600 11px/1 var(--bp-font-ui); text-transform:uppercase; letter-spacing:.08em;
-    display:flex; align-items:center; gap:8px;
-  }
-  .filmhero-scrollcue svg{animation:bp-filmhero-bounce 1.6s ease-in-out infinite}
-  @keyframes bp-filmhero-bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
-  @media (prefers-reduced-motion: reduce){ .filmhero-scrollcue svg{animation:none} }
-  /* Phase-2 state (any trigger -- Passer, the film ending, a second-session
-     visit, or a play() rejection): the film band collapses to a slim banner
-     carrying the poster (the film's last frame) and a replay control --
-     never autoplays again in the same session. Every JS transition into
-     phase 2 always adds .banner alongside data-phase="2" (goPhase2()), so
-     .filmhero[data-phase="2"] alone, without .banner, is never reached --
-     .filmhero's poster/video are position:absolute, so height:auto with no
-     min-height would otherwise collapse the band to 0. */
-  .filmhero.banner{ height:34vh; min-height:220px; max-height:360px; }
-  @media (max-width:640px){
-    /* Phones: the 16:9 film is shown whole (object-fit:contain), so the band
-       takes the film's own proportions plus room for the controls -- a 78vh
-       band left two thirds of the screen as black bars. */
-    .filmhero{ height:auto; min-height:0; aspect-ratio:16/10.5 }
-    .filmhero.banner{ height:auto; min-height:0; aspect-ratio:16/9 }
-    .filmhero-controls{ right:16px; bottom:16px }
-    .filmhero-scrollcue{ left:16px; bottom:16px }
-  }
-
-  /* =====================================================================
-     PHASE 2 -- data hero, commune-Portrait styling: chapter-colour hairline
-     over each card, eyebrows, .card surfaces instead of dark "glass".
+     HERO -- data-first, search-first (2026-10-04, issue #312). The film
+     left this page entirely (it now lives on about.html, played only on
+     request) -- see screenshots-review/site-audit-2026-10-04/home.md and
+     ux.md for the measurements that drove this: 27.5s before any figure,
+     11.3 MB fetched on a throttled connection, CLS ~0.32. Five things only:
+     headline, one-sentence lead, the commune search, two real national
+     figures, one quiet link to the map. The interactive map card, the
+     featured commune and the simulated finance strip all still exist,
+     unchanged, just lower on the page (#mapCardSection, #communeSection,
+     #financeStrip).
      ===================================================================== */
   :root{ --v5-hero-th: var(--bp-chart-2); --v5-commune-th: var(--bp-chart-1); --v5-maps-th: var(--bp-chart-3);
          --v5-indicators-th: var(--bp-chart-5); --v5-how-th: var(--bp-chart-6); }
-  .datahero{ padding-top:32px; padding-bottom:8px; }
-  .datahero-top{ display:grid; grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr); gap:40px; align-items:start; margin-bottom:28px }
-  .datahero .eyebrow{ font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold); letter-spacing:.14em; color:var(--v5-hero-th); margin-bottom:10px; text-transform:uppercase }
-  .datahero h1{ font-size:2.3rem; line-height:1.12; max-width:18ch; text-wrap:balance; margin:0 0 14px }
-  .datahero .lead{ color:var(--bp-text-muted); max-width:48ch; margin:0 0 20px; font-size:var(--bp-text-body) }
-  .datahero-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
-  .datahero-search{ margin-top:22px; max-width:340px }
-  .datahero-search .searchbox{ display:flex; align-items:center; gap:8px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:9px 13px; background:var(--bp-surface) }
-  .datahero-search input{ border:0; background:transparent; outline:0; font:inherit; font-size:13px; color:inherit; flex:1; min-width:0 }
-  .datahero-search svg{ color:var(--bp-text-faint); flex:none }
+  /* issue #312 fold-fit (2026-10-04): 40/22/22/22px of rhythm here plus
+     below (.herosearch, .hero-mini) put the quiet map link 22px past the
+     bottom of a 1366x768 screen once the two figure cards were sized
+     correctly (see .hero-mini above) -- measured with Playwright
+     (getBoundingClientRect), not assumed. Trimmed by ~32px total across
+     four rules, kept proportionate (still 24-18px, not a cramped reset),
+     to bring it back on-screen with a small margin; re-verified after. */
+  .datahero{ padding-top:28px; padding-bottom:28px }
+  /* Lead review, round 2: at 1366px the single text column left the whole
+     right half of the first screen empty. Two columns from 1024px up --
+     same 1fr 1fr + 32px gutter as .duo elsewhere on this page (the
+     commune-profile/finance-strip pair below) -- text+search on the
+     left, the two figure cards on the right; one column, stacked in DOM
+     order (text first), below 1024px, same as before this round. */
+  .datahero-grid{ display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start }
+  @media (max-width:1023px){ .datahero-grid{ grid-template-columns:minmax(0,1fr) } }
+  .datahero-main{ max-width:640px; min-width:0 }
+  /* Independent audit (round 3, P1): the raw chapter hue (--v5-hero-th)
+     measured 3.72:1 in dark and 4.08:1 in paper at this 12px size, both
+     under 4.5:1. --bp-accent-ink is the token tokens.css keeps explicitly
+     AA-checked for text in all three themes -- the same one the
+     simulated badge already uses (.bp-simulated-badge, components.css),
+     so this reuses rather than invents a second "safe for text" colour. */
+  .datahero .eyebrow{ font-size:var(--bp-text-eyebrow); font-weight:var(--bp-weight-semibold); letter-spacing:.14em; color:var(--bp-accent-ink); margin-bottom:10px; text-transform:uppercase }
+  .datahero h1{ font-size:2.1rem; line-height:1.2; margin:0 0 12px }
+  .datahero .lead{ color:var(--bp-text-muted); margin:0 0 16px; font-size:var(--bp-text-body) }
 
-  .hero-cards{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:16px }
+  /* ---- the commune search: a visible label, a real submit button and a
+     custom listbox of suggestions (ARIA 1.2 combobox pattern). The old
+     control was a bare <input list=datalist> with no visible label and no
+     way to drive it by arrow keys (site-audit-2026-10-04/ux.md, section
+     6a) -- it also only matched the French label, so a Flemish visitor
+     typing their own commune's name got silence. See wireSearch() below:
+     it matches name_fr/name_nl and the NIS code, case- and
+     accent-insensitively, in every interface language. */
+  .herosearch{ margin-bottom:16px }
+  .herosearch-label{ display:block; font-size:var(--bp-text-small); font-weight:var(--bp-weight-semibold); color:var(--bp-text); margin-bottom:7px }
+  .herosearch-row{ display:flex; gap:8px; align-items:flex-start }
+  .herosearch-field{ position:relative; flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:8px; border:1px solid var(--bp-border); border-radius:var(--bp-radius-control); padding:10px 13px; background:var(--bp-surface) }
+  .herosearch-field:focus-within{ border-color:var(--v5-hero-th); box-shadow:0 0 0 2px color-mix(in srgb, var(--v5-hero-th) 30%, transparent) }
+  .herosearch-field svg{ color:var(--bp-text-faint); flex:none }
+  .herosearch-field input{ border:0; background:transparent; outline:0; font:inherit; font-size:14px; color:inherit; flex:1; min-width:0 }
+  .herosearch-submit{ flex:none }
+  .herosearch-suggestions{
+    position:absolute; z-index:5; top:calc(100% + 4px); left:0; right:0; margin:0; padding:4px;
+    list-style:none; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-control);
+    box-shadow:var(--bp-shadow-card); max-height:280px; overflow-y:auto;
+  }
+  .herosearch-suggestions[hidden]{ display:none }
+  .herosearch-suggestions li{ padding:8px 10px; border-radius:6px; font-size:13px; cursor:pointer }
+  .herosearch-suggestions li[aria-selected="true"]{ background:color-mix(in srgb, var(--v5-hero-th) 16%, transparent) }
+  /* province/region disambiguator (independent audit round 3, P1) --
+     --bp-text-muted, not the fainter --bp-text-faint .nis uses below:
+     this is what tells "Saint-Nicolas" (46021) from "Saint-Nicolas"
+     (62093) apart, so it reads as information, not decoration. */
+  .herosearch-suggestions li .where{ color:var(--bp-text-muted); font-size:12px }
+  .herosearch-suggestions li .nis{ color:var(--bp-text-faint); font-size:11px; margin-left:4px }
+  .herosearch-maplink{ display:inline-flex; align-items:center; gap:6px; font-size:var(--bp-text-small); color:var(--bp-accent-ink); text-decoration:none; font-weight:var(--bp-weight-medium) }
+  .herosearch-maplink:hover{ text-decoration:underline }
+
+  /* ---- the figures row: the site's existing mini-KPI card (same markup,
+     same renderHeroMini()), now the right column of .datahero-grid. A
+     reserved min-height keeps the row's place before national.json
+     resolves, so the page does not jump once the two cards render
+     (CLS budget < 0.05 -- the old film-first hero measured ~0.32).
+     Lead review, round 2, three changes together: (1) the card's own
+     title is now a short config-supplied label (heroShortName(), home2
+     script) instead of the indicator's long official name, which used to
+     wrap onto seven lines; (2) the WHOLE card is the link to
+     macro.html#finances-publiques now (a.hero-figure-card below), so the
+     title goes back to the page's plain dark ink instead of link red --
+     same convention as .kpicard h3 lower on this page, which also has no
+     colour override; (3) the chart no longer tries to fill whatever
+     space a taller reservation leaves (that was the root cause of a
+     visible empty band between the head and the chart, and, before that,
+     of a reservation/chart feedback loop -- see HERO_CHART_HEIGHT in the
+     script): it is now a fixed height, so card content height is fixed
+     too, and min-height below is simply set to match it. Re-measured
+     after the two-column restructure, min-height at 0, across every width
+     from 641 (where .datahero-grid is already stacked one-column but
+     .hero-mini's own two-up cards are at their widest) up to 1600 (the
+     two-column-grid case, cards at their narrowest, ~272px, from 1120px
+     up): worst case 287px, at the narrow edge of the two-column grid
+     (1024px viewport). 295px covers it with a small margin. */
+  .hero-mini{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; min-height:295px }
   .hcard{ background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card); box-shadow:var(--bp-shadow-card); padding:16px; border-top:3px solid var(--v5-hero-th) }
   .hcard h3{ font-family:var(--bp-font-ui); font-size:var(--bp-text-small); font-weight:600; margin:0 }
   .hcard .sub{ font-size:11px; color:var(--bp-text-muted) }
-  .hero-mini{ display:flex; flex-direction:column; gap:16px }
+  /* The whole hero figure card is the link to macro.html#finances-publiques
+     (issue #312) -- colour:inherit so its text stays the page's normal
+     ink (an <a> is not styled as a link anywhere else on this card), a
+     border-colour hover matching .zoombtns button's own hover below, and
+     the same focus ring already used on this row's chart canvas
+     (.mini-canvas canvas:focus-visible, components.css) so the two
+     focusable things inside one card -- the card-link itself, then its
+     canvas -- read as one consistent family, not two different styles. */
+  a.hero-figure-card{ display:flex; color:inherit; text-decoration:none; cursor:pointer }
+  a.hero-figure-card:hover{ border-color:var(--v5-hero-th) }
+  a.hero-figure-card:focus-visible{ outline:2px solid var(--bp-accent); outline-offset:2px }
   .hero-mini .hcard{ display:flex; flex-direction:column; min-height:0; overflow:hidden }
   .mini-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px }
   .mini-label{ min-width:0; padding-right:4px }
+  /* Lead review round 3: "Dette publique" stays on one line but "Solde
+     budgétaire" wraps to two next to the wider "Déficit 5,2%" value,
+     so the two cards' headers (and so their charts, which start right
+     after) ended up ~10-15px apart. Reserving two lines' worth of height
+     on EVERY card's title -- not just the one that happens to wrap --
+     makes both headers the same height regardless of which label is
+     short enough to fit on one line; 2.6em/1.3 line-height is exactly two
+     lines at this title's own font-size, not a guessed constant. */
+  .mini-label h3{ min-height:2.6em; line-height:1.3 }
   .mini-reading{ flex:none; text-align:right; line-height:1 }
+  /* reserved whether or not THIS card's reading has a sign word (only
+     format:'signed_label' does) -- min-height, not the text itself, is
+     what keeps both cards' reading columns, and so both charts below
+     them, the same height. */
+  .mini-reading .sign-word{ display:block; min-height:1.4em; line-height:1.4; font-weight:var(--bp-weight-semibold) }
   .mini-reading b{ display:block; font-size:1.5rem; font-weight:700; color:var(--bp-text) }
   .mini-reading .period{ display:block; margin-top:5px }
   .mini-canvas{ position:relative; margin-top:4px; min-width:0 }
   .mini-canvas canvas{ display:block; width:100% }
-  .hero-mini .mini-canvas{ margin-top:auto; padding-top:6px }
+  .hero-mini .mini-canvas{ padding-top:6px }
   .hero-mini .provenance{ margin-top:2px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .hero-figure-unavailable{ grid-column:1 / -1; display:flex; align-items:center; justify-content:center; color:var(--bp-text-muted); font-size:13px; min-height:170px; text-align:center; padding:0 12px }
 
-  .hero-map{ display:flex; flex-direction:column }
-  .hero-map .maphead{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:8px }
-  .hero-map .mapzone{ position:relative; flex:1 1 auto; min-height:0 }
-  .hero-map .mapbox{ position:relative; min-height:260px; height:100% }
-  .hero-map .mapfoot{ margin-top:10px }
+  /* ---- the interactive map card -- same markup/behaviour and the same
+     shared engine (assets/commune_map.js, rule 29 -- no second
+     implementation), just relocated to #mapCardSection below the first
+     screen. Two columns from 1024px up -- same grid/gutter idiom as
+     .datahero-grid and .duo elsewhere on this page -- map graphic on the
+     left, title/picker/legend/source/full-page-map-link on the right;
+     stacked on phones. The engine still sets `svg.style.aspectRatio` from
+     Belgium's own bounding box (measured: ~1.211, width/height), so
+     capping .mapbox's width is still what sets its height, just against
+     the LEFT COLUMN's own width now, not the whole card's. */
+  .mapcard-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start }
+  @media (max-width:1023px){ .mapcard-grid{ grid-template-columns:minmax(0,1fr) } }
+  .mapside{ min-width:0; display:flex; flex-direction:column; gap:10px }
+  .hero-map .maphead{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px }
+  .hero-map .mapzone{ position:relative; min-width:0 }
+  .hero-map .mapbox{ position:relative; width:100%; max-width:600px; max-height:500px; margin:0 auto }
   .hero-map .legend{ overflow-x:auto }
+  /* issue #312 batch 2: .mapfoot starts empty (legendCaption/swatches/
+     ticks/mapProvenance all populate once drawIndicator()'s async fetch
+     resolves) and grows by ~60px once they do -- measured with Playwright
+     (getBoundingClientRect before/after population): 54.6px -> 114.6px.
+     .mapzone (the map graphic) is taller regardless, so this growth never
+     changes the CARD's own height, but it still moved .map-full-link and
+     the page below it -- a real, if small, layout-shift source this
+     batch's own new map-card-grid introduced. Reserved to the populated
+     height so nothing here moves once the map's own data resolves,
+     the same "measure the real content, then reserve it" fix already
+     applied to .hero-mini above. */
+  .hero-map .mapfoot{ min-height:115px }
+  .map-full-link{ display:inline-flex; align-items:center; gap:6px; font-size:var(--bp-text-small); color:var(--bp-accent-ink); text-decoration:none; font-weight:var(--bp-weight-medium); margin-top:auto; padding-top:4px }
+  .map-full-link:hover{ text-decoration:underline }
   .legend-caption{ font-size:11px; margin-bottom:3px; color:var(--bp-text-muted) }
   .zoombtns{ display:flex; flex-direction:column; gap:4px; position:absolute; top:8px; right:8px; z-index:2 }
   .zoombtns button{ width:26px; height:26px; border-radius:6px; border:1px solid var(--bp-border); background:var(--bp-surface); color:var(--bp-text); font:inherit; font-size:14px; line-height:1; cursor:pointer }
   .zoombtns button:hover{ border-color:var(--v5-hero-th); color:var(--v5-hero-th) }
 
-  @media (max-width:1024px){
-    .datahero-top{ grid-template-columns:minmax(0,1fr) }
-    .hero-cards{ grid-template-columns:minmax(0,1fr) }
-  }
-  @media (max-width:900px){
-    .hero-mini{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)) }
-  }
   @media (max-width:640px){
-    .datahero h1{ font-size:1.8rem }
-    .hero-mini{ grid-template-columns:minmax(0,1fr) }
+    .datahero h1{ font-size:1.7rem }
+    .herosearch-row{ flex-direction:column; align-items:stretch }
+    .herosearch-submit{ width:100% }
+    /* HERO_CHART_HEIGHT is a plain constant (home2 script), so the
+       stacked cards' height no longer depends on this rule's own
+       min-height either. Re-measured with Playwright, this rule's
+       min-height at 0: worst case 541px, at 320px (the narrowest phone
+       this page targets). 550px covers it with a small margin. */
+    .hero-mini{ grid-template-columns:minmax(0,1fr); min-height:550px }
   }
 
   /* ---- finance strip ----
@@ -237,6 +319,18 @@
   .section-head h2{ font-size:1.5rem; margin:0 }
   .section-head a{ font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium) }
   .section-head a:hover{ text-decoration:underline }
+  /* issue #312, lead review round 2: this link's nowrap, in a flex row
+     that also carries the section's h2, was the cause of home2's
+     390/360px horizontal scroll in fr/nl (confirmed: hiding ONLY this
+     link brought scrollWidth down to clientWidth; this page's new hero
+     content measured zero contribution). At phone widths the link drops
+     onto its own line under the heading instead of forcing the row wider
+     than the screen, and keeps wrap as a second line of defence for a
+     language/zoom combination narrower still. */
+  @media (max-width:480px){
+    .section-head{ flex-direction:column; align-items:flex-start; gap:4px }
+    .section-head a{ white-space:normal }
+  }
   .section-sub{ color:var(--bp-text-muted); font-size:var(--bp-text-small); margin:8px 0 18px }
 
   .duo{ display:grid; grid-template-columns:1fr 1fr; gap:32px }
@@ -339,68 +433,72 @@
 
 <main id="bp-main">
 
-  <!-- ── PHASE 1: the film, full width, nothing else ─────────────────── -->
-  <section class="filmhero" id="filmHero" data-phase="1">
-    <picture>
-      <source srcset="assets/belpulse/home-film/poster.webp" type="image/webp">
-      <img id="filmPoster" src="assets/belpulse/home-film/poster.jpg" alt="" width="1920" height="1080" fetchpriority="high">
-    </picture>
-    <video id="filmVideo" muted playsinline preload="none" poster="assets/belpulse/home-film/poster.jpg" hidden>
-      <source data-src="assets/belpulse/home-film/film-1080.mp4" type="video/mp4" data-variant="desktop">
-      <source data-src="assets/belpulse/home-film/film-720.mp4" type="video/mp4" data-variant="mobile">
-    </video>
-
-    <span class="visually-hidden" data-t="homeFilmAlt">Background: an animated film of Belgium's map and its 565 communes, decorative only, with no figures of its own.</span>
-    <div class="filmhero-scrollcue" id="filmScrollCue"><span data-t="v5ScrollCue">Scroll for the data</span>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </div>
-    <div class="filmhero-controls">
-      <button type="button" id="filmSkip" data-t="v5SkipFilm">Skip &darr;</button>
-      <button type="button" id="filmReplay" hidden data-t-aria="homeFilmReplay" data-t="v5ReplayFilm">&#8635; Watch again</button>
-    </div>
-  </section>
-
-  <!-- ── PHASE 2: the data hero, commune-Portrait styling ────────────── -->
+  <!-- ── HERO: data-first, search-first (issue #312, 2026-10-04) -- no
+       film, no video element, no video request. Five things only: the
+       text/search column and the figures column are the same "row of two
+       national figures" item, not a sixth thing -- two columns from
+       ~1024px (.datahero-grid, same 1fr 1fr + 32px gutter as .duo
+       elsewhere on this page), one column (stacked, text first) below it,
+       where the first screen is tall enough that a second column would
+       add width without saving height anyway. ──────────────────────── -->
   <div class="wrap">
     <section class="datahero" id="dataHero">
-      <div class="datahero-top">
-        <div>
+      <div class="datahero-grid">
+        <div class="datahero-main">
           <div class="eyebrow" data-t="homeEyebrow">DATA · TERRITORIES · PROSPERITY</div>
           <h1 data-t="homeTitle">Belgium's economic data, updated automatically.</h1>
-          <p class="lead" data-t="homeLead">Every figure on this site is fetched from an official source, re-keyed to one canonical model, and published with the date it was retrieved and how it was made. No estimate is presented as a measurement.</p>
-          <div class="datahero-actions">
-            <a class="bp-btn bp-btn--primary" href="profiles.html">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-              <span data-t="homeExplore">Explore the data</span>
-            </a>
-          </div>
-          <div class="datahero-search">
-            <label class="searchbox">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-              <input id="communeSearch" list="communeList" type="text" data-t-placeholder="v4SwitcherPlaceholder" placeholder="Search a commune…" autocomplete="off">
-              <datalist id="communeList"></datalist>
-            </label>
-          </div>
+          <p class="lead" data-t="homeLeadShort">Every figure here is sourced and dated — never an estimate shown as a measurement.</p>
+
+          <form class="herosearch" id="heroSearchForm" role="search" action="profiles.html" method="get" autocomplete="off">
+            <label class="herosearch-label" for="communeSearch" data-t="homeSearchLabel">Find your commune</label>
+            <div class="herosearch-row">
+              <div class="herosearch-field">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input id="communeSearch" name="q" type="text" role="combobox" aria-expanded="false" aria-controls="communeSuggestions" aria-autocomplete="list" aria-activedescendant="" data-t-placeholder="v4SwitcherPlaceholder" placeholder="Search a commune…" autocomplete="off">
+                <ul class="herosearch-suggestions" id="communeSuggestions" role="listbox" data-t-aria="homeSearchLabel" aria-label="Find your commune" hidden></ul>
+              </div>
+              <button type="submit" class="bp-btn bp-btn--primary herosearch-submit" data-t="homeSearchSubmit">Search</button>
+            </div>
+            <div class="visually-hidden" id="communeSearchStatus" role="status" aria-live="polite"></div>
+          </form>
+
+          <a class="herosearch-maplink" href="map.html" data-t="homeMapLinkQuiet">See the map of every commune →</a>
         </div>
 
-        <div class="hero-cards">
-          <div class="hcard hero-map bp-state" id="mapCard" data-state="loading">
+        <div class="hero-mini" id="heroMini"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── the interactive map card: unchanged, moved off the first screen
+       so measured figures (above) are what a visitor meets first ───── -->
+  <div class="wrap">
+    <section class="section" id="mapCardSection" style="--th:var(--v5-hero-th)">
+      <div class="hcard hero-map bp-state" id="mapCard" data-state="loading">
+        <!-- Two columns from ~1024px -- map left, title/picker/legend/
+             source/the same "full-page map" link #mapsSection further
+             down already has (reused here rather than a new one
+             invented) on the right; stacked on phones. Same engine, same
+             options object (all id-based lookups below, unchanged),
+             layout only. -->
+        <div class="mapcard-grid">
+          <div class="mapzone">
+            <div class="mapbox" id="mapbox">
+              <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
+              <div class="map-tip map-hidden" id="tip"></div>
+              <div class="zoombtns">
+                <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
+                <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
+              </div>
+            </div>
+          </div>
+          <div class="mapside">
             <div class="maphead">
               <div>
                 <h3 id="mapTitle">—</h3>
                 <div class="sub" id="mapSubtitle" data-t="homeMapSubtitle">Pick an indicator; every commune this pipeline covers is drawn.</div>
               </div>
               <select class="bp-chart-select" id="mapIndicator" data-t-aria="indicatorToMap" aria-label="Indicator to draw on the map" style="max-width:130px"></select>
-            </div>
-            <div class="mapzone">
-              <div class="mapbox" id="mapbox">
-                <svg id="svg" role="img" aria-label="Choropleth map of Belgian communes"></svg>
-                <div class="map-tip map-hidden" id="tip"></div>
-                <div class="zoombtns">
-                  <button type="button" id="zoomIn" data-t-title="zoomIn" title="Zoom in">+</button>
-                  <button type="button" id="zoomOut" data-t-title="zoomOut" title="Zoom out">&minus;</button>
-                </div>
-              </div>
             </div>
             <div class="mapfoot">
               <div class="legend-caption" id="legendCaption"></div>
@@ -410,82 +508,84 @@
               </div>
               <div class="sub" id="mapProvenance" style="margin-top:6px"></div>
             </div>
+            <a class="map-full-link" href="map.html" data-t="homeAllMaps">See the full-page map →</a>
           </div>
-
-          <div class="hero-mini" id="heroMini"></div>
         </div>
       </div>
-
-      <!-- Issue #309 PR 2: built by assets/belpulse/live_counters.js from
-           public/data/live_counters.json (placements.home_strip), or falls
-           back to the honest "not published" sentence this strip has
-           always shown if that payload is missing/invalid/expired -- see
-           HomeFinance below. data-simulated="true" + a visible, non-empty
-           .bp-simulated-badge are REQUIRED here: BPLiveCounters.mount()
-           throws without them (CLAUDE.md rules 2/24/36). -->
-      <section class="finance" id="financeStrip" data-simulated="true" style="--th:var(--v5-hero-th)">
-        <!-- Header row (icon, title, badge, pause, the detail link) above a
-             FULL-WIDTH row of the five compact tiles -- the old layout put
-             icon+title+badge+text in one flex item beside the counters,
-             squeezing them into whatever width that item's sibling left. -->
-        <div class="fin-header">
-          <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
-          <h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2>
-          <span class="bp-simulated-badge bp-simulated-badge--prominent" id="financeBadge" data-t="finSimulatedBadge" hidden>Simulation — trend extrapolation, not a forecast</span>
-          <button type="button" class="bp-sim-pause" id="financePause" aria-pressed="false" hidden><span data-t="finPause">Pause</span></button>
-          <a class="fin-link" href="macro.html#finances-publiques" data-t="homeFinanceSeeDetails">See the details →</a>
-        </div>
-        <!-- Static fallback (an honest message, not a typed number) so a
-             reader whose JavaScript never runs still sees an accurate
-             statement -- HomeFinance.mount()/renderFallback() overwrite
-             this once the real payload is checked. The pipeline DOES hold
-             these figures now (the Official figures block on the Macro
-             page); only the live trend simulation can be unavailable,
-             which is what both this default and renderFallback() say. -->
-        <p class="fin-text" id="financeCompactText">The live simulation is unavailable here. <a href="macro.html#finances-publiques">See the official figures on the Macro page</a></p>
-        <div class="bp-sim-strip bp-sim-strip--compact" id="financeLiveCounters"></div>
-      </section>
     </section>
   </div>
 
-  <!-- ── commune profiles | Belgium in maps ──────────────────────────── -->
+  <!-- ── commune profiles, then the simulated finance strip (moved below
+       the featured commune so it is never the first figure met) ─────── -->
   <div class="wrap">
-    <div class="duo">
-      <section class="section" id="communeSection" style="--th:var(--v5-commune-th)">
-        <div class="section-head">
-          <div>
-            <span class="section-eyebrow" data-t="v5SectionCommune">Commune profile</span>
-            <h2 data-t="homeCommunesTitle">Commune profiles</h2>
-          </div>
-          <a href="profiles.html" data-t="homeAllCommunes">Explore every commune →</a>
+    <section class="section" id="communeSection" style="--th:var(--v5-commune-th)">
+      <div class="section-head">
+        <div>
+          <span class="section-eyebrow" data-t="v5SectionCommune">Commune profile</span>
+          <h2 data-t="homeCommunesTitle">Commune profiles</h2>
         </div>
-        <p class="section-sub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
-        <div class="commune-card bp-state" id="featuredCard" data-state="loading">
-          <div class="bp-state-skeleton"></div>
-          <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur" loading="lazy" decoding="async"></div>
-          <div>
-            <div class="cc-name" id="featuredName">—</div>
-            <div class="cc-region" id="featuredRegion">—</div>
-            <a class="bp-btn bp-btn--outline" id="featuredLink" href="profiles.html" style="border-color:var(--v5-commune-th); color:var(--v5-commune-th); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
-            <div class="cc-stats" id="featuredStats"></div>
-          </div>
+        <a href="profiles.html" data-t="homeAllCommunes">Explore every commune →</a>
+      </div>
+      <p class="section-sub" data-t="homeCommunesSub">Compare every Belgian commune and explore its economic and social indicators.</p>
+      <div class="commune-card bp-state" id="featuredCard" data-state="loading">
+        <div class="bp-state-skeleton"></div>
+        <div class="cc-photo"><img src="assets/belpulse/home2/home2-namur-card.png" data-t-alt="homeAiNamurAlt" alt="AI-generated illustrative view inspired by Namur" loading="lazy" decoding="async"></div>
+        <div>
+          <div class="cc-name" id="featuredName">—</div>
+          <div class="cc-region" id="featuredRegion">—</div>
+          <a class="bp-btn bp-btn--outline" id="featuredLink" href="profiles.html" style="border-color:var(--v5-commune-th); color:var(--v5-commune-th); font-size:11px; padding:6px 12px" data-t="homeViewProfile">See the full profile</a>
+          <div class="cc-stats" id="featuredStats"></div>
         </div>
-        <p class="featured-meta" id="featuredCaption"></p>
-      </section>
+      </div>
+      <p class="featured-meta" id="featuredCaption"></p>
+    </section>
 
-      <section class="section" id="mapsSection" style="--th:var(--v5-maps-th)">
-        <div class="section-head">
-          <div>
-            <span class="section-eyebrow" data-t="v5SectionMaps">Belgium in maps</span>
-            <h2 data-t="homeMapsTitle">Belgium in maps</h2>
-          </div>
-          <a href="map.html" data-t="homeAllMaps">See the full-page map →</a>
+    <!-- Issue #309 PR 2: built by assets/belpulse/live_counters.js from
+         public/data/live_counters.json (placements.home_strip), or falls
+         back to the honest "not published" sentence this strip has
+         always shown if that payload is missing/invalid/expired -- see
+         HomeFinance below. data-simulated="true" + a visible, non-empty
+         .bp-simulated-badge are REQUIRED here: BPLiveCounters.mount()
+         throws without them (CLAUDE.md rules 2/24/36). -->
+    <section class="finance" id="financeStrip" data-simulated="true" style="--th:var(--v5-hero-th)">
+      <!-- Header row (icon, title, badge, pause, the detail link) above a
+           FULL-WIDTH row of the five compact tiles -- the old layout put
+           icon+title+badge+text in one flex item beside the counters,
+           squeezing them into whatever width that item's sibling left. -->
+      <div class="fin-header">
+        <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
+        <h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2>
+        <span class="bp-simulated-badge bp-simulated-badge--prominent" id="financeBadge" data-t="finSimulatedBadge" hidden>Simulation — trend extrapolation, not a forecast</span>
+        <button type="button" class="bp-sim-pause" id="financePause" aria-pressed="false" hidden><span data-t="finPause">Pause</span></button>
+        <a class="fin-link" href="macro.html#finances-publiques" data-t="homeFinanceSeeDetails">See the details →</a>
+      </div>
+      <!-- Static fallback (an honest message, not a typed number) so a
+           reader whose JavaScript never runs still sees an accurate
+           statement -- HomeFinance.mount()/renderFallback() overwrite
+           this once the real payload is checked. The pipeline DOES hold
+           these figures now (the Official figures block on the Macro
+           page); only the live trend simulation can be unavailable,
+           which is what both this default and renderFallback() say. -->
+      <p class="fin-text" id="financeCompactText">The live simulation is unavailable here. <a href="macro.html#finances-publiques">See the official figures on the Macro page</a></p>
+      <div class="bp-sim-strip bp-sim-strip--compact" id="financeLiveCounters"></div>
+    </section>
+  </div>
+
+  <!-- ── Belgium in maps -- unchanged, now full width (it lost its .duo
+       partner: #communeSection now sits above the finance strip) ────── -->
+  <div class="wrap">
+    <section class="section" id="mapsSection" style="--th:var(--v5-maps-th)">
+      <div class="section-head">
+        <div>
+          <span class="section-eyebrow" data-t="v5SectionMaps">Belgium in maps</span>
+          <h2 data-t="homeMapsTitle">Belgium in maps</h2>
         </div>
-        <p class="section-sub" data-t="homeMapsSub">Explore regional dynamics through interactive maps built on official data.</p>
-        <div class="pilltabs" id="themeTabs" role="tablist" aria-label="Map themes"></div>
-        <div class="thumbs" id="themeThumbs"></div>
-      </section>
-    </div>
+        <a href="map.html" data-t="homeAllMaps">See the full-page map →</a>
+      </div>
+      <p class="section-sub" data-t="homeMapsSub">Explore regional dynamics through interactive maps built on official data.</p>
+      <div class="pilltabs" id="themeTabs" role="tablist" aria-label="Map themes"></div>
+      <div class="thumbs" id="themeThumbs"></div>
+    </section>
   </div>
 
   <!-- ── national key indicators ──────────────────────────────────────── -->
@@ -613,7 +713,7 @@
   </div>
 </div>
 
-<script src="assets/i18n.js?v=1ceaa67dc8"></script>
+<script src="assets/i18n.js?v=913d4b6c67"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
 <script src="assets/belpulse/components.js"></script>
@@ -633,6 +733,13 @@
   'use strict';
 
   var GEO_URL     = 'data/geo/communes.geojson';
+  // Independent audit round 3: communes.geojson alone carries only
+  // name_fr/name_nl -- no name_en, and no province/region to tell two
+  // communes with the same French name apart ("Saint-Nicolas", 46021 AND
+  // 62093). geographies.json (the same payload profiles.html's own
+  // "Région / Province" line reads) has both, joined on geo_id, which
+  // communes.geojson's features already carry too.
+  var GEOGRAPHIES_URL = 'public/data/metadata/geographies.json';
   var INDEX_URL   = 'public/data/metadata/indicators.json';
   var SECTIONS_URL= 'public/data/metadata/sections.json';
   var SOURCES_URL = 'public/data/metadata/sources.json';
@@ -661,7 +768,7 @@
     sources: {}, grades: {}, national: {}, map: null, geojson: null,
     activeTheme: null, thumbs: [], drawnIndicator: null,
     featuredNis: null, featuredCodes: [], featured: null,
-    heroCodes: [],
+    heroCodes: [], geographies: {},
     financesPubliques: null,
   };
 
@@ -814,15 +921,35 @@
     });
   }
 
+  // Lead review (2026-10-04): the hero card used the indicator's full
+  // official name ("General government net lending/borrowing (balance),
+  // Belgium (% of GDP)") as its title and wrapped onto seven lines. The
+  // hero entry's own `short_label` (national_sections.json's `hero` list,
+  // trilingual, never an indicator id or a literal in this function --
+  // rule 2/24) is a short display name for exactly this card; falls back
+  // to the long name only when a hero entry has none (the nationalOrder()
+  // fallback path in heroOrder(), used only if the config fetch itself
+  // failed), same as the rest of this page already degrades.
+  function heroShortName(h, entry, code){
+    return (h.short_label && (h.short_label[LANG] || h.short_label.en)) || nationalName(entry, code);
+  }
+
+  // hero entries are {code, format, short_label} from
+  // national_sections.json's `hero` list (format: 'plain' | 'signed_label'
+  // -- never an indicator id in this function, rule 2/24). A bare string
+  // (the exporter's pre-batch-2 shape, or the nationalOrder() fallback
+  // below) normalises to {code, format: 'plain'}.
   function heroOrder(){
-    var declared = (state.heroCodes || []).filter(function(c){
-      return state.national[c] && latestNumeric(state.national[c]) !== null;
-    });
+    var declared = (state.heroCodes || [])
+      .map(function(c){ return typeof c === 'string' ? {code: c, format: 'plain'} : c; })
+      .filter(function(c){
+        return c && c.code && state.national[c.code] && latestNumeric(state.national[c.code]) !== null;
+      });
     // Falls back only if the config fetch itself failed (offline preview,
     // stale build) -- the exporter already refuses to publish a `hero` id
     // nothing provides, so an empty `declared` on a real build means the
     // fetch failed, not that the config was wrong.
-    return declared.length ? declared : nationalOrder().slice(0, 2);
+    return declared.length ? declared : nationalOrder().slice(0, 2).map(function(c){ return {code: c, format: 'plain'}; });
   }
 
   function seriesPoints(entry, limit){
@@ -833,23 +960,17 @@
     });
   }
 
-  /* The plot fills whatever the card has left after its head and source
-     line, so the chart is as big as the card allows. The slot itself is
-     left out of the sum, so the result never feeds back into itself; 128px
-     is the floor (and what a content-sized card on a phone gets). */
-  function heroChartHeight(canvas){
-    var slot = canvas.parentNode, card = slot.parentNode;
-    var cs = getComputedStyle(card), used = 0;
-    Array.prototype.forEach.call(card.children, function(child){
-      if(child === slot) return;
-      var st = getComputedStyle(child);
-      used += child.offsetHeight + parseFloat(st.marginTop) + parseFloat(st.marginBottom);
-    });
-    var ss = getComputedStyle(slot);
-    var free = card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) -
-      used - parseFloat(ss.paddingTop) - parseFloat(ss.marginTop);
-    return Math.max(128, Math.floor(free));
-  }
+  // Lead review (round 2): the chart used to measure "whatever the card has
+  // left" at draw time -- fine in principle, but a taller reservation gave
+  // the chart more room, which made the chart grow, which (once the
+  // reservation this function itself fed was corrected) left a visible
+  // empty band between the head and the chart. A plain constant removes
+  // the dependency entirely: the chart is always this tall, and the
+  // reserved min-height on .hero-mini (components CSS above) is chosen to
+  // match it plus the rest of the card's real content, measured with
+  // Playwright, not guessed -- so nothing here can feed back into anything
+  // else.
+  var HERO_CHART_HEIGHT = 150;
 
   var heroUnregister = [];
   function renderHeroMini(){
@@ -858,27 +979,64 @@
     var host = document.getElementById('heroMini');
     host.innerHTML = '';
     var draws = [];
-    heroOrder().slice(0, 2).forEach(function(code, i){
+    var statusLabels = {
+      provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
+    };
+    var entries = heroOrder().slice(0, 2);
+    entries.forEach(function(h, i){
+      var code = h.code;
       var entry = state.national[code];
-      var name = nationalName(entry, code);
+      var name = heroShortName(h, entry, code);
       var latest = latestNumeric(entry);
-      var el = document.createElement('div');
-      el.className = 'hcard';
+      // Lead review (round 2): the WHOLE card is the link to
+      // macro.html#finances-publiques now, not just its title -- so the
+      // title stays the page's normal dark ink, same as the lower-page
+      // national cards' own .kpicard h3 (no colour override there
+      // either). colour:inherit (CSS above) keeps that ink on an <a>
+      // rather than the browser's default link blue.
+      var el = document.createElement('a');
+      el.className = 'hcard hero-figure-card';
+      el.href = 'macro.html#finances-publiques';
       // Title and latest value + period share the head row, then the plot,
-      // then its source -- the plot never sits above the figure it illustrates.
+      // then its source -- the plot never sits above the figure it
+      // illustrates. Lead review round 3: the sign word gets its own small
+      // reserved line ABOVE the figure (format:'signed_label' only), so
+      // the big number is always just "5,2%" and the label column never
+      // has to make room for "Déficit 5,2%" as one wide string.
       el.innerHTML =
         '<div class="mini-head"><div class="mini-label"><h3></h3><div class="sub"></div></div>' +
-        '<div class="mini-reading"><b></b><span class="period sub"></span></div></div>' +
+        '<div class="mini-reading"><div class="sign-word sub"></div><b></b><span class="period sub"></span></div></div>' +
         '<div class="mini-canvas"><canvas></canvas></div>' +
         '<div class="provenance sub"></div>';
       el.querySelector('h3').textContent = name;
       // A unit LABEL, never the raw code -- "percent_yy" must not reach a
       // reader (claude.md rule 7; MapUI.unitLabel, shared with macro.html).
-      el.querySelector('.sub').textContent = MapUI.unitLabel(entry.unit, LANG);
-      el.querySelector('.mini-reading b').textContent =
-        latest ? MapUI.formatValue(latest.value, entry.unit, entry.decimals, LANG) : '—';
-      el.querySelector('.period').textContent = latest ? latest.period : '';
-      el.querySelector('.provenance').textContent = nationalSourceLine(entry);
+      el.querySelector('.mini-label .sub').textContent = MapUI.unitLabel(entry.unit, LANG);
+      // format:'signed_label' (from national_sections.json's `hero` entry
+      // -- never an indicator id in this function, rule 2/24): the sign
+      // word (T('finDeficit')/T('finSurplus'), the same convention
+      // live_counters.js already uses for this series) and the magnitude
+      // are two separate pieces, so a negative balance can never be
+      // misread as a positive one (rule 26).
+      var signWord = '', magnitude = '—';
+      if(latest){
+        if(h.format === 'signed_label'){
+          signWord = latest.value < 0 ? T('finDeficit') : T('finSurplus');
+          magnitude = MapUI.formatValue(Math.abs(latest.value), entry.unit, entry.decimals, LANG);
+        } else {
+          magnitude = MapUI.formatValue(latest.value, entry.unit, entry.decimals, LANG);
+        }
+      }
+      el.querySelector('.sign-word').textContent = signWord;
+      el.querySelector('.mini-reading b').textContent = magnitude;
+      // Period AND status word together -- "provisional"/"estimate"/
+      // "revised" must stay visible on the card itself, not only in the
+      // chart tooltip below (rule 26: a provisional figure is not a final
+      // one and must not read as one).
+      el.querySelector('.period').textContent = latest
+        ? latest.period + (latest.status && latest.status !== 'final' ? ' · ' + (statusLabels[latest.status] || latest.status) : '')
+        : '';
+      el.querySelector('.provenance').textContent = latest ? nationalSourceLine(entry) : T('homeFigureUnavailable');
       host.appendChild(el);
       var pts = seriesPoints(entry, 24);
       if(pts.filter(function(p){ return typeof p.value === 'number'; }).length > 1){
@@ -886,17 +1044,23 @@
           unit: entry.unit, decimals: entry.decimals, i: i});
       }
     });
-    // Draw only once every card is in the DOM: .hero-mini is a flex column
-    // whose children size against the grid, and a canvas measured mid-append
+    // national.json missing/unreachable: heroOrder() returns [] (nothing in
+    // state.national to fall back to either) -- say so plainly rather than
+    // leaving the row silently empty, which could read as "zero" (rule 26).
+    if(!entries.length){
+      var unavailable = document.createElement('div');
+      unavailable.className = 'hero-figure-unavailable';
+      unavailable.textContent = T('homeFigureUnavailable');
+      host.appendChild(unavailable);
+    }
+    // Draw only once every card is in the DOM: .hero-mini is a grid whose
+    // children size against the row, and a canvas measured mid-append
     // bakes in the wrong width (found the hard way in the original batch).
-    var statusLabels = {
-      provisional: T('status_provisional'), estimate: T('status_estimate'), revised: T('status_revised'),
-    };
     draws.forEach(function(d){
       // label: null keeps the indicator name out of the tooltip -- the card
       // title already names it, and the canvas aria-label still carries it.
       var model = BPCharts.drawLine(d.canvas, [{label: null, unit: d.unit, points: d.points, colourIndex: d.i}],
-        {locale: LANG, height: heroChartHeight(d.canvas)});
+        {locale: LANG, height: HERO_CHART_HEIGHT});
       // formatValue: MapUI's own formatter, the same one every other number
       // on this page uses -- "2,2%", never "2,2 percent_yy" (rule 7).
       var tipOpts = {
@@ -906,7 +1070,7 @@
       BPCharts.attachTooltip(d.canvas, model, tipOpts);
       var redraw = function(){
         var next = BPCharts.drawLine(d.canvas, [{label: null, unit: d.unit, points: d.points, colourIndex: d.i}],
-          {locale: LANG, height: heroChartHeight(d.canvas)});
+          {locale: LANG, height: HERO_CHART_HEIGHT});
         model.hits = next.hits;
       };
       heroUnregister.push(BPCharts.register(d.canvas, redraw));
@@ -1280,25 +1444,226 @@
     });
   }
 
-  /* ---- commune search (hero) -- lists every commune from the geojson;
-     picking one (or typing its name and pressing enter/change) navigates to
-     the real commune.html?nis=... profile, exactly like commune.html's own
-     switcher. */
-  function wireSearch(){
-    var input = document.getElementById('communeSearch');
-    var list = document.getElementById('communeList');
-    if(!input || !list || !state.geojson) return;
-    list.innerHTML = '';
-    (state.geojson.features || []).forEach(function(f){
+  /* ---- commune search (hero) -- a small ARIA 1.2 combobox over the same
+     geojson the map already loaded, joined against geographies.json (the
+     same payload profiles.html's own "Région / Province" line reads) for
+     an English name and a province/region. Matches name_fr, name_nl and
+     the geographies.json name_en where one exists (no name_de exists
+     anywhere in this payload -- checked directly: 0 of 565 features carry
+     one), case- and accent-insensitively, in every interface language,
+     plus the NIS code. Exactly one match (typed, or chosen from the
+     list) -> commune.html?nis=; several or no match, or JavaScript never
+     running at all (the <form> is a real GET to profiles.html) -> the
+     commune directory with the query, never a dead end
+     (site-audit-2026-10-04/ux.md, section 6a: the old control only
+     matched the French label and had no visible label or keyboard of its
+     own). */
+  function foldDiacritics(s){
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  }
+
+  // geographies.json value resolver, same shape as profiles.html's own
+  // text() -- current language, falling back to English, never a raw
+  // code reaching a reader (rule 7).
+  function geoText(obj){
+    if(!obj) return '';
+    if(typeof obj === 'string') return obj;
+    return obj[LANG] || obj.en || '';
+  }
+  function geoEntry(props){
+    return state.geographies[props.geo_id] || null;
+  }
+  // Walks the parent_geo_id chain up from a municipality to the first
+  // ancestor at `level` -- same walk as profiles.html's levelOf(), which
+  // is how it finds a commune's province (or stops at region for
+  // Brussels, which has none).
+  function levelOf(geo, level){
+    while(geo && geo.level !== level) geo = state.geographies[geo.parent_geo_id];
+    return geo || null;
+  }
+  // Independent audit round 3 (P1): "Saint-Nicolas" names two communes
+  // (46021 Sint-Niklaas and 62093, Liège province) identically in French,
+  // and the suggestion list showed nothing else to tell them apart --
+  // about half of visitors who arrowed down to the first one landed on
+  // the wrong commune. Every suggestion line now carries its province,
+  // or its region where it has no province (Brussels's 19 communes),
+  // read the same way profiles.html already reads it for its own
+  // "Région / Province" line -- never typed.
+  function communeWhereLabel(props){
+    var geo = geoEntry(props);
+    if(!geo) return '';
+    var prov = levelOf(geo, 'province');
+    if(prov) return geoText(prov.name);
+    var reg = levelOf(geo, 'region');
+    return reg ? geoText(reg.name) : '';
+  }
+
+  function communeDisplayName(props){
+    // Independent audit round 3 (P2): the English interface showed the
+    // French name ("Anvers") even though geographies.json carries a real
+    // English one ("Antwerp") -- falls back to the French/Dutch official
+    // name geojson already carries, exactly as before, wherever no
+    // distinct English name exists.
+    var geo = geoEntry(props);
+    var en = geo && geo.name && geo.name.en;
+    if(LANG === 'en' && en) return en;
+    return (LANG === 'nl' ? props.name_nl : props.name_fr) || props.name_fr || props.name_nl || props.nis;
+  }
+
+  // A commune whose OWN name is a short substring of several others'
+  // (typing "Bergen", the Dutch name for Mons, also matches Grimbergen/
+  // Keerbergen/Destelbergen/Geraardsbergen's own Dutch names -- found
+  // while testing the required query list with Playwright) is an exact
+  // fold-match, never a partial one. Used only to ORDER matchCommunes()'s
+  // result below, never to narrow it: the one/several/no-match counts
+  // wireSearch() acts on are unchanged either way.
+  function isExactCommuneMatch(props, q){
+    var geo = geoEntry(props);
+    var en = geo && geo.name && geo.name.en;
+    return foldDiacritics(props.name_fr) === q || foldDiacritics(props.name_nl) === q ||
+           (en && foldDiacritics(en) === q) || (props.nis || '') === q;
+  }
+
+  function matchCommunes(raw){
+    var q = foldDiacritics(raw);
+    if(!q) return [];
+    var matches = ((state.geojson && state.geojson.features) || []).filter(function(f){
       var p = f.properties || {};
-      var name = LANG === 'nl' ? p.name_nl : p.name_fr;
-      var o = document.createElement('option');
-      o.value = (name || p.name_fr || p.nis) + ' (' + p.nis + ')';
-      list.appendChild(o);
+      var geo = geoEntry(p);
+      var en = geo && geo.name && geo.name.en;
+      return foldDiacritics(p.name_fr).indexOf(q) !== -1 ||
+             foldDiacritics(p.name_nl).indexOf(q) !== -1 ||
+             (en && foldDiacritics(en).indexOf(q) !== -1) ||
+             (p.nis || '').indexOf(q) !== -1;
     });
-    input.addEventListener('change', function(){
-      var m = /\((\d{4,5})\)\s*$/.exec(input.value);
-      if(m) window.location.href = 'commune.html?nis=' + m[1];
+    matches.sort(function(a, b){
+      var ea = isExactCommuneMatch(a.properties || {}, q), eb = isExactCommuneMatch(b.properties || {}, q);
+      return ea === eb ? 0 : (ea ? -1 : 1);
+    });
+    return matches;
+  }
+
+  function wireSearch(){
+    var form   = document.getElementById('heroSearchForm');
+    var input  = document.getElementById('communeSearch');
+    var list   = document.getElementById('communeSuggestions');
+    var status = document.getElementById('communeSearchStatus');
+    if(!form || !input || !list || !status || !state.geojson) return;
+    // Listeners attach once; every closure below re-reads state.geojson/
+    // LANG live, so a later call (bp:lang) needs no re-wiring at all.
+    if(input.dataset.wired) return;
+    input.dataset.wired = '1';
+
+    var activeIndex = -1;
+    var shown = [];
+
+    function closeList(){
+      list.hidden = true;
+      list.innerHTML = '';
+      input.setAttribute('aria-expanded', 'false');
+      input.setAttribute('aria-activedescendant', '');
+      activeIndex = -1;
+      shown = [];
+    }
+
+    function setActive(i){
+      var items = list.children;
+      if(activeIndex >= 0 && items[activeIndex]) items[activeIndex].setAttribute('aria-selected', 'false');
+      activeIndex = i;
+      if(activeIndex >= 0 && items[activeIndex]){
+        items[activeIndex].setAttribute('aria-selected', 'true');
+        input.setAttribute('aria-activedescendant', items[activeIndex].id);
+        items[activeIndex].scrollIntoView({block: 'nearest'});
+      } else {
+        input.setAttribute('aria-activedescendant', '');
+      }
+    }
+
+    function choose(feature){
+      var p = feature.properties || {};
+      input.value = communeDisplayName(p);
+      closeList();
+      window.location.href = 'commune.html?nis=' + p.nis;
+    }
+
+    function openList(matches){
+      shown = matches.slice(0, 8);
+      activeIndex = -1;
+      list.innerHTML = '';
+      shown.forEach(function(f, i){
+        var p = f.properties || {};
+        var li = document.createElement('li');
+        li.id = 'communeOption' + i;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', 'false');
+        li.appendChild(document.createTextNode(communeDisplayName(p)));
+        // Independent audit round 3 (P1): two communes can share the
+        // exact same display name ("Saint-Nicolas", 46021 and 62093) with
+        // nothing before this to tell them apart -- a visitor arrowing
+        // down to the first one had no way to know it might be the wrong
+        // one. The province (or region, for Brussels's communes, which
+        // have none) goes on every line, not just ambiguous ones, read
+        // from geographies.json via communeWhereLabel() above, never typed.
+        var where = communeWhereLabel(p);
+        if(where){
+          var whereSpan = document.createElement('span');
+          whereSpan.className = 'where';
+          whereSpan.textContent = ' · ' + where;
+          li.appendChild(whereSpan);
+        }
+        var nis = document.createElement('span');
+        nis.className = 'nis';
+        nis.textContent = '(' + p.nis + ')';
+        li.appendChild(nis);
+        // mousedown, not click: fires before the input's blur, so the
+        // choice registers even though focus never visibly leaves the field.
+        li.addEventListener('mousedown', function(e){ e.preventDefault(); choose(f); });
+        list.appendChild(li);
+      });
+      list.hidden = shown.length === 0;
+      input.setAttribute('aria-expanded', shown.length ? 'true' : 'false');
+      status.textContent = shown.length === 0 ? T('homeSearchNoMatches')
+        : shown.length === 1 ? T('homeSearchOneMatch') : T('homeSearchMatches', {n: shown.length});
+    }
+
+    function goToDirectory(){
+      window.location.href = 'profiles.html?q=' + encodeURIComponent(input.value.trim());
+    }
+
+    input.addEventListener('input', function(){
+      if(!input.value.trim()){ closeList(); status.textContent = ''; return; }
+      openList(matchCommunes(input.value));
+    });
+
+    input.addEventListener('keydown', function(e){
+      if(list.hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp') && input.value.trim()){
+        openList(matchCommunes(input.value));
+      }
+      if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        if(shown.length) setActive(Math.min(activeIndex + 1, shown.length - 1));
+      } else if(e.key === 'ArrowUp'){
+        e.preventDefault();
+        if(shown.length) setActive(Math.max(activeIndex - 1, 0));
+      } else if(e.key === 'Escape'){
+        if(!list.hidden){ e.preventDefault(); closeList(); }
+      } else if(e.key === 'Enter' && activeIndex >= 0 && shown[activeIndex]){
+        // No suggestion highlighted: fall through to the form's own submit
+        // handler below (exactly one match, or off to the directory).
+        e.preventDefault();
+        choose(shown[activeIndex]);
+      }
+    });
+
+    // The suggestion's own mousedown (above) must land before blur hides
+    // the list, hence the short delay rather than closing synchronously.
+    input.addEventListener('blur', function(){ setTimeout(closeList, 120); });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var matches = matchCommunes(input.value);
+      if(matches.length === 1) choose(matches[0]);
+      else goToDirectory();
     });
   }
 
@@ -1315,22 +1680,45 @@
     });
     applyStrings();
 
+    // issue #312 hardening: every member of this Promise.all() now catches
+    // its own network-level failure (a hard abort/timeout/DNS failure, not
+    // just a non-2xx response) and resolves to null instead of rejecting.
+    // Before this fix a single hard failure on ANY of these -- e.g.
+    // national.json, the one this hero's two figures depend on -- rejected
+    // the whole Promise.all, threw out of init() uncaught, and silently
+    // skipped every line after it: renderHeroMini() never ran (blank hero,
+    // not the honest "not available" state renderHeroMini() already has),
+    // and wireSearch() (called later in this same function, after the
+    // geojson fetch) never ran either, so the commune search died too --
+    // found with Playwright by aborting the national.json request and
+    // watching an unrelated feature (search) go dark with it.
     var responses = await Promise.all([
-      fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
-      fetch(NATIONAL_URL), fetch(MANIFEST_URL), fetch(FEATURED_CONFIG_URL).catch(function(){ return null; }),
+      fetch(INDEX_URL).catch(function(){ return null; }),
+      fetch(SECTIONS_URL).catch(function(){ return null; }),
+      fetch(SOURCES_URL).catch(function(){ return null; }),
+      fetch(NATIONAL_URL).catch(function(){ return null; }),
+      fetch(MANIFEST_URL).catch(function(){ return null; }),
+      fetch(FEATURED_CONFIG_URL).catch(function(){ return null; }),
       fetch(NATIONAL_SECTIONS_URL).catch(function(){ return null; }),
       fetch(LIVE_COUNTERS_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+      fetch(GEOGRAPHIES_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
     ]);
-    var indexJson = responses[0].ok ? await responses[0].json() : {indicators: []};
+    var indexJson = (responses[0] && responses[0].ok) ? await responses[0].json() : {indicators: []};
     state.index = indexJson.indicators || [];
     state.index.forEach(function(r){ state.byCode[r.indicator_code] = r; });
-    if(responses[1].ok) state.sections = await responses[1].json();
-    if(responses[2].ok){
+    if(responses[1] && responses[1].ok) state.sections = await responses[1].json();
+    if(responses[2] && responses[2].ok){
       var reg = await responses[2].json();
       state.sources = reg.sources || {}; state.grades = reg.grades || {};
     }
-    if(responses[3].ok) state.national = (await responses[3].json()).indicators || {};
-    if(responses[4].ok){
+    // national.json missing/unreachable: state.national stays {} (its
+    // initial value) -- heroOrder() and nationalOrder() already read that
+    // as "nothing to show" and renderHeroMini() already renders
+    // T('homeFigureUnavailable') in that case (never a blank row, never a
+    // zero). This is the one line that lets that existing fallback run at
+    // all when the fetch hard-fails rather than just answering non-2xx.
+    if(responses[3] && responses[3].ok) state.national = (await responses[3].json()).indicators || {};
+    if(responses[4] && responses[4].ok){
       var ds = (await responses[4].json()).datasets || {};
       document.getElementById('statCommunes').textContent = (ds.communes || {}).count || '—';
       document.getElementById('statIndicators').textContent = (ds.communes || {}).indicators || '—';
@@ -1369,6 +1757,16 @@
     var upd = document.getElementById('attrUpdated');
     if(upd && state.attrUpdated) upd.textContent = state.attrUpdated;
 
+    // geographies.json missing/unreachable: state.geographies stays {}
+    // (its initial value). Every reader of it (communeDisplayName(),
+    // communeWhereLabel()) already falls back to what communes.geojson
+    // alone provides, so search keeps working, just without an English
+    // name or a province/region line -- never broken, same "degrade
+    // honestly" pattern as national.json above.
+    if(responses[8]){
+      (responses[8].geographies || []).forEach(function(g){ state.geographies[g.geo_id] = g; });
+    }
+
     HomeFinance.init(state.financesPubliques, responses[7], LANG);
     renderHeroMini();
     renderNational();
@@ -1404,176 +1802,11 @@
     else document.getElementById('mapCard').dataset.state = 'unavailable';
   }
 
-  /* =========================================================================
-     Two-phase hero: phase 1 is the film alone (full width, nothing on top);
-     phase 2 is the data hero. Transition triggers: the film ending, the
-     visitor scrolling past ~40% of the film band, or clicking "Passer".
-     Session repeat: sessionStorage flag -- a later view in the same session
-     opens straight into phase 2 with the film's last frame as a slim banner
-     ("Revoir le film" replays it in place, without leaving phase 2).
-     prefers-reduced-motion / Save-Data: no video is ever requested; the
-     poster shows and the page opens directly in phase 2 (no film band,
-     nothing to skip).
-     ========================================================================= */
-  function initHero(){
-    var SESSION_KEY = 'belpulse-home-film-played';
-    var filmHero = document.getElementById('filmHero');
-    var poster   = document.getElementById('filmPoster');
-    var video    = document.getElementById('filmVideo');
-    var skipBtn  = document.getElementById('filmSkip');
-    var replayBtn= document.getElementById('filmReplay');
-    var scrollCue= document.getElementById('filmScrollCue');
-    var dataHero = document.getElementById('dataHero');
-    if(!filmHero || !video) return;
-
-    function prefersReducedMotion(){
-      try{ return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
-      catch(e){ return false; }
-    }
-    function isSlowConnection(){
-      try{
-        var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        if(!c) return false;
-        if(c.saveData) return true;
-        return /^(slow-2g|2g|3g)$/.test(c.effectiveType || '');
-      }catch(e){ return false; }
-    }
-    function alreadyPlayedThisSession(){
-      try{ return sessionStorage.getItem(SESSION_KEY) === '1'; }
-      catch(e){ return false; }
-    }
-    function markPlayedThisSession(){
-      try{ sessionStorage.setItem(SESSION_KEY, '1'); }catch(e){}
-    }
-    function isMobileViewport(){
-      return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-    }
-
-    // Every phase-2 transition -- Passer, the film ending naturally, a
-    // second-session visit, or a play() rejection -- collapses the band to
-    // the same slim banner showing the frozen last frame: .filmhero's
-    // poster/video are position:absolute, so with no min-height the band
-    // would otherwise have no in-flow content to give it any height at all.
-    function goPhase2(){
-      filmHero.dataset.phase = '2';
-      filmHero.classList.add('banner');
-      video.hidden = true;
-      poster.hidden = false;
-      if(!video.paused) video.pause();
-      scrollCue.style.display = 'none';
-      skipBtn.hidden = true;
-    }
-
-    var reduced = prefersReducedMotion() || isSlowConnection();
-
-    if(reduced){
-      // No video ever requested. Straight into phase 2, poster as a slim
-      // banner (there is nothing to play, so no replay control either).
-      goPhase2();
-      replayBtn.hidden = true;
-      return;
-    }
-
-    if(alreadyPlayedThisSession()){
-      // Later view in the same session: slim banner with the last frame,
-      // "Revoir le film" replays the film in place (still full-band while
-      // replaying, same as the first visit).
-      goPhase2();
-      replayBtn.hidden = false;
-      replayBtn.addEventListener('click', function(){
-        filmHero.classList.remove('banner');
-        filmHero.dataset.phase = '1';
-        replayBtn.hidden = true;
-        skipBtn.hidden = false;
-        scrollCue.style.display = '';
-        playOnce();
-      });
-      return;
-    }
-
-    var wiredSrc = false;
-    function wireSources(){
-      if(wiredSrc) return;
-      wiredSrc = true;
-      var mobile = isMobileViewport();
-      Array.prototype.forEach.call(video.querySelectorAll('source'), function(src){
-        var wantsMobile = src.getAttribute('data-variant') === 'mobile';
-        if(wantsMobile === mobile) src.src = src.getAttribute('data-src');
-      });
-      video.load();
-    }
-
-    function playOnce(){
-      wireSources();
-      poster.hidden = true;
-      video.hidden = false;
-      var p = video.play();
-      if(p && typeof p.catch === 'function') p.catch(function(){ goPhase2(); });
-    }
-
-    function endFilm(){
-      markPlayedThisSession();
-      // asBanner:true -- the film freezes on its last frame as a visible
-      // slim banner (per the plan), not a collapsed 0-height band: the
-      // poster/video are position:absolute inside .filmhero, so with no
-      // min-height the band would otherwise have no in-flow content to give
-      // it any height at all once data-phase="2" removes the 92vh rule.
-      goPhase2();
-      replayBtn.hidden = false;
-      replayBtn.onclick = function(){
-        replayBtn.hidden = true;
-        filmHero.dataset.phase = '1';
-        filmHero.classList.remove('banner');
-        scrollCue.style.display = 'none';
-        playOnce();
-        video.addEventListener('ended', function onEnded(){
-          video.removeEventListener('ended', onEnded);
-          endFilm();
-        });
-      };
-    }
-
-    playOnce();
-    video.addEventListener('ended', endFilm);
-
-    skipBtn.addEventListener('click', function(){
-      endFilm();
-      dataHero.scrollIntoView({behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start'});
-    });
-
-    // Scrolling past ~40% of the film band also counts as "seen it" -- the
-    // visitor asked to move on by scrolling, same intent as Passer.
-    var triggered = false;
-    window.addEventListener('scroll', function onScroll(){
-      if(triggered || filmHero.dataset.phase === '2') { window.removeEventListener('scroll', onScroll); return; }
-      var rect = filmHero.getBoundingClientRect();
-      if(rect.bottom < window.innerHeight * 0.6){
-        triggered = true;
-        endFilm();
-        window.removeEventListener('scroll', onScroll);
-      }
-    }, {passive: true});
-
-    // Pause when scrolled fully out of view during phase 1 (rare -- the
-    // band is ~92vh -- but keeps the same courtesy the previous cut had).
-    if('IntersectionObserver' in window){
-      var io = new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){
-          if(filmHero.dataset.phase === '2' || video.hidden) return;
-          if(!entry.isIntersecting && !video.paused) video.pause();
-          else if(entry.isIntersecting && video.paused && !video.ended && video.currentTime > 0){
-            var p = video.play();
-            if(p && typeof p.catch === 'function') p.catch(function(){});
-          }
-        });
-      }, {threshold: 0.15});
-      io.observe(filmHero);
-    }
-  }
-
   // Fires on DOMContentLoaded (script is at the end of body, so the DOM is
-  // already parsed) and does not wait on init()'s network fetches.
-  initHero();
+  // already parsed) and does not wait on init()'s network fetches. There is
+  // no film on this page any more (2026-10-04, issue #312) -- it moved to
+  // about.html, played only on request -- so there is no initHero() left
+  // to call here.
   init();
 })();
 </script>
