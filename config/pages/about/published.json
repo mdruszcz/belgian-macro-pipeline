@@ -153,9 +153,9 @@
             "src_mobile": "/assets/belpulse/home-film/film-720.mp4",
             "poster": "/assets/belpulse/home-film/poster.webp",
             "alt": {
-              "en": "An animated film of Belgium's map and its 565 communes",
-              "fr": "Un film animé de la carte de la Belgique et de ses 565 communes",
-              "nl": "Een geanimeerde film van de kaart van België en haar 565 gemeenten"
+              "en": "An animated film of Belgium's map and its communes",
+              "fr": "Un film animé de la carte de la Belgique et de ses communes",
+              "nl": "Een geanimeerde film van de kaart van België en haar gemeenten"
             },
             "caption": {
               "en": "Belgium’s map and every commune, animated.",

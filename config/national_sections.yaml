@@ -233,7 +233,10 @@ hero:
     short_label: {en: "Public debt", fr: "Dette publique", nl: "Overheidsschuld"}
   - code: GOV_BALANCE_PCT_GDP_BE
     format: signed_label
-    short_label: {en: "Balance", fr: "Solde", nl: "Saldo"}
+    # Issue #312 batch 2 audit (P2): was {en: Balance, fr: Solde, nl: Saldo}
+    # -- the approved mockup's own public/data/metadata/national_sections.json
+    # reads "Budget balance" / "Solde budgétaire" / "Begrotingssaldo".
+    short_label: {en: "Budget balance", fr: "Solde budgétaire", nl: "Begrotingssaldo"}
 
 # =============================================================================
 # Issue #309 PR 2 -- the #finances-publiques chapter's own cards/charts and
