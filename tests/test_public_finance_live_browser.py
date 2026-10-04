@@ -1005,6 +1005,51 @@ _SNAPSHOT_JS = """
 """
 
 
+def _wait_for_leaf_snapshot_to_settle(
+    page, snapshot_js=_SNAPSHOT_JS, step_ms=250, cap_ms=30000, required_stable_reads=3
+):
+    """Advance the FAKE clock in small steps, re-snapshotting the leaf
+    elements after each step, until the number of leaves is identical on
+    `required_stable_reads` (default 3) consecutive reads -- proof the page
+    has actually finished producing late DOM structure (the Europe map's
+    lazy IntersectionObserver init, macro.html's deferred official charts
+    via afterLayoutSettles), not just that one lucky `networkidle` + a fixed
+    50ms nudge happened to land after it on this run. A single fixed delay
+    is a race: on a loaded CI box the deferred content can still arrive
+    after that one sample, which the guard below then (correctly, by its
+    own rules) reads as a forbidden structural change -- it is not wrong
+    about what it saw, the snapshot was just taken too early. Comparing
+    only the COUNT (not full equality) while settling is deliberate: the
+    counters are actively ticking every virtual frame, so their text content
+    never stops changing -- only the number of leaf elements must stabilise.
+
+    Returns the last snapshot taken (the one whose count matched the two
+    before it), to be used as the "before" snapshot for the real assertions.
+    Raises a clear AssertionError, naming the elapsed virtual time, if the
+    page never settles within `cap_ms`.
+    """
+    snapshot = page.evaluate(snapshot_js)
+    stable_reads = 1
+    elapsed_ms = 0
+    while stable_reads < required_stable_reads:
+        if elapsed_ms >= cap_ms:
+            raise AssertionError(
+                f"page never settled structurally after {elapsed_ms}ms of virtual "
+                f"time (wanted {required_stable_reads} consecutive reads with the "
+                f"same leaf-element count, longest run achieved was {stable_reads}; "
+                f"last count was {len(snapshot)})"
+            )
+        page.clock.run_for(step_ms)
+        elapsed_ms += step_ms
+        next_snapshot = page.evaluate(snapshot_js)
+        if len(next_snapshot) == len(snapshot):
+            stable_reads += 1
+        else:
+            stable_reads = 1
+        snapshot = next_snapshot
+    return snapshot
+
+
 @pytest.mark.parametrize("width", [1440, 390], ids=["1440px", "390px"])
 @pytest.mark.parametrize(
     "url_fragment,expect_any_change",
@@ -1051,12 +1096,17 @@ def test_behavioural_guard_changed_text_lives_only_in_a_badged_simulated_region(
         # macro.html's five official charts build one deferred animation
         # frame after the rest of the chapter (afterLayoutSettles, issue
         # #309 fix round 3) so they never block the Europe map's own first
-        # render -- flushed here, BEFORE the "before" snapshot, so their
-        # one-time appearance is not itself mistaken for a change during
-        # the 5s window below. A no-op on home2.html/micro.html, neither of
-        # which defers anything.
-        page.clock.run_for(50)
-        before = page.evaluate(_SNAPSHOT_JS)
+        # render, and the Europe panel itself lazy-inits off an
+        # IntersectionObserver. Both can still land AFTER networkidle on a
+        # loaded CI box. Rather than guess one fixed delay that is "usually"
+        # enough (the cause of the flake this settle helper replaces -- see
+        # its own docstring), advance the fake clock in small steps and keep
+        # re-snapshotting until the leaf-element count stops changing, so
+        # the "before" snapshot is taken only once the page has actually
+        # finished producing late structure. A no-op (settles on the very
+        # first read) on home2.html/micro.html, neither of which defers
+        # anything.
+        before = _wait_for_leaf_snapshot_to_settle(page)
         page.clock.run_for(5000)
         after = page.evaluate(_SNAPSHOT_JS)
         assert len(before) == len(after), (
