@@ -45,6 +45,15 @@ GOV_FIXTURE = REPO / "tests" / "fixtures" / "eurostat" / "gov_10a_main_TR_BE.jso
 #: here first.
 _GOV_REVENUE_SOURCE = bmdb.SOURCES["GOV_REVENUE_BE"]
 
+#: ADR 0018 (docs/decisions/0018-stopped-inflation-series.md, ACCEPTED
+#: 2026-10-04): HICP_EUROSTAT_BE's own real response, prc_hicp_minr filtered
+#: to unit=RCH_A, coicop18=TOTAL, geo=BE -- fetched live 2026-10-04 (same
+#: real-fetch run this PR's own data regeneration used, not a synthetic
+#: fixture). 225 rows, 2008-01 to 2026-09; the last cell carries OBS_FLAG
+#: 'e' (2026-09 = 4.6, a flash estimate), matching the catalogue exactly.
+_HICP_EUROSTAT_BE_SOURCE = bmdb.SOURCES["HICP_EUROSTAT_BE"]
+HICP_FIXTURE = REPO / "tests" / "fixtures" / "eurostat" / "prc_hicp_minr_BE.json"
+
 
 class _FakeResponse:
     def __init__(self, content: bytes, status_code: int = 200):
@@ -160,3 +169,51 @@ def test_a_public_finance_series_p_flag_lands_as_provisional_end_to_end(db, monk
         conn.close()
     assert canonical is not None, "the canonical sync must have written GOV_REVENUE_BE's 2025 row"
     assert canonical == (314736.4, "provisional")
+
+
+def test_hicp_eurostat_be_flash_estimate_lands_as_estimate_end_to_end(db, monkeypatch):
+    """ADR 0018: HICP_EUROSTAT_BE's real prc_hicp_minr response, through the
+    same national fetch_all -> sync_to_canonical path as every other
+    single-country Eurostat indicator (unlike HICP_ANNUAL_RATE_EUROPE,
+    which is multi-geo and goes through scripts/sync_international.py
+    instead). The 'e' flag on 2026-09 (4.6, Eurostat's own flash estimate)
+    must land as 'estimate' at both layers, and 2026-08 (a settled 'A' cell,
+    4.2) as 'final' -- the exact two values the catalogue and ADR both name."""
+    fake_sources = {"HICP_EUROSTAT_BE": _HICP_EUROSTAT_BE_SOURCE}
+    monkeypatch.setattr(bmdb, "SOURCES", fake_sources)
+    monkeypatch.setattr(sync_mod, "SOURCES", fake_sources)
+
+    raw = HICP_FIXTURE.read_bytes()
+    monkeypatch.setattr("src.fetchers.base.requests.get", lambda *a, **k: _FakeResponse(raw))
+
+    assert bmdb.fetch_all(db) is True
+
+    legacy_rows = dict(
+        db.conn.execute(
+            "SELECT period, obs_status FROM legacy_observations "
+            "WHERE indicator_code = 'HICP_EUROSTAT_BE' AND period IN ('2026-08', '2026-09')"
+        )
+    )
+    assert legacy_rows == {"2026-08": "A", "2026-09": "E"}
+    db.close()
+
+    checked, changed = sync_mod.sync(db.db_path, vintage="v1")
+    assert checked > 0
+    assert changed == checked
+
+    conn = sqlite3.connect(str(db.db_path))
+    try:
+        canonical = dict(
+            conn.execute(
+                "SELECT period, value || '|' || status FROM observations "
+                "WHERE indicator_id = 'HICP_EUROSTAT_BE' AND geo_id = 'be:country' "
+                "AND period IN ('2025-12', '2026-08', '2026-09')"
+            )
+        )
+    finally:
+        conn.close()
+    assert canonical == {
+        "2025-12": "2.2|final",
+        "2026-08": "4.2|final",
+        "2026-09": "4.6|estimate",
+    }
