@@ -255,11 +255,28 @@
       rateEl.textContent = tmpl ? tmpl.replace('{amount}', amountText) : ('+' + amountText);
     }
 
+    // Audit P2 fix: right after a year-boundary reset, a reader who had
+    // the page open across the boundary used to see "+€42,729 since you
+    // opened this page" sitting under "€21,846 -- so far in 2027" -- the
+    // since-opened figure (correctly, never negative -- see sinceOpened's
+    // own comment) still counted time accrued in the PREVIOUS segment,
+    // making it read larger than the year-to-date total it sits beside.
+    // Re-based at the current segment's own start whenever the page was
+    // opened earlier than that: "since you opened this page" now only
+    // ever counts the segment actually running right now, the same window
+    // the headline figure itself is counting, so the two can never
+    // contradict each other again.
+    var curSegStart = null;
+    for(var si = 0; si < (counter.segments || []).length; si++){
+      var seg = counter.segments[si];
+      if(now >= seg.start_ms && now < seg.end_ms){ curSegStart = seg.start_ms; break; }
+    }
+    var effectiveOpenedAt = (curSegStart !== null) ? Math.max(region.openedAt, curSegStart) : region.openedAt;
     // Floor BEFORE the zero check: a few cents or a fraction of a unit
     // accrued since the page opened must never surface as "+€0" / "+0
     // since you opened" -- the line simply stays blank until there is a
     // whole unit to show (rule: never show an explicit, misleading zero).
-    var since = Math.floor(sinceOpened(counter.segments, region.openedAt, now));
+    var since = Math.floor(sinceOpened(counter.segments, effectiveOpenedAt, now));
     if(since > 0 && L.sinceOpened){
       sinceEl.textContent = L.sinceOpened.replace('{amount}', region.formatValue(since, baseUnit, 0, region.lang));
     } else {

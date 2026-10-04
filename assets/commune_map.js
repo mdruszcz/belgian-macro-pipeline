@@ -78,7 +78,7 @@ MapUI.geometryToPath = function(geom, lonScale){
    Belgian reader expects "35 363", and Dutch expects "35.363". Passing
    undefined to toLocaleString takes the browser's locale, which is the one
    thing on the page the reader did not choose. */
-MapUI.formatValue = function(num, unit, decimals, lang){
+MapUI.formatValue = function(num, unit, decimals, lang, opts){
   if(num === null || num === undefined || isNaN(num)) return '\u2014';
   const declared = !(decimals === null || decimals === undefined);
   const digits = declared ? decimals : (Math.abs(num) >= 1000 ? 0 : 2);
@@ -88,7 +88,16 @@ MapUI.formatValue = function(num, unit, decimals, lang){
      src/pages/resolve.py's _format_value has always done for the static
      pages; the two mirrors disagreed until Batch 6. With no declared
      decimals the old guess stands, and a trailing "0,00" would be noise. */
-  const body = num.toLocaleString(lang || undefined, declared
+  /* opts.digitLocale (issue #309): an OPT-IN override for the locale used
+     to GROUP/PUNCTUATE THE DIGITS only -- every other caller (every other
+     chapter and page) omits opts and gets exactly today's behaviour,
+     keyed on `lang` alone. Still fully generic: this function knows
+     nothing about "finances" or any indicator, only that a caller may ask
+     for its digits formatted as a different locale would, while every
+     unit-specific word/symbol below this line (the euro sign's placement,
+     "%", "/hab.") still reads in the REAL `lang`, never the override. */
+  const digitLang = (opts && opts.digitLocale) || lang;
+  const body = num.toLocaleString(digitLang || undefined, declared
     ? {minimumFractionDigits: digits, maximumFractionDigits: digits}
     : {maximumFractionDigits: digits});
   const u = (unit || '').toLowerCase();

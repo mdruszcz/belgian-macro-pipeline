@@ -259,6 +259,11 @@ I18N.STRINGS = {
     homeFinanceWhyLink: 'See the official figures on the Macro page',
     homeFinanceExpired: 'The simulation window has ended',
     homeFinanceExpiredWhy: 'This trend estimate only covers a fixed period. See the confirmed official figures on the Macro page instead of an extrapolation running past its own window.',
+    // Audit P2 fix: macro.html's own expired state used to reuse
+    // home2's sentence verbatim, which sends a reader already ON the
+    // Macro page back to "the Macro page" -- this points at the
+    // Official figures block a few lines below instead.
+    finExpiredWhy: 'This trend estimate only covers a fixed period. See the Official figures below instead of an extrapolation running past its own window.',
     homeFinanceSeeDetails: 'See the details →',
     homeCommunesTitle: 'Commune profiles',
     homeCommunesLead: 'Every Belgian commune has its own page: its indicators, its own map, and how it compares with its province, its region and the country.',
@@ -1146,6 +1151,7 @@ I18N.STRINGS = {
     homeFinanceWhyLink: 'Voir les chiffres officiels sur la page Macro',
     homeFinanceExpired: 'La période de simulation est terminée',
     homeFinanceExpiredWhy: 'Cette estimation de tendance ne couvre qu’une période fixe. Consultez les chiffres officiels confirmés sur la page Macro plutôt qu’une extrapolation allant au-delà de sa propre fenêtre.',
+    finExpiredWhy: 'Cette estimation de tendance ne couvre qu’une période fixe. Consultez les chiffres officiels ci-dessous plutôt qu’une extrapolation allant au-delà de sa propre fenêtre.',
     homeFinanceSeeDetails: 'Voir le détail →',
     homeCommunesTitle: 'Profils des communes',
     homeCommunesLead: 'Chaque commune belge a sa propre page : ses indicateurs, sa carte, et sa comparaison avec sa province, sa région et le pays.',
@@ -1950,6 +1956,7 @@ I18N.STRINGS = {
     homeFinanceWhyLink: 'Bekijk de officiële cijfers op de Macro-pagina',
     homeFinanceExpired: 'De simulatieperiode is afgelopen',
     homeFinanceExpiredWhy: 'Deze trendschatting dekt maar een vaste periode. Bekijk de bevestigde officiële cijfers op de Macro-pagina in plaats van een extrapolatie die voorbij haar eigen venster loopt.',
+    finExpiredWhy: 'Deze trendschatting dekt maar een vaste periode. Bekijk de officiële cijfers hieronder in plaats van een extrapolatie die voorbij haar eigen venster loopt.',
     homeFinanceSeeDetails: 'Bekijk de details →',
     homeCommunesTitle: 'Gemeenteprofielen',
     homeCommunesLead: 'Elke Belgische gemeente heeft haar eigen pagina: haar indicatoren, haar eigen kaart, en hoe ze zich verhoudt tot haar provincie, haar gewest en het land.',

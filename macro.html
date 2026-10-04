@@ -25,14 +25,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/belpulse/tokens.css">
 <link rel="stylesheet" href="assets/belpulse/layout.css">
-<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/belpulse/components.css?v=14baea3455">
 <!-- Europe panel (Batch B3): the choropleth ramp tokens (--ramp-*/--nodata)
      assets/commune_map.css already defines, reused rather than duplicated
      (docs/features/europe_nuts2.md). europe_map.css is page chrome only. -->
 <link rel="stylesheet" href="assets/commune_map.css">
 <link rel="stylesheet" href="assets/belpulse/europe_map.css">
 <link rel="stylesheet" href="assets/belpulse/macro_portrait.css">
-<link rel="stylesheet" href="assets/belpulse/live_counters.css">
+<link rel="stylesheet" href="assets/belpulse/live_counters.css?v=40908bd707">
 </head>
 <body class="bp-shell macro">
 
@@ -243,6 +243,19 @@
          without one, by design, so a real figure can never be silently fed
          through this path without the "simulation" label going with it. -->
     <section class="bp-panel" id="finances-publiques" data-panel>
+      <!-- Audit P1 fix (rule 31): the pre-mockup chapter carried
+           id="public-finance" on its own placeholder card; this one
+           replaced it with real content under id="finances-publiques"
+           instead, leaving the legacy anchor config/national_sections.yaml
+           still declares (legacy_anchors: [public-finance]) with no
+           element to land on. Deliberately NOT `hidden` (display:none has
+           no box, so reapplyHashScroll()'s own target.scrollIntoView()
+           has nowhere to scroll to -- confirmed by this fix's own browser
+           test, which failed against a hidden version first): an empty,
+           unstyled div takes zero visible height on its own and sits
+           exactly at the chapter's own top in normal flow, which is all a
+           landing target needs to be. -->
+      <div id="public-finance"></div>
       <h2 data-panel-label="finances-publiques">Public finances</h2>
 
       <!-- ONE chapter-level badge + ONE pause button for every simulated
@@ -306,7 +319,12 @@
         <div class="provenance" id="finOfficialProvenance"></div>
       </article>
 
-      <details class="fin-method">
+      <!-- Audit P2 fix: without JavaScript (or before renderMethod() has
+           filled #finMethodBody), this control used to be clickable and
+           open onto nothing -- hidden in static markup, revealed by
+           renderMethod() itself only once it has real content, the same
+           reveal-after-fill device the badges/pause buttons already use. -->
+      <details class="fin-method" id="finMethodDetails" hidden>
         <summary data-t="finMethodSummary">How this is simulated</summary>
         <div id="finMethodBody"></div>
       </details>
@@ -363,12 +381,12 @@
     if(window.ResizeObserver) new ResizeObserver(set).observe(bar);
   })();
 </script>
-<script src="assets/i18n.js"></script>
+<script src="assets/i18n.js?v=1ceaa67dc8"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
 <script src="assets/belpulse/macro_portrait_charts.js"></script>
 <script src="assets/commune_map.js"></script>
-<script src="assets/belpulse/live_counters.js"></script>
+<script src="assets/belpulse/live_counters.js?v=b8438eaebc"></script>
 <!-- Europe panel (Batch B3): loads its own vendored map library lazily,
      only once the panel opens -- never at page load (CLAUDE.md rule 30). -->
 <script src="assets/belpulse/europe_map.js"></script>
@@ -604,13 +622,32 @@
     if(binding){var idx=sections.findIndex(function(section){return (section.cards||[]).indexOf(binding.id)>=0;});if(idx>=0)return idx;}
     return 1;
   }
+  // A plain "percent*" unit: MapUI.formatValue already puts the "%" on the
+  // number itself, so the unit hint stays silent (a second "%" beside it
+  // would repeat the one already on the number).
+  function isPercentLike(unit){ return /^percent/.test((unit || '').toLowerCase()); }
+  // "pct_of_gdp" (public-finance batch) is ALSO a percentage -- Europe's
+  // own debt ratios exceed the percent_bounded validator's 100 cap, so it
+  // is deliberately not spelled "percent*" -- but its own full phrase
+  // ("% of GDP"/"% du PIB"/"% van het bbp", from unitHint -> MapUI.unitLabel)
+  // was being thrown away in favour of a bare " %" appended on top of the
+  // "%" MapUI.formatValue's own pct_of_gdp branch already puts on the
+  // number (audit P0: "107.9% % of GDP"). Ported from the approved mockup.
+  function isPctOfGdp(unit){ return (unit || '').toLowerCase() === 'pct_of_gdp'; }
   function displayUnit(entry){
+    if(isPctOfGdp(entry.unit)) return ' ' + unitHint(entry.unit);
+    if(isPercentLike(entry.unit)) return ' %';
     var hint=unitHint(entry.unit);
-    return /^percent/.test((entry.unit||'').toLowerCase())?' %':hint?' '+hint:'';
+    return hint?' '+hint:'';
   }
   function displayValue(value,entry){
     var formatted=fmtValue(value,entry);
-    return formatted+(/^percent/.test((entry.unit||'').toLowerCase())?'':displayUnit(entry));
+    if(isPctOfGdp(entry.unit)){
+      // fmtValue() already appended a bare "%" -- replace it with the full
+      // phrase so the unit reads once ("107,9 % of GDP"), never doubled.
+      return formatted.replace(/%\s*$/, '') + displayUnit(entry);
+    }
+    return formatted+(isPercentLike(entry.unit)?'':displayUnit(entry));
   }
   /* Lead review of commit 4f2da786f (2026-09-27): the essentials band and
      the chapter chart headline figures still clipped/overflowed at some
@@ -995,7 +1032,16 @@
     // chapter-aware pause concept of its own); this little controller is
     // page-level wiring, same spirit as decorateStripCounter below.
     var chapterRegions = [];
-    var chapterPaused = false;
+    // Audit P1 fix: this used to always start false, so under
+    // prefers-reduced-motion the button read "Pause"/aria-pressed=false
+    // while every region it controls had ALREADY started paused
+    // (live_counters.js's own mount(), same matchMedia check) -- a reader
+    // relying on reduced motion was told the counters were running when
+    // they were frozen, and had to press the control twice (toggle to
+    // "paused" with nothing visibly changing, then again to actually
+    // resume) to start them. Read the SAME signal the engine itself uses,
+    // once, up front.
+    var chapterPaused = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     function registerChapterRegion(handle){ if(handle) chapterRegions.push(handle); }
     function applyChapterPauseLabel(){
       var s = (cfg && cfg.simulated) || DEFAULT_SIMULATED;
@@ -1029,7 +1075,38 @@
       }
     }
 
-    function fmtLive(v, unit, decimals, l){ return MapUI.formatValue(v, unit, decimals, l); }
+    /* Maintainer request (issue #309, 2026-10-04): every number in this ONE
+     * chapter groups thousands with a dot and uses a comma for decimals in
+     * French ("726.216.948.043 €"), not the site's usual narrow-no-break-
+     * space grouping ("726 216 948 043 €") -- long ticking numbers are
+     * hard to read that way. Dutch already formats digits this way, so
+     * this reuses IT for the DIGITS only, through MapUI.formatValue's own
+     * generic, opt-in digitLocale parameter -- the surrounding words/unit
+     * symbol still read in the real page language (lang stays 'fr'
+     * everywhere else: euro placement, "% du PIB", every translated
+     * string). English is unchanged (English's own convention already
+     * matches, so FIN_DIGIT_LOCALE has no 'en' entry). This table and the
+     * three helpers below are used ONLY inside this IIFE -- every OTHER
+     * chapter keeps calling the page's own fmtValue()/displayValue()/
+     * MapUI.formatValue() exactly as before (CLAUDE.md rule 10: no
+     * sitewide change for a one-chapter request). No regex ever touches a
+     * rendered digit string -- every value here is formatted this way
+     * from the start, never post-processed, so a year or a period string
+     * (never passed through these helpers) cannot be corrupted by it. */
+    var FIN_DIGIT_LOCALE = {fr: 'nl'};
+    function finDigitOpts(l){ var dl = FIN_DIGIT_LOCALE[l]; return dl ? {digitLocale: dl} : undefined; }
+    function finFormatValue(v, unit, decimals, l){ return MapUI.formatValue(v, unit, decimals, l, finDigitOpts(l)); }
+    function finDisplayValue(value, entry){
+      var d = (typeof entry.decimals === 'number') ? entry.decimals : 1;
+      var formatted = finFormatValue(value, entry.unit, d, lang);
+      // Same isPctOfGdp handling as the page-wide displayValue() (audit
+      // P0: "107,9% % du PIB" -- fmtValue's own bare "%" must be replaced
+      // by the unit's full phrase, never both shown).
+      if(isPctOfGdp(entry.unit)) return formatted.replace(/%\s*$/, '') + displayUnit(entry);
+      return formatted + (isPercentLike(entry.unit) ? '' : displayUnit(entry));
+    }
+
+    function fmtLive(v, unit, decimals, l){ return finFormatValue(v, unit, decimals, l); }
 
     function finLabels(){
       return {
@@ -1110,8 +1187,11 @@
       if(headline) headline.textContent = T(state === 'expired' ? 'homeFinanceExpired' : 'macroUnavailable');
       var whyEl = document.getElementById(whyElId);
       if(whyEl){
+        // Audit P2 fix: macro's own expired reason no longer sends a
+        // reader already on this page back to "the Macro page" -- points
+        // at the Official figures block below instead (finExpiredWhy).
         whyEl.textContent = reasonOverride ? text(reasonOverride)
-          : T(state === 'expired' ? 'homeFinanceExpiredWhy' : 'finUnavailableReason');
+          : T(state === 'expired' ? 'finExpiredWhy' : 'finUnavailableReason');
       }
     }
 
@@ -1305,7 +1385,7 @@
         // colour ramp repeats hues with no way to tell which segment is
         // which -- a title (native tooltip) ties every segment back to its
         // row in the list below it even where the ramp itself repeats.
-        seg.title = partLabel(part) + ' — ' + MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+        seg.title = partLabel(part) + ' — ' + finFormatValue(part.share * 100, 'percent', 1, lang);
         bar.appendChild(seg);
       });
       // ONE merged list per round-1 review (L2/P0-1): colour key, short
@@ -1348,7 +1428,7 @@
             var dot = document.createElement('span'); dot.className = 'bp-share-swatch'; swatch(dot, i);
             var name = document.createElement('span'); name.className = 'bp-live-counter-name bp-share-label';
             var pct = document.createElement('span'); pct.className = 'bp-share-pct';
-            pct.textContent = MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+            pct.textContent = finFormatValue(part.share * 100, 'percent', 1, lang);
             left.append(dot, name, pct);
             var value = document.createElement('span'); value.className = 'bp-value'; value.setAttribute('aria-hidden', 'true'); value.dataset.raw = ''; value.textContent = '—';
             var rate = document.createElement('span'); rate.className = 'bp-live-counter-rate'; rate.setAttribute('aria-hidden', 'true');
@@ -1410,7 +1490,7 @@
           // card keeps its plain value. Unit always shown (same
           // displayValue() every other figure on this page already uses,
           // not the bare fmtValue() this used to call).
-          val.textContent = displayValue(cardSpec.signed_label ? Math.abs(v.latest.value) : v.latest.value, v.entry);
+          val.textContent = finDisplayValue(cardSpec.signed_label ? Math.abs(v.latest.value) : v.latest.value, v.entry);
           var small = document.createElement('small');
           small.textContent = fmtPeriod(v.latest.period) + (v.latest.status && v.latest.status !== 'final' ? ' · ' + T('status_' + v.latest.status) : '');
           val.appendChild(small);
@@ -1422,6 +1502,32 @@
       document.getElementById('finOfficialProvenance').textContent = latestEntry ? provenance(latestEntry, latestOverall) : '';
 
       var chartsHost = document.getElementById('finOfficialCharts'); chartsHost.innerHTML = '';
+      // Audit P0 (CI): these five portrait.line() calls are the heaviest
+      // synchronous work this chapter does (D3-ish SVG construction over a
+      // real history series each). Opening macro.html#europe lands the
+      // reader on the Europe panel immediately, which initialises itself
+      // lazily off its OWN IntersectionObserver (europeObserver below) --
+      // but that observer's callback cannot fire until the CURRENT
+      // synchronous call stack finishes, so building these five charts
+      // inline, as part of the same boot() call chain, measurably delayed
+      // the Europe map's first paint (median +334ms / +9.6% at 4x CPU
+      // throttle, reproduced independently). Deferred one paint past
+      // render via the page's own afterLayoutSettles() -- the SAME one-shot
+      // utility the hash-scroll correction already uses, not a second
+      // timer/rAF loop (afterLayoutSettles's own single requestAnimationFrame
+      // call site is unchanged; this is a second CALLER of it, not a second
+      // call site in the source, which is what test_macro_simulates_nothing
+      // actually counts) -- so chart-building yields to whatever the
+      // browser already had queued (the Europe observer among it) instead
+      // of running first just because it happens to be listed first in
+      // this script.
+      afterLayoutSettles(function(){ buildOfficialCharts(cfg, lang); });
+    }
+
+    function buildOfficialCharts(cfg, lang){
+      var chartsHost = document.getElementById('finOfficialCharts');
+      if(!chartsHost || !cfg) return;
+      chartsHost.innerHTML = '';
       (cfg.charts || []).forEach(function(spec){
         var seriesEntries = (spec.series || []).map(function(code){ return {code: code, entry: state.national[code]}; }).filter(function(s){ return s.entry; });
         if(!seriesEntries.length) return;
@@ -1466,7 +1572,15 @@
           var result = portrait.line({
             width: 320, height: 220, points: pts, decimals: s.entry.decimals,
             unitSuffix: displayUnit(s.entry), ariaLabel: nameOf(s.code),
-            zeroLine: !!spec.zero_line,
+            zeroLine: !!spec.zero_line, digitLocale: FIN_DIGIT_LOCALE[lang],
+            // Audit P2: the proper Unicode minus (U+2212) used to apply to
+            // every chart on the site, an undeclared sitewide change --
+            // scoped here to the one finance chart that can actually show
+            // a negative value (the signed balance chart, the same
+            // zero_line flag that already singles it out for its own
+            // margin treatment), so every other chart's axis text is
+            // completely unchanged.
+            properMinus: !!spec.zero_line,
           });
           plotHost.innerHTML = result.svg || '';
           wrap.append(head, plotHost);
@@ -1518,8 +1632,8 @@
         var revC = counterById(breakdownIds[0]), spendC = counterById(breakdownIds[1]);
         if(revC && typeof revC.growth_rate === 'number' && spendC && typeof spendC.growth_rate === 'number'){
           paras.push(T('finMethodGrowthRates', {
-            revenue: MapUI.formatValue(revC.growth_rate * 100, 'percent', 1, lang),
-            spending: MapUI.formatValue(spendC.growth_rate * 100, 'percent', 1, lang),
+            revenue: finFormatValue(revC.growth_rate * 100, 'percent', 1, lang),
+            spending: finFormatValue(spendC.growth_rate * 100, 'percent', 1, lang),
           }));
         }
       }
@@ -1557,7 +1671,7 @@
           var isDef = pace && paceIsDeficit(pace.counter, Date.now());
           paras.push(T('finMethodDebtAnchor', {
             period: fmtPeriod(anchor.period),
-            value: MapUI.formatValue(anchor.value, anchor.unit, 0, lang) + ' ' + unitHint(anchor.unit),
+            value: finFormatValue(anchor.value, anchor.unit, 0, lang) + ' ' + unitHint(anchor.unit),
             status: T('status_' + anchor.status),
             pace: T(isDef === false ? 'finMethodDebtPaceSurplus' : 'finMethodDebtPaceDeficit'),
             year: annualDebtLatest ? annualDebtLatest.period : anchor.period.slice(0, 4),
@@ -1595,6 +1709,8 @@
       forecastP.appendChild(link);
       forecastP.appendChild(document.createTextNode('.'));
       body.appendChild(forecastP);
+      var detailsEl = document.getElementById('finMethodDetails');
+      if(detailsEl) detailsEl.hidden = false;
     }
 
     /* Round-1 rules review (P1-6): #finSourceLine and the Statbel credit
@@ -1643,13 +1759,13 @@
       var bar = document.getElementById(b.bar);
       if(bar) Array.prototype.forEach.call(bar.children, function(seg, i){
         var part = parts[i]; if(!part) return;
-        seg.title = partLabel(part) + ' — ' + MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+        seg.title = partLabel(part) + ' — ' + finFormatValue(part.share * 100, 'percent', 1, lang);
       });
       var list = document.getElementById(b.list);
       if(list) Array.prototype.forEach.call(list.children, function(li, i){
         var part = parts[i]; if(!part) return;
         var pct = li.querySelector('.bp-share-pct');
-        if(pct) pct.textContent = MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+        if(pct) pct.textContent = finFormatValue(part.share * 100, 'percent', 1, lang);
       });
     }
 

@@ -95,10 +95,24 @@ window.BPMacroPortraitCharts = function(options){
     region:   {colour: 'var(--bp-text-faint)', glyph: 'sq'},
     country:  {colour: 'var(--bp-text)',       glyph: 'dotc'},
   };
-  function fmtAxisNum(v, decimals){
+  // digitLocale (issue #309): an OPT-IN override, additive only -- every
+  // existing caller passes nothing and gets exactly today's localeTag()
+  // behaviour. opts.zeroLine (above) is the same pattern: a chart asks for
+  // it by name in its own opts, every other chart is untouched.
+  //
+  // properMinus (audit P2, issue #309): the U+2212 swap below used to run
+  // for EVERY caller, an undeclared sitewide typography change the batch's
+  // own handoff excluded ("must not alter any existing chart") -- measured
+  // effect: the pre-existing growth chart's axis labels on macro.html
+  // changed from "-4" to "−4". Gated the same opt-in way as
+  // digitLocale: only a caller that explicitly asks (today, only the
+  // finance chapter's own zero-line chart) gets the proper minus sign;
+  // every other existing chart keeps its exact prior ASCII hyphen output.
+  function fmtAxisNum(v, decimals, digitLocale, properMinus){
     var d = (decimals == null) ? (Math.abs(v) < 10 ? 1 : 0) : decimals;
     var n = (Math.abs(v) < Math.pow(10, -d) / 2 ? 0 : v);
-    var s = n.toLocaleString(localeTag(), {maximumFractionDigits: d});
+    var s = n.toLocaleString(digitLocale || localeTag(), {maximumFractionDigits: d});
+    if(!properMinus) return s;
     // Round-2 visual review (P2-a): Number.toLocaleString prints an ASCII
     // hyphen-minus for a negative value in every locale this engine sees --
     // replaced with the proper Unicode minus sign (U+2212) here, the one
@@ -163,7 +177,7 @@ window.BPMacroPortraitCharts = function(options){
     if(opts.zeroLine){
       var axisFont = '11px Inter, sans-serif';
       var widestLabel = niceValsForDomain.reduce(function(max, v){
-        return Math.max(max, measureTextWidth(fmtAxisNum(v, opts.decimals), axisFont));
+        return Math.max(max, measureTextWidth(fmtAxisNum(v, opts.decimals, opts.digitLocale, opts.properMinus), axisFont));
       }, 0);
       /* A real rendered measurement (SVGTextElement.getBBox(), taken after
          this batch's own first pass) came in ~5px wider than this same
@@ -241,7 +255,7 @@ window.BPMacroPortraitCharts = function(options){
       if(typeof p.value !== 'number') return;
       hits.push({
         x: xOf(i), y: yOf(p.value), period: p.period, value: p.value,
-        valueText: fmtAxisNum(p.value, opts.decimals) + (opts.unitSuffix || ''),
+        valueText: fmtAxisNum(p.value, opts.decimals, opts.digitLocale, opts.properMinus) + (opts.unitSuffix || ''),
         compareLines: compareLines,
       });
     });
@@ -253,7 +267,7 @@ window.BPMacroPortraitCharts = function(options){
         '" stroke="' + (isZeroLine ? 'var(--bp-text-muted)' : 'var(--bp-border)') +
         '" stroke-width="' + (isZeroLine ? '1.5' : '1') + '"' + (isZeroLine ? ' stroke-dasharray="3,3"' : '') + '/>');
       svg.push('<text x="0" y="' + (y - 4).toFixed(1) + '" font-family="Inter,sans-serif" font-size="11" fill="var(--bp-text-faint)">' +
-        escapeHtml(fmtAxisNum(v, opts.decimals)) + '</text>');
+        escapeHtml(fmtAxisNum(v, opts.decimals, opts.digitLocale, opts.properMinus)) + '</text>');
     });
 
     /* A5 tick order: first, last, each segment's start (the point right
@@ -309,7 +323,7 @@ window.BPMacroPortraitCharts = function(options){
               var p0 = run[0];
               var x0 = xOfTime(p0.period), y0 = yOf(p0.value);
               svg.push('<circle class="sim-dot" data-nis="' + escapeHtml(s.nis) + '" data-first="' + escapeHtml(String(p0.period)) + '" data-last="' + escapeHtml(String(p0.period)) + '" cx="' + x0.toFixed(1) + '" cy="' + y0.toFixed(1) + '" r="1.6"/>');
-              simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: x0, y: y0, period: p0.period, value: p0.value, status: p0.status, valueText: fmtAxisNum(p0.value, opts.decimals) + (opts.unitSuffix || '')});
+              simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: x0, y: y0, period: p0.period, value: p0.value, status: p0.status, valueText: fmtAxisNum(p0.value, opts.decimals, opts.digitLocale, opts.properMinus) + (opts.unitSuffix || '')});
               drawnAny = true;
             }
             return;
@@ -317,7 +331,7 @@ window.BPMacroPortraitCharts = function(options){
           var d = run.map(function(p, k){ return (k === 0 ? 'M' : 'L') + xOfTime(p.period).toFixed(1) + ',' + yOf(p.value).toFixed(1); }).join(' ');
           svg.push('<path class="sim-line" data-nis="' + escapeHtml(s.nis) + '" data-first="' + escapeHtml(String(run[0].period)) + '" data-last="' + escapeHtml(String(run[run.length-1].period)) + '" d="' + d + '"/>');
           run.forEach(function(p){
-            simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: xOfTime(p.period), y: yOf(p.value), period: p.period, value: p.value, status: p.status, valueText: fmtAxisNum(p.value, opts.decimals) + (opts.unitSuffix || '')});
+            simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: xOfTime(p.period), y: yOf(p.value), period: p.period, value: p.value, status: p.status, valueText: fmtAxisNum(p.value, opts.decimals, opts.digitLocale, opts.properMinus) + (opts.unitSuffix || '')});
           });
           drawnAny = true;
         });

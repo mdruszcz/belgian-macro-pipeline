@@ -733,9 +733,19 @@ def _check_finances_publiques(
     if official.get("note"):
         _check_trilingual_label(official["note"], "finances_publiques.official_figures.note")
     for card in official.get("cards") or []:
+        # Audit P2 fix: a card with neither `label` nor `signed_label: true`
+        # used to pass silently and render an empty .label div on
+        # macro.html (displayValue()'s signed_label branch computes the
+        # label from the VALUE's own sign instead -- balanceWord() -- so
+        # that one case genuinely needs no static label).
         if card.get("label"):
             _check_trilingual_label(
                 card["label"], f"finances_publiques.official_figures.cards[{card.get('id')}].label"
+            )
+        elif not card.get("signed_label"):
+            raise ValueError(
+                f"finances_publiques.official_figures.cards[{card.get('id')}] has neither a "
+                "label nor signed_label: true -- it would render with no visible title"
             )
     for chart in charts:
         if chart.get("label"):
