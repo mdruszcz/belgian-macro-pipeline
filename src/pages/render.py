@@ -468,6 +468,64 @@ def _render_photo(block, props, data, lang, prefix=""):
     return '<figure class="bp-photo">' + "".join(parts) + "</figure>"
 
 
+#: The play button's own default visible text -- chrome, not page content,
+#: the same reason STATE_TEXT and ZOOM_LABELS above live with the renderer
+#: rather than in a document. A `film` block may override it with its own
+#: trilingual `play_label`; this is what shows when it does not.
+FILM_LABEL = {"en": "Play the film", "fr": "Voir le film", "nl": "Bekijk de film"}
+
+
+def _render_film(block, props, data, lang, prefix=""):
+    """A film that downloads nothing until the reader clicks play.
+
+    Issue #312 batch 2 (docs/features/site_clarity.md): the brand film
+    moved off the homepage onto About, played only on request. The
+    `<video>` itself carries `preload="none"` and no `autoplay` (claude.md
+    rule 30) -- nothing is fetched on page load. The click handler that
+    turns on native controls and starts playback lives in
+    assets/belpulse/home-film/film-block.js, a FIXED asset
+    `src/pages/shell.py` loads only on a page that carries a `film` block;
+    no `<script>` is written into the page document itself (rule 22: a
+    page document is data, not code).
+
+    No `accessible_name` prop: the play button's own visible text (from
+    `play_label`, or FILM_LABEL's default) IS its accessible name --
+    the registry does not mark this block type `interactive` for exactly
+    that reason, so there is nothing for
+    `src/pages/semantics.py:check_accessible_name` to require.
+    """
+    src = props.get("src")
+    src_mobile = props.get("src_mobile")
+    poster = props.get("poster")
+    alt = text_in(props.get("alt"), lang)
+    sources = []
+    if isinstance(src_mobile, str) and src_mobile and safe_href(src_mobile, prefix) != "#":
+        href = esc(safe_href(src_mobile, prefix))
+        sources.append(f'<source media="(max-width:768px)" src="{href}" type="video/mp4">')
+    if isinstance(src, str) and src and safe_href(src, prefix) != "#":
+        sources.append(f'<source src="{esc(safe_href(src, prefix))}" type="video/mp4">')
+    poster_attr = ""
+    if isinstance(poster, str) and poster and safe_href(poster, prefix) != "#":
+        poster_attr = f' poster="{esc(safe_href(poster, prefix))}"'
+    label = text_in(props.get("play_label"), lang) or FILM_LABEL.get(lang, FILM_LABEL["en"])
+    parts = [
+        '<div class="film-frame">',
+        f'<video class="film-video"{poster_attr} preload="none" playsinline aria-label="{esc(alt)}">',
+        "".join(sources),
+        "</video>",
+        '<button type="button" class="film-play">'
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+        '<path d="M8 5v14l11-7z"/></svg>'
+        f'<span class="film-play-label" data-with-duration="{esc(label)} ({{s}}s)">{esc(label)}</span>'
+        "</button>",
+        "</div>",
+    ]
+    caption = text_in(props.get("caption"), lang)
+    if caption:
+        parts.append(f'<p class="bp-block-caption">{esc(caption)}</p>')
+    return "".join(parts)
+
+
 def _render_sources_panel(block, props, data, lang, prefix=""):
     """Editorial prose about where the figures come from, plus the machine
     truth beside it.
@@ -830,6 +888,7 @@ BLOCK_RENDERERS = {
     "section_nav": _render_section_nav,
     "stat_tile": _render_stat_tile,
     "photo": _render_photo,
+    "film": _render_film,
     "sources_panel": _render_sources_panel,
     "ranking_list": _render_ranking_list,
     "neighbour_list": _render_neighbour_list,

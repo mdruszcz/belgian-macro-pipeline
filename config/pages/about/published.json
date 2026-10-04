@@ -123,6 +123,53 @@
             "mobile": true,
             "tablet": true
           }
+        },
+        {
+          "binding": null,
+          "id": "about-film-1",
+          "layout": {
+            "desktop": {
+              "h": 7,
+              "w": 12,
+              "x": 0,
+              "y": 8
+            },
+            "mobile": {
+              "h": 8,
+              "w": 4,
+              "x": 0,
+              "y": 8
+            },
+            "tablet": {
+              "h": 7,
+              "w": 8,
+              "x": 0,
+              "y": 8
+            }
+          },
+          "locked": false,
+          "props": {
+            "src": "/assets/belpulse/home-film/film-1080.mp4",
+            "src_mobile": "/assets/belpulse/home-film/film-720.mp4",
+            "poster": "/assets/belpulse/home-film/poster.webp",
+            "alt": {
+              "en": "An animated film of Belgium's map and its 565 communes",
+              "fr": "Un film animé de la carte de la Belgique et de ses 565 communes",
+              "nl": "Een geanimeerde film van de kaart van België en haar 565 gemeenten"
+            },
+            "caption": {
+              "en": "Belgium’s map and every commune, animated.",
+              "fr": "La carte de la Belgique et chaque commune, animées.",
+              "nl": "De kaart van België en elke gemeente, geanimeerd."
+            }
+          },
+          "type": "film",
+          "version": 1,
+          "visibility": {
+            "desktop": true,
+            "mobile": true,
+            "tablet": true
+          }
         }
       ],
       "id": "intro"

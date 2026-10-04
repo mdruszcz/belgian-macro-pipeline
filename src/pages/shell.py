@@ -300,6 +300,25 @@ def read_attribution(lang: str = DEFAULT_LANG) -> str:
     return notice
 
 
+#: issue #312 batch 2: the film block's own click-to-play wiring. Loaded
+#: only on a page that carries a `film` block (same pattern as
+#: INTERACTIVE_SCRIPTS above, which only loads for a chart/map) -- a page
+#: with no film block links none of it. Not in INTERACTIVE_SCRIPTS itself:
+#: that list feeds BPBlocks.hydrate()'s own data-resolution pass, and a
+#: `film` block is never hydrated (accepts_binding: false) -- it only
+#: needs the play-button wiring, nothing resolved for it to render.
+FILM_JS = "assets/belpulse/home-film/film-block.js"
+
+
+def _has_block_type(doc, block_type: str) -> bool:
+    """Does this document carry at least one block of this type."""
+    for section in doc.get("sections") or []:
+        for block in (section or {}).get("blocks") or []:
+            if isinstance(block, dict) and block.get("type") == block_type:
+                return True
+    return False
+
+
 def hydrated_block_types(doc) -> set:
     """Which hydrated block types a document contains -- the map's stylesheet
     is linked from this rather than from the page id."""
@@ -764,6 +783,12 @@ def wrap(
             "window.location.href=urls[m.value];}});"
             "window.parent.postMessage('dashboard-ready','*');})();</script>"
         )
+
+    # issue #312 batch 2: the film block's play-button wiring, loaded only
+    # when this document actually carries one -- a page with no film block
+    # (every page but About, today) links none of it.
+    if _has_block_type(doc, "film"):
+        scripts += f'\n<script src="{escape(asset_prefix + FILM_JS, quote=True)}"></script>'
 
     # THE SHARED SHELL SCRIPT -- the theme menu, the language menu and the
     # mobile nav toggle that render_header() below just emitted markup for.
