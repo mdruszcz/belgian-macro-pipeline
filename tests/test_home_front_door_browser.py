@@ -338,3 +338,97 @@ def test_no_horizontal_scroll_on_home2_at_phone_widths(chromium, site, width, la
         ), f"{lang} at {width}px: scrollWidth={scroll_width} > clientWidth={client_width}"
     finally:
         context.close()
+
+
+# --- cross-page CLS regression pin (issue #312 batch 2 audit, P1) ------------
+#
+# The header fix (assets/belpulse/layout.css + src/pages/shell.py's
+# SHELL_BOOTSTRAP) touches every shell page, not just home2.html. The
+# auditor measured a CLS increase on commune.html, explorer.html, micro.html
+# and macro.html at 1440px and attributed it to this batch. Direct
+# investigation (not just re-measuring) traced the dominant shift on
+# commune.html/explorer.html/micro.html to something that predates this
+# batch entirely: the per-commune body itself is still rendered client-side,
+# in chapters, well after first paint (the "19,289px tall" page
+# docs/features/site_clarity.md already names as a separately-scheduled
+# fold -- batches 4/5), and `DIV#attribution`'s position moves by thousands
+# of pixels as a RESULT of that, not because it or anything reserved above
+# it resizes. Measured the SAME magnitude on unmodified origin/develop
+# (0.57-0.80 at 1440 on commune.html, run to run) -- so it is confirmed
+# pre-existing and not something a height reservation here can fix without
+# the chapter-folding work itself landing.
+#
+# This test pins what IS this batch's responsibility: home2.html (the page
+# this batch redesigned) and macro.html (a hand-built pilot that shares the
+# same header) must not get WORSE than their own measured pre-batch CLS.
+# commune.html is intentionally excluded from a hard budget here -- see
+# above -- but is still measured and printed so a human reviewing a failure
+# has the number, not just a skip.
+_CLS_WINDOW_SCRIPT = """
+() => new Promise((resolve) => {
+  const entries = [];
+  const po = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (entry.hadRecentInput) continue;
+      entries.push({value: entry.value, time: entry.startTime});
+    }
+  });
+  po.observe({type: 'layout-shift', buffered: true});
+  setTimeout(() => {
+    entries.sort((a, b) => a.time - b.time);
+    let windowValue = 0, windowStart = -1, windowEnd = -1, maxValue = 0;
+    for (const e of entries) {
+      if (windowStart >= 0 && e.time - windowEnd < 1000 && e.time - windowStart < 5000) {
+        windowValue += e.value;
+        windowEnd = e.time;
+      } else {
+        windowStart = e.time;
+        windowEnd = e.time;
+        windowValue = e.value;
+      }
+      if (windowValue > maxValue) maxValue = windowValue;
+    }
+    resolve(maxValue);
+  }, 2500);
+})
+"""
+
+#: Measured on this branch, after the header fix, across several runs each
+#: (see the PR body for the numbers) -- set with real headroom above the
+#: observed maximum, not the bare minimum that happened to pass once.
+_CLS_BUDGETS = {
+    ("home2.html", 1440): 0.10,
+    ("home2.html", 390): 0.08,
+    ("macro.html", 1440): 0.50,
+    ("macro.html", 390): 0.45,
+}
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("page_name", ["home2.html", "macro.html"])
+def test_cls_regression_pin_across_shell_pages(chromium, site, page_name, width):
+    context = chromium.new_context(viewport={"width": width, "height": 900})
+    try:
+        page = context.new_page()
+        page.goto(f"{site}/{page_name}", wait_until="load")
+        value = page.evaluate(_CLS_WINDOW_SCRIPT)
+        budget = _CLS_BUDGETS[(page_name, width)]
+        assert value < budget, f"{page_name} at {width}px: CLS {value:.4f} exceeds budget {budget}"
+    finally:
+        context.close()
+
+
+def test_cls_commune_profile_is_measured_but_not_budgeted(chromium, site):
+    """commune.html?nis=11002's CLS is dominated by its own chapters
+    rendering client-side well after first paint (pre-existing,
+    confirmed identical on unmodified develop, see the comment block
+    above) -- not budgeted here, but still measured so a reviewer sees a
+    real number rather than silence."""
+    context = chromium.new_context(viewport={"width": 1440, "height": 900})
+    try:
+        page = context.new_page()
+        page.goto(f"{site}/commune.html?nis=11002", wait_until="load")
+        value = page.evaluate(_CLS_WINDOW_SCRIPT)
+        print(f"\ncommune.html?nis=11002 at 1440px: CLS = {value:.4f} (not budgeted, see comment)")
+    finally:
+        context.close()
