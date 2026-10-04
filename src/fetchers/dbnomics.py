@@ -25,19 +25,27 @@ source_id is an __init__ parameter, not a class attribute: unlike NBBSource
 two distinct sources.source_id values ("dbnomics_ameco" today; "dbnomics_eurostat"
 until this pilot moved it), so it cannot be fixed at class-definition time.
 
-ADR 0017 -- forecast years excluded, never silently. AMECO's own Reference
-Metadata (26 November 2025) states the rule: "The most recent available two
-years (Spring forecast) or three years (Autumn forecast) in the AMECO
-database are forecasts", updated "usually ... in mid-May and mid-November,
-not in between". Neither DBnomics nor AMECO's own bulk file flags a forecast
-year -- there is no last-actual marker in either -- so the split has to come
-from the release date, `indexed_at`, the one date either response carries
-(verified against the live API: no `observations_attributes` on any of the
-five AMECO series DBnomics exposes). `_last_outturn_year` below reproduces
-AMECO's rule from that date; _parse then drops (never silently -- rule 13)
-any period after it, counting and logging what it left out. Routing those
-years into the `forecasts` table instead is its own, later decision (ADR
-0017, Recommendation #3) -- not this adapter's job.
+ADR 0017 -- forecast years excluded, never silently, AMECO ONLY. AMECO's own
+Reference Metadata (26 November 2025) states the rule: "The most recent
+available two years (Spring forecast) or three years (Autumn forecast) in the
+AMECO database are forecasts", updated "usually ... in mid-May and
+mid-November, not in between". Neither DBnomics nor AMECO's own bulk file
+flags a forecast year -- there is no last-actual marker in either -- so the
+split has to come from the release date, `indexed_at`, the one date either
+response carries (verified against the live API: no `observations_attributes`
+on any of the five AMECO series DBnomics exposes). `_last_outturn_year` below
+reproduces AMECO's rule from that date; `_parse` then drops (never silently
+-- rule 13) any period after it, counting and logging what it left out.
+Routing those years into the `forecasts` table instead is its own, later
+decision (ADR 0017, Recommendation #3) -- not this adapter's job.
+
+This is an AMECO rule, not a DBnomics one, and this very docstring already
+says this one class serves (or served) more than one source_id. `_parse`
+gates the whole ADR 0017 behaviour -- the exclusion AND the indexed_at
+requirement -- on `self.source_id == AMECO_SOURCE_ID`, so a future, non-AMECO
+DBnomics source is never required to carry indexed_at and never has its own
+latest periods silently dropped by a rule that was never about it. See
+test_a_non_ameco_source_id_is_never_forecast_filtered.
 """
 
 import json
@@ -48,6 +56,16 @@ from src.fetchers.base import TimeSeriesSource
 from src.fetchers.rebase import rebase_to_2010
 
 log = logging.getLogger("fetchers.dbnomics")
+
+#: source_id_for("AMECO/EC") (belgian_macro_db.py) -- the one source_id
+#: config/sources/dbnomics_ameco.yaml's `agency: AMECO/EC` ever produces, and
+#: the one every existing LABOUR_COST_* config and test uses. ADR 0017's
+#: forecast-year exclusion is an AMECO rule; a DBnomics source under any
+#: other source_id (the module docstring's own former "dbnomics_eurostat",
+#: or any future one) passes through unfiltered, exactly as this adapter
+#: always did before ADR 0017 -- and is never required to carry indexed_at
+#: either, since that requirement is AMECO-specific too.
+AMECO_SOURCE_ID = "ameco_ec"
 
 
 class DBnomicsSource(TimeSeriesSource):
@@ -66,7 +84,12 @@ class DBnomicsSource(TimeSeriesSource):
         except (KeyError, IndexError, ValueError) as e:
             raise ValueError(f"Unexpected DBnomics JSON structure: {e}") from e
 
-        last_outturn_year = self._last_outturn_year(series)
+        # ADR 0017 is an AMECO rule: for any other source_id, skip it
+        # entirely (no indexed_at requirement, no exclusion) rather than
+        # silently filtering periods a non-AMECO series never asked for.
+        last_outturn_year = (
+            self._last_outturn_year(series) if self.source_id == AMECO_SOURCE_ID else None
+        )
 
         results = []
         excluded: list[str] = []
@@ -80,7 +103,7 @@ class DBnomicsSource(TimeSeriesSource):
                 val = float(v)
             except ValueError:
                 continue
-            if int(period[:4]) > last_outturn_year:
+            if last_outturn_year is not None and int(period[:4]) > last_outturn_year:
                 excluded.append(period)
                 continue
             results.append({"period": period, "value": val, "obs_status": "A"})
@@ -104,13 +127,14 @@ class DBnomicsSource(TimeSeriesSource):
         return results
 
     def _last_outturn_year(self, series: dict) -> int:
-        """ADR 0017: the last calendar year AMECO has actually measured,
-        derived from the release date (`indexed_at`), never from today's
-        date -- between two releases `indexed_at` does not move, which is
-        what keeps a just-ended year correctly a forecast until AMECO's own
-        next release says otherwise (the risk the ADR names: anchoring on
-        the fetch date instead would flip the just-ended year to `final`
-        the moment the calendar turns, weeks before AMECO agrees).
+        """ADR 0017, AMECO only (callers gate this on AMECO_SOURCE_ID): the
+        last calendar year AMECO has actually measured, derived from the
+        release date (`indexed_at`), never from today's date -- between two
+        releases `indexed_at` does not move, which is what keeps a
+        just-ended year correctly a forecast until AMECO's own next release
+        says otherwise (the risk the ADR names: anchoring on the fetch date
+        instead would flip the just-ended year to `final` the moment the
+        calendar turns, weeks before AMECO agrees).
 
         AMECO never has outturn data for the year a release happens in --
         that year is not over yet -- so the last FULLY MEASURED year is
@@ -122,10 +146,18 @@ class DBnomicsSource(TimeSeriesSource):
         carries beyond this cutoff -- never hardcoded here, so a change to
         AMECO's own 2-or-3 rule cannot silently slip past this adapter.
 
-        A fetch between 1 January and that year's own mid-May release has an
-        `indexed_at` that still reflects the PRIOR November's release (AMECO
-        has not published anything new yet), so it reads as that November's
-        year, not the calendar year the fetch happens to run in.
+        THE CUTOFF IS MID-MAY -- A DAY WITHIN THE MONTH, NOT "month >= 5".
+        AMECO's real release is dated 21 May 2026, and DBnomics' own
+        indexed_at for it is 2026-05-22. An indexed_at early in May (e.g. a
+        re-index on 2026-05-02, nothing new actually published yet) must
+        still read as the PRIOR November's release, not this year's Spring
+        one -- otherwise the just-ended year would flip to outturn roughly
+        two weeks before AMECO itself has published anything, the exact
+        anchoring risk the ADR warns against, only moved from the month
+        boundary to the day one. Day 15 is the cut, matching AMECO's own
+        "usually ... mid-May" wording: on or after the 15th of May counts as
+        this year's Spring release having happened; any earlier day in May,
+        like any day in January-April, still reflects the prior November.
         """
         indexed_at = series.get("indexed_at")
         if not indexed_at:
@@ -136,5 +168,10 @@ class DBnomicsSource(TimeSeriesSource):
                 'Refusing to default to "everything is final" (CLAUDE.md rule 13).'
             )
         released = datetime.fromisoformat(str(indexed_at).replace("Z", "+00:00"))
-        release_year = released.year if released.month >= 5 else released.year - 1
+        this_years_spring_release_has_happened = released.month > 5 or (
+            released.month == 5 and released.day >= 15
+        )
+        release_year = (
+            released.year if this_years_spring_release_has_happened else released.year - 1
+        )
         return release_year - 1

@@ -189,18 +189,26 @@ def test_an_autumn_release_excludes_the_last_three_years(tmp_path, monkeypatch):
 
 
 def test_the_outturn_boundary_before_a_springs_own_release(tmp_path, monkeypatch):
-    """A fetch in April, before THIS year's Spring release has happened,
-    must read as still being under the PRIOR November's release -- not flip
-    the just-ended year to final merely because the calendar turned to a new
-    year (the exact risk ADR 0017 names against anchoring on the fetch date).
-    indexed_at has not moved since the prior November (DBnomics only
-    re-indexes when AMECO actually republishes), so it still reads
-    2025-11-18 here -- release_year 2025, last outturn 2024."""
+    """A fetch in January-April, before THIS year's own mid-May Spring
+    release has happened, must still read as being under the PRIOR
+    November's release -- not flip the just-ended year to final merely
+    because the calendar turned to a new year (the exact risk ADR 0017
+    names against anchoring on the fetch date). indexed_at 2026-03-10 has
+    not moved since the prior November (DBnomics only re-indexes when AMECO
+    actually republishes): `released.month == 3 < 5`, so release_year =
+    2026 - 1 = 2025 and last outturn = 2024 -- a mutant that deleted the
+    month/day correction (leaving `release_year = released.year`, i.e.
+    2026, last outturn 2025) would wrongly keep 2025 too and this test
+    would catch it, unlike the previous version of this test, which passed
+    an indexed_at of 2025-11-18 -- month 11, already on the `>= 5` branch
+    either way, so it never actually exercised this correction at all."""
     monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
     monkeypatch.setattr(
         "src.fetchers.base.requests.get",
         lambda *a, **k: _FakeResponse(
-            _annual_fixture("2025-11-18T00:00:00Z", ["2023", "2024", "2025", "2026", "2027"])
+            _annual_fixture(
+                "2026-03-10T00:00:00Z", ["2022", "2023", "2024", "2025", "2026", "2027"]
+            )
         ),
     )
 
@@ -208,7 +216,7 @@ def test_the_outturn_boundary_before_a_springs_own_release(tmp_path, monkeypatch
         "https://example.test/dbnomics", cache_key="LABOUR_COST_BE"
     )
 
-    assert [r["period"] for r in rows] == ["2023", "2024"]
+    assert [r["period"] for r in rows] == ["2022", "2023", "2024"]
 
 
 def test_the_outturn_boundary_right_at_a_springs_own_release(tmp_path, monkeypatch):
@@ -228,6 +236,84 @@ def test_the_outturn_boundary_right_at_a_springs_own_release(tmp_path, monkeypat
     )
 
     assert [r["period"] for r in rows] == ["2023", "2024", "2025"]
+
+
+def test_the_mid_may_boundary_before_the_15th_is_not_yet_advanced(tmp_path, monkeypatch):
+    """AMECO's real release is dated 21 May 2026 and DBnomics' own
+    indexed_at for it is 2026-05-22 -- AMECO publishes mid-May, not on the
+    1st. An early-May indexed_at (2026-05-02, before AMECO has actually
+    released anything new) must still read as the PRIOR November's
+    release: `month == 5` but `day == 2 < 15`, so release_year stays
+    2026 - 1 = 2025 and last outturn stays 2024, exactly as it would in
+    April. A `month >= 5` check (no day comparison) would wrongly treat
+    this as the new Spring release already having happened -- last outturn
+    2025 -- two weeks before AMECO itself agrees."""
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(
+            _annual_fixture("2026-05-02T00:00:00Z", ["2023", "2024", "2025", "2026", "2027"])
+        ),
+    )
+
+    rows = DBnomicsSource(source_id="ameco_ec").fetch(
+        "https://example.test/dbnomics", cache_key="LABOUR_COST_BE"
+    )
+
+    assert [r["period"] for r in rows] == ["2023", "2024"]
+
+
+def test_the_mid_may_boundary_on_the_real_release_date_is_advanced(tmp_path, monkeypatch):
+    """The complement, using AMECO's own real 2026 release date: indexed_at
+    2026-05-22 (`day == 22 >= 15`) -- the Spring release has now happened,
+    so last outturn advances to 2025."""
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(
+            _annual_fixture("2026-05-22T00:00:00Z", ["2023", "2024", "2025", "2026", "2027"])
+        ),
+    )
+
+    rows = DBnomicsSource(source_id="ameco_ec").fetch(
+        "https://example.test/dbnomics", cache_key="LABOUR_COST_BE"
+    )
+
+    assert [r["period"] for r in rows] == ["2023", "2024", "2025"]
+
+
+def test_a_non_ameco_source_id_is_never_forecast_filtered(tmp_path, monkeypatch):
+    """ADR 0017 is an AMECO rule, not a DBnomics one -- the module docstring
+    is explicit that this class also served "dbnomics_eurostat" before the
+    international pilot moved it off. A hypothetical future DBnomics source
+    under any other source_id must pass through exactly as this adapter
+    always did before ADR 0017: no indexed_at requirement, no period
+    excluded, even for a period far in the "future" and even with no
+    indexed_at in the response at all."""
+    monkeypatch.setattr("src.fetchers.base.RAW_CACHE_DIR", tmp_path)
+    no_indexed_at_future_period = json.dumps(
+        {
+            "series": {
+                "docs": [
+                    {
+                        "series_code": "SOME/OTHER/SERIES",
+                        "period": ["2024", "2099"],
+                        "value": [10.0, 11.0],
+                    }
+                ]
+            }
+        }
+    ).encode()
+    monkeypatch.setattr(
+        "src.fetchers.base.requests.get",
+        lambda *a, **k: _FakeResponse(no_indexed_at_future_period),
+    )
+
+    rows = DBnomicsSource(source_id="some_other_dbnomics_source").fetch(
+        "https://example.test/dbnomics", cache_key="OTHER_IND"
+    )
+
+    assert [r["period"] for r in rows] == ["2024", "2099"]
 
 
 def test_missing_indexed_at_raises_and_names_the_series(tmp_path, monkeypatch):
