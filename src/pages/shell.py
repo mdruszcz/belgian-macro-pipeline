@@ -106,8 +106,29 @@ THEME_CHOICES = (
 #: their own older switcher and reading the legacy `theme` key there is exactly
 #: what tests/test_theme_toggle.py:83 forbids. This constant is simply never
 #: placed on those pages.
+#:
+#: ISSUE #312 BATCH 2 FOLLOW-UP (auditor finding, P1). `document.documentElement.
+#: classList.add('bp-js')` used to be the first line of `assets/belpulse/
+#: shell.js` -- a LINKED file, loaded at the end of body, which cannot promise
+#: to run before the browser paints the header it governs. With JS available
+#: but shell.js not yet executed, the header's menu panels and mobile nav
+#: rendered with no `.bp-js` on <html> at all, which (after the earlier fix in
+#: this same batch made their CSS depend entirely on that class) meant they
+#: painted in their no-JS shape -- open, in-flow, pushing `<main>` down -- and
+#: covered the page's own H1, breadcrumb or zoom controls until shell.js
+#: finally ran. Moved here for the same reason the theme read above is here:
+#: inline, in the head, BLOCKING, so it runs before the header markup is even
+#: parsed, let alone painted -- `.bp-js` is therefore present from the very
+#: first frame for every reader whose browser runs JavaScript at all, and
+#: never appears at all for one whose browser does not (the one case layout.css's
+#: `:root:not(.bp-js)` defaults, and the <noscript> fallback render_header()
+#: emits, exist to keep fully reachable). shell.js's own call is left in place
+#: as an idempotent no-op safety net, not removed, in case this script is ever
+#: skipped by a page that does not call wrap() (classList.add on an
+#: already-present class does nothing).
 SHELL_BOOTSTRAP = (
-    "<script>(function(){try{"
+    "<script>(function(){try{document.documentElement.classList.add('bp-js');}catch(e){}"
+    "try{"
     "var KEY='belpulse-theme',LEGACY_KEY='theme',"
     "LEGACY={day:'light',soft:'light',night:'dark'};"
     "var v=localStorage.getItem(KEY);"

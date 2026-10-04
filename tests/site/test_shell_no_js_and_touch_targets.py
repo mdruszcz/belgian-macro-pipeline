@@ -1,4 +1,5 @@
-"""Two properties the A1.1 audit found broken and this file now pins.
+"""Three properties this file pins, the third added by the issue #312 batch
+2 audit.
 
 1. NO-JS REACHABILITY. The shared header/footer (src/pages/shell.py,
    assets/belpulse/layout.css, assets/belpulse/shell.js) is progressive
@@ -13,6 +14,26 @@
    phone reader presses to reach everything else in the header; each must be
    at least 44x44 CSS pixels (WCAG 2.5.5 / the iOS and Android platform
    minimums), not just visually present.
+
+3. OCCLUSION (added after the issue #312 batch 2 audit). The first CLS fix
+   in that batch made the theme panel, the language panel and the mobile
+   nav `position:absolute` UNCONDITIONALLY, reasoning that an element
+   nothing ever closes (no JS means no `hidden` attribute, ever) should at
+   least not push the page down. That broke reachability a different way:
+   with no `hidden` and no JS to add one, all three floated open,
+   permanently, over whatever `<main>` content sits beneath the header --
+   confirmed covering home2/profiles's own H1, sources's H1 and breadcrumb,
+   map's zoom controls, about's breadcrumb, with the nav's own links
+   unreachable underneath the other two. `assets/belpulse/layout.css` now
+   gates `position:absolute` on `:root.bp-js`, and `src/pages/shell.py`'s
+   `SHELL_BOOTSTRAP` sets that class from a blocking inline script in
+   <head> (not the linked, end-of-body `shell.js`), so it is present
+   before paint for any reader who runs JavaScript at all, and never
+   appears for one who does not -- the no-JS default falls back to the
+   ORIGINAL in-flow, visible, reachable layout. This section checks the
+   geometry directly: with JS off, at both 390 and 1440, none of the
+   page's own landmarks (`h1`, `.bp-breadcrumb`, the map's zoom buttons)
+   may be covered by the nav, the theme panel or the language panel.
 """
 
 from __future__ import annotations
@@ -28,6 +49,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 MOBILE_WIDTH = 390
+DESKTOP_WIDTH = 1440
 
 
 class Quiet(socketserver.TCPServer):
@@ -195,5 +217,79 @@ def test_390px_touch_targets_are_at_least_44px(chromium, site, page):
             box = links.nth(i).bounding_box()
             assert box is not None
             assert box["height"] >= 44, f"{page}: nav link {i} is {box}, height under 44px"
+    finally:
+        context.close()
+
+
+# --- 3. occlusion (issue #312 batch 2 audit) ----------------------------------
+
+#: The page's own landmarks that a floating header panel must never cover.
+#: Not every page carries every one of these -- a page without a given
+#: selector is simply skipped for it, same as `_has_block_type`-style checks
+#: elsewhere in this codebase never assume a shape that is not there.
+_OCCLUSION_TARGETS = ("h1", ".bp-breadcrumb", "#zoomIn", "#zoomOut")
+
+#: The three things the CLS fix made `position:absolute` (gated on
+#: `:root.bp-js`) -- exactly what must never cover a landmark above when
+#: JavaScript is off and that gate never fires.
+_FLOATING_PANELS = (".bp-theme-switch", ".bp-lang-switch", "#bp-nav")
+
+
+def _boxes_overlap(a, b) -> bool:
+    # Playwright's bounding_box() returns {x, y, width, height}, not
+    # left/top/right/bottom.
+    a_right, b_right = a["x"] + a["width"], b["x"] + b["width"]
+    a_bottom, b_bottom = a["y"] + a["height"], b["y"] + b["height"]
+    return a["x"] < b_right and b["x"] < a_right and a["y"] < b_bottom and b["y"] < a_bottom
+
+
+@pytest.mark.parametrize("width", [MOBILE_WIDTH, DESKTOP_WIDTH])
+@pytest.mark.parametrize(
+    "page",
+    [
+        "home2.html",
+        "macro.html",
+        "profiles.html",
+        "commune.html",
+        "micro.html",
+        "map.html",
+        "sources.html",
+        "about.html",
+    ],
+)
+def test_no_js_no_header_panel_covers_a_page_landmark(chromium, site, page, width):
+    """With JavaScript off, `.bp-js` never appears (confirmed below), so the
+    theme panel, the language panel and the nav all fall back to their
+    no-JS default -- real, visible, in-flow. This is the geometric half of
+    that guarantee: none of them may OVERLAP the page's own H1, breadcrumb
+    or (on map.html) the zoom controls, at a phone width or a desktop one."""
+    context = chromium.new_context(
+        viewport={"width": width, "height": 900}, java_script_enabled=False
+    )
+    try:
+        p = context.new_page()
+        p.goto(f"{site}/{page}", wait_until="load")
+        assert "bp-js" not in (p.evaluate("document.documentElement.className") or "")
+
+        targets = {}
+        for selector in _OCCLUSION_TARGETS:
+            locator = p.locator(selector)
+            if locator.count():
+                targets[selector] = locator.first.bounding_box()
+
+        panels = {}
+        for selector in _FLOATING_PANELS:
+            locator = p.locator(selector)
+            if locator.count():
+                panels[selector] = locator.first.bounding_box()
+
+        bad = [
+            (target_name, panel_name)
+            for target_name, target_box in targets.items()
+            if target_box
+            for panel_name, panel_box in panels.items()
+            if panel_box and _boxes_overlap(target_box, panel_box)
+        ]
+        assert not bad, f"{page} at {width}px: panel(s) cover landmark(s): {bad}"
     finally:
         context.close()
