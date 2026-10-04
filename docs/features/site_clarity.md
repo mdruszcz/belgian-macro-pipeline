@@ -149,11 +149,19 @@ the module all four pages already load), `assets/belpulse/europe_map.js` (`:1558
    from config, not from the clock: `stale_after` (period end plus the indicator's staleness
    allowance — 2026-04-03 for HICP) and `superseded_by`. The page only compares dates, so output
    stays byte-identical on an unchanged input (rules 28, 35).
-4. **Two labels corrected.** AMECO `PLCD` is "Nominal unit labour costs (ratio of compensation per
-   employee to real GDP per person employed)". `LABOUR_COST_BE.yaml:20,26` calls it "Labour Cost
-   Index (LCI) — Nominal hourly costs" and "Nominal compensation per employee". Neither is what the
-   series measures. `HICP.yaml:34` has `sdmx_code: HICP_INDEX` on a growth-rate series. Display text
-   and the code comment only; no indicator id changes (it is part of the `observations` primary key).
+4. **Two labels corrected — in all five AMECO configs, not just the published one.** AMECO `PLCD`
+   is "Nominal unit labour costs (ratio of compensation per employee to real GDP per person
+   employed)". `LABOUR_COST_BE.yaml:20,26` calls it "Labour Cost Index (LCI) — Nominal hourly
+   costs" and "Nominal compensation per employee". Neither is what the series measures. **The same
+   wrong label is on the four unpublished siblings too** — verified by grep:
+   `LABOUR_COST_DE.yaml`, `LABOUR_COST_EA.yaml`, `LABOUR_COST_FR.yaml` and `LABOUR_COST_NL.yaml`
+   each carry "Nominal compensation per employee" at `:3` and `:21`. All five are corrected in this
+   batch. They are not published today (`scripts/export_canonical_csv.py:97-98` keeps `be:country`
+   only), which is exactly why they must be done now and not later: a wrong label nobody is reading
+   is a wrong label that ships silently the day someone publishes the comparison, and the fix is the
+   same five-minute edit either way. `HICP.yaml:34` has `sdmx_code: HICP_INDEX` on a growth-rate
+   series. Display text and the code comment only; no indicator id changes (an id is part of the
+   `observations` primary key).
 
 **What is reused.** `MapUI` and its `unitLabel`; the existing provenance line; the existing
 `estimate` / `provisional` wording on `macro.html:449,569` and `explorer.html:468`; the staleness
@@ -192,8 +200,22 @@ three languages, with Enter falling back to the filtered directory; a row of two
 figures (`GOV_DEBT_PCT_GDP_BE` 107.9 % of GDP, 2025, final; `GOV_BALANCE_PCT_GDP_BE` -5.2 %, 2025,
 provisional — both already in `national.json`, verified); one quiet "see an indicator on the map"
 link. The map card, featured commune, finance strip and indicator grid move one screen down,
-unchanged. Same batch: convert the two decorative PNGs (4,923 KB) and serve one poster, not two
-(`poster.jpg` 243,384 B + `poster.webp` 238,284 B).
+unchanged.
+
+**The decorative images, and a rule 12 question for the maintainer.** There are **three** oversized
+decorative PNGs under `assets/belpulse/home2/`, not the two first written — verified by `ls`:
+`home2-namur-card.png` 2,846 KB, `home2-namur-cta.png` 2,076 KB and
+`home2-hero-brussels.png` **1,643 KB**, which the earlier draft missed. 6,565 KB in total.
+Converting them to WebP, and serving one film poster instead of two (`poster.jpg` 243,384 B +
+`poster.webp` 238,284 B), would **create new binary artefacts in git**, and rule 12 says new
+binaries are not committed without asking. So this is a decision for the maintainer, listed under
+"Assumptions and open questions" below, not something the batch assumes. Three ways to go, and he
+picks one: (a) commit the converted WebP files and delete the PNGs — smallest page, one approval,
+and the originals stay in git history anyway; (b) leave the images untouched and ship the rest of
+the batch — the homepage still stops downloading 11.3 MB of video, which is where the 28 seconds
+came from; (c) drop the decorative images from the page entirely rather than convert them, which
+adds no binary at all. **If he does not answer, the batch ships option (b)** and the images are a
+follow-up — nothing in the batch depends on them.
 
 **What changes on the About page.** `about.html` is generated from
 `config/pages/about/published.json` through typed blocks; it uses `hero` and `rich_text` today.
@@ -288,10 +310,18 @@ panel. The six key figures come first on a phone.
 
 `config/local_sections.yaml` has **eleven** sections and ten of them carry figures (verified by
 loading the file: demography 21, origins 5, households 7, income 5, social 4, housing 20, business 3,
-employment 10, safety 4, finances 15 = 94; `mobility` carries only its trilingual `unavailable` note
+employment 10, safety 4, finances 15; `mobility` carries only its trilingual `unavailable` note
 and no figures). `age_structure` is a composition block above the `sections:` list, not a chapter.
 So the sticky menu shows ten chapters plus the mobility note, and nothing in this batch changes that
 count.
+
+**94 unique figures from 95 declarations — one duplicate, in `safety`.** Verified by loading the
+file: `HOUSE_BURGLARIES_PER_10K` is declared twice in the `safety` section, once as its `headline`
+and once again in its `indicators` list. **Removing that duplicate is part of this batch**, and has
+to be: this batch's own test — every indicator appears exactly once, in front or in detail — cannot
+pass while it stands. It is a one-line deletion in `config/local_sections.yaml`; the figure keeps
+its headline position and loses only its second appearance, so no figure leaves the page and no
+anchor changes.
 
 **The label carries the withheld count.** 405 latest-period cells are suppressed or not-applicable
 across 287 of 565 communes, concentrated on exactly the indicators this batch folds. A control
@@ -307,7 +337,9 @@ failing. Extending it is part of this batch, not a follow-up.
 wrong: only folding whole chapters gets under ten, which is batch 5.
 
 **Tests.** `_check_sections` rejects an unknown id in `detail:`. Every indicator in front or in
-detail appears exactly once. The panel label's counts match the payload for a commune with
+detail appears exactly once — which is why the `safety` duplicate is removed in this batch; the test
+would otherwise fail on its first run, 95 declarations against 94 unique ids. A duplicate
+declaration in any section is rejected, so it cannot come back. The panel label's counts match the payload for a commune with
 withheld cells. Every `#anchor` valid before the change resolves after it (rule 31). A phone-width
 browser test that the six key figures precede chapter one.
 
@@ -460,11 +492,39 @@ pin, with the reason in the test's own docstring: `tests/test_macro_panels.py:43
 4. **The two Walloon finance-ratio validation steps** (each definition against real budget documents;
    three communes against their published budgets). His own, and until they are done
    `MUN_DEBT_TO_REVENUE` cannot go in front — the figure the paying buyer opens the page for.
+5. **Batch 4 averages 3.3 figures per chapter, not five, and four chapters get only two.** He agreed
+   to "about five figures in front per chapter". This is what the per-cluster judgement actually
+   produced, and he should see it before the folding mockup rather than in it:
 
-**Assumptions this spec makes, any of which he can overturn:** that "about five figures per chapter"
-means the per-chapter counts in batch 4, not exactly five everywhere; that the film's existing cut
-and files are reused as they are; that the About page is the right home for the film rather than a
-page of its own; that the two national figures on the new homepage are debt and the balance.
+   | Chapter | In front | Total | | Chapter | In front | Total |
+   |---|---|---|---|---|---|---|
+   | demography | 5 | 21 | | business | 3 | 3 |
+   | origins | **2** | 5 | | employment | 3 | 10 |
+   | households | **2** | 7 | | safety | 4 | 4 |
+   | income | **2** | 5 | | finances | 5 | 15 |
+   | social | **2** | 4 | | **total** | **33** | **94** |
+
+   Four chapters (origins, households, income, social) show two. Three of those four have only four
+   to seven figures in total, so "five in front" would mean folding almost nothing — and `business`
+   (3 of 3) and `safety` (4 of 4) have fewer than five to begin with. Raising the four thin chapters
+   to five would put 41 of 94 in front and fold almost nothing in them, which is a fair trade to
+   want. **Recommendation: keep these counts** — the point is a page a reader can finish, and a
+   chapter of two strong figures reads better than one of five where three restate each other. But
+   it is his call, it is cheap to change (it is one `detail:` list per chapter in config, no code),
+   and he should make it before the mockup is built rather than after.
+6. **Rule 12: may batch 2 commit converted images?** Three decorative PNGs under
+   `assets/belpulse/home2/` total 6,565 KB (`home2-namur-card.png` 2,846 KB,
+   `home2-namur-cta.png` 2,076 KB, `home2-hero-brussels.png` 1,643 KB). Converting them to WebP
+   creates new binary artefacts, which rule 12 says are not committed without asking. Options and
+   the default are in batch 2. **Recommendation: (b) leave them and ship the rest** — the 28-second
+   first visit came from the 11.3 MB of video, not from these, so the images can be a follow-up with
+   its own approval and nothing waits on them.
+
+**Assumptions this spec makes, any of which he can overturn:** that the film's existing cut and
+files are reused as they are; that the About page is the right home for the film rather than a page
+of its own; that the two national figures on the new homepage are debt and the balance. ("About five
+figures per chapter" was an assumption in an earlier draft of this spec; it is now question 5 above,
+because the counts do not meet it.)
 
 **Not established.** Whether the simulated live counters from #309 PR 2 should also appear on the
 new homepage hero — that depends on a design the maintainer has not seen yet, so batch 2 leaves the

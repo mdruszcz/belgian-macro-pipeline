@@ -63,7 +63,7 @@ across all 16 stores found every current row whose period ends after its own vin
 | `spf_finances` | 6,711 + 69 | `final` / `suppressed` | correct — 1-January snapshots, 11 indicators, plus the IPP rate for tax year 2026 |
 | `eurostat` consumer confidence | 34 | `final` | correct — September surveys |
 | `nbb` `CONSUMER_CONFIDENCE` | 1 | `final` | correct — the September survey |
-| `onem` 2026 | 2,653 + 173 | `provisional` / `suppressed` | correct, and deliberately provisional (`scripts/sync_onem.py:298-307`) |
+| `onem` 2026 | 2,653 + 173 | `provisional` / `suppressed` | correct, and deliberately provisional (`scripts/sync_onem.py:298-307`). The 2,653 is **2,087** rows from `onem` plus **566** from `onem_rates`, and those 566 are `UNEMPLOYMENT_RATE_INSURED` 2026 for the 565 communes **plus the `be:country` row = 5.05** — the one named below as a figure the page-side rule must not hide. Counting communes only gives 565 and understates the row by one |
 
 So "an open period cannot be `final`" fires on 9,016 rows, 10 of which are the defect. The other
 9,006 are right. No `estimate` row has an open period at all (1,388 exist; every one is a Eurostat
