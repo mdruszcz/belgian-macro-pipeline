@@ -1,3 +1,16 @@
+# STOPPED SOURCE, KEPT ON PURPOSE (ADR 0018, docs/decisions/0018-stopped-
+# inflation-series.md, ACCEPTED 2026-10-04). The NBB dataflow this config
+# queries (config/sources/nbb.yaml + the fetch.query below) froze at
+# 2025-12 and keeps answering HTTP 200 with the same 192 rows -- the source
+# itself moved to a new dataflow (BE2:DF_HICP_2025) this config deliberately
+# does not follow, because that flow is still annotated NonFinalDataflow and
+# rebased at a year no other source publishes. December 2025 is a real,
+# final, correct figure, not a missing one (rule 26): this series keeps its
+# rows, its chart, its explorer.html row and its download, and only leaves
+# the "current inflation" slots. HICP_EUROSTAT_BE (Eurostat prc_hicp_minr)
+# is the series that continues being updated. No id/unit/frequency/fetch
+# change here -- that is this record's whole point: nothing about what this
+# config already measures is wrong, it has simply stopped moving.
 id: HICP
 name:
   en: HICP (Harmonised Inflation)
@@ -14,7 +27,10 @@ geo_levels:
 - national
 preferred_direction: contextual
 description:
-  en: Harmonised Index of Consumer Prices, all items, year-on-year growth rate
+  en: Harmonised Index of Consumer Prices, all items, year-on-year growth rate.
+    STOPPED at 2025-12 (ADR 0018) -- the NBB dataflow behind this series is
+    frozen, kept for its history, not deleted (rule 26). HICP_EUROSTAT_BE is
+    the continuing series.
 fetch:
   query: ',DF_HICP,1.0/M.BE.000000.2015.HCP.GROWTH_RATE?startPeriod=2010-01&dimensionAtObservation=AllDimensions'
 display:

@@ -1,12 +1,12 @@
 id: LABOUR_COST_NL
 name:
-  en: Nominal compensation per employee, Netherlands (2010=100)
-  fr: Rémunération nominale par salarié, Pays-Bas (2010=100)
-  nl: Nominale beloning per werknemer, Nederland (2010=100)
+  en: Nominal unit labour costs, Netherlands (2010=100)
+  fr: Coûts salariaux unitaires nominaux, Pays-Bas (2010=100)
+  nl: Nominale loonkosten per eenheid product, Nederland (2010=100)
 definition:
-  en: "Index of the cost of employing staff in the Netherlands, based on 2010 as 100."
-  fr: "Indice du coût de la main-d'œuvre aux Pays-Bas, base 2010 = 100."
-  nl: "Index van de loonkosten in Nederland, met 2010 als 100."
+  en: "Ratio of nominal compensation per employee to real GDP per person employed in the Netherlands, indexed so that 2010 = 100."
+  fr: "Rapport entre la rémunération nominale par salarié et le PIB réel par personne occupée aux Pays-Bas, indexé sur 2010 = 100."
+  nl: "Verhouding tussen de nominale beloning per werknemer en het reële bbp per werkende persoon in Nederland, geïndexeerd met 2010 = 100."
 country: NL
 unit: index_2010
 transform:
@@ -18,7 +18,9 @@ geo_levels:
 - national
 preferred_direction: neutral
 description:
-  en: Nominal compensation per employee, total economy (2010=100) - Netherlands
+  en: Nominal unit labour costs, total economy (2010=100) - Netherlands, the
+    ratio of nominal compensation per employee to real GDP per person employed.
+    AMECO code PLCD.
 fetch:
   query: /PLCD/NLD.3.1.99.0.PLCD?observations=true
 display: null

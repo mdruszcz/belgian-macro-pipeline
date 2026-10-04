@@ -1722,10 +1722,15 @@ the NBB dataflow behind Belgian inflation froze at December 2025, Eurostat retir
 behind the Europe panel's inflation at the same time, and the site publishes 2.2 % as current
 Belgian inflation while both sources publish 4.2 % for August 2026.
 
-**Approved, but not yet built.** Implementation is its own pull request. As of this row, no
-`HICP_EUROSTAT_BE` config exists, `HICP_ANNUAL_RATE_EUROPE` still asks `prc_hicp_manr`, and
-**nothing has fetched `prc_hicp_minr`**. The approval is what rule 8 requires before that work
-starts, not a record that it happened.
+**Built.** Implementation PR "Wrong numbers 1/2" (#312) added `config/indicators/HICP_EUROSTAT_BE.yaml`
+and repointed `HICP_ANNUAL_RATE_EUROPE` to `prc_hicp_minr`. Both were real-fetched 2026-10-04,
+coverage and values matching this row exactly: `HICP_EUROSTAT_BE` 225 rows, 2008-01 to 2026-09;
+`HICP_ANNUAL_RATE_EUROPE` 8,010 rows across 38 geographies (BA, LI, MD, UA allowlisted but absent
+from this dataset, logged, not an error). Belgium: 2025-12 = 2.2 (`final`), 2026-08 = 4.2
+(`final`), 2026-09 = 4.6 (`estimate`) in both series. The NBB `HICP` series was marked stopped in
+its own config, kept, not deleted. The page-side switch -- which pages read `HICP_EUROSTAT_BE`
+instead of the stopped `HICP` -- is explicitly a separate, later pull request (#312's own PR body);
+until it lands, the published pages still show the NBB figure.
 
 **No new data source, and no new licence decision.** Both rows use the `eurostat` source, adapter
 and licence already approved by the maintainer on 2026-09-13 (see "Approved sources" above), the
@@ -1762,6 +1767,21 @@ requested, not inferred; nothing was written into the pipeline to obtain them.
 | Dry run | *Measured 2026-10-04:* 9,513 rows across 46 geographies, none outside the existing allowlist and exclusion lists. Swapping only the dataset code **fails loudly**, as it should: HTTP 400 on the old `coicop` filter and a `FetchError` on the unpinned `unit` dimension |
 | Why it needed approval | A `fetch` change on an existing indicator is rule 19 (ADR plus explicit approval), not a config tidy-up |
 | Approval | **APPROVED by the maintainer 2026-10-04**, under ADR 0018 together with row 1. Not yet applied: the config still asks `prc_hicp_manr` |
+
+### Iceland: 107 months misattributed to a dataset that does not contain them
+
+**Found during implementation, not part of the original approval.** 107 Iceland months
+(`is:country`, 2008-01 to 2016-11) come from the discontinued `prc_hicp_manr`; the new
+`prc_hicp_minr` only covers Iceland from 2016-12, so the live repoint fetch never returned them
+and they stayed in `observations` under their old vintage. `public/data/europe/countries/HICP_ANNUAL_RATE_EUROPE.json`
+carries one `source` block (one dataset name) for the whole series, so it now credits those 107
+months to `prc_hicp_minr` — a dataset that does not actually contain them. Not a wrong value:
+Iceland's old figures remain true, just not reproducible from the current config.
+
+**The maintainer chose 2026-10-04 to keep them as they are**, not retire them. Recorded as a P2
+row in `docs/implementation/known-risks.md`. A possible later fix is per-period provenance in the
+europe-countries payload, so each period can name its own source dataset instead of one stamp for
+the whole series — not scoped to issue #312.
 
 ### The NBB `HICP` series is kept, not retired
 

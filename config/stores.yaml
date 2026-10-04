@@ -284,6 +284,12 @@ stores:
       - EUROSTAT_GDP_Q_MEUR_NL
       - EC_CONS_CONF_BE
       - EC_CONS_CONF_EU
+      # Belgian inflation from Eurostat (docs/data_catalog.md, "Belgian
+      # inflation from Eurostat", APPROVED by the maintainer 2026-10-04;
+      # ADR 0018). Single-country Eurostat fetch (fetch.filters.geo: BE),
+      # same shape and same `international` store as EC_CONS_CONF_BE above
+      # -- no new store.
+      - HICP_EUROSTAT_BE
       # Eurostat additional domains batch (docs/data_catalog.md, 2026-09-15):
       # 21 country-level indicators across 7 new domains (sector/productivity/
       # employment, public finance, trade, social inequalities, energy/

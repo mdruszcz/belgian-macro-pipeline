@@ -1,12 +1,12 @@
 id: LABOUR_COST_FR
 name:
-  en: Nominal compensation per employee, France (2010=100)
-  fr: Rémunération nominale par salarié, France (2010=100)
-  nl: Nominale beloning per werknemer, Frankrijk (2010=100)
+  en: Nominal unit labour costs, France (2010=100)
+  fr: Coûts salariaux unitaires nominaux, France (2010=100)
+  nl: Nominale loonkosten per eenheid product, Frankrijk (2010=100)
 definition:
-  en: "Index of the cost of employing staff in France, based on 2010 as 100."
-  fr: "Indice du coût de la main-d'œuvre en France, base 2010 = 100."
-  nl: "Index van de loonkosten in Frankrijk, met 2010 als 100."
+  en: "Ratio of nominal compensation per employee to real GDP per person employed in France, indexed so that 2010 = 100."
+  fr: "Rapport entre la rémunération nominale par salarié et le PIB réel par personne occupée en France, indexé sur 2010 = 100."
+  nl: "Verhouding tussen de nominale beloning per werknemer en het reële bbp per werkende persoon in Frankrijk, geïndexeerd met 2010 = 100."
 country: FR
 unit: index_2010
 transform:
@@ -18,7 +18,9 @@ geo_levels:
 - national
 preferred_direction: neutral
 description:
-  en: Nominal compensation per employee, total economy (2010=100) - France
+  en: Nominal unit labour costs, total economy (2010=100) - France, the ratio
+    of nominal compensation per employee to real GDP per person employed.
+    AMECO code PLCD.
 fetch:
   query: /PLCD/FRA.3.1.99.0.PLCD?observations=true
 display: null

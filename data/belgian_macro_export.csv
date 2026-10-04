@@ -1627,6 +1627,231 @@ HICP,HICP (Harmonised Inflation),2025-09,2.68512,A,percent_yy,NBB,2026-09-05T12:
 HICP,HICP (Harmonised Inflation),2025-10,2.52822,A,percent_yy,NBB,2026-09-05T12:48:35.250844+00:00
 HICP,HICP (Harmonised Inflation),2025-11,2.61399,A,percent_yy,NBB,2026-09-05T12:48:35.250844+00:00
 HICP,HICP (Harmonised Inflation),2025-12,2.17715,A,percent_yy,NBB,2026-09-05T12:48:35.250844+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-01,3.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-02,3.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-03,4.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-04,4.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-05,5.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-06,5.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-07,5.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-08,5.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-09,5.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-10,4.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-11,3.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2008-12,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-01,2.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-02,1.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-03,0.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-04,0.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-05,-0.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-06,-1.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-07,-1.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-08,-0.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-09,-1.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-10,-0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-11,0.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2009-12,0.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-01,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-02,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-03,1.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-04,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-05,2.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-06,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-07,2.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-08,2.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-09,2.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-10,3.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-11,3.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2010-12,3.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-01,3.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-02,3.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-03,3.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-04,3.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-05,2.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-06,3.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-07,4.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-08,3.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-09,3.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-10,3.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-11,3.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2011-12,3.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-01,3.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-02,3.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-03,3.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-04,2.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-05,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-06,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-07,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-08,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-09,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-10,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-11,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2012-12,2.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-01,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-02,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-03,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-04,1.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-05,1.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-06,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-07,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-08,1.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-09,1.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-10,0.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-11,0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2013-12,1.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-01,1.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-02,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-03,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-04,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-05,0.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-06,0.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-07,0.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-08,0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-09,0.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-10,0.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-11,0.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2014-12,-0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-01,-0.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-02,-0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-03,-0.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-04,0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-05,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-06,0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-07,0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-08,0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-09,0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-10,1.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-11,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2015-12,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-01,1.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-02,1.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-03,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-04,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-05,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-06,1.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-07,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-08,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-09,1.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-10,1.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-11,1.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2016-12,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-01,3.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-02,3.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-03,2.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-04,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-05,1.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-06,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-07,1.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-08,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-09,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-10,1.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-11,2.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2017-12,2.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-01,1.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-02,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-03,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-04,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-05,2.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-06,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-07,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-08,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-09,2.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-10,3.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-11,2.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2018-12,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-01,1.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-02,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-03,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-04,2.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-05,1.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-06,1.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-07,1.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-08,0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-09,0.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-10,0.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-11,0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2019-12,0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-01,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-02,1.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-03,0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-04,0.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-05,-0.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-06,0.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-07,1.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-08,-0.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-09,0.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-10,0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-11,0.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2020-12,0.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-01,0.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-02,0.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-03,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-04,2.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-05,2.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-06,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-07,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-08,4.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-09,3.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-10,5.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-11,7.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2021-12,6.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-01,8.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-02,9.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-03,9.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-04,9.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-05,9.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-06,10.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-07,10.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-08,10.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-09,12.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-10,13.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-11,10.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2022-12,10.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-01,7.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-02,5.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-03,4.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-04,3.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-05,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-06,1.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-07,1.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-08,2.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-09,0.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-10,-1.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-11,-0.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2023-12,0.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-01,1.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-02,3.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-03,3.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-04,4.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-05,4.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-06,5.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-07,5.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-08,4.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-09,4.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-10,4.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-11,4.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2024-12,4.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-01,4.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-02,4.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-03,3.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-04,3.1,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-05,2.8,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-06,2.9,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-07,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-08,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-09,2.7,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-10,2.5,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-11,2.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2025-12,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-01,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-02,1.4,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-03,2.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-04,4.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-05,4.0,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-06,3.3,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-07,3.6,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-08,4.2,A,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
+HICP_EUROSTAT_BE,"HICP (Harmonised Inflation), Eurostat",2026-09,4.6,E,percent_yy,Eurostat,2026-10-04T07:09:54.524689+00:00
 INDUSTRIAL_PROD,Industrial production,2010-01,67.8,A,index_2021,NBB,2026-09-05T12:48:35.250844+00:00
 INDUSTRIAL_PROD,Industrial production,2010-02,69.1,A,index_2021,NBB,2026-09-05T12:48:35.250844+00:00
 INDUSTRIAL_PROD,Industrial production,2010-03,68.9,A,index_2021,NBB,2026-09-05T12:48:35.250844+00:00
@@ -1826,26 +2051,24 @@ INDUSTRIAL_PROD,Industrial production,2026-04,91.1,A,index_2021,NBB,2026-09-14T1
 INDUSTRIAL_PROD,Industrial production,2026-05,88.4,A,index_2021,NBB,2026-09-14T10:17:39.684110+00:00
 INDUSTRIAL_PROD,Industrial production,2026-06,87.9,A,index_2021,NBB,2026-09-14T10:17:39.684110+00:00
 INDUSTRIAL_PROD,Industrial production,2026-07,87.7,A,index_2021,NBB,2026-09-14T10:17:39.684110+00:00
-LABOUR_COST_BE,Labour cost index,2008,97.68,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2009,100.54,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2010,100.0,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2011,102.52,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2012,105.95,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2013,107.9,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2014,107.5,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2015,107.02,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2016,107.89,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2017,109.98,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2018,111.54,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2019,112.89,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2020,116.99,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2021,117.5,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2022,123.8,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2023,132.07,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2024,135.4,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2025,138.98,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2026,142.26,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
-LABOUR_COST_BE,Labour cost index,2027,145.02,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2008,97.68,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2009,100.54,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2010,100.0,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2011,102.52,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2012,105.95,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2013,107.9,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2014,107.5,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2015,107.02,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2016,107.89,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2017,109.98,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2018,111.54,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2019,112.89,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2020,116.99,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2021,117.5,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2022,123.8,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2023,132.07,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2024,135.4,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
+LABOUR_COST_BE,Nominal unit labour costs,2025,138.98,A,index_2010,AMECO/EC,2026-09-05T12:48:35.250844+00:00
 NET_EXPORTS_CY,Net exports,2006,0.6,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 NET_EXPORTS_CY,Net exports,2007,0.1,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
 NET_EXPORTS_CY,Net exports,2008,-1.4,A,pp_contribution,NBB,2026-09-05T12:48:35.250844+00:00
