@@ -24,15 +24,23 @@ def _html() -> str:
 
 
 def test_home2_has_the_reference_sections_and_generated_assets():
-    """The film-first redesign (home-v5) replaced the single dark `.hero`
-    section with a two-phase hero: `.filmhero` (phase 1, the brand film
-    alone) and `.datahero` (phase 2, the commune-Portrait-styled data hero,
-    holding the map/chart cards the old `.hero` used to carry directly).
-    Every other reference section/asset below the hero is unchanged."""
+    """Issue #312 batch 2 (2026-10-04): the two-phase film/data hero is gone
+    -- the film left this page entirely (it now plays only on request, on
+    about.html). `.filmhero` no longer exists anywhere in this file; this
+    guard, which used to pin it as a reference section, now pins its
+    absence instead, alongside `#dataHero` (now data-first and
+    search-first from the first screen) and the interactive map card,
+    relocated to its own `#mapCardSection` one screen down. Every other
+    reference section/asset below the hero is unchanged."""
     html = _html()
+    assert 'class="filmhero"' not in html, "the film hero band must not exist on this page"
+    # Comments (including this file's own top-of-file explanation) may
+    # mention "<video>" in prose; only a real tag matters here.
+    rendered = re.sub(r"<!--.*?-->", "", html, flags=re.DOTALL)
+    assert "<video" not in rendered, "no <video> element belongs on this page any more"
     for marker in (
-        'class="filmhero"',
         'id="dataHero"',
+        'id="mapCardSection"',
         'id="financeStrip"',
         'id="featuredCard"',
         'id="themeThumbs"',
@@ -100,38 +108,55 @@ def test_home2_is_the_indexable_canonical_homepage():
 
 
 def test_home2_hero_map_has_three_material_zones():
-    """Batch A1.3 (docs/features/site_unification.md, "Home2 : corriger la
-    composition"): the hero map card is materially three zones -- title +
-    indicator picker, map + zoom controls, legend + source -- not one box
-    with the zoom buttons floating over whatever happens to be underneath.
-    Structural: the three zone classes exist inside the map card, in that
-    order, and the zoom buttons live inside the map zone (mapbox), never as
-    a sibling of maphead where they could land on top of the picker."""
+    """Issue #312 batch 2, lead review round 3: the map card moved off the
+    first screen into its own `#mapCardSection`, and became a two-column
+    grid (`.mapcard-grid`) rather than one column of three stacked zones --
+    a 355px map graphic was floating alone in a full-width card with its
+    legend stretched thin underneath, so the map graphic now sits in its
+    own column (`.mapzone`, carrying `.mapbox` and the zoom controls) next
+    to a second column (`.mapside`) carrying title + picker (`.maphead`),
+    then legend + source (`.mapfoot`), then the full-page-map link. Still
+    structural, not visual: the two grid zones exist in that order, the
+    zoom buttons live inside `.mapzone` (never a sibling of `.maphead`
+    where they could land on top of the picker), and `.maphead` precedes
+    `.mapfoot` inside `.mapside`."""
     html = _html()
-    card_match = re.search(r'id="mapCard"[^>]*>(.*?)<div class="hero-mini"', html, re.DOTALL)
+    card_match = re.search(
+        r'id="mapCard"[^>]*>(.*?)</div>\s*</section>\s*</div>\s*\n\n\s*<!-- ── commune',
+        html,
+        re.DOTALL,
+    )
     assert card_match, "could not find the hero map card markup"
     card = card_match.group(1)
 
-    head_at = card.index('class="maphead"')
+    grid_at = card.index('class="mapcard-grid"')
     zone_at = card.index('class="mapzone"')
+    side_at = card.index('class="mapside"')
+    assert grid_at < zone_at < side_at, "mapzone must precede mapside inside mapcard-grid"
+
+    head_at = card.index('class="maphead"')
     foot_at = card.index('class="mapfoot"')
-    assert head_at < zone_at < foot_at, "the three zones must appear in this order"
+    assert side_at < head_at < foot_at, "maphead must precede mapfoot inside mapside"
 
     # The zoom buttons must be inside mapzone (in fact inside mapbox, which
     # is itself inside mapzone) -- not a sibling of maphead, or an absolute
     # position anchored to the whole card could still land on the picker.
     zoombtns_at = card.index('class="zoombtns"')
-    mapfoot_open_at = card.index('<div class="mapfoot"')
-    assert zone_at < zoombtns_at < mapfoot_open_at
+    assert zone_at < zoombtns_at < side_at
 
 
 def test_home2_hero_series_come_from_national_sections_config_not_the_page():
-    """The hero's two mini-charts must be the ids config/national_sections.yaml
+    """The hero's two figure cards must be the ids config/national_sections.yaml
     declares under `hero:`, read at runtime from
     public/data/metadata/national_sections.json -- never a literal id typed
     into home2.html (claude.md rule 2/24, the same guarantee
     tests/test_macro.py's test_macro_names_no_indicator_anywhere gives
-    macro.html)."""
+    macro.html).
+
+    Issue #312 batch 2: `hero:` entries are now `{code, format,
+    short_label}` objects (a short, trilingual title replaced each card's
+    full indicator name, which used to wrap seven lines) rather than bare
+    indicator-id strings -- this test reads `entry["code"]` accordingly."""
     import yaml
 
     html = _html()
@@ -140,8 +165,9 @@ def test_home2_hero_series_come_from_national_sections_config_not_the_page():
     )
     hero = layout.get("hero") or []
     assert hero, "config/national_sections.yaml declares no hero series"
+    codes = [entry["code"] if isinstance(entry, dict) else entry for entry in hero]
 
-    named = sorted(code for code in hero if code in html)
+    named = sorted(code for code in codes if code in html)
     assert not named, f"home2.html names hero indicator(s) directly: {named}"
 
     # And it must actually be wired to read the declared list, not just
@@ -149,23 +175,38 @@ def test_home2_hero_series_come_from_national_sections_config_not_the_page():
     assert "national_sections.json" in html
     assert "heroCodes" in html
     assert "heroOrder" in html
+    # The short_label is what the card titles itself with now, never a
+    # literal indicator name string -- see heroShortName() in the script.
+    assert "heroShortName" in html
+    assert "short_label" in html
 
 
 def test_home2_has_a_commune_search_wired_to_the_real_commune_page():
-    """The film-first redesign (home-v5) added a commune search to the data
-    hero, matching commune.html's own switcher pattern: every commune in
-    view-src/geojson goes into the <datalist> as 'Name (nis)', and picking one
-    (or typing the name and pressing enter, which fires `change`) navigates to
-    the REAL commune.html?nis=... profile -- not a dead link, since this is
-    the real site page, not the self-contained mockup that first proved the
-    interaction. This replaces the old 'no search box' assertion: the old
-    dark-hero layout deliberately had none, the new commune-Portrait-styled
-    hero deliberately does."""
+    """Issue #312 batch 2: the old bare `<input list=datalist>` had no
+    visible label, no submit button, no keyboard navigation of its own,
+    and only matched the French name (site-audit-2026-10-04/ux.md, section
+    6a). It is now a real ARIA 1.2 combobox: a visible trilingual label, a
+    text input, a submit button and a listbox of suggestions
+    (`#communeSuggestions`), inside a real `<form>` that GETs to
+    profiles.html so it still works with JavaScript disabled. Exactly one
+    match goes to commune.html?nis=...; several or none fall back to the
+    directory -- never a dead end."""
     html = _html()
+    assert 'id="heroSearchForm"' in html
+    assert 'role="search"' in html
+    assert 'action="profiles.html"' in html
+    assert 'method="get"' in html
+    assert (
+        '<label class="herosearch-label" for="communeSearch"' in html
+    ), "the search field needs a real, visible <label>, not just a placeholder"
     assert 'id="communeSearch"' in html
-    assert 'id="communeList"' in html
+    assert 'role="combobox"' in html
+    assert 'id="communeSuggestions"' in html
+    assert 'role="listbox"' in html
     assert "wireSearch" in html
+    assert "matchCommunes" in html
     assert "commune.html?nis=" in html
+    assert "profiles.html?q=" in html, "an ambiguous/empty search must fall back to the directory"
 
 
 def test_home2_nav_uses_the_shared_header_typography():
@@ -177,19 +218,28 @@ def test_home2_nav_uses_the_shared_header_typography():
 # --- Batch A2b: visual polish -------------------------------------------------
 
 
-def test_home2_headline_wraps_with_a_balanced_measure_not_a_tight_character_cap():
-    """Item 1: 'mises à jour automatiquement' used to leave 'jour' alone on
-    its own line in every theme, because the h1 was capped too tight for the
-    column it sits in. text-wrap:balance lets the browser choose break points
-    that avoid an orphan. The film-first redesign moved the headline from
-    `.home2 .hero h1` into the phase-2 data hero's own `.datahero h1`; the
-    same balanced-wrap contract still applies there."""
+def test_home2_headline_has_no_tight_character_cap():
+    """Item 1 (pre-issue-#312): 'mises à jour automatiquement' used to leave
+    'jour' alone on its own line, because the h1 was capped too tight
+    (max-width:17ch) for the column it sat in -- fixed then with
+    text-wrap:balance.
+
+    Issue #312 batch 2 superseded that fix's own context: the hero is now
+    two columns from ~1024px (`.datahero-grid`), with the headline in the
+    narrower `.datahero-main` column (max-width:640px) rather than the
+    previous single wide column, and the h1 itself carries no max-width or
+    text-wrap:balance any more (lead review: the two-column layout and the
+    shorter headline column no longer produce the orphan that rule
+    guarded against). This test now pins the ABSENCE of a tight character
+    cap -- the specific regression the original fix targeted -- rather
+    than the particular technique used to avoid it, since the layout that
+    produced the orphan no longer exists."""
     html = _html()
     rule = re.search(r"\.datahero h1\{([^}]+)\}", html)
     assert rule, "no .datahero h1 rule"
     body = rule.group(1).replace(" ", "")
-    assert "text-wrap:balance" in body
     assert "max-width:17ch" not in body, "still capped to the width that produced the orphan"
+    assert not re.search(r"max-width:\d+ch", body), "a character cap on the headline itself"
 
 
 def test_home2_headline_translations_have_no_new_orphan_risk():

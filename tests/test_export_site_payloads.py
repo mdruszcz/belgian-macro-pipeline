@@ -229,22 +229,58 @@ def test_national_sections_layout_passes_through_the_declared_hero_series(tmp_pa
     `hero:` in config/national_sections.yaml rather than sorting national.json
     itself, so home2.html can hold no indicator id (rule 2/24). The exporter
     must both carry the key through and refuse a hero id nothing publishes,
-    the same guarantee `_check_national_sections` already gives `kpis` etc."""
+    the same guarantee `_check_national_sections` already gives `kpis` etc.
+
+    Issue #312 batch 2: a bare string is still accepted (pre-batch-2 shape,
+    `format` defaults to "plain" and `short_label` to None) -- this test
+    exercises exactly that backward-compatible path; the richer
+    `{code, format, short_label}` object batch 2 actually publishes is
+    covered by test_national_sections_hero_rejects_a_missing_short_label
+    below."""
     layout_path = tmp_path / "national_sections.yaml"
     layout_path.write_text(
         "kpis: [A]\nhero: [A, B]\n",
         encoding="utf-8",
     )
     layout = _national_sections(layout_path)
-    assert layout["hero"] == ["A", "B"]
+    assert layout["hero"] == [
+        {"code": "A", "format": "plain", "short_label": None},
+        {"code": "B", "format": "plain", "short_label": None},
+    ]
 
     # Every hero id must exist in the published national payload, exactly
     # like every other list this function checks -- an id nothing provides
     # would render home2's hero card as an empty box, invisible to every
-    # other test.
+    # other test. Neither entry carries a short_label, so the check is
+    # expected to refuse on that ground too (see the next test) -- here we
+    # only exercise the "unknown id" branch by giving both a short_label.
+    layout["hero"][0]["short_label"] = {"en": "A", "fr": "A", "nl": "A"}
+    layout["hero"][1]["short_label"] = {"en": "B", "fr": "B", "nl": "B"}
     _check_national_sections(layout, known={"A", "B"})
     with pytest.raises(ValueError, match=r"\['B'\]"):
         _check_national_sections(layout, known={"A"})
+
+
+def test_national_sections_hero_rejects_a_missing_short_label(tmp_path):
+    """Issue #312 batch 2: a hero entry with no short_label, or one missing
+    a language, must be refused at export time -- the same "cannot render
+    as an empty box" guarantee as an unknown id, because home2.html's hero
+    cards print short_label as their only heading."""
+    layout_path = tmp_path / "national_sections.yaml"
+    layout_path.write_text(
+        "hero:\n  - code: A\n    short_label: {en: Debt}\n",
+        encoding="utf-8",
+    )
+    layout = _national_sections(layout_path)
+    assert layout["hero"] == [{"code": "A", "format": "plain", "short_label": {"en": "Debt"}}]
+    with pytest.raises(ValueError, match=r"\['A'\]"):
+        _check_national_sections(layout, known={"A"})
+
+    no_label_path = tmp_path / "national_sections_no_label.yaml"
+    no_label_path.write_text("hero: [A]\n", encoding="utf-8")
+    layout2 = _national_sections(no_label_path)
+    with pytest.raises(ValueError, match=r"\['A'\]"):
+        _check_national_sections(layout2, known={"A"})
 
 
 def test_national_sections_layout_passes_through_and_checks_panel_charts(tmp_path):

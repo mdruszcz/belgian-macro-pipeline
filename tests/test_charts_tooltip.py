@@ -31,15 +31,14 @@ def site():
     production actually is, and costs nothing extra."""
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(REPO))
 
-    # ThreadingMixIn: this module's own film hero leaves an in-flight
-    # film-1080.mp4 request open past a "Passer" click (pausing playback does
-    # not cancel the underlying network request), and this file opens a
-    # SECOND page/navigation (the `mobile` fixture, or `desktop`+`mobile`
-    # together) on the same module-scoped server while that request may
-    # still be in flight. A single-threaded server then blocks the second
-    # page's GETs behind that multi-MB response -- a server-fixture
-    # artifact, not real behaviour: a real static host serves both
-    # concurrently.
+    # ThreadingMixIn: this file opens a SECOND page/navigation (the
+    # `mobile` fixture, or `desktop`+`mobile` together) on the same
+    # module-scoped server, and a single-threaded server would serialise
+    # the two pages' concurrent GETs -- a server-fixture artifact, not real
+    # behaviour: a real static host serves both concurrently. (Pre-issue
+    # #312 this mattered even more: the old film-first hero left an
+    # in-flight film-1080.mp4 request open past a "Passer" click, which no
+    # longer exists -- home2.html requests no video at all now.)
     class Quiet(socketserver.ThreadingMixIn, http.server.HTTPServer):
         allow_reuse_address = True
         daemon_threads = True
@@ -64,10 +63,16 @@ def site():
 
 
 def _hero_codes() -> list[str]:
+    """Issue #312 batch 2: `hero:` entries are now `{code, format,
+    short_label}` objects (a short, trilingual title replaced each card's
+    full indicator name), not bare indicator-id strings -- unwrap `code`
+    either way, since a bare string is still accepted for backward
+    compatibility (see `_hero_entries` in scripts/export_site_payloads.py)."""
     layout = yaml.safe_load(
         (REPO / "config" / "national_sections.yaml").read_text(encoding="utf-8")
     )
-    return layout.get("hero") or []
+    hero = layout.get("hero") or []
+    return [entry["code"] if isinstance(entry, dict) else entry for entry in hero]
 
 
 def _national() -> dict:
@@ -81,33 +86,15 @@ def _open_home2(chromium, site, width, height, lang="fr"):
     pre-paint script always forces light), and the given language via the
     same localStorage key the language picker itself writes.
 
-    The hero mini-charts (`#heroMini .hcard`) are the film-first redesign's
-    renamed card class (`.glass` -- the old dark hero's card -- became
-    `.hcard`, the commune-Portrait-styled light card). They render
-    regardless of which film-hero phase is showing: `.datahero` (which holds
-    `#heroMini`) is a normal sibling section below `.filmhero` in the DOM,
-    not hidden behind or inside it, and init()'s data fetch/render runs
-    independently of initHero()'s phase state."""
+    Issue #312 batch 2: the two-phase film/data hero is gone -- home2.html
+    opens directly on the data hero, no film, no "Passer" button, no
+    scroll-triggered phase transition to settle first. `#heroMini .hcard`
+    now renders as soon as init()'s national.json fetch resolves and
+    renderHeroMini() runs, so this helper simply waits on that directly."""
     context = chromium.new_context(viewport={"width": width, "height": height})
     context.add_init_script(f"try{{localStorage.setItem('belpulse-lang', '{lang}');}}catch(e){{}}")
     page = context.new_page()
     page.goto(f"{site}/home2.html")
-    # Reach phase 2 (the data hero) deterministically via "Passer" rather
-    # than relying on the scroll-triggered transition: this suite scrolls
-    # canvases into view itself later, and racing that against the film
-    # hero's OWN scroll-driven phase transition (which changes #filmHero's
-    # height out from under an in-flight scroll) left elements measured at a
-    # stale, off-screen position. Clicking Skip settles the layout up front.
-    page.wait_for_selector("#filmSkip:not([hidden])", timeout=15000)
-    page.click("#filmSkip")
-    page.wait_for_function(
-        "(() => document.getElementById('filmHero').dataset.phase === '2')()", timeout=15000
-    )
-    # Skip also triggers a smooth scrollIntoView() on #dataHero; let it
-    # settle before any bounding-box measurement, otherwise two elements'
-    # boxes can be read a frame apart, mid-scroll, and appear to overlap by
-    # however far the page moved between the two reads.
-    page.wait_for_timeout(600)
     # Wait on a real condition, never a duration: the hero mini-charts exist
     # once init()'s fetches resolve and renderHeroMini() has run.
     page.wait_for_function(
@@ -257,11 +244,16 @@ def test_zoom_controls_do_not_intersect_the_indicator_select(desktop, mobile):
 
 
 def test_at_390px_the_map_card_and_the_chart_cards_do_not_overlap(mobile):
+    """Issue #312 batch 2 reordered the page: the two national figure cards
+    (`#heroMini`) are now IN the first-screen hero, and the interactive map
+    card (`#mapCard`) moved to its own section one screen further down --
+    the reverse of the pre-batch-2 order this test used to assert. Still a
+    stacking/overlap guard, just in the new, correct order."""
     map_box = mobile.locator("#mapCard").bounding_box()
     mini_box = mobile.locator("#heroMini").bounding_box()
     assert map_box and mini_box
-    # Stacked: the mini-chart cluster starts at or below where the map card
-    # ends (a hairline of sub-pixel rounding is fine; real overlap is not).
+    # Stacked: the map card starts at or below where the chart cards end
+    # (a hairline of sub-pixel rounding is fine; real overlap is not).
     assert (
-        mini_box["y"] >= map_box["y"] + map_box["height"] - 1
-    ), f"map card {map_box} overlaps the chart cards {mini_box} at 390px"
+        map_box["y"] >= mini_box["y"] + mini_box["height"] - 1
+    ), f"chart cards {mini_box} overlap the map card {map_box} at 390px"
