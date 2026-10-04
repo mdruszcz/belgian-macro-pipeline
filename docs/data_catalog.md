@@ -1709,3 +1709,64 @@ below can run in the existing daily job; none needs a hand-download.
 | Licence | Public domain (no attribution legally required; Natural Earth is credited here as a courtesy and in the film's production notes). |
 | Approval | Approved by the maintainer 2026-09-28, film geometry only. |
 | Implementation | Consumed only by the film's own render pipeline (outside this repository); no exporter, adapter or public/data/** payload in this pipeline reads it. |
+
+## PROPOSED — awaiting maintainer approval: Eurostat `prc_hicp_minr` (2026-10-04)
+
+**NOT APPROVED. Nothing fetches this dataset and no indicator config for it exists.** Per
+CLAUDE.md rule 8 these rows are a proposal; they are not an approval, and they must not be read as
+one. The decision record is `docs/decisions/0018-stopped-inflation-series.md` (also PROPOSED), and
+the reason is in `docs/features/site_clarity.md` and
+`docs/reviews/2026-10-04-site-clarity-audit.md`: the NBB dataflow behind Belgian inflation froze at
+December 2025, Eurostat retired the dataset behind the Europe panel's inflation at the same time,
+and the site is publishing 2.2 % as current Belgian inflation while both sources publish 4.2 % for
+August 2026.
+
+**No new data source, and no new licence decision.** Both rows below use the `eurostat` source,
+adapter and licence already approved by the maintainer on 2026-09-13 (see "Approved sources"
+above), the existing `international` store (`data/international/{ID}.csv`) and
+`src/fetchers/eurostat.py` unchanged. What needs approval is one new indicator and one changed
+dataset code, not a new publisher.
+
+Every figure below was measured live against the real Eurostat API on 2026-10-04 by a research
+pass, not inferred; nothing was written into the pipeline to obtain them.
+
+### Row 1 — NEW indicator: Belgian HICP annual rate from `prc_hicp_minr` (PROPOSED)
+
+| Field | Value |
+|---|---|
+| Publisher | Eurostat, via the already-approved `eurostat` source (`ec.europa.eu/eurostat/api/dissemination`) |
+| Dataset | `prc_hicp_minr` — "ECOICOP ver.2", HICP monthly indices and rates of change. *Measured 2026-10-04:* last updated 2026-10-02, coverage 1996-01 → 2026-09. It is the successor Eurostat's own catalogue gives for `prc_hicp_manr`, whose label now ends "(1997-2025)" |
+| What | The all-items HICP annual rate of change for Belgium — the same concept the site publishes today as `HICP` from the NBB, which stopped at 2025-12 |
+| Filters | `unit=RCH_A` (annual rate of change), `coicop18=TOTAL` (all items), `geo=BE`. **All three pinned explicitly**: `coicop` is now `coicop18`, the all-items code `CP00` is now `TOTAL`, and `unit` is a new dimension (`I25`, `I15`, `RCH_M`, `RCH_A`, `RCH_MV12MAVR`), so an unpinned dimension would silently return a different measure |
+| Periods | *Measured:* monthly. Running `EurostatSource._parse` in memory over the live response gave 225 rows, 2008-01 → 2026-09 — one dataset carrying its own back-cast history, so **no splice and no joined series** |
+| Latest values | *Measured 2026-10-04:* 2025-12 = 2.2, 2026-08 = 4.2 (`final`), 2026-09 = 4.6 with Eurostat's `e` flag, which the existing adapter maps to `estimate` |
+| Geography | Belgium only (`geo=BE`), the same single-country shape as `EC_CONS_CONF_BE`. No commune, province or region figure, and no aggregate to recompute |
+| Suppression / flags | Eurostat's own flags, handled by the existing adapter: `e` → `estimate`, and the `f` forecast flag already fails loudly (`src/fetchers/eurostat.py:65-67`) |
+| Proposed indicator | `HICP_EUROSTAT_BE` (unit `percent_yy`, frequency `M`, source `eurostat`). **A new id, never a re-sourcing of `HICP`**: re-sourcing would lay Eurostat vintages over NBB's inside the same `(indicator_id, geo_id, period, vintage)` key. **The id is part of the observations primary key and appears in published downloads forever, so the maintainer confirms the name before anything is built** |
+| Known difference from today's figure | *Measured:* against the retired dataset, 11 of 348 months differ by 0.1 point, 6 of them since 2008. Small, visible to a reader comparing an old screenshot, and it belongs in the indicator's own trilingual `definition` |
+| Licence | Eurostat copyright/licence policy, already approved 2026-09-13 for every `eurostat` fetch — reuse including commercial dissemination with Eurostat acknowledged as the source. No new licence question |
+| Approval | **NOT APPROVED — awaiting the maintainer.** Rule 8: nothing is fetched and no config is written until he approves this row and ADR 0018 |
+
+### Row 2 — CHANGED row: `HICP_ANNUAL_RATE_EUROPE` repointed to `prc_hicp_minr` (PROPOSED)
+
+| Field | Value |
+|---|---|
+| Today | `config/indicators/HICP_ANNUAL_RATE_EUROPE.yaml:18-24` asks `dataset: prc_hicp_manr` with `filters: {coicop: CP00}` (verified by reading the file) |
+| Why it must change | *Measured:* `prc_hicp_manr` stops at 2025-12 and still answers HTTP 200, so nothing fails. `data/international/HICP_ANNUAL_RATE_EUROPE.csv` has **all 36 geographies ending 2025-12**, and the Europe panel on `macro.html` shows frozen 2025 inflation for every country |
+| Proposed change | `dataset: prc_hicp_minr`, `filters: {coicop18: TOTAL, unit: RCH_A}` — the same three pinned dimensions as row 1. The indicator id, unit, frequency, store and the allowlist/exclusion lists are unchanged |
+| Dry run | *Measured 2026-10-04:* 9,513 rows across 46 geographies, none outside the existing allowlist and exclusion lists. Swapping only the dataset code **fails loudly**, as it should: HTTP 400 on the old `coicop` filter and a `FetchError` on the unpinned `unit` dimension |
+| Why it needs approval | A `fetch` change on an existing indicator is rule 19 (ADR plus explicit approval), not a config tidy-up |
+| Approval | **NOT APPROVED — awaiting the maintainer**, under ADR 0018 together with row 1 |
+
+### The NBB `HICP` series is kept, not retired
+
+No catalogue row is withdrawn. The NBB `HICP` series' December 2025 value is real, final and
+correct — it is not a missing value (rule 26). Under ADR 0018 it keeps its rows, its chart, its
+`explorer.html` row and its download, labelled with its last publication date and the fact that the
+source stopped it, and it leaves the "current inflation" slots. The new dataflow NBB continues it in
+(`BE2:DF_HICP_2025`, annotated `NonFinalDataflow`) is deliberately **not** queried, so no joined
+series is constructed at a base year no source publishes.
+
+**Separately and still open:** the `nbb` source's licence is `TODO` in the table above and
+`licence: null  # TODO` in `config/sources/nbb.yaml:6`, through production use. It does not block
+these rows — they are Eurostat — but it is a real exposure and is the maintainer's to close.
