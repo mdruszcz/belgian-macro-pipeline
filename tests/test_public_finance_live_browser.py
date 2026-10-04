@@ -21,6 +21,7 @@ never a hand-typed expected number (CLAUDE.md rule 36).
 from __future__ import annotations
 
 import functools
+import hashlib
 import http.server
 import json
 import re
@@ -364,6 +365,21 @@ def test_year_rollover_resets_flow_counters_and_since_opened_stays_non_negative(
         assert since_text is not None
         assert "-" not in since_text and "−" not in since_text, since_text
 
+        # Audit P2 fix: right after the reset, "since you opened this page"
+        # must never read LARGER than the year-to-date total it sits under
+        # -- it used to still count time accrued in 2026's own segment,
+        # contradicting the headline figure that had already reset to
+        # 2027's near-zero start. Compares the since-opened line's own
+        # digits against the counter's current data-raw (both read at the
+        # exact same instant, 2 real seconds after the Brussels boundary).
+        since_digits = "".join(ch for ch in since_text if ch.isdigit())
+        if since_digits:
+            deficit_raw = float(rows["deficit"]["raw"])
+            assert int(since_digits) <= int(deficit_raw) + 1, (
+                f"since-opened ({since_digits}) exceeds the counter's own current "
+                f"value ({deficit_raw}) right after the year-boundary reset"
+            )
+
         # The YTD year label on a flow/difference counter must read the NEW
         # year, read via activeSegmentYear()'s own Brussels-calendar logic,
         # not "2026" held over from before the rollover.
@@ -511,7 +527,33 @@ def test_home2_payload_fetch_failure_falls_back_honestly_with_no_badge_and_no_pa
 # ================================ formatting ==================================
 
 
-def test_french_values_use_a_non_breaking_thousands_separator(chromium, site, counters_by_id):
+def _no_digit_adjacent_nbsp(texts):
+    """True if no text has U+202F or U+00A0 directly between two digits.
+    Deliberately NOT a blanket ban on those characters anywhere (the space
+    before a trailing currency symbol, e.g. '1.220,01 €', is
+    untouched by this feature and stays as it always has -- only the
+    THOUSANDS GROUPING inside the number itself changed)."""
+    narrow_nbsp, nbsp = chr(0x202F), chr(0x00A0)
+    violations = []
+    for t in texts:
+        for i, ch in enumerate(t):
+            if ch in (narrow_nbsp, nbsp) and 0 < i < len(t) - 1:
+                if t[i - 1].isdigit() and t[i + 1].isdigit():
+                    violations.append(t)
+                    break
+    return violations
+
+
+def test_french_finance_chapter_groups_thousands_with_a_dot_and_a_comma_decimal(chromium, site):
+    """Maintainer request (2026-10-04): French numbers inside the public-
+    finance view group thousands with a dot and use a comma for decimals
+    ('726.216.948.043 €') -- the site's usual narrow no-break-space
+    convention (U+202F) was hard to read in a long ticking number. Checked
+    broadly across the whole chapter: the live strip, both breakdown
+    lists, the official-figures grid, and the official charts' own axis/
+    tooltip text (svg text) -- no digit-adjacent U+202F or U+00A0 may
+    appear anywhere in any of them, and at least one value must show a
+    literal dot group separator plus a comma decimal."""
     context = chromium.new_context(viewport={"width": 1440, "height": 1000})
     _set_lang(context, "fr")
     page = context.new_page()
@@ -519,22 +561,112 @@ def test_french_values_use_a_non_breaking_thousands_separator(chromium, site, co
         _freeze(page, FROZEN)
         page.goto(f"{site}/macro.html#finances-publiques")
         page.wait_for_selector('#finance-live-strip[data-state="ready"]', timeout=15000)
+        page.wait_for_selector('#finance-breakdown-revenue[data-state="ready"]', timeout=15000)
+        page.wait_for_selector('#finance-official[data-state="ready"]', timeout=15000)
+        page.clock.run_for(50)  # flush the deferred official charts (afterLayoutSettles)
+        page.wait_for_selector("#finOfficialCharts svg", timeout=15000)
         texts = page.eval_on_selector_all(
-            "#finance-live-strip [data-counter-id] .bp-value",
-            "els => els.map(el => el.textContent)",
+            "#finances-publiques .bp-value, "
+            "#finances-publiques .bp-live-counter-rate, "
+            "#finances-publiques .bp-live-counter-since, "
+            "#finOfficialGrid .value, "
+            "#finOfficialCharts .leadchart-eyebrow, "
+            "#finOfficialCharts svg text, "
+            "#finMethodBody",
+            "els => els.map(el => el.textContent).filter(t => t && t.trim())",
         )
         assert texts
-        # 'debt'/'revenue'/'spending' are all well over 1000 at this instant
-        # (committed payload), so at least one rendered value must group
-        # thousands with the French NARROW NO-BREAK SPACE (U+202F) -- the
-        # actual separator MapUI.formatValue uses, confirmed by printing the
-        # live page's own rendered text's codepoints, not assumed -- never an
-        # English-style comma.
-        narrow_nbsp = chr(0x202F)
-        assert any(narrow_nbsp in t for t in texts), [t.encode("unicode_escape") for t in texts]
-        assert not any("," in t for t in texts), texts
+        violations = _no_digit_adjacent_nbsp(texts)
+        assert (
+            not violations
+        ), f"narrow/no-break space between digits in the finance chapter: {violations}"
+        assert any("." in t and any(c.isdigit() for c in t) for t in texts), [
+            t.encode("unicode_escape") for t in texts
+        ]
+        assert any("," in t for t in texts), texts
     finally:
         context.close()
+
+
+def test_french_home2_strip_groups_thousands_with_a_dot(chromium, site):
+    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    _set_lang(context, "fr")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/home2.html")
+        page.wait_for_selector("#financeStrip .bp-live-counter[data-counter-id]", timeout=15000)
+        texts = page.eval_on_selector_all(
+            "#financeStrip .bp-value, #financeStrip .bp-live-counter-rate, "
+            "#financeStrip .bp-live-counter-since",
+            "els => els.map(el => el.textContent).filter(t => t && t.trim())",
+        )
+        assert texts
+        violations = _no_digit_adjacent_nbsp(texts)
+        assert (
+            not violations
+        ), f"narrow/no-break space between digits on home2's strip: {violations}"
+        assert any("." in t and any(c.isdigit() for c in t) for t in texts), texts
+    finally:
+        context.close()
+
+
+def test_french_values_outside_the_finance_chapter_are_unchanged(chromium, site):
+    """Browser-level proof that a real page outside the finance chapter
+    renders a large number the ordinary French way. macro.html's OWN other
+    chapters (#croissance, #emploi, ...) turned out to be a weak target for
+    this -- their charts are rates/indices, every axis value under 200 --
+    so this uses a commune profile page instead (a real population figure,
+    comfortably over 1000, through the SAME MapUI.formatValue() with no
+    opts). Node-level proof that the override is OPT-IN at the function
+    itself lives in tests/test_resolve_format_value.py::
+    test_map_ui_format_value_without_opts_keeps_the_old_french_grouping;
+    this is the end-to-end companion on an actual other page."""
+    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    _set_lang(context, "fr")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/commune.html?nis=11002")
+        page.wait_for_selector(".portrait-metric .value, .essentiel-value", timeout=15000)
+        page.wait_for_timeout(300)
+        texts = page.eval_on_selector_all(
+            "body *:not(script):not(style)",
+            "els => els.map(el => el.textContent).filter(t => t && /\\d{4,}/.test(t))",
+        )
+        narrow_nbsp = chr(0x202F)
+        grouped = [t for t in texts if narrow_nbsp in t]
+        assert (
+            grouped
+        ), "no French-grouped (U+202F) value found on commune.html -- test proves nothing"
+    finally:
+        context.close()
+
+
+def test_digit_locale_override_appears_in_no_other_page_or_asset():
+    """Static companion to the browser test above: the finance module's own
+    FIN_DIGIT_LOCALE table and the digitLocale parameter it passes are
+    read ONLY by the two files that declare them (macro.html, home2.html)
+    and the two shared, opt-in-parameter formatters they call into
+    (assets/commune_map.js's MapUI.formatValue, assets/belpulse/
+    macro_portrait_charts.js's fmtAxisNum/buildLineChartSVG) -- no OTHER
+    page (micro.html, commune.html, map.html, profiles.html, the preview
+    pages) references digitLocale or FIN_DIGIT_LOCALE at all, so the
+    override cannot leak into a chapter/page that never asks for it."""
+    allowed_definers = {
+        REPO / "macro.html",
+        REPO / "home2.html",
+        REPO / "assets" / "commune_map.js",
+        REPO / "assets" / "belpulse" / "macro_portrait_charts.js",
+    }
+    offenders = []
+    for page_path in (REPO / "micro.html", REPO / "commune.html", REPO / "map.html"):
+        if not page_path.exists() or page_path in allowed_definers:
+            continue
+        text = page_path.read_text(encoding="utf-8")
+        if "digitLocale" in text or "FIN_DIGIT_LOCALE" in text:
+            offenders.append(page_path.name)
+    assert not offenders, f"the finance-only digit-grouping override leaked into: {offenders}"
 
 
 def test_french_official_figures_translate_the_pct_of_gdp_unit():
@@ -557,6 +689,52 @@ def test_french_official_figures_translate_the_pct_of_gdp_unit():
     )
 
 
+# Audit P2 (#314): macro.html and home2.html loaded their four changed
+# shared assets (components.css, i18n.js, the two new live_counters.*
+# files) with no ?v= at all -- the content-hash cache-busting
+# tests/test_commune_asset_versioning.py already enforces, but ONLY for
+# commune.html. A returning visitor with any of these cached from before a
+# deploy could get the new #finances-publiques markup paired with old CSS
+# (unstyled) or old i18n (missing fin*/homeFinance* keys).
+VERSIONED_ASSETS_ON_FIN_PAGES = (
+    "assets/belpulse/components.css",
+    "assets/i18n.js",
+    "assets/belpulse/live_counters.css",
+    "assets/belpulse/live_counters.js",
+)
+
+
+def _content_hash(path: Path) -> str:
+    data = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()[:10]
+
+
+@pytest.mark.parametrize("page_name", ["macro.html", "home2.html"])
+def test_changed_shared_assets_carry_a_matching_v_query(page_name):
+    text = (REPO / page_name).read_text(encoding="utf-8")
+    mismatches = []
+    for asset_path in VERSIONED_ASSETS_ON_FIN_PAGES:
+        m = re.search(
+            r'<(?:link|script)\b[^>]*(?:href|src)="' + re.escape(asset_path) + r'(\?[^"]*)?"[^>]*>',
+            text,
+        )
+        if not m:
+            mismatches.append(f"{asset_path}: no <link>/<script> tag found in {page_name}")
+            continue
+        tag = m.group(0)
+        vm = re.search(r"\?v=([0-9a-f]+)", tag)
+        if not vm:
+            mismatches.append(f"{asset_path}: no ?v= query on its tag in {page_name}: {tag!r}")
+            continue
+        expected = _content_hash(REPO / asset_path)
+        if vm.group(1) != expected:
+            mismatches.append(
+                f"{asset_path} in {page_name}: ?v={vm.group(1)}, but the file's own sha256 "
+                f"gives {expected} -- bump ?v= in the same change"
+            )
+    assert not mismatches, "\n".join(mismatches)
+
+
 def test_french_official_figures_render_pib_not_gdp(chromium, site):
     context = chromium.new_context(viewport={"width": 1440, "height": 1000})
     _set_lang(context, "fr")
@@ -565,6 +743,16 @@ def test_french_official_figures_render_pib_not_gdp(chromium, site):
         _freeze(page, FROZEN)
         page.goto(f"{site}/macro.html#finances-publiques")
         page.wait_for_selector('#finance-official[data-state="ready"]', timeout=15000)
+        # Issue #309 fix round 3: the five official charts now build one
+        # animation frame after the rest of the chapter (afterLayoutSettles)
+        # so they never block the Europe map's own first render --
+        # #finance-official reads "ready" before that deferred callback has
+        # necessarily run. Under a REAL clock the browser fires that frame
+        # on its own within ~16ms; under this test's FROZEN, PAUSED clock
+        # nothing fires until time is explicitly advanced (confirmed
+        # directly: 0 chart <svg> elements before, 5 after run_for(50)).
+        page.clock.run_for(50)
+        page.wait_for_selector("#finOfficialCharts svg", timeout=15000)
         texts = page.eval_on_selector_all(
             "#finOfficialGrid .bp-official-item .value, #finOfficialCharts .leadchart-eyebrow",
             "els => els.map(el => el.textContent)",
@@ -576,6 +764,167 @@ def test_french_official_figures_render_pib_not_gdp(chromium, site):
         assert not any(
             "GDP" in t for t in texts
         ), f"English 'GDP' leaked into the French page: {texts}"
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("lang", ["en", "fr", "nl"])
+def test_official_figures_never_show_a_doubled_percent_sign(chromium, site, lang):
+    """Audit P0: the pct_of_gdp cards printed "107.9% % of GDP" in every
+    language -- MapUI.formatValue's own bare '%' (its pct_of_gdp branch)
+    was never stripped before displayValue()/finDisplayValue() appended
+    unitHint()'s full phrase after it. No text anywhere in the official
+    grid or the official charts' own eyebrow/axis/tooltip text may contain
+    '%' twice."""
+    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    _set_lang(context, lang)
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/macro.html#finances-publiques")
+        page.wait_for_selector('#finance-official[data-state="ready"]', timeout=15000)
+        # See test_french_official_figures_render_pib_not_gdp's own comment:
+        # the five charts build one deferred frame later, which this test's
+        # frozen+paused clock never reaches on its own.
+        page.clock.run_for(50)
+        page.wait_for_selector("#finOfficialCharts svg", timeout=15000)
+        texts = page.eval_on_selector_all(
+            "#finOfficialGrid .bp-official-item .value, "
+            "#finOfficialCharts .leadchart-eyebrow, #finOfficialCharts svg text",
+            "els => els.map(el => el.textContent)",
+        )
+        assert texts
+        doubled = [t for t in texts if t.count("%") > 1]
+        assert not doubled, f"a doubled percent sign leaked into {lang}: {doubled}"
+        pct_gdp_tiles = [t for t in texts if "%" in t and any(c.isdigit() for c in t)]
+        assert (
+            pct_gdp_tiles
+        ), f"no pct_of_gdp value rendered at all for {lang} -- test proves nothing"
+    finally:
+        context.close()
+
+
+def test_reduced_motion_pause_button_starts_synced_with_the_engines_own_state(chromium, site):
+    """Audit P1: the engine itself starts every region paused under
+    prefers-reduced-motion (live_counters.js's own matchMedia check), but
+    macro.html's chapter-level pause button used to always start with
+    chapterPaused=false -- aria-pressed=false / 'Pause' label -- while the
+    counters it claims to control were already frozen. A reader had to
+    press it TWICE (once to visibly do nothing, once more to actually
+    resume) to start the simulation."""
+    context = chromium.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
+    _set_lang(context, "en")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/macro.html#finances-publiques")
+        page.wait_for_selector('#finance-live-strip[data-state="ready"]', timeout=15000)
+        btn = page.locator("#finChapterPause")
+        assert btn.get_attribute("aria-pressed") == "true", (
+            "the chapter pause button does not start synced with the engine's own "
+            "reduced-motion state"
+        )
+        assert "resume" in (btn.text_content() or "").lower()
+        states = page.eval_on_selector_all(
+            "#finance-live-strip .bp-live-counter[data-counter-id]",
+            "els => els.map(el => el.dataset.counterState)",
+        )
+        assert states and all(s == "paused" for s in states)
+    finally:
+        context.close()
+
+
+def test_legacy_public_finance_anchor_still_lands_on_the_chapter(chromium, site):
+    """Audit rule 31: the pre-mockup chapter carried id="public-finance" on
+    its own placeholder card; this PR's real chapter moved everything under
+    id="finances-publiques" and dropped the old id entirely, leaving the
+    legacy URL (still declared in config/national_sections.yaml's
+    legacy_anchors) with no element to land on -- a visitor following
+    macro.html#public-finance landed at the TOP of the page instead."""
+    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    _set_lang(context, "en")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/macro.html#public-finance")
+        page.wait_for_selector('#finance-live-strip[data-state="ready"]', timeout=15000)
+        page.wait_for_timeout(300)
+        chapter_top = page.eval_on_selector(
+            "#finances-publiques", "el => el.getBoundingClientRect().top + window.scrollY"
+        )
+        scroll_y = page.evaluate("window.scrollY")
+        assert scroll_y > 500, (
+            f"macro.html#public-finance left the reader at scrollY={scroll_y} -- "
+            "the legacy anchor is dead"
+        )
+        assert abs(scroll_y - chapter_top) < 400, (
+            f"scrolled to {scroll_y}, but the chapter itself starts at {chapter_top} -- "
+            "landed on the wrong place"
+        )
+    finally:
+        context.close()
+
+
+def test_home2_strip_lays_out_five_tiles_in_one_row_at_desktop_width(chromium, site):
+    """Audit P1: home2.html's finance strip markup moved to the mockup's
+    shape, but the .finance/.fin-header CSS was left at the pre-mockup
+    rules (no .fin-header rule at all) -- the five counters collapsed into
+    one 200px column, ~690px tall, instead of five columns in one row."""
+    context = chromium.new_context(viewport={"width": 1440, "height": 900})
+    _set_lang(context, "en")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/home2.html")
+        page.wait_for_selector("#financeStrip .bp-live-counter[data-counter-id]", timeout=15000)
+        tops = page.eval_on_selector_all(
+            "#financeLiveCounters .bp-live-counter",
+            "els => els.map(el => Math.round(el.getBoundingClientRect().top))",
+        )
+        assert len(tops) == 5, tops
+        assert len(set(tops)) == 1, f"the five counters are not in one row: tops={tops}"
+        strip_height = page.eval_on_selector(
+            "#financeStrip", "el => el.getBoundingClientRect().height"
+        )
+        assert (
+            strip_height < 300
+        ), f"#financeStrip is {strip_height}px tall -- still the collapsed column"
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("width", [390, 360])
+def test_home2_strip_header_elements_never_overlap_at_phone_width(chromium, site, width):
+    """Audit P1: at 390/360px the simulation badge box overlapped the
+    h2.fin-title heading (138x19px of overlap measured) and the Pause
+    button, because .fin-header had no CSS rule to lay its children out at
+    all. Checks every pair of {title, badge, pause, link} for a real,
+    non-trivial bounding-box intersection."""
+    context = chromium.new_context(viewport={"width": width, "height": 844})
+    _set_lang(context, "fr")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/home2.html")
+        page.wait_for_selector("#financeStrip .bp-live-counter[data-counter-id]", timeout=15000)
+        rects = page.eval_on_selector_all(
+            ".fin-header .fin-title, #financeBadge, #financePause, .fin-header .fin-link",
+            "els => els.map(el => { const r = el.getBoundingClientRect(); "
+            "return {left: r.left, right: r.right, top: r.top, bottom: r.bottom, w: r.width, h: r.height}; })",
+        )
+        rects = [r for r in rects if r["w"] > 0 and r["h"] > 0]
+        assert len(rects) >= 2, "too few visible header elements to prove anything"
+
+        def overlaps(a, b):
+            ox = min(a["right"], b["right"]) - max(a["left"], b["left"])
+            oy = min(a["bottom"], b["bottom"]) - max(a["top"], b["top"])
+            return ox > 2 and oy > 2  # a couple px of anti-aliasing slack, not a real overlap
+
+        for i in range(len(rects)):
+            for j in range(i + 1, len(rects)):
+                assert not overlaps(
+                    rects[i], rects[j]
+                ), f"header elements overlap at {width}px: {rects[i]} vs {rects[j]}"
     finally:
         context.close()
 
@@ -699,6 +1048,14 @@ def test_behavioural_guard_changed_text_lives_only_in_a_badged_simulated_region(
             "document.getElementById('financeStrip') "
             "&& document.getElementById('financeStrip').scrollIntoView()"
         )
+        # macro.html's five official charts build one deferred animation
+        # frame after the rest of the chapter (afterLayoutSettles, issue
+        # #309 fix round 3) so they never block the Europe map's own first
+        # render -- flushed here, BEFORE the "before" snapshot, so their
+        # one-time appearance is not itself mistaken for a change during
+        # the 5s window below. A no-op on home2.html/micro.html, neither of
+        # which defers anything.
+        page.clock.run_for(50)
         before = page.evaluate(_SNAPSHOT_JS)
         page.clock.run_for(5000)
         after = page.evaluate(_SNAPSHOT_JS)
@@ -770,15 +1127,17 @@ def test_macro_boots_cleanly_from_any_chapter_anchor(chromium, site, anchor, wid
             timeout=15000,
         )
         if anchor == "europe":
-            # A generous budget, not the suite's usual 15s: eurostat-map
-            # draws ~2935 <path> elements via D3, and this test ALSO waits
-            # for the finance chapter's own (now heavier -- five official-
-            # figure charts, two breakdown bars) synchronous render to
-            # settle first, on the SAME single JS thread, before reaching
-            # this wait -- a CI runner under load genuinely needs more than
-            # 15s for both some of the time (observed directly: PR #314's
-            # own CI run timed out at 15s on this exact wait once).
-            page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=30000)
+            # Audit P0/E fix: raising this wait's own BUDGET (15s -> 30s,
+            # then 45s, across two earlier pushes) was treating the symptom.
+            # The actual cause -- the finance chapter's five official charts
+            # and two breakdown bars rendering synchronously, on the SAME JS
+            # thread, AHEAD of the Europe panel's own lazy IntersectionObserver
+            # init, delaying its first paint by a measured ~9.6% -- is now
+            # fixed at the source (macro.html's buildOfficialCharts() defers
+            # one frame via afterLayoutSettles; see its own comment). This
+            # wait is back at the suite's ordinary 15s, same as every other
+            # wait on this selector in tests/test_europe_panel.py.
+            page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=15000)
             count = page.eval_on_selector_all(EUROPE_SVG_SELECTOR, "els => els.length")
             assert count > 0, "opened on #europe but the Europe map drew no regions"
         assert not errors, f"uncaught page error(s) opening macro.html#{anchor}: {errors}"
@@ -869,7 +1228,7 @@ def test_a_forced_mount_failure_falls_back_without_killing_the_rest_of_the_page(
             "document.getElementById('finance-live-strip').dataset.state !== 'loading'",
             timeout=15000,
         )
-        page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=30000)
+        page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=15000)
         assert not errors, f"the forced mount failure was not caught -- uncaught: {errors}"
         strip_state = page.eval_on_selector("#finance-live-strip", "el => el.dataset.state")
         assert (

@@ -362,6 +362,36 @@ def test_finances_publiques_refuses_a_label_missing_a_language(tmp_path):
         _check_national_sections(layout, known={"A"})
 
 
+def test_finances_publiques_refuses_a_card_with_no_label_and_no_signed_label(tmp_path):
+    """Audit P2: a card with neither a static label nor signed_label: true
+    used to pass this check silently and render macro.html's .label div
+    empty -- see displayValue()'s signed_label branch (balanceWord()) for
+    the one case that legitimately needs no static label."""
+    layout = _fp_layout(
+        tmp_path,
+        "finances_publiques:\n"
+        "  official_figures:\n"
+        "    cards:\n"
+        "      - id: debt\n"
+        "        items: [{indicator: A}]\n",
+    )
+    with pytest.raises(ValueError, match=r"neither a label nor signed_label"):
+        _check_national_sections(layout, known={"A"})
+
+
+def test_finances_publiques_accepts_a_signed_label_card_with_no_static_label(tmp_path):
+    layout = _fp_layout(
+        tmp_path,
+        "finances_publiques:\n"
+        "  official_figures:\n"
+        "    cards:\n"
+        "      - id: balance\n"
+        "        signed_label: true\n"
+        "        items: [{indicator: A}]\n",
+    )
+    _check_national_sections(layout, known={"A"})  # must not raise
+
+
 def test_geographies_metadata_ancestor_walk_resolves_to_a_real_region(tmp_path):
     db_path = tmp_path / "db.sqlite"
     _geo_db(db_path)

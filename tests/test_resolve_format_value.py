@@ -317,3 +317,77 @@ def test_format_value_never_called_with_none_for_a_suppressed_cell():
     out = _format_value(None, {"unit": "eur_per_month", "decimals": None}, "en")
     assert out == ""
     assert out != "0" and "0" not in out
+
+
+# ── MapUI.formatValue's opts.digitLocale (issue #309, maintainer request 2026-10-04) ──
+#
+# The public-finance view's French numbers group thousands with a dot and
+# use a comma for decimals ("726.216.948.043"), not the site's usual narrow
+# no-break-space grouping -- long ticking numbers were hard to read that
+# way. Dutch's own locale already formats digits this way, so the finance
+# module passes {digitLocale: 'nl'} while lang stays 'fr' for every
+# surrounding word/symbol. These tests exercise MapUI.formatValue directly,
+# the same shared formatter every other page calls -- opts is new, entirely
+# optional, and every existing call site (no opts argument) must render
+# byte-identical to before.
+
+
+def test_map_ui_format_value_digit_locale_groups_a_large_integer_with_dots():
+    out = _run_node(
+        "console.log(JSON.stringify("
+        "MapUI.formatValue(726216948043, 'count', 0, 'fr', {digitLocale: 'nl'})));"
+    )
+    assert out == "726.216.948.043"
+
+
+def test_map_ui_format_value_digit_locale_uses_a_comma_for_two_decimals():
+    out = _run_node(
+        "console.log(JSON.stringify("
+        "MapUI.formatValue(1220.01, 'count', 2, 'fr', {digitLocale: 'nl'})));"
+    )
+    assert out == "1.220,01"
+
+
+def test_map_ui_format_value_digit_locale_uses_a_comma_for_one_decimal():
+    out = _run_node(
+        "console.log(JSON.stringify("
+        "MapUI.formatValue(692460.8, 'count', 1, 'fr', {digitLocale: 'nl'})));"
+    )
+    assert out == "692.460,8"
+
+
+def test_map_ui_format_value_digit_locale_keeps_the_sign_on_a_negative_value():
+    out = _run_node(
+        "console.log(JSON.stringify("
+        "MapUI.formatValue(-692460.8, 'count', 1, 'fr', {digitLocale: 'nl'})));"
+    )
+    # MapUI.formatValue has never special-cased the minus sign itself (every
+    # existing caller formats a magnitude and prepends its own sign
+    # character -- see fmtSigned in macro.html) -- this only proves the
+    # MAGNITUDE grouping survives a negative input unchanged.
+    assert "692.460,8" in out
+    assert out.lstrip("-−").startswith("692.460,8")
+
+
+def test_map_ui_format_value_digit_locale_is_opt_in_english_is_unaffected():
+    """English never gets a digitLocale from any caller in this codebase,
+    but this proves the parameter is inert for it regardless: 'en' keeps
+    its own comma-grouped convention even if a future caller passed one by
+    mistake, because digitLocale is only ever consulted as an override, not
+    a requirement to GROUP differently than lang already would for a non-fr
+    caller -- the finance module itself never passes it for English."""
+    out = _run_node(
+        "console.log(JSON.stringify(MapUI.formatValue(726216948043, 'count', 0, 'en')));"
+    )
+    assert out == "726,216,948,043"
+
+
+def test_map_ui_format_value_without_opts_keeps_the_old_french_grouping():
+    """The load-bearing proof that this is OPT-IN: the exact same call as
+    above, MINUS the opts argument, must render EXACTLY what it rendered
+    before this feature existed -- the narrow no-break space (U+202F)
+    convention every other French page still uses."""
+    out = _run_node(
+        "console.log(JSON.stringify(MapUI.formatValue(726216948043, 'count', 0, 'fr')));"
+    )
+    assert out == "726" + chr(0x202F) + "216" + chr(0x202F) + "948" + chr(0x202F) + "043"

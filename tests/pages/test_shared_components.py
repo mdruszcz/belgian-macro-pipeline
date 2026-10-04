@@ -551,6 +551,91 @@ def test_mount_accepts_a_badge_that_is_simply_scrolled_out_of_view(live_counters
     ), f"a badge merely scrolled out of view was rejected by the visibility guard: {message}"
 
 
+# Audit P2 (#314): isTrulyVisible() refuses a badge on five independent
+# grounds (el.hidden; display:none/visibility:hidden; opacity:0; a
+# position:absolute/fixed badge parked off-canvas by a large negative
+# left/top; a 0x0 box) -- only the el.hidden branch had a test. A global
+# getComputedStyle stub (Node has none) lets these fake a real CSSOM
+# answer; the badge object's own getBoundingClientRect stays a normal,
+# positive, on-screen box throughout so each test isolates ONE branch.
+_GET_COMPUTED_STYLE_STUB = """
+function getComputedStyle(el){ return el.__style || {}; }
+"""
+
+
+def _styled_badge_mount_throws(style_js, live_counters_js):
+    fake_el = (
+        """
+    const attrs = {'data-simulated': 'true'};
+    const badge = {
+      textContent: 'Simulation', hidden: false,
+      __style: """
+        + style_js
+        + """,
+      getBoundingClientRect(){ return {width: 60, height: 20, top: 10, bottom: 30, left: 10, right: 70}; },
+    };
+    const container = {
+      getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },
+      querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },
+    };
+    """
+    )
+    return _mount_throws(fake_el, [_GET_COMPUTED_STYLE_STUB, live_counters_js])
+
+
+def test_mount_refuses_a_badge_with_display_none(live_counters_js):
+    message = _styled_badge_mount_throws(
+        "{display: 'none', visibility: 'visible', opacity: '1', position: 'static'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_with_visibility_hidden(live_counters_js):
+    message = _styled_badge_mount_throws(
+        "{display: 'block', visibility: 'hidden', opacity: '1', position: 'static'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_with_opacity_zero(live_counters_js):
+    message = _styled_badge_mount_throws(
+        "{display: 'block', visibility: 'visible', opacity: '0', position: 'static'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_parked_off_canvas_by_position(live_counters_js):
+    """The branch issue #309's own round-2 fix (commit ac69a62c8) added to
+    replace the old, scroll-position-dependent off-canvas check: a badge
+    whose COMPUTED STYLE itself (not its on-screen geometry) places it far
+    off with position:absolute -- the actual 'visually hidden' CSS trick
+    this guard exists to catch."""
+    message = _styled_badge_mount_throws(
+        "{display: 'block', visibility: 'visible', opacity: '1', position: 'absolute', left: '-9999px', top: '0px'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_with_a_zero_by_zero_box(live_counters_js):
+    fake_el = """
+    const attrs = {'data-simulated': 'true'};
+    const badge = {
+      textContent: 'Simulation', hidden: false,
+      getBoundingClientRect(){ return {width: 0, height: 0, top: 10, bottom: 10, left: 10, right: 10}; },
+    };
+    const container = {
+      getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },
+      querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },
+    };
+    """
+    message = _mount_throws(fake_el, [live_counters_js])
+    assert message and "bp-simulated-badge" in message
+
+
 def test_gallery_loads_tokens_before_layout_before_components(gallery_html):
     """Cascade order matters: components.css assumes layout's box-sizing
     reset and tokens.css's custom properties are already in scope."""

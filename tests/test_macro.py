@@ -99,6 +99,59 @@ def test_macro_prints_none_of_the_designs_invented_figures():
     html = _html()
     found = [figure for figure in DESIGN_FIGURES if figure in html]
     assert not found, f"macro.html contains design mockup figures: {found}"
+    # Audit P2: the handoff asked for this scan to also cover the shared
+    # live-counter engine, not just this page's own markup -- a design
+    # figure typed into the generic renderer would be invented too, and
+    # would affect home2.html's strip as well.
+    engine = (REPO / "assets" / "belpulse" / "live_counters.js").read_text(encoding="utf-8")
+    found_in_engine = [figure for figure in DESIGN_FIGURES if figure in engine]
+    assert (
+        not found_in_engine
+    ), f"live_counters.js contains design mockup figures: {found_in_engine}"
+
+
+def _script_bodies(html: str) -> str:
+    """Every inline <script>...</script> body in an HTML page, comments
+    stripped (block /* */ and full-line // only -- never an inline
+    trailing //, which would mis-eat a code line holding a 'https://' URL
+    string literal, e.g. the method note's plan.be link)."""
+    bodies = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", html, re.DOTALL)
+    out = []
+    for body in bodies:
+        body = re.sub(r"/\*.*?\*/", "", body, flags=re.DOTALL)
+        body = "\n".join(line for line in body.split("\n") if not re.match(r"\s*//", line))
+        out.append(body)
+    return "\n".join(out)
+
+
+def test_no_counter_id_or_placement_name_is_a_string_literal_in_a_page_script():
+    """Round-2 rules review decisions this codebase's own comments repeatedly
+    claim ("decision 4's own grep: zero 'macro_strip' literals anywhere in
+    this script") had no automated guard -- this is that guard. Reads the
+    real ids from config/live_counters.yaml (never hand-typed), scoped to
+    <script> bodies with comments stripped so the comments explaining the
+    rule (which necessarily quote the forbidden literal) do not trip it."""
+    config = yaml.safe_load((REPO / "config" / "live_counters.yaml").read_text(encoding="utf-8"))
+    counter_ids = [c["id"] for c in config.get("counters", [])]
+    placement_names = list((config.get("placements") or {}).keys())
+    literals = counter_ids + placement_names
+    assert literals, "config/live_counters.yaml yielded no ids to check against -- fixture broken"
+
+    for page_path in (
+        REPO / "macro.html",
+        REPO / "home2.html",
+        REPO / "assets" / "belpulse" / "live_counters.js",
+    ):
+        text = page_path.read_text(encoding="utf-8")
+        code = (
+            _script_bodies(text)
+            if page_path.suffix == ".html"
+            else re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+        )
+        hits = [literal for literal in literals if f"'{literal}'" in code or f'"{literal}"' in code]
+        assert (
+            not hits
+        ), f"{page_path.name} has a counter id/placement name as a string literal: {hits}"
 
 
 def test_macro_simulates_nothing():
@@ -118,7 +171,15 @@ def test_macro_simulates_nothing():
     ticks nothing: no setInterval, no hand-rolled tick loop, and the engine
     it loads ticks on exactly one setTimeout."""
     html = _html()
-    regions = re.findall(r'<article[^>]+data-simulated="true"[^>]*>.*?</article>', html, re.DOTALL)
+    # Audit P2: matching only <article> let a badge-less <div> or <section
+    # data-simulated="true"> pass silently -- home2.html's own simulated
+    # region IS a <section> (not hypothetical). A backreference pins the
+    # closing tag to whatever opening tag actually carried the attribute,
+    # so this catches data-simulated="true" on any element.
+    regions = [
+        m.group(0)
+        for m in re.finditer(r'<(\w+)[^>]+data-simulated="true"[^>]*>.*?</\1>', html, re.DOTALL)
+    ]
     assert regions, "no data-simulated region found -- is the chapter still built?"
     for region in regions:
         assert (
@@ -132,8 +193,11 @@ def test_macro_simulates_nothing():
     assert (
         "settimeout(function tick" not in low
     ), "a hand-rolled tick loop belongs in live_counters.js, not here"
-    assert (
-        'src="assets/belpulse/live_counters.js"' in html
+    # Tolerates the ?v=<hash> cache-busting query string this file's own
+    # asset tag now carries (audit P2 fix) -- still pins the un-versioned
+    # path, so a typo'd filename is still caught.
+    assert re.search(
+        r'src="assets/belpulse/live_counters\.js(\?[^"]*)?"', html
     ), "the shared live-counter engine is not loaded"
     # requestAnimationFrame is allowed exactly once, and only as a ONE-SHOT
     # redraw after layout (the history chart is sized by the row it lands in).
@@ -603,6 +667,11 @@ def test_macro_is_registered_indexable_and_in_the_sitemap():
 def test_macro_links_and_scripts_all_resolve():
     html = _html()
     targets = re.findall(r"(?:href|src)=[\"']([^\"'#]+)[\"']", html)
+    # Audit P2 fix: the four changed shared assets now carry a ?v=<hash>
+    # content-hash query string (tests/test_public_finance_live_browser.py::
+    # test_changed_shared_assets_carry_a_matching_v_query) -- stripped
+    # before checking the file itself exists on disk.
+    targets = [t.split("?", 1)[0] for t in targets]
     broken = [
         t
         for t in targets
