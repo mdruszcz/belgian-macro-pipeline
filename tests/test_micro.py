@@ -472,11 +472,18 @@ def test_micro_is_registered_indexable_and_in_the_sitemap():
 
 
 def test_micro_links_and_scripts_all_resolve():
+    """Issue #312 batch 2: micro.html's layout.css link gained a `?v=<hash>`
+    content-hash query string (the same cache-busting mechanism
+    tests/test_commune_asset_versioning.py already enforces for commune.html),
+    so the raw href is no longer a literal file path -- the query string is
+    stripped before checking existence, same as a browser does when
+    resolving the URL."""
     html = _html()
     targets = re.findall(r"(?:href|src)=[\"']([^\"'#]+)[\"']", html)
     broken = [
         t
         for t in targets
-        if not t.startswith(("http://", "https://", "mailto:")) and not (REPO / t).is_file()
+        if not t.startswith(("http://", "https://", "mailto:"))
+        and not (REPO / t.split("?", 1)[0]).is_file()
     ]
     assert not broken, f"micro.html references files that do not exist: {broken}"
