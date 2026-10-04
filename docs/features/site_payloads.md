@@ -209,6 +209,62 @@ segment starts at 1774998000000 (2026-Q1's own start, later). PR 2's browser cod
 read each counter's own `segments[0].start_ms`/`segments[-1].end_ms` to know when ITS
 line is valid, never assume every counter shares the envelope.
 
+#### `metadata/national_sections.json` gains a `finances_publiques` key (issue #309 PR 2)
+
+The one-line mention in the file layout above (Batch 6) covers every OTHER chapter's own
+key in this file; this is the first new key added since. Shape, inside the existing
+top-level object:
+
+Real excerpt (abbreviated) from the committed file, `finances_publiques` is a sibling of
+`official_figures`'s own `charts` list, not nested inside it:
+
+```json
+{
+  "...": "... every existing key (kpis, panels, unavailable, ...) unchanged ...",
+  "finances_publiques": {
+    "official_figures": {
+      "label": {"en": "Official figures", "fr": "...", "nl": "..."},
+      "note": {"en": "...", "fr": "...", "nl": "..."},
+      "cards": [
+        {"id": "debt", "label": {"en": "Government debt", "fr": "...", "nl": "..."},
+         "anchor_indicator": "GOV_DEBT_Q_MEUR_BE",
+         "items": [{"indicator": "GOV_DEBT_MEUR_BE"}, {"indicator": "GOV_DEBT_PCT_GDP_BE"}]}
+      ]
+    },
+    "charts": ["... five chart configs, same {id, title, ...} shape every other chapter's panel_charts uses ..."],
+    "simulated": {
+      "strip_placement": "macro_strip", "home_strip_placement": "home_strip",
+      "chapter_badge": "finChapterBadge", "chapter_pause": "finChapterPause",
+      "strip_card": "finance-live-strip", "strip_list": "finStripCounters",
+      "strip_badge": "finStripBadge", "strip_headline": "finStripHeadline", "strip_why": "finStripWhy",
+      "breakdowns": [
+        {"counter": "revenue", "card": "finance-breakdown-revenue", "title_key": "finRevenueByType",
+         "year_key": "finRevenueShareYear", "year_note": "finRevenueYearNote",
+         "bar": "finRevenueShareBar", "list": "finRevenueShareList",
+         "badge": "finRevenueBadge", "headline": "finRevenueHeadline", "why": "finRevenueWhy"}
+      ]
+    }
+  }
+}
+```
+
+Produced by the same `_national_sections()` / `_check_national_sections()` pair in
+`scripts/export_site_payloads.py` every other chapter's own cards/panels already go
+through, from a new `finances_publiques` block in `config/national_sections.yaml` --
+not a second config file or a second exporter step. `_check_national_sections()` was
+extended (not replaced) to also refuse: an `indicator`/`anchor_indicator` absent from
+`public/data/national.json`'s indicator set, a `counter`/`strip_placement`/
+`home_strip_placement` absent from `config/live_counters.yaml`'s own declared ids, and a
+trilingual `label` missing `en`/`fr`/`nl` -- exercised by
+`tests/test_export_site_payloads.py::test_finances_publiques_refuses_*`.
+`anchor_indicator` on the `debt` card (the quarterly debt series, `GOV_DEBT_Q_MEUR_BE`)
+is what lets macro.html's script find that counter's own official annual/quarterly
+figure without ever naming an indicator id in the page's `<script>` (rule 24) -- it looks
+up the card whose `anchor_indicator` matches the simulated debt counter's own anchor
+basis, not the other way around. Every `strip_*`/`chapter_*`/breakdown field above is an
+element id or an i18n key, read generically by macro.html/home2.html's own wiring and by
+`live_counters.js`'s `mount()` -- never a literal in either script (rule 2/24).
+
 ### `aggregates.json` (added Batch 7)
 
 The province/region/country cross-section micro.html's territorial comparison and any future
