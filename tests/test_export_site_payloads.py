@@ -18,6 +18,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from export_site_payloads import (  # noqa: E402
+    NATIONAL_SECTIONS_CONFIG,
     _check_national_sections,
     _indicator_definitions,
     _indicator_peer_deviation,
@@ -271,6 +272,93 @@ def test_national_sections_layout_passes_through_and_checks_panel_charts(tmp_pat
 
     _check_national_sections(layout, known={"A", "B"})
     with pytest.raises(ValueError, match=r"\['B'\]"):
+        _check_national_sections(layout, known={"A"})
+
+
+# --- Issue #309 PR 2: the #finances-publiques chapter's own config block ----
+
+
+NATIONAL_JSON = Path(__file__).resolve().parents[1] / "public" / "data" / "national.json"
+NATIONAL_SECTIONS_JSON = (
+    Path(__file__).resolve().parents[1] / "public" / "data" / "metadata" / "national_sections.json"
+)
+
+
+def test_committed_national_sections_json_matches_the_real_config():
+    """Proves the committed public/data/metadata/national_sections.json is
+    what running the exporter against the real, committed
+    config/national_sections.yaml and public/data/national.json actually
+    produces -- not hand-edited to look right. Runs the exact two functions
+    export_site_payloads() itself calls for this file (_national_sections +
+    _check_national_sections) against the real repo inputs, rather than
+    re-deriving the whole site payload set (which would need the local
+    DB/CSV build artefacts a fresh checkout does not carry, and would risk
+    this test depending on data unrelated to the one block it is about)."""
+    if not NATIONAL_JSON.exists() or not NATIONAL_SECTIONS_JSON.exists():
+        pytest.skip("site payloads not built")
+    known = set(json.loads(NATIONAL_JSON.read_text(encoding="utf-8"))["indicators"])
+    layout = _national_sections(NATIONAL_SECTIONS_CONFIG)
+    _check_national_sections(layout, known)  # must not raise
+    committed = json.loads(NATIONAL_SECTIONS_JSON.read_text(encoding="utf-8"))
+    assert layout == committed, (
+        "config/national_sections.yaml and the committed national_sections.json have "
+        "drifted apart -- regenerate the committed file from this config"
+    )
+
+
+def _fp_layout(tmp_path, finances_publiques_yaml: str) -> dict:
+    layout_path = tmp_path / "national_sections.yaml"
+    layout_path.write_text("kpis: [A]\n" + finances_publiques_yaml, encoding="utf-8")
+    return _national_sections(layout_path)
+
+
+def test_finances_publiques_refuses_an_indicator_id_national_json_lacks(tmp_path):
+    layout = _fp_layout(
+        tmp_path,
+        "finances_publiques:\n"
+        "  official_figures:\n"
+        "    cards:\n"
+        "      - id: revenue\n"
+        "        items: [{indicator: NOT_A_REAL_INDICATOR}]\n",
+    )
+    with pytest.raises(ValueError, match=r"NOT_A_REAL_INDICATOR"):
+        _check_national_sections(layout, known={"A"})
+
+
+def test_finances_publiques_refuses_a_counter_id_live_counters_yaml_lacks(tmp_path):
+    """config/live_counters.yaml is the one place counter ids are defined
+    (CLAUDE.md rule 2/24) -- a breakdown naming one it does not declare
+    would mount nothing, invisible to every other test. Checked against the
+    REAL config/live_counters.yaml (this check's own default path): 'not_a_
+    counter' is not, and must never become, a real counter id there."""
+    layout = _fp_layout(
+        tmp_path,
+        "finances_publiques:\n"
+        "  simulated:\n"
+        "    strip_placement: macro_strip\n"
+        "    breakdowns: [{counter: not_a_counter}]\n",
+    )
+    with pytest.raises(ValueError, match=r"not_a_counter"):
+        _check_national_sections(layout, known={"A"})
+
+
+def test_finances_publiques_refuses_a_placement_live_counters_yaml_lacks(tmp_path):
+    layout = _fp_layout(
+        tmp_path,
+        "finances_publiques:\n" "  simulated:\n" "    strip_placement: not_a_real_placement\n",
+    )
+    with pytest.raises(ValueError, match=r"not_a_real_placement"):
+        _check_national_sections(layout, known={"A"})
+
+
+def test_finances_publiques_refuses_a_label_missing_a_language(tmp_path):
+    layout = _fp_layout(
+        tmp_path,
+        "finances_publiques:\n"
+        "  official_figures:\n"
+        "    label: {en: Official figures, fr: Chiffres officiels}\n",
+    )
+    with pytest.raises(ValueError, match=r"missing a language"):
         _check_national_sections(layout, known={"A"})
 
 

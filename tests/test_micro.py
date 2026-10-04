@@ -122,6 +122,11 @@ def test_micro_simulates_nothing():
     # row they land in). A second call is how a one-shot becomes a ticking
     # loop, so the count is the test.
     assert html.count("requestanimationframe(") <= 1, "more than one rAF: is something ticking?"
+    # Issue #309 PR 2 gave macro.html and home2.html a real simulation
+    # (assets/belpulse/live_counters.js); micro.html was never part of that
+    # feature and loads none of it -- this page's own "simulates nothing"
+    # stays literally true, not just true of its own inline script.
+    assert 'src="assets/belpulse/live_counters.js"' not in html
 
 
 def test_micro_loads_no_third_party_asset():

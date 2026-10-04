@@ -32,6 +32,7 @@
 <link rel="stylesheet" href="assets/commune_map.css">
 <link rel="stylesheet" href="assets/belpulse/europe_map.css">
 <link rel="stylesheet" href="assets/belpulse/macro_portrait.css">
+<link rel="stylesheet" href="assets/belpulse/live_counters.css">
 </head>
 <body class="bp-shell macro">
 
@@ -232,13 +233,94 @@
     </section>
 
     <!-- ==================== panel: finances-publiques ==================== -->
+    <!-- Issue #309 PR 2: the simulated strip/breakdowns below are built by
+         assets/belpulse/live_counters.js, driven entirely by
+         public/data/live_counters.json plus state.layout.finances_publiques
+         (config/national_sections.yaml) -- no indicator id, counter id or
+         figure is typed into this markup (CLAUDE.md rules 2/24/36). Each
+         data-simulated="true" region below MUST keep its own visible,
+         non-empty .bp-simulated-badge: BPLiveCounters.mount() throws
+         without one, by design, so a real figure can never be silently fed
+         through this path without the "simulation" label going with it. -->
     <section class="bp-panel" id="finances-publiques" data-panel>
       <h2 data-panel-label="finances-publiques">Public finances</h2>
-      <article class="bp-chart-card bp-state" id="public-finance" data-slot="public_finance" data-state="unavailable">
-        <div class="bp-chart-head"><div><h3 class="slot-title">&nbsp;</h3></div></div>
-        <div class="placeholder"></div>
-        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span><span class="why slot-reason"></span></div>
+
+      <!-- ONE chapter-level badge + ONE pause button for every simulated
+           region below (the strip and both breakdown cards), instead of
+           three identical full-sentence badges and three separate pause
+           buttons. Ships hidden; revealed by script only once at least one
+           simulated region has actually mounted (never claim a live
+           simulation is running before one is). -->
+      <div class="bp-sim-region-head" id="finChapterHead">
+        <span class="bp-simulated-badge bp-simulated-badge--prominent" id="finChapterBadge" data-t="finSimulatedBadge" hidden>Simulation — trend extrapolation, not a forecast</span>
+        <button type="button" class="bp-sim-pause" id="finChapterPause" aria-pressed="false" hidden><span data-t="finPause">Pause</span></button>
+      </div>
+
+      <article class="bp-chart-card bp-sim-region bp-state" id="finance-live-strip" data-simulated="true" data-state="loading">
+        <div class="bp-sim-region-head">
+          <h3 class="bp-sim-region-title" data-t="finLiveStripTitle">Live estimate</h3>
+          <!-- Short per-region tag, hidden until mount succeeds: just
+               enough for BPLiveCounters.mount()'s own guard (it throws
+               without a visible, non-empty .bp-simulated-badge), the full
+               sentence lives once, above, in #finChapterHead. -->
+          <span class="bp-simulated-badge" id="finStripBadge" data-t="finSimulatedShort" hidden>Simulation</span>
+        </div>
+        <div class="bp-sim-strip bp-state-body" id="finStripCounters"></div>
+        <div class="bp-state-message"><span class="headline" id="finStripHeadline" data-t="macroUnavailable">Not available yet</span> <span class="why" id="finStripWhy"></span></div>
       </article>
+
+      <section class="bp-finance-row">
+        <article class="bp-chart-card bp-sim-region bp-state" id="finance-breakdown-revenue" data-simulated="true" data-state="loading">
+          <div class="bp-sim-region-head">
+            <h3 class="bp-sim-region-title" id="finRevenueTitle" data-t="finRevenueByType">Revenue by type</h3>
+            <span class="bp-simulated-badge" id="finRevenueBadge" data-t="finSimulatedShort" hidden>Simulation</span>
+          </div>
+          <div class="subtitle" id="finRevenueYearNote"></div>
+          <div class="bp-state-body">
+            <div class="bp-share-bar" id="finRevenueShareBar"></div>
+            <ul class="bp-share-list" id="finRevenueShareList"></ul>
+          </div>
+          <div class="bp-state-message"><span class="headline" id="finRevenueHeadline" data-t="macroUnavailable">Not available yet</span> <span class="why" id="finRevenueWhy"></span></div>
+        </article>
+        <article class="bp-chart-card bp-sim-region bp-state" id="finance-breakdown-spending" data-simulated="true" data-state="loading">
+          <div class="bp-sim-region-head">
+            <h3 class="bp-sim-region-title" id="finSpendingTitle" data-t="finSpendingByFunction">Spending by function</h3>
+            <span class="bp-simulated-badge" id="finSpendingBadge" data-t="finSimulatedShort" hidden>Simulation</span>
+          </div>
+          <div class="subtitle" id="finSpendingYearNote"></div>
+          <div class="bp-state-body">
+            <div class="bp-share-bar" id="finSpendingShareBar"></div>
+            <ul class="bp-share-list" id="finSpendingShareList"></ul>
+          </div>
+          <div class="bp-state-message"><span class="headline" id="finSpendingHeadline" data-t="macroUnavailable">Not available yet</span> <span class="why" id="finSpendingWhy"></span></div>
+        </article>
+      </section>
+
+      <article class="bp-chart-card bp-state" id="finance-official" data-state="loading">
+        <div class="bp-chart-head"><div><h3 data-t="finOfficialTitle">Official figures</h3><div class="subtitle" id="finOfficialNote"></div></div></div>
+        <div class="bp-official-figures bp-state-body">
+          <div class="bp-official-grid" id="finOfficialGrid"></div>
+          <div class="bp-finance-row" id="finOfficialCharts"></div>
+        </div>
+        <div class="bp-state-message"><span class="headline" data-t="macroUnavailable">Not available yet</span></div>
+        <div class="provenance" id="finOfficialProvenance"></div>
+      </article>
+
+      <details class="fin-method">
+        <summary data-t="finMethodSummary">How this is simulated</summary>
+        <div id="finMethodBody"></div>
+      </details>
+
+      <p class="provenance" id="finSourceLine"><span data-t="finSourceLine">BelPulse simulation based on Eurostat and Statbel data</span> · <a href="sources.html" data-t="navSources">Sources</a></p>
+      <!-- This chapter shows a Statbel-sourced figure (the population
+           counter above) with no static credit or licence name anywhere on
+           the page -- DELEGATING_PAGES pattern (tests/
+           test_statbel_attribution.py), same requirement home2.html's own
+           attribution block already meets for its commune-level figures.
+           English stays in the markup so a reader whose JavaScript never
+           runs still sees the complete credit; data-t-html swaps in the
+           fr/nl wording. -->
+      <p class="provenance" id="finPopulationAttribution" data-t-html="finPopulationAttributionHtml">Population figure: <a href="https://statbel.fgov.be/" rel="noopener">Statbel</a> (Direction générale Statistique — Statistics Belgium), reused under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>.</p>
     </section>
 
     <!-- ==================== panel: europe ==================== -->
@@ -286,6 +368,7 @@
 <script src="assets/belpulse/charts.js"></script>
 <script src="assets/belpulse/macro_portrait_charts.js"></script>
 <script src="assets/commune_map.js"></script>
+<script src="assets/belpulse/live_counters.js"></script>
 <!-- Europe panel (Batch B3): loads its own vendored map library lazily,
      only once the panel opens -- never at page load (CLAUDE.md rule 30). -->
 <script src="assets/belpulse/europe_map.js"></script>
@@ -305,6 +388,12 @@
   var SOURCES_URL  = 'public/data/metadata/sources.json';
   var NATIONAL_URL = 'public/data/national.json';
   var MANIFEST_URL = 'public/data/manifest.json';
+  // Issue #309 PR 2: scripts/export_live_counters.py's own output, consumed
+  // only through assets/belpulse/live_counters.js. The #finances-publiques
+  // chapter's OWN cards/charts/placements live in LAYOUT_URL above instead
+  // of a second config file -- state.layout.finances_publiques, read by
+  // FinancesPubliques.init() below.
+  var LIVE_COUNTERS_URL = 'public/data/live_counters.json';
 
   var LANG = I18N.initial();
   var T = function(key, vars){ return I18N.t(LANG, key, vars); };
@@ -853,6 +942,695 @@
     });
   }
 
+  /* ---- #finances-publiques: simulated live strip/breakdowns + official
+   * figures ----------------------------------------------------------------
+   * This is page-level binding code, not the generic engine: it is the
+   * one place allowed to know what "the deficit counter" or "the balance
+   * card" MEANS (CLAUDE.md rule 24 extends rule 2 to the builder -- the
+   * generic renderer/engine, assets/belpulse/live_counters.js, never
+   * mentions a counter id; this page, reading its own config file, may).
+   * Mounted ONCE (in boot(), after the payload loads) and never rebuilt on
+   * resize/renderAll() the way the rest of the page is -- destroying and
+   * re-mounting a live region would reset its pause state and its "since
+   * you opened this page" baseline for no reason. Only a language change
+   * calls back in, through setLang(), which updates labels in place. */
+  var FinancesPubliques = (function(){
+    var cfg = null, payload = null, lang = 'en', handles = {};
+    // Defensive fallback matching this page's OWN markup ids, used only if
+    // state.layout.finances_publiques itself is missing (rule 13: fail
+    // loudly, never silently invent a FIGURE -- this invents no
+    // figure, only keeps the strip/breakdown wiring from throwing instead
+    // of mounting, since the official-figures block below has its own
+    // independent !cfg guard already and should still render). PR 2's real
+    // config file is exporter-checked and should never actually be
+    // missing, the way national_sections.json's own exporter check is.
+    // Round-2 rules review (decision 4's own grep: zero 'macro_strip'
+    // literals anywhere in this script): this fallback deliberately has NO
+    // strip_placement of its own -- the placement name is config, not a
+    // guessable default, so a missing config renders the strip unavailable
+    // (mountStrip() below checks `!cfg.simulated` before ever looking at a
+    // placement) rather than falling back to a hardcoded guess at one.
+    var DEFAULT_SIMULATED = {
+      chapter_badge: 'finChapterBadge', chapter_pause: 'finChapterPause',
+      strip_card: 'finance-live-strip', strip_list: 'finStripCounters', strip_badge: 'finStripBadge',
+      strip_headline: 'finStripHeadline', strip_why: 'finStripWhy',
+      breakdowns: [],
+    };
+    // Round-2 design decision: ONE pause button for the whole chapter,
+    // driving every mounted simulated region (the strip and both breakdown
+    // cards) through the handle BPLiveCounters.mount() already returns --
+    // the generic engine stays exactly that (it never gets a second,
+    // chapter-aware pause concept of its own); this little controller is
+    // page-level wiring, same spirit as decorateStripCounter below.
+    var chapterRegions = [];
+    var chapterPaused = false;
+    function registerChapterRegion(handle){ if(handle) chapterRegions.push(handle); }
+    function applyChapterPauseLabel(){
+      var s = (cfg && cfg.simulated) || DEFAULT_SIMULATED;
+      var btn = document.getElementById(s.chapter_pause);
+      if(!btn) return;
+      btn.setAttribute('aria-pressed', chapterPaused ? 'true' : 'false');
+      var span = btn.querySelector('span');
+      if(span) span.textContent = chapterPaused ? T('finResume') : T('finPause');
+      btn.setAttribute('aria-label', chapterPaused ? T('finResumeAria') : T('finPauseAria'));
+    }
+    function toggleChapterPause(){
+      chapterPaused = !chapterPaused;
+      chapterRegions.forEach(function(h){ chapterPaused ? h.pause() : h.resume(); });
+      applyChapterPauseLabel();
+    }
+    /* Reveal the one chapter-level badge + pause button the first time any
+     * simulated region actually mounts (round-1/round-2 review, decision 3:
+     * both ship `hidden` in the static markup so a reader whose JavaScript
+     * never runs, or who loads this page before the first region mounts,
+     * never sees a "simulation running" badge next to nothing running). */
+    function revealChapterHead(){
+      var s = (cfg && cfg.simulated) || DEFAULT_SIMULATED;
+      var badge = document.getElementById(s.chapter_badge);
+      var btn = document.getElementById(s.chapter_pause);
+      if(badge) badge.hidden = false;
+      if(btn && btn.hidden){
+        btn.hidden = false;
+        btn.setAttribute('aria-pressed', chapterPaused ? 'true' : 'false');
+        btn.addEventListener('click', toggleChapterPause);
+        applyChapterPauseLabel();
+      }
+    }
+
+    function fmtLive(v, unit, decimals, l){ return MapUI.formatValue(v, unit, decimals, l); }
+
+    function finLabels(){
+      return {
+        pause: T('finPause'), resume: T('finResume'),
+        pauseAria: T('finPauseAria'), resumeAria: T('finResumeAria'),
+        notStarted: T('finNotStarted'), expired: T('finExpired'),
+        unavailable: T('finUnavailableReason'),
+        perSecond: T('finPerSecond'), perHour: T('finPerHour'), perDay: T('finPerDay'),
+        sinceOpened: T('finSinceOpened'), pausedSuffix: T('finPausedSuffix'),
+      };
+    }
+
+    function counterById(id){
+      return (payload.counters || []).find(function(c){ return c.id === id; });
+    }
+
+    /* Round-2 rules review (R-P1-2/NEW P1-2, decision 4): replaces the old
+     * `counter.id === 'debt'` literal. A counter is identified by what its
+     * OWN basis[] says about it, never by its id string -- here, "this
+     * counter's pace is set by another counter" (basis[].role==='pace_counter'),
+     * which in this payload only ever describes the debt counter but makes
+     * no assumption about its id, label or position. */
+    function isPacedCounter(counter){
+      return !!(counter && (counter.basis || []).some(function(b){ return b.role === 'pace_counter'; }));
+    }
+    function pacedCounter(){
+      return (payload.counters || []).find(isPacedCounter);
+    }
+    /* true = the pace counter currently reads as a deficit, false =
+     * surplus, null = unknown (no live value yet). Used to pick between the
+     * two pre-built, lower-case i18n sentences (finDebtPaceCaptionDeficit/
+     * Surplus, finMethodDebtPaceDeficit/Surplus) instead of interpolating
+     * the capitalised standalone word (T('finDeficit')/T('finSurplus')) into
+     * a fixed grammatical frame -- the mid-sentence capitalisation and fr
+     * elision bugs (round-2 review, M3/P3-7) both came from doing that. */
+    function paceIsDeficit(paceCounterId, now){
+      var c = counterById(paceCounterId);
+      if(!c) return null;
+      var at = BPLiveCounters.valueAt(c.segments, now);
+      return (at && typeof at.value === 'number') ? at.value >= 0 : null;
+    }
+
+    /* True when every counter named in `ids` (a placements.* array) has
+     * already reached its 'expired' state -- the whole region has nothing
+     * left to show, as opposed to one counter among several running out.
+     * Used to swap a ticking-but-dead region for an honest "simulation
+     * window ended" message instead of just "not available yet" (round-1
+     * review: macro had no expiry fallback at all; home2's own wording for
+     * this case was wrong -- see HomeFinance.allExpired/renderFallback). */
+    function allExpired(ids){
+      if(!payload || !ids || !ids.length) return false;
+      var now = Date.now();
+      return ids.every(function(id){
+        var c = counterById(id);
+        return c && c.segments && BPLiveCounters.valueAt(c.segments, now).state === 'expired';
+      });
+    }
+
+    function setWhy(elId, key){
+      var el = document.getElementById(elId);
+      if(el) el.textContent = key ? T(key) : '';
+    }
+
+    /* Round-2 rules review (NEW P2-5a): a card's headline and its reason
+     * used to always be "Not available yet" + a reason -- for an EXPIRED
+     * simulation that read as a contradiction ("not available yet" next to
+     * "this estimate has ended"). state is 'unavailable' (no payload / no
+     * breakdown data) or 'expired' (the payload ran its course); each gets
+     * its own distinct headline + reason, both already-existing i18n keys
+     * (no new strings needed: homeFinanceExpired/-Why are the same honest
+     * sentences home2's own expiry fallback already uses). */
+    /* Called ONLY for the two genuinely-unavailable states ('unavailable' /
+     * 'expired') -- a ready card clears its own `why` text directly
+     * (setWhy(id, null)) rather than routing through here with a 'ready'
+     * state that would mean nothing. */
+    function setCardUnavailable(headlineElId, whyElId, state, reasonOverride){
+      var headline = document.getElementById(headlineElId);
+      if(headline) headline.textContent = T(state === 'expired' ? 'homeFinanceExpired' : 'macroUnavailable');
+      var whyEl = document.getElementById(whyElId);
+      if(whyEl){
+        whyEl.textContent = reasonOverride ? text(reasonOverride)
+          : T(state === 'expired' ? 'homeFinanceExpiredWhy' : 'finUnavailableReason');
+      }
+    }
+
+    /* The active segment's own calendar year, from ITS MIDPOINT -- never
+     * "new Date().getFullYear()" (the counter's own segment defines what
+     * year it is currently counting up for; round-1 review: "Revenue
+     * €10,923" on 1 Jan read as a plain total, not "so far this year") and,
+     * since round-2, never the segment's raw start_ms either: a Brussels-
+     * local midnight on 1 January falls on 31 December the PREVIOUS year in
+     * UTC, so getUTCFullYear() on it read one year too early (caught by
+     * this batch's own Playwright self-review). Round-1's fix nudged the
+     * timestamp 24h forward, which happened to work for year-long segments
+     * but is not actually correct for a segment of any other length; the
+     * segment's own MIDPOINT, read back through the Brussels calendar via
+     * toLocaleString (not a fixed UTC-offset guess, which breaks across a
+     * DST change), is correct regardless of the segment's length. */
+    function activeSegmentYear(segments, now){
+      if(!segments) return null;
+      for(var i = 0; i < segments.length; i++){
+        var s = segments[i];
+        if(now >= s.start_ms && now < s.end_ms){
+          var mid = (s.start_ms + s.end_ms) / 2;
+          return parseInt(new Date(mid).toLocaleString('en', {timeZone: 'Europe/Brussels', year: 'numeric'}), 10);
+        }
+      }
+      return null;
+    }
+
+    /* Page-level knowledge the generic engine must never hold (rule 24):
+     * what the "deficit" counter's sign means, that "debt" ticks at the
+     * pace of another named counter, and that a year-to-date flow should
+     * carry a "so far in {year}" suffix. Only used for the headline strip,
+     * where a reader sees one bare total per counter with no breakdown
+     * year beside it to give it context. */
+    function decorateStripCounter(counter, node, at){
+      var nameEl = node.querySelector('.bp-live-counter-name');
+      if(counter.kind === 'difference'){
+        var raw = node.querySelector('.bp-value').dataset.raw;
+        if(nameEl && raw !== undefined && raw !== ''){
+          nameEl.textContent = Number(raw) >= 0 ? T('finDeficit') : T('finSurplus');
+        }
+      }
+      if(isPacedCounter(counter)){
+        // Round-1 visual review: debt's own rate line duplicated deficit's
+        // "+X / day" almost verbatim (it ticks at the SAME pace, by
+        // design) and its since-opened line repeated deficit's too --
+        // together they read like a copy-paste bug. Replace both with one
+        // honest caption naming what it actually tracks.
+        //
+        // An EARLIER version of this read the pace counter's name back
+        // from its sibling node, on the assumption "deficit" always
+        // renders before "debt" in the same tick -- true for macro's own
+        // strip.macro_strip order, but FALSE for home2's home_strip order
+        // (population, debt, deficit, revenue, spending -- debt first),
+        // where it silently fell back to the raw "Budget balance" label
+        // instead of "Deficit"/"Surplus" (caught by this batch's own
+        // Playwright self-review). Computing the pace counter's own sign
+        // directly, instead of reading another node's rendered text, is
+        // correct regardless of iteration order. Round-2 (P3-7): a full,
+        // pre-built, lower-case sentence per sign (no mid-sentence
+        // capitalised word, no fr elision bug).
+        var paceEntry = (counter.basis || []).find(function(b){ return b.role === 'pace_counter'; });
+        var rateEl = node.querySelector('.bp-live-counter-rate');
+        var sinceEl = node.querySelector('.bp-live-counter-since');
+        if(sinceEl) sinceEl.textContent = '';
+        if(rateEl && paceEntry){
+          var isDef = paceIsDeficit(paceEntry.counter, Date.now());
+          rateEl.textContent = T(isDef === false ? 'finDebtPaceCaptionSurplus' : 'finDebtPaceCaptionDeficit');
+        }
+      }
+      if((counter.kind === 'flow' || counter.kind === 'difference') && at && at.state === 'running' && nameEl){
+        var year = activeSegmentYear(counter.segments, Date.now());
+        if(year){
+          var ytd = node.querySelector('.bp-live-counter-ytd');
+          if(!ytd){
+            ytd = document.createElement('span');
+            ytd.className = 'bp-live-counter-ytd';
+            nameEl.parentNode.appendChild(ytd);
+          }
+          ytd.textContent = T('finYtd', {year: year});
+        }
+      }
+    }
+
+    function mountStrip(){
+      var s = (cfg && cfg.simulated) || DEFAULT_SIMULATED;
+      var card = document.getElementById(s.strip_card);
+      if(!payload || !cfg || !cfg.simulated){
+        card.dataset.state = 'unavailable';
+        setCardUnavailable(s.strip_headline, s.strip_why, 'unavailable');
+        return;
+      }
+      var ids = (payload.placements || {})[s.strip_placement] || [];
+      if(allExpired(ids)){
+        card.dataset.state = 'unavailable';
+        setCardUnavailable(s.strip_headline, s.strip_why, 'expired');
+        return;
+      }
+      card.dataset.state = 'ready';
+      setWhy(s.strip_why, null);
+      // Round-1 rules review (decision 3): the badge ships `hidden` in the
+      // static markup -- revealed here, right before mount(), since
+      // BPLiveCounters.mount() itself requires a visible badge already in
+      // place (it throws otherwise, by design -- see its own comment).
+      var stripBadge = document.getElementById(s.strip_badge);
+      if(stripBadge) stripBadge.hidden = false;
+      handles.strip = BPLiveCounters.mount(card, payload, {
+        lang: lang, labels: finLabels(), formatValue: fmtLive,
+        placement: s.strip_placement,
+        listEl: document.getElementById(s.strip_list),
+        onCounterRendered: decorateStripCounter,
+      });
+      registerChapterRegion(handles.strip);
+      revealChapterHead();
+    }
+
+    function swatch(el, index){
+      portrait.theme(el, index);
+      el.style.background = 'var(--th)';
+    }
+
+    /* Short label for a breakdown part: the optional short_label the
+     * payload may carry (round-1 fix -- a part used to show its full
+     * indicator name, "Recettes de l'impôt sur le revenu des personnes
+     * physiques, Belgique", in a list row with no room for it), falling
+     * back to the full name so an older payload without short_label still
+     * renders something. Built once per language, never cached across a
+     * language change. */
+    function partLabel(part){
+      var sl = part.short_label;
+      if(sl && (sl[lang] || sl.en)) return sl[lang] || sl.en;
+      return (part.names && (part.names[lang] || part.names.en)) || part.id;
+    }
+
+    /* Round-2 rules review (NEW P2-5b): a breakdown card used to only check
+     * whether it HAD breakdown data, never whether the counter driving it
+     * had already run out -- it stayed in its 'ready' layout, ticking
+     * values frozen at their last segment's end, with no indication the
+     * simulation window was over (the strip already caught this; the
+     * breakdown cards did not). Checked the same way allExpired() checks
+     * the strip: the counter's OWN segments, not a flag the config invents. */
+    function isExpiredCounter(counter, now){
+      return !!(counter && counter.segments && BPLiveCounters.valueAt(counter.segments, now).state === 'expired');
+    }
+
+    function mountBreakdown(b){
+      var card = document.getElementById(b.card);
+      var counter = payload && counterById(b.counter);
+      var noBreakdown = !counter || !counter.breakdown || counter.breakdown.state !== 'available';
+      var expired = counter && isExpiredCounter(counter, Date.now());
+      if(noBreakdown || expired){
+        card.dataset.state = 'unavailable';
+        // Round-2 rules review (R-P2-10): pass the payload's OWN reason for
+        // an unavailable breakdown through when it has one, instead of
+        // always falling back to the generic "not published yet" text --
+        // an expired counter still wins (it is the more specific, more
+        // certain fact: this counter undeniably ran out, whatever reason
+        // string a not-yet-available breakdown might otherwise carry).
+        var specificReason = !expired && counter && counter.breakdown && counter.breakdown.reason;
+        setCardUnavailable(b.headline, b.why, expired ? 'expired' : 'unavailable', specificReason);
+        document.getElementById(b.year_note).textContent = '';
+        return;
+      }
+      card.dataset.state = 'ready';
+      setWhy(b.why, null);
+      var breakdownBadge = document.getElementById(b.badge);
+      if(breakdownBadge) breakdownBadge.hidden = false;
+      document.getElementById(b.year_note).textContent = T(b.year_key, {year: counter.breakdown.year});
+      var parts = counter.breakdown.parts || [];
+      var bar = document.getElementById(b.bar); bar.innerHTML = '';
+      parts.forEach(function(part, i){
+        var seg = document.createElement('span');
+        seg.style.width = (part.share * 100) + '%';
+        swatch(seg, i);
+        // Round-1 visual review: a 12-segment spending bar on a shorter
+        // colour ramp repeats hues with no way to tell which segment is
+        // which -- a title (native tooltip) ties every segment back to its
+        // row in the list below it even where the ramp itself repeats.
+        seg.title = partLabel(part) + ' — ' + MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+        bar.appendChild(seg);
+      });
+      // ONE merged list per round-1 review (L2/P0-1): colour key, short
+      // label and live share% on the left, the ticking value right-
+      // aligned -- not a separate legend list plus a second grid of
+      // sub-counters repeating the same labels. opts.buildNode below is
+      // the generic engine's extension point (live_counters.js): it still
+      // drives the ticking .bp-value/rate/since/sr elements by class name,
+      // this function only decides what ELSE sits in the row.
+      // Round-2 rules review (R-P2-10): carry each part's own state/reason
+      // through to the synthetic counter the generic engine renders --
+      // undefined for both on every part in today's payload (every part
+      // here is fully available), but a future payload that marks one part
+      // 'unavailable' (a withheld sub-total, rule 26: missing/unavailable/
+      // suppressed/not-applicable/zero are five distinct states, never
+      // collapsed) must not have that silently dropped on the way into the
+      // generic engine, which already knows how to render it correctly.
+      var synthetic = parts.map(function(part){
+        return {
+          id: part.id, label: part.short_label || part.names, unit: counter.unit, kind: 'flow',
+          segments: part.segments, state: part.state, reason: part.reason,
+        };
+      });
+      if(handles[b.card]) handles[b.card].destroy();
+      handles[b.card] = BPLiveCounters.mount(card, payload, {
+        lang: lang, labels: finLabels(), formatValue: fmtLive,
+        counters: synthetic,
+        listEl: document.getElementById(b.list),
+        buildNode: function(counterRow, i){
+          var part = parts[i];
+          var li = document.createElement('li');
+          li.className = 'bp-share-row';
+          li.dataset.counterId = counterRow.id;
+          var left = document.createElement('span'); left.className = 'bp-share-left';
+          var dot = document.createElement('span'); dot.className = 'bp-share-swatch'; swatch(dot, i);
+          var name = document.createElement('span'); name.className = 'bp-live-counter-name bp-share-label';
+          var pct = document.createElement('span'); pct.className = 'bp-share-pct';
+          pct.textContent = MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+          left.append(dot, name, pct);
+          var value = document.createElement('span'); value.className = 'bp-value'; value.setAttribute('aria-hidden', 'true'); value.dataset.raw = ''; value.textContent = '—';
+          var rate = document.createElement('span'); rate.className = 'bp-live-counter-rate'; rate.setAttribute('aria-hidden', 'true');
+          var since = document.createElement('span'); since.className = 'bp-live-counter-since'; since.setAttribute('aria-hidden', 'true');
+          var sr = document.createElement('p'); sr.className = 'bp-sr-only';
+          li.append(left, value, rate, since, sr);
+          return li;
+        },
+      });
+      registerChapterRegion(handles[b.card]);
+      revealChapterHead();
+    }
+
+    /* Official net-lending/borrowing convention: POSITIVE = surplus
+     * (government lends), NEGATIVE = deficit (government borrows) -- see
+     * the note on decorateDifferenceLabel() above for why this reads the
+     * opposite way from the simulated "deficit" counter. Round-2 review
+     * (P2-M/decision 5): names the CONCEPT behind the sign, not just the
+     * bare word -- "Deficit (net borrowing)" -- since this label sits next
+     * to a signed chart of the very same series further down the page. */
+    function balanceWord(value){
+      return value >= 0 ? T('finSurplusFull') : T('finDeficitFull');
+    }
+
+    function renderOfficialFigures(){
+      var card = document.getElementById('finance-official');
+      if(!cfg || !cfg.official_figures){ card.dataset.state = 'unavailable'; return; }
+      document.getElementById('finOfficialNote').textContent = text(cfg.official_figures.note);
+      var grid = document.getElementById('finOfficialGrid'); grid.innerHTML = '';
+      var any = false;
+      var latestOverall = null, latestEntry = null;
+      (cfg.official_figures.cards || []).forEach(function(cardSpec){
+        var values = cardSpec.items.map(function(item){
+          var entry = state.national[item.indicator];
+          return {entry: entry, latest: entry ? latestNumeric(entry) : null};
+        }).filter(function(v){ return v.latest; });
+        if(!values.length) return;
+        any = true;
+        values.forEach(function(v){
+          if(!latestOverall || v.latest.period > latestOverall.period){ latestOverall = v.latest; latestEntry = v.entry; }
+        });
+        var item = document.createElement('div'); item.className = 'bp-official-item';
+        var label = document.createElement('div'); label.className = 'label';
+        label.textContent = cardSpec.signed_label ? balanceWord(values[0].latest.value) : text(cardSpec.label);
+        item.appendChild(label);
+        values.forEach(function(v){
+          var val = document.createElement('div'); val.className = 'value';
+          // Round-1 review (P0-2/L4): a magnitude labelled by its sign word
+          // ("Deficit"/"Surplus") must show the MAGNITUDE, not the signed
+          // number -- "Deficit -33 221" is a double negative. Every other
+          // card keeps its plain value. Unit always shown (same
+          // displayValue() every other figure on this page already uses,
+          // not the bare fmtValue() this used to call).
+          val.textContent = displayValue(cardSpec.signed_label ? Math.abs(v.latest.value) : v.latest.value, v.entry);
+          var small = document.createElement('small');
+          small.textContent = fmtPeriod(v.latest.period) + (v.latest.status && v.latest.status !== 'final' ? ' · ' + T('status_' + v.latest.status) : '');
+          val.appendChild(small);
+          item.appendChild(val);
+        });
+        grid.appendChild(item);
+      });
+      card.dataset.state = any ? 'ready' : 'unavailable';
+      document.getElementById('finOfficialProvenance').textContent = latestEntry ? provenance(latestEntry, latestOverall) : '';
+
+      var chartsHost = document.getElementById('finOfficialCharts'); chartsHost.innerHTML = '';
+      (cfg.charts || []).forEach(function(spec){
+        var seriesEntries = (spec.series || []).map(function(code){ return {code: code, entry: state.national[code]}; }).filter(function(s){ return s.entry; });
+        if(!seriesEntries.length) return;
+        var group = document.createElement('div');
+        /* More than one series (revenue-spending-chart) is drawn as several
+         * small single-line Portrait charts side by side, the SAME pattern
+         * renderPanelCharts() above already uses for the business-cycle
+         * chapter (Business/Consumer confidence) -- portrait.line() itself
+         * only draws one series' own history plus end-of-line peer-scope
+         * MARKERS via compareSeries (a dot and a label, not a second
+         * drawn line), so it is never asked to overlay two full lines. */
+        if(seriesEntries.length > 1){
+          var groupHead = document.createElement('div'); groupHead.className = 'leadchart-eyebrow';
+          groupHead.textContent = text(spec.label);
+          group.appendChild(groupHead);
+          var row = document.createElement('div'); row.className = 'leadrow stacked-lead';
+          group.appendChild(row);
+        }
+        seriesEntries.forEach(function(s){
+          var host = seriesEntries.length > 1 ? document.createElement('div') : group;
+          var wrap = document.createElement('div'); wrap.className = 'leadchart-svgwrap';
+          var head = document.createElement('div'); head.className = 'leadchart-head';
+          var eyebrow = document.createElement('div'); eyebrow.className = 'leadchart-eyebrow';
+          // Round-1 review (P0-2/L4): a chart eyebrow printed the series
+          // name alone, with no unit anywhere near the axis -- displayUnit()
+          // is the same per-language unit hint every other value on this
+          // page already carries.
+          eyebrow.textContent = (seriesEntries.length > 1 ? nameOf(s.code) : text(spec.label)) + displayUnit(s.entry);
+          head.appendChild(eyebrow);
+          // Round-2 review (P2-M/decision 5): the signed net-lending/
+          // borrowing chart needs one line saying which side of zero is a
+          // deficit -- a translation key the config names (subtitle_key),
+          // never a figure or indicator id, so this stays generic to any
+          // chart spec that sets one.
+          if(spec.subtitle_key){
+            var subtitle = document.createElement('div'); subtitle.className = 'subtitle';
+            subtitle.textContent = T(spec.subtitle_key);
+            head.appendChild(subtitle);
+          }
+          var plotHost = document.createElement('div');
+          var pts = panelSeriesPoints(s.entry, 10000);
+          var result = portrait.line({
+            width: 320, height: 220, points: pts, decimals: s.entry.decimals,
+            unitSuffix: displayUnit(s.entry), ariaLabel: nameOf(s.code),
+            zeroLine: !!spec.zero_line,
+          });
+          plotHost.innerHTML = result.svg || '';
+          wrap.append(head, plotHost);
+          host.appendChild(wrap);
+          if(seriesEntries.length > 1) group.querySelector('.leadrow').appendChild(host);
+          portrait.wireLine(plotHost, result.hits || [], {title: nameOf(s.code)});
+          // Round-1 review (P1-9): this chart is built while the
+          // finances-publiques panel is not necessarily the visible one
+          // (built once at boot, from whichever panel happens to be open).
+          // wireLine() just armed a scroll-triggered draw-in on an element
+          // with no layout box yet, which several browsers then never
+          // re-trigger once the panel becomes visible -- the line never
+          // appears. Rather than chase that timing generically in the
+          // shared chart module (used correctly elsewhere, e.g. #croissance,
+          // which IS visible at build time), this chart simply rests fully
+          // drawn: CLAUDE.md's own acceptance bar for this is "reveal when
+          // visible, OR rest at dashoffset 0" -- no chart may ever show
+          // empty axes, and a still chart is never wrong, only less showy.
+          var drawnPath = plotHost.querySelector('path');
+          if(drawnPath){
+            drawnPath.style.strokeDasharray = '';
+            drawnPath.style.strokeDashoffset = '';
+            drawnPath.classList.remove('bp-anim-line');
+          }
+        });
+        chartsHost.appendChild(group);
+      });
+    }
+
+    function renderMethod(){
+      var body = document.getElementById('finMethodBody');
+      body.innerHTML = '';
+      var paras = [];
+      if(payload && payload.method){
+        paras.push(T('finMethodWindow', {years: payload.method.trend_window_years, horizon: payload.method.horizon_years}));
+      }
+      // Round-2 rules review (R-P1-2/NEW P1-2, decision 4): driven from
+      // cfg.simulated.breakdowns (the SAME list the breakdown cards
+      // themselves iterate) instead of a hardcoded ['revenue','spending'] --
+      // this sentence only reads as "revenue ... spending ..." because that
+      // config currently lists exactly those two, in that order; a page
+      // with a different pair of breakdowns would need a different i18n
+      // sentence shape, not a different literal here.
+      var breakdownIds = ((cfg && cfg.simulated ? cfg.simulated.breakdowns : null) || []).map(function(b){ return b.counter; });
+      // Round-1 review (P1-7): the method note never said HOW fast revenue
+      // and spending are each trending -- both rates, straight from the
+      // payload, no figure typed here.
+      if(payload && breakdownIds.length === 2){
+        var revC = counterById(breakdownIds[0]), spendC = counterById(breakdownIds[1]);
+        if(revC && typeof revC.growth_rate === 'number' && spendC && typeof spendC.growth_rate === 'number'){
+          paras.push(T('finMethodGrowthRates', {
+            revenue: MapUI.formatValue(revC.growth_rate * 100, 'percent', 1, lang),
+            spending: MapUI.formatValue(spendC.growth_rate * 100, 'percent', 1, lang),
+          }));
+        }
+      }
+      if(payload){
+        breakdownIds.forEach(function(id){
+          var c = counterById(id);
+          if(c && c.breakdown && c.breakdown.year){
+            paras.push(T('finMethodBreakdownYear', {name: (c.label && (c.label[lang] || c.label.en)) || id, year: c.breakdown.year}));
+          }
+        });
+      }
+      paras.push(T('finMethodAnnualReset'));
+      // Round-1 review (P1-7): the old sentence named no period, no value
+      // and no status for the debt anchor, and never said why it differs
+      // from the ANNUAL official debt shown above (that one is 2025; the
+      // anchor is the latest available quarter, 2026-Q1) -- a reader could
+      // reasonably wonder why the two don't match. Every figure below comes
+      // from the payload's own basis[] / state.national, never typed here.
+      // Round-2 (R-P1-2): `debtC` is found structurally (isPacedCounter),
+      // never by the literal id 'debt'; the matching OFFICIAL card is found
+      // by matching the anchor's own indicator against each official card's
+      // configured anchor_indicator (state.layout.finances_publiques,
+      // config/national_sections.yaml), so the debt anchor's own indicator
+      // id is never typed into this script either.
+      if(payload){
+        var debtC = pacedCounter();
+        var anchor = debtC && (debtC.basis || []).find(function(b){ return b.role === 'anchor'; });
+        var pace = debtC && (debtC.basis || []).find(function(b){ return b.role === 'pace_counter'; });
+        if(anchor){
+          var annualDebtCard = (cfg && cfg.official_figures && cfg.official_figures.cards || [])
+            .find(function(c){ return c.anchor_indicator === anchor.indicator; });
+          var annualDebtItem = annualDebtCard && annualDebtCard.items && annualDebtCard.items[0];
+          var annualDebtEntry = annualDebtItem && state.national[annualDebtItem.indicator];
+          var annualDebtLatest = annualDebtEntry ? latestNumeric(annualDebtEntry) : null;
+          var isDef = pace && paceIsDeficit(pace.counter, Date.now());
+          paras.push(T('finMethodDebtAnchor', {
+            period: fmtPeriod(anchor.period),
+            value: MapUI.formatValue(anchor.value, anchor.unit, 0, lang) + ' ' + unitHint(anchor.unit),
+            status: T('status_' + anchor.status),
+            pace: T(isDef === false ? 'finMethodDebtPaceSurplus' : 'finMethodDebtPaceDeficit'),
+            year: annualDebtLatest ? annualDebtLatest.period : anchor.period.slice(0, 4),
+          }));
+        }
+        // Round-1 review (P1-7): say so, generically, wherever the basis
+        // status itself says "provisional" -- never asserted for a counter
+        // whose own basis is already final. Round-2: the id list is the
+        // breakdown counters plus the (structurally found) paced counter,
+        // never a hardcoded ['revenue','spending','debt'].
+        var provisionalIds = breakdownIds.concat(debtC ? [debtC.id] : []);
+        var provisionalNames = provisionalIds.map(function(id){
+          var c = counterById(id);
+          var b0 = c && c.basis && c.basis[0];
+          return (b0 && b0.status && b0.status !== 'final') ? ((c.label && (c.label[lang] || c.label.en)) || id) : null;
+        }).filter(Boolean);
+        if(provisionalNames.length){
+          paras.push(T('finMethodProvisional', {names: provisionalNames.join(', ')}));
+        }
+      }
+      paras.push(T('finMethodPopulation'));
+      paras.push(T('finMethodJumps'));
+      paras.forEach(function(txt){ var p = document.createElement('p'); p.textContent = txt; body.appendChild(p); });
+      var forecastP = document.createElement('p');
+      forecastP.textContent = T('finMethodForecastsDiffer') + ' ';
+      // Round-1 review (P0-1): this used to link macro.html's own
+      // dashboard.html, a stub that just redirects back to macro.html --
+      // a dead loop, not an "official forecasts" source. Links an external
+      // official source instead (no figure read from it, no page here
+      // depends on its content); dropping the link entirely was the other
+      // option CLAUDE.md gave and is the fallback if this URL is wrong.
+      var link = document.createElement('a');
+      link.href = 'https://www.plan.be/en/'; link.target = '_blank'; link.rel = 'noopener';
+      link.textContent = T('finMethodForecastsLink');
+      forecastP.appendChild(link);
+      forecastP.appendChild(document.createTextNode('.'));
+      body.appendChild(forecastP);
+    }
+
+    /* Round-1 rules review (P1-6): #finSourceLine and the Statbel credit
+     * beside it are now STATIC markup (data-t / data-t-html), so a reader
+     * whose JavaScript never runs still sees the complete sentence, the
+     * Sources link and the licence credit -- applyStrings() (called by
+     * renderAll() on every render and language change) keeps them
+     * translated; nothing needs rebuilding here from script any more. */
+    function renderSourceLine(){}
+
+    function init(finSections, liveCountersRaw, initialLang){
+      cfg = finSections;
+      payload = BPLiveCounters.validate(liveCountersRaw);
+      lang = initialLang;
+      mountStrip();
+      // Round-1 review (P1-2): counter ids and placement/element names used
+      // to be literals in this <script> ('revenue', 'spending',
+      // 'macro_strip', ...); cfg.simulated.breakdowns (state.layout.
+      // finances_publiques, config/national_sections.yaml) is now the one
+      // place that lives, iterated rather than named twice by hand.
+      ((cfg && cfg.simulated ? cfg.simulated.breakdowns : null) || []).forEach(mountBreakdown);
+      renderOfficialFigures();
+      renderMethod();
+      renderSourceLine();
+    }
+
+    /* Chrome text that a breakdown card's own `handles[].setLang()` call
+     * does not touch, because it was never engine-owned content to begin
+     * with: the "why" reason, the reference-year subtitle, and the share
+     * bar/list's own percentage text and hover titles. Cheaper than a full
+     * destroy+remount (mountBreakdown itself), and keeps the card's pause
+     * state across a language switch, same as the strip already does. */
+    function refreshBreakdownChrome(b){
+      var counter = payload && counterById(b.counter);
+      var noBreakdown = !counter || !counter.breakdown || counter.breakdown.state !== 'available';
+      var expired = counter && isExpiredCounter(counter, Date.now());
+      if(noBreakdown || expired){
+        var specificReason = !expired && counter && counter.breakdown && counter.breakdown.reason;
+        setCardUnavailable(b.headline, b.why, expired ? 'expired' : 'unavailable', specificReason);
+        var emptyNote = document.getElementById(b.year_note); if(emptyNote) emptyNote.textContent = '';
+        return;
+      }
+      setWhy(b.why, null);
+      document.getElementById(b.year_note).textContent = T(b.year_key, {year: counter.breakdown.year});
+      var parts = counter.breakdown.parts || [];
+      var bar = document.getElementById(b.bar);
+      if(bar) Array.prototype.forEach.call(bar.children, function(seg, i){
+        var part = parts[i]; if(!part) return;
+        seg.title = partLabel(part) + ' — ' + MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+      });
+      var list = document.getElementById(b.list);
+      if(list) Array.prototype.forEach.call(list.children, function(li, i){
+        var part = parts[i]; if(!part) return;
+        var pct = li.querySelector('.bp-share-pct');
+        if(pct) pct.textContent = MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+      });
+    }
+
+    function setLang(newLang){
+      lang = newLang;
+      Object.keys(handles).forEach(function(key){ handles[key].setLang(lang, finLabels()); });
+      // The strip itself updates in place via handles.strip.setLang() above
+      // when it is mounted; when it is NOT (payload missing or expired),
+      // there is no handle to re-language -- re-running the unavailable/
+      // expired check just re-sets that static "why" text, it mounts
+      // nothing new.
+      if(!handles.strip) mountStrip();
+      ((cfg && cfg.simulated ? cfg.simulated.breakdowns : null) || []).forEach(refreshBreakdownChrome);
+      renderOfficialFigures();
+      renderMethod();
+      renderSourceLine();
+    }
+
+    return {init: init, setLang: setLang};
+  })();
+
   async function boot(){
     applyStrings();
     // The shared header's language menu (assets/belpulse/shell.js) is what a
@@ -864,8 +1642,9 @@
       LANG = e.detail.lang;
       renderAll();
       if(state.manifest) renderManifest(state.manifest);
+      FinancesPubliques.setLang(LANG);
     });
-    var results = await Promise.all([LAYOUT_URL, NATIONAL_URL, SOURCES_URL, MANIFEST_URL, "public/data/metadata/indicators.json"].map(function(url){
+    var results = await Promise.all([LAYOUT_URL, NATIONAL_URL, SOURCES_URL, MANIFEST_URL, "public/data/metadata/indicators.json", LIVE_COUNTERS_URL].map(function(url){
       return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
     }));
     state.layout = results[0];
@@ -881,6 +1660,7 @@
     }
     renderAll();
     renderManifest(state.manifest);
+    FinancesPubliques.init((state.layout && state.layout.finances_publiques) || null, results[5], LANG);
     // A deep link (macro.html#prix, a legacy #growth, etc.) is resolved by
     // the BROWSER's own one-shot anchor-scroll -- at `load` for the initial
     // URL, or on a pill click for #href navigation afterwards. Both landed

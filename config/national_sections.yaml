@@ -23,9 +23,15 @@ kpis:
   - INDUSTRIAL_PROD
   - EC_CONS_CONF_BE
 kpis_note:
-  en: Population, the employment rate, the fiscal balance and public debt have no national series in this pipeline yet; the cards show the six that exist.
-  fr: La population, le taux d’emploi, le solde budgétaire et la dette publique n’ont pas encore de série nationale dans ce pipeline ; les cartes montrent les six séries qui existent.
-  nl: Bevolking, werkgelegenheidsgraad, begrotingssaldo en overheidsschuld hebben in dit pipeline nog geen nationale reeks; de kaarten tonen de zes reeksen die er zijn.
+  # Issue #309 PR 2: population, the fiscal balance and public debt stopped
+  # being true gaps once the Finances publiques chapter shipped (simulated
+  # counters plus real Eurostat official figures) -- they are just not part
+  # of THIS six-card headline row. Only the employment rate (taux d'emploi,
+  # distinct from the unemployment rate this pipeline does carry) remains an
+  # actual gap. Wording not yet confirmed by the maintainer (rule 40).
+  en: Population, the fiscal balance and public debt are now shown in the Finances publiques chapter; the employment rate still has no national series in this pipeline. The cards above show the six that do.
+  fr: La population, le solde budgétaire et la dette publique sont désormais présentés dans le chapitre Finances publiques ; le taux d’emploi n’a toujours pas de série nationale dans ce pipeline. Les cartes ci-dessus montrent les six séries qui existent.
+  nl: Bevolking, het begrotingssaldo en de overheidsschuld worden nu getoond in het hoofdstuk Overheidsfinanciën; de werkgelegenheidsgraad heeft nog geen nationale reeks in dit pipeline. De kaarten hierboven tonen de zes reeksen die er wel zijn.
 
 # The big chart: annual real GDP growth, as bars, every year on record.
 history:
@@ -77,12 +83,14 @@ unavailable:
   # `empty_reason` below -- are gone. #international stays a valid anchor
   # (rule 31): panels.js resolves it via the europe panel's own
   # `legacy_anchors`, unrelated to this list.
-  - id: public_finance
-    label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
-    reason:
-      en: No national series for state revenue, expenditure, balance or debt is in this pipeline. The design’s live counters are simulated; a simulation from nothing would be an invention, so the card says so instead.
-      fr: Aucune série nationale de recettes, dépenses, solde ou dette de l’État n’est dans ce pipeline. Les compteurs en direct de la maquette sont simulés ; une simulation sans base serait une invention, la carte le dit plutôt.
-      nl: Geen enkele nationale reeks over ontvangsten, uitgaven, saldo of schuld van de Staat zit in dit pipeline. De live tellers van het ontwerp zijn gesimuleerd; een simulatie uit het niets zou verzinsel zijn, dus zegt de kaart dat.
+  #
+  # `public_finance` lived here from Batch 6 (no national revenue/expenditure/
+  # balance/debt series existed) until issue #309 PR 1 loaded 26 real Eurostat
+  # general-government series and PR 2 built the chapter on them (simulated
+  # live counters plus real official figures, see `finances_publiques` below)
+  # -- ADR docs/decisions/0016-simulated-live-counters.md. #public-finance
+  # stays a valid anchor: the finances-publiques panel's own `legacy_anchors`
+  # below resolves it now, unrelated to this list.
   - id: economic_map
     label: {en: Economic map, fr: Carte économique, nl: Economische kaart}
     reason:
@@ -132,7 +140,11 @@ panels:
     legacy_anchors: []
   - id: finances-publiques
     label: {en: Public finances, fr: Finances publiques, nl: Overheidsfinanciën}
-    cards: [public-finance]
+    # Issue #309 PR 2: the single placeholder card ("public-finance") is gone
+    # -- four real blocks now sit in this panel (the simulated live strip,
+    # the two breakdown cards, and the official Eurostat figures block). See
+    # `finances_publiques` below for what each one reads.
+    cards: [finance-live-strip, finance-breakdown-revenue, finance-breakdown-spending, finance-official]
     legacy_anchors: [public-finance]
   - id: europe
     label: {en: Europe, fr: Europe, nl: Europa}
@@ -202,3 +214,141 @@ panel_charts:
 hero:
   - GDP_QUARTERLY_YY
   - HICP
+
+# =============================================================================
+# Issue #309 PR 2 -- the #finances-publiques chapter's own cards/charts and
+# the live-counter placements/breakdowns macro.html and home2.html iterate.
+#
+# This mirrors config/live_counters.yaml's own role one level up: that file
+# names which counters/parts exist and where they may be placed
+# (`placements:`); this block says which of those placements/parts each PAGE
+# actually draws, and which real Eurostat indicators the separate, NEVER
+# SIMULATED "Official figures" block below the live strip reads. Neither
+# page names a counter id, a placement name or an indicator id of its own --
+# CLAUDE.md rules 2/24 extended to this chapter specifically (round-2 fix,
+# docs/decisions/0016-simulated-live-counters.md): `scripts/
+# export_site_payloads.py`'s `_check_finances_publiques` refuses to publish
+# this block if it names a counter/placement config/live_counters.yaml does
+# not declare, or an indicator national.json does not carry, or a label
+# missing a language -- the same "cannot render as an empty box" guarantee
+# every other list in this file already gets.
+#
+# Before PR 2 this lived in its own file, a mockup-only
+# public/data/metadata/finances_publiques_sections.json, because the real
+# site's national_sections.json did not exist yet when that mockup was
+# built. Folded in here instead of staying separate: both pages already
+# fetch this one file, so this chapter does not become the only one reading
+# a second config alongside it.
+finances_publiques:
+  # Round-2 design decision (docs/decisions/0016): ONE chapter-level badge +
+  # ONE pause button controls every simulated region in the chapter (the
+  # strip and both breakdown cards) -- `chapter_badge`/`chapter_pause` name
+  # the two elements macro.html's own FinancesPubliques module wires up.
+  # Each region still carries its OWN short, visible `.bp-simulated-badge`
+  # tag (ids given per-region below) only so `BPLiveCounters.mount()`'s own
+  # guard (refuses to start without one) still applies to each separately.
+  #
+  # `strip_placement` is the placement macro.html's own strip reads;
+  # `home_strip_placement` is the SEPARATE placement home2.html's compact
+  # strip reads -- two different fields, not one reused, so each page gets
+  # the counter order config/live_counters.yaml actually declares for it
+  # (`macro_strip`: population/revenue/spending/deficit/debt;
+  # `home_strip`: population/debt/deficit/revenue/spending).
+  simulated:
+    strip_placement: macro_strip
+    home_strip_placement: home_strip
+    chapter_badge: finChapterBadge
+    chapter_pause: finChapterPause
+    strip_card: finance-live-strip
+    strip_list: finStripCounters
+    strip_badge: finStripBadge
+    strip_headline: finStripHeadline
+    strip_why: finStripWhy
+    # Round-1 fix: `counter`/placement/element ids used to be literals in
+    # macro.html's own <script> ('revenue', 'spending', 'macro_strip', ...)
+    # -- this list is the one place they live now; both pages iterate it
+    # instead of naming a counter.
+    breakdowns:
+      - counter: revenue
+        card: finance-breakdown-revenue
+        title_key: finRevenueByType
+        year_key: finRevenueShareYear
+        year_note: finRevenueYearNote
+        bar: finRevenueShareBar
+        list: finRevenueShareList
+        badge: finRevenueBadge
+        headline: finRevenueHeadline
+        why: finRevenueWhy
+      - counter: spending
+        card: finance-breakdown-spending
+        title_key: finSpendingByFunction
+        year_key: finSpendingShareYear
+        year_note: finSpendingYearNote
+        bar: finSpendingShareBar
+        list: finSpendingShareList
+        badge: finSpendingBadge
+        headline: finSpendingHeadline
+        why: finSpendingWhy
+  # The NEVER-SIMULATED block: the latest confirmed Eurostat figures, read
+  # straight from public/data/national.json, exactly like every other card
+  # on this page -- no badge, no pause button, visually the opposite of the
+  # live strip above it. `cards[].items[].indicator` is checked against
+  # national.json the same way `kpis`/`key_list` above are.
+  official_figures:
+    label: {en: Official figures, fr: Chiffres officiels, nl: Officiële cijfers}
+    note:
+      en: The latest confirmed figures from Eurostat, not simulated.
+      fr: Les derniers chiffres confirmés d’Eurostat, non simulés.
+      nl: De laatste bevestigde cijfers van Eurostat, niet gesimuleerd.
+    cards:
+      - id: debt
+        label: {en: Government debt, fr: Dette publique, nl: Overheidsschuld}
+        # Round-2 fix: the quarterly indicator the SIMULATED debt counter's
+        # own basis[] anchors on (live_counters.json: basis[].role==='anchor')
+        # -- macro.html's method note matches its anchor against this field
+        # to find this card, never by naming GOV_DEBT_Q_MEUR_BE in the script.
+        anchor_indicator: GOV_DEBT_Q_MEUR_BE
+        items:
+          - indicator: GOV_DEBT_MEUR_BE
+          - indicator: GOV_DEBT_PCT_GDP_BE
+      - id: balance
+        # No `label`: the page picks "Deficit (net borrowing)" / "Surplus
+        # (net lending)" from the series' own live sign (finDeficitFull/
+        # finSurplusFull), never a label typed here.
+        signed_label: true
+        items:
+          - indicator: GOV_BALANCE_MEUR_BE
+          - indicator: GOV_BALANCE_PCT_GDP_BE
+      - id: revenue
+        label: {en: Revenue, fr: Recettes, nl: Ontvangsten}
+        items:
+          - indicator: GOV_REVENUE_BE
+      - id: expenditure
+        label: {en: Spending, fr: Dépenses, nl: Uitgaven}
+        items:
+          - indicator: GOV_EXPENDITURE_BE
+  # Five sibling chart cells (debt in EUR, debt in % of GDP, balance,
+  # revenue, spending) -- debt-eur-chart/debt-pct-chart share one short
+  # label, differentiated only by the unit macro.html's own displayUnit()
+  # appends once per chart (no indicator id in that logic).
+  charts:
+    - id: debt-eur-chart
+      series: [GOV_DEBT_MEUR_BE]
+      label: {en: Government debt, fr: Dette publique, nl: Overheidsschuld}
+    - id: debt-pct-chart
+      series: [GOV_DEBT_PCT_GDP_BE]
+      label: {en: Government debt, fr: Dette publique, nl: Overheidsschuld}
+    - id: balance-chart
+      series: [GOV_BALANCE_MEUR_BE]
+      # Additive opts.zeroLine in macro_portrait_charts.js: folds 0 into the
+      # chart's own domain so a reference gridline always exists, and widens
+      # the left margin to fit this chart's own (signed, wider) axis labels.
+      zero_line: true
+      label: {en: "Net lending (+) / net borrowing (−)", fr: "Capacité (+) / besoin (−) de financement", nl: "Vorderingenoverschot (+) / -tekort (−)"}
+      subtitle_key: finBalanceChartSubtitle
+    - id: revenue-chart
+      series: [GOV_REVENUE_BE]
+      label: {en: Revenue, fr: Recettes, nl: Ontvangsten}
+    - id: spending-chart
+      series: [GOV_EXPENDITURE_BE]
+      label: {en: Spending, fr: Dépenses, nl: Uitgaven}

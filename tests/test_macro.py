@@ -82,6 +82,15 @@ def test_macro_names_no_indicator_anywhere():
     named = sorted(code for code in codes if code in _html())
     assert not named, f"macro.html names indicators directly: {named}"
 
+    # Issue #309 PR 2: the generic simulated-counter engine both this page
+    # and home2.html load -- same guarantee, extended to the shared,
+    # page-agnostic renderer (tests/test_map_ui_logic.py's own
+    # test_no_page_names_an_indicator gives assets/commune_map.js the same
+    # check for the same reason).
+    engine = (REPO / "assets" / "belpulse" / "live_counters.js").read_text(encoding="utf-8")
+    named_in_engine = sorted(code for code in codes if code in engine)
+    assert not named_in_engine, f"live_counters.js names indicators directly: {named_in_engine}"
+
 
 def test_macro_prints_none_of_the_designs_invented_figures():
     """The mockup's six KPIs and its three live counters are illustrations.
@@ -93,17 +102,48 @@ def test_macro_prints_none_of_the_designs_invented_figures():
 
 
 def test_macro_simulates_nothing():
-    """macro.md's own note: the public-finance counters are the one component
-    in all four designs that is not a real data binding. This page does not
-    build them at all -- it says why."""
-    html = _html().lower()
-    for forbidden in ("data-simulated", "setinterval(", "settimeout(function tick"):
-        assert forbidden not in html, f"macro.html looks like it animates a counter: {forbidden}"
+    """Superseded by issue #309 / ADR docs/decisions/0016-simulated-live-
+    counters.md: a simulation built from real, loaded Eurostat/Statbel data
+    is no longer "an invention" (CLAUDE.md rule 36) -- the old policy this
+    test enforced (no `data-simulated` region anywhere on the page) no
+    longer holds, and pinning it would just make this test fail against the
+    real #finances-publiques chapter rather than catch anything.
+
+    The new policy: simulation is allowed ONLY through the shared engine
+    (assets/belpulse/live_counters.js, loaded here, never reimplemented),
+    inside a `data-simulated="true"` region that carries its own visible
+    `.bp-simulated-badge` tag (BPLiveCounters.mount()'s own guard refuses to
+    start without one -- tests/pages/test_shared_components.py style unit
+    tests cover the engine itself). This page's OWN inline script still
+    ticks nothing: no setInterval, no hand-rolled tick loop, and the engine
+    it loads ticks on exactly one setTimeout."""
+    html = _html()
+    regions = re.findall(r'<article[^>]+data-simulated="true"[^>]*>.*?</article>', html, re.DOTALL)
+    assert regions, "no data-simulated region found -- is the chapter still built?"
+    for region in regions:
+        assert (
+            'class="bp-simulated-badge' in region
+        ), f"simulated region has no badge tag: {region[:160]}"
+
+    low = html.lower()
+    assert (
+        "setinterval(" not in low
+    ), "macro.html's own script ticks something -- all timing belongs in live_counters.js"
+    assert (
+        "settimeout(function tick" not in low
+    ), "a hand-rolled tick loop belongs in live_counters.js, not here"
+    assert (
+        'src="assets/belpulse/live_counters.js"' in html
+    ), "the shared live-counter engine is not loaded"
     # requestAnimationFrame is allowed exactly once, and only as a ONE-SHOT
     # redraw after layout (the history chart is sized by the row it lands in).
     # A second call is how a one-shot becomes a ticking loop, so the count is
     # the test.
-    assert html.count("requestanimationframe(") <= 1, "more than one rAF: is something ticking?"
+    assert low.count("requestanimationframe(") <= 1, "more than one rAF: is something ticking?"
+
+    engine = (REPO / "assets" / "belpulse" / "live_counters.js").read_text(encoding="utf-8").lower()
+    assert engine.count("settimeout(") == 1, "the shared engine must tick on exactly one setTimeout"
+    assert "setinterval(" not in engine, "the shared engine must never use setInterval"
 
 
 def test_macro_loads_no_third_party_asset():
@@ -117,12 +157,23 @@ def test_macro_loads_no_third_party_asset():
     # self-referencing macro.html's own https://.../macro.html, which is not
     # third-party at all. Excluded here rather than weakening the check for
     # an actually-loaded resource.
-    external = re.findall(r"(?:href|src)=[\"'](https?://[^\"']+)", html)
-    external = [
-        url
-        for url in external
-        if url != "https://mdruszcz.github.io/belgian-macro-pipeline/macro.html"
-    ]
+    external = []
+    for tag, attr, url in re.findall(
+        r"<(\w+)\b[^>]*?\b(href|src)=[\"'](https?://[^\"']+)[\"']", html, re.IGNORECASE
+    ):
+        if url == "https://mdruszcz.github.io/belgian-macro-pipeline/macro.html":
+            continue
+        # Issue #309 PR 2: a plain <a href> is a link the READER chooses to
+        # follow -- never a resource the browser fetches on its own, unlike
+        # <img src>/<link href rel=stylesheet>/url(...), which this loop
+        # still catches for every other tag. The Statbel attribution credit
+        # (DELEGATING_PAGES pattern, tests/test_statbel_attribution.py) and
+        # its CC BY 4.0 licence link are exactly that: two ordinary outbound
+        # <a> tags, the same kind home2.html's own attribution block already
+        # carries for its commune-level figures.
+        if tag.lower() == "a" and attr.lower() == "href":
+            continue
+        external.append(url)
     assert all(url.startswith("https://fonts.googleapis.com/") for url in external), external
 
 
@@ -397,27 +448,32 @@ def test_the_two_named_unavailable_cards_are_compact_not_a_designed_size_box():
     only ever supplied the label/reason/link text, unchanged here (see
     test_the_page_renders_a_slot_for_every_unavailable_section and
     test_every_label_in_the_layout_is_trilingual, both still passing).
-    #public-finance is out of item 7's scope and keeps its box -- it is its
-    own single-card panel, not a row beside a taller populated card."""
+    #public-finance was out of item 7's scope and kept its box -- it was its
+    own single-card panel, not a row beside a taller populated card. Issue
+    #309 PR 2 removed that placeholder card entirely (four real blocks sit
+    in the finances-publiques panel now, none of them a reason-only empty
+    box), so this test's #public-finance arm is dropped rather than kept
+    passing against markup that no longer exists; the chapter's own absence
+    of a placeholder is asserted directly below instead."""
     html = _html()
     map_card = re.search(r'<article[^>]+id="map"[^>]*>.*?</article>', html, re.DOTALL)
     news_card = re.search(r'<article[^>]+id="news"[^>]*>.*?</article>', html, re.DOTALL)
-    finance_card = re.search(
-        r'<article[^>]+id="public-finance"[^>]*>.*?</article>', html, re.DOTALL
-    )
-    assert map_card and news_card and finance_card
+    assert map_card and news_card
     assert 'class="placeholder"' not in map_card.group(0)
     assert 'class="placeholder"' not in news_card.group(0)
-    assert 'class="placeholder"' in finance_card.group(
-        0
-    ), "public-finance is out of scope for item 7 and must keep its designed-size box"
     assert "card-compact-empty" in map_card.group(0)
     assert "card-compact-empty" in news_card.group(0)
-    assert "card-compact-empty" not in finance_card.group(0)
     # The label/reason/link text itself is untouched -- still config-driven.
     assert 'data-slot="economic_map"' in map_card.group(0)
     assert 'data-slot="news"' in news_card.group(0)
     assert "slot-link" in map_card.group(0)
+
+    finances_section = _panel_sections(html)["finances-publiques"]
+    assert 'class="placeholder"' not in finances_section, (
+        "the finances-publiques panel has no empty reason-only box any more -- "
+        "it holds the live strip, the two breakdowns and the official figures "
+        "block, every one of them real content, not a designed-size placeholder"
+    )
 
 
 def test_the_compact_empty_cards_do_not_stretch_to_match_a_taller_sibling():

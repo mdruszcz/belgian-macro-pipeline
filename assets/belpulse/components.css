@@ -173,17 +173,42 @@
 /* ---- simulated live counter --------------------------------------------------
    docs/design-references/macro.md: the ONE component that is not, and must
    never silently become, a real-time data feed. The "simulated" label is
-   REQUIRED markup, not optional styling -- see components.js's own guard. */
-.bp-live-counter{background:var(--bp-navy-surface); border-radius:var(--bp-radius-card); padding:var(--bp-space-5); color:var(--bp-navy-text)}
-.bp-live-counter-label{font-size:var(--bp-text-small); color:var(--bp-navy-text-muted); display:flex; align-items:center; gap:6px}
-.bp-live-counter .bp-value{font-size:1.6rem; font-weight:var(--bp-weight-bold); font-variant-numeric:tabular-nums; margin:4px 0}
-.bp-live-counter-rate{font-size:11px; color:var(--bp-navy-text-muted)}
-.bp-live-counter-bar{height:5px; border-radius:3px; background:rgba(255,255,255,.12); margin-top:8px; overflow:hidden}
-.bp-live-counter-bar span{display:block; height:100%; background:var(--bp-blue)}
+   REQUIRED markup, not optional styling -- see components.js's own guard.
+   Round-3 visual review ("make it more in the style of the website"): this
+   used to be a solid navy tile (--bp-navy-surface/--bp-navy-text) in every
+   theme -- the one place on either page that broke from the site's own light
+   card vocabulary. Rebuilt on the same recipe as a Portrait KPI tile
+   (macro_portrait.css's .portrait-metric): the ordinary surface/border
+   tokens, a short chapter-coloured accent dash (--th, set by whichever
+   chapter/section this tile sits inside -- never a colour chosen by this
+   component), and the value itself in the brand accent ink rather than a
+   plain, uncoloured number. --bp-accent-ink specifically, not --th: --th
+   rotates through a 12-hue chapter ramp (macro_portrait_charts.js) and at
+   least one of those hues measures under 4.5:1 on a plain card surface --
+   --bp-accent-ink is the one colour tokens.css keeps AA-checked for text use
+   against every theme's surface, so the live figure stays readable whichever
+   chapter it lands in. */
+.bp-live-counter{
+  position:relative; background:var(--bp-surface); border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-card); padding:16px 18px 14px; color:var(--bp-text);
+}
+.bp-live-counter::before{
+  content:""; display:block; position:absolute; left:18px; top:0; width:26px; height:3px;
+  border-radius:0 0 2px 2px; background:var(--th, var(--bp-accent)); opacity:.9;
+}
+.bp-live-counter-label{font-size:var(--bp-text-small); color:var(--bp-text-muted); display:flex; align-items:center; gap:6px}
+.bp-live-counter .bp-value{font-size:1.6rem; font-weight:var(--bp-weight-bold); font-variant-numeric:tabular-nums; margin:4px 0; color:var(--bp-accent-ink)}
+.bp-live-counter-rate{font-size:11px; color:var(--bp-text-muted)}
+.bp-live-counter-bar{height:5px; border-radius:3px; background:var(--bp-surface-alt); margin-top:8px; overflow:hidden}
+.bp-live-counter-bar span{display:block; height:100%; background:var(--th, var(--bp-blue))}
+/* Small per-region tag -- BPLiveCounters.mount()'s own required visible
+   badge, one per simulated card. The SAME accent-tinted pill recipe as
+   .bp-simulated-badge--prominent (live_counters.css): a simulated card is
+   marked with a tint, in every theme, never a solid alarm-coloured fill. */
 .bp-simulated-badge{
   font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:var(--bp-weight-semibold);
-  color:var(--bp-navy-text-muted); border:1px solid var(--bp-navy-border); border-radius:var(--bp-radius-pill);
-  padding:1px 7px;
+  color:var(--bp-accent-ink); background:var(--bp-accent-soft); border:1px solid var(--bp-accent-ink);
+  border-radius:var(--bp-radius-pill); padding:2px 8px;
 }
 
 /* ---- editorial pull-quote ---------------------------------------------------- */

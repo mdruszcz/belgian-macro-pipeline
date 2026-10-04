@@ -62,7 +62,17 @@ MUNICIPAL_PAGES = [
 #
 # This is a change of POLICY, not a relaxation that crept in: before it, every
 # page showing a Statbel figure carried the complete notice in its own markup.
-DELEGATING_PAGES = ["map.html"]
+#
+# Issue #309 PR 2 added macro.html to this pattern: the Finances publiques
+# chapter's population counter is Statbel-sourced, and the chapter is one
+# paragraph among several on a long page, not map.html's single footer --
+# same three obligations, a different container per page, so each page maps
+# to the one regex that finds ITS OWN credit block rather than assuming
+# every delegating page shares map.html's <footer class="mapfoot">.
+DELEGATING_PAGES = {
+    "map.html": r'<footer class="mapfoot">(.*?)</footer>',
+    "macro.html": r'<p class="provenance" id="finPopulationAttribution"[^>]*>(.*?)</p>',
+}
 FULL_NOTICE_PAGE = "sources.html"
 
 
@@ -457,20 +467,21 @@ def test_a_delegating_page_still_credits_a_source_in_its_own_markup(page):
     licence condition that depends on a script running is a licence condition
     that is not always met."""
     text = _page(page)
-    footer = re.search(r'<footer class="mapfoot">(.*?)</footer>', text, re.DOTALL)
-    assert footer, f"{page} has no credit footer"
-    assert "statbel.fgov.be" in footer.group(1), f"{page} names no source in its markup"
+    block = re.search(DELEGATING_PAGES[page], text, re.DOTALL)
+    assert block, f"{page} has no credit block matching its own DELEGATING_PAGES pattern"
+    assert "statbel.fgov.be" in block.group(1), f"{page} names no source in its markup"
     assert re.search(
-        r"<a[^>]+href=\"https://statbel\.fgov\.be/", footer.group(1)
+        r"<a[^>]+href=\"https://statbel\.fgov\.be/", block.group(1)
     ), f"{page} does not LINK the source it names"
 
 
 @pytest.mark.parametrize("page", DELEGATING_PAGES)
 def test_a_delegating_page_names_the_licence(page):
     text = _page(page)
-    footer = re.search(r'<footer class="mapfoot">(.*?)</footer>', text, re.DOTALL)
-    assert "CC BY 4.0" in footer.group(1), f"{page} names no licence"
-    assert "creativecommons.org/licenses/by/4.0" in footer.group(
+    block = re.search(DELEGATING_PAGES[page], text, re.DOTALL)
+    assert block, f"{page} has no credit block matching its own DELEGATING_PAGES pattern"
+    assert "CC BY 4.0" in block.group(1), f"{page} names no licence"
+    assert "creativecommons.org/licenses/by/4.0" in block.group(
         1
     ), f"{page} does not link the licence it names"
 

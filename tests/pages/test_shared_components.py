@@ -173,6 +173,17 @@ def test_the_gallery_demonstrates_every_state_for_kpi_and_chart_components(galle
 # --- component classes exist for everything Batch 2's spec names ------------
 
 
+# Issue #309 PR 2 restyled .bp-live-counter/.bp-simulated-badge here (the
+# light Portrait-card look, docs/decisions/0016-simulated-live-counters.md)
+# but did NOT add classes to this generic component library for the new,
+# FEATURE-SCOPED vocabulary it needed on top (.bp-sim-region, .bp-sim-strip,
+# .bp-sim-pause, .bp-simulated-badge--prominent, .bp-share-*, .bp-official-*,
+# .bp-finance-row). Those live in assets/belpulse/live_counters.css instead,
+# each documented at its own definition -- they are specific to the
+# Finances publiques chapter's own layout, not reusable the way a KPI tile
+# or a ranking list is, so they do not belong in docs/design-references/
+# component-gallery.html's generic catalogue (the same reasoning already
+# keeps europe_map.css's and macro_portrait.css's own classes out of it).
 REQUIRED_COMPONENT_CLASSES = [
     "bp-kpi",
     "bp-kpi--compact",
@@ -244,6 +255,27 @@ def _run_node(js_body: str, *scripts: str):
     if result.returncode != 0:
         raise AssertionError(f"node failed:\n{result.stderr}")
     return result.stdout
+
+
+def test_simulated_counter_appears_in_no_public_page():
+    """components.js's initSimulatedCounter() is a GALLERY-ONLY demo helper
+    (see test_simulated_counter_is_never_a_silent_data_source above). The
+    real simulated counters this site ships (issue #309: macro.html and
+    home2.html) are built by the separate, generic assets/belpulse/
+    live_counters.js engine instead -- a public page calling the gallery's
+    own demo helper would be exactly the "silent data source" risk that
+    function's own guard exists to prevent, just one level up."""
+    from src.site.routes import root_routes
+
+    checked = 0
+    for route in root_routes():
+        page = REPO / route.lstrip("/")
+        if not page.is_file():
+            continue
+        checked += 1
+        text = page.read_text(encoding="utf-8")
+        assert "initSimulatedCounter(" not in text, f"{route} calls the gallery-only demo helper"
+    assert checked, "no root page resolved to a real file, so this test would prove nothing"
 
 
 def test_simulated_counter_actually_throws_without_the_attribute(components_js):
