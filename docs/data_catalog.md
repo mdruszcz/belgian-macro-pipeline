@@ -1768,6 +1768,21 @@ requested, not inferred; nothing was written into the pipeline to obtain them.
 | Why it needed approval | A `fetch` change on an existing indicator is rule 19 (ADR plus explicit approval), not a config tidy-up |
 | Approval | **APPROVED by the maintainer 2026-10-04**, under ADR 0018 together with row 1. Not yet applied: the config still asks `prc_hicp_manr` |
 
+### Iceland: 107 months misattributed to a dataset that does not contain them
+
+**Found during implementation, not part of the original approval.** 107 Iceland months
+(`is:country`, 2008-01 to 2016-11) come from the discontinued `prc_hicp_manr`; the new
+`prc_hicp_minr` only covers Iceland from 2016-12, so the live repoint fetch never returned them
+and they stayed in `observations` under their old vintage. `public/data/europe/countries/HICP_ANNUAL_RATE_EUROPE.json`
+carries one `source` block (one dataset name) for the whole series, so it now credits those 107
+months to `prc_hicp_minr` — a dataset that does not actually contain them. Not a wrong value:
+Iceland's old figures remain true, just not reproducible from the current config.
+
+**The maintainer chose 2026-10-04 to keep them as they are**, not retire them. Recorded as a P2
+row in `docs/implementation/known-risks.md`. A possible later fix is per-period provenance in the
+europe-countries payload, so each period can name its own source dataset instead of one stamp for
+the whole series — not scoped to issue #312.
+
 ### The NBB `HICP` series is kept, not retired
 
 No catalogue row is withdrawn. The NBB `HICP` series' December 2025 value is real, final and
