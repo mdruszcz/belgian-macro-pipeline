@@ -505,7 +505,19 @@
     if(u === 'pp_contribution' || u === 'balance' || /^index_\d{4}$/.test(u)){
       return MapUI.unitLabel(unit, LANG);
     }
-    return MapUI.unitSuffix(unit).trim();
+    // Issue #309 PR 2 fix: this fallback used to call MapUI.unitSuffix(unit)
+    // with NO lang argument, silently defaulting every non-allowlisted unit
+    // to English inside MapUI.unitLabel. Invisible until now because no
+    // earlier macro.html KPI used a unit whose MapUI.unitLabel wording
+    // actually differs by language outside the three cases above --
+    // 'pct_of_gdp' (the Official-figures cards/charts this PR adds, the
+    // page's first use of it) is the first one that does: "% of GDP" in
+    // every language instead of "% du PIB"/"% van het bbp", caught by
+    // comparing this page's own French render against the approved
+    // mockup's. Passing LANG through makes the fallback correctly
+    // trilingual for pct_of_gdp today and for any future unit that lands
+    // here without needing its own allowlist entry.
+    return MapUI.unitSuffix(unit, LANG).trim();
   }
 
   function fmtValue(v, entry){

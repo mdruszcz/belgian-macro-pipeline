@@ -23,6 +23,7 @@ from __future__ import annotations
 import functools
 import http.server
 import json
+import re
 import socketserver
 import threading
 from datetime import datetime, timezone
@@ -525,6 +526,49 @@ def test_french_values_use_a_non_breaking_thousands_separator(chromium, site, co
         narrow_nbsp = chr(0x202F)
         assert any(narrow_nbsp in t for t in texts), [t.encode("unicode_escape") for t in texts]
         assert not any("," in t for t in texts), texts
+    finally:
+        context.close()
+
+
+def test_french_official_figures_translate_the_pct_of_gdp_unit():
+    """Regression for a real bug this batch's own mockup-fidelity check
+    caught: the Official-figures cards/charts are the first thing on
+    macro.html to ever display a 'pct_of_gdp' value, and macro.html's own
+    unitHint() fell back to MapUI.unitSuffix(unit) with NO lang argument
+    for any unit outside its small allowlist -- silently defaulting to
+    English ('% of GDP') in every language. Checks the FIX directly in the
+    source (not a rendered page, since this is a one-line argument-passing
+    defect any future regression of the same shape would reproduce
+    identically): the fallback must pass LANG through."""
+    html = (REPO / "macro.html").read_text(encoding="utf-8")
+    fn = re.search(r"function unitHint\(unit\)\{.*?\n  \}", html, re.DOTALL)
+    assert fn, "unitHint() not found"
+    assert "MapUI.unitSuffix(unit, LANG)" in fn.group(0), (
+        "unitHint()'s fallback no longer passes LANG to MapUI.unitSuffix -- "
+        "every non-allowlisted unit (pct_of_gdp among them) would silently "
+        "render English regardless of the page's own language"
+    )
+
+
+def test_french_official_figures_render_pib_not_gdp(chromium, site):
+    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    _set_lang(context, "fr")
+    page = context.new_page()
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/macro.html#finances-publiques")
+        page.wait_for_selector('#finance-official[data-state="ready"]', timeout=15000)
+        texts = page.eval_on_selector_all(
+            "#finOfficialGrid .bp-official-item .value, #finOfficialCharts .leadchart-eyebrow",
+            "els => els.map(el => el.textContent)",
+        )
+        assert texts
+        assert any(
+            "PIB" in t for t in texts
+        ), f"no French '% du PIB' rendered anywhere in the official-figures block: {texts}"
+        assert not any(
+            "GDP" in t for t in texts
+        ), f"English 'GDP' leaked into the French page: {texts}"
     finally:
         context.close()
 
