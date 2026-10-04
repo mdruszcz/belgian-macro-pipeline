@@ -122,10 +122,16 @@ def foreign_db(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
     migrate.run(db_path, migrations_dir=REPO / "migrations")
     conn = sqlite3.connect(str(db_path))
+    # IF NOT EXISTS on both: migrations/006_retire_ameco_forecast_years.sql
+    # (ADR 0017) now defensively creates these same two tables so it can
+    # also run against a bare canonical-only database like this fixture's
+    # -- migrate.run() above already applies it, so a plain CREATE TABLE
+    # here would collide. The columns this fixture actually uses are the
+    # same either way.
     conn.executescript("""
-        CREATE TABLE legacy_indicators (code TEXT PRIMARY KEY);
-        CREATE TABLE legacy_observations (indicator_code TEXT, period TEXT, value REAL,
-                                           obs_status TEXT, fetched_at TEXT);
+        CREATE TABLE IF NOT EXISTS legacy_indicators (code TEXT PRIMARY KEY);
+        CREATE TABLE IF NOT EXISTS legacy_observations (indicator_code TEXT, period TEXT,
+                                           value REAL, obs_status TEXT, fetched_at TEXT);
         INSERT INTO legacy_observations VALUES
             ('GDP_BE', '2024-Q1', 118.2, 'A', 'x'),
             ('GDP_DE', '2024-Q1', 109.7, 'A', 'x'),

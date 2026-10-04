@@ -257,8 +257,8 @@ def test_the_migration_touches_only_the_two_tables_and_columns_it_should():
     # migration file's own comment): it never touches an existing table,
     # it only lets this migration also run against a bare canonical-only
     # database that was never bootstrapped through MacroDatabase.
-    assert body.count("CREATE TABLE") == 2
-    assert body.count("CREATE TABLE IF NOT EXISTS") == 2
+    assert body.count("CREATE TABLE") == 1
+    assert body.count("CREATE TABLE IF NOT EXISTS") == 1
     for forbidden in ("DROP", "ALTER", "INSERT"):
         assert forbidden not in body, f"unexpected {forbidden} in migration 006"
     for ind in AMECO_IDS:

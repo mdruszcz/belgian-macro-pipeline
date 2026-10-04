@@ -51,18 +51,28 @@
 -- Data-only: no change to any EXISTING schema, so no `migration-mode`
 -- marker and no table recreation.
 --
--- THE TWO "CREATE TABLE IF NOT EXISTS" STATEMENTS BELOW ARE DEFENSIVE, NOT A
--- SCHEMA CHANGE: legacy_observations/legacy_indicators are not part of the
--- migrations/ -tracked canonical schema at all -- they are created
--- separately, ad hoc, by belgian_macro_db.py's MacroDatabase._init_schema()
--- (verified by reading it), which every real committed database has always
--- gone through. In that always-true-in-production shape this is a pure
--- no-op. It exists only so this migration also runs cleanly against a bare
--- canonical-only database that was never bootstrapped through
--- MacroDatabase -- exactly the shape tests/test_migrations.py's own
--- `migrated_db` fixture builds to exercise the migration RUNNER in
--- isolation. Column-for-column identical to belgian_macro_db.py's own
--- definition, so there is no second, drifting copy of this table's shape.
+-- THE "CREATE TABLE IF NOT EXISTS" BELOW IS DEFENSIVE, NOT A SCHEMA CHANGE:
+-- legacy_observations is not part of the migrations/ -tracked canonical
+-- schema at all -- it is created separately, ad hoc, by belgian_macro_db.py's
+-- MacroDatabase._init_schema() (verified by reading it), which every real
+-- committed database has always gone through. In that always-true-in-
+-- production shape this is a pure no-op (IF NOT EXISTS; the real table is
+-- left exactly as it already was). It exists only so this migration also
+-- runs cleanly against a bare canonical-only database that was never
+-- bootstrapped through MacroDatabase -- exactly the shape
+-- tests/test_migrations.py's own `migrated_db` fixture builds to exercise
+-- the migration RUNNER in isolation.
+--
+-- Deliberately WITHOUT the real table's FOREIGN KEY to legacy_indicators
+-- (and so with no need to also create legacy_indicators here): several
+-- existing tests bootstrap their own minimal legacy_observations rows with
+-- no matching legacy_indicators row and no FK at all today, and check
+-- `PRAGMA foreign_key_check` is empty (tests/test_sync_international.py's
+-- `foreign_db` fixture among them). This migration only ever needs a table
+-- it can safely DELETE FROM, in the one place (a from-scratch test
+-- fixture) where it does not already exist -- never in production, where
+-- the real, FK-bearing table is already there and this statement is a
+-- no-op regardless of whether the FK is written here.
 UPDATE observations
    SET is_latest = 0
  WHERE indicator_id IN
@@ -70,24 +80,13 @@ UPDATE observations
    AND period IN ('2026', '2027')
    AND is_latest = 1;
 
-CREATE TABLE IF NOT EXISTS legacy_indicators (
-    code          TEXT PRIMARY KEY,
-    name          TEXT NOT NULL,
-    frequency     TEXT NOT NULL,
-    unit          TEXT NOT NULL,
-    source_agency TEXT NOT NULL,
-    description   TEXT,
-    api_url       TEXT
-);
-
 CREATE TABLE IF NOT EXISTS legacy_observations (
     indicator_code TEXT NOT NULL,
     period         TEXT NOT NULL,
     value          REAL NOT NULL,
     obs_status     TEXT,
     fetched_at     TEXT NOT NULL,
-    PRIMARY KEY (indicator_code, period),
-    FOREIGN KEY (indicator_code) REFERENCES legacy_indicators(code)
+    PRIMARY KEY (indicator_code, period)
 );
 
 DELETE FROM legacy_observations
