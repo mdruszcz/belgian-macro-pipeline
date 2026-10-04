@@ -770,7 +770,15 @@ def test_macro_boots_cleanly_from_any_chapter_anchor(chromium, site, anchor, wid
             timeout=15000,
         )
         if anchor == "europe":
-            page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=15000)
+            # A generous budget, not the suite's usual 15s: eurostat-map
+            # draws ~2935 <path> elements via D3, and this test ALSO waits
+            # for the finance chapter's own (now heavier -- five official-
+            # figure charts, two breakdown bars) synchronous render to
+            # settle first, on the SAME single JS thread, before reaching
+            # this wait -- a CI runner under load genuinely needs more than
+            # 15s for both some of the time (observed directly: PR #314's
+            # own CI run timed out at 15s on this exact wait once).
+            page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=30000)
             count = page.eval_on_selector_all(EUROPE_SVG_SELECTOR, "els => els.length")
             assert count > 0, "opened on #europe but the Europe map drew no regions"
         assert not errors, f"uncaught page error(s) opening macro.html#{anchor}: {errors}"
@@ -861,7 +869,7 @@ def test_a_forced_mount_failure_falls_back_without_killing_the_rest_of_the_page(
             "document.getElementById('finance-live-strip').dataset.state !== 'loading'",
             timeout=15000,
         )
-        page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=15000)
+        page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=30000)
         assert not errors, f"the forced mount failure was not caught -- uncaught: {errors}"
         strip_state = page.eval_on_selector("#finance-live-strip", "el => el.dataset.state")
         assert (
