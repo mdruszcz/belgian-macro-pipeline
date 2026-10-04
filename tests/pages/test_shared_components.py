@@ -26,6 +26,11 @@ LAYOUT_CSS = BELPULSE_DIR / "layout.css"
 COMPONENTS_CSS = BELPULSE_DIR / "components.css"
 CHARTS_JS = BELPULSE_DIR / "charts.js"
 COMPONENTS_JS = BELPULSE_DIR / "components.js"
+# Issue #309 PR 2's generic simulated-counter engine (macro.html, home2.html).
+# Exercised here under Node the same way charts.js/components.js already are
+# (pure-logic functions need no DOM; mount()'s own refusal guards need only
+# the minimal fake element this file already builds for components.js).
+LIVE_COUNTERS_JS = BELPULSE_DIR / "live_counters.js"
 GALLERY_HTML = REPO / "docs" / "design-references" / "component-gallery.html"
 
 
@@ -57,6 +62,11 @@ def components_js() -> str:
 @pytest.fixture(scope="module")
 def gallery_html() -> str:
     return GALLERY_HTML.read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def live_counters_js() -> str:
+    return LIVE_COUNTERS_JS.read_text(encoding="utf-8")
 
 
 @pytest.fixture(scope="module")
@@ -173,6 +183,17 @@ def test_the_gallery_demonstrates_every_state_for_kpi_and_chart_components(galle
 # --- component classes exist for everything Batch 2's spec names ------------
 
 
+# Issue #309 PR 2 restyled .bp-live-counter/.bp-simulated-badge here (the
+# light Portrait-card look, docs/decisions/0016-simulated-live-counters.md)
+# but did NOT add classes to this generic component library for the new,
+# FEATURE-SCOPED vocabulary it needed on top (.bp-sim-region, .bp-sim-strip,
+# .bp-sim-pause, .bp-simulated-badge--prominent, .bp-share-*, .bp-official-*,
+# .bp-finance-row). Those live in assets/belpulse/live_counters.css instead,
+# each documented at its own definition -- they are specific to the
+# Finances publiques chapter's own layout, not reusable the way a KPI tile
+# or a ranking list is, so they do not belong in docs/design-references/
+# component-gallery.html's generic catalogue (the same reasoning already
+# keeps europe_map.css's and macro_portrait.css's own classes out of it).
 REQUIRED_COMPONENT_CLASSES = [
     "bp-kpi",
     "bp-kpi--compact",
@@ -246,6 +267,27 @@ def _run_node(js_body: str, *scripts: str):
     return result.stdout
 
 
+def test_simulated_counter_appears_in_no_public_page():
+    """components.js's initSimulatedCounter() is a GALLERY-ONLY demo helper
+    (see test_simulated_counter_is_never_a_silent_data_source above). The
+    real simulated counters this site ships (issue #309: macro.html and
+    home2.html) are built by the separate, generic assets/belpulse/
+    live_counters.js engine instead -- a public page calling the gallery's
+    own demo helper would be exactly the "silent data source" risk that
+    function's own guard exists to prevent, just one level up."""
+    from src.site.routes import root_routes
+
+    checked = 0
+    for route in root_routes():
+        page = REPO / route.lstrip("/")
+        if not page.is_file():
+            continue
+        checked += 1
+        text = page.read_text(encoding="utf-8")
+        assert "initSimulatedCounter(" not in text, f"{route} calls the gallery-only demo helper"
+    assert checked, "no root page resolved to a real file, so this test would prove nothing"
+
+
 def test_simulated_counter_actually_throws_without_the_attribute(components_js):
     fake_el = """
     const el = { attrs: {}, getAttribute(n){ return this.attrs[n] || null; } };
@@ -296,6 +338,302 @@ def test_charts_js_reads_colour_only_from_bp_chart_tokens(charts_js):
     assert "--bp-chart-" in charts_js
     hits = re.findall(r"#[0-9a-fA-F]{3,8}\b", charts_js)
     assert not hits, f"charts.js should use tokens only, found raw colour: {hits}"
+
+
+# --- live_counters.js: pure segment math + mount()'s refusal guards ---------
+#
+# Issue #309 PR 2. valueAt/sinceOpened are pure functions of plain segment
+# objects -- no DOM needed, same as charts.js's niceSteps above. mount()'s
+# four refusal checks (missing data-simulated, missing badge, empty badge,
+# invisible badge) all throw BEFORE the function ever touches
+# document.createElement, so a minimal fake container/badge (no real DOM, no
+# jsdom dependency) is enough to exercise them -- the same style as
+# test_simulated_counter_actually_throws_without_the_attribute's fake_el
+# above.
+
+
+def test_value_at_before_the_first_segment_is_not_started(live_counters_js):
+    body = """
+    const segments = [{start_ms: 1000, end_ms: 2000, v0: 5, v1: 15, rate_per_ms: 0.01}];
+    console.log(JSON.stringify(BPLiveCounters.valueAt(segments, 500)));
+    """
+    out = json.loads(_run_node(body, live_counters_js).strip())
+    assert out == {"state": "not-started", "value": 5, "ratePerMs": 0.01}
+
+
+def test_value_at_inside_a_segment_is_the_linear_interpolation(live_counters_js):
+    body = """
+    const segments = [{start_ms: 1000, end_ms: 2000, v0: 5, v1: 15, rate_per_ms: 0.01}];
+    console.log(JSON.stringify(BPLiveCounters.valueAt(segments, 1500)));
+    """
+    out = json.loads(_run_node(body, live_counters_js).strip())
+    assert out["state"] == "running"
+    # v0 + rate_per_ms*(t-start_ms) = 5 + 0.01*500 = 10, hand-computed.
+    assert out["value"] == pytest.approx(10.0)
+    assert out["ratePerMs"] == 0.01
+
+
+def test_value_at_after_the_last_segment_is_expired_at_its_final_value(live_counters_js):
+    body = """
+    const segments = [{start_ms: 1000, end_ms: 2000, v0: 5, v1: 15, rate_per_ms: 0.01}];
+    console.log(JSON.stringify(BPLiveCounters.valueAt(segments, 9999)));
+    """
+    out = json.loads(_run_node(body, live_counters_js).strip())
+    assert out == {"state": "expired", "value": 15, "ratePerMs": 0.01}
+
+
+def test_value_at_in_a_gap_between_two_segments_holds_the_earlier_value(live_counters_js):
+    """Two declared segments with a gap in between (e.g. a payload that
+    skips a period) must never invent a number inside the gap -- valueAt
+    reports 'expired' at the earlier segment's own v1, not a fabricated
+    interpolation toward the next segment's v0."""
+    body = """
+    const segments = [
+      {start_ms: 1000, end_ms: 2000, v0: 5, v1: 15, rate_per_ms: 0.01},
+      {start_ms: 5000, end_ms: 6000, v0: 50, v1: 60, rate_per_ms: 0.01},
+    ];
+    console.log(JSON.stringify(BPLiveCounters.valueAt(segments, 3000)));
+    """
+    out = json.loads(_run_node(body, live_counters_js).strip())
+    assert out == {"state": "expired", "value": 15, "ratePerMs": 0.01}
+
+
+def test_value_at_with_no_segments_is_not_started_with_no_fabricated_value(live_counters_js):
+    body = """
+    console.log(JSON.stringify(BPLiveCounters.valueAt([], 1234)));
+    console.log(JSON.stringify(BPLiveCounters.valueAt(null, 1234)));
+    """
+    out = _run_node(body, live_counters_js).strip().splitlines()
+    assert json.loads(out[0]) == {"state": "not-started", "value": None, "ratePerMs": None}
+    assert json.loads(out[1]) == {"state": "not-started", "value": None, "ratePerMs": None}
+
+
+def test_since_opened_never_goes_negative_across_a_year_boundary_reset(live_counters_js):
+    """The real-world case this guards: a flow counter (revenue, spending)
+    resets to v0=0 at every year boundary. Computed the naive way --
+    valueAt(now) minus valueAt(openedAt) -- a reader who opened the page
+    late in one year (a large accumulated value) and is still watching a
+    couple of seconds into the next (reset near 0) would see a large
+    NEGATIVE "since you opened this page" figure. Hand-computed expected
+    value: segment 1 contributes 1ms*rate 1 = 1 (the overlap of
+    [openedAt=999, now=1001) with [0,1000)); segment 2 contributes
+    1ms*rate 1 = 1 (the overlap with [1000,2000)); total 2 -- never the
+    naive diff (valueAt(1001)=1, valueAt(999)=999, diff = -998)."""
+    body = """
+    const segments = [
+      {start_ms: 0, end_ms: 1000, v0: 0, v1: 1000, rate_per_ms: 1},
+      {start_ms: 1000, end_ms: 2000, v0: 0, v1: 1000, rate_per_ms: 1},
+    ];
+    console.log(JSON.stringify({
+      sinceOpened: BPLiveCounters.sinceOpened(segments, 999, 1001),
+      naiveDiff: BPLiveCounters.valueAt(segments, 1001).value - BPLiveCounters.valueAt(segments, 999).value,
+    }));
+    """
+    out = json.loads(_run_node(body, live_counters_js).strip())
+    assert out["sinceOpened"] == pytest.approx(2.0)
+    assert out["sinceOpened"] >= 0
+    assert out["naiveDiff"] < 0, "the scenario should reproduce the bug the real formula avoids"
+
+
+def test_since_opened_is_zero_when_now_is_not_after_opened(live_counters_js):
+    body = """
+    const segments = [{start_ms: 0, end_ms: 1000, v0: 0, v1: 1000, rate_per_ms: 1}];
+    console.log(JSON.stringify([
+      BPLiveCounters.sinceOpened(segments, 500, 500),
+      BPLiveCounters.sinceOpened(segments, 500, 100),
+      BPLiveCounters.sinceOpened(null, 0, 1000),
+    ]));
+    """
+    out = json.loads(_run_node(body, live_counters_js).strip())
+    assert out == [0, 0, 0]
+
+
+def _fake_container_js(data_simulated="true", badge="good"):
+    """badge: 'good' (visible, non-empty), 'missing' (no element at all),
+    'empty' (element present, blank text), or 'hidden' (non-empty text but
+    el.hidden true -- isTrulyVisible's cheapest-to-fake failure mode)."""
+    badge_literal = {
+        "good": "{textContent: 'Simulation', hidden: false}",
+        "missing": "null",
+        "empty": "{textContent: '   ', hidden: false}",
+        "hidden": "{textContent: 'Simulation', hidden: true}",
+    }[badge]
+    attrs_literal = (
+        "{}" if data_simulated is None else "{'data-simulated': " + json.dumps(data_simulated) + "}"
+    )
+    return (
+        "const attrs = " + attrs_literal + ";\n"
+        "const badge = " + badge_literal + ";\n"
+        "const container = {\n"
+        "  getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },\n"
+        "  querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },\n"
+        "};\n"
+    )
+
+
+def _mount_throws(js_setup: str, scripts) -> str:
+    body = js_setup + """
+    let message = null;
+    try { BPLiveCounters.mount(container, {schema_version: 1, simulated: true, counters: [], placements: {}}, {}); }
+    catch(e) { message = e.message; }
+    console.log(JSON.stringify(message));
+    """
+    out = _run_node(body, *scripts)
+    return json.loads(out.strip())
+
+
+def test_mount_refuses_a_container_without_data_simulated_true(live_counters_js):
+    message = _mount_throws(
+        _fake_container_js(data_simulated=None, badge="good"), [live_counters_js]
+    )
+    assert message and "data-simulated" in message
+
+
+def test_mount_refuses_a_container_with_no_badge_element_at_all(live_counters_js):
+    message = _mount_throws(_fake_container_js(badge="missing"), [live_counters_js])
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_container_with_an_empty_badge(live_counters_js):
+    message = _mount_throws(_fake_container_js(badge="empty"), [live_counters_js])
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_container_with_an_invisible_badge(live_counters_js):
+    message = _mount_throws(_fake_container_js(badge="hidden"), [live_counters_js])
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_accepts_a_container_with_data_simulated_and_a_visible_badge(live_counters_js):
+    """The positive control for the four refusal tests above: change
+    nothing except making the badge visible and non-empty, and mount()
+    must get PAST its own guard (it will still fail shortly after, inside
+    resolveCounters/buildNode, because this fake container has no real DOM
+    -- caught and reported here as a DIFFERENT error, proving the guard
+    itself did not fire)."""
+    message = _mount_throws(_fake_container_js(badge="good"), [live_counters_js])
+    assert message is not None, "mount() did not throw at all against a fake, DOM-less container"
+    assert (
+        "data-simulated" not in message and "bp-simulated-badge" not in message
+    ), f"the guard itself rejected a valid container: {message}"
+
+
+def test_mount_accepts_a_badge_that_is_simply_scrolled_out_of_view(live_counters_js):
+    """Issue #309 fix round 2 (CI regression on PR #314): a badge the
+    reader has merely scrolled PAST -- e.g. the browser's own anchor-scroll
+    jumped straight to a later chapter, such as macro.html#europe, landing
+    below an earlier chapter's own data-simulated region -- is not hidden,
+    it is just not on screen right now. A previous isTrulyVisible() used
+    getBoundingClientRect()'s rect.right/rect.bottom (VIEWPORT-relative) to
+    catch a badge deliberately parked off-canvas by CSS, which also
+    rejected this perfectly normal case: width/height are real and
+    positive, but top/left/right/bottom are all negative (the element sits
+    above/left of the current viewport, exactly what scrolling past it
+    looks like). mount() must accept it -- the guard itself should not
+    fire, so the error it does see (device-less container has no real DOM)
+    must be a DIFFERENT message than the badge-guard ones, same proof
+    technique as the positive control above."""
+    fake_el = """
+    const attrs = {'data-simulated': 'true'};
+    const badge = {
+      textContent: 'Simulation', hidden: false,
+      getBoundingClientRect(){ return {width: 60, height: 20, top: -500, bottom: -480, left: -200, right: -140}; },
+    };
+    const container = {
+      getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },
+      querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },
+    };
+    """
+    message = _mount_throws(fake_el, [live_counters_js])
+    assert message is not None, "mount() did not throw at all against a fake, DOM-less container"
+    assert (
+        "data-simulated" not in message and "bp-simulated-badge" not in message
+    ), f"a badge merely scrolled out of view was rejected by the visibility guard: {message}"
+
+
+# Audit P2 (#314): isTrulyVisible() refuses a badge on five independent
+# grounds (el.hidden; display:none/visibility:hidden; opacity:0; a
+# position:absolute/fixed badge parked off-canvas by a large negative
+# left/top; a 0x0 box) -- only the el.hidden branch had a test. A global
+# getComputedStyle stub (Node has none) lets these fake a real CSSOM
+# answer; the badge object's own getBoundingClientRect stays a normal,
+# positive, on-screen box throughout so each test isolates ONE branch.
+_GET_COMPUTED_STYLE_STUB = """
+function getComputedStyle(el){ return el.__style || {}; }
+"""
+
+
+def _styled_badge_mount_throws(style_js, live_counters_js):
+    fake_el = (
+        """
+    const attrs = {'data-simulated': 'true'};
+    const badge = {
+      textContent: 'Simulation', hidden: false,
+      __style: """
+        + style_js
+        + """,
+      getBoundingClientRect(){ return {width: 60, height: 20, top: 10, bottom: 30, left: 10, right: 70}; },
+    };
+    const container = {
+      getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },
+      querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },
+    };
+    """
+    )
+    return _mount_throws(fake_el, [_GET_COMPUTED_STYLE_STUB, live_counters_js])
+
+
+def test_mount_refuses_a_badge_with_display_none(live_counters_js):
+    message = _styled_badge_mount_throws(
+        "{display: 'none', visibility: 'visible', opacity: '1', position: 'static'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_with_visibility_hidden(live_counters_js):
+    message = _styled_badge_mount_throws(
+        "{display: 'block', visibility: 'hidden', opacity: '1', position: 'static'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_with_opacity_zero(live_counters_js):
+    message = _styled_badge_mount_throws(
+        "{display: 'block', visibility: 'visible', opacity: '0', position: 'static'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_parked_off_canvas_by_position(live_counters_js):
+    """The branch issue #309's own round-2 fix (commit ac69a62c8) added to
+    replace the old, scroll-position-dependent off-canvas check: a badge
+    whose COMPUTED STYLE itself (not its on-screen geometry) places it far
+    off with position:absolute -- the actual 'visually hidden' CSS trick
+    this guard exists to catch."""
+    message = _styled_badge_mount_throws(
+        "{display: 'block', visibility: 'visible', opacity: '1', position: 'absolute', left: '-9999px', top: '0px'}",
+        live_counters_js,
+    )
+    assert message and "bp-simulated-badge" in message
+
+
+def test_mount_refuses_a_badge_with_a_zero_by_zero_box(live_counters_js):
+    fake_el = """
+    const attrs = {'data-simulated': 'true'};
+    const badge = {
+      textContent: 'Simulation', hidden: false,
+      getBoundingClientRect(){ return {width: 0, height: 0, top: 10, bottom: 10, left: 10, right: 10}; },
+    };
+    const container = {
+      getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },
+      querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },
+    };
+    """
+    message = _mount_throws(fake_el, [live_counters_js])
+    assert message and "bp-simulated-badge" in message
 
 
 def test_gallery_loads_tokens_before_layout_before_components(gallery_html):

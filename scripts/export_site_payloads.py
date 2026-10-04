@@ -592,6 +592,13 @@ def _national_sections(path: Path = NATIONAL_SECTIONS_CONFIG) -> dict:
         # Batch A1.3: the two indicator ids home2.html's hero draws, so that
         # page carries no indicator id of its own either (rule 2/24).
         "hero": layout.get("hero") or [],
+        # Issue #309 PR 2: the #finances-publiques chapter's own cards/
+        # charts and the live-counter placements/breakdowns macro.html and
+        # home2.html iterate -- folded into this one file (rather than the
+        # mockup's separate finances_publiques_sections.json) because both
+        # pages already fetch this file; see _check_finances_publiques below
+        # for what gets cross-checked.
+        "finances_publiques": layout.get("finances_publiques") or {},
     }
 
 
@@ -626,6 +633,125 @@ def _check_national_sections(layout: dict, known: set[str]) -> None:
             f"not carry: {unknown}. They would render as empty cards on macro.html. Remove "
             "them from the layout, or load the data they need."
         )
+
+    fp = layout.get("finances_publiques") or {}
+    if fp:
+        _check_finances_publiques(fp, known)
+
+
+LIVE_COUNTERS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "live_counters.yaml"
+
+
+def _live_counter_ids_and_placements(
+    path: Path = LIVE_COUNTERS_CONFIG,
+) -> tuple[set[str], set[str]]:
+    """The counter ids and placement names config/live_counters.yaml itself
+    declares -- the universe finances_publiques.simulated (below) is
+    cross-checked against, the same "can only name what really exists"
+    guarantee every other list in this file already gets. A missing file
+    gives an EMPTY universe, so any reference refuses rather than silently
+    passing (there would be nothing for it to be valid against)."""
+    if not path.is_file():
+        return set(), set()
+    import yaml
+
+    cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    ids = {c["id"] for c in cfg.get("counters") or [] if c.get("id")}
+    placements = set((cfg.get("placements") or {}).keys())
+    return ids, placements
+
+
+def _check_trilingual_label(label: dict, where: str) -> None:
+    """CLAUDE.md rule 7, enforced at export time for this one config block
+    (every other layout block's trilingual-ness is enforced by the test
+    suite reading the YAML directly; this block mixes two config files and
+    the maintainer's own handoff asked for the exporter itself to refuse a
+    missing language here)."""
+    missing = {"en", "fr", "nl"} - set(label)
+    blank = {lang for lang in ("en", "fr", "nl") if lang in label and not str(label[lang]).strip()}
+    if missing or blank:
+        raise ValueError(
+            f"config/national_sections.yaml: {where} is missing a language "
+            f"(missing={sorted(missing)}, blank={sorted(blank)})"
+        )
+
+
+def _check_finances_publiques(
+    fp: dict, known: set[str], live_counters_config: Path = LIVE_COUNTERS_CONFIG
+) -> None:
+    """The #finances-publiques chapter's own config block (issue #309, PR 2):
+    every indicator id it names must exist in national.json -- the same
+    guarantee every other list in this file gets -- and every counter id /
+    placement name it names must exist in config/live_counters.yaml, the ONE
+    place those are defined (CLAUDE.md rule 2/24 extended to the builder). A
+    reference into either universe that doesn't exist would render as an
+    empty card or a counter that never mounts, invisible to every other
+    test, so this refuses it before publish rather than after."""
+    sim = fp.get("simulated") or {}
+    official = fp.get("official_figures") or {}
+    charts = fp.get("charts") or []
+
+    counter_ids, placements = _live_counter_ids_and_placements(live_counters_config)
+
+    named_placements = [
+        p for p in (sim.get("strip_placement"), sim.get("home_strip_placement")) if p
+    ]
+    unknown_placements = sorted(set(named_placements) - placements)
+    if unknown_placements:
+        raise ValueError(
+            "config/national_sections.yaml finances_publiques.simulated names placement(s) "
+            f"config/live_counters.yaml does not declare: {unknown_placements}"
+        )
+
+    named_counters = [b.get("counter") for b in sim.get("breakdowns") or []]
+    unknown_counters = sorted({c for c in named_counters if c} - counter_ids)
+    if unknown_counters:
+        raise ValueError(
+            "config/national_sections.yaml finances_publiques.simulated.breakdowns names "
+            f"counter(s) config/live_counters.yaml does not declare: {unknown_counters}"
+        )
+
+    named_indicators: list[str] = []
+    for card in official.get("cards") or []:
+        if card.get("anchor_indicator"):
+            named_indicators.append(card["anchor_indicator"])
+        for item in card.get("items") or []:
+            if item.get("indicator"):
+                named_indicators.append(item["indicator"])
+    for chart in charts:
+        named_indicators.extend(chart.get("series") or [])
+    unknown_indicators = sorted({i for i in named_indicators if i not in known})
+    if unknown_indicators:
+        raise ValueError(
+            "config/national_sections.yaml finances_publiques names indicator(s) the national "
+            f"payload does not carry: {unknown_indicators}. They would render as an empty card "
+            "on macro.html's Finances publiques chapter. Remove them, or load the data they need."
+        )
+
+    if official.get("label"):
+        _check_trilingual_label(official["label"], "finances_publiques.official_figures.label")
+    if official.get("note"):
+        _check_trilingual_label(official["note"], "finances_publiques.official_figures.note")
+    for card in official.get("cards") or []:
+        # Audit P2 fix: a card with neither `label` nor `signed_label: true`
+        # used to pass silently and render an empty .label div on
+        # macro.html (displayValue()'s signed_label branch computes the
+        # label from the VALUE's own sign instead -- balanceWord() -- so
+        # that one case genuinely needs no static label).
+        if card.get("label"):
+            _check_trilingual_label(
+                card["label"], f"finances_publiques.official_figures.cards[{card.get('id')}].label"
+            )
+        elif not card.get("signed_label"):
+            raise ValueError(
+                f"finances_publiques.official_figures.cards[{card.get('id')}] has neither a "
+                "label nor signed_label: true -- it would render with no visible title"
+            )
+    for chart in charts:
+        if chart.get("label"):
+            _check_trilingual_label(
+                chart["label"], f"finances_publiques.charts[{chart.get('id')}].label"
+            )
 
 
 MICRO_SECTIONS_CONFIG = Path(__file__).resolve().parents[1] / "config" / "micro_sections.yaml"

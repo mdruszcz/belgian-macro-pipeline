@@ -5,7 +5,13 @@ window.BPMacroPortraitCharts = function(options){
   function localeTag(){ return options.locale(); }
   function escapeHtml(value){ return String(value == null ? '' : value).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function isDarkTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark'; }
-  var THEME_HUES = ['#3a67e0','#1c7f86','#7a5ce0','#278a53','#b8811f','#d2691e','#a23b8f','#1b8bb8','#6b7f1a','#5b6b80','#8a5a3b'];
+  // Round-2 visual review (P3-L): a 12-item series (the spending breakdown's
+  // bar, public-finance-live mockup) wrapped this 11-hue ramp exactly once,
+  // so its 12th segment landed back on hue 0 -- the same colour as its 1st.
+  // One more, visually distinct hue (added, not substituted, so every
+  // existing index below 11 keeps the exact colour it already had) closes
+  // that gap without touching anything that relied on the previous length.
+  var THEME_HUES = ['#3a67e0','#1c7f86','#7a5ce0','#278a53','#b8811f','#d2691e','#a23b8f','#1b8bb8','#6b7f1a','#5b6b80','#8a5a3b','#c9476b'];
   var THEME_RAMP_VARS = [0,1,2,3,4,5,6].map(function(i){ return 'var(--th-ramp-' + i + ')'; });
   function hexToRgb(h){
     h = String(h).replace('#','');
@@ -89,15 +95,51 @@ window.BPMacroPortraitCharts = function(options){
     region:   {colour: 'var(--bp-text-faint)', glyph: 'sq'},
     country:  {colour: 'var(--bp-text)',       glyph: 'dotc'},
   };
-  function fmtAxisNum(v, decimals){
+  // digitLocale (issue #309): an OPT-IN override, additive only -- every
+  // existing caller passes nothing and gets exactly today's localeTag()
+  // behaviour. opts.zeroLine (above) is the same pattern: a chart asks for
+  // it by name in its own opts, every other chart is untouched.
+  //
+  // properMinus (audit P2, issue #309): the U+2212 swap below used to run
+  // for EVERY caller, an undeclared sitewide typography change the batch's
+  // own handoff excluded ("must not alter any existing chart") -- measured
+  // effect: the pre-existing growth chart's axis labels on macro.html
+  // changed from "-4" to "−4". Gated the same opt-in way as
+  // digitLocale: only a caller that explicitly asks (today, only the
+  // finance chapter's own zero-line chart) gets the proper minus sign;
+  // every other existing chart keeps its exact prior ASCII hyphen output.
+  function fmtAxisNum(v, decimals, digitLocale, properMinus){
     var d = (decimals == null) ? (Math.abs(v) < 10 ? 1 : 0) : decimals;
-    return (Math.abs(v) < Math.pow(10, -d) / 2 ? 0 : v).toLocaleString(localeTag(), {maximumFractionDigits: d});
+    var n = (Math.abs(v) < Math.pow(10, -d) / 2 ? 0 : v);
+    var s = n.toLocaleString(digitLocale || localeTag(), {maximumFractionDigits: d});
+    if(!properMinus) return s;
+    // Round-2 visual review (P2-a): Number.toLocaleString prints an ASCII
+    // hyphen-minus for a negative value in every locale this engine sees --
+    // replaced with the proper Unicode minus sign (U+2212) here, the one
+    // place every axis label and hit/tooltip value text in this shared
+    // chart engine goes through (both read fmtAxisNum, not a copy of it).
+    return n < 0 ? s.replace('-', '−') : s;
+  }
+  // Round-3 visual review ("make it more in the style of the website"): how
+  // wide a y-axis label actually renders, measured in the SAME font/size the
+  // axis <text> below uses -- not a guessed px-per-character constant. Used
+  // only to decide a chart's own LEFT MARGIN (buildLineChartSVG's opts.zeroLine
+  // branch below); never touches a plotted value. One shared canvas context,
+  // reused across every call rather than created per chart.
+  var measureCtx = null;
+  function measureTextWidth(text, font){
+    if(!measureCtx){
+      var c = document.createElement('canvas');
+      measureCtx = c.getContext && c.getContext('2d');
+    }
+    if(!measureCtx) return String(text).length * 7; // no canvas 2D context: a generous per-character fallback
+    measureCtx.font = font;
+    return measureCtx.measureText(String(text)).width;
   }
   function buildLineChartSVG(opts){
     var W = opts.width || 640, H = opts.height || 260;
     var hasCompare = (opts.compareSeries || []).some(function(s){ return s.points.some(function(p){ return typeof p.value === 'number'; }); });
-    var padL = 8, padR = hasCompare ? (W < 500 ? 104 : 150) : 8, padT = 16, padB = 26;
-    var innerW = W - padL - padR, innerH = H - padT - padB;
+    var padR = hasCompare ? (W < 500 ? 104 : 150) : 8, padT = 16, padB = 26;
     var pts = opts.points;
     /* Comparable-communes grey lines (PR C, spec 4.4). Included in the
        y-range up front so a peer's extreme value is never clipped -- the
@@ -109,6 +151,13 @@ window.BPMacroPortraitCharts = function(options){
     var allVals = [];
     allSeries.forEach(function(s){ s.points.forEach(function(p){ if(typeof p.value === 'number') allVals.push(p.value); }); });
     if(!allVals.length) return '';
+    /* public-finance-live mockup: a balance/net-lending series is asked to
+       show a zero reference line (positive = surplus, negative = deficit)
+       even when every recorded year sits on one side of zero. Folding 0
+       into the DOMAIN here (never into the drawn series) means the normal
+       gridline loop below naturally lands a line on it; opts.zeroLine is
+       additive and does nothing for every existing caller that omits it. */
+    if(opts.zeroLine) allVals.push(0);
     var dataMin = Math.min.apply(null, allVals), dataMax = Math.max.apply(null, allVals);
     if(dataMin === dataMax){ dataMin -= 1; dataMax += 1; }
     var niceValsForDomain = niceGridlinesBracketing(dataMin, dataMax, 4);
@@ -116,6 +165,32 @@ window.BPMacroPortraitCharts = function(options){
     if(vMax <= vMin){ vMin -= 1; vMax += 1; }
     var finalPad = (vMax - vMin) * 0.04;
     vMin -= finalPad; vMax += finalPad;
+    /* The finance chapter's net-lending/borrowing chart (today's only
+       opts.zeroLine caller) crosses zero, so its widest axis label is a
+       signed, thousands-grouped number ("−60 000") several times wider than
+       every other chart's short label ("87,7") -- found crossing its own
+       gridline under the old fixed 8px margin. Opt-in and additive only:
+       every existing chart that never sets zeroLine keeps exactly today's
+       8px, pixel for pixel -- this only widens the margin for a chart that
+       asks for one, and only as much as its own labels actually need. */
+    var padL = 8;
+    if(opts.zeroLine){
+      var axisFont = '11px Inter, sans-serif';
+      var widestLabel = niceValsForDomain.reduce(function(max, v){
+        return Math.max(max, measureTextWidth(fmtAxisNum(v, opts.decimals, opts.digitLocale, opts.properMinus), axisFont));
+      }, 0);
+      /* A real rendered measurement (SVGTextElement.getBBox(), taken after
+         this batch's own first pass) came in ~5px wider than this same
+         canvas measurement for the identical string -- most likely Inter
+         itself still swapping in for the canvas context at the moment this
+         runs, early in the page's life, while the actual axis <text> below
+         paints slightly later with the webfont already active. A 10%
+         scale-up plus a flat 10px, not just a bigger flat number: covers
+         both a proportional metric gap (any string length) and a constant
+         one, with margin, rather than chasing the exact font-load race. */
+      padL = Math.max(padL, Math.ceil(widestLabel * 1.1) + 10);
+    }
+    var innerW = W - padL - padR, innerH = H - padT - padB;
     var n = pts.length;
     var times = pts.map(function(p){ return periodToTime(p.period); });
     var timesOk = times.every(function(t){ return t !== null; });
@@ -180,16 +255,19 @@ window.BPMacroPortraitCharts = function(options){
       if(typeof p.value !== 'number') return;
       hits.push({
         x: xOf(i), y: yOf(p.value), period: p.period, value: p.value,
-        valueText: fmtAxisNum(p.value, opts.decimals) + (opts.unitSuffix || ''),
+        valueText: fmtAxisNum(p.value, opts.decimals, opts.digitLocale, opts.properMinus) + (opts.unitSuffix || ''),
         compareLines: compareLines,
       });
     });
 
     niceValsForDomain.forEach(function(v){
       var y = yOf(v);
-      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="var(--bp-border)" stroke-width="1"/>');
+      var isZeroLine = opts.zeroLine && Math.abs(v) < 1e-9;
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) +
+        '" stroke="' + (isZeroLine ? 'var(--bp-text-muted)' : 'var(--bp-border)') +
+        '" stroke-width="' + (isZeroLine ? '1.5' : '1') + '"' + (isZeroLine ? ' stroke-dasharray="3,3"' : '') + '/>');
       svg.push('<text x="0" y="' + (y - 4).toFixed(1) + '" font-family="Inter,sans-serif" font-size="11" fill="var(--bp-text-faint)">' +
-        escapeHtml(fmtAxisNum(v, opts.decimals)) + '</text>');
+        escapeHtml(fmtAxisNum(v, opts.decimals, opts.digitLocale, opts.properMinus)) + '</text>');
     });
 
     /* A5 tick order: first, last, each segment's start (the point right
@@ -245,7 +323,7 @@ window.BPMacroPortraitCharts = function(options){
               var p0 = run[0];
               var x0 = xOfTime(p0.period), y0 = yOf(p0.value);
               svg.push('<circle class="sim-dot" data-nis="' + escapeHtml(s.nis) + '" data-first="' + escapeHtml(String(p0.period)) + '" data-last="' + escapeHtml(String(p0.period)) + '" cx="' + x0.toFixed(1) + '" cy="' + y0.toFixed(1) + '" r="1.6"/>');
-              simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: x0, y: y0, period: p0.period, value: p0.value, status: p0.status, valueText: fmtAxisNum(p0.value, opts.decimals) + (opts.unitSuffix || '')});
+              simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: x0, y: y0, period: p0.period, value: p0.value, status: p0.status, valueText: fmtAxisNum(p0.value, opts.decimals, opts.digitLocale, opts.properMinus) + (opts.unitSuffix || '')});
               drawnAny = true;
             }
             return;
@@ -253,7 +331,7 @@ window.BPMacroPortraitCharts = function(options){
           var d = run.map(function(p, k){ return (k === 0 ? 'M' : 'L') + xOfTime(p.period).toFixed(1) + ',' + yOf(p.value).toFixed(1); }).join(' ');
           svg.push('<path class="sim-line" data-nis="' + escapeHtml(s.nis) + '" data-first="' + escapeHtml(String(run[0].period)) + '" data-last="' + escapeHtml(String(run[run.length-1].period)) + '" d="' + d + '"/>');
           run.forEach(function(p){
-            simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: xOfTime(p.period), y: yOf(p.value), period: p.period, value: p.value, status: p.status, valueText: fmtAxisNum(p.value, opts.decimals) + (opts.unitSuffix || '')});
+            simHits.push({nis: s.nis, name: s.name, rank: s.rank, x: xOfTime(p.period), y: yOf(p.value), period: p.period, value: p.value, status: p.status, valueText: fmtAxisNum(p.value, opts.decimals, opts.digitLocale, opts.properMinus) + (opts.unitSuffix || '')});
           });
           drawnAny = true;
         });

@@ -67,8 +67,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Caveat:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/belpulse/tokens.css">
 <link rel="stylesheet" href="assets/belpulse/layout.css">
-<link rel="stylesheet" href="assets/belpulse/components.css">
+<link rel="stylesheet" href="assets/belpulse/components.css?v=14baea3455">
 <link rel="stylesheet" href="assets/commune_map.css">
+<link rel="stylesheet" href="assets/belpulse/live_counters.css?v=40908bd707">
 <style>
   /* Page composition only. Anything reusable belongs in
      assets/belpulse/components.css -- Batch 2 owns the library. */
@@ -196,17 +197,38 @@
     .hero-mini{ grid-template-columns:minmax(0,1fr) }
   }
 
-  /* ---- finance strip ---- */
+  /* ---- finance strip ----
+     Audit P1 fix: this file still held the PRE-MOCKUP ruleset (one flex
+     row, no .fin-header rule at all) after the markup itself moved to the
+     mockup's header-row-above-a-full-width-counter-row shape -- the strip
+     collapsed to a single 200px column 690px tall, and the badge overlapped
+     the heading on phones. Ported verbatim from the approved mockup
+     (screenshots-review/public-finance-live/home2.html:206-246).
+     border-top:3px solid var(--v5-hero-th) matches .hcard exactly (this
+     section's own hero-row vocabulary); the accent-tinted LEFT rule is the
+     second, independent cue (next to the Simulation badge/pause) that this
+     one card shows a simulation, not a measured figure. */
   .finance{
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-card);
+    border-top:3px solid var(--v5-hero-th); border-left:3px solid var(--bp-accent-ink);
     box-shadow:var(--bp-shadow-card); padding:var(--bp-space-4) var(--bp-space-6);
-    display:flex; align-items:center; gap:var(--bp-space-4); flex-wrap:wrap; margin-top:22px;
+    padding-left:calc(var(--bp-space-6) - 2px);
+    display:flex; flex-direction:column; gap:10px; margin-top:22px;
   }
+  .fin-header{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; }
   .fin-icon{ width:32px; height:32px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb, var(--bp-text-faint) 14%, transparent); color:var(--bp-text-muted) }
-  .fin-text{ flex:1 1 320px; min-width:0; margin:0; font-size:12px; line-height:1.45; color:var(--bp-text-muted) }
-  .fin-title{ display:inline; margin:0 4px 0 0; font:inherit; font-weight:var(--bp-weight-semibold); color:var(--bp-text) }
-  .fin-link{ font-size:var(--bp-text-small); color:var(--bp-accent); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium); flex:none }
+  .fin-title{ margin:0; font:inherit; font-weight:var(--bp-weight-semibold); color:var(--bp-text) }
+  .fin-link{
+    font-size:var(--bp-text-small); text-decoration:none; white-space:nowrap; font-weight:var(--bp-weight-medium);
+    flex:none; margin-left:auto;
+    /* --bp-accent-ink, not --bp-accent: the raw accent colour measures
+       3.22:1 on dark, short of the 4.5:1 AA text needs -- accent-ink is
+       the token tokens.css keeps AA-checked per theme for text use. */
+    color:var(--bp-accent-ink);
+    display:inline-flex; align-items:center; min-height:24px;
+  }
   .fin-link:hover{ text-decoration:underline }
+  .fin-text{ margin:0; font-size:12px; line-height:1.45; color:var(--bp-text-muted) }
 
   /* ---- section header, chapter-nav vocabulary (commune.html's own) ---- */
   .section{ padding-top:44px; scroll-margin-top:16px }
@@ -394,10 +416,34 @@
         </div>
       </div>
 
-      <section class="finance" id="financeStrip">
-        <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
-        <div class="fin-text"><h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2> <span id="financeCompactText"></span></div>
-        <a class="fin-link" href="macro.html" data-t="homeAllIndicators">See all national data →</a>
+      <!-- Issue #309 PR 2: built by assets/belpulse/live_counters.js from
+           public/data/live_counters.json (placements.home_strip), or falls
+           back to the honest "not published" sentence this strip has
+           always shown if that payload is missing/invalid/expired -- see
+           HomeFinance below. data-simulated="true" + a visible, non-empty
+           .bp-simulated-badge are REQUIRED here: BPLiveCounters.mount()
+           throws without them (CLAUDE.md rules 2/24/36). -->
+      <section class="finance" id="financeStrip" data-simulated="true" style="--th:var(--v5-hero-th)">
+        <!-- Header row (icon, title, badge, pause, the detail link) above a
+             FULL-WIDTH row of the five compact tiles -- the old layout put
+             icon+title+badge+text in one flex item beside the counters,
+             squeezing them into whatever width that item's sibling left. -->
+        <div class="fin-header">
+          <span class="fin-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/><path d="M3 3l18 18" stroke-width="1.6"/></svg></span>
+          <h2 class="fin-title" data-t="homeFinanceTitle">Public finances</h2>
+          <span class="bp-simulated-badge bp-simulated-badge--prominent" id="financeBadge" data-t="finSimulatedBadge" hidden>Simulation — trend extrapolation, not a forecast</span>
+          <button type="button" class="bp-sim-pause" id="financePause" aria-pressed="false" hidden><span data-t="finPause">Pause</span></button>
+          <a class="fin-link" href="macro.html#finances-publiques" data-t="homeFinanceSeeDetails">See the details →</a>
+        </div>
+        <!-- Static fallback (an honest message, not a typed number) so a
+             reader whose JavaScript never runs still sees an accurate
+             statement -- HomeFinance.mount()/renderFallback() overwrite
+             this once the real payload is checked. The pipeline DOES hold
+             these figures now (the Official figures block on the Macro
+             page); only the live trend simulation can be unavailable,
+             which is what both this default and renderFallback() say. -->
+        <p class="fin-text" id="financeCompactText">The live simulation is unavailable here. <a href="macro.html#finances-publiques">See the official figures on the Macro page</a></p>
+        <div class="bp-sim-strip bp-sim-strip--compact" id="financeLiveCounters"></div>
       </section>
     </section>
   </div>
@@ -567,11 +613,12 @@
   </div>
 </div>
 
-<script src="assets/i18n.js"></script>
+<script src="assets/i18n.js?v=1ceaa67dc8"></script>
 <script src="assets/belpulse/shell.js"></script>
 <script src="assets/belpulse/charts.js"></script>
 <script src="assets/belpulse/components.js"></script>
 <script src="assets/commune_map.js"></script>
+<script src="assets/belpulse/live_counters.js?v=b8438eaebc"></script>
 <script>
 /* BelPulse homepage -- film-first hero + commune-Portrait data hero.
  *
@@ -599,13 +646,15 @@
   var FEATURED_CONFIG_URL = 'config/pages/commune-profile/published.json';
   var VALUES_URL  = function(code){ return 'public/data/indicators/' + code + '.json'; };
   var COMMUNE_URL = function(nis){ return 'public/data/communes/' + nis + '.json'; };
+  // Issue #309 PR 2: scripts/export_live_counters.py's own output, consumed
+  // only through assets/belpulse/live_counters.js. #financeStrip's own
+  // cards/placement name live in NATIONAL_SECTIONS_URL's
+  // `finances_publiques` key instead of a second config file -- see
+  // HomeFinance.init() below.
+  var LIVE_COUNTERS_URL = 'public/data/live_counters.json';
 
   var LANG = I18N.initial();
   var T = function(key, vars){ return I18N.t(LANG, key, vars); };
-
-  // A fixed editorial group in the design -- not indicator colours, and
-  // none of them has any data behind it yet (see the file header).
-  var FINANCE_KEYS = ['homeFinanceSpending', 'homeFinanceRevenue', 'homeFinanceBalance', 'homeFinanceDebt'];
 
   var state = {
     index: [], byCode: {}, sections: {headlines: [], sections: []},
@@ -613,6 +662,7 @@
     activeTheme: null, thumbs: [], drawnIndicator: null,
     featuredNis: null, featuredCodes: [], featured: null,
     heroCodes: [],
+    financesPubliques: null,
   };
 
   /* ---- language, the site's existing pattern ---------------------------- */
@@ -896,21 +946,205 @@
     });
   }
 
-  /* ---- finance strip: designed shape, honest state ----------------------
-     One compact line instead of four cards. Still built from
-     FINANCE_KEYS/homeFinanceUnavailable/homeFinanceWhy -- the same fixed
-     editorial group and the same honest "unavailable" state as before (see
-     the file header for why this pipeline holds no public-finance levels),
-     just not one card and one repeated sentence per item. */
-  function renderFinance(){
-    var span = document.getElementById('financeCompactText');
-    var names = FINANCE_KEYS.map(function(key){ return T(key); });
-    var joined = names.length > 1
-      ? names.slice(0, -1).join(', ') + ' ' + T('listJoinerAnd') + ' ' + names[names.length - 1]
-      : names.join('');
-    span.textContent = joined + ' — ' + T('homeFinanceUnavailable') + '.';
-    span.title = T('homeFinanceWhy');
-  }
+  /* ---- finance strip ------------------------------------------------------
+   * Issue #309 PR 2: a compact live strip
+   * (payload.placements.home_strip -- population/debt/deficit/revenue/
+   * spending) built by assets/belpulse/live_counters.js, or the honest
+   * "the live simulation is unavailable" fallback
+   * (HomeFinance.renderFallback(), homeFinanceUnavailable/homeFinanceWhy) if
+   * the payload is missing, fails validation, or every one of its counters
+   * has already expired by the time this page loads -- this strip never shows a
+   * stale or impossible number instead of admitting that. Mounted once; a
+   * language switch calls setLang(), never a re-mount (that would reset the
+   * pause state and the "since you opened this page" baseline for no
+   * reason). */
+  var HomeFinance = (function(){
+    var cfg = null, payload = null, handle = null, lang = 'en';
+
+    /* Maintainer request (issue #309, 2026-10-04): same formatting change
+     * as macro.html's FinancesPubliques -- French numbers in this strip
+     * group thousands with a dot and use a comma for decimals (Dutch's own
+     * locale already formats digits this way, reused here for the DIGITS
+     * only via MapUI.formatValue's generic opt-in digitLocale parameter;
+     * the surrounding words/unit symbol still read in real French). Used
+     * ONLY inside this IIFE -- every other page keeps calling
+     * MapUI.formatValue() exactly as before. */
+    var FIN_DIGIT_LOCALE = {fr: 'nl'};
+    function fmtLive(v, unit, decimals, l){
+      var dl = FIN_DIGIT_LOCALE[l];
+      return MapUI.formatValue(v, unit, decimals, l, dl ? {digitLocale: dl} : undefined);
+    }
+
+    function finLabels(){
+      return {
+        pause: T('finPause'), resume: T('finResume'),
+        pauseAria: T('finPauseAria'), resumeAria: T('finResumeAria'),
+        notStarted: T('finNotStarted'), expired: T('finExpired'),
+        unavailable: T('finUnavailableReason'),
+        perSecond: T('finPerSecond'), perHour: T('finPerHour'), perDay: T('finPerDay'),
+        sinceOpened: T('finSinceOpened'), pausedSuffix: T('finPausedSuffix'),
+      };
+    }
+
+    function counterById(id){
+      return (payload.counters || []).find(function(c){ return c.id === id; });
+    }
+
+    /* Round-2 rules review (R-P1-2/NEW P1-2, decision 4): same structural
+     * test as macro.html's FinancesPubliques -- identifies the debt counter
+     * by what its OWN basis[] says (it is paced by another counter), never
+     * by the literal id 'debt'. */
+    function isPacedCounter(counter){
+      return !!(counter && (counter.basis || []).some(function(b){ return b.role === 'pace_counter'; }));
+    }
+    function paceIsDeficit(paceCounterId, now){
+      var c = counterById(paceCounterId);
+      if(!c) return null;
+      var at = BPLiveCounters.valueAt(c.segments, now);
+      return (at && typeof at.value === 'number') ? at.value >= 0 : null;
+    }
+
+    function allExpired(placement){
+      if(!placement) return false;
+      var ids = (payload.placements || {})[placement] || [];
+      var now = Date.now();
+      return ids.length > 0 && ids.every(function(id){
+        var c = counterById(id);
+        return c && BPLiveCounters.valueAt(c.segments, now).state === 'expired';
+      });
+    }
+
+    /* Round-1 review (P2-f / decision 15): "not yet published" is FALSE
+     * once the simulation has run and simply reached the end of its
+     * window -- that is an honest "the trend estimate expired" story, not
+     * a missing payload. Two distinct reasons, two distinct sentences;
+     * `reason` is 'missing' (no payload / invalid) or 'expired'.
+     * Round-2 rules review (NEW P1-1): the pipeline now DOES hold these
+     * levels (macro.html's Official figures block reads them from
+     * Eurostat) -- only the live simulation itself can be unavailable, so
+     * the fallback now says that and links to where the real figures are,
+     * instead of falsely claiming the pipeline has no such data at all. */
+    function renderFallback(reason){
+      document.getElementById('financeBadge').hidden = true;
+      document.getElementById('financePause').hidden = true;
+      document.getElementById('financeLiveCounters').innerHTML = '';
+      var span = document.getElementById('financeCompactText');
+      span.innerHTML = '';
+      span.title = reason === 'expired' ? T('homeFinanceExpiredWhy') : T('homeFinanceWhy');
+      var lead = document.createElement('span');
+      lead.textContent = (reason === 'expired' ? T('homeFinanceExpired') : T('homeFinanceUnavailable')) + ' ';
+      span.appendChild(lead);
+      var link = document.createElement('a');
+      link.href = 'macro.html#finances-publiques';
+      link.textContent = T('homeFinanceWhyLink');
+      span.appendChild(link);
+    }
+
+    /* The active segment's own calendar year, from ITS MIDPOINT -- same
+     * helper and same reasoning as macro.html's FinancesPubliques
+     * (round-2: the midpoint read through the Brussels calendar, not a
+     * fixed 24h nudge on the raw start_ms, which only happened to work for
+     * year-long segments). */
+    function activeSegmentYear(segments, now){
+      if(!segments) return null;
+      for(var i = 0; i < segments.length; i++){
+        var s = segments[i];
+        if(now >= s.start_ms && now < s.end_ms){
+          var mid = (s.start_ms + s.end_ms) / 2;
+          return parseInt(new Date(mid).toLocaleString('en', {timeZone: 'Europe/Brussels', year: 'numeric'}), 10);
+        }
+      }
+      return null;
+    }
+
+    /* Same page-level counter knowledge as macro.html's FinancesPubliques
+     * (rule 24: this binding code, not the generic engine, is allowed to
+     * know what "deficit" and "debt" mean here) -- kept in step with it so
+     * the compact home strip reads the same way the full chapter does:
+     * the deficit/surplus sign flip, debt's rate line naming the counter
+     * whose pace it follows instead of repeating deficit's own line, and a
+     * "so far in {year}" suffix on the flow counters. Round-2 (P3-7): a
+     * full, pre-built, lower-case sentence per sign, same as macro.html. */
+    function decorateStripCounter(counter, node, at){
+      var nameEl = node.querySelector('.bp-live-counter-name');
+      if(counter.kind === 'difference'){
+        var raw = node.querySelector('.bp-value').dataset.raw;
+        if(nameEl && raw !== undefined && raw !== ''){
+          nameEl.textContent = Number(raw) >= 0 ? T('finDeficit') : T('finSurplus');
+        }
+      }
+      if(isPacedCounter(counter)){
+        var paceEntry = (counter.basis || []).find(function(b){ return b.role === 'pace_counter'; });
+        var rateEl = node.querySelector('.bp-live-counter-rate');
+        var sinceEl = node.querySelector('.bp-live-counter-since');
+        if(sinceEl) sinceEl.textContent = '';
+        if(rateEl && paceEntry){
+          var isDef = paceIsDeficit(paceEntry.counter, Date.now());
+          rateEl.textContent = T(isDef === false ? 'finDebtPaceCaptionSurplus' : 'finDebtPaceCaptionDeficit');
+        }
+      }
+      if((counter.kind === 'flow' || counter.kind === 'difference') && at && at.state === 'running' && nameEl){
+        var year = activeSegmentYear(counter.segments, Date.now());
+        if(year){
+          var ytd = node.querySelector('.bp-live-counter-ytd');
+          if(!ytd){
+            ytd = document.createElement('span');
+            ytd.className = 'bp-live-counter-ytd';
+            nameEl.parentNode.appendChild(ytd);
+          }
+          ytd.textContent = T('finYtd', {year: year});
+        }
+      }
+    }
+
+    function mount(placement){
+      var span = document.getElementById('financeCompactText');
+      span.textContent = ''; span.title = '';
+      document.getElementById('financeBadge').hidden = false;
+      document.getElementById('financePause').hidden = false;
+      var strip = document.getElementById('financeStrip');
+      // Issue #309 fix round 2: BPLiveCounters.mount() can throw; a failed
+      // strip must fall back to the SAME honest "simulation not available"
+      // state init() already renders for a missing payload (renderFallback
+      // undoes the badge/pause hidden=false two lines above), never take
+      // the rest of this page's own startup down with it.
+      try{
+        handle = BPLiveCounters.mount(strip, payload, {
+          lang: lang, labels: finLabels(), formatValue: fmtLive,
+          placement: placement,
+          listEl: document.getElementById('financeLiveCounters'),
+          pauseBtn: document.getElementById('financePause'),
+          onCounterRendered: decorateStripCounter,
+        });
+      } catch(err){
+        if(typeof console !== 'undefined' && console.error) console.error('HomeFinance: strip mount failed', err);
+        handle = null;
+        renderFallback('missing');
+      }
+    }
+
+    function init(finSections, liveCountersRaw, initialLang){
+      lang = initialLang;
+      cfg = finSections;
+      payload = BPLiveCounters.validate(liveCountersRaw);
+      // Round-2 rules review (R-P1-2/NEW P1-2, decision 4): the payload
+      // placement name ('home_strip') now comes from the SAME config file
+      // macro.html's own chapter reads, never a literal in this script.
+      var placement = (cfg && cfg.simulated) ? cfg.simulated.home_strip_placement : null;
+      if(!payload || !placement){ renderFallback('missing'); return; }
+      if(allExpired(placement)){ renderFallback('expired'); return; }
+      mount(placement);
+    }
+
+    function setLang(newLang){
+      lang = newLang;
+      if(handle){ handle.setLang(lang, finLabels()); return; }
+      var placement = (cfg && cfg.simulated) ? cfg.simulated.home_strip_placement : null;
+      renderFallback(payload && allExpired(placement) ? 'expired' : 'missing');
+    }
+
+    return {init: init, setLang: setLang};
+  })();
 
   /* ---- map theme tabs + three thumbnails --------------------------------
      The thumbnails are three more instances of the SAME shared map
@@ -1073,7 +1307,7 @@
     document.addEventListener('bp:lang', function(e){
       LANG = e.detail.lang;
       applyStrings();
-      renderFinance(); renderHeroMini(); renderNational();
+      HomeFinance.setLang(LANG); renderHeroMini(); renderNational();
       renderThemes(); renderThumbs(); renderFeatured();
       populateIndicatorPicker(); wireSearch();
       if(state.map) state.map.setLang(LANG);
@@ -1085,6 +1319,7 @@
       fetch(INDEX_URL), fetch(SECTIONS_URL), fetch(SOURCES_URL),
       fetch(NATIONAL_URL), fetch(MANIFEST_URL), fetch(FEATURED_CONFIG_URL).catch(function(){ return null; }),
       fetch(NATIONAL_SECTIONS_URL).catch(function(){ return null; }),
+      fetch(LIVE_COUNTERS_URL).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
     ]);
     var indexJson = responses[0].ok ? await responses[0].json() : {indicators: []};
     state.index = indexJson.indicators || [];
@@ -1103,6 +1338,9 @@
     if(responses[6] && responses[6].ok){
       var nationalLayout = await responses[6].json();
       state.heroCodes = nationalLayout.hero || [];
+      // Issue #309 PR 2: #financeStrip's own cards/placement, the same file
+      // macro.html's own Finances publiques chapter reads (rule 2/24).
+      state.financesPubliques = nationalLayout.finances_publiques || null;
     }
     if(responses[5] && responses[5].ok){
       try{
@@ -1131,7 +1369,7 @@
     var upd = document.getElementById('attrUpdated');
     if(upd && state.attrUpdated) upd.textContent = state.attrUpdated;
 
-    renderFinance();
+    HomeFinance.init(state.financesPubliques, responses[7], LANG);
     renderHeroMini();
     renderNational();
     populateIndicatorPicker();

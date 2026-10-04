@@ -1,8 +1,10 @@
 # Feature: Public-finance live counters
 
-Status: in-progress (PR 1 of 2 -- data + engine + payload; no page/UI change)
-Issue: public-finance feature, maintainer request
-Branch: feat/public-finance-data
+Status: PR 2 of 2 open for review (data + engine + payload + the live UI on
+macro.html/home2.html -- see "PR 2: the live UI" below). Not yet merged;
+docs/steps stays unticked until the daily export is verified live.
+Issue: #309 (public-finance feature, maintainer request)
+Branch: feat/public-finance-data (PR 1), feat/309-public-finance-live-ui (PR 2)
 
 ## Problem
 
@@ -26,7 +28,7 @@ and is reproducible: identical inputs produce byte-identical output
 ## Non-goals (this PR)
 
 - No page or UI change. `live_counters.js`, the macro.html/home2.html card wiring, and
-  any guard-test rewrite are PR 2.
+  any guard-test rewrite are PR 2 (now built -- see "PR 2: the live UI" below).
 - No births/deaths/migration counters, no FPB forecast figures.
 - Not a forecast: the projection is a 3-year trend extrapolation, clearly labelled as a
   simulation (see the ADR). It is not held to forecast accuracy, and must never be
@@ -173,3 +175,78 @@ changed file.
   degrades to `"unavailable"` with a reason, not a build failure, for every DATA
   condition (never for a config/schema one).
 - This PR produces no page; nothing on the public site changes until PR 2 ships.
+
+## PR 2: the live UI (issue #309, branch feat/309-public-finance-live-ui)
+
+Built from an approved, out-of-repo design mockup (four review rounds; see that PR's own
+report for the full before/after). Adds the UI this PR's engine/payload had no page for:
+macro.html's `#finances-publiques` chapter and home2.html's `#financeStrip`, via one new
+generic, page-agnostic engine, `assets/belpulse/live_counters.js`
+(`window.BPLiveCounters`), loaded by both pages and by no other (`tests/test_micro.py`,
+`tests/test_map_ui_logic.py` both assert this).
+
+**Config, not code (rules 2/20/24/28).** The mockup's own
+`finances_publiques_sections.json` (official-figure cards + `anchor_indicator`, the five
+official charts, the `simulated` block naming the strip placement and breakdown list)
+moved into a `finances_publiques` block inside `config/national_sections.yaml`, passed
+through unmodified structure by `scripts/export_site_payloads.py`'s existing
+`_national_sections()`/`_check_national_sections()` into the SAME generated file every
+other macro.html chapter already reads, `public/data/metadata/national_sections.json`.
+`_check_national_sections()` now also refuses (exit non-zero): an `indicator` not present
+in `public/data/national.json`'s own indicator set, a `counter`/`strip_placement` name not
+declared in `config/live_counters.yaml`, and a trilingual label missing a language --
+`tests/test_export_site_payloads.py`'s `test_finances_publiques_refuses_*` tests exercise
+all three refusals directly, and `test_committed_national_sections_json_matches_the_real_config`
+proves the committed JSON is the exporter's own output against the real, committed
+config and `national.json`, not hand-edited to look right. The `unavailable` list's old
+`public_finance` entry (and its now-false `kpis_note` claiming these series "do not
+exist") is gone; `legacy_anchors: [public-finance]` still resolves to the same chapter.
+
+**States, never collapsed (rule 26).** Each simulated region (the strip, the two
+breakdown cards, home2's strip) renders one of: `not-started` (before its first segment),
+`running` (ticking, with a `data-raw` float), `expired` (past the payload's own last
+segment -- a DIFFERENT headline from "unavailable", since a simulation that ran and
+stopped is a different fact from one that never had data), or `unavailable` (missing
+config, missing/invalid payload fetch, or -- for a breakdown -- the payload's own stated
+reason). The "Official figures" block is separate and never simulated: read straight from
+`national.json`, each figure carrying its own period/status, no badge, no pause.
+
+**Guard tests rewritten to the new policy (ADR docs/decisions/0016-simulated-live-counters.md),
+not dodged.** `test_macro.py::test_macro_simulates_nothing` no longer asserts the OLD
+policy (no `data-simulated` anywhere); it now asserts the NEW one: every `data-simulated`
+region carries a visible `.bp-simulated-badge`, this page's own inline script contains no
+`setInterval`/hand-rolled tick loop, and the shared engine it loads ticks on exactly one
+`setTimeout` and zero `setInterval`. `test_home2.py`'s finance-strip tests assert the strip
+is wired as a simulated region with a badge and a link to
+`macro.html#finances-publiques`, and that the fallback sentence is now actually TRUE
+(official figures are no longer "not published"; only the live trend can be
+unavailable/expired). `test_statbel_attribution.py`'s `DELEGATING_PAGES` gained
+macro.html (its own population figure is Statbel-sourced) as a `{page: credit-block
+pattern}` map, since macro's credit block is a `<p>`, not map.html's `<footer>`.
+
+**Tests.** `tests/pages/test_shared_components.py` adds Node-run unit tests for
+`live_counters.js` (`valueAt`'s five states including a gap between segments;
+`sinceOpened` never negative across a year-boundary reset, with the naive
+value-difference formula shown to go negative in the same scenario; `mount()`'s four
+refusal guards plus one positive control), run the same way `charts.js`/`components.js`
+already are -- no DOM needed. `tests/test_public_finance_live_browser.py` is a new
+Playwright suite (frozen clock via `page.clock.install`/`pause_at`/`run_for`): every
+`data-raw` checked against an independent Python re-statement of `valueAt`'s own formula
+against the committed `live_counters.json`, at a frozen instant and after `run_for(5000)`;
+pause/resume; `prefers-reduced-motion` starting every counter paused; the year-boundary
+reset (flow counters, the since-opened line staying non-negative, the YTD label reading
+the new year); the expired state reading a different headline from a missing payload; a
+mocked 404 falling back honestly with no badge/pause; French thousands-grouping
+(U+202F); no value wrapping/overflow at 390px; and a behavioural guard that snapshots
+every leaf element's rendered text, advances the clock 5s, and requires any node whose
+text changed to sit inside a badged `[data-simulated="true"]` region -- zero changed
+nodes on micro.html.
+
+**Not done in PR 2 / unconfirmed.** The French/Dutch wording for the breakdown
+`short_label`s, the home-strip fallback sentences, and the signed-balance strings are
+first-draft translations (see the mockup's own LISEZMOI.md "Ce qui reste à décider"),
+not yet confirmed by a native reviewer. The Bureau fédéral du Plan link in the chapter's
+method `<details>` is a proposed replacement for a dead link, also unconfirmed. Three
+pre-existing, sitewide contrast gaps the mockup's own review found (the raw `--th`
+chapter-number colour, chart axis text, a dark-theme prose link colour) are out of scope
+(rule 10) and unchanged by this PR.

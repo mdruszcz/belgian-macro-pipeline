@@ -28,6 +28,10 @@ COMMUNE_HTML = REPO / "commune.html"
 PROFILES_HTML = REPO / "profiles.html"
 COMPONENT_JS = REPO / "assets" / "commune_map.js"
 COMPONENT_CSS = REPO / "assets" / "commune_map.css"
+# Issue #309 PR 2: the generic simulated-counter engine home2.html and
+# macro.html both load -- same guarantee as COMPONENT_JS (no indicator id
+# ever written into the shared, page-agnostic renderer).
+LIVE_COUNTERS_JS = REPO / "assets" / "belpulse" / "live_counters.js"
 
 # Pages that draw a map, and therefore must load the shared component rather
 # than carry their own copy of it. communes.html and home.html used to be
@@ -410,7 +414,7 @@ def test_no_page_names_an_indicator():
     }
     assert codes, "the indicator index is empty, so this test would prove nothing"
 
-    for path in MAP_PAGES + [COMPONENT_JS]:
+    for path in MAP_PAGES + [COMPONENT_JS, LIVE_COUNTERS_JS]:
         text = path.read_text(encoding="utf-8")
         named = sorted(code for code in codes if code in text)
         assert not named, f"{path.name} names indicators directly: {named}"

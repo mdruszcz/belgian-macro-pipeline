@@ -205,40 +205,79 @@ def test_home2_headline_translations_have_no_new_orphan_risk():
     assert "homeTitle: 'De economische gegevens van België, automatisch bijgewerkt.'," in strings
 
 
-def test_home2_finance_strip_is_one_compact_line_not_four_cards():
-    """Item 2/3: was four cards, each reading 'Not published by this pipeline
-    yet' -- the widest band on the page, right under the hero. Same honest
-    state (FINANCE_KEYS + homeFinanceUnavailable), built into one line with
-    the 'see national data' link inline instead."""
+def test_home2_finance_strip_is_simulated_with_a_link_to_the_chapter():
+    """Item 2/3 built one compact line instead of four cards, each of which
+    used to read 'Not published by this pipeline yet'. Issue #309 PR 2
+    supersedes that honest-but-empty line: the strip now mounts five live
+    simulated counters (the same shared engine as the Macro page's own
+    chapter) with a link to the full chapter -- still one line/section, the
+    old four-card markup still gone, but no longer a bare sentence."""
     html = _html()
     assert "ftile" not in html, "the old four-card markup/CSS is still here"
+    assert '<section class="finance" id="financeStrip" data-simulated="true"' in html, (
+        "the strip is not wired as a simulated region -- BPLiveCounters.mount() "
+        'requires data-simulated="true" on its container'
+    )
     strip = re.search(
-        r'<section class="finance" id="financeStrip">(.*?)</section>', html, re.DOTALL
+        r'<section class="finance" id="financeStrip"[^>]*>(.*?)</section>', html, re.DOTALL
     )
     assert strip, "no #financeStrip section"
     body = strip.group(1)
     assert 'id="financeCompactText"' in body
+    assert (
+        'class="bp-simulated-badge' in body
+    ), "no simulated badge -- mount() would throw without one"
+    assert 'id="financePause"' in body
     assert 'class="fin-link"' in body
-    assert 'data-t="homeAllIndicators"' in body
+    assert (
+        'href="macro.html#finances-publiques"' in body
+    ), "the link no longer points at the full chapter"
+    assert 'data-t="homeFinanceSeeDetails"' in body
     assert 'data-t="homeFinanceTitle"' in body
 
 
-def test_home2_finance_compact_sentence_reuses_the_existing_honest_strings():
-    """The absence must remain visible (claude.md rule 26 in spirit -- an
-    honest 'unavailable' must not quietly disappear): the compact line is
-    still built from FINANCE_KEYS and the same homeFinanceUnavailable/
-    homeFinanceWhy strings the four cards used, not a new invented one."""
+def test_home2_finance_fallback_is_honest_about_what_is_actually_missing():
+    """Issue #309 PR 2 (round-2 fix, NEW P1-1): the OLD fallback sentence
+    (FINANCE_KEYS + homeFinanceUnavailable: 'Not published by this pipeline
+    yet') stopped being true the moment the Macro page's Official figures
+    block shipped reading real Eurostat levels -- this pipeline does hold
+    them now. FINANCE_KEYS/renderFinance() are gone; HomeFinance.
+    renderFallback() says the narrower, still-true thing instead (only the
+    LIVE trend simulation can be unavailable here), with a link to the
+    chapter where the real figures already are. claude.md rule 26 in
+    spirit still holds: the absence stays visible, just accurately named."""
     html = _html()
-    render = re.search(r"function renderFinance\(\)\{(.*?)\n  \}", html, re.DOTALL)
-    assert render, "renderFinance() not found"
-    body = render.group(1)
-    assert "FINANCE_KEYS.map" in body
-    assert "listJoinerAnd" in body
-    assert "homeFinanceUnavailable" in body
-    assert "homeFinanceWhy" in body
-    # And the joiner itself exists in all three languages.
+    assert "FINANCE_KEYS" not in html, "the old, now-false fixed editorial group is gone"
+    assert "function renderFinance(" not in html
+
+    fallback = re.search(r"function renderFallback\(reason\)\{(.*?)\n    \}", html, re.DOTALL)
+    assert fallback, "HomeFinance.renderFallback() not found"
+    body = fallback.group(1)
+    for key in (
+        "homeFinanceUnavailable",
+        "homeFinanceWhy",
+        "homeFinanceWhyLink",
+        "homeFinanceExpired",
+        "homeFinanceExpiredWhy",
+    ):
+        assert key in body, f"renderFallback() no longer reads {key}"
+    assert "macro.html#finances-publiques" in body, "no link to where the real figures are"
+
+    # The static, no-JS default says the same honest thing before any
+    # script runs, never the old, now-false "not published" claim.
+    static_default = re.search(r'id="financeCompactText">(.*?)</p>', html, re.DOTALL)
+    assert static_default and "macro.html#finances-publiques" in static_default.group(1)
+
     strings = (REPO / "assets" / "i18n.js").read_text(encoding="utf-8")
-    assert strings.count("listJoinerAnd:") == 3
+    for key in (
+        "homeFinanceUnavailable",
+        "homeFinanceWhy",
+        "homeFinanceWhyLink",
+        "homeFinanceExpired",
+        "homeFinanceExpiredWhy",
+        "homeFinanceSeeDetails",
+    ):
+        assert strings.count(f"{key}:") == 3, f"{key} is not defined in all three languages"
 
 
 def test_home2_heading_structure_exposes_one_h1_and_a_named_h2_per_section():

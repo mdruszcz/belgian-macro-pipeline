@@ -392,3 +392,32 @@ def test_live_counters_payloads_is_in_the_export_selection():
         for k in build_defs().resolve_job_def("validate_and_export").asset_layer.selected_asset_keys
     }
     assert "live_counters_payloads" in selected
+
+
+# ── committed payload matches the exporter's own output (audit P2, #314) ────
+#
+# Every test above runs against TRIMMED fixtures, so a wrong number hand-
+# edited (or left stale) in the COMMITTED public/data/live_counters.json --
+# the one file that supplies every figure a visitor actually reads in the
+# #finances-publiques chapter -- was invisible to the whole suite (proven in
+# the audit: multiplying the committed debt counter's v0/v1 by 1.5 and
+# re-running this file still gave a clean pass). Same device as
+# tests/test_export_site_payloads.py::test_committed_national_sections_json_matches_the_real_config:
+# regenerate from the REAL, committed inputs (export_live_counters' own
+# defaults already point at them) into a throwaway temp file and diff.
+
+
+def test_committed_live_counters_json_matches_the_real_config(tmp_path):
+    from scripts.export_live_counters import DEFAULT_NATIONAL, DEFAULT_OUT
+
+    if not DEFAULT_NATIONAL.exists() or not DEFAULT_OUT.exists():
+        pytest.skip("site payloads not built")
+    out_path = tmp_path / "live_counters.json"
+    export_live_counters(out_path=out_path)  # every other arg defaults to the real committed file
+    regenerated = json.loads(out_path.read_text(encoding="utf-8"))
+    committed = json.loads(DEFAULT_OUT.read_text(encoding="utf-8"))
+    assert regenerated == committed, (
+        "config/live_counters.yaml and the committed public/data/live_counters.json have "
+        "drifted apart -- regenerate the committed file from this config/the committed "
+        "national.json/aggregates.json/metadata"
+    )

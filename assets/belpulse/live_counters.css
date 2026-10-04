@@ -1,0 +1,326 @@
+/* Simulated live public-finance counters -- styling only.
+ * Reuses the existing .bp-live-counter / .bp-simulated-badge vocabulary
+ * from components.css (docs/design-references/component-gallery.html) so
+ * this does not become a second design language for the same idea; this
+ * file only adds the layout and the "more prominent, not less" badge
+ * treatment the maintainer's brief for this page asked for.
+ */
+
+/* macro_portrait.css's .row-2/.row-3 are scoped to .micro only (the macro
+   page's own #apercu .row-3 is a one-off). This page needs the same even
+   2-column behaviour for the breakdown cards and the official charts, so
+   it gets its own small, unscoped grid rather than reaching for a class
+   that happens not to apply here. auto-fit with minmax(min(320px,100%),1fr)
+   instead of a fixed 2-column split + a <=900px override: a flat 2-column
+   split left an uneven, mostly-empty last row at 1440px for the official
+   charts below (round-1 visual review, one group there is wider than the
+   others) -- auto-fit reflows to however many 320px-ish columns actually
+   fit, and min(320px,100%) is what still collapses it to one column on a
+   narrow screen without a second, easily-forgotten breakpoint rule. */
+.bp-finance-row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; margin-top:20px; }
+
+/* Compound selector (.bp-chart-card.bp-sim-region), not the bare class:
+   macro_portrait.css's ".macro .bp-chart-card{background:var(--bp-surface)}"
+   is two class selectors (specificity 0,2,0), which beats a single-class
+   ".bp-sim-region" rule (0,1,0) regardless of stylesheet load order -- CSS
+   resolves specificity before source order. This rule must still win, even
+   though round-3 gives it the SAME background as that shared rule now
+   (round-1/2 had it diverge to a solid navy tile here -- see below): without
+   it, the shared rule's 1px all-round border would silently swallow this
+   card's own accent-tinted left rule the instant a specificity tie breaks
+   the other way.
+   Round-3 visual review ("make it more in the style of the website"): the
+   navy tile this used to be (--bp-navy-surface/--bp-navy-text) was the one
+   surface on either page that broke from the site's own light card
+   vocabulary in every theme -- every other chapter card is --bp-surface on
+   --bp-border, with the chapter's accent dash on top
+   (.macro .bp-chart-card::before, macro_portrait.css), and this is now no
+   different. What still marks a card here as SIMULATED rather than the
+   official figures below it: the accent-tinted left rule (never used by a
+   non-simulated card on this page) plus its own .bp-simulated-badge tag --
+   the two cues CLAUDE.md's reviewers asked for, neither of them a navy
+   background. */
+.bp-chart-card.bp-sim-region{
+  border:1px solid var(--bp-border);
+  border-left:3px solid var(--bp-accent-ink);
+  border-radius:var(--bp-radius-card);
+  background:var(--bp-surface);
+  color:var(--bp-text);
+  padding:var(--bp-space-5, 20px);
+  padding-left:calc(var(--bp-space-5, 20px) - 2px);
+  margin-bottom:20px;
+}
+/* The year-note caption under a simulated card's own title ("Parts des
+   recettes de 2025") sits outside .bp-chart-head (its head is
+   .bp-sim-region-head instead), so it never reached macro_portrait.css's
+   ".bp-chart-head .subtitle{color:var(--bp-text-faint)}" -- it rendered at
+   full ink-strength card text instead of the muted caption weight every
+   other card's own subtitle uses. --bp-text-muted, not --bp-text-faint:
+   round-2's own a11y review already found text-faint short of 4.5:1 on this
+   page's surfaces (the reason #finOfficialNote etc. below were bumped to
+   plain --bp-text) -- muted is the one step that both reads as a caption
+   and still clears the bar. */
+.bp-sim-region .subtitle{ color:var(--bp-text-muted); font-size:12px; margin:2px 0 10px; }
+
+.bp-sim-region-head{
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px;
+  margin-bottom:14px;
+}
+
+.bp-sim-region-title{
+  font-weight:var(--bp-weight-semibold); margin:0; flex:1 1 auto; min-width:0;
+}
+
+/* The prominent badge for a whole simulated region (the strip, the home
+   strip): bigger than the small per-chip .bp-simulated-badge used
+   elsewhere in the design system, per the maintainer's note ("make it more
+   prominent if anything, not less") -- but prominence is size and
+   placement, not a solid alarm-coloured fill. Round-1 review: a solid
+   --bp-accent pill is the single loudest thing on the card and reads as an
+   error/warning badge, not an information label. An outlined, tinted pill
+   (the same --bp-accent-soft / --bp-accent-ink pair tokens.css already
+   defines, AA-checked per theme for exactly this "accent text on a light
+   accent tint" use) keeps it clearly visible without looking like a fault. */
+.bp-simulated-badge--prominent{
+  font-size:12px; text-transform:none; letter-spacing:0; font-weight:var(--bp-weight-semibold);
+  color:var(--bp-accent-ink); background:var(--bp-accent-soft);
+  border:1px solid var(--bp-accent-ink); border-radius:var(--bp-radius-pill); padding:5px 12px;
+  /* NOT nowrap: the French/Dutch sentence ("Simulation — extrapolation
+     de tendance, pas une prévision") is wider than a 360px viewport on
+     its own -- a fixed-width pill here caused real page-level horizontal
+     scroll (caught by this batch's own Playwright self-review at 360px).
+     max-width keeps it from stretching past its flex container instead. */
+  white-space:normal; max-width:100%;
+}
+
+.bp-sim-pause{
+  display:inline-flex; align-items:center; gap:6px;
+  min-width:44px; min-height:44px; padding:0 14px;
+  border-radius:var(--bp-radius-pill); border:1px solid var(--bp-border);
+  background:transparent; color:inherit; font:inherit; font-weight:var(--bp-weight-medium);
+  cursor:pointer;
+}
+/* Same hover affordance as the site's other pill control, .bp-chip -- this
+   button is already built on that pill's exact shape (border-radius:pill,
+   a 44px minimum target); round-3 just stops its border tying to a navy
+   fallback that no longer exists anywhere near it. */
+.bp-sim-pause:hover{ background:var(--bp-surface-alt); }
+.bp-sim-pause:focus-visible{ outline:2px solid var(--bp-accent); outline-offset:2px; }
+.bp-sim-pause[aria-pressed="true"]::before{ content:'\25B6'; }
+.bp-sim-pause[aria-pressed="false"]::before{ content:'\23F8'; }
+/* display:inline-flex above (0,1,0) otherwise beats the UA [hidden]
+   stylesheet rule at equal specificity by source order -- a paused button
+   stayed visible on an unavailable/expired card with `hidden` set on it
+   from script (round-1 review). */
+.bp-sim-pause[hidden]{ display:none; }
+
+/* Unavailable/error state: nothing is actually simulated, so neither the
+   "Simulation" badge nor a Pause button belongs on screen (round-1 visual +
+   a11y review: both were shown on an empty card, which reads as a live
+   simulation that happens to show nothing, rather than honestly "not
+   available"). Generic to any .bp-sim-region inside the bp-state machine,
+   not one card's id. */
+.bp-state[data-state="unavailable"] .bp-simulated-badge,
+.bp-state[data-state="unavailable"] .bp-sim-pause{ display:none; }
+
+/* The five headline counters (population, revenue, spending, deficit,
+   debt). Round-2 visual review (decision 1): a number must NEVER wrap
+   inside itself -- the round-1 fixed breakpoints (5/3/2/1 columns by
+   VIEWPORT width) squeezed 5 columns into widths too narrow for the
+   longest value at a few sizes in between, which is exactly where the
+   round-2 review caught a digit group splitting across two lines.
+   auto-fit with minmax(200px,1fr) asks the grid itself, from the
+   CARD's own available width (not the viewport), for as many >=200px
+   columns as actually fit -- dropping to 3+2, 2+2+1 or fewer rather than
+   shrinking every column below the width a value needs. */
+.bp-sim-strip{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:14px;
+}
+
+/* .bp-state[data-state="ready"] .bp-state-body{display:block} in
+   macro_portrait.css (specificity 0,3,0) beats this file's own
+   .bp-sim-strip{display:grid} (0,1,0) regardless of load order -- the five
+   headline counters stacked in one column (round-1 lead + visual review).
+   Same fix the shared stylesheet already uses for .portrait-metrics:
+   match the state-machine selector shape but add the layout class, which
+   wins on specificity (0,4,0) without touching the shared file. */
+.bp-state[data-state="ready"] .bp-state-body.bp-sim-strip{ display:grid; }
+
+.bp-live-counter-name{ display:block; }
+.bp-live-counter-since, .bp-live-counter-ytd{ font-size:11px; color:var(--bp-text-muted); margin-top:2px; display:block; }
+/* Round-2 visual review (M2): .bp-live-counter-label (components.css) is
+   display:flex -- a display:block CHILD of a flex container is still laid
+   out as a flex ITEM on the same row, not pushed to a new line, so the
+   year-to-date qualifier squeezed the counter's own name into whatever
+   width was left beside it instead of sitting under it. flex-wrap on the
+   label plus flex-basis:100% on the qualifier is what actually forces the
+   wrap point, scoped to this feature's own strip rather than editing the
+   shared .bp-live-counter-label rule every live counter uses. */
+.bp-sim-strip .bp-live-counter-label{ flex-wrap:wrap; }
+.bp-live-counter-ytd{ flex-basis:100%; margin-top:0; }
+
+/* Round-2 visual review (P1-A, decision 1): a number must NEVER wrap
+   inside itself. white-space:nowrap replaces the round-1 overflow-wrap:
+   anywhere, which was the actual cause of a digit group splitting across
+   two lines at 1440px -- that rule is for LABELS (bp-share-label below),
+   never for a value. container-type:inline-size on each counter cell lets
+   the value's own font-size respond to ITS cell's width (cqi), which
+   differs by breakpoint/column-count, rather than the viewport's width
+   (vw) the round-1 rule used -- a 5-column cell at 1440px and a 2-column
+   cell at 900px are not the same width, even though the viewport-based
+   clamp() used to treat them as if the ratio were fixed. */
+.bp-live-counter{ container-type:inline-size; }
+/* Compound selector (.bp-live-counter .bp-value), not the bare class: this
+   file's rule was silently losing to components.css's own
+   ".bp-live-counter .bp-value{font-size:1.6rem}" (specificity 0,2,0 beats
+   a single ".bp-value" class at 0,1,0 regardless of load order -- the same
+   "CSS resolves specificity before source order" lesson the
+   .bp-chart-card.bp-sim-region rule above this file already documents).
+   Caught by this batch's own Playwright self-review: the computed font-size
+   measured 25.6px (that 1.6rem) no matter what this rule's clamp() said. */
+.bp-live-counter .bp-value{
+  /* cqi is a percentage of the QUERY CONTAINER's content-box (padding
+     excluded), not its border-box -- measured empirically with this
+     batch's own Playwright self-review (cloning the longest rendered value
+     at a fixed 100px font and reading its scrollWidth gave ~8.99px of
+     width per character at 100px, so a coefficient above ~100/8.99 ~= 11.1
+     would overflow at ANY container width, cqi being scale-invariant by
+     design; 10 leaves a safety margin below that for font-metric
+     differences this estimate does not capture exactly). */
+  font-size:clamp(0.78rem, 10cqi, 1.4rem);
+  line-height:1.15;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  font-weight:var(--bp-weight-bold);
+  margin:4px 0;
+}
+
+/* Compact variant for home2's strip: smaller cards, same column logic as
+   the full strip above (it is the SAME five counters, just denser) -- a
+   smaller padding gives each cell more inner width per cqi unit than the
+   full strip's, so the same longest figure can afford a slightly larger
+   coefficient here without reopening the overflow this fixes above. */
+.bp-sim-strip--compact{ gap:10px; }
+.bp-sim-strip--compact .bp-live-counter{ padding:12px; min-width:0; }
+.bp-sim-strip--compact .bp-live-counter .bp-value{ font-size:clamp(0.7rem, 10cqi, 1.05rem); }
+
+/* Breakdown card: a share bar (one segment per part, left to right) above
+   ONE merged list -- colour key, short label and live share%, then the
+   live value right-aligned in tabular numerals. Round-1 review: this used
+   to be a separate legend list PLUS a full sub-counter grid repeating the
+   same long labels, and the sub-counter numbers clipped at the card edge.
+   Each row is built by live_counters.js's opts.buildNode hook (page-level
+   code decides the breakdown markup; the generic engine still drives the
+   ticking value/rate/since/sr elements inside it by class name). */
+.bp-share-bar{
+  display:flex; height:10px; border-radius:5px; overflow:hidden;
+  margin:4px 0 16px; background:var(--bp-border);
+}
+.bp-share-bar span{ display:block; height:100%; }
+.bp-share-list{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.bp-share-row{
+  display:grid; grid-template-columns:1fr auto; column-gap:12px; align-items:baseline;
+  padding:7px 0; border-bottom:1px solid var(--bp-border);
+}
+.bp-share-row:last-child{ border-bottom:none; }
+/* Narrow screens: the value drops to its own line under the label instead
+   of being forced to share a row it cannot fit on (round-1 visual review:
+   values clipped mid-number at every width). */
+@media (max-width:420px){
+  .bp-share-row{ grid-template-columns:1fr; row-gap:2px; }
+  .bp-share-row .bp-value{ justify-self:start; }
+}
+.bp-share-left{ display:flex; align-items:baseline; gap:6px; min-width:0; flex-wrap:wrap; }
+/* Round-2 visual review (P2-F): a LABEL may wrap anywhere it needs to (a
+   long Dutch compound word with no natural break point) -- unlike a value,
+   nothing is lost or misread if a label's word splits across two lines. */
+.bp-share-label{ min-width:0; overflow-wrap:anywhere; }
+.bp-live-counter-label{ overflow-wrap:anywhere; }
+.bp-share-pct{ font-variant-numeric:tabular-nums; color:var(--bp-text-muted); font-size:12px; white-space:nowrap; }
+.bp-share-swatch{ display:inline-block; width:9px; height:9px; border-radius:2px; flex:none; align-self:center; }
+.bp-share-row .bp-value{
+  font-size:1rem; white-space:nowrap; text-align:right; justify-self:end;
+  /* Never clipped: this is the one thing round-1 review flagged hardest
+     (a reader seeing 41 million when the real figure was 41 billion). */
+  overflow:visible;
+}
+/* The breakdown row's own rate/since lines are not shown -- twelve spending
+   segments each with a "per second" line is noise the design dropped in
+   favour of the share list alone; the engine still computes them (so the
+   ticking value above stays correct), this only hides the two elements. */
+.bp-share-row .bp-live-counter-rate, .bp-share-row .bp-live-counter-since{ display:none; }
+
+.bp-value, .bp-live-counter-rate, .bp-live-counter-since{ font-variant-numeric:tabular-nums; }
+
+/* Official (non-simulated) figures block: deliberately plain, no badge, no
+   accent background -- visually the opposite of the simulated strip so the
+   two are never mistaken for each other. */
+.bp-official-figures{ margin-top:8px; }
+.bp-official-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:16px; margin-bottom:16px;
+}
+.bp-official-item{ container-type:inline-size; }
+.bp-official-item .label{ font-size:12px; color:var(--bp-text-muted); margin-bottom:2px; }
+/* Round-2 visual review (M1/P1-A): same "never wrap a number" rule as the
+   simulated strip above -- white-space:nowrap + a cell-width-aware (cqi)
+   font-size instead of overflow-wrap:anywhere, which let a digit group
+   split mid-number. */
+.bp-official-item .value{
+  font-size:clamp(0.9rem, 9cqi, 1.3rem); font-weight:var(--bp-weight-semibold);
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+/* Round-2 visual review (M6): the period/status qualifier is a separate
+   fact from the value, not a continuation of the same line -- display:block
+   forces it onto its own line under every value, consistently, instead of
+   wrapping mid-way through whichever one happened to be long enough.
+   white-space:normal overrides the nowrap the number above needs; this
+   text is a short date/status phrase, never a figure that must not break. */
+.bp-official-item .value small{
+  display:block; font-size:11px; font-weight:var(--bp-weight-regular);
+  color:var(--bp-text-muted); margin-left:0; margin-top:2px; white-space:normal;
+}
+.bp-official-item .meta{ font-size:11px; color:var(--bp-text); }
+
+@media (max-width:480px){
+  .bp-official-grid{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width:360px){
+  .bp-official-grid{ grid-template-columns:1fr; }
+}
+
+/* Target size (WCAG 2.5.8, round-1 a11y review: both measured under 24px
+   at some width) and text contrast (round-1 a11y review: the faint token
+   measured 2.6-3.8:1 on these three surfaces, short of 4.5:1) for the new
+   provenance/method surfaces this batch adds. --bp-text is the same token
+   already used for ordinary body copy on this page, so this does not
+   introduce a new colour, just stops using the faint one here. Round-2
+   a11y review (P1-D): #finSourceLine and #finPopulationAttribution
+   (including its CC BY 4.0 credit) measured the same under-4.5:1 faint
+   token in all three themes -- same fix, same already-verified token. */
+#finOfficialNote, #finOfficialProvenance, #finSourceLine, #finPopulationAttribution{ color:var(--bp-text); }
+.fin-method summary{ padding:6px 0; min-height:24px; display:flex; align-items:center; }
+
+/* Round-2 a11y review (P1-B) found .bp-state-message illegible inside a
+   .bp-sim-region because that card was dark navy while the message's own
+   colour (macro_portrait.css) is a light-surface token -- fixed here with
+   an on-dark override. Round-3 removes the navy card itself (see
+   .bp-chart-card.bp-sim-region above), so this override is no longer
+   needed: macro_portrait.css's own ".bp-state-message{color:var(--bp-text-
+   muted)}" / ".headline{color:var(--bp-text)}" are already correct for a
+   light surface, exactly like every other card on this page. */
+
+/* Round-2 visual review (DESIGNER note): cards inside a .bp-finance-row
+   grid row default-stretch to the tallest sibling (the 12-row spending
+   breakdown vs. the 7-row revenue one), leaving a tall card's shorter
+   sibling with a large empty bottom strip for no content reason -- each
+   card should size to its own content instead. */
+.bp-finance-row > .bp-chart-card{ align-self:start; }
+
+/* Round 4 (lead): the live values use the plain text ink, exactly like the
+   site's own key-figure tiles (the KPI row at the top of macro.html: dark value,
+   small chapter-coloured dash, muted label). The brand crimson is kept for the
+   simulation markers only (badge, tags, left rule), so "simulated" stays the one
+   red signal on the card. Applies on both pages. */
+.bp-live-counter .bp-value{color:var(--bp-text)}
