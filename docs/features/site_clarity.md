@@ -1,13 +1,16 @@
 # Feature: site clarity — fewer figures in front, every one of them true
 
-Status: draft — awaiting maintainer approval
+Status: draft — the maintainer's decisions of 2026-10-04 are incorporated; the spec itself is not
+yet approved
 Issue: #312
 Branch: `docs/312-site-clarity-spec` for this document; one `feat/312-<slug>` branch per batch,
 named in each batch below.
 
 Audit record: `docs/reviews/2026-10-04-site-clarity-audit.md`.
-Source-side fixes this programme deliberately does **not** make: `docs/decisions/0017-ameco-forecast-periods.md`
-and `docs/decisions/0018-stopped-inflation-series.md`, both PROPOSED.
+Source-side fixes this programme deliberately does **not** make:
+`docs/decisions/0017-ameco-forecast-periods.md` and
+`docs/decisions/0018-stopped-inflation-series.md`, **both ACCEPTED on 2026-10-04** and each built in
+its own pull request, outside the six batches below.
 
 ## Problem
 
@@ -60,8 +63,9 @@ When this programme is done, all of the following are true and checkable:
    Belgian figure renders in under 1 s on a first visit with no video requested.
 6. The brand film is reachable from the About page and plays on a click. It never downloads unless
    the visitor asks for it.
-7. Each commune chapter shows about five figures in front; the rest sit behind one control whose
-   label says how many figures and how many are withheld.
+7. 33 of the commune page's 94 figures are in front, on the per-chapter split the maintainer
+   confirmed on 2026-10-04; the rest sit behind one control per chapter whose label says how many
+   figures and how many of those are withheld.
 8. On a phone each commune chapter opens closed, showing its title, its key figure and a one-line
    reading.
 9. Every indicator in front carries one sentence of why it matters, in en/fr/nl, containing no digit,
@@ -72,10 +76,13 @@ When this programme is done, all of the following are true and checkable:
 ## Non-goals
 
 - **No source adapter, geography resolution or analytical formula is altered.** The two mislabelled
-  series are fixed on the pages in batch 1. The source-side fix waits for ADR 0017/0018 approval
-  (rule 19) and is not part of any batch below.
-- **No new indicator and no new data source is loaded.** The one proposed row in
-  `docs/data_catalog.md` is marked PROPOSED and is not acted on (rule 8).
+  series are fixed on the pages in batch 1. ADR 0017 and ADR 0018 are now ACCEPTED (2026-10-04), and
+  each is implemented in **its own pull request** — not in any batch below. The page-side fix and
+  the source-side fix stay separate deliberately: batch 1 can ship while the adapter work is still
+  being written, and it reaches a reader first.
+- **No new indicator and no new data source is loaded by this programme.** `HICP_EUROSTAT_BE` and
+  the `prc_hicp_minr` repoint are approved (`docs/data_catalog.md`, 2026-10-04) and belong to ADR
+  0018's own PR. No batch below fetches them (rule 8).
 - **No database schema change** (rule 18).
 - **Nothing is deleted.** No figure, no URL, no anchor, no download leaves the site. "Hidden" means
   a closed panel on the same page.
@@ -208,14 +215,14 @@ decorative PNGs under `assets/belpulse/home2/`, not the two first written — ve
 `home2-hero-brussels.png` **1,643 KB**, which the earlier draft missed. 6,565 KB in total.
 Converting them to WebP, and serving one film poster instead of two (`poster.jpg` 243,384 B +
 `poster.webp` 238,284 B), would **create new binary artefacts in git**, and rule 12 says new
-binaries are not committed without asking. So this is a decision for the maintainer, listed under
-"Assumptions and open questions" below, not something the batch assumes. Three ways to go, and he
-picks one: (a) commit the converted WebP files and delete the PNGs — smallest page, one approval,
-and the originals stay in git history anyway; (b) leave the images untouched and ship the rest of
-the batch — the homepage still stops downloading 11.3 MB of video, which is where the 28 seconds
-came from; (c) drop the decorative images from the page entirely rather than convert them, which
-adds no binary at all. **If he does not answer, the batch ships option (b)** and the images are a
-follow-up — nothing in the batch depends on them.
+binaries are not committed without asking.
+
+**Settled: option (b) — the batch leaves them untouched and adds no new image file.** Announced to
+the maintainer on 2026-10-04 as the default; no objection recorded. The two alternatives stay
+available as their own small change later: (a) commit the converted WebP files and delete the PNGs,
+or (c) drop the decorative images from the page entirely, which adds no binary at all. Nothing in
+this batch depends on any of it — the 28-second first visit came from the 11.3 MB of video, not from
+these images.
 
 **What changes on the About page.** `about.html` is generated from
 `config/pages/about/published.json` through typed blocks; it uses `hero` and `rich_text` today.
@@ -278,7 +285,9 @@ maintainer's existing English `description` (186 files, median 56 words, holding
 reader needs — "per TAX RETURN, not per inhabitant"). Every clause that goes beyond those two
 sources is listed for him; he rewrites it in his own words ([H] step). `description` is never
 published as it stands: 163 of 186 are English-only (rule 7). One proofreading sheet per language
-for a native reader ([H] step). The first text written is the ONEM insured-rate caveat.
+for a native reader ([H] step). The first text written is the ONEM insured-rate caveat: the
+maintainer chose that rate to lead on 2026-10-04, and its caveat is that a fall can come from a
+change in benefit rules rather than from more people working. His wording of it is still owed.
 
 **Tests.** Schema tests: a digit, a `%` and a `€` each rejected in each of the three languages, in
 both schemas. A lint test with a verdict word on a `contextual` indicator. A byte-identical
@@ -301,7 +310,8 @@ label says how many.
 `assets/belpulse/*` chapter CSS/JS, `docs/features/commune_portrait.md`, its "Structure" section
 (amended **first**, in the same PR).
 
-**What changes.** Per chapter, about five figures in front and the rest in a `detail:` list:
+**What changes.** The per-chapter front tier, **confirmed by the maintainer on 2026-10-04 ("Keep 33
+in front")**, with the rest in a `detail:` list:
 demography 5 of 21, origins 2 of 5, households 2 of 7, income 2 of 5, social 2 of 4, housing 5 of 20,
 business 3 of 3, employment 3 of 10, safety 4 of 4, finances 5 of 15 — 33 of 94 in front. Per
 redundancy cluster the comparable form stays (rate, share, total, ratio) and the redundant form
@@ -442,20 +452,23 @@ Configuration changes, all additive:
   deterministic keys `stale_after` and `superseded_by` (batch 1). Both computed from config, never
   from the clock, so an unchanged input still rebuilds byte-identical (rule 35).
 
-**Source-side changes, not made here.** `docs/decisions/0017-ameco-forecast-periods.md` (forecast
-periods stored as `final`) and `docs/decisions/0018-stopped-inflation-series.md` (the NBB dataflow
-that stopped) are both PROPOSED. Until the maintainer approves them, `src/fetchers/dbnomics.py`,
-`src/fetchers/nbb.py`, `config/indicators/HICP.yaml`'s `fetch.query`,
-`config/indicators/HICP_ANNUAL_RATE_EUROPE.yaml`'s `fetch.dataset` and
-`scripts/sync_to_canonical.py` are untouched (rule 19). The stored rows and
-`data/belgian_macro_export.csv` keep saying `final`; batch 1 fixes what a reader sees, not what is
-stored, and says so in the PR body.
+**Source-side changes, approved but not made here.**
+`docs/decisions/0017-ameco-forecast-periods.md` (forecast periods stored as `final`) and
+`docs/decisions/0018-stopped-inflation-series.md` (the NBB dataflow that stopped) were **both
+ACCEPTED on 2026-10-04**, and each is implemented in its own pull request. No batch below touches
+`src/fetchers/dbnomics.py`, `src/fetchers/nbb.py`, `config/indicators/HICP.yaml`'s `fetch.query`,
+`config/indicators/HICP_ANNUAL_RATE_EUROPE.yaml`'s `fetch.dataset` or
+`scripts/sync_to_canonical.py` (rule 19). Until those two PRs land, the stored rows and
+`data/belgian_macro_export.csv` keep saying `final` and the Europe panel stays frozen at 2025-12;
+batch 1 fixes what a reader sees, not what is stored, and must say so in its PR body.
 
 ## New data sources
 
-None loaded. ADR 0018's recommended fix would need one Eurostat dataset, `prc_hicp_minr`. Its row is
-in `docs/data_catalog.md` under **"PROPOSED — awaiting maintainer approval"** and is explicitly not
-approved. Per rule 8 nothing fetches it until the maintainer approves that row.
+**None loaded by this programme.** One Eurostat dataset, `prc_hicp_minr`, was approved on 2026-10-04
+under ADR 0018 — the row is in `docs/data_catalog.md` under "Belgian inflation from Eurostat —
+APPROVED by the maintainer 2026-10-04", and it covers one new indicator (`HICP_EUROSTAT_BE`) and one
+repointed existing one. Rule 8 is satisfied, and the fetch belongs to ADR 0018's own PR: nothing in
+batches 1-6 reads it, and nothing has fetched it yet.
 
 ## Tests
 
@@ -476,25 +489,37 @@ pin, with the reason in the test's own docstring: `tests/test_macro_panels.py:43
 
 ## Assumptions and open questions
 
-**For the maintainer, in the order they block work:**
+### Still open — the maintainer's, in the order they block work
 
-1. **Which unemployment rate leads on a commune page?** The audit recommends the ONEM insured rate:
-   it is the only one covering all 565 communes and the only one with a peer median. It needs one
-   sentence saying a fall can mean a benefit-rule change rather than more people working. Blocks the
-   first wave-1 text in batch 3.
-2. **ADR 0017 and ADR 0018.** Until they are approved, the stored status stays wrong and inflation
-   stays frozen at December 2025 in the store. Batch 1 makes the pages honest about both; it cannot
-   make them current.
-3. **Flanders and Brussels municipal finances.** 305 of 565 communes have no debt, revenue or
-   expenditure figure, so a Flemish finance director finds a tax rate and five land-registry totals.
-   The recommendation is to say so plainly on those profiles now and decide the ABB/IBSA source
-   separately — the biggest product gap, not a layout question.
-4. **The two Walloon finance-ratio validation steps** (each definition against real budget documents;
-   three communes against their published budgets). His own, and until they are done
-   `MUN_DEBT_TO_REVENUE` cannot go in front — the figure the paying buyer opens the page for.
-5. **Batch 4 averages 3.3 figures per chapter, not five, and four chapters get only two.** He agreed
-   to "about five figures in front per chapter". This is what the per-cluster judgement actually
-   produced, and he should see it before the folding mockup rather than in it:
+1. **The two Walloon finance-ratio validation steps** (each definition against real budget documents;
+   three communes against their published budgets). His own, and nobody else can do them. Until they
+   are done `MUN_DEBT_TO_REVENUE` cannot go in front — the figure the paying buyer opens the page
+   for. Blocks the queued "Walloon finance ratios in front" item, not batches 1-6.
+2. **Confirming the wave-1 "why it matters" texts in his own words, and native fr/nl proofreading.**
+   Two separate `[H]` steps inside batch 3, both unavoidable: 163 of 186 indicator `description`
+   fields are English-only, so nothing can be published as drafted (rule 7), and the drafts are
+   written only from each indicator's own `definition` and his existing English `description`, with
+   every clause that goes beyond those two listed for him. Blocks batch 3 shipping, not starting.
+3. **The NBB licence.** `config/sources/nbb.yaml:6` has read `licence: null  # TODO` through
+   production use. Outside this programme and outside ADR 0018, which deliberately did not decide
+   it, but it is a real exposure and it is his to close.
+
+### Decided by the maintainer, 2026-10-04
+
+4. **Which unemployment rate leads on a commune page — the ONEM insured rate.** His choice: "ONEM
+   insured rate (Recommended)", with the one-sentence caveat that a fall can come from a change in
+   benefit rules rather than from more people working. It is the only rate covering all 565 communes
+   and the only one with a peer median. That caveat is the first wave-1 text written in batch 3, and
+   its exact wording is still his to confirm (open item 2 above).
+5. **ADR 0017 and ADR 0018 — both ACCEPTED.** "Keep them out (Recommended)": AMECO forecast years
+   are no longer stored beside real measurements, and each fetch counts and logs what it left out.
+   "Approve with that name (Recommended)": Belgian inflation comes from Eurostat as a new series
+   `HICP_EUROSTAT_BE`, and the NBB series stays, marked as stopped. Each is implemented in its own
+   pull request. Until those land, the stored status is still wrong and the store still stops at
+   December 2025 — batch 1 makes the pages honest about both, and cannot make them current.
+6. **Batch 4 keeps 33 figures in front, not five per chapter.** His choice: "Keep 33 in front
+   (Recommended)", accepting an average of 3.3 per chapter and four chapters (origins, households,
+   income, social) showing two:
 
    | Chapter | In front | Total | | Chapter | In front | Total |
    |---|---|---|---|---|---|---|
@@ -504,27 +529,35 @@ pin, with the reason in the test's own docstring: `tests/test_macro_panels.py:43
    | income | **2** | 5 | | finances | 5 | 15 |
    | social | **2** | 4 | | **total** | **33** | **94** |
 
-   Four chapters (origins, households, income, social) show two. Three of those four have only four
-   to seven figures in total, so "five in front" would mean folding almost nothing — and `business`
-   (3 of 3) and `safety` (4 of 4) have fewer than five to begin with. Raising the four thin chapters
-   to five would put 41 of 94 in front and fold almost nothing in them, which is a fair trade to
-   want. **Recommendation: keep these counts** — the point is a page a reader can finish, and a
-   chapter of two strong figures reads better than one of five where three restate each other. But
-   it is his call, it is cheap to change (it is one `detail:` list per chapter in config, no code),
-   and he should make it before the mockup is built rather than after.
-6. **Rule 12: may batch 2 commit converted images?** Three decorative PNGs under
-   `assets/belpulse/home2/` total 6,565 KB (`home2-namur-card.png` 2,846 KB,
-   `home2-namur-cta.png` 2,076 KB, `home2-hero-brussels.png` 1,643 KB). Converting them to WebP
-   creates new binary artefacts, which rule 12 says are not committed without asking. Options and
-   the default are in batch 2. **Recommendation: (b) leave them and ship the rest** — the 28-second
-   first visit came from the 11.3 MB of video, not from these, so the images can be a follow-up with
-   its own approval and nothing waits on them.
+   Three of those four thin chapters hold only four to seven figures in total, so five in front would
+   fold almost nothing; `business` (3 of 3) and `safety` (4 of 4) have fewer than five to begin with.
+   The rejected alternative was 41 of 94. **Settled before the mockup is built, which is the point of
+   asking.**
 
-**Assumptions this spec makes, any of which he can overturn:** that the film's existing cut and
-files are reused as they are; that the About page is the right home for the film rather than a page
-of its own; that the two national figures on the new homepage are debt and the balance. ("About five
-figures per chapter" was an assumption in an earlier draft of this spec; it is now question 5 above,
-because the counts do not meet it.)
+### Defaults announced to the maintainer 2026-10-04, no objection recorded yet
+
+These two were not asked as questions. They were announced as what will happen unless he objects, and
+**no objection is recorded**. They are not his explicit decision, and this spec does not claim they
+are; if he reads either and disagrees, it changes cheaply.
+
+7. **Flemish and Brussels commune profiles will say plainly that municipal finance figures cover
+   Wallonia only.** 305 of 565 communes have no debt, revenue or expenditure figure, so a Flemish
+   finance director finds a tax rate and five land-registry totals and no explanation today. Built as
+   a real "not applicable" state, never a blank or a zero (rule 26). Whether to source ABB (Flanders)
+   and IBSA (Brussels) stays a separate, larger decision — this is the wording, not the data.
+8. **The decorative PNGs are left untouched and batch 2 adds no new image files.** Three PNGs under
+   `assets/belpulse/home2/` total 6,565 KB (`home2-namur-card.png` 2,846 KB,
+   `home2-namur-cta.png` 2,076 KB, `home2-hero-brussels.png` 1,643 KB); converting them would create
+   new binary artefacts, which rule 12 says are not committed without asking. So batch 2 ships
+   without them — option (b) in that batch. Nothing is lost by waiting: the 28-second first visit
+   came from 11.3 MB of video, not from these images, and converting them stays available later as
+   its own small change with its own approval.
+
+**Assumptions this spec still makes, any of which he can overturn:** that the film's existing cut
+and files are reused as they are; that the About page is the right home for the film rather than a
+page of its own; that the two national figures on the new homepage are debt and the balance.
+("About five figures per chapter" was an assumption in an earlier draft; it became a question
+because the counts did not meet it, and he answered it on 2026-10-04 — see item 6 above.)
 
 **Not established.** Whether the simulated live counters from #309 PR 2 should also appear on the
 new homepage hero — that depends on a design the maintainer has not seen yet, so batch 2 leaves the

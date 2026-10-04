@@ -1,11 +1,17 @@
 # ADR 0017 — AMECO forecast years are stored as `final`
 
 Date: 2026-10-04
-Status: **PROPOSED — awaiting maintainer approval.** Nothing in `src/fetchers/`,
-`scripts/sync_to_canonical.py` or `src/validation/` changes until he approves this record.
+Status: **ACCEPTED — approved by the maintainer 2026-10-04**, option (d) with the forecast years
+kept OUT of `observations`, in his words: "Keep them out (Recommended)". Superseded the PROPOSED
+status of the same day.
 Required by: CLAUDE.md rules 6, 13, 19, 26, 35. Sibling record:
-`docs/decisions/0018-stopped-inflation-series.md`. Page-side half of the fix:
-`docs/features/site_clarity.md`, batch 1.
+`docs/decisions/0018-stopped-inflation-series.md` (also ACCEPTED 2026-10-04). Page-side half of the
+fix: `docs/features/site_clarity.md`, batch 1.
+
+**Implementation happens in its own pull request, not in this one.** The branch that carries this
+record changes documents only: no adapter, no sync script, no validation rule and no stored row is
+touched by it. Until that separate PR merges, everything under "What the approval does not change
+yet" below is still true of the running pipeline.
 
 ## Context
 
@@ -132,7 +138,35 @@ is a reasonable trade and this record should be amended to say so rather than qu
 **What this does to the page.** Under (d) the tile reads `139.0 · 2025`, the latest outturn, and the
 forecast leaves the site. Under (a) it reads `145.0 · 2027` with "estimate" beside it.
 
-## What is NOT changed until he approves
+## What exactly was approved, 2026-10-04
+
+The maintainer chose **option (d) with the forecast years kept out of `observations`** — the
+recommendation above, verbatim: "Keep them out (Recommended)". Concretely, he approved:
+
+1. **The adapter computes the last outturn year from the release date**, reproducing AMECO's own
+   published rule (the most recent two years are forecasts after a Spring release, three after an
+   Autumn one), anchored on `indexed_at` where that is the only date available, and **raising** when
+   that date is missing rather than defaulting to "everything is final".
+2. **The forecast rows do not enter `observations` at all.** A forecast year is no longer stored
+   beside real measurements.
+3. **Every fetch counts and logs what it left out**, and a test asserts that count, so a year where
+   AMECO's rule changes shows up as a failure rather than as rows quietly appearing or disappearing.
+   Nothing is silently dropped (rule 13).
+4. **Routing the forecast years into the `forecasts` table stays a separate, later decision.** It
+   changes a published download's shape and has nowhere to put geography or unit, and nothing on the
+   site needs those years.
+5. **The blocking validation rule (c) remains the backstop, and still waits on a schema addition** —
+   indicators must first be able to declare what their period means (`period_meaning`: flow |
+   stock_1jan | survey | rate_set_in_advance), because without it the rule fires on 9,006 correct
+   rows. That is its own PR and is not part of this approval.
+
+He did not choose (a), so `estimate` does not acquire a second meaning and no Commission forecast
+stays inside `observations`.
+
+## What the approval does not change yet
+
+Approval is not implementation. **This record's own pull request changes documents only.** Until the
+separate implementation PR merges, all of the following are still true:
 
 - `src/fetchers/dbnomics.py` — unchanged, including the unconditional `"obs_status": "A"`.
 - `src/fetchers/sdmx_status.py`, `scripts/sync_to_canonical.py`, `belgian_macro_db.py` — unchanged.
@@ -142,8 +176,9 @@ forecast leaves the site. Under (a) it reads `145.0 · 2027` with "estimate" bes
 
 **What happens meanwhile.** `docs/features/site_clarity.md` batch 1 stops the forecast years being
 shown as current values on the pages, using a narrow page-side rule (a `final` whole-year period
-past its own `updated` date is not a current value). That is a display fix. The stored status stays
-wrong, the published CSV keeps saying `final`, and the PR body says so.
+past its own `updated` date is not a current value). That is a display fix, and it is the one that
+reaches a reader first. The stored status stays wrong until the implementation PR lands, the
+published CSV keeps saying `final`, and that PR body must say so.
 
 ## Consequences
 

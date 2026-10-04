@@ -1,12 +1,17 @@
 # ADR 0018 — the Belgian inflation series stopped, and nothing noticed
 
 Date: 2026-10-04
-Status: **PROPOSED — awaiting maintainer approval.** No `fetch.query`, `fetch.dataset`, adapter or
-indicator config changes until he approves this record, and nothing fetches `prc_hicp_minr` until
-its catalogue row is approved.
+Status: **ACCEPTED — approved by the maintainer 2026-10-04**, option (b) plus the Europe repoint,
+with the proposed indicator id confirmed, in his words: "Approve with that name (Recommended)".
+Superseded the PROPOSED status of the same day.
 Required by: CLAUDE.md rules 6, 8, 13, 19, 26, 28, 35. Sibling record:
-`docs/decisions/0017-ameco-forecast-periods.md`. Page-side half of the fix:
-`docs/features/site_clarity.md`, batch 1.
+`docs/decisions/0017-ameco-forecast-periods.md` (also ACCEPTED 2026-10-04). Page-side half of the
+fix: `docs/features/site_clarity.md`, batch 1. Catalogue rows: `docs/data_catalog.md`, "Belgian
+inflation from Eurostat — APPROVED by the maintainer 2026-10-04".
+
+**Implementation happens in its own pull request, not in this one.** The branch that carries this
+record changes documents only: no indicator config, no `fetch` string, no adapter and no store is
+touched by it, and nothing has fetched `prc_hicp_minr` yet.
 
 ## Context
 
@@ -132,15 +137,45 @@ on the old `coicop` filter, and a `FetchError` on the unpinned `unit` dimension.
    `licence: null  # TODO` through production use. It does not block this record, but it is a real
    exposure.
 
-## What is NOT changed until he approves
+## What exactly was approved, 2026-10-04
+
+The maintainer chose **option (b) plus the Europe repoint**, and confirmed the proposed id, verbatim:
+"Approve with that name (Recommended)". Concretely, he approved:
+
+1. **A new Belgian indicator, `HICP_EUROSTAT_BE`**, from Eurostat `prc_hicp_minr` with all three
+   dimensions pinned (`unit=RCH_A`, `coicop18=TOTAL`, `geo=BE`). **The name is settled**: he
+   confirmed it rather than renaming it, which matters because an indicator id is part of the
+   `observations` primary key and stays in published downloads permanently.
+2. **A new id, never a re-sourcing of `HICP`** — re-sourcing would lay Eurostat vintages over NBB's
+   inside the same `(indicator_id, geo_id, period, vintage)` key.
+3. **`HICP_ANNUAL_RATE_EUROPE` repointed** to `prc_hicp_minr` with `coicop18: TOTAL` and
+   `unit: RCH_A` pinned explicitly, so an unpinned dimension fails loudly instead of returning a
+   different measure.
+4. **The NBB `HICP` series is kept, not deleted, and marked as stopped.** December 2025 is a real,
+   final, correct figure, not a missing one (rule 26). It keeps its rows, its chart, its
+   `explorer.html` row and its download, labelled with its last publication date and the fact that
+   the source stopped it, and it leaves the "current inflation" slots.
+5. **`DF_HICP_2025` is not queried**, so no joined series is constructed at a base year no source
+   publishes, and the `NonFinalDataflow` annotation stays out of the pipeline.
+6. **Both catalogue rows are approved** and now sit under "Belgian inflation from Eurostat —
+   APPROVED by the maintainer 2026-10-04" in `docs/data_catalog.md` (rule 8). No new data source and
+   no new licence decision: the `eurostat` source was approved on 2026-09-13.
+
+The NBB licence `TODO` (`config/sources/nbb.yaml:6`) was **not** part of this decision and is still
+open.
+
+## What the approval does not change yet
+
+Approval is not implementation. **This record's own pull request changes documents only.** Until the
+separate implementation PR merges, all of the following are still true:
 
 - `config/indicators/HICP.yaml` — `fetch.query` untouched; it keeps asking the frozen dataflow and
   keeps returning the same 192 rows.
-- `config/indicators/HICP_ANNUAL_RATE_EUROPE.yaml` — still `prc_hicp_manr`, `coicop: CP00`.
+- `config/indicators/HICP_ANNUAL_RATE_EUROPE.yaml` — still `prc_hicp_manr`, `coicop: CP00`, so the
+  Europe panel is still frozen at 2025-12 for all 36 geographies.
 - `src/fetchers/nbb.py`, `src/fetchers/eurostat.py`, `config/stores.yaml` — unchanged.
-- No new indicator config exists. No row is fetched from `prc_hicp_minr`.
-- `docs/data_catalog.md` carries the `prc_hicp_minr` row under **"PROPOSED — awaiting maintainer
-  approval"** and nothing acts on it (rule 8).
+- No `HICP_EUROSTAT_BE` config exists, and **no row has been fetched from `prc_hicp_minr`**.
+- The site still shows 2.2 % as Belgian inflation until batch 1 lands.
 
 **What happens meanwhile.** `docs/features/site_clarity.md` batch 1 takes the December 2025 figure
 out of the current-inflation slots and labels it with its own date and the fact that the source
