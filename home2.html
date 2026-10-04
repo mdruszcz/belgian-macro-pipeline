@@ -1070,13 +1070,24 @@
       document.getElementById('financeBadge').hidden = false;
       document.getElementById('financePause').hidden = false;
       var strip = document.getElementById('financeStrip');
-      handle = BPLiveCounters.mount(strip, payload, {
-        lang: lang, labels: finLabels(), formatValue: fmtLive,
-        placement: placement,
-        listEl: document.getElementById('financeLiveCounters'),
-        pauseBtn: document.getElementById('financePause'),
-        onCounterRendered: decorateStripCounter,
-      });
+      // Issue #309 fix round 2: BPLiveCounters.mount() can throw; a failed
+      // strip must fall back to the SAME honest "simulation not available"
+      // state init() already renders for a missing payload (renderFallback
+      // undoes the badge/pause hidden=false two lines above), never take
+      // the rest of this page's own startup down with it.
+      try{
+        handle = BPLiveCounters.mount(strip, payload, {
+          lang: lang, labels: finLabels(), formatValue: fmtLive,
+          placement: placement,
+          listEl: document.getElementById('financeLiveCounters'),
+          pauseBtn: document.getElementById('financePause'),
+          onCounterRendered: decorateStripCounter,
+        });
+      } catch(err){
+        if(typeof console !== 'undefined' && console.error) console.error('HomeFinance: strip mount failed', err);
+        handle = null;
+        renderFallback('missing');
+      }
     }
 
     function init(finSections, liveCountersRaw, initialLang){

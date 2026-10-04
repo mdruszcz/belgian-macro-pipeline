@@ -366,17 +366,46 @@
    * collapsed 0x0 box, or shifting it off-screen (e.g. position:absolute;
    * left:-9999px). A badge hidden any of those ways is exactly as absent,
    * for this guard's purpose, as one that is display:none. */
+  /* "Visible" means RENDERED, never "currently inside the viewport" --
+   * those are different facts. A badge the reader has simply scrolled
+   * past (the browser's own anchor-scroll can jump straight to a LATER
+   * chapter, e.g. macro.html#europe, landing well below an earlier
+   * chapter's own data-simulated region) is not hidden, it is just not
+   * the thing on screen right now; mount() runs once, synchronously,
+   * regardless of which chapter the page happened to open on, so this
+   * check must give the SAME answer no matter the current scroll
+   * position. A previous version used getBoundingClientRect()'s
+   * rect.right/rect.bottom (VIEWPORT-relative) to catch a badge "parked
+   * off-canvas" by CSS, which also rejected every perfectly normal badge
+   * sitting above whatever anchor the page opened on at narrow widths --
+   * found by issue #309's own fidelity check (macro.html#europe at
+   * 390px: the finance chapter's badges sit above the viewport once the
+   * browser has jumped to #europe, so mount() threw, and because nothing
+   * caught it -- see mount()'s own try/catch note in macro.html/home2.html
+   * -- the rest of boot(), the Europe map included, never ran).
+   *
+   * "Parked off-canvas" is instead read from the COMPUTED STYLE offsets
+   * themselves (position:absolute/fixed plus a large negative left/top --
+   * the common "visually hidden" trick), never from the element's
+   * on-screen position, so it cannot be confused with ordinary scrolling.
+   * Every real badge in this codebase is position:static (components.css
+   * .bp-simulated-badge), so this branch never fires for one; it exists
+   * only to refuse a badge a future page-level mistake tried to hide this
+   * way. */
   function isTrulyVisible(el){
     if(!el || el.hidden) return false;
-    if(typeof getComputedStyle === 'function'){
-      var style = getComputedStyle(el);
+    var style = (typeof getComputedStyle === 'function') ? getComputedStyle(el) : null;
+    if(style){
       if(style.display === 'none' || style.visibility === 'hidden') return false;
       if(parseFloat(style.opacity) === 0) return false;
+      if(style.position === 'absolute' || style.position === 'fixed'){
+        var left = parseFloat(style.left), top = parseFloat(style.top);
+        if((!isNaN(left) && left < -500) || (!isNaN(top) && top < -500)) return false;
+      }
     }
     if(typeof el.getBoundingClientRect === 'function'){
       var rect = el.getBoundingClientRect();
       if(rect.width <= 0 || rect.height <= 0) return false;
-      if(rect.right <= 0 || rect.bottom <= 0) return false;
     }
     return true;
   }

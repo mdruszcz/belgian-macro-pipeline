@@ -1218,14 +1218,29 @@
       // place (it throws otherwise, by design -- see its own comment).
       var stripBadge = document.getElementById(s.strip_badge);
       if(stripBadge) stripBadge.hidden = false;
-      handles.strip = BPLiveCounters.mount(card, payload, {
-        lang: lang, labels: finLabels(), formatValue: fmtLive,
-        placement: s.strip_placement,
-        listEl: document.getElementById(s.strip_list),
-        onCounterRendered: decorateStripCounter,
-      });
-      registerChapterRegion(handles.strip);
-      revealChapterHead();
+      // Issue #309 fix round 2: BPLiveCounters.mount() can throw (its own
+      // badge-visibility guard, or any other defensive check it adds
+      // later) -- this call site used to let that exception propagate
+      // straight out of boot(), silently skipping every statement after
+      // it in the SAME synchronous call chain, including the Europe
+      // panel's own init a little further down. One region failing to
+      // mount must show ITS OWN unavailable state (rule 13: a data/runtime
+      // condition is not a build failure) and never take the rest of the
+      // page down with it.
+      try{
+        handles.strip = BPLiveCounters.mount(card, payload, {
+          lang: lang, labels: finLabels(), formatValue: fmtLive,
+          placement: s.strip_placement,
+          listEl: document.getElementById(s.strip_list),
+          onCounterRendered: decorateStripCounter,
+        });
+        registerChapterRegion(handles.strip);
+        revealChapterHead();
+      } catch(err){
+        if(typeof console !== 'undefined' && console.error) console.error('FinancesPubliques: strip mount failed', err);
+        card.dataset.state = 'unavailable';
+        setCardUnavailable(s.strip_headline, s.strip_why, 'unavailable');
+      }
     }
 
     function swatch(el, index){
@@ -1315,31 +1330,44 @@
         };
       });
       if(handles[b.card]) handles[b.card].destroy();
-      handles[b.card] = BPLiveCounters.mount(card, payload, {
-        lang: lang, labels: finLabels(), formatValue: fmtLive,
-        counters: synthetic,
-        listEl: document.getElementById(b.list),
-        buildNode: function(counterRow, i){
-          var part = parts[i];
-          var li = document.createElement('li');
-          li.className = 'bp-share-row';
-          li.dataset.counterId = counterRow.id;
-          var left = document.createElement('span'); left.className = 'bp-share-left';
-          var dot = document.createElement('span'); dot.className = 'bp-share-swatch'; swatch(dot, i);
-          var name = document.createElement('span'); name.className = 'bp-live-counter-name bp-share-label';
-          var pct = document.createElement('span'); pct.className = 'bp-share-pct';
-          pct.textContent = MapUI.formatValue(part.share * 100, 'percent', 1, lang);
-          left.append(dot, name, pct);
-          var value = document.createElement('span'); value.className = 'bp-value'; value.setAttribute('aria-hidden', 'true'); value.dataset.raw = ''; value.textContent = '—';
-          var rate = document.createElement('span'); rate.className = 'bp-live-counter-rate'; rate.setAttribute('aria-hidden', 'true');
-          var since = document.createElement('span'); since.className = 'bp-live-counter-since'; since.setAttribute('aria-hidden', 'true');
-          var sr = document.createElement('p'); sr.className = 'bp-sr-only';
-          li.append(left, value, rate, since, sr);
-          return li;
-        },
-      });
-      registerChapterRegion(handles[b.card]);
-      revealChapterHead();
+      // Issue #309 fix round 2: same reasoning as mountStrip() above -- a
+      // thrown mount() must only take THIS card down, never the rest of
+      // boot() (the Europe panel's own init runs later in the same
+      // synchronous chain).
+      try{
+        handles[b.card] = BPLiveCounters.mount(card, payload, {
+          lang: lang, labels: finLabels(), formatValue: fmtLive,
+          counters: synthetic,
+          listEl: document.getElementById(b.list),
+          buildNode: function(counterRow, i){
+            var part = parts[i];
+            var li = document.createElement('li');
+            li.className = 'bp-share-row';
+            li.dataset.counterId = counterRow.id;
+            var left = document.createElement('span'); left.className = 'bp-share-left';
+            var dot = document.createElement('span'); dot.className = 'bp-share-swatch'; swatch(dot, i);
+            var name = document.createElement('span'); name.className = 'bp-live-counter-name bp-share-label';
+            var pct = document.createElement('span'); pct.className = 'bp-share-pct';
+            pct.textContent = MapUI.formatValue(part.share * 100, 'percent', 1, lang);
+            left.append(dot, name, pct);
+            var value = document.createElement('span'); value.className = 'bp-value'; value.setAttribute('aria-hidden', 'true'); value.dataset.raw = ''; value.textContent = '—';
+            var rate = document.createElement('span'); rate.className = 'bp-live-counter-rate'; rate.setAttribute('aria-hidden', 'true');
+            var since = document.createElement('span'); since.className = 'bp-live-counter-since'; since.setAttribute('aria-hidden', 'true');
+            var sr = document.createElement('p'); sr.className = 'bp-sr-only';
+            li.append(left, value, rate, since, sr);
+            return li;
+          },
+        });
+        registerChapterRegion(handles[b.card]);
+        revealChapterHead();
+      } catch(err){
+        if(typeof console !== 'undefined' && console.error) console.error('FinancesPubliques: breakdown mount failed', b.card, err);
+        handles[b.card] = null;
+        card.dataset.state = 'unavailable';
+        setCardUnavailable(b.headline, b.why, 'unavailable');
+        var emptyBar = document.getElementById(b.bar); if(emptyBar) emptyBar.innerHTML = '';
+        var emptyNote2 = document.getElementById(b.year_note); if(emptyNote2) emptyNote2.textContent = '';
+      }
     }
 
     /* Official net-lending/borrowing convention: POSITIVE = surplus

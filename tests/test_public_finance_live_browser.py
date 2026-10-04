@@ -157,10 +157,16 @@ def _now_ms(page) -> int:
 # ============================= macro.html chapter ===========================
 
 
+@pytest.mark.parametrize("width", [1440, 390], ids=["1440px", "390px"])
 def test_macro_strip_values_match_python_computed_segments_at_frozen_time(
-    chromium, site, counters_by_id
+    chromium, site, counters_by_id, width
 ):
-    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    """Issue #309 fix round 2: also run at 390px, not only desktop -- the
+    regression this guards (the badge-visibility check rejecting a region
+    the browser's own anchor-scroll had already scrolled past) only showed
+    up at phone width, where macro.html#finances-publiques's own anchor
+    scroll behaves differently against a shorter viewport."""
+    context = chromium.new_context(viewport={"width": width, "height": 1000})
     _set_lang(context, "en")
     page = context.new_page()
     try:
@@ -232,10 +238,11 @@ def test_macro_breakdown_parts_match_python_computed_segments(
         context.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390], ids=["1440px", "390px"])
 def test_home2_strip_values_match_python_computed_segments_at_frozen_time(
-    chromium, site, counters_by_id
+    chromium, site, counters_by_id, width
 ):
-    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    context = chromium.new_context(viewport={"width": width, "height": 1000})
     _set_lang(context, "en")
     page = context.new_page()
     try:
@@ -649,6 +656,7 @@ _SNAPSHOT_JS = """
 """
 
 
+@pytest.mark.parametrize("width", [1440, 390], ids=["1440px", "390px"])
 @pytest.mark.parametrize(
     "url_fragment,expect_any_change",
     [
@@ -658,9 +666,9 @@ _SNAPSHOT_JS = """
     ],
 )
 def test_behavioural_guard_changed_text_lives_only_in_a_badged_simulated_region(
-    chromium, site, url_fragment, expect_any_change
+    chromium, site, url_fragment, expect_any_change, width
 ):
-    context = chromium.new_context(viewport={"width": 1440, "height": 1000})
+    context = chromium.new_context(viewport={"width": width, "height": 1000})
     _set_lang(context, "en")
     page = context.new_page()
     try:
@@ -715,5 +723,153 @@ def test_behavioural_guard_changed_text_lives_only_in_a_badged_simulated_region(
             assert (
                 changed == 0
             ), f"{url_fragment}: {changed} node(s) changed; this page simulates nothing"
+    finally:
+        context.close()
+
+
+# ============== issue #309 fix round 2: boot-order safety ====================
+#
+# CI regression on PR #314: opening macro.html#europe at 390px threw an
+# uncaught "BPLiveCounters.mount: container has no visible, non-empty
+# .bp-simulated-badge" from inside FinancesPubliques.init() -- the finance
+# chapter sits ABOVE #europe in the DOM, so the browser's own anchor-scroll
+# lands past it before boot() ever mounts it, and isTrulyVisible() used to
+# read that as "hidden" (see live_counters.js's own isTrulyVisible comment
+# for the geometry). Because nothing caught the exception, every statement
+# boot() had left to run -- including the Europe panel's own init a little
+# further down the same synchronous chain -- silently never ran. Two
+# independent fixes, tested together here: isTrulyVisible() no longer
+# depends on scroll position (tests/pages/test_shared_components.py has the
+# unit-level proof), and every BPLiveCounters.mount() call site now catches
+# its own failure instead of letting it propagate.
+
+EUROPE_SVG_SELECTOR = '#bpEuropeStage svg path[id^="em-nutsrg-"]'
+
+
+@pytest.mark.parametrize("width", [390, 1440], ids=["390px", "1440px"])
+@pytest.mark.parametrize("anchor", ["europe", "croissance", "finances-publiques"])
+def test_macro_boots_cleanly_from_any_chapter_anchor(chromium, site, anchor, width):
+    """Opening macro.html on ANY chapter's own anchor -- not just the one
+    the reader is about to look at -- must mount the finance strip with no
+    uncaught page error, at both a phone and a desktop width. #europe is
+    the specific regression (its own map must also actually draw); the
+    other two anchors are controls that were never broken, included so a
+    future change that fixes #europe by special-casing it would still be
+    caught here."""
+    context = chromium.new_context(viewport={"width": width, "height": 844})
+    _set_lang(context, "en")
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/macro.html#{anchor}")
+        page.wait_for_selector("#finance-live-strip[data-state]", timeout=15000)
+        page.wait_for_function(
+            "document.getElementById('finance-live-strip').dataset.state !== 'loading'",
+            timeout=15000,
+        )
+        if anchor == "europe":
+            page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=15000)
+            count = page.eval_on_selector_all(EUROPE_SVG_SELECTOR, "els => els.length")
+            assert count > 0, "opened on #europe but the Europe map drew no regions"
+        assert not errors, f"uncaught page error(s) opening macro.html#{anchor}: {errors}"
+        raws = page.eval_on_selector_all(
+            "#finance-live-strip [data-counter-id] .bp-value",
+            "els => els.map(e => e.getAttribute('data-raw'))",
+        )
+        assert raws and all(
+            r is not None for r in raws
+        ), f"finance strip did not mount its counters when opened on #{anchor}: {raws}"
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("width", [390, 1440], ids=["390px", "1440px"])
+def test_home2_boots_cleanly_when_scrolled_to_the_bottom_before_mount(chromium, site, width):
+    """Same class of regression as above, reproduced on home2.html: scroll
+    to the very bottom of the document BEFORE the async payload fetch
+    resolves (boot() is still awaiting it at this point), so #financeStrip
+    mounts while it is nowhere near the viewport -- it must still mount
+    successfully, with no uncaught page error."""
+    context = chromium.new_context(viewport={"width": width, "height": 844})
+    _set_lang(context, "en")
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    page.route("**/*.mp4", lambda route: route.abort())
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/home2.html")
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_function(
+            "document.getElementById('financeBadge') && "
+            "(document.getElementById('financeBadge').hidden === false || "
+            "document.getElementById('financeCompactText').textContent.trim().length > 0)",
+            timeout=15000,
+        )
+        assert not errors, f"uncaught page error(s) on home2.html scrolled to bottom: {errors}"
+        assert (
+            page.eval_on_selector("#financeBadge", "el => el.hidden") is False
+        ), "the strip fell back to unavailable instead of mounting -- regression, not just scroll"
+        raws = page.eval_on_selector_all(
+            "#financeStrip [data-counter-id] .bp-value",
+            "els => els.map(e => e.getAttribute('data-raw'))",
+        )
+        assert raws and all(r is not None for r in raws), f"strip did not mount: {raws}"
+    finally:
+        context.close()
+
+
+# A script that forces exactly the FIRST BPLiveCounters.mount() call to
+# throw (on macro.html, that is mountStrip()'s own call), then lets every
+# later call through untouched -- installed before live_counters.js runs by
+# trapping the `window.BPLiveCounters =` assignment itself, so it is not a
+# timing-dependent race against boot()'s own async fetch.
+_FORCE_FIRST_MOUNT_FAILURE_INIT_SCRIPT = """
+(function(){
+  var real, failed = false;
+  Object.defineProperty(window, 'BPLiveCounters', {
+    configurable: true,
+    get: function(){ return real; },
+    set: function(v){
+      if(v && typeof v.mount === 'function'){
+        var originalMount = v.mount;
+        v.mount = function(){
+          if(!failed){ failed = true; throw new Error('forced mount failure (test)'); }
+          return originalMount.apply(this, arguments);
+        };
+      }
+      real = v;
+    }
+  });
+})();
+"""
+
+
+def test_a_forced_mount_failure_falls_back_without_killing_the_rest_of_the_page(chromium, site):
+    context = chromium.new_context(viewport={"width": 1440, "height": 900})
+    _set_lang(context, "en")
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    page.add_init_script(_FORCE_FIRST_MOUNT_FAILURE_INIT_SCRIPT)
+    try:
+        _freeze(page, FROZEN)
+        page.goto(f"{site}/macro.html#europe")
+        page.wait_for_function(
+            "document.getElementById('finance-live-strip').dataset.state !== 'loading'",
+            timeout=15000,
+        )
+        page.wait_for_selector(EUROPE_SVG_SELECTOR, timeout=15000)
+        assert not errors, f"the forced mount failure was not caught -- uncaught: {errors}"
+        strip_state = page.eval_on_selector("#finance-live-strip", "el => el.dataset.state")
+        assert (
+            strip_state == "unavailable"
+        ), f"the region whose mount() was forced to throw should read 'unavailable', got {strip_state!r}"
+        europe_count = page.eval_on_selector_all(EUROPE_SVG_SELECTOR, "els => els.length")
+        assert (
+            europe_count > 0
+        ), "the Europe map did not initialise after an earlier region's mount failed"
     finally:
         context.close()

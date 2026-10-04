@@ -518,6 +518,39 @@ def test_mount_accepts_a_container_with_data_simulated_and_a_visible_badge(live_
     ), f"the guard itself rejected a valid container: {message}"
 
 
+def test_mount_accepts_a_badge_that_is_simply_scrolled_out_of_view(live_counters_js):
+    """Issue #309 fix round 2 (CI regression on PR #314): a badge the
+    reader has merely scrolled PAST -- e.g. the browser's own anchor-scroll
+    jumped straight to a later chapter, such as macro.html#europe, landing
+    below an earlier chapter's own data-simulated region -- is not hidden,
+    it is just not on screen right now. A previous isTrulyVisible() used
+    getBoundingClientRect()'s rect.right/rect.bottom (VIEWPORT-relative) to
+    catch a badge deliberately parked off-canvas by CSS, which also
+    rejected this perfectly normal case: width/height are real and
+    positive, but top/left/right/bottom are all negative (the element sits
+    above/left of the current viewport, exactly what scrolling past it
+    looks like). mount() must accept it -- the guard itself should not
+    fire, so the error it does see (device-less container has no real DOM)
+    must be a DIFFERENT message than the badge-guard ones, same proof
+    technique as the positive control above."""
+    fake_el = """
+    const attrs = {'data-simulated': 'true'};
+    const badge = {
+      textContent: 'Simulation', hidden: false,
+      getBoundingClientRect(){ return {width: 60, height: 20, top: -500, bottom: -480, left: -200, right: -140}; },
+    };
+    const container = {
+      getAttribute(n){ return attrs[n] === undefined ? null : attrs[n]; },
+      querySelector(sel){ return sel === '.bp-simulated-badge' ? badge : null; },
+    };
+    """
+    message = _mount_throws(fake_el, [live_counters_js])
+    assert message is not None, "mount() did not throw at all against a fake, DOM-less container"
+    assert (
+        "data-simulated" not in message and "bp-simulated-badge" not in message
+    ), f"a badge merely scrolled out of view was rejected by the visibility guard: {message}"
+
+
 def test_gallery_loads_tokens_before_layout_before_components(gallery_html):
     """Cascade order matters: components.css assumes layout's box-sizing
     reset and tokens.css's custom properties are already in scope."""
