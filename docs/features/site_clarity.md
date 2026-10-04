@@ -335,7 +335,12 @@ URL opens income. Every anchor still resolves. Desktop output unchanged — a be
 comparison at 1440 px.
 
 **Effort** M. **Risk** medium: an anchor that stops working is a broken public URL. **Mockup** yes.
-**Ceremony** lead → builder → auditor (rule 31) → builder fixes.
+**Ceremony** lead → builder. No auditor pass, deliberately: this batch adds no schema, no payload
+key and no new data path, desktop output is unchanged, and the one risk that matters — a dead
+`#chapter-*` anchor — is covered by a hard anchor test in the batch itself and by the mockup folder.
+The same anchor machinery, on a larger surface, is independently reviewed one batch earlier in
+batch 4. If batch 4's auditor finds anything in the anchor or panel code, this batch gets an auditor
+too.
 
 ### Batch 6 — One yardstick
 

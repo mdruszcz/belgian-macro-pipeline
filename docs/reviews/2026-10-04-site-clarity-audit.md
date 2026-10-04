@@ -95,9 +95,14 @@ audited** — I checked these; no independent reviewer has.
 | The About page is built from typed blocks | Read `config/pages/about/published.json` and the registry | `hero` + `rich_text`; 16 block types exist; no video type ✓ |
 | Hiding "any period past `updated`" is too broad | Compared each of the 45 national series' last period against its own `updated` | 4 series hit, not 1: `LABOUR_COST_BE` 2026/2027 (wanted), `UNEMPLOYMENT_RATE_INSURED` 2026 = 5.05 `provisional`, `CONSUMER_CONFIDENCE` and `EC_CONS_CONF_BE` 2026-09 (real surveys; `EC_CONS_CONF_BE` is a headline KPI) ✓ |
 | #309 PR 2 already fixes part of D5 | `git status` and `git diff` in the `bp-pf-ui` worktree | uncommitted work already rewrites `kpis_note`, removes `public_finance` from `unavailable:`, and rewrites `homeFinanceUnavailable`/`homeFinanceWhy` ✓ |
+| The commune page's chapters and the 94-figure denominator | Loaded `config/local_sections.yaml` and counted each section's `headline`, `indicators`, `headlines` and composition `parts` | **eleven** sections, **ten** carrying figures: demography 21, origins 5, households 7, income 5, social 4, housing 20, business 3, employment 10, safety 4, finances 15 = **94**; `mobility` carries only its trilingual `unavailable` note and no figures, and `age_structure` is a composition block above the `sections:` list, not a chapter ✓ |
 
-That last check changed the plan: the first batch was scoped to rewrite three sets of strings that
+That #309 check changed the plan: the first batch was scoped to rewrite three sets of strings that
 another branch is already rewriting. It now leaves them alone.
+
+The chapter count corrected the plan's own arithmetic: two batches had been written against "nine
+chapters", and batch 4's per-chapter front tier sums to 33 of 94, not the 34 first written. The
+per-chapter denominators the inventory lens reported are exactly right.
 
 ## Reported by a lens, not re-checked by me
 
@@ -189,7 +194,13 @@ reference, not a measurement. None was reproduced, and no decision in the plan r
 
 ## Residual gap
 
-No batch in `docs/features/site_clarity.md` is audited. Three of the six batches carry a planned
-`auditor` pass; none has run. The counts in "Reported by a lens, not re-checked by me" above are a
-single lens's measurement each, and the two mockup folders (batches 2 and 4/5) are the only
+No batch in `docs/features/site_clarity.md` is audited — and **unaudited is not clean**. Five of the
+six batches carry a planned `auditor` pass (batch 5 deliberately does not; the reason is in the
+batch); **none has run**, because no batch has been built. Everything above that is marked verified
+was verified by me, the lead, against the files and the payloads — no independent reviewer has
+checked any of it.
+
+The counts in "Reported by a lens, not re-checked by me" are a single lens's measurement each. The
+`94` denominator under them is now verified (see the table above); the `43 of 94` and `51 of 94`
+redundancy splits on top of it are not. The two mockup folders (batches 2 and 4/5) are the only
 independent check the maintainer gets on the layout decisions before they ship.
