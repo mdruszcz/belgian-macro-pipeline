@@ -1,0 +1,30 @@
+id: HICP_EUROSTAT_BE
+name:
+  en: HICP (Harmonised Inflation), Eurostat
+  fr: IPCH (Inflation harmonisée), Eurostat
+  nl: GICP (Geharmoniseerde inflatie), Eurostat
+definition:
+  en: "Year-on-year change in Belgium's harmonised consumer price index, from Eurostat's current dataset; the National Bank's own HICP series (indicator HICP) stopped being updated after December 2025 and is kept separately."
+  fr: "Variation en glissement annuel de l'indice des prix à la consommation harmonisé belge, à partir du jeu de données actuel d'Eurostat ; la série IPCH de la Banque nationale (indicateur HICP) a cessé d'être mise à jour après décembre 2025 et est conservée séparément."
+  nl: "Jaar-op-jaar verandering van de Belgische geharmoniseerde consumentenprijsindex, op basis van de actuele dataset van Eurostat; de eigen GICP-reeks van de Nationale Bank (indicator HICP) werd na december 2025 niet meer bijgewerkt en wordt afzonderlijk bewaard."
+unit: percent_yy
+frequency: M
+source_id: eurostat
+geo_levels:
+- national
+preferred_direction: contextual
+description:
+  en: Harmonised Index of Consumer Prices, all items, year-on-year growth rate,
+    from Eurostat dataset prc_hicp_minr (ECOICOP ver.2). Eurostat's 2026
+    methodology update makes a small number of months read about 0.1 percentage
+    point differently from the retired prc_hicp_manr dataset the NBB-sourced
+    HICP series was built on (6 months since 2008, 11 since 1996) -- a
+    re-reference, not a revision. See docs/decisions/0018-stopped-inflation-series.md.
+fetch:
+  dataset: prc_hicp_minr
+  filters:
+    unit: RCH_A
+    coicop18: TOTAL
+    geo: BE
+  since: "2008"
+display: null

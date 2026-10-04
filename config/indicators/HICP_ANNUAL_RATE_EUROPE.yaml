@@ -17,9 +17,18 @@ description:
   en: Harmonised Index of Consumer Prices, all items, annual rate of change, every
     allowlisted European country -- the international pilot (docs/features/international.md).
 fetch:
-  dataset: prc_hicp_manr
+  # ADR 0018 (docs/decisions/0018-stopped-inflation-series.md, ACCEPTED
+  # 2026-10-04): prc_hicp_manr stopped at 2025-12 and still answers HTTP 200,
+  # so nothing failed loudly on its own. prc_hicp_minr is its ECOICOP ver.2
+  # successor -- same concept, same adapter, both dimensions that changed
+  # name/code pinned explicitly so an unpinned one fails loudly instead of
+  # silently returning a different measure (coicop -> coicop18, CP00 ->
+  # TOTAL; unit is a new dimension, pinned to RCH_A, the annual rate of
+  # change -- without it the dataset would also return index levels).
+  dataset: prc_hicp_minr
   filters:
-    coicop: CP00
+    coicop18: TOTAL
+    unit: RCH_A
   geographies: allowlist
   since: "2008"
 display: null
