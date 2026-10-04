@@ -1,6 +1,6 @@
 # Feature: site clarity — fewer figures in front, every one of them true
 
-Status: draft
+Status: draft — awaiting maintainer approval
 Issue: #312
 Branch: `docs/312-site-clarity-spec` for this document; one `feat/312-<slug>` branch per batch,
 named in each batch below.
@@ -23,7 +23,7 @@ are counts or euro totals carrying a rank that only restates how big the commune
 
 **The front door costs 27.5 seconds.** On a first visit to `home2.html` the brand film occupies
 828 of 900 px at 1440x900 and 11,287,965 bytes download before the first Belgian figure appears at
-28,377 ms. LCP is `VIDEO#filmVideo`; CLS is 0.34, of which 0.1788 fires at 27,952 ms as the film
+28,377 ms. LCP is `VIDEO#filmVideo`; CLS is 0.3163, of which 0.1788 fires at 27,952 ms as the film
 band collapses. The reduced-motion run proves the alternative: no video requested, first figure at
 527 ms, 12 figures above the fold. The commune search below it is inert unless the visitor types the
 French name *plus* its NIS code, and at 1366x768 it sits below the fold.
@@ -271,20 +271,27 @@ schemas and the lint) → builder fixes.
 
 Branch `feat/312-chapter-detail-tier`.
 
-**Objective.** About 34 of 94 commune figures in front; the rest behind one control per chapter whose
+**Objective.** 33 of 94 commune figures in front; the rest behind one control per chapter whose
 label says how many.
 
 **Files.** `config/local_sections.yaml` (a new per-section `detail:` list),
 `scripts/export_site_payloads.py` (`_check_sections` at `:522`), `commune.html`,
-`assets/belpulse/*` chapter CSS/JS, `docs/features/commune_portrait.md` §6 (amended **first**, in
-the same PR).
+`assets/belpulse/*` chapter CSS/JS, `docs/features/commune_portrait.md`, its "Structure" section
+(amended **first**, in the same PR).
 
-**What changes.** Per chapter, five figures in front and the rest in a `detail:` list:
+**What changes.** Per chapter, about five figures in front and the rest in a `detail:` list:
 demography 5 of 21, origins 2 of 5, households 2 of 7, income 2 of 5, social 2 of 4, housing 5 of 20,
-business 3 of 3, employment 3 of 10, safety 4 of 4, finances 5 of 15. Per redundancy cluster the
-comparable form stays (rate, share, total, ratio) and the redundant form folds. Each chapter keeps
-its chart, its map and its neighbours box. `#chapter-finances` opens its panel. The six key figures
-come first on a phone. The sticky menu shows all nine chapters.
+business 3 of 3, employment 3 of 10, safety 4 of 4, finances 5 of 15 — 33 of 94 in front. Per
+redundancy cluster the comparable form stays (rate, share, total, ratio) and the redundant form
+folds. Each chapter keeps its chart, its map and its neighbours box. `#chapter-finances` opens its
+panel. The six key figures come first on a phone.
+
+`config/local_sections.yaml` has **eleven** sections and ten of them carry figures (verified by
+loading the file: demography 21, origins 5, households 7, income 5, social 4, housing 20, business 3,
+employment 10, safety 4, finances 15 = 94; `mobility` carries only its trilingual `unavailable` note
+and no figures). `age_structure` is a composition block above the `sections:` list, not a chapter.
+So the sticky menu shows ten chapters plus the mobility note, and nothing in this batch changes that
+count.
 
 **The label carries the withheld count.** 405 latest-period cells are suppressed or not-applicable
 across 287 of 565 communes, concentrated on exactly the indicators this batch folds. A control
@@ -322,7 +329,8 @@ figure and one line of reading. Opening is a click; deep links keep working — 
 `#chapter-*` anchor opens that chapter and scrolls to it (rule 31). No figure is removed from the
 DOM in a way that breaks an in-page anchor or the browser's own find.
 
-**Tests.** At 390 px: nine chapters, all closed, each showing exactly one figure. A `#chapter-income`
+**Tests.** At 390 px: all ten figure-carrying chapters closed, each showing exactly one figure, and
+the `mobility` note unchanged (it has no figure to show). A `#chapter-income`
 URL opens income. Every anchor still resolves. Desktop output unchanged — a before/after DOM
 comparison at 1440 px.
 
