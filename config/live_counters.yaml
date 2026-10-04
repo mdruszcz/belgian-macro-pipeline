@@ -255,4 +255,10 @@ counters:
 placements:
   macro_strip: [population, revenue, spending, deficit, debt]
   macro_breakdowns: [revenue, spending]
-  home_strip: [population, debt, deficit, revenue, spending]
+  # Issue #312 batch 2: was [population, debt, deficit, revenue, spending].
+  # The maintainer approved macro_strip's order (population, revenue,
+  # spending, deficit, debt) in the public-finance-live mockup; home_strip
+  # now matches it exactly, so a reader sees the same five counters in the
+  # same order on both home2.html and macro.html rather than two different
+  # orderings of the same five things.
+  home_strip: [population, revenue, spending, deficit, debt]

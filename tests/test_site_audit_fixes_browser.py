@@ -72,27 +72,33 @@ def test_profiles_html_has_no_horizontal_overflow_at_390px(chromium, site):
 
 
 def test_commune_search_input_shows_a_visible_focus_change(chromium, site):
-    """#communeSearch's own <input> has outline:0 (its .searchbox wrapper
-    draws the border instead), so before this fix, tabbing to it produced NO
-    visible change at all -- neither the browser's default ring (suppressed)
-    nor a replacement (never added). After the fix, the .searchbox WRAPPER
-    gets a :focus-within outline. Compares the wrapper's own outline style
-    focused vs not, rather than asserting a specific colour, so the test
-    does not need to know the accent token's exact value."""
+    """#communeSearch's own <input> has outline:0 (its wrapper draws the
+    border instead), so before this fix, tabbing to it produced NO visible
+    change at all -- neither the browser's default ring (suppressed) nor a
+    replacement (never added). After the fix, the wrapper gets a
+    :focus-within ring.
+
+    Issue #312 batch 2: home2.html's commune search was rebuilt as a real
+    ARIA 1.2 combobox; its wrapper is now `.herosearch-field`, not
+    `.searchbox`, and its own focus ring is a border-colour + box-shadow
+    change (`.herosearch-field:focus-within`), not an `outline` -- so this
+    test now compares the wrapper's box-shadow instead. Still asserts "a
+    visible change happens", not a specific colour, so it does not need to
+    know the accent token's exact value."""
     context = chromium.new_context(viewport={"width": 1280, "height": 900})
     page = context.new_page()
     try:
         page.goto(f"{site}/home2.html")
         page.wait_for_selector("#communeSearch", timeout=15000)
         unfocused = page.eval_on_selector(
-            "#communeSearch", "el => getComputedStyle(el.closest('.searchbox')).outlineStyle"
+            "#communeSearch", "el => getComputedStyle(el.closest('.herosearch-field')).boxShadow"
         )
         page.focus("#communeSearch")
         focused = page.eval_on_selector(
-            "#communeSearch", "el => getComputedStyle(el.closest('.searchbox')).outlineStyle"
+            "#communeSearch", "el => getComputedStyle(el.closest('.herosearch-field')).boxShadow"
         )
-        assert unfocused == "none", f"searchbox has a visible outline even unfocused: {unfocused}"
-        assert focused == "solid", f"searchbox has no visible focus outline: {focused}"
+        assert unfocused == "none", f"search field has a visible ring even unfocused: {unfocused}"
+        assert focused != "none", "search field has no visible focus ring"
     finally:
         context.close()
 

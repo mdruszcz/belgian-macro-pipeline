@@ -216,6 +216,57 @@
         }
       }
     },
+    "film": {
+      "accepts_binding": false,
+      "props_schema_status": "provisional",
+      "current_version": 1,
+      "interactive": false,
+      "reuses": "assets/belpulse/home-film/film-1080.mp4, film-720.mp4, poster.webp -- the existing film files, no re-encode (claude.md rule 12, no new binary)",
+      "requires_binding": false,
+      "supported_versions": [
+        1
+      ],
+      "why_in_batch_9": "not in Batch 9; added in issue #312 batch 2 (docs/features/site_clarity.md) so the brand film can move off the homepage onto the About page. The renderer emits a plain <video controls preload=\"none\"> with no autoplay and no script in the page document itself (rule 22) -- the click-to-play wiring (assets/belpulse/home-film/film-block.js) is a fixed asset src/pages/shell.py loads only when a page carries this block type, never code inside published.json.",
+      "not_interactive_because": "the play button's own visible text IS its accessible name (no separate aria-label needed), so this block carries no `accessible_name` prop and is not marked interactive -- interactive:true would force one via src/pages/semantics.py's check_accessible_name, which is not what this design calls for.",
+      "versions": {
+        "1": {
+          "props_schema_status": "provisional",
+          "props_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "alt"
+            ],
+            "properties": {
+              "src": {
+                "description": "Site-relative only (rule 23 -- no remote URL in a page definition).",
+                "$ref": "#/$defs/relative_url"
+              },
+              "src_mobile": {
+                "description": "A narrower-bitrate source shown below 768px, matching the <source media> split the mockup proved. Optional: a block with no src_mobile simply serves `src` at every width.",
+                "$ref": "#/$defs/relative_url"
+              },
+              "poster": {
+                "$ref": "#/$defs/relative_url"
+              },
+              "alt": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "caption": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "overlay_title": {
+                "$ref": "#/$defs/trilingual_text"
+              },
+              "play_label": {
+                "description": "The play button's own visible text. Optional: a block with none falls back to the renderer's own chrome wording (FILM_LABEL in src/pages/render.py), the same kind of fallback STATE_TEXT already provides elsewhere in that module.",
+                "$ref": "#/$defs/trilingual_text"
+              }
+            }
+          }
+        }
+      }
+    },
     "photo": {
       "accepts_binding": false,
       "props_schema_status": "provisional",

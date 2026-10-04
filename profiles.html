@@ -69,7 +69,7 @@
 </script>
 
 <!-- bp-shell:bootstrap:start -->
-<script>(function(){try{var KEY='belpulse-theme',LEGACY_KEY='theme',LEGACY={day:'light',soft:'light',night:'dark'};var v=localStorage.getItem(KEY);if(v===null){var legacy=localStorage.getItem(LEGACY_KEY);if(legacy&&Object.prototype.hasOwnProperty.call(LEGACY,legacy))v=LEGACY[legacy];}if(v==='auto'){v=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';try{localStorage.setItem(KEY,v);}catch(e){}}if(v!=='light'&&v!=='dark'&&v!=='paper')v='light';document.documentElement.setAttribute('data-theme',v);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<script>(function(){try{document.documentElement.classList.add('bp-js');}catch(e){}try{var KEY='belpulse-theme',LEGACY_KEY='theme',LEGACY={day:'light',soft:'light',night:'dark'};var v=localStorage.getItem(KEY);if(v===null){var legacy=localStorage.getItem(LEGACY_KEY);if(legacy&&Object.prototype.hasOwnProperty.call(LEGACY,legacy))v=LEGACY[legacy];}if(v==='auto'){v=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';try{localStorage.setItem(KEY,v);}catch(e){}}if(v!=='light'&&v!=='dark'&&v!=='paper')v='light';document.documentElement.setAttribute('data-theme',v);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <!-- bp-shell:bootstrap:end -->
 <script>
   (function(){
@@ -86,7 +86,7 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:wght@500;600;700&family=Caveat:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/belpulse/tokens.css">
-<link rel="stylesheet" href="assets/belpulse/layout.css">
+<link rel="stylesheet" href="assets/belpulse/layout.css?v=47546f9b60">
 <link rel="stylesheet" href="assets/belpulse/components.css">
 <link rel="stylesheet" href="assets/commune_map.css">
 <style>
@@ -1000,6 +1000,57 @@
     return null;
   }
 
+  /* issue #312 batch 2: the homepage hero search (home2.html) sends an
+     ambiguous or unmatched query here as ?q= -- several matches, or none --
+     never a dead end (site-audit-2026-10-04/ux.md, section 6a: the old
+     control gave no fallback at all). Reuses renderList()'s own
+     {title, sub, note, members, mixed} shape rather than a separate
+     rendering path, so this list view carries the same empty-state
+     handling, counts and card markup as every other selection() kind. */
+  function foldDiacritics(s){
+    return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  // Independent audit, round 3 (P2): "Bergen" (the Dutch name for Mons)
+  // also substring-matches Grimbergen/Keerbergen/Destelbergen/
+  // Kluisbergen/Oudsbergen/Geraardsbergen's own Dutch names -- an exact
+  // name match (in any language) or NIS code sorts first, same rule and
+  // same reasoning as home2.html's own suggestion dropdown
+  // (isExactCommuneMatch there), so arriving here from a multi-match
+  // search lands on the same order the dropdown already showed.
+  function isExactCommuneName(m, nq, rawQ){
+    var n = m.name || {};
+    return foldDiacritics(n.en) === nq || foldDiacritics(n.fr) === nq ||
+           foldDiacritics(n.nl) === nq || (m.nis_code || '') === rawQ;
+  }
+
+  function searchSelection(){
+    var q = qs('q');
+    if(!q) return null;
+    var nq = foldDiacritics(q);
+    var rawQ = q.trim();
+    var members = state.municipalities.filter(function(m){
+      var n = m.name || {};
+      return foldDiacritics(n.en).indexOf(nq) !== -1 || foldDiacritics(n.fr).indexOf(nq) !== -1 ||
+             foldDiacritics(n.nl).indexOf(nq) !== -1 || (m.nis_code || '').indexOf(rawQ) !== -1;
+    }).sort(function(a, b){
+      var ea = isExactCommuneName(a, nq, rawQ), eb = isExactCommuneName(b, nq, rawQ);
+      if(ea !== eb) return ea ? -1 : 1;
+      return byName(a, b);
+    }).map(function(m){ return m.nis_code; });
+    return {
+      title: T('pfSearchResultsTitle', {q: q}), sub: '',
+      note: members.length ? '' : T('pfSearchNoResults', {q: q}),
+      members: members, mixed: [],
+      // renderList() always re-sorts members alphabetically for the
+      // region/province/family/type views, correctly; this is the one
+      // selection kind where the exact-match-first order above must
+      // survive instead (rule: a reader who typed "Bergen" and landed
+      // here should still see Mons first, not buried alphabetically).
+      preserveOrder: true,
+    };
+  }
+
   function renderList(sel){
     var byNis = {};
     state.municipalities.forEach(function(m){ byNis[m.nis_code] = m; });
@@ -1009,7 +1060,8 @@
     crumb.textContent = sel.title;
     document.title = 'BelPulse — ' + T('navCommunes') + ' — ' + sel.title;
     document.getElementById('listTitle').textContent = sel.title;
-    var members = sel.members.map(function(n){ return byNis[n]; }).filter(Boolean).sort(byName);
+    var ordered = sel.members.map(function(n){ return byNis[n]; }).filter(Boolean);
+    var members = sel.preserveOrder ? ordered : ordered.sort(byName);
     document.getElementById('listSub').textContent =
       [sel.sub, T('pfResults', {n: members.length})].filter(Boolean).join(' · ');
     var note = document.getElementById('listNote');
@@ -1038,9 +1090,16 @@
       o.value = nameOfGeo(m) + ' (' + m.nis_code + ')';
       list.appendChild(o);
     });
+    var q = qs('q');
     ['pfSearch'].forEach(function(id){
       var input = document.getElementById(id);
-      if(!input || input.dataset.wired) return;
+      if(!input) return;
+      // issue #312 batch 2: prefill the directory's own search box with
+      // whatever the homepage hero search sent, so a reader who typed
+      // "xyz" or "Sint-" there sees the SAME text here, not an empty box
+      // beside a filtered list it looks unrelated to.
+      if(q && !input.dataset.wired) input.value = q;
+      if(input.dataset.wired) return;
       input.dataset.wired = '1';
       input.addEventListener('change', function(){
         var m = /\((\d{5})\)\s*$/.exec(input.value);
@@ -1063,7 +1122,11 @@
     applyStrings();
     renderCounts();
     renderSearch();
-    var sel = selection();
+    // issue #312 batch 2: a ?q= from the homepage hero search takes
+    // priority over type/family/province/region -- the two are never both
+    // present in practice (home2.html only ever sends q=), but a search
+    // result is what the reader asked for just now, so it wins if they are.
+    var sel = searchSelection() || selection();
     document.getElementById('viewDirectory').hidden = !!sel;
     document.getElementById('viewList').hidden = !sel;
     document.getElementById('crumbSep').hidden = true;

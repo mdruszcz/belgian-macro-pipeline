@@ -106,8 +106,29 @@ THEME_CHOICES = (
 #: their own older switcher and reading the legacy `theme` key there is exactly
 #: what tests/test_theme_toggle.py:83 forbids. This constant is simply never
 #: placed on those pages.
+#:
+#: ISSUE #312 BATCH 2 FOLLOW-UP (auditor finding, P1). `document.documentElement.
+#: classList.add('bp-js')` used to be the first line of `assets/belpulse/
+#: shell.js` -- a LINKED file, loaded at the end of body, which cannot promise
+#: to run before the browser paints the header it governs. With JS available
+#: but shell.js not yet executed, the header's menu panels and mobile nav
+#: rendered with no `.bp-js` on <html> at all, which (after the earlier fix in
+#: this same batch made their CSS depend entirely on that class) meant they
+#: painted in their no-JS shape -- open, in-flow, pushing `<main>` down -- and
+#: covered the page's own H1, breadcrumb or zoom controls until shell.js
+#: finally ran. Moved here for the same reason the theme read above is here:
+#: inline, in the head, BLOCKING, so it runs before the header markup is even
+#: parsed, let alone painted -- `.bp-js` is therefore present from the very
+#: first frame for every reader whose browser runs JavaScript at all, and
+#: never appears at all for one whose browser does not (the one case layout.css's
+#: `:root:not(.bp-js)` defaults, and the <noscript> fallback render_header()
+#: emits, exist to keep fully reachable). shell.js's own call is left in place
+#: as an idempotent no-op safety net, not removed, in case this script is ever
+#: skipped by a page that does not call wrap() (classList.add on an
+#: already-present class does nothing).
 SHELL_BOOTSTRAP = (
-    "<script>(function(){try{"
+    "<script>(function(){try{document.documentElement.classList.add('bp-js');}catch(e){}"
+    "try{"
     "var KEY='belpulse-theme',LEGACY_KEY='theme',"
     "LEGACY={day:'light',soft:'light',night:'dark'};"
     "var v=localStorage.getItem(KEY);"
@@ -298,6 +319,25 @@ def read_attribution(lang: str = DEFAULT_LANG) -> str:
             "condition, not decoration -- refusing to generate pages without it."
         )
     return notice
+
+
+#: issue #312 batch 2: the film block's own click-to-play wiring. Loaded
+#: only on a page that carries a `film` block (same pattern as
+#: INTERACTIVE_SCRIPTS above, which only loads for a chart/map) -- a page
+#: with no film block links none of it. Not in INTERACTIVE_SCRIPTS itself:
+#: that list feeds BPBlocks.hydrate()'s own data-resolution pass, and a
+#: `film` block is never hydrated (accepts_binding: false) -- it only
+#: needs the play-button wiring, nothing resolved for it to render.
+FILM_JS = "assets/belpulse/home-film/film-block.js"
+
+
+def _has_block_type(doc, block_type: str) -> bool:
+    """Does this document carry at least one block of this type."""
+    for section in doc.get("sections") or []:
+        for block in (section or {}).get("blocks") or []:
+            if isinstance(block, dict) and block.get("type") == block_type:
+                return True
+    return False
 
 
 def hydrated_block_types(doc) -> set:
@@ -764,6 +804,12 @@ def wrap(
             "window.location.href=urls[m.value];}});"
             "window.parent.postMessage('dashboard-ready','*');})();</script>"
         )
+
+    # issue #312 batch 2: the film block's play-button wiring, loaded only
+    # when this document actually carries one -- a page with no film block
+    # (every page but About, today) links none of it.
+    if _has_block_type(doc, "film"):
+        scripts += f'\n<script src="{escape(asset_prefix + FILM_JS, quote=True)}"></script>'
 
     # THE SHARED SHELL SCRIPT -- the theme menu, the language menu and the
     # mobile nav toggle that render_header() below just emitted markup for.
